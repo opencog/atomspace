@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/StringValue.h
+ * opencog/atoms/value/StringValue.h
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -25,8 +25,8 @@
 
 #include <string>
 #include <vector>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {
@@ -39,16 +39,16 @@ namespace opencog
  * StringValues hold an ordered vector of std::strings.
  */
 class StringValue
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	std::vector<std::string> _value;
 
 public:
 	StringValue(const std::string& v)
-		: ProtoAtom(STRING_VALUE) { _value.push_back(v); }
+		: Value(STRING_VALUE) { _value.push_back(v); }
 	StringValue(const std::vector<std::string>& v)
-		: ProtoAtom(STRING_VALUE), _value(v) {}
+		: Value(STRING_VALUE), _value(v) {}
 
 	virtual ~StringValue() {}
 
@@ -58,11 +58,11 @@ public:
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<const StringValue> StringValuePtr;
-static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
+static inline StringValuePtr StringValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<const StringValue>(a); }
 
 template<typename ... Type>

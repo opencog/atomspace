@@ -39,7 +39,7 @@ class MinusLink : public PlusLink
 protected:
 	void init(void);
 
-	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
+	ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b);
 	MinusLink(const HandleSeq&, Type=MINUS_LINK);

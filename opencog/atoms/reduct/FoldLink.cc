@@ -22,8 +22,8 @@
 
 #include <limits>
 
-#include <opencog/atoms/proto/atom_types.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "FoldLink.h"
 
@@ -56,9 +56,9 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-ProtoAtomPtr FoldLink::delta_reduce(void) const
+ValuePtr FoldLink::delta_reduce(void) const
 {
-	ProtoAtomPtr expr = knil;
+	ValuePtr expr = knil;
 
 	// Loop over the outgoing set, kons'ing away.
 	// This is right to left.

@@ -53,9 +53,9 @@ public:
     CountTruthValue(strength_t, confidence_t, count_t);
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
-    CountTruthValue(const ProtoAtomPtr&);
+    CountTruthValue(const ValuePtr&);
 
-    virtual bool operator==(const ProtoAtom& rhs) const;
+    virtual bool operator==(const Value& rhs) const;
 
     virtual std::string to_string(const std::string& = "") const;
 
@@ -71,7 +71,7 @@ public:
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const CountTruthValue>(s, f, c));
     }
-    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const CountTruthValue>(pap));

@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomTable.h>
 

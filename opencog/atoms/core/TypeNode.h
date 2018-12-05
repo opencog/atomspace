@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TYPE_NODE_H
 #define _OPENCOG_TYPE_NODE_H
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 
 namespace opencog

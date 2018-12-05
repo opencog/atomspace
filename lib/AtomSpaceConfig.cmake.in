@@ -12,7 +12,7 @@ set_property(TARGET query
 
 # these names are used in some projects e.g. opencog
 set(ATOMSPACE_LIBRARY atomspace)
-set(ATOMSPACE_atomproto_LIBRARY atomproto)
+set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atombase_LIBRARY atombase)
 set(ATOMSPACE_atomcore_LIBRARY atomcore)
 set(ATOMSPACE_attentionbank_LIBRARY attentionbank)
@@ -22,7 +22,6 @@ set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
 set(ATOMSPACE_atomutils_LIBRARY atomutils)
 set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_lambda_LIBRARY lambda)
-set(ATOMSPACE_PythonEval_LIBRARY PythonEval)
 set(ATOMSPACE_persist_LIBRARY persist)
 set(ATOMSPACE_query_LIBRARY query)
 set(ATOMSPACE_execution_LIBRARY execution)
@@ -31,7 +30,7 @@ set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_unify_LIBRARY unify)
 
 set(ATOMSPACE_LIBRARIES
-    atomproto
+    value
     atombase
     atomcore
     attentionbank
@@ -40,7 +39,6 @@ set(ATOMSPACE_LIBRARIES
     atomutils
     clearbox
     lambda
-    PythonEval
     persist
     query
     execution
@@ -49,6 +47,15 @@ set(ATOMSPACE_LIBRARIES
     atomspace
     unify
 )
+
+# Python is optional
+IF (HAVE_CYTHON)
+	set(ATOMSPACE_PythonEval_LIBRARY PythonEval)
+	SET(ATOMSPACE_LIBRARIES
+		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_PythonEval_LIBRARY}
+	)
+ENDIF (HAVE_CYTHON)
 
 # persist-sql is optional
 IF (persist-sql)
@@ -73,5 +80,3 @@ ENDIF (zmqatoms)
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_VERSION "@SEMANTIC_VERSION@")
 set(ATOMSPACE_FOUND 1)
-
-

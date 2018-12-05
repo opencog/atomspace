@@ -36,7 +36,7 @@
 
 #include <opencog/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 
 #include <opencog/atomspace/TypeIndex.h>
 

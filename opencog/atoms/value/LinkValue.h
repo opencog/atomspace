@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/LinkValue.h
+ * opencog/atoms/value/LinkValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,8 +24,8 @@
 #define _OPENCOG_LINK_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {
@@ -39,28 +39,28 @@ namespace opencog
  * (i.e. its a link, but for values)
  */
 class LinkValue
-	: public ProtoAtom
+	: public Value
 {
 protected:
-	std::vector<ProtoAtomPtr> _value;
+	std::vector<ValuePtr> _value;
 
 public:
-	LinkValue(const std::vector<ProtoAtomPtr>& v)
-		: ProtoAtom(LINK_VALUE), _value(v) {}
+	LinkValue(const std::vector<ValuePtr>& v)
+		: Value(LINK_VALUE), _value(v) {}
 
 	virtual ~LinkValue() {}
 
-	const std::vector<ProtoAtomPtr>& value() const { return _value; }
+	const std::vector<ValuePtr>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal, else false.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
+static inline LinkValuePtr LinkValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<LinkValue>(a); }
 
 template<typename ... Type>

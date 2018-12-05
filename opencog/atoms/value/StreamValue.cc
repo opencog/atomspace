@@ -1,11 +1,8 @@
 /*
- * opencog/atoms/proto/types.h
+ * opencog/atoms/value/StreamValue.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,28 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * basic type definitions.
- */
+#include <stdlib.h>
+#include <opencog/atoms/value/StreamValue.h>
 
-#ifndef _OPENCOG_TYPES_H
-#define _OPENCOG_TYPES_H
+using namespace opencog;
 
-#include <set>
+// ==============================================================
 
-namespace opencog
+bool StreamValue::operator==(const Value& other) const
 {
-/** \addtogroup grp_atomspace
- *  @{
- */
+	return &other == this;
+}
 
-//! type of Atoms, represented as short integer (16 bits)
-typedef unsigned short Type;
-
-//! Set of atom types
-typedef std::set<Type> TypeSet;
-
-/** @}*/
-} // namespace opencog
-
-#endif // _OPENCOG_TYPES_H
+// ==============================================================

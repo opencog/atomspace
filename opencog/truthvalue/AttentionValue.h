@@ -28,7 +28,7 @@
 #include <limits.h>
 #include <memory>
 
-#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 namespace opencog
 {
@@ -87,7 +87,7 @@ public:
                    lti_t = DEFAULTATOMLTI,
                    vlti_t = DEFAULTATOMVLTI);
     AttentionValue(const AttentionValue&);
-    AttentionValue(const ProtoAtomPtr&);
+    AttentionValue(const ValuePtr&);
 
     //! return STI property value
     sti_t getSTI() const;
@@ -141,12 +141,12 @@ public:
     }
 };
 
-static inline AttentionValuePtr AttentionValueCast(const ProtoAtomPtr& pa)
+static inline AttentionValuePtr AttentionValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const AttentionValue>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const AttentionValuePtr& av)
+static inline ValuePtr ValueCast(const AttentionValuePtr& av)
 {
-    return std::shared_ptr<ProtoAtom>(av, (ProtoAtom*) av.get());
+    return std::shared_ptr<Value>(av, (Value*) av.get());
 }
 
 /** @}*/

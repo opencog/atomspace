@@ -32,7 +32,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -109,10 +109,10 @@ protected:
 public:
     virtual ~TruthValue() {}
 
-    virtual bool operator==(const ProtoAtom&) const = 0;
+    virtual bool operator==(const Value&) const = 0;
 
     static TruthValuePtr factory(Type, const std::vector<double>&);
-    static TruthValuePtr factory(const ProtoAtomPtr&);
+    static TruthValuePtr factory(const ValuePtr&);
 
     virtual std::string to_short_string(const std::string&) const;
 
@@ -167,19 +167,19 @@ public:
     virtual bool isDefinedTV() const;
 };
 
-static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
+static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const TruthValue>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
+static inline ValuePtr ValueCast(const TruthValuePtr& tv)
 {
     // This should have worked!?
-    // return std::const_pointer_cast<ProtoAtom>(tv);
+    // return std::const_pointer_cast<Value>(tv);
 
     // This, too, should have worked!?
-    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+    // return std::shared_ptr<Value>(tv, const_cast<Value*>(tv.get()));
 
     // This works...
-    return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
+    return std::shared_ptr<Value>(tv, (Value*) tv.get());
 }
 
 typedef std::vector<TruthValuePtr> TruthValueSeq;

@@ -24,10 +24,10 @@ using namespace opencog;
 /**
  * cog-execute! executes any/all FunctionLinks
  */
-static ProtoAtomPtr ss_execute(AtomSpace* atomspace, const Handle& h)
+static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
-	ProtoAtomPtr pap(inst.execute(h));
+	ValuePtr pap(inst.execute(h));
 	Handle rh(HandleCast(pap));
 	if (NULL != rh)
 		pap = atomspace->add_atom(rh);

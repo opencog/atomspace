@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/StringValue.cc
+ * opencog/atoms/value/StringValue.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -20,12 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/StringValue.h>
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool StringValue::operator==(const ProtoAtom& other) const
+bool StringValue::operator==(const Value& other) const
 {
 	if (STRING_VALUE != other.get_type()) return false;
 
@@ -50,11 +50,7 @@ std::string StringValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-static __attribute__ ((constructor)) void init(void)
-{
-    valuefactory().addFactory(STRING_VALUE, (CreateProto) & (createStringValue<std::vector<std::string>>),
-                                    std::vector<std::type_index> {std::type_index(typeid(std::vector<std::string>))});
-
-    valuefactory().addFactory(STRING_VALUE, (CreateProto) & (createStringValue<std::string>),
-                                    std::vector<std::type_index> {std::type_index(typeid(std::string))});
-}
+DEFINE_VALUE_FACTORY(STRING_VALUE,
+                     createStringValue, std::vector<std::string>)
+DEFINE_VALUE_FACTORY(STRING_VALUE,
+                     createStringValue, std::string)

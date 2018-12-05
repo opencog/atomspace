@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/RandomStream.cc
+ * opencog/atoms/value/RandomStream.cc
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -21,8 +21,8 @@
  */
 
 #include <stdlib.h>
-#include <opencog/atoms/proto/RandomStream.h>
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/RandomStream.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
@@ -58,9 +58,5 @@ std::string RandomStream::to_string(const std::string& indent) const
 // ==============================================================
 
 // Adds factor when library is loaded.
-static __attribute__ ((constructor)) void init(void)
-{
-    valuefactory().addFactory(RANDOM_STREAM, (CreateProto) & (createRandomStream<int>),
-                                    std::vector<std::type_index> {std::type_index(typeid(int))});
-}
-
+DEFINE_VALUE_FACTORY(RANDOM_STREAM,
+                     createRandomStream, int)

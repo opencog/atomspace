@@ -69,7 +69,7 @@ SleepLink::SleepLink(const Link &l)
 
 /// Return number of seconds left to sleep.
 /// Normally, this is zero, unless the sleep was interrupted.
-ProtoAtomPtr SleepLink::execute() const
+ValuePtr SleepLink::execute() const
 {
 	Handle time(_outgoing[0]);
 	FunctionLinkPtr flp(FunctionLinkCast(time));
@@ -91,7 +91,7 @@ ProtoAtomPtr SleepLink::execute() const
 	if (0 == secs)
 		usleep (usec);
 
-	return ProtoAtomPtr(createNumberNode(secs));
+	return ValuePtr(createNumberNode(secs));
 }
 
 DEFINE_LINK_FACTORY(SleepLink, SLEEP_LINK)

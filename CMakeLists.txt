@@ -368,6 +368,9 @@ IF(HAVE_PY_INTERP)
 	ELSE ()
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
+	IF (NOT NOSETESTS_EXECUTABLE)
+		MESSAGE(STATUS "nosetest not found: needed for python tests")
+	endif ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
 		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
@@ -466,8 +469,8 @@ ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
 SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # include custom opencog cmake macros
-INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogFunctions.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs
@@ -495,6 +498,7 @@ SET(CMAKE_INSTALL_RPATH
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
 ADD_SUBDIRECTORY(lib)
 

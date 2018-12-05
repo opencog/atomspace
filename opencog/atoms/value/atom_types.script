@@ -41,6 +41,13 @@ STREAM_VALUE <- FLOAT_VALUE
 // An example of a time-varying value stream
 RANDOM_STREAM <- STREAM_VALUE
 
+// ====================================================================
+// Octomap related. The Octomap code is (currently) in the opencog repo.
+// We need to define these here, until SchemeSmob::ss_new_value() gets
+// converted into some kind of factory. Once we get a factory, these
+// should be moved to live with the octomap code.
+OCTO_VALUE <- VALUE
+
 // ===========================================================
 // Base of Atom hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.

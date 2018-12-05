@@ -53,9 +53,9 @@ public:
     SimpleTruthValue(strength_t, confidence_t);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(const SimpleTruthValue&);
-    SimpleTruthValue(const ProtoAtomPtr&);
+    SimpleTruthValue(const ValuePtr&);
 
-    virtual bool operator==(const ProtoAtom& rhs) const;
+    virtual bool operator==(const Value& rhs) const;
 
     std::string to_string(const std::string&) const;
 
@@ -81,7 +81,7 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(createSTV(mean, conf));
     }
-    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const SimpleTruthValue>(pap));

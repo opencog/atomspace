@@ -29,7 +29,7 @@
 #include <math.h>
 #include <string.h>
 
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Node.h>

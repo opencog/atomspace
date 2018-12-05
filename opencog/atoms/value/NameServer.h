@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/NameServer.h
+ * opencog/atoms/value/NameServer.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
  * Copyright (C) 2017 by Linas Vepstas
@@ -30,8 +30,8 @@
 #include <vector>
 
 #include <opencog/util/sigslot.h>
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {

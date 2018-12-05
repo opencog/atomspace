@@ -33,7 +33,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 
 #include "AtomSpace.h"
 
@@ -271,7 +271,7 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 Handle AtomSpace::add_atom(const Handle& h, bool async)
 {
-    // Cannot add atoms to a read-only atomspce. But if it's already
+    // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
     if (_read_only) return _atom_table.getHandle(h);
 
@@ -292,7 +292,7 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
 Handle AtomSpace::add_node(Type t, const string& name,
                            bool async)
 {
-    // Cannot add atoms to a read-only atomspce. But if it's already
+    // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
     if (_read_only) return _atom_table.getHandle(t, name);
 
@@ -306,7 +306,7 @@ Handle AtomSpace::get_node(Type t, const string& name)
 
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
-    // Cannot add atoms to a read-only atomspce. But if it's already
+    // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
     if (_read_only) return _atom_table.getHandle(t, outgoing);
 
@@ -433,7 +433,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
 // Copy-on-write for setting values.
 Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
-                            const ProtoAtomPtr& value)
+                            const ValuePtr& value)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make

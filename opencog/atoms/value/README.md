@@ -1,7 +1,7 @@
 
-ProtoAtoms
+ProtoAtoms [now renamed Value]
 ==========
-ProtoAtoms provide a common base class for both Atoms and Values.
+ProtoAtoms aka Values provide a common base class for both Atoms and Values.
 The aim of having a common base class for both kinds of objects is to
 simplify general handling in various different subsystems.
 
