@@ -22,21 +22,12 @@ ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 
 PROJECT(atomspace)
 
-# get atomspace version
+## Get atomspace version
 FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
 STRING(REGEX MATCH
-    "#define ATOMSPACE_MAJOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MINOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MICRO_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_MATCH_1})
-SET(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
+        _ "${_ATOMSPACE_H_CONTENTS}")
+SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
 # Remove when CMake >= 2.8.4 is required to build the project
@@ -198,13 +189,10 @@ ENDIF (WIN32)
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
+SET(MIN_BOOST 1.46)
 
 # Required boost packages
-# hypertable requires boost iostreams
-# boost-1.49 no longer has a libboost_iostreams
-# 1.46 is minimum for required filesystem support
-# program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
@@ -213,7 +201,7 @@ IF(Boost_FOUND)
 	SET(BOOST_PARAMETER_MAX_ARITY 7)
 	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
@@ -222,10 +210,6 @@ IF(105100 EQUAL ${Boost_VERSION})
 	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
 ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
-
-# Optional boost packages; can build without these.
-# FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
-# FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
 
 # Arghhh. Except cmake is treating above as required, not optional. #$%**&
 IF(Boost_FOUND_SAVE)
@@ -583,81 +567,52 @@ ADD_CUSTOM_TARGET(cscope
 	COMMENT "Generating CScope database"
 )
 
-# packaging
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
-SET(CPACK_PACKAGE_NAME "atomspace")
-SET(CPACK_PACKAGE_VENDOR "opencog.org")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+# ===============================================================
+# Packaging
+## Architecture the package is for.
+## TODO: Will give error on non debian distros, fix it.
+EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
+	OUTPUT_VARIABLE PACKAGE_ARCHITECTURE
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 
-SET(CPACK_BINARY_STGZ "OFF")
-SET(CPACK_BINARY_TBZ2 "OFF")
-SET(CPACK_BINARY_TGZ "OFF")
-SET(CPACK_BINARY_TZ "OFF")
-SET(CPACK_SOURCE_STGZ "OFF")
-SET(CPACK_SOURCE_TBZ2 "ON")
-SET(CPACK_SOURCE_TGZ "OFF")
-SET(CPACK_SOURCE_TZ "OFF")
+## Cpack configuration
+SET(CPACK_GENERATOR "DEB")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
-SET(CPACK_GENERATOR "TBZ2;DEB")
-SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
-SET(CPACK_SOURCE_IGNORE_FILES
-	"~$"
-	".a$"
-	".so$"
-	".log$"
-	".tar.z$"
-	".tar.gz$"
-	".tar.bz2$"
-	"/Makefile$"
-	"/CMakeFiles/"
-	"/CMakeCache.txt$"
-	"/DartTestfile.txt$"
-	"/cmake_install.cmake$"
-	"/Testfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"UTest$"
-	"UTest.cpp$"
-	"/_CPack_Packages/"
-	"/CPackConfig.cmake$"
-	"/CPackSourceConfig.cmake$"
-	"/sniff$"
-	"/install_manifest.txt$"
-	"${CPACK_PACKAGE_FILE_NAME}"
-	"^${PROJECT_SOURCE_DIR}/debian/"
-	"^${PROJECT_SOURCE_DIR}/.*spec$"
-	"^${PROJECT_SOURCE_DIR}/vendor/"
-	"^${PROJECT_SOURCE_DIR}/.bzr/"
-	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
-	"^${PROJECT_SOURCE_DIR}/.git/"
-)
-
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
+SET(CPACK_PACKAGE_NAME "atomspace-dev")
+SET(CPACK_PACKAGE_VENDOR "opencog.org")
+SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_FILE_NAME
+	"${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}")
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.2 (>= 2.2.2), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
+
+## Debian specific configurations
+SET(DEPENDENCY_LIST
+	"guile-2.2-dev (>= 2.2.2)"
+	"python-dev (>= 2.7.5)"
+	"libzmq3-dev (>= 4.0.4)"
+	"libboost-date-time-dev (>= ${MIN_BOOST})"
+	"libboost-filesystem-dev (>= ${MIN_BOOST})"
+	"libboost-program-options-dev (>= ${MIN_BOOST})"
+	"libboost-regex-dev (>= ${MIN_BOOST})"
+	"libboost-serialization-dev (>= ${MIN_BOOST})"
+	"libboost-thread-dev (>= ${MIN_BOOST})"
+	"libboost-system-dev (>= ${MIN_BOOST})"
+	"libboost-random-dev (>= ${MIN_BOOST})"
+	"libstdc++6 (>= 4.7)"
+	"libgearman-dev (>=1.0.6)"
+        "libpq-dev (>=9.3.24)"
+	"libcogutil-dev (>= 2.0.2)"
 )
 
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-IF (WIN32)
-	# Its "not unix" is cygwin is being used.
-	IF (NOT UNIX)
-		# There is a bug in NSI that does not handle full unix paths
-		# properly. Make sure there is at least one set of four (4)
-		# backslashes.
-		SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
-		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The OpenCog Atomspace")
-		SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
-		SET(CPACK_NSIS_MODIFY_PATH ON)
-	ELSE(NOT UNIX)
-		SET(CPACK_SOURCE_STRIP_FILES "")
-	ENDIF(NOT UNIX)
-ENDIF(WIN32)
-
+STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${MAIN_DEPENDENCIES}")
+SET(CPACK_DEBIAN_PACKAGE_SECTION "libdevel")
+SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
 # documentation
