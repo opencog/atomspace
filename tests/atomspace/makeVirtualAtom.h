@@ -26,7 +26,7 @@
 
 #include <boost/variant.hpp>
 
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 #include <opencog/util/tree.h>
 
 namespace opencog

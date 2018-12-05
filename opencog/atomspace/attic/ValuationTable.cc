@@ -64,7 +64,7 @@ void ValuationTable::addValuation(const ValuationPtr& vp)
 /// Associate a value with a particular (key,atom) pair
 void ValuationTable::addValuation(const Handle& key,
                                   const Handle& atom,
-                                  const ProtoAtomPtr& val)
+                                  const ValuePtr& val)
 {
 	ValuationPtr vp(createValuation(key, atom, val));
 	addValuation(vp);
@@ -82,7 +82,7 @@ ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 	return vpiter->second;
 }
 
-ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
+ValuePtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 {
 	return getValuation(key, atom)->value();
 }

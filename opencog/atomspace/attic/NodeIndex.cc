@@ -21,8 +21,8 @@
 
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/proto/NameServer.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/value/atom_types.h>
 
 using namespace opencog;
 

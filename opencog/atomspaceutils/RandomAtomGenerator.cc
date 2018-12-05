@@ -3,7 +3,7 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 

@@ -18,7 +18,7 @@ design tradeoffs, and of the current implementation.
 
 Subdirectories
 --------------
- * base -- The basic atoms: ProtoAtom, Atom, Node, Link, Value.
+ * base -- The basic atoms: Atom, Node, Link, Value.
 
  * bind -- Atoms involved with pattern matching: BindLink, LambdaLink,
    SatisfactionLink, SatisfactionSetLink, GetLink.  These cache some

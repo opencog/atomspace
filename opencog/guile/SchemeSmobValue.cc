@@ -1,7 +1,7 @@
 /* 
  * SchemeSmobValue.cc
  *
- * Scheme small objects (SMOBS) for ProtoAtoms.
+ * Scheme small objects (SMOBS) for ProtoAtoms [now renamed Value].
  *
  * Copyright (c) 2008,2009,2016 Linas Vepstas <linas@linas.org>
  */
@@ -9,15 +9,15 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/proto/StringValue.h>
-#include <opencog/atoms/proto/RandomStream.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
@@ -71,7 +71,7 @@ SchemeSmob::scm_to_float_list (SCM svalue_list)
 /**
  * Convert argument into a list of protoatoms.
  */
-std::vector<ProtoAtomPtr>
+std::vector<ValuePtr>
 SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 {
 	// Verify that second arg is an actual list. Allow null list
@@ -82,16 +82,16 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 	return scm_to_protom_list(svalue_list);
 }
 
-std::vector<ProtoAtomPtr>
+std::vector<ValuePtr>
 SchemeSmob::scm_to_protom_list (SCM svalue_list)
 {
-	std::vector<ProtoAtomPtr> valist;
+	std::vector<ValuePtr> valist;
 	SCM sl = svalue_list;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
 		if (not scm_is_null(svalue)) {
-			ProtoAtomPtr pa(scm_to_protom(svalue));
+			ValuePtr pa(scm_to_protom(svalue));
 			valist.emplace_back(pa);
 		}
 		sl = SCM_CDR(sl);
@@ -140,7 +140,7 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 {
 	Type t = verify_type(stype, "cog-new-value", 1);
 
-	ProtoAtomPtr pa;
+	ValuePtr pa;
 	if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
@@ -164,7 +164,7 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 
 	else if (LINK_VALUE == t)
 	{
-		std::vector<ProtoAtomPtr> valist;
+		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
 		pa = valueserver().create(t, valist);
 	}
@@ -194,7 +194,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 
 	// If svalue is actually a value, just use it.
 	// If it is a list, assume its a list of values.
-	ProtoAtomPtr pa;
+	ValuePtr pa;
 	if (scm_is_pair(svalue)) {
 		SCM sitem = SCM_CAR(svalue);
 
@@ -233,7 +233,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		else if (scm_is_true(scm_list_p(svalue)))
 		{
 			verify_protom(sitem, "cog-set-value!", 3);
-			std::vector<ProtoAtomPtr> fl = scm_to_protom_list(svalue);
+			std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
 			pa = createLinkValue(fl);
 		}
 		else
@@ -323,7 +323,7 @@ static SCM scm_from_string(const std::string& str)
 
 SCM SchemeSmob::ss_value_to_list (SCM svalue)
 {
-	ProtoAtomPtr pa(verify_protom(svalue, "cog-value->list"));
+	ValuePtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))
@@ -340,7 +340,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 
 	if (LINK_VALUE == t)
 	{
-		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		CPPL_TO_SCML(v, protom_to_scm)
 	}
 
@@ -361,7 +361,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 
 SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 {
-	ProtoAtomPtr pa(verify_protom(svalue, "cog-value-ref"));
+	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
    size_t index = verify_size(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
@@ -379,7 +379,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 
 	if (LINK_VALUE == t)
 	{
-		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 

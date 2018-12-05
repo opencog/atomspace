@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/core/TypeNode.h>

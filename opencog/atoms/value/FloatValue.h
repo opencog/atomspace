@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/FloatValue.h
+ * opencog/atoms/value/FloatValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,8 +24,8 @@
 #define _OPENCOG_FLOAT_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {
@@ -38,21 +38,21 @@ namespace opencog
  * FloatValues hold an ordered vector of doubles.
  */
 class FloatValue
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	mutable std::vector<double> _value;
 
 	virtual void update() const {}
 
-	FloatValue(Type t) : ProtoAtom(t) {}
+	FloatValue(Type t) : Value(t) {}
 public: // XXX should be protected...
-	FloatValue(Type t, const std::vector<double>& v) : ProtoAtom(t), _value(v) {}
+	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
 
 public:
-	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
+	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
 	FloatValue(const std::vector<double>& v)
-		: ProtoAtom(FLOAT_VALUE), _value(v) {}
+		: Value(FLOAT_VALUE), _value(v) {}
 
 	virtual ~FloatValue() {}
 
@@ -62,11 +62,11 @@ public:
 	virtual std::string to_string(const std::string& indent = "") const;
 
 	/** Returns true if two atoms are equal.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<const FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
+static inline FloatValuePtr FloatValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
 template<typename ... Type>
@@ -75,14 +75,14 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 }
 
 // Scalar multiplication and addition
-ProtoAtomPtr times(double, const FloatValuePtr&);
-ProtoAtomPtr plus(double, const FloatValuePtr&);
-ProtoAtomPtr divide(double, const FloatValuePtr&);
+ValuePtr times(double, const FloatValuePtr&);
+ValuePtr plus(double, const FloatValuePtr&);
+ValuePtr divide(double, const FloatValuePtr&);
 
 // Vector multiplication and addition
-ProtoAtomPtr times(const FloatValuePtr&, const FloatValuePtr&);
-ProtoAtomPtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ProtoAtomPtr divide(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
 
 
 /** @}*/

@@ -1,7 +1,7 @@
 /*
- * opencog/attentionbank/AVUtils.cc
+ * atom_types_init.cc
  *
- * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2014 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,26 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/attentionbank/AVUtils.h>
+#include "opencog/atoms/value/atom_types.definitions"
 
-using namespace opencog;
+#define INHERITANCE_FILE "opencog/atoms/value/atom_types.inheritance"
+#define INITNAME base_types_init
 
-static const Handle& attn_key(void)
-{
-	static Handle ak(createNode(PREDICATE_NODE, "*-AttentionValueKey-*"));
-	return ak;
-}
-
-AttentionValuePtr opencog::get_av(const Handle& h)
-{
-    auto pr = h->getValue(attn_key());
-    if (nullptr == pr) return AttentionValue::DEFAULT_AV();
-    return AttentionValueCast(pr);
-}
-
-void opencog::set_av(AtomSpace* as, const Handle& h, const AttentionValuePtr& av)
-{
-    as->set_value(h, attn_key(), ValueCast(av));
-}
+#include <opencog/atoms/value/atom_types.cc>

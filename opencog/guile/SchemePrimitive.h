@@ -288,7 +288,7 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_tv(arg, scheme_name, idx);
 	}
-	ProtoAtomPtr scm_to(SCM args, size_t idx, const ProtoAtomPtr) const
+	ValuePtr scm_to(SCM args, size_t idx, const ValuePtr) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_protom(arg, scheme_name, idx);
@@ -399,7 +399,7 @@ protected:
 	{
 		return SchemeSmob::tv_to_scm(tv);
 	}
-	SCM scm_from(const ProtoAtomPtr& pa)
+	SCM scm_from(const ValuePtr& pa)
 	{
 		return SchemeSmob::protom_to_scm(pa);
 	}

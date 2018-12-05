@@ -4,6 +4,6 @@
 ;
 ; The correct file is auto-generated during the build, and is installed
 ; from the build directory.
-; Specifically, the build/opencog/atoms/proto/core_types.scm file.
+; Specifically, the build/opencog/atoms/value/core_types.scm file.
 ;
-(load-from-path "opencog/atoms/proto/core_types.scm")
+(load-from-path "opencog/atoms/value/core_types.scm")

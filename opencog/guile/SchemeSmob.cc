@@ -139,8 +139,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		}
 		case COG_PROTOM:
 		{
-			ProtoAtomPtr* av = (ProtoAtomPtr *) SCM_SMOB_DATA(a);
-			ProtoAtomPtr* bv = (ProtoAtomPtr *) SCM_SMOB_DATA(b);
+			ValuePtr* av = (ValuePtr *) SCM_SMOB_DATA(a);
+			ValuePtr* bv = (ValuePtr *) SCM_SMOB_DATA(b);
 			scm_remember_upto_here_1(a);
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;

@@ -33,7 +33,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 
 #include "AtomSpace.h"
 
@@ -433,7 +433,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
 // Copy-on-write for setting values.
 Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
-                            const ProtoAtomPtr& value)
+                            const ValuePtr& value)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make

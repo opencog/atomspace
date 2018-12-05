@@ -42,7 +42,7 @@ public:
 	SleepLink(const Link &l);
 
 	// Return number of seconds left to sleep.
-	virtual ProtoAtomPtr execute() const;
+	virtual ValuePtr execute() const;
 
 	static Handle factory(const Handle&);
 };

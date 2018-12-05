@@ -26,7 +26,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 

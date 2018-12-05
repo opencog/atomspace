@@ -29,7 +29,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include "ProbabilisticTruthValue.h"
 
 using namespace opencog;
@@ -61,7 +61,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& 
     _value[COUNT] = source.get_count();
 }
 
-ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
+ProbabilisticTruthValue::ProbabilisticTruthValue(const ValuePtr& source)
        : TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     if (source->get_type() != PROBABILISTIC_TRUTH_VALUE)
@@ -100,7 +100,7 @@ std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool ProbabilisticTruthValue::operator==(const ProtoAtom& rhs) const
+bool ProbabilisticTruthValue::operator==(const Value& rhs) const
 {
     const ProbabilisticTruthValue *ctv = dynamic_cast<const ProbabilisticTruthValue *>(&rhs);
     if (NULL == ctv) return false;

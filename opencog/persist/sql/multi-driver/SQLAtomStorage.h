@@ -37,10 +37,10 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/proto/StringValue.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>
@@ -139,19 +139,19 @@ class SQLAtomStorage : public AtomStorage
 
 		typedef unsigned long VUID;
 
-		ProtoAtomPtr doUnpackValue(Response&);
-		ProtoAtomPtr doGetValue(const char *);
+		ValuePtr doUnpackValue(Response&);
+		ValuePtr doGetValue(const char *);
 
-		VUID storeValue(const ProtoAtomPtr&);
-		ProtoAtomPtr getValue(VUID);
+		VUID storeValue(const ValuePtr&);
+		ValuePtr getValue(VUID);
 		void deleteValue(VUID);
 
 		// --------------------------
 		// Valuations
 		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
-		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
-		ProtoAtomPtr getValuation(const Handle&, const Handle&);
+		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
+		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		void deleteValuation(Response&, UUID, UUID);
 		void deleteAllValuations(Response&, UUID);

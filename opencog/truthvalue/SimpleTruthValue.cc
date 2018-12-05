@@ -63,7 +63,7 @@ SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
     _value[CONFIDENCE] = source._value[CONFIDENCE];
 }
 
-SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
+SimpleTruthValue::SimpleTruthValue(const ValuePtr& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
 	if (source->get_type() != SIMPLE_TRUTH_VALUE)
@@ -138,7 +138,7 @@ std::string SimpleTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
+bool SimpleTruthValue::operator==(const Value& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;

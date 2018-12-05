@@ -113,7 +113,7 @@ class SchemeEval : public GenericEval
 
 		// Apply function to arguments, returning Handle or TV
 		Handle _hargs;
-		ProtoAtomPtr _retval;
+		ValuePtr _retval;
 		AtomSpace* _retas;
 		SCM do_apply_scm(const std::string& func, const Handle& varargs);
 		static void * c_wrap_apply_v(void *);
@@ -163,8 +163,8 @@ class SchemeEval : public GenericEval
 			{ return eval(ss.str()); }
 
 		// Evaluate expression, returning value.
-		ProtoAtomPtr eval_v(const std::string&);
-		ProtoAtomPtr eval_v(const std::stringstream& ss) { return eval_v(ss.str()); }
+		ValuePtr eval_v(const std::string&);
+		ValuePtr eval_v(const std::stringstream& ss) { return eval_v(ss.str()); }
 
 		// Evaluate expression, returning handle.
 		Handle eval_h(const std::string& str) { return HandleCast(eval_v(str)); }
@@ -178,7 +178,7 @@ class SchemeEval : public GenericEval
 		AtomSpace* eval_as(const std::string&);
 
 		// Apply expression to args, returning Handle or TV
-		ProtoAtomPtr apply_v(const std::string& func, Handle varargs);
+		ValuePtr apply_v(const std::string& func, Handle varargs);
 		Handle apply(const std::string& func, Handle varargs) {
 			return HandleCast(apply_v(func, varargs)); }
 		TruthValuePtr apply_tv(const std::string& func, Handle varargs) {

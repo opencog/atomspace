@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
@@ -59,18 +59,18 @@ void MinusLink::init(void)
 		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const ProtoAtomPtr& pap)
+static inline double get_double(const ValuePtr& pap)
 {
 	return NumberNodeCast(pap)->get_value();
 }
 
-ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
+ValuePtr MinusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(get_value(fi));
+	ValuePtr vi(get_value(fi));
 	Type vitype = vi->get_type();
 
-	ProtoAtomPtr vj(get_value(fj));
+	ValuePtr vj(get_value(fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers?

@@ -52,13 +52,13 @@ TruthValueOfLink::TruthValueOfLink(const Link &l)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the TruthValue
-ProtoAtomPtr TruthValueOfLink::execute() const
+ValuePtr TruthValueOfLink::execute() const
 {
 	size_t ary = _outgoing.size();
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	return ProtoAtomCast(_outgoing[0]->getTruthValue());
+	return ValueCast(_outgoing[0]->getTruthValue());
 }
 
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)

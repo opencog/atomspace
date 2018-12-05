@@ -38,7 +38,7 @@ class TimesLink : public ArithmeticLink
 {
 protected:
 	static Handle one;
-	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
+	ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
 
 	void init(void);
 

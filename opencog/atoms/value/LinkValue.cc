@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/LinkValue.cc
+ * opencog/atoms/value/LinkValue.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,12 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+bool LinkValue::operator==(const Value& other) const
 {
 	if (LINK_VALUE != other.get_type()) return false;
 
@@ -45,7 +45,7 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 std::string LinkValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
-	for (ProtoAtomPtr v :_value)
+	for (ValuePtr v :_value)
 		rv += std::string(" ") + v->to_string(indent + "   ");
 	rv += ")\n";
 	return rv;
@@ -53,4 +53,4 @@ std::string LinkValue::to_string(const std::string& indent) const
 
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(LINK_VALUE,
-                     createLinkValue, std::vector<ProtoAtomPtr>)
+                     createLinkValue, std::vector<ValuePtr>)

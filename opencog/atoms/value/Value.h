@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/ProtoAtom.h
+ * opencog/atoms/value/Value.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -26,8 +26,8 @@
 #include <memory>
 #include <string>
 
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/NameServer.h>
 
 namespace opencog
 {
@@ -37,10 +37,10 @@ namespace opencog
  */
 
 /**
- * ProtoAtoms are the base class for the Atom shared pointer.
+ * Values are the base class for the Atom shared pointer.
  */
-class ProtoAtom
-	: public std::enable_shared_from_this<ProtoAtom>
+class Value
+	: public std::enable_shared_from_this<Value>
 {
 protected:
 	// We store the type locally, to avoid the overhead of
@@ -48,9 +48,9 @@ protected:
 	Type _type;
 
 public:
-	ProtoAtom(Type t) : _type(t) {}
+	Value(Type t) : _type(t) {}
 
-	virtual ~ProtoAtom() {}
+	virtual ~Value() {}
 
 	inline Type get_type() const { return _type; }
 
@@ -84,29 +84,29 @@ public:
 	 *
 	 * @return true if the proto-atoms are equal, false otherwise.
 	 */
-	virtual bool operator==(const ProtoAtom&) const = 0;
+	virtual bool operator==(const Value&) const = 0;
 
 	/**
 	 * Returns whether two proto-atoms are different.
 	 *
 	 * @return true if the proto-atoms are different, false otherwise.
 	 */
-	bool operator!=(const ProtoAtom& other) const
+	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
 };
 
-typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
+typedef std::shared_ptr<Value> ValuePtr;
 
-typedef std::vector<ProtoAtomPtr> ProtomSeq;
+typedef std::vector<ValuePtr> ProtomSeq;
 
 /** @}*/
 } // namespace opencog
 
-// overload of operator<< to print ProtoAtoms
+// overload of operator<< to print Values
 namespace std
 {
     template<typename Out>
-    Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
+    Out& operator<<(Out& out, const opencog::ValuePtr& pa)
     {
         out << pa->to_string("");
         return out;

@@ -67,9 +67,9 @@ public:
 	~ValuationTable();
 
 	void addValuation(const ValuationPtr&);
-	void addValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
+	void addValuation(const Handle&, const Handle&, const ValuePtr&);
 	ValuationPtr getValuation(const Handle&, const Handle&);
-	ProtoAtomPtr getValue(const Handle&, const Handle&);
+	ValuePtr getValue(const Handle&, const Handle&);
 
 	HandleSet getKeys(const Handle&);
 };

@@ -11,8 +11,8 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/proto/NameServer.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
@@ -45,18 +45,18 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	// In the current C++ code, handles can also be pointers to
-	// protoAtoms.  Howerver, in the guile wrapper, we expect all
+	// values.  Howerver, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
-	// if you just want ProtoAtoms.
+	// if you just want Values.
 	if (not (h->is_link() or h->is_node()))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
 }
 
-ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 {
-	ProtoAtomPtr pv(scm_to_protom(satom));
+	ValuePtr pv(scm_to_protom(satom));
 	if (nullptr == pv)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
 

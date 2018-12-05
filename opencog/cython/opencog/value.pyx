@@ -1,10 +1,10 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr):
-    """Factory method to construct ProtoAtom from C++ ProtoAtomPtr (see
+cdef Value createProtoAtom(cValuePtr shared_ptr):
+    """Factory method to construct Value from C++ ValuePtr (see
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
     for example)"""
-    cdef ProtoAtom proto_atom = ProtoAtom.__new__(ProtoAtom)
+    cdef Value proto_atom = Value.__new__(Value)
     proto_atom.shared_ptr = shared_ptr
     return proto_atom
 
@@ -24,37 +24,37 @@ cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
         inc(it)
     return list
 
-cdef list vector_of_protoatoms_to_list(const vector[cProtoAtomPtr]* cpp_vector):
+cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
     list = []
     it = cpp_vector.const_begin()
-    cdef cProtoAtomPtr value
+    cdef cValuePtr value
     while it != cpp_vector.const_end():
         value = deref(it)
         if is_a(deref(value).get_type(), types.Value):
             list.append(createProtoAtom(value))
         else:
             # TODO: Support Atoms as members of LinkValue requires inheriting
-            # Atom from ProtoAtom and constructor to create Atom from cHandle.
+            # Atom from Value and constructor to create Atom from cHandle.
             raise TypeError('Only Values are supported '
                             'as members of LinkValue')
         inc(it)
     return list
 
-cdef cProtoAtom* get_protoatom_ptr(ProtoAtom protoAtom):
-    """Return plain C++ ProtoAtom pointer, raise AttributeError if
+cdef cValue* get_value_ptr(Value protoAtom):
+    """Return plain C++ Value pointer, raise AttributeError if
     pointer is nullptr"""
-    cdef cProtoAtom* ptr = protoAtom.shared_ptr.get()
+    cdef cValue* ptr = protoAtom.shared_ptr.get()
     if ptr == NULL:
-        raise AttributeError('ProtoAtom contains NULL reference')
+        raise AttributeError('Value contains NULL reference')
     else:
         return ptr
 
-cdef class ProtoAtom:
-    """C++ ProtoAtom object wrapper for Python clients"""
+cdef class Value:
+    """C++ Value object wrapper for Python clients"""
 
     property type:
          def __get__(self):
-             return get_protoatom_ptr(self).get_type()
+             return get_value_ptr(self).get_type()
 
     property type_name:
         def __get__(self):
@@ -75,21 +75,21 @@ cdef class ProtoAtom:
     def to_list(self):
         if self.is_a(types.FloatValue):
             return vector_of_doubles_to_list(
-                &((<cFloatValue*>get_protoatom_ptr(self)).value()))
+                &((<cFloatValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
-                &((<cStringValue*>get_protoatom_ptr(self)).value()))
+                &((<cStringValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.LinkValue):
-            return vector_of_protoatoms_to_list(
-                &((<cLinkValue*>get_protoatom_ptr(self)).value()))
+            return vector_of_values_to_list(
+                &((<cLinkValue*>get_value_ptr(self)).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
-        return get_protoatom_ptr(self).to_string().decode('UTF-8')
+        return get_value_ptr(self).to_string().decode('UTF-8')
 
     def short_string(self):
-        return get_protoatom_ptr(self).to_short_string().decode('UTF-8')
+        return get_value_ptr(self).to_short_string().decode('UTF-8')
 
     def __str__(self):
         return self.short_string()
@@ -98,15 +98,15 @@ cdef class ProtoAtom:
         return self.long_string()
 
     def __richcmp__(self, other, op):
-        if not isinstance(other, ProtoAtom):
-            raise TypeError('ProtoAtom cannot be compared with {}'
+        if not isinstance(other, Value):
+            raise TypeError('Value cannot be compared with {}'
                             .format(type(other)))
-        cdef cProtoAtom* self_ptr = get_protoatom_ptr(<ProtoAtom>self)
-        cdef cProtoAtom* other_ptr = get_protoatom_ptr(<ProtoAtom>other)
+        cdef cValue* self_ptr = get_value_ptr(<Value>self)
+        cdef cValue* other_ptr = get_value_ptr(<Value>other)
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         elif op == Py_NE:
             return deref(self_ptr) != deref(other_ptr)
         else:
-            raise TypeError('ProtoAtom can be compared using '
+            raise TypeError('Value can be compared using '
                             + 'Py_EQ and Py_NE only')

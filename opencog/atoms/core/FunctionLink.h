@@ -75,7 +75,7 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual ProtoAtomPtr execute() const;
+	virtual ValuePtr execute() const;
 
 	static Handle factory(const Handle&);
 };
@@ -84,7 +84,7 @@ static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FunctionLink>(h); }
 static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
-static inline FunctionLinkPtr FunctionLinkCast(const ProtoAtomPtr& a)
+static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
 
 #define createFunctionLink std::make_shared<FunctionLink>

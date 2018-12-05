@@ -51,7 +51,7 @@ AttentionValue::AttentionValue(const AttentionValue& source) :
 	_value[VLTI] = source._value[VLTI];
 }
 
-AttentionValue::AttentionValue(const ProtoAtomPtr& source) :
+AttentionValue::AttentionValue(const ValuePtr& source) :
 	FloatValue(ATTENTION_VALUE)
 {
 	if (source->get_type() != ATTENTION_VALUE)

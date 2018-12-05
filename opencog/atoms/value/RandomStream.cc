@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/proto/StringValue.cc
+ * opencog/atoms/value/RandomStream.cc
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,37 +20,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/StringValue.h>
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <stdlib.h>
+#include <opencog/atoms/value/RandomStream.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool StringValue::operator==(const ProtoAtom& other) const
+// ==============================================================
+
+RandomStream::RandomStream(int len) :
+	StreamValue(RANDOM_STREAM), _len(len)
 {
-	if (STRING_VALUE != other.get_type()) return false;
-
-	const StringValue* sov = (const StringValue*) &other;
-
-	if (_value.size() != sov->_value.size()) return false;
-	size_t len = _value.size();
-	for (size_t i=0; i<len; i++)
-		if (_value[i] != sov->_value[i]) return false;
-	return true;
+	_value.resize(len, 0.0);
 }
 
 // ==============================================================
 
-std::string StringValue::to_string(const std::string& indent) const
+void RandomStream::update() const
+{
+	static thread_local unsigned short xsubi[3] = {0, 0, 0};
+	for (int i=0; i< _len; i++)
+	{
+		_value[i] = erand48(xsubi);
+	}
+}
+
+// ==============================================================
+
+std::string RandomStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	for (std::string v :_value)
-		rv += std::string(" \"") + v + "\"";
+	rv += " " + std::to_string(_len);
 	rv += ")\n";
 	return rv;
 }
 
-// Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(STRING_VALUE,
-                     createStringValue, std::vector<std::string>)
-DEFINE_VALUE_FACTORY(STRING_VALUE,
-                     createStringValue, std::string)
+// ==============================================================
+
+// Adds factor when library is loaded.
+DEFINE_VALUE_FACTORY(RANDOM_STREAM,
+                     createRandomStream, int)

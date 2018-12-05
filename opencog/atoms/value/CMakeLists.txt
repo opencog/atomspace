@@ -13,7 +13,7 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY (atomproto
+ADD_LIBRARY (value
 	atom_types_init.cc
 	FloatValue.cc
 	LinkValue.cc
@@ -25,13 +25,13 @@ ADD_LIBRARY (atomproto
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atomproto opencog_atom_types)
+ADD_DEPENDENCIES(value opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(atomproto
+TARGET_LINK_LIBRARIES(value
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atomproto EXPORT AtomSpaceTargets
+INSTALL (TARGETS value EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -41,13 +41,13 @@ INSTALL (FILES
 	FloatValue.h
 	LinkValue.h
 	NameServer.h
-	ProtoAtom.h
+	Value.h
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
 	ValueFactory.h
 	types.h
-	DESTINATION "include/opencog/atoms/proto"
+	DESTINATION "include/opencog/atoms/value"
 )
 
 # Install the auto-generated atom types as well

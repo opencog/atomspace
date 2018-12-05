@@ -42,8 +42,8 @@ typedef std::shared_ptr<FoldLink> FoldLinkPtr;
 class FoldLink : public FunctionLink
 {
 protected:
-	ProtoAtomPtr knil;
-	virtual ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const = 0;
+	ValuePtr knil;
+	virtual ValuePtr kons(const ValuePtr&, const ValuePtr&) const = 0;
 
 	void init(void);
 
@@ -51,7 +51,7 @@ public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);
 	FoldLink(const Link& l);
 
-   virtual ProtoAtomPtr delta_reduce(void) const;
+   virtual ValuePtr delta_reduce(void) const;
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)
