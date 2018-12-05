@@ -136,10 +136,10 @@ int SchemeSmob::print_misc(SCM node, SCM port, scm_print_state * ps)
 {
 	std::string str = misc_to_string(node);
 
-#ifdef HAVE_GUILE_2_2
+#if defined(HAVE_GUILE_2_2) || defined(HAVE_GUILE3)
 
 	// Deal with a regression in guile-2.1.x See bug report
-	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
+	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25397
 	scm_display (scm_from_utf8_string (str.c_str()), port);
 #else
 	scm_puts (str.c_str(), port);
