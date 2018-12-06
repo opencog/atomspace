@@ -82,7 +82,6 @@ public:
                 // Second, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
                 {
-                    // At this time, only one arg is supported. FIXME
                     int size = 1;
                     if ((int) fr.args.size() != size)
                         continue;
@@ -120,7 +119,6 @@ public:
                 // Second, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
                 {
-                    // At this time, only one arg is supported. FIXME
                     int size = 2;
                     if ((int) fr.args.size() != size)
                         continue;
