@@ -141,16 +141,16 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 	Type t = verify_type(stype, "cog-new-value", 1);
 
 	ValuePtr pa;
-    if (OCTO_VALUE == t) {
-        SCM sl = svalue_list;
-        SCM satom = SCM_CAR(sl);
-        SCM svalue = SCM_CDR(sl);
-        Handle hlist = verify_handle(satom, "cog-new-value",2);
-        HandleSeq hseq = hlist->getOutgoingSet();
-        std::vector<double> valist = verify_float_list(svalue, "cog-new-value",2);
-        pa = valueserver().create(t,hseq,valist);
-    }
-    else if (FLOAT_VALUE == t)
+	if (OCTO_VALUE == t) {
+		SCM sl = svalue_list;
+		SCM satom = SCM_CAR(sl);
+		SCM svalue = SCM_CDR(sl);
+		Handle hlist = verify_handle(satom, "cog-new-value",2);
+		HandleSeq hseq = hlist->getOutgoingSet();
+		std::vector<double> valist = verify_float_list(svalue, "cog-new-value",2);
+		pa = valueserver().create(t,hseq,valist);
+	}
+	else if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
