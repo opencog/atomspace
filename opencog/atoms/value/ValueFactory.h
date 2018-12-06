@@ -82,7 +82,6 @@ public:
                 // Second, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
                 {
-                    // At this time, only one arg is supported. FIXME
                     int size = 1;
                     if ((int) fr.args.size() != size)
                         continue;
@@ -103,6 +102,45 @@ public:
         throw NotFoundException(TRACE_INFO,
               "No factory found for this Value type and arguments.");
     }
+
+    template <typename TYP, typename ARG1, typename ARG2>
+    ValuePtr create(TYP vtype, ARG1 arg1, ARG2 arg2) const
+    {
+        // Look up the factory only once; cache the result.
+        static ValueFactory fptr = nullptr;
+
+        if (nullptr == fptr)
+        {
+            try
+            {
+                // First, find the list of factories for this type.
+                std::vector<ProtoFactory> func_vec = _factories.at(vtype);
+
+                // Second, find the matching arglist.
+                for (const ProtoFactory& fr : func_vec)
+                {
+                    int size = 2;
+                    if ((int) fr.args.size() != size)
+                        continue;
+                     
+                    if (fr.args[0] == std::type_index(typeid(arg1)) and
+                        fr.args[1] == std::type_index(typeid(arg2)))
+                    {
+                        fptr = fr.func;
+                        break;
+                    }
+                }
+            }
+            catch(...) {}
+        }
+
+        if (fptr)
+            return (*fptr)(arg1, arg2);
+
+        throw NotFoundException(TRACE_INFO,
+              "No factory found for this Value type and arguments.");
+    }
+
 };
 
 ValueServer& valueserver();
