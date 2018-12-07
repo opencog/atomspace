@@ -38,6 +38,16 @@ bool StringValue::operator==(const ProtoAtom& other) const
 	return true;
 }
 
+bool StringValue::operator<(const ProtoAtom& other) const
+{
+	if (STRING_VALUE != other.get_type())
+		return STRING_VALUE < other.get_type();
+
+	const StringValue* sov = (const StringValue*) &other;
+
+	return _value < sov->_value;
+}
+
 // ==============================================================
 
 std::string StringValue::to_string(const std::string& indent) const

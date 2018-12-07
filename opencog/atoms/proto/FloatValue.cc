@@ -45,6 +45,16 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 	return true;
 }
 
+bool FloatValue::operator<(const ProtoAtom& other) const
+{
+	if (FLOAT_VALUE != other.get_type())
+		return FLOAT_VALUE < other.get_type();
+
+    const FloatValue* fov = (const FloatValue*) &other;
+
+	return _value < fov->_value;
+}
+
 // ==============================================================
 
 std::string FloatValue::to_string(const std::string& indent) const

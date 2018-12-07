@@ -102,6 +102,16 @@ bool Node::operator<(const Atom& other) const
         return get_type() < other.get_type();
 }
 
+bool Node::operator<(const ProtoAtom& other) const
+{
+	if (get_type() != other.get_type())
+		return get_type() < other.get_type();
+
+	const Node* nov = (const Node*) &other;
+
+	return get_name() < nov->get_name();
+}
+
 ContentHash Node::compute_hash() const
 {
 	ContentHash hsh = std::hash<std::string>()(get_name());

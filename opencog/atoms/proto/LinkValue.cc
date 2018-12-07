@@ -40,6 +40,23 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 	return true;
 }
 
+bool LinkValue::operator<(const ProtoAtom& other) const
+{
+	if (LINK_VALUE != other.get_type())
+		return LINK_VALUE < other.get_type();
+
+	const LinkValue* lov = (const LinkValue*) &other;
+
+	return _value < lov->_value;
+
+//auto it1 = _value.begin();
+//auto it2 = other._value.begin();
+//	while (it1 != _value.end() && it2 != other._value.end())
+//	{
+//		if (*it1 != *it2)
+//			return *it1 < *it2;
+//	}
+}
 // ==============================================================
 
 std::string LinkValue::to_string(const std::string& indent) const

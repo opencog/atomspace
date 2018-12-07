@@ -57,6 +57,11 @@ public:
 
 	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const ProtoAtom&) const;
+
+	/** Ordering operator for ProtoAtoms.
+	 * First compares Types then based on Content
+	 */
+    virtual bool operator<(const ProtoAtom&) const;
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;

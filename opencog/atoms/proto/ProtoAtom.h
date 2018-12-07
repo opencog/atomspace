@@ -95,14 +95,22 @@ public:
 	 */
 	bool operator!=(const ProtoAtom& other) const
 		{ return not operator==(other); }
+
+    /** Ordering operator for ProtoAtoms. */
+    virtual bool operator<(const ProtoAtom&) const = 0;
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 
+struct cmpByContent {
+    bool operator()(const ProtoAtomPtr a, const ProtoAtomPtr b) const {
+        return *a < *b;
+    }
+};
 //! a map from ProtoAtomPtr to double
-typedef Counter<ProtoAtomPtr, double> ValueCounter;
+typedef Counter<ProtoAtomPtr, double, cmpByContent> ValueCounter;
 
 /** @}*/
 } // namespace opencog

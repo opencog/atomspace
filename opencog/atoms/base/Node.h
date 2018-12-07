@@ -117,6 +117,8 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
 	virtual bool operator<(const Atom&) const;
+
+	bool operator<(const ProtoAtom&) const;
 };
 
 typedef std::shared_ptr<Node> NodePtr;

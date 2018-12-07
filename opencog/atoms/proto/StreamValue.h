@@ -48,6 +48,11 @@ public:
 
 	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
+
+	/** Ordering operator for ProtoAtoms.
+	 * First compares Types then based on Content
+	 */
+    virtual bool operator<(const ProtoAtom&) const;
 };
 
 typedef std::shared_ptr<StreamValue> StreamValuePtr;

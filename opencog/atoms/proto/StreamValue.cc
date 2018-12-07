@@ -32,4 +32,13 @@ bool StreamValue::operator==(const ProtoAtom& other) const
 	return &other == this;
 }
 
+bool StreamValue::operator<(const ProtoAtom& other) const
+{
+	if (STREAM_VALUE != other.get_type())
+		return STREAM_VALUE < other.get_type();
+
+    const StreamValue* sov = (const StreamValue*) &other;
+
+	return _value < sov->_value;
+}
 // ==============================================================
