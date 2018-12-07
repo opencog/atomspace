@@ -193,6 +193,104 @@ ValueCounter DistributionalValue::PartJoint(ProtoAtomPtr idx,int pos) const
     return res;
 }
 
+//Create a Conjuction from 2 DVs
+DistributionalValuePtr DistributionalValue::Conjuction(DistributionalValuePtr dv) const
+{
+	typedef std::pair<ProtoAtomPtr,double> Elem;
+	typedef std::function<bool(Elem,Elem)> Comparator;
+
+	Comparator compF =
+		[](Elem elem1,Elem elem2)
+		{
+			double v1 = getKeyMin(elem1.first);
+			double v2 = getKeyMin(elem2.first);
+			return v1 < v2;
+		};
+
+	std::set<Elem,Comparator> set1(value.begin(),value.end(),compF);
+	std::set<Elem,Comparator> set2(dv->value.begin(),dv->value.end(),compF);
+
+	ValueCounter res;
+	double count = std::min(total_count(),dv->total_count());
+
+	auto it1 = set1.begin();
+	auto it2 = set2.begin();
+
+	double m1 = 1;
+	double m2 = 1;
+
+	while (m1 != 0 && m2 != 0)
+	{
+		double v1 = getKeyMin(it1->first);
+		double v2 = getKeyMin(it2->first);
+		if (v1 < v2)
+		{
+			double mean = get_mean_for(it1->second);
+			res[it1->first] += count * mean * m2;
+			m1 -= mean;
+			it1++;
+		}
+		else
+		{
+			double mean = get_mean_for(it2->second);
+			res[it2->first] += count * mean * m1;
+			m2 -= mean;
+			it2++;
+		}
+	}
+
+	return createDV(res);
+}
+
+//Create a disjuction from 2 DVs
+DistributionalValuePtr DistributionalValue::Disjuction(DistributionalValuePtr dv) const
+{
+	typedef std::pair<ProtoAtomPtr,double> Elem;
+	typedef std::function<bool(Elem,Elem)> Comparator;
+
+	Comparator compF =
+		[](Elem elem1,Elem elem2)
+		{
+			double v1 = getKeyMax(elem1.first);
+			double v2 = getKeyMax(elem2.first);
+			return v1 > v2;
+		};
+
+	std::set<Elem,Comparator> set1(value.begin(),value.end(),compF);
+	std::set<Elem,Comparator> set2(dv->value.begin(),dv->value.end(),compF);
+
+	ValueCounter res;
+	double count = std::min(total_count(),dv->total_count());
+
+	auto it1 = set1.begin();
+	auto it2 = set2.begin();
+
+	double m1 = 1;
+	double m2 = 1;
+
+	while (m1 != 0 && m2 != 0)
+	{
+		double v1 = getKeyMax(it1->first);
+		double v2 = getKeyMax(it2->first);
+		if (v1 > v2)
+		{
+			double mean = get_mean_for(it1->second);
+			res[it1->first] += count * mean * m2;
+			m1 -= mean;
+			it1++;
+		}
+		else
+		{
+			double mean = get_mean_for(it2->second);
+			res[it2->first] += count * mean * m1;
+			m2 -= mean;
+			it2++;
+		}
+	}
+
+	return createDV(res);
+}
+
 bool DistributionalValue::IsUniform() const
 {
     double val = value.begin()->second;
@@ -395,12 +493,38 @@ ProtoAtomPtr DistributionalValue::getKey(ProtoAtomPtr h) const
     throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
+double DistributionalValue::getKeyMin(ProtoAtomPtr p) const
+{
+	switch(p->get_type()) {
+		case FLOAT_VALUE:
+			return FloatValueCast(p)->value()[0];
+		case LINK_VALUE:
+			return FloatValueCast(LinkValueCast(p)->value()[0])->value()[0];
+		default:
+			throw RuntimeException(TRACE_INFO, "Can't handle key of this type.");
+	}
+
+}
+
+double DistributionalValue::getKeyMax(ProtoAtomPtr p) const
+{
+	switch(p->get_type()) {
+		case FLOAT_VALUE:
+			return FloatValueCast(p)->value()[0];
+		case LINK_VALUE:
+			return FloatValueCast(LinkValueCast(p)->value()[1])->value()[0];
+		default:
+			throw RuntimeException(TRACE_INFO, "Can't handle key of this type.");
+	}
+
+}
+
 ProtomSeq DistributionalValue::getKeys() const
 {
     ProtomSeq res;
     for (auto h : value)
     {
-        res.push_back(h.first);
+        res.push_back(std::shared_ptr<ProtoAtom>(h.first));
     }
     return res;
 }
@@ -409,7 +533,7 @@ double DistributionalValue::getCount(ProtoAtomPtr h) const
 {
 	for (auto& elem : value)
 	{
-		if (*(elem.first) == *h)
+		if (elem.first == h)
 			return elem.second;
 	}
     throw RuntimeException(TRACE_INFO, "No Key for this value.");

@@ -203,6 +203,9 @@ private:
 	static SCM ss_dv_get_confidence(SCM);
 	static SCM ss_dv_get_swc(SCM);
 	static SCM ss_dv_get_fom(SCM);
+	static SCM ss_dv_conjunction(SCM,SCM);
+	static SCM ss_dv_disjunction(SCM,SCM);
+	static SCM ss_dv_negate(SCM);
 	static SCM ss_new_cdv(SCM, SCM);
     static SCM ss_cdv_get_conditions(SCM);
     static SCM ss_cdv_get_unconditonals(SCM);
@@ -210,6 +213,7 @@ private:
     static SCM ss_cdv_get_unconditonal_no_match(SCM,SCM);
     static SCM ss_cdv_get_joint(SCM,SCM);
     static SCM ss_cdv_merge(SCM,SCM);
+    static SCM ss_cdv_cde(SCM,SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);

@@ -88,6 +88,9 @@ public:
     DistributionalValuePtr SumJoint(DistributionalValuePtr,int) const;
     ValueCounter PartJoint(ProtoAtomPtr,int) const;
 
+	DistributionalValuePtr Conjuction(DistributionalValuePtr) const;
+	DistributionalValuePtr Disjuction(DistributionalValuePtr) const;
+
     bool IsUniform() const;
 
     std::vector<double> get_mode() const;
@@ -115,9 +118,12 @@ public:
     static double to_conf(int c);
     static int to_count(double);
 
+    static double getKeyMin(ProtoAtomPtr) const;
+    static double getKeyMax(ProtoAtomPtr) const;
+
     ProtoAtomPtr getKey(ProtoAtomPtr) const;
     double getCount(ProtoAtomPtr) const;
-    double getCountNoMatch(ProtoAtomPtr h) const;
+    double getCountNoMatch(ProtoAtomPtr) const;
     double getMean(ProtoAtomPtr) const;
     double getMeanNoMatch(ProtoAtomPtr) const;
     double getMode(ProtoAtomPtr) const;

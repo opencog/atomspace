@@ -239,6 +239,31 @@ ConditionalDVPtr ConditionalDV::merge(ConditionalDVPtr cdv2) const
 	return createCDV(res);
 }
 
+ConditionalDVPtr ConditionalDV::CDE(ConditionalDVPtr cdv2) const
+{
+	CDVrep res;
+	for (auto elem : cdv2->value)
+	{
+		DistributionalValuePtr v1 = getUnconditionalNoMatch(elem.first);
+		ValueCounter partres;
+
+		double count;
+		if (v1->total_count() >= elem.second.total_count())
+			count = v1->total_count();
+		else
+			count = elem.second.total_count();
+
+		for (auto elem2 : elem.second)
+		{
+			double m1 = v1->getMeanNoMatch(elem2.first);
+			double m2 = DistributionalValue::createDV(elem.second)->getMean(elem2.first);
+			partres[elem2.first] = count * ((m1 - m2) / (1 - m2));
+		}
+		res[elem.first] = partres;
+	}
+	return createCDV(res);
+}
+
 std::string ConditionalDV::to_string(const std::string& indent) const
 {
     std::stringstream ss;

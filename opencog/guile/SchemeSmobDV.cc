@@ -201,6 +201,22 @@ SCM SchemeSmob::ss_dv_part_joint(SCM sdv,SCM sh,SCM si)
     return dv_to_scm(dvres);
 }
 
+SCM SchemeSmob::ss_dv_conjunction(SCM sdv1,SCM sdv2)
+{
+    DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-conjunction",1);
+    DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-conjunction",2);
+	DistributionalValuePtr dvres = dv1->Conjuction(dv2);
+	return dv_to_scm(dvres);
+}
+
+SCM SchemeSmob::ss_dv_disjunction(SCM sdv1,SCM sdv2)
+{
+    DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-disjunction",1);
+    DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-disjunction",2);
+	DistributionalValuePtr dvres = dv1->Disjuction(dv2);
+	return dv_to_scm(dvres);
+}
+
 SCM SchemeSmob::ss_dv_get_swc(SCM sdv)
 {
     DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-swc",1);
@@ -217,6 +233,12 @@ SCM SchemeSmob::ss_dv_get_confidence(SCM sdv)
 {
     DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-confidence",1);
     return scm_from_double(dv->get_confidence());
+}
+
+SCM SchemeSmob::ss_dv_negate(SCM sdv)
+{
+    DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-negate",1);
+    return dv_to_scm(dv->negate());
 }
 
 SCM SchemeSmob::cdv_to_scm (const ConditionalDVPtr& cdv)
@@ -287,6 +309,14 @@ SCM SchemeSmob::ss_cdv_merge(SCM scdv1,SCM scdv2)
    ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-merge",1);
    ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-merge",2);
    ConditionalDVPtr res = cdv1->merge(cdv2);
+   return cdv_to_scm(res);
+}
+
+SCM SchemeSmob::ss_cdv_cde(SCM scdv1,SCM scdv2)
+{
+   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
+   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
+   ConditionalDVPtr res = cdv1->CDE(cdv2);
    return cdv_to_scm(res);
 }
 /* ===================== END OF FILE ============================ */

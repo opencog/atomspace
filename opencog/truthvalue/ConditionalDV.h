@@ -83,6 +83,8 @@ public:
 
     DistributionalValuePtr getJointProbability(DistributionalValuePtr) const;
 
+	//Consequen-Disjuction-Elimination
+	ConditionalDVPtr CDE(ConditionalDVPtr) const;
 
 	double total_count() const;
 	double avg_count() const;
