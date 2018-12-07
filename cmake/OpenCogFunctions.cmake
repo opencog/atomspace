@@ -20,9 +20,13 @@
 # MODULE_DIR_PATH in the PARENT_SCOPE.
 FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME)
     SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
-    SET(GUILE_INSTALL_DIR "${DATADIR}/scm")
+    IF(HAVE_GUILE AND (GUILE_VERSION VERSION_GREATER 2.2))
+        EXECUTE_PROCESS(COMMAND guile -c "(display (%site-dir))"
+            OUTPUT_VARIABLE GUILE_INSTALL_DIR
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF()
 
-    # Create symlinks in build directory mirroring the install path structure.
+    # Copy files into build directory mirroring the install path structure.
     # Also configure for install.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
         EXECUTE_PROCESS(
@@ -116,7 +120,7 @@ FUNCTION(ADD_GUILE_MODULE)
             LIST(APPEND GUILE_MODULE_DEPENDS ${MODULE_FILE_DEPEND})
         ENDFOREACH()
         IF( NOT ( TARGET "${MODULE_NAME}_GUILE_INSTALL"))
-		ADD_CUSTOM_TARGET("${MODULE_NAME}_GUILE_INSTALL" ALL DEPENDS "${GUILE_MODULE_DEPENDS}")
+            ADD_CUSTOM_TARGET("${MODULE_NAME}_GUILE_INSTALL" ALL DEPENDS "${GUILE_MODULE_DEPENDS}")
         ENDIF()
     ELSE()
         IF(NOT DEFINED SCM_FILES)
