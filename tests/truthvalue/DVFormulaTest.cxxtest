@@ -38,14 +38,14 @@ private:
 	DVKey keys[17];
 
 public:
-    DVFormulaTest()
-    {
-    }
+	DVFormulaTest()
+	{
+	}
 
-    void setUp()
-    {
+	void setUp()
+	{
 		keys[0] = DVKey{Interval{0.0 ,0.25}};
-	    keys[1] = DVKey{Interval{0.25,0.5 }};
+		keys[1] = DVKey{Interval{0.25,0.5 }};
 		keys[2] = DVKey{Interval{0.5 ,0.75}};
 		keys[3] = DVKey{Interval{0.75,1.0 }};
 
@@ -95,9 +95,9 @@ public:
 		dvc3[keys[16]] = 10;
 
 		dvs[3] = DistributionalValue::createDV(dvc3);
-    }
+	}
 
-    void tearDown() {}
+	void tearDown() {}
 
 	void testGetKeyMin()
 	{

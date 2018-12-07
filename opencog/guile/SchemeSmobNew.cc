@@ -163,7 +163,7 @@ SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
             res = scm_cons(sh,res);
         }
     }
-	return res;
+    return res;
 }
 
 SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
@@ -181,7 +181,7 @@ SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
             res = scm_cons(sh,res);
         }
     }
-	return res;
+    return res;
 }
 
 SCM SchemeSmob::dvkey_to_scm(const DVKey& v)
@@ -199,7 +199,7 @@ SCM SchemeSmob::dvkey_to_scm(const DVKey& v)
             res = scm_cons(sh,res);
         }
     }
-	return res;
+    return res;
 }
 
 SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
@@ -217,7 +217,7 @@ SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
             res = scm_cons(sh,res);
         }
     }
-	return res;
+    return res;
 }
 
 SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
@@ -235,7 +235,7 @@ SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
             res = scm_cons(sp,res);
         }
     }
-	return res;
+    return res;
 }
 
 SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)

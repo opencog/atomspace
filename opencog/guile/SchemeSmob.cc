@@ -154,8 +154,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 /* ============================================================== */
 
 [[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
-												const char *func,
-												SCM args)
+                                                const char *func,
+                                                SCM args)
 {
 	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
@@ -247,9 +247,9 @@ void SchemeSmob::module_init(void*)
 
 	scm_c_eval_string(
 		"(setenv \"LTDL_LIBRARY_PATH\""
-		"	(if (getenv \"LTDL_LIBRARY_PATH\")"
-		"	   (string-append (getenv \"LTDL_LIBRARY_PATH\") \":\" path)"
-		"	   path))");
+		"   (if (getenv \"LTDL_LIBRARY_PATH\")"
+		"      (string-append (getenv \"LTDL_LIBRARY_PATH\") \":\" path)"
+		"       path))");
 
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
@@ -281,126 +281,126 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
-	register_proc("cog-new-value",		   1, 0, 1, C(ss_new_value));
-	register_proc("cog-new-node",		   2, 0, 1, C(ss_new_node));
-	register_proc("cog-new-link",		   1, 0, 1, C(ss_new_link));
-	register_proc("cog-node",			   2, 0, 1, C(ss_node));
-	register_proc("cog-link",			   1, 0, 1, C(ss_link));
-	register_proc("cog-delete",			   1, 0, 1, C(ss_delete));
+	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
+	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
+	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
+	register_proc("cog-node",              2, 0, 1, C(ss_node));
+	register_proc("cog-link",              1, 0, 1, C(ss_link));
+	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
 	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
-	register_proc("cog-extract",		   1, 0, 1, C(ss_extract));
+	register_proc("cog-extract",           1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive", 1, 0, 1, C(ss_extract_recursive));
 
-	register_proc("cog-value?",			   1, 0, 0, C(ss_value_p));
-	register_proc("cog-atom?",			   1, 0, 0, C(ss_atom_p));
-	register_proc("cog-node?",			   1, 0, 0, C(ss_node_p));
-	register_proc("cog-link?",			   1, 0, 0, C(ss_link_p));
+	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
+	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
+	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
+	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
 
 	// hash-value of the atom
-	register_proc("cog-handle",			   1, 0, 0, C(ss_handle));
-	register_proc("cog-atom-less?",		   2, 0, 0, C(ss_atom_less_p));
+	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+	register_proc("cog-atom-less?",        2, 0, 0, C(ss_atom_less_p));
 
 	// Value API
-	register_proc("cog-value->list",	   1, 0, 0, C(ss_value_to_list));
-	register_proc("cog-value-ref",		   2, 0, 0, C(ss_value_ref));
+	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));
+	register_proc("cog-value-ref",         2, 0, 0, C(ss_value_ref));
 
 	// Generic property setter on atoms
-	register_proc("cog-set-value!",		   3, 0, 0, C(ss_set_value));
+	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
 
 	// TV property setters on atoms
-	register_proc("cog-set-tv!",		   2, 0, 0, C(ss_set_tv));
-	register_proc("cog-inc-count!",		   2, 0, 0, C(ss_inc_count));
+	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 
 	// property getters on atoms
-	register_proc("cog-name",			   1, 0, 0, C(ss_name));
-	register_proc("cog-type",			   1, 0, 0, C(ss_type));
-	register_proc("cog-arity",			   1, 0, 0, C(ss_arity));
-	register_proc("cog-incoming-set",	   1, 0, 0, C(ss_incoming_set));
+	register_proc("cog-name",              1, 0, 0, C(ss_name));
+	register_proc("cog-type",              1, 0, 0, C(ss_type));
+	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
+	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
-	register_proc("cog-outgoing-set",	   1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
-	register_proc("cog-outgoing-atom",	   2, 0, 0, C(ss_outgoing_atom));
-	register_proc("cog-keys",			   1, 0, 0, C(ss_keys));
-	register_proc("cog-value",			   2, 0, 0, C(ss_value));
-	register_proc("cog-tv",				   1, 0, 0, C(ss_tv));
-	register_proc("cog-as",				   1, 0, 0, C(ss_as));
-	register_proc("cog-mean",			   1, 0, 0, C(ss_get_mean));
-	register_proc("cog-confidence",		   1, 0, 0, C(ss_get_confidence));
-	register_proc("cog-count",			   1, 0, 0, C(ss_get_count));
+	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
+	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
+	register_proc("cog-value",             2, 0, 0, C(ss_value));
+	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
+	register_proc("cog-as",                1, 0, 0, C(ss_as));
+	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
+	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
+	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
-	register_proc("cog-new-stv",		   2, 0, 0, C(ss_new_stv));
-	register_proc("cog-new-ctv",		   3, 0, 0, C(ss_new_ctv));
-	register_proc("cog-new-itv",		   3, 0, 0, C(ss_new_itv));
-	register_proc("cog-new-ptv",		   3, 0, 0, C(ss_new_ptv));
-	register_proc("cog-new-ftv",		   2, 0, 0, C(ss_new_ftv));
-	register_proc("cog-new-etv",		   2, 0, 0, C(ss_new_etv));
-	register_proc("cog-tv?",			   1, 0, 0, C(ss_tv_p));
-	register_proc("cog-stv?",			   1, 0, 0, C(ss_stv_p));
-	register_proc("cog-ctv?",			   1, 0, 0, C(ss_ctv_p));
-	register_proc("cog-itv?",			   1, 0, 0, C(ss_itv_p));
-	register_proc("cog-ptv?",			   1, 0, 0, C(ss_ptv_p));
-	register_proc("cog-ftv?",			   1, 0, 0, C(ss_ftv_p));
-	register_proc("cog-etv?",			   1, 0, 0, C(ss_etv_p));
-	register_proc("cog-tv->alist",		   1, 0, 0, C(ss_tv_get_value));
-	register_proc("cog-tv-mean",		   1, 0, 0, C(ss_tv_get_mean));
-	register_proc("cog-tv-confidence",	   1, 0, 0, C(ss_tv_get_confidence));
-	register_proc("cog-tv-count",		   1, 0, 0, C(ss_tv_get_count));
-	register_proc("cog-tv-merge",		   2, 0, 0, C(ss_tv_merge));
+	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
+	register_proc("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
+	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
+	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
+	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
+	register_proc("cog-new-etv",           2, 0, 0, C(ss_new_etv));
+	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
+	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
+	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
+	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
+	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
+	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
+	register_proc("cog-etv?",              1, 0, 0, C(ss_etv_p));
+	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
+	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
+	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
+	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
+	register_proc("cog-tv-merge",          2, 0, 0, C(ss_tv_merge));
 	register_proc("cog-tv-merge-hi-conf",  2, 0, 0, C(ss_tv_merge_hi_conf));
 
 	// Atom Spaces
-	register_proc("cog-new-atomspace",	   0, 1, 0, C(ss_new_as));
-	register_proc("cog-atomspace?",		   1, 0, 0, C(ss_as_p));
-	register_proc("cog-atomspace",		   0, 0, 0, C(ss_get_as));
+	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
+	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
+	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
-	register_proc("cog-atomspace-env",	   1, 0, 0, C(ss_as_env));
+	register_proc("cog-atomspace-env",     1, 0, 0, C(ss_as_env));
 	register_proc("cog-atomspace-uuid",    1, 0, 0, C(ss_as_uuid));
 	register_proc("cog-atomspace-clear",   1, 0, 0, C(ss_as_clear));
 
 	// Attention values
-	register_proc("cog-new-av",			   3, 0, 0, C(ss_new_av));
-	register_proc("cog-av?",			   1, 0, 0, C(ss_av_p));
-	register_proc("cog-av->alist",		   1, 0, 0, C(ss_av_get_value));
+	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
+	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
+	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
 	// DistributionalValuePtr values
-	register_proc("cog-new-dv",			   2, 0, 0, C(ss_new_dv));
-	register_proc("cog-new-dv-simple",	   2, 0, 0, C(ss_new_dv_simple));
-	register_proc("cog-dv?",			   1, 0, 0, C(ss_dv_p));
-	register_proc("cog-dv-divide",		   3, 0, 0, C(ss_dv_divide));
-	register_proc("cog-dv-sum-joint",	   2, 0, 0, C(ss_dv_sum_joint));
+	register_proc("cog-new-dv",            2, 0, 0, C(ss_new_dv));
+	register_proc("cog-new-dv-simple",     2, 0, 0, C(ss_new_dv_simple));
+	register_proc("cog-dv?",               1, 0, 0, C(ss_dv_p));
+	register_proc("cog-dv-divide",         3, 0, 0, C(ss_dv_divide));
+	register_proc("cog-dv-sum-joint",      2, 0, 0, C(ss_dv_sum_joint));
 	register_proc("cog-dv-get-confidence", 1, 0, 0, C(ss_dv_get_confidence));
 	register_proc("cog-dv-conjunction",    2, 0, 0, C(ss_dv_conjunction));
 	register_proc("cog-dv-disjunction",    2, 0, 0, C(ss_dv_disjunction));
-	register_proc("cog-dv-negate",		   1, 0, 0, C(ss_dv_negate));
+	register_proc("cog-dv-negate",         1, 0, 0, C(ss_dv_negate));
 	register_proc("cog-dv-is-empty",       1, 0, 0, C(ss_dv_is_empty));
 	register_proc("cog-cdv-is-empty",      1, 0, 0, C(ss_cdv_is_empty));
-	register_proc("cog-new-cdv",		   2, 0, 0, C(ss_new_cdv));
+	register_proc("cog-new-cdv",           2, 0, 0, C(ss_new_cdv));
 	register_proc("cog-cdv-get-conditions",1, 0, 0, C(ss_cdv_get_conditions));
-	register_proc("cog-cdv-get-unconditionals"
-		     ,1, 0, 0, C(ss_cdv_get_unconditonals));
-	register_proc("cog-cdv-get-unconditional"
-		     ,2, 0, 0, C(ss_cdv_get_unconditonal));
-	register_proc("cog-cdv-get-joint",	   2, 0, 0, C(ss_cdv_get_joint));
-	register_proc("cog-cdv-merge",		   2, 0, 0, C(ss_cdv_merge));
-	register_proc("cog-cdv-cde",		   2, 0, 0, C(ss_cdv_cde));
+	register_proc("cog-cdv-get-unconditionals",
+	                                       1, 0, 0, C(ss_cdv_get_unconditonals));
+	register_proc("cog-cdv-get-unconditional",
+	                                       2, 0, 0, C(ss_cdv_get_unconditonal));
+	register_proc("cog-cdv-get-joint",     2, 0, 0, C(ss_cdv_get_joint));
+	register_proc("cog-cdv-merge",         2, 0, 0, C(ss_cdv_merge));
+	register_proc("cog-cdv-cde",           2, 0, 0, C(ss_cdv_cde));
 
 	// Atom types
-	register_proc("cog-get-types",		   0, 0, 0, C(ss_get_types));
-	register_proc("cog-type->int",		   1, 0, 0, C(ss_get_type));
-	register_proc("cog-type?",			   1, 0, 0, C(ss_type_p));
-	register_proc("cog-value-type?",	   1, 0, 0, C(ss_value_type_p));
-	register_proc("cog-node-type?",		   1, 0, 0, C(ss_node_type_p));
-	register_proc("cog-link-type?",		   1, 0, 0, C(ss_link_type_p));
-	register_proc("cog-get-subtypes",	   1, 0, 0, C(ss_get_subtypes));
-	register_proc("cog-subtype?",		   2, 0, 0, C(ss_subtype_p));
+	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
+	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
+	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
+	register_proc("cog-value-type?",       1, 0, 0, C(ss_value_type_p));
+	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
+	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
+	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
+	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 
 	// Iterators
-	register_proc("cog-map-type",		   2, 0, 0, C(ss_map_type));
+	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
 
 	// Free variables
 	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));
-	register_proc("cog-closed?",		   1, 0, 0, C(ss_is_closed));
+	register_proc("cog-closed?",           1, 0, 0, C(ss_is_closed));
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)

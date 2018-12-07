@@ -7,8 +7,8 @@ ADD_LIBRARY (truthvalue
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
-    DistributionalValue.cc
-    ConditionalDV.cc
+	DistributionalValue.cc
+	ConditionalDV.cc
 	DVFormulas.cc
 )
 
@@ -32,8 +32,8 @@ INSTALL (FILES
 	SimpleTruthValue.h
 	EvidenceCountTruthValue.h
 	TruthValue.h
-    DistributionalValue.h
-    ConditionalDV.h
+	DistributionalValue.h
+	ConditionalDV.h
 	DVFormulas.h
 	DESTINATION "include/opencog/truthvalue"
 )

@@ -311,7 +311,7 @@ ConditionalDVPtr SchemeSmob::verify_cdv(SCM sav, const char *subrname, int pos)
 
 	if (nullptr == cdv)
 		scm_wrong_type_arg_msg(subrname, pos, sav
-							  , "opencog condtional distributional value");
+		                       , "opencog condtional distributional value");
 
 	return cdv;
 }

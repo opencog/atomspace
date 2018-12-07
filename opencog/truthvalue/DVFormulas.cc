@@ -51,9 +51,9 @@ DVec DVFormulas::get_key_max(DVKey k)
 
 	return res;
 }
-ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1
-									     ,DistributionalValuePtr dv2
-										 ,int idx)
+ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
+                                          DistributionalValuePtr dv2,
+                                          int idx)
 {
 	CDVrep res;
 	size_t dv1dims = dv1->value().begin()->first.size();
@@ -72,8 +72,8 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1
 
 		if (dv2->get_contained_mean(hs) != 0)
 			res[hs][h] = dv1->get_mean(elem.first)
-					   / dv2->get_contained_mean(hs)
-					   * dv2->total_count();
+				/ dv2->get_contained_mean(hs)
+				* dv2->total_count();
 	}
 	return ConditionalDV::createCDV(res);
 }
@@ -114,8 +114,8 @@ void printVec(DVec i)
 
 //Create a Conjuction from 2 DVs
 DistributionalValuePtr
-DVFormulas::conjunction(DistributionalValuePtr dv1
-                       ,DistributionalValuePtr dv2)
+DVFormulas::conjunction(DistributionalValuePtr dv1,
+                        DistributionalValuePtr dv2)
 {
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
@@ -160,8 +160,8 @@ DVFormulas::conjunction(DistributionalValuePtr dv1
 
 //Create a disjuction from 2 DVs
 DistributionalValuePtr
-DVFormulas::disjunction(DistributionalValuePtr dv1
-                       ,DistributionalValuePtr dv2)
+DVFormulas::disjunction(DistributionalValuePtr dv1,
+                        DistributionalValuePtr dv2)
 {
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
@@ -210,8 +210,8 @@ DVFormulas::disjunction(DistributionalValuePtr dv1
 
 //A -> (B || C) + A -> B => A -> C
 ConditionalDVPtr
-DVFormulas::consequent_disjunction_elemination(ConditionalDVPtr cdv1
-											  ,ConditionalDVPtr cdv2)
+DVFormulas::consequent_disjunction_elemination(ConditionalDVPtr cdv1,
+                                               ConditionalDVPtr cdv2)
 {
 	CDVrep res;
 	for (auto elem : cdv2->value())

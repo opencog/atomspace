@@ -76,13 +76,14 @@ DistributionalValuePtr DistributionalValue::createDV(DVCounter dvctr)
 	return std::make_shared<const DistributionalValue>(dvctr);
 }
 
-DistributionalValuePtr DistributionalValue::createDV(double mode
-													,double conf)
+DistributionalValuePtr DistributionalValue::createDV(double mode,
+                                                     double conf)
 {
 	return std::make_shared<const DistributionalValue>(mode,conf);
 }
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(DVKey k,int c)
+DistributionalValuePtr
+DistributionalValue::UniformDistributionalValue(DVKey k,int c)
 {
 	DVCounter dvctr;
 	dvctr[k] = c;
@@ -90,7 +91,8 @@ DistributionalValuePtr DistributionalValue::UniformDistributionalValue(DVKey k,i
 }
 
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(DVKeySeq ks,int c)
+DistributionalValuePtr
+DistributionalValue::UniformDistributionalValue(DVKeySeq ks,int c)
 {
 	DVCounter dvctr;
 	for (auto k : ks)

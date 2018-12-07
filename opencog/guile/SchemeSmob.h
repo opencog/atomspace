@@ -51,9 +51,9 @@ private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_AS,			// atom spaces
-		COG_LOGGER,		// logger
-		COG_EXTEND		// callbacks into C++ code.
+		COG_AS,         // atom spaces
+		COG_LOGGER,     // logger
+		COG_EXTEND      // callbacks into C++ code.
 	};
 
 	// Encrypt and decrypt atomspace pointer, work around to bug
@@ -246,7 +246,7 @@ private:
 
 	// validate arguments coming from scheme passing into C++
 	[[ noreturn ]] static void throw_exception(const std::exception&,
-											   const char *, SCM);
+	                                           const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
@@ -257,24 +257,25 @@ private:
 	static DVKey verify_DVKey(SCM, const char *, int pos=1);
 	static DVKeySeq verify_DVKeySeq(SCM, const char *, int pos=1);
 	static DistributionalValuePtr verify_dv(SCM, const char *, int pos = 1);
-	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *, int pos = 1);
+	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *,
+	                                                          int pos = 1);
 	static ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
-												   int pos = 1);
+	                                     int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
-												   int pos = 1);
+	                                              int pos = 1);
 	static ProtomSeq verify_protom_list (SCM, const char *,
-												   int pos = 1);
+	                                     int pos = 1);
 	static std::vector<std::string> verify_string_list (SCM, const char *,
-												   int pos = 1);
+	                                                    int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
-									  const char *msg = "string");
+	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
-						   const char *msg = "integer");
+	                       const char *msg = "integer");
 	static size_t verify_size (SCM, const char *, int pos = 1,
-							   const char *msg = "size integer");
+	                           const char *msg = "size integer");
 	static double verify_real (SCM, const char *, int pos = 1,
-							   const char *msg = "real number");
+	                           const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;

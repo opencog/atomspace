@@ -215,7 +215,7 @@ public:
 	// explanation.
 	using Atom::to_string;
 	using Atom::to_short_string;
-	
+
     /**
      * Perform a content-based compare of another atom to this one.
      * Return true if the content is the same for both atoms.
@@ -233,8 +233,6 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
     virtual bool operator<(const Atom&) const;
-
-	bool operator<(const ProtoAtom&) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

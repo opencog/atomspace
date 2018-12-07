@@ -31,100 +31,98 @@ using namespace opencog;
 class DVTest :  public CxxTest::TestSuite
 {
 private:
-
 	DistributionalValuePtr dvs[3];
 	DVKey keys[11];
 
 public:
-    DVTest()
-    {
-    }
+	DVTest()
+	{
+	}
 
-    void setUp()
-    {
-	keys[0] = DVKey{Interval{0.0 ,0.25}};
-	keys[1] = DVKey{Interval{0.25,0.5 }};
-	keys[2] = DVKey{Interval{0.5 ,0.75}};
-	keys[3] = DVKey{Interval{0.75,1.0 }};
+	void setUp()
+	{
+		keys[0] = DVKey{Interval{0.0 ,0.25}};
+		keys[1] = DVKey{Interval{0.25,0.5 }};
+		keys[2] = DVKey{Interval{0.5 ,0.75}};
+		keys[3] = DVKey{Interval{0.75,1.0 }};
 
-	keys[4] = DVKey{Interval{0.0 ,0.3}};
-	keys[5] = DVKey{Interval{0.3,0.7 }};
-	keys[6] = DVKey{Interval{0.7,1.0 }};
+		keys[4] = DVKey{Interval{0.0 ,0.3}};
+		keys[5] = DVKey{Interval{0.3,0.7 }};
+		keys[6] = DVKey{Interval{0.7,1.0 }};
 
-	keys[7] = DVKey{Interval{0.0,0.5}};
-	keys[8] = DVKey{Interval{0.5,1.0}};
+		keys[7] = DVKey{Interval{0.0,0.5}};
+		keys[8] = DVKey{Interval{0.5,1.0}};
 
-	keys[9] = DVKey{Interval{0}};
-	keys[10] = DVKey{Interval{0.5}};
+		keys[9] = DVKey{Interval{0}};
+		keys[10] = DVKey{Interval{0.5}};
 
-	DVCounter dvc;
-	dvc[keys[5]] = 10;
-	dvc[keys[6]] = 20;
+		DVCounter dvc;
+		dvc[keys[5]] = 10;
+		dvc[keys[6]] = 20;
 
-	dvs[0] = DistributionalValue::createDV(dvc);
+		dvs[0] = DistributionalValue::createDV(dvc);
 
-	DVCounter dvc1;
-	dvc1[keys[0]] = 30;
-	dvc1[keys[1]] = 30;
+		DVCounter dvc1;
+		dvc1[keys[0]] = 30;
+		dvc1[keys[1]] = 30;
 
-	dvs[1] = DistributionalValue::createDV(dvc1);
+		dvs[1] = DistributionalValue::createDV(dvc1);
 
-	DVCounter dvc2;
-	dvc2[keys[2]] = 30;
-	dvc2[keys[3]] = 30;
+		DVCounter dvc2;
+		dvc2[keys[2]] = 30;
+		dvc2[keys[3]] = 30;
 
-	dvs[2] = DistributionalValue::createDV(dvc2);
-    }
+		dvs[2] = DistributionalValue::createDV(dvc2);
+	}
 
-    void tearDown() {}
+	void tearDown() {}
 
-    void testKeyContained()
-    {
-	DVKey key11{Interval{0.0 ,0.25}};
-	DVKey key12{Interval{0.0 ,0.5}};
-	DVKey key13{Interval{0.6 ,0.75}};
-	DVKey key14{Interval{0.3}};
-	double r1 = DistributionalValue::key_contained(key11,key12);
-	TS_ASSERT_EQUALS(r1, 1.0);
-	double r2 = DistributionalValue::key_contained(key12,key11);
-	TS_ASSERT_EQUALS(r2, 0.5);
-	double r3 = DistributionalValue::key_contained(key11,key13);
-	TS_ASSERT_EQUALS(r3, 0);
-	double r4 = DistributionalValue::key_contained(key12,key14);
-	TS_ASSERT_EQUALS(r4, 0);
-	double r5 = DistributionalValue::key_contained(key14,key12);
-	TS_ASSERT_EQUALS(r5, 1);
+	void testKeyContained()
+	{
+		DVKey key11{Interval{0.0 ,0.25}};
+		DVKey key12{Interval{0.0 ,0.5}};
+		DVKey key13{Interval{0.6 ,0.75}};
+		DVKey key14{Interval{0.3}};
+		double r1 = DistributionalValue::key_contained(key11,key12);
+		TS_ASSERT_EQUALS(r1, 1.0);
+		double r2 = DistributionalValue::key_contained(key12,key11);
+		TS_ASSERT_EQUALS(r2, 0.5);
+		double r3 = DistributionalValue::key_contained(key11,key13);
+		TS_ASSERT_EQUALS(r3, 0);
+		double r4 = DistributionalValue::key_contained(key12,key14);
+		TS_ASSERT_EQUALS(r4, 0);
+		double r5 = DistributionalValue::key_contained(key14,key12);
+		TS_ASSERT_EQUALS(r5, 1);
 
-	double r6 = DistributionalValue::key_contained(keys[9],keys[9]);
-	TS_ASSERT_EQUALS(r6, 1);
-	double r7 = DistributionalValue::key_contained(keys[9],keys[10]);
-	TS_ASSERT_EQUALS(r7, 0);
-	double r8 = DistributionalValue::key_contained(keys[10],keys[5]);
-	TS_ASSERT_EQUALS(r8, 1);
-	double r9 = DistributionalValue::key_contained(keys[5],keys[10]);
-	TS_ASSERT_EQUALS(r9, 0);
-    }
+		double r6 = DistributionalValue::key_contained(keys[9],keys[9]);
+		TS_ASSERT_EQUALS(r6, 1);
+		double r7 = DistributionalValue::key_contained(keys[9],keys[10]);
+		TS_ASSERT_EQUALS(r7, 0);
+		double r8 = DistributionalValue::key_contained(keys[10],keys[5]);
+		TS_ASSERT_EQUALS(r8, 1);
+		double r9 = DistributionalValue::key_contained(keys[5],keys[10]);
+		TS_ASSERT_EQUALS(r9, 0);
+	}
 
-    void printVec(DVec i)
-    {
-	std::cout << "{";
-	for (auto e : i)
-		std::cout << e << ",";
-	std::cout << "}" << std::endl;
-    }
+	void printVec(DVec i)
+	{
+		std::cout << "{";
+		for (auto e : i)
+			std::cout << e << ",";
+		std::cout << "}" << std::endl;
+	}
 
-    void testMean()
-    {
-	DVec m = dvs[0]->get_mean();
-	TS_ASSERT_EQUALS(m[0], 1.0/3.0);
-	TS_ASSERT_EQUALS(m[1], 2.0/3.0);
-    }
+	void testMean()
+	{
+		DVec m = dvs[0]->get_mean();
+		TS_ASSERT_EQUALS(m[0], 1.0/3.0);
+		TS_ASSERT_EQUALS(m[1], 2.0/3.0);
+	}
 
-    void testMode()
-    {
-	DVec m = dvs[0]->get_mode();
-	TS_ASSERT_EQUALS(m[0], 9.0/28.0);
-	TS_ASSERT_EQUALS(m[1], 19.0/28.0);
-    }
-
+	void testMode()
+	{
+		DVec m = dvs[0]->get_mode();
+		TS_ASSERT_EQUALS(m[0], 9.0/28.0);
+		TS_ASSERT_EQUALS(m[1], 19.0/28.0);
+	}
 };

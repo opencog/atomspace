@@ -53,23 +53,22 @@ public:
 	//static double interval_dist(DVKey,DVKey);
 
 	//was divide
-	static ConditionalDVPtr joint_to_cdv(DistributionalValuePtr
-		         						,DistributionalValuePtr
-										,int);
+	static ConditionalDVPtr joint_to_cdv(DistributionalValuePtr,
+	                                     DistributionalValuePtr,
+	                                     int);
 
 	static DistributionalValuePtr sum_joint(DistributionalValuePtr,int);
 
 	static bool compare(DVec,DVec);
 	static bool floatCompare(double,double);
 
-	static DistributionalValuePtr conjunction(DistributionalValuePtr
-			                                 ,DistributionalValuePtr);
-	static DistributionalValuePtr disjunction(DistributionalValuePtr
-			  	                             ,DistributionalValuePtr);
+	static DistributionalValuePtr conjunction(DistributionalValuePtr,
+	                                          DistributionalValuePtr);
+	static DistributionalValuePtr disjunction(DistributionalValuePtr,
+	                                          DistributionalValuePtr);
 
-	static ConditionalDVPtr consequent_disjunction_elemination(ConditionalDVPtr
-															  ,ConditionalDVPtr);
-	//double middle_of_interval(DVKey) const;
+	static ConditionalDVPtr consequent_disjunction_elemination(ConditionalDVPtr,
+	                                                           ConditionalDVPtr);
 };
 
 } // namespace opencog

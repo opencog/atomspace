@@ -400,6 +400,13 @@ public:
 
     /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
+
+    /**
+     * Compares Atoms based on Type and then using the normal Ordering operator
+     *
+     * @return true if this atom is less than the given one, false otherwise.
+     */
+    bool operator<(const ProtoAtom&) const;
 };
 
 static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)

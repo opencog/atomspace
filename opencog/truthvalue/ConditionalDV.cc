@@ -79,7 +79,7 @@ ConditionalDVPtr ConditionalDV::createCDV(CDVrep rep)
 }
 
 ConditionalDVPtr ConditionalDV::createCDV(DVKeySeq conds
-										 ,std::vector<DistributionalValuePtr> dvs)
+                                         ,std::vector<DistributionalValuePtr> dvs)
 {
 	return std::make_shared<const ConditionalDV>(conds,dvs);
 }
