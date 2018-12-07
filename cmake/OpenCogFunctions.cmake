@@ -134,8 +134,6 @@ ENDFUNCTION(ADD_GUILE_MODULE)
 
 FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
     # srfi-64 is installed in guile 2.2 and above, thus check for it.
-    FIND_PACKAGE(Guile 2.2)
-
     IF(HAVE_GUILE AND (GUILE_VERSION VERSION_GREATER 2.2))
         SET(FILE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}")
         # Check if the file exists in the current source directory.
