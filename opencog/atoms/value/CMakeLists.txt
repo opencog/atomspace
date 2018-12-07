@@ -15,6 +15,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (value
 	atom_types_init.cc
+	Value.cc
 	FloatValue.cc
 	LinkValue.cc
 	NameServer.cc
