@@ -89,6 +89,8 @@ public:
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 
+    virtual bool operator<(const ProtoAtom&) const;
+
     using ProtoAtom::to_string;
     std::string to_string(const std::string&) const;
 

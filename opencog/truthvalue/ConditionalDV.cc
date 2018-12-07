@@ -261,3 +261,13 @@ bool ConditionalDV::operator==(const ProtoAtom& rhs) const
     const DistributionalValue *gdtv2 = dynamic_cast<const DistributionalValue *>(&rhs);
     if (NULL == gdtv2) return false;
 }
+
+bool ConditionalDV::operator<(const ProtoAtom& other) const
+{
+	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type())
+		return CONDITIONAL_DISTRIBUTIONAL_VALUE < other.get_type();
+
+	const ConditionalDV* dov = (const ConditionalDV*) &other;
+
+	return value < dov->value;
+}

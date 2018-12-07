@@ -465,6 +465,16 @@ bool DistributionalValue::operator==(const ProtoAtom& rhs) const
     if (NULL == gdtv2) return false;
 }
 
+bool DistributionalValue::operator<(const ProtoAtom& other) const
+{
+	if (DISTRIBUTIONAL_VALUE != other.get_type())
+		return DISTRIBUTIONAL_VALUE < other.get_type();
+
+	const DistributionalValue* dov = (const DistributionalValue*) &other;
+
+	return value < dov->value;
+}
+
 std::string oc_to_string(const DistributionalValuePtr dvp)
 {
     std::string part = dvp->to_string("");
