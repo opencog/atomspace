@@ -35,7 +35,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/ScopeLink.h>
 

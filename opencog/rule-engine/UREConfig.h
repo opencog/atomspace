@@ -62,10 +62,10 @@ public:
 	RuleSet& get_rules();
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
-	// FC
-	bool get_retry_sources() const;
-	// BC
 	double get_complexity_penalty() const;
+	// FC
+	bool get_retry_exhausted_sources() const;
+	// BC
 	double get_max_bit_size() const;
 	double get_mm_complexity_penalty() const;
 	double get_mm_compressiveness() const;
@@ -82,7 +82,7 @@ public:
 	void set_attention_allocation(bool);
 	void set_maximum_iterations(int);
 	// FC
-	void set_retry_sources(bool);
+	void set_retry_exhausted_sources(bool);
 	// BC
 	void set_complexity_penalty(double);
 	void set_mm_complexity_penalty(double);
@@ -105,13 +105,13 @@ public:
 	// parameter
 	static const std::string max_iter_name;
 
-	// Name of the PredicateNode outputting whether sources should be
-	// retried after exhaustion
-	static const std::string fc_retry_sources_name;
-
 	// Name of the complexity penalty parameter for the Backward
 	// Chainer
-	static const std::string bc_complexity_penalty_name;
+	static const std::string complexity_penalty_name;
+
+	// Name of the PredicateNode outputting whether sources should be
+	// retried after exhaustion
+	static const std::string fc_retry_exhausted_sources_name;
 
 	// Name of the maximum number of and-BITs in the BIT parameter
 	static const std::string bc_max_bit_size_name;
@@ -132,24 +132,26 @@ private:
 		RuleSet rules;
 		bool attention_alloc;
 		int max_iter;           // If negative then disabled
+
+		// This parameter biases source or inference tree selection
+		// towards simpler one. Simpler means fewer inference steps to
+		// reach them. It usually range from 0 to +inf. 0 means there is
+		// no complexity penalty, the greater value the greater the
+		// complexity penalty. One can use negative values, in such
+		// case, the behavior is a run away depth search.
+		double complexity_penalty;
 	};
 	CommonParameters _common_params;
 
 	// Parameter specific to the forward chainer.
 	struct FCParameters {
 		// Retry all sources even if they have all been tried
-		bool retry_sources;
+		bool retry_exhausted_sources;
 	};
 	FCParameters _fc_params;
 
 	// Parameter specific to the backward chainer.
 	struct BCParameters {
-		// This parameter biases select_expansion_andbit towards
-		// simpler FCS. Range from 0 to +inf. 0 means there is no
-		// complexity penalty, the greater value the greater the
-		// complexity penalty.
-		double complexity_penalty;
-
 		// This put an upper boundary on the maximum number of
 		// and-BITs the BIT can hold. Negative means unlimited.
 		int max_bit_size;
@@ -201,7 +203,7 @@ private:
 	// it).
 	HandleSeq fetch_execution_outputs(const Handle& schema,
 	                                  const Handle& input,
-	                                  Type type = ATOM);
+	                                  Type type=ATOM);
 
 	// Similar to above but takes instead the schema name instead of
 	// the schema Handle, assumes that output value is a NumberNode,
@@ -218,7 +220,7 @@ private:
 	// no such ExecutionLink exists.
 	double fetch_num_param(const std::string& schema_name,
 	                       const Handle& input,
-	                       double default_value = 0.0);
+	                       double default_value=0.0);
 
 	// Given <pred_name> and <input> in
 	//
@@ -228,7 +230,9 @@ private:
 	//
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
-	bool fetch_bool_param(const std::string& pred_name, const Handle& input, bool default_value = false);
+	bool fetch_bool_param(const std::string& pred_name,
+	                      const Handle& input,
+	                      bool default_value=false);
 
 	// Log debug message about the value of parameter, fetched or default
 	template<typename T>

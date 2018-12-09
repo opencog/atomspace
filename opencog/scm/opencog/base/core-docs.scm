@@ -317,6 +317,21 @@
        \"abc\"
 ")
 
+(set-procedure-property! cog-number 'documentation
+"
+ cog-number NUMBER-NODE
+    Return the floating point value of the NumberNode NUMBER-NODE.
+    If it is a NumberNode, then this is the same as saying
+        (string->number (cog-name NUMBER-NODE))
+    If it is not a NumberNode, then this will throw an exception.
+
+    Example:
+       ; Define a node
+       guile> (define x (cog-new-node 'NumberNode 42))
+       guile> (cog-number x)
+       42.0
+")
+
 (set-procedure-property! cog-type 'documentation
 "
  cog-type ATOM
@@ -992,20 +1007,26 @@
 
 (set-procedure-property! cog-atomspace-env 'documentation
 "
- cog-atomspace-env ATOMSPACE
-     Return the parent of ATOMSPACE.
+ cog-atomspace-env [ATOMSPACE]
+     Return the parent of ATOMSPACE. The ATOMSPACE argument is
+     optional; if not specified, the current atomspace is assumed.
 ")
 
 (set-procedure-property! cog-atomspace-uuid 'documentation
 "
- cog-atomspace-uuid ATOMSPACE
-     Return the UUID of ATOMSPACE.
+ cog-atomspace-uuid [ATOMSPACE]
+     Return the UUID of ATOMSPACE. The ATOMSPACE argument is
+     optional; if not specified, the current atomspace is assumed.
 ")
 
 (set-procedure-property! cog-atomspace-clear 'documentation
 "
- cog-atomspace-clear ATOMSPACE
-     Remove all atoms from ATOMSPACE.
+ cog-atomspace-clear [ATOMSPACE]
+     Extract all atoms from ATOMSPACE. The ATOMSPACE argument is
+     optional; if not specified, the current atomspace is assumed.
+
+     This only removes the atoms from the atomspace, it does NOT
+     remove them from the backingstore.
 ")
 
 ;set-procedure-property! cog-yield 'documentation

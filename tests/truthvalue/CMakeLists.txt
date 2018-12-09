@@ -1,7 +1,7 @@
 
 LINK_LIBRARIES(
 	atomspace
-	atomproto
+	value
 	atomutils
 )
 

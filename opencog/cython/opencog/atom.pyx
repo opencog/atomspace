@@ -167,10 +167,10 @@ cdef class Atom(object):
 
     def set_value(self, key, value):
         get_atom_ptr(self).setValue(deref((<Atom>key).handle),
-                                (<ProtoAtom>value).shared_ptr)
+                                (<Value>value).shared_ptr)
         
     def get_value(self, key):
-        cdef cProtoAtomPtr value = get_atom_ptr(self).getValue(
+        cdef cValuePtr value = get_atom_ptr(self).getValue(
             deref((<Atom>key).handle))
         if (value != NULL):
             return createProtoAtom(value)
@@ -209,25 +209,6 @@ cdef class Atom(object):
             atom_ptr.getIncomingSet(back_inserter(handle_vector))
             return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
-    property xincoming:
-        def __get__(self):
-            cdef vector[cHandle] handle_vector
-            cdef cAtom* atom_ptr = self.handle.atom_ptr()
-            if atom_ptr == NULL:   # avoid null-pointer deref
-                return None
-            atom_ptr.getIncomingSet(back_inserter(handle_vector))
-
-            # This code is the same for all the x iterators but there is no
-            # way in Cython to yield out of a cdef function and no way to pass a
-            # vector into a Python def function, so we have to repeat code. ARGGG!
-            cdef vector[cHandle].iterator c_handle_iter
-            cdef cHandle current_c_handle
-            c_handle_iter = handle_vector.begin()
-            while c_handle_iter != handle_vector.end():
-                current_c_handle = deref(c_handle_iter)
-                yield Atom(void_from_candle(current_c_handle),self)
-                inc(c_handle_iter)
-
     def incoming_by_type(self, Type type):
         cdef vector[cHandle] handle_vector
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
@@ -235,24 +216,6 @@ cdef class Atom(object):
             return None
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
-
-    def xincoming_by_type(self, Type type):
-        cdef vector[cHandle] handle_vector
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            return None
-        atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
-
-        # This code is the same for all the x iterators but there is no
-        # way in Cython to yield out of a cdef function and no way to pass a
-        # vector into a Python def function, so we have to repeat code. ARGGG!
-        cdef vector[cHandle].iterator c_handle_iter
-        cdef cHandle current_c_handle
-        c_handle_iter = handle_vector.begin()
-        while c_handle_iter != handle_vector.end():
-            current_c_handle = deref(c_handle_iter)
-            yield Atom(void_from_candle(current_c_handle), self.atomspace)
-            inc(c_handle_iter)
 
     property type:
         def __get__(self):

@@ -33,7 +33,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 
 #include "AtomSpace.h"
 
@@ -61,7 +61,7 @@ using namespace opencog;
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _backing_store(nullptr),
-    _transient(transient)
+    _read_only(false)
 {
 }
 
@@ -77,6 +77,17 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 void AtomSpace::clear_transient()
 {
     _atom_table.clear_transient();
+}
+
+// An extremely primitive permissions system.
+void AtomSpace::set_read_only(void)
+{
+    _read_only = true;
+}
+
+void AtomSpace::set_read_write(void)
+{
+    _read_only = false;
 }
 
 bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
@@ -117,9 +128,9 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     // If we get this far, we need to compare each individual atom.
 
     // Get the atoms in each atomspace.
-    HandleSeq atomsInFirstSpace, atomsInSecondSpace;
-    space_first.get_all_atoms(atomsInFirstSpace);
-    space_second.get_all_atoms(atomsInSecondSpace);
+    HandleSet atomsInFirstSpace, atomsInSecondSpace;
+    space_first.get_handleset_by_type(atomsInFirstSpace, ATOM, true);
+    space_second.get_handleset_by_type(atomsInSecondSpace, ATOM, true);
 
     // Uncheck each atom in the second atomspace.
     for (auto atom : atomsInSecondSpace)
@@ -260,6 +271,10 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 Handle AtomSpace::add_atom(const Handle& h, bool async)
 {
+    // Cannot add atoms to a read-only atomspace. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(h);
+
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
@@ -277,6 +292,10 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
 Handle AtomSpace::add_node(Type t, const string& name,
                            bool async)
 {
+    // Cannot add atoms to a read-only atomspace. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(t, name);
+
     return _atom_table.add(createNode(t, name), async);
 }
 
@@ -287,6 +306,10 @@ Handle AtomSpace::get_node(Type t, const string& name)
 
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
+    // Cannot add atoms to a read-only atomspace. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(t, outgoing);
+
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
@@ -311,6 +334,9 @@ void AtomSpace::store_atom(const Handle& h)
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
+    if (_read_only)
+        throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
     _backing_store->storeAtom(h);
 }
 
@@ -319,9 +345,6 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
     if (nullptr == h) return Handle::UNDEFINED;
-
-    // First, make sure the atom is actually in the atomspace.
-    Handle hc(_atom_table.add(h, false));
 
     // Now, get the latest values from the backing store.
     // The operation here is to CLOBBER the values, NOT to merge them!
@@ -339,16 +362,15 @@ Handle AtomSpace::fetch_atom(const Handle& h)
                                      h->getOutgoingSet());
     }
 
-    // Hmm I don't quite get it ...  shouldn't hv and hc be the same
-    // atom, by now? So the below should not be needed...!?
-    if (hv and hv != hc)
-    {
-        hc->copyValues(hv);
-        TruthValuePtr tv = hv->getTruthValue();
-        hc->setTruthValue(tv);
-    }
+    // If we found it, add it to the atomspace -- even when the
+    // atomspace is marked read-only; the atomspace is acting as
+    // a cache for the backingstore.
+    if (hv) return _atom_table.add(hv, false);
 
-    return hc;
+    // If it is not found, then it cannot be added.
+    if (_read_only) return Handle::UNDEFINED;
+
+    return _atom_table.add(h, false);
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
@@ -399,9 +421,61 @@ void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
-    if (_backing_store)
+    // Removal of atoms from read-only databases is not allowed.
+    // It is OK to remove atoms from a read-only atomspace, because
+    // it is acting as a cache for the database, and removal is used
+    // used to free up RAM storage.
+    if (_backing_store and not _read_only)
         _backing_store->removeAtom(h, recursive);
     return 0 < _atom_table.extract(h, recursive).size();
+}
+
+// Copy-on-write for setting values.
+Handle AtomSpace::set_value(const Handle& h,
+                            const Handle& key,
+                            const ValuePtr& value)
+{
+    // If the atom is in a read-only atomspace (i.e. if the parent
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    AtomSpace* has = h->getAtomSpace();
+    if (has->_read_only) {
+        if (has != this and not _read_only) {
+            // Copy the atom into this atomspace
+            Handle copy(_atom_table.add(h, false, true));
+            copy->setValue(key, value);
+            return copy;
+        }
+    } else {
+        h->setValue(key, value);
+        return h;
+    }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "Value not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
+}
+
+// Copy-on-write for setting truth values.
+Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
+{
+    // If the atom is in a read-only atomspace (i.e. if the parent
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    AtomSpace* has = h->getAtomSpace();
+    if (has->_read_only) {
+        if (has != this and not _read_only) {
+            // Copy the atom into this atomspace
+            Handle copy(_atom_table.add(h, false, true));
+            copy->setTruthValue(tvp);
+            return copy;
+        }
+    } else {
+        h->setTruthValue(tvp);
+        return h;
+    }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "TruthValue not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
 }
 
 std::string AtomSpace::to_string() const

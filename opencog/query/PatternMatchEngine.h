@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -92,6 +92,16 @@ private:
 	HandleMap var_grounding;
 	// Map of clauses to their current groundings
 	HandleMap clause_grounding;
+
+	// Insert association between pattern ptm and its grounding hg into
+	// var_grounding.
+	//
+	// Takes quotation into account, that is only insert unquoted
+	// pattern, and if it is quoted, attempt to restore the unquoted
+	// pattern (as the quote is hidden inside the PatternTerm). This is
+	// especially useful for recording subclause patterns, which turn
+	// out to be useful during instantiation.
+	void record_grounding(const PatternTermPtr& ptm, const Handle& hg);
 
 	void clear_current_state(void);  // clear the stuff above
 

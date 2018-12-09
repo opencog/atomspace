@@ -29,7 +29,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include "CountTruthValue.h"
 
 using namespace opencog;
@@ -61,7 +61,7 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     _value[COUNT] = source.get_count();
 }
 
-CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
+CountTruthValue::CountTruthValue(const ValuePtr& source)
        : TruthValue(COUNT_TRUTH_VALUE)
 {
     if (source->get_type() != COUNT_TRUTH_VALUE)
@@ -100,7 +100,7 @@ std::string CountTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool CountTruthValue::operator==(const ProtoAtom& rhs) const
+bool CountTruthValue::operator==(const Value& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;

@@ -213,6 +213,12 @@ class SQLAtomStorage::Response
 					store->_tlbuf.addAtom(h, uuid);
 				}
 			}
+			else
+			{
+				// In case it's still in the TLB, but was
+				// previously removed from the atomspace.
+				h = table->add(h, false);
+			}
 
 			// Clobber all values, including truth values.
 			store->get_atom_values(h);
@@ -338,7 +344,7 @@ class SQLAtomStorage::Response
 				hkey = store->get_recursive_if_not_exists(pu);
 			}
 
-			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			ValuePtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
 			return false;
 		}
@@ -371,7 +377,7 @@ class SQLAtomStorage::Response
 			}
 
 			// Otherwise, just get this one and only value.
-			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			ValuePtr pap = store->doUnpackValue(*this);
 			h->setValue(katom, pap);
 
 			return false;

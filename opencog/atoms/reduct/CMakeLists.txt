@@ -17,7 +17,7 @@ ADD_DEPENDENCIES(clearbox opencog_atom_types)
 TARGET_LINK_LIBRARIES(clearbox
 	atomcore
 	atombase
-	atomproto
+	value
 	${COGUTIL_LIBRARY}
 )
 

@@ -31,7 +31,7 @@ AttentionValuePtr SchemeSmob::get_av_from_list(SCM slist)
 			switch (misctype)
 			{
 				case COG_PROTOM: {
-					ProtoAtomPtr pa(scm_to_protom(sval));
+					ValuePtr pa(scm_to_protom(sval));
 					AttentionValuePtr av(AttentionValueCast(pa));
 					if (av) return av;
 				}
@@ -64,7 +64,7 @@ std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 
 SCM SchemeSmob::av_to_scm (const AttentionValuePtr& av)
 {
-	return protom_to_scm(ProtoAtomCast(av));
+	return protom_to_scm(ValueCast(av));
 }
 
 /**
@@ -94,7 +94,7 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
  */
 SCM SchemeSmob::ss_av_p (SCM s)
 {
-	ProtoAtomPtr pa(scm_to_protom(s));
+	ValuePtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
 	if (pa->get_type() == ATTENTION_VALUE)
@@ -108,7 +108,7 @@ SCM SchemeSmob::ss_av_p (SCM s)
 
 AttentionValuePtr SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
 {
-	ProtoAtomPtr pa(scm_to_protom(sav));
+	ValuePtr pa(scm_to_protom(sav));
 	AttentionValuePtr av(AttentionValueCast(pa));
 
 	if (nullptr == av)

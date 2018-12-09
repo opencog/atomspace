@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/DeleteLink.h>
@@ -199,28 +199,25 @@ void AtomTable::clear()
     }
     else
     {
-        HandleSeq allAtoms;
+        HandleSet allNodes;
 
-        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-
-        DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
-
-        // Uncomment to turn on logging at DEBUG level.
-        // Logger::Level save = logger().get_level();
-        // logger().set_level(Logger::DEBUG);
+        getHandleSetByType(allNodes, NODE, true, false);
 
         // XXX FIXME TODO This is a stunningly inefficient way to clear the
         // atomtable! This will take minutes on any decent-sized atomspace!
-        HandleSeq::iterator i;
-        for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-            extract(*i, true);
-        }
+        for (Handle h: allNodes) extract(h, true);
 
-        allAtoms.clear();
-        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-        assert(allAtoms.size() == 0);
+        allNodes.clear();
+        getHandleSetByType(allNodes, ATOM, true, false);
+        for (Handle h: allNodes) extract(h, true);
 
-        // logger().set_level(save);
+        allNodes.clear();
+        getHandleSetByType(allNodes, ATOM, true, false);
+
+        OC_ASSERT(allNodes.size() == 0);
+        OC_ASSERT(_size == 0);
+        OC_ASSERT(_num_nodes == 0);
+        OC_ASSERT(_num_links == 0);
     }
 }
 
@@ -230,10 +227,8 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     return getNodeHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
+Handle AtomTable::getNodeHandle(const AtomPtr& a) const
 {
-    AtomPtr a(orig);
-
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -257,25 +252,17 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
+Handle AtomTable::getLinkHandle(const AtomPtr& a) const
 {
-    AtomPtr a(orig);
-    Type t = a->get_type();
-    const HandleSeq &seq = a->getOutgoingSet();
-
     // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not, then reject the whole mess.
-    HandleSeq resolved_seq;
-    // Reserving space improves emplace_back performance by 2x
-    resolved_seq.reserve(seq.size());
-    bool changed = false;
-    for (const Handle& ho : seq) {
+    // If any are not, then reject the whole mess. XXX Why? So what?
+    // If the hash-checking, below, is good, then everything should be
+    // just fine. XXX Except BackwardChainerUTest fails myseriously,
+    // when we skip this test. Not sure why. Strange. XXX FIXME.
+    for (const Handle& ho : a->getOutgoingSet()) {
         Handle rh(getHandle(ho));
         if (not rh) return rh;
-        if (rh != ho) changed = true;
-        resolved_seq.emplace_back(rh);
     }
-    if (changed) a = createLink(resolved_seq, t);
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
@@ -362,13 +349,13 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(AtomPtr atom, bool async)
+Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 {
-    // Can be null, if its a ProtoAtom
+    // Can be null, if its a Value
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
-    if (in_environ(atom))
+    if (not force and in_environ(atom))
         return atom->get_handle();
 
     AtomPtr orig(atom);
@@ -391,7 +378,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // Reserving space improves emplace_back performance by 2x
         closet.reserve(atom->get_arity());
         for (const Handle& h : atom->getOutgoingSet()) {
-            // operator->() will be null if its a ProtoAtom that is
+            // operator->() will be null if its a Value that is
             // not an atom.
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
@@ -416,8 +403,21 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    Handle hcheck(getHandle(orig));
-    if (hcheck) return hcheck;
+    if (not force) {
+        Handle hcheck(getHandle(orig));
+        if (hcheck) return hcheck;
+    } else {
+
+        // If force-adding, we have to be more careful.  We're looking
+        // for the atom in this table, and not some other table.
+        Handle hcheck;
+        if (orig->is_node())
+            hcheck = getNodeHandle(orig);
+        else if (orig->is_link())
+            hcheck = getLinkHandle(orig);
+
+        if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
+    }
 
     atom->copyValues(Handle(orig));
 

@@ -25,7 +25,7 @@
 
 using namespace opencog;
 
-bool Valuation::operator==(const ProtoAtom& other) const
+bool Valuation::operator==(const Value& other) const
 {
 	if (VALUATION != other.get_type()) return false;
 	Valuation* vp = (Valuation*) &other;
@@ -45,7 +45,7 @@ std::string Valuation::to_string(const std::string& indent) const
 	return rv;
 }
 
-void Valuation::setValue(const ProtoAtomPtr& v)
+void Valuation::setValue(const ValuePtr& v)
 {
 	// XXX TODO -- C++ smart pointers are not atomic; we really
 	// need to use a lock here, to avoid thread-races.

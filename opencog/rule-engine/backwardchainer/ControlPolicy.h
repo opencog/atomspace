@@ -37,14 +37,16 @@ namespace opencog
 //! a map from handles to truth values
 typedef std::map<Handle, TruthValuePtr> HandleTVMap;
 
-// Hold RuleTypedSubstitutionPair and double, the probability of
-// selecting the rule, which must be passed to the BIT to calculate
-// the and-BIT complexity.
+// Hold RuleTypedSubstitutionPair and the probability estimate that
+// selected rule fulfills the objective, which must be passed
+// to the BIT to calculate the and-BIT complexity.
+//
+// TODO: maybe wrap that in a class, and use it in foward chainer
 typedef std::pair<RuleTypedSubstitutionPair, double> RuleSelection;
 
 class ControlPolicy
 {
-    friend class ::ControlPolicyUTest;
+	friend class ::ControlPolicyUTest;
 public:
 	ControlPolicy(const UREConfig& ure_config, const BIT& bit,
 	              const Handle& target, AtomSpace* control_as=nullptr);
@@ -63,7 +65,7 @@ public:
 	 *
 	 * Unless a control_as is provided at construction time, the
 	 * Selection is random amongst the valid rules and weighted
-	 * according to their weights.
+	 * according to their truth values.
 	 *
 	 * TODO: add comments about inference control policy, see
 	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning/README.md
@@ -72,6 +74,12 @@ public:
 	 * exhausted it will set its exhausted flag to false.
 	 */
 	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
+
+	/**
+	 * Return the set of rule aliases (i,e. DefineSchema pointing to
+	 * rule names).
+	 */
+	static HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules);
 
 private:
 	// Reference to URE configuration
@@ -151,13 +159,6 @@ private:
 	std::vector<double> rule_weights(
 		const HandleCounter& alias_weights,
 		const RuleTypedSubstitutionMap& inf_rules) const;
-
-	/**
-	 * Return the set of rule aliases, as aliases of inference rules
-	 * are used in control rules.
-	 */
-	HandleSet rule_aliases(const RuleSet& rules) const;
-	HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules) const;
 
 	/**
 	 * Return the map from rule aliases to their default weights.

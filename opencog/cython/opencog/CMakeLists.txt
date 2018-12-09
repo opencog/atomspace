@@ -62,9 +62,9 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 ###################### atomspace ####################################
 CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "nameserver.pyx" "truth_value.pyx"
-	"atomspace_details.pyx" "protoatom.pyx" opencog_atom_types
+	"atomspace_details.pyx" "value.pyx" opencog_atom_types
 	"../../truthvalue/TruthValue.h" "../../truthvalue/SimpleTruthValue.h"
-	"../../atoms/proto/NameServer.h" "../../atoms/base/Handle.h"
+	"../../atoms/value/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
 )
 
@@ -226,6 +226,34 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
+##################### backward chainer #####################
+CYTHON_ADD_MODULE_PYX(backwardchainer "backwardchainer.pxd" opencog_atom_types
+	                      "../../rule-engine/backwardchainer/BackwardChainer.h" ruleengine)
+
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "backwardchainer.cpp")
+
+# opencog.backwardchainer Python bindings
+ADD_LIBRARY(backwardchainer_cython
+        backwardchainer.cpp
+)
+
+TARGET_LINK_LIBRARIES(backwardchainer_cython
+        atomspace_cython
+        type_constructors
+	ruleengine
+        ${COGUTIL_LIBRARY}
+        ${PYTHON_LIBRARIES}
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+)
+
+SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
+	PREFIX ""
+	OUTPUT_NAME backwardchainer)
+
+INSTALL (TARGETS
+	backwardchainer_cython
+	DESTINATION "${PYTHON_DEST}")
 
 INSTALL (FILES
 	__init__.py

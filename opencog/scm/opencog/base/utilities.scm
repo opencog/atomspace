@@ -52,7 +52,6 @@
 ; -- choose-var-name -- Generate a random variable name.
 ; -- random-node  -- Generate a random node of given type.
 ; -- random-variable -- Generate a random variable.
-; -- cog-new-flattened-link -- Create flattened link
 ; -- cog-cp -- Copy list of atoms from one atomspace to another
 ; -- cog-cp-all -- Copy all atoms from one atomspace to another
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
@@ -242,14 +241,10 @@
 ; --------------------------------------------------------------------
 (define-public (clear)
 "
-  clear -- extract all atoms in the atomspace.  This only removes the
-  atoms from the atomspace, it does NOT remove it from the backingstore,
-  if attached!
+  clear -- extract all atoms in the atomspace. Deprecated; use
+      cog-atomspace-clear instead.
 "
-	(for-each
-		extract-type
-		(cog-get-types)
-	)
+	(cog-atomspace-clear)
 )
 
 ; --------------------------------------------------------------------
@@ -304,15 +299,16 @@
 "
   traverse-roots -- Applies func to every root atom in the atomspace.
 
-  The root atoms are those, which have no incoming atoms,
-  located in the atomspace or its ancestors (i.e. visible from the atomspace).
+  The root atoms are those, which have no incoming atoms, located
+  in the atomspace or its ancestors (i.e. visible from the atomspace).
 "
-	(define (is-visible? atom)
-		(member
-			(cog-as atom)
-			(get-atomspace-and-parents)))
-	(define (get-atomspace-and-parents)
+	; A list of the atomspace and all parents
+	(define atomspace-and-parents
 		(unfold null? identity cog-atomspace-env (cog-atomspace)))
+
+	; Is the atom in any of the atomspaces?
+	(define (is-visible? atom)
+		(member (cog-as atom) atomspace-and-parents))
 
 	(define (apply-if-root h)
 		(if (not (any is-visible? (cog-incoming-set h)))
@@ -326,10 +322,11 @@
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically, only
-  those atoms that have no incoming set in the atomspace or its ancestors,
-  and thus are at the top of a tree.  All other atoms (those which do
-  have an incoming set) will appear somewhere underneath these top-most atoms.
+  This will print all of the atoms in the atomspace: specifically,
+  only those atoms that have no incoming set in the atomspace or its
+  ancestors, and thus are at the top of a tree.  All other atoms
+  (those which do have an incoming set) will appear somewhere
+  underneath these top-most atoms.
 "
 	(traverse-roots display)
 )
@@ -1187,53 +1184,6 @@
 )
 
 ; -----------------------------------------------------------------------
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (cog-new-flattened-link link-type . args)
-"
- Creates a new flattened link, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A B) C)
-
- will create the following
-
-    (AndLink A B C)
-
- This is not recursive. So, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
-
- will not produce
-
-   (AndLink A B C)
-
- but will produce instead
-
-   (AndLink A (AndLink B) C)
-
- Note that it will also remove duplicates, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A B C) C)
-
- will create the following
-
-   (AndLink A B C)
-
- WARNING: TVs and other values attached to the atoms are ignored.
-   The TV's and values are not copied to the new link, nor are they
-   recomputed in any way.
-"
-  (define (flatten e r)
-    (append r (if (and (cog-link? e)
-                       (equal? (cog-type e) link-type))
-                  (cog-outgoing-set e)
-                  (list e))))
-  (let ((flat (delete-duplicates (fold flatten '() args))))
-    (apply cog-new-link link-type flat))
-)
-
-; -----------------------------------------------------------------------
 ;
 ; XXX FIXME. The two arguments to this function are backwards.
 ; The AS should come first, then the list.
@@ -1338,7 +1288,6 @@
 'choose-var-name
 'random-node
 'random-variable
-'cog-new-flattened-link
 'cog-cp
 'cog-cp-all
 'cog-get-all-subtypes

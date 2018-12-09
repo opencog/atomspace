@@ -39,7 +39,7 @@ class DivideLink : public TimesLink
 protected:
 	void init(void);
 
-	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
+	ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
 	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);

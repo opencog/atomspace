@@ -36,7 +36,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 class AtomUTest;
@@ -102,7 +102,7 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
  * properties from atoms.
  */
 class Atom
-    : public ProtoAtom
+    : public Value
 {
     friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
@@ -128,7 +128,7 @@ protected:
     AtomSpace *_atom_space;
 
     /// All of the values on the atom, including the TV.
-    mutable std::map<const Handle, ProtoAtomPtr> _values;
+    mutable std::map<const Handle, ValuePtr> _values;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -147,7 +147,7 @@ protected:
      * @param The truthValue of the atom.
      */
     Atom(Type t)
-      : ProtoAtom(t),
+      : Value(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
@@ -269,9 +269,9 @@ public:
     void setTruthValue(const TruthValuePtr&);
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, const ProtoAtomPtr& value);
+    void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
-    ProtoAtomPtr getValue(const Handle& key) const;
+    ValuePtr getValue(const Handle& key) const;
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
@@ -392,7 +392,7 @@ public:
     bool operator!=(const Atom& other) const
     { return not operator==(other); }
 
-    virtual bool operator==(const ProtoAtom& other) const
+    virtual bool operator==(const Value& other) const
     {
         if (_type != other.get_type()) return false;
         return operator==(dynamic_cast<const Atom&>(other));
@@ -409,13 +409,13 @@ public:
     bool operator<(const ProtoAtom&) const;
 };
 
-static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)
+static inline AtomPtr AtomCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<Atom>(pa); }
 
 static inline AtomPtr AtomCast(const Handle& h)
     { return AtomPtr(h); }
 
-static inline Handle HandleCast(const ProtoAtomPtr& pa)
+static inline Handle HandleCast(const ValuePtr& pa)
     { return Handle(AtomCast(pa)); }
 
 // Debugging helpers see

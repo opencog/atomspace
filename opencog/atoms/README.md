@@ -10,12 +10,15 @@ the performance of the system.  Almost all of these atom types
 during run-time to speed performance, and avoid repeated, redundant
 computations.
 
-See the [AtomSpace REAMDE](../atomspace/README) for a quick definition
+See the [README](../README.md) one level down for a quick definition
 of what an Atom is.
+
+See the [AtomSpace README](../atomspace/README.md) for a discussion of
+design tradeoffs, and of the current implementation.
 
 Subdirectories
 --------------
- * base -- The basic atoms: ProtoAtom, Atom, Node, Link, Value.
+ * base -- The basic atoms: Atom, Node, Link, Value.
 
  * bind -- Atoms involved with pattern matching: BindLink, LambdaLink,
    SatisfactionLink, SatisfactionSetLink, GetLink.  These cache some

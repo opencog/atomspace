@@ -17,7 +17,7 @@ using namespace opencog;
 
 bool PrimitiveEnviron::is_inited = false;
 
-#ifdef HAVE_GUILE2
+#if defined(HAVE_GUILE2) || defined(HAVE_GUILE3)
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)

@@ -20,8 +20,8 @@
 #include <libguile.h>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/DistributionalValue.h>
@@ -80,7 +80,7 @@ private:
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM handleseq_to_scm(const HandleSeq&);
-	static SCM protom_to_scm(const ProtoAtomPtr&);
+	static SCM protom_to_scm(const ValuePtr&);
 	static SCM protomseq_to_scm(const ProtomSeq&);
 	static SCM tv_to_scm(const TruthValuePtr&);
 	static SCM av_to_scm(const AttentionValuePtr&);
@@ -91,7 +91,7 @@ private:
 	static SCM dvkey_to_scm(const DVKey&);
 	static SCM dvkeyseq_to_scm(const DVKeySeq&);
 	static Handle scm_to_handle(SCM);
-	static ProtoAtomPtr scm_to_protom(SCM);
+	static ValuePtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
 
 	static DVKey scm_to_DVKey(SCM);
@@ -132,6 +132,7 @@ private:
 
 	// Atom properties
 	static SCM ss_name(SCM);
+	static SCM ss_number(SCM);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_as(SCM);
@@ -188,6 +189,9 @@ private:
 	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);
 	static SCM ss_as_clear(SCM);
+	static SCM ss_as_mark_readonly(SCM);
+	static SCM ss_as_mark_readwrite(SCM);
+	static SCM ss_as_readonly_p(SCM);
 	static SCM make_as(AtomSpace *);
 	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);
@@ -250,7 +254,7 @@ private:
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
-	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
+	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
 	static Interval verify_interval(SCM, const char *, int pos=1);

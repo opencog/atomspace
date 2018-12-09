@@ -13,8 +13,6 @@ jobs:
       - image: opencog/postgres
         name: opencog-postgres
     working_directory: /ws/atomspace
-    environment:
-      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws
@@ -28,11 +26,19 @@ jobs:
       - run:
           name: Install cogutil
           command: |
-            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - checkout
+      - restore_cache:
+          name: Restore GCH Cache
+          keys:
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+      - restore_cache:
+          name: Restore Haskell Deps Cache
+          keys:
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
@@ -55,6 +61,16 @@ jobs:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
           when: always
+      - save_cache:
+          name: Save GHC Cache
+          key: ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+          paths:
+            - /root/.stack
+      - save_cache:
+          name: Save Haskell Deps Cache
+          key: haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
+          paths:
+            - /ws/atomspace/opencog/haskell/.stack-work
       - persist_to_workspace:
           root: /ws/
           paths:
@@ -69,11 +85,17 @@ jobs:
         environment:
           CCACHE_DIR: /ws/ccache
     working_directory: /ws/opencog
-    environment:
-      ORG: singnet
     steps:
       - attach_workspace:
-          at: /ws
+          at: /ws/
+      - restore_cache:
+          name: Restore GCH Cache
+          keys:
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+      - restore_cache:
+          name: Restore Haskell Deps Cache
+          keys:
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: Install cogutil
           command: cd /ws/cogutil/build && make -j2 install && ldconfig
@@ -82,7 +104,7 @@ jobs:
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
           name: Clone OpenCog
-          command: git clone --depth 1 https://github.com/$ORG/opencog .
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..

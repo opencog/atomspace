@@ -23,11 +23,9 @@
 
 #include <math.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -282,11 +280,11 @@ void BasicSCMUTest::test_clear(void)
 		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
 
 	std::string rs = eval->eval("(clear)");
-	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error
-	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
+	TSM_ASSERT("Failed to clear the atomspace", rs == "#t\n");
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -299,11 +297,12 @@ void BasicSCMUTest::test_extract_hypergraph(void)
 	std::string rs =
 		eval->eval("(define x (ListLink (Concept \"A\") (Concept \"A\")))");
 	rs = eval->eval("(extract-hypergraph x)");
-	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error
-	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
+	TSM_ASSERT("Failed to clear the atomspace", rs == "\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -405,26 +404,26 @@ void BasicSCMUTest::test_values(void)
 
 	Handle h = eval->eval_h("h");
 	Handle k = eval->eval_h("k");
-	ProtoAtomPtr f = eval->eval_v("f");
-	ProtoAtomPtr s = eval->eval_v("s");
-	ProtoAtomPtr ss = eval->eval_v("ss");
-	ProtoAtomPtr l = eval->eval_v("l");
+	ValuePtr f = eval->eval_v("f");
+	ValuePtr s = eval->eval_v("s");
+	ValuePtr ss = eval->eval_v("ss");
+	ValuePtr l = eval->eval_v("l");
 
 	eval->eval("(cog-set-value! h k l)");
 	TSM_ASSERT("Failed to set value", not eval->eval_error());
 
-	ProtoAtomPtr lv = eval->eval_v("(cog-value h k)");
+	ValuePtr lv = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", l == lv);
 
-	ProtoAtomPtr alv = h->getValue(k);
+	ValuePtr alv = h->getValue(k);
 	TSM_ASSERT("Failed to get correct value", l == alv);
 
 	// -------
 	eval->eval("(cog-set-value! h k '(0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to set float", not eval->eval_error());
 
-	ProtoAtomPtr fv = h->getValue(k);
+	ValuePtr fv = h->getValue(k);
 	TSM_ASSERT("Failed to get correct value", *f == *fv);
 
 	const std::vector<double>& vv(FloatValueCast(fv)->value());
@@ -432,7 +431,7 @@ void BasicSCMUTest::test_values(void)
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[1] - 0.2), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[2] - 0.3), 1.0e-6);
 
-	ProtoAtomPtr fv2 = eval->eval_v("(cog-value h k)");
+	ValuePtr fv2 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *f == *fv2);
 
@@ -440,7 +439,7 @@ void BasicSCMUTest::test_values(void)
 	eval->eval("(cog-set-value! h k (list f h s k t))");
 	TSM_ASSERT("Failed to set value", not eval->eval_error());
 
-	ProtoAtomPtr lv2 = eval->eval_v("(cog-value h k)");
+	ValuePtr lv2 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *l == *lv2);
 
@@ -448,7 +447,7 @@ void BasicSCMUTest::test_values(void)
 	eval->eval("(cog-set-value! h k '(\"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to set value", not eval->eval_error());
 
-	ProtoAtomPtr sv = eval->eval_v("(cog-value h k)");
+	ValuePtr sv = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *s == *sv);
 	TSM_ASSERT("Failed to test inequality", *ss != *sv);
@@ -459,7 +458,7 @@ void BasicSCMUTest::test_values(void)
 	eval->eval("(cog-set-value! h k '(f h s k t))");
 	TSM_ASSERT("Failed to set value", not eval->eval_error());
 
-	ProtoAtomPtr lv3 = eval->eval_v("(cog-value h k)");
+	ValuePtr lv3 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *l == *lv3);
 }

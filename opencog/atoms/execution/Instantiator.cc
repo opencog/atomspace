@@ -45,7 +45,7 @@ Instantiator::Instantiator(AtomSpace* as)
 /// member of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
+static Handle beta_reduce(const Handle& expr, const HandleMap& vmap)
 {
 	// Format conversion. FreeVariables::substitute_nocheck() performs
 	// beta-reduction correctly, so we just use that. But we have to
@@ -480,7 +480,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// However, some of these may hold embedded executable links
 	// inside of them, which the current unit tests and code
 	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of thier
+	// evaluating VirtualLinks, as these all are capable of their
 	// own lazy-evaluation, and so, if evaluation is needed,
 	// it will be triggered by something else.
 	// Non-virtual evaluatables fall through and are handled
@@ -547,7 +547,7 @@ bool Instantiator::not_self_match(Type t)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
+ValuePtr Instantiator::instantiate(const Handle& expr,
                                        const HandleMap &vars,
                                        bool silent)
 {
@@ -565,7 +565,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	// to the instantiated tree). However, special-case the handling
 	// of expr being a FunctionLink - this can return a Value, which
 	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
-	// A proper solution would convert walk_tree to return ProtoAtomPtr's
+	// A proper solution would convert walk_tree to return ValuePtr's
 	// instead of Handles. However, it seems this would require lots
 	// of upcasting, which is horribly slow. So it seems better to
 	// hold off on a "good fix", until the instantiate-to-values
@@ -599,7 +599,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 			}
 		}
 		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-		ProtoAtomPtr pap(flp->execute());
+		ValuePtr pap(flp->execute());
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
@@ -625,7 +625,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	    GREATER_THAN_LINK == t)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
-		ProtoAtomPtr pap(ProtoAtomCast(tvp));
+		ValuePtr pap(ValueCast(tvp));
 		return pap;
 	}
 #endif

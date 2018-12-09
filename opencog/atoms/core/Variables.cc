@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -109,6 +109,23 @@ FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
 		index.insert({var, i++});
 }
 
+bool FreeVariables::is_identical(const FreeVariables& other) const
+{
+	Arity ary = varseq.size();
+	if (ary != other.varseq.size()) return false;
+	for (Arity i=0; i< ary; i++)
+	{
+		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i]))
+			return false;
+	}
+	return true;
+}
+
+bool FreeVariables::is_in_varset(const Handle& v) const
+{
+	return varset.end() != varset.find(v);
+}
+
 void FreeVariables::find_variables(const HandleSeq& oset)
 {
 	VarScraper vsc;
@@ -154,11 +171,6 @@ void FreeVariables::erase(const Handle& var)
 	}
 }
 
-bool FreeVariables::operator<(const FreeVariables& other) const
-{
-	return varseq < other.varseq;
-}
-
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
@@ -173,6 +185,36 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          bool silent) const
 {
 	return substitute_scoped(term, make_sequence(vm), silent, index, 0);
+}
+
+bool FreeVariables::operator<(const FreeVariables& other) const
+{
+	return varseq < other.varseq;
+}
+
+std::size_t FreeVariables::size() const
+{
+	return varseq.size();
+}
+
+bool FreeVariables::empty() const
+{
+	return varseq.empty();
+}
+
+std::string FreeVariables::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+
+	// Varseq
+	ss << indent << "varseq:" << std::endl
+	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT);
+
+	// index
+	ss << indent << "index:" << std::endl
+	   << oc_to_string(index, indent + OC_TO_STRING_INDENT);
+
+	return ss.str();
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely
@@ -284,19 +326,6 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	}
 
 	return createLink(oset, term->get_type());
-}
-
-/* ================================================================= */
-
-bool FreeVariables::is_identical(const FreeVariables& other) const
-{
-	Arity ary = varseq.size();
-	if (ary != other.varseq.size()) return false;
-	for (Arity i=0; i< ary; i++)
-	{
-		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i])) return false;
-	}
-	return true;
 }
 
 /* ================================================================= */
@@ -712,16 +741,6 @@ bool Variables::operator<(const Variables& other) const
 		        and _fuzzy_typemap < other._fuzzy_typemap));
 }
 
-std::size_t FreeVariables::size() const
-{
-	return varseq.size();
-}
-
-bool FreeVariables::empty() const
-{
-	return varseq.empty();
-}
-
 /// Look up the type declaration for `var`, but create the actual
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
@@ -773,9 +792,8 @@ std::string Variables::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 
-	// Varseq
-	ss << indent << "varseq:" << std::endl
-	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT);
+	// FreeVariables
+	ss << FreeVariables::to_string(indent);
 
 	// Simple typemap
 	ss << indent << "_simple_typemap:" << std::endl;
@@ -791,7 +809,25 @@ std::string Variables::to_string(const std::string& indent) const
 		ss << std::endl;
 		i++;
 	}
+
 	return ss.str();
+}
+
+std::string oc_to_string(const FreeVariables::IndexMap& imap,
+                         const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << imap.size() << std::endl;
+	for (const auto& el : imap) {
+		ss << indent << "index[" << el.second << "]: "
+		   << el.first->id_to_string() << std::endl;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const FreeVariables& var, const std::string& indent)
+{
+	return var.to_string(indent);
 }
 
 std::string oc_to_string(const Variables& var, const std::string& indent)

@@ -56,7 +56,9 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
-		void test_prep(void);
+		void do_tst_prep(void);
+		void test_prep_rw(void);
+		void test_prep_overlay(void);
 };
 
 #define an as->add_node
@@ -227,7 +229,7 @@ void BiggerPatternUTest::setUp(void)
  *      $prep   = DefinedLinguisticRelationshipNode "of"
  *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
-void BiggerPatternUTest::test_prep(void)
+void BiggerPatternUTest::do_tst_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -303,4 +305,21 @@ void BiggerPatternUTest::test_prep(void)
 	TSM_ASSERT_EQUALS("incorrect phrase", hphrase, france_phrase);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BiggerPatternUTest::test_prep_rw(void)
+{
+	do_tst_prep();
+}
+
+void BiggerPatternUTest::test_prep_overlay(void)
+{
+	// Mark base-space as readonly; create a read-write overlay.
+	as->set_read_only();
+	AtomSpace* save = as;
+	as = new AtomSpace(as);
+	do_tst_prep();
+	delete as;
+	as = save;
+	as->set_read_write();
 }

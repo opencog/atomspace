@@ -12,7 +12,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -20,7 +20,7 @@ using namespace opencog;
 /* ============================================================== */
 /**
  * Return a string holding the scheme representation of an opencog object.
- * This could be a ProtoAtom (an atom or a value), or an AtomSpace, or a
+ * This could be a Value including Atom, or an AtomSpace, or a
  * guile module created with the PrimitiveEnviron C++ module wrapper.
  *
  * Returned is a valid scheme expression that represents that object.
@@ -110,7 +110,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 
 std::string SchemeSmob::protom_to_string(SCM node)
 {
-	ProtoAtomPtr pa(scm_to_protom(node));
+	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
 	// XXX FIXME; should not use pa->to_string() as the print method.
@@ -237,13 +237,12 @@ SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
     }
     return res;
 }
-
-SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
+SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
 	if (nullptr == pa) return SCM_EOL;
 
 	// Use new so that the smart pointer increments!
-	ProtoAtomPtr* pap = new ProtoAtomPtr(pa);
+	ValuePtr* pap = new ValuePtr(pa);
 	scm_gc_register_allocation(sizeof(pa));
 
 	SCM smob;
@@ -252,7 +251,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 	return smob;
 }
 
-ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
+ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
 		return nullptr;
@@ -261,14 +260,14 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 	if (COG_PROTOM != misctype)
 		return nullptr;
 
-	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
+	ValuePtr pv(*((ValuePtr *) SCM_SMOB_DATA(sh)));
 	scm_remember_upto_here_1(sh);
 	return pv;
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-	ProtoAtomPtr pa(scm_to_protom(sh));
+	ValuePtr pa(scm_to_protom(sh));
 	if (nullptr == pa)
 		return Handle::UNDEFINED;
 
@@ -462,15 +461,18 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		"string name for the node"));
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
 		Handle h(atomspace->add_node(t, name));
 
-		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-		if (tv) h->setTruthValue(tv);
+		if (h)
+		{
+			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+			if (tv) h->setTruthValue(tv);
+		}
 
 		return handle_to_scm(h);
 	}
@@ -496,15 +498,15 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 									"string name for the node");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-node");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
 	Handle h(atomspace->get_handle(t, name));
-	if (NULL == h) return SCM_EOL;
+	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -577,7 +579,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
@@ -585,8 +587,11 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		Handle h(atomspace->add_link(t, outgoing_set));
 
 		// Fish out a truth value, if its there.
-		const TruthValuePtr tv(get_tv_from_list(satom_list));
-		if (tv) h->setTruthValue(tv);
+		if (h)
+		{
+			const TruthValuePtr tv(get_tv_from_list(satom_list));
+			if (tv) h->setTruthValue(tv);
+		}
 
 		return handle_to_scm (h);
 	}
@@ -611,7 +616,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-link");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_handle(t, outgoing_set));
@@ -619,7 +624,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

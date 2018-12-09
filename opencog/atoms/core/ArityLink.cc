@@ -53,7 +53,7 @@ ArityLink::ArityLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-ProtoAtomPtr ArityLink::execute() const
+ValuePtr ArityLink::execute() const
 {
 	size_t ary = 0;
 	for (const Handle& h : _outgoing)
@@ -61,7 +61,7 @@ ProtoAtomPtr ArityLink::execute() const
 		FunctionLinkPtr flp(FunctionLinkCast(h));
 		if (nullptr != flp)
 		{
-			ProtoAtomPtr pap(h);
+			ValuePtr pap(h);
 			pap = flp->execute();
 			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
 
@@ -73,7 +73,7 @@ ProtoAtomPtr ArityLink::execute() const
 		}
 	}
 
-	return ProtoAtomPtr(createNumberNode(ary));
+	return ValuePtr(createNumberNode(ary));
 }
 
 DEFINE_LINK_FACTORY(ArityLink, ARITY_LINK)

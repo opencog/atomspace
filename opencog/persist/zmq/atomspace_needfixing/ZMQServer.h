@@ -50,8 +50,8 @@ Setup:
  		make
  		sudo make install
  		eclipse: add protobuf to libraries
- 	Compile proto file (if changed)
-		protoc --cpp_out=. AtomSpaceMessages.proto
+ 	Compile value file (if changed)
+		protoc --cpp_out=. AtomSpaceMessages.value
 
 How to compile:
      Add new files and libs to opencog/atomspace/CMakeLists.txt
