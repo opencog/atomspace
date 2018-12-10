@@ -22,7 +22,7 @@
 
 #include "opencog/atoms/atom_types/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/atoms/value/atom_types.inheritance"
+#define INHERITANCE_FILE "opencog/atoms/atom_types/atom_types.inheritance"
 #define INITNAME base_types_init
 
 #include <opencog/atoms/atom_types/atom_types.cc>
