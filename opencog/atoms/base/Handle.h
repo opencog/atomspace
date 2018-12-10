@@ -40,7 +40,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/Counter.h>
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 
 // Comment this out if you want to enforce more determinism in the
 // AtomSpace. For instance atoms are indexed according to content

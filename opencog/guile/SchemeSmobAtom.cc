@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/truthvalue/AttentionValue.h>

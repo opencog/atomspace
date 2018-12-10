@@ -25,7 +25,7 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atomspace/HandleSetIndex.h>
 
 namespace opencog

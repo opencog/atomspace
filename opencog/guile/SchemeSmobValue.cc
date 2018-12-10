@@ -14,7 +14,7 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
 #include <opencog/atoms/value/ValueFactory.h>
