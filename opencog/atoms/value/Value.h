@@ -96,8 +96,8 @@ public:
 	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
 
-	/** Ordering operator for ProtoAtoms. */
-	virtual bool operator<(const ProtoAtom&) const = 0;
+	/** Ordering operator for Values. */
+	virtual bool operator<(const Value&) const = 0;
 };
 
 typedef std::shared_ptr<Value> ValuePtr;
@@ -112,12 +112,12 @@ typedef std::vector<ValuePtr> ProtomSeq;
 std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
 
 struct cmpByContent {
-	bool operator()(const ProtoAtomPtr a, const ProtoAtomPtr b) const {
+	bool operator()(const ValuePtr a, const ValuePtr b) const {
 		return *a < *b;
 	}
 };
-//! a map from ProtoAtomPtr to double
-typedef Counter<ProtoAtomPtr, double, cmpByContent> ValueCounter;
+//! a map from ValuePtr to double
+typedef Counter<ValuePtr, double, cmpByContent> ValueCounter;
 
 /** @}*/
 } // namespace opencog

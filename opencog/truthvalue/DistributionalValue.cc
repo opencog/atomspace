@@ -29,9 +29,6 @@
 #include <opencog/util/numeric.h>
 
 #include <opencog/truthvalue/DistributionalValue.h>
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <boost/range/combine.hpp>
@@ -42,11 +39,11 @@ using namespace opencog;
 count_t DistributionalValue::DEFAULT_K = 800.0;
 
 DistributionalValue::DistributionalValue()
-	: ProtoAtom(DISTRIBUTIONAL_VALUE)
+	: Value(DISTRIBUTIONAL_VALUE)
 {}
 
 DistributionalValue::DistributionalValue(DVCounter dvctr)
-	: ProtoAtom(DISTRIBUTIONAL_VALUE)
+	: Value(DISTRIBUTIONAL_VALUE)
 {
 	for (auto elem : dvctr)
 	{
@@ -61,7 +58,7 @@ DistributionalValue::DistributionalValue(DVCounter dvctr)
 //which in some calculations is unusalbe as the chance of overlaps in the
 //Sets/Intervals is small
 DistributionalValue::DistributionalValue(double mode,double conf)
-	: ProtoAtom(DISTRIBUTIONAL_VALUE)
+	: Value(DISTRIBUTIONAL_VALUE)
 {
 	confidence_t cf = std::min(conf, 0.9999998);
 	double count = (DEFAULT_K * cf / (1.0 - cf));
@@ -435,7 +432,7 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool DistributionalValue::operator==(const ProtoAtom& other) const
+bool DistributionalValue::operator==(const Value& other) const
 {
 	if (DISTRIBUTIONAL_VALUE != other.get_type()) return false;
 	const DistributionalValue* dov = (const DistributionalValue*) &other;
@@ -451,7 +448,7 @@ bool DistributionalValue::operator==(const ProtoAtom& other) const
 	return true;
 }
 
-bool DistributionalValue::operator<(const ProtoAtom& other) const
+bool DistributionalValue::operator<(const Value& other) const
 {
 	if (DISTRIBUTIONAL_VALUE != other.get_type())
 		return DISTRIBUTIONAL_VALUE < other.get_type();

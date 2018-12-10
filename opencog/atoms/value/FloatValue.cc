@@ -41,7 +41,7 @@ bool FloatValue::operator==(const Value& other) const
 	return true;
 }
 
-bool FloatValue::operator<(const ProtoAtom& other) const
+bool FloatValue::operator<(const Value& other) const
 {
 	if (FLOAT_VALUE != other.get_type())
 		return FLOAT_VALUE < other.get_type();

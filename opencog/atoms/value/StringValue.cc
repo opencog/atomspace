@@ -38,7 +38,7 @@ bool StringValue::operator==(const Value& other) const
 	return true;
 }
 
-bool StringValue::operator<(const ProtoAtom& other) const
+bool StringValue::operator<(const Value& other) const
 {
 	if (STRING_VALUE != other.get_type())
 		return STRING_VALUE < other.get_type();

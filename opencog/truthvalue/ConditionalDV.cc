@@ -25,29 +25,26 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <sstream>
 
 #include <opencog/truthvalue/ConditionalDV.h>
 #include <opencog/truthvalue/DistributionalValue.h>
-#include <opencog/atoms/base/Link.h>
-
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
 
 using namespace opencog;
 
 ConditionalDV::ConditionalDV()
-: ProtoAtom(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 }
 
 ConditionalDV::ConditionalDV(CDVrep rep)
-: ProtoAtom(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 	_value = rep;
 }
 
 ConditionalDV::ConditionalDV(DVKeySeq conds,std::vector<DistributionalValuePtr> dvs)
-: ProtoAtom(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 	auto it1 = conds.begin();
 	auto it2 = dvs.begin();
@@ -238,7 +235,7 @@ std::string ConditionalDV::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool ConditionalDV::operator==(const ProtoAtom& other) const
+bool ConditionalDV::operator==(const Value& other) const
 {
 	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type()) return false;
 	const ConditionalDV* cov = (const ConditionalDV*) &other;
@@ -257,7 +254,7 @@ bool ConditionalDV::operator==(const ProtoAtom& other) const
 	return true;
 }
 
-bool ConditionalDV::operator<(const ProtoAtom& other) const
+bool ConditionalDV::operator<(const Value& other) const
 {
 	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type())
 		return CONDITIONAL_DISTRIBUTIONAL_VALUE < other.get_type();

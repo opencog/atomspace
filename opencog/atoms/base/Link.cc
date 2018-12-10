@@ -159,7 +159,7 @@ bool Link::operator<(const Atom& other) const
     return false;
 }
 
-bool Link::operator<(const ProtoAtom& other) const
+bool Link::operator<(const Value& other) const
 {
 	if (get_type() != other.get_type())
 		return get_type() < other.get_type();

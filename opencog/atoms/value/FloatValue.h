@@ -67,7 +67,7 @@ public:
 	/** Ordering operator for ProtoAtoms.
 	 * First compares Types then based on Content
 	 */
-	virtual bool operator<(const ProtoAtom&) const;
+	virtual bool operator<(const Value&) const;
 };
 
 typedef std::shared_ptr<const FloatValue> FloatValuePtr;

@@ -31,9 +31,7 @@
 #include <limits>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/value/Value.h>
 
 //#include <opencog/truthvalue/DistributionalValue.h>
 /** \addtogroup grp_atomspace
@@ -56,7 +54,7 @@ typedef std::shared_ptr<const ConditionalDV> ConditionalDVPtr;
 typedef std::map<DVKey,DVCounter> CDVrep;
 
 class ConditionalDV
-	: public ProtoAtom
+	: public Value
 {
 	CDVrep _value;
 
@@ -93,28 +91,28 @@ public:
 	double total_count() const;
 	double avg_count() const;
 
-	virtual bool operator==(const ProtoAtom& rhs) const;
+	virtual bool operator==(const Value& rhs) const;
 
-	virtual bool operator<(const ProtoAtom&) const;
+	virtual bool operator<(const Value&) const;
 
-	using ProtoAtom::to_string;
+	using Value::to_string;
 	std::string to_string(const std::string&) const;
 
 };
 
-static inline ConditionalDVPtr ConditionalDVCast(const ProtoAtomPtr& pa)
+static inline ConditionalDVPtr ConditionalDVCast(const ValuePtr& pa)
 	{ return std::dynamic_pointer_cast<const ConditionalDV>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const ConditionalDVPtr& cdv)
+static inline ValuePtr ValueCast(const ConditionalDVPtr& cdv)
 {
 	// This should have worked!?
-	// return std::const_pointer_cast<ProtoAtom>(tv);
+	// return std::const_pointer_cast<Value>(tv);
 
 	// This, too, should have worked!?
-	// return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+	// return std::shared_ptr<Value>(tv, const_cast<Value*>(tv.get()));
 
 	// This works...
-	return std::shared_ptr<ProtoAtom>(cdv, (ProtoAtom*) cdv.get());
+	return std::shared_ptr<Value>(cdv, (Value*) cdv.get());
 }
 } // namespace opencog
 

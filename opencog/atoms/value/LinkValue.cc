@@ -40,7 +40,7 @@ bool LinkValue::operator==(const Value& other) const
 	return true;
 }
 
-bool LinkValue::operator<(const ProtoAtom& other) const
+bool LinkValue::operator<(const Value& other) const
 {
 	if (LINK_VALUE != other.get_type())
 		return LINK_VALUE < other.get_type();

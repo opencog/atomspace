@@ -117,6 +117,12 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
 	virtual bool operator<(const Atom&) const;
+
+	/**
+	 * Compares Node with Value based on type.
+	 * If they have the same type compares the names;
+	 */
+    bool operator<(const Value& other) const;
 };
 
 typedef std::shared_ptr<Node> NodePtr;

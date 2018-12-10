@@ -233,6 +233,12 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
     virtual bool operator<(const Atom&) const;
+
+	/**
+	 * Compares Link with Value based on type.
+	 * If they have the same type falls back on hashbased Link comparison
+	 */
+    bool operator<(const Value& other) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

@@ -32,7 +32,7 @@ DistributionalValuePtr SchemeSmob::get_dv_from_list(SCM slist)
 			switch (misctype)
 			{
 				case COG_PROTOM: {
-					ProtoAtomPtr pa(scm_to_protom(sval));
+					ValuePtr pa(scm_to_protom(sval));
 					DistributionalValuePtr dv(DistributionalValueCast(pa));
 					if (dv) return dv;
 				}
@@ -128,7 +128,7 @@ std::string SchemeSmob::dv_to_string(const DistributionalValuePtr& dv)
 
 SCM SchemeSmob::dv_to_scm (const DistributionalValuePtr& dv)
 {
-	return protom_to_scm(ProtoAtomCast(dv));
+	return protom_to_scm(ValueCast(dv));
 }
 
 SCM SchemeSmob::dvs_to_scm(const std::vector<DistributionalValuePtr>& dvs)
@@ -190,7 +190,7 @@ SCM SchemeSmob::ss_new_dv_simple(SCM smean, SCM sconf)
  */
 SCM SchemeSmob::ss_dv_p (SCM s)
 {
-	ProtoAtomPtr pa(scm_to_protom(s));
+	ValuePtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
 	if (pa->get_type() == DISTRIBUTIONAL_VALUE)
@@ -204,7 +204,7 @@ SCM SchemeSmob::ss_dv_p (SCM s)
 
 DistributionalValuePtr SchemeSmob::verify_dv(SCM sav, const char *subrname, int pos)
 {
-	ProtoAtomPtr pa(scm_to_protom(sav));
+	ValuePtr pa(scm_to_protom(sav));
 	DistributionalValuePtr dv(DistributionalValueCast(pa));
 
 	if (nullptr == dv)
@@ -301,12 +301,12 @@ SCM SchemeSmob::ss_cdv_is_empty(SCM scdv)
 
 SCM SchemeSmob::cdv_to_scm (const ConditionalDVPtr& cdv)
 {
-	return protom_to_scm(ProtoAtomCast(cdv));
+	return protom_to_scm(ValueCast(cdv));
 }
 
 ConditionalDVPtr SchemeSmob::verify_cdv(SCM sav, const char *subrname, int pos)
 {
-	ProtoAtomPtr pa(scm_to_protom(sav));
+	ValuePtr pa(scm_to_protom(sav));
 	ConditionalDVPtr cdv(ConditionalDVCast(pa));
 
 	if (nullptr == cdv)

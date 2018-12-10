@@ -31,8 +31,7 @@
 #include <limits>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/value/Value.h>
 
 #include <opencog/truthvalue/ConditionalDV.h>
 
@@ -64,7 +63,7 @@ typedef std::shared_ptr<const DistributionalValue> DistributionalValuePtr;
 class AtomSpace;
 
 class DistributionalValue
-	: public ProtoAtom
+	: public Value
 {
 
 	friend class ConditionalDV;
@@ -131,27 +130,27 @@ public:
 	double get_mode(DVKey) const;
 	double get_var(DVKey) const;
 
-	virtual bool operator==(const ProtoAtom& rhs) const;
+	virtual bool operator==(const Value& rhs) const;
 
-	virtual bool operator<(const ProtoAtom&) const;
+	virtual bool operator<(const Value&) const;
 
-	using ProtoAtom::to_string;
+	using Value::to_string;
 	std::string to_string(const std::string&) const;
 };
 
-static inline DistributionalValuePtr DistributionalValueCast(const ProtoAtomPtr& pa)
+static inline DistributionalValuePtr DistributionalValueCast(const ValuePtr& pa)
 	{ return std::dynamic_pointer_cast<const DistributionalValue>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const DistributionalValuePtr& dv)
+static inline ValuePtr ValueCast(const DistributionalValuePtr& dv)
 {
 	// This should have worked!?
-	// return std::const_pointer_cast<ProtoAtom>(tv);
+	// return std::const_pointer_cast<Value>(tv);
 
 	// This, too, should have worked!?
-	// return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+	// return std::shared_ptr<Value>(tv, const_cast<Value*>(tv.get()));
 
 	// This works...
-	return std::shared_ptr<ProtoAtom>(dv, (ProtoAtom*) dv.get());
+	return std::shared_ptr<Value>(dv, (Value*) dv.get());
 }
 
 std::string oc_to_string(const DistributionalValue& hc);

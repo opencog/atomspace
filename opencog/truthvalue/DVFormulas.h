@@ -30,10 +30,6 @@
 #include <vector>
 #include <limits>
 
-#include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/base/Handle.h>
-
 #include <opencog/truthvalue/ConditionalDV.h>
 #include <opencog/truthvalue/DistributionalValue.h>
 

@@ -224,7 +224,7 @@ SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
 {
     SCM res = SCM_UNDEFINED;
     bool first = true;
-    for (ProtoAtomPtr p : ps)
+    for (ValuePtr p : ps)
     {
         SCM sp = protom_to_scm(p);
         if (first) {
