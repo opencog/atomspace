@@ -79,7 +79,7 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-	# gcc before version 4.8 does not support the c++11 definition
+	# gcc before version 5.4  does not support the c++11 definition
 	# of thread_local.
 	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.4.0)
 		MESSAGE(FATAL_ERROR "GCC version must be at least 5.4.0!")
