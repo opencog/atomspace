@@ -81,9 +81,9 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 IF (CMAKE_COMPILER_IS_GNUCXX)
 	# gcc before version 4.8 does not support the c++11 definition
 	# of thread_local.
-	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
-		MESSAGE(FATAL_ERROR "GCC version must be at least 4.8.0!")
-	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
+	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.4.0)
+		MESSAGE(FATAL_ERROR "GCC version must be at least 5.4.0!")
+	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.4.0)
 
 	IF (APPLE)
 		CMAKE_POLICY(SET CMP0042 NEW)  # Something about MACOSX_RPATH
