@@ -3,7 +3,7 @@
 
 ADD_GUILE_MODULE (FILES
 	opencog.scm
-	MODULE_DESTINATION "${DATADIR}/scm/"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/"
 )
 
 ADD_GUILE_MODULE (FILES
@@ -15,7 +15,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/repl-shell.scm
 	opencog/base/tv.scm
 	opencog/base/utilities.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/base"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/base"
 )
 
 ADD_GUILE_MODULE (FILES
@@ -28,7 +28,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/query.scm
 	opencog/rule-engine.scm
 	opencog/test-runner.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
 # These guile modules spew "libBlahBlah.so not found" errors,
@@ -37,14 +37,14 @@ ADD_GUILE_MODULE (FILES
 IF (HAVE_GEARMAN)
 	ADD_GUILE_MODULE (FILES
 		opencog/dist-gearman.scm
-		MODULE_DESTINATION "${DATADIR}/scm/opencog"
+		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (HAVE_GEARMAN)
 
 IF (PGSQL_FOUND OR ODBC_FOUND)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
-		MODULE_DESTINATION "${DATADIR}/scm/opencog"
+		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (PGSQL_FOUND OR ODBC_FOUND)
 
@@ -52,25 +52,25 @@ ENDIF (PGSQL_FOUND OR ODBC_FOUND)
 # IF (PGSQL_FOUND)
 # 	ADD_GUILE_MODULE (FILES
 # 		opencog/persist-pgsql.scm
-# 		MODULE_DESTINATION "${DATADIR}/scm/opencog"
+# 		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 # 	)
 # ENDIF (PGSQL_FOUND)
 
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
-		MODULE_DESTINATION "${DATADIR}/scm/opencog"
+		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (HAVE_CYTHON)
 
 IF (HAVE_ZMQ)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-zmq.scm
-		MODULE_DESTINATION "${DATADIR}/scm/opencog"
+		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (HAVE_ZMQ)
 
 ADD_GUILE_MODULE (FILES
 	opencog/rule-engine/rule-engine-utils.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/rule-engine"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/rule-engine"
 )

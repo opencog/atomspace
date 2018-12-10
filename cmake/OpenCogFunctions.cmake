@@ -14,17 +14,18 @@
 #   for it be importable, as per guile's specification. See reference
 #   links above.
 
+IF(HAVE_GUILE)
+    EXECUTE_PROCESS(COMMAND guile -c "(display (%site-dir))"
+        OUTPUT_VARIABLE GUILE_SITE_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+ENDIF()
+
 # ----------------------------------------------------------------------------
 # This configures the install and binary paths for each file, passed to it,
 # based on the value of the variables MODULE_NAME, MODULE_FILE_DIR_PATH and
 # MODULE_DIR_PATH in the PARENT_SCOPE.
 FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME)
     SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
-    IF(HAVE_GUILE AND (GUILE_VERSION VERSION_GREATER 2.2))
-        EXECUTE_PROCESS(COMMAND guile -c "(display (%site-dir))"
-            OUTPUT_VARIABLE GUILE_SITE_DIR
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-    ENDIF()
 
     # Copy files into build directory mirroring the install path structure.
     # Also configure for install.
@@ -74,7 +75,7 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 FUNCTION(ADD_GUILE_MODULE)
     # NOTE: Change PREFIX_DIR_PATH variable if a choice is made to adapt
     # guile's site-package convention.
-    SET(PREFIX_DIR_PATH "${DATADIR}/scm")
+    SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
     SET(oneValueArgs MODULE_DESTINATION)
     SET(multiValueArgs FILES)
