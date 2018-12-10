@@ -19,6 +19,7 @@ IF(HAVE_GUILE)
         OUTPUT_VARIABLE GUILE_SITE_DIR
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 ENDIF()
+ADD_DEFINITIONS(-DGUILE_SITE_DIR=\\"${GUILE_SITE_DIR}\\")
 
 # ----------------------------------------------------------------------------
 # This configures the install and binary paths for each file, passed to it,
