@@ -1,5 +1,5 @@
 
-OPENCOG_ADD_ATOM_TYPES(atom_types.script 
+OPENCOG_ADD_ATOM_TYPES(atom_types.script
   atom_types.h
   atom_types.definitions
   atom_types.inheritance
@@ -53,5 +53,5 @@ INSTALL (FILES
 # Install the auto-generated atom types as well
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
-	DESTINATION "${DATADIR}/scm/opencog/base"
+	DESTINATION "${GUILE_SITE_DIR}/opencog/base"
 )
