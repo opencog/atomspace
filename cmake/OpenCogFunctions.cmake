@@ -73,8 +73,7 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 #   MODULE_FILE, is inferred from this argument, even if it is the only file to
 #   be installed.
 FUNCTION(ADD_GUILE_MODULE)
-    # NOTE: Change PREFIX_DIR_PATH variable if a choice is made to adapt
-    # guile's site-package convention.
+  IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
     SET(oneValueArgs MODULE_DESTINATION)
@@ -135,6 +134,7 @@ FUNCTION(ADD_GUILE_MODULE)
             ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE})
         ENDIF()
     ENDIF()
+  ENDIF()
 ENDFUNCTION(ADD_GUILE_MODULE)
 
 FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
