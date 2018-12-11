@@ -79,11 +79,11 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-	# gcc before version 4.8 does not support the c++11 definition
+	# version 5.0 of gcc is required for passing non-trivially copyable class via C varargs
 	# of thread_local.
-	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
-		MESSAGE(FATAL_ERROR "GCC version must be at least 4.8.0!")
-	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
+	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
+	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
 
 	IF (APPLE)
 		CMAKE_POLICY(SET CMP0042 NEW)  # Something about MACOSX_RPATH
