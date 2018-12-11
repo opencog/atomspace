@@ -11,6 +11,7 @@ set_property(TARGET query
 )
 
 # these names are used in some projects e.g. opencog
+set(ATOMSPACE_atomtypes_LIBRARY atom_types)
 set(ATOMSPACE_LIBRARY atomspace)
 set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atombase_LIBRARY atombase)
@@ -30,6 +31,7 @@ set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_unify_LIBRARY unify)
 
 set(ATOMSPACE_LIBRARIES
+    atom_types
     value
     atombase
     atomcore
