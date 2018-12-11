@@ -22,7 +22,6 @@ ADD_LIBRARY (atom_types
 ADD_DEPENDENCIES(atom_types opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atom_types
-	value
 	${COGUTIL_LIBRARY}
 	)
 
