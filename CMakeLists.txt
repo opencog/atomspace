@@ -80,7 +80,7 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
 	# version 5.0 of gcc is required for passing non-trivially copyable class via C varargs
-	# of thread_local.
+	
 	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
 		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
 	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
