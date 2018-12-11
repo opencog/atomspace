@@ -82,7 +82,7 @@ cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
-cdef extern from "opencog/atoms/atom_types/Value.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
     cdef cppclass cValue "opencog::Value":
         Type get_type()
         bint is_atom()
