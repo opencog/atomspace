@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AtomSpace.h>
 

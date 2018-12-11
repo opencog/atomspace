@@ -244,7 +244,7 @@ Please refer to the following for specific questions:
   discussed in the [atomspace/README.md](atomspace/README.md) file.
 
 * How to add new atom or value types. See
- [README-Adding-New-Atom-Types.md](atoms/value/README-Adding-New-Atom-Types.md)
+ [README-Adding-New-Atom-Types.md](atoms/atom_types/README-Adding-New-Atom-Types.md)
 
 * Performance benchmarks are no longer in this repo. See the
   [opencog/benchmark](https://github.com/opencog/benchmark) repo.

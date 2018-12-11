@@ -21,7 +21,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
