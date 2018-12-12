@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/SimpleTruthValue.h
+ * opencog/truthvalue/ProbabilisticTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -24,10 +24,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SIMPLE_TRUTH_VALUE_H_
-#define _OPENCOG_SIMPLE_TRUTH_VALUE_H_
+#ifndef _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_
+#define _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -35,27 +35,27 @@ namespace opencog
  *  @{
  */
 
-class SimpleTruthValue;
-typedef std::shared_ptr<const SimpleTruthValue> SimpleTruthValuePtr;
+class ProbabilisticTruthValue;
+typedef std::shared_ptr<const ProbabilisticTruthValue> ProbabilisticTruthValuePtr;
 
-//! a TruthValue that stores a strength and confidence.
-class SimpleTruthValue : public TruthValue
+//! a TruthValue that stores a mean, a confidence and the number of observations
+class ProbabilisticTruthValue : public TruthValue
 {
 protected:
     enum {
         MEAN, /// Mean of the strength of the TV over all observations.
-        CONFIDENCE /// Estimate of confidence of the observation.
+        CONFIDENCE, /// Estimate of confidence of the observation.
+        COUNT /// Raw count
     };
 
 public:
-    static count_t DEFAULT_K;
 
-    SimpleTruthValue(strength_t, confidence_t);
-    SimpleTruthValue(const TruthValue&);
-    SimpleTruthValue(const SimpleTruthValue&);
-    SimpleTruthValue(const ValuePtr&);
+    ProbabilisticTruthValue(strength_t, confidence_t, count_t);
+    ProbabilisticTruthValue(const TruthValue&);
+    ProbabilisticTruthValue(ProbabilisticTruthValue const&);
+    ProbabilisticTruthValue(const ValuePtr&);
 
-    virtual bool operator==(const Value& rhs) const;
+    virtual bool operator==(const Value&) const;
 
     std::string to_string(const std::string&) const;
 
@@ -63,37 +63,27 @@ public:
     count_t get_count() const;
     confidence_t get_confidence() const;
 
-    /**
-     * Truth value merge formula, as specified by PLN.
-     *
-     * Currently tv1.merge(tv2) works as follows:
-     * the resulting TV is either tv1 or tv2, the result being the one
-     * with the highest confidence.
-     */
-    TruthValuePtr merge(const TruthValuePtr&,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+    virtual TruthValuePtr merge(const TruthValuePtr&,
+                                const MergeCtrl& mc=MergeCtrl()) const;
 
-    static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
+    static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
-        return std::make_shared<const SimpleTruthValue>(mean, conf);
-    }
-    static TruthValuePtr createTV(strength_t mean, confidence_t conf)
-    {
-        return std::static_pointer_cast<const TruthValue>(createSTV(mean, conf));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const ProbabilisticTruthValue>(s, f, c));
     }
     static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<const SimpleTruthValue>(pap));
+            std::make_shared<const ProbabilisticTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
     {
-        return std::make_shared<const SimpleTruthValue>(*this);
+        return std::make_shared<const ProbabilisticTruthValue>(*this);
     }
 };
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_SIMPLE_TRUTH_VALUE_H_
+#endif // _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_

@@ -27,7 +27,7 @@
 #ifndef _OPENCOG_FUZZY_TRUTH_VALUE_H_
 #define _OPENCOG_FUZZY_TRUTH_VALUE_H_
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {

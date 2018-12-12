@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/ProbabilisticTruthValue.h
+ * opencog/truthvalue/CountTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -24,10 +24,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_
-#define _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_
+#ifndef _OPENCOG_COUNT_TRUTH_VALUE_H_
+#define _OPENCOG_COUNT_TRUTH_VALUE_H_
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -35,11 +35,11 @@ namespace opencog
  *  @{
  */
 
-class ProbabilisticTruthValue;
-typedef std::shared_ptr<const ProbabilisticTruthValue> ProbabilisticTruthValuePtr;
+class CountTruthValue;
+typedef std::shared_ptr<const CountTruthValue> CountTruthValuePtr;
 
 //! a TruthValue that stores a mean, a confidence and the number of observations
-class ProbabilisticTruthValue : public TruthValue
+class CountTruthValue : public TruthValue
 {
 protected:
     enum {
@@ -50,14 +50,14 @@ protected:
 
 public:
 
-    ProbabilisticTruthValue(strength_t, confidence_t, count_t);
-    ProbabilisticTruthValue(const TruthValue&);
-    ProbabilisticTruthValue(ProbabilisticTruthValue const&);
-    ProbabilisticTruthValue(const ValuePtr&);
+    CountTruthValue(strength_t, confidence_t, count_t);
+    CountTruthValue(const TruthValue&);
+    CountTruthValue(CountTruthValue const&);
+    CountTruthValue(const ValuePtr&);
 
-    virtual bool operator==(const Value&) const;
+    virtual bool operator==(const Value& rhs) const;
 
-    std::string to_string(const std::string&) const;
+    virtual std::string to_string(const std::string& = "") const;
 
     strength_t get_mean() const;
     count_t get_count() const;
@@ -69,21 +69,25 @@ public:
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
         return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<const ProbabilisticTruthValue>(s, f, c));
+            std::make_shared<const CountTruthValue>(s, f, c));
     }
     static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<const ProbabilisticTruthValue>(pap));
+            std::make_shared<const CountTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
     {
-        return std::make_shared<const ProbabilisticTruthValue>(*this);
+        return std::make_shared<CountTruthValue>(*this);
     }
 };
+
+static inline CountTruthValuePtr CountTruthValueCast(const TruthValuePtr& tv)
+    { return std::dynamic_pointer_cast<const CountTruthValue>(tv); }
+
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_PROBABILISTIC_TRUTH_VALUE_H_
+#endif // _OPENCOG_COUNT_TRUTH_VALUE_H_
