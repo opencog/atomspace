@@ -30,5 +30,5 @@ INSTALL (FILES
 	SimpleTruthValue.h
 	EvidenceCountTruthValue.h
 	TruthValue.h
-	DESTINATION "include/opencog/truthvalue"
+	DESTINATION "include/opencog/atoms/truthvalue"
 )
