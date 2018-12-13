@@ -95,9 +95,6 @@ public:
 	 */
 	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
-
-	/** Ordering operator for Values. */
-	virtual bool operator<(const Value&) const = 0;
 };
 
 typedef std::shared_ptr<Value> ValuePtr;
@@ -110,14 +107,6 @@ typedef std::vector<ValuePtr> ProtomSeq;
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
-
-struct cmpByContent {
-	bool operator()(const ValuePtr a, const ValuePtr b) const {
-		return *a < *b;
-	}
-};
-//! a map from ValuePtr to double
-typedef Counter<ValuePtr, double, cmpByContent> ValueCounter;
 
 /** @}*/
 } // namespace opencog

@@ -253,13 +253,3 @@ bool ConditionalDV::operator==(const Value& other) const
 	}
 	return true;
 }
-
-bool ConditionalDV::operator<(const Value& other) const
-{
-	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type())
-		return CONDITIONAL_DISTRIBUTIONAL_VALUE < other.get_type();
-
-	const ConditionalDV* dov = (const ConditionalDV*) &other;
-
-	return _value < dov->_value;
-}

@@ -448,16 +448,6 @@ bool DistributionalValue::operator==(const Value& other) const
 	return true;
 }
 
-bool DistributionalValue::operator<(const Value& other) const
-{
-	if (DISTRIBUTIONAL_VALUE != other.get_type())
-		return DISTRIBUTIONAL_VALUE < other.get_type();
-
-	const DistributionalValue* dov = (const DistributionalValue*) &other;
-
-	return _value < dov->_value;
-}
-
 std::string oc_to_string(const DistributionalValuePtr dvp)
 {
 	std::string part = dvp->to_string("");

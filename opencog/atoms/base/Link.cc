@@ -159,16 +159,6 @@ bool Link::operator<(const Atom& other) const
     return false;
 }
 
-bool Link::operator<(const Value& other) const
-{
-	if (get_type() != other.get_type())
-		return get_type() < other.get_type();
-
-	const Link* lov = (const Link*) &other;
-
-	return this < lov;
-}
-
 /// Returns a Merkle tree hash -- that is, the hash of this link
 /// chains the hash values of the child atoms, as well.
 ContentHash Link::compute_hash() const

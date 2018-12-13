@@ -57,11 +57,6 @@ public:
 
 	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const Value&) const;
-
-	/** Ordering operator for Values.
-	 * First compares Types then based on Content
-	 */
-	virtual bool operator<(const Value&) const;
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;

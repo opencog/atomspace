@@ -132,8 +132,6 @@ public:
 
 	virtual bool operator==(const Value& rhs) const;
 
-	virtual bool operator<(const Value&) const;
-
 	using Value::to_string;
 	std::string to_string(const std::string&) const;
 };

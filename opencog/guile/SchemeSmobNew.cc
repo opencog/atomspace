@@ -148,24 +148,6 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 	return protom_to_scm(AtomCast(h));
 }
 
-SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
-{
-    SCM res = SCM_UNDEFINED;
-    bool first = true;
-    for (Handle h : hs)
-    {
-        SCM sh = handle_to_scm(h);
-        if (first) {
-            first = false;
-            res = scm_list_1(sh);
-        }
-        else {
-            res = scm_cons(sh,res);
-        }
-    }
-    return res;
-}
-
 SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
 {
     SCM res = SCM_UNDEFINED;
@@ -220,23 +202,6 @@ SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
     return res;
 }
 
-SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
-{
-    SCM res = SCM_UNDEFINED;
-    bool first = true;
-    for (ValuePtr p : ps)
-    {
-        SCM sp = protom_to_scm(p);
-        if (first) {
-            first = false;
-            res = scm_list_1(sp);
-        }
-        else {
-            res = scm_cons(sp,res);
-        }
-    }
-    return res;
-}
 SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
 	if (nullptr == pa) return SCM_EOL;
