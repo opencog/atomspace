@@ -34,7 +34,7 @@
 #include <opencog/util/RandGen.h>
 #include <opencog/util/sigslot.h>
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 

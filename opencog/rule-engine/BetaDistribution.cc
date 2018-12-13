@@ -24,7 +24,7 @@
 #include "BetaDistribution.h"
 #include "URELogger.h"
 
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 namespace opencog {
 

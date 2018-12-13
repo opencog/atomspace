@@ -23,7 +23,7 @@
 #include <thread>
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>

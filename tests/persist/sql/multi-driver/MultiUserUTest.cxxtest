@@ -39,7 +39,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 #include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
-#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>

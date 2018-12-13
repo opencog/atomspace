@@ -2,7 +2,7 @@
 #include "opencog/atomspace/Atom.h"
 #include "opencog/atomspace/Link.h"
 #include "opencog/atomspace/Node.h"
-#include "opencog/truthvalue/SimpleTruthValue.h"
+#include "opencog/atoms/truthvalue/SimpleTruthValue.h"
 
 using namespace opencog;
 

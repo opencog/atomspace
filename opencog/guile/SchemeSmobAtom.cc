@@ -14,9 +14,9 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 

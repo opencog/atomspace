@@ -40,7 +40,7 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/persist/sql/SQLBackingStore.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>

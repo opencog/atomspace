@@ -23,8 +23,8 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/atom_types/types.h>
 
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 

@@ -1,10 +1,10 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/FuzzyTruthValue.h>
-#include <opencog/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/atoms/truthvalue/FuzzyTruthValue.h>
+#include <opencog/atoms/truthvalue/ProbabilisticTruthValue.h>
 
 
 /**

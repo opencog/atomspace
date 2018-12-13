@@ -21,7 +21,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 // Copied/pasted from gcc 4.9 utility. Remove as soon as C++14 is
