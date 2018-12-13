@@ -210,7 +210,7 @@ IF(Boost_FOUND_SAVE)
 ENDIF(Boost_FOUND_SAVE)
 
 # ----------------------------------------------------------
-# Needed for uit tests.
+# Needed for unit tests.
 
 FIND_PACKAGE(Cxxtest)
 IF (CXXTEST_FOUND)
@@ -470,7 +470,6 @@ SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # ===================================================================
 # Global includes
-
 
 # -------------------------------------------------
 # Include configuration.
