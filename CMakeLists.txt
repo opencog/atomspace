@@ -8,9 +8,8 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-# Need to have cmake-2.8.8 in order to be able to check the compiler
-# version.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+# cogutils already requires 2.8.12.2, so may as well ask for that.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF (COMMAND CMAKE_POLICY)
@@ -21,30 +20,22 @@ ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 
 PROJECT(atomspace)
 
-## Get atomspace version
-FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
-STRING(REGEX MATCH
-	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
-        _ "${_ATOMSPACE_H_CONTENTS}")
-SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
-
-# To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
-# Remove when CMake >= 2.8.4 is required to build the project
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
-# uncomment to be in Release mode [default]
+# ----------------------------------------------------------
+# User-modifiable options. Feel free to change these!
+#
+# Uncomment to be in Release mode [default].
 # SET(CMAKE_BUILD_TYPE Release)
 
-# uncomment to build in debug mode
+# Uncomment to build in debug mode.
 # SET(CMAKE_BUILD_TYPE Debug)
 
-# uncomment to be in coverage testing mode
+# Uncomment to be in coverage testing mode.
 # SET(CMAKE_BUILD_TYPE Coverage)
 
-# uncomment to build in profile mode
+# Uncomment to build in profile mode.
 # SET(CMAKE_BUILD_TYPE Profile)
 
-# uncomment to build in release mode with debug information
+# Uncomment to build in release mode with debug information.
 # SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # default build type
@@ -60,25 +51,12 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 # add the 'lib' dir to cmake's module search path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
-# Cogutil
-FIND_PACKAGE(CogUtil CONFIG)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
-
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
-
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-	# version 5.0 of gcc is required for passing non-trivially copyable class via C varargs
+	# version 5.0 of gcc is required for passing non-trivially
+	# copyable class via C varargs
 	
 	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
 		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
@@ -154,8 +132,9 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
 	SET(BUILD_SHARED_LIBS ON)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 
+# ----------------------------------------------------
+# Do the windows build.
 
-# Do the windows build
 IF (WIN32)
 	ADD_DEFINITIONS(-DWIN32)
 	IF (CYGWIN)
@@ -182,6 +161,21 @@ IF (WIN32)
 	ENDIF (NOT UNIX)
 ENDIF (WIN32)
 
+# ===============================================================
+# Cogutil
+FIND_PACKAGE(CogUtil CONFIG)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+    SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
+# add the 'cmake' directory from cogutil to search path
+list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
+
+include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
@@ -438,6 +432,14 @@ ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
 ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
+# ===============================================================
+## Get atomspace version
+FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
+STRING(REGEX MATCH
+	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
+        _ "${_ATOMSPACE_H_CONTENTS}")
+SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # ==========================================================
 # Decide what to build, based on the packages found.
