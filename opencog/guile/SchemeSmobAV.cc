@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;

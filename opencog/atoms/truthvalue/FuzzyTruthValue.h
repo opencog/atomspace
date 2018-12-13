@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/FuzzyTruthValue.h
+ * opencog/atoms/truthvalue/FuzzyTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 #ifndef _OPENCOG_FUZZY_TRUTH_VALUE_H_
 #define _OPENCOG_FUZZY_TRUTH_VALUE_H_
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {

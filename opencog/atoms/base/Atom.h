@@ -37,7 +37,7 @@
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 class AtomUTest;
 

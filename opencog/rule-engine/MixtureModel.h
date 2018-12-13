@@ -24,7 +24,7 @@
 #define _OPENCOG_MIXTUREMODEL_H_
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {

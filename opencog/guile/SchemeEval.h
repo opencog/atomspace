@@ -18,7 +18,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob

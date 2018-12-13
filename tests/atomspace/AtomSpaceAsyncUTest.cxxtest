@@ -32,7 +32,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/mt19937ar.h>

@@ -2,7 +2,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 using namespace opencog;
 using namespace std::placeholders;

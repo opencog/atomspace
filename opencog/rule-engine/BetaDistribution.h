@@ -26,7 +26,7 @@
 #include <boost/math/distributions/beta.hpp>
 
 #include <opencog/util/empty_string.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
