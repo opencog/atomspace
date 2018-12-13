@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/FuzzyTruthValue.h
+ * opencog/atoms/truthvalue/FuzzyTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

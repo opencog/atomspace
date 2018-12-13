@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/SimpleTruthValue.h
+ * opencog/atoms/truthvalue/SimpleTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

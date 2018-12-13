@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/IndefiniteTruthValue.h
+ * opencog/atoms/truthvalue/IndefiniteTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

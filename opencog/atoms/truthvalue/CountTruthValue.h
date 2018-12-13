@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/CountTruthValue.h
+ * opencog/atoms/truthvalue/CountTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

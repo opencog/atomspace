@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/EvidenceCountTruthValue.cc
+ * opencog/atoms/truthvalue/EvidenceCountTruthValue.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/ProbabilisticTruthValue.h
+ * opencog/atoms/truthvalue/ProbabilisticTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
