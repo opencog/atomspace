@@ -29,24 +29,12 @@
 using namespace opencog;
 
 PersistSCM::PersistSCM(void)
+	: ModuleWrap("opencog persist")
 {
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
-	scm_with_guile(init_in_guile, this);
-}
-
-void* PersistSCM::init_in_guile(void* self)
-{
-	scm_c_define_module("opencog persist", init_in_module, self);
-	scm_c_use_module("opencog persist");
-	return NULL;
-}
-
-void PersistSCM::init_in_module(void* data)
-{
-	PersistSCM* self = (PersistSCM*) data;
-	self->init();
+	module_init();
 }
 
 void PersistSCM::init(void)
