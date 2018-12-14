@@ -3,14 +3,15 @@
 include("@CMAKE_INSTALL_PREFIX@/lib/cmake/AtomSpace/AtomSpaceTargets.cmake")
 
 # Execution depends on query and query depends on execution,
-# but circular dependencies are forbidden by cmake, so dependancy on execution is omitted
-# in query at build time. It should be set here for proper linking.
+# but circular dependencies are forbidden by cmake, so dependancy
+# on execution is omitted in query at build time. It should be set
+# here for proper linking.
 set_property(TARGET query
     APPEND PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_@build_type@
     execution
 )
 
-# these names are used in some projects e.g. opencog
+# These names are used in varius projects e.g. opencog, as-moses, etc.
 set(ATOMSPACE_LIBRARY atomspace)
 set(ATOMSPACE_atombase_LIBRARY atombase)
 set(ATOMSPACE_atomcore_LIBRARY atomcore)
@@ -80,6 +81,7 @@ IF (zmqatoms)
     )
 ENDIF (zmqatoms)
 
+set(ATOMSPACE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_VERSION "@SEMANTIC_VERSION@")
 set(ATOMSPACE_FOUND 1)
