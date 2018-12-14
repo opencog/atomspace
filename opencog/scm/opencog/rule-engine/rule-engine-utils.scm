@@ -50,6 +50,8 @@
 ;; -- gen-rand-variable -- Generate random VariableNode
 ;; -- gen-rand-variables -- Generate random VariableNodes
 ;; -- cog-new-flattened-link -- Create flattened link TODO: remove cog- prefix
+;; -- simple-forward-step -- Simple forward step over a focus-set
+;; -- simple-forward-chain -- Iterations of simple foward steps over a focus-set
 ;;
 ;; If you add more utilities don't forget to add them in the
 ;; export-rule-engine-utils function.
@@ -62,6 +64,7 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 receive))
 
 (define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
 "
@@ -516,6 +519,60 @@
                   (list e))))
   (let ((flat (delete-duplicates (fold flatten '() args))))
     (cog-new-link link-type flat)))
+
+; ----------------------------------------------------------------------------
+(define (simple-forward-step RB-NODE FOCUS-SET)
+"
+  Makes a single forward step using the rules in rulebase RB-NODE over the
+  whole FOCUS-SET.
+"
+; NOTE: It is simple b/c it doesn't try to restrict inference over a
+; certain source atoms.
+; TODO: Move logic to ForwardChainer.
+    (let* ((result (cog-fc RB-NODE (Set) #:focus-set (Set FOCUS-SET)))
+           (result-list (cog-outgoing-set result)))
+        ; Cleanup
+        (cog-delete result)
+
+        ; If there are multiple results for application of a rule, the
+        ; result will have a ListLink of the results. Get the results out
+        ; of the ListLinks helps in debugging and filtering-for-pln/sureal
+        (receive (list-links other)
+            (partition
+                (lambda (x) (equal? 'ListLink (cog-type x))) result-list)
+
+            (let ((partial-results (append-map cog-outgoing-set list-links)))
+                ; Cleanup. NOTE: Cleanup is not done on `other` b/c, it might
+                ; contain atoms which are part of r2l outputs, which if deleted
+                ; recursively might affect the nlp pipline.
+                (map cog-delete-recursive list-links)
+                (delete-duplicates (append partial-results other))
+            )
+        )
+    )
+)
+
+; ----------------------------------------------------------------------------
+(define-public (simple-forward-chain RB-NODE FOCUS-SET STEPS)
+"
+  Applys the rules in rulebase RB-NODE over the whole FOCUS-SET, STEPS times.
+  Before each recursive step occurs, the FOCUS-SET and outputs of current-step
+  are merged and passed as the new FOCUS-SET.
+
+  Returns a list containing both the FOCUS-SET and the inference results.
+"
+    ; TODO: Add an optional argument for filtering results b/n steps using.
+    ; Create the next focus-set.
+    (define (create-next-fs prev-fs chaining-result)
+            (delete-duplicates (append chaining-result prev-fs)))
+
+    (if (equal? 1 STEPS)
+        (create-next-fs  FOCUS-SET (simple-forward-step RB-NODE FOCUS-SET))
+        (simple-forward-chain RB-NODE
+            (create-next-fs FOCUS-SET (simple-forward-step RB-NODE FOCUS-SET))
+            (- STEPS 1))
+    )
+)
 
 (define (export-rule-engine-utils)
   (export
