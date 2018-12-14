@@ -37,3 +37,5 @@ INSTALL (FILES
 	DVFormulas.h
 	DESTINATION "include/opencog/truthvalue"
 )
+
+

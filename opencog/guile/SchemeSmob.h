@@ -84,12 +84,6 @@ private:
 	static SCM protomseq_to_scm(const ProtomSeq&);
 	static SCM tv_to_scm(const TruthValuePtr&);
 	static SCM av_to_scm(const AttentionValuePtr&);
-	static SCM dv_to_scm(const DistributionalValuePtr&);
-	static SCM dvs_to_scm(const std::vector<DistributionalValuePtr>&);
-	static SCM cdv_to_scm(const ConditionalDVPtr&);
-	static SCM float_list_to_scm(const std::vector<double>&);
-	static SCM dvkey_to_scm(const DVKey&);
-	static SCM dvkeyseq_to_scm(const DVKeySeq&);
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
@@ -204,27 +198,6 @@ private:
 	static SCM ss_av_p(SCM);
 	static SCM ss_av_get_value(SCM);
 
-	// Distributional values
-	static SCM ss_new_dv(SCM, SCM);
-	static SCM ss_new_dv_simple(SCM, SCM);
-	static SCM ss_dv_p(SCM);
-	static SCM ss_dv_divide(SCM,SCM,SCM);
-	static SCM ss_dv_sum_joint(SCM,SCM);
-	static SCM ss_dv_get_confidence(SCM);
-	static SCM ss_dv_get_fom(SCM);
-	static SCM ss_dv_conjunction(SCM,SCM);
-	static SCM ss_dv_disjunction(SCM,SCM);
-	static SCM ss_dv_negate(SCM);
-	static SCM ss_dv_is_empty(SCM);
-	static SCM ss_cdv_is_empty(SCM);
-	static SCM ss_new_cdv(SCM, SCM);
-	static SCM ss_cdv_get_conditions(SCM);
-	static SCM ss_cdv_get_unconditonals(SCM);
-	static SCM ss_cdv_get_unconditonal(SCM,SCM);
-	static SCM ss_cdv_get_joint(SCM,SCM);
-	static SCM ss_cdv_merge(SCM,SCM);
-	static SCM ss_cdv_cde(SCM,SCM);
-
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
@@ -236,7 +209,6 @@ private:
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AttentionValuePtr get_av_from_list(SCM);
-	static DistributionalValuePtr get_dv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
 
 	// Logger
@@ -258,12 +230,6 @@ private:
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
 	static Interval verify_interval(SCM, const char *, int pos=1);
-	static DVKey verify_DVKey(SCM, const char *, int pos=1);
-	static DVKeySeq verify_DVKeySeq(SCM, const char *, int pos=1);
-	static DistributionalValuePtr verify_dv(SCM, const char *, int pos = 1);
-	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *,
-	                                                          int pos = 1);
-	static ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                     int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,

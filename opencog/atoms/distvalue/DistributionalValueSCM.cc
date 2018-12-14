@@ -11,39 +11,39 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/distvalue/DistributionalValueSCM.h>
 
 using namespace opencog;
 
-/* ============================================================== */
-/**
- * Search for an distributional value in a list of values.
- * Return the attention value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
- */
-DistributionalValuePtr SchemeSmob::get_dv_from_list(SCM slist)
+void DistributionalValueSCM::init(void)
 {
-	while (scm_is_pair(slist))
-	{
-		SCM sval = SCM_CAR(slist);
-		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
-		{
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			switch (misctype)
-			{
-				case COG_PROTOM: {
-					ValuePtr pa(scm_to_protom(sval));
-					DistributionalValuePtr dv(DistributionalValueCast(pa));
-					if (dv) return dv;
-				}
-				default:
-					break;
-			}
-		}
-		slist = SCM_CDR(slist);
-	}
-	return nullptr;
+	// DistributionalValuePtr values
+	define_scheme_primitive("cog-new-dv", &DistributionalValueSCM::ss_new_dv
+	                        ,this,"distvalue");
+	define_scheme_primitive("cog-new-dv-simple",     ss_new_dv_simple);
+	define_scheme_primitive("cog-dv?",               ss_dv_p);
+	define_scheme_primitive("cog-dv-divide",         ss_dv_divide);
+	define_scheme_primitive("cog-dv-sum-joint",      ss_dv_sum_joint);
+	define_scheme_primitive("cog-dv-get-confidence", ss_dv_get_confidence);
+	define_scheme_primitive("cog-dv-conjunction",    ss_dv_conjunction);
+	define_scheme_primitive("cog-dv-disjunction",    ss_dv_disjunction);
+	define_scheme_primitive("cog-dv-negate",         ss_dv_negate);
+	define_scheme_primitive("cog-dv-is-empty",       ss_dv_is_empty);
+	define_scheme_primitive("cog-cdv-is-empty",      ss_cdv_is_empty);
+	define_scheme_primitive("cog-new-cdv",           ss_new_cdv);
+	define_scheme_primitive("cog-cdv-get-conditions",ss_cdv_get_conditions);
+	define_scheme_primitive("cog-cdv-get-unconditionals",ss_cdv_get_unconditonals);
+	define_scheme_primitive("cog-cdv-get-unconditional",ss_cdv_get_unconditonal);
+	define_scheme_primitive("cog-cdv-get-joint",     ss_cdv_get_joint);
+	define_scheme_primitive("cog-cdv-merge",         ss_cdv_merge);
+	define_scheme_primitive("cog-cdv-cde",           ss_cdv_cde);
+
+
 }
+
+
+
+//Utility Functions
 
 Interval
 SchemeSmob::verify_interval(SCM svalue_list, const char * subrname, int pos)
