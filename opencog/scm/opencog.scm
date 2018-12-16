@@ -41,20 +41,19 @@
 ; in guile-2.1 that causes this to be collected, anyway.  Its as if
 ; guile forgets about this ... how? why? I don't get it.
 ;
-; But wait -- it gets worse. If this module is loaded from the guile
-; REPL (i.e. as "(use-modules (opencog))" ), and then the cogserver
-; is started from the REPL, as "(start-cogserver "cogserver.conf"),
-; then there is a good chance that this file will be loaded (again),
-; directly by the SCM_PRELOAD directive in the cogserver.conf file.
-; Viz, the stuff in here may end up running a second time. We want
-; to avoid creating a second atomspace as a result. The below tries
-; to avoid problems by simply grabbing the existing atomspace, when
-; called a second time; this will almost surely be the cogserver
-; atomspace. Ugh. What a mess.
+; In various bad scenarios, the cogserver creates it's own atomspace,
+; before the code here runs.  We want to avoid creating a second
+; atomspace as a result. The below tries to avoid problems by simply
+; grabbing the existing atomspace, if there already is one.
+;
+; FIXME: Both of the above-described problems might no longer exist.
+; I'm not sure. The below is simple and painless, I'm leaving it for
+; now.
 
 (export cog-atomspace cog-new-atomspace cog-set-atomspace!)
 
 (define-public cog-initial-as (cog-atomspace))
+(define-public my-as (cog-atomspace))
 (if (eq? cog-initial-as #f)
 	(begin
 		(set! cog-initial-as (cog-new-atomspace))
