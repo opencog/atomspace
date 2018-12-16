@@ -633,7 +633,7 @@ void PythonEval::build_python_error_message(const char* function_name,
 #if PY_MAJOR_VERSION == 2
         char* pythonErrorString = PyBytes_AsString(pyErrorString);
 #else
-        char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+        const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
 #endif
         if (pythonErrorString) {
             errorStringStream << ": " << pythonErrorString << ".";
