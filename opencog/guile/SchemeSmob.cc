@@ -225,10 +225,6 @@ void SchemeSmob::module_init(void*)
 	// The portion of (opencog) done in C++
 	register_procs();
 
-	// The portion of (opencog) done in scm files.
-	// This needs to stay in sync with /opencog/scm/opencog.scm
-	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-
 	// Set the library load path, so that other modules can find
 	// thier libraries. Copied from `scm/opencog.scm` and should stay
 	// in sync with that file.  This is NOT needed for ordinary usage
