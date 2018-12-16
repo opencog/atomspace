@@ -25,7 +25,7 @@
 ;
 
 ; lib64 is used by various versions of CentOS
-(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
+(define path "/usr/lib/opencog:/usr/lib64/opencog:/usr/local/lib/opencog:/usr/local/lib64/opencog")
 (setenv "LTDL_LIBRARY_PATH"
 	(if (getenv "LTDL_LIBRARY_PATH")
 		(string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
@@ -67,7 +67,7 @@
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
-; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 257
+; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 266
 
 (load-from-path "opencog/base/core-docs.scm")
 

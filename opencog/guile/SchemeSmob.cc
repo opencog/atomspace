@@ -239,7 +239,7 @@ void SchemeSmob::module_init(void*)
 	//
 	// lib64 is used by various versions of CentOS
 	scm_c_eval_string(
-		"(define path \"/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
+		"(define path \"/usr/lib/opencog:/usr/lib64/opencog:/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
 
 	scm_c_eval_string(
 		"(setenv \"LTDL_LIBRARY_PATH\""
@@ -250,7 +250,7 @@ void SchemeSmob::module_init(void*)
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 	// Loading files from the project directory is broken by design.
-	// However, teh unit tests are broken by design.
+	// However, the unit tests are broken by design.
 	// We REALLY should not do this, it violates basic laws of security,
 	// usability, debuggability. But some people think that's OK.
 	// Too lazy to fix.  See issue
