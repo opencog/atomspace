@@ -31,7 +31,7 @@ namespace opencog
 {
 
 /** \addtogroup grp_atomspace
- *	@{
+ *  @{
  */
 
 /**

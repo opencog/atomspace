@@ -29,13 +29,11 @@
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
-#include <opencog/util/Counter.h>
-
 namespace opencog
 {
 
 /** \addtogroup grp_atomspace
- *	@{
+ *  @{
  */
 
 /**

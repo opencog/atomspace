@@ -429,10 +429,7 @@ Return TrueTV iff A has a dv/cdv attached and it is not empty
       (if (cog-dv? dv)
         (bool->tv (not (cog-dv-is-empty dv)))
         (bool->tv (not (cog-cdv-is-empty dv)))
-      )
- 	  )
-  )
-)
+      ))))
 
 (define-public (gt-zero-confidence-eval A)
 "

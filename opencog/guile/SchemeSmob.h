@@ -30,7 +30,7 @@
 
 namespace opencog {
 /** \addtogroup grp_smob
- *	@{
+ *  @{
  */
 
 class Atom;
@@ -43,8 +43,9 @@ class SchemeSmob
 	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
 	friend class LoggerSCM;
+	friend class DistributionalValueSCM;
 
-public:
+private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
@@ -76,9 +77,7 @@ public:
 	static size_t free_misc(SCM);
 
 	static SCM handle_to_scm(const Handle&);
-	static SCM handleseq_to_scm(const HandleSeq&);
 	static SCM protom_to_scm(const ValuePtr&);
-	static SCM protomseq_to_scm(const ProtomSeq&);
 	static SCM tv_to_scm(const TruthValuePtr&);
 	static SCM av_to_scm(const AttentionValuePtr&);
 	static Handle scm_to_handle(SCM);

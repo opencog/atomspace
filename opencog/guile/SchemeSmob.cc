@@ -231,7 +231,7 @@ void SchemeSmob::module_init(void*)
 
 	// Set the library load path, so that other modules can find
 	// thier libraries. Copied from `scm/opencog.scm` and should stay
-	// in sync with that file.	This is NOT needed for ordinary usage
+	// in sync with that file. This is NOT needed for ordinary usage
 	// from the guile REPL, but is needed by the unit tests.  The problem
 	// is that the unit tests create SchemeEval class directly, which
 	// causes this code here to run, which defines the opencog scheme
@@ -249,7 +249,7 @@ void SchemeSmob::module_init(void*)
 		"(setenv \"LTDL_LIBRARY_PATH\""
 		"   (if (getenv \"LTDL_LIBRARY_PATH\")"
 		"      (string-append (getenv \"LTDL_LIBRARY_PATH\") \":\" path)"
-		"       path))");
+		"      path))");
 
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR

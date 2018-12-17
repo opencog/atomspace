@@ -32,5 +32,3 @@ INSTALL (FILES
 	TruthValue.h
 	DESTINATION "include/opencog/atoms/truthvalue"
 )
-
-
