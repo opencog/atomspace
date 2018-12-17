@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY (distvalue)
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
