@@ -352,7 +352,7 @@ Perform the following steps at the shell prompt:
     mkdir build
     cd build
     cmake ..
-    make
+    make -j4
 ```
 Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.
@@ -363,7 +363,7 @@ the structure of the source directory root.
 To build and run the unit tests, from the `./build` directory enter
 (after building opencog as above):
 ```
-    make test
+    make -j4 test ARGS=-j4
 ```
 
 ### Install

@@ -92,6 +92,6 @@ The current implementation status is tracked in
 Adding New Atom and Value Types
 -------------------------------
 Please see the
-[README-Adding-New-Atom-Types.md](README-Adding-New-Atom-Types.md) file.
+[README-Adding-New-Atom-Types.md](../atom_types/README-Adding-New-Atom-Types.md) file.
 
 

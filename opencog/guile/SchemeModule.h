@@ -9,8 +9,8 @@
 #define _OPENCOG_SCHEME_MODULE_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/value/atom_types.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog {
 

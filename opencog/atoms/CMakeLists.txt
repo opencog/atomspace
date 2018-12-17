@@ -1,4 +1,4 @@
-
+ADD_SUBDIRECTORY (atom_types)
 ADD_SUBDIRECTORY (value)
 ADD_SUBDIRECTORY (distvalue)
 ADD_SUBDIRECTORY (base)
@@ -6,3 +6,4 @@ ADD_SUBDIRECTORY (core)
 ADD_SUBDIRECTORY (execution)
 ADD_SUBDIRECTORY (pattern)
 ADD_SUBDIRECTORY (reduct)
+ADD_SUBDIRECTORY (truthvalue)

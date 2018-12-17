@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {

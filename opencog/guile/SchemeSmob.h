@@ -21,10 +21,10 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -83,6 +83,7 @@ public:
 	static SCM av_to_scm(const AttentionValuePtr&);
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
+	static ValuePtr make_value(Type, SCM);
 	static TruthValuePtr scm_to_tv(SCM);
 
 	static std::vector<double> scm_to_float_list (SCM);

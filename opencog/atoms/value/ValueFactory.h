@@ -99,8 +99,8 @@ public:
         if (fptr)
             return (*fptr)(arg);
 
-        throw NotFoundException(TRACE_INFO,
-              "No factory found for this Value type and arguments.");
+        throw IndexErrorException(TRACE_INFO,
+            "No factory found for Value type %d and arguments.", vtype);
     }
 
     template <typename TYP, typename ARG1, typename ARG2>

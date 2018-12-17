@@ -15,6 +15,7 @@ ADD_LIBRARY (clearbox
 ADD_DEPENDENCIES(clearbox opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(clearbox
+	atom_types
 	atomcore
 	atombase
 	value

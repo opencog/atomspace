@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/CountTruthValue.cc
+ * opencog/atoms/truthvalue/ProbabilisticTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -29,13 +29,13 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atoms/value/atom_types.h>
-#include "CountTruthValue.h"
+#include <opencog/atoms/atom_types/atom_types.h>
+#include "ProbabilisticTruthValue.h"
 
 using namespace opencog;
 
-CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
-	: TruthValue(COUNT_TRUTH_VALUE)
+ProbabilisticTruthValue::ProbabilisticTruthValue(strength_t m, confidence_t n, count_t c)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     _value.resize(3);
     _value[MEAN] = m;
@@ -43,8 +43,8 @@ CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
     _value[COUNT] = c;
 }
 
-CountTruthValue::CountTruthValue(const TruthValue& source)
-	: TruthValue(COUNT_TRUTH_VALUE)
+ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     _value.resize(3);
     _value[MEAN] = source.get_mean();
@@ -52,8 +52,8 @@ CountTruthValue::CountTruthValue(const TruthValue& source)
     _value[COUNT] = source.get_count();
 }
 
-CountTruthValue::CountTruthValue(CountTruthValue const& source)
-	: TruthValue(COUNT_TRUTH_VALUE)
+ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     _value.resize(3);
     _value[MEAN] = source.get_mean();
@@ -61,12 +61,12 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     _value[COUNT] = source.get_count();
 }
 
-CountTruthValue::CountTruthValue(const ValuePtr& source)
-       : TruthValue(COUNT_TRUTH_VALUE)
+ProbabilisticTruthValue::ProbabilisticTruthValue(const ValuePtr& source)
+       : TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
-    if (source->get_type() != COUNT_TRUTH_VALUE)
+    if (source->get_type() != PROBABILISTIC_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
-            "Source must be a CountTruthValue");
+            "Source must be a ProbabilisticTruthValue");
 
     FloatValuePtr fp(FloatValueCast(source));
     _value.resize(3);
@@ -75,58 +75,61 @@ CountTruthValue::CountTruthValue(const ValuePtr& source)
     _value[COUNT] = fp->value()[COUNT];
 }
 
-strength_t CountTruthValue::get_mean() const
+strength_t ProbabilisticTruthValue::get_mean() const
 {
     return _value[MEAN];
 }
 
-count_t CountTruthValue::get_count() const
+count_t ProbabilisticTruthValue::get_count() const
 {
     return  _value[COUNT];
 }
 
-confidence_t CountTruthValue::get_confidence() const
+confidence_t ProbabilisticTruthValue::get_confidence() const
 {
     return _value[CONFIDENCE];
 }
 
-std::string CountTruthValue::to_string(const std::string& indent) const
+std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(get_mean()),
-            static_cast<double>(get_confidence()),
-            static_cast<float>(get_count()));
+            static_cast<float>(get_count()),
+            static_cast<double>(get_confidence()));
     return buf;
 }
 
-bool CountTruthValue::operator==(const Value& rhs) const
+bool ProbabilisticTruthValue::operator==(const Value& rhs) const
 {
-    const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
+    const ProbabilisticTruthValue *ctv = dynamic_cast<const ProbabilisticTruthValue *>(&rhs);
     if (NULL == ctv) return false;
 
-    if (not nearly_equal(get_mean(), ctv->get_mean())) return false;
-    if (not nearly_equal(get_confidence(), ctv->get_confidence())) return false;
-    if (not nearly_equal(ctv->get_count(), get_count())) return false;
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(get_mean() - ctv->get_mean())) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(get_confidence() - ctv->get_confidence())) return false;
+#define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->get_count()/get_count()))) return false;
 
     return true;
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
-// because the CountTruthValue usally stores an integer count,
+// because the ProbabilisticTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
-TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
+TruthValuePtr ProbabilisticTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const
 {
-    CountTruthValuePtr oc(CountTruthValueCast(other));
+    ProbabilisticTruthValuePtr oc =
+        std::dynamic_pointer_cast<const ProbabilisticTruthValue>(other);
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    if (NULL == oc)
-        return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+    if (nullptr == oc)
+        return std::static_pointer_cast<const TruthValue>(shared_from_this());
 
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the

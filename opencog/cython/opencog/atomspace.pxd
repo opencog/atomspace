@@ -32,7 +32,7 @@ ctypedef double count_t
 ctypedef float confidence_t
 ctypedef float strength_t
 
-cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
+cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
     cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
         tv_ptr()
         tv_ptr(tv_ptr copy)
@@ -49,7 +49,7 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
-cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
+cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
         cSimpleTruthValue(float, float)
         strength_t get_mean()
@@ -67,7 +67,7 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
 # NameServer
 ctypedef short Type
 
-cdef extern from "opencog/atoms/value/NameServer.h" namespace "opencog":
+cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
     cdef cppclass cNameServer "opencog::NameServer":
         bint isNode(Type t)
         bint isLink(Type t)
@@ -79,7 +79,7 @@ cdef extern from "opencog/atoms/value/NameServer.h" namespace "opencog":
         Type getNumberOfClasses()
     cdef cNameServer nameserver()
 
-cdef extern from "opencog/atoms/value/atom_types.h" namespace "opencog":
+cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
