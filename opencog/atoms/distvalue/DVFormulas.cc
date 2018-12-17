@@ -26,6 +26,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <iomanip>
+#include <vector>
 
 #include <opencog/util/numeric.h>
 #include <opencog/truthvalue/DVFormulas.h>
@@ -33,6 +34,7 @@
 
 using namespace opencog;
 
+//Given a key return the min of all it's Intervals
 DVec DVFormulas::get_key_min(DVKey k)
 {
 	std::vector<double> res;
@@ -41,6 +43,7 @@ DVec DVFormulas::get_key_min(DVKey k)
 	return res;
 }
 
+//Given a key return the max of all it's Intervals
 DVec DVFormulas::get_key_max(DVKey k)
 {
 	std::vector<double> res;
@@ -52,6 +55,10 @@ DVec DVFormulas::get_key_max(DVKey k)
 
 	return res;
 }
+
+//(A,B,C) + (B,C) => (B,C) -> A
+//idx is the position of consequent in the joint Distribution
+//(A,B,C) A is at idx 0
 ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
                                           DistributionalValuePtr dv2,
                                           int idx)
@@ -79,6 +86,8 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	return ConditionalDV::createCDV(res);
 }
 
+//(A,B,C) => (A,C)
+//idx is the position of the Element to sum out of the joint-dv
 DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
 {
 	DVCounter res;
@@ -89,28 +98,6 @@ DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
 		res[key] += elem.second;
 	}
 	return DistributionalValue::createDV(res);
-}
-
-bool DVFormulas::compare(DVec v1,DVec v2)
-{
-	auto i1 = v1.begin();
-	auto i2 = v2.begin();
-	for (; i1 != v1.end() && i2 != v2.end();)
-	{
-		if (i1 != i2)
-			return *i1 < *i2;
-		i1++;
-		i2++;
-	}
-	return false;
-};
-
-void printVec(DVec i)
-{
-	std::cout << "{";
-	for (auto e : i)
-		std::cout << e << ",";
-	std::cout << "}" << std::endl;
 }
 
 //Create a Conjuction from 2 DVs
@@ -135,7 +122,7 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 		DVec v2 = get_key_min(it2->first);
 		//We check which key represents a lower Truthness/Value
 		//This is a fuzzy conjunction so we want to take the min of that
-		if (compare(v1 , v2))
+		if (v1 < v2)
 		{
 			//We get the mean for that Key
 			double mean = dv1->get_mean_for(it1->second);
@@ -186,7 +173,7 @@ DVFormulas::disjunction(DistributionalValuePtr dv1,
 		DVec v2 = get_key_max(it2->first);
 		//We check which key represents a higher Truthness/Value
 		//This is a fuzzy disjunction so we want to take the max of that
-		if (not compare(v1 , v2))
+		if (v1 > v2)
 		{
 			double mean = dv1->get_mean_for(it1->second);
 			//Multiply by the count to de-normalize that
