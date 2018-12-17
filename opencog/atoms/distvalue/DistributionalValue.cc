@@ -442,7 +442,7 @@ bool DistributionalValue::operator==(const Value& other) const
 	for (auto elem : _value) {
 		double v1 = elem.second;
 		double v2 = dov->_value.get(elem.first);
-		if (not is_approx_eq_ulp(v1,v2))
+		if (not is_approx_eq_ulp(v1,v2,24))
 			return false;
 	}
 	return true;

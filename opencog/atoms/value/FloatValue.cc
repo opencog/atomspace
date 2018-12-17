@@ -36,7 +36,7 @@ bool FloatValue::operator==(const Value& other) const
 	if (_value.size() != fov->_value.size()) return false;
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
-		if (not is_approx_eq_ulp(_value[i],fov->_value[i]))
+		if (not is_approx_eq_ulp(_value[i],fov->_value[i],24))
 			return false;
 	return true;
 }

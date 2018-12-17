@@ -24,9 +24,6 @@
 #include <opencog/atoms/value/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/DistributionalValue.h>
-#include <opencog/truthvalue/ConditionalDV.h>
-#include <opencog/truthvalue/DVFormulas.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -47,7 +44,7 @@ class SchemeSmob
 
 	friend class LoggerSCM;
 
-private:
+public:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
@@ -87,9 +84,6 @@ private:
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
-
-	static DVKey scm_to_DVKey(SCM);
-	static DVKeySeq scm_to_DVKeySeq(SCM);
 
 	static std::vector<double> scm_to_float_list (SCM);
 	static ProtomSeq scm_to_protom_list (SCM);
@@ -229,7 +223,6 @@ private:
 	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
-	static Interval verify_interval(SCM, const char *, int pos=1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                     int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
@@ -264,7 +257,6 @@ public:
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
 	static std::string av_to_string(const AttentionValuePtr&);
-	static std::string dv_to_string(const DistributionalValuePtr&);
 	static std::string tv_to_string(const TruthValuePtr&);
 };
 

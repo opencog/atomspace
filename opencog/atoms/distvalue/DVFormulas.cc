@@ -177,7 +177,7 @@ DVFormulas::disjunction(DistributionalValuePtr dv1,
 	double m1 = 1;
 	double m2 = 1;
 
-	while (not is_approx_eq(m1,0.0) && not is_approx_eq(m2,0.0))
+	while (not is_approx_eq(m1,0.0,1e-32) && not is_approx_eq(m2,0.0,1e-32))
 	{
 		if (m1 < 0 || m2 < 0)
 			throw RuntimeException(TRACE_INFO,"This should not happen.");

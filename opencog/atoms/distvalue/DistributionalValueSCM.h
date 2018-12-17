@@ -29,47 +29,66 @@
 #include <opencog/atoms/distvalue/ConditionalDV.h>
 #include <opencog/atoms/distvalue/DVFormulas.h>
 
+#include <opencog/guile/SchemeModule.h>
+
 namespace opencog
 {
 
-class DistributionalValueSCM
+class DistributionalValueSCM : public ModuleWrap
 {
 
-	static SCM dv_to_scm(const DistributionalValuePtr&);
+public:
+	DistributionalValueSCM();
 
-	static SCM dvs_to_scm(const std::vector<DistributionalValuePtr>&);
-	static SCM cdv_to_scm(const ConditionalDVPtr&);
-	static SCM float_list_to_scm(const std::vector<double>&);
-	static SCM dvkey_to_scm(const DVKey&);
-	static SCM dvkeyseq_to_scm(const DVKeySeq&);
+protected:
+	void init(void);
 
-	static SCM ss_new_dv(SCM, SCM);
-	static SCM ss_new_dv_simple(SCM, SCM);
-	static SCM ss_dv_p(SCM);
-	static SCM ss_dv_divide(SCM,SCM,SCM);
-	static SCM ss_dv_sum_joint(SCM,SCM);
-	static SCM ss_dv_get_confidence(SCM);
-	static SCM ss_dv_get_fom(SCM);
-	static SCM ss_dv_conjunction(SCM,SCM);
-	static SCM ss_dv_disjunction(SCM,SCM);
-	static SCM ss_dv_negate(SCM);
-	static SCM ss_dv_is_empty(SCM);
-	static SCM ss_cdv_is_empty(SCM);
-	static SCM ss_new_cdv(SCM, SCM);
-	static SCM ss_cdv_get_conditions(SCM);
-	static SCM ss_cdv_get_unconditonals(SCM);
-	static SCM ss_cdv_get_unconditonal(SCM,SCM);
-	static SCM ss_cdv_get_joint(SCM,SCM);
-	static SCM ss_cdv_merge(SCM,SCM);
-	static SCM ss_cdv_cde(SCM,SCM);
+	SCM dv_to_scm(const DistributionalValuePtr&);
 
-	static DVKey verify_DVKey(SCM, const char *, int pos=1);
-	static DVKeySeq verify_DVKeySeq(SCM, const char *, int pos=1);
-	static DistributionalValuePtr verify_dv(SCM, const char *, int pos = 1);
-	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *,
-	                                                          int pos = 1);
-	static ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
+	SCM dvs_to_scm(const std::vector<DistributionalValuePtr>&);
+	SCM cdv_to_scm(const ConditionalDVPtr&);
+	SCM float_list_to_scm(const std::vector<double>&);
+	SCM dvkey_to_scm(const DVKey&);
+	SCM dvkeyseq_to_scm(const DVKeySeq&);
+
+	SCM ss_new_dv(SCM, SCM);
+	SCM ss_new_dv_simple(SCM, SCM);
+	SCM ss_dv_p(SCM);
+	SCM ss_dv_divide(SCM,SCM,SCM);
+	SCM ss_dv_sum_joint(SCM,SCM);
+	SCM ss_dv_get_confidence(SCM);
+	SCM ss_dv_get_fom(SCM);
+	SCM ss_dv_conjunction(SCM,SCM);
+	SCM ss_dv_disjunction(SCM,SCM);
+	SCM ss_dv_negate(SCM);
+	SCM ss_dv_is_empty(SCM);
+	SCM ss_cdv_is_empty(SCM);
+	SCM ss_new_cdv(SCM, SCM);
+	SCM ss_cdv_get_conditions(SCM);
+	SCM ss_cdv_get_unconditonals(SCM);
+	SCM ss_cdv_get_unconditonal(SCM,SCM);
+	SCM ss_cdv_get_joint(SCM,SCM);
+	SCM ss_cdv_merge(SCM,SCM);
+	SCM ss_cdv_cde(SCM,SCM);
+
+	Interval verify_interval(SCM, const char *, int pos=1);
+	DVKey verify_DVKey(SCM, const char *, int pos=1);
+	DVKeySeq verify_DVKeySeq(SCM, const char *, int pos=1);
+	DistributionalValuePtr verify_dv(SCM, const char *, int pos = 1);
+	std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *,
+	                                                   int pos = 1);
+	ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
+
+	DVKey scm_to_DVKey(SCM);
+	DVKeySeq scm_to_DVKeySeq(SCM);
+	std::string dv_to_string(const DistributionalValuePtr&);
 
 }; // class
+
+} // namespace opencog
+
+extern "C" {
+void opencog_distvalue_init(void);
+};
 
 #endif // _OPENCOG_DISTRIBUTIONAL_VALUE_SCM_H

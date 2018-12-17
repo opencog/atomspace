@@ -9,6 +9,7 @@ ADD_LIBRARY (distvalue
 ADD_DEPENDENCIES(distvalue opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(distvalue
+	smob
 	${COGUTIL_LIBRARY}
 )
 

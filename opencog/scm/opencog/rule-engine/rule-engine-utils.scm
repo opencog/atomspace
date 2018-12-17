@@ -62,6 +62,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+(use-modules (opencog distvalue))
 (use-modules (srfi srfi-1))
 
 (define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
