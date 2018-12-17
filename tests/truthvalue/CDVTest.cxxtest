@@ -22,8 +22,8 @@
 
 #include <math.h>
 
-#include <opencog/truthvalue/DistributionalValue.h>
-#include <opencog/truthvalue/ConditionalDV.h>
+#include <opencog/atoms/distvalue/DistributionalValue.h>
+#include <opencog/atoms/distvalue/ConditionalDV.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 

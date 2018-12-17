@@ -25,6 +25,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <iomanip>
 
 #include <opencog/util/numeric.h>
 #include <opencog/truthvalue/DVFormulas.h>
@@ -177,7 +178,7 @@ DVFormulas::disjunction(DistributionalValuePtr dv1,
 	double m1 = 1;
 	double m2 = 1;
 
-	while (not is_approx_eq(m1,0.0,1e-32) && not is_approx_eq(m2,0.0,1e-32))
+	while (not is_approx_eq(m1,0.0,1e-16) && not is_approx_eq(m2,0.0,1e-16))
 	{
 		if (m1 < 0 || m2 < 0)
 			throw RuntimeException(TRACE_INFO,"This should not happen.");

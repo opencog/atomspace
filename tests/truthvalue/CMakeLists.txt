@@ -2,6 +2,7 @@
 LINK_LIBRARIES(
 	atomspace
 	value
+	distvalue
 	atomutils
 )
 
