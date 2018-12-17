@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include <sstream>
 
-#include <opencog/truthvalue/ConditionalDV.h>
-#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/atoms/distvalue/ConditionalDV.h>
+#include <opencog/atoms/distvalue/DistributionalValue.h>
 
 using namespace opencog;
 

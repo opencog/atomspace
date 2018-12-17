@@ -30,10 +30,8 @@
 #include <vector>
 #include <limits>
 
-#include <opencog/util/exceptions.h>
-#include <opencog/atoms/value/Value.h>
-
-#include <opencog/truthvalue/ConditionalDV.h>
+#include <opencog/util/Counter.h>
+#include <opencog/atoms/distvalue/ConditionalDV.h>
 
 /** \addtogroup grp_atomspace
  *	@{

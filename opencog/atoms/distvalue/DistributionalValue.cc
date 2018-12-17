@@ -28,7 +28,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/atoms/distvalue/DistributionalValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <boost/range/combine.hpp>

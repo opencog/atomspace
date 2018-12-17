@@ -29,7 +29,7 @@
 #include <vector>
 
 #include <opencog/util/numeric.h>
-#include <opencog/truthvalue/DVFormulas.h>
+#include <opencog/atoms/distvalue/DVFormulas.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;

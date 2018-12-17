@@ -32,8 +32,8 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/distvalue/DistributionalValue.h>
 
-//#include <opencog/truthvalue/DistributionalValue.h>
 /** \addtogroup grp_atomspace
  *	@{
  */
