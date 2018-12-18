@@ -78,18 +78,18 @@ public:
 	static count_t DEFAULT_K;
 
 	DistributionalValue();
-	DistributionalValue(DVCounter);
-	DistributionalValue(double,double);
+	DistributionalValue(const DVCounter&);
+	DistributionalValue(double, double);
 
 	const DVCounter& value() const { return _value; }
 
-	static DistributionalValuePtr UniformDistributionalValue(DVKey,int);
-	static DistributionalValuePtr UniformDistributionalValue(DVKeySeq,int);
+	static DistributionalValuePtr UniformDistributionalValue(const DVKey&, int);
+	static DistributionalValuePtr UniformDistributionalValue(const DVKeySeq&, int);
 	static DistributionalValuePtr TRUE_TV();
 	static DistributionalValuePtr FALSE_TV();
 	static DistributionalValuePtr DEFAULT_TV();
-	static DistributionalValuePtr createDV(double,double);
-	static DistributionalValuePtr createDV(DVCounter);
+	static DistributionalValuePtr createDV(double, double);
+	static DistributionalValuePtr createDV(const DVCounter&);
 
 	static double to_conf(int c);
 	static int to_count(double);
@@ -101,13 +101,13 @@ public:
 	std::vector<double> get_var() const;
 
 	double get_fstord_mean() const;
-	DVec middle_of_interval(DVKey) const;
+	DVec middle_of_interval(const DVKey&) const;
 
 	double get_mode_for(double) const;
 	double get_mean_for(double) const;
 	double get_var_for(double) const;
 
-	DistributionalValuePtr add_evidence(DVKey) const;
+	DistributionalValuePtr add_evidence(const DVKey&) const;
 	DistributionalValuePtr merge(DistributionalValuePtr) const;
 	DistributionalValuePtr negate() const;
 
@@ -117,16 +117,16 @@ public:
 	double total_count() const;
 	double get_confidence() const;
 
-	static double key_contained(DVKey k1,DVKey k2);
+	static double key_contained(const DVKey&, const DVKey&);
 
-	bool has_key(DVKey) const;
+	bool has_key(const DVKey&) const;
 	DVKeySeq get_keys() const;
-	double get_count(DVKey) const;
-	double get_contained_count(DVKey) const;
-	double get_mean(DVKey) const;
-	double get_contained_mean(DVKey) const;
-	double get_mode(DVKey) const;
-	double get_var(DVKey) const;
+	double get_count(const DVKey&) const;
+	double get_contained_count(const DVKey&) const;
+	double get_mean(const DVKey&) const;
+	double get_contained_mean(const DVKey&) const;
+	double get_mode(const DVKey&) const;
+	double get_var(const DVKey&) const;
 
 	virtual bool operator==(const Value& rhs) const;
 
@@ -149,7 +149,7 @@ static inline ValuePtr ValueCast(const DistributionalValuePtr& dv)
 	return std::shared_ptr<Value>(dv, (Value*) dv.get());
 }
 
-std::string oc_to_string(const DistributionalValue& hc);
+std::string oc_to_string(const DistributionalValue&, const std::string&);
 
 } // namespace opencog
 

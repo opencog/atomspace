@@ -44,19 +44,18 @@ class DVFormulas
 {
 
 public:
-	static DVec get_key_min(DVKey);
-	static DVec get_key_max(DVKey);
-	//static double interval_dist(DVKey,DVKey);
+	static DVec get_key_min(const DVKey&);
+	static DVec get_key_max(const DVKey&);
 
 	//was divide
 	static ConditionalDVPtr joint_to_cdv(DistributionalValuePtr,
 	                                     DistributionalValuePtr,
 	                                     int);
 
-	static DistributionalValuePtr sum_joint(DistributionalValuePtr,int);
+	static DistributionalValuePtr sum_joint(DistributionalValuePtr, int);
 
-	static bool compare(DVec,DVec);
-	static bool floatCompare(double,double);
+	static bool compare(const DVec&, const DVec&);
+	static bool floatCompare(double, double);
 
 	static DistributionalValuePtr conjunction(DistributionalValuePtr,
 	                                          DistributionalValuePtr);

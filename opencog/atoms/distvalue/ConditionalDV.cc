@@ -33,18 +33,19 @@
 using namespace opencog;
 
 ConditionalDV::ConditionalDV()
-: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+	: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 }
 
-ConditionalDV::ConditionalDV(CDVrep rep)
-: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+ConditionalDV::ConditionalDV(const CDVrep &rep)
+	: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 	_value = rep;
 }
 
-ConditionalDV::ConditionalDV(DVKeySeq conds,std::vector<DistributionalValuePtr> dvs)
-: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
+ConditionalDV::ConditionalDV(const DVKeySeq &conds,
+                             const std::vector<DistributionalValuePtr> &dvs)
+	: Value(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
 	auto it1 = conds.begin();
 	auto it2 = dvs.begin();
@@ -70,13 +71,13 @@ ConditionalDVPtr ConditionalDV::createCDV()
 	return std::make_shared<const ConditionalDV>();
 }
 
-ConditionalDVPtr ConditionalDV::createCDV(CDVrep rep)
+ConditionalDVPtr ConditionalDV::createCDV(const CDVrep &rep)
 {
 	return std::make_shared<const ConditionalDV>(rep);
 }
 
-ConditionalDVPtr ConditionalDV::createCDV(DVKeySeq conds
-                                         ,std::vector<DistributionalValuePtr> dvs)
+ConditionalDVPtr ConditionalDV::createCDV(const DVKeySeq &conds,
+                                          const std::vector<DistributionalValuePtr> &dvs)
 {
 	return std::make_shared<const ConditionalDV>(conds,dvs);
 }
@@ -107,7 +108,7 @@ std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
  * Merge unconditional weighted based on the overlap of the given Interval
  * to the condition interval
  */
-DVCounter ConditionalDV::get_unconditionalP(DVKey h) const
+DVCounter ConditionalDV::get_unconditionalP(const DVKey &h) const
 {
 	DVCounter res;
 	for (auto elem : _value)
@@ -121,7 +122,7 @@ DVCounter ConditionalDV::get_unconditionalP(DVKey h) const
 	return res;
 }
 
-DistributionalValuePtr ConditionalDV::get_unconditional(DVKey k) const
+DistributionalValuePtr ConditionalDV::get_unconditional(const DVKey &k) const
 {
 	DVCounter res = get_unconditionalP(k);
 	return DistributionalValue::createDV(res);

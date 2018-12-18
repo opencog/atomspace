@@ -32,7 +32,7 @@ void DistributionalValueSCM::init(void)
 	                        &DistributionalValueSCM::ss_dv_divide,
 	                        this,"distvalue");
 	define_scheme_primitive("cog-dv-sum-joint",
-							&DistributionalValueSCM::ss_dv_sum_joint,
+	                        &DistributionalValueSCM::ss_dv_sum_joint,
 	                        this,"distvalue");
 	define_scheme_primitive("cog-dv-get-confidence",
 	                        &DistributionalValueSCM::ss_dv_get_confidence,
@@ -141,56 +141,56 @@ DVKeySeq DistributionalValueSCM::scm_to_DVKeySeq(SCM svalue_list)
 
 SCM DistributionalValueSCM::float_list_to_scm(const std::vector<double>& v)
 {
-    SCM res = SCM_UNDEFINED;
-    bool first = true;
-    for (double d : v)
-    {
-        SCM sh = scm_from_double(d);
-        if (first) {
-            first = false;
-            res = scm_list_1(sh);
-        }
-        else {
-            res = scm_cons(sh,res);
-        }
-    }
-    return res;
+	SCM res = SCM_UNDEFINED;
+	bool first = true;
+	for (double d : v)
+	{
+		SCM sh = scm_from_double(d);
+		if (first) {
+			first = false;
+			res = scm_list_1(sh);
+		}
+		else {
+			res = scm_cons(sh,res);
+		}
+	}
+	return res;
 }
 
 SCM DistributionalValueSCM::dvkey_to_scm(const DVKey& v)
 {
-    SCM res = SCM_UNDEFINED;
-    bool first = true;
-    for (auto d : v)
-    {
-        SCM sh = float_list_to_scm(d);
-        if (first) {
-            first = false;
-            res = scm_list_1(sh);
-        }
-        else {
-            res = scm_cons(sh,res);
-        }
-    }
-    return res;
+	SCM res = SCM_UNDEFINED;
+	bool first = true;
+	for (auto d : v)
+	{
+		SCM sh = float_list_to_scm(d);
+		if (first) {
+			first = false;
+			res = scm_list_1(sh);
+		}
+		else {
+			res = scm_cons(sh,res);
+		}
+	}
+	return res;
 }
 
 SCM DistributionalValueSCM::dvkeyseq_to_scm(const DVKeySeq& v)
 {
-    SCM res = SCM_UNDEFINED;
-    bool first = true;
-    for (auto d : v)
-    {
-        SCM sh = dvkey_to_scm(d);
-        if (first) {
-            first = false;
-            res = scm_list_1(sh);
-        }
-        else {
-            res = scm_cons(sh,res);
-        }
-    }
-    return res;
+	SCM res = SCM_UNDEFINED;
+	bool first = true;
+	for (auto d : v)
+	{
+		SCM sh = dvkey_to_scm(d);
+		if (first) {
+			first = false;
+			res = scm_list_1(sh);
+		}
+		else {
+			res = scm_cons(sh,res);
+		}
+	}
+	return res;
 }
 
 /* ============================================================== */
@@ -433,26 +433,26 @@ SCM DistributionalValueSCM::ss_cdv_get_unconditonal(SCM scdv,SCM sdv)
 
 SCM DistributionalValueSCM::ss_cdv_get_joint(SCM scdv,SCM sdv)
 {
-   ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-joint",1);
-   DistributionalValuePtr dv = verify_dv(sdv,"cog-cdv-get-joint",2);
-   DistributionalValuePtr res = cdv->get_joint_probability(dv);
-   return dv_to_scm(res);
+	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-joint",1);
+	DistributionalValuePtr dv = verify_dv(sdv,"cog-cdv-get-joint",2);
+	DistributionalValuePtr res = cdv->get_joint_probability(dv);
+	return dv_to_scm(res);
 }
 
 SCM DistributionalValueSCM::ss_cdv_merge(SCM scdv1,SCM scdv2)
 {
-   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-merge",1);
-   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-merge",2);
-   ConditionalDVPtr res = cdv1->merge(cdv2);
-   return cdv_to_scm(res);
+	ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-merge",1);
+	ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-merge",2);
+	ConditionalDVPtr res = cdv1->merge(cdv2);
+	return cdv_to_scm(res);
 }
 
 SCM DistributionalValueSCM::ss_cdv_cde(SCM scdv1,SCM scdv2)
 {
-   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
-   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
-   ConditionalDVPtr res = DVFormulas::consequent_disjunction_elemination(cdv1,cdv2);
-   return cdv_to_scm(res);
+	ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
+	ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
+	ConditionalDVPtr res = DVFormulas::consequent_disjunction_elemination(cdv1,cdv2);
+	return cdv_to_scm(res);
 }
 
 void opencog_distvalue_init(void)

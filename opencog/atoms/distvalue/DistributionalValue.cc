@@ -42,7 +42,7 @@ DistributionalValue::DistributionalValue()
 	: Value(DISTRIBUTIONAL_VALUE)
 {}
 
-DistributionalValue::DistributionalValue(DVCounter dvctr)
+DistributionalValue::DistributionalValue(const DVCounter &dvctr)
 	: Value(DISTRIBUTIONAL_VALUE)
 {
 	for (auto elem : dvctr)
@@ -68,7 +68,7 @@ DistributionalValue::DistributionalValue(double mode,double conf)
 	_value[k] = count;
 }
 
-DistributionalValuePtr DistributionalValue::createDV(DVCounter dvctr)
+DistributionalValuePtr DistributionalValue::createDV(const DVCounter &dvctr)
 {
 	return std::make_shared<const DistributionalValue>(dvctr);
 }
@@ -80,7 +80,7 @@ DistributionalValuePtr DistributionalValue::createDV(double mode,
 }
 
 DistributionalValuePtr
-DistributionalValue::UniformDistributionalValue(DVKey k,int c)
+DistributionalValue::UniformDistributionalValue(const DVKey &k,int c)
 {
 	DVCounter dvctr;
 	dvctr[k] = c;
@@ -89,7 +89,7 @@ DistributionalValue::UniformDistributionalValue(DVKey k,int c)
 
 
 DistributionalValuePtr
-DistributionalValue::UniformDistributionalValue(DVKeySeq ks,int c)
+DistributionalValue::UniformDistributionalValue(const DVKeySeq &ks,int c)
 {
 	DVCounter dvctr;
 	for (auto k : ks)
@@ -142,7 +142,7 @@ bool DistributionalValue::is_uniform() const
 
 //Add Evidence for the provided key i.e increment the count of this Interval
 //Returns a new DVPtr with the update count
-DistributionalValuePtr DistributionalValue::add_evidence(DVKey h) const
+DistributionalValuePtr DistributionalValue::add_evidence(const DVKey &h) const
 {
 	DVCounter newdvc = _value;
 	newdvc[h] += 1;
@@ -244,7 +244,7 @@ double DistributionalValue::get_fstord_mean() const
 }
 
 //Calculates the Middle of all intervals in a Key
-DVec DistributionalValue::middle_of_interval(DVKey k) const
+DVec DistributionalValue::middle_of_interval(const DVKey &k) const
 {
 	DVec res;
 	for (auto interval : k) {
@@ -294,7 +294,7 @@ int DistributionalValue::to_count(double cf)
 	return (cf * DEFAULT_K / (1 - cf));
 }
 
-bool DistributionalValue::has_key(DVKey k) const
+bool DistributionalValue::has_key(const DVKey &k) const
 {
 	auto it = _value.find(k);
 	return it != _value.end();
@@ -308,7 +308,7 @@ DVKeySeq DistributionalValue::get_keys() const
 	return res;
 }
 
-double DistributionalValue::get_count(DVKey h) const
+double DistributionalValue::get_count(const DVKey &h) const
 {
 	auto pos = _value.find(h);
 	if (pos != _value.end())
@@ -317,7 +317,7 @@ double DistributionalValue::get_count(DVKey h) const
 }
 
 //Find out how much of Key1 is contained in Key2
-double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
+double DistributionalValue::key_contained(const DVKey &ks1,const DVKey &ks2)
 {
 	Interval k1,k2;
 	//Start with the assumption that 100% of Key1 is in Key2
@@ -373,7 +373,7 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 //Get the Count of a Key that might not be in the DV explicitly
 //by a weighted sum of all the Keys that are in the DV
 //weighted by the overlapp of the given Key with the Keys of the DV
-double DistributionalValue::get_contained_count(DVKey h) const
+double DistributionalValue::get_contained_count(const DVKey &h) const
 {
 	double res = 0;
 	for (auto v : _value)
@@ -384,19 +384,19 @@ double DistributionalValue::get_contained_count(DVKey h) const
 	return res;
 }
 
-double DistributionalValue::get_mode(DVKey val) const
+double DistributionalValue::get_mode(const DVKey &val) const
 {
 	return get_mode_for(get_count(val));
 }
-double DistributionalValue::get_mean(DVKey val) const
+double DistributionalValue::get_mean(const DVKey &val) const
 {
 	return get_mean_for(get_count(val));
 }
-double DistributionalValue::get_contained_mean(DVKey val) const
+double DistributionalValue::get_contained_mean(const DVKey &val) const
 {
 	return get_mean_for(get_contained_count(val));
 }
-double DistributionalValue::get_var(DVKey val) const
+double DistributionalValue::get_var(const DVKey &val) const
 {
 	return get_var_for(get_count(val));
 }
@@ -448,8 +448,8 @@ bool DistributionalValue::operator==(const Value& other) const
 	return true;
 }
 
-std::string oc_to_string(const DistributionalValuePtr dvp)
+std::string oc_to_string(const DistributionalValuePtr& dvp,
+                         const std::string& indent)
 {
-	std::string part = dvp->to_string("");
-	return part;
+	return dvp->to_string(indent);
 }

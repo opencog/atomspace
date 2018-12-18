@@ -65,22 +65,23 @@ class ConditionalDV
 
 public:
 	ConditionalDV();
-	ConditionalDV(CDVrep);
-	ConditionalDV(DVKeySeq,std::vector<DistributionalValuePtr>);
+	ConditionalDV(const CDVrep&);
+	ConditionalDV(const DVKeySeq&,const std::vector<DistributionalValuePtr>&);
 
 	const CDVrep& value() const { return _value; }
 
 	static ConditionalDVPtr createCDV();
-	static ConditionalDVPtr createCDV(CDVrep);
-	static ConditionalDVPtr createCDV(DVKeySeq,std::vector<DistributionalValuePtr>);
+	static ConditionalDVPtr createCDV(const CDVrep&);
+	static ConditionalDVPtr createCDV(const DVKeySeq&,
+									  const std::vector<DistributionalValuePtr>&);
 
 	ConditionalDVPtr merge(ConditionalDVPtr) const;
 
 	DVKeySeq get_conditions() const;
 	std::vector<DistributionalValuePtr> get_unconditionals() const;
 
-	DVCounter get_unconditionalP(DVKey) const;
-	DistributionalValuePtr get_unconditional(DVKey) const;
+	DVCounter get_unconditionalP(const DVKey&) const;
+	DistributionalValuePtr get_unconditional(const DVKey&) const;
 	DistributionalValuePtr get_unconditional(DistributionalValuePtr) const;
 
 	DistributionalValuePtr get_joint_probability(DistributionalValuePtr) const;

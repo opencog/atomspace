@@ -2,7 +2,7 @@ ADD_LIBRARY (distvalue
 	DistributionalValue.cc
 	ConditionalDV.cc
 	DVFormulas.cc
-    DistributionalValueSCM.cc
+	DistributionalValueSCM.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -21,6 +21,6 @@ INSTALL (FILES
 	DistributionalValue.h
 	ConditionalDV.h
 	DVFormulas.h
-    DistributionalValueSCM.h
+	DistributionalValueSCM.h
 	DESTINATION "include/opencog/atoms/distvalue"
 )

@@ -35,7 +35,7 @@
 using namespace opencog;
 
 //Given a key return the min of all it's Intervals
-DVec DVFormulas::get_key_min(DVKey k)
+DVec DVFormulas::get_key_min(const DVKey &k)
 {
 	std::vector<double> res;
 	for (auto interval : k)
@@ -44,7 +44,7 @@ DVec DVFormulas::get_key_min(DVKey k)
 }
 
 //Given a key return the max of all it's Intervals
-DVec DVFormulas::get_key_max(DVKey k)
+DVec DVFormulas::get_key_max(const DVKey &k)
 {
 	std::vector<double> res;
 	for (auto interval : k)
@@ -88,7 +88,7 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 
 //(A,B,C) => (A,C)
 //idx is the position of the Element to sum out of the joint-dv
-DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
+DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv, int pos)
 {
 	DVCounter res;
 	for (auto elem : dv->value())
