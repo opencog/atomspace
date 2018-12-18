@@ -100,6 +100,8 @@ DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
 	return DistributionalValue::createDV(res);
 }
 
+#define EPSILON 1e-16
+
 //Create a Conjuction from 2 DVs
 DistributionalValuePtr
 DVFormulas::conjunction(DistributionalValuePtr dv1,
@@ -116,7 +118,7 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 	double m1 = 1;
 	double m2 = 1;
 
-	while ((abs(m1) > 0.0000001) && (abs(m2) > 0.0000001))
+	while (not is_within(m1,0.0,EPSILON) && not is_within(m2,0.0,EPSILON))
 	{
 		DVec v1 = get_key_min(it1->first);
 		DVec v2 = get_key_min(it2->first);
@@ -165,7 +167,7 @@ DVFormulas::disjunction(DistributionalValuePtr dv1,
 	double m1 = 1;
 	double m2 = 1;
 
-	while (not is_approx_eq(m1,0.0,1e-16) && not is_approx_eq(m2,0.0,1e-16))
+	while (not is_within(m1,0.0,EPSILON) && not is_within(m2,0.0,EPSILON))
 	{
 		if (m1 < 0 || m2 < 0)
 			throw RuntimeException(TRACE_INFO,"This should not happen.");
