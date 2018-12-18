@@ -15,6 +15,7 @@ LINK_LIBRARIES(
 	smob
 	clearbox
 	execution
+	logger
 	${GUILE_LIBRARIES}
 )
 

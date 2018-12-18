@@ -16,6 +16,7 @@ LINK_LIBRARIES (
 	clearbox
 	execution
 	atomspace
+	logger
 )
 
 # We want to run the tests in the order below;
