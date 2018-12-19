@@ -31,4 +31,9 @@ ADD_GUILE_TEST(SCMOpenogTestRunnerFail scm-opencog-test-runner-fail.scm)
 # The SCMOpenogTestRunnerFail fails purposely, as it is testing that the
 # scheme opencog-test-runner exits properly; thus requiring the flipping
 # of the test result by setting its properties.
-SET_TESTS_PROPERTIES(SCMOpenogTestRunnerFail PROPERTIES WILL_FAIL TRUE)
+SET_PROPERTY(TEST SCMOpenogTestRunnerFail PROPERTY WILL_FAIL TRUE)
+
+# Add guile code to the load path to make it possible run tests before
+# executing "make install"
+SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
+	PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm")
