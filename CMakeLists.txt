@@ -54,7 +54,7 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 IF (CMAKE_COMPILER_IS_GNUCXX)
 	# version 5.0 of gcc is required for passing non-trivially
 	# copyable class via C varargs
-	
+
 	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
 		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
 	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
@@ -619,6 +619,11 @@ EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
 	OUTPUT_VARIABLE PACKAGE_ARCHITECTURE
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
 STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
+# If 'sudo make install' is run before 'make package', then install_manifest.txt
+# will be owned by root. Creating the file during configuration stage ensures
+# that is owned by the builder thus avoiding 'Permission denied' error when
+# packaging
+FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
