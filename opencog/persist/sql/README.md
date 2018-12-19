@@ -319,7 +319,7 @@ Each step discussed below.
 
 Database Install
 ----------------
-Download and install Postgres version 9.5.  The current design
+Download and install Postgres version 9.5 or newer.  The current design
 simply won't work with MySQL, because of a lack of array support.
 Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
