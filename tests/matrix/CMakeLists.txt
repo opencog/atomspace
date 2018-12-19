@@ -16,6 +16,7 @@ LINK_LIBRARIES(
 	clearbox
 	execution
 	persist
+	persist-sql
 	${GUILE_LIBRARIES}
 )
 
