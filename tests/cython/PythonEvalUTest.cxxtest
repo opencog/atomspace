@@ -27,14 +27,13 @@ public:
 
     ~PythonEvalUTest() {}
 
-    void setUp() {
-        TS_SKIP("FIXME: this test fais with SEGFAUL");
-    }
+    void setUp() {}
 
     void tearDown() {}
 
     void testRawPythonInitialization()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         logger().debug("[PythonEvalUTest] testRawPythonInitialization()");
 
         // Start up Python.
@@ -76,6 +75,7 @@ public:
 
     void testRawPythonInitializeWithGetSys()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys()");
 
         PyObject* pySysPath = NULL;
@@ -136,6 +136,7 @@ public:
 
     void testGlobalPythonInitializationFinalization()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
 
         // Initialize and finalize Python.
@@ -151,6 +152,7 @@ public:
 
     void testPythonEvalSingletonCreationDeletion()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
         AtomSpace* atomSpace = NULL;
@@ -219,6 +221,7 @@ public:
 
     void testPythonEvalEvalExpr()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
 
         // Initialize Python.
@@ -248,6 +251,7 @@ public:
 
     void testApplyAndApplyTV()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         // Initialize Python.
         global_python_initialize();
 
@@ -313,6 +317,7 @@ public:
 
     void testCodeBlockWithNewline()
     {
+        TS_SKIP("FIXME: this test fais with SEGFAUL");
         // Initialize Python.
         global_python_initialize();
 
