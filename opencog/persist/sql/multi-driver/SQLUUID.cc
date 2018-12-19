@@ -173,7 +173,11 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(UUID maxuuid)
 		+ std::to_string(that->_initial_conn_pool_size) +
 		" THEN"
 		"      under := " + std::to_string(maxuuid + 1) +
+#if PG_VERSION_NUM < 100000
 		"            - (SELECT increment_by FROM " + poolname + ");"
+#else
+		"            - (SELECT increment FROM " + poolname + ");"
+#endif
 		"      IF (1 < under) THEN "
 		"         RAISE NOTICE 'Set " + poolname + " sequence to %', under;"
 		"         PERFORM (SELECT setval('" + poolname + "', under));"

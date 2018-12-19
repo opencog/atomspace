@@ -410,17 +410,17 @@ MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 # ----------------------------------------------------------
 # Mandatory Postgres
 
-FIND_PACKAGE(PGSQL REQUIRED)
+FIND_PACKAGE(PGSQL 9.5 REQUIRED)
 IF (PGSQL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
 	ADD_DEFINITIONS(-DHAVE_PGSQL_STORAGE)
 	SET(HAVE_PGSQL_STORAGE 1)
 	SET(PGSQL_FOUND 1)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was found.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
 ELSE (PGSQL_FOUND)
 	SET(PGSQL_FOUND 0)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
 ENDIF (PGSQL_FOUND)
 MESSAGE(STATUS "${PGSQL_DIR_MESSAGE}")
 
