@@ -25,19 +25,19 @@ ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 # This configures the install and binary paths for each file, passed to it,
 # based on the value of the variables MODULE_NAME, MODULE_FILE_DIR_PATH and
 # MODULE_DIR_PATH in the PARENT_SCOPE.
-FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME)
+FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
+    GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
     SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
 
     # Copy files into build directory mirroring the install path structure.
-    # Also configure for install.
+    # Also, set install path.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}
         )
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}"
+        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}" "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
+            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}"
         )
         SET(MODULE_FILE_DEPEND "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
             PARENT_SCOPE)
@@ -48,10 +48,9 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME)
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_BIN_DIR}/${MODULE_DIR_PATH}
         )
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}"
+        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}" "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
+            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}"
         )
         SET(MODULE_FILE_DEPEND "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
             PARENT_SCOPE)
@@ -74,6 +73,15 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 #   MODULE_FILE, is inferred from this argument, even if it is the only file to
 #   be installed.
 FUNCTION(ADD_GUILE_MODULE)
+  # Define the target that will be used to copy scheme files in the current
+  # source directory to the build directory. This is done so as to be able to
+  # run scheme unit-tests without having to run 'make install'.
+  STRING(REPLACE "/" "_" _TARGET_NAME_SUFFIX ${CMAKE_CURRENT_SOURCE_DIR})
+  SET(TARGET_NAME "COPY_TO_LOAD_PATH_IN_BUILD_DIR_FROM_${_TARGET_NAME_SUFFIX}")
+  IF (NOT (TARGET ${TARGET_NAME}))
+    ADD_CUSTOM_TARGET(${TARGET_NAME} ALL)
+  ENDIF()
+
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
@@ -86,9 +94,11 @@ FUNCTION(ADD_GUILE_MODULE)
     # required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
         SET(GUILE_MODULE_DEPENDS "")
-        FOREACH(FILE_NAME ${SCM_FILES})
+        # FILE_PATH is used for variable name because files in
+        # sub-directories may be passed.
+        FOREACH(FILE_PATH ${SCM_FILES})
             # Check if the file exists in the current source directory.
-            IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME})
+            IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH})
                 MESSAGE(FATAL_ERROR "${FILE_NAME} file does not exist in "
                 ${CMAKE_CURRENT_SOURCE_DIR})
             ENDIF()
@@ -107,22 +117,18 @@ FUNCTION(ADD_GUILE_MODULE)
             SET(MODULE_NAME ${CMAKE_MATCH_3})
             SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
             SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
+            PROCESS_MODULE_STRUCTURE(${FILE_PATH})
 
-            PROCESS_MODULE_STRUCTURE(${FILE_NAME})
             # NOTE: The install configuration isn't part of
             # PROCESS_MODULE_STRUCTURE function so as to avoid "Command
             # INSTALL() is not scriptable" error, when using it in copying
             # scheme files during code-generation by the OPENCOG_ADD_ATOM_TYPES
             # macro.
             INSTALL (FILES
-                ${FILE_NAME}
+                ${FILE_PATH}
                 DESTINATION ${FILE_INSTALL_PATH}
             )
-            LIST(APPEND GUILE_MODULE_DEPENDS ${MODULE_FILE_DEPEND})
         ENDFOREACH()
-        IF( NOT ( TARGET "${MODULE_NAME}_GUILE_INSTALL"))
-            ADD_CUSTOM_TARGET("${MODULE_NAME}_GUILE_INSTALL" ALL DEPENDS "${GUILE_MODULE_DEPENDS}")
-        ENDIF()
     ELSE()
         IF(NOT DEFINED SCM_FILES)
             MESSAGE(FATAL_ERROR "The keyword argument 'FILES' is not set in "
