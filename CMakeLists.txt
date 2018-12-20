@@ -348,16 +348,31 @@ IF(HAVE_PY_INTERP)
 	FIND_PACKAGE(Cython 0.23.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
-		# Find python destination dir for python bindings because it may
-		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
 
-		# Hack together some reasonable install location.
-		SET(PYTHON_DEST
-			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		# Find python destination dir for python bindings
+		# because it may differ on each operating system.
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
+
+		# Chop off leading /usr
+		STRING(REPLACE "/usr" ${CMAKE_INSTALL_PREFIX} PYTHON_DEST "${PYTHON_DEST}")
+		# Replace new line at end
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+
+		# thunk
+		SET(PYTHON_DEST "${PYTHON_DEST}/opencog")
+
 		MESSAGE(STATUS
-			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+			"Python install dir: ${PYTHON_DEST}" )
 
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
@@ -372,8 +387,8 @@ IF(HAVE_PY_INTERP)
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
 	IF (NOT NOSETESTS_EXECUTABLE)
-		MESSAGE(STATUS "nosetest not found: needed for python tests")
-	endif ()
+		MESSAGE(STATUS "nosetests not found: needed for python tests")
+	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
 		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
