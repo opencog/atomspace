@@ -30,15 +30,12 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME DIR_PATH)
 
     # Copy files into build directory mirroring the install path structure,
     # and also set the install path.
-    # DEPENDS is set for custom commands because some of the files may be
-    # generated.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}
         )
         ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${DIR_PATH}/${FILE_NAME}"
         )
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
             PARENT_SCOPE
@@ -49,7 +46,6 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME DIR_PATH)
         )
         ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${DIR_PATH}/${FILE_NAME}"
         )
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
@@ -60,7 +56,7 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 # ----------------------------------------------------------------------------
 # When building, all files specifed are are copied to
 # '${CMAKE_BINARY_DIR}/opencog/scm' following the file tree structure created
-# when installing to /usr/local/share/opencog/scm. It has two keyword arguments
+# when installing to /usr/local/share/opencog/scm. It has three keyword arguments
 #
 # FILES: List of files to be installed/copied
 #
@@ -69,6 +65,9 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 #   MODULE_FILE(see definition at top of this file). The path for
 #   MODULE_FILE, is inferred from this argument, even if it is the only file to
 #   be installed.
+#
+# DEPENDS: The name of a target that generates a scheme file that is to be
+# installed. This is an optional argument only required for generated files.
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the current
   # source directory to the build directory. This is done so as to be able to
@@ -104,16 +103,16 @@ FUNCTION(ADD_GUILE_MODULE)
             ELSEIF(EXISTS /${DIR_PATH}/${FILE_NAME})
                 SET(FULL_DIR_PATH /${DIR_PATH}/)
             ELSEIF(FILE_GENERATED AND (NOT SCM_DEPENDS))
-                MESSAGE(STATUS "The target that generates ${FILE_PATH} has "
-                    "not been added as a dependency using the option "
-                    "'DEPENDS'")
+                MESSAGE(FATAL_ERROR "The target that generates ${FILE_PATH} "
+                    "has not been added as a dependency using the keyword "
+                    "argument 'DEPENDS'")
             ELSEIF(FILE_GENERATED AND SCM_DEPENDS)
                 ADD_DEPENDENCIES(${TARGET_NAME} ${SCM_DEPENDS})
                 SET(FULL_DIR_PATH /${DIR_PATH}/)
             ELSE()
                 MESSAGE(FATAL_ERROR "${FILE_PATH} file does not exist in "
                     "${CMAKE_CURRENT_SOURCE_DIR} nor does it have "
-                    "'GENERATED' property.")
+                    "'GENERATED' property")
             ENDIF()
 
             # Specify module paths.
@@ -144,14 +143,12 @@ FUNCTION(ADD_GUILE_MODULE)
         ENDFOREACH()
     ELSE()
         IF(NOT DEFINED SCM_FILES)
-            MESSAGE(FATAL_ERROR "The keyword argument 'FILES' is not set in "
-                ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE})
+            MESSAGE(FATAL_ERROR "The keyword argument 'FILES' is not set")
         ENDIF()
 
-        IF(NOT DEFINED MODULE_DESTINATION)
+        IF(NOT DEFINED SCM_MODULE_DESTINATION)
             MESSAGE(FATAL_ERROR "The keyword argument 'MODULE_DESTINATION' "
-            "is not set in "
-            ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE})
+                "is not set")
         ENDIF()
     ENDIF()
   ENDIF()
