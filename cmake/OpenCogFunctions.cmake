@@ -25,22 +25,21 @@ ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 # This configures the install and binary paths for each file, passed to it,
 # based on the value of the variables MODULE_NAME, MODULE_FILE_DIR_PATH and
 # MODULE_DIR_PATH in the PARENT_SCOPE.
-FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
-    GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
+FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME DIR_PATH)
     SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
 
-    # Copy files into build directory mirroring the install path structure.
-    # Also, set install path.
+    # Copy files into build directory mirroring the install path structure,
+    # and also set the install path.
+    # DEPENDS is set for custom commands because some of the files may be
+    # generated.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}
         )
         ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}" "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
+            DEPENDS "${DIR_PATH}/${FILE_NAME}"
         )
-        SET(MODULE_FILE_DEPEND "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-            PARENT_SCOPE)
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
             PARENT_SCOPE
         )
@@ -49,11 +48,9 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_BIN_DIR}/${MODULE_DIR_PATH}
         )
         ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}" "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}" "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
+            DEPENDS "${DIR_PATH}/${FILE_NAME}"
         )
-        SET(MODULE_FILE_DEPEND "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-            PARENT_SCOPE)
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
         )
@@ -86,21 +83,37 @@ FUNCTION(ADD_GUILE_MODULE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
     SET(oneValueArgs MODULE_DESTINATION)
-    SET(multiValueArgs FILES)
+    SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
     # NOTE:  The keyword arguments 'FILES' and 'MODULE_DESTINATION' are
     # required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
-        SET(GUILE_MODULE_DEPENDS "")
         # FILE_PATH is used for variable name because files in
         # sub-directories may be passed.
         FOREACH(FILE_PATH ${SCM_FILES})
-            # Check if the file exists in the current source directory.
-            IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH})
-                MESSAGE(FATAL_ERROR "${FILE_NAME} file does not exist in "
-                ${CMAKE_CURRENT_SOURCE_DIR})
+            GET_PROPERTY(FILE_GENERATED SOURCE ${FILE_PATH} PROPERTY GENERATED SET)
+            GET_FILENAME_COMPONENT(DIR_PATH ${FILE_PATH} DIRECTORY)
+            GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
+
+            # Check if the file exists or is generated, and set FULL_DIR_PATH
+            # or target dependencies.
+            IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/${FILE_NAME})
+                SET(FULL_DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/)
+            ELSEIF(EXISTS /${DIR_PATH}/${FILE_NAME})
+                SET(FULL_DIR_PATH /${DIR_PATH}/)
+            ELSEIF(FILE_GENERATED AND (NOT SCM_DEPENDS))
+                MESSAGE(STATUS "The target that generates ${FILE_PATH} has "
+                    "not been added as a dependency using the option "
+                    "'DEPENDS'")
+            ELSEIF(FILE_GENERATED AND SCM_DEPENDS)
+                ADD_DEPENDENCIES(${TARGET_NAME} ${SCM_DEPENDS})
+                SET(FULL_DIR_PATH /${DIR_PATH}/)
+            ELSE()
+                MESSAGE(FATAL_ERROR "${FILE_PATH} file does not exist in "
+                    "${CMAKE_CURRENT_SOURCE_DIR} nor does it have "
+                    "'GENERATED' property.")
             ENDIF()
 
             # Specify module paths.
@@ -117,7 +130,7 @@ FUNCTION(ADD_GUILE_MODULE)
             SET(MODULE_NAME ${CMAKE_MATCH_3})
             SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
             SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
-            PROCESS_MODULE_STRUCTURE(${FILE_PATH})
+            PROCESS_MODULE_STRUCTURE(${FILE_NAME} ${FULL_DIR_PATH})
 
             # NOTE: The install configuration isn't part of
             # PROCESS_MODULE_STRUCTURE function so as to avoid "Command
