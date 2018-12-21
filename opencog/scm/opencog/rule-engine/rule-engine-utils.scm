@@ -170,7 +170,15 @@
 
 (define-public (ure-add-rules rbs rules)
 "
-  Given a rbs and a list of pairs (rule-alias tv) create for each rule
+  Given a rbs and a list of pairs rule-alias, tv, either represented as
+
+  (list rule-alias tv)
+
+  or
+
+  (cons rule-alias tv)
+
+  create for each rule
 
   MemberLink tv
     rule-alias
@@ -178,14 +186,17 @@
 
   rbs: The ConceptNode that represents a rulebase
 
-  rules: A list of rule-alias, or rule-alias and tv pairs, where rule-alias
-         is the node alias of a rule in a DefineLink already created.
-         In case the TVs are not provided the default TV is used
+  rules: A list of rule-alias, or rule-alias and tv pairs (represented as
+         list or cons) , where rule-alias is the node alias of a rule in a
+         DefineLink already created. In case the TVs are not provided the
+         default TV is used.
 "
   (define (add-rule tved-rule)
-    (if (list? tved-rule)
+    (if (pair? tved-rule)
         (let* ((rule-alias (car tved-rule))
-               (tv (cadr tved-rule)))
+               (tv (if (list? tved-rule)
+                       (cadr tved-rule)
+                       (cdr tved-rule))))
           (ure-add-rule rbs rule-alias tv))
         (ure-add-rule rbs tved-rule)))
 
@@ -277,19 +288,6 @@
 "
   (ure-set-num-parameter rbs "URE:maximum-iterations" value))
 
-(define (ure-set-fc-retry-exhausted-sources rbs value)
-"
-  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
-
-  EvaluationLink (stv value 1)
-    PredicateNode \"URE:FC:retry-exhausted-sources\"
-    rbs
-
-  If the provided value is a boolean, then it is automatically
-  converted into tv.
-"
-  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
-
 (define (ure-set-complexity-penalty rbs value)
 "
   Set the URE:complexity-penalty parameter of a given RBS
@@ -302,6 +300,19 @@
   Delete any previous one if exists.
 "
   (ure-set-num-parameter rbs "URE:complexity-penalty" value))
+
+(define (ure-set-fc-retry-exhausted-sources rbs value)
+"
+  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
+
+  EvaluationLink (stv value 1)
+    PredicateNode \"URE:FC:retry-exhausted-sources\"
+    rbs
+
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
+"
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
 
 (define (ure-set-bc-maximum-bit-size rbs value)
 "
