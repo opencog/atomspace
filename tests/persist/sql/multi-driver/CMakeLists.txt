@@ -57,6 +57,7 @@ ENDIF (PSQL_EXECUTABLE)
 
 LINK_LIBRARIES(
     atomspace
+    persist
     persist-sql
 )
 
