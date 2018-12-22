@@ -237,10 +237,13 @@ void Rule::add(AtomSpace& as)
 	if (!_rule)
 		return;
 
-	HandleSeq outgoings;
-	for (const Handle& h : _rule->getOutgoingSet())
-		outgoings.push_back(as.add_atom(h));
-	_rule = createBindLink(outgoings);
+	// XXX FIXME ... this seems wrong ... why would we EVER create
+	// a BindLink, and NOT put it in the atomspace?  The correct
+	// fix would seem to be to say
+	// _rule = BindLinkCast(as.add_link(BIND_LINK, _rule->getOutgoingSet()));
+	// but doing this causes BackwardChainerUTest to consistently crash.
+	// This sure smells like a bug, somewhere, to me.
+	_rule = createBindLink(_rule->getOutgoingSet());
 }
 
 Handle Rule::get_vardecl() const
@@ -552,7 +555,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		Handle hcpy(as->add_atom(createLink(new_outgoing, h->get_type())));
+		Handle hcpy(as->add_link(h->get_type(), new_outgoing));
 		hcpy->copyValues(h);
 		return hcpy;
 	}
@@ -570,7 +573,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		std::string new_name = h->get_name() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
 
-		Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+		Handle hcpy(as->add_node(h->get_type(), new_name));
 		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
@@ -582,7 +585,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		return dict[h];
 
 	std::string new_name = h->get_name() + "-" + _name;
-	Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+	Handle hcpy(as->add_node(h->get_type(), new_name));
 	hcpy->copyValues(h);
 
 	dict[h] = hcpy;
