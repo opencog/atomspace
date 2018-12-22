@@ -552,7 +552,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		Handle hcpy(as->add_atom(createLink(new_outgoing, h->get_type())));
+		Handle hcpy(as->add_link(h->get_type(), new_outgoing));
 		hcpy->copyValues(h);
 		return hcpy;
 	}
@@ -570,7 +570,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		std::string new_name = h->get_name() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
 
-		Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+		Handle hcpy(as->add_node(h->get_type(), new_name));
 		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
@@ -582,7 +582,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		return dict[h];
 
 	std::string new_name = h->get_name() + "-" + _name;
-	Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+	Handle hcpy(as->add_node(h->get_type(), new_name));
 	hcpy->copyValues(h);
 
 	dict[h] = hcpy;
