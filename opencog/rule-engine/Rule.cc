@@ -237,10 +237,13 @@ void Rule::add(AtomSpace& as)
 	if (!_rule)
 		return;
 
-	HandleSeq outgoings;
-	for (const Handle& h : _rule->getOutgoingSet())
-		outgoings.push_back(as.add_atom(h));
-	_rule = createBindLink(outgoings);
+	// XXX FIXME ... this seems wrong ... why would we EVER create
+	// a BindLink, and NOT put it in the atomspace?  The correct
+	// fix would seem to be to say
+	// _rule = BindLinkCast(as.add_link(BIND_LINK, _rule->getOutgoingSet()));
+	// but doing this causes BackwardChainerUTest to consistently crash.
+	// This sure smells like a bug, somewhere, to me.
+	_rule = createBindLink(_rule->getOutgoingSet());
 }
 
 Handle Rule::get_vardecl() const
