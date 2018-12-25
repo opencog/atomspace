@@ -19,6 +19,7 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
+PTR_VALUE <- VALUE
 
 // ===========================================================
 // All of the different flavors of truth values
