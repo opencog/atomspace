@@ -26,9 +26,9 @@
 
 #include <dlfcn.h>
 #include <unistd.h>
-#include <memory>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -1177,7 +1177,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 }
 
 // Check for errors in a script.
-void PythonEval::throw_on_error(){
+void PythonEval::throw_on_error()
+{
     if (PyErr_Occurred())
     {
         std::string errorString;
@@ -1195,10 +1196,11 @@ std::string PythonEval::apply_script(const std::string& script)
 
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
-    typedef std::shared_ptr<void> scope_guard;
-    scope_guard RAII(nullptr, [&gstate](void * ptr){
-                                   // Release the GIL. No Python API allowed beyond this point.
-                                   PyGILState_Release(gstate);});
+    BOOST_SCOPE_EXIT(&gstate)
+    {
+        // Release the GIL. No Python API allowed beyond this point.
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
     throw_on_error();
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
