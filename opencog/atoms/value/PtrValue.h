@@ -41,14 +41,19 @@ class PtrValue
 	: public Value
 {
 protected:
-	void* ptr;
+	std::shared_ptr<void> ptr;
 
 public:
-	PtrValue(void* ptr) : Value(PTR_VALUE), ptr(ptr) {}
+	/** Function to be called when value is destroyed to release the pointer */
+	using Deleter = std::function<void(void*)>;
+
+	PtrValue(void* ptr, Deleter deleter)
+		: Value(PTR_VALUE), ptr(ptr, deleter) {}
 
 	virtual ~PtrValue() {}
 
-	void* value() const { return ptr; }
+	/** Returns the pointer */
+	void* value() const { return ptr.get(); }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
@@ -59,10 +64,13 @@ public:
 
 typedef std::shared_ptr<const PtrValue> PtrValuePtr;
 static inline PtrValuePtr PtrValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<const PtrValue>(a); }
+{
+	return std::dynamic_pointer_cast<const PtrValue>(a);
+}
 
 template<typename ... Type>
-static inline std::shared_ptr<PtrValue> createPtrValue(Type&&... args) {
+static inline std::shared_ptr<PtrValue> createPtrValue(Type&&... args)
+{
 	return std::make_shared<PtrValue>(std::forward<Type>(args)...);
 }
 

@@ -31,7 +31,7 @@ bool PtrValue::operator==(const Value& other) const
 
 	const PtrValue* value = dynamic_cast<const PtrValue*>(&other);
 
-	return ptr == value->ptr;
+	return this->value() == value->value();
 }
 
 // ==============================================================
@@ -41,7 +41,7 @@ std::string PtrValue::to_string(const std::string& indent) const
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	{
 		char buf[20];
-		snprintf(buf, 20, "%p", ptr);
+		snprintf(buf, 20, "%p", value());
 		rv += std::string(" ") + buf;
 	}
 	rv += ")\n";
@@ -49,5 +49,4 @@ std::string PtrValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(PTR_VALUE, createPtrValue, void*)
-
+DEFINE_VALUE_FACTORY(PTR_VALUE, createPtrValue, void*, PtrValue::Deleter)
