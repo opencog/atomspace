@@ -15,6 +15,11 @@ namespace opencog
 using ValueFactory = ValuePtr (*) (...);
 using ValueCaster = ValuePtr (*) (const ValuePtr&);
 
+template<typename... Types>
+static std::vector<std::type_index> to_list_of_type_indexes()
+{
+	return std::vector<std::type_index>{ std::type_index(typeid(Types))... };
+}
 
 class ValueServer
 {
@@ -66,8 +71,8 @@ public:
       * @param vtype The type of the Value.
       * @throws invalid_argument exception.
       */
-    template <typename TYP, typename ARG>
-    ValuePtr create(TYP vtype, ARG arg) const
+    template <typename TYP, typename... ARG>
+    ValuePtr create(TYP vtype, ARG&&... arg) const
     {
         // Look up the factory only once; cache the result.
         static ValueFactory fptr = nullptr;
@@ -78,15 +83,15 @@ public:
             {
                 // First, find the list of factories for this type.
                 std::vector<ProtoFactory> func_vec = _factories.at(vtype);
+                
+                // Second, get a list of types expected
+				std::vector<std::type_index> expected_args =
+					to_list_of_type_indexes<ARG...>();
 
-                // Second, find the matching arglist.
+                // Third, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
                 {
-                    int size = 1;
-                    if ((int) fr.args.size() != size)
-                        continue;
-                     
-                    if (fr.args[0] == std::type_index(typeid(arg)))
+                    if (fr.args == expected_args)
                     {
                         fptr = fr.func;
                         break;
@@ -97,64 +102,25 @@ public:
         }
 
         if (fptr)
-            return (*fptr)(arg);
+            return (*fptr)(arg...);
 
         throw IndexErrorException(TRACE_INFO,
             "No factory found for Value type %d and arguments.", vtype);
     }
-
-    template <typename TYP, typename ARG1, typename ARG2>
-    ValuePtr create(TYP vtype, ARG1 arg1, ARG2 arg2) const
-    {
-        // Look up the factory only once; cache the result.
-        static ValueFactory fptr = nullptr;
-
-        if (nullptr == fptr)
-        {
-            try
-            {
-                // First, find the list of factories for this type.
-                std::vector<ProtoFactory> func_vec = _factories.at(vtype);
-
-                // Second, find the matching arglist.
-                for (const ProtoFactory& fr : func_vec)
-                {
-                    int size = 2;
-                    if ((int) fr.args.size() != size)
-                        continue;
-                     
-                    if (fr.args[0] == std::type_index(typeid(arg1)) and
-                        fr.args[1] == std::type_index(typeid(arg2)))
-                    {
-                        fptr = fr.func;
-                        break;
-                    }
-                }
-            }
-            catch(...) {}
-        }
-
-        if (fptr)
-            return (*fptr)(arg1, arg2);
-
-        throw NotFoundException(TRACE_INFO,
-              "No factory found for this Value type and arguments.");
-    }
-
 };
 
 ValueServer& valueserver();
 
 #define TOKENPASTE(x, y) x ## y
 #define TOKENPASTE2(x, y) TOKENPASTE(x, y)
-#define DEFINE_VALUE_FACTORY(CTYPE,CREATE,ARG)                       \
+#define DEFINE_VALUE_FACTORY(CTYPE,CREATE,...)                       \
                                                                      \
 /* This runs when the shared lib is loaded. */                       \
 static __attribute__ ((constructor)) void                            \
     TOKENPASTE2(init, __COUNTER__)(void)                             \
-{                                                                    \
-   valueserver().addFactory(CTYPE, (ValueFactory) & (CREATE<ARG>),   \
-      std::vector<std::type_index> {std::type_index(typeid(ARG))});  \
+{                                                                           \
+   valueserver().addFactory(CTYPE, (ValueFactory) & (CREATE<__VA_ARGS__>),  \
+      to_list_of_type_indexes<__VA_ARGS__>());                              \
 }
 
 }
