@@ -19,6 +19,8 @@ cdef extern from "opencog/cython/opencog/Cast.h":
     # Tacky hack to convert C objects into Python objects.
     cdef PANDLE   void_from_candle(const cHandle& h)
     cdef PANDLE   void_from_cptr(cHandle* hp)
+    cdef void incref(void* ptr)
+    cdef void decref(void* ptr)
 
 
 # Basic wrapping for back_insert_iterator conversion.
@@ -100,6 +102,7 @@ cdef class Value:
     cdef cValuePtr shared_ptr
 
 cdef Value createProtoAtom(cValuePtr shared_ptr)
+cdef Value wrapPtrValue(cValuePtr shared_ptr)
 
 # Atom
 ctypedef public short av_type
@@ -236,13 +239,13 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
         const vector[double]& value() const;
-    
+
     cdef cValuePtr createFloatValue(...)
 
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
         const vector[string]& value() const;
-    
+
     cdef cValuePtr createStringValue(...)
 
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
@@ -250,3 +253,10 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         const vector[cValuePtr]& value() const;
 
     cdef cValuePtr createLinkValue(...)
+
+cdef extern from "opencog/atoms/value/PtrValue.h" namespace "opencog":
+    cdef cppclass cPtrValue "opencog::PtrValue":
+        void* value() const;
+
+    cdef cValuePtr createPtrValue(...)
+

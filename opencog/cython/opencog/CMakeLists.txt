@@ -129,6 +129,7 @@ ADD_LIBRARY(type_constructors
 
 TARGET_LINK_LIBRARIES(type_constructors
 	atomspace
+	atomspace_cython
 	${PYTHON_LIBRARIES}
 )
 
