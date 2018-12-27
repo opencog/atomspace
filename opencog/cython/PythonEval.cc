@@ -66,6 +66,7 @@ const int MISSING_FUNC_CODE = -1;
 // The Python functions can't take const flags.
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+static void *_dlso = nullptr;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
@@ -280,6 +281,10 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Don't initialize twice
+    if (already_initialized) return;
+    already_initialized = true;
+
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
@@ -290,21 +295,12 @@ void opencog::global_python_initialize()
     // is as old as the wind. The solution of using dlopen() is given
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
-#if PY_MAJOR_VERSION < 3
-    dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
-#else
-    dlopen("libpython3.5.so", RTLD_LAZY | RTLD_GLOBAL);
-#endif
+
+    // Should result in PYLIBNAME being "libpython3.5.so", etc.
+#define PYLIBNAME "libpython" TOSTRING(PY_MAJOR_VERSION) "." TOSTRING(PY_MINOR_VERSION) ".so"
+    _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
     logger().info("[global_python_initialize] Start");
-
-    // Don't initialize twice
-    if (already_initialized) {
-        return;
-    }
-
-    // Remember this initialization.
-    already_initialized = true;
 
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
@@ -370,10 +366,12 @@ void opencog::global_python_finalize()
     {
         PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
+        if (_dlso) dlclose(_dlso);
     }
 
     // No longer initialized.
     already_initialized = false;
+    _dlso = nullptr;
 
     logger().debug("[global_python_finalize] Finish");
 }
