@@ -280,6 +280,10 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Don't initialize twice
+    if (already_initialized) return;
+    already_initialized = true;
+
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
@@ -296,14 +300,6 @@ void opencog::global_python_initialize()
     _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
     logger().info("[global_python_initialize] Start");
-
-    // Don't initialize twice
-    if (already_initialized) {
-        return;
-    }
-
-    // Remember this initialization.
-    already_initialized = true;
 
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
@@ -369,11 +365,12 @@ void opencog::global_python_finalize()
     {
         PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
-        dlclose(_dlso);
+        if (_dlso) dlclose(_dlso);
     }
 
     // No longer initialized.
     already_initialized = false;
+    _dlso = nullptr;
 
     logger().debug("[global_python_finalize] Finish");
 }
