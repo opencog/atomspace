@@ -1,4 +1,3 @@
-(use-modules (opencog))
 (use-modules (opencog test-runner))
 (use-modules (opencog python))
 
