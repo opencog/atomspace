@@ -640,6 +640,18 @@ void PythonEval::build_python_error_message(const char* function_name,
             errorStringStream << ": Undefined Error";
         }
 
+        // Print the traceback, too, if it is provided.
+        if (pyTraceback) {
+            PyObject* pyTBString = PyObject_Str(pyTraceback);
+#if PY_MAJOR_VERSION == 2
+            char* tb = PyBytes_AsString(pyTBString);
+#else
+            const char* tb = PyUnicode_AsUTF8(pyTBString);
+#endif
+            errorStringStream << "\nTraceback: " << tb;
+            Py_DECREF(pyTBString);
+        }
+
         // Cleanup the references. NOTE: The traceback can be NULL even
         // when the others aren't.
         Py_DECREF(pyErrorType);
@@ -1211,6 +1223,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
     this->execute_string(script.c_str());
+
     throw_on_error();
     return "";
 }
