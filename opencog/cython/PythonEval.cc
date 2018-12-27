@@ -1196,12 +1196,18 @@ std::string PythonEval::apply_script(const std::string& script)
 
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
-    BOOST_SCOPE_EXIT(&gstate)
-    {
-        // Release the GIL. No Python API allowed beyond this point.
+
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
         PyGILState_Release(gstate);
     } BOOST_SCOPE_EXIT_END
+
     throw_on_error();
+
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
