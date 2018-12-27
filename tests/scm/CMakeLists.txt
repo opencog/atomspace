@@ -41,4 +41,6 @@ SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
 # And some more tests
 IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
+	SET_PROPERTY(TEST SCMOpenogPython
+		PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm")
 ENDIF (HAVE_CYTHON)
