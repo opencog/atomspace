@@ -37,3 +37,8 @@ SET_PROPERTY(TEST SCMOpenogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 # executing "make install"
 SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
 	PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm")
+
+# And some more tests
+IF (HAVE_CYTHON)
+	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
+ENDIF (HAVE_CYTHON)
