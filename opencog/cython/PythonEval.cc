@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -1175,38 +1176,38 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyGILState_Release(gstate);
 }
 
+// Check for errors in a script.
+void PythonEval::throw_on_error()
+{
+    if (PyErr_Occurred())
+    {
+        std::string errorString;
+        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
+
+        // If there was an error, throw an exception so the user knows the
+        // script had a problem.
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+    }
+}
+
 std::string PythonEval::apply_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
-
+    BOOST_SCOPE_EXIT(&gstate)
+    {
+        // Release the GIL. No Python API allowed beyond this point.
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+    throw_on_error();
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
     this->execute_string(script.c_str());
-
-    bool errorRunningScript = false;
-    std::string errorString;
-
-    // Check for errors in the script.
-    if (PyErr_Occurred())
-    {
-        // Remember the error and get the error string for the throw below.
-        errorRunningScript = true;
-        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
-    }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-
-    // If there was an error, throw an exception so the user knows the
-    // script had a problem.
-    if (errorRunningScript)
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
+    throw_on_error();
     return "";
 }
 
