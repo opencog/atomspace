@@ -164,7 +164,9 @@ FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
                 ${CMAKE_CURRENT_SOURCE_DIR})
         ENDIF()
 
-        ADD_TEST(${TEST_NAME} guile --use-srfi=64 ${FILE_PATH}
+        ADD_TEST(NAME ${TEST_NAME}
+            COMMAND guile -L ${PROJECT_BINARY_DIR}/opencog/scm
+                      --use-srfi=64 ${FILE_PATH}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
     ENDIF()
