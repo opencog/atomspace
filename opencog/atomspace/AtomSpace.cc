@@ -435,11 +435,20 @@ Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
                             const ValuePtr& value)
 {
+    AtomSpace* has = h->getAtomSpace();
+
+    // Hmm. It's kind-of a user-error, if they give us a naked atom.
+    // We could throw here, and force them to fix thier code, or we
+    // can silently do what they wanted!? Which will probably expose
+    // other hard-to-debug bugs in the user's code ...
+    // if (nullptr == has)
+    //     throw opencog::RuntimeException(TRACE_INFO,
+    //            "Your atom is needs to be placed in an atomspace!")
+
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    AtomSpace* has = h->getAtomSpace();
-    if (has->_read_only) {
+    if (nullptr == has or has->_read_only) {
         if (has != this and not _read_only) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, false, true));
@@ -458,11 +467,19 @@ Handle AtomSpace::set_value(const Handle& h,
 // Copy-on-write for setting truth values.
 Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 {
+    AtomSpace* has = h->getAtomSpace();
+    // Hmm. It's kind-of a user-error, if they give us a naked atom.
+    // We could throw here, and force them to fix thier code, or we
+    // can silently do what they wanted!? Which will probably expose
+    // other hard-to-debug bugs in the user's code ...
+    // if (nullptr == has)
+    //     throw opencog::RuntimeException(TRACE_INFO,
+    //            "Your atom is needs to be placed in an atomspace!")
+
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    AtomSpace* has = h->getAtomSpace();
-    if (has->_read_only) {
+    if (nullptr == has or has->_read_only) {
         if (has != this and not _read_only) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, false, true));
