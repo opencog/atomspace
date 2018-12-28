@@ -1,9 +1,13 @@
-(add-to-load-path "../../opencog/scm")
 
-(use-modules (bogus))
-
-(load-from-path "opencog.scm")
+; For reasons I cannot comprehend, circle-ci fails with an error message:
+;
+;;; compiling /ws/atomspace/tests/scm/scm-opencog-python.scm
+;;; WARNING: compilation of /ws/atomspace/tests/scm/scm-opencog-python.scm failed:
+;;; no code for module (opencog)
+;
+; I don't know why it fails. But it does.
 ; (use-modules (opencog))
+(load-from-path "opencog.scm")
 
 (use-modules (opencog test-runner))
 (use-modules (opencog python))
