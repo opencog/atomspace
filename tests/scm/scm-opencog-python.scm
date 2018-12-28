@@ -1,4 +1,7 @@
-(use-modules (opencog))
+(add-to-load-path "../../opencog/scm")
+
+(load-from-path "opencog.scm")
+; (use-modules (opencog))
 
 (display "hello world")
 
