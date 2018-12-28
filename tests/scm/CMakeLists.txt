@@ -36,7 +36,7 @@ SET_PROPERTY(TEST SCMOpenogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 # Add guile code to the load path to make it possible run tests before
 # executing "make install"
 SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
-	PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm")
+	PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm")
 
 # And some more tests
 IF (HAVE_CYTHON)
@@ -46,13 +46,13 @@ IF (HAVE_CYTHON)
 	MESSAGE(STATUS "Project source dir: ${PROJECT_SOURCE_DIR}")
 	EXECUTE_PROCESS(COMMAND guile -c "(display %load-path)" OUTPUT_VARIABLE GLP)
 	MESSAGE(STATUS "Guile load path: ${GLP}")
-	SET(ENV{GUILE_LOAD_PATH} ${PROJECT_SOURCE_DIR}/opencog/scm:${PROJECT_SOURCE_DIR}/opencog/scm/opencog)
+	SET(ENV{GUILE_LOAD_PATH} ${PROJECT_BINARY_DIR}/opencog/scm:${PROJECT_SOURCE_DIR}/opencog/scm/opencog)
 	EXECUTE_PROCESS(COMMAND guile -c "(display %load-path)" OUTPUT_VARIABLE GLF)
 	MESSAGE(STATUS "Full guile load path: ${GLF}")
 	# EXECUTE_PROCESS(COMMAND ls -la ${PROJECT_SOURCE_DIR}/opencog/scm OUTPUT_VARIABLE SDL)
 	# MESSAGE(STATUS "Scheme directory contents: ${SDL}")
 	SET_PROPERTY(TEST SCMOpenogPython
-		PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm:${PROJECT_SOURCE_DIR}/opencog/scm/opencog")
+		PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm:${PROJECT_SOURCE_DIR}/opencog/scm/opencog")
 	SET_PROPERTY(TEST SCMOpenogPython
 		PROPERTY ENVIRONMENT "LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/guile")
 ENDIF (HAVE_CYTHON)

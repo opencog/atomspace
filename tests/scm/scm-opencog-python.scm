@@ -6,8 +6,8 @@
 ;;; no code for module (opencog)
 ;
 ; I don't know why it fails. But it does.
-; (use-modules (opencog))
-(load-from-path "opencog.scm")
+(use-modules (opencog))
+; (load-from-path "opencog.scm")
 
 (use-modules (opencog test-runner))
 (use-modules (opencog python))
