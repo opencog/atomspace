@@ -42,6 +42,10 @@ SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
 IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
 	MESSAGE(STATUS "Scheme sources: ${PROJECT_SOURCE_DIR}")
+	EXECUTE_PROCESS(COMMAND guile -c "(display %load-path)" OUTPUT_VARIABLE GLP)
+	MESSAGE(STATUS "Guile load path: ${GLP}")
+	EXECUTE_PROCESS(COMMAND ls -la ${PROJECT_SOURCE_DIR}/opencog/scm OUTPUT_VARIABLE SDL)
+	MESSAGE(STATUS "Scheme directory contents: ${SDL}")
 	SET_PROPERTY(TEST SCMOpenogPython
 		PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm:${PROJECT_SOURCE_DIR}/opencog/scm/opencog")
 	SET_PROPERTY(TEST SCMOpenogPython
