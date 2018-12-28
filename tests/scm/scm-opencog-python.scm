@@ -3,11 +3,9 @@
 (load-from-path "opencog.scm")
 ; (use-modules (opencog))
 
-(display "hello world")
+(use-modules (opencog test-runner))
+(use-modules (opencog python))
 
-;;;(use-modules (opencog test-runner))
-;;;(use-modules (opencog python))
-;;;
 ;;;(opencog-test-runner)
 ;;;(define t "opencog-python-sniff-test")
 ;;;
