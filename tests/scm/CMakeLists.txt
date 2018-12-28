@@ -37,3 +37,10 @@ SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 # so as to make it possible to run tests before executing "make install".
 SET_PROPERTY(TEST SCMOpencogTestRunnerPass SCMOpencogTestRunnerFail
 	PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile")
+
+# Guile-python bridge requires python
+IF (HAVE_CYTHON)
+	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
+	SET_PROPERTY(TEST SCMOpenogPython
+		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
+ENDIF (HAVE_CYTHON)
