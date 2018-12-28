@@ -33,7 +33,7 @@ ADD_GUILE_TEST(SCMOpenogTestRunnerFail scm-opencog-test-runner-fail.scm)
 # of the test result by setting its properties.
 SET_PROPERTY(TEST SCMOpenogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 
-# Add guile code to the load path to make it possible run tests before
-# executing "make install"
+# Configure LD_LIBRARY_PATH for loading the libraries used by the guile code,
+# so as to make it possible to run tests before executing "make install".
 SET_PROPERTY(TEST SCMOpenogTestRunnerPass SCMOpenogTestRunnerFail
-	PROPERTY ENVIRONMENT "GUILE_LOAD_PATH=${PROJECT_SOURCE_DIR}/opencog/scm")
+	PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile")
