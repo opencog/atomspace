@@ -237,12 +237,18 @@ void Rule::add(AtomSpace& as)
 	if (!_rule)
 		return;
 
-	// XXX FIXME ... this seems wrong ... why would we EVER create
-	// a BindLink, and NOT put it in the atomspace?  The correct
-	// fix would seem to be to say
-	// _rule = BindLinkCast(as.add_link(BIND_LINK, _rule->getOutgoingSet()));
-	// but doing this causes BackwardChainerUTest to consistently crash.
-	// This sure smells like a bug, somewhere, to me.
+	// The BindLink of the rule itself is not added to atomspace in
+	// order to avoid alpha-converting it if an equivalent rule already
+	// exist. Indeed such a rule has been previously alpha-converted to
+	// avoid variable name collisions with the inference tree it is
+	// going to expand, and adding it to the atomspace might undo that
+	// alpha-conversion.
+	//
+	// A workaround be to alpha-convert right before inference tree
+	// expansion. However since alpha-conversion has already taken
+	// place during unification (see Rule::unify_source or
+	// Rule::unify_target) we avoid re-doing the alpha-conversion that
+	// way.
 	_rule = createBindLink(_rule->getOutgoingSet());
 }
 
