@@ -161,12 +161,6 @@ public:
 	 * that the backward chainer does when building forward chaining
 	 * strategies.
 	 *
-	 * Nil, can you explain what the problem above actually is, and
-	 * open a bug report, illustrating it? No hacks should be required:
-	 * the alpha conversion should already be doing exactly the right
-	 * thing, in every situation.  What is the "inconvenience"? What
-	 * is the problem that you are trying to work around?
-	 *
 	 * TODO: support backward rule form.
 	 */
 	void add(AtomSpace&);
