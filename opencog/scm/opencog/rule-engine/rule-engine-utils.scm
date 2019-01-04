@@ -66,53 +66,158 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 receive))
 
-(define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
+(define* (cog-fc rbs source
+                 #:key
+                 (vardecl (List))
+                 (focus-set (Set))
+                 (attention-allocation *unspecified*)
+                 (maximum-iterations *unspecified*)
+                 (complexity-penalty *unspecified*)
+                 (fs-retry-exhausted-sources *unspecified*))
 "
   Forward Chainer call.
 
-  Usage: (cog-fc rbs source #:vardecl vd #:focus-set fs)
+  Usage: (cog-fc rbs source
+                 #:vardecl vd
+                 #:focus-set fs
+                 #:attention-allocation aa
+                 #:maximum-iterations mi
+                 #:complexity-penalty cp
+                 #:fs-retry-exhausted-sources res)
 
   rbs: ConceptNode representing a rulebase.
 
   source: Source from where to start forward chaining. If a SetLink
           then multiple sources are considered.
 
-  vd: optional variable declaration of the source (in case it has
-      variables)
+  vd: [optional] Variable declaration of the source (in case it has
+      variables).
 
-  fs: optional focus-set, a SetLink with all atoms to consider for
-      forward chaining
+  fs: [optional] Focus set, a SetLink with all atoms to consider for
+      forward chaining.
+
+  aa: [optional] Whether the atoms involved with the
+      inference are restricted to the attentional focus.
+
+  mi: [optional] Maximum number of iterations.
+
+  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+      A high value means more breadth. A value of 0 means an equilibrium
+      between breadth and depth. A negative value means more depth.
+      Possible range is (-inf, +inf) but it's rarely necessary in practice
+      to go outside of [-10, 10].
+
+  res: [optional] Whether exhausted sources should be retried. A source is
+       exhausted if all its valid rules (so that at least one rule premise
+       unifies with the source) have been applied to it. Given that the
+       forward chainer results are added to the kb atomspace during forward
+       chaining, the same source may yield different results as time goes,
+       thus this option.
+
+  Note that optional arguments do not have defaults! That is in order not
+  to overwrite existing parameters set by ure-set-maximum-iterations and such.
+  If these parameters were not set at all, then the rule engine itself selects
+  defaults. These defaults will be logged in the log file.
 "
+  ;; Set optional parameters
+  (if (not (unspecified? attention-allocation))
+      (ure-set-attention-allocation rbs attention-allocation))
+  (if (not (unspecified? maximum-iterations))
+      (ure-set-maximum-iterations rbs maximum-iterations))
+  (if (not (unspecified? complexity-penalty))
+      (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? fs-retry-exhausted-sources))
+      (ure-set-fs-retry-exhausted-sources rbs fs-retry-exhausted-sources))
+
+  ;; Call the forward chainer
   (cog-mandatory-args-fc rbs source vardecl focus-set))
 
 (define* (cog-bc rbs target
                  #:key
-                 (vardecl (List)) (trace-as #f) (control-as #f) (focus-set (Set)))
+                 (vardecl (List))
+                 (trace-as #f)
+                 (control-as #f)
+                 (focus-set (Set))
+                 (attention-allocation *unspecified*)
+                 (maximum-iterations *unspecified*)
+                 (complexity-penalty *unspecified*)
+                 (bc-maximum-bit-size *unspecified*)
+                 (bc-mm-complexity-penalty *unspecified*)
+                 (bc-mm-compressiveness *unspecified*))
 "
   Backward Chainer call.
 
-  Usage: (cog-bc rbs target #:vardecl vd #:trace-as tas #:focus-set fs)
+  Usage: (cog-bc rbs target
+                 #:vardecl vd
+                 #:trace-as tas
+                 #:control-as cas
+                 #:focus-set fs
+                 #:attention-allocation aa
+                 #:maximum-iterations mi
+                 #:complexity-penalty cp
+                 #:bc-maximum-bit-size mbs
+                 #:bc-mm-complexity-penalty mcp
+                 #:bc-mm-compressiveness mc)
 
   rbs: ConceptNode representing a rulebase.
 
   target: Target to proof.
 
-  vardecl: [optional] Variable declaration of the target (in case it
-           has variables)
+  vd: [optional] Variable declaration of the target (in case it
+      has variables).
 
-  trace-as: [optional] AtomSpace to record the back-inference traces.
+  tas: [optional] AtomSpace to record the back-inference traces.
 
-  control-as: [optional] AtomSpace storing inference control rules.
+  cas: [optional] AtomSpace storing inference control rules.
 
-  focus-set: [optional] focus-set, a SetLink with all atoms to
-             consider for forward chaining (NOT IMPLEMENTED).
+  fs: [optional] focus-set, a SetLink with all atoms to
+      consider for forward chaining (Not Implemented).
+
+  aa: [optional] Whether the atoms involved with the
+      inference are restricted to the attentional focus.
+
+  mi: [optional] Maximum number of iterations.
+
+  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+      A high value means more breadth. A value of 0 means an equilibrium
+      between breadth and depth. A negative value means more depth.
+      Possible range is (-inf, +inf) but it's rarely necessary in practice
+      to go outside of [-10, 10].
+
+  mbs: [optional] Maximum size of the inference tree pool to evolve.
+
+  mcp: [optional] Complexity penalty applied to the control rules during
+       Bayesian Model Averaging.
+
+  mc: [optional] Compressiveness parameter for partial control rules
+      (how well a control rule can explain data outside of its context).
+
+  Note that optional arguments do not have defaults! That is in order not
+  to overwrite existing parameters set by ure-set-maximum-iterations and such.
+  If these parameters were not set at all, then the rule engine itself selects
+  defaults. These defaults will be logged in the log file.
 "
+  ;; Set optional parameters
+  (if (not (unspecified? attention-allocation))
+      (ure-set-attention-allocation rbs attention-allocation))
+  (if (not (unspecified? maximum-iterations))
+      (ure-set-maximum-iterations rbs maximum-iterations))
+  (if (not (unspecified? complexity-penalty))
+      (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? bc-maximum-bit-size))
+      (ure-set-bc-maximum-bit-size rbs bc-maximum-bit-size))
+  (if (not (unspecified? bc-mm-complexity-penalty))
+      (ure-set-bc-mm-complexity-penalty rbs bc-mm-complexity-penalty))
+  (if (not (unspecified? bc-mm-compressiveness))
+      (ure-set-bc-mm-compressiveness rbs bc-mm-compressiveness))
+
+  ;; Defined optional atomspaces and call the backward chainer
   (let* ((trace-enabled (cog-atomspace? trace-as))
          (control-enabled (cog-atomspace? control-as))
          (tas (if trace-enabled trace-as (cog-atomspace)))
          (cas (if control-enabled control-as (cog-atomspace))))
-  (cog-mandatory-args-bc rbs target vardecl
-                         trace-enabled tas control-enabled cas focus-set)))
+    (cog-mandatory-args-bc rbs target vardecl
+                           trace-enabled tas control-enabled cas focus-set)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URE Configuration Helpers ;;
