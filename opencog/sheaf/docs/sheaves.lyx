@@ -96,6 +96,15 @@ Sheaves: A Topological Approach to Big Data
 
 \begin_layout Author
 Linas Vepštas
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
@@ -118,6 +127,45 @@ This document develops general concepts useful for extracting knowledge
  of a sheaf.
  In essence, this paper introduces the basic concepts of sheaf theory into
  the domain of graphical datasets.
+\end_layout
+
+\begin_layout Abstract
+DRAFT: This is an unfinished draft; the last 1/4th of the document needs
+ a complete make-over.
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+Hanson Robotics; SingularityNET
+\end_layout
+
+\begin_layout Email
+<linasvepstas@gmail.com>
+\end_layout
+
+\begin_layout Keywords
+ACM Subject Classification:
+\begin_inset Newline newline
+\end_inset
+
+Theory of computation—Models of computation;500,
+\begin_inset Newline newline
+\end_inset
+
+Theory of computation—Formal languages and automata theory—Grammars and
+ context-free languages;500,
+\begin_inset Newline newline
+\end_inset
+
+Theory of computation—Design and analysis of algorithms—Graph algorithms
+ analysis;500
 \end_layout
 
 \begin_layout Section*
