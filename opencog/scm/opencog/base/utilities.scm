@@ -550,7 +550,7 @@
   Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
   Starting at the atom 'anchor', chase its incoming links of
   'link-type', and call proceedure 'proc' on all of the atoms of
-  type 'node-type' in those links. For example, if 'anchor' is the
+  type 'endpoint-type' in those links. For example, if 'anchor' is the
   node 'GivenNode \"a\"', and the atomspace contains
 
      SomeLink
