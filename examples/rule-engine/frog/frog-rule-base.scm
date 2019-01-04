@@ -81,8 +81,8 @@
 ;; Add rules to frog-rb
 (ure-add-rules frog-rb
                (list
-                (if-croaks-and-eats-flies-then-frog-rule-name . (stv 0.9 1))
-                (if-frog-then-green-rule-name . (stv 0.5 1))))
+                (cons if-croaks-and-eats-flies-then-frog-rule-name (stv 0.9 1))
+                (cons if-frog-then-green-rule-name (stv 0.5 1))))
 
 ;; Set URE parameters
 (ure-set-maximum-iterations frog-rb 20)
