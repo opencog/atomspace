@@ -4,7 +4,7 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass amsart
+\textclass article
 \begin_preamble
 \usepackage{url} 
 
@@ -143,28 +143,24 @@ DRAFT: This is an unfinished draft; the last 1/4th of the document needs
 
 \end_inset
 
-Hanson Robotics; SingularityNET
+Hanson Robotics; SingularityNET; <linasvepstas@gmail.com>
 \end_layout
 
-\begin_layout Email
-<linasvepstas@gmail.com>
-\end_layout
-
-\begin_layout Keywords
+\begin_layout Address
 ACM Subject Classification:
 \begin_inset Newline newline
 \end_inset
 
-Theory of computation—Models of computation;500,
+• Theory of computation—Models of computation;500,
 \begin_inset Newline newline
 \end_inset
 
-Theory of computation—Formal languages and automata theory—Grammars and
+• Theory of computation—Formal languages and automata theory—Grammars and
  context-free languages;500,
 \begin_inset Newline newline
 \end_inset
 
-Theory of computation—Design and analysis of algorithms—Graph algorithms
+• Theory of computation—Design and analysis of algorithms—Graph algorithms
  analysis;500
 \end_layout
 
