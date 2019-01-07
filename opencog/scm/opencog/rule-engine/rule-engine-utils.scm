@@ -334,14 +334,18 @@
        rbs
        atom)
   )
-  (let ((del-prev-val (BindLink
-                          (param-hypergraph (VariableNode "__VALUE__"))
-                          (DeleteLink
-                             (param-hypergraph (VariableNode "__VALUE__"))))))
-       ; Delete any previous value for that parameter
-       (cog-execute! del-prev-val)
-       ; Delete pattern to not create to much junk in the atomspace
-       (extract-hypergraph del-prev-val)
+  (let* ((var (VariableNode "__VALUE__"))
+         (exec-var (param-hypergraph var))
+         (del-prev-val (BindLink
+                         exec-var
+                         (DeleteLink exec-var))))
+    ;; Delete any previous value for that parameter
+    (cog-execute! del-prev-val)
+    ;; Delete pattern to not create to much junk in the atomspace
+    (cog-delete del-prev-val)
+    (cog-delete (DeleteLink exec-var))
+    (cog-delete exec-var)
+    (cog-delete var)
   )
 
   ; Set new value for that parameter
