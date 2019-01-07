@@ -90,10 +90,27 @@ namespace opencog
 
 class BackwardChainer
 {
-    friend class ::BackwardChainerUTest;
+	friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, const Handle& rbs,
+	BackwardChainer(AtomSpace& kb_as, // Knowledge-base atomspace
+	                AtomSpace& rb_as, // Rule-base atomspace
+	                const Handle& rbs,
+	                const Handle& target,
+	                const Handle& vardecl=Handle::UNDEFINED,
+	                AtomSpace* trace_as=nullptr, // Where to record the trace
+	                // TODO: maybe move the control and focus set to
+	                // the rbs configuration
+	                AtomSpace* control_as=nullptr, // Inference Control Rules
+	                const Handle& focus_set=Handle::UNDEFINED,
+	                // TODO: maybe wrap all fitnesses in a Fitness class
+	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
+	                const AndBITFitness& andbit_fitness=AndBITFitness());
+
+	// For backward compatibility, rule base atomspace is the same as
+	// the knowledge base atomspace
+	BackwardChainer(AtomSpace& as, // Knowledge-base and rule-base atomspace
+	                const Handle& rbs,
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
 	                AtomSpace* trace_as=nullptr, // Where to record the trace
@@ -181,9 +198,12 @@ private:
 	// this and-BIT may lead to a successful inference.
 	double operator()(const AndBIT& andbit) const;
 
-	// Atomspace containing the knowledge base, the rule base and
-	// where the final results will be dumped.
-	AtomSpace& _as;
+	// Atomspace containing the knowledge base and where the final
+	// results will be dumped.
+	AtomSpace& _kb_as;
+
+	// Atomspace containing the rule base, can be the same as _kb_as
+	AtomSpace& _rb_as;
 
 	// Contain the configuration
 	UREConfig _config;
