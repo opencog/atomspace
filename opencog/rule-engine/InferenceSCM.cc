@@ -111,25 +111,25 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
                                          Handle vardecl,
                                          Handle focus_set_h)
 {
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
-    HandleSeq focus_set = {};
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
+	HandleSeq focus_set = {};
 
-    // A ListLink means that the variable declaration is undefined
-    if (vardecl->get_type() == LIST_LINK)
-	    vardecl = Handle::UNDEFINED;
+	// A ListLink means that the variable declaration is undefined
+	if (vardecl->get_type() == LIST_LINK)
+		vardecl = Handle::UNDEFINED;
 
-    if (focus_set_h->get_type() == SET_LINK)
-	    focus_set = focus_set_h->getOutgoingSet();
-    else
-	    throw RuntimeException(
-		    TRACE_INFO,
-		    "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+	if (focus_set_h->get_type() == SET_LINK)
+		focus_set = focus_set_h->getOutgoingSet();
+	else
+		throw RuntimeException(
+			TRACE_INFO,
+			"InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
 
-    ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
-    fc.do_chain();
-    HandleSet result = fc.get_chaining_result();
+	ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
+	fc.do_chain();
+	HandleSet result = fc.get_chaining_result();
 
-    return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
+	return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
 Handle InferenceSCM::do_backward_chaining(Handle rbs,
