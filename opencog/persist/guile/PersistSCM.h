@@ -26,6 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/guile/SchemeModule.h>
 
 namespace opencog
 {
@@ -33,11 +34,9 @@ namespace opencog
  *  @{
  */
 
-class PersistSCM
+class PersistSCM : public ModuleWrap
 {
 private:
-	static void* init_in_guile(void*);
-	static void init_in_module(void*);
 	void init(void);
 
 	Handle fetch_atom(Handle);

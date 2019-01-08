@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/EvidenceCountTruthValue.h
+ * opencog/atoms/truthvalue/EvidenceCountTruthValue.h
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_EVIDENCE_TRUTH_VALUE_H_
 #define _OPENCOG_EVIDENCE_TRUTH_VALUE_H_
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {

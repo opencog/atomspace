@@ -15,6 +15,8 @@ LINK_LIBRARIES(
 	smob
 	clearbox
 	execution
+	persist
+	persist-sql
 	${GUILE_LIBRARIES}
 )
 

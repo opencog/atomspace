@@ -26,8 +26,8 @@
 #include <memory>
 #include <string>
 
-#include <opencog/atoms/value/types.h>
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/types.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 
 namespace opencog
 {
@@ -98,6 +98,13 @@ public:
 typedef std::shared_ptr<Value> ValuePtr;
 
 typedef std::vector<ValuePtr> ProtomSeq;
+
+// Debugging helpers see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
 
 /** @}*/
 } // namespace opencog

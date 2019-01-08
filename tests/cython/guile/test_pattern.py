@@ -3,6 +3,7 @@ from unittest import TestCase
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
+import os
 
 
 # We are poking atoms into this from the scm files, so we want
@@ -14,6 +15,10 @@ class SchemeTest(TestCase):
     def setUp(self):
         global shared_space
         self.space = shared_space
+        scheme_eval(self.space, '(add-to-load-path "' +
+                    os.environ['PROJECT_SOURCE_DIR'] + '")')
+        scheme_eval(self.space, '(add-to-load-path "' +
+                    os.environ['PROJECT_SOURCE_DIR'] + '/opencog/scm")')
 
     def tearDown(self):
         pass
@@ -26,12 +31,11 @@ class SchemeTest(TestCase):
 
         scheme_eval(self.space, "(use-modules (opencog))")
 
-
     # Load a file that results in atoms placed in the atomspace.
     # Make sure the loaded atom is what we think it is.
     def test_b_load_file(self):
 
-        status = load_scm(self.space, "tests/cython/guile/basic_unify.scm")
+        status = scheme_eval(self.space, '(load-from-path "tests/cython/guile/basic_unify.scm")')
         self.assertTrue(status)
 
         a1 = self.space.add_node(types.ConceptNode, "hello")

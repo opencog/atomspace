@@ -23,7 +23,7 @@
 #define _OPENCOG_BINDLINK_API_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog {
 

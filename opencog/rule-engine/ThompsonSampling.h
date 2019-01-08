@@ -24,7 +24,7 @@
 #define _OPENCOG_THOMPSON_SAMPLING_H_
 
 #include <opencog/util/empty_string.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "BetaDistribution.h"
 

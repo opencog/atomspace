@@ -3,7 +3,6 @@
 ;
 ; Create some misc atoms.
 
-(add-to-load-path "./opencog/scm")
 (use-modules (opencog))
 (use-modules (opencog exec))
 

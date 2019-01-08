@@ -1,5 +1,5 @@
 /*
- * opencog/truthvalue/AttentionValue.h
+ * opencog/atoms/truthvalue/AttentionValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

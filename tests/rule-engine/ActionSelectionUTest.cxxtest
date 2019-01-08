@@ -7,7 +7,7 @@
 
 #include <opencog/rule-engine/ActionSelection.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <cxxtest/TestSuite.h>
 

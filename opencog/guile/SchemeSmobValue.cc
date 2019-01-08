@@ -14,7 +14,7 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
 #include <opencog/atoms/value/ValueFactory.h>
@@ -136,18 +136,27 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  * Create a new value, of named type stype, and value vector svect
  * XXX FIXME Clearly, a factory for values is called for.
  */
-SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
+ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	Type t = verify_type(stype, "cog-new-value", 1);
-
-	ValuePtr pa;
 	if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		pa = valueserver().create(t, valist);
+		return valueserver().create(t, valist);
 	}
-	else if (RANDOM_STREAM == t)
+
+	if (OCTO_VALUE == t)
+	{
+		SCM sl = svalue_list;
+		SCM satom = SCM_CAR(sl);
+		SCM svalue = SCM_CDR(sl);
+		Handle hlist = verify_handle(satom, "cog-new-value", 2);
+		HandleSeq hseq = hlist->getOutgoingSet();
+		std::vector<double> valist = verify_float_list(svalue, "cog-new-value", 2);
+		return valueserver().create(t, hseq, valist);
+	}
+
+	if (RANDOM_STREAM == t)
 	{
 		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
 			scm_wrong_type_arg_msg("cog-new-value", 1,
@@ -159,30 +168,41 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 			SCM svalue = SCM_CAR(svalue_list);
 			dim = verify_int(svalue, "cog-new-value", 2);
 		}
-		pa = valueserver().create(t, dim);
+		return valueserver().create(t, dim);
 	}
 
-	else if (LINK_VALUE == t)
+	if (LINK_VALUE == t)
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		pa = valueserver().create(t, valist);
+		return valueserver().create(t, valist);
 	}
 
-	else if (STRING_VALUE == t)
+	if (STRING_VALUE == t)
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
-		pa = valueserver().create(t, valist);
+		return valueserver().create(t, valist);
 	}
 
-	else
+	scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "value type");
+
+	return nullptr;
+}
+
+SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
+{
+	Type t = verify_type(stype, "cog-new-value", 1);
+	try
 	{
-		scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "value type");
+		ValuePtr pa = make_value(t, svalue_list);
+		return protom_to_scm(pa);
 	}
-
-	scm_remember_upto_here_1(svalue_list);
-	return protom_to_scm(pa);
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-value!", scm_cons(stype, svalue_list));
+	}
+	return SCM_EOL;
 }
 
 /* ============================================================== */
@@ -326,7 +346,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	ValuePtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE))
+	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_double)
@@ -365,7 +385,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
    size_t index = verify_size(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE))
+	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);

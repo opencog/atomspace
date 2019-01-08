@@ -13,8 +13,6 @@ jobs:
       - image: opencog/postgres
         name: opencog-postgres
     working_directory: /ws/atomspace
-    environment:
-      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws
@@ -28,7 +26,7 @@ jobs:
       - run:
           name: Install cogutil
           command: |
-            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j2 && make -j2 install
             ldconfig
@@ -48,17 +46,17 @@ jobs:
           name: Build
           command: cd build && make -j2
       - run:
-          name: Install AtomSpace
-          command: cd build && make -j2 install && ldconfig
-      - run:
-          name: Build examples
-          command: cd build && make -j2 examples
-      - run:
           name: Build tests
           command: cd build && make -j2 tests
       - run:
           name: Run tests
           command: cd build && make -j2 test ARGS=-j2
+      - run:
+          name: Install AtomSpace
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Build examples
+          command: cd build && make -j2 examples
       - run:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
@@ -87,8 +85,6 @@ jobs:
         environment:
           CCACHE_DIR: /ws/ccache
     working_directory: /ws/opencog
-    environment:
-      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws/
@@ -108,7 +104,7 @@ jobs:
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
           name: Clone OpenCog
-          command: git clone --depth 1 https://github.com/$ORG/opencog .
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..

@@ -15,6 +15,7 @@ ADD_LIBRARY (atombase
 ADD_DEPENDENCIES(atombase opencog_atom_types value)
 
 TARGET_LINK_LIBRARIES(atombase
+	atom_types
 	value
 	truthvalue
 	${COGUTIL_LIBRARY}

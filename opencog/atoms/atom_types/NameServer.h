@@ -30,8 +30,8 @@
 #include <vector>
 
 #include <opencog/util/sigslot.h>
-#include <opencog/atoms/value/types.h>
-#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/atom_types/types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {

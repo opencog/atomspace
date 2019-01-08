@@ -29,7 +29,7 @@
 
 #include <opencog/util/numeric.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include "BetaDistribution.h"
 #include "URELogger.h"

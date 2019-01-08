@@ -319,7 +319,7 @@ Each step discussed below.
 
 Database Install
 ----------------
-Download and install Postgres version 9.3 or newer.  The current design
+Download and install Postgres version 9.5 or newer.  The current design
 simply won't work with MySQL, because of a lack of array support.
 Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
@@ -328,7 +328,7 @@ the missing features are kind-of complicated, and likely to be slow.
 Be sure to install the Postgres server and the Postgres client.
 
 ```
-    sudo apt-get install postgresql-9.3
+    sudo apt-get install postgresql-9.5
 ```
 
 Deprecated; Optional: ODBC Device Driver Setup
@@ -396,7 +396,7 @@ This kind of loss is usually not a problem for most opencog apps,
 data, and so this kind of loss is almost surely inconsequential.
 
 Edit `postgresql.conf` (a typical location is
-`/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
+`/etc/postgresql/9.5/main/postgresql.conf`) and make the changes below.
 The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 ```
@@ -568,7 +568,7 @@ psql: FATAL:  Peer authentication failed for user "opencog_user"
 ```
 To fix this, you need to edit the file
 ```
-   /etc/postgresql/9.3/main/pg_hba.conf
+   /etc/postgresql/9.5/main/pg_hba.conf
 ```
 as unix user `postgres`, and add the following line. It will allow
 password logins for all local users. (A local user is a user on the

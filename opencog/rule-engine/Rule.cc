@@ -237,10 +237,19 @@ void Rule::add(AtomSpace& as)
 	if (!_rule)
 		return;
 
-	HandleSeq outgoings;
-	for (const Handle& h : _rule->getOutgoingSet())
-		outgoings.push_back(as.add_atom(h));
-	_rule = createBindLink(outgoings);
+	// The BindLink of the rule itself is not added to atomspace in
+	// order to avoid alpha-converting it if an equivalent rule already
+	// exist. Indeed such a rule has been previously alpha-converted to
+	// avoid variable name collisions with the inference tree it is
+	// going to expand, and adding it to the atomspace might undo that
+	// alpha-conversion.
+	//
+	// A workaround be to alpha-convert right before inference tree
+	// expansion. However since alpha-conversion has already taken
+	// place during unification (see Rule::unify_source or
+	// Rule::unify_target) we avoid re-doing the alpha-conversion that
+	// way.
+	_rule = createBindLink(_rule->getOutgoingSet());
 }
 
 Handle Rule::get_vardecl() const
@@ -552,7 +561,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		Handle hcpy(as->add_atom(createLink(new_outgoing, h->get_type())));
+		Handle hcpy(as->add_link(h->get_type(), new_outgoing));
 		hcpy->copyValues(h);
 		return hcpy;
 	}
@@ -570,7 +579,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		std::string new_name = h->get_name() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
 
-		Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+		Handle hcpy(as->add_node(h->get_type(), new_name));
 		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
@@ -582,7 +591,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		return dict[h];
 
 	std::string new_name = h->get_name() + "-" + _name;
-	Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
+	Handle hcpy(as->add_node(h->get_type(), new_name));
 	hcpy->copyValues(h);
 
 	dict[h] = hcpy;

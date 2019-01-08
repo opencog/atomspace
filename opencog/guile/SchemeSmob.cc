@@ -225,10 +225,6 @@ void SchemeSmob::module_init(void*)
 	// The portion of (opencog) done in C++
 	register_procs();
 
-	// The portion of (opencog) done in scm files.
-	// This needs to stay in sync with /opencog/scm/opencog.scm
-	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-
 	// Set the library load path, so that other modules can find
 	// thier libraries. Copied from `scm/opencog.scm` and should stay
 	// in sync with that file.  This is NOT needed for ordinary usage
@@ -243,7 +239,7 @@ void SchemeSmob::module_init(void*)
 	//
 	// lib64 is used by various versions of CentOS
 	scm_c_eval_string(
-		"(define path \"/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
+		"(define path \"/usr/lib/opencog:/usr/lib64/opencog:/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
 
 	scm_c_eval_string(
 		"(setenv \"LTDL_LIBRARY_PATH\""
@@ -254,7 +250,7 @@ void SchemeSmob::module_init(void*)
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 	// Loading files from the project directory is broken by design.
-	// However, teh unit tests are broken by design.
+	// However, the unit tests are broken by design.
 	// We REALLY should not do this, it violates basic laws of security,
 	// usability, debuggability. But some people think that's OK.
 	// Too lazy to fix.  See issue
@@ -273,7 +269,7 @@ void SchemeSmob::module_init(void*)
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));
 }
 
-#ifdef HAVE_GUILE2
+#if defined(HAVE_GUILE2) || defined(HAVE_GUILE3)
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)

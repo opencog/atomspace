@@ -25,7 +25,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "ThompsonSampling.h"
 

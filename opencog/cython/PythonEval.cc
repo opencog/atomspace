@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -65,6 +66,7 @@ const int MISSING_FUNC_CODE = -1;
 // The Python functions can't take const flags.
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+static void *_dlso = nullptr;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
@@ -279,6 +281,10 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Don't initialize twice
+    if (already_initialized) return;
+    already_initialized = true;
+
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
@@ -289,21 +295,12 @@ void opencog::global_python_initialize()
     // is as old as the wind. The solution of using dlopen() is given
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
-#if PY_MAJOR_VERSION < 3
-    dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
-#else
-    dlopen("libpython3.5.so", RTLD_LAZY | RTLD_GLOBAL);
-#endif
+
+    // Should result in PYLIBNAME being "libpython3.5.so", etc.
+#define PYLIBNAME "libpython" TOSTRING(PY_MAJOR_VERSION) "." TOSTRING(PY_MINOR_VERSION) ".so"
+    _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
     logger().info("[global_python_initialize] Start");
-
-    // Don't initialize twice
-    if (already_initialized) {
-        return;
-    }
-
-    // Remember this initialization.
-    already_initialized = true;
 
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
@@ -369,10 +366,12 @@ void opencog::global_python_finalize()
     {
         PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
+        if (_dlso) dlclose(_dlso);
     }
 
     // No longer initialized.
     already_initialized = false;
+    _dlso = nullptr;
 
     logger().debug("[global_python_finalize] Finish");
 }
@@ -633,12 +632,24 @@ void PythonEval::build_python_error_message(const char* function_name,
 #if PY_MAJOR_VERSION == 2
         char* pythonErrorString = PyBytes_AsString(pyErrorString);
 #else
-        char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+        const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
 #endif
         if (pythonErrorString) {
             errorStringStream << ": " << pythonErrorString << ".";
         } else {
             errorStringStream << ": Undefined Error";
+        }
+
+        // Print the traceback, too, if it is provided.
+        if (pyTraceback) {
+            PyObject* pyTBString = PyObject_Str(pyTraceback);
+#if PY_MAJOR_VERSION == 2
+            char* tb = PyBytes_AsString(pyTBString);
+#else
+            const char* tb = PyUnicode_AsUTF8(pyTBString);
+#endif
+            errorStringStream << "\nTraceback: " << tb;
+            Py_DECREF(pyTBString);
         }
 
         // Cleanup the references. NOTE: The traceback can be NULL even
@@ -1175,6 +1186,20 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyGILState_Release(gstate);
 }
 
+// Check for errors in a script.
+void PythonEval::throw_on_error()
+{
+    if (PyErr_Occurred())
+    {
+        std::string errorString;
+        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
+
+        // If there was an error, throw an exception so the user knows the
+        // script had a problem.
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+    }
+}
+
 std::string PythonEval::apply_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -1182,31 +1207,24 @@ std::string PythonEval::apply_script(const std::string& script)
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
+    throw_on_error();
+
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
     this->execute_string(script.c_str());
 
-    bool errorRunningScript = false;
-    std::string errorString;
-
-    // Check for errors in the script.
-    if (PyErr_Occurred())
-    {
-        // Remember the error and get the error string for the throw below.
-        errorRunningScript = true;
-        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
-    }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-
-    // If there was an error, throw an exception so the user knows the
-    // script had a problem.
-    if (errorRunningScript)
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
+    throw_on_error();
     return "";
 }
 

@@ -49,7 +49,7 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/eval/GenericEval.h>
 
 
@@ -135,6 +135,7 @@ class PythonEval : public GenericEval
         std::string _result;
         int _paren_count;
         void eval_expr_line(const std::string&);
+        void throw_on_error();
 
     public:
         PythonEval(AtomSpace*);
