@@ -60,7 +60,7 @@ BackwardChainer::BackwardChainer(AtomSpace& kb_as,
 	_trace_recorder.target(target);
 }
 
-BackwardChainer::BackwardChainer(AtomSpace& as,
+BackwardChainer::BackwardChainer(AtomSpace& kb_as,
                                  const Handle& rbs,
                                  const Handle& target,
                                  const Handle& vardecl,
@@ -69,8 +69,10 @@ BackwardChainer::BackwardChainer(AtomSpace& as,
                                  const Handle& focus_set,
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-: BackwardChainer(as, as, rbs, target, vardecl, trace_as, control_as,
-                  focus_set, bitnode_fitness, andbit_fitness)
+	: BackwardChainer(kb_as,
+	                  rbs->getAtomSpace() ? *rbs->getAtomSpace() : kb_as,
+	                  rbs, target, vardecl, trace_as, control_as,
+	                  focus_set, bitnode_fitness, andbit_fitness)
 {
 }
 

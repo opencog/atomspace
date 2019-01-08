@@ -93,30 +93,46 @@ class BackwardChainer
 	friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& kb_as, // Knowledge-base atomspace
-	                AtomSpace& rb_as, // Rule-base atomspace
+	/**
+	 * CTor.
+	 *
+	 * @param kb_as              Knowledge-base atomspace
+	 * @param rb_as              Rule-base atomspace
+	 * @param rbs                Rule-base concept
+	 * @param target             Target to proof
+	 * @param vardecl            Variable declaration of the target
+	 * @param trace_as           Atomspace where to record the trace
+	 * @param control_as         Atomspace containing control rules
+	 * @param focus_set          Focus set (not implemented)
+	 * @param bitnode_fitness    BITNode fitness function
+	 * @param andbit_fitness     AndBIT (inference tree) fitness function
+	 */
+	BackwardChainer(AtomSpace& kb_as,
+	                AtomSpace& rb_as,
 	                const Handle& rbs,
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
-	                AtomSpace* trace_as=nullptr, // Where to record the trace
+	                AtomSpace* trace_as=nullptr,
 	                // TODO: maybe move the control and focus set to
 	                // the rbs configuration
-	                AtomSpace* control_as=nullptr, // Inference Control Rules
+	                AtomSpace* control_as=nullptr,
 	                const Handle& focus_set=Handle::UNDEFINED,
 	                // TODO: maybe wrap all fitnesses in a Fitness class
 	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
 	                const AndBITFitness& andbit_fitness=AndBITFitness());
 
-	// For backward compatibility, rule base atomspace is the same as
-	// the knowledge base atomspace
-	BackwardChainer(AtomSpace& as, // Knowledge-base and rule-base atomspace
+	/**
+	 * Like above, but use as rule-base atomspace, the atomspace of rbs
+	 * if any, otherwise use kb_as if rbs has no atomspace.
+	 */
+	BackwardChainer(AtomSpace& kb_as,
 	                const Handle& rbs,
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
-	                AtomSpace* trace_as=nullptr, // Where to record the trace
+	                AtomSpace* trace_as=nullptr,
 	                // TODO: maybe move the control and focus set to
 	                // the rbs configuration
-	                AtomSpace* control_as=nullptr, // Inference Control Rules
+	                AtomSpace* control_as=nullptr,
 	                const Handle& focus_set=Handle::UNDEFINED,
 	                // TODO: maybe wrap all fitnesses in a Fitness class
 	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),

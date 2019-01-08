@@ -136,9 +136,9 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
                                           Handle target,
                                           Handle vardecl,
                                           bool trace_enabled,
-                                          AtomSpace* trace_as,
+                                          AtomSpace *trace_as,
                                           bool control_enabled,
-                                          AtomSpace* control_as,
+                                          AtomSpace *control_as,
                                           Handle focus_link)
 {
 	// A ListLink means that the variable declaration is undefined
@@ -152,8 +152,7 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
 		control_as = nullptr;
 
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
-	BackwardChainer bc(*as, rb_as, rbs, target, vardecl,
-	                   trace_as, control_as, focus_link);
+	BackwardChainer bc(*as, rbs, target, vardecl, trace_as, control_as, focus_link);
 
 	bc.do_chain();
 
