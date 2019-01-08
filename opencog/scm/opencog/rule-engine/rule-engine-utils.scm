@@ -73,7 +73,7 @@
                  (attention-allocation *unspecified*)
                  (maximum-iterations *unspecified*)
                  (complexity-penalty *unspecified*)
-                 (fs-retry-exhausted-sources *unspecified*))
+                 (fc-retry-exhausted-sources *unspecified*))
 "
   Forward Chainer call.
 
@@ -83,7 +83,7 @@
                  #:attention-allocation aa
                  #:maximum-iterations mi
                  #:complexity-penalty cp
-                 #:fs-retry-exhausted-sources res)
+                 #:fc-retry-exhausted-sources res)
 
   rbs: ConceptNode representing a rulebase.
 
@@ -126,8 +126,8 @@
       (ure-set-maximum-iterations rbs maximum-iterations))
   (if (not (unspecified? complexity-penalty))
       (ure-set-complexity-penalty rbs complexity-penalty))
-  (if (not (unspecified? fs-retry-exhausted-sources))
-      (ure-set-fs-retry-exhausted-sources rbs fs-retry-exhausted-sources))
+  (if (not (unspecified? fc-retry-exhausted-sources))
+      (ure-set-fc-retry-exhausted-sources rbs fc-retry-exhausted-sources))
 
   ;; Call the forward chainer
   (cog-mandatory-args-fc rbs source vardecl focus-set))
