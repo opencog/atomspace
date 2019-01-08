@@ -311,31 +311,29 @@
 (define (ure-set-num-parameter rbs name value)
 "
   Set numerical parameters. Given an rbs, a parameter name and its
-  value, create
+  value, create (in the same atomspace where rbs lives)
 
   ExecutionLink
      SchemaNode name
      rbs
      NumberNode value
 
-  It will also delete the any
-
-  ExecutionLink
-     SchemaNode name
-     rbs
-     *
-
-  to be sure there is ever only one value associated to that
-  parameter. The value is automatically converted into string.
+  If a value already exists it first delete it to make sure there is
+  only one value associated to that parameter and rule-base.
 "
-  (define (param-hypergraph atom)
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+  (define (param-execution atom)
     (ExecutionLink
        (SchemaNode name)
        rbs
        atom)
   )
+
+  ;; Delete existing value if any
   (let* ((var (VariableNode "__VALUE__"))
-         (exec-var (param-hypergraph var))
+         (exec-var (param-execution var))
          (del-prev-val (BindLink
                          exec-var
                          (DeleteLink exec-var))))
@@ -348,14 +346,16 @@
     (cog-delete var)
   )
 
-  ; Set new value for that parameter
-  (param-hypergraph (NumberNode value))
-)
+  ; Set new value for that parameter, switch back to current-as and
+  ; return new value.
+  (let ((new-param-exec (param-execution (NumberNode value))))
+    (cog-set-atomspace! current-as)
+    new-param-exec))
 
 (define (ure-set-fuzzy-bool-parameter rbs name value)
 "
   Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
-  value, create (or overwrite)
+  value, create or overwrite (in the same atomspace where rbs lives)
 
   EvaluationLink (stv value 1)
      PredicateNode name
@@ -364,10 +364,21 @@
   If the provided value is a boolean, then it is automatically
   converted into tv.
 "
-  (let* ((tv (if (number? value) (stv value 1) (bool->tv value))))
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+  (define (param-evaluation tv)
     (EvaluationLink tv
-      (PredicateNode name)
-      rbs)))
+       (PredicateNode name)
+       rbs)
+  )
+
+  ;; Set new value for that parameter, switch back to
+  ;; current-as and return new value.
+  (let* ((tv (if (number? value) (stv value 1) (bool->tv value)))
+         (new-param-eval (param-evaluation tv)))
+    (cog-set-atomspace! current-as)
+    new-param-eval))
 
 (define (ure-set-attention-allocation rbs value)
 "
