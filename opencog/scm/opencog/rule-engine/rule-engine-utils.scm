@@ -225,9 +225,15 @@
 
 (define-public (ure-define-add-rule rbs rule-name rule . tv)
 "
-
   Associate a rule name and a rule content, and adds it to a rulebase
   with a given TV and returns the rule alias (DefinedSchemaNode <rule-name>).
+  That is add the following
+
+  MemberLink <tv>
+    (DefinedSchemaNode <rule-name>)
+    rbs
+
+  MemberLink and DefinedSchemaNode are added in the same atomspace as rbs.
 
   rbs: The ConceptNode that represents a rulebase.
 
@@ -235,21 +241,22 @@
 
   rule: The BindLink that is run.
 
-  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
+  tv: [optional] TV representing the probability and its confidence
+      that the rule produces a desire outcome.
 "
-    ; Didn't add type checking here b/c the ure-configuration format isn't
-    ; set in stone yet. And the best place to do that is in c++ UREConfig
+    ;; Switch to rbs atomspace
+    (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+    (define (mk-member tv) (if (null? tv)
+                               (MemberLink rule-alias rbs)
+                               (MemberLink tv rule-alias rbs)))
+
+    ;; Didn't add type checking here b/c the ure-configuration format isn't
+    ;; set in stone yet. And the best place to do that is in c++ UREConfig
     (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
-
-        (if (null? tv)
-            (MemberLink
-               alias
-               rbs)
-            (MemberLink (car tv)
-               alias
-               rbs))
-
+        (mk-member tv)
+        (cog-set-atomspace! current-as)
         alias
     )
 )
@@ -264,14 +271,14 @@
 
   tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
 "
-  (if (null? tv)
-      (MemberLink
-        rule-alias
-        rbs)
-      (MemberLink (car tv)
-        rule-alias
-        rbs))
-)
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define (mk-member tv) (if (null? tv)
+                             (MemberLink rule-alias rbs)
+                             (MemberLink tv rule-alias rbs)))
+  (let* ((member (mk-member tv)))
+    (cog-set-atomspace! current-as)
+    member))
 
 (define-public (ure-add-rules rbs rules)
 "
