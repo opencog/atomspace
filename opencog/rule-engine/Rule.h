@@ -40,7 +40,10 @@ class Rule;
 class RuleSet : public std::set<Rule>
 {
 public:
-	// Run all meta rules and insert the resulting rules back in the rule set.
+	/**
+	 * Run all meta rules over as and insert the resulting rules back
+	 * in the rule set.
+	 */
 	void expand_meta_rules(AtomSpace& as);
 
 	/**

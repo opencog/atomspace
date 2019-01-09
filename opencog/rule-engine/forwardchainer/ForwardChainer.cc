@@ -415,7 +415,7 @@ void ForwardChainer::expand_meta_rules()
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	size_t rules_size = _rules.size();
-	_rules.expand_meta_rules(_rb_as);
+	_rules.expand_meta_rules(_kb_as);
 
 	if (rules_size != _rules.size()) {
 		ure_logger().debug() << "The rule set has gone from "
