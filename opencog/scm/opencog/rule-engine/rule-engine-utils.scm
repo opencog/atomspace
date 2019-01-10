@@ -8,7 +8,14 @@
 ;;
 ;; Utilities include:
 ;; -- ure-add-rule -- Associate a rule to a rbs with a certain TV
+;; -- ure-add-rule-by-name -- Associate a rule (by name) to a rbs with a certain TV
 ;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
+;; -- ure-add-rules-by-names -- Associate a list of rules (by names) and TV pairs to a rbs
+;; -- ure-rm-rule -- Remove rule from a rbs
+;; -- ure-rm-rule-by-name -- Remove rule from a rbs given the name of its alias
+;; -- ure-rm-rules -- Remove rules from a rbs
+;; -- ure-rm-rules-by-names -- Remove rules from a rbs given the names of its aliases
+;; -- ure-weighted-rules -- List all weighted rules of a given rule base
 ;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
@@ -263,45 +270,72 @@
 
 (define-public (ure-add-rule rbs rule-alias . tv)
 "
-  Adds a rule to a rulebase and sets its tv.
+  Given
 
-  rbs: The ConceptNode that represents a rulebase.
+  rbs: a ConceptNode that represents a rulebase,
 
-  rule-alias : A string that names the rule.
+  rule-alias : a DefinedSchemeNode of the rule,
 
-  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
+  tv (head): optional TV representing the probability (including
+             confidence) that the rule produces a desire outcome,
+
+  adds a rule to a rulebase and sets its tv.
+
+"
+  (if (null? tv)
+      (MemberLink rule-alias rbs)
+      (MemberLink tv rule-alias rbs)))
+
+(define-public (ure-add-rule-by-name rbs rule-name . tv)
+"
+  Given
+
+  rbs: The ConceptNode that represents a rulebase,
+
+  rule-name : a string of the rule name,
+
+  tv (head): Optional TV representing the probability (including
+             confidence) that the rule produces a desire outcome,
+
+  adds a rule to a rulebase and sets its tv, that is
+
+  Member
+    DefinedSchemaNode rule-name
+    rbs
+
+  The rule is added in the atomspace of rbs, if different from the
+  current one.
 "
   ;; Switch to rbs atomspace
   (define current-as (cog-set-atomspace! (cog-as rbs)))
-  (define (mk-member tv) (if (null? tv)
-                             (MemberLink rule-alias rbs)
-                             (MemberLink tv rule-alias rbs)))
-  (let* ((member (mk-member tv)))
+  (define rule-alias (DefinedSchemaNode rule-name))
+  (let ((member (apply ure-add-rule (cons rbs (cons rule-alias tv)))))
     (cog-set-atomspace! current-as)
     member))
 
 (define-public (ure-add-rules rbs rules)
 "
-  Given a rbs and a list of pairs rule-alias, tv, either represented as
+  Given
 
-  (list rule-alias tv)
+  rbs: a ConceptNode that represents a rulebase,
 
-  or
+  rules: A list of rule-alias, or rule-alias and tv pairs, represented as
 
-  (cons rule-alias tv)
+         (list rule-alias tv)
+
+         or
+
+         (cons rule-alias tv)
+
+         where rule-alias is the node alias of a rule in a DefineLink
+         already created. In case the TVs are not provided the default
+         TV is used.
 
   create for each rule
 
   MemberLink tv
     rule-alias
     rbs
-
-  rbs: The ConceptNode that represents a rulebase
-
-  rules: A list of rule-alias, or rule-alias and tv pairs (represented as
-         list or cons) , where rule-alias is the node alias of a rule in a
-         DefineLink already created. In case the TVs are not provided the
-         default TV is used.
 "
   (define (add-rule tved-rule)
     (if (pair? tved-rule)
@@ -314,6 +348,110 @@
 
   (for-each add-rule rules)
 )
+
+(define-public (ure-add-rules-by-names rbs rules)
+"
+  Given
+
+  rbs: a ConceptNode that represents a rulebase,
+
+  rules: A list of rule-names, or rule-name and tv pairs, represented as
+
+         (list rule-name tv)
+
+         or
+
+         (cons rule-name tv)
+
+         where rule-name is the rule name of DefinedSchemaNode rule
+         alias in a already created DefineLink. In case the TVs are not
+         provided the default TV is used.
+
+  create for each rule
+
+  MemberLink tv
+    DefinedSchemaNode rule-name
+    rbs
+
+  The rules are added in the atomspace of rbs, if different from the
+  current one.
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define (add-rule-by-name-in-rbs rule-name)
+    (ure-add-rule-by-name rbs rule-name))
+  (for-each add-rule-by-name-in-rbs rules)
+  (cog-set-atomspace! current-as)
+  *unspecified*)
+
+(define-public (ure-rm-rule rbs rule-alias)
+"
+  Given a rule-base and rule alias, remove the rule from the rule-base
+
+  That is remove from the rule-base atomspace
+
+  Member
+    <rule-alias>
+    <rbs>
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define member (MemberLink rule-alias rbs))
+  (cog-delete member)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-rm-rule-by-name rbs rule-name)
+"
+  Like ure-rm-rule but provide the name of the DefinedSchemaNode
+  instead of the atom (called alias)
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define rule-alias (DefinedSchemaNode rule-name))
+  (ure-rm-rule rbs rule-alias)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-rm-rules rbs rule-aliases)
+"
+  Given a list of rule aliases remove all of them (call ure-rm-rule
+  over all of them)
+"
+  (define rm-rule-from-rbs (lambda (rule-alias) (ure-rm-rule rbs rule-alias)))
+  (for-each rm-rule-from-rbs rule-aliases)
+)
+
+(define-public (ure-rm-rules-by-names rbs rule-names)
+"
+  Like ure-rm-rules but provide the names of the DefinedSchemaNode
+  to remove instead of the atoms (called aliases)
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define rule-aliases (map DefinedSchemaNode rule-names))
+  (ure-rm-rules rbs rule-aliases)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-weighted-rules rbs)
+"
+  List all weighted rules of rbs, as follow
+
+  ((tv-1 . rule-1)
+   ...
+   (tv-n . rule-n))
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (let* ((get-weighted-rule (lambda (x) (cons (cog-tv (MemberLink x rbs)) x)))
+         (weighted-rules (cog-map-chase-link 'MemberLink
+                                             'DefinedSchemaNode
+                                             get-weighted-rule
+                                             rbs))
+         ;; Remove extraneous list (no idea why it is here)
+         (clean-weighted-rules (map car weighted-rules)))
+
+    (cog-set-atomspace! current-as)
+    clean-weighted-rules))
 
 (define (ure-set-num-parameter rbs name value)
 "
@@ -718,7 +856,13 @@
           cog-bc
           ure-define-add-rule
           ure-add-rule
-          ure-add-rules
+          ure-add-rule-by-name
+          ure-add-rules-by-names
+          ure-weighted-rules
+          ure-rm-rule
+          ure-rm-rule-by-name
+          ure-rm-rules
+          ure-rm-rules-by-names
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
           ure-set-attention-allocation
