@@ -104,9 +104,6 @@ void InferenceSCM::init(void)
 
 	define_scheme_primitive("cog-mandatory-args-bc",
 		&InferenceSCM::do_backward_chaining, this, "rule-engine");
-
-	define_scheme_primitive("cog-rbs-rules",
-		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
 Handle InferenceSCM::do_forward_chaining(Handle rbs,
@@ -114,75 +111,53 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
                                          Handle vardecl,
                                          Handle focus_set_h)
 {
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
-    HandleSeq focus_set = {};
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
+	HandleSeq focus_set = {};
 
-    // A ListLink means that the variable declaration is undefined
-    if (vardecl->get_type() == LIST_LINK)
-	    vardecl = Handle::UNDEFINED;
+	// A ListLink means that the variable declaration is undefined
+	if (vardecl->get_type() == LIST_LINK)
+		vardecl = Handle::UNDEFINED;
 
-    if (focus_set_h->get_type() == SET_LINK)
-	    focus_set = focus_set_h->getOutgoingSet();
-    else
-	    throw RuntimeException(
-		    TRACE_INFO,
-		    "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+	if (focus_set_h->get_type() == SET_LINK)
+		focus_set = focus_set_h->getOutgoingSet();
+	else
+		throw RuntimeException(
+			TRACE_INFO,
+			"InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
 
-    ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
-    fc.do_chain();
-    HandleSet result = fc.get_chaining_result();
+	ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
+	fc.do_chain();
+	HandleSet result = fc.get_chaining_result();
 
-    return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
+	return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
 Handle InferenceSCM::do_backward_chaining(Handle rbs,
                                           Handle target,
                                           Handle vardecl,
                                           bool trace_enabled,
-                                          AtomSpace* trace_as,
+                                          AtomSpace *trace_as,
                                           bool control_enabled,
-                                          AtomSpace* control_as,
+                                          AtomSpace *control_as,
                                           Handle focus_link)
 {
-    // A ListLink means that the variable declaration is undefined
-    if (vardecl->get_type() == LIST_LINK)
-	    vardecl = Handle::UNDEFINED;
+	// A ListLink means that the variable declaration is undefined
+	if (vardecl->get_type() == LIST_LINK)
+		vardecl = Handle::UNDEFINED;
 
-    if (not trace_enabled)
-	    trace_as = nullptr;
+	if (not trace_enabled)
+		trace_as = nullptr;
 
-    if (not control_enabled)
-	    control_as = nullptr;
+	if (not control_enabled)
+		control_as = nullptr;
 
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
-    BackwardChainer bc(*as, rbs, target, vardecl, trace_as, control_as, focus_link);
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
+	BackwardChainer bc(*as, rbs, target, vardecl, trace_as, control_as, focus_link);
 
-    bc.do_chain();
+	bc.do_chain();
 
-    return bc.get_results();
+	return bc.get_results();
 }
-
-// XXX FIXME -- this appears to be dead code, that no one uses.
-// Can this be removed?
-Handle InferenceSCM::get_rulebase_rules(Handle rbs)
-{
-    if (Handle::UNDEFINED == rbs)
-        throw RuntimeException(TRACE_INFO,
-            "InferenceSCM::get_rulebase_rules - invalid rulebase!");
-
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-rbs-rules");
-    UREConfig ure_config(*as, rbs);
-    auto rules = ure_config.get_rules();
-    HandleSeq hs;
-
-    // Copy handles from a rule vector to a handle vector
-    for (auto i = rules.begin(); i != rules.end(); i++){
-        hs.push_back((*i).get_alias());
-    }
-
-    return createLink(hs, SET_LINK);
-}
-
 
 extern "C" {
 void opencog_ruleengine_init(void);
@@ -190,8 +165,8 @@ void opencog_ruleengine_init(void);
 
 void opencog_ruleengine_init(void)
 {
-    static InferenceSCM inference;
-    inference.module_init();
+	static InferenceSCM inference;
+	inference.module_init();
 }
 
 #endif // HAVE_GUILE

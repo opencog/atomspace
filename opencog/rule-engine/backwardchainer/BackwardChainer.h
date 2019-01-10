@@ -90,16 +90,49 @@ namespace opencog
 
 class BackwardChainer
 {
-    friend class ::BackwardChainerUTest;
+	friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, const Handle& rbs,
+	/**
+	 * CTor.
+	 *
+	 * @param kb_as              Knowledge-base atomspace
+	 * @param rb_as              Rule-base atomspace
+	 * @param rbs                Rule-base concept
+	 * @param target             Target to proof
+	 * @param vardecl            Variable declaration of the target
+	 * @param trace_as           Atomspace where to record the trace
+	 * @param control_as         Atomspace containing control rules
+	 * @param focus_set          Focus set (not implemented)
+	 * @param bitnode_fitness    BITNode fitness function
+	 * @param andbit_fitness     AndBIT (inference tree) fitness function
+	 */
+	BackwardChainer(AtomSpace& kb_as,
+	                AtomSpace& rb_as,
+	                const Handle& rbs,
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
-	                AtomSpace* trace_as=nullptr, // Where to record the trace
+	                AtomSpace* trace_as=nullptr,
 	                // TODO: maybe move the control and focus set to
 	                // the rbs configuration
-	                AtomSpace* control_as=nullptr, // Inference Control Rules
+	                AtomSpace* control_as=nullptr,
+	                const Handle& focus_set=Handle::UNDEFINED,
+	                // TODO: maybe wrap all fitnesses in a Fitness class
+	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
+	                const AndBITFitness& andbit_fitness=AndBITFitness());
+
+	/**
+	 * Like above, but use as rule-base atomspace, the atomspace of rbs
+	 * if any, otherwise use kb_as if rbs has no atomspace.
+	 */
+	BackwardChainer(AtomSpace& kb_as,
+	                const Handle& rbs,
+	                const Handle& target,
+	                const Handle& vardecl=Handle::UNDEFINED,
+	                AtomSpace* trace_as=nullptr,
+	                // TODO: maybe move the control and focus set to
+	                // the rbs configuration
+	                AtomSpace* control_as=nullptr,
 	                const Handle& focus_set=Handle::UNDEFINED,
 	                // TODO: maybe wrap all fitnesses in a Fitness class
 	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
@@ -181,9 +214,12 @@ private:
 	// this and-BIT may lead to a successful inference.
 	double operator()(const AndBIT& andbit) const;
 
-	// Atomspace containing the knowledge base, the rule base and
-	// where the final results will be dumped.
-	AtomSpace& _as;
+	// Atomspace containing the knowledge base and where the final
+	// results will be dumped.
+	AtomSpace& _kb_as;
+
+	// Atomspace containing the rule base, can be the same as _kb_as
+	AtomSpace& _rb_as;
 
 	// Contain the configuration
 	UREConfig _config;

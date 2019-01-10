@@ -8,7 +8,14 @@
 ;;
 ;; Utilities include:
 ;; -- ure-add-rule -- Associate a rule to a rbs with a certain TV
+;; -- ure-add-rule-by-name -- Associate a rule (by name) to a rbs with a certain TV
 ;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
+;; -- ure-add-rules-by-names -- Associate a list of rules (by names) and TV pairs to a rbs
+;; -- ure-rm-rule -- Remove rule from a rbs
+;; -- ure-rm-rule-by-name -- Remove rule from a rbs given the name of its alias
+;; -- ure-rm-rules -- Remove rules from a rbs
+;; -- ure-rm-rules-by-names -- Remove rules from a rbs given the names of its aliases
+;; -- ure-weighted-rules -- List all weighted rules of a given rule base
 ;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
@@ -66,53 +73,158 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 receive))
 
-(define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
+(define* (cog-fc rbs source
+                 #:key
+                 (vardecl (List))
+                 (focus-set (Set))
+                 (attention-allocation *unspecified*)
+                 (maximum-iterations *unspecified*)
+                 (complexity-penalty *unspecified*)
+                 (fc-retry-exhausted-sources *unspecified*))
 "
   Forward Chainer call.
 
-  Usage: (cog-fc rbs source #:vardecl vd #:focus-set fs)
+  Usage: (cog-fc rbs source
+                 #:vardecl vd
+                 #:focus-set fs
+                 #:attention-allocation aa
+                 #:maximum-iterations mi
+                 #:complexity-penalty cp
+                 #:fc-retry-exhausted-sources res)
 
   rbs: ConceptNode representing a rulebase.
 
   source: Source from where to start forward chaining. If a SetLink
           then multiple sources are considered.
 
-  vd: optional variable declaration of the source (in case it has
-      variables)
+  vd: [optional] Variable declaration of the source (in case it has
+      variables).
 
-  fs: optional focus-set, a SetLink with all atoms to consider for
-      forward chaining
+  fs: [optional] Focus set, a SetLink with all atoms to consider for
+      forward chaining.
+
+  aa: [optional] Whether the atoms involved with the
+      inference are restricted to the attentional focus.
+
+  mi: [optional] Maximum number of iterations.
+
+  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+      A high value means more breadth. A value of 0 means an equilibrium
+      between breadth and depth. A negative value means more depth.
+      Possible range is (-inf, +inf) but it's rarely necessary in practice
+      to go outside of [-10, 10].
+
+  res: [optional] Whether exhausted sources should be retried. A source is
+       exhausted if all its valid rules (so that at least one rule premise
+       unifies with the source) have been applied to it. Given that the
+       forward chainer results are added to the kb atomspace during forward
+       chaining, the same source may yield different results as time goes,
+       thus this option.
+
+  Note that optional arguments do not have defaults! That is in order not
+  to overwrite existing parameters set by ure-set-maximum-iterations and such.
+  If these parameters were not set at all, then the rule engine itself selects
+  defaults. These defaults will be logged in the log file.
 "
+  ;; Set optional parameters
+  (if (not (unspecified? attention-allocation))
+      (ure-set-attention-allocation rbs attention-allocation))
+  (if (not (unspecified? maximum-iterations))
+      (ure-set-maximum-iterations rbs maximum-iterations))
+  (if (not (unspecified? complexity-penalty))
+      (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? fc-retry-exhausted-sources))
+      (ure-set-fc-retry-exhausted-sources rbs fc-retry-exhausted-sources))
+
+  ;; Call the forward chainer
   (cog-mandatory-args-fc rbs source vardecl focus-set))
 
 (define* (cog-bc rbs target
                  #:key
-                 (vardecl (List)) (trace-as #f) (control-as #f) (focus-set (Set)))
+                 (vardecl (List))
+                 (trace-as #f)
+                 (control-as #f)
+                 (focus-set (Set))
+                 (attention-allocation *unspecified*)
+                 (maximum-iterations *unspecified*)
+                 (complexity-penalty *unspecified*)
+                 (bc-maximum-bit-size *unspecified*)
+                 (bc-mm-complexity-penalty *unspecified*)
+                 (bc-mm-compressiveness *unspecified*))
 "
   Backward Chainer call.
 
-  Usage: (cog-bc rbs target #:vardecl vd #:trace-as tas #:focus-set fs)
+  Usage: (cog-bc rbs target
+                 #:vardecl vd
+                 #:trace-as tas
+                 #:control-as cas
+                 #:focus-set fs
+                 #:attention-allocation aa
+                 #:maximum-iterations mi
+                 #:complexity-penalty cp
+                 #:bc-maximum-bit-size mbs
+                 #:bc-mm-complexity-penalty mcp
+                 #:bc-mm-compressiveness mc)
 
   rbs: ConceptNode representing a rulebase.
 
   target: Target to proof.
 
-  vardecl: [optional] Variable declaration of the target (in case it
-           has variables)
+  vd: [optional] Variable declaration of the target (in case it
+      has variables).
 
-  trace-as: [optional] AtomSpace to record the back-inference traces.
+  tas: [optional] AtomSpace to record the back-inference traces.
 
-  control-as: [optional] AtomSpace storing inference control rules.
+  cas: [optional] AtomSpace storing inference control rules.
 
-  focus-set: [optional] focus-set, a SetLink with all atoms to
-             consider for forward chaining (NOT IMPLEMENTED).
+  fs: [optional] focus-set, a SetLink with all atoms to
+      consider for forward chaining (Not Implemented).
+
+  aa: [optional] Whether the atoms involved with the
+      inference are restricted to the attentional focus.
+
+  mi: [optional] Maximum number of iterations.
+
+  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+      A high value means more breadth. A value of 0 means an equilibrium
+      between breadth and depth. A negative value means more depth.
+      Possible range is (-inf, +inf) but it's rarely necessary in practice
+      to go outside of [-10, 10].
+
+  mbs: [optional] Maximum size of the inference tree pool to evolve.
+
+  mcp: [optional] Complexity penalty applied to the control rules during
+       Bayesian Model Averaging.
+
+  mc: [optional] Compressiveness parameter for partial control rules
+      (how well a control rule can explain data outside of its context).
+
+  Note that optional arguments do not have defaults! That is in order not
+  to overwrite existing parameters set by ure-set-maximum-iterations and such.
+  If these parameters were not set at all, then the rule engine itself selects
+  defaults. These defaults will be logged in the log file.
 "
+  ;; Set optional parameters
+  (if (not (unspecified? attention-allocation))
+      (ure-set-attention-allocation rbs attention-allocation))
+  (if (not (unspecified? maximum-iterations))
+      (ure-set-maximum-iterations rbs maximum-iterations))
+  (if (not (unspecified? complexity-penalty))
+      (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? bc-maximum-bit-size))
+      (ure-set-bc-maximum-bit-size rbs bc-maximum-bit-size))
+  (if (not (unspecified? bc-mm-complexity-penalty))
+      (ure-set-bc-mm-complexity-penalty rbs bc-mm-complexity-penalty))
+  (if (not (unspecified? bc-mm-compressiveness))
+      (ure-set-bc-mm-compressiveness rbs bc-mm-compressiveness))
+
+  ;; Defined optional atomspaces and call the backward chainer
   (let* ((trace-enabled (cog-atomspace? trace-as))
          (control-enabled (cog-atomspace? control-as))
          (tas (if trace-enabled trace-as (cog-atomspace)))
          (cas (if control-enabled control-as (cog-atomspace))))
-  (cog-mandatory-args-bc rbs target vardecl
-                         trace-enabled tas control-enabled cas focus-set)))
+    (cog-mandatory-args-bc rbs target vardecl
+                           trace-enabled tas control-enabled cas focus-set)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URE Configuration Helpers ;;
@@ -120,9 +232,15 @@
 
 (define-public (ure-define-add-rule rbs rule-name rule . tv)
 "
-
   Associate a rule name and a rule content, and adds it to a rulebase
   with a given TV and returns the rule alias (DefinedSchemaNode <rule-name>).
+  That is add the following
+
+  MemberLink <tv>
+    (DefinedSchemaNode <rule-name>)
+    rbs
+
+  MemberLink and DefinedSchemaNode are added in the same atomspace as rbs.
 
   rbs: The ConceptNode that represents a rulebase.
 
@@ -130,112 +248,259 @@
 
   rule: The BindLink that is run.
 
-  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
+  tv: [optional] TV representing the probability and its confidence
+      that the rule produces a desire outcome.
 "
-    ; Didn't add type checking here b/c the ure-configuration format isn't
-    ; set in stone yet. And the best place to do that is in c++ UREConfig
+    ;; Switch to rbs atomspace
+    (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+    (define (mk-member tv) (if (null? tv)
+                               (MemberLink rule-alias rbs)
+                               (MemberLink tv rule-alias rbs)))
+
+    ;; Didn't add type checking here b/c the ure-configuration format isn't
+    ;; set in stone yet. And the best place to do that is in c++ UREConfig
     (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
-
-        (if (null? tv)
-            (MemberLink
-               alias
-               rbs)
-            (MemberLink (car tv)
-               alias
-               rbs))
-
+        (mk-member tv)
+        (cog-set-atomspace! current-as)
         alias
     )
 )
 
 (define-public (ure-add-rule rbs rule-alias . tv)
 "
-  Adds a rule to a rulebase and sets its tv.
+  Given
 
-  rbs: The ConceptNode that represents a rulebase.
+  rbs: a ConceptNode that represents a rulebase,
 
-  rule-alias : A string that names the rule.
+  rule-alias : a DefinedSchemeNode of the rule,
 
-  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
+  tv (head): optional TV representing the probability (including
+             confidence) that the rule produces a desire outcome,
+
+  adds a rule to a rulebase and sets its tv.
+
 "
   (if (null? tv)
-      (MemberLink
-        rule-alias
-        rbs)
-      (MemberLink (car tv)
-        rule-alias
-        rbs))
-)
+      (MemberLink rule-alias rbs)
+      (MemberLink tv rule-alias rbs)))
+
+(define-public (ure-add-rule-by-name rbs rule-name . tv)
+"
+  Given
+
+  rbs: The ConceptNode that represents a rulebase,
+
+  rule-name : a string of the rule name,
+
+  tv (head): Optional TV representing the probability (including
+             confidence) that the rule produces a desire outcome,
+
+  adds a rule to a rulebase and sets its tv, that is
+
+  Member
+    DefinedSchemaNode rule-name
+    rbs
+
+  The rule is added in the atomspace of rbs, if different from the
+  current one.
+"
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define rule-alias (DefinedSchemaNode rule-name))
+  (let ((member (apply ure-add-rule (cons rbs (cons rule-alias tv)))))
+    (cog-set-atomspace! current-as)
+    member))
 
 (define-public (ure-add-rules rbs rules)
 "
-  Given a rbs and a list of pairs (rule-alias tv) create for each rule
+  Given
+
+  rbs: a ConceptNode that represents a rulebase,
+
+  rules: A list of rule-alias, or rule-alias and tv pairs, represented as
+
+         (list rule-alias tv)
+
+         or
+
+         (cons rule-alias tv)
+
+         where rule-alias is the node alias of a rule in a DefineLink
+         already created. In case the TVs are not provided the default
+         TV is used.
+
+  create for each rule
 
   MemberLink tv
     rule-alias
     rbs
-
-  rbs: The ConceptNode that represents a rulebase
-
-  rules: A list of rule-alias, or rule-alias and tv pairs, where rule-alias
-         is the node alias of a rule in a DefineLink already created.
-         In case the TVs are not provided the default TV is used
 "
   (define (add-rule tved-rule)
-    (if (list? tved-rule)
+    (if (pair? tved-rule)
         (let* ((rule-alias (car tved-rule))
-               (tv (cadr tved-rule)))
+               (tv (if (list? tved-rule)
+                       (cadr tved-rule)
+                       (cdr tved-rule))))
           (ure-add-rule rbs rule-alias tv))
         (ure-add-rule rbs tved-rule)))
 
   (for-each add-rule rules)
 )
 
+(define-public (ure-add-rules-by-names rbs rules)
+"
+  Given
+
+  rbs: a ConceptNode that represents a rulebase,
+
+  rules: A list of rule-names, or rule-name and tv pairs, represented as
+
+         (list rule-name tv)
+
+         or
+
+         (cons rule-name tv)
+
+         where rule-name is the rule name of DefinedSchemaNode rule
+         alias in a already created DefineLink. In case the TVs are not
+         provided the default TV is used.
+
+  create for each rule
+
+  MemberLink tv
+    DefinedSchemaNode rule-name
+    rbs
+
+  The rules are added in the atomspace of rbs, if different from the
+  current one.
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define (add-rule-by-name-in-rbs rule-name)
+    (ure-add-rule-by-name rbs rule-name))
+  (for-each add-rule-by-name-in-rbs rules)
+  (cog-set-atomspace! current-as)
+  *unspecified*)
+
+(define-public (ure-rm-rule rbs rule-alias)
+"
+  Given a rule-base and rule alias, remove the rule from the rule-base
+
+  That is remove from the rule-base atomspace
+
+  Member
+    <rule-alias>
+    <rbs>
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define member (MemberLink rule-alias rbs))
+  (cog-delete member)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-rm-rule-by-name rbs rule-name)
+"
+  Like ure-rm-rule but provide the name of the DefinedSchemaNode
+  instead of the atom (called alias)
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define rule-alias (DefinedSchemaNode rule-name))
+  (ure-rm-rule rbs rule-alias)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-rm-rules rbs rule-aliases)
+"
+  Given a list of rule aliases remove all of them (call ure-rm-rule
+  over all of them)
+"
+  (define rm-rule-from-rbs (lambda (rule-alias) (ure-rm-rule rbs rule-alias)))
+  (for-each rm-rule-from-rbs rule-aliases)
+)
+
+(define-public (ure-rm-rules-by-names rbs rule-names)
+"
+  Like ure-rm-rules but provide the names of the DefinedSchemaNode
+  to remove instead of the atoms (called aliases)
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (define rule-aliases (map DefinedSchemaNode rule-names))
+  (ure-rm-rules rbs rule-aliases)
+  (cog-set-atomspace! current-as)
+  *unspecified*
+)
+
+(define-public (ure-weighted-rules rbs)
+"
+  List all weighted rules of rbs, as follow
+
+  ((tv-1 . rule-1)
+   ...
+   (tv-n . rule-n))
+"
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+  (let* ((get-weighted-rule (lambda (x) (cons (cog-tv (MemberLink x rbs)) x)))
+         (weighted-rules (cog-map-chase-link 'MemberLink
+                                             'DefinedSchemaNode
+                                             get-weighted-rule
+                                             rbs))
+         ;; Remove extraneous list (no idea why it is here)
+         (clean-weighted-rules (map car weighted-rules)))
+
+    (cog-set-atomspace! current-as)
+    clean-weighted-rules))
+
 (define (ure-set-num-parameter rbs name value)
 "
   Set numerical parameters. Given an rbs, a parameter name and its
-  value, create
+  value, create (in the same atomspace where rbs lives)
 
   ExecutionLink
      SchemaNode name
      rbs
      NumberNode value
 
-  It will also delete the any
-
-  ExecutionLink
-     SchemaNode name
-     rbs
-     *
-
-  to be sure there is ever only one value associated to that
-  parameter. The value is automatically converted into string.
+  If a value already exists it first delete it to make sure there is
+  only one value associated to that parameter and rule-base.
 "
-  (define (param-hypergraph atom)
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+  (define (param-execution atom)
     (ExecutionLink
        (SchemaNode name)
        rbs
        atom)
   )
-  (let ((del-prev-val (BindLink
-                          (param-hypergraph (VariableNode "__VALUE__"))
-                          (DeleteLink
-                             (param-hypergraph (VariableNode "__VALUE__"))))))
-       ; Delete any previous value for that parameter
-       (cog-execute! del-prev-val)
-       ; Delete pattern to not create to much junk in the atomspace
-       (extract-hypergraph del-prev-val)
+
+  ;; Delete existing value if any
+  (let* ((var (VariableNode "__VALUE__"))
+         (exec-var (param-execution var))
+         (del-prev-val (BindLink
+                         exec-var
+                         (DeleteLink exec-var))))
+    ;; Delete any previous value for that parameter
+    (cog-execute! del-prev-val)
+    ;; Delete pattern to not create to much junk in the atomspace
+    (cog-delete del-prev-val)
+    (cog-delete (DeleteLink exec-var))
+    (cog-delete exec-var)
+    (cog-delete var)
   )
 
-  ; Set new value for that parameter
-  (param-hypergraph (NumberNode value))
-)
+  ; Set new value for that parameter, switch back to current-as and
+  ; return new value.
+  (let ((new-param-exec (param-execution (NumberNode value))))
+    (cog-set-atomspace! current-as)
+    new-param-exec))
 
 (define (ure-set-fuzzy-bool-parameter rbs name value)
 "
   Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
-  value, create (or overwrite)
+  value, create or overwrite (in the same atomspace where rbs lives)
 
   EvaluationLink (stv value 1)
      PredicateNode name
@@ -244,10 +509,21 @@
   If the provided value is a boolean, then it is automatically
   converted into tv.
 "
-  (let* ((tv (if (number? value) (stv value 1) (bool->tv value))))
+  ;; Switch to rbs atomspace
+  (define current-as (cog-set-atomspace! (cog-as rbs)))
+
+  (define (param-evaluation tv)
     (EvaluationLink tv
-      (PredicateNode name)
-      rbs)))
+       (PredicateNode name)
+       rbs)
+  )
+
+  ;; Set new value for that parameter, switch back to
+  ;; current-as and return new value.
+  (let* ((tv (if (number? value) (stv value 1) (bool->tv value)))
+         (new-param-eval (param-evaluation tv)))
+    (cog-set-atomspace! current-as)
+    new-param-eval))
 
 (define (ure-set-attention-allocation rbs value)
 "
@@ -277,19 +553,6 @@
 "
   (ure-set-num-parameter rbs "URE:maximum-iterations" value))
 
-(define (ure-set-fc-retry-exhausted-sources rbs value)
-"
-  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
-
-  EvaluationLink (stv value 1)
-    PredicateNode \"URE:FC:retry-exhausted-sources\"
-    rbs
-
-  If the provided value is a boolean, then it is automatically
-  converted into tv.
-"
-  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
-
 (define (ure-set-complexity-penalty rbs value)
 "
   Set the URE:complexity-penalty parameter of a given RBS
@@ -302,6 +565,19 @@
   Delete any previous one if exists.
 "
   (ure-set-num-parameter rbs "URE:complexity-penalty" value))
+
+(define (ure-set-fc-retry-exhausted-sources rbs value)
+"
+  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
+
+  EvaluationLink (stv value 1)
+    PredicateNode \"URE:FC:retry-exhausted-sources\"
+    rbs
+
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
+"
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
 
 (define (ure-set-bc-maximum-bit-size rbs value)
 "
@@ -580,7 +856,13 @@
           cog-bc
           ure-define-add-rule
           ure-add-rule
-          ure-add-rules
+          ure-add-rule-by-name
+          ure-add-rules-by-names
+          ure-weighted-rules
+          ure-rm-rule
+          ure-rm-rule-by-name
+          ure-rm-rules
+          ure-rm-rules-by-names
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
           ure-set-attention-allocation

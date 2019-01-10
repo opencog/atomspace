@@ -49,7 +49,11 @@ class ForwardChainer
 private:
 	friend class ::ForwardChainerUTest;
 
-	AtomSpace& _as;
+	// Knowledge base atomspace
+	AtomSpace& _kb_as;
+
+	// Rule base atomspace (can be the same as _kb_as)
+	AtomSpace& _rb_as;
 
 	// The focus set is copied into this atomspace; during chaining,
 	// the pattern matcher is applied only to this atomspace.  This
@@ -121,12 +125,32 @@ protected:
 
 public:
 	/**
-	 * Ctor. rbs is a Handle pointing to rule-based system.
+	 * Ctor.
+	 *
+	 * @param kb_as     Knowledge-base atomspace
+	 * @param rb_as     Rule-base atomspace
+	 * @param rbs       Handle pointing to rule-based system.
+	 * @param source    Source to start with, if it is a pattern, or a Set,
+	 *                  multiple sources are considered
+	 * @param vardecl   Variable declaration of Source if pattern
+	 * @param focus_set Set of atoms under focus
 	 */
-	ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& source,
+	ForwardChainer(AtomSpace& kb_as,
+	               AtomSpace& rb_as,
+	               const Handle& rbs,
+	               const Handle& source,
 	               const Handle& vardecl=Handle::UNDEFINED,
-	               const HandleSeq& focus_set=HandleSeq(),
-	               source_selection_mode sm=source_selection_mode::UNIFORM);
+	               const HandleSeq& focus_set=HandleSeq());
+
+	/**
+	 * Like above, but use as rule-base atomspace, the atomspace of rbs
+	 * if any, otherwise use kb_as if rbs has no atomspace.
+	 */
+	ForwardChainer(AtomSpace& kb_as,
+	               const Handle& rbs,
+	               const Handle& source,
+	               const Handle& vardecl=Handle::UNDEFINED,
+	               const HandleSeq& focus_set=HandleSeq());
 	~ForwardChainer();
 
 	/**
