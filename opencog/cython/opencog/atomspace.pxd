@@ -88,12 +88,12 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
         bint is_atom()
         bint is_node()
         bint is_link()
-        
+
         string to_string()
         string to_short_string()
         bint operator==(const cValue&)
         bint operator!=(const cValue&)
-    
+
     ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
 cdef class Value:
@@ -128,7 +128,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     ctypedef shared_ptr[cAtom] cAtomPtr "opencog::AtomPtr"
-    
+
     cdef cppclass cHandle "opencog::Handle" (cAtomPtr):
         cHandle()
         cHandle(const cHandle&)
@@ -236,13 +236,13 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
         const vector[double]& value() const;
-    
+
     cdef cValuePtr createFloatValue(...)
 
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
         const vector[string]& value() const;
-    
+
     cdef cValuePtr createStringValue(...)
 
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
