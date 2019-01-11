@@ -27,7 +27,6 @@
 ;; -- ure-set-bc-mm-compressiveness -- Set the URE:BC:MM:compressiveness
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
-;; -- ure-get-forward-rule -- Return the forward form of a rule
 ;; -- ure-logger-set-level! -- Set level of the URE logger
 ;; -- ure-logger-get-level -- get level of the URE logger
 ;; -- ure-logger-set-filename! -- set filename of the URE logger
@@ -633,14 +632,6 @@
     (ure-set-num-parameter rbs "URE:maximum-iterations"  iteration)
 
     rbs
-)
-
-(define-public (ure-get-forward-rule rule)
-"
-  Given a rule return the forward form
-"
-  (let ((rule-type (cog-type rule)))
-    (if (eq? rule-type 'ListLink) (gar rule) rule))
 )
 
 ;;;;;;;;;;;;;;;;
