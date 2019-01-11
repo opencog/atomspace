@@ -250,3 +250,6 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         const vector[cValuePtr]& value() const;
 
     cdef cValuePtr createLinkValue(...)
+
+cdef cValue* get_value_ptr(Value protoAtom)
+
