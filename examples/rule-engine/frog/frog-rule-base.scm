@@ -78,23 +78,11 @@
 
 (define frog-rb (Concept "frog-rb"))
 
-(Inheritance
-  frog-rb
-  (Concept "URE")
-)
+;; Add rules to frog-rb
+(ure-add-rules frog-rb
+               (list
+                (cons if-croaks-and-eats-flies-then-frog-rule-name (stv 0.9 1))
+                (cons if-frog-then-green-rule-name (stv 0.5 1))))
 
-(Execution
-  (Schema "URE:maximum-iterations")
-  frog-rb
-  (Number 20)
-)
-
-(Member (stv 0.9 1)
-  if-croaks-and-eats-flies-then-frog-rule-name
-  frog-rb
-)
-
-(Member (stv 0.5 1)
-  if-frog-then-green-rule-name
-  frog-rb
-)
+;; Set URE parameters
+(ure-set-maximum-iterations frog-rb 20)

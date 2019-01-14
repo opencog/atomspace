@@ -459,7 +459,7 @@ public:
 	           const BITNode& bitnode) const;
 
 private:
-    // Queried atomspace
+	// Queried atomspace
 	AtomSpace* _as;
 
 	Handle _init_target;

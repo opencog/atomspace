@@ -704,11 +704,12 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///    (GetLink (Equal (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
-/// If the ImplicationLink is suitably simple, it can be added
-/// added s a ordinary clause, and searched for as if it was "present".
+/// If the ImplicationLink is suitably simple, it can be added added
+/// as an ordinary clause, and searched for as if it was "present".
+///
 /// XXX FIXME: the code here assumes that the situation is indeed
 /// simple: more complex cases are not handled correctly.  Doing this
-/// correctly would require iteratating again, and examining the
+/// correctly would require iterating again, and examining the
 /// contents of the left and right side of the EqualLink... ugh.
 ///
 bool PatternLink::add_dummies()
