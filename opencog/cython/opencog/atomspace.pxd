@@ -253,3 +253,4 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
 
 cdef cValue* get_value_ptr(Value protoAtom)
 
+include "ptrvalue.pxd"
