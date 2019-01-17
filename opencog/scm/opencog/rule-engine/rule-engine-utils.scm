@@ -253,15 +253,15 @@
     ;; Switch to rbs atomspace
     (define current-as (cog-set-atomspace! (cog-as rbs)))
 
-    (define (mk-member tv) (if (null? tv)
-                               (MemberLink rule-alias rbs)
-                               (MemberLink tv rule-alias rbs)))
+    (define (mk-member alias tv) (if (null? tv)
+                                     (MemberLink alias rbs)
+                                     (MemberLink tv alias rbs)))
 
     ;; Didn't add type checking here b/c the ure-configuration format isn't
     ;; set in stone yet. And the best place to do that is in c++ UREConfig
     (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
-        (mk-member tv)
+        (mk-member alias tv)
         (cog-set-atomspace! current-as)
         alias
     )
