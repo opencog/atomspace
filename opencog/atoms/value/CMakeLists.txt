@@ -6,7 +6,7 @@ ADD_LIBRARY (value
 	LinkValue.cc
 	RandomStream.cc
 	StreamValue.cc
-	StringValue.cc
+	StringSeqValue.cc
 	ValueFactory.cc
 )
 
@@ -28,7 +28,7 @@ INSTALL (FILES
 	Value.h
 	RandomStream.h
 	StreamValue.h
-	StringValue.h
+	StringSeqValue.h
 	ValueFactory.h
 	DESTINATION "include/opencog/atoms/value"
 )

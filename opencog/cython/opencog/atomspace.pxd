@@ -239,11 +239,11 @@ cdef extern from "opencog/atoms/value/FloatSeqValue.h" namespace "opencog":
 
     cdef cValuePtr createFloatSeqValue(...)
 
-cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
-    cdef cppclass cStringValue "opencog::StringValue":
+cdef extern from "opencog/atoms/value/StringSeqValue.h" namespace "opencog":
+    cdef cppclass cStringSeqValue "opencog::StringSeqValue":
         const vector[string]& value() const;
 
-    cdef cValuePtr createStringValue(...)
+    cdef cValuePtr createStringSeqValue(...)
 
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/StringValue.h
+ * opencog/atoms/value/StringSeqValue.h
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_STRING_VALUE_H
-#define _OPENCOG_STRING_VALUE_H
+#ifndef _OPENCOG_STRING_SEQ_VALUE_H
+#define _OPENCOG_STRING_SEQ_VALUE_H
 
 #include <string>
 #include <vector>
@@ -36,21 +36,21 @@ namespace opencog
  */
 
 /**
- * StringValues hold an ordered vector of std::strings.
+ * StringSeqValues hold an ordered vector of std::strings.
  */
-class StringValue
+class StringSeqValue
 	: public Value
 {
 protected:
 	std::vector<std::string> _value;
 
 public:
-	StringValue(const std::string& v)
-		: Value(STRING_VALUE) { _value.push_back(v); }
-	StringValue(const std::vector<std::string>& v)
-		: Value(STRING_VALUE), _value(v) {}
+	StringSeqValue(const std::string& v)
+		: Value(STRING_SEQ_VALUE) { _value.push_back(v); }
+	StringSeqValue(const std::vector<std::string>& v)
+		: Value(STRING_SEQ_VALUE), _value(v) {}
 
-	virtual ~StringValue() {}
+	virtual ~StringSeqValue() {}
 
 	const std::vector<std::string>& value() const { return _value; }
 
@@ -61,17 +61,17 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<const StringValue> StringValuePtr;
-static inline StringValuePtr StringValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<const StringValue>(a); }
+typedef std::shared_ptr<const StringSeqValue> StringSeqValuePtr;
+static inline StringSeqValuePtr StringSeqValueCast(const ValuePtr& a)
+	{ return std::dynamic_pointer_cast<const StringSeqValue>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<StringValue> createStringValue(Type&&... args) {
-	return std::make_shared<StringValue>(std::forward<Type>(args)...);
+static inline std::shared_ptr<StringSeqValue> createStringSeqValue(Type&&... args) {
+	return std::make_shared<StringSeqValue>(std::forward<Type>(args)...);
 }
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_STRING_VALUE_H
+#endif // _OPENCOG_STRING_SEQ_VALUE_H

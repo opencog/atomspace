@@ -14,11 +14,11 @@
 (define f (FloatSeqValue 0.1 0.2 3.3 4.5678))
 
 ; or lists of strings:
-(define s (StringValue "asdf" "gh" "jkl;"))
+(define s (StringSeqValue "asdf" "gh" "jkl;"))
 
 ; or lists of other values or atoms.  Thus, they can be heirarchical.
 (define l (LinkValue
-  (Concept "foobar") (StringValue "property") (FloatSeqValue 42)))
+  (Concept "foobar") (StringSeqValue "property") (FloatSeqValue 42)))
 
 ; A list of values can be converted into an ordinary scheme list:
 (cog-value->list f)

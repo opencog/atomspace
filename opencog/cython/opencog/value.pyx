@@ -76,9 +76,9 @@ cdef class Value:
         if self.is_a(types.FloatSeqValue):
             return vector_of_doubles_to_list(
                 &((<cFloatSeqValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.StringValue):
+        elif self.is_a(types.StringSeqValue):
             return vector_of_strings_to_list(
-                &((<cStringValue*>get_value_ptr(self)).value()))
+                &((<cStringSeqValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.LinkValue):
             return vector_of_values_to_list(
                 &((<cLinkValue*>get_value_ptr(self)).value()))

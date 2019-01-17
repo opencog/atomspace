@@ -756,7 +756,7 @@
 "
  cog-new-value TYPE LIST
     Create a new value of type TYPE, hold the LIST of strings, floats
-    or values.  The TYPE must be either 'StringValue, 'FloatSeqValue
+    or values.  The TYPE must be either 'StringSeqValue, 'FloatSeqValue
     or 'LinkValue. The LIST must be an ordinary guile list, consisting
     entirely of guile strings, guile numbers, or opencog values,
     respectively, for each of the three types.
@@ -765,14 +765,14 @@
        guile> (cog-new-value 'FloatSeqValue 1 2 3))
        (FloatSeqValue 1.000000 2.000000 3.00000)
 
-       guile> (cog-new-value 'StringValue \"foo\" \"bar\")
-       (StringValue \"foo\" \"bar\")
+       guile> (cog-new-value 'StringSeqValue \"foo\" \"bar\")
+       (StringSeqValue \"foo\" \"bar\")
 
        guile> (cog-new-value 'LinkValue
-             (Concept \"foo\") (StringValue \"bar\"))
+             (Concept \"foo\") (StringSeqValue \"bar\"))
        (LinkValue
            (ConceptNode \"foo\")
-           (StringValue \"bar\")
+           (StringSeqValue \"bar\")
        )
 ")
 
@@ -836,7 +836,7 @@
     Return a scheme list holding the values in the opencog VALUE.
     If VALUE is a Link, this returns the outgoing set.
     If VALUE is a Node, this returns list containing the node name.
-    If VALUE is a StringValue, FloatSeqValue or LinkValue, this returns
+    If VALUE is a StringSeqValue, FloatSeqValue or LinkValue, this returns
         the associated list of values.
 
     Example:
@@ -851,7 +851,7 @@
     If VALUE is a Link, this returns the N'th atom in the outgoing set.
         That is, it returns the same atom as cog-outgoing-atom.
     If VALUE is a Node, and N is zero, this returns the node name.
-    If VALUE is a StringValue, FloatSeqValue or LinkValue, this returns
+    If VALUE is a StringSeqValue, FloatSeqValue or LinkValue, this returns
         the N'th entry in the value.
 
     This returns the same result as

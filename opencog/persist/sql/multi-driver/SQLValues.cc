@@ -27,7 +27,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
@@ -69,7 +69,7 @@ std::string SQLAtomStorage::float_to_string(const FloatSeqValuePtr& fvle)
 	return str;
 }
 
-std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
+std::string SQLAtomStorage::string_to_string(const StringSeqValuePtr& svle)
 {
 	bool not_first = false;
 	std::string str = "\'{";
@@ -226,9 +226,9 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		STMT("floatvalue", fstr);
 	}
 	else
-	if (nameserver().isA(vtype, STRING_VALUE))
+	if (nameserver().isA(vtype, STRING_SEQ_VALUE))
 	{
-		StringValuePtr fvp = StringValueCast(pap);
+		StringSeqValuePtr fvp = StringSeqValueCast(pap);
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
@@ -285,9 +285,9 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 		STMT("floatvalue", fstr);
 	}
 	else
-	if (nameserver().isA(vtype, STRING_VALUE))
+	if (nameserver().isA(vtype, STRING_SEQ_VALUE))
 	{
-		StringValuePtr fvp = StringValueCast(pap);
+		StringSeqValuePtr fvp = StringSeqValueCast(pap);
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
@@ -354,7 +354,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
 	// Split it along the commas.
-	if (vtype == STRING_VALUE)
+	if (vtype == STRING_SEQ_VALUE)
 	{
 		std::vector<std::string> strarr;
 		char *s = strdup(rp.strval);
@@ -378,7 +378,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			p++;
 		}
 		free(s);
-		return createStringValue(strarr);
+		return createStringSeqValue(strarr);
 	}
 
 	// We expect rp.fltval to be of the form

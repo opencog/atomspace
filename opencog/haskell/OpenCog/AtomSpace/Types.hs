@@ -27,7 +27,7 @@ data Atom = Link AtomType [Atom] TruthVal
           deriving (Eq,Show,Read)
 
 data Value = FloatSeqValue     AtomType    [Double]
-           | StringValue    AtomType    String
+           | StringSeqValue    AtomType    String
            | LinkValue      AtomType    [Value]
 
 -- | 'TruthVal' represent the different types of TruthValues.

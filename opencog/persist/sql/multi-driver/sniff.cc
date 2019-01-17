@@ -15,7 +15,7 @@
 
 #include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspaceutils/TLB.h>
@@ -197,7 +197,7 @@ int main ()
     ValuationPtr valf = createValuation(key, atom, pvf);
     store->storeValuation(valf);
 
-    ValuePtr pvs = createStringValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+    ValuePtr pvs = createStringSeqValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
     ValuationPtr vals = createValuation(key, atom, pvs);
     store->storeValuation(vals);
 

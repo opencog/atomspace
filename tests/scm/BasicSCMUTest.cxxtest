@@ -393,9 +393,9 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to create key", not eval->eval_error());
 	eval->eval("(define f (FloatSeqValue 0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to create float", not eval->eval_error());
-	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
+	eval->eval("(define s (StringSeqValue \"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
-	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
+	eval->eval("(define ss (StringSeqValue \"ddd\" \"eee\" \"fff\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define t (stv 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
@@ -477,9 +477,9 @@ void BasicSCMUTest::test_value_list(void)
 	TSM_ASSERT("Failed to create key", not eval->eval_error());
 	eval->eval("(define f (FloatSeqValue 0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to create float", not eval->eval_error());
-	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
+	eval->eval("(define s (StringSeqValue \"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
-	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
+	eval->eval("(define ss (StringSeqValue \"ddd\" \"eee\" \"fff\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define t (stv 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());

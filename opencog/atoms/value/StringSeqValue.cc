@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/StringValue.cc
+ * opencog/atoms/value/StringSeqValue.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -20,16 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool StringValue::operator==(const Value& other) const
+bool StringSeqValue::operator==(const Value& other) const
 {
-	if (STRING_VALUE != other.get_type()) return false;
+	if (STRING_SEQ_VALUE != other.get_type()) return false;
 
-	const StringValue* sov = (const StringValue*) &other;
+	const StringSeqValue* sov = (const StringSeqValue*) &other;
 
 	if (_value.size() != sov->_value.size()) return false;
 	size_t len = _value.size();
@@ -40,7 +40,7 @@ bool StringValue::operator==(const Value& other) const
 
 // ==============================================================
 
-std::string StringValue::to_string(const std::string& indent) const
+std::string StringSeqValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	for (std::string v :_value)
@@ -50,7 +50,7 @@ std::string StringValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(STRING_VALUE,
-                     createStringValue, std::vector<std::string>)
-DEFINE_VALUE_FACTORY(STRING_VALUE,
-                     createStringValue, std::string)
+DEFINE_VALUE_FACTORY(STRING_SEQ_VALUE,
+                     createStringSeqValue, std::vector<std::string>)
+DEFINE_VALUE_FACTORY(STRING_SEQ_VALUE,
+                     createStringSeqValue, std::string)

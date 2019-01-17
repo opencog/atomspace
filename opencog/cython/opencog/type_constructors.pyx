@@ -8,7 +8,7 @@
 #
 
 from opencog.atomspace import AtomSpace, TruthValue, types
-from atomspace cimport (cValuePtr, createFloatSeqValue, createStringValue,
+from atomspace cimport (cValuePtr, createFloatSeqValue, createStringSeqValue,
                         createLinkValue, Value, createProtoAtom,
                         cValuePtr)
 from libcpp.vector cimport vector
@@ -50,11 +50,11 @@ cdef createValue(type, arg):
             result = createFloatSeqValue(list_of_doubles_to_vector(arg))
         else:
             result = createFloatSeqValue(<double>arg)
-    elif type == types.StringValue:
+    elif type == types.StringSeqValue:
         if (isinstance(arg, list)):
-            result = createStringValue(list_of_strings_to_vector(arg))
+            result = createStringSeqValue(list_of_strings_to_vector(arg))
         else:
-            result = createStringValue(<string>(arg.encode('UTF-8')))
+            result = createStringSeqValue(<string>(arg.encode('UTF-8')))
     elif type == types.LinkValue:
         if (isinstance(arg, list)):
             result = createLinkValue(list_of_values_to_vector(arg))

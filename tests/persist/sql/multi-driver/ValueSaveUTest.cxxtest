@@ -37,7 +37,7 @@
 
 #include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
@@ -336,7 +336,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
-	ValuePtr pvs = createStringValue(
+	ValuePtr pvs = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	atom->setValue(key, pvs);
@@ -461,7 +461,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	check_one(pvf, fkey);
 
 	// --------------------
-	ValuePtr pvs = createStringValue(
+	ValuePtr pvs = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	check_one(pvs, fkey);
@@ -520,7 +520,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	af->setTruthValue(tf);
 
 	// --------------------
-	ValuePtr pvt = createStringValue(
+	ValuePtr pvt = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 
@@ -659,7 +659,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	cf->setTruthValue(tf);
 
 	// --------------------
-	ValuePtr pvt = createStringValue(
+	ValuePtr pvt = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 	bt->setValue(key, pvt);
@@ -872,7 +872,7 @@ void ValueSaveUTest::do_test_incoming()
 	cf->setTruthValue(tf);
 
 	// --------------------
-	ValuePtr pvt = createStringValue(
+	ValuePtr pvt = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 	bt->setValue(key, pvt);
@@ -1074,7 +1074,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	af->setTruthValue(tf);
 
 	// --------------------
-	ValuePtr pvt = createStringValue(
+	ValuePtr pvt = createStringSeqValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 

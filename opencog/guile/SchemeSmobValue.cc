@@ -11,7 +11,7 @@
 
 #include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -178,7 +178,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
-	if (STRING_VALUE == t)
+	if (STRING_SEQ_VALUE == t)
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
@@ -226,7 +226,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		else if (scm_is_string(sitem))
 		{
 			std::vector<std::string> fl = scm_to_string_list(svalue);
-			pa = createStringValue(fl);
+			pa = createStringSeqValue(fl);
 		}
 		else if (scm_is_symbol(sitem))
 		{
@@ -352,9 +352,9 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, scm_from_double)
 	}
 
-	if (STRING_VALUE == t)
+	if (STRING_SEQ_VALUE == t)
 	{
-		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		const std::vector<std::string>& v = StringSeqValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_string)
 	}
 
@@ -391,9 +391,9 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 
-	if (STRING_VALUE == t)
+	if (STRING_SEQ_VALUE == t)
 	{
-		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		const std::vector<std::string>& v = StringSeqValueCast(pa)->value();
 		if (index < v.size()) return scm_from_string(v[index]);
 	}
 
