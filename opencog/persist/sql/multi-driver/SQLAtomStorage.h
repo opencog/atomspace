@@ -39,7 +39,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/value/FloatSeqValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
@@ -158,7 +158,7 @@ class SQLAtomStorage : public AtomStorage
 
 		std::string float_to_string(const FloatSeqValuePtr&);
 		std::string string_to_string(const StringSeqValuePtr&);
-		std::string link_to_string(const LinkValuePtr&);
+		std::string link_to_string(const SeqValuePtr&);
 
 		Handle tvpred; // the key to a very special valuation.
 

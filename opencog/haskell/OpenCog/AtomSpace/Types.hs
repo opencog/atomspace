@@ -28,7 +28,7 @@ data Atom = Link AtomType [Atom] TruthVal
 
 data Value = FloatSeqValue     AtomType    [Double]
            | StringSeqValue    AtomType    String
-           | LinkValue      AtomType    [Value]
+           | SeqValue          AtomType    [Value]
 
 -- | 'TruthVal' represent the different types of TruthValues.
 data TruthVal = SimpleTV { tvMean       :: Double

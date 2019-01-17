@@ -245,11 +245,11 @@ cdef extern from "opencog/atoms/value/StringSeqValue.h" namespace "opencog":
 
     cdef cValuePtr createStringSeqValue(...)
 
-cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
-    cdef cppclass cLinkValue "opencog::LinkValue":
+cdef extern from "opencog/atoms/value/SeqValue.h" namespace "opencog":
+    cdef cppclass cSeqValue "opencog::SeqValue":
         const vector[cValuePtr]& value() const;
 
-    cdef cValuePtr createLinkValue(...)
+    cdef cValuePtr createSeqValue(...)
 
 cdef cValue* get_value_ptr(Value protoAtom)
 

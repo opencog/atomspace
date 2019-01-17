@@ -14,7 +14,7 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atoms/value/FloatSeqValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
@@ -201,11 +201,11 @@ int main ()
     ValuationPtr vals = createValuation(key, atom, pvs);
     store->storeValuation(vals);
 
-    ValuePtr pvl = createLinkValue(std::vector<ValuePtr>({pvf, pvs}));
+    ValuePtr pvl = createSeqValue(std::vector<ValuePtr>({pvf, pvs}));
     ValuationPtr vall = createValuation(key, atom, pvl);
     store->storeValuation(vall);
 
-    ValuePtr pvl2 = createLinkValue(std::vector<ValuePtr>({pvl, pvl, pvl, pvf, pvs}));
+    ValuePtr pvl2 = createSeqValue(std::vector<ValuePtr>({pvl, pvl, pvl, pvf, pvs}));
     ValuationPtr vall2 = createValuation(key, atom, pvl2);
     store->storeValuation(vall2);
 

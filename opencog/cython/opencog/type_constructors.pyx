@@ -9,7 +9,7 @@
 
 from opencog.atomspace import AtomSpace, TruthValue, types
 from atomspace cimport (cValuePtr, createFloatSeqValue, createStringSeqValue,
-                        createLinkValue, Value, createProtoAtom,
+                        createSeqValue, Value, createProtoAtom,
                         cValuePtr)
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -55,11 +55,11 @@ cdef createValue(type, arg):
             result = createStringSeqValue(list_of_strings_to_vector(arg))
         else:
             result = createStringSeqValue(<string>(arg.encode('UTF-8')))
-    elif type == types.LinkValue:
+    elif type == types.SeqValue:
         if (isinstance(arg, list)):
-            result = createLinkValue(list_of_values_to_vector(arg))
+            result = createSeqValue(list_of_values_to_vector(arg))
         else:
-            result = createLinkValue(list_of_values_to_vector([arg]))
+            result = createSeqValue(list_of_values_to_vector([arg]))
     else:
         raise TypeError('Unexpected value type {}'.format(type))
     

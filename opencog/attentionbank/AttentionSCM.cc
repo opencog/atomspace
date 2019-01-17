@@ -133,7 +133,7 @@ Handle AttentionSCM::update_af(int n)
 		af.push_back(h);
 	}
 
-	af_anchor->setValue(af_key, createLinkValue(af));
+	af_anchor->setValue(af_key, createSeqValue(af));
 
 	return af_anchor;
 }

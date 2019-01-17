@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/LinkValue.h
+ * opencog/atoms/value/SeqValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LINK_VALUE_H
-#define _OPENCOG_LINK_VALUE_H
+#ifndef _OPENCOG_SEQ_VALUE_H
+#define _OPENCOG_SEQ_VALUE_H
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
@@ -35,20 +35,20 @@ namespace opencog
  */
 
 /**
- * LinkValue holds an ordered vector of protoatoms.
+ * SeqValue holds an ordered vector of protoatoms.
  * (i.e. its a link, but for values)
  */
-class LinkValue
+class SeqValue
 	: public Value
 {
 protected:
 	std::vector<ValuePtr> _value;
 
 public:
-	LinkValue(const std::vector<ValuePtr>& v)
-		: Value(LINK_VALUE), _value(v) {}
+	SeqValue(const std::vector<ValuePtr>& v)
+		: Value(SEQ_VALUE), _value(v) {}
 
-	virtual ~LinkValue() {}
+	virtual ~SeqValue() {}
 
 	const std::vector<ValuePtr>& value() const { return _value; }
 
@@ -59,17 +59,17 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<LinkValue>(a); }
+typedef std::shared_ptr<SeqValue> SeqValuePtr;
+static inline SeqValuePtr SeqValueCast(const ValuePtr& a)
+	{ return std::dynamic_pointer_cast<SeqValue>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<LinkValue> createLinkValue(Type&&... args) {
-	return std::make_shared<LinkValue>(std::forward<Type>(args)...);
+static inline std::shared_ptr<SeqValue> createSeqValue(Type&&... args) {
+	return std::make_shared<SeqValue>(std::forward<Type>(args)...);
 }
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_LINK_VALUE_H
+#endif // _OPENCOG_SEQ_VALUE_H

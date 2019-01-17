@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/LinkValue.cc
+ * opencog/atoms/value/SeqValue.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,16 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const Value& other) const
+bool SeqValue::operator==(const Value& other) const
 {
-	if (LINK_VALUE != other.get_type()) return false;
+	if (SEQ_VALUE != other.get_type()) return false;
 
-	const LinkValue* lov = (const LinkValue*) &other;
+	const SeqValue* lov = (const SeqValue*) &other;
 
 	if (_value.size() != lov->_value.size()) return false;
 
@@ -42,7 +42,7 @@ bool LinkValue::operator==(const Value& other) const
 
 // ==============================================================
 
-std::string LinkValue::to_string(const std::string& indent) const
+std::string SeqValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 	for (ValuePtr v :_value)
@@ -52,5 +52,5 @@ std::string LinkValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(LINK_VALUE,
-                     createLinkValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(SEQ_VALUE,
+                     createSeqValue, std::vector<ValuePtr>)

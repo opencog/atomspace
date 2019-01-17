@@ -17,7 +17,7 @@
 (define s (StringSeqValue "asdf" "gh" "jkl;"))
 
 ; or lists of other values or atoms.  Thus, they can be heirarchical.
-(define l (LinkValue
+(define l (SeqValue
   (Concept "foobar") (StringSeqValue "property") (FloatSeqValue 42)))
 
 ; A list of values can be converted into an ordinary scheme list:
@@ -79,7 +79,7 @@
 (equal? (cog-value a ktv) (cog-tv a))
 
 ; Truth Values are values, just like the rest. So are Attention Values:
-(define l2 (LinkValue
+(define l2 (SeqValue
   (stv 0.1 0.2) (stv 0.3 0.4) (Concept "foobar") (av 3 2 1) (av 4 5 0)))
 
 (cog-set-value! a k2 l2)

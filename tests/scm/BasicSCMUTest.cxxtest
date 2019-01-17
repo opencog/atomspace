@@ -399,7 +399,7 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define t (stv 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
-	eval->eval("(define l (LinkValue f h s k t))");
+	eval->eval("(define l (SeqValue f h s k t))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 
 	Handle h = eval->eval_h("h");
@@ -483,7 +483,7 @@ void BasicSCMUTest::test_value_list(void)
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define t (stv 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
-	eval->eval("(define l (LinkValue f h s k t))");
+	eval->eval("(define l (SeqValue f h s k t))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 
 	// -------

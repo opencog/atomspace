@@ -36,7 +36,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/value/FloatSeqValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
@@ -344,7 +344,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvs}));
 
 	atom->setValue(key, pvl);
@@ -352,7 +352,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
-	ValuePtr pvl2 = createLinkValue(
+	ValuePtr pvl2 = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	atom->setValue(key, pvl2);
@@ -467,13 +467,13 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	check_one(pvs, fkey);
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvs}));
 
 	check_one(pvl, fkey);
 
 	// --------------------
-	ValuePtr pvl2 = createLinkValue(
+	ValuePtr pvl2 = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	check_one(pvl2, fkey);
@@ -528,7 +528,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	at->setTruthValue(tt);
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 
@@ -536,7 +536,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	al->setTruthValue(tl);
 
 	// --------------------
-	ValuePtr pvv = createLinkValue(
+	ValuePtr pvv = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 
@@ -671,7 +671,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	ct->setTruthValue(tt);
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 	bl->setValue(key, pvl);
@@ -683,7 +683,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	cl->setTruthValue(tl);
 
 	// --------------------
-	ValuePtr pvv = createLinkValue(
+	ValuePtr pvv = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 	bv->setValue(key, pvv);
@@ -884,7 +884,7 @@ void ValueSaveUTest::do_test_incoming()
 	ct->setTruthValue(tt);
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 	bl->setValue(key, pvl);
@@ -896,7 +896,7 @@ void ValueSaveUTest::do_test_incoming()
 	cl->setTruthValue(tl);
 
 	// --------------------
-	ValuePtr pvv = createLinkValue(
+	ValuePtr pvv = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 	bv->setValue(key, pvv);
@@ -1082,7 +1082,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	at->setTruthValue(tt);
 
 	// --------------------
-	ValuePtr pvl = createLinkValue(
+	ValuePtr pvl = createSeqValue(
 		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 
@@ -1090,7 +1090,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	al->setTruthValue(tl);
 
 	// --------------------
-	ValuePtr pvv = createLinkValue(
+	ValuePtr pvv = createSeqValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 

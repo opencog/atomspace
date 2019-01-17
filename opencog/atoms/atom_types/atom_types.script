@@ -17,7 +17,7 @@ NOTYPE
 VALUE
 FLOAT_SEQ_VALUE <- VALUE    // vector of floats, actually.
 STRING_SEQ_VALUE <- VALUE
-LINK_VALUE <- VALUE     // vector of values ("link" holding values)
+SEQ_VALUE <- VALUE     // vector of values
 VALUATION <- VALUE
 
 // ===========================================================

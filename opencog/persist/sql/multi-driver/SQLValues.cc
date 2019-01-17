@@ -26,7 +26,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/FloatSeqValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/base/Valuation.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
@@ -83,7 +83,7 @@ std::string SQLAtomStorage::string_to_string(const StringSeqValuePtr& svle)
 	return str;
 }
 
-std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
+std::string SQLAtomStorage::link_to_string(const SeqValuePtr& lvle)
 {
 	bool not_first = false;
 	std::string str = "\'{";
@@ -141,7 +141,7 @@ void SQLAtomStorage::deleteValuation(Response& rp, UUID key_uid, UUID atom_uid)
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::get_value_cb, &rp);
 
-	if (LINK_VALUE == rp.vtype)
+	if (SEQ_VALUE == rp.vtype)
 	{
 		const char *p = rp.lnkval;
 		if (p and *p == '{') p++;
@@ -233,9 +233,9 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		STMT("stringvalue", sstr);
 	}
 	else
-	if (nameserver().isA(vtype, LINK_VALUE))
+	if (nameserver().isA(vtype, SEQ_VALUE))
 	{
-		LinkValuePtr fvp = LinkValueCast(pap);
+		SeqValuePtr fvp = SeqValueCast(pap);
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
@@ -292,9 +292,9 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 		STMT("stringvalue", sstr);
 	}
 	else
-	if (nameserver().isA(vtype, LINK_VALUE))
+	if (nameserver().isA(vtype, SEQ_VALUE))
 	{
-		LinkValuePtr fvp = LinkValueCast(pap);
+		SeqValuePtr fvp = SeqValueCast(pap);
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
@@ -404,7 +404,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.lnkval to be a comma-separated list of
 	// vuid's, which we then fetch recursively.
-	if (vtype == LINK_VALUE)
+	if (vtype == SEQ_VALUE)
 	{
 		std::vector<ValuePtr> lnkarr;
 		const char *p = rp.lnkval;
@@ -418,7 +418,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			p = strchr(p, ',');
 			if (p) p++;
 		}
-		return createLinkValue(lnkarr);
+		return createSeqValue(lnkarr);
 	}
 
 	throw IOException(TRACE_INFO, "Unexpected value type=%d", rp.vtype);
@@ -437,7 +437,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 	// Perform a recursive delete, if necessary.
 	// We expect rp.strval to be of the form
 	// {81,82,83} -- Split it along the commas.
-	if (rp.vtype == LINK_VALUE)
+	if (rp.vtype == SEQ_VALUE)
 	{
 		const char *p = rp.lnkval;
 		if (p and *p == '{') p++;

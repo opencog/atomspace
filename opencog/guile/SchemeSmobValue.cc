@@ -10,7 +10,7 @@
 #include <libguile.h>
 
 #include <opencog/atoms/value/FloatSeqValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/SeqValue.h>
 #include <opencog/atoms/value/StringSeqValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
@@ -171,7 +171,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, dim);
 	}
 
-	if (LINK_VALUE == t)
+	if (SEQ_VALUE == t)
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
@@ -254,7 +254,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		{
 			verify_protom(sitem, "cog-set-value!", 3);
 			std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
-			pa = createLinkValue(fl);
+			pa = createSeqValue(fl);
 		}
 		else
 		{
@@ -358,9 +358,9 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, scm_from_string)
 	}
 
-	if (LINK_VALUE == t)
+	if (SEQ_VALUE == t)
 	{
-		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
+		const std::vector<ValuePtr>& v = SeqValueCast(pa)->value();
 		CPPL_TO_SCML(v, protom_to_scm)
 	}
 
@@ -397,9 +397,9 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 		if (index < v.size()) return scm_from_string(v[index]);
 	}
 
-	if (LINK_VALUE == t)
+	if (SEQ_VALUE == t)
 	{
-		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
+		const std::vector<ValuePtr>& v = SeqValueCast(pa)->value();
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 

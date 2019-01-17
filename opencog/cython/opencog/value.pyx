@@ -33,10 +33,10 @@ cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
         if is_a(deref(value).get_type(), types.Value):
             list.append(createProtoAtom(value))
         else:
-            # TODO: Support Atoms as members of LinkValue requires inheriting
+            # TODO: Support Atoms as members of SeqValue requires inheriting
             # Atom from Value and constructor to create Atom from cHandle.
             raise TypeError('Only Values are supported '
-                            'as members of LinkValue')
+                            'as members of SeqValue')
         inc(it)
     return list
 
@@ -79,9 +79,9 @@ cdef class Value:
         elif self.is_a(types.StringSeqValue):
             return vector_of_strings_to_list(
                 &((<cStringSeqValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.LinkValue):
+        elif self.is_a(types.SeqValue):
             return vector_of_values_to_list(
-                &((<cLinkValue*>get_value_ptr(self)).value()))
+                &((<cSeqValue*>get_value_ptr(self)).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 
