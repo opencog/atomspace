@@ -136,7 +136,7 @@
 				"*-Dimension Key-*")))
 
 		(define (set-size LEFT RIGHT NPAIRS)
-			(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
+			(cog-set-value! wild-atom dim-key (FloatSeqValue LEFT RIGHT NPAIRS)))
 
 		; Use round to force return of integer.
 		(define (get-left-dim)
@@ -159,7 +159,7 @@
 				"*-Total Entropy Key-*")))
 
 		(define (set-entropy LEFT RIGHT TOT)
-			(cog-set-value! wild-atom ent-key (FloatValue LEFT RIGHT TOT)))
+			(cog-set-value! wild-atom ent-key (FloatSeqValue LEFT RIGHT TOT)))
 
 		(define (get-left-entropy)
 			(cog-value-ref (cog-value wild-atom ent-key) 0))
@@ -178,7 +178,7 @@
 				"*-Total MI Key-*")))
 
 		(define (set-mi TOT)
-			(cog-set-value! wild-atom mi-key (FloatValue TOT)))
+			(cog-set-value! wild-atom mi-key (FloatSeqValue TOT)))
 
 		(define (get-total-mi)
 			(cog-value-ref (cog-value wild-atom mi-key) 0))
@@ -196,7 +196,7 @@
 
 		(define (set-left-norms L0 L1 L2 RMS)
 			(cog-set-value! wild-atom l-norm-key
-				(FloatValue L0 L1 L2 RMS)))
+				(FloatSeqValue L0 L1 L2 RMS)))
 
 		(define (get-left-support)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 0))
@@ -212,7 +212,7 @@
 
 		(define (set-right-norms L0 L1 L2 RMS)
 			(cog-set-value! wild-atom r-norm-key
-				(FloatValue L0 L1 L2 RMS)))
+				(FloatSeqValue L0 L1 L2 RMS)))
 
 		(define (get-right-support)
 			(cog-value-ref (cog-value wild-atom r-norm-key) 0))

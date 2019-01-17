@@ -71,7 +71,7 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(const ValuePtr& source)
         throw RuntimeException(TRACE_INFO,
             "Source must be a EvidenceCountTruthValue");
 
-    FloatValuePtr fp(FloatValueCast(source));
+    FloatSeqValuePtr fp(FloatSeqValueCast(source));
     _value.resize(2);
     _value[POS_COUNT] = fp->value()[POS_COUNT];
     _value[TOTAL_COUNT] = fp->value()[TOTAL_COUNT];

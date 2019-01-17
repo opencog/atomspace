@@ -32,7 +32,7 @@ const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
 const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
 
 AttentionValue::AttentionValue(sti_t s, lti_t l, vlti_t v) :
-	FloatValue(ATTENTION_VALUE)
+	FloatSeqValue(ATTENTION_VALUE)
 {
 	_value.resize(3);
 	_value[STI] = s;
@@ -43,7 +43,7 @@ AttentionValue::AttentionValue(sti_t s, lti_t l, vlti_t v) :
 }
 
 AttentionValue::AttentionValue(const AttentionValue& source) :
-	FloatValue(ATTENTION_VALUE)
+	FloatSeqValue(ATTENTION_VALUE)
 {
 	_value.resize(3);
 	_value[STI] = source._value[STI];
@@ -52,7 +52,7 @@ AttentionValue::AttentionValue(const AttentionValue& source) :
 }
 
 AttentionValue::AttentionValue(const ValuePtr& source) :
-	FloatValue(ATTENTION_VALUE)
+	FloatSeqValue(ATTENTION_VALUE)
 {
 	if (source->get_type() != ATTENTION_VALUE)
 		throw RuntimeException(TRACE_INFO,

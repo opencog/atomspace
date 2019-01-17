@@ -68,7 +68,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(const ValuePtr& source)
         throw RuntimeException(TRACE_INFO,
             "Source must be a ProbabilisticTruthValue");
 
-    FloatValuePtr fp(FloatValueCast(source));
+    FloatSeqValuePtr fp(FloatSeqValueCast(source));
     _value.resize(3);
     _value[MEAN] = fp->value()[MEAN];
     _value[CONFIDENCE] = fp->value()[CONFIDENCE];

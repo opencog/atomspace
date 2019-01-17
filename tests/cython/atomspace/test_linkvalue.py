@@ -19,39 +19,39 @@ class LinkValueTest(unittest.TestCase):
         self.assertTrue(value is not None)
 
     def test_create_list_value(self):
-        value = LinkValue([FloatValue(42), StringValue('foo')])
+        value = LinkValue([FloatSeqValue(42), StringValue('foo')])
         self.assertTrue(value is not None)
     
     def test_value_equals(self):
         self.assertEqual(LinkValue(StringValue('foo')),
                          LinkValue([StringValue('foo')]))
-        self.assertEqual(LinkValue([FloatValue(42), StringValue('foo')]),
-                         LinkValue([FloatValue(42), StringValue('foo')]))
+        self.assertEqual(LinkValue([FloatSeqValue(42), StringValue('foo')]),
+                         LinkValue([FloatSeqValue(42), StringValue('foo')]))
         self.assertNotEqual(LinkValue(StringValue('foo')),
                             LinkValue(StringValue('bar')))
-        self.assertNotEqual(LinkValue([FloatValue(1), StringValue('foo')]),
-                            LinkValue([StringValue('foo'), FloatValue(1)]))
+        self.assertNotEqual(LinkValue([FloatSeqValue(1), StringValue('foo')]),
+                            LinkValue([StringValue('foo'), FloatSeqValue(1)]))
 
     def test_add_value_to_atom(self):
         atom = ConceptNode('foo')
         key = PredicateNode('bar')
-        value = LinkValue([StringValue('a'), FloatValue(42)])
+        value = LinkValue([StringValue('a'), FloatSeqValue(42)])
         atom.set_value(key, value)
-        self.assertEqual(LinkValue([StringValue('a'), FloatValue(42)]),
+        self.assertEqual(LinkValue([StringValue('a'), FloatSeqValue(42)]),
                          atom.get_value(key))
 
     def test_get_list_of_items_from_value(self):
-        value = LinkValue([FloatValue(42), StringValue('foo')])
-        self.assertEqual([FloatValue(42), StringValue('foo')],
+        value = LinkValue([FloatSeqValue(42), StringValue('foo')])
+        self.assertEqual([FloatSeqValue(42), StringValue('foo')],
                          value.to_list())
 
     def test_str(self):
-        value = LinkValue([FloatValue(42), StringValue('foo')])
-        self.assertEqual('(LinkValue\n    (FloatValue 42)\n    '
+        value = LinkValue([FloatSeqValue(42), StringValue('foo')])
+        self.assertEqual('(LinkValue\n    (FloatSeqValue 42)\n    '
                          '(StringValue "foo")\n)\n', str(value))
 
     def test_is_a(self):
-        value = LinkValue([FloatValue(42), StringValue('foo')])
+        value = LinkValue([FloatSeqValue(42), StringValue('foo')])
         self.assertEqual(types.LinkValue, value.type)
         self.assertEqual('LinkValue', value.type_name)
         self.assertFalse(value.is_node())

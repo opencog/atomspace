@@ -31,7 +31,7 @@ int Exec_evaluate(AtomSpace* atomspace
 {
     Handle h = *handle;
 	TruthValuePtr tv = EvaluationLink::do_evaluate(atomspace, h);
-    return FloatValue_toRaw(tv,tv_type,parameters);
+    return FloatSeqValue_toRaw(tv,tv_type,parameters);
 }
 
 

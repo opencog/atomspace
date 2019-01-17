@@ -10,7 +10,7 @@
 ; to the atom, for the given key.
 (define k (Predicate "key"))
 (define a (Concept "my atom"))
-(cog-set-value! a k (FloatValue 1 2 3))
+(cog-set-value! a k (FloatSeqValue 1 2 3))
 
 ; Fetch the value, using the ValueOfLink
 (define vo (ValueOf a k))

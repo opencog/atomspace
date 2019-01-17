@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/FloatValue.cc
+ * opencog/atoms/value/FloatSeqValue.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -21,16 +21,16 @@
  */
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-bool FloatValue::operator==(const Value& other) const
+bool FloatSeqValue::operator==(const Value& other) const
 {
-	if (FLOAT_VALUE != other.get_type()) return false;
+	if (FLOAT_SEQ_VALUE != other.get_type()) return false;
 
-   const FloatValue* fov = (const FloatValue*) &other;
+   const FloatSeqValue* fov = (const FloatSeqValue*) &other;
 
 	if (_value.size() != fov->_value.size()) return false;
 	size_t len = _value.size();
@@ -47,7 +47,7 @@ bool FloatValue::operator==(const Value& other) const
 
 // ==============================================================
 
-std::string FloatValue::to_string(const std::string& indent) const
+std::string FloatSeqValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	for (double v :_value)
@@ -63,7 +63,7 @@ std::string FloatValue::to_string(const std::string& indent) const
 // ==============================================================
 
 /// Scalar multiplication
-ValuePtr opencog::times(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::times(double scalar, const FloatSeqValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -71,11 +71,11 @@ ValuePtr opencog::times(double scalar, const FloatValuePtr& fvp)
 	for (size_t i=0; i<len; i++)
 		prod[i] = scalar * fv[i];
 
-	return createFloatValue(prod);
+	return createFloatSeqValue(prod);
 }
 
 /// Scalar addition
-ValuePtr opencog::plus(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::plus(double scalar, const FloatSeqValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -83,11 +83,11 @@ ValuePtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 	for (size_t i=0; i<len; i++)
 		sum[i] = scalar + fv[i];
 
-	return createFloatValue(sum);
+	return createFloatSeqValue(sum);
 }
 
 /// Scalar division
-ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::divide(double scalar, const FloatSeqValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -95,11 +95,11 @@ ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
 	for (size_t i=0; i<len; i++)
 		ratio[i] = scalar / fv[i];
 
-	return createFloatValue(ratio);
+	return createFloatSeqValue(ratio);
 }
 
 /// Vector (point-wise) multiplication
-ValuePtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::times(const FloatSeqValuePtr& fvpa, const FloatSeqValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -111,11 +111,11 @@ ValuePtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 	for (size_t i=0; i<len; i++)
 		prod[i] = fva[i] * fvb[i];
 
-	return createFloatValue(prod);
+	return createFloatSeqValue(prod);
 }
 
 /// Vector (point-wise) addition
-ValuePtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::plus(const FloatSeqValuePtr& fvpa, const FloatSeqValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -127,11 +127,11 @@ ValuePtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 	for (size_t i=0; i<len; i++)
 		sum[i] = fva[i] + fvb[i];
 
-	return createFloatValue(sum);
+	return createFloatSeqValue(sum);
 }
 
 /// Vector (point-wise) division
-ValuePtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::divide(const FloatSeqValuePtr& fvpa, const FloatSeqValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -143,11 +143,11 @@ ValuePtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 	for (size_t i=0; i<len; i++)
 		ratio[i] = fva[i] / fvb[i];
 
-	return createFloatValue(ratio);
+	return createFloatSeqValue(ratio);
 }
 
 // Adds factory when the library is loaded.
-DEFINE_VALUE_FACTORY(FLOAT_VALUE,
-                     createFloatValue, std::vector<double>)
-DEFINE_VALUE_FACTORY(FLOAT_VALUE,
-                     createFloatValue, double)
+DEFINE_VALUE_FACTORY(FLOAT_SEQ_VALUE,
+                     createFloatSeqValue, std::vector<double>)
+DEFINE_VALUE_FACTORY(FLOAT_SEQ_VALUE,
+                     createFloatSeqValue, double)

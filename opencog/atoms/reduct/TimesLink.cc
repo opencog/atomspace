@@ -122,22 +122,22 @@ ValuePtr TimesLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		return vi;
 
 	// Swap order, make things easier below.
-	if (nameserver().isA(vitype, FLOAT_VALUE))
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE))
 	{
 		std::swap(vi, vj);
 		std::swap(vitype, vjtype);
 	}
 
 	// Scalar times vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		return times(get_double(vi), FloatValueCast(vj));
+		return times(get_double(vi), FloatSeqValueCast(vj));
 	}
 
 	// Vector times vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE) and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		return times(FloatValueCast(vi), FloatValueCast(vj));
+		return times(FloatSeqValueCast(vi), FloatSeqValueCast(vj));
 	}
 
 	Handle hi(HandleCast(vi));

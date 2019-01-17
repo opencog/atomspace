@@ -24,7 +24,7 @@
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 
@@ -68,7 +68,7 @@ ValueOfUTest::ValueOfUTest(void)
 
 void ValueOfUTest::setUp(void)
 {
-	value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	value = createFloatSeqValue(std::vector<double>{0.0, 1.0, 2.0});
 	key = an(PREDICATE_NODE, "my key");
 	atom = an(CONCEPT_NODE, "some atom");
 	atom->setValue(key, value);
@@ -77,9 +77,9 @@ void ValueOfUTest::setUp(void)
 void ValueOfUTest::check(void)
 {
 	// value must not get corrupted.
-	FloatValuePtr orig_value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	FloatSeqValuePtr orig_value = createFloatSeqValue(std::vector<double>{0.0, 1.0, 2.0});
 	ValuePtr check_value = atom->getValue(key);
-	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+	TS_ASSERT(*orig_value == *FloatSeqValueCast(check_value));
 }
 
 // ====================================================================
@@ -105,7 +105,7 @@ void ValueOfUTest::test_basic()
 }
 
 // ====================================================================
-// Make sure FloatValues work.
+// Make sure FloatSeqValues work.
 void ValueOfUTest::test_basic_value()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -161,11 +161,11 @@ void ValueOfUTest::test_times()
 
 	ValuePtr result = FunctionLinkCast(times)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{0.0, 3.0, 6.0});
+	FloatSeqValuePtr expect = createFloatSeqValue(std::vector<double>{0.0, 3.0, 6.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -175,11 +175,11 @@ void ValueOfUTest::test_times()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{0.0, 7.0, 14.0});
+	expect = createFloatSeqValue(std::vector<double>{0.0, 7.0, 14.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -189,11 +189,11 @@ void ValueOfUTest::test_times()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{0.0, 1.0, 4.0});
+	expect = createFloatSeqValue(std::vector<double>{0.0, 1.0, 4.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -214,11 +214,11 @@ void ValueOfUTest::test_plus()
 
 	ValuePtr result = FunctionLinkCast(plus)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 4.0, 5.0});
+	FloatSeqValuePtr expect = createFloatSeqValue(std::vector<double>{3.0, 4.0, 5.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -228,11 +228,11 @@ void ValueOfUTest::test_plus()
 
 	result = FunctionLinkCast(plus)->execute();
 
-	expect = createFloatValue(std::vector<double>{7.0, 8.0, 9.0});
+	expect = createFloatSeqValue(std::vector<double>{7.0, 8.0, 9.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -242,11 +242,11 @@ void ValueOfUTest::test_plus()
 
 	result = FunctionLinkCast(plus)->execute();
 
-	expect = createFloatValue(std::vector<double>{0.0, 2.0, 4.0});
+	expect = createFloatSeqValue(std::vector<double>{0.0, 2.0, 4.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -268,11 +268,11 @@ void ValueOfUTest::test_times_plus()
 
 	ValuePtr result = FunctionLinkCast(times)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{5.0, 8.0, 11.0});
+	FloatSeqValuePtr expect = createFloatSeqValue(std::vector<double>{5.0, 8.0, 11.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -283,11 +283,11 @@ void ValueOfUTest::test_times_plus()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
+	expect = createFloatSeqValue(std::vector<double>{15.0, 20.0, 25.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -299,11 +299,11 @@ void ValueOfUTest::test_times_plus()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
+	expect = createFloatSeqValue(std::vector<double>{15.0, 20.0, 25.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -324,11 +324,11 @@ void ValueOfUTest::test_minus()
 
 	ValuePtr result = FunctionLinkCast(minus)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 2.0, 1.0});
+	FloatSeqValuePtr expect = createFloatSeqValue(std::vector<double>{3.0, 2.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -338,11 +338,11 @@ void ValueOfUTest::test_minus()
 
 	result = FunctionLinkCast(minus)->execute();
 
-	expect = createFloatValue(std::vector<double>{-7.0, -6.0, -5.0});
+	expect = createFloatSeqValue(std::vector<double>{-7.0, -6.0, -5.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -352,11 +352,11 @@ void ValueOfUTest::test_minus()
 
 	result = FunctionLinkCast(minus)->execute();
 
-	expect = createFloatValue(std::vector<double>{0.0, 0.0, 0.0});
+	expect = createFloatSeqValue(std::vector<double>{0.0, 0.0, 0.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -377,11 +377,11 @@ void ValueOfUTest::test_divide()
 
 	ValuePtr result = FunctionLinkCast(divide)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{0.0, 0.25, 0.5});
+	FloatSeqValuePtr expect = createFloatSeqValue(std::vector<double>{0.0, 0.25, 0.5});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -393,11 +393,11 @@ void ValueOfUTest::test_divide()
 
 	result = FunctionLinkCast(divide)->execute();
 
-	expect = createFloatValue(std::vector<double>{3.0, 3.0/2.0, 1.0});
+	expect = createFloatSeqValue(std::vector<double>{3.0, 3.0/2.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();
@@ -409,11 +409,11 @@ void ValueOfUTest::test_divide()
 
 	result = FunctionLinkCast(divide)->execute();
 
-	expect = createFloatValue(std::vector<double>{1.0, 1.0, 1.0});
+	expect = createFloatSeqValue(std::vector<double>{1.0, 1.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	TS_ASSERT(*expect == *FloatSeqValueCast(result));
 
 	// value must not get corrupted.
 	check();

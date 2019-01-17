@@ -30,7 +30,7 @@
 
 	; Create a random pair, and assign a random weight to it.
 	(define (mkwpair)
-		(cog-set-value! (mkpair) mi-pred (FloatValue (mkmi))))
+		(cog-set-value! (mkpair) mi-pred (FloatSeqValue (mkmi))))
 
 	;; Loop M times.
 	(define (mkmprs M)

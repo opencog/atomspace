@@ -13,13 +13,13 @@ from opencog.scheme_wrapper import scheme_eval_v
 atomspace = AtomSpace()
 set_type_ctor_atomspace(atomspace)
 
-a = FloatValue([1.0, 2.0, 3.0])
-b = FloatValue([1.0, 2.0, 3.0])
-c = FloatValue(1.0)
+a = FloatSeqValue([1.0, 2.0, 3.0])
+b = FloatSeqValue([1.0, 2.0, 3.0])
+c = FloatSeqValue(1.0)
 print('{} == {}: {}'.format(a, b, a == b))
 print('{} == {}: {}'.format(a, c, a == c))
 
-featureValue = FloatValue([1.0, 2])
+featureValue = FloatSeqValue([1.0, 2])
 print('new value created: {}'.format(featureValue))
 
 boundingBox = ConceptNode('boundingBox')

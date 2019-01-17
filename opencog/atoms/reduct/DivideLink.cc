@@ -85,21 +85,21 @@ ValuePtr DivideLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		return vi;
 
 	// Scalar divided by vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		return divide(get_double(vi), FloatValueCast(vj));
+		return divide(get_double(vi), FloatSeqValueCast(vj));
 	}
 
 	// Vector divided by scalar
-	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE) and NUMBER_NODE == vjtype)
 	{
-		return times(1.0/get_double(vj), FloatValueCast(vi));
+		return times(1.0/get_double(vj), FloatSeqValueCast(vi));
 	}
 
 	// Vector divided by vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE) and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		return divide(FloatValueCast(vi), FloatValueCast(vj));
+		return divide(FloatSeqValueCast(vi), FloatSeqValueCast(vj));
 	}
 
 	Handle hi(HandleCast(vi));

@@ -67,7 +67,7 @@ FuzzyTruthValue::FuzzyTruthValue(const ValuePtr& source)
         throw RuntimeException(TRACE_INFO,
             "Source must be a FuzzyTruthValue");
 
-    FloatValuePtr fp(FloatValueCast(source));
+    FloatSeqValuePtr fp(FloatSeqValueCast(source));
     _value.resize(2);
     _value[MEAN] = fp->value()[MEAN];
     _value[COUNT] = fp->value()[COUNT];

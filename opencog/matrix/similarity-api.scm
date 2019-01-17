@@ -116,7 +116,7 @@
 				(cog-value ATOM sim-key)))
 
 		; Save a precomputed similarity on ATOM. The SIM should be a
-		; Value, e.g. a FloatValue.
+		; Value, e.g. a FloatSeqValue.
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key SIM))
 
@@ -205,7 +205,7 @@
 							(set! savecnt (+ savecnt 1))
 							(simobj 'set-pair-similarity
 								(cog-new-link pair-sim-type A B)
-									(FloatValue simv))))
+									(FloatSeqValue simv))))
 					simv)))
 
 		; Compute and cache the similarity between the ITEM, and the

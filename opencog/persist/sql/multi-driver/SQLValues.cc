@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
@@ -52,7 +52,7 @@ std::string SQLAtomStorage::oset_to_string(const HandleSeq& out)
 	return str;
 }
 
-std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
+std::string SQLAtomStorage::float_to_string(const FloatSeqValuePtr& fvle)
 {
 	bool not_first = false;
 	std::string str = "\'{";
@@ -219,9 +219,9 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
-	if (nameserver().isA(vtype, FLOAT_VALUE))
+	if (nameserver().isA(vtype, FLOAT_SEQ_VALUE))
 	{
-		FloatValuePtr fvp = FloatValueCast(pap);
+		FloatSeqValuePtr fvp = FloatSeqValueCast(pap);
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
@@ -278,9 +278,9 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
-	if (nameserver().isA(vtype, FLOAT_VALUE))
+	if (nameserver().isA(vtype, FLOAT_SEQ_VALUE))
 	{
-		FloatValuePtr fvp = FloatValueCast(pap);
+		FloatSeqValuePtr fvp = FloatSeqValueCast(pap);
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
@@ -383,7 +383,7 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
-	if ((vtype == FLOAT_VALUE)
+	if ((vtype == FLOAT_SEQ_VALUE)
 	    or nameserver().isA(vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
@@ -396,8 +396,8 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			fltarr.emplace_back(flt);
 			p++; // skip over  comma
 		}
-		if (vtype == FLOAT_VALUE)
-			return createFloatValue(fltarr);
+		if (vtype == FLOAT_SEQ_VALUE)
+			return createFloatSeqValue(fltarr);
 		else
 			return ValueCast(TruthValue::factory(vtype, fltarr));
 	}

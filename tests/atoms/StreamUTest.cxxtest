@@ -97,7 +97,7 @@ double StreamUTest::loop(const Handle& stream)
 	for (int i=0; i<LOOPCNT; i++)
 	{
 		ValuePtr pap = flp->execute();
-		const std::vector<double>& rv = FloatValueCast(pap)->value();
+		const std::vector<double>& rv = FloatSeqValueCast(pap)->value();
 		TS_ASSERT_EQUALS(rv.size(), LEN);
 
 		for (int j=0; j<LEN; j++)
@@ -344,12 +344,12 @@ void StreamUTest::test_number()
 }
 
 // ====================================================================
-// Test FloatValue::operator==()
+// Test FloatSeqValue::operator==()
 void StreamUTest::test_equals()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	FloatValuePtr a = createFloatValue(1.0);
-	FloatValuePtr b = createFloatValue(2.0);
+	FloatSeqValuePtr a = createFloatSeqValue(1.0);
+	FloatSeqValuePtr b = createFloatSeqValue(2.0);
 	
 	TS_ASSERT(*a != *b);
 	
@@ -399,21 +399,21 @@ void StreamUTest::test_guile()
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval.eval("(load-from-path \"tests/atoms/stream.scm\")");
 
-	FloatValuePtr voex = createFloatValue(std::vector<double>{1.0, 2.0, 3.0});
+	FloatSeqValuePtr voex = createFloatSeqValue(std::vector<double>{1.0, 2.0, 3.0});
 	ValuePtr vo = eval.eval_v("(cog-execute! vo)");
 	printf("     got: %s", vo->to_string().c_str());
 	printf("expected: %s\n", voex->to_string().c_str());
-	TS_ASSERT(*voex == *FloatValueCast(vo));
+	TS_ASSERT(*voex == *FloatSeqValueCast(vo));
 
-	FloatValuePtr tymex = createFloatValue(std::vector<double>{14.0, 16.0, 18.0});
+	FloatSeqValuePtr tymex = createFloatSeqValue(std::vector<double>{14.0, 16.0, 18.0});
 	ValuePtr tym = eval.eval_v("(cog-execute! tym)");
 	printf("     got: %s", tym->to_string().c_str());
 	printf("expected: %s\n", tymex->to_string().c_str());
-	TS_ASSERT(*tymex == *FloatValueCast(tym));
+	TS_ASSERT(*tymex == *FloatSeqValueCast(tym));
 
 	ValuePtr tymb = eval.eval_v("(cog-execute! tymb)");
 	printf("     got: %s", tymb->to_string().c_str());
-	FloatValuePtr ftymb = FloatValueCast(tymb);
+	FloatSeqValuePtr ftymb = FloatSeqValueCast(tymb);
 	const std::vector<double>& vals = ftymb->value();
 
 	for (int i=0; i< 24; i++)

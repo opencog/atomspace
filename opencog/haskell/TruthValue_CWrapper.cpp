@@ -10,7 +10,7 @@ int TruthValue_getFromAtom( Handle* atom
         return -1;
     TruthValuePtr tv = h->getTruthValue();
 
-    return FloatValue_toRaw(tv,tv_type,parameters);
+    return FloatSeqValue_toRaw(tv,tv_type,parameters);
 }
 
 int TruthValue_setOnAtom( Handle* atom

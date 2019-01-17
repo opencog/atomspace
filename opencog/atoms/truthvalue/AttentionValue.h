@@ -28,7 +28,7 @@
 #include <limits.h>
 #include <memory>
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 
 namespace opencog
 {
@@ -47,7 +47,7 @@ class AttentionValue;
 typedef std::shared_ptr<const AttentionValue> AttentionValuePtr;
 
 class AttentionValue
-    : public FloatValue
+    : public FloatSeqValue
 {
 protected:
     enum {

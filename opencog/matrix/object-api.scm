@@ -697,7 +697,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 		(define ln2 (* -1.4426950408889634 (log FREQ)))
 		(define ent (* FREQ ln2))
-		(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
+		(cog-set-value! ATOM freq-key (FloatSeqValue FREQ ln2 ent)))
 
 	; ----------------------------------------------------
 	; Key under which the entropy values are stored.
@@ -720,7 +720,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 
 	; Set the entropy value for ATOM.
 	(define (set-entropy ATOM ENT FRENT)
-		(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
+		(cog-set-value! ATOM entropy-key (FloatSeqValue ENT FRENT)))
 
 	; ----------------------------------------------------
 	; The key under which the MI is stored.
@@ -750,7 +750,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
-		(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
+		(cog-set-value! ATOM mi-key (FloatSeqValue MI FMI)))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency

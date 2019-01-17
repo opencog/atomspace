@@ -233,11 +233,11 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
 
-cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
-    cdef cppclass cFloatValue "opencog::FloatValue":
+cdef extern from "opencog/atoms/value/FloatSeqValue.h" namespace "opencog":
+    cdef cppclass cFloatSeqValue "opencog::FloatSeqValue":
         const vector[double]& value() const;
 
-    cdef cValuePtr createFloatValue(...)
+    cdef cValuePtr createFloatSeqValue(...)
 
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":

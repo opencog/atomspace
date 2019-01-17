@@ -164,7 +164,7 @@ TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
 
 TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)
 {
-	ValuePtr pap = createFloatValue(t,v);
+	ValuePtr pap = createFloatSeqValue(t,v);
 	return factory(pap);
 }
 

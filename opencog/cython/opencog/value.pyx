@@ -73,9 +73,9 @@ cdef class Value:
         return is_a(self.type, type)
 
     def to_list(self):
-        if self.is_a(types.FloatValue):
+        if self.is_a(types.FloatSeqValue):
             return vector_of_doubles_to_list(
-                &((<cFloatValue*>get_value_ptr(self)).value()))
+                &((<cFloatSeqValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
                 &((<cStringValue*>get_value_ptr(self)).value()))

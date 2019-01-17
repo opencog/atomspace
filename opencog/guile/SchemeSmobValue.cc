@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/RandomStream.h>
@@ -138,7 +138,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (FLOAT_VALUE == t)
+	if (FLOAT_SEQ_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
@@ -221,7 +221,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		if (scm_is_number(sitem))
 		{
 			std::vector<double> fl = scm_to_float_list(svalue);
-			pa = createFloatValue(fl);
+			pa = createFloatSeqValue(fl);
 		}
 		else if (scm_is_string(sitem))
 		{
@@ -346,9 +346,9 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	ValuePtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
+	if (nameserver().isA(t, FLOAT_SEQ_VALUE) or nameserver().isA(t, OCTO_VALUE))
 	{
-		const std::vector<double>& v = FloatValueCast(pa)->value();
+		const std::vector<double>& v = FloatSeqValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_double)
 	}
 
@@ -385,9 +385,9 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
    size_t index = verify_size(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
+	if (nameserver().isA(t, FLOAT_SEQ_VALUE) or nameserver().isA(t, OCTO_VALUE))
 	{
-		const std::vector<double>& v = FloatValueCast(pa)->value();
+		const std::vector<double>& v = FloatSeqValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 

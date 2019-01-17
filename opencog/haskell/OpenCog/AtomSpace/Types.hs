@@ -26,7 +26,7 @@ data Atom = Link AtomType [Atom] TruthVal
           | Node AtomType AtomName TruthVal
           deriving (Eq,Show,Read)
 
-data Value = FloatValue     AtomType    [Double]
+data Value = FloatSeqValue     AtomType    [Double]
            | StringValue    AtomType    String
            | LinkValue      AtomType    [Value]
 

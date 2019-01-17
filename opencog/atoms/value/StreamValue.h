@@ -24,7 +24,7 @@
 #define _OPENCOG_STREAM_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -38,10 +38,10 @@ namespace opencog
  * StreamValues provide an example of streaming data.
  */
 class StreamValue
-	: public FloatValue
+	: public FloatSeqValue
 {
 protected:
-	StreamValue(Type t) : FloatValue(t) {}
+	StreamValue(Type t) : FloatSeqValue(t) {}
 
 public:
 	virtual ~StreamValue() {}

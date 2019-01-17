@@ -85,23 +85,23 @@ ValuePtr MinusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		return vi;
 
 	// Scalar minus vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
+		FloatSeqValuePtr mj = FloatSeqValueCast(times(-1.0, FloatSeqValueCast(vj)));
 		return plus(get_double(vi), mj);
 	}
 
 	// Vector minus scalar
-	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE) and NUMBER_NODE == vjtype)
 	{
-		return plus(-get_double(vj), FloatValueCast(vi));
+		return plus(-get_double(vj), FloatSeqValueCast(vi));
 	}
 
 	// Vector times vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	if (nameserver().isA(vitype, FLOAT_SEQ_VALUE) and nameserver().isA(vjtype, FLOAT_SEQ_VALUE))
 	{
-		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
-		return plus(FloatValueCast(vi), mj);
+		FloatSeqValuePtr mj = FloatSeqValueCast(times(-1.0, FloatSeqValueCast(vj)));
+		return plus(FloatSeqValueCast(vi), mj);
 	}
 
 	Handle hi(HandleCast(vi));

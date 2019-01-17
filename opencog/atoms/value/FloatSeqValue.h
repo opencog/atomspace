@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/FloatValue.h
+ * opencog/atoms/value/FloatSeqValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FLOAT_VALUE_H
-#define _OPENCOG_FLOAT_VALUE_H
+#ifndef _OPENCOG_FLOAT_SEQ_VALUE_H
+#define _OPENCOG_FLOAT_SEQ_VALUE_H
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
@@ -35,9 +35,9 @@ namespace opencog
  */
 
 /**
- * FloatValues hold an ordered vector of doubles.
+ * FloatSeqValues hold an ordered vector of doubles.
  */
-class FloatValue
+class FloatSeqValue
 	: public Value
 {
 protected:
@@ -45,16 +45,16 @@ protected:
 
 	virtual void update() const {}
 
-	FloatValue(Type t) : Value(t) {}
+	FloatSeqValue(Type t) : Value(t) {}
 public: // XXX should be protected...
-	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
+	FloatSeqValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
 
 public:
-	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(const std::vector<double>& v)
-		: Value(FLOAT_VALUE), _value(v) {}
+	FloatSeqValue(double v) : Value(FLOAT_SEQ_VALUE) { _value.push_back(v); }
+	FloatSeqValue(const std::vector<double>& v)
+		: Value(FLOAT_SEQ_VALUE), _value(v) {}
 
-	virtual ~FloatValue() {}
+	virtual ~FloatSeqValue() {}
 
 	const std::vector<double>& value() const { update(); return _value; }
 
@@ -65,27 +65,27 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<const FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
+typedef std::shared_ptr<const FloatSeqValue> FloatSeqValuePtr;
+static inline FloatSeqValuePtr FloatSeqValueCast(const ValuePtr& a)
+	{ return std::dynamic_pointer_cast<const FloatSeqValue>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
-	return std::make_shared<FloatValue>(std::forward<Type>(args)...);
+static inline std::shared_ptr<FloatSeqValue> createFloatSeqValue(Type&&... args) {
+	return std::make_shared<FloatSeqValue>(std::forward<Type>(args)...);
 }
 
 // Scalar multiplication and addition
-ValuePtr times(double, const FloatValuePtr&);
-ValuePtr plus(double, const FloatValuePtr&);
-ValuePtr divide(double, const FloatValuePtr&);
+ValuePtr times(double, const FloatSeqValuePtr&);
+ValuePtr plus(double, const FloatSeqValuePtr&);
+ValuePtr divide(double, const FloatSeqValuePtr&);
 
 // Vector multiplication and addition
-ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr times(const FloatSeqValuePtr&, const FloatSeqValuePtr&);
+ValuePtr plus(const FloatSeqValuePtr&, const FloatSeqValuePtr&);
+ValuePtr divide(const FloatSeqValuePtr&, const FloatSeqValuePtr&);
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_FLOAT_VALUE_H
+#endif // _OPENCOG_FLOAT_SEQ_VALUE_H

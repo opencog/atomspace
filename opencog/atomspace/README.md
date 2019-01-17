@@ -38,8 +38,8 @@ Valuation Implementation Notes
 Valuations are stored in a C++ `std::map` container -- basically, a
 key-value database -- in each atom.
 
-TruthValues and AttentionValues are layered on top of FloatValue; a
-FloatValue is just a sequence of doubles (`std::vector<double>`).
+TruthValues and AttentionValues are layered on top of FloatSeqValue; a
+FloatSeqValue is just a sequence of doubles (`std::vector<double>`).
 
 Valuations are immutable. It seemed like it was just easier to make
 them immutable, rather than adding a mutex to each and every one.

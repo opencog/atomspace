@@ -81,7 +81,7 @@ CREATE TABLE Valuations (
     -- The Atom to which this value applies
     atom BIGINT REFERENCES Atoms(uuid),
 
-    -- Value type, e.g. FloatValue, StringValue, etc.
+    -- Value type, e.g. FloatSeqValue, StringValue, etc.
     type  SMALLINT,
 
     -- An array of values associated with the (key,atom) pair
@@ -112,7 +112,7 @@ CREATE TABLE Values (
     -- The unique ID for this value
     vuid BIGINT PRIMARY KEY,
 
-    -- Value type, e.g. FloatValue, StringValue, etc.
+    -- Value type, e.g. FloatSeqValue, StringValue, etc.
     type  SMALLINT,
 
     -- An array of values associated with the vuid.

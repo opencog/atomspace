@@ -32,7 +32,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -85,7 +85,7 @@ class TruthValue;
 typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
-    : public FloatValue
+    : public FloatSeqValue
 {
     friend class Atom;
 
@@ -99,7 +99,7 @@ class TruthValue
     }
 
 protected:
-    TruthValue(Type t) : FloatValue(t) {}
+    TruthValue(Type t) : FloatSeqValue(t) {}
 
     // Merge helper method
     TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;

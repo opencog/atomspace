@@ -13,7 +13,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
@@ -193,7 +193,7 @@ int main ()
     store->storeAtom(key, true);
     store->storeAtom(atom, true);
 
-    ValuePtr pvf = createFloatValue(std::vector<double>({1.14, 2.24, 3.34}));
+    ValuePtr pvf = createFloatSeqValue(std::vector<double>({1.14, 2.24, 3.34}));
     ValuationPtr valf = createValuation(key, atom, pvf);
     store->storeValuation(valf);
 

@@ -11,11 +11,11 @@ Handle* PatternMatcher_BindLink(AtomSpace* this_ptr, Handle* handle)
 }
 
 int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
-                            , Handle* handle
-                            , char** tv_type
-                            , double* parameters)
+                                   , Handle* handle
+                                   , char** tv_type
+                                   , double* parameters)
 {
     TruthValuePtr tv = satisfaction_link(this_ptr, *handle);
-    return FloatValue_toRaw(tv,tv_type,parameters);
+    return FloatSeqValue_toRaw(tv,tv_type,parameters);
 }
 

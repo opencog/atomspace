@@ -69,7 +69,7 @@
 	(define mtm-key (PredicateNode mtm-name))
 
 	(define (set-norms KEY ATOM L0 L1)
-		(cog-set-value! ATOM KEY (FloatValue L0 L1)))
+		(cog-set-value! ATOM KEY (FloatSeqValue L0 L1)))
 
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this

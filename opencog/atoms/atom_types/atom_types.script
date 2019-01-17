@@ -15,14 +15,14 @@
 NOTYPE
 
 VALUE
-FLOAT_VALUE <- VALUE    // vector of floats, actually.
+FLOAT_SEQ_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
 
 // ===========================================================
 // All of the different flavors of truth values
-TRUTH_VALUE <- FLOAT_VALUE
+TRUTH_VALUE <- FLOAT_SEQ_VALUE
 SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
 COUNT_TRUTH_VALUE <- TRUTH_VALUE
 INDEFINITE_TRUTH_VALUE <- TRUTH_VALUE
@@ -31,12 +31,12 @@ PROBABILISTIC_TRUTH_VALUE <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 
 // The AttentionValue
-ATTENTION_VALUE <- FLOAT_VALUE
+ATTENTION_VALUE <- FLOAT_SEQ_VALUE
 
 // ===========================================================
 // A base class for time-varying (floating-point) values.
 // XXX TODO we need some other base class for other kinds of varying values.
-STREAM_VALUE <- FLOAT_VALUE
+STREAM_VALUE <- FLOAT_SEQ_VALUE
 
 // An example of a time-varying value stream
 RANDOM_STREAM <- STREAM_VALUE
@@ -46,7 +46,7 @@ RANDOM_STREAM <- STREAM_VALUE
 // We need to define these here, until SchemeSmob::ss_new_value() gets
 // converted into some kind of factory. Once we get a factory, these
 // should be moved to live with the octomap code.
-OCTO_VALUE <- FLOAT_VALUE
+OCTO_VALUE <- FLOAT_SEQ_VALUE
 
 // ===========================================================
 // Base of Atom hierarchy - NOTE: ATOM will not have a corresponding Python

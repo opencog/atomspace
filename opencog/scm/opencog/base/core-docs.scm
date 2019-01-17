@@ -756,14 +756,14 @@
 "
  cog-new-value TYPE LIST
     Create a new value of type TYPE, hold the LIST of strings, floats
-    or values.  The TYPE must be either 'StringValue, 'FloatValue
+    or values.  The TYPE must be either 'StringValue, 'FloatSeqValue
     or 'LinkValue. The LIST must be an ordinary guile list, consisting
     entirely of guile strings, guile numbers, or opencog values,
     respectively, for each of the three types.
 
     Example:
-       guile> (cog-new-value 'FloatValue 1 2 3))
-       (FloatValue 1.000000 2.000000 3.00000)
+       guile> (cog-new-value 'FloatSeqValue 1 2 3))
+       (FloatSeqValue 1.000000 2.000000 3.00000)
 
        guile> (cog-new-value 'StringValue \"foo\" \"bar\")
        (StringValue \"foo\" \"bar\")
@@ -786,7 +786,7 @@
     Example:
        guile> (cog-set-value!
                  (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
+                 (FloatSeqValue 1 2 3))
        guile> (cog-keys (Concept \"abc\"))
 ")
 
@@ -799,9 +799,9 @@
     Example:
        guile> (cog-set-value!
                  (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
+                 (FloatSeqValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
-       (FloatValue 1.000000 2.000000 3.00000)
+       (FloatSeqValue 1.000000 2.000000 3.00000)
 ")
 
 (set-procedure-property! cog-set-value! 'documentation
@@ -813,9 +813,9 @@
     Example:
        guile> (cog-set-value!
                  (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
+                 (FloatSeqValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
-       (FloatValue 1.000000 2.000000 3.00000)
+       (FloatSeqValue 1.000000 2.000000 3.00000)
 ")
 
 (set-procedure-property! cog-value? 'documentation
@@ -824,7 +824,7 @@
     Return #t if EXP is an opencog value, else return #f
 
     Example:
-       guile> (cog-value? (FloatValue 42))
+       guile> (cog-value? (FloatSeqValue 42))
        #t
        guile> (cog-value? 42)
        #f
@@ -836,11 +836,11 @@
     Return a scheme list holding the values in the opencog VALUE.
     If VALUE is a Link, this returns the outgoing set.
     If VALUE is a Node, this returns list containing the node name.
-    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    If VALUE is a StringValue, FloatSeqValue or LinkValue, this returns
         the associated list of values.
 
     Example:
-       guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
+       guile> (cog-value->list (FloatSeqValue 0.1 0.2 0.3))
        (0.1 0.2 0.3)
 ")
 
@@ -851,14 +851,14 @@
     If VALUE is a Link, this returns the N'th atom in the outgoing set.
         That is, it returns the same atom as cog-outgoing-atom.
     If VALUE is a Node, and N is zero, this returns the node name.
-    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    If VALUE is a StringValue, FloatSeqValue or LinkValue, this returns
         the N'th entry in the value.
 
     This returns the same result as
         (list-ref (cog-value->list VALUE) N)
 
     Example:
-       guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
+       guile> (cog-value-ref (FloatSeqValue 0.1 0.2 0.3) 2)
        0.3
 ")
 

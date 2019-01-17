@@ -144,7 +144,7 @@ IndefiniteTruthValue::IndefiniteTruthValue(const ValuePtr& source)
         throw RuntimeException(TRACE_INFO,
             "Source must be a IndefiniteTruthValue");
 
-    FloatValuePtr fp(FloatValueCast(source));
+    FloatSeqValuePtr fp(FloatSeqValueCast(source));
     _value.resize(4);
     _value[L] = fp->value()[L];
     _value[U] = fp->value()[U];

@@ -50,7 +50,7 @@
 	(define norm-key (PredicateNode key-name))
 
 	(define (set-norms ATOM L0 L1 L2)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
+		(cog-set-value! ATOM norm-key (FloatSeqValue L0 L1 L2)))
 
 	; -----------------
 	; Set the grand-total count. Use the CountTruthValue.
@@ -68,7 +68,7 @@
 
 	(define (set-left-totals L0 L1)
 		(set-wild-wild-count L1)
-		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1)))
+		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatSeqValue L0 L1)))
 
 	(define right-total-key-name
 		(if (and ID (LLOBJ 'filters?))
@@ -79,7 +79,7 @@
 
 	(define (set-right-totals L0 L1)
 		(set-wild-wild-count L1)
-		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1)))
+		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatSeqValue L0 L1)))
 
 	; -----------------
 	; User might ask for something not in the matrix. In that

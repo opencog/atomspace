@@ -134,11 +134,11 @@ static double get_numeric_value(const ValuePtr& pap)
 		return n->get_value();
 	}
 
-	if (nameserver().isA(t, FLOAT_VALUE))
+	if (nameserver().isA(t, FLOAT_SEQ_VALUE))
 	{
-		FloatValuePtr fv(FloatValueCast(pap));
+		FloatSeqValuePtr fv(FloatSeqValueCast(pap));
 		if (fv->value().empty())
-			throw RuntimeException(TRACE_INFO, "FloatValue is empty!");
+			throw RuntimeException(TRACE_INFO, "FloatSeqValue is empty!");
 		return fv->value()[0];
 	}
 

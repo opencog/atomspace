@@ -35,7 +35,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
@@ -327,7 +327,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.12345678901234567, 2.12345678901234567e35,
 		                     3.09876543210987654e200}));
 
@@ -454,7 +454,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.6543210987654321, 2.67890123456789012e-35,
 		                     3.2109876543210987e-200}));
 
@@ -511,7 +511,7 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);
@@ -646,7 +646,7 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);
@@ -859,7 +859,7 @@ void ValueSaveUTest::do_test_incoming()
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e-37,
 		                     3.2109876543210987e250}));
 	af->setValue(key, pvf);
@@ -1065,7 +1065,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 
 	// --------------------
 	// Now set some values
-	ValuePtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatSeqValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);

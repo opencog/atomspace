@@ -8,7 +8,7 @@
 #
 
 from opencog.atomspace import AtomSpace, TruthValue, types
-from atomspace cimport (cValuePtr, createFloatValue, createStringValue,
+from atomspace cimport (cValuePtr, createFloatSeqValue, createStringValue,
                         createLinkValue, Value, createProtoAtom,
                         cValuePtr)
 from libcpp.vector cimport vector
@@ -45,11 +45,11 @@ cdef createValue(type, arg):
     argument. It is similar to SchemeSmob::ss_new_value()"""
     cdef cValuePtr result
     
-    if type == types.FloatValue:
+    if type == types.FloatSeqValue:
         if (isinstance(arg, list)):
-            result = createFloatValue(list_of_doubles_to_vector(arg))
+            result = createFloatSeqValue(list_of_doubles_to_vector(arg))
         else:
-            result = createFloatValue(<double>arg)
+            result = createFloatSeqValue(<double>arg)
     elif type == types.StringValue:
         if (isinstance(arg, list)):
             result = createStringValue(list_of_strings_to_vector(arg))

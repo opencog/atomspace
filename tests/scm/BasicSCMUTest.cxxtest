@@ -391,7 +391,7 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to create atom", not eval->eval_error());
 	eval->eval("(define k (Predicate \"key\"))");
 	TSM_ASSERT("Failed to create key", not eval->eval_error());
-	eval->eval("(define f (FloatValue 0.1 0.2 0.3))");
+	eval->eval("(define f (FloatSeqValue 0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to create float", not eval->eval_error());
 	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
@@ -426,7 +426,7 @@ void BasicSCMUTest::test_values(void)
 	ValuePtr fv = h->getValue(k);
 	TSM_ASSERT("Failed to get correct value", *f == *fv);
 
-	const std::vector<double>& vv(FloatValueCast(fv)->value());
+	const std::vector<double>& vv(FloatSeqValueCast(fv)->value());
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[0] - 0.1), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[1] - 0.2), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[2] - 0.3), 1.0e-6);
@@ -475,7 +475,7 @@ void BasicSCMUTest::test_value_list(void)
 	TSM_ASSERT("Failed to create key", not eval->eval_error());
 	eval->eval("(define ll (ListLink h k h))");
 	TSM_ASSERT("Failed to create key", not eval->eval_error());
-	eval->eval("(define f (FloatValue 0.1 0.2 0.3))");
+	eval->eval("(define f (FloatSeqValue 0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to create float", not eval->eval_error());
 	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
