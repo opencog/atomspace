@@ -422,4 +422,11 @@ std::string oc_to_string(const IncomingSet& iset,
 /** @}*/
 } // namespace opencog
 
+// Overloading operator<< for Incoming Set 
+namespace std {
+    
+ostream& operator<<(ostream&, const opencog::IncomingSet&);
+
+}
+
 #endif // _OPENCOG_ATOM_H
