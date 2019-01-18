@@ -491,7 +491,7 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	CHKEV(eval);
 
 	// When evaluated, this one should be false.
-	tv = EvaluationLink::do_evaluate(as, boolex);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(as, boolex));
 	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.001);
 }
 

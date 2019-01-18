@@ -76,29 +76,29 @@ void EqualLinkUTest::test_equality()
 	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
 
 	// -------
-	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, ident_aa);
+	TruthValuePtr tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, ident_aa));
 	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_asa);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, ident_asa));
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_ab);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, ident_ab));
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_asb);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, ident_asb));
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	// -------
-	tv = EvaluationLink::do_evaluate(&_as, equal_aa);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, equal_aa));
 	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_asa);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, equal_asa));
 	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_ab);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, equal_ab));
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
+	tv = TruthValueCast(EvaluationLink::do_evaluate(&_as, equal_asb));
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);

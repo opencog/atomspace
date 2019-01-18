@@ -128,7 +128,7 @@ void ValueOfUTest::test_truth_value()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle tvof = al(TRUTH_VALUE_OF_LINK, al(FALSE_LINK));
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, tvof);
+	TruthValuePtr tvp = TruthValueCast(EvaluationLink::do_evaluate(&_as, tvof));
 
 	printf("expect: %s\n", TruthValue::FALSE_TV()->to_string().c_str());
 	printf("result: %s\n\n", tvp->to_string().c_str());
@@ -138,7 +138,7 @@ void ValueOfUTest::test_truth_value()
 	// -----------
 
 	tvof = al(TRUTH_VALUE_OF_LINK, al(TRUE_LINK));
-	tvp = EvaluationLink::do_evaluate(&_as, tvof);
+	tvp = TruthValueCast(EvaluationLink::do_evaluate(&_as, tvof));
 
 	printf("expect: %s\n", TruthValue::TRUE_TV()->to_string().c_str());
 	printf("result: %s\n\n", tvp->to_string().c_str());
