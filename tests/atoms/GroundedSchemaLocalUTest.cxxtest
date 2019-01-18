@@ -140,8 +140,8 @@ void GroundedSchemaLocalUTest::test_local_predicate()
 	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
 	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
 
-	TruthValuePtr result1 = EvaluationLinkCast(evl1)->evaluate(as);
-	TruthValuePtr result2 = EvaluationLinkCast(evl2)->evaluate(as);
+	ValuePtr result1 = EvaluationLinkCast(evl1)->evaluate(as);
+	ValuePtr result2 = EvaluationLinkCast(evl2)->evaluate(as);
  	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
 	TruthValuePtr expected1 = TruthValue::TRUE_TV();
 	TruthValuePtr expected2 = TruthValue::FALSE_TV();
