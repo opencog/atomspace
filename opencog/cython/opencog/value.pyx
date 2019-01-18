@@ -96,8 +96,26 @@ cdef class Value:
 
     def __repr__(self):
         return self.long_string()
+    
+    # TODO: Ideally TruthValue should be subclass of Value and thus                        
+    # Value.__richcmp__() will be used to compare both. But TruthValue
+    # was implemented earlier and is not subclass of Value.
+    # This comparing procedure is workaround before proper fix.
+    def compareWithTruthValue(self, other, op):
+        cdef cTruthValue* self_ptr = <cTruthValue*>get_value_ptr(<Value>self)
+        self_tv = TruthValue(deref(self_ptr).get_mean(),
+                             deref(self_ptr).get_confidence())
+        if op == Py_EQ:
+            return self_tv == other
+        elif op == Py_NE:
+            return self_tv != other
+        else:
+            raise TypeError('Value can be compared using '
+                            + 'Py_EQ and Py_NE only')
 
     def __richcmp__(self, other, op):
+        if isinstance(other, TruthValue):
+            return self.compareWithTruthValue(other, op)
         if not isinstance(other, Value):
             raise TypeError('Value cannot be compared with {}'
                             .format(type(other)))
