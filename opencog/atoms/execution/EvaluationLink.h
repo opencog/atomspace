@@ -44,18 +44,39 @@ public:
 	    return do_evaluate(as, get_handle());
 	}
 
-	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
+	static ValuePtr do_evaluate_value(AtomSpace*, const Handle&,
 	                                 bool silent=false);
-	static TruthValuePtr do_eval_scratch(AtomSpace* main,
+	static ValuePtr do_eval_scratch_value(AtomSpace* main,
 	                                     const Handle&,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
-	static TruthValuePtr do_evaluate(AtomSpace*,
+	static ValuePtr do_evaluate_value(AtomSpace*,
 	                                 const HandleSeq& schema_and_args,
 	                                 bool silent=false);
-	static TruthValuePtr do_evaluate(AtomSpace*,
+	static ValuePtr do_evaluate_value(AtomSpace*,
 	                                 const Handle& schema, const Handle& args,
 	                                 bool silent=false);
+
+	static TruthValuePtr do_evaluate(AtomSpace* as, const Handle& h,
+	                                 bool silent=false) {
+		return TruthValueCast(do_evaluate_value(as, h, silent));
+	}
+	static TruthValuePtr do_eval_scratch(AtomSpace* main,
+	                                     const Handle& h,
+	                                     AtomSpace* scratch,
+	                                     bool silent=false) {
+		return TruthValueCast(do_eval_scratch_value(main, h, scratch, silent));
+	}
+	static TruthValuePtr do_evaluate(AtomSpace* as,
+	                                 const HandleSeq& schema_and_args,
+	                                 bool silent=false) {
+		return TruthValueCast(do_evaluate_value(as, schema_and_args, silent));
+	}
+	static TruthValuePtr do_evaluate(AtomSpace* as,
+	                                 const Handle& schema, const Handle& args,
+	                                 bool silent=false) {
+		return TruthValueCast(do_evaluate_value(as, schema, silent));
+	}
 
 	static Handle factory(const Handle&);
 };
