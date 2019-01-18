@@ -350,7 +350,12 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// one how the evaluation turned out.  Its "crisp logic"
 	// because we use a greater-than-half for the TV.
 	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd));
+	ValuePtr v = EvaluationLink::do_evaluate(_as, lgnd);
+	if (!v->is_type(TRUTH_VALUE))
+	{
+		throw RuntimeException(TRACE_INFO, "Unexpected value type: %d, TRUTH_VALUE is expected", v->get_type());
+	}
+	TruthValuePtr tv(TruthValueCast(v));
 	return tv->get_mean() >= 0.5;
 }
 

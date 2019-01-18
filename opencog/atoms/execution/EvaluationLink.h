@@ -57,9 +57,9 @@ public:
 	                                 const Handle& schema, const Handle& args,
 	                                 bool silent=false);
 
-	static TruthValuePtr do_evaluate(AtomSpace* as, const Handle& h,
+	static ValuePtr do_evaluate(AtomSpace* as, const Handle& h,
 	                                 bool silent=false) {
-		return TruthValueCast(do_evaluate_value(as, h, silent));
+		return do_evaluate_value(as, h, silent);
 	}
 	static TruthValuePtr do_eval_scratch(AtomSpace* main,
 	                                     const Handle& h,
