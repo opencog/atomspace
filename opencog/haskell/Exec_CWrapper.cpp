@@ -26,12 +26,14 @@ int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out)
  */
 int Exec_evaluate(AtomSpace* atomspace
                  , Handle* handle
-                 , char** tv_type
+                 , char** v_type
                  , double* parameters)
 {
     Handle h = *handle;
-	TruthValuePtr tv = EvaluationLink::do_evaluate(atomspace, h);
-    return FloatValue_toRaw(tv,tv_type,parameters);
+	ValuePtr v = EvaluationLink::do_evaluate(atomspace, h);
+	if (!v->is_type(FLOAT_VALUE))
+        throw RuntimeException(TRACE_INFO,"Unexpected value type: %d, FLOAT_VALUE is expected", v->get_type());
+    return FloatValue_toRaw(FloatValueCast(v),v_type,parameters);
 }
 
 
