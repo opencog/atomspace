@@ -1,4 +1,4 @@
-from opencog.atomspace cimport cHandle, tv_ptr, cAtomSpace
+from opencog.atomspace cimport cHandle, tv_ptr, cAtomSpace, cValuePtr
 
 ctypedef size_t cSize
 
@@ -27,4 +27,4 @@ cdef extern from "opencog/attentionbank/AFImplicator.h" namespace "opencog":
     cdef cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, cHandle)
 
 cdef extern from "opencog/atoms/execution/EvaluationLink.h" namespace "opencog":
-    tv_ptr c_evaluate_atom "opencog::EvaluationLink::do_evaluate"(cAtomSpace*, cHandle)
+    cValuePtr c_evaluate_atom "opencog::EvaluationLink::do_evaluate"(cAtomSpace*, cHandle)
