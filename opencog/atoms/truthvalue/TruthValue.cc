@@ -210,7 +210,7 @@ TruthValuePtr TruthValueCheckedCast(const ValuePtr& pa)
 {
 	if (!pa->is_type(TRUTH_VALUE))
 	{
-		throw RuntimeException(TRACE_INFO, "Unexpected value type: %d, TRUTH_VALUE is expected", pa->get_type());
+		throw RuntimeException(TRACE_INFO, "Unexpected value type: %s, TruthValue is expected", nameserver().getTypeName(pa->get_type()).c_str());
 	}
 	return TruthValueCast(pa);
 }

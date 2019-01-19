@@ -32,7 +32,9 @@ int Exec_evaluate(AtomSpace* atomspace
     Handle h = *handle;
     ValuePtr v = EvaluationLink::do_evaluate(atomspace, h);
     if (!v->is_type(FLOAT_VALUE))
-        throw RuntimeException(TRACE_INFO,"Unexpected value type: %d, FLOAT_VALUE is expected", v->get_type());
+        throw RuntimeException(TRACE_INFO,
+                               "Unexpected value type: %s, FloatValue is expected",
+                               nameserver().getTypeName(v->get_type()).c_str());
     return FloatValue_toRaw(FloatValueCast(v),v_type,parameters);
 }
 
