@@ -5,6 +5,7 @@ LINK_LIBRARIES(
 	atomutils
 )
 
+ADD_CXXTEST(TruthValueUTest)
 ADD_CXXTEST(SimpleTruthValueUTest)
 ADD_CXXTEST(EvidenceCountTruthValueUTest)
 # ADD_CXXTEST(IndefiniteTruthValueUTest)

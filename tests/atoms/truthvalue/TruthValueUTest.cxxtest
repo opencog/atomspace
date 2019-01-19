@@ -1,0 +1,49 @@
+#include <algorithm>
+
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class TruthValueUTest : public CxxTest::TestSuite
+{
+public:
+
+	void testTruthValueCheckedCast() {
+		ValuePtr v = ValueCast(SimpleTruthValue::createTV(0.1, 0.9));
+
+		TruthValuePtr tv = TruthValueCheckedCast(v);
+
+		TS_ASSERT_EQUALS(tv, v);
+	}
+
+	static void ASSERT_PREFIX(const char* prefix, const char* actual) {
+		std::string _prefix(prefix);
+		std::string _actual(actual);
+		ASSERT_PREFIX(_prefix, _actual);
+	}
+
+	static void ASSERT_PREFIX(std::string& prefix, std::string& actual) {
+		auto res = std::mismatch(prefix.begin(), prefix.end(), actual.begin());
+		TS_ASSERT(res.first == prefix.end());
+	}
+
+	void testTruthValueCheckedCastException() {
+		bool exceptionThrown = false;
+		RuntimeException exception;
+		ValuePtr v = createFloatValue(0.1);
+
+		try {
+			TruthValuePtr tv = TruthValueCheckedCast(v);
+		} catch (RuntimeException& e) {
+			exceptionThrown = true;
+			exception = e;
+		}
+
+		TS_ASSERT(exceptionThrown);
+		ASSERT_PREFIX("Unexpected value type: FloatValue, TruthValue is expected",
+		              exception.get_message());
+	}
+};
