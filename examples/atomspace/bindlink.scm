@@ -67,7 +67,11 @@
 ; preposition. This searches the atomsace for a verb-object pair,
 ; and a verb-preposition pair, and if it finds them, creates a triple.
 ;
-; It encodes the IF
+; This encodes the re-write rule:
+;    IF
+;         _obj(verb, thing) AND from(verb, substance)
+;    THEN
+;         make_from(thing, substance)
 ;
 (define make-semantic-triple
 	(BindLink
