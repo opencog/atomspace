@@ -61,11 +61,11 @@ public:
 	                                 bool silent=false) {
 		return do_evaluate_value(as, h, silent);
 	}
-	static TruthValuePtr do_eval_scratch(AtomSpace* main,
+	static ValuePtr do_eval_scratch(AtomSpace* main,
 	                                     const Handle& h,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false) {
-		return TruthValueCast(do_eval_scratch_value(main, h, scratch, silent));
+		return do_eval_scratch_value(main, h, scratch, silent);
 	}
 	static TruthValuePtr do_evaluate(AtomSpace* as,
 	                                 const HandleSeq& schema_and_args,

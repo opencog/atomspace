@@ -350,12 +350,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// one how the evaluation turned out.  Its "crisp logic"
 	// because we use a greater-than-half for the TV.
 	// This is the same behavior as used in evaluate_term().
-	ValuePtr v = EvaluationLink::do_evaluate(_as, lgnd);
-	if (!v->is_type(TRUTH_VALUE))
-	{
-		throw RuntimeException(TRACE_INFO, "Unexpected value type: %d, TRUTH_VALUE is expected", v->get_type());
-	}
-	TruthValuePtr tv(TruthValueCast(v));
+	TruthValuePtr tv(TruthValueCheckedCast(EvaluationLink::do_evaluate(_as, lgnd)));
 	return tv->get_mean() >= 0.5;
 }
 
@@ -528,7 +523,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace->clear();
-		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
+		TruthValuePtr tvp(TruthValueCheckedCast(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace)));
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
 		              << std::endl << tvp->to_string() << std::endl;})
@@ -658,7 +653,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_temp_aspace->clear();
 		try
 		{
-			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
+			tvp = TruthValueCheckedCast(EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true));
 		}
 		catch (const SilentException& ex)
 		{

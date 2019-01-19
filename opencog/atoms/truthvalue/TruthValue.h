@@ -182,6 +182,8 @@ static inline ValuePtr ValueCast(const TruthValuePtr& tv)
     return std::shared_ptr<Value>(tv, (Value*) tv.get());
 }
 
+TruthValuePtr TruthValueCheckedCast(const ValuePtr& pa);
+
 typedef std::vector<TruthValuePtr> TruthValueSeq;
 
 // Debugging helpers see

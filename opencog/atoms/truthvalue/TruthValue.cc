@@ -206,4 +206,13 @@ std::string oc_to_string(const TruthValueSeq& tvs, const std::string& indent)
 	return ss.str();
 }
 
+TruthValuePtr TruthValueCheckedCast(const ValuePtr& pa)
+{
+	if (!pa->is_type(TRUTH_VALUE))
+	{
+		throw RuntimeException(TRACE_INFO, "Unexpected value type: %d, TRUTH_VALUE is expected", pa->get_type());
+	}
+	return TruthValueCast(pa);
+}
+
 } // ~namespace opencog
