@@ -18,11 +18,11 @@ Example Files
 =============
 It is recommended that you go through the examples in the order given.
 
-* `basic.scm`   -- A very simple introduction
-* `bindlink-example.scm` -- An example of using the pattern matcher.
-* `python.scm`  -- loading python code from scheme.
-* `execute.scm` -- An example of executing executable atoms, with
-                   callbacks written in python or scheme.
+* `basic.scm`    -- A very simple introduction
+* `bindlink.scm` -- Queries and inference with the pattern matcher.
+* `python.scm`   -- Loading python code from scheme.
+* `execute.scm`  -- An example of executing executable atoms, with
+                    callbacks written in python or scheme.
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
 * `property.scm`-- Designing properties with Atoms.
