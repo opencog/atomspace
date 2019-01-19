@@ -1,13 +1,37 @@
 ;
-; values.scm -- Putting generic values on Atoms.
+; truthvalues.scm -- Declaring the truth of a proposition.
 ;
-; Example of use of `Values`, mixed with regular atoms.
-; ProtoAtoms are similar to regular atoms, except that:
-; 1) They do not have a TV or AV.
-; 2) They cannot be placed in the AtomSpace.
-; 2a) As a result they are not universally unique.
-; 2b) They do not have a UUID.
-
+; A knowledgebase records a set of facts. Or so it is claimed; but
+; are all of these "facts" actually true?  The TruthValue provides
+; an efficient, high-speed kind of way of associating a truth to
+; any given Atom.
+;
+; TruthValues need not be boolean true/false crisp-logic values.
+; They can be numbers, commonly interpreted as a probability. So,
+; a truth value between zero and one is the "probability" of it
+; being true. Sometimes, one can assign a probability, but without
+; being confident that it is true: thus the most basic TruthValue
+; is a SimpleTruthValue; it has a "strength" and a "confidence".
+;
+; Observational probabilities require counting to obtain a frequency.
+; The CountTruthValue simplifies this representation.
+;
+; The AtomSpace is probability-theory agnostic: you can use TruthValues
+; for Bayesian probabilites, frequentist probabilites, indefinite
+; probabilities, or whatever you can imagine. None of the rules enforce
+; any one particular theory.
+;
+; The word "Value" comes from the mathematical model-theoretic notion
+; of a "valuation". In model theory, a valuation is a special kind of
+; function that assigns a truth value to any proposition. Roughly
+; speaking, valuations provide the bridge between syntax and semantics.
+; They indicate one possible world out of many.
+;
+; There are other ways of describing possibility, probability and modal
+; logic in the AtomSpace; this includes Contexts and contextual truth
+; values. All that is for later examples; this example focuses on the
+; most basic forms.
+;
 (use-modules (opencog))
 
 ; Values can store vectors of floats ...
@@ -94,3 +118,11 @@
 (cog-value a kav)
 (cog-av a)
 (equal? (cog-value a kav) (cog-av a))
+
+; Example of use of `Values`, mixed with regular atoms.
+; ProtoAtoms are similar to regular atoms, except that:
+; 1) They do not have a TV or AV.
+; 2) They cannot be placed in the AtomSpace.
+; 2a) As a result they are not universally unique.
+; 2b) They do not have a UUID.
+

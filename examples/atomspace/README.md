@@ -29,14 +29,15 @@ Example Files
 =============
 It is recommended that you go through the examples in the order given.
 
-* `basic.scm`     -- How to start the guile shell.
-* `knowledge.scm` -- Representing knowledge.
-* `bindlink.scm`  -- Queries and inference with the pattern matcher.
-* `get-put.scm`   -- The two halves of a query: Get and Put.
+* `basic.scm`       -- How to start the guile shell.
+* `knowledge.scm`   -- Representing knowledge.
+* `bindlink.scm`    -- Queries and inference with the pattern matcher.
+* `get-put.scm`     -- The two halves of a query: Get and Put.
 * `assert-retract.scm` -- Asserting facts in the AtomSpace.
-* `state.scm`     -- Maintaining unique state.
-* `property.scm`  -- Designing properties with Atoms.
-* `values.scm`  -- Using Values and attaching them to Atoms.
+* `state.scm`       -- Maintaining unique state.
+* `property.scm`    -- Designing Atoms with properties.
+* `truthvalues.scm` -- Declaring the truth of a proposition.
+* `values.scm`      -- Using Values and attaching them to Atoms.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
 * `recursive-loop.scm`  -- An example of a tail-recursive loop.

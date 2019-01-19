@@ -1,5 +1,5 @@
 ;
-; property.scm -- Designing properties with atoms.
+; property.scm -- Designing Atoms with properties.
 ;
 ; Many knowledge representation systems want to view the world in
 ; terms of objects that have properties on them. This can already
