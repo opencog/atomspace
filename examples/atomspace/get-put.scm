@@ -1,5 +1,18 @@
 ;
-; Guile assert/retract example.
+; get-put.scm -- Asserting and retracting facts.
+;
+; A knowledgebase is rarely static. one needs to be able to assert
+; new facts, and retract old ones.  Of course, one can always do this
+; directly: just write some Atoms at the guile prompt, or just delete
+; them (using the `cog-delete` function). But what if you do not yet
+; know what these facts are? What if they are the result of logical
+; reasoning?
+;
+; Rather than writing a procedural program that performs reasoning,
+; and then just performs the insertion/deletion "manually" (by calling
+; some function "proceedurally"), one can also maintain the knowlegbase
+; with knowledge-snippets themselves. That is, the tools for maintaining
+; the data can be a part of the data itself.
 ;
 ; The cog-execute! function is used to assert facts, or retract them
 ; from the AtomSpace.  The idea of asserting and retracting facts is

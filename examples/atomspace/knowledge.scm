@@ -1,7 +1,7 @@
 ;
 ; knowledge.scm - Representing data with Predicates and Evaluations
 ;
-; The atomspace is primarily a knowledge-represention database 
+; The atomspace is primarily a knowledge-represention database
 ; (a "knowledgebase"). That is, you have a collection of statements:
 ; some "semantic triples" or maybe some "ontology". A "semantic netowrk"
 ; or some "frames" or some "rules" or maybe even some "axioms".
@@ -42,3 +42,28 @@
 
 ; Nodes always have string names.
 ; Links are always collections of Nodes or of other Links.
+;
+; --------------------------------------------------------
+; Schemas.
+;
+; The above example is "free-form".  There are no particular rules for
+; how you can put data into the knowledgebase. This makes it quite
+; unlike SQL, where you MUST declare a table, before putting data into
+; it. Thus, Atomese is a bit more like ProLog: you can assert facts,
+; without specifying any kind of template or schema in advance.
+;
+; However, some kinds of data problems do want a strict structuring
+; of data. This can be acheived by using the TypedAtomLink. Using types
+; in the AtomSpace is an advanced topic, but some flavor of this can
+; be given here.
+;
+; Suppose you wanted to say that the "_obj" predicate must always take
+; only two arguments, no more and no less, and that these must always
+; be ConceptNodes. You can declare this by writing the following:
+
+(TypedAtom
+	(Evaluation
+		(Predicate "_obj")
+		(ListLink
+			(Type "ConceptNode")
+			(Type "ConceptNode"))))

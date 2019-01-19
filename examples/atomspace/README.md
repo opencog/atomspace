@@ -4,15 +4,26 @@ Demo of Atoms, Values and the AtomSpace
 This directory contains examples that illustrate all of the main ideas
 underlying the AtomSpace. This includes:
 
-* Atoms, how to create them and how to use them.
-* TruthValues, and how to associate them to atoms.
-* A simple pattern-matching example.
-* Techniques to control state in the AtomSpace.
-* How to use Values to attach arbitrary data to specific Atoms.
-* How to user a read-only base AtomSpace, with a read-write overlay.
-* How to use time-varying (streaming) Values (experimental).
+* The AtomSpace as a knowledgebase - a graph database.
+* Basic querying (pattern-matching) and inference on knowledge.
+* Assigning degrees of truth various facts and inferences.
+* Complex knowledge-representation tasks, including:
+  -- Setting unique state
+  -- Designing properties
+  -- Assigning values and using key-value pairs efficiently
+  -- Handling rapidly time-varying data (video/audio streams).
 
-All of the examples are written in scheme.
+After this come examples for assorted advanced features that are
+typically encountered:
+
+* Creating a read-only base AtomSpace, with a read-write overlay.
+* Throwing excpetions.
+* Storing the Atomspace in PostgreSQL
+* Using the logger.
+* Calling Python from within the Atomspace.
+* Multithreading with ParallelLink and JoinLink
+* ... and much much more.
+
 
 Example Files
 =============
@@ -21,7 +32,7 @@ It is recommended that you go through the examples in the order given.
 * `basic.scm`     -- How to start the guile shell.
 * `knowledge.scm` -- Representing knowledge.
 * `bindlink.scm`  -- Queries and inference with the pattern matcher.
-* `get-put.scm` -- An example of asserting facts in the AtomSpace.
+* `get-put.scm`   -- Asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
 * `property.scm`-- Designing properties with Atoms.
 * `values.scm`  -- Using Values and attaching them to Atoms.
