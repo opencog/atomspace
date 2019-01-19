@@ -1,15 +1,22 @@
 ;
-; bindlink-example.scm
+; bindlink.scm
 ;
-; Linas Vepstas January 2009
+; A common task in knowledge representation systems is searching and
+; querying for data, and then re-shaping the query results into a new
+; form. In Atomese, querying and graph-rewriting is done with the
+; BindLink atom. The BindLink uses "pattern matching" to find subgraphs
+; in the atomspace that match the query, and then creates a new graph
+; with those results in them.
 ;
-; This file contains a simple, visual-inspection demo example for the
-; use of the query engine to find pattern matches using the scheme
-; interfaces.  The below defines a single BindLink and two chunks of
-; data, and then calls the pattern matcher.
+; Unlike most query languages (SQL, etc.) atomese queries are stored
+; in the Atomspace itself, as graphs. Thus BindLink is just another
+; link type.
 ;
-; The expected result, after running the below, is that the following
-; should be printed:
+; The example places some typical "semantic triple" natural-language
+; style data in the Atomspace, and then defines a query, build from
+; BindLink, to perform some "basic inference" on that data.
+;
+; The expected result is that the following should be printed:
 ;
 ; guile> (cog-execute! x)
 ; (ListLink (EvaluationLink (PredicateNode "make_from")
@@ -23,6 +30,20 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))
+
+; Place some data in the atomspace that the above pattern will
+; be able to find.
+(EvaluationLink (stv 1.0 1.0)
+	(PredicateNode "_obj")
+	(ListLink
+		(ConceptNode "make")
+		(ConceptNode "pottery")))
+
+(EvaluationLink  (stv 1.0 1.0)
+	(PredicateNode "from")
+	(ListLink
+		(ConceptNode "make")
+		(ConceptNode "clay")))
 
 ; Create a "semantic triple" by combining a verb, an object and a
 ; preposition. This searches the atomsace for a verb-object pair,
@@ -69,20 +90,6 @@
 		)
 	)
 )
-
-; Place some data in the atomspace that the above pattern will
-; be able to find.
-(EvaluationLink (stv 1.0 1.0)
-	(PredicateNode "_obj")
-	(ListLink
-		(ConceptNode "make")
-		(ConceptNode "pottery")))
-
-(EvaluationLink  (stv 1.0 1.0)
-	(PredicateNode "from")
-	(ListLink
-		(ConceptNode "make")
-		(ConceptNode "clay")))
 
 ; Run the pattern matcher.
 (cog-execute! make-semantic-triple)
