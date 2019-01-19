@@ -35,6 +35,10 @@ class AtomSpace;
 
 class EvaluationLink : public FreeLink
 {
+private:
+	static ValuePtr do_evaluate_value(AtomSpace*,
+	                                 const Handle& schema, const Handle& args,
+	                                 bool silent=false);
 public:
 	EvaluationLink(const HandleSeq&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
@@ -50,9 +54,6 @@ public:
 	                                     const Handle&,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
-	static ValuePtr do_evaluate_value(AtomSpace*,
-	                                 const Handle& schema, const Handle& args,
-	                                 bool silent=false);
 
 	static ValuePtr do_evaluate(AtomSpace* as, const Handle& h,
 	                                 bool silent=false) {
@@ -63,11 +64,6 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false) {
 		return do_eval_scratch_value(main, h, scratch, silent);
-	}
-	static TruthValuePtr do_evaluate(AtomSpace* as,
-	                                 const Handle& schema, const Handle& args,
-	                                 bool silent=false) {
-		return TruthValueCast(do_evaluate_value(as, schema, silent));
 	}
 
 	static Handle factory(const Handle&);
