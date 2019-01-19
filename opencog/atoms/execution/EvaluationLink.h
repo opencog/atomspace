@@ -51,9 +51,6 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
 	static ValuePtr do_evaluate_value(AtomSpace*,
-	                                 const HandleSeq& schema_and_args,
-	                                 bool silent=false);
-	static ValuePtr do_evaluate_value(AtomSpace*,
 	                                 const Handle& schema, const Handle& args,
 	                                 bool silent=false);
 
@@ -66,11 +63,6 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false) {
 		return do_eval_scratch_value(main, h, scratch, silent);
-	}
-	static TruthValuePtr do_evaluate(AtomSpace* as,
-	                                 const HandleSeq& schema_and_args,
-	                                 bool silent=false) {
-		return TruthValueCast(do_evaluate_value(as, schema_and_args, silent));
 	}
 	static TruthValuePtr do_evaluate(AtomSpace* as,
 	                                 const Handle& schema, const Handle& args,
