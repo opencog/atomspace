@@ -1,8 +1,14 @@
 ;
-; property.scm -- Associating properties with atoms.
+; property.scm -- Designing properties with atoms.
 ;
-; The StateLink can be used to set "state" in he atomspace; see
-; the state.scm file for a example.  States can be thought of as
+; Many knowledge representation systems want to view the world in
+; terms of objects that have properties on them. This can already
+; be done quite easily with EvaluationLinks and PredicateNodes.
+; But what if one wants a strict guarantee that there is only one
+; property of a given name, and then change it time to time?
+;
+; The StateLink can be used to set "state" in the atomspace; see
+; the `state.scm` file for a example.  States can be thought of as
 ; "key-value" pairs in the atomspace; for a give key, there can only
 ; ever be one value. Keys and values can be any atoms whatever. By
 ; using a key that combines an atom with a property name, one can

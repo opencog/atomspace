@@ -25,7 +25,7 @@ It is recommended that you go through the examples in the order given.
                    callbacks written in python or scheme.
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
-* `property.scm`-- Setting properies on Atoms.
+* `property.scm`-- Designing properties with Atoms.
 * `values.scm`  -- Using Values and attaching them to Atoms.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
