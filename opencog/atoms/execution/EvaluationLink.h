@@ -36,7 +36,7 @@ class AtomSpace;
 class EvaluationLink : public FreeLink
 {
 private:
-	static ValuePtr do_evaluate_value(AtomSpace*,
+	static ValuePtr do_evaluate_evaluation_link(AtomSpace*,
 	                                 const Handle& schema, const Handle& args,
 	                                 bool silent=false);
 public:

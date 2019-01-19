@@ -300,7 +300,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		Instantiator inst(scratch);
 		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
 
-		return do_evaluate_value(scratch, sna.at(0), args, silent);
+		return do_evaluate_evaluation_link(scratch, sna.at(0), args, silent);
 	}
 	else if (IDENTICAL_LINK == t)
 	{
@@ -561,13 +561,13 @@ ValuePtr EvaluationLink::do_evaluate_value(AtomSpace* as,
 // uses this function, so more refactoring would be needed
 #include "ExecutionOutputLink.h"
 
-/// do_evaluate_value -- evaluate the GroundedPredicateNode of the EvaluationLink
+/// do_evaluate_evalution_link -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
 /// Expects "args" to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
-ValuePtr EvaluationLink::do_evaluate_value(AtomSpace* as,
+ValuePtr EvaluationLink::do_evaluate_evaluation_link(AtomSpace* as,
                                           const Handle& pn,
                                           const Handle& cargs,
                                           bool silent)
