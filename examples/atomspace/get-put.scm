@@ -21,7 +21,11 @@
 ;
 ; Spliting a query into a satisfying set, followed by a beta-reduction
 ; can sometimes allow a more flexible approach to managing the
-; knowledgebase.
+; knowledgebase. In some sense, Get and Put are opposites: whatever
+; one of them does, the other can undo. In this example, a query is
+; made for P(x) and then Q(x) is created. But one could, instead,
+; create Q(x) first, and then ask for it later. In the language of
+; category theory, Get and Put are adjoint functors.
 ;
 (use-modules (opencog) (opencog exec) (opencog query))
 

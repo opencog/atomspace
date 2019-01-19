@@ -14,46 +14,59 @@
 ; with knowledge-snippets themselves. That is, the tools for maintaining
 ; the data can be a part of the data itself.
 ;
-; This is done with two link types: GetLink and PutLink. The GetLink
-; is another form of query, much like BindLink, but without the
-; re-writing: it is "half" of an implication. PutLink is the other half
-; of the implication: it only does the re-writing part. PutLink is
-; a form of beta-reduction for graphs.  These two halves can be
-; combined; thus, every BindLink is equivalent to a Get-Put pair.
+; The GetLink and PutLink, from the `get-put.scm` example, provide the
+; tools needed to work with facts beig deduced on the fly. They allow
+; facts to be asserted and retracted, even though thier specific present
+; form is not yet known.
 ;
-; Splitting graph-query and rewriting into two pieces allows for greater
-; flexibility in how knowledge self-mutates at runtime.  The example
-; below
-; allows 
-; The cog-execute! function is used to assert facts, or retract them
-; from the AtomSpace.  The idea of asserting and retracting facts is
-; taken from ProLog, where the system as a whole behave like a database,
-; and there must be a way of adding records, or removing them from the
-; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
-; and the PutLink and DeleteLink provide a way to add and remove
-; statements when they are executed.
+; The `cog-execute!` function is the primary driver for affecting state
+; change. Every time it is called, the state of the atomspace will
+; (usually) change. The `cog-execute!` forces a single time-step of
+; an Atomese knowledgebase into it's next form.  In this sense, the
+; knowledgebase is a dynamical system. It is not just a static
+; collection of facts. It is also a collection of rules that determine
+; how the state changes over time.
+;
+; The idea of asserting and retracting facts is taken from ProLog, where
+; the collection of facts, as a whole, behaves like a database (this is
+; sometimes called the "DataLog" subset of ProLog). There must be a way
+; of adding records, or removing them from the database.  So, likewise,
+; in the AtomSpace: the AtomSpace is a database, a knowledgebase.
+;
+; In this example, PutLink is used to assert new knowledge. The
+; DeleteLink is used to remove it. The DeleteLink is quite special:
+; it is one of a collection of Link types that MUST have a VariableNode
+; in it.  That is, DeleteLinks can NEVER be "ground terms", as, by
+; definition, grounding it causes it to vanish.
 
-(use-modules (opencog))
-(use-modules (opencog exec))
-(use-modules (opencog query))
+(use-modules (opencog) (opencog exec) (opencog query))
 
 ; A utility function to print all EvaluationLinks in the AtomSpace.
+; Very handy to see what is in the AtomSpace. Don't worry about the
+; scheme code used to implement this: it's just a black box, and is
+; not really a part of this example. Just know that it prints all
+; EvaluationLinks.
 (define (show-eval-links)
 	(cog-map-type (lambda (h) (display h) #f) 'EvaluationLink))
 
-; The EvaluationLink won't be added until this is reduced.
-; When it is reduced, the ListLink will be substitited for the
-; variable $x, creating the fully-assembled EvaluationLink.
-(define to-be-added
-	(PutLink
-		(EvaluationLink
-		    (PredicateNode "some property")
-          (VariableNode "$x"))
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "B-dom-ness"))))
-
 ; Verify that the atomspace contains no EvaluationLinks:
+(show-eval-links)
+
+; Define a beta-reduction, using the PutLink. The EvaluationLink won't
+; be added until this is reduced. When it is reduced, the ListLink will
+; be substitited for the variable $x, creating the fully-assembled
+; EvaluationLink.
+;
+(define to-be-added
+	(Put
+		(Evaluation
+		    (Predicate "some property") (Variable "$x"))
+		(ListLink
+			(Concept "thing A")
+			(Concept "B-dom-ness"))))
+
+; The atomspace now contains one ungrounded EvaluationLink.
+; (Its called "ungrounded" because it has a free variable in it).
 (show-eval-links)
 
 ; Now, actually create the EvaluationLink.
@@ -62,59 +75,52 @@
 ; Take a look again:
 (show-eval-links)
 
-; One way to view the result of having run the PutLink is to
-; use the GetLink with the same pattern.  Thus, the GetLink
-; below has a satisfying set that corresponds to the PutLink
-; above.
+; Whatever the PutLink does, the GetLink can un-do.  The GetLink
+; below has a satisfying set that corresponds to the PutLink above.
+; (This means that Get and Put are "adjoint functors".)
 
-(define get-value
-	(GetLink
-		(EvaluationLink
-			(PredicateNode "some property")
-			(VariableNode "$x"))))
+(define get-property
+	(Get (Evaluation (Predicate "some property") (Variable "$x"))))
 
-; The cog-execute! function will return the value(s) that
-; the GetLink finds.  If only one value satsifies the query, then
-; that is returned. Else a SetLink is returned. Equivalently,
-; the cog-execute! function will do the same thing.
-(cog-execute! get-value)
-(cog-execute! get-value)
+; The cog-execute! function will return the set of all atoms that
+; the GetLink finds.
+(cog-execute! get-property)
 
-; The PutLink below causes the put-link above to be un-done.
-; It explicitly specifies the same parts as were specified above,
-; but when these are assembled, it causes the DeleteLink to
-; run and remove them.  That is, it is impossible to insert
-; a DeleteLink into the atomspace, if it does not have any
-; variables in it. Attempting such an insertion will cause the
-; body of the DeleteLink to be removed.
+; The PutLink below causes the PutLink above to be un-done.
+; It explicitly specifies the same parts as were specified before,
+; but when these parts are assembled into a whole, they materialize
+; inside of a DeleteLink, which causes them to disappear. That is,
+; it is impossible to insert a fully-grounded DeleteLink into the
+; atomspace. A DeleteLink must ALWAYS have at least one variable in
+; it, otherwise, it cannot exist. Attempting such an insertion will
+; cause the body of the DeleteLink to be removed.
+;
+; (This shows that PutLink and DeleteLink are also adjoint functors.)
+;
 (define remove-thing-ab
-	(PutLink
-		(DeleteLink
-			(EvaluationLink
-				(PredicateNode "some property")
-				(VariableNode "$x")))
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "B-dom-ness"))))
+	(Put
+		(Delete
+			(Evaluation (Predicate "some property") (Variable "$x")))
+		(ListLink (Concept "thing A") (Concept "B-dom-ness"))))
 
 ; Force its removal.
 (cog-execute! remove-thing-ab)
 
 ; Look for it; it should be absent.
-(cog-execute! get-value)
+(cog-execute! get-property)
 ; Double-check it's absence.
 (show-eval-links)
 
 ; Add it back in:
 (cog-execute! to-be-added)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 ; ... and so on. We can now continue to remove it and add it
 ; back in repeatedly.
 (cog-execute! remove-thing-ab)
-(cog-execute! get-value)
+(cog-execute! get-property)
 (cog-execute! to-be-added)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 
 ; It is also useful to generically remove any atom matching
@@ -137,29 +143,40 @@
 
 ; Now, remove the EvaluationLink
 (cog-execute! remove-some-property)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 ; We can now add and remove over and over:
 (cog-execute! to-be-added)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 (cog-execute! remove-some-property)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 ; And do it again, for good luck:
 (cog-execute! to-be-added)
-(cog-execute! get-value)
+(cog-execute! get-property)
 (cog-execute! remove-some-property)
-(cog-execute! get-value)
+(cog-execute! get-property)
 
 
 ; ------------------------------------------------
 ; The simplest way to combine Delete/Get/Put to maintain state is to
 ; use the StateLink.  StateLinks do not even have to be executed;
-; simply using them changes the state. See state.scm for details.
+; simply using them changes the state. See the `state.scm` example
+; for details.
 ;
-; Thus for example:
-
+; StateLinks can be thought of as a combined Delete+Put. Whenever the
+; state is set, the old state is deleted, first. Computationally, this
+; is an atomic operation: it is protected by a mutex lock (so you can
+; safely use it in multi-threaded Atomese programs).
+;
+; The StateLink can be thought of as a key-value pair.  For any given
+; key, there is a corresponding value. It is kind of UniqueLink: the
+; StateLink can only ever correspond to one value at a time, never two.
+; Compare to EvaluationLink: you can create as many of those as you
+; want; but there can ever be only one state. States are necessarily
+; single-valued. (They are fermions to EvaluationLink's bosons.)
+;
 (StateLink
 	(PredicateNode "some property")
 	(ListLink
