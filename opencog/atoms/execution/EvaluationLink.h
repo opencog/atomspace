@@ -45,26 +45,15 @@ public:
 	EvaluationLink(const Link& l);
 
 	ValuePtr evaluate(AtomSpace* as) {
-	    return do_evaluate_value(as, get_handle());
+	    return do_evaluate(as, get_handle());
 	}
 
-	static ValuePtr do_evaluate_value(AtomSpace*, const Handle&,
+	static ValuePtr do_evaluate(AtomSpace*, const Handle&,
 	                                 bool silent=false);
-	static ValuePtr do_eval_scratch_value(AtomSpace* main,
+	static ValuePtr do_eval_scratch(AtomSpace* main,
 	                                     const Handle&,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
-
-	static ValuePtr do_evaluate(AtomSpace* as, const Handle& h,
-	                                 bool silent=false) {
-		return do_evaluate_value(as, h, silent);
-	}
-	static ValuePtr do_eval_scratch(AtomSpace* main,
-	                                     const Handle& h,
-	                                     AtomSpace* scratch,
-	                                     bool silent=false) {
-		return do_eval_scratch_value(main, h, scratch, silent);
-	}
 
 	static Handle factory(const Handle&);
 };

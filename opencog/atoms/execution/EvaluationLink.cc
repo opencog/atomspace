@@ -235,17 +235,17 @@ static void thread_eval(AtomSpace* as,
                         const Handle& evelnk, AtomSpace* scratch,
                         bool silent)
 {
-	EvaluationLink::do_eval_scratch_value(as, evelnk, scratch, silent);
+	EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 }
 
 static void thread_eval_tv(AtomSpace* as,
                            const Handle& evelnk, AtomSpace* scratch,
                            bool silent, ValuePtr* v)
 {
-	*v = EvaluationLink::do_eval_scratch_value(as, evelnk, scratch, silent);
+	*v = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 }
 
-/// do_evaluate_value -- evaluate any Node or Link types that can meaningfully
+/// do_evaluate -- evaluate any Node or Link types that can meaningfully
 /// result in a truth value.
 ///
 /// For example, evaluating a TrueLink returns TruthValue::TRUE_TV, and
@@ -277,7 +277,7 @@ static void thread_eval_tv(AtomSpace* as,
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
+ValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               const Handle& evelnk,
                                               AtomSpace* scratch,
                                               bool silent)
@@ -316,7 +316,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 	}
 	else if (NOT_LINK == t)
 	{
-		TruthValuePtr tv(TruthValueCast(do_eval_scratch_value(as, evelnk->getOutgoingAtom(0),
+		TruthValuePtr tv(TruthValueCast(do_eval_scratch(as, evelnk->getOutgoingAtom(0),
 		                                 scratch, silent)));
 		return ValueCast(SimpleTruthValue::createTV(
 		              1.0 - tv->get_mean(), tv->get_confidence()));
@@ -325,7 +325,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(TruthValueCast(do_eval_scratch_value(as, h, scratch, silent)));
+			TruthValuePtr tv(TruthValueCast(do_eval_scratch(as, h, scratch, silent)));
 			if (tv->get_mean() < 0.5)
 				return ValueCast(tv);
 		}
@@ -335,7 +335,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(TruthValueCast(do_eval_scratch_value(as, h, scratch, silent)));
+			TruthValuePtr tv(TruthValueCast(do_eval_scratch(as, h, scratch, silent)));
 			if (0.5 < tv->get_mean())
 				return ValueCast(tv);
 		}
@@ -356,7 +356,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(TruthValueCast(do_eval_scratch_value(as, oset[i], scratch, silent)));
+				TruthValuePtr tv(TruthValueCast(do_eval_scratch(as, oset[i], scratch, silent)));
 				if (tv->get_mean() < 0.5)
 					return ValueCast(tv);
 			}
@@ -378,7 +378,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(TruthValueCast(do_eval_scratch_value(as, oset[i], scratch, silent)));
+				TruthValuePtr tv(TruthValueCast(do_eval_scratch(as, oset[i], scratch, silent)));
 				if (0.5 < tv->get_mean())
 					return ValueCast(tv);
 			}
@@ -441,7 +441,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 			const Handle& term = evelnk->getOutgoingAtom(0);
 			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
 			{
-				EvaluationLink::do_eval_scratch_value(as, term, scratch, silent);
+				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
 			}
 			else
 			{
@@ -463,7 +463,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return do_eval_scratch_value(as, evelnk->getOutgoingAtom(0), scratch, silent);
+		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -491,11 +491,11 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		Handle red = pl->reduce();
 
 		// Step (3)
-		return do_eval_scratch_value(as, red, scratch, silent);
+		return do_eval_scratch(as, red, scratch, silent);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_eval_scratch_value(as, DefineLink::get_definition(evelnk),
+		return do_eval_scratch(as, DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
 	else if (// Links that evaluate to themselves
@@ -511,7 +511,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		// If the truth value of the link is being requested,
 		// then ... compute the truth value, on the fly!
 		Handle ofatom = evelnk->getOutgoingAtom(0);
-		TruthValuePtr tvp(TruthValueCast(EvaluationLink::do_eval_scratch_value(as,
+		TruthValuePtr tvp(TruthValueCast(EvaluationLink::do_eval_scratch(as,
 		                    ofatom, scratch, silent)));
 
 		// Cache the computed truth value...
@@ -525,7 +525,7 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		ValuePtr pap(ValueOfLinkCast(evelnk)->execute());
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
-			return EvaluationLink::do_eval_scratch_value(as,
+			return EvaluationLink::do_eval_scratch(as,
 			                    HandleCast(pap), scratch, silent);
 
 		return pap;
@@ -549,11 +549,11 @@ ValuePtr EvaluationLink::do_eval_scratch_value(AtomSpace* as,
 		evelnk->to_string().c_str());
 }
 
-ValuePtr EvaluationLink::do_evaluate_value(AtomSpace* as,
+ValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& evelnk,
                                           bool silent)
 {
-	return do_eval_scratch_value(as, evelnk, as, silent);
+	return do_eval_scratch(as, evelnk, as, silent);
 }
 
 // Fixme: added here, because lang_lib_fun is declared inside ExecutionOutputLink class
@@ -598,7 +598,7 @@ ValuePtr EvaluationLink::do_evaluate_evaluation_link(AtomSpace* as,
 		Handle reduct = lam->beta_reduce(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));
-		return do_evaluate_value(as, reduct, silent);
+		return do_evaluate(as, reduct, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
