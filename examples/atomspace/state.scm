@@ -56,21 +56,33 @@
 ; of ungrounded terms are allowed, so that arbitrary queries can be
 ; written, just like the above.
 
-; cog-evaluate! is used to evaluate expressions that return truth
-; values. So, evaluate, to see if the current state is "apple": this
-; should return a truth value corresponding to "true"
-(cog-evaluate! (EqualLink (SetLink (Concept "apple"))
-	(GetLink (State (Anchor "fruit") (Variable "$x")))))
+; ------------------
+; The `cog-execute!` function always returns atoms. The `cog-evaluate!`
+; function always returns TruthValues. Very roughly speaking,
+; "execution" is like running a program, "evaluation" is like evaluating
+; an expression. Very similar, but not the same in Atomese.
+;
+; So, evaluate, to see if the current state is really is "apple": this
+; should return a truth value corresponding to "true". Here, EqualLink
+; is a link that, when evaluated, returns a TruthValue.
+
+(cog-evaluate!
+	(EqualLink
+		(Set (Concept "apple"))
+		(Get (State (Anchor "fruit") (Variable "$x")))))
 
 ; Same as above, but should be false:
-(cog-evaluate! (EqualLink (SetLink (Concept "bananna"))
-	(GetLink (State (Anchor "fruit") (Variable "$x")))))
+(cog-evaluate!
+	(EqualLink
+		(Set (Concept "bananna"))
+		(Get (State (Anchor "fruit") (Variable "$x")))))
 
 ; Change the state, using PutLink:
-(cog-execute! (PutLink
-	(State (Anchor "fruit") (Variable "$x"))
-	(Concept "strawberry")))
+(cog-execute!
+	(Put
+		(State (Anchor "fruit") (Variable "$x"))
+		(Concept "strawberry")))
 
-; And, again verify that the stae has changed, as expected:
-(cog-execute! (GetLink
-	(State (Anchor "fruit") (Variable "$x"))))
+; And, again verify that the state has changed, as expected:
+(cog-execute!
+	(Get (State (Anchor "fruit") (Variable "$x"))))
