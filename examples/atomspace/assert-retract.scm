@@ -1,5 +1,5 @@
 ;
-; get-put.scm -- Asserting and retracting facts.
+; assert-retract.scm -- Asserting and retracting facts.
 ;
 ; A knowledgebase is rarely static. one needs to be able to assert
 ; new facts, and retract old ones.  Of course, one can always do this
@@ -21,6 +21,18 @@
 ; a form of beta-reduction for graphs.  These two halves can be
 ; combined; thus, every BindLink is equivalent to a Get-Put pair.
 ;
+; Splitting graph-query and rewriting into two pieces allows for greater
+; flexibility in how knowledge self-mutates at runtime.  The example
+; below
+; allows 
+; The cog-execute! function is used to assert facts, or retract them
+; from the AtomSpace.  The idea of asserting and retracting facts is
+; taken from ProLog, where the system as a whole behave like a database,
+; and there must be a way of adding records, or removing them from the
+; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
+; and the PutLink and DeleteLink provide a way to add and remove
+; statements when they are executed.
+
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog query))
