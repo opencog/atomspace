@@ -1,0 +1,100 @@
+/*
+ * tests/atomspace/HashMixUTest.cxxtest
+ *
+ * Copyright (C) 2019 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * Written by Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
+
+using namespace opencog;
+
+class HashMixUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+
+public:
+	HashMixUTest()
+	{
+	}
+
+	void setUp()
+	{
+		as = new AtomSpace();
+	}
+
+	void tearDown()
+	{
+		delete as;
+	}
+
+	void HashMixer(int num_atoms, int width)
+	{
+		Handle h = as->add_node(CONCEPT_NODE, "foobar");
+
+		// This test is successful if it runs to completion. A hash
+		// function with a collision will cause this to hang for a
+		// very very very long time! (Because the collision will
+		// force a Link compare-by-content, which will take about
+		// (width) power-of (num_atoms) so 14 Billion years if there
+		// is an actual hash collision.
+		for (int i = 0; i < num_atoms; i++)
+		{
+			// Create a width-ary tree. (e.g. binary tree for width=2)
+			HandleSeq hs;
+			for (int j=0; j< width; j++) hs.push_back(h);
+			h = as->add_link(LIST_LINK, hs);
+		}
+
+		// Just for grins. This is meaningless.
+		size_t sz = as->get_size();
+
+		printf("Final size is %lu\n", sz);
+		TS_ASSERT_EQUALS(sz, num_atoms+1);
+
+		while (h->is_link())
+		{
+			Handle h2 = h->getOutgoingAtom(0);
+			bool done = as->extract_atom(h);
+			TS_ASSERT_EQUALS(done, true);
+			h = h2;
+			sz --;
+		}
+		TS_ASSERT_EQUALS(sz, 1);
+		as->clear();
+	}
+
+	void testHashMixing()
+	{
+		logger().info("BEGIN TEST: %s", __FUNCTION__);
+		HashMixer(134001, 2);
+		HashMixer(136301, 3);
+		HashMixer( 74501, 4);
+		HashMixer( 74601, 5);
+		HashMixer( 74701, 6);
+		HashMixer( 74801, 7);
+
+		logger().info("END TEST: %s", __FUNCTION__);
+	}
+};

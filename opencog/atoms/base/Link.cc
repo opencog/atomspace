@@ -168,6 +168,13 @@ ContentHash Link::compute_hash() const
 	for (const Handle& h: _outgoing)
 	{
 		hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
+
+		// Bit-mixing copied from murmur64. Yes, this is needed.
+		hsh ^= hsh >> 33;
+		hsh *= 0xff51afd7ed558ccdL;
+		hsh ^= hsh >> 33;
+		hsh *= 0xc4ceb9fe1a85ec53L;
+		hsh ^= hsh >> 33;
 	}
 
 	// Links will always have the MSB set.
