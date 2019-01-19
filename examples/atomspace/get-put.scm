@@ -8,11 +8,11 @@
 ; graph re-writing.
 ;
 ; If BindLink is thought of as logical implication:
-;    For all x, P(x) implies Q(x)
+;	 For all x, P(x) implies Q(x)
 ; then GetLink is the first half:
-;    For all x, P(x) implies a set {all x that satisfy P(x)}
+;	 For all x, P(x) implies a set {all x that satisfy P(x)}
 ; while PutLink is the second half:
-;    Create the set {Q(x)} given some other set {x}
+;	 Create the set {Q(x)} given some other set {x}
 ; The PutLink is a form of "beta-reduction" or "substitution" or
 ; "pasting": for each `x` in the set {x} it just pastes `x` into `Q(x)`.
 ;
@@ -34,17 +34,25 @@
 
 (Evaluation (Predicate "from") (List (Concept "make") (Concept "clay")))
 
-(define make-semantic-triple
-	(BindLink
-		(VariableList   ; Variable declaration (optional)
+; Create a query, an "inner join" of several interesting clauses.
+;
+; This searches for all triples (verb, thing, substance) that
+; simultaneously satisfy two clauses:
+;
+;			_obj(verb, thing) AND from(verb, substance)
+;
+; This is an "inner join" because `verb` must be the same in both
+; clauses.
+
+(define get-satisfying-set
+	(GetLink
+		(VariableList	; Variable declaration (optional)
+			(Variable "$verb")
 			(Variable "$var0")
 			(Variable "$var1")
-			(Variable "$verb")
 		)
 
-		; The premise of the implication is wrapped by an AndLink.
-		; This means that each of the clauses must be satisfied in
-		; the atomspace. In SQL terms, this is an "inner join".
+		; The distinct clauses are wrapped by an AndLink.
 		(AndLink
 			; Look for _obj($verb, $var0)
 			(Evaluation
@@ -63,24 +71,40 @@
 				)
 			)
 		)
-		; Combine the two above into one.
-		(EvaluationLink
-			(PredicateNode "make_from")
-			(ListLink
-				(VariableNode "$var0")
-				(VariableNode "$var1")
-			)
-		)
 	)
 )
 
 ; Run the pattern matcher. This matches both required clauses,
 ; and creates a set of all matching results.
-(cog-execute! make-semantic-triple)
+(cog-execute! get-satisfying-set)
 
-; The following should have been printed:
-;
-; (SetLink
-;     (Evaluation (Predicate "make_from")
-;         (ListLink (Concept "pottery") (Concept "clay"))))
-;
+; Optional: save the results from the query in a scheme variable.
+; In general, this is discouraged; however, it will make this example
+; easier to understand (we hope!)
+
+(define the-sat-set (cog-execute! get-satisfying-set))
+
+; Define a beta-reduction.
+(define reduction-rule
+	(PutLink
+		; A veriable declaration is mandatory, whenever there are
+		; more than one variables. It is required, so that one can
+		; know the order (the sequence) of the variables. If there
+		; is only one variable, it does not need to be declared.
+		(VariableList	; Variable declaration (optional)
+			(Variable "$verb")
+			(Variable "$var0")
+			(Variable "$var1"))
+
+		; The "output" of the re-write; the `Q(x)` part of the
+		; implication.
+		(Evaluation
+			(Predicate "make_from")
+			(List (Variable "$var0") (Variable "$var1")))
+
+		; The "input" to the re-write; some set of `x`'s that will
+		; be pasted into `Q(x)`. This is just the set computed earlier.
+		the-sat-set
+	))
+
+; Now, run the
