@@ -74,7 +74,7 @@
 	)
 )
 
-; Run the pattern matcher. This matches both required clauses,
+; Run the pattern-matcher. This matches both required clauses,
 ; and creates a set of all matching results.
 (cog-execute! get-satisfying-set)
 
@@ -84,6 +84,9 @@
 
 (define the-sat-set (cog-execute! get-satisfying-set))
 
+: The above is just a big SetLink containing all of the results of
+; the search.
+
 ; Define a beta-reduction.
 (define reduction-rule
 	(PutLink
@@ -91,7 +94,7 @@
 		; more than one variables. It is required, so that one can
 		; know the order (the sequence) of the variables. If there
 		; is only one variable, it does not need to be declared.
-		(VariableList	; Variable declaration (optional)
+		(VariableList
 			(Variable "$verb")
 			(Variable "$var0")
 			(Variable "$var1"))
@@ -103,8 +106,41 @@
 			(List (Variable "$var0") (Variable "$var1")))
 
 		; The "input" to the re-write; some set of `x`'s that will
-		; be pasted into `Q(x)`. This is just the set computed earlier.
+		; be pasted into `Q(x)`. This is just the SetLink computed
+		; earlier.
 		the-sat-set
 	))
 
-; Now, run the
+; Now, run the reduction rule.
+(cog-execute! reduction-rule)
+
+; Thereis no need to cache the intermediate values returned by GetLink.
+; They can be piped, dynamically, on-the-fly, to the PutLink.  This
+; looks almost identical to the above PutLink, except that the "input"
+; is not a SetLink, its a GetLink.
+;
+(define find-and-rewrite-rule
+	(PutLink
+
+		; Using a dollar sign in variables is just a goofy convention.
+		; There is no technical need to stick to that convention.
+		(VariableList
+			(Variable "verb")
+			(Variable "thing")
+			(Variable "stuff"))
+
+		(Evaluation
+			(Predicate "make_from")
+			(List (Variable "thing") (Variable "stuff")))
+
+		; The is the GetLink, defined earlier.
+		get-satisfying-set
+	))
+
+; Now, run the combined Get-Put structure:
+(cog-execute! find-and-rewrite-rule)
+
+; The results reported by this rule are *identical* to the results
+; that the BindLink rule, from the BindLink example would report.
+; This Get-Put combination behaves in an identical fashion to a
+; single BindLink.  It just split up the operation into parts.

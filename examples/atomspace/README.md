@@ -32,7 +32,8 @@ It is recommended that you go through the examples in the order given.
 * `basic.scm`     -- How to start the guile shell.
 * `knowledge.scm` -- Representing knowledge.
 * `bindlink.scm`  -- Queries and inference with the pattern matcher.
-* `get-put.scm`   -- Asserting facts in the AtomSpace.
+* `get-put.scm`   -- The two halves of a query: Get and Put.
+* `assert-retract.scm` -- Asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
 * `property.scm`-- Designing properties with Atoms.
 * `values.scm`  -- Using Values and attaching them to Atoms.
