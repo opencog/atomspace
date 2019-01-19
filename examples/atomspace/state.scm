@@ -86,3 +86,69 @@
 ; And, again verify that the state has changed, as expected:
 (cog-execute!
 	(Get (State (Anchor "fruit") (Variable "$x"))))
+
+; ------------------
+; Hang on; apples, bananas and strwaberries are all fruit. How can
+; this be expressed? Why, juast as before:
+
+(Evaluation (Predicate "fruit") (List (Concept "apple")))
+(Evaluation (Predicate "fruit") (List (Concept "bannana")))
+(Evaluation (Predicate "fruit") (List (Concept "strawberry")))
+
+; By convention, one uses a PredicateNode here, instead of an
+; AnchorNode. One could do it the other way around, but this is the
+; current convention. This convention mostly just makes it easier to
+; understand the atomspace contents.
+;
+; The message here is that EvaluationLinks are multi-state StateLinks.
+; Really. So, for example:
+
+(cog-execute! (Get (Evaluation (Predicate "fruit") (Variable "$x"))))
+
+; ------------------
+; Only one problem: the above example is a bad example. We should
+; instead have said "is-a". The whole world knows the "is-a" relation.
+
+(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "apple")))
+(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "bannana")))
+(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "strawerry")))
+
+(cog-execute! (Get
+	(Evaluation (Predicate "Is A") (List (Concept "fruit") (Variable "$x")))))
+
+; ------------------
+; The is-a relation is so very special, it get's it's own custom link
+; type. It is a bit shorter and easier to read.
+
+(Inheritance (Concept "fruit") (Concept "apple"))
+(Inheritance (Concept "fruit") (Concept "bannana"))
+(Inheritance (Concept "fruit") (Concept "strawerry"))
+
+(cog-execute! (Get (Inheritance (Concept "fruit") (Variable "$x"))))
+
+; By convention, one writes a ConceptLink instead of a PredicateLink
+; in this situation. Again, this is just a convention. Its handy, and
+; makes things more readable.
+
+; ------------------
+; One can also think of "fruit" as a set, with lots of members in it.
+; The SetLink used so far has been "anonymous", it is a set without a
+; name.  The MemberLink offers a way to name name a set:
+
+(Member (Concept "apple")     (Concept "fruit"))
+(Member (Concept "bannana")   (Concept "fruit"))
+(Member (Concept "strawerry") (Concept "fruit"))
+
+(cog-execute! (Get (Member (Variable "$x") (Concept "fruit"))))
+
+; By convention, this is backwards from the InheritanceLink. It is meant
+; to be read "first thing is a member of the set that is the second thing".
+
+; ------------------
+; There is no such thing as "InheritanceStateLink" or "MemberStateLink".
+; These are not needed; having them would be confusing. The StateLink is
+; ideal for associating a predicate to a single-valued grounded term.
+; The EvaluationLink is for associating multiple things together, in a
+; naive-set-theory predicate-like way. The InheritanceLink is handy for
+; the extremely common "is-a" relation.  The MemberLink is handy for the
+; equally-common set-membership relation.
