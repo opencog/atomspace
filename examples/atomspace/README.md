@@ -18,11 +18,9 @@ Example Files
 =============
 It is recommended that you go through the examples in the order given.
 
-* `basic.scm`    -- A very simple introduction
-* `bindlink.scm` -- Queries and inference with the pattern matcher.
-* `python.scm`   -- Loading python code from scheme.
-* `execute.scm`  -- An example of executing executable atoms, with
-                    callbacks written in python or scheme.
+* `basic.scm`     -- How to start the guile shell.
+* `knowledge.scm` -- Representing knowledge.
+* `bindlink.scm`  -- Queries and inference with the pattern matcher.
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
 * `property.scm`-- Designing properties with Atoms.
@@ -33,6 +31,9 @@ It is recommended that you go through the examples in the order given.
 * `random-choice.scm`   -- Numerical programming, including loops.
 * `logger-example.scm`  -- Using the built-in logger.
 * `except.scm`          -- Throwing and catching exceptions.
+* `python.scm`    -- Loading python code from scheme.
+* `execute.scm`   -- An example of executing executable atoms, with
+                    callbacks written in python or scheme.
 * `persist-example.scm` -- Saving atomspace data in an SQL database.
 * `copy-on-write.scm`   -- Read-only atomspaces, with r/w overlays.
 * `stream.scm`  -- Using a stream of time-varying Values.

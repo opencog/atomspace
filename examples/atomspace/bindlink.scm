@@ -1,5 +1,5 @@
 ;
-; bindlink.scm
+; bindlink.scm - querying and graph re-writing example.
 ;
 ; A common task in knowledge representation systems is searching and
 ; querying for data, and then re-shaping the query results into a new
