@@ -29,7 +29,7 @@ answer (it's some graph), and one is looking for questions that might
 deliver that answer (the questions are just other graphs).
 
 Another important feature is that many Atomese Atoms are "active", and
-cause things to heppen when executed. The pattern matcher is a natural
+cause things to happen when executed. The pattern matcher is a natural
 place to trigger these. Thus, Atoms can lie dormant until a query causes
 them to run.
 
@@ -37,7 +37,7 @@ The simplest example of this is the GreaterThanLink. As a
 knowledge-base, it is impossible to passively store all possible
 greater-than relationships between integers: there's a countable
 infinity of them. The GreaterThanLink, when triggered during a search,
-can proceedurally (algorithmically) evaluate, on the spot, the relative
+can procedurally (algorithmically) evaluate, on the spot, the relative
 order of two integers.  The GreaterThanLink serves as an example of
 arbitrary computation that can be done "behind the scenes". However,
 (and this is the important part!) the "meaning" of greater-than is
@@ -63,7 +63,7 @@ Basic Examples
 The first four examples provide a basic introduction to basic
 pattern matching.
 
-* `satisfcation.scm` -- Determining satisfiability of a query.
+* `satisfaction.scm` -- Determining satisfiability of a query.
 * `glob.scm`         -- Matching multiple atoms at once.
 * `choice.scm`       -- Using the ChoiceLink to explore alternatives.
 
@@ -105,7 +105,7 @@ can think of the recognizer as being kind-of-like a RETE algorithm).
 
 Types
 -----
-Types allow queries to be constrainted so that only certain types of
+Types allow queries to be constrained so that only certain types of
 graphs are matched.  For example, one might want to find all graphs that
 have a ConceptNode in one location, and a PredicateNode in a different
 one. In this case, one constrains the pattern variable to be of type
@@ -115,7 +115,7 @@ More generally, one may want to define new types that are combinations
 of existing types: these are the type constructors. For example, one
 might want to find all "functions" that take certain "inputs" and
 produce certain "outputs", where the inputs and outputs are of a certain
-type. This can be acheived by the "function type" or "arrow type": a
+type. This can be achieved by the "function type" or "arrow type": a
 type constructor that builds function types.
 
 Atomese implements a fairly complete type system.  It provides all of
@@ -133,7 +133,7 @@ to store all pairs of numbers such that the first is greater than the
 second. However, it is quite easy to run an algorithm to make the same
 determination.  This is a "virtual link": it acts as if any given
 ordered pair of numbers was actually in the AtomSpace, even though it
-isn't, really. The pair is only "virtually" there, existing breifly,
+isn't, really. The pair is only "virtually" there, existing briefly,
 just long enough to perform the determination.
 
 Any relation that might require an infinitely-large set to instantiate
@@ -148,7 +148,7 @@ appear -- the join discards or filters away most members of the
 Cartesian product.
 
 This is easy to do for ordinary graphs that "really" exist in the
-knowledgbase; its a good bit harder when the graph has virtual links in
+knowledgebase; its a good bit harder when the graph has virtual links in
 it.  There is a potential combinatorial explosion: the Cartesian product
 can become huge, and one cannot afford to execute a virtual link on
 every potential combination. The pattern matcher takes steps to minimize
@@ -164,7 +164,7 @@ might want to apply some transformation to that set. This can be done
 with `MapLink`.  This somewhat resembles the filtering predicates and
 mapping functions found in
 [srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `MapLink`
-is particularly intersting: it can be though of as an `UnPutLink`, to
+is particularly interesting: it can be though of as an `UnPutLink`, to
 undo the effects of a `PutLink`, that is, to extract data.
 
 These two links are kind-of deprecated. They are a historical

@@ -1,5 +1,5 @@
 ;
-; persistance.scm -- Putting the AtomSpace in a "real" database.
+; persistence.scm -- Putting the AtomSpace in a "real" database.
 ;
 ; The AtomSpace is an in-RAM database. You just might want to sometimes
 ; write some of it out to disk, and save it for later.  The most robust

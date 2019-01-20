@@ -17,11 +17,11 @@ After this come examples for assorted advanced features that are
 typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
-* Throwing excpetions.
-* Storing the Atomspace in PostgreSQL
+* Throwing exceptions.
+* Storing the AtomSpace in PostgreSQL
 * Using the logger.
-* Calling Python from within the Atomspace.
-* Multithreading with ParallelLink and JoinLink
+* Calling Python from within the AtomSpace.
+* Multi-threading with ParallelLink and JoinLink
 * ... and much much more.
 
 Most of the querying and pattern matching examples are in the
@@ -60,10 +60,10 @@ be effective.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
-* `parallel.scm`       -- Multithreading in Atomese.
+* `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
-* `persistance.scm`    -- Layering the atomspace on a "real" database.
-* `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
+* `persistence.scm`    -- Layering the AtomSpace on a "real" database.
+* `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
 
@@ -75,12 +75,12 @@ line working.
 
 The variant of scheme used in OpenCog is that provided by
 [guile](https://www.gnu.org/software/guile/).
-Guile was chosen primarily because of its strong C/C++ inerfacing
+Guile was chosen primarily because of its strong C/C++ interfacing
 capabilities.  Guile runs as an interpreter/compiler, providing a
 read-evaluate-print loop (REPL), called `guile`. It is started at
 the terminal shell prompt.
 
-Before starting guile, you have to tell guile where to find the opencog
+Before starting guile, you have to tell guile where to find the OpenCog
 modules.  The best way to do this is to add the below to your `~/.guile`
 file.  These will then run every time you start guile.
 ```
