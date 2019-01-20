@@ -60,6 +60,7 @@ be effective.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
+* `parallel.scm`       -- Multithreading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
 * `persistance.scm`    -- Layering the atomspace on a "real" database.
 * `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
