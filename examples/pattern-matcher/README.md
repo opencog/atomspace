@@ -97,20 +97,29 @@ a rule-engine. Given a rule-set, it allows one to figure out very
 quickly which rules can be chained together. (Crudely speaking, one
 can think of the recognizer as being kind-of-like a RETE algorithm).
 
-* `recognizer.scm`    -- Implementing AIML with DualLink
+* `recognizer.scm`    -- Implementing AIML with DualLink.
 
 Types
 -----
-The above examples should make clear that the pattern matcher implements
-a kind-of programming langauge, refered to as "atomese". Like any good
-programming language, it steals ideas.  One of these is the idea of
-defining things.  Another is a fairly complete type system, providing
-basic type constructors (although it currently stops short of providing
-dependent types).
+Types allow queries to be constrainted so that only certain types of
+graphs are matched.  For example, one might want to find all graphs that
+have a ConceptNode in one location, and a PredicateNode in a different
+one. In this case, one constrains the pattern variable to be of type
+"ConceptNode" or of type "PredicateNode".
 
-* define.scm: using DefineLinks to create patterns out of parts.
-* type-signature.scm: using signatures and type constructors to refine
-    the search.
+More generally, one may want to define new types that are combinations
+of existing types: these are the type constructors. For example, one
+might want to find all "functions" that take certain "inputs" and
+produce certain "outputs", where the inputs and outputs are of a certain
+type. This can be acheived by the "function type" or "arrow type": a
+type constructor that builds function types.
+
+Atomese implements a fairly complete type system.  It provides all of
+the basic type constructors; the biggest missing piece is support for
+dependent types.
+
+* `define.scm`         -- DefineLinks give names to sub-patterns.
+* `type-signature.scm` -- Using signatures and type constructors.
 
 Triggering Side-Effects
 -----------------------
@@ -118,19 +127,23 @@ The pattern matcher can be used to trigger side-effects, when a pattern
 is matched.  This includes the execution of arbitrary code, both as
 "black-box" code, as well as "clear-box" Atomese.
 
-* gsn.scm: Calling arbitrary functions upon a match.
-* gpn.scm: Calling arbitrary functions to decide a match.
-* sequence.scm: Using GPN's to execute a sequence of tasks.
-* condition.scm: Combining GPN's and GSN's to make an action taken
-    depend on a precondition.
+* `gsn.scm`            -- When a match is found, call a callback.
+* `gpn.scm`            -- Callback decides: is there a match?
+* `sequence.scm`       -- Using GPN's to execute a sequence of tasks.
+* `condition.scm`      -- Actions taken can depend on preconditions.
 
-Some simpler applications showing some things one can do, and how to do
-them.
+State Machines
+--------------
+The pattern matcher is powerful enough to write state machines without
+any further ado.  The pattern matcher itself is implemented as a stack
+machine. As a result, it is fairly easy to implement state machines
+simply by writing down the transition graphs (transition functions)
+for them.
 
-* fsm-basic.scm: A simple Deterministic Finite State Machine demo.
-* fsm-full.scm: A generic deterministic finite-state-machine constructor.
-* fsm-mealy.scm: A generic Mealy machine constructor.
-* markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.
+* `fsm-basic.scm`     -- A Deterministic Finite State Machine (FSM).
+* `fsm-full.scm`      -- A generic deterministic FSM constructor.
+* `fsm-mealy.scm`     -- A generic Mealy machine constructor.
+* `markov-chain.scm`  -- A Markov chain (probabilistic FSM) based on fsm-full.
 
 Examples that demonstrate some of the inner workings of the pattern
 matcher.
@@ -138,7 +151,8 @@ matcher.
 * virtual.scm: Using virtual links, and the resulting combinatorial
      explosion.
 
-Unfinished examples:
+Unfinished examples
+-------------------
+Some experiments that get complicated. And can't easily be done.
 
-* deduction-engine.scm: How to create a ProLog-like reasoning engine in
-      Atomese.
+* `deduction-engine.scm`  -- a ProLog-like reasoning engine
