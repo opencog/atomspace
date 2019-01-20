@@ -77,7 +77,9 @@
 (cog-set-tv! a (CountTruthValue 1.0e-6 -19.9316 55))
 
 ; Attention Values are a different kind of sequence of floats
-; that can be attached to an atom.
+; that can be attached to an atom.  They require the attention-bank
+; module to be loaded.
+(use-modules (opencog attention-bank))
 (cog-set-av! a (AttentionValue 3 2 1))
 
 ; The can be accessed as expected:
