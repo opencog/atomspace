@@ -28,8 +28,8 @@
 ; Attention Values are a different kind of sequence of floats
 ; that can be attached to an atom.  They require the attention-bank
 ; module to be loaded.
-(use-modules (opencog attention-bank))
-(cog-set-av! a (AttentionValue 3 2 1))
+; (use-modules (opencog attention-bank))
+; (cog-set-av! a (AttentionValue 3 2 1))
 
 ; The can be accessed as expected:
-(cog-av a)
+; (cog-av a)
