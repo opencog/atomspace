@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
@@ -58,10 +59,21 @@ void TVandAVUTest::test_guile()
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
 
-	TruthValuePtr vo = eval.eval_v("(cog-tv a)");
-	printf("     got: %s", vo->to_string().c_str());
+	TruthValuePtr tva = eval.eval_tv("(cog-tv a)");
+	printf("     got: %s ", tva->to_string().c_str());
 	printf("expected SimpleTruthValue\n");
-	TS_ASSERT(vo->type() == SIMPLE_TRUTH_VALUE);
+	TS_ASSERT(tva->get_type() == SIMPLE_TRUTH_VALUE);
+
+	TruthValuePtr tvb = eval.eval_tv("(cog-tv (Concept \"bbb\")");
+	printf("     got: %s ", tvb->to_string().c_str());
+	printf("expected CountTruthValue\n");
+	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
+
+	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\")");
+	AttentionValuePtr av = AttentionValueCast(vav);
+	printf("     got: %s ", av->to_string().c_str());
+	printf("expected AttentionValue\n");
+	TS_ASSERT(av->get_type() == ATTENTION_VALUE);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

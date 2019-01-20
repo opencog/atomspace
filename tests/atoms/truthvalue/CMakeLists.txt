@@ -1,5 +1,6 @@
 
 LINK_LIBRARIES(
+	smob
 	atomspace
 	value
 	atomutils
