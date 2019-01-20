@@ -75,7 +75,18 @@ public:
     ValuePtr create(TYP vtype, ARG&&... arg) const
     {
         // Look up the factory only once; cache the result.
-        static ValueFactory fptr = nullptr;
+        // There is one distinct copy of `fax` for each
+        // template ARG. However, TYP is always a short,
+        // and we cannot know what vtype is at compile time.
+        // So we have to do one run-time lookup, in a vector.
+        static std::vector<ValueFactory> fax;
+
+        ValueFactory fptr = nullptr;
+        try
+        {
+            fptr = fax.at(vtype);
+        }
+        catch(...) {}
 
         if (nullptr == fptr)
         {
@@ -94,6 +105,9 @@ public:
                     if (fr.args == expected_args)
                     {
                         fptr = fr.func;
+                        if (fax.size() <= vtype)
+                            fax.resize(vtype+1);
+                        fax[vtype] = fr.func;
                         break;
                     }
                 }
