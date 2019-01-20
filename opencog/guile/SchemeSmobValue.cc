@@ -138,13 +138,6 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (FLOAT_VALUE == t)
-	{
-		std::vector<double> valist;
-		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
 	if (OCTO_VALUE == t)
 	{
 		SCM sl = svalue_list;
@@ -169,6 +162,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			dim = verify_int(svalue, "cog-new-value", 2);
 		}
 		return valueserver().create(t, dim);
+	}
+
+	// Catch and handle generic FloatValues not named above.
+	if (nameserver().isA(t, FLOAT_VALUE))
+	{
+		std::vector<double> valist;
+		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
 	if (LINK_VALUE == t)
