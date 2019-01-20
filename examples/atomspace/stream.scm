@@ -1,6 +1,17 @@
 ;
-; Example of using values that are time-varying streams of data.
-; Here, the stream is modelled by the `RandomStream`.
+; stream.scm -- Time-varying streams of data
+;
+; Values are suitable for holding time-carying streams of data.
+; They are designed to accomplish this with a minimum of CPU cycles
+; spent in the Atomspace, by serving as wrappers for time-varying
+; data being processed elsewhere (e.g. on GPU's, by external systems
+; such as tensorflow, or network processes, such as ROS nodes.)
+;
+; There is a trick to acheive this: the StreamValue does not actually
+; store any time-varying data. Instead, it just holds a handle to where
+; the actual data really is, and only returns a value when asked for it.
+;
+; Here, the time-varying stream is modelled by the `RandomStream`.
 ; Every time that it is accessed, it generates a different set
 ; of random floating-point values.
 ;

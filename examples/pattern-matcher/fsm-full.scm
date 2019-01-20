@@ -1,32 +1,12 @@
 ;
-; Finite State Machine (FSM) Demo.
+; fsm-full.scm -- Finite State Machine (FSM) Demo.
 ;
-; Based on fsm-basic.scm, this defines a very simple four-state finite
+; Based on `fsm-basic.scm`, this defines a very simple four-state finite
 ; state machine, but illustrates the general (universal) FSM state
 ; machine constructor.  This allows mutlple FSM's to be simultaneously
 ; defined and operated asynchronously from each-other.
 ;
-; The run this, you probably need to do this:
-;
-; OCDIR=home/home/yourname/opencog
-; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
-;
-; Add the following to your ~/.guile file:
-; (add-to-load-path "/home/yourname/opencog/build")
-; (add-to-load-path "/home/yourname/opencog/opencog/scm")
-; (add-to-load-path ".")
-;
-; Start guile:
-; guile
-;
-; and then load this file:
-; (load-from-path "fsm-full.scm")
-;
-; Then, scroll to the bottom, and try some of the commented-out
-; examples.
-
-(use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog) (opencog query))
 
 ;; Set of possible states of the state machine
 ;; This defintion of the set of states is not strictly needed; it is
@@ -38,13 +18,13 @@
 	(ConceptNode "red")
 )
 
-(define my-trans (ConceptNode "My FSM's Transition Rule"))
-(define my-state (AnchorNode "My FSM's Current State"))
+(define my-trans (Concept "My FSM's Transition Rule"))
+(define my-state (Anchor  "My FSM's Current State"))
 
 ;; The inital state of the FSM
-(ListLink
+(List
 	my-state
-	(ConceptNode "initial state")
+	(Concept "initial state")
 )
 
 ;; The set of allowed state transistions.  Its a triangular cycle,
@@ -69,37 +49,36 @@
 ;; For the example below, P(B|A) is always one.
 
 (ContextLink
-	(ConceptNode "initial state")
-	(ListLink
+	(Concept "initial state")
+	(List
 		my-trans
-		(ConceptNode "green")
+		(Concept "green")
 	)
 )
 
 (ContextLink
-	(ConceptNode "green")
-	(ListLink
+	(Concept "green")
+	(List
 		my-trans
-		(ConceptNode "yellow")
+		(Concept "yellow")
 	)
 )
 
 (ContextLink
-	(ConceptNode "yellow")
-	(ListLink
+	(Concept "yellow")
+	(List
 		my-trans
-		(ConceptNode "red")
+		(Concept "red")
 	)
 )
 
 (ContextLink
-	(ConceptNode "red")
-	(ListLink
+	(Concept "red")
+	(List
 		my-trans
-		(ConceptNode "green")
+		(Concept "green")
 	)
 )
-
 
 ;;; A Universal Deterministic Finite State Machine Constructor.
 ;;;
@@ -112,38 +91,38 @@
 ;;; created, each invocation of it will advance the FSM bu one step.
 ;;;
 (define (create-fsm fsm-name fsm-state)
-	(BindLink
+	(Bind
 		;; We will need to find the current and the next state
 		(VariableList
-			(VariableNode "$curr-state")
-			(VariableNode "$next-state")
+			(Variable "$curr-state")
+			(Variable "$next-state")
 		)
-		(AndLink
+		(And
 			;; If we are in the current state ...
-			(ListLink
+			(List
 				fsm-state
-				(VariableNode "$curr-state")
+				(Variable "$curr-state")
 			)
 			;; ... and there is a transition to another state...
-			(ContextLink
-				(VariableNode "$curr-state")
-				(ListLink
+			(Context
+				(Variable "$curr-state")
+				(List
 					fsm-name
-					(VariableNode "$next-state")
+					(Variable "$next-state")
 				)
 			)
 		)
-		(AndLink
+		(And
 			;; ... then transistion to the next state ...
-			(ListLink
+			(List
 				fsm-state
-				(VariableNode "$next-state")
+				(Variable "$next-state")
 			)
 			;; ... and leave the current state.
-			(DeleteLink
-				(ListLink
+			(Delete
+				(List
 					fsm-state
-					(VariableNode "$curr-state")
+					(Variable "$curr-state")
 				)
 			)
 		)

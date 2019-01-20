@@ -1,5 +1,5 @@
 ;
-; Demo illustrating use of AbsentLink, StateLink
+; absent.scm -- Demo illustrating use of AbsentLink, StateLink
 ;
 ; Repeatedly create and destroy an EvaluationLink. Then test to see if
 ; the EvaluationLink is present in the atomspace. If it is, then set a
@@ -53,47 +53,47 @@
 ; Clause to match during query.  This is the EvaluationLink whose
 ; presence or absence we will be testing for.
 (define query
-	(EvaluationLink
-		(PredicateNode "visiblity")
-		(ListLink (VariableNode "$x"))))
+	(Evaluation
+		(Predicate "visiblity")
+		(List (Variable "$x"))))
 
 ; Create a golem; the golem is brought to life when its executed.
 ; i.e. this creates the EvaluationLink when it is executed.
 (define golem
-	(PutLink query (ConceptNode "item 42")))
+	(Put query (Concept "item 42")))
 
 ; If an item is visible, delete it, kill it.
 (define destroy
-	(BindLink query (DeleteLink query))
+	(Bind query (DeleteLink query))
 )
 
 ; If nothing is visible, then hallucinate the golem into existance.
 (define create
-	(BindLink (AbsentLink query) golem)
+	(Bind (Absent query) golem)
 )
 
 ; The state variable, and it's two states.
-(define room-state (AnchorNode "Room State"))
-(define room-empty (ConceptNode "room empty"))
-(define room-nonempty (ConceptNode "room nonempty"))
+(define room-state (Anchor "Room State"))
+(define room-empty (Concept "room empty"))
+(define room-nonempty (Concept "room nonempty"))
 
 ; Initial state: room is empty.
-(StateLink room-state room-empty)
+(State room-state room-empty)
 
 ; Set the current state if an item is visible.
 (define is-visible
-	(BindLink
+	(Bind
 		query
-		(PutLink (StateLink room-state (VariableNode "$x")) room-nonempty)
+		(Put (State room-state (Variable "$x")) room-nonempty)
 	)
 )
 
 ; This has an absent link in it; the link is assigned only when
 ; the atomspace does not have a visible item.
 (define is-invisible
-	(BindLink
-		(AbsentLink query)
-		(PutLink (StateLink room-state (VariableNode "$x")) room-empty)
+	(Bind
+		(Absent query)
+		(Put (State room-state (Variable "$x")) room-empty)
 	)
 )
 

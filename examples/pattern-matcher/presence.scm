@@ -1,5 +1,5 @@
 ;;
-;; presence.scm
+;; presence.scm -- Testing for the presence of an Atom.
 ;;
 ;; Four different ways to check for the existance of some structure
 ;; in the atomspace.
@@ -13,20 +13,16 @@
 ;; run inside the AtomSpace.  Others fit the more traditional query
 ;; paradigm.
 
-(add-to-load-path "/usr/local/share/opencog/scm")
-
-(use-modules (opencog))
-(use-modules (opencog query))
-(use-modules (opencog exec))
+(use-modules (opencog) (opencog query) (opencog exec))
 
 ;; Is the room empty, or is someone in it?
 ;; One of several different states can be linked to the state variable.
-(define room-state (AnchorNode "Room State"))
-(define room-empty (ConceptNode "room empty"))
-(define room-nonempty (ConceptNode "room nonempty"))
+(define room-state (Anchor "Room State"))
+(define room-empty (Concept "room empty"))
+(define room-nonempty (Concept "room nonempty"))
 
 ;; Assume room empty at first
-(ListLink room-state room-empty)
+(List room-state room-empty)
 
 ; Print a message, return a TV value
 (define (tv-print-msg)
@@ -52,26 +48,26 @@
 ;; uses the SequentialAndLink, it is in a form appropriate for creating
 ;; a behavior tree.
 ;;
-;; Note that there may be other atoms linked to the AnchoreNode;
+;; Note that there may be other atoms linked to the Anchore;
 ;; it there are, then those other atoms are ignored. This may be
 ;; an davantage or a disadvantage; the next axample demands that
-;; there be only one atom linked to the AnchorNode.
+;; there be only one atom linked to the Anchor.
 ;;
 (define empty-sequence
-	(SatisfactionLink
+	(Satisfaction
 		;; SequentialAndLink - verify predicates in sequential order.
-		(SequentialAndLink
+		(SequentialAnd
 			;; Assign the room-state to variable $x
 			;; PresentLink evaluates to 'true' if the ListLink is found;
 			;; processing continues to the next statement ONLY if true
 			;; is returned by the PresentLink.
-			(PresentLink (ListLink room-state (VariableNode "$x")))
+			(Present (List room-state (Variable "$x")))
 			;; If the variable $x equals the emtpry state, then ...
-			(EqualLink (VariableNode "$x") room-empty)
+			(Equal (Variable "$x") room-empty)
 			;; ... then print a message.
-			(EvaluationLink
-				(GroundedPredicateNode "scm: tv-print-atom")
-				(ListLink (VariableNode "$x")))
+			(Evaluation
+				(GroundedPredicate "scm: tv-print-atom")
+				(List (Variable "$x")))
 		)))
 
 (cog-evaluate! empty-sequence)
@@ -89,25 +85,25 @@
 ;; for that variable cannot be given to the print-message routine.
 ;;
 ;; Unlike the previous example, this one will explicitly fail if there
-;; are other atoms linked to the AnchorNode.  That is, the equality
+;; are other atoms linked to the Anchor.  That is, the equality
 ;; check is makeing sure that the SetLink has one and only one element
 ;; in it, which effectively blocks other anchored atoms.  This may be
 ;; an advantage, or a disadvantage, depending on the situation.
 
 (define get-empty-seq
-	(SatisfactionLink
+	(Satisfaction
 		;; Perform operations in sequential order.
-		(SequentialAndLink
+		(SequentialAnd
 			;; Check for equality ...
-			(EqualLink
-				(SetLink room-empty)
+			(Equal
+				(Set room-empty)
 				;; Retrieve the room state; place it into a SetLink
-				(GetLink (ListLink room-state (VariableNode "$x"))))
+				(Get (List room-state (Variable "$x"))))
 
 			;; If the EqualLink evaluated to TRUE, then print the message.
-			(EvaluationLink
-				(GroundedPredicateNode "scm: tv-print-msg")
-				(ListLink))  ; zero arguments passed to function
+			(Evaluation
+				(GroundedPredicate "scm: tv-print-msg")
+				(List))  ; zero arguments passed to function
 		)))
 
 (cog-evaluate! get-empty-seq)
@@ -126,18 +122,18 @@
 ;;    suitable for creating a behavior tree.
 
 (define bind-empty
-	(BindLink
+	(Bind
 		;; Perform operations in sequential order.
-		(AndLink
+		(And
 			;; Assign the room-state to variable $x
-			(ListLink room-state (VariableNode "$x"))
+			(List room-state (Variable "$x"))
 			;; If the variable $x equals the emtpry state, then ...
-			(EqualLink (VariableNode "$x") room-empty)
+			(Equal (Variable "$x") room-empty)
 		)
 		;; If the EqualLink evaluated to TRUE, then print the message.
-		(ExecutionOutputLink
-				(GroundedSchemaNode "scm: atom-print-atom")
-				(ListLink (VariableNode "$x")))
+		(ExecutionOutput
+				(GroundedSchema "scm: atom-print-atom")
+				(List (Variable "$x")))
 		))
 
 (cog-execute! bind-empty)
@@ -148,19 +144,19 @@
 ;; is done is reversed w.r.t. the test.
 ;;
 (define put-empty-atom
-	(PutLink
+	(Put
 		;; Replace the value of $x by whatever the GetLink returns.
-		(ExecutionOutputLink
-				(GroundedSchemaNode "scm: atom-print-atom")
-				(ListLink (VariableNode "$x")))
-		(GetLink
+		(ExecutionOutput
+				(GroundedSchema "scm: atom-print-atom")
+				(List (Variable "$x")))
+		(Get
 			;; The variable $y is automatically bound by the GetLink;
 			;; it does not escape the scope of the GetLink.
-			(AndLink
+			(And
 				;; Search for presence
-				(ListLink room-state (VariableNode "$y"))
+				(List room-state (Variable "$y"))
 				;; Check for equality ...
-				(EqualLink (VariableNode "$y") room-empty)))
+				(Equal (Variable "$y") room-empty)))
 		))
 
 (cog-execute! put-empty-atom)
