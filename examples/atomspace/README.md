@@ -29,9 +29,10 @@ Most of the querying and pattern matching examples are in the
 a good idea of the basics from the demos here, go an explore the
 examples there.
 
-Example Files
--------------
+Introductory Examples
+---------------------
 It is recommended that you go through the examples in the order given.
+These are "basic" demos that all users should know.
 
 * `basic.scm`          -- How to start the guile shell.
 * `knowledge.scm`      -- Representing knowledge.
@@ -43,6 +44,17 @@ It is recommended that you go through the examples in the order given.
 * `truthvalues.scm`    -- Declaring the truth of a proposition.
 * `values.scm`         -- Using Values and attaching them to Atoms.
 * `stream.scm`         -- Using a stream of time-varying Values.
+
+There is an important collection of demos in the
+[pattern-matcher](../pattern-matcher) folder. The pattern matching
+demos are vital for understanding how to to be effective in writing
+queries and formulating rules.
+
+Advanced Demos
+--------------
+System programmers will need to know the following examples in order to
+be effective.
+
 * `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
 * `logging.scm`        -- Using the cogutils logger.
@@ -60,7 +72,8 @@ Some minor familiarity with scheme is useful, but not required.
 This section provides some hints and tips for getting the command
 line working.
 
-The variant of scheme used in OpenCog is that provided by guile.
+The variant of scheme used in OpenCog is that provided by
+[guile](https://www.gnu.org/software/guile/).
 Guile was chosen primarily because of its strong C/C++ inerfacing
 capabilities.  Guile runs as an interpreter/compiler, providing a
 read-evaluate-print loop (REPL), called `guile`. It is started at
@@ -118,8 +131,9 @@ and more generally
 ,help
 ```
 
-See also opencog/guile/README or http://wiki.opencog.org/w/Scheme
-for additional documentation.
+See also AtomSpace [guile wrapper README](../../opencog/guile/README.md)
+or [OpenCog Scheme wiki page](https://wiki.opencog.org/w/Scheme) for
+additional documentation.
 
 
 List of the various modules
