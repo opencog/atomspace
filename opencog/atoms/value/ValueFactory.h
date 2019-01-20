@@ -85,8 +85,8 @@ public:
                 std::vector<ProtoFactory> func_vec = _factories.at(vtype);
                 
                 // Second, get a list of types expected
-				std::vector<std::type_index> expected_args =
-					to_list_of_type_indexes<ARG...>();
+                std::vector<std::type_index> expected_args =
+                    to_list_of_type_indexes<ARG...>();
 
                 // Third, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
