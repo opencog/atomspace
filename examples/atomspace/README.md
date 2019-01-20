@@ -29,21 +29,21 @@ Example Files
 =============
 It is recommended that you go through the examples in the order given.
 
-* `basic.scm`       -- How to start the guile shell.
-* `knowledge.scm`   -- Representing knowledge.
-* `bindlink.scm`    -- Queries and inference with the pattern matcher.
-* `get-put.scm`     -- The two halves of a query: Get and Put.
+* `basic.scm`          -- How to start the guile shell.
+* `knowledge.scm`      -- Representing knowledge.
+* `bindlink.scm`       -- Queries and inference with the pattern matcher.
+* `get-put.scm`        -- The two halves of a query: Get and Put.
 * `assert-retract.scm` -- Asserting facts in the AtomSpace.
-* `state.scm`       -- Maintaining unique state.
-* `property.scm`    -- Designing Atoms with properties.
-* `truthvalues.scm` -- Declaring the truth of a proposition.
-* `values.scm`      -- Using Values and attaching them to Atoms.
-* `filter.scm`  -- Filtering sets of atoms.
-* `map.scm`     -- Applying a map function to a set or list.
-* `recursive-loop.scm`  -- An example of a tail-recursive loop.
-* `random-choice.scm`   -- Numerical programming, including loops.
-* `logger-example.scm`  -- Using the built-in logger.
-* `except.scm`          -- Throwing and catching exceptions.
+* `state.scm`          -- Maintaining unique state.
+* `property.scm`       -- Designing Atoms with properties.
+* `truthvalues.scm`    -- Declaring the truth of a proposition.
+* `values.scm`         -- Using Values and attaching them to Atoms.
+* `filter.scm`         -- Filtering sets of atoms with PutLink.
+* `map.scm`            -- Extracting and re-writing with MapLink.
+* `recursive-loop.scm` -- An example of a tail-recursive loop.
+* `random-choice.scm`  -- Numerical programming, including loops.
+* `logger-example.scm` -- Using the built-in logger.
+* `except.scm`         -- Throwing and catching exceptions.
 * `python.scm`    -- Loading python code from scheme.
 * `execute.scm`   -- An example of executing executable atoms, with
                     callbacks written in python or scheme.

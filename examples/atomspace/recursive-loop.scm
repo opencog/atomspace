@@ -1,5 +1,5 @@
 ;
-; recursive-loop.scm
+; recursive-loop.scm - Writing tail-recursive loops.
 ;
 ; This demonstrates how to write a tail-recursive loop in Atomese.
 ;
