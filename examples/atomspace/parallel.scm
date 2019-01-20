@@ -8,22 +8,33 @@
 
 (use-modules (opencog) (opencog exec))
 
-(define nnn 0)
-(define (incr) (set! nnn (+ nnn 1)) (stv 1 0))
+; Define a simple counter that will be incremented
+(define (make-counter)
+	(let ((nnn 1))
+		(lambda ()
+			(format #t "Entering the counter for the ~A'th time!\n" nnn)
+			(format #t " -- The time is ~A\n"
+				(strftime "%c" (localtime (current-time))))
+			(set! nnn (+ nnn 1))
+			(stv 1 0))
+	))
 
+(define incr (make-counter))
+
+; Define a dettached thread
 (define pllel
 	(Parallel
 		(SequentialAnd
 			(True (Sleep (Number 1)))
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicate "scm:incr") (List)))
 		(SequentialAnd
 			(True (Sleep (Number 3)))
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicate "scm:incr") (List)))
 		(SequentialAnd
 			(True (Sleep (Number 5)))
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicate "scm:incr") (List)))
 	))
 
