@@ -57,12 +57,17 @@ void TVandAVUTest::test_guile()
 
 	SchemeEval eval(&_as);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	std::string rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
+	std::string rv = eval.eval("(use-modules (opencog attention-bank))");
+	TS_ASSERT(not eval.eval_error());
+	printf("Result from use-modules is %s\n", rv.c_str());
+	rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
 	TS_ASSERT(not eval.input_pending());
 	TS_ASSERT(not eval.eval_error());
 	printf("Result from loading is %s\n", rv.c_str());
 	rv = eval.eval("(getenv \"LTDL_LIBRARY_PATH\")");
-	printf("The lib path is %s\n", rv.c_str());
+	printf("The libtool path is %s\n", rv.c_str());
+	rv = eval.eval("(getenv \"LD_LIBRARY_PATH\")");
+	printf("The loader path is %s\n", rv.c_str());
 
 	TruthValuePtr tva = eval.eval_tv("(cog-tv (Concept \"aaa\"))");
 	TS_ASSERT(tva != nullptr);
@@ -76,6 +81,7 @@ void TVandAVUTest::test_guile()
 	printf("expected CountTruthValue\n");
 	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
 
+#define CIRCLECI_LTDL_IS_BROKEN_AGAIN
 #if CIRCLECI_LTDL_IS_BROKEN_AGAIN
 	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\"))");
 	TS_ASSERT(vav != nullptr);
