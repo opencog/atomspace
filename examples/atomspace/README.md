@@ -24,6 +24,10 @@ typically encountered:
 * Multithreading with ParallelLink and JoinLink
 * ... and much much more.
 
+Most of the querying and pattern matching examples are in the
+[pattern-matcher](../pattern-matcher) folder. Once you've gotten
+a good idea of the basics from the demos here, go an explore the
+examples there.
 
 Example Files
 -------------

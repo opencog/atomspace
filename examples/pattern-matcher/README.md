@@ -53,16 +53,39 @@ Please go through the first four or six or ten demos in the
 introduction to the various features and functions in the AtomSpace
 itself. This will make the examples here much easier to understand.
 
-The Examples
-------------
-The first three examples provide a basic introduction to basic
+Basic Examples
+--------------
+The first four examples provide a basic introduction to basic
 pattern matching.
 
-* simple.scm: A basic introduction to pattern matching.
-* satisfcation.scm: An example of using the SatisfactionLink
-* glob.scm: Matching multiple atoms at once.
-* choice.scm: Using the ChoiceLink to explore alternatives.
+* `simple.scm`       -- A basic introduction to pattern matching.
+* `satisfcation.scm` -- Determining satisfiability of a query.
+* `glob.scm`         -- Matching multiple atoms at once.
+* `choice.scm`       -- Using the ChoiceLink to explore alternatives.
 
+Presence and Absence
+--------------------
+Sometimes, one wants a query to match, only if some other sub-query does
+not.  To find all graphs that do *not* have a certain subgraph in them.
+This requires testing for absence.
+
+Normally, a query consists of a collection of "clauses", each of which
+must be matched. Any variables appearing in the clauses must have
+consistent groundings: the clauses are treated as an "inner join".
+Absence is handled in a very similar fashion: absent clauses are those
+which do not have a common grounding, which cannot be joined to the
+other (required) clauses.
+
+(Cute factoid for the mathematically-inclined: this implies that the
+pattern matcher implements a form of "intuitionistic logic", or
+"constructivist logic" under the covers. Perhaps not a surprise: these
+are the logics of theorem-proving, in general.)
+
+* `presence.scm`     -- Testing for the presence of an Atom.
+* `absent.scm`       -- Using the AbsentLink.
+
+Triggering Side-Effects
+-----------------------
 The pattern matcher can be used to trigger side-effects, when a pattern
 is matched.  This includes the execution of arbitrary code, both as
 "black-box" code, as well as "clear-box" Atomese.
@@ -72,16 +95,6 @@ is matched.  This includes the execution of arbitrary code, both as
 * sequence.scm: Using GPN's to execute a sequence of tasks.
 * condition.scm: Combining GPN's and GSN's to make an action taken
     depend on a precondition.
-
-The pattern matcher is a kind of graph query-engine; it is looking for
-the presence (or absence) of certain graphs in the atomspace. This can
-be understood to be a form of "intuitionistic logic", or
-"constructivist logic".
-
-* presence.scm: various ways of testing for the presence of an atom in
-    the AtomSpace.
-* absent.scm: Use the StateLink to set state; use AbsentLink to check
-    for the absence of atoms in the AtomSpace.
 
 The above examples should make clear that the pattern matcher implements
 a kind-of programming langauge, refered to as "atomese". Like any good
