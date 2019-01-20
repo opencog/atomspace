@@ -1,9 +1,8 @@
 ;
-; simple.scm -- Graph queries that trigger actions.
+; gsn-basic.scm -- Graph queries that trigger actions.
 ;
-; Some of these queries These are the queries and
-; the action to be taken on the result of the query
-;
+; This demonstrates how graph queries can trigger code to alter
+; the truth values on an atom.
 ;
 (use-modules (opencog) (opencog query))
 

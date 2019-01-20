@@ -63,7 +63,6 @@ Basic Examples
 The first four examples provide a basic introduction to basic
 pattern matching.
 
-* `simple.scm`       -- A basic introduction to pattern matching.
 * `satisfcation.scm` -- Determining satisfiability of a query.
 * `glob.scm`         -- Matching multiple atoms at once.
 * `choice.scm`       -- Using the ChoiceLink to explore alternatives.
@@ -194,6 +193,7 @@ The pattern matcher can be used to trigger side-effects, when a pattern
 is matched.  This includes the execution of arbitrary code, both as
 "black-box" code, as well as "clear-box" Atomese.
 
+* `gsn-basic.scm`      -- A basic introduction to callbacks.
 * `gsn.scm`            -- When a match is found, call a callback.
 * `gpn.scm`            -- Callback decides: is there a match?
 * `sequence.scm`       -- Using GPN's to execute a sequence of tasks.
