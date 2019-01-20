@@ -1,5 +1,5 @@
 ;
-; Simple goal solving using Get/PutLinks.
+; deduction-engine.scm -- Very simple goal solving using Get/PutLinks.
 ;
 ; The point of this example is to show how ProLog-like deductions can
 ; be made, and, more precisely, how to write a ProLog-like chainer
