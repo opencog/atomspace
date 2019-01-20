@@ -1,8 +1,8 @@
 ;
-; gsn-basic.scm -- Graph queries that trigger actions.
+; gsn-truth.scm -- Altering TruthValues with GroundedSchemaNode
 ;
-; This demonstrates how graph queries can trigger code to alter
-; the truth values on an atom.
+; One of the most basic useages of the GroundedSchemaNode is to
+; recompute the TruthValue on an atom, once its been found.
 ;
 (use-modules (opencog) (opencog query))
 
@@ -79,17 +79,17 @@
 ;;;; Expected output for each case above:
 
 ; (SetLink
-;	 (Concept "Ben")
-;	 (Concept "Linas"))
+;    (Concept "Ben")
+;    (Concept "Linas"))
 ;
 ; (SetLink
-;		(InheritanceLink (Concept "Linas") (Concept "animal"))
-;		(InheritanceLink (Concept "Ben") (Concept "animal")))
+;    (InheritanceLink (Concept "Linas") (Concept "animal"))
+;    (InheritanceLink (Concept "Ben") (Concept "animal")))
 ;
 ; (SetLink
-;	 (InheritanceLink (stv 0.3 0.99)
-;		 (Concept "Linas")
-;		 (Concept "animal"))
-;	 (InheritanceLink (stv 0.3 0.99)
-;		 (Concept "Ben")
-;		 (Concept "animal")))
+;    (InheritanceLink (stv 0.3 0.99)
+;       (Concept "Linas")
+;       (Concept "animal"))
+;    (InheritanceLink (stv 0.3 0.99)
+;       (Concept "Ben")
+;       (Concept "animal")))
