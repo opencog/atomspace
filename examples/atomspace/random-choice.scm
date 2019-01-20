@@ -1,5 +1,5 @@
 ;
-; random-choice.scm -- Example use of the RandomChoiceLink
+; random-choice.scm -- Using the RandomChoiceLink for sampling.
 ;
 ; This example uses the RadomChoiceLink to pick one of two alteratives,
 ; ConceptNode A or ConceptNode B, with a probability of 70-30.  It then

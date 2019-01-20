@@ -40,7 +40,7 @@ It is recommended that you go through the examples in the order given.
 * `values.scm`         -- Using Values and attaching them to Atoms.
 * `filter.scm`         -- Filtering sets of atoms with PutLink.
 * `map.scm`            -- Extracting and re-writing with MapLink.
-* `recursive-loop.scm` -- An example of a tail-recursive loop.
+* `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
 * `logger-example.scm` -- Using the built-in logger.
 * `except.scm`         -- Throwing and catching exceptions.

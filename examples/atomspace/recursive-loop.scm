@@ -3,7 +3,10 @@
 ;
 ; This demonstrates how to write a tail-recursive loop in Atomese.
 ;
-; The example is perhaps pointlessly complicated.
+; Tail-recursive loops in Atomese are easy. Perhaps too easy; thus
+; this example adds a lot of pointless complication so as to provide
+; a more ealistic example.
+;
 ; First, it defines a random-number source, attaches it to an atom.
 ; It then samples the random number three times, adds it together,
 ; and then tests to see if it is less than 2.5. If it is (and this
