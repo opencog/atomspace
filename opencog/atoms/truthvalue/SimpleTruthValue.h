@@ -50,6 +50,7 @@ protected:
 public:
     static count_t DEFAULT_K;
 
+    SimpleTruthValue(const std::vector<double>&);
     SimpleTruthValue(strength_t, confidence_t);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(const SimpleTruthValue&);
@@ -73,6 +74,8 @@ public:
     TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
+    // XXX FIXME Are all of these really needed?
+    // Can we get rid of some of them?
     static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {
         return std::make_shared<const SimpleTruthValue>(mean, conf);
@@ -81,6 +84,12 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(createSTV(mean, conf));
     }
+    static TruthValuePtr createTV(const std::vector<double>& v)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const SimpleTruthValue>(v));
+    }
+
     static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
@@ -92,6 +101,12 @@ public:
         return std::make_shared<const SimpleTruthValue>(*this);
     }
 };
+
+template<typename ... Type>
+static inline TruthValuePtr createSimpleTruthValue(Type&&...  args) {
+   return SimpleTruthValue::createTV(std::forward<Type>(args)...);
+}
+
 
 /** @}*/
 } // namespace opencog

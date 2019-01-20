@@ -23,6 +23,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -30,6 +31,12 @@ using namespace opencog;
 const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
 const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
 const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
+
+AttentionValue::AttentionValue(const std::vector<double>& v) :
+	FloatValue(ATTENTION_VALUE)
+{
+	_value = v;
+}
 
 AttentionValue::AttentionValue(sti_t s, lti_t l, vlti_t v) :
 	FloatValue(ATTENTION_VALUE)
@@ -86,3 +93,6 @@ std::string AttentionValue::to_string(const std::string& indent) const
 	sprintf(buffer, "(av %f %f %f)", getSTI(), getLTI(), getVLTI());
 	return buffer;
 }
+
+DEFINE_VALUE_FACTORY(ATTENTION_VALUE,
+	createAttentionValue, std::vector<double>)

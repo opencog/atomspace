@@ -24,15 +24,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <math.h>
-
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include "CountTruthValue.h"
 
 using namespace opencog;
+
+CountTruthValue::CountTruthValue(const std::vector<double>& v)
+	: TruthValue(COUNT_TRUTH_VALUE)
+{
+    _value = v;
+}
 
 CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
 	: TruthValue(COUNT_TRUTH_VALUE)
@@ -146,3 +151,6 @@ TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
 
     return createTV(meeny, get_confidence(), cnt);
 }
+
+DEFINE_VALUE_FACTORY(COUNT_TRUTH_VALUE,
+	createCountTruthValue, std::vector<double>)
