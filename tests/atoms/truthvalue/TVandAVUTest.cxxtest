@@ -60,21 +60,24 @@ void TVandAVUTest::test_guile()
 	eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
 
 	TruthValuePtr tva = eval.eval_tv("(cog-tv a)");
+	TS_ASSERT(tva != nullptr);
 	printf("     got: %s ", tva->to_string().c_str());
 	printf("expected SimpleTruthValue\n");
 	TS_ASSERT(tva->get_type() == SIMPLE_TRUTH_VALUE);
 
-	TruthValuePtr tvb = eval.eval_tv("(cog-tv (Concept \"bbb\")");
+	TruthValuePtr tvb = eval.eval_tv("(cog-tv (Concept \"bbb\"))");
+	TS_ASSERT(tvb != nullptr);
 	printf("     got: %s ", tvb->to_string().c_str());
 	printf("expected CountTruthValue\n");
 	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
 
-	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\")");
+	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\"))");
+	TS_ASSERT(vav != nullptr);
 	AttentionValuePtr av = AttentionValueCast(vav);
+	TS_ASSERT(av != nullptr);
 	printf("     got: %s ", av->to_string().c_str());
 	printf("expected AttentionValue\n");
 	TS_ASSERT(av->get_type() == ATTENTION_VALUE);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
