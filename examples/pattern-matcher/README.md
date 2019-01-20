@@ -1,9 +1,60 @@
+
 Pattern Matcher Examples
-------------------------
+========================
+The AtomSpace is a knowledgebase: a collection of tools for working
+with (semantic) knowledge stored in a graph database. Querying the
+database is a basic building block, on top of which much of the rest
+is built.
 
-See `../guile/README` for an intro on running the guile shell needed
-to run the demos here.
+The pattern matcher implements a graph query language (GQL) with a
+number of advanced features not found in ordinary graph databases.
+This directory contains examples of how to use these.
 
+Perhaps the most novel aspect is that the queries themselves are also
+graphs, and so that they too can be stored in the knowledgebase.  This
+in turn enables a kind of recursive query processing.
+
+By storing queries as graphs, one can build a rule-engine, by writing
+each rule as a query. The rule-engine performs a "meta"-query,
+selecting appropriate rules, so as to chain them together. The rule
+engine in turn can serve as a foundation for inferencing, theorem-
+proving, logical deduction, common-sense reasoning, and the like.
+The axioms of natural deduction (of Hilbert systems) are themselves
+stored as graphs.
+
+By storing each query as a graph, one can do inverse queries. So, for
+example, one can search for all queries that match a given "answer".
+This reverses the ordinary concept of queries: here, one knows the
+answer (it's some graph), and one is looking for questions that might
+deliver that answer (the questions are just other graphs).
+
+Another important feature is that many Atomese Atoms are "active", and
+cause things to heppen when executed. The pattern matcher is a natural
+place to trigger these. Thus, Atoms can lie dormant until a query causes
+them to run.
+
+The simplest example of this is the GreaterThanLink. As a
+knowledge-base, it is impossible to passively store all possible
+greater-than relationships between integers: there's a countable
+infinity of them. The GreaterThanLink, when triggered during a search,
+can proceedurally (algorithmically) evaluate, on the spot, the relative
+order of two integers.  The GreaterThanLink serves as an example of
+arbitrary computation that can be done "behind the scenes". However,
+(and this is the important part!) the "meaning" of greater-than is
+known a-priori. Thus, the reasoning engine can make logical deductions
+about what GreaterThanLink would have done, if it had been called.
+Thus, it is both declarative (asserting a fact) and active (returns an
+actual answer, if you ask it).
+
+Preliminaries
+-------------
+Please go through the first four or six or ten demos in the
+[atomspace](../atomspace) folder first. These will provide an
+introduction to the various features and functions in the AtomSpace
+itself. This will make the examples here much easier to understand.
+
+The Examples
+------------
 The first three examples provide a basic introduction to basic
 pattern matching.
 
