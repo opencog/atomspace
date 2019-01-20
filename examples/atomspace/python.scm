@@ -1,7 +1,9 @@
 ;
+; python.scm -- mixing Python code with Scheme
+;
 ; The built-in python interpreter can be invoked from scheme, as shown
 ; below.  It should not be confused with another concept: calling python
-; functions from ExecutionOutputLinks, which is demoed in execute.scm.
+; functions from ExecutionOutputLinks, which is demoed in `execute.scm`.
 
 
 ; Start by loading the python module:
@@ -55,7 +57,7 @@ from opencog.atomspace import types
 asp = scheme_eval_as('(cog-atomspace)')
 TV = TruthValue(0.444, 0.777)
 
-#Do something with it ...
+# Do something with it ...
 asp.add_node(types.ConceptNode, 'Bananna', TV)
 ")
 

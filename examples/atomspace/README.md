@@ -42,14 +42,13 @@ It is recommended that you go through the examples in the order given.
 * `map.scm`            -- Extracting and re-writing with MapLink.
 * `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
-* `logger-example.scm` -- Using the built-in logger.
+* `logging.scm`        -- Using the cogutils logger.
+* `python.scm`         -- Mixing Python and Scheme together.
+* `execute.scm`        -- Callbacks written in python or scheme.
 * `except.scm`         -- Throwing and catching exceptions.
-* `python.scm`    -- Loading python code from scheme.
-* `execute.scm`   -- An example of executing executable atoms, with
-                    callbacks written in python or scheme.
-* `persist-example.scm` -- Saving atomspace data in an SQL database.
-* `copy-on-write.scm`   -- Read-only atomspaces, with r/w overlays.
-* `stream.scm`  -- Using a stream of time-varying Values.
+* `persist-example.scm`-- Saving atomspace data in an SQL database.
+* `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
+* `stream.scm`         -- Using a stream of time-varying Values.
 * `gperf.scm`   -- Some very crude performance measurements.
 
 
