@@ -1,5 +1,5 @@
 ;
-; recognizer.scm
+; recognizer.scm -- patten recognition
 ;
 ; Pattern recognition is dual to pattern matching!
 ; AKA the "dynamic Rete algorithm".
@@ -10,10 +10,10 @@
 ; ones fire.  When there are more than a few dozen rules, this becomes
 ; impractical.  This issue was observed, and resolved in the 1970's and
 ; 1980's, with the Rete algorithm: one organizes the set of rules into
-; a trie, which is then very easily and quickly walked, to determine
+; a Trie, which is then very easily and quickly walked, to determine
 ; which ones can fire.
 ;
-; OpenCog and the AtomSpace do NOT (explicitly) implement tries or Rete!
+; OpenCog and the AtomSpace do NOT (explicitly) implement Tries or Rete!
 ; However, the general (hyper-)graph structure of OpenCog Atoms already
 ; contains enough connectivity information to accomplish more or less
 ; the same thing: a kind-of "dynamic Rete", where rulesets can be
@@ -36,7 +36,7 @@
 ;
 ; The example below is based on an AIML-like search, simply because
 ; this is easy to explain and demonstrate. Note that all AIML chatbots
-; maintain a trie of AIML rules, and so AIML is a "natural" example of
+; maintain a Trie of AIML rules, and so AIML is a "natural" example of
 ; pattern recognition.  The atomese DualLink is, however, a general
 ; pattern recognizer: it can be used in a general setting, not just
 ; for AIML-like structures.
