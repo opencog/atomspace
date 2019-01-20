@@ -121,6 +121,37 @@ dependent types.
 * `define.scm`         -- DefineLinks give names to sub-patterns.
 * `type-signature.scm` -- Using signatures and type constructors.
 
+Virtual Links
+-------------
+Virtual links are links that require algorithmic support to make a
+decision. The primary example is GreaterThanLink. It is impossible
+to store all pairs of numbers such that the first is greater than the
+second. However, it is quite easy to run an algorithm to make the same
+determination.  This is a "virtual link": it acts as if any given
+ordered pair of numbers was actually in the AtomSpace, even though it
+isn't, really. The pair is only "virtually" there, existing breifly,
+just long enough to perform the determination.
+
+Any relation that might require an infinitely-large set to instantiate
+can be implemented as a virtual link.  The pattern matcher knows how to
+join these together.
+
+More precisely: A collection of clauses to be (collectively) satisfied
+can be thought of as a Cartesian product of those clauses. The "inner
+join", the need to have variables have common groundings during
+satisfaction means that not every possible element of the product can
+appear -- the join discards or filters away most members of the
+Cartesian product.
+
+This is easy to do for ordinary graphs that "really" exist in the
+knowledgbase; its a good bit harder when the graph has virtual links in
+it.  There is a potential combinatorial explosion: the Cartesian product
+can become huge, and one cannot afford to execute a virtual link on
+every potential combination. The pattern matcher takes steps to minimize
+that combinatorial explosion.
+
+* `virtual.scm`         -- Using virtual links.
+
 Triggering Side-Effects
 -----------------------
 The pattern matcher can be used to trigger side-effects, when a pattern
@@ -144,12 +175,6 @@ for them.
 * `fsm-full.scm`      -- A generic deterministic FSM constructor.
 * `fsm-mealy.scm`     -- A generic Mealy machine constructor.
 * `markov-chain.scm`  -- A Markov chain (probabilistic FSM) based on fsm-full.
-
-Examples that demonstrate some of the inner workings of the pattern
-matcher.
-
-* virtual.scm: Using virtual links, and the resulting combinatorial
-     explosion.
 
 Unfinished examples
 -------------------
