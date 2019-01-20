@@ -152,6 +152,37 @@ that combinatorial explosion.
 
 * `virtual.scm`         -- Using virtual links.
 
+Filtering and Mapping
+---------------------
+Given a set of Atoms, one might want to filter out only portions of that
+set. This can be done with `FilterLink`.  Given a set of Atoms, one
+might want to apply some transformation to that set. This can be done
+with `MapLink`.  This somewhat resembles the filtering predicates and
+mapping functions found in
+[srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `MapLink`
+is particularly intersting: it can be though of as an `UnPutLink`, to
+undo the effects of a `PutLink`, that is, to extract data.
+
+These two links are kind-of deprecated. They are a historical
+experiment, and they overlap some of the core pattern matcher
+functionality, but limiting it to just a subspace of the AtomSpace.
+There is an open issue to resolve this situation, by providing a
+unified interface that allows sub-spaces of the AtomSpace to be
+specified. The goal is to allow subspaces to be thought of as contexts
+or as "general frames".
+
+(The pattern matcher implicitly implements a certain kind of modal
+logic, under the covers and invisibly to the user.  May as well come
+out of the closet about that, and allow full-blown contexts and general
+frames.  It will take some work to do this.)
+
+In the meanwhile, some awkward examples of searching, querying,
+filtering and mapping, done sideways.
+
+* `filter.scm`         -- Filtering sets of atoms with PutLink.
+* `map.scm`            -- Extracting and re-writing with MapLink.
+
+
 Triggering Side-Effects
 -----------------------
 The pattern matcher can be used to trigger side-effects, when a pattern
