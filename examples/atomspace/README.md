@@ -132,7 +132,7 @@ and more generally
 ,help
 ```
 
-See also AtomSpace [guile wrapper README](../../opencog/guile/README.md)
+See also AtomSpace [guile wrapper README](../../opencog/guile/README)
 or [OpenCog Scheme wiki page](https://wiki.opencog.org/w/Scheme) for
 additional documentation.
 
