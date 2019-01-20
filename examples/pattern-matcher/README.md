@@ -53,6 +53,11 @@ Please go through the first four or six or ten demos in the
 introduction to the various features and functions in the AtomSpace
 itself. This will make the examples here much easier to understand.
 
+Many of the examples assume that you are cutting and pasting from the
+example to the guile prompt. You might find it easier to bulk-load
+the example, `(load-from-path "some-example.scm")` and then bounce
+around inside of it.
+
 Basic Examples
 --------------
 The first four examples provide a basic introduction to basic
