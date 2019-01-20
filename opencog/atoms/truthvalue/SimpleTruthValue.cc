@@ -24,8 +24,6 @@
  *
  */
 
-#include <math.h>
-
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
