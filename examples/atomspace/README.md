@@ -8,10 +8,10 @@ underlying the AtomSpace. This includes:
 * Basic querying (pattern-matching) and inference on knowledge.
 * Assigning degrees of truth various facts and inferences.
 * Complex knowledge-representation tasks, including:
-  -- Setting unique state
-  -- Designing properties
-  -- Assigning values and using key-value pairs efficiently
-  -- Handling rapidly time-varying data (video/audio streams).
+   -- Setting unique state
+   -- Designing properties
+   -- Assigning values and using key-value pairs efficiently
+   -- Handling rapidly time-varying data (video/audio streams).
 
 After this come examples for assorted advanced features that are
 typically encountered:
@@ -26,7 +26,7 @@ typically encountered:
 
 
 Example Files
-=============
+-------------
 It is recommended that you go through the examples in the order given.
 
 * `basic.scm`          -- How to start the guile shell.
@@ -53,7 +53,7 @@ It is recommended that you go through the examples in the order given.
 
 
 Introduction to Scheme and Guile
-================================
+--------------------------------
 Some minor familiarity with scheme is useful, but not required.
 This section provides some hints and tips for getting the command
 line working.
@@ -120,20 +120,30 @@ See also opencog/guile/README or http://wiki.opencog.org/w/Scheme
 for additional documentation.
 
 
-List of the various OpenCog modules
-===================================
-A reasonably up-to-date list of modules provided by OpenCog:
+List of the various modules
+---------------------------
+Here's a list of modules provided by the AtomSpace, listed in
+alphabetical order. In general, you will use `(opencog query)`
+and `(opencog exec)` the most frequently: these contain core
+function that almost everything else depends on.
 ```
 (use-modules (opencog))
+(use-modules (opencog atom-types))
+(use-modules (opencog attention-bank))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
-(use-modules (opencog ghost))
-(use-modules (opencog atom-types))
+```
+
+There are other modules provided in other projects and repos. Here is
+a reasonably up-to-date list of modules provided by OpenCog:
+```
+(use-modules (opencog agi-bio))
 (use-modules (opencog cogserver))
+(use-modules (opencog ghost))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
