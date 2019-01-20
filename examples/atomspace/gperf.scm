@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
-cat - << XXX | /usr/bin/env guile
+#!/usr/bin/env guile
+!#
 ;
 ; gperf.scm -- Simple guile atom creation benchmark.
 ;
@@ -64,13 +64,12 @@ cat - << XXX | /usr/bin/env guile
 		(+ (time-second elapsed) 
 			(/ (time-nanosecond elapsed) 1000000000.0)))
 	(define rate (round (/ niter delta)))
-	(display id) (newline)
-	(display "Elapsed time (secs): ") (display delta) (newline)
-	(display "Loops per second: ") (display rate) (newline)
-	(newline)
+	(format #t "~A\n" id)
+	(format #t "\tElapsed time (secs): ~A\n" delta)
+	(format #t "\tLoops per second: ~A\n\n" rate)
 )
 
-(display "Running the benchmark. Please wait ...\n")
+(display "\nRunning the benchmark. Please wait ...\n\n")
 
 ; Measure how long it takes to create a bunch of links.
 (define niter 250000)
@@ -95,5 +94,5 @@ cat - << XXX | /usr/bin/env guile
 ; Make a large binary tree, again.
 (set! start (current-time))
 (make-link-tree niter)
-(define stop (current-time))
+(set! stop (current-time))
 (report-perf "Binary tree, second time:" start stop niter)
