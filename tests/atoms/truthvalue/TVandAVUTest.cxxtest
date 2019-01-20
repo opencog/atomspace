@@ -1,0 +1,68 @@
+/*
+ * tests/atoms/truthvalue/TVandAVUTest.cxxtest
+ *
+ * Copyright (C) 2019 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class TVandAVUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	TVandAVUTest(void);
+
+	void test_guile();
+};
+
+TVandAVUTest::TVandAVUTest(void)
+{
+	logger().set_level(Logger::INFO);
+	logger().set_print_to_stdout_flag(true);
+}
+
+// ====================================================================
+// Make sure the scheme bindings work.
+void TVandAVUTest::test_guile()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(&_as);
+	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
+
+	TruthValuePtr vo = eval.eval_v("(cog-tv a)");
+	printf("     got: %s", vo->to_string().c_str());
+	printf("expected SimpleTruthValue\n");
+	TS_ASSERT(vo->type() == SIMPLE_TRUTH_VALUE);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
