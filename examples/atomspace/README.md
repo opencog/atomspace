@@ -61,7 +61,7 @@ be effective.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
 * `except.scm`         -- Throwing and catching exceptions.
-* `persist-example.scm`-- Saving atomspace data in an SQL database.
+* `persistance.scm`    -- Layering the atomspace on a "real" database.
 * `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 

@@ -35,36 +35,47 @@
 
 ; Lets hop right in. The below should throw an exception, since
 ; the database is not yet open.
-(store-atom (ConceptNode "asdf" (stv 0.42 0.24)))
+(store-atom (Concept "asdf" (stv 0.42 0.24)))
 
 ; Use the test database credentials. These are the credentials that
 ; the unit tests use. Next time the unit tests run, they will wipe
 ; out this data, and so you should probably create and use your own
 ; private login.
-(sql-open "opencog_test" "opencog_tester" "cheese")
+(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
 
 ; Try storing again.
-(store-atom (ConceptNode "asdf" (stv 0.318309886 0.36787944)))
+(store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
 
 ; Close the database.
 (sql-close)
 
 ; Try fetching the atom. The database is closed -- this should fail!
-(fetch-atom (ConceptNode "asdf"))
+(fetch-atom (Concept "asdf"))
 
 ; Reopen the database.
-(sql-open "opencog_test" "opencog_tester" "cheese")
+(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
 
 ; Try fetching the atom. This time it should work.  Notice that
 ; it retrieved the correct TruthValue.
-(fetch-atom (ConceptNode "asdf"))
+(fetch-atom (Concept "asdf"))
 
 ; Change it's truth value, store it, and repeat.
-(define my-atom (ConceptNode "asdf"))
+(define my-atom (Concept "asdf"))
 (cog-set-tv! my-atom (stv 0.25 0.75))
+
+; One can save generic Values, as well.
+(define my-key (Predicate "my key"))
+(cog-set-value! my-atom my-key (StringValue "Humpty" "Dumpty"))
+
 (store-atom my-atom)
 (sql-close)
-(sql-open "opencog_test" "opencog_tester" "cheese")
-(fetch-atom (ConceptNode "asdf"))
+(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+(fetch-atom (Concept "asdf"))
+
+; Look at all the keys attached to the atom:
+(cog-keys my-atom)
+
+; Make sure the values were restored:
+(cog-value my-atom my-key)
 
 ; That's all for now
