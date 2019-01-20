@@ -1,7 +1,7 @@
 ;
 ; Basic guile usage example!
 ;
-; See opencog/guile/README or http://wiki.opencog.org/w/Scheme
+; See `opencog/guile/README` or http://wiki.opencog.org/w/Scheme
 ; for additional documentation.
 ;
 ; If you have installed opencog, then start guile simply by saying

@@ -4,38 +4,51 @@ Demo of Atoms, Values and the AtomSpace
 This directory contains examples that illustrate all of the main ideas
 underlying the AtomSpace. This includes:
 
-* Atoms, how to create them and how to use them.
-* TruthValues, and how to associate them to atoms.
-* A simple pattern-matching example.
-* Techniques to control state in the AtomSpace.
-* How to use Values to attach arbitrary data to specific Atoms.
-* How to user a read-only base AtomSpace, with a read-write overlay.
-* How to use time-varying (streaming) Values (experimental).
+* The AtomSpace as a knowledgebase - a graph database.
+* Basic querying (pattern-matching) and inference on knowledge.
+* Assigning degrees of truth various facts and inferences.
+* Complex knowledge-representation tasks, including:
+  -- Setting unique state
+  -- Designing properties
+  -- Assigning values and using key-value pairs efficiently
+  -- Handling rapidly time-varying data (video/audio streams).
 
-All of the examples are written in scheme.
+After this come examples for assorted advanced features that are
+typically encountered:
+
+* Creating a read-only base AtomSpace, with a read-write overlay.
+* Throwing excpetions.
+* Storing the Atomspace in PostgreSQL
+* Using the logger.
+* Calling Python from within the Atomspace.
+* Multithreading with ParallelLink and JoinLink
+* ... and much much more.
+
 
 Example Files
 =============
 It is recommended that you go through the examples in the order given.
 
-* `basic.scm`   -- A very simple introduction
-* `bindlink-example.scm` -- An example of using the pattern matcher.
-* `python.scm`  -- loading python code from scheme.
-* `execute.scm` -- An example of executing executable atoms, with
-                   callbacks written in python or scheme.
-* `get-put.scm` -- An example of asserting facts in the AtomSpace.
-* `state.scm`   -- Maintaining unique state.
-* `property.scm`-- Setting properies on Atoms.
-* `values.scm`  -- Using Values and attaching them to Atoms.
-* `filter.scm`  -- Filtering sets of atoms.
-* `map.scm`     -- Applying a map function to a set or list.
-* `recursive-loop.scm`  -- An example of a tail-recursive loop.
-* `random-choice.scm`   -- Numerical programming, including loops.
-* `logger-example.scm`  -- Using the built-in logger.
-* `except.scm`          -- Throwing and catching exceptions.
-* `persist-example.scm` -- Saving atomspace data in an SQL database.
-* `copy-on-write.scm`   -- Read-only atomspaces, with r/w overlays.
-* `stream.scm`  -- Using a stream of time-varying Values.
+* `basic.scm`          -- How to start the guile shell.
+* `knowledge.scm`      -- Representing knowledge.
+* `bindlink.scm`       -- Queries and inference with the pattern matcher.
+* `get-put.scm`        -- The two halves of a query: Get and Put.
+* `assert-retract.scm` -- Asserting facts in the AtomSpace.
+* `state.scm`          -- Maintaining unique state.
+* `property.scm`       -- Designing Atoms with properties.
+* `truthvalues.scm`    -- Declaring the truth of a proposition.
+* `values.scm`         -- Using Values and attaching them to Atoms.
+* `filter.scm`         -- Filtering sets of atoms with PutLink.
+* `map.scm`            -- Extracting and re-writing with MapLink.
+* `recursive-loop.scm` -- Writing tail-recursive loops.
+* `random-choice.scm`  -- Numerical programming, including loops.
+* `logging.scm`        -- Using the cogutils logger.
+* `python.scm`         -- Mixing Python and Scheme together.
+* `execute.scm`        -- Callbacks written in python or scheme.
+* `except.scm`         -- Throwing and catching exceptions.
+* `persist-example.scm`-- Saving atomspace data in an SQL database.
+* `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
+* `stream.scm`         -- Using a stream of time-varying Values.
 * `gperf.scm`   -- Some very crude performance measurements.
 
 
