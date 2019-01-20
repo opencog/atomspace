@@ -81,8 +81,6 @@ void TVandAVUTest::test_guile()
 	printf("expected CountTruthValue\n");
 	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
 
-#define CIRCLECI_LTDL_IS_BROKEN_AGAIN
-#if CIRCLECI_LTDL_IS_BROKEN_AGAIN
 	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\"))");
 	TS_ASSERT(vav != nullptr);
 	AttentionValuePtr av = AttentionValueCast(vav);
@@ -90,7 +88,6 @@ void TVandAVUTest::test_guile()
 	printf("     got: %s ", av->to_string().c_str());
 	printf("expected AttentionValue\n");
 	TS_ASSERT(av->get_type() == ATTENTION_VALUE);
-#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
