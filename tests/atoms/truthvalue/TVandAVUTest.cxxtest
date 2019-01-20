@@ -59,7 +59,7 @@ void TVandAVUTest::test_guile()
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
 
-	TruthValuePtr tva = eval.eval_tv("(cog-tv a)");
+	TruthValuePtr tva = eval.eval_tv("(cog-tv (Concept \"aaa\"))");
 	TS_ASSERT(tva != nullptr);
 	printf("     got: %s ", tva->to_string().c_str());
 	printf("expected SimpleTruthValue\n");
