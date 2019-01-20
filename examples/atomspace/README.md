@@ -38,6 +38,7 @@ It is recommended that you go through the examples in the order given.
 * `property.scm`       -- Designing Atoms with properties.
 * `truthvalues.scm`    -- Declaring the truth of a proposition.
 * `values.scm`         -- Using Values and attaching them to Atoms.
+* `stream.scm`         -- Using a stream of time-varying Values.
 * `filter.scm`         -- Filtering sets of atoms with PutLink.
 * `map.scm`            -- Extracting and re-writing with MapLink.
 * `recursive-loop.scm` -- Writing tail-recursive loops.
@@ -48,7 +49,6 @@ It is recommended that you go through the examples in the order given.
 * `except.scm`         -- Throwing and catching exceptions.
 * `persist-example.scm`-- Saving atomspace data in an SQL database.
 * `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
-* `stream.scm`         -- Using a stream of time-varying Values.
 * `gperf.scm`   -- Some very crude performance measurements.
 
 
