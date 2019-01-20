@@ -78,17 +78,21 @@
 
 ; Attention Values are a different kind of sequence of floats
 ; that can be attached to an atom.  They require the attention-bank
-; module to be loaded.
+; module to be loaded. Using them causes the attention bank to track
+; the total amount of "attention" in the system. See documentation
+; for details.
 (use-modules (opencog attention-bank))
 (cog-set-av! a (AttentionValue 3 2 1))
 
-; The can be accessed as expected:
+; The AttentionValue can be accessed as expected:
 (cog-av a)
 
-; Example of use of `Values`, mixed with regular atoms.
-; ProtoAtoms are similar to regular atoms, except that:
-; 1) They do not have a TV or AV.
-; 2) They cannot be placed in the AtomSpace.
-; 2a) As a result they are not universally unique.
-; 2b) They do not have a UUID.
-
+;--------------
+;
+; Unlike Atoms, there is no way to search for a particular TruthValue
+; (nor a particular AttentionValue). In particular, these do not live
+; in the AtomSpace. They are not univerally unique; two different
+; TruthValues really are independent of each-other. They do not have
+; a unique hash or UUID.  And finally, you cannot assign a TruthValue
+; to a TruthValue.
+;
