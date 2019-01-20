@@ -58,6 +58,8 @@ void TVandAVUTest::test_guile()
 	SchemeEval eval(&_as);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
+	TS_ASSERT(not eval.input_pending());
+	TS_ASSERT(not eval.eval_error());
 
 	TruthValuePtr tva = eval.eval_tv("(cog-tv (Concept \"aaa\"))");
 	TS_ASSERT(tva != nullptr);
