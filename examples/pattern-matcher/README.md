@@ -84,18 +84,23 @@ are the logics of theorem-proving, in general.)
 * `presence.scm`     -- Testing for the presence of an Atom.
 * `absent.scm`       -- Using the AbsentLink.
 
-Triggering Side-Effects
------------------------
-The pattern matcher can be used to trigger side-effects, when a pattern
-is matched.  This includes the execution of arbitrary code, both as
-"black-box" code, as well as "clear-box" Atomese.
+Pattern Recognition
+-------------------
+It is sometimes useful to invert a query. One might want to find all
+"questions" that provide a given "answer". This is accomplished with
+the pattern-recognizer, or `DualLink`. Given a graph without variables
+in it (a "ground term"), it can find all graphs that do have variables
+in them, that would have matched up, if aligned properly.
 
-* gsn.scm: Calling arbitrary functions upon a match.
-* gpn.scm: Calling arbitrary functions to decide a match.
-* sequence.scm: Using GPN's to execute a sequence of tasks.
-* condition.scm: Combining GPN's and GSN's to make an action taken
-    depend on a precondition.
+This inverted search for ungrounded patterns is very useful for building
+a rule-engine. Given a rule-set, it allows one to figure out very
+quickly which rules can be chained together. (Crudely speaking, one
+can think of the recognizer as being kind-of-like a RETE algorithm).
 
+* `recognizer.scm`    -- Implementing AIML with DualLink
+
+Types
+-----
 The above examples should make clear that the pattern matcher implements
 a kind-of programming langauge, refered to as "atomese". Like any good
 programming language, it steals ideas.  One of these is the idea of
@@ -107,13 +112,17 @@ dependent types).
 * type-signature.scm: using signatures and type constructors to refine
     the search.
 
-The pattern matcher can be used to implement a rule engine.  In order
-for rule engines to run efficiently, they need to implement the Rete
-algorithm, or something similar.  The pattern-recognizer, or DualLink,
-does this: it is used to find the rules that can be applied to a given
-graph.
+Triggering Side-Effects
+-----------------------
+The pattern matcher can be used to trigger side-effects, when a pattern
+is matched.  This includes the execution of arbitrary code, both as
+"black-box" code, as well as "clear-box" Atomese.
 
-* recognizer.scm: using DualLink to implement an AIML-like system.
+* gsn.scm: Calling arbitrary functions upon a match.
+* gpn.scm: Calling arbitrary functions to decide a match.
+* sequence.scm: Using GPN's to execute a sequence of tasks.
+* condition.scm: Combining GPN's and GSN's to make an action taken
+    depend on a precondition.
 
 Some simpler applications showing some things one can do, and how to do
 them.
