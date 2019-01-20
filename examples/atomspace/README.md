@@ -25,7 +25,7 @@ typically encountered:
 * ... and much much more.
 
 Most of the querying and pattern matching examples are in the
-[pattern-matcher](../pattern-matcher) folder. Once you've gotten
+[**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
 a good idea of the basics from the demos here, go an explore the
 examples there.
 
@@ -51,7 +51,7 @@ It is recommended that you go through the examples in the order given.
 * `except.scm`         -- Throwing and catching exceptions.
 * `persist-example.scm`-- Saving atomspace data in an SQL database.
 * `copy-on-write.scm`  -- Read-only atomspaces, with r/w overlays.
-* `gperf.scm`   -- Some very crude performance measurements.
+* `gperf.scm`          -- Some very crude performance measurements.
 
 
 Introduction to Scheme and Guile
