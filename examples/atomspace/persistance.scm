@@ -59,23 +59,46 @@
 ; it retrieved the correct TruthValue.
 (fetch-atom (Concept "asdf"))
 
-; Change it's truth value, store it, and repeat.
-(define my-atom (Concept "asdf"))
-(cog-set-tv! my-atom (stv 0.25 0.75))
-
 ; One can save generic Values, as well.
-(define my-key (Predicate "my key"))
-(cog-set-value! my-atom my-key (StringValue "Humpty" "Dumpty"))
+(cog-set-value!
+	(Concept "asdf")
+	(Predicate "my key")
+	(StringValue "Humpty" "Dumpty"))
 
 (store-atom my-atom)
 (sql-close)
+
+; The database is closed. Let's mess with the truth value.
+(cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
+
+; Let's wipe out the value as well.
+(cog-set-value!
+	(Concept "asdf")
+	(Predicate "my key")
+	(StringValue "sat" "on" "a" "wall"))
+
 (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+
 (fetch-atom (Concept "asdf"))
 
 ; Look at all the keys attached to the atom:
-(cog-keys my-atom)
+(cog-keys (Concept "asdf"))
 
-; Make sure the values were restored:
-(cog-value my-atom my-key)
+; Make sure the the current values are those restored from the database:
+(cog-value (Concept "asdf") (Predicate "my key"))
 
+; Other useful commands are:
+;
+; * `sql-load` and `sql-store` for bulk fetch and restore. For large
+;   datasets, these can be slow. Extremly large datasets might not fit
+;   in RAM, which is why `fetch-atom` is so handy!
+;
+; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
+;   useful for fetching all graphs that an atom belongs to. These
+;   two are possibly the single most-important persistance calls in
+;   the system. They really make the whole idea usable and easy-to-use.
+;
+; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
+;   performance data.
+;
 ; That's all for now
