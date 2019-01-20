@@ -5,6 +5,9 @@
 
 (define-module (opencog attention-bank))
 
+; We need this to set the LTDL_LIBRARY_PATH
+(use-modules (opencog))
+
 (load-extension "libattentionbank" "opencog_attention_init")
 
 ; This avoids complaints, when the docs are set, below.
@@ -13,8 +16,6 @@
 	cog-update-af cog-af-size cog-set-af-size! cog-stimulate
 	cog-bind-af
 )
-
-(use-modules (opencog))
 
 ;; -----------------------------------------------------
 
