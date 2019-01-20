@@ -1,5 +1,9 @@
 #
-# A short python snippet that is used in the execute.scm example.
+# my_py_func.py -- Python callback example.
+#
+# This is a short python snippet that is needed by the `execute.scm`
+# example. The code below is called, when a GroundedSchemaNode and
+# a GroundedPredicateNode is triggered.
 #
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
