@@ -19,3 +19,6 @@ cdef void decref(void* obj):
 def PtrValue(obj):
     Py_INCREF(obj)
     return wrapPtrValue(createPtrValue(<void*>obj, decref))
+
+def valueToPtrValue(value):
+    return wrapPtrValue(<cValuePtr>((<Value>value).shared_ptr))
