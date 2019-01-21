@@ -26,11 +26,9 @@
 ; 5) tail recursion, to loop and repeat the process again.
 (define (make-node-and-link prefix n)
 	(define (make-atoms prefix node n)
+		(define cpt (ConceptNode (string-append/shared prefix (number->string n))))
 		; Hmmm.. formatted printing is kind-of slow.
-		;    (ConceptNode (format #f "Object_~d" n))
-		; so do string-append instead.
-		(define cpt (ConceptNode
-			(string-append/shared prefix (number->string n))))
+		; (ConceptNode (format #f "Object_~d" n))
 		(ListLink node cpt)
 		(if (< 0 n)
 			(make-atoms prefix cpt (- n 1))
@@ -43,18 +41,17 @@
 ; Define a function that creates large tree of links.
 ; We expect this to run much faster than the above, because it does a
 ; lot less.  Things that waste CPU time here are:
-;   1) creation of the ListLink in the AtomSpace.
-;   2) tail recursion, to loop and repeat the process again.
-; This will create a tree of depth "depth"; however, since the
-; atoms are unique, only "depth" of them are needed for the whole tree.
-(define (make-link-tree depth)
+; 1) creation of the ListLink in the AtomSpace.
+; 2) tail recursion, to loop and repeat the process again.
+(define (make-link-tree n)
 	(define (make-atoms atom n)
+		(define linky (ListLink atom atom))
 		(if (< 0 n)
-			(make-atoms (ListLink atom atom) (- n 1))
+			(make-atoms linky (- n 1))
 			'()
 		)
 	)
-	(make-atoms (ConceptNode "nil") depth)
+	(make-atoms (ConceptNode "nil") n)
 )
 
 ; A handy utility to report the elapsed time and the rate.
