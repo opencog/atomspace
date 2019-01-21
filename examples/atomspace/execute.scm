@@ -22,8 +22,8 @@
 ;
 ; The ExecutionOutputLink is not a continuation, and cannot be used
 ; as a closure. If you really want closures and continuations, then
-; treat Atom types as C++ classes or as Python objects. In breif:
-; a type is a type is a type: Atom types can be C++ clases, and
+; treat Atom types as C++ classes or as Python objects. In brief:
+; a type is a type is a type: Atom types can be C++ classes, and
 ; that is exactly how BindLink, GetLink and PutLink are implemented.
 ; Don't be afraid of creating more types and classes to do your work.
 ;

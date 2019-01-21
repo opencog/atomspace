@@ -4,7 +4,7 @@
 ; gperf.scm -- Simple guile atom creation benchmark.
 ;
 ; This is a super-simple benchmark, with no bells & whistles. But it
-; works and can give you a bsic idea of how fast (or slow) atom creation
+; works and can give you a basic idea of how fast (or slow) atom creation
 ; is in the AtomSpace.  A more comprehensive set of benchmarks can be
 ; found in the https://github.com/opencog/benchmark repository.
 ;

@@ -1,9 +1,9 @@
 ;
 ; random-choice.scm -- Using the RandomChoiceLink for sampling.
 ;
-; This example uses the RadomChoiceLink to pick one of two alteratives,
+; This example uses the RandomChoiceLink to pick one of two alternatives,
 ; ConceptNode A or ConceptNode B, with a probability of 70-30.  It then
-; counts how often each of these choices occured.
+; counts how often each of these choices occurred.
 ;
 (use-modules (opencog) (opencog exec))
 

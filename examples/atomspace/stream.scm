@@ -58,7 +58,7 @@
 (define flipkey (PredicateNode "*-coinflip-*"))
 (cog-set-value! c flipkey (GreaterThan (Number 0.5) (ValueOf c k)))
 
-; The flipkey above should generate a stream of true and false truthvalues
+; The flipkey above should generate a stream of true and false TruthValues
 ; Note that cog-evaluate! is being used here, to get truth values, and not
 ; cog-execute! (which would only return the value, without evaluating it.)
 (cog-evaluate! (ValueOf c flipkey))

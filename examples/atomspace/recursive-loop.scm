@@ -5,7 +5,7 @@
 ;
 ; Tail-recursive loops in Atomese are easy. Perhaps too easy; thus
 ; this example adds a lot of pointless complication so as to provide
-; a more ealistic example.
+; a more realistic example.
 ;
 ; First, it defines a random-number source, attaches it to an atom.
 ; It then samples the random number three times, adds it together,

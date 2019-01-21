@@ -1,9 +1,9 @@
 ;
 ; knowledge.scm - Representing data with Predicates and Evaluations
 ;
-; The atomspace is primarily a knowledge-represention database
+; The atomspace is primarily a knowledge-representation database
 ; (a "knowledgebase"). That is, you have a collection of statements:
-; some "semantic triples" or maybe some "ontology". A "semantic netowrk"
+; some "semantic triples" or maybe some "ontology". A "semantic network"
 ; or some "frames" or some "rules" or maybe even some "axioms".
 ;
 ; There is a tremendous variety of ways that the above can be
@@ -15,7 +15,7 @@
 
 ; Some typical natural-language dependency data.  Consider a dependency
 ; parse of the sentence "Susan makes pottery". Here, "makes" is the
-; verb, and "pottery" is the object of the verb. Thuse, the dependency
+; verb, and "pottery" is the object of the verb. Thus, the dependency
 ; is "_obj(make, pottery)". This can be represented as
 ;
 (Evaluation
@@ -53,7 +53,7 @@
 ; without specifying any kind of template or schema in advance.
 ;
 ; However, some kinds of data problems do want a strict structuring
-; of data. This can be acheived by using the TypedAtomLink. Using types
+; of data. This can be achieved by using the TypedAtomLink. Using types
 ; in the AtomSpace is an advanced topic, but some flavor of this can
 ; be given here.
 ;

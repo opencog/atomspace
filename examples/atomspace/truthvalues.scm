@@ -17,7 +17,7 @@
 ; The CountTruthValue simplifies this representation.
 ;
 ; The AtomSpace is probability-theory agnostic: you can use TruthValues
-; for Bayesian probabilites, frequentist probabilites, indefinite
+; for Bayesian probabilities, frequentist probabilities, indefinite
 ; probabilities, or whatever you can imagine. None of the rules enforce
 ; any one particular theory.
 ;
@@ -91,7 +91,7 @@
 ;
 ; Unlike Atoms, there is no way to search for a particular TruthValue
 ; (nor a particular AttentionValue). In particular, these do not live
-; in the AtomSpace. They are not univerally unique; two different
+; in the AtomSpace. They are not universally unique; two different
 ; TruthValues really are independent of each-other. They do not have
 ; a unique hash or UUID.  And finally, you cannot assign a TruthValue
 ; to a TruthValue.

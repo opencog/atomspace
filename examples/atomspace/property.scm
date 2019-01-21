@@ -19,7 +19,7 @@
 
 (use-modules (opencog) (opencog exec))
 
-; Two differet atoms, to which a number will be associated.
+; Two different atoms, to which a number will be associated.
 (Concept "asdf")
 (Concept "qwerty")
 
@@ -45,10 +45,10 @@
 (State (List (Concept "qwerty") (Predicate "truthiness"))
 	(Number 0.6))
 
-; The getter cane be absracted away, so that the use of the StateLink
-; is hidde from view.  Below, the DefineLink is used to define a schema
+; The getter cane be abstracted away, so that the use of the StateLink
+; is hidden from view.  Below, the DefineLink is used to define a schema
 ; called "get property", which takes two arguments: an atom name, and
-; the property.  When executed, the schema returs the property value.
+; the property.  When executed, the schema returns the property value.
 (DefineLink
 	(DefinedSchema "get property")
 	(Lambda

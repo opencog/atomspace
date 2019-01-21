@@ -10,17 +10,17 @@
 ;
 ; Rather than writing a procedural program that performs reasoning,
 ; and then just performs the insertion/deletion "manually" (by calling
-; some function "proceedurally"), one can also maintain the knowlegbase
+; some function "procedurally"), one can also maintain the knowledgebase
 ; with knowledge-snippets themselves. That is, the tools for maintaining
 ; the data can be a part of the data itself.
 ;
 ; The GetLink and PutLink, from the `get-put.scm` example, provide the
-; tools needed to work with facts beig deduced on the fly. They allow
-; facts to be asserted and retracted, even though thier specific present
+; tools needed to work with facts being deduced on the fly. They allow
+; facts to be asserted and retracted, even though their specific present
 ; form is not yet known.
 ;
 ; The `cog-execute!` function is the primary driver for affecting state
-; change. Every time it is called, the state of the atomspace will
+; change. Every time it is called, the state of the AtomSpace will
 ; (usually) change. The `cog-execute!` forces a single time-step of
 ; an Atomese knowledgebase into it's next form.  In this sense, the
 ; knowledgebase is a dynamical system. It is not just a static
@@ -49,12 +49,12 @@
 (define (show-eval-links)
 	(cog-map-type (lambda (h) (display h) #f) 'EvaluationLink))
 
-; Verify that the atomspace contains no EvaluationLinks:
+; Verify that the AtomSpace contains no EvaluationLinks:
 (show-eval-links)
 
 ; Define a beta-reduction, using the PutLink. The EvaluationLink won't
 ; be added until this is reduced. When it is reduced, the ListLink will
-; be substitited for the variable $x, creating the fully-assembled
+; be substituted for the variable $x, creating the fully-assembled
 ; EvaluationLink.
 ;
 (define to-be-added
@@ -65,7 +65,7 @@
 			(Concept "thing A")
 			(Concept "B-dom-ness"))))
 
-; The atomspace now contains one ungrounded EvaluationLink.
+; The AtomSpace now contains one ungrounded EvaluationLink.
 ; (Its called "ungrounded" because it has a free variable in it).
 (show-eval-links)
 
@@ -91,7 +91,7 @@
 ; but when these parts are assembled into a whole, they materialize
 ; inside of a DeleteLink, which causes them to disappear. That is,
 ; it is impossible to insert a fully-grounded DeleteLink into the
-; atomspace. A DeleteLink must ALWAYS have at least one variable in
+; AtomSpace. A DeleteLink must ALWAYS have at least one variable in
 ; it, otherwise, it cannot exist. Attempting such an insertion will
 ; cause the body of the DeleteLink to be removed.
 ;
@@ -255,15 +255,15 @@
 ; The above example introduces several other new things, the most
 ; important being the LambdaLink. The LambdaLink is a lot like the
 ; lambda in scheme, LISP or lambda-calculus. But it's different,
-; because Atomspace contents are graphs, and are not strings-of-symbols.
-; This differrence is subtle, and can lead to tricky confusions,
+; because AtomSpace contents are graphs, and are not strings-of-symbols.
+; This difference is subtle, and can lead to tricky confusions,
 ; seeming paradoxes and generally-annoying properties. Lambda and
 ; graphs are not quite natural partners.
 ;
 ; Anyway: at the simplest level, LambdaLink can be thought of as a
-; generic, agnositic way of converting free variables into bound
+; generic, agnostic way of converting free variables into bound
 ; variables. A variable inside of a Lambda belongs to that Lambda,
-; it does not "leak" outside, and it is freely alpha-convertable to
+; it does not "leak" outside, and it is freely alpha-convertible to
 ; other variable names.
 ;
 ; The Lambda is agnostic, in that it has many special cases: so,

@@ -22,8 +22,8 @@
 
 (define incr (make-counter))
 
-; Define three dettached threads. When this is evaluated, the
-; ParallelLink will create three dettached threads, one for each
+; Define three detached threads. When this is evaluated, the
+; ParallelLink will create three detached threads, one for each
 ; Atom in it's outgoing set. (One thread for each SequentialAndLink).
 ; It will then return immediately to the caller.  Meanwhile, each thread
 ; will go off and do it's thing. The three threads will each sleep

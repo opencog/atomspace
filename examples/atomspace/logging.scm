@@ -43,11 +43,11 @@
 ;; Normally, messages are written asynchronously, so that they do not
 ;; slow down the main execution thread. But sometimes messages are
 ;; urgent -- such as those written right before a crash. For such
-;; emergency situations, one can enable syncrhonous logging: the
+;; emergency situations, one can enable synchronous logging: the
 ;; logger will not return until the message is written.
 (cog-logger-set-sync! #t)
 
-;; The logger supports formated printing. See
+;; The logger supports formatted printing. See
 ;; https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html
 ;; for more information.  This makes it easy to log messages about
 ;; Atoms and other objects.

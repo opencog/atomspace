@@ -2,14 +2,14 @@
 ; state.scm - Setting state in the atomspace.
 ;
 ; This demonstrates using the StateLink to maintain unique state in the
-; atomspace. A Statelink is a kind of link of which there can only ever
+; atomspace. A StateLink is a kind of link of which there can only ever
 ; be one of in the atomspace.  Whenever a new StateLink is added to the
 ; atomspace, the old one is automatically removed.
 ;
 ; StateLinks can be used to associate properties with atoms; they behave
 ; like atomic key-value pairs, allowing one and only one value to be
 ; associated with a given key. They are literally "atomic", in the
-; multi-threaded programming sense: thier update is protected by a mutex
+; multi-threaded programming sense: their update is protected by a mutex
 ; lock, and so the state remains single-valued, even when viewed from
 ; multiple threads.
 ;
@@ -27,8 +27,8 @@
 ; Lets make sure of that:
 (cog-incoming-set (Anchor "fruit"))
 
-; Change the state to bananna:
-(State (Anchor "fruit") (Concept "bananna"))
+; Change the state to banana:
+(State (Anchor "fruit") (Concept "banana"))
 
 ; Lets make sure the state changed:
 (cog-incoming-set (Anchor "fruit"))
@@ -74,7 +74,7 @@
 ; Same as above, but should be false:
 (cog-evaluate!
 	(EqualLink
-		(Set (Concept "bananna"))
+		(Set (Concept "banana"))
 		(Get (State (Anchor "fruit") (Variable "$x")))))
 
 ; Change the state, using PutLink:
@@ -88,11 +88,11 @@
 	(Get (State (Anchor "fruit") (Variable "$x"))))
 
 ; ------------------
-; Hang on; apples, bananas and strwaberries are all fruit. How can
-; this be expressed? Why, juast as before:
+; Hang on; apples, bananas and strawberries are all fruit. How can
+; this be expressed? Why, just as before:
 
 (Evaluation (Predicate "fruit") (List (Concept "apple")))
-(Evaluation (Predicate "fruit") (List (Concept "bannana")))
+(Evaluation (Predicate "fruit") (List (Concept "banana")))
 (Evaluation (Predicate "fruit") (List (Concept "strawberry")))
 
 ; By convention, one uses a PredicateNode here, instead of an
@@ -110,8 +110,8 @@
 ; instead have said "is-a". The whole world knows the "is-a" relation.
 
 (Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "apple")))
-(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "bannana")))
-(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "strawerry")))
+(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "banana")))
+(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "strawberry")))
 
 (cog-execute! (Get
 	(Evaluation (Predicate "Is A") (List (Concept "fruit") (Variable "$x")))))
@@ -121,12 +121,12 @@
 ; type. It is a bit shorter and easier to read.
 
 (Inheritance (Concept "fruit") (Concept "apple"))
-(Inheritance (Concept "fruit") (Concept "bannana"))
-(Inheritance (Concept "fruit") (Concept "strawerry"))
+(Inheritance (Concept "fruit") (Concept "banana"))
+(Inheritance (Concept "fruit") (Concept "strawberry"))
 
 (cog-execute! (Get (Inheritance (Concept "fruit") (Variable "$x"))))
 
-; By convention, one writes a ConceptLink instead of a PredicateLink
+; By convention, one writes a ConceptNode instead of a PredicateNode
 ; in this situation. Again, this is just a convention. Its handy, and
 ; makes things more readable.
 
@@ -136,8 +136,8 @@
 ; name.  The MemberLink offers a way to name name a set:
 
 (Member (Concept "apple")     (Concept "fruit"))
-(Member (Concept "bannana")   (Concept "fruit"))
-(Member (Concept "strawerry") (Concept "fruit"))
+(Member (Concept "banana")   (Concept "fruit"))
+(Member (Concept "strawberry") (Concept "fruit"))
 
 (cog-execute! (Get (Member (Variable "$x") (Concept "fruit"))))
 

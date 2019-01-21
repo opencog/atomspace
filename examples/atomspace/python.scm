@@ -58,10 +58,10 @@ asp = scheme_eval_as('(cog-atomspace)')
 TV = TruthValue(0.444, 0.777)
 
 # Do something with it ...
-asp.add_node(types.ConceptNode, 'Bananna', TV)
+asp.add_node(types.ConceptNode, 'Banana', TV)
 ")
 
 ; As before, verify that an atom was created, as expected.
-(cog-node 'ConceptNode "Bananna")
+(cog-node 'ConceptNode "Banana")
 
 ; -------------------------------------------------------------------

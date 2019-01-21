@@ -1,18 +1,18 @@
 ;
-; values.scm -- Attching generic values on Atoms.
+; values.scm -- Attaching generic values on Atoms.
 ;
 ; The previous example, `truthvalues.scm`, showed how to assign
 ; sequences of floating-point numbers to Atoms. There is no need
 ; to limit oneself only to floats; there is a generic facility
 ; for attaching Values to Atoms.
 ;
-; Why is this intersting? Why is this needed? Short answer: because
+; Why is this interesting? Why is this needed? Short answer: because
 ; its faster that way.
 ;
 ; In principle, you can put "anything" into the AtomSpace; it is quite
 ; generic. In practice, the AtomSpace forces certain assumptions that
 ; have strong impacts on runtime performance and on system RAM usage.
-; In order to make Atoms pattern-matchable (searchable, queriable), the
+; In order to make Atoms pattern-matchable (searchable, queryable), the
 ; entire graph structure has to be kept. This uses a lot of RAM. To have
 ; database-like properties, the AtomSpace has to keep indexes of Atoms.
 ; This uses yet more RAM, and also makes Atom insertion and removal
@@ -78,7 +78,7 @@
 ; Verify that the value changed.
 (cog-value a k1)
 
-; Multipe values can be attached using different keys.
+; Multiple values can be attached using different keys.
 (define k2 (PredicateNode "second key"))
 (cog-set-value! a k2 s)
 (cog-value a k2)

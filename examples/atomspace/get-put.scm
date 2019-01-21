@@ -2,7 +2,7 @@
 ; get-put.scm -- The two halves of a query.
 ;
 ; The BindLink example showed how one can create a query, run it, and
-; simulataneously use the query results to create new data in the
+; simultaneously use the query results to create new data in the
 ; AtomSpace. In fact, this process can be split into two: a "Get"
 ; part that performs the query, and a "Put" part that performs the
 ; graph re-writing.
@@ -19,7 +19,7 @@
 ; Every BindLink is equivalent to a Get-Put pair. This example
 ; demonstrates this explicitly.
 ;
-; Spliting a query into a satisfying set, followed by a beta-reduction
+; Splitting a query into a satisfying set, followed by a beta-reduction
 ; can sometimes allow a more flexible approach to managing the
 ; knowledgebase. In some sense, Get and Put are opposites: whatever
 ; one of them does, the other can undo. In this example, a query is
@@ -94,7 +94,7 @@
 ; Define a beta-reduction.
 (define reduction-rule
 	(PutLink
-		; A veriable declaration is mandatory, whenever there are
+		; A variable declaration is mandatory, whenever there are
 		; more than one variables. It is required, so that one can
 		; know the order (the sequence) of the variables. If there
 		; is only one variable, it does not need to be declared.
@@ -118,7 +118,7 @@
 ; Now, run the reduction rule.
 (cog-execute! reduction-rule)
 
-; Thereis no need to cache the intermediate values returned by GetLink.
+; There is no need to cache the intermediate values returned by GetLink.
 ; They can be piped, dynamically, on-the-fly, to the PutLink.  This
 ; looks almost identical to the above PutLink, except that the "input"
 ; is not a SetLink, its a GetLink.

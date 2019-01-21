@@ -19,7 +19,7 @@
 
 (use-modules (opencog))
 
-; Create an atom and place it in the default atomspace.
+; Create an atom and place it in the default AtomSpace.
 (ConceptNode "asdf")
 
 ; Access this newly created atom.

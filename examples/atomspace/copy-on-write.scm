@@ -1,12 +1,12 @@
 ;
 ; copy-on-write.scm -- Copy-on-write into overlay AtomSpaces.
 ;
-; The goal is to demonstrate how to use read-write atomspaces
-; layered on top of a read-only atomspace.
+; The goal is to demonstrate how to use read-write AtomSpaces
+; layered on top of a read-only AtomSpace.
 ;
-; This creates two atomspaces: the base atomspace, which
+; This creates two AtomSpaces: the base AtomSpace, which
 ; will be marked read-only (after adding atoms to it),
-; and an overlay atomspace, which will remain read-write.
+; and an overlay AtomSpace, which will remain read-write.
 ; Atoms and truth values can be manipulated in the overlay,
 ; without damaging atoms in the base space.
 ;
@@ -18,13 +18,13 @@
 ;
 (use-modules (opencog))
 
-; Create atoms in the base atomspace.
+; Create atoms in the base AtomSpace.
 (define a (Concept "a"))
 (define b (Concept "b"))
 
 (cog-set-tv! a (cog-new-stv 0.1 0.1))
 
-; Mark the current atomspace as read-only.
+; Mark the current AtomSpace as read-only.
 ; New atoms can no longer be created.
 (cog-atomspace-ro!)
 (define c (Concept "c"))

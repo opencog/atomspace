@@ -90,12 +90,12 @@
 ; Other useful commands are:
 ;
 ; * `sql-load` and `sql-store` for bulk fetch and restore. For large
-;   datasets, these can be slow. Extremly large datasets might not fit
+;   datasets, these can be slow. Extremely large datasets might not fit
 ;   in RAM, which is why `fetch-atom` is so handy!
 ;
 ; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
 ;   useful for fetching all graphs that an atom belongs to. These
-;   two are possibly the single most-important persistance calls in
+;   two are possibly the single most-important persistence calls in
 ;   the system. They really make the whole idea usable and easy-to-use.
 ;
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
