@@ -2,11 +2,11 @@
 ; map.scm -- Using MapLink to extract and rewrite.
 ;
 ; The MapLink implements a link type analogous to the `map` function
-; commmonly found in functional programming languages, such as the
+; commonly found in functional programming languages, such as the
 ; scheme srfi-1 `map`, or `map` in haskell.
 ;
 ; In many ways, MapLink is similar to BindLink, except that MapLink
-; does not search the entire atomspace for matching patterns; rather,
+; does not search the entire AtomSpace for matching patterns; rather,
 ; it only examines the given input list/set, and applies the map to
 ; that.
 ;
@@ -227,7 +227,7 @@
 ; First, the outermost link is a SetLink; this corresponds to the fact
 ; that the input to the map was a SetLink. Next, we observe a single
 ; element in the set, because only one element of the input matched.
-; That single elt then specifies the values for the two variables.
+; That single element then specifies the values for the two variables.
 ; The variable values are ordered, in a ListLink, because we need to
 ; know which value corresponded to $x and which to $y (the first and
 ; the second, of course).  Without the ListLink, we would not know which
@@ -235,8 +235,8 @@
 ;
 (cog-execute! double-num-set)
 
-; Same as above, except the variables are type differently, and soe we
-; expect two answers, not one.
+; Same as above, except the variables are typed differently, and
+; sometimes, we expect two answers, not one.
 (define double-con-set
 	(Map
 		(Scope
@@ -279,7 +279,7 @@
 ; link is in the form of P(x,y)->Q(x,y) and inputs P(a,b) are
 ; re-written to Q(a,b).
 ;
-; Observe that the re-writing could also be acheived by combining
+; Observe that the re-writing could also be achieved by combining
 ; the results of the MapLink with a PutLink.  The form below is
 ; slightly less verbose, and thus, maybe more convenient than
 ; using Map and Put together.
@@ -351,6 +351,6 @@
 		))
 )
 
-; This example is curently broken, because lazy evaluation does not
+; This example is currently broken, because lazy evaluation does not
 ; work!
 (cog-execute! summation)

@@ -22,15 +22,15 @@
 	(Concept "red")
 )
 
-;; The inital state of the FSM
+;; The initial state of the FSM
 (List
 	(Anchor "Current State")
 	(Concept "initial state")
 )
 
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The set of allowed state transitions.  Its a triangular cycle,
+;; of green going to yellow going to red going back to green.
+;; The initial state transitions into green (and is never visited again).
 (List
 	(Concept "initial state")
 	(Concept "green")
@@ -84,7 +84,7 @@
 			)
 		)
 		(And
-			;; ... then transistion to the next state ...
+			;; ... then transition to the next state ...
 			(List
 				(Anchor "Current State")
 				(Variable "$next-state")
@@ -104,7 +104,7 @@
 ;(cog-bind-single take-one-step)
 ;
 ;;; Take three more steps;
-;;; Try it!  See what appens!
+;;; Try it!  See what happens!
 ;(cog-bind-single take-one-step)
 ;(cog-bind-single take-one-step)
 ;(cog-bind-single take-one-step)

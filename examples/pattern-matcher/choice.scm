@@ -4,7 +4,7 @@
 ; A very simple example of using the ChoiceLink.
 ;
 
-; Populate the atomspace with some data
+; Populate the AtomSpace with some data
 (Evaluation
 	(Predicate "has-color")
 	(List
@@ -14,7 +14,7 @@
 (Evaluation
 	(Predicate "has-color")
 	(List
-		(Concept "bannana")
+		(Concept "banana")
 		(Concept "yellow")))
 
 (Evaluation

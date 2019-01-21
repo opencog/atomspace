@@ -3,11 +3,11 @@
 ;
 ; Based on `fsm-full.scm`, this defines a very simple four-state Markov
 ; chain, using the same states as the demo FSM's. The difference here is
-; that the transitions are specified probabilistically; mutiple
+; that the transitions are specified probabilistically; multiple
 ; transitions may occur; each transition has a fixed probability.
 ;
 ; Another way to look at this is an example of matrix multiplication.
-; The state of a Markov chain is a vector, and the state transtions
+; The state of a Markov chain is a vector, and the state transitions
 ; can be understood as a matrix (a Markov matrix, where the columns
 ; sum to one).  One iteration of the probabilistic state machine
 ; corresponds to one matrix multiplication.
@@ -31,7 +31,7 @@
 (define my-state (Anchor "My Chain's Current State"))
 (define my-nexts (Anchor "My Chain's Next State"))
 
-;; The inital state of the Markov chain.  It starts with 100%
+;; The initial state of the Markov chain.  It starts with 100%
 ;; probability in this state.
 ( (stv 1 1)
 	my-state
@@ -51,12 +51,12 @@
 )
 
 ;; --------------------------------------------------------------------
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The set of allowed state transitions.  Its a triangular cycle,
+;; of green going to yellow going to red going back to green.
+;; The initial state transitions into green (and is never visited again).
 ;;
 ;; Each rule is labelled with the "my-fsm", so that rules for
-;; different FSM's do not clash with one-another.  A ConextLink is used
+;; different FSM's do not clash with one-another.  A ContextLink is used
 ;; because that will allow this example to generalize: Context's are
 ;; usually used to  express conditional probabilities, so that
 ;;
@@ -64,14 +64,14 @@
 ;;         A
 ;;         B
 ;;
-;; representes the probibility of B contiditoned on A, and the TV holds
+;; represents the probability of B conditioned on A, and the TV holds
 ;; the numeric value for P(B|A).  In this case, A is the current state
-;; of the machine, and B the the next state of theh machine, so that P(B|A)
+;; of the machine, and B the the next state of the machine, so that P(B|A)
 ;; is the probability of transitioning to state B give that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
 ;;
 
-; Transition from initial to green with 90% proability.
+; Transition from initial to green with 90% probability.
 (ContextLink (stv 0.9 1)
 	(Concept "initial state")
 	(

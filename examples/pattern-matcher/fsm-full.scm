@@ -3,13 +3,13 @@
 ;
 ; Based on `fsm-basic.scm`, this defines a very simple four-state finite
 ; state machine, but illustrates the general (universal) FSM state
-; machine constructor.  This allows mutlple FSM's to be simultaneously
+; machine constructor.  This allows multiple FSM's to be simultaneously
 ; defined and operated asynchronously from each-other.
 ;
 (use-modules (opencog) (opencog query))
 
 ;; Set of possible states of the state machine
-;; This defintion of the set of states is not strictly needed; it is
+;; This definition of the set of states is not strictly needed; it is
 ;; not used anywhere in the demo below.
 (SetLink
 	(ConceptNode "initial state")
@@ -21,18 +21,18 @@
 (define my-trans (Concept "My FSM's Transition Rule"))
 (define my-state (Anchor  "My FSM's Current State"))
 
-;; The inital state of the FSM
+;; The initial state of the FSM
 (List
 	my-state
 	(Concept "initial state")
 )
 
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The set of allowed state transitions.  Its a triangular cycle,
+;; of green going to yellow going to red going back to green.
+;; The initial state transitions into green (and is never visited again).
 ;;
 ;; Each rule is labelled with the "my-trans", so that rules for
-;; different FSM's do not clash with one-another.  A ConextLink is used
+;; different FSM's do not clash with one-another.  A ContextLink is used
 ;; because that will allow this example to generalize: Context's are
 ;; usually used to  express conditional probabilities, so that 
 ;;
@@ -40,9 +40,9 @@
 ;;         A
 ;;         B
 ;;
-;; representes the probibility of B contiditoned on A, and the TV holds
+;; represents the probability of B conditioned on A, and the TV holds
 ;; the numeric value for P(B|A).  In this case, A is the current state
-;; of the machine, and B the the next state of theh machine, so that P(B|A)
+;; of the machine, and B the the next state of the machine, so that P(B|A)
 ;; is the probability of transitioning to state B give that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
 ;; 
@@ -88,7 +88,7 @@
 ;;;
 ;;; Create a BindLink that can take an FSM with the name `fsm-name`
 ;;; and stores it's state in `fsm-state`.  After the BindLink is
-;;; created, each invocation of it will advance the FSM bu one step.
+;;; created, each invocation of it will advance the FSM but one step.
 ;;;
 (define (create-fsm fsm-name fsm-state)
 	(Bind
@@ -113,7 +113,7 @@
 			)
 		)
 		(And
-			;; ... then transistion to the next state ...
+			;; ... then transition to the next state ...
 			(List
 				fsm-state
 				(Variable "$next-state")

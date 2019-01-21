@@ -2,7 +2,7 @@
 ; absent.scm -- Demo illustrating use of AbsentLink, StateLink
 ;
 ; Repeatedly create and destroy an EvaluationLink. Then test to see if
-; the EvaluationLink is present in the atomspace. If it is, then set a
+; the EvaluationLink is present in the AtomSpace. If it is, then set a
 ; state atom that indicates whether it is present or not.
 ;
 ; The state is managed using the StateLink, which provides a device
@@ -15,7 +15,7 @@
 ; The presence or absence of an atom in the AtomSpace can be determined
 ; by using the AbsentLink. When evaluated by the pattern matcher, the
 ; AbsentLink evaluates to "true" only when the atom that it wraps is
-; absent from the atomspace.  This makes the AbsentLink a rather
+; absent from the AtomSpace.  This makes the AbsentLink a rather
 ; strange link type; roughly speaking, it can be thought of as
 ; implementing the concept of "reductio ad absurdum" (RAA) or the "law
 ; of the excluded middle" (LEM) for the AtomSpace.  The AtomSpace can
@@ -25,7 +25,7 @@
 ; logic, everything is assumed to be knowable, and that which is not
 ; true must be false; this is the law of the excluded middle. By
 ; contrast, the AtomSpace only contains those sentences known to be
-; either true or false (according to thier TruthValue); it implements
+; either true or false (according to their TruthValue); it implements
 ; a form in Intuitionist Logic.  The AbsentLink is used to determine
 ; those things that are not yet known.
 ;
@@ -36,15 +36,15 @@
 ; function will display the current state, when called.
 ;
 ; The room state is set by invoking two patterns: is-visible and
-; is-invisibile.  The first checks for the presence of the EvaluationLink
+; is-invisible.  The first checks for the presence of the EvaluationLink
 ; and, if found, sets the room state to full.  The second checks for it's
-; absense, and if it is absent, sets the state to "empty".
+; absence, and if it is absent, sets the state to "empty".
 ;
 ; The EvaluationLink is created and destroyed by running one of two
 ; patterns, `create` or `destroy`.  The first one uses a `golem`, an
 ; PutLink that will create the actual EvaluationLink when it is
 ; executed.  That is, the PutLink defines a potential link, one that
-; is not yet in the Atomspace, but whose description is. When it is
+; is not yet in the AtomSpace, but whose description is. When it is
 ; triggered, the description is turned into the actual link.
 ;
 (use-modules (opencog))
@@ -54,7 +54,7 @@
 ; presence or absence we will be testing for.
 (define query
 	(Evaluation
-		(Predicate "visiblity")
+		(Predicate "visibility")
 		(List (Variable "$x"))))
 
 ; Create a golem; the golem is brought to life when its executed.
@@ -67,7 +67,7 @@
 	(Bind query (DeleteLink query))
 )
 
-; If nothing is visible, then hallucinate the golem into existance.
+; If nothing is visible, then hallucinate the golem into existence.
 (define create
 	(Bind (Absent query) golem)
 )
@@ -89,7 +89,7 @@
 )
 
 ; This has an absent link in it; the link is assigned only when
-; the atomspace does not have a visible item.
+; the AtomSpace does not have a visible item.
 (define is-invisible
 	(Bind
 		(Absent query)

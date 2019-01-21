@@ -3,7 +3,7 @@
 ;
 ; SatisfactionLink usage example.
 ;
-; Using the SatisfacionLink is fairly straightforward; what this
+; Using the SatisfactionLink is fairly straightforward; what this
 ; example shows is how to obtain the variable grounding that caused
 ; the satisfaction to be fulfilled.
 ;

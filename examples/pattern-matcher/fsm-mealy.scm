@@ -1,7 +1,7 @@
 ;
 ; fsm-mealy.scm -- Mealy Finite State Machine (FSM) Demo.
 ;
-; Based on fsm-full.scm, this alters the general FSM defintion to
+; Based on fsm-full.scm, this alters the general FSM definition to
 ; include a dependency on the external state.
 ;
 ; To run this demo, load this file:
@@ -32,13 +32,13 @@
 (define go-reverse (Concept "reverse"))
 (define halt (Concept "halt"))
 
-;; The inital state of the FSM
+;; The initial state of the FSM
 (List my-state halt-state)
 
-;; The current envoronment
+;; The current environment
 (Evaluation extern-anchor halt)
 
-;; The set of allowed state transistions.  The transitions depend on
+;; The set of allowed state transitions.  The transitions depend on
 ;; both the current state, and the external state; thus, this is
 ;; effectively a Mealy machine.
 ;;
@@ -88,7 +88,7 @@
 ;;;
 ;;; Create a BindLink that can take an FSM with the name `fsm-name`
 ;;; and stores it's state in `fsm-state`.  After the BindLink is
-;;; created, each invocation of it will advance the FSM bu one step.
+;;; created, each invocation of it will advance the FSM but one step.
 ;;;
 (define (create-fsm fsm-name fsm-state extern-state)
 	(BindLink
@@ -129,7 +129,7 @@
 					(Variable "$curr-state")
 				)
 			)
-			;; ... and transistion to the next state.
+			;; ... and transition to the next state.
 			(List
 				fsm-state
 				(Variable "$next-state")

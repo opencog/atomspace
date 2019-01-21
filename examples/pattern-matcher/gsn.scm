@@ -4,7 +4,7 @@
 ; After a pattern-match has been found, arbitrary code can be
 ; triggered to run.  This demo shows how.
 ;
-; Running arbitary functions upon match can be useful for any number
+; Running arbitrary functions upon match can be useful for any number
 ; of reasons:  to send a message whenever a match is found; to perform
 ; some particularly complex or odious computation, and so on.
 
@@ -42,7 +42,7 @@
 ;; pattern matcher. They can be used to invoke a function every time
 ;; that a match is found.
 ;;
-;; To demonstrate this, we need to populate the atomspace with some data.
+;; To demonstrate this, we need to populate the AtomSpace with some data.
 ;; In this case, some assertions about who is human.
 (Evaluation
 	(Predicate "is-a")
@@ -65,7 +65,7 @@
 			(Predicate "is-a")
 			(List (Variable "$person") (Concept "human")))
 
-		;; The proceedure to invoke when a grounding is found.
+		;; The procedure to invoke when a grounding is found.
 		(ExecutionOutput
 			(GroundedSchema "scm: say-hello")
 			(List (Variable "$person")))))

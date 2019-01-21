@@ -19,8 +19,8 @@
 ; such that $y < $x (the city is larger than the country)
 ;
 ; In the above, one graph component is the set of assertions about
-; cities and thier population. The other graph component is the set of
-; assertions about countries and thier populations.  These two sets
+; cities and their population. The other graph component is the set of
+; assertions about countries and their populations.  These two sets
 ; must then be pair-wise compared.
 ;
 ; There are similar queries which do not split into disconnected
@@ -119,6 +119,6 @@ cnt
 ; Display the count.
 cnt
 ; The above should display 6 = 2 x 3 as there are two countries to be
-; compared to three cities.  The comparisons muct be down pair-wise,
+; compared to three cities.  The comparisons must be down pair-wise,
 ; resulting in a combinatoric explosion in the number of comparisons to
 ; be performed.

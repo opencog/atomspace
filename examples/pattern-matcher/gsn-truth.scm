@@ -1,7 +1,7 @@
 ;
 ; gsn-truth.scm -- Altering TruthValues with GroundedSchemaNode
 ;
-; One of the most basic useages of the GroundedSchemaNode is to
+; One of the most basic usages of the GroundedSchemaNode is to
 ; recompute the TruthValue on an atom, once its been found.
 ;
 (use-modules (opencog) (opencog query))
@@ -61,7 +61,7 @@
 	atom2	; return atom hb
 )
 
-; Some data to populate the atomspace:
+; Some data to populate the AtomSpace:
 (InheritanceLink (stv 1 0.99)	; a non-zero truth value is needed!
 	(Concept "Ben")
 	(Concept "human"))

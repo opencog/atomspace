@@ -3,7 +3,7 @@
 ;
 (use-modules (opencog) (opencog query) (opencog exec))
 
-;; Some data to populate the atomspace.
+;; Some data to populate the AtomSpace.
 (Inheritance
 	(Concept "battery")
 	(Concept "electrical device"))
@@ -27,7 +27,7 @@
 (Evaluation
 	(Predicate "PartOf")
 	(List
-		(Concept "windsheild")
+		(Concept "windshield")
 		(Variable "car")))
 
 ;; Define the concept of electrical parts of things.
@@ -49,7 +49,7 @@
 (define get-elect
 	(Get (DefinedPredicate "Electrical Part Of")))
 
-;; Search the atomspace for electrical things.
+;; Search the AtomSpace for electrical things.
 (cog-execute! get-elect)
 
 ;; ==================================================================

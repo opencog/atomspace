@@ -1,8 +1,8 @@
 ;
-; condition.scm -- Applying preconditions to actins.
+; condition.scm -- Applying preconditions to actions.
 ;
 ; Demonstration of using GroundedPredicateNodes to accept
-; or rejct a match (impose a match condition) followed by the
+; or reject a match (impose a match condition) followed by the
 ; use of GroudnedSchemaNodes to perform some action, depending
 ; on whether or not the predicate accepted the match.
 ;
@@ -81,6 +81,6 @@
 	)
 )
 
-;; Performing the below should cause only the (ConcpetNode "acceptance")
+;; Performing the below should cause only the (ConceptNode "acceptance")
 ;; to be printed.
 ; (cog-execute! do-things)

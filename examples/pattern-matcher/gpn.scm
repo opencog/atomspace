@@ -40,8 +40,8 @@
 ; Try it!  run the following a few times:
 ; (cog-evaluate! sometimes)
 
-; The pattern-matching requires some data in the atomspace to match
-; against. So populate the atomspace with some data.
+; The pattern-matching requires some data in the AtomSpace to match
+; against. So populate the AtomSpace with some data.
 (Evaluation
 	(Predicate "is-a")
 	(List (Concept "Aristotle") (Concept "logician")))
@@ -50,16 +50,16 @@
 	(Predicate "is-a")
 	(List (Concept "CS Pierce") (Concept "logician")))
 
-;; The followig pattern will search for all logicians in the AtomSpace,
+;; The following pattern will search for all logicians in the AtomSpace,
 ;; and then will randomly select some of them, with a 50-50 chance each
-;; time. The propsoed grounding, made in the first clause of the
+;; time. The proposed grounding, made in the first clause of the
 ;; pattern, is randomly approved of or rejected by the second clause.
 (define find-logicians
 	(Bind
 		; Define the variable to be grounded
 		(Variable "$person")
 
-		; Define a list of two clauses, both of which must be satsified
+		; Define a list of two clauses, both of which must be satisfied
 		(And
 			; The first clause: find a grounding for the variable, such
 			; that the variable is grounded by the name of a logician.
@@ -67,7 +67,7 @@
 				(Predicate "is-a")
 				(List (Variable "$person") (Concept "logician")))
 
-			; The second clause: the propsed grounding, from above,
+			; The second clause: the proposed grounding, from above,
 			; is randomly accepted or rejected.  Several of these can be
 			; combined using AndLink, OrLink and NotLink.
 			(Evaluation

@@ -3,7 +3,7 @@
 ;
 ; A demonstration of using type signatures during pattern matching.
 ; Type signatures are a way of specifying the type of a hypergraph.
-; This can be used to restrict the search space during a pattrn
+; This can be used to restrict the search space during a pattern
 ; match: by default, types are checked during a search, and variable
 ; groundings must respect the variable type.
 ;

@@ -1,13 +1,13 @@
 ;;
 ;; presence.scm -- Testing for the presence of an Atom.
 ;;
-;; Four different ways to check for the existance of some structure
-;; in the atomspace.
+;; Four different ways to check for the existence of some structure
+;; in the AtomSpace.
 ;;
-;; Each variant checks to see if the atomspace contains the link
+;; Each variant checks to see if the AtomSpace contains the link
 ;;    (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
 ;;
-;; If the atomspace does contain the above, then the print-msg function
+;; If the AtomSpace does contain the above, then the print-msg function
 ;; is run. Each different method has its strengths and weaknesses.
 ;; Several of the methods are good for designing behavior trees that
 ;; run inside the AtomSpace.  Others fit the more traditional query
@@ -48,9 +48,9 @@
 ;; uses the SequentialAndLink, it is in a form appropriate for creating
 ;; a behavior tree.
 ;;
-;; Note that there may be other atoms linked to the Anchore;
+;; Note that there may be other atoms linked to the Anchor;
 ;; it there are, then those other atoms are ignored. This may be
-;; an davantage or a disadvantage; the next axample demands that
+;; an advantage or a disadvantage; the next example demands that
 ;; there be only one atom linked to the Anchor.
 ;;
 (define empty-sequence
@@ -62,7 +62,7 @@
 			;; processing continues to the next statement ONLY if true
 			;; is returned by the PresentLink.
 			(Present (List room-state (Variable "$x")))
-			;; If the variable $x equals the emtpry state, then ...
+			;; If the variable $x equals the empty state, then ...
 			(Equal (Variable "$x") room-empty)
 			;; ... then print a message.
 			(Evaluation
@@ -86,7 +86,7 @@
 ;;
 ;; Unlike the previous example, this one will explicitly fail if there
 ;; are other atoms linked to the Anchor.  That is, the equality
-;; check is makeing sure that the SetLink has one and only one element
+;; check is making sure that the SetLink has one and only one element
 ;; in it, which effectively blocks other anchored atoms.  This may be
 ;; an advantage, or a disadvantage, depending on the situation.
 
@@ -110,7 +110,7 @@
 
 ; ------------------------------------------------------
 ;; This variant uses the traditional BindLink format to trigger
-;; the execuation of a schema.  It is similar to the first example,
+;; the execution of a schema.  It is similar to the first example,
 ;; except for these notable differences:
 ;;
 ;; -- The BindLink does not use SequentialAnd, and thus any embedded
@@ -127,7 +127,7 @@
 		(And
 			;; Assign the room-state to variable $x
 			(List room-state (Variable "$x"))
-			;; If the variable $x equals the emtpry state, then ...
+			;; If the variable $x equals the empty state, then ...
 			(Equal (Variable "$x") room-empty)
 		)
 		;; If the EqualLink evaluated to TRUE, then print the message.
