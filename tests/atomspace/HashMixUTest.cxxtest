@@ -49,22 +49,17 @@ public:
 		delete as;
 	}
 
-	void HashMixer(int num_atoms, int width)
+	void testHashMixing()
 	{
+		logger().info("BEGIN TEST: %s", __FUNCTION__);
 		Handle h = as->add_node(CONCEPT_NODE, "foobar");
 
 		// This test is successful if it runs to completion. A hash
 		// function with a collision will cause this to hang for a
-		// very very very long time! (Because the collision will
-		// force a Link compare-by-content, which will take about
-		// (width) power-of (num_atoms) so 14 Billion years if there
-		// is an actual hash collision.
-		for (int i = 0; i < num_atoms; i++)
-		{
-			// Create a width-ary tree. (e.g. binary tree for width=2)
-			HandleSeq hs;
-			for (int j=0; j< width; j++) hs.push_back(h);
-			h = as->add_link(LIST_LINK, hs);
+		// very very very long time!
+		int num_atoms = 256123;
+		for (int i = 0; i < num_atoms; i++) {
+			h = as->add_link(LIST_LINK, h, h);
 		}
 
 		// Just for grins. This is meaningless.
@@ -72,29 +67,6 @@ public:
 
 		printf("Final size is %lu\n", sz);
 		TS_ASSERT_EQUALS(sz, num_atoms+1);
-
-		while (h->is_link())
-		{
-			Handle h2 = h->getOutgoingAtom(0);
-			bool done = as->extract_atom(h);
-			TS_ASSERT_EQUALS(done, true);
-			h = h2;
-			sz --;
-		}
-		TS_ASSERT_EQUALS(sz, 1);
-		as->clear();
-	}
-
-	void testHashMixing()
-	{
-		logger().info("BEGIN TEST: %s", __FUNCTION__);
-		HashMixer(134001, 2);
-		HashMixer(136301, 3);
-		HashMixer( 74501, 4);
-		HashMixer( 74601, 5);
-		HashMixer( 74701, 6);
-		HashMixer( 74801, 7);
-
 		logger().info("END TEST: %s", __FUNCTION__);
 	}
 };
