@@ -1,5 +1,8 @@
 
 ADD_SUBDIRECTORY (truthvalue)
+
+ADD_SUBDIRECTORY (value)
+
 IF(HAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest smob atomspace)
