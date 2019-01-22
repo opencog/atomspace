@@ -18,7 +18,8 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in PostgreSQL
+* Storing the AtomSpace in PostgreSQL.
+* Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
 * Multi-threading with ParallelLink and JoinLink
@@ -63,6 +64,7 @@ be effective.
 * `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
 * `persistence.scm`    -- Layering the AtomSpace on a "real" database.
+* `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
