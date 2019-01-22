@@ -36,16 +36,15 @@
 ; https://www.enterprisedb.com/blog/horizontal-scalability-postgresql-96
 ; https://www.cybertec-postgresql.com/en/services/administration/postgresql-performance-and-scalability/
 ;
-; This demos is a minor variant of the demo in `persistence.scm`. It
+; This demo is a minor variant of the demo in `persistence.scm`. It
 ; uses two AtomSpaces, running on different machines, connecting to the
 ; same PostgreSQL backend. This assumes that you have correctly
 ; configured PostgreSQL for network operation. This is not easy.
-; PostgreSQL has been configured to run with the AtomSpace.
 ; [The instructions are here](../../opencog/persist/sql/README.md)
 ;
 ; You should make sure that the unit tests pass. There are four unit
 ; tests that check the PostgreSQL backend. If you misconfigured the
-; database, the unit tests will fail. This will at least get you started.
+; database, the unit tests will fail. Passing them will get you started.
 ;
 ; -------------------------------------------------
 ; Demo steps:
