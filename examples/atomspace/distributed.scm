@@ -65,7 +65,8 @@
 
 ; Notice that the above obtained the correct TruthValue, specified on
 ; machine "A".   Both "A" and "B" now have the same Atom, having the
-; same TruthValue. This is bi-directional.
+; same TruthValue. This is bi-directional. Try going the other
+; direction.
 
 ; On machine "B" only:
 (store-atom (Concept "asdf" (stv 0.99 0.66)))
@@ -75,7 +76,7 @@
 
 ; Again, notice that the TruthValue updated correctly.
 
-; Automated distrubtion of other values works also.
+; Automated distribution of other values also works.
 ; On machine "B", issue this:
 (cog-set-value!
 	(Concept "asdf")
@@ -94,19 +95,53 @@
 
 ; Use the above to practice sending other atoms and values between "A"
 ; and "B".
+; ---------------------
+; Sending and receiving one atom at a time is a bit tedious. There are
+; various different commands to store and fetch larger subsets.
 
+; On machine "A" only:
+(Evaluation (stv 0.8 0.5)
+	(Predicate "foo")
+	(List (Concept "asdf") (Concept "qwerty")))
 
+(Member (Concept "asdf") (Concept "keyboard"))
 
+(Inheritance (Concept "asdf") (Concept "string of letters"))
+
+; Export all of the above with one command (on machine "A" only):
+(store-referers (Concept "asdf"))
+
+; The `store-referers` command will recursively walk the entire incoming
+; set of `(Concept "asdf")` and push all those atoms out to the network
+; server.
+
+; On machine "B" only:
+(fetch-incoming-by-type (Concept "asdf") 'MemberLink)
+
+; Verify that the MemberLink (and the MemberLink only) came across:
+(cog-incoming-set (Concept "asdf"))
+
+; Get all of the incoming set, and make sure it arrived:
+(fetch-incoming-set (Concept "asdf"))
+(cog-incoming-set (Concept "asdf"))
+
+; Notice that only one layer-level was fetched. The ListLink does not
+; have an incoming set (yet; it was not fetched):
+(cog-incoming-set (List (Concept "asdf") (Concept "qwerty")))
+
+; Now fetch the EvaluationLink as well:
+(load-referers (Concept "asdf"))
+
+; Notice that the EvaluationLink came across, together with it's
+; TruthValue.
+(cog-incoming-set (List (Concept "asdf") (Concept "qwerty")))
+
+; ---------------------
 ; Other useful commands are:
 ;
 ; * `sql-load` and `sql-store` for bulk fetch and restore. For large
 ;   datasets, these can be slow. Extremely large datasets might not fit
 ;   in RAM, which is why `fetch-atom` is so handy!
-;
-; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
-;   useful for fetching all graphs that an atom belongs to. These
-;   two are possibly the single most-important persistence calls in
-;   the system. They really make the whole idea usable and easy-to-use.
 ;
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
 ;   performance data.
