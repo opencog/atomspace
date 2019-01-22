@@ -1,11 +1,12 @@
 ;
+; condition.scm -- Applying preconditions to actions.
+;
 ; Demonstration of using GroundedPredicateNodes to accept
-; or rejct a match (impose a match condition) followed by the
+; or reject a match (impose a match condition) followed by the
 ; use of GroudnedSchemaNodes to perform some action, depending
 ; on whether or not the predicate accepted the match.
 ;
-(use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog) (opencog query))
 
 ; The function will be used as the condition that will be checked, to
 ; see if the subsequent action should be taken or not. It returns a
@@ -13,8 +14,8 @@
 ; ConceptNode "good" or "bad". If it is neither, it throws an error.
 (define (truf x)
 	(cond
-		((equal? x (ConceptNode "good")) (cog-new-stv 1 1))
-		((equal? x (ConceptNode "bad")) (cog-new-stv 0 1))
+		((equal? x (Concept "good")) (cog-new-stv 1 1))
+		((equal? x (Concept "bad")) (cog-new-stv 0 1))
 		(else (throw 'whats-up-jack "you done it wrong"))
 	)
 )
@@ -25,61 +26,61 @@
 (define (konsekwens x)
 	(display "Taken action on the atom ") (display x) (newline)
 	; Must return an atom, or undefined.
-	(ImplicationLink x x)
+	(Implication x x)
 )
 
 ; Populate the AtomSpace with some data. In this case, two different
 ; ContextLinks, with two different conditions and actions.  The pattern
 ; defined later will match this first ContextLink, but not the second.
 (ContextLink
-	(ConceptNode "situation")
-	(EvaluationLink
-		(GroundedPredicateNode "scm: truf")
-		(ListLink (ConceptNode "good"))
+	(Concept "situation")
+	(Evaluation
+		(GroundedPredicate "scm: truf")
+		(List (Concept "good"))
 	)
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: konsekwens")
-		(ListLink (ConceptNode "acceptance"))
+	(ExecutionOutput
+		(GroundedSchema "scm: konsekwens")
+		(List (Concept "acceptance"))
 	)
 )
 
 ; The BindLink will reject this ContextLink.
 (ContextLink
-	(ConceptNode "predicament")
-	(EvaluationLink
-		(GroundedPredicateNode "scm: truf")
-		(ListLink (ConceptNode "bad"))
+	(Concept "predicament")
+	(Evaluation
+		(GroundedPredicate "scm: truf")
+		(List (Concept "bad"))
 	)
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: konsekwens")
-		(ListLink (ConceptNode "rejection"))
+	(ExecutionOutput
+		(GroundedSchema "scm: konsekwens")
+		(List (Concept "rejection"))
 	)
 )
 
 ; This pattern will accept one of the two ContextLinks above, and
 ; reject the other.
 (define do-things
-	(BindLink
+	(Bind
 		(VariableList
-			(VariableNode "$cxt")
-			(VariableNode "$condition")
-			(VariableNode "$action")
+			(Variable "$cxt")
+			(Variable "$condition")
+			(Variable "$action")
 		)
-		(AndLink
+		(And
 			; If there is a plan to do something ...
 			(ContextLink
-				(VariableNode "$cxt")
-				(VariableNode "$condition")
-				(VariableNode "$action")
+				(Variable "$cxt")
+				(Variable "$condition")
+				(Variable "$action")
 			)
 			; ... and the precondition holds true ...
-			(VariableNode "$condition")
+			(Variable "$condition")
 		)
 		; ...  then perform the action.
-		(VariableNode "$action")
+		(Variable "$action")
 	)
 )
 
-;; Performing the below should cause only the (ConcpetNode "acceptance")
+;; Performing the below should cause only the (ConceptNode "acceptance")
 ;; to be printed.
 ; (cog-execute! do-things)

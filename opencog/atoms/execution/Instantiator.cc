@@ -343,7 +343,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// it might do.  It would be great if the authors of ExOutLinks
 	// did the lazy execution themselves... but this is too much to
 	// ask for. So we always eager-evaluate those args.
-	if (EXECUTION_OUTPUT_LINK == t)
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 
@@ -402,7 +402,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			args = beta_reduce(args, *_vmap);
 		}
 
-		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
+		Handle eolh = createLink(t, sn, args);
+		ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
 		return geolp->execute(_as, silent);
 	}
 

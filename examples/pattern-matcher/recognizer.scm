@@ -1,5 +1,5 @@
 ;
-; recognizer.scm
+; recognizer.scm -- pattern recognition
 ;
 ; Pattern recognition is dual to pattern matching!
 ; AKA the "dynamic Rete algorithm".
@@ -10,13 +10,13 @@
 ; ones fire.  When there are more than a few dozen rules, this becomes
 ; impractical.  This issue was observed, and resolved in the 1970's and
 ; 1980's, with the Rete algorithm: one organizes the set of rules into
-; a trie, which is then very easily and quickly walked, to determine
+; a Trie, which is then very easily and quickly walked, to determine
 ; which ones can fire.
 ;
-; OpenCog and the AtomSpace do NOT (explicitly) implement tries or Rete!
+; OpenCog and the AtomSpace do NOT (explicitly) implement Tries or Rete!
 ; However, the general (hyper-)graph structure of OpenCog Atoms already
 ; contains enough connectivity information to accomplish more or less
-; the same thing: a kind-of "dynamic Rete", where rulesets can be
+; the same thing: a kind-of "dynamic Rete", where rule-sets can be
 ; searched for, on-demand, at runtime.
 ;
 ; The core idea is that pattern recognition is dual to pattern matching.
@@ -36,8 +36,8 @@
 ;
 ; The example below is based on an AIML-like search, simply because
 ; this is easy to explain and demonstrate. Note that all AIML chatbots
-; maintain a trie of AIML rules, and so AIML is a "natural" example of
-; pattern recognition.  The atomese DualLink is, however, a general
+; maintain a Trie of AIML rules, and so AIML is a "natural" example of
+; pattern recognition.  The Atomese DualLink is, however, a general
 ; pattern recognizer: it can be used in a general setting, not just
 ; for AIML-like structures.
 ;
@@ -185,7 +185,7 @@
 ; ------------------
 ; The below takes the above rule generator, and turns it into a
 ; bona-fide rule recognizer.  It does this by running the DualLink to
-; find the antencedents, and then using a PutLink to plug these into
+; find the antecedents, and then using a PutLink to plug these into
 ; the rule generator.
 
 (define (get-untyped-rules DATA)
@@ -239,11 +239,11 @@
 (map cog-execute! ruleset)
 
 ; When the above code is executed, you will get back a bunch of
-; sentences: that's because the atomspace already contains a bunch of
+; sentences: that's because the AtomSpace already contains a bunch of
 ; sentences in it, and the rule-set will find ALL of them, and get
 ; applied to all of them.  To avoid this behavior, you need to tag
 ; the one sentence you are interested in in some way,  e.g. by using
-; a link to connect it to `(AnchorNode "the current sentnece")` and
+; a link to connect it to `(AnchorNode "the current sentence")` and
 ; then including the AnchorNode in each AIML rule.
 ;
 ;-------------------------------------------------------
@@ -444,7 +444,7 @@
 		(map make-sent
 			(cog-outgoing-set (car (get-aiml-response SENT)))))
 
-	; Now, actually do stuff.  Push and pop the atomspace, to avoid
+	; Now, actually do stuff.  Push and pop the AtomSpace, to avoid
 	; polluting it with sentences.  The push and pop here is a hack;
 	; a more elegant solution is to use anchors to point at the
 	; current sentence, and have the rules look for it there.

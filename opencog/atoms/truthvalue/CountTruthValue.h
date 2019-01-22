@@ -50,6 +50,7 @@ protected:
 
 public:
 
+    CountTruthValue(const std::vector<double>&);
     CountTruthValue(strength_t, confidence_t, count_t);
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
@@ -66,6 +67,8 @@ public:
     virtual TruthValuePtr merge(const TruthValuePtr&,
                                 const MergeCtrl& mc=MergeCtrl()) const;
 
+    // XXX FIXME Are all of these really needed?
+    // Can we get rid of some of them?
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
         return std::static_pointer_cast<const TruthValue>(
@@ -77,6 +80,12 @@ public:
             std::make_shared<const CountTruthValue>(pap));
     }
 
+    static TruthValuePtr createTV(const std::vector<double>& v)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const CountTruthValue>(v));
+    }
+
     TruthValuePtr clone() const
     {
         return std::make_shared<CountTruthValue>(*this);
@@ -86,6 +95,10 @@ public:
 static inline CountTruthValuePtr CountTruthValueCast(const TruthValuePtr& tv)
     { return std::dynamic_pointer_cast<const CountTruthValue>(tv); }
 
+template<typename ... Type>
+static inline TruthValuePtr createCountTruthValue(Type&&...  args) {
+   return CountTruthValue::createTV(std::forward<Type>(args)...);
+}
 
 /** @}*/
 } // namespace opencog

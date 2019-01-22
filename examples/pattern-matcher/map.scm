@@ -1,19 +1,19 @@
 ;
-; Mapping example.
+; map.scm -- Using MapLink to extract and rewrite.
 ;
 ; The MapLink implements a link type analogous to the `map` function
-; commmonly found in functional programming languages, such as the
+; commonly found in functional programming languages, such as the
 ; scheme srfi-1 `map`, or `map` in haskell.
 ;
 ; In many ways, MapLink is similar to BindLink, except that MapLink
-; does not search the entire atomspace for matching patterns; rather,
+; does not search the entire AtomSpace for matching patterns; rather,
 ; it only examines the given input list/set, and applies the map to
 ; that.
 ;
 ; In many ways, MapLink is the opposite of PutLink, in that it un-does
 ; a beta reduction, by extracting values from a matching pattern. Thus,
 ; MapLink could have been named UnPutLink, CoPutLink or ExtractLink or
-; UnBetaReduceLink.
+; UnBetaReduceLink. That is, MapLink is an adjoint functor to PutLink.
 ;
 ; These ideas are illustrated below. The first 4 examples illustrate
 ; the extraction of values for a single variable; this is, of un-beta-
@@ -27,20 +27,20 @@
 (use-modules (opencog) (opencog exec))
 
 (define single
-	(MapLink
+	(Map
 		; Define a pattern that will be used to extract a value
 		; from a pattern. The extracted value will correspond to
 		; the place-holder variable $x.
-		(ScopeLink
+		(Scope
 			(Variable "$x")
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Variable "$x"))))
+				(List (Concept "bar") (Variable "$x"))))
 		; The graph from which a value is to be extracted.  Clearly,
 		; the variable $x corresponds to Concept "baz"
-		(EvaluationLink
+		(Evaluation
 			(Predicate "foo")
-			(ListLink (Concept "bar") (Concept "baz"))))
+			(List (Concept "bar") (Concept "baz"))))
 )
 
 ; This should return (Concept "baz") as that is the extracted value
@@ -48,25 +48,25 @@
 (cog-execute! single)
 
 (define single-set
-	(MapLink
+	(Map
 		; The same pattern as above.  Extracts values for variable $x.
-		(ScopeLink
+		(Scope
 			(Variable "$x")
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Variable "$x"))))
-		(SetLink
+				(List (Concept "bar") (Variable "$x"))))
+		(Set
 			; A set of graphs to which the above pattern should
 			; be matched.
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+				(List (Concept "bar") (Number 3)))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
+				(List (Concept "bar") (Concept "ah one")))
 		))
 )
 
@@ -83,27 +83,27 @@
 ; a SetLink is used. The ListLink is an ordered link; the ordering
 ; of the list is preserved by the mapping.
 (define single-list
-	(MapLink
-		(ScopeLink
+	(Map
+		(Scope
 			(Variable "$x")
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Variable "$x"))))
-		(ListLink
-			(EvaluationLink
+				(List (Concept "bar") (Variable "$x"))))
+		(List
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+				(List (Concept "bar") (Number 3)))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
+				(List (Concept "bar") (Concept "ah two")))
 		))
 )
 
 ; This should return
-; (ListLink (Concept "ah one") (Number 3) (Concept "ah two"))
+;    (List (Concept "ah one") (Number 3) (Concept "ah two"))
 ; Note that the sequential order of the original list is preserved.
 (cog-execute! single-list)
 
@@ -112,26 +112,26 @@
 ; This causes the input to be filtered, so that any graphs
 ; that don't match the type are discarded.
 (define single-type
-	(MapLink
-		(ScopeLink
+	(Map
+		(Scope
 			; The type of the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Variable "$x"))))
-		(SetLink
+				(List (Concept "bar") (Variable "$x"))))
+		(Set
 			; A set of graphs to which the above pattern should be
 			; applied.  Note that, due to the type constraint, only
 			; two of the three can match. (Numbers not being Concepts)
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(List (Concept "bar") (Number 3)))
 		))
 )
 
@@ -154,27 +154,27 @@
 ; using PutLink; see the `filter.scm` example for more.
 ;
 (define single-signature
-	(MapLink
-		(ScopeLink
-         ; The variable $x must be an evaluationLink of a certain form!
+	(Map
+		(Scope
+         ; The variable $x must be an evaluation of a certain form!
 			(TypedVariable (Variable "$x")
-				(SignatureLink
-					(EvaluationLink
+				(Signature
+					(Evaluation
 						(Predicate "foo")
-						(ListLink (Concept "bar") (Type "ConceptNode")))))
+						(List (Concept "bar") (Type "ConceptNode")))))
 			(Variable "$x"))
-		(SetLink
+		(Set
 			; Of the three elements in this set, only two have the type
 			; that is specified above.
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(List (Concept "bar") (Number 3)))
 		))
 )
 
@@ -195,26 +195,26 @@
 ; variable. The below demonstrates matching to two variables, one of
 ; which is typed to be a concept, and the other a number.
 (define double-num-set
-	(MapLink
-		(ScopeLink
+	(Map
+		(Scope
 			; Two variables, $x and $y, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Variable "$x") (Variable "$y"))))
-		(SetLink
+				(List (Variable "$x") (Variable "$y"))))
+		(Set
 			; Same input as always.
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(List (Concept "bar") (Number 3)))
 		))
 )
 
@@ -227,7 +227,7 @@
 ; First, the outermost link is a SetLink; this corresponds to the fact
 ; that the input to the map was a SetLink. Next, we observe a single
 ; element in the set, because only one element of the input matched.
-; That single elt then specifies the values for the two variables.
+; That single element then specifies the values for the two variables.
 ; The variable values are ordered, in a ListLink, because we need to
 ; know which value corresponded to $x and which to $y (the first and
 ; the second, of course).  Without the ListLink, we would not know which
@@ -235,27 +235,27 @@
 ;
 (cog-execute! double-num-set)
 
-; Same as above, except the variables are type differently, and soe we
-; expect two answers, not one.
+; Same as above, except the variables are typed differently, and
+; sometimes, we expect two answers, not one.
 (define double-con-set
-	(MapLink
-		(ScopeLink
+	(Map
+		(Scope
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Variable "$x") (Variable "$y"))))
-		(SetLink
-			(EvaluationLink
+				(List (Variable "$x") (Variable "$y"))))
+		(Set
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(List (Concept "bar") (Number 3)))
 		))
 )
 
@@ -279,37 +279,37 @@
 ; link is in the form of P(x,y)->Q(x,y) and inputs P(a,b) are
 ; re-written to Q(a,b).
 ;
-; Observe that the re-writing could also be acheived by combining
+; Observe that the re-writing could also be achieved by combining
 ; the results of the MapLink with a PutLink.  The form below is
 ; slightly less verbose, and thus, maybe more convenient than
 ; using Map and Put together.
 ;
 (define imply-map
-	(MapLink
-		; The ImplicationScopeLink is the "map" that will be applied.
-		(ImplicationScopeLink
-			; The implicationLink has two variables in it, both typed.
+	(Map
+		; The ImplicationScope is the "map" that will be applied.
+		(ImplicationScope
+			; The implication has two variables in it, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
 			; The P(x,y) part of the implication.
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Variable "$x") (Variable "$y")))
+				(List (Variable "$x") (Variable "$y")))
 			; The Q(x,y) part of the implication.
-			(EvaluationLink
+			(Evaluation
 				(Predicate "reverse-foo")
-				(ListLink (Variable "$y") (Variable "$x"))))
-		(SetLink
-			(EvaluationLink
+				(List (Variable "$y") (Variable "$x"))))
+		(Set
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah two")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(List (Concept "bar") (Number 3)))
 		))
 )
 
@@ -329,28 +329,28 @@
 (cog-execute! imply-map)
 
 (define summation
-	(MapLink
-		(ImplicationScopeLink
+	(Map
+		(ImplicationScope
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(EvaluationLink
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Variable "$x") (Variable "$y")))
-			(PlusLink (Variable "$y") (Variable "$x")))
-		(SetLink
-			(EvaluationLink
+				(List (Variable "$x") (Variable "$y")))
+			(Plus (Variable "$y") (Variable "$x")))
+		(Set
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+				(List (Concept "bar") (Concept "ah one")))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Number 2) (Number 3)))
-			(EvaluationLink
+				(List (Number 2) (Number 3)))
+			(Evaluation
 				(Predicate "foo")
-				(ListLink (Number 10) (Times (Number 3) (Number 2))))
+				(List (Number 10) (Times (Number 3) (Number 2))))
 		))
 )
 
-; This example is curently broken, because lazy evaluation does not
+; This example is currently broken, because lazy evaluation does not
 ; work!
 (cog-execute! summation)

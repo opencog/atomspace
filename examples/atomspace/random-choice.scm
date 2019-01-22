@@ -1,13 +1,13 @@
 ;
-; random-choice.scm -- Example use of the RandomChoiceLink
+; random-choice.scm -- Using the RandomChoiceLink for sampling.
 ;
-; This example uses the RadomChoiceLink to pick one of two alteratives,
+; This example uses the RandomChoiceLink to pick one of two alternatives,
 ; ConceptNode A or ConceptNode B, with a probability of 70-30.  It then
-; couns how often each of these choices occured.
+; counts how often each of these choices occurred.
 ;
 (use-modules (opencog) (opencog exec))
 
-; Pick A with 70% probability, pick B with 30% probability
+; Pick A with 70% probability, pick B with 30% probability.
 (Define (DefinedSchema "randy")
 	(RandomChoice
 		(List (Number 0.7) (Number 0.3))
@@ -34,7 +34,7 @@
 			(Plus (Number 1)
 				(Get (State (Anchor "sum-B") (Variable "$y"))))))))
 
-; Run this several times
+; Run this several times.
 (cog-evaluate! (DefinedPredicate "counter"))
 (cog-evaluate! (DefinedPredicate "counter"))
 (cog-evaluate! (DefinedPredicate "counter"))
@@ -46,15 +46,15 @@
 (cog-evaluate! (DefinedPredicate "counter"))
 (cog-evaluate! (DefinedPredicate "counter"))
 
-; Print the counts
+; Print the counts.
 (cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
 (cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
 
-; Run it a thousand times
+; Run it a thousand times.
 (State (Anchor "loop-count") (Number 0))
 
 ; This defines a tail-recursive loop. The loop-counter is incremented,
-; and, if its less than a thousand, the function calls itself again.
+; and, if it is less than a thousand, the function calls itself again.
 (Define (DefinedPredicate "loop a lot of times")
 	(SequentialAnd
 		(DefinedPredicate "counter")
@@ -69,11 +69,11 @@
 ; Actually execute the loop.
 (cog-evaluate! (DefinedPredicate "loop a lot of times"))
 
-; Print the counts again
+; Print the counts again.
 (cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
 (cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
 
-; Print the ratio
+; Print the ratio.
 (Define (DefinedSchema "ratio")
 	(Divide
 		(Get (State (Anchor "sum-A") (Variable "$x")))
@@ -81,7 +81,10 @@
 
 (cog-execute! (DefinedSchema "ratio"))
 
-; Test that the expectation value is bounded.
+; Test that the actual ratio is close to the expectation value.
+; The expectation value is 0.7 / 0.3 = 2.33333 ...
+; We should almost always, after a thousand times, get a ratio
+; that is greater than 2.1 and less than 2.5.
 (Define (DefinedPredicate "test expectation")
    (SequentialAnd
       (GreaterThan (Number 2.5) (DefinedSchema "ratio"))

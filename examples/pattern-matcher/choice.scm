@@ -1,56 +1,56 @@
 ;
-; choice.scm
+; choice.scm -- Using the ChoiceLink to explore alternatives.
 ;
 ; A very simple example of using the ChoiceLink.
 ;
 
-; Populate the atomspace with some data
-(EvaluationLink
-	(PredicateNode "has-color")
-	(ListLink
-		(ConceptNode "apple")
-		(ConceptNode "green")))
+; Populate the AtomSpace with some data
+(Evaluation
+	(Predicate "has-color")
+	(List
+		(Concept "apple")
+		(Concept "green")))
 
-(EvaluationLink
-	(PredicateNode "has-color")
-	(ListLink
-		(ConceptNode "bannana")
-		(ConceptNode "yellow")))
+(Evaluation
+	(Predicate "has-color")
+	(List
+		(Concept "banana")
+		(Concept "yellow")))
 
-(EvaluationLink
-	(PredicateNode "has-color")
-	(ListLink
-		(ConceptNode "strawberry")
-		(ConceptNode "red")))
+(Evaluation
+	(Predicate "has-color")
+	(List
+		(Concept "strawberry")
+		(Concept "red")))
 
 ; Look for fruit that is red or green.
 ; This won't work; although it looks nice, the ChoiceLink cannot
 ; be used in this way. Sorry.
 (define find-fruit
-	(GetLink
-		(EvaluationLink
-			(PredicateNode "has-color")
-			(ListLink
-				(VariableNode "$fruit")
-				(ChoiceLink
-					(ConceptNode "red")
-					(ConceptNode "green"))))))
+	(Get
+		(Evaluation
+			(Predicate "has-color")
+			(List
+				(Variable "$fruit")
+				(Choice
+					(Concept "red")
+					(Concept "green"))))))
 
 
 ; This will work; the ChoiceLink appears at the top.
 (define find-fruit
-	(GetLink
-		(ChoiceLink
-			(EvaluationLink
-				(PredicateNode "has-color")
-				(ListLink
-					(VariableNode "$fruit")
-					(ConceptNode "red")))
-			(EvaluationLink
-				(PredicateNode "has-color")
-				(ListLink
-					(VariableNode "$fruit")
-					(ConceptNode "green"))))))
+	(Get
+		(Choice
+			(Evaluation
+				(Predicate "has-color")
+				(List
+					(Variable "$fruit")
+					(Concept "red")))
+			(Evaluation
+				(Predicate "has-color")
+				(List
+					(Variable "$fruit")
+					(Concept "green"))))))
 
 ; Run the query:
 (cog-execute! find-fruit)
