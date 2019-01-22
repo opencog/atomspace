@@ -65,7 +65,7 @@
 	(Predicate "my key")
 	(StringValue "Humpty" "Dumpty"))
 
-(store-atom my-atom)
+(store-atom (Concept "asdf"))
 (sql-close)
 
 ; The database is closed. Let's mess with the truth value.

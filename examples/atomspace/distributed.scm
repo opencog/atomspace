@@ -37,63 +37,65 @@
 ; PostgreSQL has been configured to run with the AtomSpace.
 ; [The instructions are here](../../opencog/persist/sql/README.md)
 ;
-; You should make sure that the unit tests pass: if you misconfigured
-; the database, the unit tests will fail! Caveat Emptor!
-
-(use-modules (ice-9 readline))
-(activate-readline)
-
+; You should make sure that the unit tests pass. There are four unit
+; tests that check the PostgreSQL backend. If you misconfigured the
+; database, the unit tests will fail. This will at least get you started.
+;
+; -------------------------------------------------
+; Demo steps:
+; * Configure, as described above. The below assumes that Postgres
+;   is running at the network address 10.70.70.2 -- change as needed.
+; * Log in on two different machines connected by a network. They are
+;   called "A" and "B" below.
+; * Get to the guile command prompt on both machines.
+; * Be prepared to cut-n-paste from this file to both machines.
+; * Follow instructions below.
+;
+; Cut-n-paste following to both machines:
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 
-; Use the test database credentials. These are the credentials that
-; the unit tests use. Next time the unit tests run, they will wipe
-; out this data, and so you should probably create and use your own
-; private login.
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+; Log in from both machines. This must not fail or error-out.
+(sql-open "postgres://opencog_tester:cheese@10.70.70.2/opencog_test")
 
-; Try storing again.
+; On machine "A" only:
 (store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
 
-; Close the database.
-(sql-close)
-
-; Try fetching the atom. The database is closed -- this should fail!
+; On machine "B" only:
 (fetch-atom (Concept "asdf"))
 
-; Reopen the database.
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+; Notice that the above obtained the correct TruthValue, specified on
+; machine "A".   Both "A" and "B" now have the same Atom, having the
+; same TruthValue. This is bi-directional.
 
-; Try fetching the atom. This time it should work.  Notice that
-; it retrieved the correct TruthValue.
+; On machine "B" only:
+(store-atom (Concept "asdf" (stv 0.99 0.66)))
+
+; On machine "A" only:
 (fetch-atom (Concept "asdf"))
 
-; One can save generic Values, as well.
+; Again, notice that the TruthValue updated correctly.
+
+; Automated distrubtion of other values works also.
+; On machine "B", issue this:
 (cog-set-value!
 	(Concept "asdf")
 	(Predicate "my key")
 	(StringValue "Humpty" "Dumpty"))
+(store-atom (Concept "asdf")) ; On machine B
 
-(store-atom my-atom)
-(sql-close)
-
-; The database is closed. Let's mess with the truth value.
-(cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
-
-; Let's wipe out the value as well.
-(cog-set-value!
-	(Concept "asdf")
-	(Predicate "my key")
-	(StringValue "sat" "on" "a" "wall"))
-
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
-
+; On machine "A" only:
 (fetch-atom (Concept "asdf"))
 
-; Look at all the keys attached to the atom:
+; On machine "A", look at all the keys attached to the atom:
 (cog-keys (Concept "asdf"))
 
-; Make sure the the current values are those restored from the database:
+; On machine "A", look at the value on "my key":
 (cog-value (Concept "asdf") (Predicate "my key"))
+
+; Use the above to practice sending other atoms and values between "A"
+; and "B".
+
+
 
 ; Other useful commands are:
 ;
