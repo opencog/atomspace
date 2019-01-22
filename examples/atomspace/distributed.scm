@@ -8,9 +8,9 @@
 ;
 ; Understanding the overall architecture is important. Some key ideas:
 ;
-; * The AtomSpace is a thin layer on top of a network-distribution layer. 
+; * The AtomSpace is a thin layer on top of a network-distribution layer.
 ; * The network distribution is provided by popular 3rd-party systems.
-; * Defacto, today, this means PostgreSQL (We've tried others. See below.)
+; * De facto, today, this means PostgreSQL (We've tried others. See below.)
 ;
 ; The reason for this layering is that creating a scalable distributed
 ; system "from scratch" is hard. There are already dozens of systems
@@ -22,7 +22,7 @@
 ;
 ; The layering is done with a generic "backend" layer. The AtomSpace
 ; works with the backend to save and fetch individual Atoms or various
-; sets of Atoms. The backend is repsonsible for network distribution.
+; sets of Atoms. The backend is responsible for network distribution.
 ;
 ; Several different backends have been implemented. Only one is fully
 ; functional, complete, debugged -- the PostgreSQL backend. Others
