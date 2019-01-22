@@ -28,7 +28,13 @@
 ; functional, complete, debugged -- the PostgreSQL backend. Others
 ; were attempted but abandoned because they were too slow. It might
 ; be nice to have a choice: for example, Apache Ignite looks very
-; promising. A backend for this does not yet exist.
+; promising. A backend for Ignite does not yet exist.  However, do not
+; underestimate the scalability of PostgreSQL. Here are some typical
+; blogs about scalability and distributed processing:
+;
+; https://blog.timescale.com/scalable-postgresql-high-availability-read-scalability-streaming-replication-fb95023e2af
+; https://www.enterprisedb.com/blog/horizontal-scalability-postgresql-96
+; https://www.cybertec-postgresql.com/en/services/administration/postgresql-performance-and-scalability/
 ;
 ; This demos is a minor variant of the demo in `persistence.scm`. It
 ; uses two AtomSpaces, running on different machines, connecting to the
@@ -146,4 +152,33 @@
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
 ;   performance data.
 ;
-; That's all for now
+; Try this, on both machines:
+(sql-stats)
+
+; The (sql-clear-stats) just rests the stats printed above.
+; The (sql-clear-cache) will reset the local cache of atoms fetched from
+; the distributed network server. This is "harmless", in that the
+; operation of the AtomSpace will not be affected. However, it will
+; affect performance: future atom fetches will take a bit longer,
+; because they have to refill the cache. The only thing that clearing
+; the cache is good for is to free up some RAM.
+
+; ---------------------
+;
+; That's all for now.
+; The Distributed AtomSpace is a work-in-progress. The above works, it
+; works really pretty well, and seems to scale just fine to reasonable
+; sizes (about 200M Atoms so far).  There is no doubt that improvements
+; could be made:
+;
+; -- Create a scatter-gather (map-reduce) type layer to simplify
+;    parallel processing of large datasets.
+; -- Double-check that atomic ops are working correctly (so that
+;    summations and counters working across multiple machines get the
+;    correct grand-total.
+; -- Improve read-write overlays on read-only AtomSpaces.
+; -- Whatever else might be needed, based on hands-on, practical
+;    experience.
+;
+; The last bullet is the most important: without practical experience,
+; the road ahead is hard to map out.

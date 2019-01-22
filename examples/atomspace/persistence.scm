@@ -101,4 +101,4 @@
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
 ;   performance data.
 ;
-; That's all for now
+; That's all for now.
