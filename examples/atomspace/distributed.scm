@@ -154,7 +154,7 @@
 ; Try this, on both machines:
 (sql-stats)
 
-; The (sql-clear-stats) just rests the stats printed above.
+; The (sql-clear-stats) just resets the stats printed above.
 ; The (sql-clear-cache) will reset the local cache of atoms fetched from
 ; the distributed network server. This is "harmless", in that the
 ; operation of the AtomSpace will not be affected. However, it will
