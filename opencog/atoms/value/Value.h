@@ -97,7 +97,7 @@ public:
 
 typedef std::shared_ptr<Value> ValuePtr;
 
-typedef std::vector<ValuePtr> ProtomSeq;
+typedef std::vector<ValuePtr> ValueSeq;
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
