@@ -12,9 +12,8 @@ Also refer to the list of .scm type definition files in opencog.conf
 
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport (cValuePtr, Value, cAtomSpace,
-                                Atom, AtomSpace, cAtom, cHandle, 
-                                AtomSpace_factory, void_from_candle,
-                                createProtoAtom)
+                                Atom, AtomSpace, cAtom, cHandle,
+                                AtomSpace_factory, createProtoAtom)
 
 
 # basic wrapping for std::string conversion

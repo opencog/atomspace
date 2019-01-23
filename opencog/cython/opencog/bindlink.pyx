@@ -1,7 +1,6 @@
 from opencog.atomspace cimport Atom, AtomSpace, TruthValue
 from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
 from opencog.atomspace cimport tv_ptr, strength_t, count_t
-from opencog.atomspace cimport void_from_candle
 from cython.operator cimport dereference as deref
 
 

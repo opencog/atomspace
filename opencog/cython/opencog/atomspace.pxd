@@ -17,7 +17,6 @@ cdef extern from "opencog/cython/opencog/Cast.h":
     cdef cHandle atom_from_the_void(long p)
 
     # Tacky hack to convert C objects into Python objects.
-    cdef PANDLE   void_from_candle(const cHandle& h)
     cdef PANDLE   void_from_cptr(cHandle* hp)
 
 
