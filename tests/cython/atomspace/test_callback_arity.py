@@ -28,10 +28,20 @@ class TestExecutionOutputLink(unittest.TestCase):
                                         ListLink(atom1))
         result = execute_atom(self.space, exec_link)
 
-    def test_incorrect_argcount(self):
+    def test_too_many_args(self):
         atom1 = ConceptNode("atom1")
         exec_link = ExecutionOutputLink(GroundedSchemaNode("py:return_concept"),
                                         ListLink(atom1, atom1))
+        try:
+           result = execute_atom(self.space, exec_link)
+           self.assertFalse("call should fail")
+        except RuntimeError:
+           pass
+
+    def test_too_few_args(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:return_concept"),
+                                        ListLink())
         try:
            result = execute_atom(self.space, exec_link)
            self.assertFalse("call should fail")
