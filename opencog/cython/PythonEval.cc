@@ -699,33 +699,6 @@ void PythonEval::execute_string(const char* command)
     if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
 }
 
-int PythonEval::argument_count(PyObject* pyFunction)
-{
-    PyObject* pyFunctionCode;
-    PyObject* pyArgumentCount;
-    int argumentCount;
-
-    // Get the 'function.func_code.co_argcount' Python internal attribute.
-    pyFunctionCode = PyObject_GetAttrString(pyFunction, "__code__");
-    if (pyFunctionCode) {
-        pyArgumentCount = PyObject_GetAttrString(pyFunctionCode, "co_argcount");
-        if (pyArgumentCount) {
-            argumentCount = PyLong_AsLong(pyArgumentCount);
-        }  else {
-            Py_DECREF(pyFunctionCode);
-            return MISSING_FUNC_CODE;
-        }
-    } else {
-        return MISSING_FUNC_CODE;
-    }
-
-    // Cleanup the reference counts.
-    Py_DECREF(pyFunctionCode);
-    Py_DECREF(pyArgumentCount);
-
-    return argumentCount;
-}
-
 /**
  * Find the Python object by its name in the given module'.
  */
@@ -850,9 +823,10 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     if (!pyUserFunc) {
         if(pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
+        const char * moduleName = PyModule_GetName(pyModule);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found!",
-            moduleFunction.c_str());
+            "Python function '%s' not found! in module '%s'",
+            moduleFunction.c_str(), moduleName);
     }
 
     // Promote the borrowed reference for pyUserFunc since it will
@@ -869,16 +843,6 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
             "Python function '%s' not callable!", moduleFunction.c_str());
     }
 
-    // Get the expected argument count.
-    int expectedArgumentCount = this->argument_count(pyUserFunc);
-    if (expectedArgumentCount == MISSING_FUNC_CODE) {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str());
-    }
-
     // Get the actual argument count, passed in the ListLink.
     if (arguments->get_type() != LIST_LINK) {
         Py_DECREF(pyUserFunc);
@@ -886,20 +850,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-
-    // Now make sure the expected count matches the actual argument count.
     int actualArgumentCount = arguments->get_arity();
-    // If this is really a method, it has 'self' argument, which is passed automatically
-    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
-    if (expectedArgumentCount != actualArgumentCount) {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' which expects '%d arguments,"
-            " called with %d arguments!", moduleFunction.c_str(),
-            expectedArgumentCount, actualArgumentCount);
-    }
-
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
@@ -1125,30 +1076,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not callable!", moduleFunction.c_str());
-    }
-
-    // Get the expected argument count.
-    int expectedArgumentCount = this->argument_count(pyUserFunc);
-    // If this is really a method, it has 'self' argument, which is passed automatically
-    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
-    if (expectedArgumentCount == MISSING_FUNC_CODE)
-    {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str());
-    }
-
-    // Make sure the argument count is 1 (just the atomspace)
-    if (1 != expectedArgumentCount)
-    {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' which expects '%d arguments,"
-            " should have one atomspace argument!",
-            moduleFunction.c_str(), expectedArgumentCount);
     }
 
     // Create the Python tuple for the function call with python

@@ -84,7 +84,6 @@ class PythonEval : public GenericEval
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
         void execute_string(const char* command);
-        int argument_count(PyObject* pyFunction);
         PyObject* find_object(const PyObject* pyModule,
                               const std::string& objectName);
         void module_for_function(const std::string& moduleFunction,
