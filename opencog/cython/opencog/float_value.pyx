@@ -11,7 +11,7 @@ cdef class FloatValue(Value):
 
     def to_list(self):
         return FloatValue.vector_of_doubles_to_list(
-            &((<cFloatValue*>get_value_ptr(self)).value()))
+            &((<cFloatValue*>self.get_c_value()).value()))
 
     @staticmethod
     cdef vector[double] list_of_doubles_to_vector(list python_list):

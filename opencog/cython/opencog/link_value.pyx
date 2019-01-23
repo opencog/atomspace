@@ -11,7 +11,7 @@ cdef class LinkValue(Value):
 
     def to_list(self):
         return LinkValue.vector_of_values_to_list(
-            &((<cLinkValue*>get_value_ptr(self)).value()))
+            &((<cLinkValue*>self.get_c_value()).value()))
 
     @staticmethod
     cdef vector[cValuePtr] list_of_values_to_vector(list python_list):

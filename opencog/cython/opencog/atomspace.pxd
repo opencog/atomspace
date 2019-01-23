@@ -95,6 +95,7 @@ cdef class ValuePtr:
 cdef class Value:
     cdef ValuePtr value_ptr
     cdef cValuePtr get_c_value_ptr(self)
+    cdef cValue* get_c_value(self)
     @staticmethod
     cdef Value create(cValuePtr shared_ptr)
 
@@ -248,5 +249,4 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
 
     cdef cValuePtr createLinkValue(...)
 
-cdef cValue* get_value_ptr(Value protoAtom)
 
