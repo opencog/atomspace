@@ -11,13 +11,15 @@ cdef cValue* get_value_ptr(Value value):
         return ptr
 
 cdef class ValuePtr:
-    """C++ Value object wrapper for Python clients"""
+    """C++ ValuePtr object wrapper for Python clients. Cython cannot create
+    Python object constructor which gets C++ pointer. This class is used to
+    wrap pointer and make it possible to initialize Value in usual
+    constructor (see
+    http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
 
     @staticmethod
     cdef ValuePtr create(cValuePtr shared_ptr):
-        """Factory method to construct ValuePtr from C++ cValuePtr (see
-        http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
-        for example)"""
+        """Factory method to construct ValuePtr from C++ cValuePtr"""
         cdef ValuePtr value_ptr = ValuePtr.__new__(ValuePtr)
         value_ptr.shared_ptr = shared_ptr
         return value_ptr
@@ -27,9 +29,8 @@ cdef class Value:
 
     @staticmethod
     cdef Value create(cValuePtr shared_ptr):
-        """Factory method to construct Value from C++ cValuePtr (see
-        http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
-        for example)"""
+        """Factory method to construct Value from C++ cValuePtr using ValuePtr
+        instance."""
         return Value(ValuePtr.create(shared_ptr))
 
     def __init__(self, value_ptr):
