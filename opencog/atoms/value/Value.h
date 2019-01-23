@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PROTO_ATOM_H
-#define _OPENCOG_PROTO_ATOM_H
+#ifndef _OPENCOG_VALUE_H
+#define _OPENCOG_VALUE_H
 
 #include <memory>
 #include <string>
@@ -67,7 +67,7 @@ public:
 	}
 
 	/**
-	 * Returns a string representation of the proto-atom.
+	 * Returns a string representation of the value.
 	 */
 	virtual std::string to_string(const std::string& indent) const = 0;
 	virtual std::string to_short_string(const std::string& indent) const
@@ -80,16 +80,16 @@ public:
 	std::string to_short_string() const { return to_short_string(""); }
 
 	/**
-	 * Returns whether two proto-atoms are equal.
+	 * Returns whether two values are equal.
 	 *
-	 * @return true if the proto-atoms are equal, false otherwise.
+	 * @return true if the values are equal, false otherwise.
 	 */
 	virtual bool operator==(const Value&) const = 0;
 
 	/**
-	 * Returns whether two proto-atoms are different.
+	 * Returns whether two values are different.
 	 *
-	 * @return true if the proto-atoms are different, false otherwise.
+	 * @return true if the values are different, false otherwise.
 	 */
 	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
@@ -120,4 +120,4 @@ namespace std
     }
 } // ~namespace std
 
-#endif // _OPENCOG_PROTO_ATOM_H
+#endif // _OPENCOG_VALUE_H
