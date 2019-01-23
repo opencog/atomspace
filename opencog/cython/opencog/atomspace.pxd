@@ -12,14 +12,6 @@ cdef extern from "Python.h":
 
 ctypedef public long PANDLE
 
-cdef extern from "opencog/cython/opencog/Cast.h":
-    # Tacky hack to pass atom pointer to Atom ctor.
-    cdef cHandle atom_from_the_void(long p)
-
-    # Tacky hack to convert C objects into Python objects.
-    cdef PANDLE   void_from_cptr(cHandle* hp)
-
-
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"

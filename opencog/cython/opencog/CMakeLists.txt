@@ -73,7 +73,6 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
-	Cast.cc
 	atomspace.cpp
 )
 
@@ -113,7 +112,6 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
-	Cast.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
