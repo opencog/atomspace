@@ -43,7 +43,7 @@ cdef createValue(type, arg):
     """Method to costruct atomspace value from given type and constructor 
     argument. It is similar to SchemeSmob::ss_new_value()"""
     cdef cValuePtr result
-    
+
     if type == types.FloatValue:
         if (isinstance(arg, list)):
             result = createFloatValue(list_of_doubles_to_vector(arg))
@@ -61,7 +61,7 @@ cdef createValue(type, arg):
             result = createLinkValue(list_of_values_to_vector([arg]))
     else:
         raise TypeError('Unexpected value type {}'.format(type))
-    
+
     return Value.create(result)
 
 include "opencog/atoms/atom_types/core_types.pyx"
