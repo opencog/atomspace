@@ -1,36 +1,5 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef list vector_of_doubles_to_list(const vector[double]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    while it != cpp_vector.const_end():
-        list.append(deref(it))
-        inc(it)
-    return list
-
-cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    while it != cpp_vector.const_end():
-        list.append((<bytes>deref(it).c_str()).decode('UTF-8'))
-        inc(it)
-    return list
-
-cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    cdef cValuePtr value
-    while it != cpp_vector.const_end():
-        value = deref(it)
-        if is_a(deref(value).get_type(), types.Value):
-            list.append(Value.create(value))
-        else:
-            # TODO: Support Atoms as members of LinkValue requires inheriting
-            # Atom from Value and constructor to create Atom from cHandle.
-            raise TypeError('Only Values are supported '
-                            'as members of LinkValue')
-        inc(it)
-    return list
 
 cdef cValue* get_value_ptr(Value value):
     """Return plain C++ Value pointer, raise AttributeError if
@@ -90,17 +59,7 @@ cdef class Value:
         return is_a(self.type, type)
 
     def to_list(self):
-        if self.is_a(types.FloatValue):
-            return vector_of_doubles_to_list(
-                &((<cFloatValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.StringValue):
-            return vector_of_strings_to_list(
-                &((<cStringValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.LinkValue):
-            return vector_of_values_to_list(
-                &((<cLinkValue*>get_value_ptr(self)).value()))
-        else:
-            raise TypeError('Type {} is not supported'.format(self.type()))
+        raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
         return get_value_ptr(self).to_string().decode('UTF-8')
