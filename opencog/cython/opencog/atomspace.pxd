@@ -162,8 +162,8 @@ cdef class Atom:
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
-
-
+    @staticmethod
+    cdef Atom create(cHandle& handle, AtomSpace a)
 
 # AtomSpace
 

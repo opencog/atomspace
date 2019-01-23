@@ -9,22 +9,23 @@ cdef cAtom* get_atom_ptr(Atom atom):
 # Atom wrapper object
 cdef class Atom(object):
 
-    def __cinit__(self, PANDLE lptr, AtomSpace a):
-        atomo = atom_from_the_void(lptr)
-        self.handle = new cHandle(atomo)
+    @staticmethod
+    cdef Atom create(const cHandle& handle, AtomSpace a):
+        """Factory method to construct Atom from C++ Handle and AtomSpace (see
+        http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
+    for example)"""
+        cdef Atom atom = Atom.__new__(Atom)
+        atom.handle = new cHandle(handle)
+        # cache the results after first retrieval of
+        # immutable properties
+        atom._atom_type = None
+        atom._name = None
+        atom._outgoing = None
+        atom.atomspace = a
+        return atom
 
     def __dealloc__(self):
         del self.handle
-
-    def __init__(self, PANDLE lptr, AtomSpace a):
-        # self.handle = h is set in __cinit__ above
-
-        # cache the results after first retrieval of
-        # immutable properties
-        self._atom_type = None
-        self._name = None
-        self._outgoing = None
-        self.atomspace = a
 
     def __nonzero__(self):
         """ Allows boolean comparison, return false is handle is
