@@ -89,8 +89,8 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
 
 cdef class Value:
     cdef cValuePtr shared_ptr
-
-cdef Value createProtoAtom(cValuePtr shared_ptr)
+    @staticmethod
+    cdef Value create(cValuePtr shared_ptr)
 
 # Atom
 ctypedef public short av_type

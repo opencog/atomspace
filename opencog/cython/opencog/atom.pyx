@@ -174,7 +174,7 @@ cdef class Atom(object):
         cdef cValuePtr value = get_atom_ptr(self).getValue(
             deref((<Atom>key).handle))
         if (value != NULL):
-            return createProtoAtom(value)
+            return Value.create(value)
         else:
             return None
 

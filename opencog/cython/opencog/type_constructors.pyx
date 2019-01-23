@@ -9,8 +9,7 @@
 
 from opencog.atomspace import AtomSpace, TruthValue, types
 from atomspace cimport (cValuePtr, createFloatValue, createStringValue,
-                        createLinkValue, Value, createProtoAtom,
-                        cValuePtr)
+                        createLinkValue, Value, cValuePtr)
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
@@ -63,6 +62,6 @@ cdef createValue(type, arg):
     else:
         raise TypeError('Unexpected value type {}'.format(type))
     
-    return createProtoAtom(result)
+    return Value.create(result)
 
 include "opencog/atoms/atom_types/core_types.pyx"

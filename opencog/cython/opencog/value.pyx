@@ -1,13 +1,5 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef Value createProtoAtom(cValuePtr shared_ptr):
-    """Factory method to construct Value from C++ ValuePtr (see
-    http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
-    for example)"""
-    cdef Value proto_atom = Value.__new__(Value)
-    proto_atom.shared_ptr = shared_ptr
-    return proto_atom
-
 cdef list vector_of_doubles_to_list(const vector[double]* cpp_vector):
     list = []
     it = cpp_vector.const_begin()
@@ -31,7 +23,7 @@ cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
     while it != cpp_vector.const_end():
         value = deref(it)
         if is_a(deref(value).get_type(), types.Value):
-            list.append(createProtoAtom(value))
+            list.append(Value.create(value))
         else:
             # TODO: Support Atoms as members of LinkValue requires inheriting
             # Atom from Value and constructor to create Atom from cHandle.
@@ -51,6 +43,15 @@ cdef cValue* get_value_ptr(Value protoAtom):
 
 cdef class Value:
     """C++ Value object wrapper for Python clients"""
+
+    @staticmethod
+    cdef Value create(cValuePtr shared_ptr):
+        """Factory method to construct Value from C++ ValuePtr (see
+        http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
+        for example)"""
+        cdef Value value = Value.__new__(Value)
+        value.shared_ptr = shared_ptr
+        return value
 
     property type:
          def __get__(self):
