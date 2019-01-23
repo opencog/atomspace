@@ -35,7 +35,7 @@ cdef vector[cValuePtr] list_of_values_to_vector(list python_list):
     cdef vector[cValuePtr] cpp_vector
     cdef Value value
     for value in python_list:
-        cpp_vector.push_back(value.shared_ptr)
+        cpp_vector.push_back(value.get_c_value_ptr())
     return cpp_vector
 
 

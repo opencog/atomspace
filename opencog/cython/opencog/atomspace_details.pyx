@@ -162,7 +162,8 @@ cdef class AtomSpace:
         """
         if self.atomspace == NULL:
             return None
-        self.atomspace.set_value(deref(atom.handle), deref(key.handle), value.shared_ptr)
+        self.atomspace.set_value(deref(atom.handle), deref(key.handle),
+                                 value.get_c_value_ptr())
 
     def set_truthvalue(self, Atom atom, TruthValue tv):
         """ Set the truth value on atom

@@ -168,7 +168,7 @@ cdef class Atom(object):
 
     def set_value(self, key, value):
         get_atom_ptr(self).setValue(deref((<Atom>key).handle),
-                                (<Value>value).shared_ptr)
+                                (<Value>value).get_c_value_ptr())
 
     def get_value(self, key):
         cdef cValuePtr value = get_atom_ptr(self).getValue(
