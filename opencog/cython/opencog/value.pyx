@@ -24,24 +24,17 @@ cdef class Value:
         return Value(ValuePtr.create(shared_ptr))
 
     def __init__(self, value_ptr):
+        if (<ValuePtr>value_ptr).shared_ptr.get() == NULL:
+            raise AttributeError('ValuePtr contains NULL reference')
         self.value_ptr = value_ptr
 
     cdef cValuePtr get_c_value_ptr(self):
         """Return C++ ValuePtr instance"""
         return self.value_ptr.shared_ptr
 
-    cdef cValue* get_c_value(self):
-        """Return plain C++ Value pointer, raise AttributeError if
-        pointer is nullptr"""
-        cdef cValue* ptr = self.get_c_value_ptr().get()
-        if ptr == NULL:
-            raise AttributeError('Value contains NULL reference')
-        else:
-            return ptr
-
     property type:
          def __get__(self):
-             return self.get_c_value().get_type()
+             return self.get_c_value_ptr().get().get_type()
 
     property type_name:
         def __get__(self):
@@ -63,10 +56,10 @@ cdef class Value:
         raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
-        return self.get_c_value().to_string().decode('UTF-8')
+        return self.get_c_value_ptr().get().to_string().decode('UTF-8')
 
     def short_string(self):
-        return self.get_c_value().to_short_string().decode('UTF-8')
+        return self.get_c_value_ptr().get().to_short_string().decode('UTF-8')
 
     def __str__(self):
         return self.short_string()
@@ -78,8 +71,8 @@ cdef class Value:
         if not isinstance(other, Value):
             raise TypeError('Value cannot be compared with {}'
                             .format(type(other)))
-        cdef cValue* self_ptr = (<Value>self).get_c_value()
-        cdef cValue* other_ptr = (<Value>other).get_c_value()
+        cdef cValue* self_ptr = (<Value>self).get_c_value_ptr().get()
+        cdef cValue* other_ptr = (<Value>other).get_c_value_ptr().get()
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         elif op == Py_NE:

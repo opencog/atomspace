@@ -11,7 +11,7 @@ cdef class StringValue(Value):
 
     def to_list(self):
         return StringValue.vector_of_strings_to_list(
-            &((<cStringValue*>self.get_c_value()).value()))
+            &((<cStringValue*>self.get_c_value_ptr().get()).value()))
 
     @staticmethod
     cdef vector[string] list_of_strings_to_vector(list python_list):
