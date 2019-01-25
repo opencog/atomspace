@@ -454,6 +454,8 @@ ATTRACTION_LINK <- ORDERED_LINK
 // as 10kg, 10s, $10, etc.
 QUANTITY_LINK <- ORDERED_LINK
 
+GROUNDED_OBJECT_NODE <- NODE
+
 // ==============================================================
 // Types and type constructors.
 
@@ -587,6 +589,9 @@ FUNCTION_LINK <- FREE_LINK
 // FunctionLinks do not have this restriction: indeed, the actual
 // function they perform is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+
+SNET_EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+DOT_LINK <- ORDERED_LINK
 
 // Return the indicated value on the indicated atom.
 // XXX FIXME - Not all ValueOfLinks are actually numeric; but there

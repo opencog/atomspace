@@ -1,0 +1,89 @@
+/*
+ * tests/atoms/execution/SnetExecutionOutputLinkUTest.cxxtest
+ *
+ * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <functional>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/execution/GroundedObject.h>
+
+using namespace opencog;
+
+#define an atomspace.add_node
+#define al atomspace.add_link
+
+class GroundedObjectExample : public GroundedObject
+{
+public:
+	virtual GroundedFunction get_method(std::string const& method_name)
+	{
+		if (method_name == "foo")
+		{
+			return std::bind(&GroundedObjectExample::foo, this,
+								std::placeholders::_1, std::placeholders::_2);
+		}
+		throw RuntimeException(TRACE_INFO, "Method \"%s\" is not implemented",
+								method_name.c_str());
+	}
+
+	ValuePtr foo(AtomSpace* atomspace, ValuePtr const& args)
+	{
+		return args;
+	}
+};
+
+class SnetExecutionOutputLinkUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace atomspace;
+
+public:
+
+	void setUp()
+	{
+	}
+
+	void tearDown()
+	{
+		atomspace.clear();
+	}
+
+	void test_execute_dot_link()
+	{
+		Instantiator inst(&atomspace);
+		GroundedObject *foo = new GroundedObjectExample();
+		Handle eol =
+			al(SNET_EXECUTION_OUTPUT_LINK,
+				al(DOT_LINK,
+					an(GROUNDED_OBJECT_NODE, "foo", foo),
+					an(CONCEPT_NODE, "bar")
+				),
+				al(LIST_LINK,
+					an(CONCEPT_NODE, "arg")
+				)
+			);
+
+		ValuePtr result = inst.execute(eol);
+
+		TS_ASSERT_EQUALS(an(CONCEPT_NODE, "arg"), result);
+	}
+};

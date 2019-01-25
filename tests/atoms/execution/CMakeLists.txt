@@ -1,0 +1,3 @@
+ADD_CXXTEST(SnetExecutionOutputLinkUTest)
+TARGET_LINK_LIBRARIES(SnetExecutionOutputLinkUTest execution atomspace)
+
