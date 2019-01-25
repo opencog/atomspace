@@ -41,6 +41,7 @@ private:
 
 protected:
 	virtual void check_schema(const Handle& schema) const;
+	void init();
 
 public:
 	/**
@@ -52,7 +53,7 @@ public:
 	static void lang_lib_fun(const std::string& schema,
 	                         std::string& lang,
 	                         std::string& lib,
-	                         std::string& fun);;
+	                         std::string& fun);
 
 	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);

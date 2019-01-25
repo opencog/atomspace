@@ -47,13 +47,13 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	}
 }
 
-ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+void ExecutionOutputLink::init()
 {
-	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+	if (!nameserver().isA(get_type(), EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
 		                      "Expection an ExecutionOutputLink!");
 
+	const HandleSeq& oset = getOutgoingSet();
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema and args! Got arity=%d",
@@ -62,22 +62,23 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	check_schema(oset[0]);
 }
 
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
+{
+	init();
+}
+
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
 	: FunctionLink({schema, args}, EXECUTION_OUTPUT_LINK)
 {
-	check_schema(schema);
+	init();
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
-	Type tscope = l.get_type();
-	if (EXECUTION_OUTPUT_LINK != tscope)
-		throw SyntaxException(TRACE_INFO,
-		                      "Expection an ExecutionOutputLink!");
-
-	check_schema(l.getOutgoingAtom(0));
+	init();
 }
 
 /// execute -- execute the function defined in an ExecutionOutputLink
