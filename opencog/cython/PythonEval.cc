@@ -825,7 +825,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         PyGILState_Release(gstate);
         const char * moduleName = PyModule_GetName(pyModule);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found! in module '%s'",
+            "Python function '%s' not found in module '%s'!",
             moduleFunction.c_str(), moduleName);
     }
 
