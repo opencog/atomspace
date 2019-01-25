@@ -45,12 +45,11 @@ typedef std::shared_ptr<SnetExecutionOutputLink> SnetExecutionOutputLinkPtr;
 
 static inline SnetExecutionOutputLinkPtr SnetExecutionOutputLinkCast(const Handle& h)
 {
-	AtomPtr a(h);
-	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(a);
+	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(h);
 }
-static inline SnetExecutionOutputLinkPtr SnetExecutionOutputLinkCast(AtomPtr a)
+static inline SnetExecutionOutputLinkPtr SnetExecutionOutputLinkCast(ValuePtr v)
 {
-	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(a);
+	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(v);
 }
 
 template<typename ... Type>
