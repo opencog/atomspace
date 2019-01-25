@@ -10,14 +10,14 @@
 ;
 ; To be precise: Globs are like regex + (1 or more in a sequence) and
 ; not regex * (zero or more in sequence).  A GlobNode has to match at
-; least one atom. At this time, there is no atomese equivalent to 
+; least one atom. At this time, there is no Atomese equivalent to
 ; regex ? (zero or one matches) nor to the * (zero or more matches).
 ; This may change; ask on the mailing list or open a github feature
 ; request.
 
 (use-modules (opencog) (opencog exec))
 
-;;; Populate the atomspace with some "sentences".
+;;; Populate the AtomSpace with some "sentences".
 (ListLink
 	(Concept "I")
 	(Concept "love")
@@ -83,7 +83,7 @@
 			(Concept "also"))))
 
 
-;;; Populate the atomspace with some more "sentences".
+;;; Populate the AtomSpace with some more "sentences".
 (ListLink (Concept "I") (Concept "love") (Number 42))
 
 ; This will find the match (Number 42); it will NOT match (Concept "you")
@@ -136,7 +136,7 @@
 ; -----------------------------------------------------------------
 ; Slightly more complicated
 
-; Populate the atomspace for the next test case
+; Populate the AtomSpace for the next test case
 (ListLink
     (Concept "I")
     (Concept "need")

@@ -910,8 +910,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     {
         // Place a Python atom object for this handle into the tuple.
 
-        long int patom = (long int) &h;
-        PyObject* pyAtom = py_atom(patom, pyAtomSpace);
+        PyObject* pyAtom = py_atom(h, pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:

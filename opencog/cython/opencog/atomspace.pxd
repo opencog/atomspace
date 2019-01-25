@@ -12,15 +12,6 @@ cdef extern from "Python.h":
 
 ctypedef public long PANDLE
 
-cdef extern from "opencog/cython/opencog/Cast.h":
-    # Tacky hack to pass atom pointer to Atom ctor.
-    cdef cHandle atom_from_the_void(long p)
-
-    # Tacky hack to convert C objects into Python objects.
-    cdef PANDLE   void_from_candle(const cHandle& h)
-    cdef PANDLE   void_from_cptr(cHandle* hp)
-
-
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
@@ -96,10 +87,16 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
 
     ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
-cdef class Value:
+cdef class ValuePtr:
     cdef cValuePtr shared_ptr
+    @staticmethod
+    cdef ValuePtr create(cValuePtr shared_ptr)
 
-cdef Value createProtoAtom(cValuePtr shared_ptr)
+cdef class Value:
+    cdef ValuePtr value_ptr
+    cdef cValuePtr get_c_value_ptr(self)
+    @staticmethod
+    cdef Value create(cValuePtr shared_ptr)
 
 # Atom
 ctypedef public short av_type
@@ -162,8 +159,8 @@ cdef class Atom:
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
-
-
+    @staticmethod
+    cdef Atom create(cHandle& handle, AtomSpace a)
 
 # AtomSpace
 
@@ -251,5 +248,4 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
 
     cdef cValuePtr createLinkValue(...)
 
-cdef cValue* get_value_ptr(Value protoAtom)
 

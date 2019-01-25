@@ -35,6 +35,9 @@ namespace opencog
  *  @{
  */
 
+// XXX FIXME Is this actually used anywehere for anything?
+// Can we get rid of it?
+
 class FuzzyTruthValue;
 typedef std::shared_ptr<const FuzzyTruthValue> FuzzyTruthValuePtr;
 

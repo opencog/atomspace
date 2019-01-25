@@ -1,22 +1,50 @@
 ;
-; values.scm
+; values.scm -- Attaching generic values on Atoms.
 ;
-; Example of use `ProtoAtoms` aka `Values`, mixed with regular atoms.
-; ProtoAtoms are similar to regular atoms, except that:
-; 1) They do not have a TV or AV.
-; 2) They cannot be placed in the AtomSpace.
-; 2a) As a result they are not universally unique.
-; 2b) They do not have a UUID.
+; The previous example, `truthvalues.scm`, showed how to assign
+; sequences of floating-point numbers to Atoms. There is no need
+; to limit oneself only to floats; there is a generic facility
+; for attaching Values to Atoms.
+;
+; Why is this interesting? Why is this needed? Short answer: because
+; its faster that way.
+;
+; In principle, you can put "anything" into the AtomSpace; it is quite
+; generic. In practice, the AtomSpace forces certain assumptions that
+; have strong impacts on runtime performance and on system RAM usage.
+; In order to make Atoms pattern-matchable (searchable, queryable), the
+; entire graph structure has to be kept. This uses a lot of RAM. To have
+; database-like properties, the AtomSpace has to keep indexes of Atoms.
+; This uses yet more RAM, and also makes Atom insertion and removal
+; slow. If you do NOT need searchability, and you are concerned about
+; performance, Values are for you!
+;
+; Values (such as TruthValues) live in a per-Atom key-value database.
+; Given any Atom, and a Key, you can get the Value attached there.
+; Given any Atom, Key and Value, you can quickly swap the new value for
+; the old. Here's what you cannot do:
+;
+; 1) Use GetLink or BindLink to search for Values
+; 2) Use PutLink to create new Values
+; 3) Store them in the Atomspace for later retrieval. (but you can
+;    store the Atom attache there; the Value will ride with it.)
+;
+; Values and Atoms do share a common type system: one can work with
+; Value types in the same was as with Atom types. This includes using
+; all of the various type constructors.
+;
+; Time for the examples:
 
 (use-modules (opencog))
 
 ; Values can store vectors of floats ...
 (define f (FloatValue 0.1 0.2 3.3 4.5678))
 
-; or lists of strings:
+; ... or lists of strings:
 (define s (StringValue "asdf" "gh" "jkl;"))
 
-; or lists of other values or atoms.  Thus, they can be heirarchical.
+; ... or lists of other values or atoms.  Thus, they can be arranged
+; in a hierarchical tree.
 (define l (LinkValue
   (Concept "foobar") (StringValue "property") (FloatValue 42)))
 
@@ -50,7 +78,7 @@
 ; Verify that the value changed.
 (cog-value a k1)
 
-; Multipe values can be attached using different keys.
+; Multiple values can be attached using different keys.
 (define k2 (PredicateNode "second key"))
 (cog-set-value! a k2 s)
 (cog-value a k2)
@@ -86,10 +114,11 @@
 (cog-value a k2)
 
 ; Attention values are stored under a special key as well:
+(use-modules (opencog attentionbank))
 (cog-set-av! a (av 3 2 1))
 (cog-keys a)
 
-; and can be accessed as values:
+; ... and can also be accessed as values:
 (define kav (PredicateNode "*-AttentionValueKey-*"))
 (cog-value a kav)
 (cog-av a)

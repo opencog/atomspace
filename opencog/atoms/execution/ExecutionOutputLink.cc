@@ -50,7 +50,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (EXECUTION_OUTPUT_LINK != t)
+	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
 		                      "Expection an ExecutionOutputLink!");
 

@@ -1,5 +1,5 @@
 ;
-; Simple goal solving using Get/PutLinks.
+; deduction-engine.scm -- Very simple goal solving using Get/PutLinks.
 ;
 ; The point of this example is to show how ProLog-like deductions can
 ; be made, and, more precisely, how to write a ProLog-like chainer
@@ -65,7 +65,7 @@
 			(VariableNode "$X"))))
 
 ;;; Same as above, but in imperative form. It uses the GetLink
-;;; to search the atomspace to find everything Tom likes, and then
+;;; to search the AtomSpace to find everything Tom likes, and then
 ;;; uses the PutLink to perform a beta-reduction, to plug in those
 ;;; answers into a template for the things that Bill likes.
 ;;; Note the use of two distinct variables; $X is bound to GetLink;
@@ -98,13 +98,13 @@
 ;;; The SatisfactionLink turns it into a question: the SatisfactionLink
 ;;; can evaluate to true or false, depending on what X is.
 ;;; Note that the SatisfactionLink is in the form of a lambda; that is,
-;;; it has the form  Lx.(Bill likes X)
+;;; it has the form  λX.(Bill likes X)
 ;;;
 ;;; Finally, we want to give the above a name, so that we can refer to it
 ;;; in other places. We use the DefineLink to do this. Given a lambda,
-;;; for example, Lx.(stuff) which is just an anonymous function taking x,
+;;; for example, λx.(stuff) which is just an anonymous function taking x,
 ;;; the DefineLink turns it into a named function: so that 
-;;;    Define name Lx.(stuff)
+;;;    Define name λx.(stuff)
 ;;; is the same as 
 ;;;    (name x).(stuff)
 ;;;
@@ -144,7 +144,7 @@
 ;; and converts them into GetPut imperatives.
 
 (define get-impl
-	;; Search for ImplicationScopeLinks, and disect them.
+	;; Search for ImplicationScopeLinks, and dissect them.
 	(GetLink
 		(VariableList
 			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
@@ -197,7 +197,7 @@
 ;; Same as above, but using BindLink, so order is reversed.
 (define b-impl
 (BindLink
-	;; Search for ImplicationLinks, and disect them.
+	;; Search for ImplicationLinks, and dissect them.
 	(VariableList
 		(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
 		(TypedVariableLink (VariableNode "$tpred") (TypeNode "PredicateNode"))

@@ -1,7 +1,7 @@
 from opencog.atomspace cimport Atom, AtomSpace, TruthValue
 from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
 from opencog.atomspace cimport tv_ptr, strength_t, count_t
-from opencog.atomspace cimport void_from_candle, createProtoAtom
+from opencog.atomspace cimport Value
 from cython.operator cimport dereference as deref
 
 
@@ -9,21 +9,21 @@ def stub_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("stub_bindlink atom is: None")
     cdef cHandle c_result = c_stub_bindlink(atomspace.atomspace,
                                             deref(atom.handle))
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("bindlink atom is: None")
     cdef cHandle c_result = c_bindlink(atomspace.atomspace,
                                        deref(atom.handle), -1)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def single_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("single_bindlink atom is: None")
     cdef cHandle c_result = c_bindlink(atomspace.atomspace,
                                        deref(atom.handle), 1)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def first_n_bindlink(AtomSpace atomspace, Atom atom, max_results):
@@ -32,14 +32,14 @@ def first_n_bindlink(AtomSpace atomspace, Atom atom, max_results):
         raise ValueError("first_n_bindlink max_results is not integer")
     cdef cHandle c_result = c_bindlink(atomspace.atomspace,
                                        deref(atom.handle), max_results)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
                                           deref(atom.handle))
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def satisfaction_link(AtomSpace atomspace, Atom atom):
@@ -55,14 +55,14 @@ def satisfying_set(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("satisfying_set atom is: None")
     cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
                                              deref(atom.handle), -1)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def satisfying_element(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("satisfying_element atom is: None")
     cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
                                              deref(atom.handle), 1)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def first_n_satisfying_set(AtomSpace atomspace, Atom atom, max_results):
@@ -71,17 +71,17 @@ def first_n_satisfying_set(AtomSpace atomspace, Atom atom, max_results):
         raise ValueError("first_n_satisfying_set max_results is not integer")
     cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
                                              deref(atom.handle), max_results)
-    cdef Atom result = Atom(void_from_candle(c_result), atomspace)
+    cdef Atom result = Atom.create(c_result, atomspace)
     return result
 
 def execute_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("execute_atom atom is: None")
     cdef cHandle c_result = c_execute_atom(atomspace.atomspace,
                                            deref(atom.handle))
-    return Atom(void_from_candle(c_result), atomspace)
+    return Atom.create(c_result, atomspace)
 
 def evaluate_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("evaluate_atom atom is: None")
     cdef cValuePtr result_v_ptr = c_evaluate_atom(atomspace.atomspace,
                                                 deref(atom.handle))
-    return createProtoAtom(result_v_ptr)
+    return Value.create(result_v_ptr)

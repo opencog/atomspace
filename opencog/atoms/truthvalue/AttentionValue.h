@@ -83,6 +83,7 @@ public:
     }
 
 public:
+    AttentionValue(const std::vector<double>&);
     AttentionValue(sti_t = DEFAULTATOMSTI,
                    lti_t = DEFAULTATOMLTI,
                    vlti_t = DEFAULTATOMVLTI);
@@ -107,6 +108,11 @@ public:
     //! Returns const string "[sti_val, lti_val, vlti_val]"
     //! @param none
     virtual std::string to_string(const std::string& = "") const;
+
+    static AttentionValuePtr createAV(const std::vector<double>& v)
+    {
+        return std::make_shared<const AttentionValue>(v);
+    }
 
     static AttentionValuePtr createAV(sti_t s = DEFAULTATOMSTI,
                                       lti_t l = DEFAULTATOMLTI,
@@ -148,6 +154,12 @@ static inline ValuePtr ValueCast(const AttentionValuePtr& av)
 {
     return std::shared_ptr<Value>(av, (Value*) av.get());
 }
+
+template<typename ... Type>
+static inline AttentionValuePtr createAttentionValue(Type&&...  args) {
+   return AttentionValue::createAV(std::forward<Type>(args)...);
+}
+
 
 /** @}*/
 } // namespace opencog

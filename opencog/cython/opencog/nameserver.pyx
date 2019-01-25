@@ -1,5 +1,5 @@
 from atomspace cimport cNameServer, nameserver, NOTYPE, string, Type
-from nameserver cimport strcmp
+from libc.string cimport strcmp
 
 
 # Dynamically construct a "types" module.
