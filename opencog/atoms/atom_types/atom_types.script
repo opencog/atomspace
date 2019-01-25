@@ -590,7 +590,7 @@ FUNCTION_LINK <- FREE_LINK
 // function they perform is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
-SNET_EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+SNET_EXECUTION_OUTPUT_LINK <- EXECUTION_OUTPUT_LINK
 DOT_LINK <- ORDERED_LINK
 
 // Return the indicated value on the indicated atom.

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedObject.h
+ * opencog/atoms/execution/SnetExecutionOutputLink.cc
  *
  * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
  * All Rights Reserved
@@ -20,22 +20,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GROUNDED_OBJECT_H
-#define _OPENCOG_GROUNDED_OBJECT_H
+#include "SnetExecutionOutputLink.h"
 
-#include <functional>
+using namespace opencog;
 
-namespace opencog
+void SnetExecutionOutputLink::check_schema(const Handle& schema)
 {
+	if (nameserver().isA(schema->get_type(), DOT_LINK))
+	{
+		return;
+	}
 
-typedef std::function<ValuePtr(AtomSpace* atomspace, ValuePtr const&)> GroundedFunction;
-
-class GroundedObject
-{
-public:
-	virtual GroundedFunction get_method(std::string const& method_name) = 0;
-};
-
+	ExecutionOutputLink::check_schema(schema);
 }
 
-#endif /* _OPENCOG_GROUNDED_OBJECT_H */
+SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
+	: ExecutionOutputLink(oset, t, SnetExecutionOutputLink::check_schema)
+{
+}
+
+Handle SnetExecutionOutputLink::execute(AtomSpace* as, bool silent) const
+{
+	return ExecutionOutputLink::execute(as, silent);
+}
+
+DEFINE_LINK_FACTORY(SnetExecutionOutputLink, SNET_EXECUTION_OUTPUT_LINK)
+

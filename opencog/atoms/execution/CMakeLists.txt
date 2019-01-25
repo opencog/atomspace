@@ -14,6 +14,7 @@ ADD_LIBRARY (execution
 	Instantiator.cc
 	MapLink.cc
 	LibraryManager.cc
+	SnetExecutionOutputLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -39,6 +40,7 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
+	SnetExecutionOutputLink.h
 	DESTINATION "include/opencog/atoms/execution"
 )
 
