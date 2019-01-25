@@ -27,6 +27,7 @@ class TestExecutionOutputLink(unittest.TestCase):
         exec_link = ExecutionOutputLink(GroundedSchemaNode("py:return_concept"),
                                         ListLink(atom1))
         result = execute_atom(self.space, exec_link)
+        self.assertTrue(result.name == "test")
 
     def test_too_many_args(self):
         atom1 = ConceptNode("atom1")
@@ -35,8 +36,8 @@ class TestExecutionOutputLink(unittest.TestCase):
         try:
            result = execute_atom(self.space, exec_link)
            self.assertFalse("call should fail")
-        except RuntimeError:
-           pass
+        except RuntimeError as e:
+           self.assertTrue("but 2 were given" in str(e))
 
     def test_too_few_args(self):
         atom1 = ConceptNode("atom1")
@@ -45,14 +46,6 @@ class TestExecutionOutputLink(unittest.TestCase):
         try:
            result = execute_atom(self.space, exec_link)
            self.assertFalse("call should fail")
-        except RuntimeError:
-           pass
-
-    def test_incorrect_atomspace_init(self):
-        self.space = AtomSpace()
-        try:
-           initialize_opencog(self.space, 15)
-        except TypeError:
-           return
-        self.assertFalse("call should fail with TypeError")
+        except RuntimeError as e:
+           self.assertTrue("missing 1 required positional argument" in str(e))
 
