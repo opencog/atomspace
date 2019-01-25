@@ -34,7 +34,7 @@
 
 using namespace opencog;
 
-void ExecutionOutputLink::check_schema(const Handle& schema) const
+void ExecutionOutputLink::check_schema(const Handle& schema)
 {
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
@@ -47,7 +47,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	}
 }
 
-void ExecutionOutputLink::init()
+void ExecutionOutputLink::init(check_schema_function check_schema)
 {
 	if (!nameserver().isA(get_type(), EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
@@ -62,23 +62,29 @@ void ExecutionOutputLink::init()
 	check_schema(oset[0]);
 }
 
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t,
+		check_schema_function check_schema_external) : FunctionLink(oset, t)
+{
+	init(check_schema_external);
+}
+
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	init();
+	init(check_schema);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
 	: FunctionLink({schema, args}, EXECUTION_OUTPUT_LINK)
 {
-	init();
+	init(check_schema);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
-	init();
+	init(check_schema);
 }
 
 /// execute -- execute the function defined in an ExecutionOutputLink

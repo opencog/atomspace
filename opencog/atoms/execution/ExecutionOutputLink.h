@@ -40,8 +40,11 @@ private:
 	                         bool silent=false);
 
 protected:
-	virtual void check_schema(const Handle& schema) const;
-	void init();
+	typedef void (*check_schema_function)(const Handle& schema);
+	static void check_schema(const Handle& schema);
+	void init(check_schema_function);
+
+	ExecutionOutputLink(const HandleSeq&, Type, check_schema_function);
 
 public:
 	/**
