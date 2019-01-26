@@ -52,6 +52,11 @@
 			(Concept "A")
 			(Concept "B"))))
 
+; More typically, one wishes to have a formula in the abstract,
+; with variables in it, so that one can apply it in any one of
+; a number of different situations. In the below, the variables
+; are automatically reduced with the Atoms in the ListLink, and
+; then the formula is evaluated to obtain a TruthValue.
 (cog-evaluate!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
@@ -68,6 +73,8 @@
 			(Concept "A")
 			(Concept "B"))))
 
+; Optionally, you can wrap formulas with LambdaLinks. This doesn't
+; really change anything; formulas work fine without LambdaLinks.
 (cog-evaluate!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
