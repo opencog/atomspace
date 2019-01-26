@@ -146,7 +146,7 @@ ValuePtr ConfidenceOfLink::execute() const
 }
 
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)
-// DEFINE_LINK_FACTORY(StrengthOfLink, STRENGTH_OF_LINK)
-// DEFINE_LINK_FACTORY(ConfidenceOfLink, CONFIDENCE_OF_LINK)
+DEFINE_LINK_FACTORY(StrengthOfLink, STRENGTH_OF_LINK)
+DEFINE_LINK_FACTORY(ConfidenceOfLink, CONFIDENCE_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

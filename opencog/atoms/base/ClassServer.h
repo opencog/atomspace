@@ -102,6 +102,9 @@ public:
 
 ClassServer& classserver();
 
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+
 #define DEFINE_LINK_FACTORY(CNAME,CTYPE)                          \
                                                                   \
 Handle CNAME::factory(const Handle& base)                         \
@@ -123,7 +126,8 @@ Handle CNAME::factory(const Handle& base)                         \
 }                                                                 \
                                                                   \
 /* This runs when the shared lib is loaded. */                    \
-static __attribute__ ((constructor)) void init(void)              \
+static __attribute__ ((constructor)) void                         \
+   TOKENPASTE2(init, __COUNTER__)(void)                           \
 {                                                                 \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }
@@ -138,7 +142,8 @@ Handle CNAME::factory(const Handle& base)                         \
 }                                                                 \
                                                                   \
 /* This runs when the shared lib is loaded. */                    \
-static __attribute__ ((constructor)) void init(void)              \
+static __attribute__ ((constructor)) void                         \
+   TOKENPASTE2(init, __COUNTER__)(void)                           \
 {                                                                 \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }
