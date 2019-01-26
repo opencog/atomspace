@@ -32,6 +32,22 @@
 	(EvaluationLink
 		; Compute TV = (1-sA*sB, cA*cB)
 		(PredicateFormulaLink
+			(MinusLink
+				(Number 1)
+				(TimesLink
+					(StrengthOf (Variable "$X"))
+					(StrengthOf (Variable "$Y"))))
+			(TimesLink
+				(ConfidenceOf (Variable "$X"))
+				(ConfidenceOf (Variable "$Y"))))
+		(List
+			(Concept "A")
+			(Concept "B"))))
+
+(cog-evaluate!
+	(EvaluationLink
+		; Compute TV = (1-sA*sB, cA*cB)
+		(PredicateFormulaLink
 			(Lambda (MinusLink
 				(Number 1)
 				(TimesLink

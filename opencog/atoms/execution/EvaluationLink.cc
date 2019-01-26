@@ -657,32 +657,54 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 				continue;
 			}
 
-			// Something that has variables in it, that need to
-			// be reduced first, to make sense.
-			Handle flp(h);
+			// In case the user wanted to wrap everything in a
+			// LambdaLink. I don't understand why this is needed,
+			// but it seems to make some people feel better, so
+			// we support it.
+			Handle flh(h);
 			if (LAMBDA_LINK == h->get_type())
 			{
 				LambdaLinkPtr lam(LambdaLinkCast(h));
 				Type atype = cargs->get_type();
 
 				// Set flp and fall through, where it is executed.
-				flp = lam->beta_reduce(atype == LIST_LINK ?
+				flh = lam->beta_reduce(atype == LIST_LINK ?
 					                     cargs->getOutgoingSet()
 				                        : HandleSeq(1, cargs));
 			}
 
-			// Something without variables in it.
-			if (not nameserver().isA(flp->get_type(), FUNCTION_LINK))
+			// At this point, we expect a FunctionLink of some kind.
+			if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
 			{
 				if (silent)
 					throw NotEvaluatableException();
 				throw SyntaxException(TRACE_INFO,
 					"Expecting a FunctionLink");
 			}
-			ValuePtr v(FunctionLinkCast(flp)->execute());
+
+			// If the FunctionLink has free variables in it,
+			// reduce them with the provided arguments.
+			FunctionLinkPtr flp(FunctionLinkCast(flh));
+			const FreeVariables& fvars = flp->get_vars();
+			if (not fvars.empty())
+			{
+				Type atype = cargs->get_type();
+				flh = fvars.substitute_nocheck(flh,
+					atype == LIST_LINK ?
+						cargs->getOutgoingSet()
+						: HandleSeq(1, cargs));
+				flp = FunctionLinkCast(flh);
+			}
+
+			// Expecting a FunctionLink without variables.
+			ValuePtr v(flp->execute());
 			FloatValuePtr fv(FloatValueCast(v));
 			nums.push_back(fv->value()[0]);
 		}
+
+		// XXX FIXME; if we are given more than two floats, then
+		// perhaps we should create some other kind of TruthValue?
+		// Maybe a distributional one ?? Or a CountTV ??
 		return createSimpleTruthValue(nums);
 	}
 
