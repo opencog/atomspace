@@ -10,7 +10,7 @@
 
 (Concept "B" (stv 0.6 0.9))
 
-(cog-execute! 
+(cog-execute!
 	(TimesLink (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 
 (cog-evaluate!
@@ -19,7 +19,7 @@
 		(TimesLink (ConfidenceOf (Concept "A")) (ConfidenceOf (Concept "B")))))
 
 (cog-evaluate!
-	(PredicateFormulaLink (Number 0.7) (Number 0.314))
+	(PredicateFormulaLink (Number 0.7) (Number 0.314)))
 
 (cog-evaluate!
 	(EvaluationLink
@@ -28,5 +28,18 @@
 			(Concept "A")
 			(Concept "B"))))
 
-(EvaluationLink
-	(TimesLink (StrengthOf (Variable "$A") (Variable "$B")))
+(cog-evaluate!
+	(EvaluationLink
+		; Compute TV = (1-sA*sB, cA*cB)
+		(PredicateFormulaLink
+			(Lambda (MinusLink
+				(Number 1)
+				(TimesLink
+					(StrengthOf (Variable "$X"))
+					(StrengthOf (Variable "$Y")))))
+			(Lambda (TimesLink
+				(ConfidenceOf (Variable "$X"))
+				(ConfidenceOf (Variable "$Y")))))
+		(List
+			(Concept "A")
+			(Concept "B"))))

@@ -516,7 +516,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				continue;
 			}
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-				throw NotEvaluatableException();
+			{
+				if (silent)
+					throw NotEvaluatableException();
+				throw SyntaxException(TRACE_INFO,
+					"Expecting a FunctionLink");
+			}
 			ValuePtr v(FunctionLinkCast(h)->execute());
 			FloatValuePtr fv(FloatValueCast(v));
 			nums.push_back(fv->value()[0]);
@@ -637,19 +642,44 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return do_evaluate(as, reduct, silent);
 	}
 
+	// Like a GPN, but the entire function is declared in the
+	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
+		// Collect up two floating point values.
 		std::vector<double> nums;
 		for (const Handle& h: pn->getOutgoingSet())
 		{
+			// An ordinary number.
 			if (NUMBER_NODE == h->get_type())
 			{
 				nums.push_back(NumberNodeCast(h)->get_value());
 				continue;
 			}
-			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-				throw NotEvaluatableException();
-			ValuePtr v(FunctionLinkCast(h)->execute());
+
+			// Something that has variables in it, that need to
+			// be reduced first, to make sense.
+			Handle flp(h);
+			if (LAMBDA_LINK == h->get_type())
+			{
+				LambdaLinkPtr lam(LambdaLinkCast(h));
+				Type atype = cargs->get_type();
+
+				// Set flp and fall through, where it is executed.
+				flp = lam->beta_reduce(atype == LIST_LINK ?
+					                     cargs->getOutgoingSet()
+				                        : HandleSeq(1, cargs));
+			}
+
+			// Something without variables in it.
+			if (not nameserver().isA(flp->get_type(), FUNCTION_LINK))
+			{
+				if (silent)
+					throw NotEvaluatableException();
+				throw SyntaxException(TRACE_INFO,
+					"Expecting a FunctionLink");
+			}
+			ValuePtr v(FunctionLinkCast(flp)->execute());
 			FloatValuePtr fv(FloatValueCast(v));
 			nums.push_back(fv->value()[0]);
 		}
