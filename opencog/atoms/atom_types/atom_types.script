@@ -571,9 +571,13 @@ FUNCTION_LINK <- FREE_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return the indicated value on the indicated atom.
-// XXX It doesn't *always* return numbers ...
+// XXX It's marked as "NUMERIC_OUTPUT, but doesn't *always* return
+// numbers ... Probably should have a FLOAT_VALUE_OF_LINK to fix this.
+// Ignore this issue for now ...
 VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
+STRENGTH_OF_LINK <- VALUE_OF_LINK
+CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
