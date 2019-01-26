@@ -505,6 +505,19 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return evelnk->getTruthValue();
 	}
+	else if (PREDICATE_FORMULA_LINK == t)
+	{
+		std::vector<double> nums;
+		for (const Handle& h: evelnk->getOutgoingSet())
+		{
+			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
+				throw NotEvaluatableException();
+			ValuePtr v(FunctionLinkCast(h)->execute());
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value()[0]);
+		}
+		return createSimpleTruthValue(nums);
+	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{
 		// If the truth value of the link is being requested,
