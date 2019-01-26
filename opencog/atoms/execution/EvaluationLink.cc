@@ -619,6 +619,20 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return do_evaluate(as, reduct, silent);
 	}
 
+	if (PREDICATE_FORMULA_LINK == pntype)
+	{
+		std::vector<double> nums;
+		for (const Handle& h: pn->getOutgoingSet())
+		{
+			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
+				throw NotEvaluatableException();
+			ValuePtr v(FunctionLinkCast(h)->execute());
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value()[0]);
+		}
+		return createSimpleTruthValue(nums);
+	}
+
 	if (GROUNDED_PREDICATE_NODE != pntype)
 	{
 		// Throw a silent exception; this is called in some try..catch blocks.
