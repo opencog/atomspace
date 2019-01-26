@@ -510,6 +510,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		std::vector<double> nums;
 		for (const Handle& h: evelnk->getOutgoingSet())
 		{
+			if (NUMBER_NODE == h->get_type())
+			{
+				nums.push_back(NumberNodeCast(h)->get_value());
+				continue;
+			}
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
 				throw NotEvaluatableException();
 			ValuePtr v(FunctionLinkCast(h)->execute());
@@ -637,6 +642,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		std::vector<double> nums;
 		for (const Handle& h: pn->getOutgoingSet())
 		{
+			if (NUMBER_NODE == h->get_type())
+			{
+				nums.push_back(NumberNodeCast(h)->get_value());
+				continue;
+			}
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
 				throw NotEvaluatableException();
 			ValuePtr v(FunctionLinkCast(h)->execute());
