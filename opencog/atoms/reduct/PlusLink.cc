@@ -149,8 +149,10 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
 			double diff = get_double(vj) - get_double(subtrahend);
-			return createPlusLink(minuend,
-				HandleCast(createNumberNode(diff)));
+			Handle hdiff(createNumberNode(diff));
+			if (content_eq(hdiff, zero))
+				return minuend;
+			return createPlusLink(minuend, hdiff);
 		}
 	}
 
@@ -234,4 +236,5 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);
+
 // ============================================================
