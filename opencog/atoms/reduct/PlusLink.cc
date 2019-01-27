@@ -143,8 +143,8 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		if (NUMBER_NODE == minuend->get_type())
 		{
 			double sum = get_double(vj) + get_double(minuend);
-			return createMinusLink(HandleCast(createNumberNode(sum)),
-				subtrahend);
+			Handle hsum(createNumberNode(sum));
+			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
