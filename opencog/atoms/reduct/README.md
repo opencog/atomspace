@@ -1,14 +1,17 @@
 
-Reduct-inspired term reduction for atoms
-----------------------------------------
+Arithmetic and term reduction for atoms
+---------------------------------------
 
-This is an experimental implementation of reduct-type functionality
-in the atomspace. Its experimental because its not really designed for
-performance nor for extensibility, nor anything else. Its more of a
-proof-of-concept. It was insipred by combo, which does reduction in
-C++ code...
+This is an implementation of arithmetic and arithmetic (algebraic)
+reduction for the atomspace. It "works" but suffers from various design
+flaws.  It is a proof-of-concept, and should be redesigned.
 
-After doing this, I decided that this is a bad idea. If you want to
+First, a few words about what it does; then a few words about its flaws.
+
+
+After doing this, I decided that this is a mediocre idea, but apparently
+needed.
+. If you want to
 do reduction, do it using the unified rule engine (URE) ad write some
 rules for it. Don't do it in C++ code, the way its done here.
 Basically, much or most of the code here should be eliminated, and

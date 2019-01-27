@@ -407,6 +407,33 @@ void ReductUTest::test_plus_minus(void)
 	Handle eone = eval->eval_h("(Variable \"x\")");
 	TS_ASSERT_EQUALS(one, eone);
 
+	// ========================================================
+	Handle d6t2 = eval->eval_h(
+		"(cog-execute! (Divide (Number 6) (Times (Variable \"x\") (Number 2))))"
+	);
+	printf("expecting 3/x: %s\n", d6t2->to_short_string().c_str());
+
+	Handle d3 = eval->eval_h("(Divide (Number 3) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(d6t2, d3);
+
+	// ---------
+	Handle d6x2 = eval->eval_h(
+		"(cog-execute! (Divide (Times (Number 6) (Variable \"x\")) (Number 2)))"
+	);
+	printf("expecting 3x: %s\n", d6x2->to_short_string().c_str());
+
+	Handle x3 = eval->eval_h("(Times (Variable \"x\") (Number 3))");
+	TS_ASSERT_EQUALS(d6x2, x3);
+
+	// ---------
+	Handle done = eval->eval_h(
+		"(cog-execute! (Divide (Times (Variable \"x\") (Number 5)) (Number 5)))"
+	);
+	printf("expecting x: %s\n", done->to_short_string().c_str());
+
+	Handle edone = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(done, edone);
+
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -84,6 +84,50 @@ ValuePtr DivideLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
 		return vi;
 
+	// Collapse (3 / (5 * x)) and (3 / (x * 5))
+	if (NUMBER_NODE == vitype and TIMES_LINK == vjtype)
+	{
+		Handle multiplier(HandleCast(vj)->getOutgoingAtom(0));
+		Handle multiplicand(HandleCast(vj)->getOutgoingAtom(1));
+		if (NUMBER_NODE == multiplier->get_type())
+		{
+			double quot = get_double(vi) / get_double(multiplier);
+			Handle hquot(createNumberNode(quot));
+			return createDivideLink(hquot, multiplicand);
+		}
+		if (NUMBER_NODE == multiplicand->get_type())
+		{
+			double quot = get_double(vi) / get_double(multiplicand);
+			Handle hquot(createNumberNode(quot));
+			return createDivideLink(hquot, multiplier);
+		}
+	}
+
+	// Collapse ((x * 13) / 6) and ((13 * x) / 6)
+	if (TIMES_LINK == vitype and NUMBER_NODE == vjtype)
+	{
+		Handle multiplier(HandleCast(vi)->getOutgoingAtom(0));
+		Handle multiplicand(HandleCast(vi)->getOutgoingAtom(1));
+		if (NUMBER_NODE == multiplier->get_type())
+		{
+			double quot = get_double(multiplier) / get_double(vj);
+			Handle hquot(createNumberNode(quot));
+			if (content_eq(hquot, one))
+				return multiplicand;
+			return createTimesLink(multiplicand, hquot);
+		}
+		if (NUMBER_NODE == multiplicand->get_type())
+		{
+			double quot = get_double(multiplicand) / get_double(vj);
+			Handle hquot(createNumberNode(quot));
+			if (content_eq(hquot, one))
+				return multiplier;
+			return createTimesLink(multiplier, hquot);
+		}
+	}
+
+	// ------------------------------------------------------------
+	// Values 
 	// Scalar divided by vector
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
