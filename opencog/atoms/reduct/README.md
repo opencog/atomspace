@@ -47,6 +47,10 @@ correct solution for term reduction would be to create an actual algebra
 system: that is, to write a bunch of rule-engine rules that perform
 algebraic reduction. This would be more maintainable than reduct in C++.
 
+By "term reduction", I mean reducing expressions like x+x to 2x, or
+reducing x+0 to just x. Mor complex examples, too: 6(x/2) == 3x and
+so on.
+
 ## Examples
 I beleive the following examples all work. See also the atomspace
 [examples](../../../examples/atomspace) directory for more examples.
