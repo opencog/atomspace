@@ -97,6 +97,11 @@ ValuePtr StrengthOfLink::execute() const
 
 	for (const Handle& h : _outgoing)
 	{
+		// Cannot take the strength of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
 		strengths.push_back(h->getTruthValue()->get_mean());
 	}
 
@@ -139,6 +144,11 @@ ValuePtr ConfidenceOfLink::execute() const
 
 	for (const Handle& h : _outgoing)
 	{
+		// Cannot take the confidence of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
 		confids.push_back(h->getTruthValue()->get_confidence());
 	}
 
