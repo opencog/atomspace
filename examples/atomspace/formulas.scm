@@ -90,3 +90,37 @@
 		(List
 			(Concept "A")
 			(Concept "B"))))
+
+
+; The PedicateFormulaLink behaves just like any other algebraic
+; expression with VariableNodes in it. When executed, it might
+; reduce a bit, but that is all.
+(cog-execute!
+	(PredicateFormula
+		(Plus (Number 41)
+			(Minus
+				(Number 1)
+				(Times
+					(StrengthOf (Variable "$VA"))
+					(StrengthOf (Variable "$VB")))))
+			(Times
+				(ConfidenceOf (Variable "$VA"))
+				(ConfidenceOf (Variable "$VB")))))
+
+(cog-execute!
+	(PutLink
+		(VariableList (Variable "$VA") (Variable "$VB"))
+		(Evaluation
+			; Compute TV = (1-sA*sB, cA*cB)
+			(PredicateFormula
+				(Minus
+					(Number 1)
+					(Times
+						(StrengthOf (Variable "$VA"))
+						(StrengthOf (Variable "$VB"))))
+				(Times
+					(ConfidenceOf (Variable "$VA"))
+					(ConfidenceOf (Variable "$VB"))))
+			(List
+				(Variable "$VA") (Variable "$VB")))
+	(Set (List (Concept "A") (Concept "B")))))
