@@ -60,6 +60,7 @@ public:
 	void test_arithmetic(void);
 	void test_setlink(void);
 	void test_minus(void);
+	void test_plus_minus(void);
 	void test_execution(void);
 };
 
@@ -312,6 +313,44 @@ void ReductUTest::test_minus(void)
 		"(Divide (Number 1) (Variable \"$x\"))"
 	);
 	TS_ASSERT_EQUALS(dx, edx);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test Plus with Minus.
+ */
+void ReductUTest::test_plus_minus(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle p43m1 = eval->eval_h(
+		"(cog-execute! (Plus (Number 43) (Minus (Variable \"x\") (Number 1))))"
+	);
+	printf("expecting x+42: %s\n", p43m1->to_short_string().c_str());
+
+	Handle p42 = eval->eval_h("(Plus (Variable \"x\") (Number 42))");
+	TS_ASSERT_EQUALS(p43m1, p42);
+
+	// ---------
+	Handle p41p1 = eval->eval_h(
+		"(cog-execute! (Plus (Number 41) (Minus (Number 1) (Variable \"x\"))))"
+	);
+	printf("expecting 42-x: %s\n", p41p1->to_short_string().c_str());
+
+	Handle m42 = eval->eval_h("(Minus (Number 42) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(p41p1, m42);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (Plus (Number 2) (Minus (Variable \"x\") (Number 2))))"
+	);
+	printf("expecting x: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(zero, ezero);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
