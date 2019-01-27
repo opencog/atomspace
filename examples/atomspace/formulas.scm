@@ -107,20 +107,43 @@
 				(ConfidenceOf (Variable "$VA"))
 				(ConfidenceOf (Variable "$VB")))))
 
-(cog-execute!
-	(PutLink
-		(VariableList (Variable "$VA") (Variable "$VB"))
-		(Evaluation
-			; Compute TV = (1-sA*sB, cA*cB)
-			(PredicateFormula
-				(Minus
-					(Number 1)
+; Beta-reducation works as normal. The below will create an
+; EvaluationLink with ConceptNode A and B in it, and will set the
+; truth value according to the formula.
+(define the-put-result
+	(cog-execute!
+		(PutLink
+			(VariableList (Variable "$VA") (Variable "$VB"))
+			(Evaluation
+				; Compute TV = (1-sA*sB, cA*cB)
+				(PredicateFormula
+					(Minus
+						(Number 1)
+						(Times
+							(StrengthOf (Variable "$VA"))
+							(StrengthOf (Variable "$VB"))))
 					(Times
-						(StrengthOf (Variable "$VA"))
-						(StrengthOf (Variable "$VB"))))
-				(Times
-					(ConfidenceOf (Variable "$VA"))
-					(ConfidenceOf (Variable "$VB"))))
-			(List
-				(Variable "$VA") (Variable "$VB")))
-	(Set (List (Concept "A") (Concept "B")))))
+						(ConfidenceOf (Variable "$VA"))
+						(ConfidenceOf (Variable "$VB"))))
+				(List
+					(Variable "$VA") (Variable "$VB")))
+		(Set (List (Concept "A") (Concept "B"))))))
+
+; The scheme variable `the-put-result` contains a SetLink with the
+; result in it. Lets unwrap it, so that `evelnk` is just the
+; EvaluationLink. And tehn we play a little trick.
+(define evelnk (cog-outgoing-atom the-put-result 0))
+
+; Change the truth value on the two concept nodes ...
+(Concept "A" (stv 0.3 0.5))
+(Concept "B" (stv 0.4 0.5))
+
+; Re-evaluate the EvaluationLink. Note the TV has been updated!
+(cog-evaluate! evelnk)
+
+; Do it again, for good luck!
+(Concept "A" (stv 0.1 0.99))
+(Concept "B" (stv 0.1 0.99))
+
+; Re-evaluate the EvaluationLink. The TV is again recomputed!
+(cog-evaluate! evelnk)
