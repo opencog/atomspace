@@ -353,6 +353,34 @@ void ReductUTest::test_plus_minus(void)
 	TS_ASSERT_EQUALS(zero, ezero);
 
 	// ========================================================
+
+	Handle m43p1 = eval->eval_h(
+		"(cog-execute! (Minus (Number 43) (Plus (Variable \"x\") (Number 1))))"
+	);
+	printf("expecting 42-x: %s\n", m43p1->to_short_string().c_str());
+
+	Handle m42x = eval->eval_h("(Minus (Number 42) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(m43p1, m42x);
+
+	// ---------
+	Handle p1m43 = eval->eval_h(
+		"(cog-execute! (Minus (Plus (Number 1) (Variable \"x\")) (Number 43)))"
+	);
+	printf("expecting x-42: %s\n", p1m43->to_short_string().c_str());
+
+	Handle mx42 = eval->eval_h("(Plus (Variable \"x\") (Number -42))");
+	TS_ASSERT_EQUALS(p1m43, mx42);
+
+	// ---------
+	Handle mpzero = eval->eval_h(
+		"(cog-execute! (Minus (Plus (Variable \"x\") (Number 2)) (Number 2)))"
+	);
+	printf("expecting x: %s\n", mpzero->to_short_string().c_str());
+
+	Handle emp = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(mpzero, emp);
+
+	// ========================================================
 	Handle t6d2 = eval->eval_h(
 		"(cog-execute! (Times (Number 6) (Divide (Variable \"x\") (Number 2))))"
 	);

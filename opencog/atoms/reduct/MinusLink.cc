@@ -24,6 +24,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
+#include "PlusLink.h"
 
 using namespace opencog;
 
@@ -84,6 +85,49 @@ ValuePtr MinusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return vi;
 
+	// Collapse (3 - (5 + x)) and (3 - (x + 5))
+	if (NUMBER_NODE == vitype and PLUS_LINK == vjtype)
+	{
+		Handle summand(HandleCast(vj)->getOutgoingAtom(0));
+		Handle addend(HandleCast(vj)->getOutgoingAtom(1));
+		if (NUMBER_NODE == summand->get_type())
+		{
+			double sum = get_double(vi) - get_double(summand);
+			Handle hsum(createNumberNode(sum));
+			return createMinusLink(hsum, addend);
+		}
+		if (NUMBER_NODE == addend->get_type())
+		{
+			double sum = get_double(vi) - get_double(addend);
+			Handle hsum(createNumberNode(sum));
+			return createMinusLink(hsum, summand);
+		}
+	}
+
+	// Collapse ((x + 13) - 6) and ((13 + x) - 6)
+	if (PLUS_LINK == vitype and NUMBER_NODE == vjtype)
+	{
+		Handle summand(HandleCast(vi)->getOutgoingAtom(0));
+		Handle addend(HandleCast(vi)->getOutgoingAtom(1));
+		if (NUMBER_NODE == summand->get_type())
+		{
+			double diff = get_double(summand) - get_double(vj);
+			Handle hdiff(createNumberNode(diff));
+			if (content_eq(hdiff, zero))
+				return addend;
+			return createPlusLink(addend, hdiff);
+		}
+		if (NUMBER_NODE == addend->get_type())
+		{
+			double diff = get_double(addend) - get_double(vj);
+			Handle hdiff(createNumberNode(diff));
+			if (content_eq(hdiff, zero))
+				return summand;
+			return createPlusLink(summand, hdiff);
+		}
+	}
+	// ------------------------------------------------------------------
+	// Values
 	// Scalar minus vector
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
