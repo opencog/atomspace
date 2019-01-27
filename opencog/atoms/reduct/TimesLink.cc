@@ -23,6 +23,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include "DivideLink.h"
 #include "TimesLink.h"
 
 using namespace opencog;
@@ -120,6 +121,32 @@ ValuePtr TimesLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		return vj;
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
 		return vi;
+
+   if (nameserver().isA(vjtype, NUMBER_NODE))
+   {
+      std::swap(vi, vj);
+      std::swap(vitype, vjtype);
+   }
+	// Collapse (3 * (5 / x)) and (13 * (x / 6))
+	if (DIVIDE_LINK == vjtype and NUMBER_NODE == vitype)
+	{
+		Handle dividend(HandleCast(vj)->getOutgoingAtom(0));
+		Handle divisor(HandleCast(vj)->getOutgoingAtom(1));
+		if (NUMBER_NODE == dividend->get_type())
+		{
+			double prod = get_double(vi) * get_double(dividend);
+			Handle hprod(createNumberNode(prod));
+			return createDivideLink(hprod, divisor);
+		}
+		if (NUMBER_NODE == divisor->get_type())
+		{
+			double quot = get_double(vi) / get_double(divisor);
+			Handle hquot(createNumberNode(quot));
+			if (content_eq(hquot, one))
+				return dividend;
+			return createTimesLink(hquot, dividend);
+		}
+	}
 
 	// Swap order, make things easier below.
 	if (nameserver().isA(vitype, FLOAT_VALUE))
