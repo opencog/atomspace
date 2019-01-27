@@ -493,6 +493,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return beta_reduce(expr, *_vmap);
 	}
 
+	// Do not reduce PredicateFormulaLink. That is because it contains
+	// formulas that we will need to re-evaluate in the future, so we
+	// must not clobber them.
+	if (PREDICATE_FORMULA_LINK == t)
+	{
+		return expr;
+	}
+
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
 	// beta-reduce it, but don't execute it. Consume the DontExecLink.
 	// Actually, don't consume it. See discussion at issue #1303.
