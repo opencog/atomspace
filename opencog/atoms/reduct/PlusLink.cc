@@ -23,6 +23,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include "MinusLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -83,7 +84,7 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		return createNumberNode(sum);
 	}
 
-	// If either one is the unit, then just drop it.
+	// If adding zero, just drop the zero.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
 		return vj;
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
@@ -125,6 +126,34 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 	{
 		Handle two(createNumberNode("2"));
 		return createTimesLink(hvi, two) -> execute();
+	}
+
+	// Swap order, to make the Minus handling below easier.
+	if (nameserver().isA(vitype, NUMBER_NODE))
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Collapse (3 + (5 - x)) and (13 + (x - 6))
+	if (MINUS_LINK == vitype and NUMBER_NODE == vjtype)
+	{
+		Handle minuend(HandleCast(vi)->getOutgoingAtom(0));
+		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
+		if (NUMBER_NODE == minuend->get_type())
+		{
+			double sum = get_double(vj) + get_double(minuend);
+			Handle hsum(createNumberNode(sum));
+			return createMinusLink(hsum, subtrahend);
+		}
+		if (NUMBER_NODE == subtrahend->get_type())
+		{
+			double diff = get_double(vj) - get_double(subtrahend);
+			Handle hdiff(createNumberNode(diff));
+			if (content_eq(hdiff, zero))
+				return minuend;
+			return createPlusLink(minuend, hdiff);
+		}
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -207,4 +236,5 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);
+
 // ============================================================
