@@ -271,7 +271,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				else
 				{
 					try {
-						EvaluationLink::do_evaluate(_as, plo, true);
+						TruthValuePtr tvp =
+							EvaluationLink::do_evaluate(_as, plo, true);
+						plo->setTruthValue(tvp);
 					}
 					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
