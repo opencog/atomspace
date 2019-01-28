@@ -31,12 +31,8 @@
 			(Concept "A")
 			(Concept "B"))))
 
-; More typically, one wishes to have a formula in the abstract,
-; with variables in it, so that one can apply it in any one of
-; a number of different situations. In the below, the variables
-; are automatically reduced with the Atoms in the ListLink, and
-; then the formula is evaluated to obtain a TruthValue.
-(cog-evaluate!
+; Formula with variables
+(define eval-formula
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
 		(PredicateFormula
@@ -54,37 +50,27 @@
 
 ; Optionally, you can wrap formulas with LambdaLinks. This doesn't
 ; really change anything; formulas work fine without LambdaLinks.
-(cog-evaluate!
+(define eval-lambda
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
 		(PredicateFormula
-			(Lambda (Minus
-				(Number 1)
+			(Lambda
+				; Lambda without a decl, intentionally so.
+				; (NopeVariableList (Variable "$X") (Variable "$Y"))
+				(Minus
+					(Number 1)
+					(Times
+						(StrengthOf (Variable "$X"))
+						(StrengthOf (Variable "$Y")))))
+			(Lambda
+				(VariableList (Variable "$X") (Variable "$Y"))
 				(Times
-					(StrengthOf (Variable "$X"))
-					(StrengthOf (Variable "$Y")))))
-			(Lambda (Times
-				(ConfidenceOf (Variable "$X"))
-				(ConfidenceOf (Variable "$Y")))))
+					(ConfidenceOf (Variable "$X"))
+					(ConfidenceOf (Variable "$Y")))))
 		(List
 			(Concept "A")
 			(Concept "B"))))
 
-
-; The PedicateFormulaLink behaves just like any other algebraic
-; expression with VariableNodes in it. When executed, it might
-; reduce a bit, but that is all.
-(cog-execute!
-	(PredicateFormula
-		(Plus (Number 41)
-			(Minus
-				(Number 1)
-				(Times
-					(StrengthOf (Variable "$VA"))
-					(StrengthOf (Variable "$VB")))))
-			(Times
-				(ConfidenceOf (Variable "$VA"))
-				(ConfidenceOf (Variable "$VB")))))
 
 ; Beta-reducation works as normal. The below will create an
 ; EvaluationLink with ConceptNode A and B in it, and will set the
