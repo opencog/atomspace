@@ -658,3 +658,5 @@ CONNECTOR <- LINK              // Link-grammar connector
 CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+COND_LINK <- FUNCTION_LINK
