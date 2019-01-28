@@ -237,8 +237,7 @@ static HandleSeq get_seq(const Handle& cargs)
 
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
-                                  const Handle& cargs,
-                                  bool silent)
+                                  const Handle& cargs)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -264,7 +263,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 
 		// At this point, we expect a FunctionLink of some kind.
 		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throwSyntaxException(silent, "Expecting a FunctionLink");
+			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
 
 		// If the FunctionLink has free variables in it,
 		// reduce them with the provided arguments.
@@ -598,6 +597,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (PREDICATE_FORMULA_LINK == t)
 	{
+		// A shortened, argument-free version of eval_formula()
 		std::vector<double> nums;
 		for (const Handle& h: evelnk->getOutgoingSet())
 		{
@@ -608,7 +608,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			}
 
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-				throwSyntaxException(silent, "Expecting a FunctionLink");
+				throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
 
 			ValuePtr v(FunctionLinkCast(h)->execute());
 			FloatValuePtr fv(FloatValueCast(v));
@@ -705,7 +705,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return eval_formula(defn, cargs, silent);
+			return eval_formula(defn, cargs);
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -725,7 +725,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return eval_formula(pn, cargs, silent);
+		return eval_formula(pn, cargs);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
