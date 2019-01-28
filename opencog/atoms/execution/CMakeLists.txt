@@ -14,6 +14,7 @@ ADD_LIBRARY (execution
 	Instantiator.cc
 	MapLink.cc
 	LibraryManager.cc
+	CondLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -54,5 +55,6 @@ ENDIF (HAVE_GUILE)
 # are fixed, first.
 INSTALL (FILES
 	MapLink.h
+	CondLink.h
 	DESTINATION "include/opencog/atoms/core"
 )
