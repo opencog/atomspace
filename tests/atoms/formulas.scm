@@ -1,30 +1,17 @@
 ;
 ; formulas.scm -- Declaring formulas that compute truth values.
 ;
-; The rule engine, PLN and other subsystems need to be able to compute
-; and alter truth values. If those formulas are known a-priori, then
-; thay can be hard-coded into GroundedPredicateNodes.  However, it is
-; possible that those formulas are not yet known: that they will be
-; learned using some learning algorithm, for example, MOSES, or maybe
-; the Pattern Miner, or some neural network.
-;
-; In this case, the formulas need to be placed where they can be
-; accessed during computation: in the AtomSpace. The example below
-; shows how formulas can be declared in the AtomSpace, but in such a
-; way that they can also be evaluated to yeild an actual truth value,
-; which is then attached to some Atom.
+; This is a modified copy of an example program. It helps verify that
+; the example actually works.
 ;
 (use-modules (opencog) (opencog exec))
 
 ; The StrengthOfLink returns a single floating-point number,
 ; the strength of a TruthValue.
-(Concept "A" (stv 0.8 1.0))
-(cog-execute! (StrengthOf (Concept "A")))
+(define atom-a (Concept "A" (stv 0.8 1.0)))
+(define atom-b (Concept "B" (stv 0.6 0.9)))
 
-; The demo needs at least one more Atom.
-(Concept "B" (stv 0.6 0.9))
-
-; Multiply the strength of the TV's of two atoms.
+; Multiple the strength of the TV's of two atoms.
 (cog-execute!
 	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 
@@ -133,18 +120,18 @@
 ; The scheme variable `the-put-result` contains a SetLink with the
 ; result in it. Lets unwrap it, so that `evelnk` is just the
 ; EvaluationLink. And tehn we play a little trick.
-(define evelnk (cog-outgoing-atom the-put-result 0))
+; (define evelnk (cog-outgoing-atom the-put-result 0))
 
 ; Change the truth value on the two concept nodes ...
-(Concept "A" (stv 0.3 0.5))
-(Concept "B" (stv 0.4 0.5))
+; (Concept "A" (stv 0.3 0.5))
+; (Concept "B" (stv 0.4 0.5))
 
 ; Re-evaluate the EvaluationLink. Note the TV has been updated!
-(cog-evaluate! evelnk)
+; (cog-evaluate! evelnk)
 
 ; Do it again, for good luck!
-(Concept "A" (stv 0.1 0.99))
-(Concept "B" (stv 0.1 0.99))
+; (Concept "A" (stv 0.1 0.99))
+; (Concept "B" (stv 0.1 0.99))
 
 ; Re-evaluate the EvaluationLink. The TV is again recomputed!
-(cog-evaluate! evelnk)
+; (cog-evaluate! evelnk)

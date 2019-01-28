@@ -1,6 +1,9 @@
 
 ADD_SUBDIRECTORY (truthvalue)
+
 IF(HAVE_GUILE)
+	ADD_CXXTEST(HashUTest)
+	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest smob atomspace)
 	ADD_CXXTEST(MapLinkUTest)
@@ -19,8 +22,8 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(PutLinkUTest execution smob atomspace)
 	ADD_CXXTEST(QuotationUTest)
 	TARGET_LINK_LIBRARIES(QuotationUTest execution smob atomspace)
-	ADD_CXXTEST(HashUTest)
-	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
+	ADD_CXXTEST(FormulaUTest)
+	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
