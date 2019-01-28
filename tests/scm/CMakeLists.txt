@@ -43,4 +43,8 @@ IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
 	SET_PROPERTY(TEST SCMOpenogPython
 		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
+
+	ADD_GUILE_TEST(SCMOpencogTestRunnerArity scm-test-arity.scm)
+	SET_PROPERTY(TEST SCMOpencogTestRunnerArity
+                PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
 ENDIF (HAVE_CYTHON)

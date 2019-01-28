@@ -7,7 +7,7 @@ cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
     #   Handle stub_bindlink(AtomSpace*, Handle);
     #
     cdef cHandle c_stub_bindlink "stub_bindlink" (cAtomSpace*, cHandle)
-    cdef cHandle c_execute_atom "do_execute"(cAtomSpace*, cHandle)
+    cdef cHandle c_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
 
 
 cdef extern from "opencog/query/BindLinkAPI.h" namespace "opencog":
