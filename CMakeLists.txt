@@ -526,6 +526,11 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
+	ADD_CUSTOM_TARGET(test_guile
+		WORKING_DIRECTORY tests/scm
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Guile and Python-bridge tests..."
+	)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
 		WORKING_DIRECTORY tests/query
