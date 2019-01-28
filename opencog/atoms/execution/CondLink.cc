@@ -67,6 +67,15 @@ CondLink::CondLink(const HandleSeq &oset, Type t)
 }
 
 Handle CondLink::execute(AtomSpace *scratch) const
-{}
+{
+	TruthValuePtr tvp;
+	Instantiator inst(scratch);
+	for (unsigned i = 0; i < conds.size(); ++i) {
+		tvp = EvaluationLink::do_evaluate(scratch, conds[i]);
+		if (tvp->get_mean() > 0.5)
+			return HandleCast(inst.instantiate(exps[i], HandleMap()));
+	}
+	return HandleCast(inst.instantiate(def_exp, HandleMap()));
+}
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)

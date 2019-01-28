@@ -27,6 +27,7 @@
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/MapLink.h>
+#include <opencog/atoms/execution/CondLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include "Instantiator.h"
@@ -436,6 +437,21 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		}
 	}
 
+	if (COND_LINK == t)
+	{
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+			CondLinkPtr clp(CondLinkCast(createLink(oset_results, t)));
+			return clp->execute(_as);
+		}
+		else
+		{
+			CondLinkPtr clp(CondLinkCast(expr));
+			return clp->execute(_as);
+		}
+	}
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
