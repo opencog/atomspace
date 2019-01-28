@@ -155,7 +155,7 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
 
 	Instantiator inst(as);
@@ -176,7 +176,7 @@ static TruthValuePtr identical(const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "IdenticalLink expects two arguments");
 
 	if (oset[0] == oset[1])
@@ -190,7 +190,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "EqualLink expects two arguments");
 
 	Instantiator inst(as);
@@ -661,7 +661,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 {
 	if (2 != sna.size())
 	{
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "Incorrect arity for an EvaluationLink!");
 	}
 	return do_evaluate(as, sna[0], sna[1], silent);
@@ -703,14 +703,14 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
-			throw RuntimeException(TRACE_INFO,
+			throw SyntaxException(TRACE_INFO,
 				"Expecting definition to be a LambdaLink, got %s",
 				defn->to_string().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(get_args(cargs));
+		Handle reduct = lam->beta_reduce(get_seq(cargs));
 		return do_evaluate(as, reduct, silent);
 	}
 
@@ -774,7 +774,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return applier->apply_tv(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
-			 "Cannot evaluate scheme GroundedPredicateNode!");
+			"This binary does not have scheme support in it; "
+			"Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */
 	}
 
@@ -790,7 +791,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return applier.apply_tv(as, schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
-			 "Cannot evaluate python GroundedPredicateNode!");
+			"This binary does not have python support in it; "
+			"Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
 	}
 
@@ -819,7 +821,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 			if (silent)
 				throw NotEvaluatableException();
 
-			throw RuntimeException(TRACE_INFO,
+			throw SyntaxException(TRACE_INFO,
 			                       "Invalid return value from predicate %s\nArgs: %s",
 			                       pn->to_string().c_str(),
 			                       cargs->to_string().c_str());
