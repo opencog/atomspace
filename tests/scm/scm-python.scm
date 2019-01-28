@@ -8,9 +8,10 @@
 (test-begin t)
 
 ; All that we do here is to make sure that python doesn't crash.
-; Currently, `python-eval` returns an empty string.
+; `python-eval` returns whatever python returned, as a string.
 (define rc (python-eval "print ('Hello world\\n', 2+2)"))
 
-(test-assert "python-eval is borken" (string=? rc ""))
+; Python print returns 'None'
+(test-assert "python-eval is borken" (string=? rc "None"))
 
 (test-end t)
