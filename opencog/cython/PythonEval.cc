@@ -1482,20 +1482,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
-    // This is the cogserver shell-freindly evaluator. We must
-    // stop all exceptions thrown in other layers, or else we
-    // will crash the cogserver. Pass the exception message to
-    // the user, who can read and contemplate it: it is almost
-    // surely a syntax error in the python code.
-    try
-    {
-        this->apply_script(_input_line);
-    }
-    catch (const RuntimeException &e)
-    {
-        _result += e.get_message();
-        _result += "\n";
-    }
+    this->apply_script(_input_line);
+
     _input_line = "";
     _paren_count = 0;
     _pending_input = false;
