@@ -98,6 +98,32 @@ EvaluationLink::EvaluationLink(const Link& l)
 		    "Expecting an EvaluationLink");
 }
 
+/// We get exceptions in two differet ways: (a) due to user error,
+/// in which case we need to report the error to the user, and
+/// (b) occasionally expected errors, which might occur during normal
+/// processing, and should be ignored. The "normal" errors should not
+/// be reported to the user; nor should they be printed to the log-file.
+/// Using a try-catch block is enough to prevent them from being passed
+/// to the user; but it is not enough to prevent them from printing.
+/// Thus, we use a bool flag to not print. (It would be nice if C++
+/// offered a way to automate this in the catch-block, so that the
+/// pesky "silent" flag was not needed.)
+///
+/// DefaultPatternMatchCB.cc and also Instantiator.cc both catch
+/// the NotEvaluatableException thrown here.  Basically, these
+/// know that they might be sending non-evaluatable atoms here, and
+/// don't want to garbage up the log files with bogus errors.
+///
+void throwSyntaxException(bool silent, const char* message...)
+{
+	if (silent)
+		throw NotEvaluatableException();
+	va_list args;
+	va_start(args, message);
+	throw SyntaxException(TRACE_INFO, message, args);
+	va_end(args);
+}
+
 /// Pattern matching hack. The pattern matcher returns sets of atoms;
 /// if that set contains a single number, then unwrap it.
 /// See issue #1502 which proposes to eliminate this SetLink hack.
@@ -238,12 +264,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 
 		// At this point, we expect a FunctionLink of some kind.
 		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-		{
-			if (silent)
-				throw NotEvaluatableException();
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a FunctionLink");
-		}
+			throwSyntaxException(silent, "Expecting a FunctionLink");
 
 		// If the FunctionLink has free variables in it,
 		// reduce them with the provided arguments.
@@ -585,13 +606,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				nums.push_back(NumberNodeCast(h)->get_value());
 				continue;
 			}
+
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-			{
-				if (silent)
-					throw NotEvaluatableException();
-				throw SyntaxException(TRACE_INFO,
-					"Expecting a FunctionLink");
-			}
+				throwSyntaxException(silent, "Expecting a FunctionLink");
+
 			ValuePtr v(FunctionLinkCast(h)->execute());
 			FloatValuePtr fv(FloatValueCast(v));
 			nums.push_back(fv->value()[0]);
@@ -623,22 +641,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return TruthValueCast(pap);
 	}
 
-	// We get exceptions here in two differet ways: (a) due to user
-	// error, in which case we need to print an error, and (b) intentionally,
-	// e.g. when Instantiator calls us, knowing it will get an error,
-	// in which case, printing the exception message is a waste of CPU
-	// time...
-	//
-	// DefaultPatternMatchCB.cc and also Instantiator wants to catch
-	// the NotEvaluatableException thrown here.  Basically, these
-	// know that they might be sending non-evaluatable atoms here, and
-	// don't want to garbage up the log files with bogus errors.
-	if (silent)
-		throw NotEvaluatableException();
-
-	throw SyntaxException(TRACE_INFO,
+	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
+
+	return TruthValuePtr(); // not reached
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
@@ -814,18 +821,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 			result = *res;
 			free(res);
 		}
-		if (nullptr == result) {
-			// If silent is true, return a simpler and non-logged
-			// exception, which may, in some contexts, be considerably
-			// faster than the one below.
-			if (silent)
-				throw NotEvaluatableException();
 
-			throw SyntaxException(TRACE_INFO,
-			                       "Invalid return value from predicate %s\nArgs: %s",
-			                       pn->to_string().c_str(),
-			                       cargs->to_string().c_str());
-		}
+		if (nullptr == result)
+			throwSyntaxException(silent,
+			        "Invalid return value from predicate %s\nArgs: %s",
+			        pn->to_string().c_str(),
+			        cargs->to_string().c_str());
+
 		return result;
 	}
 
