@@ -53,6 +53,7 @@ public:
 	void test_formula();
 	void test_evaluation();
 	void test_evalform();
+	void test_putlink();
 };
 
 #define MAXERR 1.0e-12
@@ -180,6 +181,62 @@ void FormulaUTest::test_evalform()
 	fvp = FloatValueCast(ValueCast(tvp));
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.52), MAXERR);
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.9), MAXERR);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_putlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hset = _eval.eval_h("(cog-execute! put-link)");
+	Handle hevo = hset->getOutgoingAtom(0);
+
+	TruthValuePtr tvp = hevo->getTruthValue();
+	printf("Putter result=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	FloatValuePtr fvp = FloatValueCast(ValueCast(tvp));
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.52), MAXERR);
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.9), MAXERR);
+
+	_eval.eval("(define putex (cog-execute! put-link))");
+	_eval.eval("(define pevu (cog-outgoing-atom putex 0))");
+
+	// --------------
+	_eval.eval("(Concept \"A\" (stv 0.3 0.5))");
+	_eval.eval("(Concept \"B\" (stv 0.4 0.5))");
+
+	tvp = _eval.eval_tv("(cog-evaluate! pevu)");
+	printf("New pevu=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	fvp = FloatValueCast(ValueCast(tvp));
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.88), MAXERR);
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.25), MAXERR);
+
+	tvp = _eval.eval_tv("(cog-tv pevu)");
+	printf("Pevu-tv=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	fvp = FloatValueCast(ValueCast(tvp));
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.88), MAXERR);
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.25), MAXERR);
+
+	// --------------
+	_eval.eval("(Concept \"A\" (stv 0.1 0.99))");
+	_eval.eval("(Concept \"B\" (stv 0.1 0.99))");
+
+	tvp = _eval.eval_tv("(cog-evaluate! pevu)");
+	printf("New pevu=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	fvp = FloatValueCast(ValueCast(tvp));
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.99), MAXERR);
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.9801), MAXERR);
+
+	tvp = _eval.eval_tv("(cog-tv pevu)");
+	printf("Pevu-tv=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	fvp = FloatValueCast(ValueCast(tvp));
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.99), MAXERR);
+	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.9801), MAXERR);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
