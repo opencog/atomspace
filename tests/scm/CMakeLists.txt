@@ -40,11 +40,11 @@ SET_PROPERTY(TEST SCMOpencogTestRunnerPass SCMOpencogTestRunnerFail
 
 # Guile-python bridge requires python
 IF (HAVE_CYTHON)
-	ADD_GUILE_TEST(SCMOpenogPython scm-opencog-python.scm)
-	SET_PROPERTY(TEST SCMOpenogPython
+	ADD_GUILE_TEST(SCMPython scm-opencog-python.scm)
+	SET_PROPERTY(TEST SCMPython
 		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
 
-	ADD_GUILE_TEST(SCMOpencogTestRunnerArity scm-test-arity.scm)
-	SET_PROPERTY(TEST SCMOpencogTestRunnerArity
+	ADD_GUILE_TEST(SCMPythonArity scm-test-arity.scm)
+	SET_PROPERTY(TEST SCMPythonArity
                 PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
 ENDIF (HAVE_CYTHON)
