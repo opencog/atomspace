@@ -40,7 +40,7 @@
 			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 		(Times (ConfidenceOf (Concept "A")) (ConfidenceOf (Concept "B")))))
 
-; The values do not need to be formulas; tehy can be hard-coded numbers.
+; The values do not need to be formulas; they can be hard-coded numbers.
 (cog-evaluate!
 	(PredicateFormula (Number 0.7) (Number 0.314)))
 

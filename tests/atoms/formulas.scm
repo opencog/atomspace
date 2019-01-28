@@ -6,30 +6,21 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-; The StrengthOfLink returns a single floating-point number,
-; the strength of a TruthValue.
 (define atom-a (Concept "A" (stv 0.8 1.0)))
 (define atom-b (Concept "B" (stv 0.6 0.9)))
 
-; Multiple the strength of the TV's of two atoms.
-(cog-execute!
+; Multiply the strength of the TV's of two atoms.
+(define prod
 	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 
-; Create a SimpleTruthValue with a non-trivial formula:
-; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strenghts
-; and cA, cB are confidence values. The PredicateFormulaLink assembles
-; two floating-point values, and create a SimpleTruthValue out of them.
-;
-(cog-evaluate!
+(define stv-const (PredicateFormula (Number 0.7) (Number 0.314)))
+
+(define formula-stv
 	(PredicateFormula
 		(Minus
 			(Number 1)
 			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 		(Times (ConfidenceOf (Concept "A")) (ConfidenceOf (Concept "B")))))
-
-; The values do not need to be formulas; tehy can be hard-coded numbers.
-(cog-evaluate!
-	(PredicateFormula (Number 0.7) (Number 0.314)))
 
 ; The below computes a truth value, and attaches it to the
 ; EvaluationLink.
