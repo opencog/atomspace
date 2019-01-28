@@ -623,10 +623,10 @@ std::string PythonEval::build_python_error_message(
 
     // Construct the error message string.
     std::stringstream errorStringStream;
-    errorStringStream << "Python error ";
+    errorStringStream << "Python error";
 
     if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << "in " << function_name;
+        errorStringStream << " in" << function_name;
 
     PyObject* pyErrorString = PyObject_Str(pyError);
 #if PY_MAJOR_VERSION == 2
@@ -637,11 +637,12 @@ std::string PythonEval::build_python_error_message(
     if (pythonErrorString) {
         errorStringStream << ": " << pythonErrorString << ".";
     } else {
-        errorStringStream << ": Undefined Error";
+        errorStringStream << ": Undescribed Error.";
     }
 
     // Print the traceback, too, if it is provided.
-    if (pyTraceback) {
+    if (pyTraceback)
+    {
         PyObject* pyTBString = PyObject_Str(pyTraceback);
 #if PY_MAJOR_VERSION == 2
         char* tb = PyBytes_AsString(pyTBString);
