@@ -24,9 +24,9 @@
 
 ; The below computes a truth value, and attaches it to the
 ; EvaluationLink.
-(cog-evaluate!
+(define my-ev-link
 	(Evaluation
-		(PredicateFormula (Number 0.7) (Number 0.314))
+		(PredicateFormula (Number 0.75) (Number 0.628))
 		(List
 			(Concept "A")
 			(Concept "B"))))

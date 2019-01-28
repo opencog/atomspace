@@ -45,13 +45,21 @@
 	(PredicateFormula (Number 0.7) (Number 0.314)))
 
 ; The below computes a truth value, and attaches it to the
-; EvaluationLink.
-(cog-evaluate!
+; EvaluationLink. Let's demo this in three parts: first define it,
+; then evaluate it, then look at it.
+;
+(define my-ev-link
 	(Evaluation
 		(PredicateFormula (Number 0.7) (Number 0.314))
 		(List
 			(Concept "A")
 			(Concept "B"))))
+
+; Evaluate ...
+(cog-evaluate! my-ev-link)
+
+; Print.
+(display my-ev-link)
 
 ; More typically, one wishes to have a formula in the abstract,
 ; with variables in it, so that one can apply it in any one of
