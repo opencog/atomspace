@@ -675,7 +675,7 @@ void PythonEval::build_python_error_message(const char* function_name,
  * does everything that PyRun_SimpleString does except it does not
  * call PyErr_Print() and PyErr_Clear().
  */
-void PythonEval::execute_string(const char* command)
+std::string PythonEval::execute_string(const char* command)
 {
     // We use Py_file_input here, instead of Py_single_input, because
     // Py_single_input spews errors on blank lines.  However, the
@@ -693,11 +693,24 @@ void PythonEval::execute_string(const char* command)
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
 
+    std::string retval;
     if (pyResult)
+    {
+        PyObject* obrep = PyObject_Repr(pyResult);
+#if PY_MAJOR_VERSION < 3
+        retval = PyString_AsString(obrep);
+#else
+        PyObject* str = PyUnicode_AsEncodedString(obrep, "utf-8", "~E~");
+        retval = PyBytes_AS_STRING(str);
+#endif
+        Py_DECREF(obrep);
         Py_DECREF(pyResult);
+    }
 
     PyObject *f = PySys_GetObject((char *) "stdout");
     if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
+
+    return retval;
 }
 
 /**
@@ -1020,7 +1033,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject *pyError, *pyModule, *pyObject, *pyUserFunc;
+    PyObject *pyModule, *pyObject, *pyUserFunc;
     PyObject *pyDict;
     std::string functionName;
     std::string errorString;
@@ -1149,10 +1162,10 @@ std::string PythonEval::apply_script(const std::string& script)
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
-    this->execute_string(script.c_str());
+    std::string rc = execute_string(script.c_str());
 
     throw_on_error();
-    return "";
+    return rc;
 }
 
 void PythonEval::add_to_sys_path(std::string path)
@@ -1483,7 +1496,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
-    this->apply_script(_input_line);
+    _result = apply_script(_input_line);
 
     _input_line = "";
     _paren_count = 0;
