@@ -203,10 +203,16 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
-///
-static TruthValuePtr do_formula(const Handle& predform,
-                                const Handle& cargs,
-                                bool silent)
+static HandleSeq get_seq(const Handle& cargs)
+{
+	if (LIST_LINK == cargs->get_type()) return cargs->getOutgoingSet();
+	return HandleSeq(1, cargs);
+}
+
+/// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
+static TruthValuePtr eval_formula(const Handle& predform,
+                                  const Handle& cargs,
+                                  bool silent)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -226,13 +232,8 @@ static TruthValuePtr do_formula(const Handle& predform,
 		Handle flh(h);
 		if (LAMBDA_LINK == h->get_type())
 		{
-			LambdaLinkPtr lam(LambdaLinkCast(h));
-			Type atype = cargs->get_type();
-
-			// Set flp and fall through, where it is executed.
-			flh = lam->beta_reduce(atype == LIST_LINK ?
-				                     cargs->getOutgoingSet()
-			                        : HandleSeq(1, cargs));
+			// Set flh and fall through, where it is executed.
+			flh = LambdaLinkCast(h)->beta_reduce(get_seq(cargs));
 		}
 
 		// At this point, we expect a FunctionLink of some kind.
@@ -250,11 +251,7 @@ static TruthValuePtr do_formula(const Handle& predform,
 		const FreeVariables& fvars = flp->get_vars();
 		if (not fvars.empty())
 		{
-			Type atype = cargs->get_type();
-			flh = fvars.substitute_nocheck(flh,
-				atype == LIST_LINK ?
-					cargs->getOutgoingSet()
-					: HandleSeq(1, cargs));
+			flh = fvars.substitute_nocheck(flh, get_seq(cargs));
 			flp = FunctionLinkCast(flh);
 		}
 
@@ -701,7 +698,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return do_formula(defn, cargs, silent);
+			return eval_formula(defn, cargs, silent);
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -713,10 +710,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Type atype = cargs->get_type();
-		Handle reduct = lam->beta_reduce(atype == LIST_LINK ?
-		                                cargs->getOutgoingSet()
-		                                : HandleSeq(1, cargs));
+		Handle reduct = lam->beta_reduce(get_args(cargs));
 		return do_evaluate(as, reduct, silent);
 	}
 
@@ -724,7 +718,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return do_formula(pn, cargs, silent);
+		return eval_formula(pn, cargs, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
