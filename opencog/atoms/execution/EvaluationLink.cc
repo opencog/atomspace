@@ -300,7 +300,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Instantiator inst(scratch);
 		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
 
-		return do_evaluate(scratch, sna.at(0), args, silent);
+		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), args, silent));
+		evelnk->setTruthValue(tvp);
+		return tvp;
 	}
 	else if (IDENTICAL_LINK == t)
 	{
