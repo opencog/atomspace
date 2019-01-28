@@ -7,7 +7,7 @@
 
 (test-begin t)
 
-; All tht we do here is to make sure that python doesn't crash.
+; All that we do here is to make sure that python doesn't crash.
 ; Currently, `python-eval` returns an empty string.
 (define rc (python-eval "print ('Hello world\\n', 2+2)"))
 

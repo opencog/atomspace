@@ -612,7 +612,8 @@ void PythonEval::print_dictionary(PyObject* pyDict)
 /**
  * Build the Python error message for the current error.
  *
- * Only call this when PyErr_Occurred() returns a non-null PyObject*.
+ * This can only be called when PyErr_Occurred() returns a
+ * non-null PyObject*. Otherwise, there is undefined behavior.
  */
 void PythonEval::build_python_error_message(const char* function_name,
                                             std::string& errorMessage)
@@ -886,7 +887,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     {
         // Construct the error message and throw an exception.
         std::string errorString;
-        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        build_python_error_message(moduleFunction.c_str(), errorString);
+        PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
@@ -1064,7 +1066,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
-    // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
+    // PyObject_GetAttrString already returns new reference, so we
+    // do this only for PyDict_GetItemString().
     if(nullptr == pyObject) Py_INCREF(pyUserFunc);
     if(pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
@@ -1096,16 +1099,13 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     Py_DECREF(pyArguments);
 
     // Check for errors.
-    pyError = PyErr_Occurred();
-    if (pyError)
+    if (PyErr_Occurred())
     {
         // Construct the error message and throw an exception.
-        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        build_python_error_message(moduleFunction.c_str(), errorString);
+        PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
 
     // Release the GIL. No Python API allowed beyond this point.
@@ -1118,7 +1118,8 @@ void PythonEval::throw_on_error()
     if (PyErr_Occurred())
     {
         std::string errorString;
-        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
+        build_python_error_message(NO_FUNCTION_NAME, errorString);
+        PyErr_Clear();
 
         // If there was an error, throw an exception so the user knows the
         // script had a problem.
