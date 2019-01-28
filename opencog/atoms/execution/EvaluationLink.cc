@@ -98,8 +98,9 @@ EvaluationLink::EvaluationLink(const Link& l)
 		    "Expecting an EvaluationLink");
 }
 
-// Pattern matching hack. The pattern matcher returns sets of atoms;
-// if that set contains a single number, then unwrap it.
+/// Pattern matching hack. The pattern matcher returns sets of atoms;
+/// if that set contains a single number, then unwrap it.
+/// See issue #1502 which proposes to eliminate this SetLink hack.
 static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->get_type())
@@ -125,6 +126,8 @@ static NumberNodePtr unwrap_set(Handle h)
 	return na;
 }
 
+/// Extract a single floating-point double out of a value expected to
+/// contain a number.
 static double get_numeric_value(const ValuePtr& pap)
 {
 	Type t = pap->get_type();
@@ -147,7 +150,7 @@ static double get_numeric_value(const ValuePtr& pap)
 		pap->to_string().c_str());
 }
 
-// Perform a GreaterThan check
+/// Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
@@ -199,6 +202,74 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 	else
 		return TruthValue::FALSE_TV();
 }
+
+///
+static TruthValuePtr do_formula(const Handle& predform,
+                                const Handle& cargs,
+                                bool silent)
+{
+	// Collect up two floating point values.
+	std::vector<double> nums;
+	for (const Handle& h: predform->getOutgoingSet())
+	{
+		// An ordinary number.
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
+
+		// In case the user wanted to wrap everything in a
+		// LambdaLink. I don't understand why this is needed,
+		// but it seems to make some people feel better, so
+		// we support it.
+		Handle flh(h);
+		if (LAMBDA_LINK == h->get_type())
+		{
+			LambdaLinkPtr lam(LambdaLinkCast(h));
+			Type atype = cargs->get_type();
+
+			// Set flp and fall through, where it is executed.
+			flh = lam->beta_reduce(atype == LIST_LINK ?
+				                     cargs->getOutgoingSet()
+			                        : HandleSeq(1, cargs));
+		}
+
+		// At this point, we expect a FunctionLink of some kind.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+		{
+			if (silent)
+				throw NotEvaluatableException();
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a FunctionLink");
+		}
+
+		// If the FunctionLink has free variables in it,
+		// reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			Type atype = cargs->get_type();
+			flh = fvars.substitute_nocheck(flh,
+				atype == LIST_LINK ?
+					cargs->getOutgoingSet()
+					: HandleSeq(1, cargs));
+			flp = FunctionLinkCast(flh);
+		}
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flp->execute());
+		FloatValuePtr fv(FloatValueCast(v));
+		nums.push_back(fv->value()[0]);
+	}
+
+	// XXX FIXME; if we are given more than two floats, then
+	// perhaps we should create some other kind of TruthValue?
+	// Maybe a distributional one ?? Or a CountTV ??
+	return createSimpleTruthValue(nums);
+}
+
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -603,73 +674,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 // It would be better to move lang_lib_fun to LibraryManager, but BackwardChainer also
 // uses this function, so more refactoring would be needed
 #include "ExecutionOutputLink.h"
-
-static TruthValuePtr do_formula(const Handle& predform,
-                                const Handle& cargs,
-                                bool silent)
-{
-	// Collect up two floating point values.
-	std::vector<double> nums;
-	for (const Handle& h: predform->getOutgoingSet())
-	{
-		// An ordinary number.
-		if (NUMBER_NODE == h->get_type())
-		{
-			nums.push_back(NumberNodeCast(h)->get_value());
-			continue;
-		}
-
-		// In case the user wanted to wrap everything in a
-		// LambdaLink. I don't understand why this is needed,
-		// but it seems to make some people feel better, so
-		// we support it.
-		Handle flh(h);
-		if (LAMBDA_LINK == h->get_type())
-		{
-			LambdaLinkPtr lam(LambdaLinkCast(h));
-			Type atype = cargs->get_type();
-
-			// Set flp and fall through, where it is executed.
-			flh = lam->beta_reduce(atype == LIST_LINK ?
-				                     cargs->getOutgoingSet()
-			                        : HandleSeq(1, cargs));
-		}
-
-		// At this point, we expect a FunctionLink of some kind.
-		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-		{
-			if (silent)
-				throw NotEvaluatableException();
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a FunctionLink");
-		}
-
-		// If the FunctionLink has free variables in it,
-		// reduce them with the provided arguments.
-		FunctionLinkPtr flp(FunctionLinkCast(flh));
-		const FreeVariables& fvars = flp->get_vars();
-		if (not fvars.empty())
-		{
-			Type atype = cargs->get_type();
-			flh = fvars.substitute_nocheck(flh,
-				atype == LIST_LINK ?
-					cargs->getOutgoingSet()
-					: HandleSeq(1, cargs));
-			flp = FunctionLinkCast(flh);
-		}
-
-		// Expecting a FunctionLink without variables.
-		ValuePtr v(flp->execute());
-		FloatValuePtr fv(FloatValueCast(v));
-		nums.push_back(fv->value()[0]);
-	}
-
-	// XXX FIXME; if we are given more than two floats, then
-	// perhaps we should create some other kind of TruthValue?
-	// Maybe a distributional one ?? Or a CountTV ??
-	return createSimpleTruthValue(nums);
-}
-
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
