@@ -6,18 +6,25 @@
 
 (opencog-test-runner)
 
-(define tname "opencog-arity-test")
+(define tname "python-arity-test")
 (test-begin tname)
 
 ; Define a python func returning a TV
 (python-eval "
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
-def foo(atom_a, atom_b):
-    asp = AtomSpace()
+
+# Hack around bug #2020
+shared_as = AtomSpace()
+def set_atomspace(as) :
+    global shared_as
+    shared_as = as
+
+# Twiddle some atoms in the atomspace
+def foo(atom_a, atom_b) :
     TV = TruthValue(0.2, 0.69)
-    asp.add_node(types.ConceptNode, 'Apple', TV)
-    asp.add_link(types.InheritanceLink, [atom_a, atom_b])
+    shared_as.add_node(types.ConceptNode, 'Apple', TV)
+    shared_as.add_link(types.InheritanceLink, [atom_a, atom_b])
     return TruthValue(0.42, 0.24)
 ")
 
