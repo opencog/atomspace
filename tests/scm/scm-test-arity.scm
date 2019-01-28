@@ -1,12 +1,12 @@
 
-(use-modules (opencog) )
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 (use-modules (opencog python))
 
 (opencog-test-runner)
-(define t "opencog-arity-test")
 
-(test-begin t)
+(define tname "opencog-arity-test")
+(test-begin tname)
 
 (python-eval "
 from opencog.atomspace import AtomSpace, TruthValue
@@ -19,22 +19,24 @@ def foo(atspace):
 (python-call-with-as "foo" (cog-atomspace))
 (test-assert "atom was created" (not (eq? #f (cog-node 'ConceptNode "Apple"))))
 
-(define strength (cog-mean (cog-node 'ConceptNode "Apple")))
-
-(test-assert "strength value is wrong" (< (- 0.2 strength) 0.00001))
-
+; Make sure the scheme version of Apple has the same TV on it that
+; the python code placed on it.
+(define strength (cog-mean (Concept "Apple")))
+(test-assert "strength value is wrong" (< (abs (- 0.2 strength)) 0.00001))
 
 (define (catch-wrong-args thunk)
   (catch #t 
     thunk
     (lambda (key . parameters)
       (format (current-error-port)
-              "caught throw to '~a: ~a\n" key parameters)
-      "catch")))
+         "Expected to catch this Python exception: '~a: ~a\n" key parameters)
+      "woo-hooo!!")))
 
 (define failed-result
   (catch-wrong-args
-   (lambda () (python-call-with-as "foo" (cog-atomspace) (cog-new-node 'ConceptNode "Test")))))
+    (lambda () (python-call-with-as "foo" (cog-atomspace) (Concept "Test")))))
 
-(test-assert "no error with wrong number of arguments" (string=? failed-result "catch"))
-(test-end t)
+(test-assert "Failed to throw when given wrong number of arguments"
+	(string=? failed-result "woo-hooo!!"))
+
+(test-end tname)
