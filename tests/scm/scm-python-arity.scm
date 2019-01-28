@@ -32,11 +32,9 @@ def foo(atspace):
          "Expected to catch this Python exception: '~a: ~a\n" key parameters)
       "woo-hooo!!")))
 
-(define failed-result
-  (catch-wrong-args
-    (lambda () (python-call-with-as "foo" (cog-atomspace) (Concept "Test")))))
-
 (test-assert "Failed to throw when given wrong number of arguments"
-	(string=? failed-result "woo-hooo!!"))
+	(string=? "woo-hooo!!"
+	(catch-wrong-args (lambda ()
+		(python-call-with-as "foo" (cog-atomspace) (Concept "Test"))))))
 
 (test-end tname)
