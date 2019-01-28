@@ -92,3 +92,28 @@
 				(List
 					(Variable "$VA") (Variable "$VB")))
 		(Set (List (Concept "A") (Concept "B")))))
+
+
+; One can also use DefinedPredicates, to give the formula a name.
+(DefineLink
+	(DefinedPredicate "has a reddish color")
+	(PredicateFormula
+		(Minus
+			(Number 1)
+			(Times
+				(StrengthOf (Variable "$X"))
+				(StrengthOf (Variable "$Y"))))
+		(Times
+			(ConfidenceOf (Variable "$X"))
+			(ConfidenceOf (Variable "$Y")))))
+
+(Concept "A" (stv 0.9 0.98))
+(Concept "B" (stv 0.9 0.98))
+
+; The will cause the formula to evaluate.
+(define red-form
+	(Evaluation
+		(DefinedPredicate "has a reddish color")
+		(List
+			(Concept "A")
+			(Concept "B"))))

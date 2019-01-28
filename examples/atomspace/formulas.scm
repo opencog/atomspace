@@ -157,6 +157,7 @@
 ; Re-evaluate the EvaluationLink. The TV is again recomputed!
 (cog-evaluate! evelnk)
 
+; One can also use DefinedPredicates, to give the formula a name.
 (DefineLink
 	(DefinedPredicate "has a reddish color")
 	(PredicateFormula
@@ -172,6 +173,7 @@
 (Concept "A" (stv 0.9 0.98))
 (Concept "B" (stv 0.9 0.98))
 
+; The will cause the formula to evaluate.
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "has a reddish color")
