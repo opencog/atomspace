@@ -156,3 +156,25 @@
 
 ; Re-evaluate the EvaluationLink. The TV is again recomputed!
 (cog-evaluate! evelnk)
+
+(DefineLink
+	(DefinedPredicate "has a reddish color")
+	(PredicateFormula
+		(Minus
+			(Number 1)
+			(Times
+				(StrengthOf (Variable "$X"))
+				(StrengthOf (Variable "$Y"))))
+		(Times
+			(ConfidenceOf (Variable "$X"))
+			(ConfidenceOf (Variable "$Y")))))
+
+(Concept "A" (stv 0.9 0.98))
+(Concept "B" (stv 0.9 0.98))
+
+(cog-evaluate!
+	(Evaluation
+		(DefinedPredicate "has a reddish color")
+		(List
+			(Concept "A")
+			(Concept "B"))))

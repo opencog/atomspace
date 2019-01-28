@@ -604,6 +604,73 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 // uses this function, so more refactoring would be needed
 #include "ExecutionOutputLink.h"
 
+static TruthValuePtr do_formula(const Handle& predform,
+                                const Handle& cargs,
+                                bool silent)
+{
+	// Collect up two floating point values.
+	std::vector<double> nums;
+	for (const Handle& h: predform->getOutgoingSet())
+	{
+		// An ordinary number.
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
+
+		// In case the user wanted to wrap everything in a
+		// LambdaLink. I don't understand why this is needed,
+		// but it seems to make some people feel better, so
+		// we support it.
+		Handle flh(h);
+		if (LAMBDA_LINK == h->get_type())
+		{
+			LambdaLinkPtr lam(LambdaLinkCast(h));
+			Type atype = cargs->get_type();
+
+			// Set flp and fall through, where it is executed.
+			flh = lam->beta_reduce(atype == LIST_LINK ?
+				                     cargs->getOutgoingSet()
+			                        : HandleSeq(1, cargs));
+		}
+
+		// At this point, we expect a FunctionLink of some kind.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+		{
+			if (silent)
+				throw NotEvaluatableException();
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a FunctionLink");
+		}
+
+		// If the FunctionLink has free variables in it,
+		// reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			Type atype = cargs->get_type();
+			flh = fvars.substitute_nocheck(flh,
+				atype == LIST_LINK ?
+					cargs->getOutgoingSet()
+					: HandleSeq(1, cargs));
+			flp = FunctionLinkCast(flh);
+		}
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flp->execute());
+		FloatValuePtr fv(FloatValueCast(v));
+		nums.push_back(fv->value()[0]);
+	}
+
+	// XXX FIXME; if we are given more than two floats, then
+	// perhaps we should create some other kind of TruthValue?
+	// Maybe a distributional one ?? Or a CountTV ??
+	return createSimpleTruthValue(nums);
+}
+
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
@@ -628,6 +695,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 			dtype = defn->get_type();
 		}
 
+		if (PREDICATE_FORMULA_LINK == dtype)
+		{
+			return do_formula(defn, cargs, silent);
+		}
+
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
 			throw RuntimeException(TRACE_INFO,
@@ -648,66 +720,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		// Collect up two floating point values.
-		std::vector<double> nums;
-		for (const Handle& h: pn->getOutgoingSet())
-		{
-			// An ordinary number.
-			if (NUMBER_NODE == h->get_type())
-			{
-				nums.push_back(NumberNodeCast(h)->get_value());
-				continue;
-			}
-
-			// In case the user wanted to wrap everything in a
-			// LambdaLink. I don't understand why this is needed,
-			// but it seems to make some people feel better, so
-			// we support it.
-			Handle flh(h);
-			if (LAMBDA_LINK == h->get_type())
-			{
-				LambdaLinkPtr lam(LambdaLinkCast(h));
-				Type atype = cargs->get_type();
-
-				// Set flp and fall through, where it is executed.
-				flh = lam->beta_reduce(atype == LIST_LINK ?
-					                     cargs->getOutgoingSet()
-				                        : HandleSeq(1, cargs));
-			}
-
-			// At this point, we expect a FunctionLink of some kind.
-			if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			{
-				if (silent)
-					throw NotEvaluatableException();
-				throw SyntaxException(TRACE_INFO,
-					"Expecting a FunctionLink");
-			}
-
-			// If the FunctionLink has free variables in it,
-			// reduce them with the provided arguments.
-			FunctionLinkPtr flp(FunctionLinkCast(flh));
-			const FreeVariables& fvars = flp->get_vars();
-			if (not fvars.empty())
-			{
-				Type atype = cargs->get_type();
-				flh = fvars.substitute_nocheck(flh,
-					atype == LIST_LINK ?
-						cargs->getOutgoingSet()
-						: HandleSeq(1, cargs));
-				flp = FunctionLinkCast(flh);
-			}
-
-			// Expecting a FunctionLink without variables.
-			ValuePtr v(flp->execute());
-			FloatValuePtr fv(FloatValueCast(v));
-			nums.push_back(fv->value()[0]);
-		}
-
-		// XXX FIXME; if we are given more than two floats, then
-		// perhaps we should create some other kind of TruthValue?
-		// Maybe a distributional one ?? Or a CountTV ??
-		return createSimpleTruthValue(nums);
+		return do_formula(pn, cargs, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
