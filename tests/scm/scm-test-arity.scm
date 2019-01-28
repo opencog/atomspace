@@ -1,5 +1,6 @@
 
-(use-modules (opencog) (opencog test-runner))
+(use-modules (opencog) )
+(use-modules (opencog test-runner))
 (use-modules (opencog python))
 
 (opencog-test-runner)
@@ -16,15 +17,11 @@ def foo(atspace):
 ")
 
 (python-call-with-as "foo" (cog-atomspace))
-(cog-node 'ConceptNode "Apple")
+(test-assert "atom was created" (not (eq? #f (cog-node 'ConceptNode "Apple"))))
 
-; Return the strength of a simple truth value
-(define (get-tv-strength tv) (cdr (assoc 'mean (cog-tv->alist tv))))
+(define strength (cog-mean (cog-node 'ConceptNode "Apple")))
 
-(define strength (get-tv-strength
- (cog-tv (cog-node 'ConceptNode "Apple"))))
-
-(test-assert "python-eval is borken" (< (- 0.2 strength) 0.00001))
+(test-assert "strength value is wrong" (< (- 0.2 strength) 0.00001))
 
 
 (define (catch-wrong-args thunk)
@@ -37,7 +34,7 @@ def foo(atspace):
 
 (define failed-result
   (catch-wrong-args
-   (lambda () (python-call-with-as "foo" (cog-atomspace) (cog-node 'ConceptNode "Test")))))
+   (lambda () (python-call-with-as "foo" (cog-atomspace) (cog-new-node 'ConceptNode "Test")))))
 
 (test-assert "no error with wrong number of arguments" (string=? failed-result "catch"))
 (test-end t)
