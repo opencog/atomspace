@@ -78,8 +78,7 @@ class PythonEval : public GenericEval
         // Python utility functions
         PyObject* call_user_function(const std::string& func,
                                      Handle varargs);
-        void build_python_error_message(const char* function_name,
-                                        std::string& errorMessage);
+        std::string build_python_error_message(const std::string&);
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);

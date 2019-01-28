@@ -611,60 +611,56 @@ void PythonEval::print_dictionary(PyObject* pyDict)
 
 /**
  * Build the Python error message for the current error.
- *
- * This can only be called when PyErr_Occurred() returns a
- * non-null PyObject*. Otherwise, there is undefined behavior.
  */
-void PythonEval::build_python_error_message(const char* function_name,
-                                            std::string& errorMessage)
+std::string PythonEval::build_python_error_message(
+                                     const std::string& function_name)
 {
-    PyObject *pyErrorType, *pyError, *pyTraceback, *pyErrorString;
-    std::stringstream errorStringStream;
-
     // Get the error from Python.
+    PyObject *pyErrorType, *pyError, *pyTraceback;
     PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
 
+    if (not pyError) return "No error!";
+
     // Construct the error message string.
+    std::stringstream errorStringStream;
     errorStringStream << "Python error ";
+
     if (function_name != NO_FUNCTION_NAME)
         errorStringStream << "in " << function_name;
-    if (pyError) {
-        pyErrorString = PyObject_Str(pyError);
+
+    PyObject* pyErrorString = PyObject_Str(pyError);
 #if PY_MAJOR_VERSION == 2
-        char* pythonErrorString = PyBytes_AsString(pyErrorString);
+    char* pythonErrorString = PyBytes_AsString(pyErrorString);
 #else
-        const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+    const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
 #endif
-        if (pythonErrorString) {
-            errorStringStream << ": " << pythonErrorString << ".";
-        } else {
-            errorStringStream << ": Undefined Error";
-        }
-
-        // Print the traceback, too, if it is provided.
-        if (pyTraceback) {
-            PyObject* pyTBString = PyObject_Str(pyTraceback);
-#if PY_MAJOR_VERSION == 2
-            char* tb = PyBytes_AsString(pyTBString);
-#else
-            const char* tb = PyUnicode_AsUTF8(pyTBString);
-#endif
-            errorStringStream << "\nTraceback: " << tb;
-            Py_DECREF(pyTBString);
-        }
-
-        // Cleanup the references. NOTE: The traceback can be NULL even
-        // when the others aren't.
-        Py_DECREF(pyErrorType);
-        Py_DECREF(pyError);
-        Py_DECREF(pyErrorString);
-        if (pyTraceback)
-            Py_DECREF(pyTraceback);
-
+    if (pythonErrorString) {
+        errorStringStream << ": " << pythonErrorString << ".";
     } else {
         errorStringStream << ": Undefined Error";
     }
-    errorMessage = errorStringStream.str();
+
+    // Print the traceback, too, if it is provided.
+    if (pyTraceback) {
+        PyObject* pyTBString = PyObject_Str(pyTraceback);
+#if PY_MAJOR_VERSION == 2
+        char* tb = PyBytes_AsString(pyTBString);
+#else
+        const char* tb = PyUnicode_AsUTF8(pyTBString);
+#endif
+        errorStringStream << "\nTraceback: " << tb;
+        Py_DECREF(pyTBString);
+    }
+
+    // Cleanup the references. NOTE: The traceback can be NULL even
+    // when the others aren't.
+    Py_DECREF(pyErrorType);
+    Py_DECREF(pyError);
+    Py_DECREF(pyErrorString);
+    if (pyTraceback)
+        Py_DECREF(pyTraceback);
+
+    return errorStringStream.str();
 }
 
 /**
@@ -899,8 +895,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     if (PyErr_Occurred())
     {
         // Construct the error message and throw an exception.
-        std::string errorString;
-        build_python_error_message(moduleFunction.c_str(), errorString);
+        std::string errorString =
+            build_python_error_message(moduleFunction);
         PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
@@ -1036,7 +1032,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyObject *pyModule, *pyObject, *pyUserFunc;
     PyObject *pyDict;
     std::string functionName;
-    std::string errorString;
 
     // Grab the GIL.
     PyGILState_STATE gstate;
@@ -1115,7 +1110,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     if (PyErr_Occurred())
     {
         // Construct the error message and throw an exception.
-        build_python_error_message(moduleFunction.c_str(), errorString);
+        std::string errorString =
+            build_python_error_message(moduleFunction);
         PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
@@ -1130,8 +1126,8 @@ void PythonEval::throw_on_error()
 {
     if (PyErr_Occurred())
     {
-        std::string errorString;
-        build_python_error_message(NO_FUNCTION_NAME, errorString);
+        std::string errorString =
+            build_python_error_message(NO_FUNCTION_NAME);
         PyErr_Clear();
 
         // If there was an error, throw an exception so the user knows the
