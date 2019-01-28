@@ -17,8 +17,8 @@ def foo(atom_a, atom_b):
     asp = AtomSpace()
     TV = TruthValue(0.2, 0.69)
     asp.add_node(types.ConceptNode, 'Apple', TV)
-    asp.add_link(types.InheritanceLink, atom_a, atom_b, TV)
-    TruthValue(0.42, 0.24)
+    asp.add_link(types.InheritanceLink, [atom_a, atom_b])
+    return TruthValue(0.42, 0.24)
 ")
 
 ; Call the python func defined above.
@@ -40,6 +40,7 @@ def foo(atom_a, atom_b):
 (test-assert "returned TV is wrong"
 	(< (abs (- 0.42 (cog-tv-mean returned-tv))) 0.00001))
 
+; Handy-dandy try-catch wrapper
 (define (catch-wrong-args thunk)
 	(catch #t
 		thunk
@@ -49,6 +50,7 @@ def foo(atom_a, atom_b):
 				key parameters)
 			"woo-hooo!!")))
 
+; Make sure that the handy-dandy try-catch wrapper is working.
 (test-assert "Threw exception even when given the right number of arguments"
 	(eq? (SimpleTruthValue 0.42 0.24)
 		(catch-wrong-args (lambda ()
