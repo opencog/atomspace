@@ -60,6 +60,7 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 	OUTPUT_NAME logger)
 
 ###################### atomspace ####################################
+
 CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "nameserver.pyx" "truth_value.pyx"
 	"atomspace_details.pyx" "value.pyx" "float_value.pyx" "string_value.pyx"
@@ -117,8 +118,10 @@ INSTALL (FILES
 )
 
 ############################## type constructors #####################
+
 CYTHON_ADD_MODULE_PYX(type_constructors
-	"atomspace.pxd" opencog_atom_types )
+	"atomspace.pxd" opencog_atom_types
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
 
@@ -137,8 +140,10 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 
 
 ############################## utilities #####################
+
 CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" opencog_atom_types )
+	"atomspace.pxd" opencog_atom_types
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
 
@@ -163,9 +168,12 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	OUTPUT_NAME utilities)
 
 ############################## bindlink #####################
+
 CYTHON_ADD_MODULE_PYX(bindlink
-	"atomspace.pxd" opencog_atom_types
-	"../../query/BindLinkAPI.h")
+	"atomspace.pxd"
+	opencog_atom_types
+	"../../query/BindLinkAPI.h"
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
@@ -197,9 +205,13 @@ INSTALL (TARGETS
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
+
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../load-file.h")
+		"PyScheme.h"
+		"atomspace.pxd"
+		opencog_atom_types
+		"../load-file.h"
+	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
@@ -226,24 +238,29 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 ##################### backward chainer #####################
-CYTHON_ADD_MODULE_PYX(backwardchainer "backwardchainer.pxd" opencog_atom_types
-	                      "../../rule-engine/backwardchainer/BackwardChainer.h" ruleengine)
+
+CYTHON_ADD_MODULE_PYX(backwardchainer
+	"backwardchainer.pxd"
+	opencog_atom_types
+	"../../rule-engine/backwardchainer/BackwardChainer.h"
+	ruleengine
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "backwardchainer.cpp")
 
 # opencog.backwardchainer Python bindings
 ADD_LIBRARY(backwardchainer_cython
-        backwardchainer.cpp
+	backwardchainer.cpp
 )
 
 TARGET_LINK_LIBRARIES(backwardchainer_cython
-        atomspace_cython
-        type_constructors
+	atomspace_cython
+	type_constructors
 	ruleengine
-        ${COGUTIL_LIBRARY}
-        ${PYTHON_LIBRARIES}
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
+	${COGUTIL_LIBRARY}
+	${PYTHON_LIBRARIES}
+	${Boost_THREAD_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
@@ -253,6 +270,9 @@ SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
 INSTALL (TARGETS
 	backwardchainer_cython
 	DESTINATION "${PYTHON_DEST}")
+
+##################################################
+# Tell python where to find modules.
 
 INSTALL (FILES
 	__init__.py
