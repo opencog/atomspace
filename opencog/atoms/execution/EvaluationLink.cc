@@ -652,28 +652,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	return do_eval_scratch(as, evelnk, as, silent);
 }
 
-/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
-///
-/// Expects the sequence to be exactly two atoms long.
-/// Expects the first handle of the sequence to be a GroundedPredicateNode
-/// Expects the second handle of the sequence to be a ListLink
-/// Executes the GroundedPredicateNode, supplying the second handle as argument
-///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                          const HandleSeq& sna,
-                                          bool silent)
-{
-	if (2 != sna.size())
-	{
-		throw SyntaxException(TRACE_INFO,
-		     "Incorrect arity for an EvaluationLink!");
-	}
-	return do_eval_with_args(as, sna[0], sna[1], silent);
-}
-
-// Fixme: added here, because lang_lib_fun is declared inside ExecutionOutputLink class
-// It would be better to move lang_lib_fun to LibraryManager, but BackwardChainer also
-// uses this function, so more refactoring would be needed
+// XXX FIXME: added here, because lang_lib_fun is declared inside
+// ExecutionOutputLink class. It would be better to move
+// lang_lib_fun to LibraryManager, but BackwardChainer also
+// uses this function, so more refactoring would be needed.
+// XXX Really? Can we do this, already?
 #include "ExecutionOutputLink.h"
 
 /// do_eval_with_args -- evaluate a PredicateNode with arguments.

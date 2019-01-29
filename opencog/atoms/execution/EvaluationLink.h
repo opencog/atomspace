@@ -50,12 +50,10 @@ public:
 	                                     const Handle&,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
-	static TruthValuePtr do_evaluate(AtomSpace*,
-	                                 const HandleSeq& schema_and_args,
-	                                 bool silent=false);
 	static TruthValuePtr do_eval_with_args(AtomSpace*,
-	                                 const Handle& schema, const Handle& args,
-	                                 bool silent=false);
+	                                       const Handle& schema,
+	                                       const Handle& args,
+	                                       bool silent=false);
 
 	static Handle factory(const Handle&);
 };
