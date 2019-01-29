@@ -38,7 +38,7 @@ namespace opencog {
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool arg_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const ValuePtr& val)
 {
 	Handle deep(spec);
 
@@ -81,7 +81,7 @@ bool arg_is_type(const Handle& spec, const Handle& val)
 	{
 		for (const Handle& choice : deep->getOutgoingSet())
 		{
-			if (arg_is_type(choice, val)) return true;
+			if (value_is_type(choice, val)) return true;
 		}
 		return false;
 	}
@@ -91,15 +91,15 @@ bool arg_is_type(const Handle& spec, const Handle& val)
 			"Not implemented! TODO XXX FIXME");
 	}
 
-	// If it is a node, not a link, then it is a type-constant,
+	// If it is not a link, then it is a type-constant,
 	// and thus must match perfectly.
-	if (deep->is_node())
+	if (not deep->is_link())
 		return (deep == val);
 
-	// If a link, then both must be same link type.
+	// If it is a link, then both must be same link type.
 	if (valtype != dpt) return false;
 
-	const HandleSeq& vlo = val->getOutgoingSet();
+	const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
 	const HandleSeq& dpo = deep->getOutgoingSet();
 	size_t sz = dpo.size();
 
@@ -114,7 +114,7 @@ bool arg_is_type(const Handle& spec, const Handle& val)
 	// Ordered links are compared side-by-side
 	for (size_t i=0; i<sz; i++)
 	{
-		if (not arg_is_type(dpo[i], vlo[i])) return false;
+		if (not value_is_type(dpo[i], vlo[i])) return false;
 	}
 
 	// If we are here, all checks must hav passed.
@@ -129,7 +129,8 @@ bool arg_is_type(const Handle& spec, const Handle& val)
  * a whizzy set-subset operation, one could go all formal operator
  * and etc. but more abstraction seems unlikely to make it better.
  */
-static bool type_match_rec(const Handle& left_, const Handle& right_, bool toplevel)
+static bool type_match_rec(const Handle& left_, const Handle& right_,
+                           bool toplevel)
 {
 	if (left_ == right_) return true;
 
@@ -164,7 +165,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	    DEFINED_TYPE_NODE != rtype and
 	    ARROW_LINK != rtype)
 	{
-		return arg_is_type(left, right_);
+		return value_is_type(left, right_);
 	}
 
 	Handle right(right_);

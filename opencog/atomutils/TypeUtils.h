@@ -35,13 +35,13 @@ namespace opencog
  */
 
 /**
- * Type checker.  Returns true if `val` is of type `type_spec`.
- * More precisely, returns true if `val` will fit into the type
+ * Type checker.  Returns true if `value` is of type `type_spec`.
+ * More precisely, returns true if `value` will fit into the type
  * specification given by `type_spec`; that the argument and the type
  * specification can be connected, e.g. for beta-reduction, or for
  * pattern matching (searching).
  */
-bool arg_is_type(const Handle& type_spec, const Handle& argument);
+bool value_is_type(const Handle& type_spec, const ValuePtr& value);
 
 /**
  * Type matcher. Returns true if `left` can mate with `right`.
