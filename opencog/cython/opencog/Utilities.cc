@@ -9,7 +9,7 @@
 
 using namespace opencog;
 
-void opencog::initialize_opencog(AtomSpace* atomSpace)
+void opencog::initialize_python(AtomSpace* atomSpace)
 {
     // Initialize Python.
     logger().debug("initialize_opencog - initializing Python");
@@ -21,7 +21,7 @@ void opencog::initialize_opencog(AtomSpace* atomSpace)
     PythonEval::create_singleton_instance(atomSpace);
 }
 
-void opencog::finalize_opencog()
+void opencog::finalize_python()
 {
     // Delete the singleton instance of the PythonEval.
     PythonEval::delete_singleton_instance();
