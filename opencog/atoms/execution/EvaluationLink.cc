@@ -384,11 +384,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
-		// The arguments may need to be executed...
-		Instantiator inst(scratch);
-		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
-
-		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), args, silent));
+		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), sna.at(1), silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
@@ -734,12 +730,16 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		throw NotEvaluatableException();
 	}
 
+	// The arguments may need to be executed...
+	Instantiator inst(as);
+	Handle dargs(HandleCast(inst.execute(cargs, silent)));
+
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs, silent);
+	Handle args = force_execute(as, dargs, silent);
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
