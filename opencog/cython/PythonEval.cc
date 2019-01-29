@@ -672,6 +672,13 @@ void PythonEval::throw_on_error()
     std::string errorString = build_python_error_message(NO_FUNCTION_NAME);
     PyErr_Clear();
 
+    // Clear the evaluator state; else future input is garbaged up.
+    _input_line = "";
+    _paren_count = 0;
+    _pending_input = false;
+    _eval_done = true;
+    _caught_error = true;
+
     // If there was an error, throw an exception so the user knows the
     // script had a problem.
     throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
@@ -1417,6 +1424,8 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 void PythonEval::begin_eval()
 {
     _eval_done = false;
+    _caught_error = false;
+    _pending_input = false;
     _result = "";
 }
 
@@ -1507,6 +1516,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     return;
 
 wait_for_more:
+    _caught_error = false;
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
