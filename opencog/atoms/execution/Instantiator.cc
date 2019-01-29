@@ -271,7 +271,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				else
 				{
 					try {
-						EvaluationLink::do_evaluate(_as, plo, true);
+						TruthValuePtr tvp =
+							EvaluationLink::do_evaluate(_as, plo, true);
+						plo->setTruthValue(tvp);
 					}
 					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
@@ -491,6 +493,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
+	}
+
+	// Do not reduce PredicateFormulaLink. That is because it contains
+	// formulas that we will need to re-evaluate in the future, so we
+	// must not clobber them.
+	if (PREDICATE_FORMULA_LINK == t)
+	{
+		return expr;
 	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,

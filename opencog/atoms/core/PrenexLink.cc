@@ -89,7 +89,9 @@ Handle PrenexLink::reassemble(Type prenex,
 	// prenexed.  Check for PutLink to avoid infinite recursion.
 	if (PUT_LINK != prenex and not final_varlist.empty() and
 	    nameserver().isA(prenex, PRENEX_LINK))
+	{
 		return Handle(createLink(prenex, vdecl, newbod));
+	}
 
 	// Otherwise, we are done with the beta-reduction.
 	return newbod;

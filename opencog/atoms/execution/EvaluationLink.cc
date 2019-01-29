@@ -98,8 +98,35 @@ EvaluationLink::EvaluationLink(const Link& l)
 		    "Expecting an EvaluationLink");
 }
 
-// Pattern matching hack. The pattern matcher returns sets of atoms;
-// if that set contains a single number, then unwrap it.
+/// We get exceptions in two differet ways: (a) due to user error,
+/// in which case we need to report the error to the user, and
+/// (b) occasionally expected errors, which might occur during normal
+/// processing, and should be ignored. The "normal" errors should not
+/// be reported to the user; nor should they be printed to the log-file.
+/// Using a try-catch block is enough to prevent them from being passed
+/// to the user; but it is not enough to prevent them from printing.
+/// Thus, we use a bool flag to not print. (It would be nice if C++
+/// offered a way to automate this in the catch-block, so that the
+/// pesky "silent" flag was not needed.)
+///
+/// DefaultPatternMatchCB.cc and also Instantiator.cc both catch
+/// the NotEvaluatableException thrown here.  Basically, these
+/// know that they might be sending non-evaluatable atoms here, and
+/// don't want to garbage up the log files with bogus errors.
+///
+void throwSyntaxException(bool silent, const char* message...)
+{
+	if (silent)
+		throw NotEvaluatableException();
+	va_list args;
+	va_start(args, message);
+	throw SyntaxException(TRACE_INFO, message, args);
+	va_end(args);
+}
+
+/// Pattern matching hack. The pattern matcher returns sets of atoms;
+/// if that set contains a single number, then unwrap it.
+/// See issue #1502 which proposes to eliminate this SetLink hack.
 static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->get_type())
@@ -125,6 +152,8 @@ static NumberNodePtr unwrap_set(Handle h)
 	return na;
 }
 
+/// Extract a single floating-point double out of a value expected to
+/// contain a number.
 static double get_numeric_value(const ValuePtr& pap)
 {
 	Type t = pap->get_type();
@@ -147,12 +176,12 @@ static double get_numeric_value(const ValuePtr& pap)
 		pap->to_string().c_str());
 }
 
-// Perform a GreaterThan check
+/// Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
 
 	Instantiator inst(as);
@@ -173,7 +202,7 @@ static TruthValuePtr identical(const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "IdenticalLink expects two arguments");
 
 	if (oset[0] == oset[1])
@@ -187,7 +216,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "EqualLink expects two arguments");
 
 	Instantiator inst(as);
@@ -199,6 +228,65 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 	else
 		return TruthValue::FALSE_TV();
 }
+
+static HandleSeq get_seq(const Handle& cargs)
+{
+	if (LIST_LINK == cargs->get_type()) return cargs->getOutgoingSet();
+	return HandleSeq(1, cargs);
+}
+
+/// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
+static TruthValuePtr eval_formula(const Handle& predform,
+                                  const Handle& cargs)
+{
+	// Collect up two floating point values.
+	std::vector<double> nums;
+	for (const Handle& h: predform->getOutgoingSet())
+	{
+		// An ordinary number.
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
+
+		// In case the user wanted to wrap everything in a
+		// LambdaLink. I don't understand why this is needed,
+		// but it seems to make some people feel better, so
+		// we support it.
+		Handle flh(h);
+		if (LAMBDA_LINK == h->get_type())
+		{
+			// Set flh and fall through, where it is executed.
+			flh = LambdaLinkCast(h)->beta_reduce(get_seq(cargs));
+		}
+
+		// At this point, we expect a FunctionLink of some kind.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+
+		// If the FunctionLink has free variables in it,
+		// reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			flh = fvars.substitute_nocheck(flh, get_seq(cargs));
+			flp = FunctionLinkCast(flh);
+		}
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flp->execute());
+		FloatValuePtr fv(FloatValueCast(v));
+		nums.push_back(fv->value()[0]);
+	}
+
+	// XXX FIXME; if we are given more than two floats, then
+	// perhaps we should create some other kind of TruthValue?
+	// Maybe a distributional one ?? Or a CountTV ??
+	return createSimpleTruthValue(nums);
+}
+
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -300,7 +388,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Instantiator inst(scratch);
 		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
 
-		return do_evaluate(scratch, sna.at(0), args, silent);
+		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), args, silent));
+		evelnk->setTruthValue(tvp);
+		return tvp;
 	}
 	else if (IDENTICAL_LINK == t)
 	{
@@ -505,6 +595,27 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return evelnk->getTruthValue();
 	}
+	else if (PREDICATE_FORMULA_LINK == t)
+	{
+		// A shortened, argument-free version of eval_formula()
+		std::vector<double> nums;
+		for (const Handle& h: evelnk->getOutgoingSet())
+		{
+			if (NUMBER_NODE == h->get_type())
+			{
+				nums.push_back(NumberNodeCast(h)->get_value());
+				continue;
+			}
+
+			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
+				throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+
+			ValuePtr v(FunctionLinkCast(h)->execute());
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value()[0]);
+		}
+		return createSimpleTruthValue(nums);
+	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{
 		// If the truth value of the link is being requested,
@@ -530,22 +641,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return TruthValueCast(pap);
 	}
 
-	// We get exceptions here in two differet ways: (a) due to user
-	// error, in which case we need to print an error, and (b) intentionally,
-	// e.g. when Instantiator calls us, knowing it will get an error,
-	// in which case, printing the exception message is a waste of CPU
-	// time...
-	//
-	// DefaultPatternMatchCB.cc and also Instantiator wants to catch
-	// the NotEvaluatableException thrown here.  Basically, these
-	// know that they might be sending non-evaluatable atoms here, and
-	// don't want to garbage up the log files with bogus errors.
-	if (silent)
-		throw NotEvaluatableException();
-
-	throw SyntaxException(TRACE_INFO,
+	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
+
+	return TruthValuePtr(); // not reached
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
@@ -568,7 +668,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 {
 	if (2 != sna.size())
 	{
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 		     "Incorrect arity for an EvaluationLink!");
 	}
 	return do_evaluate(as, sna[0], sna[1], silent);
@@ -603,20 +703,29 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 			dtype = defn->get_type();
 		}
 
+		if (PREDICATE_FORMULA_LINK == dtype)
+		{
+			return eval_formula(defn, cargs);
+		}
+
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
-			throw RuntimeException(TRACE_INFO,
+			throw SyntaxException(TRACE_INFO,
 				"Expecting definition to be a LambdaLink, got %s",
 				defn->to_string().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Type atype = cargs->get_type();
-		Handle reduct = lam->beta_reduce(atype == LIST_LINK ?
-		                                cargs->getOutgoingSet()
-		                                : HandleSeq(1, cargs));
+		Handle reduct = lam->beta_reduce(get_seq(cargs));
 		return do_evaluate(as, reduct, silent);
+	}
+
+	// Like a GPN, but the entire function is declared in the
+	// AtomSpace.
+	if (PREDICATE_FORMULA_LINK == pntype)
+	{
+		return eval_formula(pn, cargs);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
@@ -672,7 +781,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return applier->apply_tv(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
-			 "Cannot evaluate scheme GroundedPredicateNode!");
+			"This binary does not have scheme support in it; "
+			"Cannot evaluate scheme GroundedPredicateNode!");
 #endif /* HAVE_GUILE */
 	}
 
@@ -688,7 +798,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		return applier.apply_tv(as, schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
-			 "Cannot evaluate python GroundedPredicateNode!");
+			"This binary does not have python support in it; "
+			"Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
 	}
 
@@ -710,18 +821,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 			result = *res;
 			free(res);
 		}
-		if (nullptr == result) {
-			// If silent is true, return a simpler and non-logged
-			// exception, which may, in some contexts, be considerably
-			// faster than the one below.
-			if (silent)
-				throw NotEvaluatableException();
 
-			throw RuntimeException(TRACE_INFO,
-			                       "Invalid return value from predicate %s\nArgs: %s",
-			                       pn->to_string().c_str(),
-			                       cargs->to_string().c_str());
-		}
+		if (nullptr == result)
+			throwSyntaxException(silent,
+			        "Invalid return value from predicate %s\nArgs: %s",
+			        pn->to_string().c_str(),
+			        cargs->to_string().c_str());
+
 		return result;
 	}
 
