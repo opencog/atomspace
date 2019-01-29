@@ -58,7 +58,7 @@ using namespace opencog;
 PythonEval* PythonEval::singletonInstance = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
-const char* NO_FUNCTION_NAME = NULL;
+const char* NO_FUNCTION_NAME = "";
 const int SIMPLE_STRING_SUCCESS = 0;
 const int SIMPLE_STRING_FAILURE = -1;
 const int MISSING_FUNC_CODE = -1;
@@ -664,6 +664,19 @@ std::string PythonEval::build_python_error_message(
     return errorStringStream.str();
 }
 
+// Check for errors in a script.
+void PythonEval::throw_on_error()
+{
+    if (not PyErr_Occurred()) return;
+
+    std::string errorString = build_python_error_message(NO_FUNCTION_NAME);
+    PyErr_Clear();
+
+    // If there was an error, throw an exception so the user knows the
+    // script had a problem.
+    throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+}
+
 /**
  * Execute the python string at the __main__ module context.
  *
@@ -689,6 +702,9 @@ std::string PythonEval::execute_string(const char* command)
     PyObject* pyResult = PyRun_StringFlags(command,
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
+
+    // Check for error before collecting the result.
+    throw_on_error();
 
     std::string retval;
     if (pyResult)
@@ -1120,21 +1136,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
-}
-
-// Check for errors in a script.
-void PythonEval::throw_on_error()
-{
-    if (PyErr_Occurred())
-    {
-        std::string errorString =
-            build_python_error_message(NO_FUNCTION_NAME);
-        PyErr_Clear();
-
-        // If there was an error, throw an exception so the user knows the
-        // script had a problem.
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-    }
 }
 
 std::string PythonEval::apply_script(const std::string& script)
