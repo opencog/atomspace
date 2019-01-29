@@ -338,12 +338,12 @@ static void thread_eval_tv(AtomSpace* as,
 ///
 /// For example, evaluating a TrueLink returns TruthValue::TRUE_TV, and
 /// evaluating a FalseLink returns TruthValue::FALSE_TV.  Evaluating
-/// AndLink, OrLink returns the boolean and, or of their respective
+/// AndLink, OrLink returns the binary and/or of their respective
 /// arguments.  A wide variety of Link types are evaluatable, this
 /// handles them all.
 ///
-/// If the argument to be an EvaluationLink, it should have the
-/// following structure:
+/// If the argument is an EvaluationLink with a GPN in it, it should
+/// have the following structure:
 ///
 ///     EvaluationLink
 ///         GroundedPredicateNode "lang: func_name"
@@ -351,9 +351,9 @@ static void thread_eval_tv(AtomSpace* as,
 ///             SomeAtom
 ///             OtherAtom
 ///
-/// The "lang:" should be either "scm:" for scheme, or "py:" for python.
-/// This method will then invoke "func_name" on the provided ListLink
-/// of arguments to the function.
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for haskell.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
 ///
 /// This function takes TWO atomspace arguments!  The first is the
 /// "main" atomspace, the second is a "scratch" or "temporary"
@@ -384,6 +384,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
+		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
 		                                sna.at(0), sna.at(1), silent));
 		evelnk->setTruthValue(tvp);
@@ -705,8 +706,8 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 				"Expecting definition to be a LambdaLink, got %s",
 				defn->to_string().c_str());
 
-		// Treat it as if it were a PutLink -- perform the
-		// beta-reduction, and evaluate the result.
+		// Treat LambdaLink as if it were a PutLink -- perform
+		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Handle reduct = lam->beta_reduce(get_seq(cargs));
 		return do_evaluate(as, reduct, silent);
