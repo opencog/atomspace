@@ -61,7 +61,7 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that the handy-dandy try-catch wrapper is working.
 (test-assert "Threw exception even when given the right number of arguments"
-	(eq? (SimpleTruthValue 0.42 0.24)
+	(equal? (SimpleTruthValue 0.42 0.24)
 		(catch-wrong-args (lambda ()
 			(cog-evaluate!
 				(Evaluation
