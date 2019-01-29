@@ -46,10 +46,10 @@ IF (HAVE_CYTHON)
 
 	ADD_GUILE_TEST(SCMPythonSharedAtomspace scm-python-shared-atomspace.scm)
 	SET_PROPERTY(TEST SCMPythonSharedAtomspace
-		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
+		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/atoms/execution:${PROJECT_BINARY_DIR}/opencog/cython")
 
 	ADD_GUILE_TEST(SCMPythonArity scm-python-arity.scm)
 	SET_PROPERTY(TEST SCMPythonArity
-		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
+		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/atoms/execution:${PROJECT_BINARY_DIR}/opencog/cython")
 
 ENDIF (HAVE_CYTHON)
