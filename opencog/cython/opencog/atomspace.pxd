@@ -20,8 +20,8 @@ cdef extern from "<vector>" namespace "std":
 
 ### TruthValue
 ctypedef double count_t
-ctypedef float confidence_t
-ctypedef float strength_t
+ctypedef double confidence_t
+ctypedef double strength_t
 
 cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
     cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
@@ -42,12 +42,12 @@ cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
 
 cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
-        cSimpleTruthValue(float, float)
+        cSimpleTruthValue(double, double)
         strength_t get_mean()
         confidence_t get_confidence()
         count_t get_count()
-        count_t confidenceToCount(float)
-        confidence_t countToConfidence(float)
+        count_t confidenceToCount(double)
+        confidence_t countToConfidence(double)
         tv_ptr DEFAULT_TV()
         string to_string()
         bint operator==(cTruthValue h)
@@ -151,7 +151,7 @@ cdef class TruthValue:
     cdef _count(self)
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
-    cdef _init(self, float mean, float count)
+    cdef _init(self, double mean, double count)
 
 cdef class Atom:
     cdef cHandle *handle

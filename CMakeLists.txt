@@ -300,6 +300,7 @@ IF(HAVE_PY_INTERP)
 		ENDIF ("${PYTHON_DEST}" STREQUAL "")
 
 		# thunk
+		SET(PYTHON_ROOT "${PYTHON_DEST}")
 		SET(PYTHON_DEST "${PYTHON_DEST}/opencog")
 
 		MESSAGE(STATUS
@@ -525,6 +526,11 @@ IF (CXXTEST_FOUND)
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
+	)
+	ADD_CUSTOM_TARGET(test_guile
+		WORKING_DIRECTORY tests/scm
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Guile and Python-bridge tests..."
 	)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query

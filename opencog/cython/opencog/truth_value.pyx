@@ -40,7 +40,7 @@ cdef class TruthValue:
     cdef _count(self):
         return self._ptr().get_count()
 
-    cdef _init(self, float mean, float confidence):
+    cdef _init(self, double mean, double confidence):
         self.cobj = new tv_ptr(new cSimpleTruthValue(mean, confidence))
 
     def __richcmp__(TruthValue h1, TruthValue h2, int op):
@@ -68,9 +68,9 @@ cdef class TruthValue:
         return cs.decode('UTF-8')
 
 #    @staticmethod
-#    def confidence_to_count(float conf):
+#    def confidence_to_count(double conf):
 #        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
 #
 #    @staticmethod
-#    def count_to_confidence(float count):
+#    def count_to_confidence(double count):
 #        return (<cSimpleTruthValue*> 0).countToConfidence(count)
