@@ -594,9 +594,9 @@ void PythonEval::print_dictionary(PyObject* pyDict)
         if (not PyBytes_Check(pyKey))
         {
             pyStr = PyUnicode_AsEncodedString(pyKey, "UTF-8", "strict");
+            Py_DECREF(pyKey);
             pyKey = pyStr;
         }
-        if (pyStr) Py_DECREF(pyStr);
 
         const char* c_name = PyBytes_AsString(pyKey);
         printf("Dict item %d is %s\n", i, c_name);
@@ -720,8 +720,14 @@ std::string PythonEval::execute_string(const char* command)
 #if PY_MAJOR_VERSION < 3
         retval = PyString_AsString(obrep);
 #else
-        PyObject* str = PyUnicode_AsEncodedString(obrep, "utf-8", "~E~");
-        retval = PyBytes_AS_STRING(str);
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(obrep))
+        {
+            pyStr = PyUnicode_AsEncodedString(obrep, "UTF-8", "strict");
+            Py_DECREF(obrep);
+            obrep = pyStr;
+        }
+        retval = PyBytes_AS_STRING(obrep);
 #endif
         Py_DECREF(obrep);
         Py_DECREF(pyResult);
