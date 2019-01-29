@@ -37,20 +37,20 @@ namespace opencog
 /**
  * Type checker.  Returns true if `val` is of type `type_spec`.
  * More precisely, returns true if `val` will fit into the type
- * specification given by `type_spec`; that the value and the type
+ * specification given by `type_spec`; that the argument and the type
  * specification can be connected, e.g. for beta-reduction, or for
  * pattern matching (searching).
  */
-bool value_is_type(const Handle& type_spec, const Handle& val);
+bool arg_is_type(const Handle& type_spec, const Handle& argument);
 
 /**
  * Type matcher. Returns true if `left` can mate with `right`.
  * Here, `left` can be a type definition, and `right` can be
- * another type defintion, or a value.  Mating is possible whenever
+ * another type defintion, or an argument.  Mating is possible whenever
  * `left` is broader, less restricitve than `right`; equivalently
  * if `right` is narrower than 'left`.
  *
- * Mating types and values:
+ * Mating types and arguments:
  * left == (Type "Concept")    right == (Concept "foo")  can mate.
  * left == (Type "Concept")    right == (Number 13)  cannot.
  *

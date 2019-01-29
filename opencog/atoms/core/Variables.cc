@@ -483,7 +483,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		const HandleSet &sigset = dit->second;
 		for (const Handle& sig : sigset)
 		{
-			if (value_is_type(sig, val)) return true;
+			if (arg_is_type(sig, val)) return true;
 		}
 		ret = false;
 	}

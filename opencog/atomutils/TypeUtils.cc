@@ -38,7 +38,7 @@ namespace opencog {
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool value_is_type(const Handle& spec, const Handle& val)
+bool arg_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
@@ -61,27 +61,27 @@ bool value_is_type(const Handle& spec, const Handle& val)
 
 	if (TYPE_NODE == dpt)
 	{
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return (valtype == deeptype);
 	}
 	else if (TYPE_INH_NODE == dpt)
 	{
 		// Just like above, but allows derived types.
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(valtype, deeptype);
 	}
 	else if (TYPE_CO_INH_NODE == dpt)
 	{
 		// Just like above, but in the other direction.
 		// That is, it allows base tyes.
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(deeptype, valtype);
 	}
 	else if (TYPE_CHOICE == dpt)
 	{
 		for (const Handle& choice : deep->getOutgoingSet())
 		{
-			if (value_is_type(choice, val)) return true;
+			if (arg_is_type(choice, val)) return true;
 		}
 		return false;
 	}
@@ -114,7 +114,7 @@ bool value_is_type(const Handle& spec, const Handle& val)
 	// Ordered links are compared side-by-side
 	for (size_t i=0; i<sz; i++)
 	{
-		if (not value_is_type(dpo[i], vlo[i])) return false;
+		if (not arg_is_type(dpo[i], vlo[i])) return false;
 	}
 
 	// If we are here, all checks must hav passed.
@@ -150,9 +150,9 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		ltype = left->get_type();
 	}
 
-	// If right is not a type, then just use value-check.
+	// If right is not a type, then just use argument-check.
 	// We can only do this at the top level; lower levels
-	// can have value-like links (i.e. duck-types which
+	// can have argument-like links (i.e. duck-types which
 	// we have to type-interence).
 	Type rtype = right_->get_type();
 	if (toplevel and
@@ -164,7 +164,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	    DEFINED_TYPE_NODE != rtype and
 	    ARROW_LINK != rtype)
 	{
-		return value_is_type(left, right_);
+		return arg_is_type(left, right_);
 	}
 
 	Handle right(right_);
@@ -205,19 +205,19 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// the top-level; here we do lower levels.
 	if (TYPE_NODE == ltype)
 	{
-		return TypeNodeCast(left)->get_value() == rtype;
+		return TypeNodeCast(left)->get_kind() == rtype;
 	}
 
 	// Like above but allows derived tyes.
 	if (TYPE_INH_NODE == ltype)
 	{
-		return nameserver().isA(rtype, TypeNodeCast(left)->get_value());
+		return nameserver().isA(rtype, TypeNodeCast(left)->get_kind());
 	}
 
 	// Like above, but in the opposite direction: allows base types.
 	if (TYPE_CO_INH_NODE == ltype)
 	{
-		return nameserver().isA(TypeNodeCast(left)->get_value(), rtype);
+		return nameserver().isA(TypeNodeCast(left)->get_kind(), rtype);
 	}
 
 	// If left is a type choice, right must match a choice.

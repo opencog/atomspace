@@ -18,7 +18,7 @@ class PatternSCM : public ModuleWrap
 		virtual void init(void);
 		static std::vector<FunctionWrap*> _binders;
 		Handle find_approximate_match(Handle);
-		bool value_is_type(Handle, Handle);
+		bool arg_is_type(Handle, Handle);
 		bool type_match(Handle, Handle);
 		Handle type_compose(Handle, Handle);
 	public:
@@ -54,9 +54,9 @@ Handle PatternSCM::find_approximate_match(Handle hp)
 	return as->add_link(LIST_LINK, solns);
 }
 
-bool PatternSCM::value_is_type(Handle type, Handle val)
+bool PatternSCM::arg_is_type(Handle type, Handle val)
 {
-	return opencog::value_is_type(type, val);
+	return opencog::arg_is_type(type, val);
 }
 
 bool PatternSCM::type_match(Handle left, Handle right)
@@ -125,7 +125,7 @@ void PatternSCM::init(void)
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
 	define_scheme_primitive("cog-value-is-type?",
-		&PatternSCM::value_is_type, this, "query");
+		&PatternSCM::arg_is_type, this, "query");
 
 	define_scheme_primitive("cog-type-match?",
 		&PatternSCM::type_match, this, "query");
