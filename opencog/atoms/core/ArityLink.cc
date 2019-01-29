@@ -65,7 +65,7 @@ ValuePtr ArityLink::execute() const
 			pap = flp->execute();
 			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
 
-			// XXX TODO sum up lingth of values
+			// XXX TODO sum up length of values. (!?)
 		}
 		else
 		{
