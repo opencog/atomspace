@@ -69,6 +69,23 @@ PythonSCM::PythonSCM()
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
+
+	// Tell python where the atomspace python modules are installed.
+	// Without this, one gets the common cryptic error message:
+	//     ImportError: No module named 'opencog'
+	const char* currpath = secure_getenv("PYTHONPATH");
+	if (currpath)
+	{
+		std::string prep = currpath;
+		prep += ":";
+		prep += PYTHON_ROOT;
+		setenv("PYTHONPATH", prep.c_str(), 0);
+	}
+	else
+	{
+		setenv("PYTHONPATH", PYTHON_ROOT, 0);
+	}
+
 	scm_with_guile(init_in_guile, this);
 }
 

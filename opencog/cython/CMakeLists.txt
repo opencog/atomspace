@@ -56,6 +56,7 @@ INSTALL (FILES
 # called from scheme.
 #
 IF(HAVE_GUILE)
+	ADD_DEFINITIONS(-DPYTHON_ROOT="${PYTHON_ROOT}")
 	ADD_LIBRARY(PythonSCM
 		PythonSCM.cc
 	)
@@ -66,5 +67,8 @@ IF(HAVE_GUILE)
 		smob
 	)
 
-    INSTALL (TARGETS PythonSCM EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+   INSTALL (TARGETS PythonSCM
+		EXPORT AtomSpaceTargets
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
 ENDIF(HAVE_GUILE)
