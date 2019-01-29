@@ -16,9 +16,9 @@ from opencog.atomspace import types
 
 # Hack around bug #2020
 shared_as = AtomSpace()
-def set_atomspace(as) :
+def do_set_atomspace(sas) :
     global shared_as
-    shared_as = as
+    shared_as = sas
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b) :
@@ -27,6 +27,8 @@ def foo(atom_a, atom_b) :
     shared_as.add_link(types.InheritanceLink, [atom_a, atom_b])
     return TruthValue(0.42, 0.24)
 ")
+
+(python-call-with-as "do_set_atomspace" (cog-atomspace))
 
 ; Call the python func defined above.
 (define returned-tv
@@ -37,7 +39,7 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that Apple was created.
 (test-assert "Apple atom was created"
-	(not (eq? #f (cog-node 'ConceptNode "Apple"))))
+	(not (eq? '() (cog-node 'ConceptNode "Apple"))))
 
 ; Make sure the scheme version of Apple has the same TV on it that
 ; the python code placed on it.
