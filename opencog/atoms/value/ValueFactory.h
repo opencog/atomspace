@@ -2,7 +2,6 @@
 #define _VALUE_FACTORY_H_
 
 #include "Value.h"
-#include <opencog/atoms/base/Handle.h>
 #include <opencog/util/exceptions.h>
 
 #include <map>

@@ -36,9 +36,6 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-// For OC_TO_STRING_INDENT
-#include <opencog/atoms/base/Handle.h>
-
 namespace opencog {
 
 const strength_t MAX_TRUTH  = 1.0;
