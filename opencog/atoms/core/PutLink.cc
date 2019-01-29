@@ -126,7 +126,7 @@ void PutLink::static_typecheck_arguments(void)
 	Handle valley = _arguments;
 	Type vtype = valley->get_type();
 
-	// If it's body or value is an UnquoteLink then the PutLink is
+	// If it's body or argument is an UnquoteLink then the PutLink is
 	// likely quoted and thus there is nothing to do
 	if (btype == UNQUOTE_LINK or vtype == UNQUOTE_LINK)
 		return;
@@ -192,12 +192,12 @@ void PutLink::static_typecheck_arguments(void)
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
-					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
+					"PutLink has mismatched argument list! vardecl=%s\nvals=%s",
 					_vardecl->to_string().c_str(),
 					_arguments->to_string().c_str());
 			else
 				throw SyntaxException(TRACE_INFO,
-					"PutLink has mismatched value list! body=%s\nvals=%s",
+					"PutLink has mismatched argument list! body=%s\nvals=%s",
 					_body->to_string().c_str(),
 					_arguments->to_string().c_str());
 		}
@@ -225,11 +225,11 @@ void PutLink::static_typecheck_arguments(void)
 			// then the arguments must be in a list.
 			if (h->get_type() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
-					"PutLink expected value list!");
+					"PutLink expected argument list!");
 
 			if (not _varlist.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
-					"PutLink bad value list!");
+					"PutLink bad argument list!");
 		}
 		return;
 	}
@@ -262,7 +262,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  * evaluation or execution to happen during or after sustitution, use
  * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
- * So, for example, if this PutLink looks like this:
+ * So, for example, if the PutLink looks like this:
  *
  *   PutLink
  *      EvaluationLink
@@ -272,7 +272,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  *            ConceptNode "hot patootie"
  *      ConceptNode "cowpie"
  *
- * then the reduced value will be
+ * then the reduced body will be
  *
  *   EvaluationLink
  *      PredicateNode "is a kind of"
@@ -414,7 +414,7 @@ Handle PutLink::do_reduce(void) const
 		return reddy(subs, oset);
 	}
 
-	// If the value is a LambdaLink, it will eta-reducible.
+	// If the argument is a LambdaLink, it will eta-reducible.
 	// We already checked this earlier (a static check), so we
 	// don't need any more checking. Just pass it through.
 	if (LAMBDA_LINK == vtype)

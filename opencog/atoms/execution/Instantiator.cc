@@ -213,9 +213,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Execute the arguments in the PutLink before doing
 			// the beta-reduction. Execute the PutLink only after
 			// the beta-reduction has been done.
-			Handle pvals = ppp->get_arguments();
-			Handle gargs = walk_tree(pvals, silent);
-			if (gargs != pvals)
+			Handle pargs = ppp->get_arguments();
+			Handle gargs = walk_tree(pargs, silent);
+			if (gargs != pargs)
 			{
 				HandleSeq groset;
 				if (ppp->get_vardecl())
