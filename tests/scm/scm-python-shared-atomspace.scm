@@ -1,23 +1,30 @@
 
 (use-modules (opencog))
-(use-modules (opencog test-runner))
 (use-modules (opencog exec))
 (use-modules (opencog python))
+(use-modules (opencog test-runner))
 
 (opencog-test-runner)
+
+; Explicitly test that the atomspace that python is using is
+; the same one that guile is using. Without this, atoms created
+; by python scripts will go into some crazy private atomspace
+; where they cannot be found by anyone ...
 
 (define tname "python-guile-shared-atomspace-test")
 (test-begin tname)
 
 ; Define a python func returning a TV
 (python-eval "
-from opencog.atomspace import AtomSpace, TruthValue
-from opencog.atomspace import types
+from opencog.atomspace import AtomSpace, TruthValue, types
+from opencog.type_constructors import atomspace
+
+# Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b):
-    asp = AtomSpace()
+    global atomspace
     TV = TruthValue(0.2, 0.69)
-    asp.add_node(types.ConceptNode, 'Apple', TV)
-    asp.add_link(types.InheritanceLink, [atom_a, atom_b])
+    atomspace.add_node(types.ConceptNode, 'Apple', TV)
+    atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return TruthValue(0.42, 0.24)
 ")
 
@@ -25,7 +32,7 @@ def foo(atom_a, atom_b):
 (cog-evaluate!
 	(Evaluation
 		(GroundedPredicate "py:foo")
-		(List (Concept "fruit") (Concept "banana")))))
+		(List (Concept "fruit") (Concept "banana"))))
 
 ; Make sure that Apple was created.
 (test-assert "Apple atom was created"

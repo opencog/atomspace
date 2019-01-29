@@ -9,6 +9,9 @@
 (define tname "python-arity-test")
 (test-begin tname)
 
+; Check to make sure that python actually throws an exception,
+; when it gets the wrong number of arguments passed to it.
+
 ; Define a python func returning a TV
 (python-eval "
 from opencog.atomspace import AtomSpace, TruthValue, types
