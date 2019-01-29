@@ -37,7 +37,7 @@ namespace opencog
 /**
  * Type checker.  Returns true if `value` is of type `type_spec`.
  * More precisely, returns true if `value` will fit into the type
- * specification given by `type_spec`; that the argument and the type
+ * specification given by `type_spec`; that the value and the type
  * specification can be connected, e.g. for beta-reduction, or for
  * pattern matching (searching).
  */
@@ -46,7 +46,7 @@ bool value_is_type(const Handle& type_spec, const ValuePtr& value);
 /**
  * Type matcher. Returns true if `left` can mate with `right`.
  * Here, `left` can be a type definition, and `right` can be
- * another type defintion, or an argument.  Mating is possible whenever
+ * another type defintion, or a value.  Mating is possible whenever
  * `left` is broader, less restricitve than `right`; equivalently
  * if `right` is narrower than 'left`.
  *
@@ -84,7 +84,7 @@ bool type_match(const Handle&, const ValuePtr&);
 
 /**
  * Same as above, but return the composition (beta-reduction) of the
- * match. If the types do NOT match, the undefined handle is returned.
+ * match. If the types do NOT match, an exception is thrown.
  * If the types do match, then, for many cases, the right side is the
  * result.  The compostion of arrows, however, results either in a
  * new arrow, or a simple return type.
