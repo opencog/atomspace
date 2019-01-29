@@ -557,10 +557,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		PutLinkPtr pl(PutLinkCast(evelnk));
 
 		// Evalating a PutLink requires three steps:
-		// (1) execute the values, first,
-		// (2) beta reduce (put values into body)
+		// (1) execute the arguments, first,
+		// (2) beta reduce (put arguments into body)
 		// (3) evaluate the resulting body.
-		Handle pvals = pl->get_values();
+		Handle pvals = pl->get_arguments();
 		Instantiator inst(as);
 		// Step (1)
 		Handle gvals(HandleCast(inst.execute(pvals, silent)));

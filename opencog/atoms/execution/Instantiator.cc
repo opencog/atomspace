@@ -210,10 +210,10 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (_eager)
 		{
 			ppp = PutLinkCast(expr);
-			// Execute the values in the PutLink before doing the
-			// beta-reduction. Execute the PutLink only after the
-			// beta-reduction has been done.
-			Handle pvals = ppp->get_values();
+			// Execute the arguments in the PutLink before doing
+			// the beta-reduction. Execute the PutLink only after
+			// the beta-reduction has been done.
+			Handle pvals = ppp->get_arguments();
 			Handle gargs = walk_tree(pvals, silent);
 			if (gargs != pvals)
 			{
@@ -250,9 +250,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step three: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
 		// result has a GroundedPredicateNode, we need to run it now.
-		// We do, however, ignore the resulting TV, which is also
-		// awkward.  I'm confused about how to handle this best.
-		// The behavior tree uses this!
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		//
 		// The DontExecLink is a weird hack to halt evaluation.
