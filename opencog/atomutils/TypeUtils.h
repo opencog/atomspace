@@ -107,7 +107,7 @@ bool type_match(const Handle&, const ValuePtr&);
  *   right == (Arrow (Type "Evaluation") (Type "Concept")
  *   result = (Arrow (Type "Evaluation") (Type "Number"))
  */
-Handle type_compose(const Handle&, const Handle&);
+ValuePtr type_compose(const Handle&, const ValuePtr&);
 
 /**
  * Given a variable declaration (VariableList) and a pattern body,

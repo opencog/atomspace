@@ -277,9 +277,11 @@ bool type_match(const Handle& left_, const ValuePtr& right_)
 	return type_match_rec(left_, right_, true);
 }
 
-Handle type_compose(const Handle& left, const Handle& right)
+ValuePtr type_compose(const Handle& left, const ValuePtr& right)
 {
-	return Handle::UNDEFINED;
+	// Interesting. XXX FIXME. This is not yet implemented!
+	throw RuntimeException(TRACE_INFO, "Not implemented!");
+	return nullptr;
 }
 
 Handle filter_vardecl(const Handle& vardecl, const Handle& body)
