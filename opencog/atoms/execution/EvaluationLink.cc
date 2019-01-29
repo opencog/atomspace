@@ -731,7 +731,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs, silent);
+	Handle args(force_execute(as, cargs, silent));
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
