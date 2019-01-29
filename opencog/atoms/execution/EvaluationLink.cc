@@ -726,16 +726,12 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 		throw NotEvaluatableException();
 	}
 
-	// The arguments may need to be executed...
-	Instantiator inst(as);
-	Handle dargs(HandleCast(inst.execute(cargs, silent)));
-
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, dargs, silent);
+	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
