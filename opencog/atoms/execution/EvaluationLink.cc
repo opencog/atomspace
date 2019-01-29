@@ -384,7 +384,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
-		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), sna.at(1), silent));
+		TruthValuePtr tvp(do_eval_with_args(scratch,
+		                                sna.at(0), sna.at(1), silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
@@ -667,7 +668,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		throw SyntaxException(TRACE_INFO,
 		     "Incorrect arity for an EvaluationLink!");
 	}
-	return do_evaluate(as, sna[0], sna[1], silent);
+	return do_eval_with_args(as, sna[0], sna[1], silent);
 }
 
 // Fixme: added here, because lang_lib_fun is declared inside ExecutionOutputLink class
@@ -675,7 +676,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 // uses this function, so more refactoring would be needed
 #include "ExecutionOutputLink.h"
 
-/// do_evaluate -- evaluate a PredicateNode with arguments.
+/// do_eval_with_args -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode, the
@@ -692,7 +693,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 /// The arguments are then inserted into the predicate, and the
 /// predicate as a whole is then evaluated.
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
                                           const Handle& pn,
                                           const Handle& cargs,
                                           bool silent)

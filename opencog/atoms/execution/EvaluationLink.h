@@ -53,7 +53,7 @@ public:
 	static TruthValuePtr do_evaluate(AtomSpace*,
 	                                 const HandleSeq& schema_and_args,
 	                                 bool silent=false);
-	static TruthValuePtr do_evaluate(AtomSpace*,
+	static TruthValuePtr do_eval_with_args(AtomSpace*,
 	                                 const Handle& schema, const Handle& args,
 	                                 bool silent=false);
 
