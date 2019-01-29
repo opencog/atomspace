@@ -1,18 +1,20 @@
 ;
 ; formulas.scm -- Declaring formulas that compute truth values.
 ;
-; The rule engine, PLN and other subsystems need to be able to compute
-; and alter truth values. If those formulas are known a-priori, then
-; thay can be hard-coded into GroundedPredicateNodes.  However, it is
-; possible that those formulas are not yet known: that they will be
-; learned using some learning algorithm, for example, MOSES, or maybe
-; the Pattern Miner, or some neural network.
+; Arithmetic consists of addition, subtraction, multiplication and
+; division; there are explicit Atom types to represent these. Thus,
+; arithmetic formulas can be stored in the atomspace.
 ;
-; In this case, the formulas need to be placed where they can be
-; accessed during computation: in the AtomSpace. The example below
-; shows how formulas can be declared in the AtomSpace, but in such a
-; way that they can also be evaluated to yeild an actual truth value,
-; which is then attached to some Atom.
+; Because the AtomSpace holds descriptive, declarative knowledge, these
+; formulas can be maniuplated and edited. For example, an algebra system
+; (implemented as a collection of rules) can work with the formulas.
+;
+; But also, these formulas can be explicitly evaluated. The arithmetic
+; operators (PlusLink, TimesLink, etc.) know how to add and multiply
+; numbers and values. Thus, however a formula has been obtained (whether
+; by computation, search, reasoning, algebra or learning), it can then
+; be applied to (time-changing) Values. This example shows how formulas
+; are used to modify TruthValues.
 ;
 (use-modules (opencog) (opencog exec))
 
