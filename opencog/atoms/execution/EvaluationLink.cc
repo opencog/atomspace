@@ -675,11 +675,22 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 // uses this function, so more refactoring would be needed
 #include "ExecutionOutputLink.h"
 
-/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
+/// do_evaluate -- evaluate a PredicateNode with arguments.
 ///
-/// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
-/// Expects "args" to be a ListLink
-/// Executes the GroundedPredicateNode, supplying the args as argument
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode, the
+///     DefinedPredicateNode and the PredicateFormulasLink.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
+///
+/// For the special case of GroundedPredicateNode, the arguments are
+/// "eager-evaluated", because it is assumed that the GPN is unaware
+/// of the concept of lazy evaluation, and can't do it itself.  In
+/// all other cases, lazy evaluation is done (i.e. no evaluation is
+/// done, if it is not needed.)
+///
+/// The arguments are then inserted into the predicate, and the
+/// predicate as a whole is then evaluated.
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& pn,
@@ -803,16 +814,20 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
+	// Generic shared-library foreign-function interface.
+	// Currently used only by the Haskell bindings.
+	//
 	// Extract the language, library and function
 	std::string lang, lib, fun;
 	ExecutionOutputLink::lang_lib_fun(schema, lang, lib, fun);
-	// Used by the C++ bindings; can be used with any language, Haskel binding is now missing
 	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);
+
 		// Convert the void* pointer to the correct function type.
 		TruthValuePtr* (*func)(AtomSpace*, Handle*);
 		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
+
 		// Evaluate the predicate
 		TruthValuePtr* res = func(as, &args);
 		TruthValuePtr result;
