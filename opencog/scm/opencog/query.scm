@@ -97,31 +97,31 @@
   if `RIGHT` is narrower than 'LEFT`.
 
   Mating types and arguments:
-  LEFT == (Type "Concept")    RIGHT == (Concept "foo")  can mate.
-  LEFT == (Type "Concept")    RIGHT == (Number 13)  cannot.
+  LEFT == (Type 'ConceptNode)    RIGHT == (Concept \"foo\")  can mate.
+  LEFT == (Type 'ConceptNode)    RIGHT == (Number 13)  cannot.
 
   Mating types and types:
-  LEFT == (Type "Concept")    RIGHT == (Type "Concept")  can mate.
+  LEFT == (Type 'ConceptNode)    RIGHT == (Type 'ConceptNode)  can mate.
 
   Left is wider (polymorphic, in this case)
-    LEFT == (TypeChoice (Type "Concept") (Type "Number"))
-    RIGHT == (Type "Number")  can mate.
+    LEFT == (TypeChoice (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Type 'NumberNode)  can mate.
 
   Function call arguments can be checked:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Concept "foo")  can mate.
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Concept 'fooNode)  can mate.
 
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
     RIGHT == (Number 13)  cannot.
 
   Function call chains can be checked:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Type "Concept")  can mate.
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Type 'ConceptNode)  can mate.
 
   The following can mate, because LEFT accepts a concept as input,
   and RIGHT generates a concept as output:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Arrow (Type "Evaluation") (Type "Concept")
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Arrow (Type 'EvaluationNode) (Type 'ConceptNode)
 
   Any type specification is valid: SignatureLinks, etc work too.
 ")
@@ -139,18 +139,18 @@
   Examples:
 
   Function call arguments can be checked:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Concept "foo")  can mate.
-    result = (Type "Number")
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Concept \"foo\")  can mate.
+    result = (Type 'NumberNode)
 
   Function call chains:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Type "Concept")  can mate.
-    result = (Type "Number")
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Type 'ConceptNode)  can mate.
+    result = (Type 'NumberNode)
 
   The following can mate, because LEFT accepts a concept as input,
   and RIGHT generates a concept as output:
-    LEFT == (Arrow (Type "Concept") (Type "Number"))
-    RIGHT == (Arrow (Type "Evaluation") (Type "Concept")
-    result = (Arrow (Type "Evaluation") (Type "Number"))
+    LEFT == (Arrow (Type 'ConceptNode) (Type 'NumberNode))
+    RIGHT == (Arrow (Type 'EvaluationLink) (Type 'ConceptNode)
+    result = (Arrow (Type 'EvaluationLink) (Type 'NumberNode))
 ")
