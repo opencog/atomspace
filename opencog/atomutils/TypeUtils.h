@@ -80,11 +80,11 @@ bool value_is_type(const Handle& type_spec, const ValuePtr& value);
  * Any type specification is valid: SignatureLinks, etc work too.
  */
 
-bool type_match(const Handle&, const Handle&);
+bool type_match(const Handle&, const ValuePtr&);
 
 /**
  * Same as above, but return the composition (beta-reduction) of the
- * match. If the types do NOT match, theundefined handle is returned.
+ * match. If the types do NOT match, the undefined handle is returned.
  * If the types do match, then, for many cases, the right side is the
  * result.  The compostion of arrows, however, results either in a
  * new arrow, or a simple return type.

@@ -129,7 +129,8 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
  * a whizzy set-subset operation, one could go all formal operator
  * and etc. but more abstraction seems unlikely to make it better.
  */
-static bool type_match_rec(const Handle& left_, const Handle& right_,
+static bool type_match_rec(const Handle& left_,
+                           const ValuePtr& right_,
                            bool toplevel)
 {
 	if (left_ == right_) return true;
@@ -168,7 +169,10 @@ static bool type_match_rec(const Handle& left_, const Handle& right_,
 		return value_is_type(left, right_);
 	}
 
-	Handle right(right_);
+	// Everything below here deals with atoms.
+	if (not right_->is_atom()) return false;
+
+	Handle right(HandleCast(right_));
 
 	// If it's a user-defined type, replace by it's defintion.
 	if (DEFINED_TYPE_NODE == rtype)
@@ -228,7 +232,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_,
 		{
 			// Can everything in the right be found in the left?
 			// If so, then we are OK.
-			for (const Handle& rh : right->getOutgoingSet())
+			for (const Handle& rh : HandleCast(right)->getOutgoingSet())
 			{
 				if (not type_match_rec(left, rh, false)) return false;
 			}
@@ -268,7 +272,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_,
 	return true;
 }
 
-bool type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const ValuePtr& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
