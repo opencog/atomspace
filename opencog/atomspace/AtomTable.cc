@@ -387,7 +387,9 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, else crazy things go wrong.
+    // private copy of the atom, because each atom instance keeps a pointer to
+    // the atomspace. This pointer is used to get UUID, send signals, implement
+    // getAtomSpace() and getAtomTable() methods.
     else if (atom == orig)
     {
         if (atom->is_node())
