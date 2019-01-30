@@ -38,7 +38,7 @@ namespace opencog {
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool value_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const ValuePtr& val)
 {
 	Handle deep(spec);
 
@@ -61,20 +61,20 @@ bool value_is_type(const Handle& spec, const Handle& val)
 
 	if (TYPE_NODE == dpt)
 	{
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return (valtype == deeptype);
 	}
 	else if (TYPE_INH_NODE == dpt)
 	{
 		// Just like above, but allows derived types.
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(valtype, deeptype);
 	}
 	else if (TYPE_CO_INH_NODE == dpt)
 	{
 		// Just like above, but in the other direction.
 		// That is, it allows base tyes.
-		Type deeptype = TypeNodeCast(deep)->get_value();
+		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(deeptype, valtype);
 	}
 	else if (TYPE_CHOICE == dpt)
@@ -91,15 +91,15 @@ bool value_is_type(const Handle& spec, const Handle& val)
 			"Not implemented! TODO XXX FIXME");
 	}
 
-	// If it is a node, not a link, then it is a type-constant,
+	// If it is not a link, then it is a type-constant,
 	// and thus must match perfectly.
-	if (deep->is_node())
+	if (not deep->is_link())
 		return (deep == val);
 
-	// If a link, then both must be same link type.
+	// If it is a link, then both must be same link type.
 	if (valtype != dpt) return false;
 
-	const HandleSeq& vlo = val->getOutgoingSet();
+	const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
 	const HandleSeq& dpo = deep->getOutgoingSet();
 	size_t sz = dpo.size();
 
@@ -129,7 +129,9 @@ bool value_is_type(const Handle& spec, const Handle& val)
  * a whizzy set-subset operation, one could go all formal operator
  * and etc. but more abstraction seems unlikely to make it better.
  */
-static bool type_match_rec(const Handle& left_, const Handle& right_, bool toplevel)
+static bool type_match_rec(const Handle& left_,
+                           const ValuePtr& right_,
+                           bool toplevel)
 {
 	if (left_ == right_) return true;
 
@@ -150,9 +152,9 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		ltype = left->get_type();
 	}
 
-	// If right is not a type, then just use value-check.
+	// If right is not a type, then just use argument-check.
 	// We can only do this at the top level; lower levels
-	// can have value-like links (i.e. duck-types which
+	// can have argument-like links (i.e. duck-types which
 	// we have to type-interence).
 	Type rtype = right_->get_type();
 	if (toplevel and
@@ -167,7 +169,10 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		return value_is_type(left, right_);
 	}
 
-	Handle right(right_);
+	// Everything below here deals with atoms.
+	if (not right_->is_atom()) return false;
+
+	Handle right(HandleCast(right_));
 
 	// If it's a user-defined type, replace by it's defintion.
 	if (DEFINED_TYPE_NODE == rtype)
@@ -205,19 +210,19 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// the top-level; here we do lower levels.
 	if (TYPE_NODE == ltype)
 	{
-		return TypeNodeCast(left)->get_value() == rtype;
+		return TypeNodeCast(left)->get_kind() == rtype;
 	}
 
 	// Like above but allows derived tyes.
 	if (TYPE_INH_NODE == ltype)
 	{
-		return nameserver().isA(rtype, TypeNodeCast(left)->get_value());
+		return nameserver().isA(rtype, TypeNodeCast(left)->get_kind());
 	}
 
 	// Like above, but in the opposite direction: allows base types.
 	if (TYPE_CO_INH_NODE == ltype)
 	{
-		return nameserver().isA(TypeNodeCast(left)->get_value(), rtype);
+		return nameserver().isA(TypeNodeCast(left)->get_kind(), rtype);
 	}
 
 	// If left is a type choice, right must match a choice.
@@ -227,7 +232,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		{
 			// Can everything in the right be found in the left?
 			// If so, then we are OK.
-			for (const Handle& rh : right->getOutgoingSet())
+			for (const Handle& rh : HandleCast(right)->getOutgoingSet())
 			{
 				if (not type_match_rec(left, rh, false)) return false;
 			}
@@ -267,14 +272,16 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	return true;
 }
 
-bool type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const ValuePtr& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
 
-Handle type_compose(const Handle& left, const Handle& right)
+ValuePtr type_compose(const Handle& left, const ValuePtr& right)
 {
-	return Handle::UNDEFINED;
+	// Interesting. XXX FIXME. This is not yet implemented!
+	throw RuntimeException(TRACE_INFO, "Not implemented!");
+	return nullptr;
 }
 
 Handle filter_vardecl(const Handle& vardecl, const Handle& body)

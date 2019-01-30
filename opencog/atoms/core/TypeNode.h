@@ -39,20 +39,20 @@ namespace opencog
 class TypeNode : public Node
 {
 protected:
-	Type value;
+	Type _kind;
 
 public:
 	// Please do NOT use this constructor!
 	TypeNode(Type t, const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(t, s),
-		  value(nameserver().getType(s))
+		  _kind(nameserver().getType(s))
 	{
 		// Perform strict checking only for TypeNode.  The
 		// DefinedTypeNode, which inherits from this class,
 		// allows user-defined types which the classerver
 		// currently does not know about.
-		if (TYPE_NODE == t and NOTYPE == value)
+		if (TYPE_NODE == t and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
 	}
@@ -61,30 +61,30 @@ public:
 	TypeNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(TYPE_NODE, s),
-		  value(nameserver().getType(s))
+		  _kind(nameserver().getType(s))
 	{
-		if (NOTYPE == value)
+		if (NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
 	}
 
 	TypeNode(Type t)
 		: Node(TYPE_NODE, nameserver().getTypeName(t)),
-		  value(t)
+		  _kind(t)
 	{}
 
 	TypeNode(Node &n)
 		: Node(n),
-		  value(nameserver().getType(n.get_name()))
+		  _kind(nameserver().getType(n.get_name()))
 	{
 		OC_ASSERT(nameserver().isA(n.get_type(), TYPE_NODE),
 			"Bad TypeNode constructor!");
 
-		if (DEFINED_TYPE_NODE != _type and NOTYPE == value)
+		if (DEFINED_TYPE_NODE != _type and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", n.get_name().c_str());
 
-		if (DEFINED_TYPE_NODE == _type and NOTYPE != value)
+		if (DEFINED_TYPE_NODE == _type and NOTYPE != _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Redefinition of a built-in typename: '%s'", n.get_name().c_str());
 	}
@@ -101,7 +101,7 @@ public:
 				"Not a valid typename: '%s'", str.c_str());
 	}
 
-	Type get_value(void) { return value; }
+	Type get_kind(void) { return _kind; }
 
 	static Handle factory(const Handle&);
 };

@@ -35,13 +35,13 @@ namespace opencog
  */
 
 /**
- * Type checker.  Returns true if `val` is of type `type_spec`.
- * More precisely, returns true if `val` will fit into the type
+ * Type checker.  Returns true if `value` is of type `type_spec`.
+ * More precisely, returns true if `value` will fit into the type
  * specification given by `type_spec`; that the value and the type
  * specification can be connected, e.g. for beta-reduction, or for
  * pattern matching (searching).
  */
-bool value_is_type(const Handle& type_spec, const Handle& val);
+bool value_is_type(const Handle& type_spec, const ValuePtr& value);
 
 /**
  * Type matcher. Returns true if `left` can mate with `right`.
@@ -50,7 +50,7 @@ bool value_is_type(const Handle& type_spec, const Handle& val);
  * `left` is broader, less restricitve than `right`; equivalently
  * if `right` is narrower than 'left`.
  *
- * Mating types and values:
+ * Mating types and arguments:
  * left == (Type "Concept")    right == (Concept "foo")  can mate.
  * left == (Type "Concept")    right == (Number 13)  cannot.
  *
@@ -80,11 +80,11 @@ bool value_is_type(const Handle& type_spec, const Handle& val);
  * Any type specification is valid: SignatureLinks, etc work too.
  */
 
-bool type_match(const Handle&, const Handle&);
+bool type_match(const Handle&, const ValuePtr&);
 
 /**
  * Same as above, but return the composition (beta-reduction) of the
- * match. If the types do NOT match, theundefined handle is returned.
+ * match. If the types do NOT match, an exception is thrown.
  * If the types do match, then, for many cases, the right side is the
  * result.  The compostion of arrows, however, results either in a
  * new arrow, or a simple return type.
@@ -107,7 +107,7 @@ bool type_match(const Handle&, const Handle&);
  *   right == (Arrow (Type "Evaluation") (Type "Concept")
  *   result = (Arrow (Type "Evaluation") (Type "Number"))
  */
-Handle type_compose(const Handle&, const Handle&);
+ValuePtr type_compose(const Handle&, const ValuePtr&);
 
 /**
  * Given a variable declaration (VariableList) and a pattern body,

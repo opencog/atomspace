@@ -338,12 +338,12 @@ static void thread_eval_tv(AtomSpace* as,
 ///
 /// For example, evaluating a TrueLink returns TruthValue::TRUE_TV, and
 /// evaluating a FalseLink returns TruthValue::FALSE_TV.  Evaluating
-/// AndLink, OrLink returns the boolean and, or of their respective
+/// AndLink, OrLink returns the binary and/or of their respective
 /// arguments.  A wide variety of Link types are evaluatable, this
 /// handles them all.
 ///
-/// If the argument to be an EvaluationLink, it should have the
-/// following structure:
+/// If the argument is an EvaluationLink with a GPN in it, it should
+/// have the following structure:
 ///
 ///     EvaluationLink
 ///         GroundedPredicateNode "lang: func_name"
@@ -351,9 +351,9 @@ static void thread_eval_tv(AtomSpace* as,
 ///             SomeAtom
 ///             OtherAtom
 ///
-/// The "lang:" should be either "scm:" for scheme, or "py:" for python.
-/// This method will then invoke "func_name" on the provided ListLink
-/// of arguments to the function.
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for haskell.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
 ///
 /// This function takes TWO atomspace arguments!  The first is the
 /// "main" atomspace, the second is a "scratch" or "temporary"
@@ -384,11 +384,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
-		// The arguments may need to be executed...
-		Instantiator inst(scratch);
-		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
-
-		TruthValuePtr tvp(do_evaluate(scratch, sna.at(0), args, silent));
+		// Extract the args, and run the evaluation with them.
+		TruthValuePtr tvp(do_eval_with_args(scratch,
+		                                sna.at(0), sna.at(1), silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
@@ -559,10 +557,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		PutLinkPtr pl(PutLinkCast(evelnk));
 
 		// Evalating a PutLink requires three steps:
-		// (1) execute the values, first,
-		// (2) beta reduce (put values into body)
+		// (1) execute the arguments, first,
+		// (2) beta reduce (put arguments into body)
 		// (3) evaluate the resulting body.
-		Handle pvals = pl->get_values();
+		Handle pvals = pl->get_arguments();
 		Instantiator inst(as);
 		// Step (1)
 		Handle gvals(HandleCast(inst.execute(pvals, silent)));
@@ -655,37 +653,31 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	return do_eval_scratch(as, evelnk, as, silent);
 }
 
-/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
-///
-/// Expects the sequence to be exactly two atoms long.
-/// Expects the first handle of the sequence to be a GroundedPredicateNode
-/// Expects the second handle of the sequence to be a ListLink
-/// Executes the GroundedPredicateNode, supplying the second handle as argument
-///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                          const HandleSeq& sna,
-                                          bool silent)
-{
-	if (2 != sna.size())
-	{
-		throw SyntaxException(TRACE_INFO,
-		     "Incorrect arity for an EvaluationLink!");
-	}
-	return do_evaluate(as, sna[0], sna[1], silent);
-}
-
-// Fixme: added here, because lang_lib_fun is declared inside ExecutionOutputLink class
-// It would be better to move lang_lib_fun to LibraryManager, but BackwardChainer also
-// uses this function, so more refactoring would be needed
+// XXX FIXME: added here, because lang_lib_fun is declared inside
+// ExecutionOutputLink class. It would be better to move
+// lang_lib_fun to LibraryManager, but BackwardChainer also
+// uses this function, so more refactoring would be needed.
+// XXX Really? Can we do this, already?
 #include "ExecutionOutputLink.h"
 
-/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
+/// do_eval_with_args -- evaluate a PredicateNode with arguments.
 ///
-/// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
-/// Expects "args" to be a ListLink
-/// Executes the GroundedPredicateNode, supplying the args as argument
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode, the
+///     DefinedPredicateNode and the PredicateFormulasLink.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+/// For the special case of GroundedPredicateNode, the arguments are
+/// "eager-evaluated", because it is assumed that the GPN is unaware
+/// of the concept of lazy evaluation, and can't do it itself.  In
+/// all other cases, lazy evaluation is done (i.e. no evaluation is
+/// done, if it is not needed.)
+///
+/// The arguments are then inserted into the predicate, and the
+/// predicate as a whole is then evaluated.
+///
+TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
                                           const Handle& pn,
                                           const Handle& cargs,
                                           bool silent)
@@ -714,8 +706,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 				"Expecting definition to be a LambdaLink, got %s",
 				defn->to_string().c_str());
 
-		// Treat it as if it were a PutLink -- perform the
-		// beta-reduction, and evaluate the result.
+		// Treat LambdaLink as if it were a PutLink -- perform
+		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Handle reduct = lam->beta_reduce(get_seq(cargs));
 		return do_evaluate(as, reduct, silent);
@@ -739,7 +731,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs, silent);
+	Handle args(force_execute(as, cargs, silent));
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
@@ -803,16 +795,20 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
+	// Generic shared-library foreign-function interface.
+	// Currently used only by the Haskell bindings.
+	//
 	// Extract the language, library and function
 	std::string lang, lib, fun;
 	ExecutionOutputLink::lang_lib_fun(schema, lang, lib, fun);
-	// Used by the C++ bindings; can be used with any language, Haskel binding is now missing
 	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);
+
 		// Convert the void* pointer to the correct function type.
 		TruthValuePtr* (*func)(AtomSpace*, Handle*);
 		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
+
 		// Evaluate the predicate
 		TruthValuePtr* res = func(as, &args);
 		TruthValuePtr result;

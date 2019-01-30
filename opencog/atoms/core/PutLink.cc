@@ -44,9 +44,9 @@ PutLink::PutLink(const Link& l)
 
 /// PutLink expects a very strict format: an arity-2 link, with
 /// the first part being a pattern, and the second a list or set
-/// of values. If the pattern has N variables, then the seccond
-/// part must have N values.  Furthermore, any type restrictions on
-/// the variables must be satisfied by the values.
+/// of arguments. If the pattern has N variables, then the seccond
+/// part must have N arguments.  Furthermore, any type restrictions
+/// on the variables must be satisfied by the arguments.
 ///
 /// The following formats are understood:
 ///
@@ -94,20 +94,20 @@ void PutLink::init(void)
 		// type declarations for it, then ScopeLink gets confused.
 		_vardecl = Handle::UNDEFINED;
 		_body = _outgoing[0];
-		_values = _outgoing[1];
+		_arguments = _outgoing[1];
 	}
 	else
-		_values = _outgoing[2];
+		_arguments = _outgoing[2];
 
-	static_typecheck_values();
+	static_typecheck_arguments();
 }
 
 
-/// Check that the values in the PutLink obey the type constraints.
+/// Check that the arguments in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
-/// since the values may be dynamically obtained at run-time, we cannot
+/// since the arguments may be dynamically obtained at run-time, we cannot
 /// check these here.
-void PutLink::static_typecheck_values(void)
+void PutLink::static_typecheck_arguments(void)
 {
 	// Cannot typecheck at this pont in time, because the schema
 	// might not be defined yet...
@@ -123,10 +123,10 @@ void PutLink::static_typecheck_values(void)
 	if (nameserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
-	Handle valley = _values;
+	Handle valley = _arguments;
 	Type vtype = valley->get_type();
 
-	// If it's body or value is an UnquoteLink then the PutLink is
+	// If it's body or argument is an UnquoteLink then the PutLink is
 	// likely quoted and thus there is nothing to do
 	if (btype == UNQUOTE_LINK or vtype == UNQUOTE_LINK)
 		return;
@@ -136,7 +136,7 @@ void PutLink::static_typecheck_values(void)
 	// eta-reducible when it's body is a ListLink.
 	if (LAMBDA_LINK == vtype)
 	{
-		LambdaLinkPtr lam(LambdaLinkCast(_values));
+		LambdaLinkPtr lam(LambdaLinkCast(_arguments));
 		Handle body = lam->get_body();
 
 		// The body might not exist, if there's an unmantched
@@ -187,19 +187,19 @@ void PutLink::static_typecheck_values(void)
 	if (LIST_LINK == vtype)
 	{
 		// is_type() verifies that the arity of the vars
-		// and the values matches up.
+		// and the arguments matches up.
 		if (not _varlist.is_type(valley->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
-					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
+					"PutLink has mismatched argument list! vardecl=%s\nvals=%s",
 					_vardecl->to_string().c_str(),
-					_values->to_string().c_str());
+					_arguments->to_string().c_str());
 			else
 				throw SyntaxException(TRACE_INFO,
-					"PutLink has mismatched value list! body=%s\nvals=%s",
+					"PutLink has mismatched argument list! body=%s\nvals=%s",
 					_body->to_string().c_str(),
-					_values->to_string().c_str());
+					_arguments->to_string().c_str());
 		}
 		return;
 	}
@@ -221,19 +221,20 @@ void PutLink::static_typecheck_values(void)
 	{
 		for (const Handle& h : valley->getOutgoingSet())
 		{
-			// If the arity is greater than one, then the values must be in a list.
+			// If the arity is greater than one,
+			// then the arguments must be in a list.
 			if (h->get_type() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
-					"PutLink expected value list!");
+					"PutLink expected argument list!");
 
 			if (not _varlist.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
-					"PutLink bad value list!");
+					"PutLink bad argument list!");
 		}
 		return;
 	}
 
-	// If the arity is one, the values must obey type constraint.
+	// If the arity is one, the arguments must obey type constraint.
 	for (const Handle& h : valley->getOutgoingSet())
 	{
 		if (not _varlist.is_type(h))
@@ -253,7 +254,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 /**
  * Perform the actual beta reduction --
  *
- * Substitute values for the variables in the pattern tree.
+ * Substitute arguments for the variables in the pattern tree.
  * This is a lot like applying the function fun to the argument list
  * args, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
@@ -261,7 +262,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  * evaluation or execution to happen during or after sustitution, use
  * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
- * So, for example, if this PutLink looks like this:
+ * So, for example, if the PutLink looks like this:
  *
  *   PutLink
  *      EvaluationLink
@@ -271,7 +272,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  *            ConceptNode "hot patootie"
  *      ConceptNode "cowpie"
  *
- * then the reduced value will be
+ * then the reduced body will be
  *
  *   EvaluationLink
  *      PredicateNode "is a kind of"
@@ -279,8 +280,8 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  *         ConceptNode "cowpie"
  *         ConceptNode "hot patootie"
  *
- * Type checking is performed during substitution; if the values fail to
- * have the desired types, no substitution is performed.  In this case,
+ * Type checking is performed during substitution; if the arguments fail
+ * to have the desired types, no substitution is performed.  In this case,
  * an undefined handle is returned. For set substitutions, this acts as
  * a filter, removing (filtering out) the mismatched types.
  *
@@ -328,8 +329,8 @@ Handle PutLink::do_reduce(void) const
 		subs = lam;
 	}
 
-	// Now get the values that we will plug into the body.
-	Type vtype = _values->get_type();
+	// Now get the arguments that we will plug into the body.
+	Type vtype = _arguments->get_type();
 	size_t nvars = vars.varseq.size();
 
 	// FunctionLinks behave like pointless lambdas; that is, one can
@@ -347,7 +348,7 @@ Handle PutLink::do_reduce(void) const
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			const HandleSeq& rest = _values->getOutgoingSet();
+			const HandleSeq& rest = _arguments->getOutgoingSet();
 			oset.insert(oset.end(), rest.begin(), rest.end());
 			return createLink(oset, btype);
 		}
@@ -355,13 +356,13 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			oset.emplace_back(_values);
+			oset.emplace_back(_arguments);
 			return createLink(oset, btype);
 		}
 
-		// If the values are given in a set, then iterate over the set...
+		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _values->getOutgoingSet())
+		for (const Handle& h : _arguments->getOutgoingSet())
 		{
 			if (LIST_LINK == h->get_type())
 			{
@@ -385,12 +386,12 @@ Handle PutLink::do_reduce(void) const
 	{
 		if (SET_LINK != vtype)
 		{
-			return reddy(subs, {_values});
+			return reddy(subs, {_arguments});
 		}
 
-		// If the values are given in a set, then iterate over the set...
+		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _values->getOutgoingSet())
+		for (const Handle& h : _arguments->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.emplace_back(h);
@@ -404,25 +405,26 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// If we are here, then there are multiple variables in the body.
-	// See how many values there are.  If the values are a ListLink,
-	// then assume that there is only a single set of values to plug in.
+	// See how many arguments there are.  If the arguments are in a
+	// ListLink, then assume that there is only a single set of
+	// arguments to plug in.
 	if (LIST_LINK == vtype)
 	{
-		const HandleSeq& oset = _values->getOutgoingSet();
+		const HandleSeq& oset = _arguments->getOutgoingSet();
 		return reddy(subs, oset);
 	}
 
-	// If the value is a LambdaLink, it will eta-reducible.
+	// If the argument is a LambdaLink, it will eta-reducible.
 	// We already checked this earlier (a static check), so we
 	// don't need any more checking. Just pass it through.
 	if (LAMBDA_LINK == vtype)
 	{
 		HandleSeq oset;
-		oset.emplace_back(_values);
+		oset.emplace_back(_arguments);
 		return reddy(subs, oset);
 	}
 
-	// If we are here, then there are multiple values.
+	// If we are here, then there are multiple arguments.
 	// These MUST be given to us as a SetLink.
 	if (SET_LINK != vtype)
 	{
@@ -434,7 +436,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	HandleSeq bset;
-	for (const Handle& h : _values->getOutgoingSet())
+	for (const Handle& h : _arguments->getOutgoingSet())
 	{
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
