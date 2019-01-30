@@ -36,6 +36,9 @@ using namespace opencog;
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
+	// Derived types do thier own validation.
+	if (EXECUTION_OUTPUT_LINK != get_type()) return;
+
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
@@ -56,8 +59,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
-		                      "ExecutionOutputLink must have schema and args! Got arity=%d",
-		                      oset.size());
+		       "ExecutionOutputLink must have schema and args! Got arity=%d",
+		        oset.size());
 
 	check_schema(oset[0]);
 }

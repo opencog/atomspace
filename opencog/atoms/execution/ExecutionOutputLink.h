@@ -42,7 +42,7 @@ private:
 	                         bool silent=false);
 
 protected:
-	virtual void check_schema(const Handle& schema) const;
+	void check_schema(const Handle& schema) const;
 
 public:
 	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
