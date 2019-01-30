@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/ClassServerUTest.cxxtest
+ * tests/atoms/atom_types/NameServerUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -30,12 +30,12 @@
 using namespace opencog;
 using namespace std;
 
-class ClassServerUTest :  public CxxTest::TestSuite
+class NameServerUTest :  public CxxTest::TestSuite
 {
 private:
 
 public:
-    ClassServerUTest() {}
+    NameServerUTest() {}
 
     void setUp() {}
 
