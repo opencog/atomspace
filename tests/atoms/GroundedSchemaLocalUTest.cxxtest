@@ -23,6 +23,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/LibraryManager.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 using namespace opencog;

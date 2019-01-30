@@ -653,13 +653,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	return do_eval_scratch(as, evelnk, as, silent);
 }
 
-// XXX FIXME: added here, because lang_lib_fun is declared inside
-// ExecutionOutputLink class. It would be better to move
-// lang_lib_fun to LibraryManager, but BackwardChainer also
-// uses this function, so more refactoring would be needed.
-// XXX Really? Can we do this, already?
-#include "ExecutionOutputLink.h"
-
 /// do_eval_with_args -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
@@ -800,7 +793,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	//
 	// Extract the language, library and function
 	std::string lang, lib, fun;
-	ExecutionOutputLink::lang_lib_fun(schema, lang, lib, fun);
+	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
 	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);

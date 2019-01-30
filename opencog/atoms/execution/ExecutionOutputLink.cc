@@ -130,7 +130,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// Extract the language, library and function
 	std::string lang, lib, fun;
-	lang_lib_fun(schema, lang, lib, fun);
+	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
 
 	Handle result;
 
@@ -182,7 +182,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			free(res);
 		}
 	}
-	else {
+	else
+	{
 		// Unkown proceedure type
 		throw RuntimeException(TRACE_INFO,
 		                       "Cannot evaluate unknown Schema %s",
@@ -210,38 +211,4 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	return result;
 }
 
-void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
-                                       std::string& lang,
-                                       std::string& lib,
-                                       std::string& fun)
-{
-	std::string::size_type pos = schema.find(":");
-	if (pos == std::string::npos)
-		return;
-
-	lang = schema.substr(0, pos);
-
-	// Move past the colon and strip leading white-space
-	do { pos++; } while (' ' == schema[pos]);
-
-	if (lang == "lib") {
-		// Get the name of the Library and Function. They should be
-		// separated by '\'. If no library the separator may be omitted.
-		std::size_t seppos = schema.find("\\");
-		if (seppos == std::string::npos) { // No library
-			lib = "";
-			fun = schema.substr(pos);
-		} else {                  // Possible library
-			lib = schema.substr(pos, seppos - pos);
-			fun = schema.substr(seppos + 1);
-		}
-	} else
-		fun = schema.substr(pos);
-}
-
 DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
-
-void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
-{
-	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
-}
