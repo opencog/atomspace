@@ -20,6 +20,8 @@ STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
 
+PTR_VALUE <- VALUE 		// value which represends pointer to the object
+
 // ===========================================================
 // All of the different flavors of truth values
 TRUTH_VALUE <- FLOAT_VALUE
