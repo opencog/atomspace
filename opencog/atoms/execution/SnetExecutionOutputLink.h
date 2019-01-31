@@ -30,9 +30,6 @@ namespace opencog
 
 class SnetExecutionOutputLink : public ExecutionOutputLink
 {
-protected:
-	static void check_schema(const Handle& schema);
-
 public:
 	SnetExecutionOutputLink(const HandleSeq& oset, Type t);
 

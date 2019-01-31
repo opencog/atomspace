@@ -24,18 +24,8 @@
 
 using namespace opencog;
 
-void SnetExecutionOutputLink::check_schema(const Handle& schema)
-{
-	if (nameserver().isA(schema->get_type(), DOT_LINK))
-	{
-		return;
-	}
-
-	ExecutionOutputLink::check_schema(schema);
-}
-
 SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
-	: ExecutionOutputLink(oset, t, SnetExecutionOutputLink::check_schema)
+	: ExecutionOutputLink(oset, t)
 {
 }
 
