@@ -15,6 +15,7 @@ ADD_LIBRARY (execution
 	MapLink.cc
 	LibraryManager.cc
 	SnetExecutionOutputLink.cc
+	GroundedObjectNode.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -41,6 +42,8 @@ INSTALL (FILES
 	ExecutionOutputLink.h
 	Instantiator.h
 	SnetExecutionOutputLink.h
+	GroundedObject.h
+	GroundedObjectNode.h
 	DESTINATION "include/opencog/atoms/execution"
 )
 

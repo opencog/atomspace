@@ -25,11 +25,13 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/execution/GroundedObject.h>
+#include <opencog/atoms/execution/GroundedObjectNode.h>
 
 using namespace opencog;
 
 #define an atomspace.add_node
 #define al atomspace.add_link
+#define aa atomspace.add_atom
 
 class GroundedObjectExample : public GroundedObject
 {
@@ -71,10 +73,11 @@ public:
 	{
 		Instantiator inst(&atomspace);
 		GroundedObject *foo = new GroundedObjectExample();
+		auto deleter = [](void* ptr) { delete (GroundedObjectExample*)ptr; };
 		Handle eol =
 			al(SNET_EXECUTION_OUTPUT_LINK,
 				al(DOT_LINK,
-					an(GROUNDED_OBJECT_NODE, "foo", foo),
+					aa(createGroundedObjectNode("foo", foo, deleter)),
 					an(CONCEPT_NODE, "bar")
 				),
 				al(LIST_LINK,
