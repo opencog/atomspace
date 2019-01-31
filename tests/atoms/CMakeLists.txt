@@ -1,6 +1,8 @@
 
 ADD_SUBDIRECTORY (atom_types)
 
+ADD_SUBDIRECTORY (base)
+
 ADD_SUBDIRECTORY (truthvalue)
 
 IF(HAVE_GUILE)
