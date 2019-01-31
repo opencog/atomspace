@@ -33,6 +33,7 @@ typedef std::function<ValuePtr(AtomSpace* atomspace, ValuePtr const&)> GroundedF
 class GroundedObject
 {
 public:
+	virtual ~GroundedObject() { }
 	virtual GroundedFunction get_method(std::string const& method_name) = 0;
 };
 
