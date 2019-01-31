@@ -143,7 +143,6 @@ public:
 
 	void test_add_validator()
 	{
-		TS_SKIP("fails with SIGSEGV");
 		class_server->addValidator(NODE_B, validator_b);
 
 		TS_ASSERT_EQUALS(validator_b, class_server->getValidator(NODE_B));

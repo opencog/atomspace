@@ -101,6 +101,7 @@ void ClassServer::addValidator(Type t, Validator* checker)
 	std::unique_lock<std::mutex> l(factory_mutex);
 	_validator.resize(_nameServer.getNumberOfClasses());
 	_validator[t] = checker;
+	_atomFactory.resize(_nameServer.getNumberOfClasses());
 	spliceFactory(t, validating_factory);
 
 	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
