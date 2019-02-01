@@ -45,13 +45,32 @@ ClassServer::ClassServer(const NameServer & nameServer):
 	_nameServer(nameServer)
 {}
 
+/// ClassServer::splice -- install a factory for an atom type.
+///
+/// This inserts a factory `fact` for the atom type `t` into the
+/// array `methods`.  The insertion is performed for not only `t`
+/// but also for all of it's sub-types. The insertion for the
+/// subtypes is done such that any existing factory is not clobbered
+/// by the new one. This allows factories to be installed in any
+/// order, and still have them mirror the correct type hierarchy.
+///
+/// As currently designed, this will 'work correctly' only if the
+/// full atom type hierarchy has already been set up. If a new atom
+/// subtype is delcared, after the factories have been set up, then
+/// the new subtype will not automatically inherit a factory from the
+/// supertype; you will have to write new code for that. XXX FIXME.
+/// So I think that is a bug, as many atom types live outside of the
+/// atomspace. Fixing this bug does NOT require changes to the below;
+/// instead, it requires copying factories whenever the new atom type
+/// is added.
 template<typename T>
 void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 {
-	// N.B. it is too late to synchronize calls with NameServer using a shared mutex.
-	// If registrations of class names interleave with registration of factories,
-	// then the code will not work properly anyway. Before a factory is registered,
-	// the complete class hierarchy must be known.
+	// N.B. it is too late to synchronize calls with NameServer using
+	// a shared mutex.  If registrations of class names interleave with
+	// registration of factories, then the code will not work properly,
+	// anyway. Before a factory is registered, the complete class
+	// hierarchy must be known.
 	
 	std::unique_lock<std::mutex> l(factory_mutex);
 	methods.resize(_nameServer.getNumberOfClasses());
