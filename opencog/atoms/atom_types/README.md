@@ -1,17 +1,28 @@
+Atom Type Hierarchy
+===================
+The `atom_types.script` file defines the type hierarchy of all of the
+atoms defined in the atomspace.  By usng the `NameServer`, one can
+examine this type hierarchy at run-time.
+
+This is not the only such file describing atom types: other systems
+can add thier own. For example, the natural language subsystem declares
+a bunch of atom types for working with words and sentences. The agi-bio
+subsystem defines a bunch of atom types for working with genes and
+protiens.
 
 Adding New Atom and Value Types
 ===============================
+The `NameServer` provides an extension mechanism so that third parties
+(i.e. other systems, libraries) may add new atom types to the default
+atomspace type hierarchy.
 
-The NameServer provides a primitive extension mechanism so that
-modules/agents/libraries may add new atom types to the default type
-hierarchy. In order to ease the task of third-parties wishing to extend
-the NameServer, we provide a cmake macro that generates a set of
-files with c++ code that can be used by the module/library.
+To simplify the declaration and addition of new atom types, several
+different CMake macros are provided.
 
 Declaring a new Value or Atom type
 ----------------------------------
-The macro uses a 'type script' file as input which uses the following
-format:
+Atom type hierarchies are decleared in an 'atom type script' file. It
+uses the following format:
 ```
 <TYPE> [<- <PARENT_TYPE1>[,<PARENT_TYPE2>,<PARENT_TYPE3>,...]] ["<TYPE_NAME>"]
 ```
@@ -19,12 +30,11 @@ Where
 
  * `TYPE` is an identifier that will be used in your code to reference
    the type's numeric code. Usually, it is defined using capital
-   letters and underscores as its semantics is close to that of C/C++
-   constant.
+   letters and underscores.
 
  * `PARENT_TYPE1, PARENT_TYPE1, PARENT_TYPE2` are optional identifiers of
-   the parent types of the defined type. When more than one parent type
-   is specified, they must be separated by commas.
+   the parent types (supertypes) of the defined type. When more than one
+   parent type is specified, they must be separated by commas.
 
  * `TYPE_NAME` is a string that will be used to identify the type. If
    none is supplied, the cmake macro will generate one based on the
@@ -62,7 +72,7 @@ ADD_LIBRARY(sample
     ...
 )
 ```
-The macro `OPENCOG_ADD_ATOM_TYPES` expects 4 parameters:
+The macro `OPENCOG_ADD_ATOM_TYPES` expects six parameters:
 
 1. The filename of the script file that will be used as input
 2. The filename of the header file that will be generated with
@@ -73,44 +83,43 @@ The macro `OPENCOG_ADD_ATOM_TYPES` expects 4 parameters:
 4. The filename of the inheritance file that will be generated with
    the set of method invocations that will build the type hierarchy
    inside the NameServer.
+5. The filename for the scheme bindings to the new atom types.
+6. The filename for the python bindings to the new atom types.
 
-Creating a shared library with the types in them
-------------------------------------------------
-To properly *use* the generated files, the following conventions should be
-followed:
+Initializing the type hierachy
+------------------------------
+The type hierarchy needs to be initialized before it is used. The
+best way to do this is to define a shared library constructor, as
+follows:
 
-  * Include the definitions file right after the standard `#include`
-    statement of the file with the code that initializes your
-    module/agent/library.
-
-  * Include the inheritance file *inside the body* of the routine
-    initializing the module/agent/library.
-
-  * Include the header file by any files that references the identifier
-    of the a new atom type.
-
-For instance:
 ```
-// MyModule.cc
-#include "MyModule.h"
-#include "AnotherHeader.h"
 #include "atom_types.definitions"
-MyModule::MyModule() {}
-...
+
 static __attribute__ ((constructor)) void _init(void)
 {
+    opencog::nameserver().beginTypeDecls("my-custom-types");
     #include "atom_types.inheritance"
+    opencog::nameserver().endTypeDecls();
 }
+```
 
+See the `atom_types.cc` file for a full working example.
 
-// AnotherFile.cc
-#include "AnotherFile.h"
+Using custom atom types
+-----------------------
+To use the newly-defined atom types, just include the type header file
+in C++ code (similarly, the scheme module, of the python module).
+
+For C++, assuming that a new `MY_NODE` was defined:
+```
 #include "atom_types.h"
-#include "YetAnotherFile.h"
 
-void AnotherFile::someMethod() {
-    ...
-    std::string name = opencog::NameServer::getTypeName(opencog::MYNODE);
-    ...
+using namespace opencog;
+
+void some_function()
+{
+    Handle h = createNode(MY_NODE, "foo and bar");
+
+    std::string tname = NameServer::getTypeName(MY_NODE);
 }
 ```
