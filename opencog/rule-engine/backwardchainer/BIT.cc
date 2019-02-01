@@ -36,7 +36,7 @@
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/LibraryManager.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 
 #include "BIT.h"
@@ -647,7 +647,7 @@ std::string AndBIT::line_separator(const std::string& up_aa,
 
 	// Get formula string
 	std::string lang, lib, fun;
-	ExecutionOutputLink::lang_lib_fun(gsn->get_name(), lang, lib, fun);
+	LibraryManager::lang_lib_fun(gsn->get_name(), lang, lib, fun);
 	std::string formula_str = fun.substr(0, line_sep_size - 2);
 	size_t formula_str_size = formula_str.size();
 

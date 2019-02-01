@@ -54,7 +54,7 @@ protected:
 	/**
 	 * Perform "substitution" on a variable declaration.  This
 	 * returns a new variable declaration, where one of two things
-	 * were done.  If the map held a constant value for a variable,
+	 * were done.  If the map held a constant argument for a variable,
 	 * then that variable is removed.  If the map held a different
 	 * variable, then the alpha-conversion is performed. This might
 	 * return the invalid handle, if all variables were reduced by
@@ -72,7 +72,7 @@ protected:
 	 *
 	 * The substitution performs either a beta-reduction, or an
 	 * alpha-conversion, depending on the map. If the map specifies
-	 * variable->value, then a normal beta reduction is done. If
+	 * variable->argument, then a normal beta reduction is done. If
 	 * the maps specifies variable->variable, then an alpha renaming
 	 * is done.
 	 *
@@ -83,8 +83,8 @@ protected:
 	                            const HandleMap& vm) const;
 
 	/**
-	 * Like above but uses a mapping from variables to values instead
-	 * of a sequence of values.
+	 * Like above but uses a mapping from variables to arguments instead
+	 * of a sequence of arguments.
 	 */
 	Handle substitute_body(const Handle& nvardecl,
 	                       const Handle& body,
@@ -135,7 +135,7 @@ public:
 	 * Perform a beta-reduction and optional alpha-conversion,
 	 * returning the reduced RewriteLink.
 	 *
-	 * If the map specifies a variable->value, then a standard
+	 * If the map specifies a variable->argument, then a standard
 	 * beta-reduction is performed, and the variable is removed
 	 * from the returned RewriteLink.
 	 *
@@ -155,16 +155,16 @@ public:
 	virtual Handle beta_reduce(const HandleMap& vm) const;
 
 	/**
-	 * Like the above, but uses a sequence of values, presumed to be
+	 * Like the above, but uses a sequence of arguments, presumed to be
 	 * in the same order as the variable declarations. The number of
-	 * values must match the number of variables, or there must be
-	 * a single value that is eta-convertible and gives the right
-	 * number of values.
+	 * arguments must match the number of variables, or there must be
+	 * a single argument that is eta-convertible and gives the right
+	 * number of arguments.
 	 */
-	virtual Handle beta_reduce(const HandleSeq& values) const;
+	virtual Handle beta_reduce(const HandleSeq& arguments) const;
 
 	/**
-	 * Like the above, but accepting a sequence of values.
+	 * Like the above, but accepting a sequence of arguments.
 	 */
 	HandleSeq beta_reduce_bodies(const Handle& nvardecl,
 	                             const HandleMap& vm) const;

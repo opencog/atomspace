@@ -36,24 +36,15 @@ namespace opencog
 class ExecutionOutputLink : public FunctionLink
 {
 private:
-	static Handle do_execute(AtomSpace*, const Handle& schema, const Handle& args,
+	static Handle do_execute(AtomSpace*,
+	                         const Handle& schema,
+	                         const Handle& args,
 	                         bool silent=false);
 
 protected:
-	virtual void check_schema(const Handle& schema) const;
+	void check_schema(const Handle& schema) const;
 
 public:
-	/**
-	 * Given a grounded schema name like "py: foo", extract
-	 * 1. the language, like "py"
-	 * 2. the library, like "" if there is none
-	 * 3. the function, like "foo"
-	 */
-	static void lang_lib_fun(const std::string& schema,
-	                         std::string& lang,
-	                         std::string& lib,
-	                         std::string& fun);;
-
 	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const Link& l);
@@ -73,12 +64,6 @@ static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<ExecutionOutputLink>(a); }
 
 #define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
-
-/**
- * setLocalSchema("foo", boo) enables creating GroundedSchemaNode with the name "lib:\\foo",
- * which will call boo on execution of corresponding ExecutionOutputLink.
- */
-void setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*));
 
 /** @}*/
 }

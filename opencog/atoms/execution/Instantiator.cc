@@ -210,12 +210,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (_eager)
 		{
 			ppp = PutLinkCast(expr);
-			// Execute the values in the PutLink before doing the
-			// beta-reduction. Execute the PutLink only after the
-			// beta-reduction has been done.
-			Handle pvals = ppp->get_values();
-			Handle gargs = walk_tree(pvals, silent);
-			if (gargs != pvals)
+			// Execute the arguments in the PutLink before doing
+			// the beta-reduction. Execute the PutLink only after
+			// the beta-reduction has been done.
+			Handle pargs = ppp->get_arguments();
+			Handle gargs = walk_tree(pargs, silent);
+			if (gargs != pargs)
 			{
 				HandleSeq groset;
 				if (ppp->get_vardecl())
@@ -250,9 +250,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step three: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
 		// result has a GroundedPredicateNode, we need to run it now.
-		// We do, however, ignore the resulting TV, which is also
-		// awkward.  I'm confused about how to handle this best.
-		// The behavior tree uses this!
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		//
 		// The DontExecLink is a weird hack to halt evaluation.
@@ -271,7 +268,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				else
 				{
 					try {
-						EvaluationLink::do_evaluate(_as, plo, true);
+						TruthValuePtr tvp =
+							EvaluationLink::do_evaluate(_as, plo, true);
+						plo->setTruthValue(tvp);
 					}
 					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
@@ -491,6 +490,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
+	}
+
+	// Do not reduce PredicateFormulaLink. That is because it contains
+	// formulas that we will need to re-evaluate in the future, so we
+	// must not clobber them.
+	if (PREDICATE_FORMULA_LINK == t)
+	{
+		return expr;
 	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,

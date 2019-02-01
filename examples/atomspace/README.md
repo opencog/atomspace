@@ -45,6 +45,7 @@ These are "basic" demos that all users should know.
 * `truthvalues.scm`    -- Declaring the truth of a proposition.
 * `values.scm`         -- Using Values and attaching them to Atoms.
 * `stream.scm`         -- Using a stream of time-varying Values.
+* `formulas.scm`       -- Representing arithmetic and computing Values.
 
 There is an important collection of demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching

@@ -24,7 +24,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/LibraryManager.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/URELogger.h>

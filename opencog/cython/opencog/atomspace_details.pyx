@@ -18,7 +18,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        result.append(Atom(void_from_candle(handle), atomspace))
+        result.append(Atom.create(handle, atomspace))
         inc(handle_iter)
     return result
 
@@ -96,7 +96,7 @@ cdef class AtomSpace:
         cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom(void_from_candle(result), self);
+        atom = Atom.create(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -117,7 +117,7 @@ cdef class AtomSpace:
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom(void_from_candle(result), self);
+        atom = Atom.create(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -162,7 +162,8 @@ cdef class AtomSpace:
         """
         if self.atomspace == NULL:
             return None
-        self.atomspace.set_value(deref(atom.handle), deref(key.handle), value.shared_ptr)
+        self.atomspace.set_value(deref(atom.handle), deref(key.handle),
+                                 value.get_c_value_ptr())
 
     def set_truthvalue(self, Atom atom, TruthValue tv):
         """ Set the truth value on atom
@@ -284,6 +285,6 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(PANDLE lptr, object atomspace):
-    cdef Atom atom = Atom(lptr, atomspace)
+cdef api object py_atom(const cHandle& h, object atomspace):
+    cdef Atom atom = Atom.create(h, atomspace)
     return atom

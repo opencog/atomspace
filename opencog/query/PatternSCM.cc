@@ -18,9 +18,11 @@ class PatternSCM : public ModuleWrap
 		virtual void init(void);
 		static std::vector<FunctionWrap*> _binders;
 		Handle find_approximate_match(Handle);
-		bool value_is_type(Handle, Handle);
-		bool type_match(Handle, Handle);
-		Handle type_compose(Handle, Handle);
+
+		// The three below belong in a different module...
+		bool value_is_type(Handle, ValuePtr);
+		bool type_match(Handle, ValuePtr);
+		ValuePtr type_compose(Handle, ValuePtr);
 	public:
 		PatternSCM(void);
 		~PatternSCM();
@@ -54,17 +56,17 @@ Handle PatternSCM::find_approximate_match(Handle hp)
 	return as->add_link(LIST_LINK, solns);
 }
 
-bool PatternSCM::value_is_type(Handle type, Handle val)
+bool PatternSCM::value_is_type(Handle type, ValuePtr val)
 {
 	return opencog::value_is_type(type, val);
 }
 
-bool PatternSCM::type_match(Handle left, Handle right)
+bool PatternSCM::type_match(Handle left, ValuePtr right)
 {
 	return opencog::type_match(left, right);
 }
 
-Handle PatternSCM::type_compose(Handle left, Handle right)
+ValuePtr PatternSCM::type_compose(Handle left, ValuePtr right)
 {
 	return opencog::type_compose(left, right);
 }
