@@ -115,28 +115,6 @@ class BackingStore
 		virtual void barrier() = 0;
 
 		/**
-		 * Returns true if the backing store will ignore this type.
-		 * This is used for performance optimization, as asking the
-		 * backend to retreive an atom can take a long time. If an atom
-		 * is of this given type, it will not be fetched.
-		 */
-		virtual bool ignoreType(Type t) const {
-			 return (_ignored_types.end() != _ignored_types.find(t));
-		}
-
-		/**
-		 * Returns true if the backing store will ignore this atom,
-		 * either because it is of an ignorable type, or is a link
-		 * which contains an atom that is of an ignorable type.
-		 */
-		virtual bool ignoreAtom(const Handle&) const;
-
-		/**
-		 * The set of ignored atom types.
-		 */
-		TypeSet _ignored_types;
-
-		/**
 		 * Register this backing store with the atomspace.
 		 */
 		void registerWith(AtomSpace*);
