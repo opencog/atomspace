@@ -54,7 +54,7 @@ std::string SchemeSmob::as_to_string(const AtomSpace *as)
  * Create SCM object wrapping the atomspace.
  * Do NOT take over memory management of it!
  */
-SCM SchemeSmob::make_as (AtomSpace *as)
+SCM SchemeSmob::make_as(AtomSpace *as)
 {
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, encrypt(as));
@@ -126,7 +126,8 @@ SCM SchemeSmob::ss_new_as (SCM s)
 	// with the code below;  it will crash, because the initial
 	// AS gets erroneously garbage-collected.  Guile is trying
 	// to release the main AS every time through the loop.  I can't
-	// figure out why.
+	// figure out why. This no longer happens for guile-2.2, but
+	// the work-around seems harmless, so whatever.
 /******
 (use-modules (opencog))
 (use-modules (opencog exec))
