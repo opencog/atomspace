@@ -81,6 +81,8 @@ private:
 
     const NameServer & _nameServer;
 
+    AtomFactory* getFactory(Type) const;
+
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
@@ -89,7 +91,6 @@ public:
      * Declare a factory for an atom type.
      */
     void addFactory(Type, AtomFactory*);
-    AtomFactory* getFactory(Type) const;
 
     /**
      * Declare a validator for an atom type.

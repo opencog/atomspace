@@ -45,20 +45,6 @@ ClassServer::ClassServer(const NameServer & nameServer):
 	_nameServer(nameServer)
 {}
 
-static Handle validating_factory(const Handle& atom_to_check)
-{
-	ClassServer::Validator* checker =
-		classserver().getValidator(atom_to_check->get_type());
-
-	/* Well, is it OK, or not? */
-	if (not checker(atom_to_check))
-		throw SyntaxException(TRACE_INFO,
-		     "Invalid Atom syntax: %s",
-		     atom_to_check->to_string().c_str());
-
-	return atom_to_check;
-}
-
 void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 {
 	// N.B. it is too late to synchronize calls with NameServer using a shared mutex.
@@ -68,7 +54,6 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 	
 	// Find all the factories that belong to parents of this type.
 	std::set<AtomFactory*> ok_to_clobber;
-	ok_to_clobber.insert(validating_factory);
 	for (Type parent=0; parent < t; parent++)
 	{
 		if (_nameServer.isAncestor(parent, t) and _atomFactory[parent])
@@ -101,8 +86,6 @@ void ClassServer::addValidator(Type t, Validator* checker)
 	std::unique_lock<std::mutex> l(factory_mutex);
 	_validator.resize(_nameServer.getNumberOfClasses());
 	_validator[t] = checker;
-	_atomFactory.resize(_nameServer.getNumberOfClasses());
-	spliceFactory(t, validating_factory);
 
 	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
 	{
