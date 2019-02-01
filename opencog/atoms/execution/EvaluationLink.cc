@@ -229,12 +229,6 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
-static HandleSeq get_seq(const Handle& cargs)
-{
-	if (LIST_LINK == cargs->get_type()) return cargs->getOutgoingSet();
-	return HandleSeq(1, cargs);
-}
-
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
                                   const HandleSeq& cargs)
@@ -379,23 +373,22 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
-		Handle args(sna.at(1));
-		if (2 != sna.size())
+		HandleSeq args;
+		if (LIST_LINK == sna.at(1)->get_type())
 		{
-			if (LIST_LINK == args->get_type())
+			if (2 != sna.size())
 				throw SyntaxException(TRACE_INFO,
 					"EvaluationLink: Incorrect number of arguments, "
-					"expecting 2, got %lu",
-					sna.size());
-
-			// package up the remainder.
-			HandleSeq rest;
+					"expecting 2, got %lu for:\n\t%s",
+					sna.size(), evelnk->to_string().c_str());
+			args = sna.at(1)->getOutgoingSet();
+		}
+		else
+		{
+			// Copy all but the first.
+			// XXX Is there a more efficient way to do this copy?
 			size_t sz = sna.size();
-			for (size_t i=1; i<sz; i++)
-			{
-				rest.push_back(sna[i]);
-			}
-			args = createLink(rest, LIST_LINK);
+			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
 		}
 
 		// Extract the args, and run the evaluation with them.
@@ -686,7 +679,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 ///
 TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
                                           const Handle& pn,
-                                          const Handle& cargs,
+                                          const HandleSeq& cargs,
                                           bool silent)
 {
 	Type pntype = pn->get_type();
@@ -704,7 +697,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return eval_formula(defn, get_seq(cargs));
+			return eval_formula(defn, cargs);
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -716,7 +709,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 		// Treat LambdaLink as if it were a PutLink -- perform
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(get_seq(cargs));
+		Handle reduct = lam->beta_reduce(cargs);
 		return do_evaluate(as, reduct, silent);
 	}
 
@@ -724,7 +717,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return eval_formula(pn, get_seq(cargs));
+		return eval_formula(pn, cargs);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
@@ -738,7 +731,8 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	Handle lh(createLink(cargs, LIST_LINK));
+	Handle args(force_execute(as, lh, silent));
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
@@ -829,7 +823,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 			throwSyntaxException(silent,
 			        "Invalid return value from predicate %s\nArgs: %s",
 			        pn->to_string().c_str(),
-			        cargs->to_string().c_str());
+			        oc_to_string(cargs).c_str());
 
 		return result;
 	}
