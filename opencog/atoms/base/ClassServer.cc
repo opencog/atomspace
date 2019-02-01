@@ -127,6 +127,6 @@ Handle ClassServer::factory(const Handle& h) const
 
 ClassServer& opencog::classserver()
 {
-    static std::unique_ptr<ClassServer> instance(new ClassServer(nameserver()));
-    return *instance;
+	static std::unique_ptr<ClassServer> instance(new ClassServer(nameserver()));
+	return *instance;
 }
