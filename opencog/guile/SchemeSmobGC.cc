@@ -59,7 +59,7 @@ size_t SchemeSmob::free_misc(SCM node)
 	{
 		case COG_AS:
 		{
-			AtomSpace *as = (AtomSpace *) SCM_SMOB_DATA(node);
+			AtomSpace *as = decrypt((AtomSpace *) SCM_SMOB_DATA(node));
 			release_as(as);
 			scm_remember_upto_here_1(node);
 			return 0;
