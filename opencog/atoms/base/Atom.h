@@ -97,8 +97,8 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
- * represents nodes and links. In terms of inheritance, nodes and
- * links are specialization of atoms, that is, they inherit all
+ * represents nodes and links. In terms of C++ inheritance, nodes and
+ * links are specializations of atoms, that is, they inherit all
  * properties from atoms.
  */
 class Atom
