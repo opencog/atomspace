@@ -237,7 +237,7 @@ static HandleSeq get_seq(const Handle& cargs)
 
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
-                                  const Handle& cargs)
+                                  const HandleSeq& cargs)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -258,7 +258,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		if (LAMBDA_LINK == h->get_type())
 		{
 			// Set flh and fall through, where it is executed.
-			flh = LambdaLinkCast(h)->beta_reduce(get_seq(cargs));
+			flh = LambdaLinkCast(h)->beta_reduce(cargs);
 		}
 
 		// At this point, we expect a FunctionLink of some kind.
@@ -271,7 +271,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		const FreeVariables& fvars = flp->get_vars();
 		if (not fvars.empty())
 		{
-			flh = fvars.substitute_nocheck(flh, get_seq(cargs));
+			flh = fvars.substitute_nocheck(flh, cargs);
 			flp = FunctionLinkCast(flh);
 		}
 
@@ -704,7 +704,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return eval_formula(defn, cargs);
+			return eval_formula(defn, get_seq(cargs));
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -724,7 +724,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return eval_formula(pn, cargs);
+		return eval_formula(pn, get_seq(cargs));
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
