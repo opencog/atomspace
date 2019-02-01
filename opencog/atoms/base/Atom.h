@@ -104,7 +104,6 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 class Atom
     : public Value
 {
-    friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()

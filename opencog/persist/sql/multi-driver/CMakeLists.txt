@@ -18,7 +18,6 @@ ADD_LIBRARY (persist-sql
 ADD_DEPENDENCIES(persist-sql opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(persist-sql
-	sql-support
 	atomspaceutils
 	atomspace
 )
@@ -56,7 +55,6 @@ ADD_EXECUTABLE(sniff
 )
 
 TARGET_LINK_LIBRARIES(sniff
-	sql-support
 	persist-sql
 )
 IF (ODBC_FOUND)

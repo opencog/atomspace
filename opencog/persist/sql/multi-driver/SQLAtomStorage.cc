@@ -234,6 +234,11 @@ void SQLAtomStorage::flushStoreQueue()
 	rethrow();
 }
 
+void SQLAtomStorage::barrier()
+{
+	flushStoreQueue();
+}
+
 /* ================================================================ */
 
 void SQLAtomStorage::rename_tables(void)

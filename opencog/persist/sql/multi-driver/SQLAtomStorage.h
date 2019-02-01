@@ -45,7 +45,7 @@
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/persist/sql/AtomStorage.h>
+#include <opencog/atomspace/BackingStore.h>
 
 #include "llapi.h"
 
@@ -61,7 +61,7 @@ namespace opencog
 
 /// This class can only be used safely as a singleton; however, this
 /// singleton can be used by multiple threads.
-class SQLAtomStorage : public AtomStorage
+class SQLAtomStorage : public BackingStore
 {
 	private:
 		// Pool of shared connections
@@ -261,9 +261,12 @@ class SQLAtomStorage : public AtomStorage
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);
+		void barrier();
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
+		void loadAtomSpace(AtomSpace*);
+		void storeAtomSpace(AtomSpace*);
 		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
 

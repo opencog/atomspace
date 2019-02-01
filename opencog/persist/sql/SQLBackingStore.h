@@ -32,8 +32,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 
-#include <opencog/persist/sql/AtomStorage.h>
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -43,14 +41,10 @@ namespace opencog
 /**
  * Thin wrapper for SQL storage, both the ODBC and PostgreSQL storage
  * classes use this SQL wrapper to implement the BackingStore interface.)  
- * WTF! XXX FIXME. This wrapper is insane and totally not needed.  It's
- * just totally pointless system complexity. OMG. We've got to stop doing
- * stuff like this.  XXX Remove this code, when you get the chance!!!
  */
 class SQLBackingStore : public BackingStore
 {
     private:
-        AtomStorage* _store;
 
     public:
         SQLBackingStore();
