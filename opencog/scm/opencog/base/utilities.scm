@@ -1066,13 +1066,15 @@
 	(begin
 		(if (null-list? cog-atomspace-stack)
 			(throw 'badpop "More pops than pushes!"))
+
+		; guile gc will eventually garbage-collect this atomspace.
+		; However, gc might not run for a while; in the meanwhile,
+		; we do all the cruft it contained to be gone. So just
+		; brute-force clear it.
+		(cog-atomspace-clear)
 		(cog-set-atomspace! (car cog-atomspace-stack))
 		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
-		; Performing a gc here helps ensure that the removed atomspace
-		; is deleted, thus cleaning up incoming sets of many atoms.
-		; The pattern matcher will work correctly without this cleanup,
-		; but I think it helps. Do it twice; once is sometimes not enough.
-		(gc) (gc)))
+	))
 
 ; ---------------------------------------------------------------------
 
