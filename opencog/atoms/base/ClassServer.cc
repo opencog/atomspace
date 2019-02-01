@@ -123,12 +123,23 @@ ClassServer::Validator* ClassServer::getValidator(Type t) const
 
 Handle ClassServer::factory(const Handle& h) const
 {
+	Handle result = h;
+
 	// If there is a factory, then use it.
 	AtomFactory* fact = getFactory(h->get_type());
 	if (fact)
-		return (*fact)(h);
+		result = (*fact)(h);
 
-	return h;
+	/* Look to see if we have static typechecking to do */
+	Validator* checker =
+		classserver().getValidator(result->get_type());
+
+	/* Well, is it OK, or not? */
+	if (checker and not checker(result))
+		throw SyntaxException(TRACE_INFO,
+				"Invalid Atom syntax: %s", result->to_string().c_str());
+
+	return result;
 }
 
 ClassServer& opencog::classserver()
