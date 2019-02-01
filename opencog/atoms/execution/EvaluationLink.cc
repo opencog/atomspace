@@ -375,18 +375,32 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
 
-		if (2 != sna.size())
-			throw SyntaxException(TRACE_INFO,
-				"Incorrect number of arguments, expecting 2, got %lu",
-				sna.size());
-
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
+		Handle args(sna.at(1));
+		if (2 != sna.size())
+		{
+			if (LIST_LINK == args->get_type())
+				throw SyntaxException(TRACE_INFO,
+					"EvaluationLink: Incorrect number of arguments, "
+					"expecting 2, got %lu",
+					sna.size());
+
+			// package up the remainder.
+			HandleSeq rest;
+			size_t sz = sna.size();
+			for (size_t i=1; i<sz; i++)
+			{
+				rest.push_back(sna[i]);
+			}
+			args = createLink(rest, LIST_LINK);
+		}
+
 		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
-		                                sna.at(0), sna.at(1), silent));
+		                                sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
