@@ -77,7 +77,8 @@ private:
     mutable std::vector<AtomFactory*> _atomFactory;
     mutable std::vector<Validator*> _validator;
 
-    void spliceFactory(Type, AtomFactory*);
+    template<typename T>
+    void splice(std::vector<T>&, Type, T);
 
     const NameServer & _nameServer;
 

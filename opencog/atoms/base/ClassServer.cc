@@ -45,7 +45,8 @@ ClassServer::ClassServer(const NameServer & nameServer):
 	_nameServer(nameServer)
 {}
 
-void ClassServer::spliceFactory(Type t, AtomFactory* fact)
+template<typename T>
+void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 {
 	// N.B. it is too late to synchronize calls with NameServer using a shared mutex.
 	// If registrations of class names interleave with registration of factories,
@@ -53,11 +54,11 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 	// the complete class hierarchy must be known.
 	
 	// Find all the factories that belong to parents of this type.
-	std::set<AtomFactory*> ok_to_clobber;
+	std::set<T> ok_to_clobber;
 	for (Type parent=0; parent < t; parent++)
 	{
-		if (_nameServer.isAncestor(parent, t) and _atomFactory[parent])
-			ok_to_clobber.insert(_atomFactory[parent]);
+		if (_nameServer.isAncestor(parent, t) and methods[parent])
+			ok_to_clobber.insert(methods[parent]);
 	}
 
 	// Set the factory for t and all children of its type. Be careful
@@ -66,10 +67,10 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
 	{
 		if (_nameServer.isAncestor(t, chi) and
-		    (nullptr == _atomFactory[chi] or
-		     ok_to_clobber.end() != ok_to_clobber.find(_atomFactory[chi])))
+		    (nullptr == methods[chi] or
+		     ok_to_clobber.end() != ok_to_clobber.find(methods[chi])))
 		{
-			_atomFactory[chi] = fact;
+			methods[chi] = fact;
 		}
 	}
 }
@@ -78,20 +79,14 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
 	std::unique_lock<std::mutex> l(factory_mutex);
 	_atomFactory.resize(_nameServer.getNumberOfClasses());
-	spliceFactory(t, fact);
+	splice(_atomFactory, t, fact);
 }
 
 void ClassServer::addValidator(Type t, Validator* checker)
 {
 	std::unique_lock<std::mutex> l(factory_mutex);
 	_validator.resize(_nameServer.getNumberOfClasses());
-	_validator[t] = checker;
-
-	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
-	{
-		if (_nameServer.isAncestor(t, chi))
-			_validator[chi] = checker;
-	}
+	splice(_validator, t, checker);
 }
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const

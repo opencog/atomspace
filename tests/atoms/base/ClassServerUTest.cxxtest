@@ -193,7 +193,6 @@ public:
 
 	void test_explicitly_set_validator_is_not_replaced()
 	{
-		TS_SKIP("fails");
 		class_server->addValidator(NODE_C, validator_c);
 
 		class_server->addValidator(NODE_B, validator_b);
