@@ -53,6 +53,9 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 	// then the code will not work properly anyway. Before a factory is registered,
 	// the complete class hierarchy must be known.
 	
+	std::unique_lock<std::mutex> l(factory_mutex);
+	methods.resize(_nameServer.getNumberOfClasses());
+
 	// Find all the factories that belong to parents of this type.
 	std::set<T> ok_to_clobber;
 	for (Type parent=0; parent < t; parent++)
@@ -77,15 +80,11 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
-	std::unique_lock<std::mutex> l(factory_mutex);
-	_atomFactory.resize(_nameServer.getNumberOfClasses());
 	splice(_atomFactory, t, fact);
 }
 
 void ClassServer::addValidator(Type t, Validator* checker)
 {
-	std::unique_lock<std::mutex> l(factory_mutex);
-	_validator.resize(_nameServer.getNumberOfClasses());
 	splice(_validator, t, checker);
 }
 
