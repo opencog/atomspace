@@ -231,6 +231,6 @@ public:
 
 		class_server->addValidator(NODE_B, validator_b);
 
-		TS_ASSERT_EQUALS(factory_b, class_server->getFactory(NODE_B));
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_B));
 	}
 };
