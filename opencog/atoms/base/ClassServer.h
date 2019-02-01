@@ -35,6 +35,8 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Handle.h>
 
+class ClassServerUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -47,6 +49,8 @@ namespace opencog
  */
 class ClassServer
 {
+    friend class ::ClassServerUTest;
+
 public:
     // Currently, we provide factories only for atoms, not for
     // values. TruthValues could use a factory, but, for now,
