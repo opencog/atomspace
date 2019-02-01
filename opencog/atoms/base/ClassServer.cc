@@ -62,7 +62,9 @@ ClassServer::ClassServer(const NameServer & nameServer):
 /// So I think that is a bug, as many atom types live outside of the
 /// atomspace. Fixing this bug does NOT require changes to the below;
 /// instead, it requires copying factories whenever the new atom type
-/// is added.
+/// is added. That is, whenever the nameserver registers an new type,
+/// it needs to call back here, so that the factories can be copied
+/// over.
 template<typename T>
 void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 {
