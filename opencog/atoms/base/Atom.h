@@ -39,8 +39,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-class AtomUTest;
-
 namespace opencog
 {
 class Link;
