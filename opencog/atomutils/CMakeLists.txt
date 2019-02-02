@@ -30,7 +30,6 @@ INSTALL (FILES
 	ForeachChaseLink.h
 	FuzzyMatch.h
 	FuzzyMatchBasic.h
-	ThreadSafeHandleMap.h
 	Neighbors.h
 	DESTINATION "include/opencog/atomutils"
 )

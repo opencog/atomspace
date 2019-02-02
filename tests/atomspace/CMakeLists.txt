@@ -4,7 +4,6 @@ LINK_LIBRARIES(
 	atomutils
 	atomspaceutils
 	atomspace
-#	clearbox
 )
 
 IF(HAVE_GUILE)
@@ -23,7 +22,6 @@ ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
 ADD_CXXTEST(COWSpaceUTest)
 ADD_CXXTEST(RemoveUTest)
-ADD_CXXTEST(ThreadSafeHandleMapUTest)
 
 # The ValuationTable is no longer used or even built, so don't test it.
 # ADD_CXXTEST(ValuationTableUTest)
