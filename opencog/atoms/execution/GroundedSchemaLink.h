@@ -39,6 +39,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
+using GroundedSchemaLinkPtr = std::shared_ptr<GroundedSchemaLink>;
+
 }
 
 #endif /* _OPENCOG_GROUNDED_SCHEMA_LINK_H */

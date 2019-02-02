@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/execution/DotLink.h>
+
 #include "SnetExecutionOutputLink.h"
 
 using namespace opencog;
@@ -29,9 +31,28 @@ SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
 {
 }
 
+static Handle cast_to_handle_exception(const ValuePtr& value)
+{
+	if (value == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
+	Handle handle = HandleCast(value);
+
+	if (handle == nullptr)
+		throw RuntimeException(TRACE_INFO, "Cannot cast ValuePtr to Handle");
+
+	return handle;
+}
+
 Handle SnetExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
-	return ExecutionOutputLink::execute(as, silent);
+	if (!nameserver().isA(get_schema()->get_type(), GROUNDED_SCHEMA_LINK))
+		return ExecutionOutputLink::execute(as, silent);
+
+	GroundedSchemaLinkPtr grounded_link = CastFromHandle<GroundedSchemaLink>(getOutgoingAtom(0));
+	ValuePtr args = getOutgoingAtom(1);
+	ValuePtr result = grounded_link->get_function()(as, args);
+	return cast_to_handle_exception(result);
 }
 
 DEFINE_LINK_FACTORY(SnetExecutionOutputLink, SNET_EXECUTION_OUTPUT_LINK)
