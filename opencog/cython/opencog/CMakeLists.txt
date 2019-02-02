@@ -75,7 +75,6 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
-	GetPredicates
 	atomspace.cpp
 )
 

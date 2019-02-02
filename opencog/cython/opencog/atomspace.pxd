@@ -217,19 +217,6 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
-
-cdef extern from "GetPredicates.h" namespace "opencog":
-    # C++:
-    #
-    #   HandleSeq get_predicates(const Handle& target,
-    #                     Type predicateType=PREDICATE_NODE,
-    #                     bool subClasses=true)
-    #   void finalize_opencog();
-    #   void configuration_load(const char* configFile);
-    #
-    cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
-    cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
-
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
         const vector[double]& value() const;
@@ -247,5 +234,3 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         const vector[cValuePtr]& value() const;
 
     cdef cValuePtr createLinkValue(...)
-
-
