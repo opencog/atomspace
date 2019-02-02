@@ -19,7 +19,6 @@ set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atomspace_LIBRARY atomspace)
 set(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils)
 set(ATOMSPACE_atomtypes_LIBRARY atom_types)
-set(ATOMSPACE_atomutils_LIBRARY atomutils)
 set(ATOMSPACE_attentionbank_LIBRARY attentionbank)
 set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_execution_LIBRARY execution)
@@ -40,7 +39,6 @@ set(ATOMSPACE_LIBRARIES
     attentionbank
     atomspaceutils
     truthvalue
-    atomutils
     clearbox
     lambda
     persist

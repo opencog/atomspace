@@ -93,7 +93,6 @@ TARGET_LINK_LIBRARIES(atomspace_cython
 	attentionbank
 	execution
 	atomspace
-	atomutils
 	clearbox
 	atomspaceutils
 	truthvalue

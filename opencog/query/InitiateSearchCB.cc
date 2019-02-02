@@ -27,11 +27,11 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
+#include "Substitutor.h"
 
 using namespace opencog;
 

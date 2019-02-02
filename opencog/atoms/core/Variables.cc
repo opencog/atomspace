@@ -27,8 +27,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"

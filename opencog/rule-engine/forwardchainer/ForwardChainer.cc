@@ -22,9 +22,9 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/Rule.h>
 

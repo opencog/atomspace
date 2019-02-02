@@ -247,61 +247,6 @@ class AtomSpaceTest(TestCase):
 
         self.assertEquals(len(self.space), 3)
 
-    def test_get_predicates(self):
-        dog = ConceptNode("dog")
-        mammal = ConceptNode("mammal")
-        canine = ConceptNode("canine")
-        animal = ConceptNode("animal")
-        dog_mammal = ListLink(dog, mammal)
-        dog_canine = ListLink(dog, canine)
-        dog_animal = ListLink(dog, animal)
-        isA = PredicateNode("IsA")
-        dogIsAMammal = EvaluationLink(isA, dog_mammal)
-        dogIsACanine = EvaluationLink(isA, dog_canine)
-        dogIsAAnimal = EvaluationLink(isA, dog_animal)
-
-        dog_predicates = self.space.get_predicates(dog)
-        self.assertEquals(len(dog_predicates), 3)
-
-        count = 0
-        for dogIs in self.space.get_predicates(dog):
-            count += 1
-        self.assertEquals(count, 3)
-
-    def test_get_predicates_for(self):
-        dog = ConceptNode("dog")
-        mammal = ConceptNode("mammal")
-        canine = ConceptNode("canine")
-        animal = ConceptNode("animal")
-        dog_mammal = ListLink(dog, mammal)
-        dog_canine = ListLink(dog, canine)
-        dog_animal = ListLink(dog, animal)
-        isA = PredicateNode("IsA")
-        dogIsAMammal = EvaluationLink(isA, dog_mammal)
-        dogIsACanine = EvaluationLink(isA, dog_canine)
-        dogIsAAnimal = EvaluationLink(isA, dog_animal)
-
-        human = ConceptNode("human")
-        dog_human = ListLink(dog, human)
-        loves = PredicateNode("loves")
-        dogLovesHumans = EvaluationLink(loves, dog_human)
-
-        dog_predicates = self.space.get_predicates_for(dog, isA)
-        self.assertEquals(len(dog_predicates), 3)
-
-        dog_predicates = self.space.get_predicates_for(dog, loves)
-        self.assertEquals(len(dog_predicates), 1)
-
-        count = 0
-        for dogIsA in self.space.get_predicates_for(dog, isA):
-            count += 1
-        self.assertEquals(count, 3)
-
-        count = 0
-        for dogLoves in self.space.get_predicates_for(dog, loves):
-            count += 1
-        self.assertEquals(count, 1)
-
 class AtomTest(TestCase):
 
     def setUp(self):

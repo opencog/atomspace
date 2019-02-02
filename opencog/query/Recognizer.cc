@@ -26,10 +26,10 @@
 
 #include <set>
 
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 #include "BindLinkAPI.h"
 

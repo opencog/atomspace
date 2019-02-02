@@ -24,9 +24,7 @@
 #ifndef _OPENCOG_SUBSTITUTOR
 #define _OPENCOG_SUBSTITUTOR
 
-
 #include <opencog/atoms/base/Link.h>
-
 
 namespace opencog
 {
@@ -102,4 +100,3 @@ public:
 }
 
 #endif // _OPENCOG_SUBSTITUTOR
-

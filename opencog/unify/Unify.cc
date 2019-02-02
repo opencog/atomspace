@@ -28,8 +28,12 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/Context.h>
+#include <opencog/atoms/core/FindUtils.h>
+// #include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/TypeUtils.h>
+// #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/RewriteLink.h>
-#include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 
 namespace opencog {

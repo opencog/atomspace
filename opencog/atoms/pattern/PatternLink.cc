@@ -24,10 +24,10 @@
 #include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
-#include <opencog/atomutils/FindUtils.h>
 
 #include "BindLink.h"
 #include "DualLink.h"
