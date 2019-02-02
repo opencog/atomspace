@@ -587,15 +587,20 @@ FUNCTION_LINK <- FREE_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return the indicated value on the indicated atom.
-VALUE_OF_LINK <- FUNCTION_LINK
-NUMERIC_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-TRUTH_VALUE_OF_LINK <- NUMERIC_VALUE_OF_LINK
-STRENGTH_OF_LINK <- NUMERIC_VALUE_OF_LINK
-CONFIDENCE_OF_LINK <- NUMERIC_VALUE_OF_LINK
+// XXX FIXME - Not all ValueOfLinks are actually numeric; but there
+// is no way to tell, in advance. They may or may not be... when they
+// aren't, the evaluator will throw a silent exception, which is
+// caught, so its mostly harmless if the returned value isn't actually
+// numeric.  We need this try..catch because sometimes there just isn't
+// a value -- i.e. ValueOfLink can return a null pointer.
+VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
+STRENGTH_OF_LINK <- VALUE_OF_LINK
+CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
-ATTENTION_VALUE_OF_LINK <- NUMERIC_VALUE_OF_LINK
-STI_OF_LINK <- NUMERIC_VALUE_OF_LINK
-LTI_OF_LINK <- NUMERIC_VALUE_OF_LINK
+ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
+STI_OF_LINK <- VALUE_OF_LINK
+LTI_OF_LINK <- VALUE_OF_LINK
 
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
