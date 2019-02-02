@@ -36,5 +36,14 @@ GroundedObjectNode::GroundedObjectNode(const std::string& name,
 	setValue(GroundedObjectNode::ptrKey, ValueCast(ptrValue));
 }
 
+GroundedObject& GroundedObjectNode::get_object() const
+{
+	return *static_cast<GroundedObject*>(
+			CastFromValue<PtrValue>(
+				getValue(GroundedObjectNode::ptrKey)
+			)->value()
+		);
+}
+
 DEFINE_NODE_FACTORY(GroundedObjectNode, GROUNDED_OBJECT_NODE)
 

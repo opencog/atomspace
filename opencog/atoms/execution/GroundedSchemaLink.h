@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/execution/GroundedObject.h
+ * opencog/atoms/execution/GroundedSchemaLink.h
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,26 +20,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GROUNDED_OBJECT_H
-#define _OPENCOG_GROUNDED_OBJECT_H
+#ifndef _OPENCOG_GROUNDED_SCHEMA_LINK_H
+#define _OPENCOG_GROUNDED_SCHEMA_LINK_H
 
-#include <functional>
-
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/execution/GroundedObject.h>
 
 namespace opencog
 {
 
-typedef std::function<ValuePtr(AtomSpace* atomspace, ValuePtr const&)> GroundedFunction;
-
-class GroundedObject
+class GroundedSchemaLink : public Link
 {
 public:
-	virtual ~GroundedObject() { }
-	virtual GroundedFunction get_method(std::string const& method_name) = 0;
+	GroundedSchemaLink(const HandleSeq& output_set, Type type)
+		: Link(output_set, type) { }
+	virtual GroundedFunction get_function() const = 0;
+
+	static Handle factory(const Handle&);
 };
 
 }
 
-#endif /* _OPENCOG_GROUNDED_OBJECT_H */
+#endif /* _OPENCOG_GROUNDED_SCHEMA_LINK_H */
 

@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/execution/GroundedObject.h
+ * opencog/atoms/execution/DotLink.h
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,26 +20,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GROUNDED_OBJECT_H
-#define _OPENCOG_GROUNDED_OBJECT_H
+#ifndef _OPENCOG_DOT_LINK_H
+#define _OPENCOG_DOT_LINK_H
 
-#include <functional>
-
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/GroundedSchemaLink.h>
 
 namespace opencog
 {
 
-typedef std::function<ValuePtr(AtomSpace* atomspace, ValuePtr const&)> GroundedFunction;
-
-class GroundedObject
+class DotLink : public GroundedSchemaLink
 {
+private:
+	GroundedObject& get_object() const;
+	const std::string& get_method_name() const;
+
 public:
-	virtual ~GroundedObject() { }
-	virtual GroundedFunction get_method(std::string const& method_name) = 0;
+	DotLink(const HandleSeq& output_set, Type type)
+		: GroundedSchemaLink(output_set, type) { }
+	virtual GroundedFunction get_function() const;
+
+	static Handle factory(const Handle&);
 };
+
+using DotLinkPtr = std::shared_ptr<DotLink>;
 
 }
 
-#endif /* _OPENCOG_GROUNDED_OBJECT_H */
+#endif /* _OPENCOG_DOT_LINK_H */
 

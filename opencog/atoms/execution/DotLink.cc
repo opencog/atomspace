@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/execution/GroundedObject.h
+ * opencog/atoms/execution/DotLink.cc
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,26 +20,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GROUNDED_OBJECT_H
-#define _OPENCOG_GROUNDED_OBJECT_H
+#include <opencog/atoms/execution/GroundedObjectNode.h>
 
-#include <functional>
+#include "DotLink.h"
 
-#include <opencog/atomspace/AtomSpace.h>
+using namespace opencog;
 
-namespace opencog
+GroundedObject& DotLink::get_object() const
 {
-
-typedef std::function<ValuePtr(AtomSpace* atomspace, ValuePtr const&)> GroundedFunction;
-
-class GroundedObject
-{
-public:
-	virtual ~GroundedObject() { }
-	virtual GroundedFunction get_method(std::string const& method_name) = 0;
-};
-
+	return CastFromHandle<GroundedObjectNode>(getOutgoingAtom(0))->get_object();
 }
 
-#endif /* _OPENCOG_GROUNDED_OBJECT_H */
+const std::string& DotLink::get_method_name() const
+{
+	return getOutgoingAtom(1)->get_name();
+}
+
+GroundedFunction DotLink::get_function() const
+{
+	return get_object().get_method(get_method_name());
+}
+
+auto DotLinkCast = CastFromHandle<DotLink>;
+
+template<typename ... Args>
+static std::shared_ptr<DotLink> createDotLink(Args&& ... args)
+{
+	return createType<DotLink>(std::forward<Args>(args)...);
+}
+
+DEFINE_LINK_FACTORY(DotLink, DOT_LINK)
 

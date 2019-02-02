@@ -34,7 +34,7 @@ class GroundedObjectNode : public Node
 {
 private:
 	static Handle ptrKey;
-	
+
 public:
 
 	GroundedObjectNode(Type type, const std::string& name)
@@ -42,6 +42,8 @@ public:
 
 	GroundedObjectNode(const std::string& name, GroundedObject* object,
 			PtrValue::Deleter deleter);
+
+	GroundedObject& get_object() const;
 
 	static Handle factory(const Handle&);
 };
