@@ -54,6 +54,7 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
+	FindUtils.h
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
@@ -72,6 +73,7 @@ INSTALL (FILES
 	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
+	TypeUtils.h
 	UniqueLink.h
 	UnorderedLink.h
 	ValueOfLink.h
