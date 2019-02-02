@@ -36,11 +36,18 @@ using namespace opencog;
 class GroundedObjectExample : public GroundedObject
 {
 public:
+	int counter = 0;
+
 	virtual GroundedFunction get_method(std::string const& method_name)
 	{
 		if (method_name == "foo")
 		{
 			return std::bind(&GroundedObjectExample::foo, this,
+								std::placeholders::_1, std::placeholders::_2);
+		}
+		if (method_name == "inc")
+		{
+			return std::bind(&GroundedObjectExample::inc, this,
 								std::placeholders::_1, std::placeholders::_2);
 		}
 		throw RuntimeException(TRACE_INFO, "Method \"%s\" is not implemented",
@@ -50,6 +57,12 @@ public:
 	ValuePtr foo(AtomSpace* atomspace, ValuePtr const& args) const
 	{
 		return CastFromValue<Atom>(args)->getOutgoingAtom(0);
+	}
+
+	ValuePtr inc(AtomSpace* atomspace, ValuePtr const& args)
+	{
+		++counter;
+		return Handle::UNDEFINED;
 	}
 };
 
@@ -88,5 +101,24 @@ public:
 		ValuePtr result = inst.execute(eol);
 
 		TS_ASSERT_EQUALS(an(CONCEPT_NODE, "arg"), result);
+	}
+
+	void test_execute_dot_link_change_object_state()
+	{
+		Instantiator inst(&atomspace);
+		GroundedObjectExample *foo = new GroundedObjectExample();
+		auto deleter = [](void* ptr) { delete (GroundedObjectExample*)ptr; };
+		Handle eol =
+			al(SNET_EXECUTION_OUTPUT_LINK,
+				al(DOT_LINK,
+					aa(createGroundedObjectNode("foo", foo, deleter)),
+					an(CONCEPT_NODE, "inc")
+				),
+				al(LIST_LINK)
+			);
+
+		ValuePtr result = inst.execute(eol);
+
+		TS_ASSERT_EQUALS(1, foo->counter);
 	}
 };
