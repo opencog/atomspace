@@ -28,7 +28,6 @@ TARGET_LINK_LIBRARIES(ruleengine
 	lambda
 	query
 	execution
-	atomutils
 	atomspace
 	atomspaceutils
 	unify

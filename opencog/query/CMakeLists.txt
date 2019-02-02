@@ -17,7 +17,6 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query
-	atomutils
 	lambda
 	atomspace
 #	execution # disabled to avoid cyclic dependency

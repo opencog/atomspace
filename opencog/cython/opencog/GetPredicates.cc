@@ -1,5 +1,5 @@
 /*
- * AtomUtils.cc
+ * GetPredicates.cc
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include "AtomUtils.h"
+#include "GetPredicates.h"
 
 namespace opencog
 {

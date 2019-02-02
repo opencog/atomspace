@@ -218,7 +218,7 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
 
-cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
+cdef extern from "GetPredicates.h" namespace "opencog":
     # C++:
     #
     #   HandleSeq get_predicates(const Handle& target,

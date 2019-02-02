@@ -1,5 +1,5 @@
 /*
- * AtomUtils.h
+ * GetPredicates.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ATOM_UTILS_H
-#define _OPENCOG_ATOM_UTILS_H
+#ifndef _OPENCOG_PREDICATES_H
+#define _OPENCOG_PREDICATES_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
@@ -131,4 +131,4 @@ HandleSeq get_predicates_for(const Handle& target,
 }
 
 
-#endif // _OPENCOG_ATOM_UTILS_H
+#endif // _OPENCOG_PREDICATES_H
