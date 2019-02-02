@@ -42,7 +42,6 @@
 
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include <opencog/persist/sql/SQLBackingStore.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
@@ -312,9 +311,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
@@ -363,7 +360,6 @@ void ValueSaveUTest::do_test_single_atom_save()
 	store->kill_data();
 
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -383,9 +379,7 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	TS_ASSERT(store->connected())
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->fetch_atom(bkey);
 	Handle atom = as->fetch_atom(batom);
@@ -400,7 +394,6 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	printf ("Stored vals %s\n", atom->valuesToString().c_str());
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// ---------------------------------
@@ -409,9 +402,7 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// Storage uses a different code path if the key is not yet
 	// known when the values are fetched.  Test this code path.
@@ -426,7 +417,6 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	TS_ASSERT(*pap == *fap);
 
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -439,9 +429,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
@@ -481,7 +469,6 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -499,9 +486,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "float node");
@@ -552,7 +537,6 @@ void ValueSaveUTest::do_test_load_by_type()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -562,9 +546,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -604,7 +586,6 @@ void ValueSaveUTest::do_test_load_by_type()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -624,9 +605,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -705,7 +684,6 @@ void ValueSaveUTest::do_test_link_by_type()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -715,9 +693,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -819,7 +795,6 @@ void ValueSaveUTest::do_test_link_by_type()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -837,9 +812,7 @@ void ValueSaveUTest::do_test_incoming()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -918,7 +891,6 @@ void ValueSaveUTest::do_test_incoming()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -928,9 +900,7 @@ void ValueSaveUTest::do_test_incoming()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch incoming set. This is what we are testing.
@@ -1035,7 +1005,6 @@ void ValueSaveUTest::do_test_incoming()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -1053,9 +1022,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "float node");
@@ -1106,7 +1073,6 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -1116,9 +1082,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -1179,7 +1143,6 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
