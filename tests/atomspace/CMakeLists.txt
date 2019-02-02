@@ -1,7 +1,6 @@
 
 LINK_LIBRARIES(
 	atombase
-	atomutils
 	atomspaceutils
 	atomspace
 )
