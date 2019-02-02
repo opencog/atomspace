@@ -28,10 +28,10 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
+#include "Substitutor.h"
 
 using namespace opencog;
 
