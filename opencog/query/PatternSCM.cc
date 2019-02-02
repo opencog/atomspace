@@ -17,7 +17,6 @@ class PatternSCM : public ModuleWrap
 	protected:
 		virtual void init(void);
 		static std::vector<FunctionWrap*> _binders;
-		Handle find_approximate_match(Handle);
 
 		// The three below belong in a different module...
 		bool value_is_type(Handle, ValuePtr);
@@ -30,7 +29,6 @@ class PatternSCM : public ModuleWrap
 
 }
 
-#include <opencog/atomutils/FuzzyMatchBasic.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -43,18 +41,6 @@ class PatternSCM : public ModuleWrap
 using namespace opencog;
 
 // ========================================================
-// Convenience wrapper
-Handle PatternSCM::find_approximate_match(Handle hp)
-{
-	FuzzyMatchBasic fpm;
-	RankedHandleSeq ranked_solns = fpm.perform_search(hp);
-	HandleSeq solns;
-	for (auto rs: ranked_solns)
-		solns.emplace_back(rs.first);
-
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
-	return as->add_link(LIST_LINK, solns);
-}
 
 bool PatternSCM::value_is_type(Handle type, ValuePtr val)
 {
@@ -117,13 +103,7 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(recognize,
 	                   "cog-recognize", "query"));
 
-	// Fuzzy matching. XXX FIXME. This is not technically
-	// a query functon, and should probably be in some other
-	// module, maybe some utilities module?
-	define_scheme_primitive("cog-fuzzy-match",
-		&PatternSCM::find_approximate_match, this, "query");
-
-	// These below also belong somewhere else. Not sure where.
+	// These below belong somewhere else. Not sure where.
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
 	define_scheme_primitive("cog-value-is-type?",

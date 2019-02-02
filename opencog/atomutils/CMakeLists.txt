@@ -1,8 +1,6 @@
 
 ADD_LIBRARY (atomutils
 	AtomUtils
-	FuzzyMatch
-	FuzzyMatchBasic
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
@@ -25,7 +23,5 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	AtomUtils.h
-	FuzzyMatch.h
-	FuzzyMatchBasic.h
 	DESTINATION "include/opencog/atomutils"
 )
