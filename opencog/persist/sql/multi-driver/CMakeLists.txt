@@ -28,9 +28,7 @@ ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
 	INCLUDE_DIRECTORIES(${ODBC_INCLUDE_DIRS})
-	ADD_LIBRARY (persist-odbc
-		odbcxx
-	)
+	ADD_LIBRARY (persist-odbc odbcxx)
 	TARGET_LINK_LIBRARIES(persist-odbc ${ODBC_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-odbc)
 
@@ -45,7 +43,7 @@ IF (PGSQL_FOUND)
 	TARGET_LINK_LIBRARIES(persist-pg ${PGSQL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-pg)
 
-    INSTALL (TARGETS persist-pg EXPORT AtomSpaceTargets 
+	INSTALL (TARGETS persist-pg EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (PGSQL_FOUND)
