@@ -162,6 +162,9 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
 	{
 		ValuePtr red(FunctionLinkCast(vptr)->execute());
+
+		// It would probably be better to throw a silent exception, here?
+		if (nullptr == red) return vptr;
 		if (*red == *vptr) return vptr;
 		vptr = red;
 	}

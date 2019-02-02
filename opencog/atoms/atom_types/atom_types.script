@@ -579,6 +579,10 @@ TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
+ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
+STI_OF_LINK <- VALUE_OF_LINK
+LTI_OF_LINK <- VALUE_OF_LINK
+
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
 // GROUNDED_PREDICATE_NODE, but holding the forumla in the atomspace.

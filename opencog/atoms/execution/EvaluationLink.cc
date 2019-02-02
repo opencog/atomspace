@@ -154,7 +154,7 @@ static NumberNodePtr unwrap_set(Handle h)
 
 /// Extract a single floating-point double out of a value expected to
 /// contain a number.
-static double get_numeric_value(const ValuePtr& pap)
+static double get_numeric_value(const ValuePtr& pap, bool silent)
 {
 	Type t = pap->get_type();
 	if (NUMBER_NODE == t or SET_LINK == t)
@@ -171,13 +171,15 @@ static double get_numeric_value(const ValuePtr& pap)
 		return fv->value()[0];
 	}
 
-	throw RuntimeException(TRACE_INFO,
+	throwSyntaxException(silent,
 		"Don't know how to do arithmetic with this: %s",
 		pap->to_string().c_str());
+
+	return std::nan("");
 }
 
 /// Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const Handle& h)
+static TruthValuePtr greater(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -188,8 +190,8 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 	ValuePtr pap0(inst.execute(oset[0]));
 	ValuePtr pap1(inst.execute(oset[1]));
 
-	double v0 = get_numeric_value(pap0);
-	double v1 = get_numeric_value(pap1);
+	double v0 = get_numeric_value(pap0, silent);
+	double v1 = get_numeric_value(pap1, silent);
 
 	if (v0 > v1)
 		return TruthValue::TRUE_TV();
@@ -407,7 +409,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, evelnk);
+		return greater(scratch, evelnk, silent);
 	}
 	else if (NOT_LINK == t)
 	{
@@ -743,7 +745,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, args);
+		return greater(as, args, silent);
 	}
 
 	// A very special-case C++ comparison.
