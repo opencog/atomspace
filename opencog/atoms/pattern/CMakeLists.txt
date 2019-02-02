@@ -16,7 +16,6 @@ ADD_DEPENDENCIES(lambda opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda
 	atomspace
-	atomutils
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}

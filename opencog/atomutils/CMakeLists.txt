@@ -9,6 +9,7 @@ ADD_LIBRARY (atomutils
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
+	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
