@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/FindUtilsUTest.cxxtest
+ * tests/atomutils/FindUtilsUTest.cxxtest
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/FindUtils.h>
 #include <opencog/util/Logger.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;

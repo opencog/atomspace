@@ -4,6 +4,5 @@ LINK_LIBRARIES(
 	atomcore
 )
 
-
 ADD_CXXTEST(CheckersUTest)
-
+ADD_CXXTEST(FindUtilsUTest)
