@@ -3,7 +3,7 @@
  * SQL-backed persistent storage.
  *
  * HISTORY:
- * Copyright (c) 2008,2009,2017 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linasvepstas@gmail.com>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify

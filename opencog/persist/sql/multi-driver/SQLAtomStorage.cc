@@ -10,7 +10,7 @@
  * Atoms are identified by means of unique ID's (UUID's), which are
  * correlated with specific in-RAM atoms via the TLB.
  *
- * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009,2013,2015,2017 Linas Vepstas <linas@linas.org>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
