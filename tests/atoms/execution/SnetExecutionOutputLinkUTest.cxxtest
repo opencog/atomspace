@@ -47,9 +47,9 @@ public:
 								method_name.c_str());
 	}
 
-	ValuePtr foo(AtomSpace* atomspace, ValuePtr const& args)
+	ValuePtr foo(AtomSpace* atomspace, ValuePtr const& args) const
 	{
-		return args;
+		return CastFromValue<Atom>(args)->getOutgoingAtom(0);
 	}
 };
 
@@ -69,16 +69,16 @@ public:
 		atomspace.clear();
 	}
 
-	void test_execute_dot_link()
+	void test_execute_dot_link_return_parameter_back()
 	{
 		Instantiator inst(&atomspace);
-		GroundedObject *foo = new GroundedObjectExample();
+		GroundedObjectExample *foo = new GroundedObjectExample();
 		auto deleter = [](void* ptr) { delete (GroundedObjectExample*)ptr; };
 		Handle eol =
 			al(SNET_EXECUTION_OUTPUT_LINK,
 				al(DOT_LINK,
 					aa(createGroundedObjectNode("foo", foo, deleter)),
-					an(CONCEPT_NODE, "bar")
+					an(CONCEPT_NODE, "foo")
 				),
 				al(LIST_LINK,
 					an(CONCEPT_NODE, "arg")
