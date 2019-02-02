@@ -737,6 +737,7 @@ Unit Test Status
 * As of 2014-06-19 both unit tests work and pass.
 * As of 2015-04-23 both unit tests work and pass.
 * As of 2017-01-20 all four unit tests work and pass.
+* As of 2019-02-01 all six unit tests work and pass.
 
 
 Using the System
