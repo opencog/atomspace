@@ -37,7 +37,7 @@
 
 ; --------------
 ; Create some goofy numbers
-(define key (PredicateNode "some key"))
+(define key (Predicate "some key"))
 
 (cog-set-value! (Concept "thing-a") key (FloatValue 42))
 (cog-set-value! (Concept "thing-b") key (FloatValue 35))
