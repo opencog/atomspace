@@ -21,17 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MixtureModel.h"
-
 #include <boost/math/special_functions/beta.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/numeric.hpp>
 
 #include <opencog/util/numeric.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include "BetaDistribution.h"
+#include "MixtureModel.h"
 #include "URELogger.h"
 
 using namespace opencog;

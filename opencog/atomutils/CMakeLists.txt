@@ -1,11 +1,9 @@
 
 ADD_LIBRARY (atomutils
 	AtomUtils
-	FindUtils
 	FuzzyMatch
 	FuzzyMatchBasic
 	Neighbors
-	TypeUtils
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
@@ -27,7 +25,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	AtomUtils.h
-	FindUtils.h
 	FollowLink.h
 	ForeachChaseLink.h
 	FuzzyMatch.h
@@ -35,6 +32,5 @@ INSTALL (FILES
 	ThreadSafeHandleMap.h
 	Neighbors.h
 	Substitutor.h
-	TypeUtils.h
 	DESTINATION "include/opencog/atomutils"
 )

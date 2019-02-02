@@ -21,14 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atomutils/FindUtils.h>
-
-#include <opencog/util/algorithm.h>
 
 #include "DefaultPatternMatchCB.h"
 

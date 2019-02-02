@@ -23,9 +23,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "BindLink.h"
 

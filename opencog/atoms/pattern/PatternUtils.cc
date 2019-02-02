@@ -20,10 +20,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <boost/range/algorithm/find.hpp>
+
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "PatternUtils.h"
 
 using namespace opencog;

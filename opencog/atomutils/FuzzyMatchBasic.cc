@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "FuzzyMatchBasic.h"
 

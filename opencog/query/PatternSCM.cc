@@ -31,7 +31,7 @@ class PatternSCM : public ModuleWrap
 }
 
 #include <opencog/atomutils/FuzzyMatchBasic.h>
-#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>

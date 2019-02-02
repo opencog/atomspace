@@ -9,6 +9,7 @@ ADD_LIBRARY (atomcore
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
+	FindUtils.cc
 	FreeLink.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
@@ -28,6 +29,7 @@ ADD_LIBRARY (atomcore
 	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
+	TypeUtils.cc
 	UniqueLink.cc
 	UnorderedLink.cc
 	ValueOfLink.cc

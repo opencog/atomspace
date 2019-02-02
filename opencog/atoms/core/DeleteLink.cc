@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "DeleteLink.h"
 

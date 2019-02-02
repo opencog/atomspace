@@ -20,8 +20,8 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
 
