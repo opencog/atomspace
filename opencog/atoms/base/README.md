@@ -10,41 +10,27 @@ and [Link](http://wiki.opencog.org/w/Link).
 ClassServer
 ===========
 The ClassServer provides a factory for creating Atoms of different
-types, given only thier type.
+types, given only thier type (and, for Nodes, the string giving the node
+name; for Links, the atom sequence).
 
-Over-use of Factory
---------------------
-At this time, the factory is over-used: it gets called, even when there
-is no need for it; this hurts performance. The problem is explained
-below.
+The ClassServer also provides a simple constructor-time type-checking
+and type-validation system. Many atoms can be thought of as "taking
+inputs", while others "generate outputs", and the type-validation system
+can check that these constraints are obeyed, at the time that the C++
+class is first constructed.  There are also other type-checking and
+type validation systems in the atomspace, this is just one of them.
 
-* A critical performance path is moving atoms from the API (python,
-  scheme, Haskell, etc.) to the AtomSpace as fast as posssible. When a
-  user creates a new atom (in scheme, python, etc.) they are actually
-  just specifying the atom type, and either a string atom-name (for
-  Nodes), or a sequence of existing atoms (for Links). The goal is to
-  move the atom-type plus string/sequence to the AtomSpace as fast as
-  possible.
+At this time, the type validation system works closely with the
+following types, declared in the
+[`atom_types.script`](../atom_types/atom_types.script) file:
 
-* Once the atom-type+string/sequence gets to the AtomSpace, the factory
-  should be used to create the "real" atom.  The "real" atom is an
-  instance of the C++ class for that atom type.  There should be only
-  one single, globally-unique copy of an Atom (ignoring multiple
-  atomspaces, for now).  Thus, the factory should be run "only once",
-  when an atom is inserted into the atomspace.
+* `EVALUATABLE_LINK`, `BOOLEAN_LINK`, `NUMERIC_LINK`,
+  `NUMERIC_OUTPUT_LINK`, `TYPE_LINK`, `TYPE_OUTPUT_LINK`
 
-* The performance problem is that some (many?) atom types have
-  complicated constructors that take a lot of CPU time to run. Thus,
-  its a bad idea to run these constructors if the full C++ class is
-  not actually needed. -- It might not be needed if one is merely
-  trying to move the atom-type+string/sequence from one place to
-  another.
-
-* Thus, we need the concept of a "seedling" atom, which has nothing in
-  it except for the atom-type, the name-string/handle-sequence, and
-  the collection of Values.  This seedling avoids the overhead of the
-  factory, and can provide the needed fast-path from the API languages
-  (python, scheme, etc.) to the AtomSpace.
-
-* Some (many?) of the `createNode` and `createLink` calls should be
-  replaced by `createSeelingNode` and `createSeedlingLink`.
+See the `atom_types.script` file for documentation (near lines 65-107)
+and examples (in the lines that follow). These six link types cause
+"validators" to be installed in the ClassServer; the ClassServer then
+runs these validators, before calling the factory itself. This
+validation helps avoid the need to have lots of repetitive checking
+in the constructors for the various C++ atom classes; they also work
+for atoms that do not have any C++ class behind them.
