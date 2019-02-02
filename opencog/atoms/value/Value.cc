@@ -29,6 +29,8 @@ namespace opencog
 
 std::string oc_to_string(const ValuePtr& vp, const std::string& indent)
 {
+	if (vp == nullptr)
+		return indent + "null";
 	return vp->to_string(indent);
 }
 
