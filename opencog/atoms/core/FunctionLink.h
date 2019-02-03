@@ -60,8 +60,6 @@ namespace opencog
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
  */
-class FunctionLink;
-typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 class FunctionLink : public FreeLink
 {
 protected:
@@ -80,6 +78,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
+typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FunctionLink>(h); }
 static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)

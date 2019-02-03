@@ -470,7 +470,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	}
 
 	// If there is a SatisfyingLink, we have to perform it
-	// and return the saisfying set.
+	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
 		return satisfying_set(_as, expr);
