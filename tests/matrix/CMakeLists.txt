@@ -12,11 +12,8 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	atomspace
-	clearbox
-	execution
 	persist
 	persist-sql
-	${GUILE_LIBRARIES}
 )
 
 ADD_CXXTEST(VectorAPIUTest)
