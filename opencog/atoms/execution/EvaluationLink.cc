@@ -837,8 +837,3 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
-
-void opencog::setLocalPredicate(std::string funcName, TruthValuePtr* (*func)(AtomSpace *, Handle*))
-{
-	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
-}

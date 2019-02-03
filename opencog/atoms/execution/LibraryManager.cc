@@ -100,7 +100,14 @@ void LibraryManager::lang_lib_fun(const std::string& schema,
 		fun = schema.substr(pos);
 }
 
-void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
+void opencog::setLocalSchema(std::string funcName,
+                             Handle* (*func)(AtomSpace *, Handle*))
 {
 	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
+}
+
+void opencog::setLocalPredicate(std::string funcName,
+                                TruthValuePtr* (*func)(AtomSpace *, Handle*))
+{
+   LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
