@@ -931,7 +931,7 @@ static const Handle& groundings_key(void)
 	return gk;
 }
 
-void PatternLink::remove_constant_clauses(const AtomSpace* queried_as)
+void PatternLink::remove_constant_clauses(void)
 {
 	// Make sure that the user did not pass in bogus clauses
 	// in the queried atomspace.

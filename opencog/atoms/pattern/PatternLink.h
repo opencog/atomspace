@@ -174,9 +174,7 @@ public:
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	// Given the queried atomspace, only remove constants if present
-	// in queried_as. WTF???
-	void remove_constant_clauses(const AtomSpace* queried_as);
+	void remove_constant_clauses(void);
 
 	bool satisfy(PatternMatchCallback&) const;
 
