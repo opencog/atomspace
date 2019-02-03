@@ -51,6 +51,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
+	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -453,20 +454,17 @@ void PatternLink::locate_globs(HandleSeq& clauses)
 
 /* ================================================================= */
 /**
- * A simple validatation a collection of clauses for correctness.
- *
- * Every clause should contain at least one variable in it; clauses
- * that are constants and can be trivially discarded.
+ * Make sure that each declared variable appears in some clause.
+ * We can't ground variables that don't show up in a clause; there's
+ * just no way to know.  Throw, because they are presumably there due
+ * to programmer error. Quoted variables are constants, and so don't
+ * count.
  */
 void PatternLink::validate_clauses(HandleSet& vars,
                                    HandleSeq& clauses,
                                    HandleSeq& constants)
 
 {
-	// Make sure that each declared variable appears in some clause.
-	// We won't (can't) ground variables that don't show up in a
-	// clause.  They are presumably there due to programmer error.
-	// Quoted variables are constants, and so don't count.
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
@@ -931,31 +929,27 @@ static const Handle& groundings_key(void)
 	return gk;
 }
 
-void PatternLink::remove_constant_clauses(const AtomSpace& queried_as)
+void PatternLink::remove_constant_clauses(void)
 {
-	// Make sure that the user did not pass in bogus clauses
-	// in the queried atomspace.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	//
-	// XXX This removal *should* be happening at pattern compile time.
-	// It was moved here, to pattern execution time, by pull req #1444
-	// but it remains unclear why this check needed to be deferred
-	// like this. This is causing other issues, so Um ??? wtf?
+	// Remove clauses that don't alter the search. Any clause that
+	// fails to contain a variable, or fails to be evaluatable, will
+	// not affect the search in any way, because it is trivially
+	// satisfiable (and is always satisfied). Thus, its pointless
+	// to try to match them; they will always match.
 	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns, queried_as);
+	                              _component_patterns);
 	if (bogus)
 	{
-		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, to_string().c_str());
-		for (const Handle& h: _pat.constants)
+		if (logger().is_debug_enabled())
 		{
-			logger().warn("%s: Removed %s",
-			              __FUNCTION__, h->to_string().c_str());
+			logger().debug("%s: Constant clauses removed from pattern %s",
+			           __FUNCTION__, to_string().c_str());
+			for (const Handle& h: _pat.constants)
+			{
+				logger().debug("%s: Removed %s",
+				          __FUNCTION__, h->to_string().c_str());
+			}
 		}
-
 		_num_comps = _components.size();
 		make_connectivity_map(_pat.cnf_clauses);
 	}

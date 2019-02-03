@@ -35,6 +35,7 @@
 // #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/RewriteLink.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
 
@@ -392,6 +393,22 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 	return createLink(oset, t);
 }
 
+
+static bool not_in_atomspace(const Handle& handle, const AtomSpace* atomspace)
+{
+	return nullptr != atomspace
+	   and nullptr == atomspace->get_atom(handle);
+}
+
+// Is a clause constant, relative to some atomspace?
+// Why would it matter whether or not it is in some atomspace?
+static bool not_constant(const HandleSet& vars,
+                         const Handle& clause,
+                         const AtomSpace* as)
+{
+	return not_in_atomspace(clause, as) or not is_constant(vars, clause);
+}
+
 // TODO: for now it is assumed clauses are connected by an AndLink
 // only. To fix that one needs to generalize
 // PatternLink::unbundle_clauses to make it usable in that code too.
@@ -409,11 +426,11 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
 	HandleSeq hs;
 	if (t == AND_LINK) {
 		for (const Handle& clause : clauses->getOutgoingSet()) {
-			if (not is_constant(vars, clause, as)) {
+			if (not_constant(vars, clause, as)) {
 				hs.push_back(clause);
 			}
 		}
-	} else if (not is_constant(vars, clauses, as)) {
+	} else if (not_constant(vars, clauses, as)) {
 		return clauses;
 	}
 	return createLink(hs, AND_LINK);
