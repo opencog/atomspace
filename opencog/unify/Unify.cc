@@ -35,6 +35,7 @@
 // #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/RewriteLink.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
 
@@ -392,15 +393,20 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 	return createLink(oset, t);
 }
 
+
+static bool not_in_atomspace(const Handle& handle, const AtomSpace* atomspace)
+{
+	return nullptr != atomspace
+	   and nullptr == atomspace->get_atom(handle);
+}
+
 // Is a clause constant, relative to some atomspace?
 // Why would it matter whether or not it is in some atomspace?
 static bool not_constant(const HandleSet& vars,
                          const Handle& clause,
                          const AtomSpace* as)
 {
-	return
-		(nullptr != as and not is_in_atomspace(clause, *as))
-			or not is_constant(vars, clause);
+	return not_in_atomspace(clause, as) or not is_constant(vars, clause);
 }
 
 // TODO: for now it is assumed clauses are connected by an AndLink

@@ -23,7 +23,6 @@
 #include <boost/range/algorithm/find.hpp>
 
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include "PatternUtils.h"
 
 using namespace opencog;
@@ -109,11 +108,6 @@ bool remove_constants(const HandleSet& vars,
 	}
 
 	return modified;
-}
-
-bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
-{
-	return nullptr != atomspace.get_atom(handle);
 }
 
 bool is_constant(const HandleSet& vars, const Handle& clause)
