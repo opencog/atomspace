@@ -51,6 +51,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
+	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -453,20 +454,17 @@ void PatternLink::locate_globs(HandleSeq& clauses)
 
 /* ================================================================= */
 /**
- * A simple validatation a collection of clauses for correctness.
- *
- * Every clause should contain at least one variable in it; clauses
- * that are constants and can be trivially discarded.
+ * Make sure that each declared variable appears in some clause.
+ * We can't ground variables that don't show up in a clause; there's
+ * just no way to know.  Throw, because they are presumably there due
+ * to programmer error. Quoted variables are constants, and so don't
+ * count.
  */
 void PatternLink::validate_clauses(HandleSet& vars,
                                    HandleSeq& clauses,
                                    HandleSeq& constants)
 
 {
-	// Make sure that each declared variable appears in some clause.
-	// We won't (can't) ground variables that don't show up in a
-	// clause.  They are presumably there due to programmer error.
-	// Quoted variables are constants, and so don't count.
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
