@@ -116,6 +116,10 @@ void VectorAPIUTest::setUp(void)
 	CHKERR;
 	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
 	CHKERR;
+
+	// XXX FIXME not needed, but get a weird link bug without this
+	eval->eval("(use-modules (opencog exec))");
+	CHKERR;
 }
 
 void VectorAPIUTest::tearDown(void)

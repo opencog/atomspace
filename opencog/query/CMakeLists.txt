@@ -10,9 +10,6 @@ ADD_LIBRARY(query-engine
 	Recognizer.cc
 	Satisfier.cc
 )
-ADD_LIBRARY(query
-	PatternSCM.cc
-)
 
 ADD_DEPENDENCIES(query-engine
 	opencog_atom_types
@@ -22,6 +19,10 @@ TARGET_LINK_LIBRARIES(query-engine
 	lambda
 	atomspace
 #	execution # still a circular dependency
+)
+
+ADD_LIBRARY(query
+	PatternSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(query

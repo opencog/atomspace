@@ -36,7 +36,7 @@ TARGET_LINK_LIBRARIES(smob
 	${NO_AS_NEEDED}
 	clearbox
 	lambda
-	# execution
+	execution
 	atomcore
 	atombase
 	truthvalue
