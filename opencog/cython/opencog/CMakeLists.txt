@@ -183,7 +183,7 @@ ADD_LIBRARY(bindlink_cython
 
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
-	query
+	query-engine
 	execution
 	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
@@ -222,7 +222,7 @@ IF (HAVE_GUILE)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		atomspace_cython
-		query
+		query-engine
 		execution
 		smob
 		${PYTHON_LIBRARIES}

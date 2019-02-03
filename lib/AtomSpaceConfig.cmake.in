@@ -42,7 +42,7 @@ set(ATOMSPACE_LIBRARIES
     clearbox
     lambda
     persist
-    query
+    query-engine
     execution
     ruleengine
     smob
