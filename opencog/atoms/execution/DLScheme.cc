@@ -21,14 +21,25 @@
  */
 
 #include <dlfcn.h>
+#include <opencog/util/exceptions.h>
 #include "DLScheme.h"
 
 using namespace opencog;
 
+static void* library = nullptr;
 SchemeEval* opencog::get_evaluator_for_scheme(AtomSpace* as)
 {
-	static void* library = dlopen("libsmob.so", RTLD_LAZY);
+	if (nullptr == library) library = dlopen("libsmob.so", RTLD_LAZY);
+	if (nullptr == library)
+		throw RuntimeException(TRACE_INFO,
+			"Unable to dynamically load libsmob.so: %s",
+			dlerror());
+
 	static void* getev = dlsym(library, "get_scheme_evaluator");
+	if (nullptr == getev)
+		throw RuntimeException(TRACE_INFO,
+			"Unable to dynamically load scheme evaluator: %s",
+			dlerror());
 
 	typedef SchemeEval* (*SEGetter)(AtomSpace*);
 
@@ -36,4 +47,9 @@ SchemeEval* opencog::get_evaluator_for_scheme(AtomSpace* as)
 	static SEGetter getter = (SEGetter) getev;
 
 	return getter(as);
+}
+
+static __attribute__ ((destructor)) void fini(void)
+{
+	if (library) dlclose(library);
 }
