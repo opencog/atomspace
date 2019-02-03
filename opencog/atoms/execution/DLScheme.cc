@@ -51,5 +51,9 @@ SchemeEval* opencog::get_evaluator_for_scheme(AtomSpace* as)
 
 static __attribute__ ((destructor)) void fini(void)
 {
-	if (library) dlclose(library);
+	// Don't bother. This can trigger a pointless error:
+	//    Inconsistency detected by ld.so: dl-close.c: 811: _dl_close:
+	//    Assertion `map->l_init_called' failed!
+	// or we can just RTLD_NODELETE during the open, instead.
+	// if (library) dlclose(library);
 }
