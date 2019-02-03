@@ -42,8 +42,7 @@ namespace opencog {
 bool remove_constants(const HandleSet& vars,
                       Pattern& pat,
                       HandleSeqSeq& components,
-                      HandleSeq& component_patterns,
-                      const AtomSpace *queried_as);
+                      HandleSeq& component_patterns);
 
 // check whether an Atom exists in a given atomspace.
 bool is_in_atomspace(const Handle& clause, const AtomSpace& atomspace);

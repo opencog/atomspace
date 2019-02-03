@@ -64,8 +64,7 @@ namespace opencog {
 bool remove_constants(const HandleSet& vars,
                       Pattern& pat,
                       HandleSeqSeq& components,
-                      HandleSeq& component_patterns,
-                      const AtomSpace *queried_as)
+                      HandleSeq& component_patterns)
 {
 	bool modified = false;
 
@@ -74,14 +73,6 @@ bool remove_constants(const HandleSet& vars,
 	for (i = pat.clauses.begin(); i != pat.clauses.end();)
 	{
 		Handle clause(*i);
-
-		// XXX?? why does this check matter ?? How is it even
-		// possible?  XXX Something is foobared, somewhere.
-		if (nullptr != queried_as and
-		    not is_in_atomspace(clause, *queried_as))
-		{
-			++i; continue;
-		}
 
 		if (not is_constant(vars, clause))
 		{

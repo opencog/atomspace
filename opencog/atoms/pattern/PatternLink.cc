@@ -945,7 +945,7 @@ void PatternLink::remove_constant_clauses(const AtomSpace* queried_as)
 	// but it remains unclear why this check needed to be deferred
 	// like this. This is causing other issues, so Um ??? wtf?
 	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns, queried_as);
+	                              _component_patterns);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern %s",
