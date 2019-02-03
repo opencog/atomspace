@@ -6,12 +6,12 @@ ADD_LIBRARY (atomspace-cwrapper
     Value_CWrapper.cpp
 )
 
-ADD_DEPENDENCIES(atomspace-cwrapper atomspace query)
+ADD_DEPENDENCIES(atomspace-cwrapper atomspace query-engine)
 
 TARGET_LINK_LIBRARIES(atomspace-cwrapper
-	atomspace
-	query
+	query-engine
 	execution
+	atomspace
 )
 
 INSTALL (TARGETS atomspace-cwrapper

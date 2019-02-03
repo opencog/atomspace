@@ -19,7 +19,8 @@ ADD_LIBRARY (execution
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
-	query
+	query-engine
+	smob
 	atomspace
 	atombase
 	clearbox
