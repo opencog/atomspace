@@ -12,7 +12,6 @@ ADD_LIBRARY (execution
 	ExecutionOutputLink.cc
 	Instantiator.cc
 	MapLink.cc
-	ExecSCM.cc
 	LibraryManager.cc
 )
 
@@ -27,18 +26,14 @@ TARGET_LINK_LIBRARIES(execution
 	${Boost_SYSTEM_LIBRARY}
 )
 
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(execution smob)
-ENDIF (HAVE_GUILE)
-
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution PythonEval)
 	TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
-INSTALL (TARGETS execution 
-    EXPORT AtomSpaceTargets 
-    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS execution
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	Force.h
@@ -47,6 +42,14 @@ INSTALL (FILES
 	Instantiator.h
 	DESTINATION "include/opencog/atoms/execution"
 )
+
+IF (HAVE_GUILE)
+	ADD_LIBRARY (exec ExecSCM.cc)
+	TARGET_LINK_LIBRARIES(exec execution smob)
+	INSTALL (TARGETS exec
+		EXPORT AtomSpaceTargets
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (HAVE_GUILE)
 
 # This does not belong, but cannot be fixed until the Python bindings
 # are fixed, first.
