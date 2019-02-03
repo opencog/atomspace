@@ -14,6 +14,7 @@ LINK_LIBRARIES(
 	atomspace
 	persist
 	persist-sql
+	smob
 )
 
 ADD_CXXTEST(VectorAPIUTest)
