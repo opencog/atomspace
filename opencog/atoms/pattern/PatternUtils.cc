@@ -61,11 +61,11 @@ namespace opencog {
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const HandleSet &vars,
-                      Pattern &pat,
+bool remove_constants(const HandleSet& vars,
+                      Pattern& pat,
                       HandleSeqSeq& components,
                       HandleSeq& component_patterns,
-                      const AtomSpace &queried_as)
+                      const AtomSpace *queried_as)
 {
 	bool modified = false;
 
@@ -75,40 +75,46 @@ bool remove_constants(const HandleSet &vars,
 	{
 		Handle clause(*i);
 
-		if (is_constant(vars, clause, &queried_as))
+		// XXX?? why does this check matter ?? How is it even
+		// possible?  XXX Something is foobared, somewhere.
+		if (nullptr != queried_as and
+		    not is_in_atomspace(clause, *queried_as))
 		{
-			pat.constants.emplace_back(clause);
-			i = pat.clauses.erase(i);
+			++i; continue;
+		}
 
-			// remove the clause from components and component_patterns
-			auto j = boost::find(components, HandleSeq{clause});
-			if (j != components.end())
+		if (not is_constant(vars, clause))
+		{
+			++i; continue;
+		}
+
+		pat.constants.emplace_back(clause);
+		i = pat.clauses.erase(i);
+
+		// remove the clause from components and component_patterns
+		auto j = boost::find(components, HandleSeq{clause});
+		if (j != components.end())
+		{
+			components.erase(j);
+			if (not component_patterns.empty())
 			{
-				components.erase(j);
-				if (not component_patterns.empty())
-				{
-					auto cpj = std::next(component_patterns.begin(),
-					                     std::distance(components.begin(), j));
-					component_patterns.erase(cpj);
-				}
+				auto cpj = std::next(component_patterns.begin(),
+				                     std::distance(components.begin(), j));
+				component_patterns.erase(cpj);
 			}
-
-			// remove the clause from _pattern_mandatory.
-			auto m = boost::find(pat.mandatory, clause);
-			if (m != pat.mandatory.end())
-				pat.mandatory.erase(m);
-
-			// remove the clause from _cnf_clauses.
-			auto c = boost::find(pat.cnf_clauses, clause);
-			if (c != pat.cnf_clauses.end())
-				pat.cnf_clauses.erase(c);
-
-			modified = true;
 		}
-		else
-		{
-			++i;
-		}
+
+		// remove the clause from _pattern_mandatory.
+		auto m = boost::find(pat.mandatory, clause);
+		if (m != pat.mandatory.end())
+			pat.mandatory.erase(m);
+
+		// remove the clause from _cnf_clauses.
+		auto c = boost::find(pat.cnf_clauses, clause);
+		if (c != pat.cnf_clauses.end())
+			pat.cnf_clauses.erase(c);
+
+		modified = true;
 	}
 
 	return modified;
@@ -116,11 +122,10 @@ bool remove_constants(const HandleSet &vars,
 
 bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
 {
-	return (bool)atomspace.get_atom(handle);
+	return nullptr != atomspace.get_atom(handle);
 }
 
-bool is_constant(const HandleSet& vars, const Handle& clause,
-                 const AtomSpace* queried_as)
+bool is_constant(const HandleSet& vars, const Handle& clause)
 {
 	Type ct = clause->get_type();
 	bool constant =
@@ -129,6 +134,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause,
 		     or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
 		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
+		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
 		     // TODO: should not the below be any VirtualLink?
 		     // Or contains any EvaluatableLink ??
 		     or contains_atomtype(clause, IDENTICAL_LINK)
@@ -142,8 +148,6 @@ bool is_constant(const HandleSet& vars, const Handle& clause,
 		              or
 		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
 
-	if (queried_as)
-		return constant and is_in_atomspace(clause, *queried_as);
 	return constant;
 }
 
