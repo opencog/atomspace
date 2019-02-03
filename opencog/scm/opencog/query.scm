@@ -9,7 +9,7 @@
 
 ; This is also loaded by (opencog exec) We need it here,
 ; else we get undefined symbols in libquery.
-(load-extension "libexecution" "opencog_exec_init")
+(load-extension "libexec" "opencog_exec_init")
 
 (load-extension "libquery" "opencog_query_init")
 
@@ -23,6 +23,11 @@
 	cog-satisfy
 )
 
+(export
+	cog-value-is-type?
+	cog-type-match?
+	cog-type-compose
+)
 
 (define-public (cog-bind handle)
 	(display "Obsolete! Do not use cog-bind, use cog-execute! insead.\n")

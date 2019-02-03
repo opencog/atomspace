@@ -42,7 +42,7 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		opencog_exec_init();
+		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~ReductUTest()
