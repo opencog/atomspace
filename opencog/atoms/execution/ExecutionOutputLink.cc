@@ -28,6 +28,7 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
+#include "DLScheme.h"
 #include "ExecutionOutputLink.h"
 #include "Force.h"
 #include "LibraryManager.h"
@@ -142,7 +143,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	if (lang == "scm")
 	{
 #ifdef HAVE_GUILE
-		SchemeEval* applier = SchemeEval::get_evaluator(as);
+		SchemeEval* applier = get_evaluator_for_scheme(as);
 		result = applier->apply(fun, args);
 
 		// Exceptions were already caught, before leaving guile mode,

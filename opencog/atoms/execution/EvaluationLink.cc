@@ -38,6 +38,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 
+#include "DLScheme.h"
 #include "Force.h"
 #include "EvaluationLink.h"
 #include "LibraryManager.h"
@@ -772,7 +773,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-		SchemeEval* applier = SchemeEval::get_evaluator(as);
+		SchemeEval* applier = get_evaluator_for_scheme(as);
 		return applier->apply_tv(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,

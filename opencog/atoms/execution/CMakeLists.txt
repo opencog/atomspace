@@ -7,6 +7,7 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
+	DLScheme.cc
 	Force.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
@@ -20,7 +21,6 @@ ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
 	query-engine
-	smob
 	atomspace
 	atombase
 	clearbox
