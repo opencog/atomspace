@@ -333,8 +333,6 @@ bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
 		                            "BindLink consists of multiple "
 		                            "disconnected components!");
 
-	remove_constant_clauses();
-
 	return PatternLink::satisfy(pmc);
 }
 
