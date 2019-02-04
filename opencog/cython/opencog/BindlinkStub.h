@@ -26,7 +26,6 @@
 
 namespace opencog {
 
-Handle stub_bindlink(AtomSpace*, Handle);
 Handle do_execute(AtomSpace*, Handle);
 
 } // namespace opencog

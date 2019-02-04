@@ -265,3 +265,9 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
 cdef api object py_atom(const cHandle& h, object atomspace):
     cdef Atom atom = Atom.create(h, atomspace)
     return atom
+
+def create_child_atomspace(object atomspace):
+    cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef AtomSpace result = AtomSpace_factory(child)
+    result.owns_atomspace = True
+    return result

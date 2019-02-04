@@ -18,8 +18,6 @@
 ; because other scheme code cannot guess what names the shared lib
 ; actually exported.  So we list them here.
 (export
-	cog-bind-first-n
-	cog-satisfying-set-first-n
 	cog-satisfy
 )
 
@@ -33,9 +31,6 @@
 	(display "Obsolete! Do not use cog-bind, use cog-execute! instead.\n")
 	(cog-execute! handle)
 )
-(define-public (cog-bind-single handle)
-	(cog-bind-first-n handle 1)
-)
 (define-public (cog-recognize handle)
 	(display "Obsolete! Do not use cog-recognize, use cog-execute! instead.\n")
 	(cog-execute! handle)
@@ -45,36 +40,9 @@
 	(cog-evaluate! handle)
 )
 (define-public (cog-satisfying-set handle)
-	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute!  instead.\n")
+	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute! insead.\n")
 	(cog-execute! handle)
 )
-(define-public (cog-satisfying-element handle)
-	(cog-satisfying-set-first-n handle 1)
-)
-
-(set-procedure-property! cog-bind 'documentation
-"
- cog-bind HANDLE
-    OBSELETE! DO NOT USE IN NEW CODE! Use cog-execute! instead.
-
-    Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
-    Uses crisp (non-probabilistic) logic during the evaluation
-    of evaluatable terms.
-")
-
-(set-procedure-property! cog-bind-first-n 'documentation
-"
- cog-bind-first-n HANDLE
-    Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
-    The search is terminated after the first N matches are found.
-")
-
-(set-procedure-property! cog-bind-single 'documentation
-"
- cog-bind-single HANDLE
-    Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
-    The search is terminated after the first match is found.
-")
 
 ; The documentation below belongs in a different module.
 
