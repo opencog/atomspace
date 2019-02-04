@@ -106,6 +106,33 @@ typedef std::vector<ValuePtr> ValueSeq;
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
 
+/**
+ * Cast ValuePtr to the specific Value subclass. This function is defined only
+ * for T which are subclasses of Value.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Value, T>::value, std::shared_ptr<T> >::type
+CastFromValue(const ValuePtr& value)
+{
+	return std::dynamic_pointer_cast<T>(value);
+}
+
+class Atom;
+
+/**
+ * Create Value of specific type using appropriate constructor. This function
+ * is defined only for T which are subclasses of Value.
+ */
+template<typename T, typename ... Args>
+static inline
+typename std::enable_if<
+	std::is_base_of<Value, T>::value && !std::is_base_of<Atom, T>::value,
+	std::shared_ptr<T> >::type
+createValue(Args&&... args) {
+	return std::make_shared<T>(std::forward<Args>(args)...);
+}
+
 /** @}*/
 } // namespace opencog
 

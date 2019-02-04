@@ -5,4 +5,5 @@ LINK_LIBRARIES(
 
 
 ADD_CXXTEST(ClassServerUTest)
+ADD_CXXTEST(HandleUTest)
 

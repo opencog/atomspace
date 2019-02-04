@@ -322,6 +322,30 @@ std::string oc_to_string(const TypeSet& types,
 std::string oc_to_string(const AtomPtr& aptr,
                          const std::string& indent=empty_string);
 
+/**
+ * Cast Handle to the specific Atom subclass. This function is defined only
+ * for T which are subclasses of Atom.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Atom, T>::value, std::shared_ptr<T> >::type
+CastFromHandle(const Handle& handle)
+{
+	return std::dynamic_pointer_cast<T>(handle);
+}
+
+/**
+ * Cast AtomPtr to the specific Atom subclass. This function is defined only
+ * for T which are subclasses of Atom.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Atom, T>::value, std::shared_ptr<T> >::type
+CastFromAtomPtr(const AtomPtr& atom)
+{
+	return std::dynamic_pointer_cast<T>(atom);
+}
+
 } // namespace opencog
 
 namespace std {

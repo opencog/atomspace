@@ -7,6 +7,8 @@ ADD_SUBDIRECTORY (core)
 
 ADD_SUBDIRECTORY (truthvalue)
 
+ADD_SUBDIRECTORY (value)
+
 IF(HAVE_GUILE)
 	ADD_CXXTEST(HashUTest)
 	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
