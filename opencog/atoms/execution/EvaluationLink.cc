@@ -289,7 +289,7 @@ static bool is_evaluatable_sat(const Handle& satl)
 	if (1 != satl->get_arity())
 		return false;
 
-	return true;
+	return false;
 #if 0
 	PatternLinkPtr plp(PatternLinkCast(satl));
 
