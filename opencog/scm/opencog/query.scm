@@ -18,10 +18,6 @@
 ; because other scheme code cannot guess what names the shared lib
 ; actually exported.  So we list them here.
 (export
-	cog-satisfy
-)
-
-(export
 	cog-value-is-type?
 	cog-type-match?
 	cog-type-compose
