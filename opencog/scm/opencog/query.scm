@@ -30,20 +30,23 @@
 )
 
 (define-public (cog-bind handle)
-	(display "Obsolete! Do not use cog-bind, use cog-execute! insead.\n")
-	(cog-bind-first-n handle -1)
+	(display "Obsolete! Do not use cog-bind, use cog-execute! instead.\n")
+	(cog-execute! handle)
 )
 (define-public (cog-bind-single handle)
 	(cog-bind-first-n handle 1)
 )
 (define-public (cog-satisfying-set handle)
-	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute! insead.\n")
-	(cog-satisfying-set-first-n handle -1)
+	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute!  instead.\n")
+	(cog-execute! handle)
 )
 (define-public (cog-satisfying-element handle)
 	(cog-satisfying-set-first-n handle 1)
 )
-
+(define-public (cog-recognize handle)
+	(display "Obsolete! Do not use cog-recognize, use cog-execute! instead.\n")
+	(cog-execute! handle)
+)
 (set-procedure-property! cog-bind 'documentation
 "
  cog-bind HANDLE

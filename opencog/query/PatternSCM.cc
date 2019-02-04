@@ -99,10 +99,6 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(satisfying_set,
 	                   "cog-satisfying-set-first-n", "query"));
 
-	// Rule recognition.
-	_binders.push_back(new FunctionWrap(recognize,
-	                   "cog-recognize", "query"));
-
 	// These below belong somewhere else. Not sure where.
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
