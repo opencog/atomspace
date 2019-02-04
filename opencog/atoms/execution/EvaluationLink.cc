@@ -30,7 +30,6 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -290,9 +289,12 @@ static bool is_evaluatable_sat(const Handle& satl)
 	if (1 != satl->get_arity())
 		return false;
 
+	return true;
+#if 0
 	PatternLinkPtr plp(PatternLinkCast(satl));
 
 	return 0 == plp->get_variables().varseq.size();
+#endif
 }
 
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
@@ -554,7 +556,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (SATISFACTION_LINK == t)
 	{
 		if (not is_evaluatable_sat(evelnk))
-			return satisfaction_link(as, evelnk);
+			return evelnk->evaluate(as);
 
 		// If we are here, the we can optimize: we can evaluate
 		// directly, instead of going through the pattern matcher.
