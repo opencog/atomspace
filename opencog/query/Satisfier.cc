@@ -182,7 +182,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	}
 	if (DUAL_LINK == blt)
 	{
-		return recognize(as, hlink);
+		return hlink->execute(as);
 	}
 
 	// If we are here, then we are a GET_LINK, right?

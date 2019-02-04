@@ -22,7 +22,8 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/query/Recognizer.h>
 
 #include "DualLink.h"
 
@@ -77,9 +78,9 @@ DualLink::DualLink(const Link &l)
 
 Handle DualLink::execute(AtomSpace* as, bool silent)
 {
-	// XXX FIXME we should someday move the code from
-	// Recognizer.cc to here. Just not today.
-	return recognize(as, get_handle());
+	Recognizer reco(as);
+	satisfy(reco);
+	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }
 
 DEFINE_LINK_FACTORY(DualLink, DUAL_LINK)
