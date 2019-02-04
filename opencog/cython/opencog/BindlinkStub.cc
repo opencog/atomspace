@@ -8,12 +8,6 @@
 
 using namespace opencog;
 
-// XXX FIXME ... what is the point of this ???
-Handle opencog::stub_bindlink(AtomSpace* atomspace, Handle handle)
-{
-    return handle;
-}
-
 Handle opencog::do_execute(AtomSpace* atomspace, Handle handle)
 {
     FunctionLinkPtr flp(FunctionLinkCast(handle));
