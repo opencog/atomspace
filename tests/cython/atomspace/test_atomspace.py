@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom
-from opencog.atomspace import types, is_a, get_type, get_type_name
+from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
@@ -26,10 +26,10 @@ class AtomSpaceTest(TestCase):
         self.space.add_node(types.Node, "node" )
 
         # Test with not a proper truthvalue
-        self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 
+        self.assertRaises(TypeError, self.space.add_node, types.Node, "test",
                 0, True)
         # Test with bad type
-        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test", 
+        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test",
                 TruthValue(0.5, 0.8))
 
         # From here on out we'll use the more compact type constructors
@@ -63,7 +63,7 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3).truth_value(0.5, 0.8)
         self.assertTrue(l3 is not None)
-        
+
         # Should fail when adding an intentionally bad type
         caught = False
         try:
@@ -141,7 +141,7 @@ class AtomSpaceTest(TestCase):
         l1 = InheritanceLink(a1, a2)
         result = self.space.get_atoms_by_type(types.Link)
         self.assertTrue(l1 in result)
-        
+
         # test non-recursive subtype
         result = self.space.get_atoms_by_type(types.Node, subtype=False)
         self.assertTrue(a1 in result)
@@ -232,15 +232,15 @@ class AtomSpaceTest(TestCase):
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
         self.space.clear()
-        self.assertEquals(self.space.size(), 0) 
-        self.assertEquals(len(self.space), 0) 
+        self.assertEquals(self.space.size(), 0)
+        self.assertEquals(len(self.space), 0)
 
     def test_container_methods(self):
-        self.assertEquals(len(self.space), 0) 
+        self.assertEquals(len(self.space), 0)
         a1 = Node("test1")
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
-        
+
         self.assertTrue(a1 in self.space)
         self.assertTrue(a2 in self.space)
         self.assertTrue(a3 in self.space)
@@ -270,7 +270,7 @@ class AtomTest(TestCase):
         # test set tv
         a.tv = TruthValue(0.1, 10)
         self.assertEqual(a.tv, TruthValue(0.1, 10))
-        
+
     def test_w_attention_value(self):
         a = Node("test2")
 
@@ -322,6 +322,13 @@ class AtomTest(TestCase):
         self.assertEqual(l.type_name, "Link")
         self.assertEqual(a.type_name, "Node")
 
+    def test_create_child_atomspace(self):
+        test = ConceptNode("test")
+        b = create_child_atomspace(self.space)
+        test2 = b.add_node(types.ConceptNode, 'test2')
+        self.assertTrue(test in b.get_atoms_by_type(types.ConceptNode))
+        self.assertTrue(test2 in b.get_atoms_by_type(types.ConceptNode))
+        self.assertTrue(test2 not in self.space.get_atoms_by_type(types.ConceptNode))
 
     def test_strings(self):
         # set up a link and atoms
