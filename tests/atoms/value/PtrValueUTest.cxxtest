@@ -24,16 +24,28 @@
 
 using namespace opencog;
 
-void noop(void* ptr) {}
-
 class PtrValueUTest : public CxxTest::TestSuite
 {
+private:
+
+	static void noop(void* ptr) {}
+
 public:
 	void test_constructor(void) {
 		int n = 10;
 
 		PtrValuePtr value = createPtrValue(&n, noop);
 		
+		TS_ASSERT(value.get() != NULL);
+		TS_ASSERT(value->value() == &n);
+		TS_ASSERT_EQUALS(*(int*)value->value(), n);
+	}
+
+	void test_constructor_shared_ptr(void) {
+		int n = 10;
+
+		PtrValuePtr value = createPtrValue(std::shared_ptr<int>(&n, noop));
+
 		TS_ASSERT(value.get() != NULL);
 		TS_ASSERT(value->value() == &n);
 		TS_ASSERT_EQUALS(*(int*)value->value(), n);
@@ -83,6 +95,17 @@ public:
 
 		{
 			PtrValuePtr value = createPtrValue(&counter, &RefCounter::decref);
+		}
+
+		TS_ASSERT_EQUALS(counter.counter, 0);
+	}
+
+	void test_decref_called_shared_ptr(void) {
+		RefCounter counter;
+
+		{
+			PtrValuePtr value = createPtrValue(
+				std::shared_ptr<RefCounter>(&counter, &RefCounter::decref));
 		}
 
 		TS_ASSERT_EQUALS(counter.counter, 0);
