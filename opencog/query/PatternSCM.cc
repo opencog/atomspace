@@ -83,21 +83,9 @@ static TruthValuePtr do_satlink(AtomSpace* as, const Handle& hlink)
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
 {
-	// Run implication, assuming that the first argument is a handle to a
-	// BindLink containing variables, a pattern and a rewrite rules.
-	// Returns the first N matches, assuming that N is the second argument.
-	_binders.push_back(new FunctionWrap(bindlink,
-	                   "cog-bind-first-n", "query"));
-
 	// A bindlink that returns a TV
 	_binders.push_back(new FunctionWrap(do_satlink,
 	                   "cog-satisfy", "query"));
-
-	// Finds set of all variable groundings, assuming that the first
-	// argument is a handle to pattern. Returns the first N matches,
-	// assuming that N is the second argument.
-	_binders.push_back(new FunctionWrap(satisfying_set,
-	                   "cog-satisfying-set-first-n", "query"));
 
 	// Rule recognition.
 	_binders.push_back(new FunctionWrap(recognize,
