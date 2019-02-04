@@ -93,15 +93,7 @@ class BindlinkTest(TestCase):
         self.assertEquals(atom.arity, expected_arity)
 
     def test_bindlink(self):
-        atom = bindlink(self.atomspace, self.bindlink_atom)
-        self._check_result_setlink(atom, 3)
-
-    def test_single_bindlink(self):
-        atom = single_bindlink(self.atomspace, self.bindlink_atom)
-        self._check_result_setlink(atom, 1)
-
-    def test_first_n_bindlink(self):
-        atom = first_n_bindlink(self.atomspace, self.bindlink_atom, 5)
+        atom = execute_atom(self.atomspace, self.bindlink_atom)
         self._check_result_setlink(atom, 3)
 
     def test_af_bindlink(self):
@@ -110,15 +102,7 @@ class BindlinkTest(TestCase):
         self._check_result_setlink(atom, 0)
 
     def test_satisfying_set(self):
-        atom = satisfying_set(self.atomspace, self.getlink_atom)
-        self._check_result_setlink(atom, 3)
-
-    def test_satisfying_element(self):
-        atom = satisfying_element(self.atomspace, self.getlink_atom)
-        self._check_result_setlink(atom, 3)
-
-    def test_first_n_satisfying_set(self):
-        atom = first_n_satisfying_set(self.atomspace, self.getlink_atom, 5)
+        atom = execute_atom(self.atomspace, self.getlink_atom)
         self._check_result_setlink(atom, 3)
 
     def test_satisfy(self):
