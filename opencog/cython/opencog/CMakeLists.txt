@@ -120,7 +120,6 @@ ADD_LIBRARY(type_constructors
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
-	execution
 	atomspace
 	${PYTHON_LIBRARIES}
 )
@@ -172,7 +171,6 @@ ADD_LIBRARY(bindlink_cython
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
 	query-engine
-	execution
 	atomspace
 	${PYTHON_LIBRARIES}
 )
