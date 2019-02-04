@@ -85,12 +85,11 @@ public:
 	void test_execute_dot_link_return_parameter_back()
 	{
 		Instantiator inst(&atomspace);
-		GroundedObjectExample *foo = new GroundedObjectExample();
-		auto deleter = [](void* ptr) { delete (GroundedObjectExample*)ptr; };
+		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
 			al(SNET_EXECUTION_OUTPUT_LINK,
 				al(DOT_LINK,
-					aa(createGroundedObjectNode("foo", foo, deleter)),
+					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "foo")
 				),
 				al(LIST_LINK,
@@ -106,12 +105,11 @@ public:
 	void test_execute_dot_link_change_object_state()
 	{
 		Instantiator inst(&atomspace);
-		GroundedObjectExample *foo = new GroundedObjectExample();
-		auto deleter = [](void* ptr) { delete (GroundedObjectExample*)ptr; };
+		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
 			al(SNET_EXECUTION_OUTPUT_LINK,
 				al(DOT_LINK,
-					aa(createGroundedObjectNode("foo", foo, deleter)),
+					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "inc")
 				),
 				al(LIST_LINK)

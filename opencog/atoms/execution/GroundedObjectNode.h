@@ -40,8 +40,8 @@ public:
 	GroundedObjectNode(Type type, const std::string& name)
 		: Node(type, name) { }
 
-	GroundedObjectNode(const std::string& name, GroundedObject* object,
-			PtrValue::Deleter deleter);
+	GroundedObjectNode(const std::string& name,
+			const std::shared_ptr<GroundedObject>& object);
 
 	GroundedObject& get_object() const;
 

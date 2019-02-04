@@ -50,6 +50,10 @@ public:
 	PtrValue(void* ptr, Deleter deleter)
 		: Value(PTR_VALUE), ptr(ptr, deleter) {}
 
+	template<typename T>
+	PtrValue(const std::shared_ptr<T>& ptr)
+		: Value(PTR_VALUE), ptr(ptr) {}
+
 	virtual ~PtrValue() {}
 
 	/** Returns the pointer */

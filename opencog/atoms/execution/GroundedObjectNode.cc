@@ -29,10 +29,10 @@ using namespace opencog;
 Handle GroundedObjectNode::ptrKey = createNode(NODE, "GroundedObjectNodeValuePtrKey");
 
 GroundedObjectNode::GroundedObjectNode(const std::string& name,
-		GroundedObject* object, PtrValue::Deleter deleter)
+		const std::shared_ptr<GroundedObject>& object)
 	: Node(GROUNDED_OBJECT_NODE, name)
 {
-	PtrValuePtr ptrValue = createPtrValue(object, deleter);
+	PtrValuePtr ptrValue = createPtrValue(object);
 	setValue(GroundedObjectNode::ptrKey, ValueCast(ptrValue));
 }
 
