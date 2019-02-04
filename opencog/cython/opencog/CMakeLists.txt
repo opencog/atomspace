@@ -220,6 +220,40 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
+##################### forward chainer #####################
+
+CYTHON_ADD_MODULE_PYX(forwardchainer
+	"forwardchainer.pxd"
+	opencog_atom_types
+	"../../rule-engine/forwardchainer/ForwardChainer.h"
+	ruleengine
+)
+
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "forwardchainer.cpp")
+
+# opencog.forwardchaine Python bindings
+ADD_LIBRARY(forwardchainer_cython
+	forwardchainer.cpp
+)
+
+TARGET_LINK_LIBRARIES(forwardchainer_cython
+	atomspace_cython
+	type_constructors
+	ruleengine
+	${COGUTIL_LIBRARY}
+	${PYTHON_LIBRARIES}
+	${Boost_THREAD_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
+)
+
+SET_TARGET_PROPERTIES(forwardchainer_cython PROPERTIES
+	PREFIX ""
+	OUTPUT_NAME forwardchainer)
+
+INSTALL (TARGETS
+	forwardchainer_cython
+	DESTINATION "${PYTHON_DEST}")
+
 ##################### backward chainer #####################
 
 CYTHON_ADD_MODULE_PYX(backwardchainer
