@@ -20,10 +20,9 @@ ADD_LIBRARY (execution
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
-	atomspace
 	atombase
+	atomcore
 	clearbox
-	${Boost_SYSTEM_LIBRARY}
 )
 
 IF (HAVE_CYTHON)

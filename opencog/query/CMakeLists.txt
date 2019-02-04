@@ -16,7 +16,6 @@ ADD_DEPENDENCIES(query-engine
 )
 
 TARGET_LINK_LIBRARIES(query-engine
-	atomspace
 	execution
 )
 
