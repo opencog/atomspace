@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/pattern/DualLink.h
+ * opencog/atoms/pattern/GetLink.h
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2019 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_DUAL_LINK_H
-#define _OPENCOG_DUAL_LINK_H
+#ifndef _OPENCOG_GET_LINK_H
+#define _OPENCOG_GET_LINK_H
 
 #include <opencog/atoms/pattern/PatternLink.h>
 
@@ -29,27 +29,29 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class DualLink : public PatternLink
+class GetLink : public PatternLink
 {
 protected:
 	void init(void);
+
 public:
-	DualLink(const HandleSeq&, Type=DUAL_LINK);
-	DualLink(const Link &l);
+	GetLink(const HandleSeq&, Type=GET_LINK);
+	explicit GetLink(const Link &l);
 
 	virtual Handle execute(AtomSpace*, bool silent=false);
+
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DualLink> DualLinkPtr;
-static inline DualLinkPtr DualLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<DualLink>(a); }
-static inline DualLinkPtr DualLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<DualLink>(a); }
+typedef std::shared_ptr<GetLink> GetLinkPtr;
+static inline GetLinkPtr GetLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<GetLink>(a); }
+static inline GetLinkPtr GetLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<GetLink>(a); }
 
-#define createDualLink std::make_shared<DualLink>
+#define createGetLink std::make_shared<GetLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_DUAL_LINK_H
+#endif // _OPENCOG_GET_LINK_H

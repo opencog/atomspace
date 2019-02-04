@@ -28,7 +28,6 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/MapLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "Instantiator.h"
 
@@ -473,7 +472,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return satisfying_set(_as, expr);
+		return expr->execute(_as);
 	}
 
 	// Ideally, we should not evaluate any EvaluatableLinks.

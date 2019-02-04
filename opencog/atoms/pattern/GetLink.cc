@@ -1,7 +1,7 @@
 /*
- * DualLink.cc
+ * GetLink.cc
  *
- * Copyright (C) 2014-2016 Linas Vepstas
+ * Copyright (C) 2019 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,64 +24,41 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/query/BindLinkAPI.h>
 
-#include "DualLink.h"
+#include "GetLink.h"
 
 using namespace opencog;
 
-void DualLink::init(void)
+void GetLink::init(void)
 {
 	Type t = get_type();
-	if (not nameserver().isA(t, DUAL_LINK))
+	if (not nameserver().isA(t, GET_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a DualLink, got %s", tname.c_str());
+			"Expecting a GetLink, got %s", tname.c_str());
 	}
-
-	_pat.redex_name = "anonymous DualLink";
-
-	_num_virts = 1;
-	_num_comps = 1;
-
-	// At this time, we don't support DualLinks with variables.
-	// We could, be we don't. Thus, the initialization here is
-	// extremely simple.
-	if (1 < _outgoing.size())
-		throw InvalidParamException(TRACE_INFO,
-			"DualLinks with variables are currently not supported.\n");
-
-	// ScopeLink::extract_variables(_outgoing);
-	_body = _outgoing[0];
-
-	_pat.clauses.emplace_back(_body);
-	_pat.cnf_clauses.emplace_back(_body);
-	_pat.mandatory.emplace_back(_body);
-	_fixed.emplace_back(_body);
-
-	_pat.body = _body;
-
-	make_term_trees();
 }
 
-DualLink::DualLink(const HandleSeq& hseq, Type t)
+GetLink::GetLink(const HandleSeq& hseq, Type t)
 	: PatternLink(hseq, t)
 {
 	init();
 }
 
-DualLink::DualLink(const Link &l)
+GetLink::GetLink(const Link &l)
 	: PatternLink(l)
 {
 	init();
 }
 
-Handle DualLink::execute(AtomSpace* as, bool silent)
+/* ================================================================= */
+
+Handle GetLink::execute(AtomSpace* as, bool silent)
 {
-	// XXX FIXME we should someday move the code from
-	// Recognizer.cc to here. Just not today.
-	return recognize(as, get_handle());
+	// XXX Someday, copy over the code from Satisfier.cc to here.
+	return satisfying_set(as, get_handle());
 }
 
-DEFINE_LINK_FACTORY(DualLink, DUAL_LINK)
+DEFINE_LINK_FACTORY(GetLink, GET_LINK)
 
 /* ===================== END OF FILE ===================== */

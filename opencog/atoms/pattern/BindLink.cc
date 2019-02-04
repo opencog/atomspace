@@ -26,6 +26,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/query/BindLinkAPI.h>
 
 #include "BindLink.h"
 
@@ -126,6 +127,13 @@ void BindLink::set_rewrite(const Handle& rewr)
 Handle BindLink::get_rewrite(void) const
 {
 	return HandleCast(getValue(rewrite_key()));
+}
+
+Handle BindLink::execute(AtomSpace* as, bool silent)
+{
+	// XXX FIXME we should someday move the code from Implicator.cc
+	// over to here.  But not today.
+	return bindlink(as, get_handle());
 }
 
 /* ================================================================= */

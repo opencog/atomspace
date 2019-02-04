@@ -32,9 +32,9 @@ ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	atombase
-	atomspace
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )
 
 INSTALL (TARGETS PythonEval EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

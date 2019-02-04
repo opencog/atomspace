@@ -1,5 +1,5 @@
 
-# Build the query shlib
+# Build the query-engine library
 ADD_LIBRARY(query-engine
 	DefaultPatternMatchCB.cc
 	Implicator.cc
@@ -16,9 +16,7 @@ ADD_DEPENDENCIES(query-engine
 )
 
 TARGET_LINK_LIBRARIES(query-engine
-	lambda
-	atomspace
-#	execution # still a circular dependency
+	execution
 )
 
 ADD_LIBRARY(query
