@@ -291,12 +291,15 @@ static bool is_evaluatable_sat(const Handle& satl)
 
 	return false;
 #if 0
+XXX Fixme -- this is a desirable optimization, but we cannot make it
+here.
 	PatternLinkPtr plp(PatternLinkCast(satl));
 
 	return 0 == plp->get_variables().varseq.size();
 #endif
 }
 
+/** Return true, if `thish` is tail-recursive */
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
 	if (DEFINED_PREDICATE_NODE != tail->get_type())
@@ -558,7 +561,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (not is_evaluatable_sat(evelnk))
 			return evelnk->evaluate(as);
 
-		// If we are here, the we can optimize: we can evaluate
+		// If we are here, then we can optimize: we can evaluate
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
