@@ -137,7 +137,6 @@
 ;; try to check member again.
 
 (cog-evaluate! (DefinedPredicateNode "Does Bill like X?"))
-(cog-satisfy (DefinedPredicateNode "Does Bill like X?"))
 
 ;; A quasi-generic rule implicator.
 ;; Searches for all implication links (of a very specific form)

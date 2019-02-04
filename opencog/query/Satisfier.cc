@@ -150,44 +150,14 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
-	// Special case the BindLink. We probably shouldn't have to, and
-	// the C++ code for handling this case could maybe be refactored
-	// to handle BindLink as well as GetLink in one place... but right
-	// now, it doesn't.
+	// Special case for the max_results != SIZE_MAX variant
 	Type blt = hlink->get_type();
 	if (BIND_LINK == blt)
 	{
 		return bindlink(as, hlink, max_results);
 	}
-	if (DUAL_LINK == blt)
-	{
-		return hlink->execute(as);
-	}
 
-	// If we are here, then we are a GET_LINK, right?
-	if (GET_LINK != blt)
-		throw RuntimeException(TRACE_INFO,
-			"Unexpected SatisfyingLink type!");
-
-	PatternLinkPtr bl(PatternLinkCast(hlink));
-
-	SatisfyingSet sater(as);
-	sater.max_results = max_results;
-	bl->satisfy(sater);
-
-	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(sater._satisfying_set, SET_LINK));
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-	// Shoot. XXX FIXME. Most of the unit tests require that the atom
-	// that we return is in the atomspace. But it would be nice if we
-	// could defer this indefinitely, until its really needed.
-	satset = as->add_atom(satset);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	bl->set_groundings(satset);
-
-	return satset;
+	return hlink->execute(as);
 }
 
 /* ===================== END OF FILE ===================== */
