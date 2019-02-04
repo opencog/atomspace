@@ -2,7 +2,7 @@ from unittest import TestCase
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import stub_bindlink, bindlink, single_bindlink,\
+from opencog.bindlink import bindlink, single_bindlink,\
                              first_n_bindlink, af_bindlink, \
                              satisfaction_link, satisfying_set, \
                              satisfying_element, first_n_satisfying_set, \
@@ -78,20 +78,6 @@ class BindlinkTest(TestCase):
         # confuse the PythonEval singletonInstance.
         # finalize_opencog()
         # del self.atomspace
-
-    def test_stub_bindlink(self):
-
-        # Remember the starting atomspace size. This test should not
-        # change the atomspace.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
-        atom = stub_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None)
-
-        # Check the ending atomspace size, it should be the same.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size)
 
     def _check_result_setlink(self, atom, expected_arity):
 
