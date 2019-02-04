@@ -170,7 +170,6 @@ ADD_LIBRARY(bindlink_cython
 
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
-	query-engine
 	atomspace
 	${PYTHON_LIBRARIES}
 )
