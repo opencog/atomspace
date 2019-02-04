@@ -59,6 +59,10 @@ public:
 	void tearDown(void);
 
 	void test_singleton(void);
+
+	void test_nondefault_exp(void);
+
+	void test_wrapped_exp();
 };
 
 void CondLinkUTest::tearDown(void)
@@ -80,6 +84,36 @@ void CondLinkUTest::test_singleton()
 	Handle result = eval->eval_h("(cog-execute! single)");
 
 	Handle baz = eval->eval_h("(Number -1)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_nondefault_exp()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! nondefault)");
+
+	Handle baz = eval->eval_h("(Number 5)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_wrapped_exp()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! listwrapped)");
+
+	Handle baz = eval->eval_h("(NumberNode 1)");
 	printf("got %s", result->to_string().c_str());
 	printf("expected %s\n", baz->to_string().c_str());
 
