@@ -166,7 +166,8 @@ cdef class Atom:
 
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
-        AtomSpace()
+        cAtomSpace()
+        cAtomSpace(cAtomSpace * parent)
 
         cHandle add_node(Type t, string s) except +
         cHandle add_node(Type t, string s, tv_ptr tvn) except +

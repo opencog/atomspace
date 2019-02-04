@@ -4,13 +4,6 @@ from opencog.atomspace cimport tv_ptr, strength_t, count_t
 from cython.operator cimport dereference as deref
 
 
-def stub_bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("stub_bindlink atom is: None")
-    cdef cHandle c_result = c_stub_bindlink(atomspace.atomspace,
-                                            deref(atom.handle))
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
 def bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("bindlink atom is: None")
     cdef cHandle c_result = c_bindlink(atomspace.atomspace,
