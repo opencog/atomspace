@@ -14,10 +14,12 @@
 #   for it be importable, as per guile's specification. See reference
 #   links above.
 
-IF(HAVE_GUILE)
-    EXECUTE_PROCESS(COMMAND guile -c "(display (%site-dir))"
-        OUTPUT_VARIABLE GUILE_SITE_DIR
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+IF (NOT DEFINED GUILE_SITE_DIR)
+    IF(HAVE_GUILE)
+        EXECUTE_PROCESS(COMMAND guile -c "(display (%site-dir))"
+            OUTPUT_VARIABLE GUILE_SITE_DIR
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF()
 ENDIF()
 ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 
