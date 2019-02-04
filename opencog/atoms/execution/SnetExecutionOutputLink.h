@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/execution/SnetExecutionOutputLink.h
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,22 +38,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SnetExecutionOutputLink> SnetExecutionOutputLinkPtr;
-
-static inline SnetExecutionOutputLinkPtr SnetExecutionOutputLinkCast(const Handle& h)
-{
-	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(h);
-}
-static inline SnetExecutionOutputLinkPtr SnetExecutionOutputLinkCast(ValuePtr v)
-{
-	return std::dynamic_pointer_cast<SnetExecutionOutputLink>(v);
-}
-
-template<typename ... Type>
-static inline SnetExecutionOutputLinkPtr createSnetExecutionOutputLink(Type&&... args)
-{
-	return std::make_shared<SnetExecutionOutputLink>(std::forward<Type>(args)...);
-}
+using SnetExecutionOutputLinkPtr = std::shared_ptr<SnetExecutionOutputLink>;
 
 }
 

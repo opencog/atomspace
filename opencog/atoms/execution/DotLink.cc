@@ -44,7 +44,7 @@ GroundedFunction DotLink::get_function() const
 auto DotLinkCast = CastFromHandle<DotLink>;
 
 template<typename ... Args>
-static std::shared_ptr<DotLink> createDotLink(Args&& ... args)
+static DotLinkPtr createDotLink(Args&& ... args)
 {
 	return createType<DotLink>(std::forward<Args>(args)...);
 }

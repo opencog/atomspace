@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/execution/GroundedObjectNode.h
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,21 +48,12 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<GroundedObjectNode> GroundedObjectNodePtr;
+using GroundedObjectNodePtr = std::shared_ptr<GroundedObjectNode>;
 
-static inline GroundedObjectNodePtr GroundedObjectNodeCast(const Handle& h)
+template<typename ... Args>
+static inline GroundedObjectNodePtr createGroundedObjectNode(Args&&... args)
 {
-	return std::dynamic_pointer_cast<GroundedObjectNode>(h);
-}
-static inline GroundedObjectNodePtr GroundedObjectNodeCast(const ValuePtr& v)
-{
-	return std::dynamic_pointer_cast<GroundedObjectNode>(v);
-}
-
-template<typename ... Type>
-static inline GroundedObjectNodePtr createGroundedObjectNode(Type&&... args)
-{
-	return std::make_shared<GroundedObjectNode>(std::forward<Type>(args)...);
+	return std::make_shared<GroundedObjectNode>(std::forward<Args>(args)...);
 }
 
 }

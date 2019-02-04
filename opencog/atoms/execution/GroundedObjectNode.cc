@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/execution/GroundedObjectNode.cc
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,6 +44,8 @@ GroundedObject& GroundedObjectNode::get_object() const
 			)->value()
 		);
 }
+
+auto GroundedObjectNodeCast = CastFromHandle<GroundedObjectNode>;
 
 DEFINE_NODE_FACTORY(GroundedObjectNode, GROUNDED_OBJECT_NODE)
 

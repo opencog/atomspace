@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/execution/SnetExecutionOutputLink.cc
  *
- * Copyright (C) 2019 Vitaly Bogdanov <vsbogd@gmail.com>
+ * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,6 +53,14 @@ Handle SnetExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 	ValuePtr args = getOutgoingAtom(1);
 	ValuePtr result = grounded_link->get_function()(as, args);
 	return cast_to_handle_exception(result);
+}
+
+auto SnetExecutionOutputLinkCast = CastFromHandle<SnetExecutionOutputLink>;
+
+template<typename ... Args>
+static inline SnetExecutionOutputLinkPtr createSnetExecutionOutputLink(Args&&... args)
+{
+	return std::make_shared<SnetExecutionOutputLink>(std::forward<Args>(args)...);
 }
 
 DEFINE_LINK_FACTORY(SnetExecutionOutputLink, SNET_EXECUTION_OUTPUT_LINK)
