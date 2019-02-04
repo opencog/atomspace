@@ -91,17 +91,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	attentionbank
-	execution
 	atomspace
-	clearbox
-	atomspaceutils
-	truthvalue
-	atomcore
-	atomspace
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -153,13 +144,9 @@ ADD_LIBRARY(utilities_cython
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
-	clearbox
 	atomspace
 	type_constructors
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
@@ -185,9 +172,8 @@ TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
 	query-engine
 	execution
+	atomspace
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
@@ -222,8 +208,7 @@ IF (HAVE_GUILE)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		atomspace_cython
-		query-engine
-		execution
+		atomspace
 		smob
 		${PYTHON_LIBRARIES}
 	)
@@ -257,10 +242,7 @@ TARGET_LINK_LIBRARIES(backwardchainer_cython
 	atomspace_cython
 	type_constructors
 	ruleengine
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
