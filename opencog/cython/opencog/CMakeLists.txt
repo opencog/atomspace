@@ -120,6 +120,7 @@ ADD_LIBRARY(type_constructors
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
+	${NO_AS_NEEDED}
 	atomspace
 	${PYTHON_LIBRARIES}
 )
@@ -169,9 +170,7 @@ ADD_LIBRARY(bindlink_cython
 )
 
 TARGET_LINK_LIBRARIES(bindlink_cython
-	${NO_AS_NEEDED}
 	atomspace_cython
-	execution
 	atomspace
 	${PYTHON_LIBRARIES}
 )
