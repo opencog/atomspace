@@ -156,7 +156,6 @@ protected:
 // H_HHH  -- pointmem (the 3D spatial API)
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
-// H_HZ   -- cog-bind-first-n
 // I_V    -- cogutil RandGen
 // P_H    -- FunctionWrapper
 // S_AS   -- CogServerSCM::start_server()

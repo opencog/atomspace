@@ -76,11 +76,9 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
-	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(ScopeUTest)
 	ADD_CXXTEST(NestedPutUTest)
 
-	ADD_CXXTEST(FirstNUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)
@@ -155,10 +153,6 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-absence.scm
     ${PROJECT_BINARY_DIR}/tests/query/seq-absence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-presence.scm
     ${PROJECT_BINARY_DIR}/tests/query/seq-presence.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
-    ${PROJECT_BINARY_DIR}/tests/query/single.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/firstn.scm
-    ${PROJECT_BINARY_DIR}/tests/query/firstn.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-o.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-u.scm
