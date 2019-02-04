@@ -148,27 +148,6 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 	return (_satisfying_set.size() >= max_results);
 }
 
-TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
-{
-	PatternLinkPtr plp(PatternLinkCast(hlink));
-
-	Satisfier sater(as);
-	plp->satisfy(sater);
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-	// Shoot. XXX FIXME. Most of the unit tests require that the atom
-	// that we return is in the atomspace. But it would be nice if we
-	// could defer this indefinitely, until its really needed.
-	Handle satgrd = as->add_atom(sater._ground);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
-	// Cache the variable groundings. OpenPsi wants this.
-	plp->set_groundings(satgrd);
-
-	return sater._result;
-}
-
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
 	// Special case the BindLink. We probably shouldn't have to, and

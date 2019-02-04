@@ -70,15 +70,6 @@ PatternSCM::PatternSCM(void) :
 	ModuleWrap("opencog query")
 {}
 
-static TruthValuePtr do_satlink(AtomSpace* as, const Handle& hlink)
-{
-	Handle plp(hlink);
-	// If not already a PatternLink, then WRAP it in a PattrnLink.
-	if (not nameserver().isA(hlink->get_type(), PATTERN_LINK))
-		plp = createPatternLink(hlink);
-	return satisfaction_link(as, plp);
-}
-
 /// This is called while (opencog query) is the current module.
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
@@ -88,10 +79,6 @@ void PatternSCM::init(void)
 	// Returns the first N matches, assuming that N is the second argument.
 	_binders.push_back(new FunctionWrap(bindlink,
 	                   "cog-bind-first-n", "query"));
-
-	// A bindlink that returns a TV
-	_binders.push_back(new FunctionWrap(do_satlink,
-	                   "cog-satisfy", "query"));
 
 	// Finds set of all variable groundings, assuming that the first
 	// argument is a handle to pattern. Returns the first N matches,

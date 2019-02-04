@@ -15,7 +15,6 @@ int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
                             , char** tv_type
                             , double* parameters)
 {
-    TruthValuePtr tv = satisfaction_link(this_ptr, *handle);
+    TruthValuePtr tv = (*handle)->evaluate(this_ptr);
     return FloatValue_toRaw(tv,tv_type,parameters);
 }
-

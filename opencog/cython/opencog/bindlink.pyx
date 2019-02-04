@@ -43,8 +43,8 @@ def af_bindlink(AtomSpace atomspace, Atom atom):
 
 def satisfaction_link(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("satisfaction_link atom is: None")
-    cdef tv_ptr result_tv_ptr = c_satisfaction_link(atomspace.atomspace,
-                                                 deref(atom.handle))
+    cdef tv_ptr result_tv_ptr = c_evaluate_atom(atomspace.atomspace,
+                                                deref(atom.handle))
     cdef cTruthValue* result_tv = result_tv_ptr.get()
     cdef strength_t strength = deref(result_tv).get_mean()
     cdef strength_t confidence = deref(result_tv).get_confidence()

@@ -36,6 +36,14 @@
 (define-public (cog-bind-single handle)
 	(cog-bind-first-n handle 1)
 )
+(define-public (cog-recognize handle)
+	(display "Obsolete! Do not use cog-recognize, use cog-execute! instead.\n")
+	(cog-execute! handle)
+)
+(define-public (cog-satisfy handle)
+	(display "Obsolete! Do not use cog-satisfy, use cog-evaluate! instead.\n")
+	(cog-evaluate! handle)
+)
 (define-public (cog-satisfying-set handle)
 	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute!  instead.\n")
 	(cog-execute! handle)
@@ -43,10 +51,7 @@
 (define-public (cog-satisfying-element handle)
 	(cog-satisfying-set-first-n handle 1)
 )
-(define-public (cog-recognize handle)
-	(display "Obsolete! Do not use cog-recognize, use cog-execute! instead.\n")
-	(cog-execute! handle)
-)
+
 (set-procedure-property! cog-bind 'documentation
 "
  cog-bind HANDLE
@@ -69,15 +74,6 @@
  cog-bind-single HANDLE
     Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
     The search is terminated after the first match is found.
-")
-
-(set-procedure-property! cog-satisfy 'documentation
-"
- cog-satisfy HANDLE
-    OBSELETE! DO NOT USE IN NEW CODE! Use cog-evaluate! instead.
-
-    Run pattern matcher on HANDLE.  HANDLE must be a SatisfactionLink.
-    Return a TV. Only satisfaction is performed, no implication.
 ")
 
 ; The documentation below belongs in a different module.

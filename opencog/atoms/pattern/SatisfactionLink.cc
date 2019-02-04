@@ -22,7 +22,8 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/Satisfier.h>
 
 #include "SatisfactionLink.h"
 
@@ -53,8 +54,21 @@ SatisfactionLink::SatisfactionLink(const Link &l)
 
 TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 {
-	// Temporary hack alert - fixme. Move the code from libquery to here
-	return satisfaction_link(as, get_handle());
+	Satisfier sater(as);
+	satisfy(sater);
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	Handle satgrd = as->add_atom(sater._ground);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+
+	// Cache the variable groundings. OpenPsi wants this.
+	set_groundings(satgrd);
+
+	return sater._result;
 }
 
 DEFINE_LINK_FACTORY(SatisfactionLink, SATISFACTION_LINK)

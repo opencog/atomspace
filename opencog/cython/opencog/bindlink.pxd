@@ -13,11 +13,9 @@ cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
 cdef extern from "opencog/query/BindLinkAPI.h" namespace "opencog":
     # C++:
     #   Handle bindlink(AtomSpace*, Handle, size_t);
-    #   TruthValuePtr satisfaction_link(AtomSpace*, Handle);
     #   Handle satisfying_set(AtomSpace*, Handle, size_t);
     #
     cdef cHandle c_bindlink "bindlink" (cAtomSpace*, cHandle, cSize)
-    cdef tv_ptr c_satisfaction_link "satisfaction_link" (cAtomSpace*, cHandle)
     cdef cHandle c_satisfying_set "satisfying_set" (cAtomSpace*, cHandle, cSize)
 
 cdef extern from "opencog/attentionbank/AFImplicator.h" namespace "opencog":
