@@ -120,6 +120,7 @@ ADD_LIBRARY(type_constructors
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
+	execution
 	atomspace
 	${PYTHON_LIBRARIES}
 )
