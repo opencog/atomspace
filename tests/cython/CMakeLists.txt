@@ -17,8 +17,6 @@ ENDIF (HAVE_GUILE)
 
 LINK_LIBRARIES(
 	atomspace
-	clearbox
-	execution
 	${GUILE_LIBRARIES}
 )
 
@@ -30,7 +28,6 @@ ADD_CXXTEST(PythonEvalUTest)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
-	clearbox
 	PythonEval
 	atomspace_cython
 	${COGUTIL_LIBRARY}
