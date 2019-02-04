@@ -253,6 +253,14 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
+    virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO, "Not evaluatable!");
+    }
+
+    virtual Handle execute(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO, "Not executable!");
+    }
+
     /** Returns the handle of the atom. */
     inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
