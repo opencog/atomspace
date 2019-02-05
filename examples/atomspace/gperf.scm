@@ -13,7 +13,7 @@
 ;     $ ./gperf.scm
 ;
 
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 (use-modules (ice-9 format))
 (use-modules (srfi srfi-19))
 

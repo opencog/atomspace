@@ -48,7 +48,6 @@
 ; triggered, the description is turned into the actual link.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
 
 ; Clause to match during query.  This is the EvaluationLink whose
 ; presence or absence we will be testing for.

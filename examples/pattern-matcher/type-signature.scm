@@ -7,7 +7,7 @@
 ; match: by default, types are checked during a search, and variable
 ; groundings must respect the variable type.
 ;
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))

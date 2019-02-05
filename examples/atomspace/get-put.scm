@@ -27,7 +27,7 @@
 ; create Q(x) first, and then ask for it later. In the language of
 ; category theory, Get and Put are adjoint functors.
 ;
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ; Place some data into the atomspace. This is the same as in the
 ; BindLink example.

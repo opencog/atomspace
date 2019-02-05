@@ -21,7 +21,6 @@ scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
 # Import opencog modules required for using `cog-execute!` in scheme_eval
 scheme_eval(atomspace, "(use-modules (opencog))")
 scheme_eval(atomspace, "(use-modules (opencog exec))")
-scheme_eval(atomspace, "(use-modules (opencog query))")
 
 # Define several animals and something of a different type as well
 scheme_animals = \
