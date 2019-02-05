@@ -35,9 +35,6 @@ class PatternSCM : public ModuleWrap
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
-#include "BindLinkAPI.h"
-#include "PatternMatch.h"
-
 using namespace opencog;
 
 // ========================================================
