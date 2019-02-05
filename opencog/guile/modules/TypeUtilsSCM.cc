@@ -63,10 +63,10 @@ ValuePtr TypeUtilsSCM::type_compose(Handle left, ValuePtr right)
 std::vector<FunctionWrap*> TypeUtilsSCM::_binders;
 
 TypeUtilsSCM::TypeUtilsSCM(void) :
-	ModuleWrap("opencog query")
+	ModuleWrap("opencog type-utils")
 {}
 
-/// This is called while (opencog query) is the current module.
+/// This is called while (opencog type-utils) is the current module.
 /// Thus, all the definitions below happen in that module.
 void TypeUtilsSCM::init(void)
 {
@@ -74,13 +74,13 @@ void TypeUtilsSCM::init(void)
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
 	define_scheme_primitive("cog-value-is-type?",
-		&TypeUtilsSCM::value_is_type, this, "query");
+		&TypeUtilsSCM::value_is_type, this, "type-utils");
 
 	define_scheme_primitive("cog-type-match?",
-		&TypeUtilsSCM::type_match, this, "query");
+		&TypeUtilsSCM::type_match, this, "type-utils");
 
 	define_scheme_primitive("cog-type-compose",
-		&TypeUtilsSCM::type_compose, this, "query");
+		&TypeUtilsSCM::type_compose, this, "type-utils");
 }
 
 TypeUtilsSCM::~TypeUtilsSCM()

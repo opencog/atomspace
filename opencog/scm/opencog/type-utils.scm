@@ -29,6 +29,10 @@
   specification can be connected. This is usefule for beta-reduction,
   (to check that some argument is reducible) or for pattern matching
   (searching).
+
+  Example:
+      (cog-value-is-type? (Type 'ConceptNode) (Concept "foo"))
+      (cog-value-is-type? (Type 'PredicateNode) (Concept "foo"))
 ")
 
 (set-procedure-property! cog-type-match? 'documentation
@@ -40,6 +44,9 @@
   another type defintion, or a value.  Mating is possible whenever
   `LEFT` is broader, less restricitve than `RIGHT`; equivalently
   if `RIGHT` is narrower than 'LEFT`.
+
+  Example:
+       (cog-type-match? (Type 'PredicateNode) (Type 'ConceptNode))
 
   Mating types and arguments:
   LEFT == (Type 'ConceptNode)    RIGHT == (Concept \"foo\")  can mate.
