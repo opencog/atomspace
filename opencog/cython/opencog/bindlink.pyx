@@ -3,66 +3,10 @@ from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
 from opencog.atomspace cimport tv_ptr, strength_t, count_t
 from cython.operator cimport dereference as deref
 
-
-def bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("bindlink atom is: None")
-    cdef cHandle c_result = c_bindlink(atomspace.atomspace,
-                                       deref(atom.handle), -1)
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
-def single_bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("single_bindlink atom is: None")
-    cdef cHandle c_result = c_bindlink(atomspace.atomspace,
-                                       deref(atom.handle), 1)
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
-def first_n_bindlink(AtomSpace atomspace, Atom atom, max_results):
-    if atom == None: raise ValueError("first_n_bindlink atom is: None")
-    if not isinstance(max_results, int):
-        raise ValueError("first_n_bindlink max_results is not integer")
-    cdef cHandle c_result = c_bindlink(atomspace.atomspace,
-                                       deref(atom.handle), max_results)
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
 def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
                                           deref(atom.handle))
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
-def satisfaction_link(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("satisfaction_link atom is: None")
-    cdef tv_ptr result_tv_ptr = c_evaluate_atom(atomspace.atomspace,
-                                                deref(atom.handle))
-    cdef cTruthValue* result_tv = result_tv_ptr.get()
-    cdef strength_t strength = deref(result_tv).get_mean()
-    cdef strength_t confidence = deref(result_tv).get_confidence()
-    return TruthValue(strength, confidence)
-
-def satisfying_set(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("satisfying_set atom is: None")
-    cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
-                                             deref(atom.handle), -1)
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
-def satisfying_element(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("satisfying_element atom is: None")
-    cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
-                                             deref(atom.handle), 1)
-    cdef Atom result = Atom.create(c_result, atomspace)
-    return result
-
-def first_n_satisfying_set(AtomSpace atomspace, Atom atom, max_results):
-    if atom == None: raise ValueError("first_n_satisfying_set atom is: None")
-    if not isinstance(max_results, int):
-        raise ValueError("first_n_satisfying_set max_results is not integer")
-    cdef cHandle c_result = c_satisfying_set(atomspace.atomspace,
-                                             deref(atom.handle), max_results)
     cdef Atom result = Atom.create(c_result, atomspace)
     return result
 

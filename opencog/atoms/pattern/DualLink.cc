@@ -76,8 +76,9 @@ DualLink::DualLink(const Link &l)
 	init();
 }
 
-Handle DualLink::execute(AtomSpace* as, bool silent)
+ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 {
+	if (nullptr == as) as = _atom_space;
 	Recognizer reco(as);
 	satisfy(reco);
 	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));

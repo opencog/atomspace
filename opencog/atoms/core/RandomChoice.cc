@@ -122,7 +122,7 @@ RandomChoiceLink::RandomChoiceLink(const Link &l)
 
 // XXX FIXME - fix this so it can also choose a single value
 // out of a vector of values.
-ValuePtr RandomChoiceLink::execute() const
+ValuePtr RandomChoiceLink::execute()
 {
 	size_t ary = _outgoing.size();
 	if (0 == ary) return ValuePtr();

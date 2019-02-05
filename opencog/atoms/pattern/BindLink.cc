@@ -129,10 +129,11 @@ Handle BindLink::get_rewrite(void) const
 	return HandleCast(getValue(rewrite_key()));
 }
 
-Handle BindLink::execute(AtomSpace* as, bool silent)
+ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
 	// XXX FIXME we should someday move the code from Implicator.cc
 	// over to here.  But not today.
+	if (nullptr == as) as = _atom_space;
 	return bindlink(as, get_handle());
 }
 

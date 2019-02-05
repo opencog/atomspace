@@ -40,7 +40,7 @@ public:
 	EvaluationLink(const Handle& schema, const Handle& args);
 	EvaluationLink(const Link& l);
 
-	TruthValuePtr evaluate(AtomSpace* as) {
+	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
 	    return do_evaluate(as, get_handle());
 	}
 

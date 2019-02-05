@@ -50,7 +50,7 @@ public:
 	ArithmeticLink(const Link& l);
 
 	virtual ValuePtr delta_reduce(void) const;
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

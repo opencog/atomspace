@@ -73,8 +73,6 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual ValuePtr execute() const;
-
 	static Handle factory(const Handle&);
 };
 

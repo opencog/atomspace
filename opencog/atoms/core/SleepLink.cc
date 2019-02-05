@@ -69,7 +69,7 @@ SleepLink::SleepLink(const Link &l)
 
 /// Return number of seconds left to sleep.
 /// Normally, this is zero, unless the sleep was interrupted.
-ValuePtr SleepLink::execute() const
+ValuePtr SleepLink::execute()
 {
 	Handle time(_outgoing[0]);
 	FunctionLinkPtr flp(FunctionLinkCast(time));

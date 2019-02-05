@@ -157,7 +157,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 		return bindlink(as, hlink, max_results);
 	}
 
-	return hlink->execute(as);
+	return HandleCast(hlink->execute(as));
 }
 
 /* ===================== END OF FILE ===================== */

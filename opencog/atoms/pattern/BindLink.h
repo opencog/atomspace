@@ -59,7 +59,7 @@ public:
 	// Return the cached implication results
 	Handle get_rewrite() const;
 
-	virtual Handle execute(AtomSpace*, bool silent=false);
+	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);
 };

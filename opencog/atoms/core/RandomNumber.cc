@@ -87,7 +87,7 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 
-ValuePtr RandomNumberLink::execute() const
+ValuePtr RandomNumberLink::execute()
 {
 	// XXX FIXME so that this also works with values.
 	NumberNodePtr nmin(unwrap_set(_outgoing[0]));
