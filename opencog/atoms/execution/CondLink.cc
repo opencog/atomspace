@@ -35,7 +35,7 @@ void CondLink::init(void)
 		                      "CondLink is expected to be arity greater-than 0!");
 
 	if (1 == _outgoing.size()) {
-		def_exp = _outgoing[0];
+		default_exp = _outgoing[0];
 		return;
 	}
 
@@ -60,7 +60,7 @@ void CondLink::init(void)
 		// positions respectively.
 		if (i % 2 == 0) {
 			if (i == _outgoing.size() - 1) {
-				def_exp = _outgoing[i];
+				default_exp = _outgoing[i];
 				return;
 			}
 			conds.push_back(_outgoing[i]);
@@ -93,7 +93,7 @@ Handle CondLink::execute(AtomSpace *scratch) const
 		if (tvp->get_mean() > 0.5)
 			return HandleCast(inst.instantiate(exps[i], HandleMap()));
 	}
-	return HandleCast(inst.instantiate(def_exp, HandleMap()));
+	return HandleCast(inst.instantiate(default_exp, HandleMap()));
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)

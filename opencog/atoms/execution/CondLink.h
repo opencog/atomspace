@@ -34,7 +34,7 @@ class CondLink : public FunctionLink
 protected:
 	HandleSeq conds;
 	HandleSeq exps;
-	Handle def_exp;
+	Handle default_exp;
 
 	void init(void);
 
