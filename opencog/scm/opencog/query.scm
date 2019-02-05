@@ -18,18 +18,22 @@
 ; because other scheme code cannot guess what names the shared lib
 ; actually exported.  So we list them here.
 (export
-	cog-satisfy
-)
-
-(export
 	cog-value-is-type?
 	cog-type-match?
 	cog-type-compose
 )
 
 (define-public (cog-bind handle)
-	(display "Obsolete! Do not use cog-bind, use cog-execute! insead.\n")
+	(display "Obsolete! Do not use cog-bind, use cog-execute! instead.\n")
 	(cog-execute! handle)
+)
+(define-public (cog-recognize handle)
+	(display "Obsolete! Do not use cog-recognize, use cog-execute! instead.\n")
+	(cog-execute! handle)
+)
+(define-public (cog-satisfy handle)
+	(display "Obsolete! Do not use cog-satisfy, use cog-evaluate! instead.\n")
+	(cog-evaluate! handle)
 )
 (define-public (cog-satisfying-set handle)
 	(display "Obsolete! Do not use cog-satisfying-set, use cog-execute! insead.\n")

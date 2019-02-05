@@ -115,7 +115,7 @@ class BindlinkTest(TestCase):
 
     def test_satisfying_element(self):
         atom = satisfying_element(self.atomspace, self.getlink_atom)
-        self._check_result_setlink(atom, 1)
+        self._check_result_setlink(atom, 3)
 
     def test_first_n_satisfying_set(self):
         atom = first_n_satisfying_set(self.atomspace, self.getlink_atom, 5)

@@ -22,7 +22,8 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/query/Satisfier.h>
 
 #include "GetLink.h"
 
@@ -55,8 +56,23 @@ GetLink::GetLink(const Link &l)
 
 Handle GetLink::execute(AtomSpace* as, bool silent)
 {
-	// XXX Someday, copy over the code from Satisfier.cc to here.
-	return satisfying_set(as, get_handle());
+	SatisfyingSet sater(as);
+	sater.max_results = SIZE_MAX;
+	satisfy(sater);
+
+	// Create the satisfying set, and cache it.
+	Handle satset(createUnorderedLink(sater._satisfying_set, SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	satset = as->add_atom(satset);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+	set_groundings(satset);
+
+	return satset;
 }
 
 DEFINE_LINK_FACTORY(GetLink, GET_LINK)

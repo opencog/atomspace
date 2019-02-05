@@ -70,27 +70,10 @@ PatternSCM::PatternSCM(void) :
 	ModuleWrap("opencog query")
 {}
 
-static TruthValuePtr do_satlink(AtomSpace* as, const Handle& hlink)
-{
-	Handle plp(hlink);
-	// If not already a PatternLink, then WRAP it in a PattrnLink.
-	if (not nameserver().isA(hlink->get_type(), PATTERN_LINK))
-		plp = createPatternLink(hlink);
-	return satisfaction_link(as, plp);
-}
-
 /// This is called while (opencog query) is the current module.
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
 {
-	// A bindlink that returns a TV
-	_binders.push_back(new FunctionWrap(do_satlink,
-	                   "cog-satisfy", "query"));
-
-	// Rule recognition.
-	_binders.push_back(new FunctionWrap(recognize,
-	                   "cog-recognize", "query"));
-
 	// These below belong somewhere else. Not sure where.
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
