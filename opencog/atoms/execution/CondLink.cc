@@ -40,6 +40,24 @@ void CondLink::init(void)
 	}
 
 	for (unsigned i = 0; i < _outgoing.size(); ++i) {
+		// If the conditions and expressions are wrapped in list_link
+		if (LIST_LINK == _outgoing[i]->get_type()) {
+			// The first item in the list_link holds the condition,
+			// and the second holds the expression.
+			conds.push_back(_outgoing[i]->getOutgoingSet()[0]);
+			exps.push_back(_outgoing[i]->getOutgoingSet()[1]);
+			continue;
+		}
+
+		// If cond_link starts wrapping conds and exps in list_link, then it is
+		// expected to be consistent. If one wants to have a default expression
+		// using true_link as condition should do it.
+		if (i != 0 && LIST_LINK == _outgoing[i - 1]->get_type())
+			throw SyntaxException(TRACE_INFO,
+			                      "CondLink is expected to wrap expressions in LIST_LINK.");
+
+		// If the conditions and expressions are flattened in even and odd
+		// positions respectively.
 		if (i % 2 == 0) {
 			if (i == _outgoing.size() - 1) {
 				def_exp = _outgoing[i];
