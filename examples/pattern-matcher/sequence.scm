@@ -16,7 +16,7 @@
 ; the concept of a behavior tree "sequence node". See
 ; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
 ;
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
 (define green-light  (Concept "green light"))
 (define red-light  (Concept "red light"))

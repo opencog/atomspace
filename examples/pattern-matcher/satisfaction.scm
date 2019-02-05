@@ -8,7 +8,7 @@
 ; the satisfaction to be fulfilled.
 ;
 
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ; Define a very simple satisfaction link.
 (define satlink

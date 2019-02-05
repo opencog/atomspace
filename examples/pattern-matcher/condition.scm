@@ -6,7 +6,7 @@
 ; use of GroudnedSchemaNodes to perform some action, depending
 ; on whether or not the predicate accepted the match.
 ;
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ; The function will be used as the condition that will be checked, to
 ; see if the subsequent action should be taken or not. It returns a

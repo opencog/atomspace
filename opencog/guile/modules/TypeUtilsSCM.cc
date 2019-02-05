@@ -1,18 +1,17 @@
 /*
- * PatternSCM.cc
+ * TypeUtilsSCM.cc
  *
- * Guile Scheme bindings for the pattern matcher.
+ * Guile Scheme bindings for misc type utilities
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
 
 #include <opencog/guile/SchemeModule.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 
 namespace opencog {
 
-class PatternSCM : public ModuleWrap
+class TypeUtilsSCM : public ModuleWrap
 {
 	protected:
 		virtual void init(void);
@@ -23,8 +22,8 @@ class PatternSCM : public ModuleWrap
 		bool type_match(Handle, ValuePtr);
 		ValuePtr type_compose(Handle, ValuePtr);
 	public:
-		PatternSCM(void);
-		~PatternSCM();
+		TypeUtilsSCM(void);
+		~TypeUtilsSCM();
 };
 
 }
@@ -35,24 +34,21 @@ class PatternSCM : public ModuleWrap
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
-#include "BindLinkAPI.h"
-#include "PatternMatch.h"
-
 using namespace opencog;
 
 // ========================================================
 
-bool PatternSCM::value_is_type(Handle type, ValuePtr val)
+bool TypeUtilsSCM::value_is_type(Handle type, ValuePtr val)
 {
 	return opencog::value_is_type(type, val);
 }
 
-bool PatternSCM::type_match(Handle left, ValuePtr right)
+bool TypeUtilsSCM::type_match(Handle left, ValuePtr right)
 {
 	return opencog::type_match(left, right);
 }
 
-ValuePtr PatternSCM::type_compose(Handle left, ValuePtr right)
+ValuePtr TypeUtilsSCM::type_compose(Handle left, ValuePtr right)
 {
 	return opencog::type_compose(left, right);
 }
@@ -64,30 +60,30 @@ ValuePtr PatternSCM::type_compose(Handle left, ValuePtr right)
 // destroying this class, but it expects things to stick around.
 // Oh well. I guess that's OK, since the definition is meant to be
 // for the lifetime of the process, anyway.
-std::vector<FunctionWrap*> PatternSCM::_binders;
+std::vector<FunctionWrap*> TypeUtilsSCM::_binders;
 
-PatternSCM::PatternSCM(void) :
-	ModuleWrap("opencog query")
+TypeUtilsSCM::TypeUtilsSCM(void) :
+	ModuleWrap("opencog type-utils")
 {}
 
-/// This is called while (opencog query) is the current module.
+/// This is called while (opencog type-utils) is the current module.
 /// Thus, all the definitions below happen in that module.
-void PatternSCM::init(void)
+void TypeUtilsSCM::init(void)
 {
 	// These below belong somewhere else. Not sure where.
 	// Perhaps a deep-type module or type-reasoning module?
 	// dependent-type module? We don't have dependent types, yet.
 	define_scheme_primitive("cog-value-is-type?",
-		&PatternSCM::value_is_type, this, "query");
+		&TypeUtilsSCM::value_is_type, this, "type-utils");
 
 	define_scheme_primitive("cog-type-match?",
-		&PatternSCM::type_match, this, "query");
+		&TypeUtilsSCM::type_match, this, "type-utils");
 
 	define_scheme_primitive("cog-type-compose",
-		&PatternSCM::type_compose, this, "query");
+		&TypeUtilsSCM::type_compose, this, "type-utils");
 }
 
-PatternSCM::~PatternSCM()
+TypeUtilsSCM::~TypeUtilsSCM()
 {
 #if PYTHON_BUG_IS_FIXED
 	for (FunctionWrap* pw : _binders)
@@ -97,12 +93,12 @@ PatternSCM::~PatternSCM()
 
 
 extern "C" {
-void opencog_query_init(void);
+void opencog_type_utils_init(void);
 };
 
-void opencog_query_init(void)
+void opencog_type_utils_init(void)
 {
-	static PatternSCM patty;
+	static TypeUtilsSCM patty;
 	patty.module_init();
 }
 #endif // HAVE_GUILE

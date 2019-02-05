@@ -24,7 +24,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
-#include "BindLinkAPI.h"
 #include "DefaultImplicator.h"
 #include "PatternMatch.h"
 
@@ -90,7 +89,7 @@ namespace opencog
 Handle do_imply(AtomSpace* as,
                 const Handle& hbindlink,
                 Implicator& impl,
-                bool do_conn_check=false)
+                bool do_conn_check)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 
@@ -153,29 +152,6 @@ Handle do_imply(AtomSpace* as,
 	bl->set_rewrite(rewr);
 
 	return rewr;
-}
-
-/**
- * Evaluate a pattern and rewrite rule embedded in a BindLink
- *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
- *
- * See the do_imply function documentation for details.
- */
-Handle bindlink(AtomSpace* as, const Handle& hbindlink, size_t max_results)
-{
-#ifdef CACHED_IMPLICATOR
-	CachedDefaultImplicator cachedImpl(as);
-	Implicator& impl = cachedImpl;
-#else
-	DefaultImplicator impl(as);
-#endif
-	impl.max_results = max_results;
-	// Now perform the search.
-	return do_imply(as, hbindlink, impl);
 }
 
 }

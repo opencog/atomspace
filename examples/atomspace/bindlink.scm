@@ -37,7 +37,7 @@
 ; in this case.
 
 
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
 ; Place some data in the AtomSpace to work with. Its some very basic
 ; natural-language dependency grammar parse data.

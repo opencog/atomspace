@@ -9,7 +9,7 @@
 ; lists.
 ;
 
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ; Define a PutLink that will keep ConceptNodes, and ignore the rest.
 (define filter-it

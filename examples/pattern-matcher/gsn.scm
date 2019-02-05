@@ -8,7 +8,7 @@
 ; of reasons:  to send a message whenever a match is found; to perform
 ; some particularly complex or odious computation, and so on.
 
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ;; Some arbitrary function, taking one atom as an argument.
 ;; This function could take zero, two or more arguments; however,

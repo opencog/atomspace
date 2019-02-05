@@ -23,9 +23,9 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Handle.h>
+#include "imply.h"
 
 #include <cxxtest/TestSuite.h>
 

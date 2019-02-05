@@ -77,7 +77,7 @@ class CachedDefaultImplicator {
 };
 #endif
 
-Handle do_imply(AtomSpace*, const Handle&, Implicator&, bool);
+Handle do_imply(AtomSpace*, const Handle&, Implicator&, bool=false);
 
 }; // namespace opencog
 

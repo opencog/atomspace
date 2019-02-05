@@ -19,25 +19,11 @@ TARGET_LINK_LIBRARIES(query-engine
 	execution
 )
 
-ADD_LIBRARY(query
-	PatternSCM.cc
-)
-
-TARGET_LINK_LIBRARIES(query
-	query-engine
-	smob
-)
-
 INSTALL (TARGETS query-engine
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-INSTALL (TARGETS query
-	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-
 INSTALL (FILES
-	BindLinkAPI.h
 	DefaultImplicator.h
 	DefaultPatternMatchCB.h
 	Implicator.h

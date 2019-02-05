@@ -23,9 +23,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
+#include "imply.h"
 
 using namespace opencog;
 

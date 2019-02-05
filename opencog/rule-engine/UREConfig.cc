@@ -25,7 +25,6 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
-#include <opencog/query/BindLinkAPI.h>
 
 using namespace std;
 using namespace opencog;
@@ -140,7 +139,7 @@ HandleSeq UREConfig::fetch_rule_names(const Handle& rbs)
 	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
 		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
 		gl = _as.add_link(GET_LINK, rule_pat),
-		results = satisfying_set(&_as, gl);
+		results = HandleCast(gl->execute(&_as));
 	HandleSeq rule_names = results->getOutgoingSet();
 
 	// Remove the GetLink pattern and other no longer useful atoms
@@ -218,7 +217,7 @@ HandleSeq UREConfig::fetch_execution_outputs(const Handle& schema,
 		                               schema,
 		                               input,
 		                               var_node)),
-		results = satisfying_set(&_as, gl);
+		results = HandleCast(gl->execute(&_as));
 	HandleSeq outputs = results->getOutgoingSet();
 
 	// Remove the GetLink pattern and other no longer useful atoms

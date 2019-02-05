@@ -4,7 +4,7 @@
 ; One of the most basic usages of the GroundedSchemaNode is to
 ; recompute the TruthValue on an atom, once its been found.
 ;
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ; A query to find all humans
 (define human

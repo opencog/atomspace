@@ -25,7 +25,6 @@
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
-#include "BindLinkAPI.h"
 #include "Satisfier.h"
 
 using namespace opencog;
@@ -146,18 +145,6 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);
-}
-
-Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
-{
-	// Special case for the max_results != SIZE_MAX variant
-	Type blt = hlink->get_type();
-	if (BIND_LINK == blt)
-	{
-		return bindlink(as, hlink, max_results);
-	}
-
-	return HandleCast(hlink->execute(as));
 }
 
 /* ===================== END OF FILE ===================== */

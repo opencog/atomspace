@@ -35,7 +35,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "DLScheme.h"
 #include "Force.h"

@@ -6,7 +6,7 @@
 ; machine constructor.  This allows multiple FSM's to be simultaneously
 ; defined and operated asynchronously from each-other.
 ;
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ;; Set of possible states of the state machine
 ;; This definition of the set of states is not strictly needed; it is
@@ -133,10 +133,10 @@
 (define my-fsm (create-fsm my-trans my-state))
 
 ;;; Take one step.
-;(cog-bind-single my-fsm)
+;(cog-execute! my-fsm)
 
 ;;; Take three steps.
 ;;; Try it!
-;(cog-bind-single my-fsm)
-;(cog-bind-single my-fsm)
-;(cog-bind-single my-fsm)
+;(cog-execute! my-fsm)
+;(cog-execute! my-fsm)
+;(cog-execute! my-fsm)

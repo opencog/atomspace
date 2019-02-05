@@ -21,7 +21,6 @@
 ; explosion associated with backward/forward chaining.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
 (use-modules (opencog exec))
 
 ;;; Assert basic fact
