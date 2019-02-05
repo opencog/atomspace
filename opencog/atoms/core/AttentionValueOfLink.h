@@ -41,7 +41,7 @@ public:
 	AttentionValueOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };
@@ -66,7 +66,7 @@ public:
 	StiOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };
@@ -91,7 +91,7 @@ public:
 	LtiOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };

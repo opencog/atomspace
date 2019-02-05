@@ -40,7 +40,7 @@ public:
 	TruthValueOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };
@@ -65,7 +65,7 @@ public:
 	StrengthOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };
@@ -90,7 +90,7 @@ public:
 	ConfidenceOfLink(const Link &l);
 
 	// Return a pointer to the extracted value.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };

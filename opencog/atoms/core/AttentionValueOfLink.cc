@@ -69,7 +69,7 @@ static AttentionValuePtr get_av(const Handle& h)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the AttentionValue
-ValuePtr AttentionValueOfLink::execute() const
+ValuePtr AttentionValueOfLink::execute()
 {
 	size_t ary = _outgoing.size();
 	if (1 != ary)
@@ -108,7 +108,7 @@ StiOfLink::StiOfLink(const Link &l)
 
 /// When executed, this will return the Strengths of all of the
 /// atoms in the outgoing set.
-ValuePtr StiOfLink::execute() const
+ValuePtr StiOfLink::execute()
 {
 	std::vector<double> strengths;
 
@@ -155,7 +155,7 @@ LtiOfLink::LtiOfLink(const Link &l)
 
 /// When executed, this will return the Confidences of all of the
 /// atoms in the outgoing set.
-ValuePtr LtiOfLink::execute() const
+ValuePtr LtiOfLink::execute()
 {
 	std::vector<double> confids;
 
