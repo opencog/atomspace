@@ -1,0 +1,72 @@
+/*
+ * tests/atoms/value/ValueUTest.cxxtest
+ *
+ * Copyright (C) 2019 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+
+using namespace opencog;
+
+class ValueUTest : public CxxTest::TestSuite
+{
+public:
+
+	void test_create_value()
+	{
+		FloatValuePtr float_value = createValue<FloatValue>(4.2);
+
+		std::vector<double> value = float_value->value();
+		TS_ASSERT_EQUALS(1, value.size());
+		TS_ASSERT_DELTA(4.2, value[0], 0.01);
+	}
+
+	void test_cast_from_value()
+	{
+		ValuePtr value = createValue<FloatValue>(4.2);
+
+		FloatValuePtr float_value = CastFromValue<FloatValue>(value);
+
+		TS_ASSERT_EQUALS(value.get(), float_value.get());
+	}
+
+	void test_cast_from_const_value()
+	{
+		FloatValuePtr float_value;
+
+		ValuePtr value = CastToValue(float_value = createFloatValue(4.2));
+
+		TS_ASSERT_EQUALS(value.get(), float_value.get());
+	}
+
+	void test_vast_from_value()
+	{
+		ValuePtr float_value = createValue<FloatValue>(4.2);
+		LinkValuePtr link_value = createValue<LinkValue>(
+			std::vector<ValuePtr>({ float_value })
+		);
+
+		TS_ASSERT_EQUALS(link_value->value(),
+				std::vector<ValuePtr>({ float_value }));
+	}
+
+};
+
