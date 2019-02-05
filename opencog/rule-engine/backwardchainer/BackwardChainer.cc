@@ -25,7 +25,6 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/unify/Unify.h>
 
 #include "BackwardChainer.h"
@@ -276,7 +275,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	//
 	// TODO: Maybe we could take advantage of the new read-only
 	// capabilities of the AtomSpace.
-	Handle hresult = bindlink(&tmp_as, fcs);
+	Handle hresult = HandleCast(fcs->execute(&tmp_as));
 	HandleSeq results;
 	for (const Handle& result : hresult->getOutgoingSet())
 		results.push_back(_kb_as.add_atom(result));

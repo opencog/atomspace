@@ -25,7 +25,6 @@
 
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/unify/Unify.h>
 #include <opencog/atoms/execution/MapLink.h>
 
@@ -374,7 +373,7 @@ HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule,
                                                        int n)
 {
 	Handle query = mk_expansion_control_rules_query(inf_rule, n);
-	Handle result = bindlink(_control_as, query);
+	Handle result = HandleCast(query->execute(_control_as));
 	HandleSeq outgoings(result->getOutgoingSet());
 	_control_as->remove_atom(result); // Remove cruft from _control_as
 	return HandleSet(outgoings.begin(), outgoings.end());

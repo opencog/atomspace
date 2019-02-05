@@ -25,7 +25,6 @@
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"
@@ -393,7 +392,7 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 		}
 		// Search the whole atomspace.
 		else {
-			Handle h = bindlink(&_kb_as, rhcpy);
+			Handle h = HandleCast(rhcpy->execute(&_kb_as));
 			add_results(_kb_as, h->getOutgoingSet());
 		}
 	}
