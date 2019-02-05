@@ -37,7 +37,6 @@ INSTALL (TARGETS query
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	BindLinkAPI.h
 	DefaultImplicator.h
 	DefaultPatternMatchCB.h
 	Implicator.h
