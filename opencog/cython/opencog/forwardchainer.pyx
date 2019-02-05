@@ -28,7 +28,7 @@ cdef class ForwardChainer:
                 handle_vector.push_back(deref((<Atom>(atom)).handle))
 
         self.chainer = new cForwardChainer(deref(_as.atomspace),
-                                        deref(_as.atomspace),
+                                        deref(rbs.atomspace.atomspace),
                                         deref(rbs.handle),
                                         deref(source.handle),
                                         c_vardecl,
