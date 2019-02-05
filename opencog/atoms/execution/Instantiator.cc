@@ -402,7 +402,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 		Handle eolh = createLink(t, sn, args);
 		ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-		return geolp->execute(_as, silent);
+		return HandleCast(geolp->execute(_as, silent));
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -472,7 +472,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return expr->execute(_as);
+		return HandleCast(expr->execute(_as));
 	}
 
 	// Ideally, we should not evaluate any EvaluatableLinks.

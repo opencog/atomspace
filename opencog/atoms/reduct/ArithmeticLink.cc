@@ -173,7 +173,7 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 
 // ===========================================================
 /// execute() -- Execute the expression
-ValuePtr ArithmeticLink::execute() const
+ValuePtr ArithmeticLink::execute()
 {
 	return delta_reduce();
 }

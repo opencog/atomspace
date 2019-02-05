@@ -51,12 +51,6 @@ FunctionLink::FunctionLink(const Link& l)
 	init();
 }
 
-ValuePtr FunctionLink::execute() const
-{
-	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
-		nameserver().getTypeName(get_type()).c_str());
-}
-
 DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);
 
 /* ===================== END OF FILE ===================== */

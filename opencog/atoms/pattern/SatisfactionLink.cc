@@ -54,6 +54,7 @@ SatisfactionLink::SatisfactionLink(const Link &l)
 
 TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 {
+	if (nullptr == as) as = _atom_space;
 	Satisfier sater(as);
 	satisfy(sater);
 

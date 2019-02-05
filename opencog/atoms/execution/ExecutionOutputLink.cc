@@ -98,7 +98,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
+ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
 	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
