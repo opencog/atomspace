@@ -49,3 +49,15 @@ static inline void match(PatternMatchCallback& pmcb,
 	PatternLinkPtr slp(createPatternLink(vars, clauses));
 	slp->satisfy(pmcb);
 }
+
+static inline Handle bindlink(AtomSpace* as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return HandleCast(hlink->execute(as));
+}
+
+static inline Handle satisfying_set(AtomSpace* as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return HandleCast(hlink->execute(as));
+}

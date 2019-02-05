@@ -30,7 +30,6 @@ namespace opencog {
 class AtomSpace;
 
 Handle bindlink(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
-Handle satisfying_set(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
 
 } // namespace opencog
 
