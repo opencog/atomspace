@@ -11,7 +11,6 @@ LINK_DIRECTORIES (
 )
 
 LINK_LIBRARIES (
-	query
 	lambda
 	clearbox
 	execution
