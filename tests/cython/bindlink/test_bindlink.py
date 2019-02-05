@@ -2,11 +2,7 @@ from unittest import TestCase
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import bindlink, single_bindlink,\
-                             first_n_bindlink, af_bindlink, \
-                             satisfaction_link, satisfying_set, \
-                             satisfying_element, first_n_satisfying_set, \
-                             execute_atom, evaluate_atom
+from opencog.bindlink import af_bindlink, execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
@@ -94,6 +90,7 @@ class BindlinkTest(TestCase):
 
     def test_bindlink(self):
         atom = execute_atom(self.atomspace, self.bindlink_atom)
+        print("Bindlink found: " + str(atom))
         self._check_result_setlink(atom, 3)
 
     def test_af_bindlink(self):
@@ -136,8 +133,8 @@ class BindlinkTest(TestCase):
             )
         )
 
-        atom = satisfaction_link(self.atomspace, satisfaction_atom)
-        self.assertTrue(atom is not None and atom.mean <= 0.5)
+        tv = evaluate_atom(self.atomspace, satisfaction_atom)
+        self.assertTrue(tv is not None and tv.mean <= 0.5)
         self.assertEquals(green_count(), 2)
         self.assertEquals(red_count(), 1)
 
