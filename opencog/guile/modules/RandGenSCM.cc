@@ -23,7 +23,7 @@
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/guile/SchemeModule.h>
-#include "SchemePrimitive.h"
+#include "../SchemePrimitive.h"
 
 using namespace opencog;
 namespace opencog {
