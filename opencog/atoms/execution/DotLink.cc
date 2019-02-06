@@ -46,7 +46,7 @@ auto DotLinkCast = CastFromHandle<DotLink>;
 template<typename ... Args>
 static DotLinkPtr createDotLink(Args&& ... args)
 {
-	return createType<DotLink>(std::forward<Args>(args)...);
+	return std::make_shared<DotLink>(std::forward<Args>(args)...);
 }
 
 DEFINE_LINK_FACTORY(DotLink, DOT_LINK)

@@ -33,7 +33,7 @@ class SnetExecutionOutputLink : public ExecutionOutputLink
 public:
 	SnetExecutionOutputLink(const HandleSeq& oset, Type t);
 
-	virtual Handle execute(AtomSpace* as, bool silent = false) const;
+	virtual ValuePtr execute(AtomSpace* as, bool silent = false);
 
 	static Handle factory(const Handle&);
 };
