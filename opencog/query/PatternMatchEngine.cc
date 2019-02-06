@@ -24,16 +24,16 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
 
-
 using namespace opencog;
+
 /* ======================================================== */
 /**
  * Pattern Match Engine Overview

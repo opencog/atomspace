@@ -33,6 +33,8 @@
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
+class ClassServerUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -47,6 +49,8 @@ typedef SigSlot<Type> TypeSignal;
  */
 class NameServer
 {
+    friend class ::ClassServerUTest;
+
 private:
 
     /** Private default constructor for this class to make it a singleton. */

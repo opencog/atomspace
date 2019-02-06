@@ -35,7 +35,8 @@
 
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/execution/LibraryManager.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 

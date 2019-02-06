@@ -2,4 +2,5 @@ LINK_LIBRARIES(
 	value
 )
 
+ADD_CXXTEST(ValueUTest)
 ADD_CXXTEST(PtrValueUTest)

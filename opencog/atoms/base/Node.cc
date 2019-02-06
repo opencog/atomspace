@@ -26,7 +26,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atomspace/AtomTable.h>
 
 #include "Node.h"
 

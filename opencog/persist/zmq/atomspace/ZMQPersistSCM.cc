@@ -45,10 +45,10 @@ class ZMQBackingStore : public BackingStore
 		ZMQBackingStore();
 		void set_store(ZMQClient *);
 
-		virtual Handle getNode(Type, const char *) const;
-		virtual Handle getLink(Type, const HandleSeq&) const;
+		virtual Handle getNode(Type, const char *);
+		virtual Handle getLink(Type, const HandleSeq&);
 		virtual AtomPtr getAtom(UUID) const;
-		virtual void storeAtom(const Handle&);
+		virtual void storeAtom(const Handle&, bool);
 		virtual void removeAtom(const Handle&, bool);
 		virtual void loadType(AtomTable&, Type);
 		virtual void getIncomingSet(AtomTable&, const Handle&);
@@ -70,12 +70,12 @@ void ZMQBackingStore::set_store(ZMQClient *as)
 	_store = as;
 }
 
-Handle ZMQBackingStore::getNode(Type t, const char *name) const
+Handle ZMQBackingStore::getNode(Type t, const char *name)
 {
 	return _store->getNode(t, name);
 }
 
-Handle ZMQBackingStore::getLink(Type t, const HandleSeq& hseq) const
+Handle ZMQBackingStore::getLink(Type t, const HandleSeq& hseq)
 {
 	return _store->getLink(t, hseq);
 }
@@ -100,7 +100,7 @@ void ZMQBackingStore::getValuations(AtomTable& table, const Handle& key, bool ge
 	_store->getValuations(table, key, get_all);
 }
 
-void ZMQBackingStore::storeAtom(const Handle& h)
+void ZMQBackingStore::storeAtom(const Handle& h, bool synchronous)
 {
 	_store->storeAtom(h);
 }

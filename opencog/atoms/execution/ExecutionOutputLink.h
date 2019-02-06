@@ -49,7 +49,7 @@ public:
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const Link& l);
 
-	virtual Handle execute(AtomSpace* as=nullptr, bool silent=false) const;
+	virtual ValuePtr execute(AtomSpace* as, bool silent=false);
 
 	Handle get_schema(void) const { return getOutgoingAtom(0); }
 	Handle get_args(void) const { return getOutgoingAtom(1); }

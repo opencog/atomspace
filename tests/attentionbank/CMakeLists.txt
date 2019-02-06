@@ -1,11 +1,6 @@
 LINK_LIBRARIES(
-	query
-	execution
 	attentionbank
 	atomspace
-	atomspaceutils
-	atombase
-	atomutils
 )
 
 ADD_CXXTEST(AttentionValueUTest)

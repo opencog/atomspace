@@ -53,7 +53,7 @@ ArityLink::ArityLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-ValuePtr ArityLink::execute() const
+ValuePtr ArityLink::execute()
 {
 	size_t ary = 0;
 	for (const Handle& h : _outgoing)

@@ -23,8 +23,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 using namespace std;
 using namespace opencog;
@@ -412,7 +412,7 @@ void ConstantClausesUTest::test_mixed_clauses_1()
 	Handle mary = an(CONCEPT_NODE, "Mary"),
 		edward = an(CONCEPT_NODE, "Edward");
 
-	eval.eval("(load-from-path \"friends.scm\")");
+	eval.eval("(load-from-path \"constant-clauses.scm\")");
 
 	Handle result = eval.eval_h("(cog-execute! mixed-clauses)"),
 		expected = al(SET_LINK, edward, mary);

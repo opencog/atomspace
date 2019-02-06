@@ -54,7 +54,7 @@
 
 ; The below demonstrates the use of python code in an ExecutionOutputLink.
 ; Begin by loading the python code. (See `python.scm` for more details).
-(python-eval "exec(open('my_py_func.py'))")
+(python-eval "exec(open('my_py_func.py').read())")
 
 ; Execute the python function `my_py_func`. The python function should
 ; return an atom, which is then printed.  This python function is

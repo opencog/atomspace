@@ -1,4 +1,10 @@
 
+ADD_SUBDIRECTORY (atom_types)
+
+ADD_SUBDIRECTORY (base)
+
+ADD_SUBDIRECTORY (core)
+
 ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
@@ -29,7 +35,7 @@ IF(HAVE_GUILE)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
-TARGET_LINK_LIBRARIES(AlphaConvertUTest query execution lambda atomspace)
+TARGET_LINK_LIBRARIES(AlphaConvertUTest execution lambda atomspace)
 
 ADD_CXXTEST(BetaReduceUTest)
 TARGET_LINK_LIBRARIES(BetaReduceUTest atomspace)

@@ -7,7 +7,7 @@
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
-(use-modules (opencog query))
+(use-modules (opencog type-utils))
 
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))

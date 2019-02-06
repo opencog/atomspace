@@ -11,7 +11,6 @@
 ; Then, scroll to the bottom, and try some of the commented-out examples.
 
 (use-modules (opencog))
-(use-modules (opencog query))
 
 (define my-trans (Concept "My FSM's Transition Rule"))
 (define my-state (Anchor  "My FSM's Current State"))
@@ -142,7 +141,7 @@
 (define my-fsm (create-fsm my-trans my-state extern-anchor))
 
 ;;; A utility to take a step, and display the new state
-(define (take-step) (gar (gar (cog-bind-single my-fsm))))
+(define (take-step) (gar (gar (cog-execute! my-fsm))))
 
 ;;; A utility to show the current FSM state
 (define (show-fsm-state)

@@ -4,10 +4,12 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
 	ArityLink.cc
+	AttentionValueOfLink.cc
 	Checkers.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
+	FindUtils.cc
 	FreeLink.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
@@ -27,6 +29,7 @@ ADD_LIBRARY (atomcore
 	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
+	TypeUtils.cc
 	UniqueLink.cc
 	UnorderedLink.cc
 	ValueOfLink.cc
@@ -38,7 +41,6 @@ ADD_LIBRARY (atomcore
 ADD_DEPENDENCIES(atomcore opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomcore
-	atomutils
 	atombase
 	${COGUTIL_LIBRARY}
 )
@@ -52,6 +54,7 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
+	FindUtils.h
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
@@ -70,6 +73,7 @@ INSTALL (FILES
 	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
+	TypeUtils.h
 	UniqueLink.h
 	UnorderedLink.h
 	ValueOfLink.h

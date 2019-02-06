@@ -1,0 +1,77 @@
+/*
+ * tests/atoms/core/CheckersUTest.cxxtest
+ *
+ * Copyright (C) 2019 OpenGog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+
+using namespace opencog;
+using namespace std;
+
+#define node atomspace.add_node
+#define lnk atomspace.add_link
+
+class CheckersUTest :  public CxxTest::TestSuite
+{
+private:
+
+	AtomSpace atomspace;
+
+public:
+
+	void test_boolean_link_cannot_contain_non_evaluatable()
+	{
+		TS_ASSERT_THROWS_ASSERT(
+			lnk(OR_LINK,
+				node(NUMBER_NODE, "3"),
+				node(NUMBER_NODE, "0")
+			),
+			const SyntaxException& e,
+			TS_ASSERT(std::string(e.get_message())
+				.find("Invalid Atom syntax:") == 0)
+		);
+	}
+
+	void test_numeric_link_cannot_contain_non_numeric()
+	{
+		TS_ASSERT_THROWS_ASSERT(
+			lnk(PLUS_LINK,
+				node(CONCEPT_NODE, "3"),
+				node(CONCEPT_NODE, "4")
+			),
+			const SyntaxException& e,
+			TS_ASSERT(std::string(e.get_message())
+				.find("Invalid Atom syntax:") == 0)
+		);
+	}
+
+	void test_type_cannot_contain_non_type()
+	{
+		TS_ASSERT_THROWS_ASSERT(
+			lnk(TYPE_SET_LINK,
+				node(CONCEPT_NODE, "test")
+			),
+			const SyntaxException& e,
+			TS_ASSERT(std::string(e.get_message())
+				.find("Invalid Atom syntax:") == 0)
+		);
+	}
+
+};

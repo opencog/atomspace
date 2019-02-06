@@ -326,14 +326,12 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  */
-bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
+bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
 {
 	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 		                            "BindLink consists of multiple "
 		                            "disconnected components!");
-
-	remove_constant_clauses(as);
 
 	return PatternLink::satisfy(pmc);
 }

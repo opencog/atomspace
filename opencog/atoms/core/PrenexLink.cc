@@ -21,13 +21,10 @@
 
 #include <string>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
-#include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "PrenexLink.h"
 

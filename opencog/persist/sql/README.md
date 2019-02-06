@@ -29,11 +29,15 @@ This works great, unless you loose power, in which case your database
 will be permanently corrupted. Power loss happens more often than you
 might imagine.
 
+Using SSD disks, instead of rotating disks, makes a big difference.
+Using faster SATA or PCIe SSD probably makes a big difference, too.
+
 Features
 --------
  * Save and restore of individual atoms and values.
+ * Save and restore of atoms-by-type.
+ * Save and restore of (recurisive) incoming sets (by-type).
  * Bulk save-and-restore of entire AtomSpace contents.
- * Generic API, useful for inter-server communications.
 
 Missing features/ToDo items
 ---------------------------
@@ -89,9 +93,9 @@ Design Goals
 ============
 The goal of this implementation is to:
 
-1) Provide OpenCog with a working memory, so that the Cogsever could
+1) Provide OpenCog with a working memory, so that the AtomSpace could
    be stopped and restarted without requiring a data dump.  That is,
-   checkpointing should be possible: if the cogserver crashes, data is
+   checkpointing should be possible: if the atomspace crashes, data is
    not lost.  By using a database, a file format does not need to be
    invented. By using a database, data integrity is assured.
    By using incremental access, only those atoms that are needed get
@@ -99,7 +103,7 @@ The goal of this implementation is to:
    if one doesn't want to.
 
 2) Provide an API for inter-server communications and atom exchange.
-   Multiple cogservers can share data simply by sending atoms to,
+   Multiple atomspaces can share data simply by sending atoms to,
    and retrieving atoms from the database.  Although this may not be
    the fastest way to send just single atoms, most algorithms do not
    need to send just single atoms: they just need to share some atoms,
@@ -130,7 +134,7 @@ The goal of this implementation is to:
    and use correctly.
 
 6) A non-design-goal (at this time) is to build a system that can scale
-   to more than 100 cogserver instances.  The current design might be
+   to more than 100 atomspace instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
@@ -163,7 +167,7 @@ The goal of this implementation is to:
 Current Design
 ==============
 The core design defines only a few very simple SQL tables, and some
-readers and writers to save and restore atoms from an SQL database.
+reader and writer threads to save and restore atoms from an SQL database.
 
 The current design can save/restore individual atoms, and it can
 bulk-save/bulk-restore the entire contents of the AtomSpace. The above
@@ -171,8 +175,8 @@ listed goals seem to be met, more or less.
 
 Features
 --------
- * The AtomStorage class is thread-safe, and multi-threaded use is
-tested in several unit tests.
+ * The AtomStorage class uses multi-threaded writeback queues for
+faster async performance (see blow for more info).
 
  * Fully automated mapping of in-RAM atoms to in-storage universal
 unique identifiers (UUID's), using the TLB mechanism.
@@ -657,7 +661,7 @@ Can't perform SQLConnect rc=-1(0) [unixODBC][Driver Manager]Data source name not
 Note that below specifies a username and a password. These should NOT
 be your regular unix username or password!  Make up something else,
 something completely different! These two will be the username and the
-password that you use when connecting from the cogserver, with the
+password that you use when connecting from the atomspace, with the
 `sql-open` command (below).
 
 Pay special attention to the name given for the `Database`.  This should
@@ -733,6 +737,7 @@ Unit Test Status
 * As of 2014-06-19 both unit tests work and pass.
 * As of 2015-04-23 both unit tests work and pass.
 * As of 2017-01-20 all four unit tests work and pass.
+* As of 2019-02-01 all six unit tests work and pass.
 
 
 Using the System

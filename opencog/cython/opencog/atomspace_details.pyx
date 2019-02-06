@@ -232,29 +232,6 @@ cdef class AtomSpace:
         attentionbank(self.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector, self)
 
-    # Deprecated. Who uses this? Anyone? Is it useful for anyone?
-    def get_predicates(self,
-                       Atom target,
-                       Type predicate_type = types.PredicateNode,
-                       subclasses=True):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        cdef bint want_subclasses = subclasses
-        handle_vector = c_get_predicates(deref(target.handle), predicate_type,
-                                         want_subclasses)
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-    # Deprecated. Who uses this? Anyone? Is it useful for anyone?
-    def get_predicates_for(self, Atom target, Atom predicate):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        handle_vector = c_get_predicates_for(deref(target.handle),
-                                             deref(predicate.handle))
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-
     @classmethod
     def include_incoming(cls, atoms):
         """
@@ -288,3 +265,9 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
 cdef api object py_atom(const cHandle& h, object atomspace):
     cdef Atom atom = Atom.create(h, atomspace)
     return atom
+
+def create_child_atomspace(object atomspace):
+    cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef AtomSpace result = AtomSpace_factory(child)
+    result.owns_atomspace = True
+    return result

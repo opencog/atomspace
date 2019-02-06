@@ -52,7 +52,7 @@ TruthValueOfLink::TruthValueOfLink(const Link &l)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the TruthValue
-ValuePtr TruthValueOfLink::execute() const
+ValuePtr TruthValueOfLink::execute()
 {
 	size_t ary = _outgoing.size();
 	if (1 != ary)
@@ -91,7 +91,7 @@ StrengthOfLink::StrengthOfLink(const Link &l)
 
 /// When executed, this will return the Strengths of all of the
 /// atoms in the outgoing set.
-ValuePtr StrengthOfLink::execute() const
+ValuePtr StrengthOfLink::execute()
 {
 	std::vector<double> strengths;
 
@@ -138,7 +138,7 @@ ConfidenceOfLink::ConfidenceOfLink(const Link &l)
 
 /// When executed, this will return the Confidences of all of the
 /// atoms in the outgoing set.
-ValuePtr ConfidenceOfLink::execute() const
+ValuePtr ConfidenceOfLink::execute()
 {
 	std::vector<double> confids;
 

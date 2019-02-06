@@ -28,6 +28,7 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
+#include "DLScheme.h"
 #include "ExecutionOutputLink.h"
 #include "Force.h"
 #include "LibraryManager.h"
@@ -97,7 +98,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
+ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
 	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
@@ -142,7 +143,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	if (lang == "scm")
 	{
 #ifdef HAVE_GUILE
-		SchemeEval* applier = SchemeEval::get_evaluator(as);
+		SchemeEval* applier = get_evaluator_for_scheme(as);
 		result = applier->apply(fun, args);
 
 		// Exceptions were already caught, before leaving guile mode,

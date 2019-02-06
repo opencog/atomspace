@@ -22,10 +22,9 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"
@@ -388,12 +387,12 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 			BindLinkPtr bl = BindLinkCast(rhcpy);
 			FocusSetPMCB fs_pmcb(&derived_rule_as, &_kb_as);
 			fs_pmcb.implicand = bl->get_implicand();
-			bl->imply(fs_pmcb, &_focus_set_as, false);
+			bl->imply(fs_pmcb, false);
 			add_results(_focus_set_as, fs_pmcb.get_result_list());
 		}
 		// Search the whole atomspace.
 		else {
-			Handle h = bindlink(&_kb_as, rhcpy);
+			Handle h = HandleCast(rhcpy->execute(&_kb_as));
 			add_results(_kb_as, h->getOutgoingSet());
 		}
 	}

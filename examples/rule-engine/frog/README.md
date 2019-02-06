@@ -27,7 +27,7 @@ for using the pattern matcher, and the rule-engine module for using
 URE.
 
 ```scheme
-(use-modules (opencog query))
+(use-modules (opencog exec))
 (use-modules (opencog rule-engine))
 ```
 

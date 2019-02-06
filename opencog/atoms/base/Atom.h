@@ -39,8 +39,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-class AtomUTest;
-
 namespace opencog
 {
 class Link;
@@ -97,14 +95,13 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
- * represents nodes and links. In terms of inheritance, nodes and
- * links are specialization of atoms, that is, they inherit all
+ * represents nodes and links. In terms of C++ inheritance, nodes and
+ * links are specializations of atoms, that is, they inherit all
  * properties from atoms.
  */
 class Atom
     : public Value
 {
-    friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()
@@ -255,6 +252,16 @@ public:
     virtual Handle getOutgoingAtom(Arity) const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
+
+    virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO, "Not evaluatable!");
+    }
+
+    virtual ValuePtr execute(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO,
+            "Not executable! %s", to_string().c_str());
+    }
+    virtual ValuePtr execute(void) { return execute(_atom_space); }
 
     /** Returns the handle of the atom. */
     inline Handle get_handle() const {

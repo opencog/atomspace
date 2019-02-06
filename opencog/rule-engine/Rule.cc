@@ -32,13 +32,11 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/TypeUtils.h>
 #include <opencog/unify/Unify.h>
-
-#include <opencog/query/BindLinkAPI.h>
 
 #include "URELogger.h"
 
@@ -511,7 +509,7 @@ RuleSet Rule::strip_typed_substitution(const RuleTypedSubstitutionMap& rules)
 
 Handle Rule::apply(AtomSpace& as) const
 {
-	return bindlink(&as, Handle(_rule));
+	return HandleCast(_rule->execute(&as));
 }
 
 std::string Rule::to_string(const std::string& indent) const

@@ -30,14 +30,13 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 
+#include "DLScheme.h"
 #include "Force.h"
 #include "EvaluationLink.h"
 #include "LibraryManager.h"
@@ -154,7 +153,7 @@ static NumberNodePtr unwrap_set(Handle h)
 
 /// Extract a single floating-point double out of a value expected to
 /// contain a number.
-static double get_numeric_value(const ValuePtr& pap)
+static double get_numeric_value(const ValuePtr& pap, bool silent)
 {
 	Type t = pap->get_type();
 	if (NUMBER_NODE == t or SET_LINK == t)
@@ -171,13 +170,15 @@ static double get_numeric_value(const ValuePtr& pap)
 		return fv->value()[0];
 	}
 
-	throw RuntimeException(TRACE_INFO,
+	throwSyntaxException(silent,
 		"Don't know how to do arithmetic with this: %s",
 		pap->to_string().c_str());
+
+	return std::nan("");
 }
 
 /// Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const Handle& h)
+static TruthValuePtr greater(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -188,8 +189,8 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 	ValuePtr pap0(inst.execute(oset[0]));
 	ValuePtr pap1(inst.execute(oset[1]));
 
-	double v0 = get_numeric_value(pap0);
-	double v1 = get_numeric_value(pap1);
+	double v0 = get_numeric_value(pap0, silent);
+	double v1 = get_numeric_value(pap1, silent);
 
 	if (v0 > v1)
 		return TruthValue::TRUE_TV();
@@ -229,15 +230,9 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
-static HandleSeq get_seq(const Handle& cargs)
-{
-	if (LIST_LINK == cargs->get_type()) return cargs->getOutgoingSet();
-	return HandleSeq(1, cargs);
-}
-
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
-                                  const Handle& cargs)
+                                  const HandleSeq& cargs)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -258,7 +253,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		if (LAMBDA_LINK == h->get_type())
 		{
 			// Set flh and fall through, where it is executed.
-			flh = LambdaLinkCast(h)->beta_reduce(get_seq(cargs));
+			flh = LambdaLinkCast(h)->beta_reduce(cargs);
 		}
 
 		// At this point, we expect a FunctionLink of some kind.
@@ -271,7 +266,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		const FreeVariables& fvars = flp->get_vars();
 		if (not fvars.empty())
 		{
-			flh = fvars.substitute_nocheck(flh, get_seq(cargs));
+			flh = fvars.substitute_nocheck(flh, cargs);
 			flp = FunctionLinkCast(flh);
 		}
 
@@ -293,11 +288,17 @@ static bool is_evaluatable_sat(const Handle& satl)
 	if (1 != satl->get_arity())
 		return false;
 
+	return false;
+#if 0
+XXX Fixme -- this is a desirable optimization, but we cannot make it
+here.
 	PatternLinkPtr plp(PatternLinkCast(satl));
 
 	return 0 == plp->get_variables().varseq.size();
+#endif
 }
 
+/** Return true, if `thish` is tail-recursive */
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
 	if (DEFINED_PREDICATE_NODE != tail->get_type())
@@ -375,18 +376,31 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
 
-		if (2 != sna.size())
-			throw SyntaxException(TRACE_INFO,
-				"Incorrect number of arguments, expecting 2, got %lu",
-				sna.size());
-
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
+		HandleSeq args;
+		if (LIST_LINK == sna.at(1)->get_type())
+		{
+			if (2 != sna.size())
+				throw SyntaxException(TRACE_INFO,
+					"EvaluationLink: Incorrect number of arguments, "
+					"expecting 2, got %lu for:\n\t%s",
+					sna.size(), evelnk->to_string().c_str());
+			args = sna.at(1)->getOutgoingSet();
+		}
+		else
+		{
+			// Copy all but the first.
+			// XXX Is there a more efficient way to do this copy?
+			size_t sz = sna.size();
+			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
+		}
+
 		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
-		                                sna.at(0), sna.at(1), silent));
+		                                sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
@@ -400,7 +414,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, evelnk);
+		return greater(scratch, evelnk, silent);
 	}
 	else if (NOT_LINK == t)
 	{
@@ -544,9 +558,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (SATISFACTION_LINK == t)
 	{
 		if (not is_evaluatable_sat(evelnk))
-			return satisfaction_link(as, evelnk);
+			return evelnk->evaluate(as);
 
-		// If we are here, the we can optimize: we can evaluate
+		// If we are here, then we can optimize: we can evaluate
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
@@ -672,7 +686,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 ///
 TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
                                           const Handle& pn,
-                                          const Handle& cargs,
+                                          const HandleSeq& cargs,
                                           bool silent)
 {
 	Type pntype = pn->get_type();
@@ -702,7 +716,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 		// Treat LambdaLink as if it were a PutLink -- perform
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(get_seq(cargs));
+		Handle reduct = lam->beta_reduce(cargs);
 		return do_evaluate(as, reduct, silent);
 	}
 
@@ -724,7 +738,8 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	Handle lh(createLink(cargs, LIST_LINK));
+	Handle args(force_execute(as, lh, silent));
 
 	// Get the schema name.
 	const std::string& schema = pn->get_name();
@@ -735,7 +750,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, args);
+		return greater(as, args, silent);
 	}
 
 	// A very special-case C++ comparison.
@@ -762,7 +777,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-		SchemeEval* applier = SchemeEval::get_evaluator(as);
+		SchemeEval* applier = get_evaluator_for_scheme(as);
 		return applier->apply_tv(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
@@ -815,7 +830,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 			throwSyntaxException(silent,
 			        "Invalid return value from predicate %s\nArgs: %s",
 			        pn->to_string().c_str(),
-			        cargs->to_string().c_str());
+			        oc_to_string(cargs).c_str());
 
 		return result;
 	}
@@ -827,8 +842,3 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
-
-void opencog::setLocalPredicate(std::string funcName, TruthValuePtr* (*func)(AtomSpace *, Handle*))
-{
-	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
-}

@@ -1,6 +1,6 @@
 //
 // Script for automatic "atom type" generation. For more information,
-// consult the opencog/atomspace/README file.
+// consult the `README.md` file in this directory.
 //
 // Please note: some of the types below are used only via the scheme
 // bindings. Thus, just because you can comment some of these out, and
@@ -10,26 +10,27 @@
 //
 // Some of them are used by Python PLN code (which also uses the
 // CamelCase names).
-//
+// ===========================================================
+
 // Special type designating that no atom type has been assigned.
 NOTYPE
 
 VALUE
 FLOAT_VALUE <- VALUE    // vector of floats, actually.
-STRING_VALUE <- VALUE
+STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
-VALUATION <- VALUE
+VALUATION <- VALUE      // (atom,key,value) triple
 
 PTR_VALUE <- VALUE 		// value which represends pointer to the object
 
 // ===========================================================
 // All of the different flavors of truth values
-TRUTH_VALUE <- FLOAT_VALUE
-SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
-COUNT_TRUTH_VALUE <- TRUTH_VALUE
-INDEFINITE_TRUTH_VALUE <- TRUTH_VALUE
-FUZZY_TRUTH_VALUE <- TRUTH_VALUE
-PROBABILISTIC_TRUTH_VALUE <- TRUTH_VALUE
+TRUTH_VALUE                <- FLOAT_VALUE
+SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
+COUNT_TRUTH_VALUE          <- TRUTH_VALUE
+INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
+FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
+PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 
 // The AttentionValue
@@ -37,7 +38,7 @@ ATTENTION_VALUE <- FLOAT_VALUE
 
 // ===========================================================
 // A base class for time-varying (floating-point) values.
-// XXX TODO we need some other base class for other kinds of varying values.
+// XXX TODO we need other base classes for other kinds of varying values.
 STREAM_VALUE <- FLOAT_VALUE
 
 // An example of a time-varying value stream
@@ -51,8 +52,9 @@ RANDOM_STREAM <- STREAM_VALUE
 OCTO_VALUE <- FLOAT_VALUE
 
 // ===========================================================
-// Base of Atom hierarchy - NOTE: ATOM will not have a corresponding Python
-// construction function to avoid identifier conflict with the Atom object.
+// Base of Atom hierarchy - NOTE: ATOM will not have a corresponding
+// Python construction function to avoid identifier conflict with the
+// Python Atom object.
 ATOM <- VALUE
 NODE <- ATOM
 LINK <- ATOM
@@ -72,6 +74,8 @@ UNORDERED_LINK <- LINK
 // a cheesey hack - really, there should be some ArrowLink
 // associated to each atom type, and that should determine the
 // behavior of the atom. But, for now, we do it the hacky way.
+// Basically, it works, and it handles most of the basic cases
+// in a fairly straightforward fashion.
 //
 // By doing type-checking at atom-creation time, this is a kind-of
 // static type-checking, and thus suffers from the typical issues
@@ -94,10 +98,12 @@ BOOLEAN_LINK <- LINK
 
 // Numeric-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
-// that can evaluate to NumberNodes: viz NumericOutputLinks.
+// that can evaluate to NumberNodes: viz NumericOutputLinks, or
+// numeric values (derived from FloatValue).
 NUMERIC_LINK <- LINK
 
-// Numeric-output link. Generates NumberNodes upon execution.
+// Numeric-output link. Generates either NumberNodes or FloatValues
+// upon execution.
 NUMERIC_OUTPUT_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
@@ -118,7 +124,7 @@ MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 // the probability.
 CONTEXT_LINK <- ORDERED_LINK
 
-// Measure-theoritic (probabilisitic) versions of AND_LINK, OR_LINK
+// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
 // These use probabilistic formulas to compute truth values.
 // UNION_LINK <- OR_LINK
 // INTERSECTION_LINK <- AND_LINK
@@ -133,7 +139,7 @@ SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
-// Boolean set operations, logical constants.
+// Binary-valued (0/1, T/F) Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
 // boolean combinations of predicates.
 //
@@ -150,19 +156,21 @@ SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
-// (the 'axiom of choice', by terrible abuse of terminology).  The
-// ChoiceLink states that a choice must be made.  Here, it is explicitly
-// an exclusive choice: you can only choose one of the alternatives.
-// The alternatives are just that: alternatives. They are not true/false
-// valued; they're simply options on a menu. Pick one.  It is an ordered
-// link, in the sense that the first choice might be preferable.
+// The ChoiceLink states that a choice must be made.  Like a restaurant
+// menu, it lists a menu of things: you can pick one (and only one).
+// Thus, ChoiceLink is an exclusive choice: you can only choose one of
+// the alternatives. The alternatives are just that: alternatives.
+// They are not true/false valued; they're simply options on a menu.
+// Pick one.  It is an ordered link, in the sense that the first choice
+// might be preferable.
 //
 // The ChoiceLink is NOT semantically equivalent to the OrLink. The
 // OrLink of two sets is a set union. The ChoiceLink of two sets is
-// "pick one of these two sets but not both".
+// "pick one of these two sets but not both". (So its more like
+// "disjoint union".)
 //
-// Currently, the only reason this exists is for the pattern matcher;
-// you use it to say "match this graph or this graph or this graph".
+// This is important for the pattern matcher; you use it to say
+// "match this graph or this graph or this graph".
 //
 CHOICE_LINK <- ORDERED_LINK
 
@@ -189,7 +197,7 @@ ABSENT_LINK <- PRESENT_LINK
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  JoinLink launches multiple threads, and waits for
-// all of them to return, and then returns the And of thier truth
+// all of them to return, and then returns the And of their truth
 // values.
 PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 JOIN_LINK <- PARALLEL_LINK
@@ -198,7 +206,7 @@ JOIN_LINK <- PARALLEL_LINK
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and
 // everything built from the pattern matcher, including the query
-// engine, the atomspace indexes, and the graph rewrite rules.
+// engine, the AtomSpace indexes, and the graph rewrite rules.
 
 // ---------------------------------------------------------
 // Variables, Lambdas and definitions.
@@ -211,7 +219,7 @@ VARIABLE_LIST <- LIST_LINK
 
 // A non-greedy globbing variable; matches one or more atoms in a
 // sequence.  XXX TODO - this could be changed to a link, so that
-// it resenbles a FUZZY_LINK more closely?  FuzzyLink implements
+// it resembles a FUZZY_LINK more closely?  FuzzyLink implements
 // the same idea, but in a more general fashion...
 // Variadic, the globbed values are meant to be of all same type.
 GLOB_NODE <- VARIABLE_NODE
@@ -221,7 +229,9 @@ GLOB_NODE <- VARIABLE_NODE
 QUOTE_LINK <- ORDERED_LINK
 
 // The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
-// quoting.  Defined to work just like in lisp/scheme.
+// quoting.  Defined to work kind-of like in lisp/scheme. (XXX TODO,
+// we currently do not check to make sure that each Unquote has a Quote
+// above it. We should ...)
 UNQUOTE_LINK <- ORDERED_LINK
 
 // Like QuoteLink but only affects the direct child, not its
@@ -258,7 +268,7 @@ FREE_LINK <- ORDERED_LINK
 // It must contain at least one VariableNode somewhere within it; that
 // is, it must be an "open sentence" and never a "closed sentence".
 // (as it would be called, using the terminology of predicate logic;
-// See wikipedia for a formal defintion).
+// See Wikipedia for a formal definition).
 //
 // Attempting to insert a DeleteLink holding a fully grounded term
 // (holding a closed sentence) will instead cause the the term to be
@@ -272,20 +282,20 @@ FREE_LINK <- ORDERED_LINK
 //
 DELETE_LINK <- FREE_LINK
 
-// Only one "closed" UniqueLink may exist (in the atomspace), for a
+// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first atom of the link.  Useful for defining state.  Additional
 // "open" links may exist; "open" links are defined as links that
-// contain free variables (see wikipedia defition of "open term",
+// contain free variables (see Wikipedia definition of "open term",
 // "closed term").  Kind of like DeleteLink, but allows one instead of
 // zero closed terms.
 UNIQUE_LINK <- FREE_LINK
 
-// Inserting a StateLink into the atomspace causes the previous
-// state to be removed from the atomspace.
+// Inserting a StateLink into the AtomSpace causes the previous
+// state to be removed from the AtomSpace.
 STATE_LINK <- UNIQUE_LINK
 
 // Uniquely naming things, tagging things. Attempting to insert a
-// second definition into the atomspace will throw an exception.
+// second definition into the AtomSpace will throw an exception.
 DEFINE_LINK <- UNIQUE_LINK
 
 // The ScopeLink is used to identify an open term, i.e. a link
@@ -295,14 +305,15 @@ DEFINE_LINK <- UNIQUE_LINK
 // body; those that are not bound remain free.
 //
 // The ScopeLink differs from the FreeLink in that the FreeLink
-// necessarily list ALL the (free) variables within it; the ScopeLink
-// need not bind all of them.  The FreeLink also has no type
-// restrictions on the variables.
+// necessarily lists ALL the (free) variables within it; the ScopeLink
+// tracks only the bound variables (and not the free ones). The
+// FreeLink cannot have type restrictions on the variables; the
+// ScopeLink can (and usually does).
 SCOPE_LINK <- ORDERED_LINK
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
-// class for many kinds of atom types, most on which CANNOT be treated
+// class for many kinds of atom types, most of which CANNOT be treated
 // as if they were lambdas!  So user beware: although RewriteLink feels
 // like LambdaLink ... it isn't.  Not everything is a Lambda.
 REWRITE_LINK <- SCOPE_LINK
@@ -311,17 +322,18 @@ REWRITE_LINK <- SCOPE_LINK
 // It serves as a base class for the various pattern-matching links,
 // since pattern matching only makes sense when the patterns are written
 // in prenex normal form.  It also serves as the base class for Lambda,
-// since function composition in atomese only seems to make sense if
-// the result is in prenex form. (I can't figure out the meaning,
-// semantics of the non-prenex forms).
+// since function composition in Atomese only seems to make sense if
+// the result is in prenex form. (I can't figure out what it means to
+// have a Lambda that is not in prenex form. Or a Pattern that is not
+// in prenex form.)
 PRENEX_LINK <- REWRITE_LINK
 
 // The LambdaLink is supposed to roughly model the traditional concept
 // of a lambda from lambda calculus (or functional programming). It
 // is meant to behave just like a lambda-abstraction, and supports the
 // standard operations of beta-reduction and alpha-conversion (modulo
-// that the atomspace enforces alpha-equivalence).  Non-prenex lambdas
-// in atomese don't seem to "make any sense", at least to me, so
+// that the AtomSpace enforces alpha-equivalence).  Non-prenex lambdas
+// in Atomese don't seem to "make any sense", at least to me, so
 // lambda's are forced to be prenex. This is a departure from classical
 // lambda calculus.
 LAMBDA_LINK <- PRENEX_LINK
@@ -336,15 +348,19 @@ PUT_LINK <- PRENEX_LINK
 // the pattern matcher will traverse.  Its primary role in life is to
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
-// of itself, it just holds machinery.
-PATTERN_LINK <- PRENEX_LINK         // A pattern encapsulated in a Link.
+// of itself, it just holds machinery and a cache of the pre-compiled
+// pattern.
+PATTERN_LINK <- PRENEX_LINK
 
 // We subdivide patterns into two types: one type returns a TV when it
 // is evaluated.  The other type returns a set of atoms when it is
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
-SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
-SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK    // Finds all groundings, return SetLink
+
+// Finds all groundings, return TV
+SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK
+// Finds all groundings, return SetLink
+SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
@@ -359,59 +375,18 @@ BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
 DUAL_LINK <- SATISFYING_LINK
 
 // ==============================================================
-// Assorted PLN link types.
-
-// Logical quantifiers
-// Actually, these probably should inherit from PrenexLink, because
-// we typically want to maintain these in prenex normal form.
-FORALL_LINK <- SCOPE_LINK,EVALUATABLE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK,EVALUATABLE_LINK
-
-// Average links are not really useful since they are equivalent to a
-// predicate (which could be a PredicateNode or derived, or built with
-// a ScopeLink. Note that the PLN rules should offer a way to
-// manipulate a predicate as if it were universally averaged quantified.
-// AVERAGE_LINK <- SCOPE_LINK
-
-// Concept constructor
-SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
-
-// Convert predicate into concept
-SATISFYING_SET_LINK <- LINK,EVALUATABLE_LINK
-
-// Basic first-order logic operations
-
-// Sugar forms of implication and equivalence links. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
-// for more information
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
-INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-
-EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
-INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-
-// Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-
-EQUIVALENCE_LINK <- UNORDERED_LINK
-INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-
-// Generic association
-ASSOCIATIVE_LINK <- ORDERED_LINK
-
-// Mystery link.  Lexical attraction???
-// Can we nuke this ??
-ATTRACTION_LINK <- ORDERED_LINK
+// Basic Knowledge-Representation types.
 
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
 EXECUTION_LINK <- ORDERED_LINK
+
+EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// An arity-2 link, used for specifying numeric intervals, such
+// as time intervals, or the lower and upper bounds of some range.
+INTERVAL_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
@@ -433,10 +408,61 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
+// Assorted PLN link types. Most of these should probably be moved
+// so that they live with PLN, and not here. Why? Because the
+// AtomSpace does not actually need or use these. XXX FIXME.
+
+// Logical quantifiers
+// Actually, these probably should inherit from PrenexLink, because
+// we typically want to maintain these in prenex normal form.
+// XXX These are not actually used anywhere, or even implemented.
+FORALL_LINK <- SCOPE_LINK,EVALUATABLE_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,EVALUATABLE_LINK
+
+// Concept constructor
+SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
+
+// Convert predicate into concept
+SATISFYING_SET_LINK <- LINK,EVALUATABLE_LINK
+
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
+INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+
+EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+
+INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+
+// Generic association
+ASSOCIATIVE_LINK <- ORDERED_LINK
+
+// Mystery link used by PLN
+ATTRACTION_LINK <- ORDERED_LINK
+
+// Link to represent the magnitude or the multitude of something, such
+// as 10kg, 10s, $10, etc.
+QUANTITY_LINK <- ORDERED_LINK
+
+// ==============================================================
 // Types and type constructors.
 
-// A TypeNode can hold only core (in-built) type declarations, such
-// as that in this file. Viz it just holds an integer.
+// A TypeNode holds simple, "atomic" type declarations, such as those
+// defined in this file. It cannot hold compound types (deep types),
+// because compound types are Atoms, and this is a Node, not a Link,
+// and so it cannot hold any atoms. Use DefinedTypeNode for compound
+// types.
+//
 // It inherits from PredicateNode because it is a kind of predicate:
 // It can evaluate to true, if something is of the indicated type,
 // else it would evaluate to false.
@@ -448,21 +474,21 @@ TYPE_INH_NODE <- TYPE_NODE
 TYPE_CO_INH_NODE <- TYPE_NODE
 
 // User-defined type.  This is meant to be used with DefineLink
-// to give a name to a type defintion; for example, a type definition
-// specificed with SignatureLink or ArrowLink.
+// to give a name to a type definition; for example, a type definition
+// specified with SignatureLink or ArrowLink.
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
-// Type constructor. Forces a boolean-and of all of the type defintions
+// Type constructor. Forces a boolean-and of all of the type definitions
 // (signatures) that it contains.  Mostly useful only when used with
 // the IntervalLink, so specify the length of a list or the size of a
-// set.  This, in turn, is mostly useful only for Regex matching using
+// set.  This, in turn, is mostly useful only for regex matching using
 // the GlobNode.
 TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
-// Type constructor.  Corresponds to right-arrow of functional
+// Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
 ARROW_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
@@ -487,7 +513,7 @@ FUZZY_LINK <- SIGNATURE_LINK
 // where variables are not free. Thus, unlike TypedAtomLink, this is
 // never globally unique.
 //
-// It hinherits from Evaluatable, because it typically obtains a value
+// It inherits from Evaluatable, because it typically obtains a value
 // of "true", if the indicated variable is of the given type, else
 // it evaluates to "false".  The predicate specifying the concrete
 // test is the signature (SignatureLink, etc) that is tested.
@@ -507,16 +533,6 @@ TYPED_ATOM_LINK <- UNIQUE_LINK
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
-
-// ====================================================================
-//
-// An arity-2 link, used for specifying numeric intervals, such
-// as time intervals, or the lower and upper bounds of some range.
-INTERVAL_LINK <- ORDERED_LINK
-
-// Link to represent the magnitude or the multitude of something, such
-// as 10kg, 10s, $10, etc.
-QUANTITY_LINK <- ORDERED_LINK
 
 // ====================================================================
 // A VirtualLink is equivalent to an EvaluationLink, with a
@@ -553,7 +569,7 @@ EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // execution being some atom.  FunctionLink does NOT derive from
 // LambdaLink, which may seem counter-intuitive; here's why, so
 // listen up.  All of the explicitly-named functions (e.g. PlusLink)
-// do not need to explicitly name thier arguments, and it would even
+// do not need to explicitly name their arguments, and it would even
 // be confusing if they did so.  Instead, the convention is that every
 // element in the outgoing set of the FunctionLink IS an argument of
 // the function; that's all, end-of-story.
@@ -573,17 +589,24 @@ FUNCTION_LINK <- FREE_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return the indicated value on the indicated atom.
-// XXX It's marked as "NUMERIC_OUTPUT, but doesn't *always* return
-// numbers ... Probably should have a FLOAT_VALUE_OF_LINK to fix this.
-// Ignore this issue for now ...
+// XXX FIXME - Not all ValueOfLinks are actually numeric; but there
+// is no way to tell, in advance. They may or may not be... when they
+// aren't, the evaluator will throw a silent exception, which is
+// caught, so its mostly harmless if the returned value isn't actually
+// numeric.  We need this try..catch because sometimes there just isn't
+// a value -- i.e. ValueOfLink can return a null pointer.
 VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
+ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
+STI_OF_LINK <- VALUE_OF_LINK
+LTI_OF_LINK <- VALUE_OF_LINK
+
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
-// GROUNDED_PREDICATE_NODE, but holding the forumla in the atomspace.
+// GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
 // This is not really needed, but will make the transition process
 // smoother.
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
@@ -610,7 +633,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
-// Sleep link pauses executation for the indicated number of seconds.
+// Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,

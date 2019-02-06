@@ -23,7 +23,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>

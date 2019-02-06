@@ -21,7 +21,6 @@
 ; explosion associated with backward/forward chaining.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
 (use-modules (opencog exec))
 
 ;;; Assert basic fact
@@ -137,7 +136,6 @@
 ;; try to check member again.
 
 (cog-evaluate! (DefinedPredicateNode "Does Bill like X?"))
-(cog-satisfy (DefinedPredicateNode "Does Bill like X?"))
 
 ;; A quasi-generic rule implicator.
 ;; Searches for all implication links (of a very specific form)

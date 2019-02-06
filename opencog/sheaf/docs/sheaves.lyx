@@ -361,7 +361,7 @@ After this comes a lighting review of how data mining, pattern mining and
  algorithms implement the gluing axiom of sheaves, viz, that gluing and
  parsing are the same thing.
  The final part examines polymorphic behavior.
- Polymoprhism is that point where syntax begins to touch semantics, where
+ Polymorphism is that point where syntax begins to touch semantics, where
  deep structure becomes distinguished from surface structure.
 \end_layout
 
@@ -1254,7 +1254,7 @@ Why sections?
 \end_layout
 
 \begin_layout Standard
-Whats the point of introducing this seemingly non-standard approach to something
+What's the point of introducing this seemingly non-standard approach to something
  that looks a lot like graph theory? There are several reasons.
 \end_layout
 
@@ -4711,7 +4711,7 @@ fly
 
 , one above another.
  Each phrase or section can be visualized as a botanical branch or botanical
- leaf branching off the central stalk.The projection of all of the stalks
+ leaf branching off the central stalk. The projection of all of the stalks
  obtained from collocation is shown below, in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -6143,7 +6143,7 @@ The general sheaf, as depicted here, holds much more data than just the
  might be a challenge.
  The stalk field is meant to be a half-way point: it can hold more information
  than the base alone, but still be computationally manageable.
- For example, the sme dataset discussed previously, containing 10 million
+ For example, the same dataset discussed previously, containing 10 million
  sentences composed of 130K words has been found to contain 6 million seeds;
  these are observed on average of 2.5 times each, although the distribution
  is roughly Zipfian: a few are observed hundreds of thousands of times,
@@ -9329,7 +9329,7 @@ cture grammars (HPSG) are essentially isomorphic.
 The final step is to realize that most introductory textbooks describe parsers
  for a context-free grammar, and that, for general instructional purposes,
  such parsers are sufficient to work with HPSG.
- The priamry issue with HPSG and context-free language parsers is that they
+ The primary issue with HPSG and context-free language parsers is that they
  obscure the notion of linking together pieces; this is one reason why dependenc
 y grammars are often favored: they make clear that it is the linkage between
  various words that has a primary psychological role in the human understanding
@@ -9755,7 +9755,7 @@ parts of speech
 
 , but they are hyperfine-grained.
  The count is overwhelming.
- So, although it is techinically correct to call them 
+ So, although it is technically correct to call them 
 \begin_inset Quotes eld
 \end_inset
 

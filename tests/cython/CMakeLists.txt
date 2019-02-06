@@ -17,8 +17,6 @@ ENDIF (HAVE_GUILE)
 
 LINK_LIBRARIES(
 	atomspace
-	clearbox
-	execution
 	${GUILE_LIBRARIES}
 )
 
@@ -30,7 +28,6 @@ ADD_CXXTEST(PythonEvalUTest)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
-	clearbox
 	PythonEval
 	atomspace_cython
 	${COGUTIL_LIBRARY}
@@ -104,7 +101,7 @@ IF (HAVE_NOSETESTS)
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer/scm"
 				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer"
-				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:$ENV{LD_LIBRARY_PATH}")
+				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
 	ENDIF (HAVE_ATOMSPACE)
 
 	IF (HAVE_ATOMSPACE AND HAVE_GUILE)

@@ -22,7 +22,7 @@
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.
 
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state

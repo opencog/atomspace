@@ -3,7 +3,6 @@ LINK_LIBRARIES(
 	smob
 	atomspace
 	value
-	atomutils
 )
 
 ADD_CXXTEST(SimpleTruthValueUTest)

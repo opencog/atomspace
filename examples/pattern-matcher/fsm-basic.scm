@@ -10,7 +10,7 @@
 ; truly general-purpose FSM, in such a way that multiple FSM's can be run
 ; at the same time.
 ;
-(use-modules (opencog) (opencog query))
+(use-modules (opencog))
 
 ;; Set of possible states of the state machine.
 ;; The definition of this set is not strictly needed; it is not used
@@ -101,10 +101,10 @@
 )
 
 ;; Take on step of the FSM
-;(cog-bind-single take-one-step)
+;(cog-execute! take-one-step)
 ;
 ;;; Take three more steps;
 ;;; Try it!  See what happens!
-;(cog-bind-single take-one-step)
-;(cog-bind-single take-one-step)
-;(cog-bind-single take-one-step)
+;(cog-execute! take-one-step)
+;(cog-execute! take-one-step)
+;(cog-execute! take-one-step)

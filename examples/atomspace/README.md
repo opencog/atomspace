@@ -143,9 +143,9 @@ additional documentation.
 List of the various modules
 ---------------------------
 Here's a list of modules provided by the AtomSpace, listed in
-alphabetical order. In general, you will use `(opencog query)`
-and `(opencog exec)` the most frequently: these contain core
-function that almost everything else depends on.
+alphabetical order. In general, you will use `(opencog exec)`
+the most frequently: this contains core functions that almost
+everything else depends on.
 ```
 (use-modules (opencog))
 (use-modules (opencog atom-types))
@@ -154,8 +154,8 @@ function that almost everything else depends on.
 (use-modules (opencog logger))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(use-modules (opencog query))
 (use-modules (opencog rule-engine))
+(use-modules (opencog type-utils))
 ```
 
 There are other modules provided in other projects and repos. Here is

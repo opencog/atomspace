@@ -91,18 +91,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	attentionbank
-	execution
 	atomspace
-	atomutils
-	clearbox
-	atomspaceutils
-	truthvalue
-	atomcore
-	atomspace
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -131,6 +121,7 @@ ADD_LIBRARY(type_constructors
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
+	${NO_AS_NEEDED}
 	atomspace
 	${PYTHON_LIBRARIES}
 )
@@ -155,13 +146,9 @@ ADD_LIBRARY(utilities_cython
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
-	clearbox
 	atomspace
 	type_constructors
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
@@ -173,7 +160,6 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 CYTHON_ADD_MODULE_PYX(bindlink
 	"atomspace.pxd"
 	opencog_atom_types
-	"../../query/BindLinkAPI.h"
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
@@ -185,11 +171,8 @@ ADD_LIBRARY(bindlink_cython
 
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
-	query
-	execution
+	atomspace
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
@@ -208,23 +191,23 @@ IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
+		"load-file.h"
 		"PyScheme.h"
 		"atomspace.pxd"
 		opencog_atom_types
-		"../load-file.h"
 	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 	ADD_LIBRARY(scheme_wrapper
+		load-file
 		PyScheme
 		scheme_wrapper.cpp
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		atomspace_cython
-		query
-		execution
+		atomspace
 		smob
 		${PYTHON_LIBRARIES}
 	)
@@ -258,10 +241,7 @@ TARGET_LINK_LIBRARIES(backwardchainer_cython
 	atomspace_cython
 	type_constructors
 	ruleengine
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES

@@ -23,9 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/query/DefaultImplicator.h>
 
 #include "BindLink.h"
 
@@ -129,6 +130,32 @@ Handle BindLink::get_rewrite(void) const
 }
 
 /* ================================================================= */
+/* ================================================================= */
+
+/**
+ * Evaluate a pattern and rewrite rule embedded in a BindLink
+ *
+ * Use the default implicator to find pattern-matches. Associated truth
+ * values are completely ignored during pattern matching; if a set of
+ * atoms that could be a ground are found in the atomspace, then they
+ * will be reported.
+ *
+ * See the do_imply function documentation for details.
+ */
+ValuePtr BindLink::execute(AtomSpace* as, bool silent)
+{
+	if (nullptr == as) as = _atom_space;
+
+#ifdef CACHED_IMPLICATOR
+	CachedDefaultImplicator cachedImpl(as);
+	Implicator& impl = cachedImpl;
+#else
+	DefaultImplicator impl(as);
+#endif
+	impl.max_results = SIZE_MAX;
+	// Now perform the search.
+	return do_imply(as, get_handle(), impl);
+}
 
 DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 

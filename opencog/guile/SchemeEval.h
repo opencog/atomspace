@@ -178,7 +178,7 @@ class SchemeEval : public GenericEval
 		AtomSpace* eval_as(const std::string&);
 
 		// Apply expression to args, returning Handle or TV
-		ValuePtr apply_v(const std::string& func, Handle varargs);
+		virtual ValuePtr apply_v(const std::string& func, Handle varargs);
 		Handle apply(const std::string& func, Handle varargs) {
 			return HandleCast(apply_v(func, varargs)); }
 		TruthValuePtr apply_tv(const std::string& func, Handle varargs) {
@@ -188,10 +188,13 @@ class SchemeEval : public GenericEval
 		bool recursing(void) { return _in_eval; }
 };
 
-
-
 /** @}*/
 }
+
+extern "C" {
+	// For shared-library loading
+	opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace*);
+};
 
 #endif/* HAVE_GUILE */
 

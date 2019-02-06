@@ -26,7 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/persist/sql/SQLBackingStore.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLPersistSCM.h"
@@ -39,8 +38,7 @@ using namespace opencog;
 SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 {
     _as = as;
-    _store = NULL;
-    _backing = new SQLBackingStore();
+    _backing = nullptr;
 
     static bool is_init = false;
     if (is_init) return;
@@ -76,7 +74,7 @@ void SQLPersistSCM::init(void)
 
 SQLPersistSCM::~SQLPersistSCM()
 {
-    delete _backing;
+    if (_backing) delete _backing;
 }
 
 void SQLPersistSCM::do_open(const std::string& uri)
@@ -93,28 +91,30 @@ void SQLPersistSCM::do_open(const std::string& uri)
     if (_as->isAttachedToBackingStore())
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Atomspace already connected to a storage backend!");
+    if (_backing)
+        throw RuntimeException(TRACE_INFO,
+             "sql-open: Error: Atomspace already connected to a storage backend!");
 
     // Use the postgres driver.
-    _store = new SQLAtomStorage(uri);
-    if (!_store)
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    if (!store)
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to open the database");
 
-    if (!_store->connected())
+    if (!store->connected())
     {
-        delete _store;
-        _store = NULL;
+        delete store;
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to connect to the database");
     }
 
-    _backing->set_store(_store);
+    _backing = store;
     _backing->registerWith(_as);
 }
 
 void SQLPersistSCM::do_close(void)
 {
-    if (_store == NULL)
+    if (nullptr == _backing)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
 
@@ -123,37 +123,34 @@ void SQLPersistSCM::do_close(void)
     // We should probably be doing this under a lock, to prevent
     // two racing threads that are both trying to close the
     // connection. But who would be crazy enough to want to do that?
-    SQLAtomStorage *sto = _store;
-    _store = NULL;
-
     _backing->unregisterWith(_as);
-    _backing->set_store(NULL);
 
-    delete sto;
+    delete _backing;
+    _backing = nullptr;
 }
 
 void SQLPersistSCM::do_load(void)
 {
-    if (_store == NULL)
+    if (nullptr == _backing)
         throw RuntimeException(TRACE_INFO,
             "sql-load: Error: Database not open");
 
-    _store->loadAtomSpace(_as);
+    _backing->loadAtomSpace(_as);
 }
 
 
 void SQLPersistSCM::do_store(void)
 {
-    if (_store == NULL)
+    if (nullptr == _backing)
         throw RuntimeException(TRACE_INFO,
             "sql-store: Error: Database not open");
 
-    _store->storeAtomSpace(_as);
+    _backing->storeAtomSpace(_as);
 }
 
 void SQLPersistSCM::do_stats(void)
 {
-    if (_store == NULL) {
+    if (nullptr == _backing) {
         printf("sql-stats: Database not open\n");
         return;
     }
@@ -164,47 +161,47 @@ void SQLPersistSCM::do_stats(void)
     AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
     printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
 
-    _store->print_stats();
+    _backing->print_stats();
 }
 
 void SQLPersistSCM::do_clear_cache(void)
 {
-    if (_store == NULL) {
+    if (nullptr == _backing) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _store->clear_cache();
+    _backing->clear_cache();
 }
 
 void SQLPersistSCM::do_clear_stats(void)
 {
-    if (_store == NULL) {
+    if (nullptr == _backing) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _store->clear_stats();
+    _backing->clear_stats();
 }
 
 void SQLPersistSCM::do_set_hilo(int hi, int lo)
 {
-    if (_store == NULL) {
+    if (nullptr == _backing) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _store->set_hilo_watermarks(hi, lo);
+    _backing->set_hilo_watermarks(hi, lo);
 }
 
 void SQLPersistSCM::do_set_stall(bool stall)
 {
-    if (_store == NULL) {
+    if (nullptr == _backing) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _store->set_stall_writers(stall);
+    _backing->set_stall_writers(stall);
 }
 
 void opencog_persist_sql_init(void)

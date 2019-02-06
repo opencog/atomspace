@@ -32,6 +32,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
@@ -277,6 +278,7 @@ void FetchUTest::test_stuff(void)
 	printf("Expecting %s\n", dtv->to_string().c_str());
 	printf("Got %s\n", tv->to_string().c_str());
 
+	eval->eval("(sql-close)");
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -321,7 +323,13 @@ void FetchUTest::test_readonly(void)
 	TS_ASSERT(c == nullptr);
 
 	// Try to change TV on A -- should fail; should get old value.
+	// We should get an assert, for good measure.
+	// The assert is turned into an evaluator error.
+	TS_ASSERT(false == eval->eval_error());
+	eval->clear_pending();
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
+	TS_ASSERT(eval->eval_error());
+	eval->clear_pending();
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	TS_ASSERT((*tv) == (*etv));
 

@@ -52,12 +52,14 @@ public:
 	BindLink(const Handle& body, const Handle& rewrite);
 	explicit BindLink(const Link &l);
 
-	bool imply(PatternMatchCallback&, AtomSpace* as,
+	bool imply(PatternMatchCallback&,
 	           bool check_connectivity=false);
 	const Handle& get_implicand(void) { return _implicand; }
 
 	// Return the cached implication results
 	Handle get_rewrite() const;
+
+	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);
 };

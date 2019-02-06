@@ -37,6 +37,7 @@ public:
 	DualLink(const HandleSeq&, Type=DUAL_LINK);
 	DualLink(const Link &l);
 
+	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 	static Handle factory(const Handle&);
 };
 

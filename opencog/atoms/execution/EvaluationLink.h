@@ -40,7 +40,7 @@ public:
 	EvaluationLink(const Handle& schema, const Handle& args);
 	EvaluationLink(const Link& l);
 
-	TruthValuePtr evaluate(AtomSpace* as) {
+	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
 	    return do_evaluate(as, get_handle());
 	}
 
@@ -52,7 +52,7 @@ public:
 	                                     bool silent=false);
 	static TruthValuePtr do_eval_with_args(AtomSpace*,
 	                                       const Handle& schema,
-	                                       const Handle& args,
+	                                       const HandleSeq& args,
 	                                       bool silent=false);
 
 	static Handle factory(const Handle&);
@@ -65,12 +65,6 @@ static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<EvaluationLink>(a); }
 
 #define createEvaluationLink std::make_shared<EvaluationLink>
-
-/**
- * setLocalPredicate("foo", boo) enables creating GroundedPredicateNode with the name "lib:\\foo",
- * which will call boo on evaluation of corresponding EvaluationLink.
- */
-void setLocalPredicate(std::string funcName, TruthValuePtr* (*func)(AtomSpace *, Handle*));
 
 /** @}*/
 }

@@ -23,6 +23,7 @@ ADD_LIBRARY (zmqatoms
 
 TARGET_LINK_LIBRARIES(zmqatoms
 	zmq
+	atomspaceutils
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
