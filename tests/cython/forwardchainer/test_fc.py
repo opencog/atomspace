@@ -1,12 +1,11 @@
 import os
 import unittest
+from unittest import TestCase
+
 from opencog.forwardchainer import ForwardChainer
 from opencog.scheme_wrapper import load_scm, scheme_eval
 from opencog.type_constructors import *
-from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
-from unittest import TestCase
-
 from opencog.atomspace import TruthValue
 
 
@@ -21,7 +20,13 @@ class FCTest(TestCase):
         scm_dir = os.environ["SCM_DIR"]
         load_scm(self.atomspace, scm_dir + "/fc-deduction-config.scm")
 
-    def test_modus_ponens(self):
+    def test_forward_chainer_instantiation(self):
+        chainer = ForwardChainer(self.atomspace,
+                                 ConceptNode("PLN"),
+                                 SetLink())
+        self.assertIsNotNone(chainer)
+
+    def test_fc_deduction(self):
         A = ConceptNode("A")
         B = ConceptNode("B")
         C = ConceptNode("C")
