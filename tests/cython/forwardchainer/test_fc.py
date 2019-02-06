@@ -1,7 +1,7 @@
 import os
 import unittest
 from opencog.forwardchainer import ForwardChainer
-from opencog.scheme_wrapper import load_scm
+from opencog.scheme_wrapper import load_scm, scheme_eval
 from opencog.type_constructors import *
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
@@ -16,8 +16,10 @@ class FCTest(TestCase):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
 
+        scheme_eval(atomspace, '(add-to-load-path "../../..")')
+        scheme_eval(atomspace, '(add-to-load-path "../../../opencog/scm/opencog/rule-engine")')
         scm_dir = os.environ["SCM_DIR"]
-        load_scm(self.atomspace, scm_dir + "/pln-config.scm")
+        load_scm(self.atomspace, scm_dir + "/fc-deduction-config.scm")
 
     def test_modus_ponens(self):
         A = ConceptNode("A")
@@ -28,7 +30,7 @@ class FCTest(TestCase):
         InheritanceLink(B, C).tv = TruthValue(0.98, 0.94)
 
         chainer = ForwardChainer(self.atomspace,
-                                 ConceptNode("PLN"),
+                                 ConceptNode("fc-deduction-rule-base"),
                                  InheritanceLink(VariableNode("$who"), C),
                                  TypedVariableLink(VariableNode("$who"), TypeNode("ConceptNode")))
         chainer.do_chain()
@@ -43,10 +45,10 @@ class FCTest(TestCase):
         self.assertEquals(C, resultC)
 
         resultTV = resultLink.tv
-        self.assertAlmostEqual(0.785333, resultTV.mean, places=5)
-        self.assertAlmostEqual(0.81, resultTV.confidence, places=5)
+        self.assertAlmostEqual(1.0, resultTV.mean, places=5)
+        self.assertAlmostEqual(1.0, resultTV.confidence, places=5)
 
 
 if __name__ == '__main__':
-    os.environ["SCM_DIR"] = "scm"
+    os.environ["SCM_DIR"] = "../../rule-engine/forwardchainer/scm"
     unittest.main()

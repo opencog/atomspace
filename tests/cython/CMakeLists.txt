@@ -100,7 +100,7 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
 		SET_PROPERTY(TEST CythonForwardchainer
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer/scm"
+				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/rule-engine/forwardchainer/scm"
 				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer"
 				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:$ENV{LD_LIBRARY_PATH}")
 
