@@ -19,6 +19,7 @@ def initialize_opencog(AtomSpace atomspace):
 def finalize_opencog():
     global is_initialized
     if is_initialized:
+        set_type_ctor_atomspace(None)
         c_finalize_python()
 
-    set_type_ctor_atomspace(None)
+    is_initialized = False
