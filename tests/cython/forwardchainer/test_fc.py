@@ -15,8 +15,8 @@ class FCTest(TestCase):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
 
-        scheme_eval(atomspace, '(add-to-load-path "../../..")')
-        scheme_eval(atomspace, '(add-to-load-path "../../../opencog/scm/opencog/rule-engine")')
+        scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
+        scheme_eval(self.atomspace, '(add-to-load-path "../../../opencog/scm/opencog/rule-engine")')
         scm_dir = os.environ["SCM_DIR"]
         load_scm(self.atomspace, scm_dir + "/fc-deduction-config.scm")
 

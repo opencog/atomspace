@@ -240,10 +240,7 @@ TARGET_LINK_LIBRARIES(forwardchainer_cython
 	atomspace_cython
 	type_constructors
 	ruleengine
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(forwardchainer_cython PROPERTIES
