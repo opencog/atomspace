@@ -13,7 +13,7 @@ cdef class TruthValue(Value):
     def __init__(self, strength=1.0, confidence=0.0):
         cdef tv_ptr c_ptr
         c_ptr.reset(new cSimpleTruthValue(strength, confidence))
-        super(TruthValue, self).__init__(ValuePtr.create(<cValuePtr&>c_ptr))
+        super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
     property mean:
         def __get__(self): return self._mean()
@@ -37,7 +37,7 @@ cdef class TruthValue(Value):
         return <cTruthValue*>(self.get_c_value_ptr().get())
 
     cdef tv_ptr* _tvptr(self):
-        return <tv_ptr*>&(self.value_ptr.shared_ptr)
+        return <tv_ptr*>&(self.ptr_holder.shared_ptr)
 
     def truth_value_ptr_object(self):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
