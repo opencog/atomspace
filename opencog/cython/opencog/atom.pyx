@@ -213,55 +213,12 @@ cdef class Atom(Value):
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
-    property type:
-        def __get__(self):
-            cdef cAtom* atom_ptr
-            if self._atom_type is None:
-                atom_ptr = self.handle.atom_ptr()
-                if atom_ptr == NULL:   # avoid null-pointer deref
-                    return None
-                self._atom_type = atom_ptr.get_type()
-            return self._atom_type
-
-    property type_name:
-        def __get__(self):
-            return get_type_name(self.type)
-
-    property t:
-        def __get__(self):
-            return self.type
-
     def truth_value(self, mean, count):
         self.tv = TruthValue(mean, count)
         return self
 
     def handle_ptr(self):
         return PyLong_FromVoidPtr(self.handle)
-
-    def is_node(self):
-        return is_a(self.t, types.Node)
-
-    def is_link(self):
-        return is_a(self.t, types.Link)
-
-    def is_a(self,t):
-        return is_a(self.t, t)
-
-    def long_string(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        if atom_ptr != NULL:
-            return atom_ptr.to_string().decode('UTF-8')
-        return ""
-
-    def __str__(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        if atom_ptr != NULL:
-            cs = atom_ptr.to_short_string()
-            return cs.decode('UTF-8')
-        return ""
-
-    def __repr__(self):
-        return self.long_string()
 
     def __richcmp__(a1_, a2_, int op):
         if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
