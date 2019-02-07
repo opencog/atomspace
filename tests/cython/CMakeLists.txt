@@ -103,7 +103,7 @@ IF (HAVE_NOSETESTS)
 				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/rule-engine/forwardchainer/scm"
 				"URE_UTILS_DIR=${PROJECT_SOURCE_DIR}/opencog/scm/opencog/rule-engine"
 				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer"
-				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:$ENV{LD_LIBRARY_PATH}")
+				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
 
 		ADD_TEST(CythonBackwardchainer ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/backwardchainer/)
