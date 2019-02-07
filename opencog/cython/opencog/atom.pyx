@@ -1,11 +1,3 @@
-
-cdef cAtom* get_atom_ptr(Atom atom):
-    cdef cAtom* atom_ptr = atom.handle.atom_ptr()
-    if atom_ptr == NULL:
-        raise AttributeError('Atom contains NULL reference')
-    return atom_ptr
-
-
 # Atom wrapper object
 cdef class Atom(Value):
 
@@ -22,6 +14,10 @@ cdef class Atom(Value):
         self._name = None
         self._outgoing = None
         self.atomspace = atomspace
+
+    cdef cHandle get_c_handle(Atom self):
+        """Return C++ shared_ptr from PtrHolder instance"""
+        return <cHandle&>(self.ptr_holder.shared_ptr)
 
     def __nonzero__(self):
         """ Allows boolean comparison, return false is handle is
@@ -162,11 +158,11 @@ cdef class Atom(Value):
         attentionbank(self.atomspace.atomspace).dec_vlti(self.handle[0])
 
     def set_value(self, key, value):
-        get_atom_ptr(self).setValue(deref((<Atom>key).handle),
+        self.get_c_handle().get().setValue(deref((<Atom>key).handle),
                                 (<Value>value).get_c_value_ptr())
 
     def get_value(self, key):
-        cdef cValuePtr value = get_atom_ptr(self).getValue(
+        cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))
         if (value != NULL):
             return Value.create(value)
