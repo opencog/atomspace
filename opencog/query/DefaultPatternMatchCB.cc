@@ -685,7 +685,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 /* ======================================================== */
 
 /**
- * This implements the evaluation of a classical boolean-logic
+ * This implements the evaluation of a classical binary-logic
  * "sentence": a well-formed formula with no free variables,
  * having a crisp true/false truth value.  Here, "top" holds
  * the sentence (with variables), 'gnds' holds the bindings of
@@ -709,9 +709,6 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	            top->to_short_string().c_str());
 
 	const HandleSeq& oset = top->getOutgoingSet();
-	if (0 == oset.size())
-		throw InvalidParamException(TRACE_INFO,
-		   "Expecting logical connective to have at least one child!");
 
 	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
@@ -798,8 +795,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	// If we are here, then what we have is some atom that is not
 	// normally "truth-valued". We can do one of three things:
 	// a) Throw an exception and complain.
-	// b) Invent a new link type: GetTruthValueLink, that 'returns'
-	//    the TV of the atom that it wraps.
+	// b) Tell user that they must use the TruthValueOfLink, which
+	//   'returns' the TV of the atom that it wraps.
 	// c) Do the above, without inventing a new link type.
 	// The below implements choice (c): i.e. it gets the TV of this
 	// atom, and checks to see if it is greater than 0.5 or not.
