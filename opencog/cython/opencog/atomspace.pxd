@@ -36,6 +36,8 @@ cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+
+# Value
 cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
     cdef cppclass cValue "opencog::Value":
         Type get_type()
@@ -61,7 +63,8 @@ cdef class Value:
     @staticmethod
     cdef Value create(cValuePtr& shared_ptr)
 
-### TruthValue
+
+# TruthValue
 ctypedef double count_t
 ctypedef double confidence_t
 ctypedef double strength_t
@@ -154,8 +157,8 @@ cdef class Atom:
     @staticmethod
     cdef Atom create(cHandle& handle, AtomSpace a)
 
-# AtomSpace
 
+# AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         cAtomSpace()
@@ -210,18 +213,21 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
+# FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
         const vector[double]& value() const;
 
     cdef cValuePtr createFloatValue(...)
 
+# StringValue
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
         const vector[string]& value() const;
 
     cdef cValuePtr createStringValue(...)
 
+# LinkValue
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         const vector[cValuePtr]& value() const;
