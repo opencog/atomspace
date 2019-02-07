@@ -29,9 +29,10 @@ class BCTest(TestCase):
         initialize_opencog(self.atomspace)
 
     def init(self):
-        scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
-        scm_dir = os.environ["SCM_DIR"]
-        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
+        project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
+        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(project_source_dir))
+        scheme_eval(self.atomspace,
+                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "tests/rule-engine/backwardchainer/scm"))
 
     def test_bc_deduction(self):
         """port of crisp.scm from examples/rule-engine/simple"""
@@ -99,5 +100,5 @@ class BCTest(TestCase):
 
 
 if __name__ == '__main__':
-    os.environ["SCM_DIR"] = "../../rule-engine/backwardchainer/scm"
+    os.environ["PROJECT_SOURCE_DIR"] = "../../.."
     unittest.main()

@@ -16,11 +16,12 @@ class FCTest(TestCase):
         initialize_opencog(self.atomspace)
 
     def init(self):
-        scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
-        scm_dir = os.environ["SCM_DIR"]
-        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
-        ure_utils_dir = os.environ["URE_UTILS_DIR"]
-        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(ure_utils_dir))
+        project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
+        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(project_source_dir))
+        scheme_eval(self.atomspace,
+                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "tests/rule-engine/forwardchainer/scm"))
+        scheme_eval(self.atomspace,
+                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "opencog/scm/opencog/rule-engine"))
 
     def test_forward_chainer_instantiation(self):
         chainer = ForwardChainer(self.atomspace,
@@ -60,6 +61,5 @@ class FCTest(TestCase):
 
 
 if __name__ == '__main__':
-    os.environ["SCM_DIR"] = "../../rule-engine/forwardchainer/scm"
-    os.environ["URE_UTILS_DIR"] = "../../../opencog/scm/opencog/rule-engine"
+    os.environ["PROJECT_SOURCE_DIR"] = "../../.."
     unittest.main()

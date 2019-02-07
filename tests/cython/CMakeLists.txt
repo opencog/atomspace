@@ -100,8 +100,7 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
 		SET_PROPERTY(TEST CythonForwardchainer
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/rule-engine/forwardchainer/scm"
-				"URE_UTILS_DIR=${PROJECT_SOURCE_DIR}/opencog/scm/opencog/rule-engine"
+				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
 				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer"
 				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
 
@@ -109,7 +108,7 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/backwardchainer/)
 		SET_PROPERTY(TEST CythonBackwardchainer
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-				"SCM_DIR=${PROJECT_SOURCE_DIR}/tests/rule-engine/backwardchainer/scm"
+				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
 				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer"
 				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
 	ENDIF (HAVE_ATOMSPACE)
