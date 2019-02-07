@@ -7,32 +7,29 @@ cdef cAtom* get_atom_ptr(Atom atom):
 
 
 # Atom wrapper object
-cdef class Atom(object):
+cdef class Atom(Value):
 
     @staticmethod
-    cdef Atom create(const cHandle& handle, AtomSpace a):
-        """Factory method to construct Atom from C++ Handle and AtomSpace (see
-        http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
-    for example)"""
-        cdef Atom atom = Atom.__new__(Atom)
-        atom.handle = new cHandle(handle)
+    cdef Atom createAtom(const cHandle& handle, AtomSpace a):
+        return Atom(PtrHolder.create(<shared_ptr[void]&>handle), a)
+
+    def __init__(self, ptr_holder, atomspace):
+        super(Atom, self).__init__(ptr_holder)
+        self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
         # cache the results after first retrieval of
         # immutable properties
-        atom._atom_type = None
-        atom._name = None
-        atom._outgoing = None
-        atom.atomspace = a
-        return atom
-
-    def __dealloc__(self):
-        del self.handle
+        self._atom_type = None
+        self._name = None
+        self._outgoing = None
+        self.atomspace = atomspace
 
     def __nonzero__(self):
         """ Allows boolean comparison, return false is handle is
         UNDEFINED or doesn't exist in AtomSpace """
         if self.handle:
             return self.atomspace.is_valid(self)
-        else: return False
+        else:
+            return False
 
     property atomspace:
         def __get__(self):

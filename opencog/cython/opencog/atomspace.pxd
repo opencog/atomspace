@@ -148,14 +148,17 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
 # HandleSeq
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
-cdef class Atom:
-    cdef cHandle *handle
+cdef class Atom(Value):
+    cdef cHandle* handle
     cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
+    # Cython compiler complains that signature of the method should be
+    # compatible with one from the parent class. It is the reason why we cannot
+    # have Atom.create and Value.create at same time.
     @staticmethod
-    cdef Atom create(cHandle& handle, AtomSpace a)
+    cdef Atom createAtom(cHandle& handle, AtomSpace a)
 
 
 # AtomSpace
