@@ -3,7 +3,7 @@
 ;
 ; Demonstrate using the GroundedPredicateNode to provide a simple
 ; behavior sequence: i.e. a set of steps that are conditionally played
-; out, depending on whether the predicate node returns true of false.
+; out, depending on whether the predicate returns true of false.
 ; There are no variables in this demo; thus, the sequence is not
 ; a graph search, but is rather a straight-forward if-else sequence
 ; evaluation.
@@ -12,9 +12,9 @@
 ; output, and no graph-rewriting occurs, thus a BindLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
-; The SatisfactionLink, combined with the SequentialAndLink, implement
+; The SatisfactionLink, combined with the SequentialAndLink, implements
 ; the concept of a behavior tree "sequence node". See
-; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
+; https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -92,7 +92,7 @@
 (define hot-rodding
 	(Satisfaction
 		(VariableList)  ; no variables
-		(SequentialOr   ; <==== unlike before, this it OR
+		(SequentialOr   ; <==== unlike before, this is OR
 			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
 				(List red-light))
