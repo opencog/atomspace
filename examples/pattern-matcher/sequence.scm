@@ -29,6 +29,7 @@
 ; and throw an exception if neither.  Increment counters so that we
 ; can verify that this was invoked.
 (define (stop-go atom)
+	(format #t "Got called with this: ~A\n" (cog-name atom))
 	(cond
 		((equal? atom green-light) (begin (set! num-green (+ 1 num-green)) (stv 1 1)))
 		((equal? atom red-light) (begin (set! num-red (+ 1 num-red)) (stv 0 1)))
@@ -71,7 +72,7 @@
 
 (define (start-again)
 	(cog-evaluate! traffic-lights)
-	(simple-format #t "Went through ~A green lights and ~A  red lights\n"
+	(format #t "Have seen ~A green lights and ~A  red lights\n"
 		num-green num-red))
 
 ;;; Try the below.  This should result in an exception being thrown.
