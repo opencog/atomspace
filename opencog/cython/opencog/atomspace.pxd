@@ -67,24 +67,19 @@ ctypedef double confidence_t
 ctypedef double strength_t
 
 cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
-    cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
-        tv_ptr()
-        tv_ptr(tv_ptr copy)
-        tv_ptr(cTruthValue* fun)
-        tv_ptr(cSimpleTruthValue* fun)
-        cTruthValue* get()
+    ctypedef shared_ptr[const cTruthValue] tv_ptr "opencog::TruthValuePtr"
 
-    cdef cppclass cTruthValue "const opencog::TruthValue":
+    cdef cppclass cTruthValue "const opencog::TruthValue"(cValue):
         strength_t get_mean()
         confidence_t get_confidence()
         count_t get_count()
+        @staticmethod
         tv_ptr DEFAULT_TV()
-        string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
 cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
-    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
+    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue"(cTruthValue):
         cSimpleTruthValue(double, double)
         strength_t get_mean()
         confidence_t get_confidence()
@@ -96,14 +91,12 @@ cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "openco
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
-cdef class TruthValue:
-    cdef tv_ptr *cobj
+cdef class TruthValue(Value):
     cdef _mean(self)
     cdef _confidence(self)
     cdef _count(self)
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
-    cdef _init(self, double mean, double count)
 
 
 # Atom

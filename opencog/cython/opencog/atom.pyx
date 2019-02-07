@@ -59,9 +59,7 @@ cdef class Atom(object):
                 return None
             tvp = atom_ptr.getTruthValue()
             if (not tvp.get()):
-                pytv = TruthValue()
-                pytv.cobj = new tv_ptr(tvp) # make copy of smart pointer
-                return pytv
+                raise AttributeError('cAtom returned NULL TruthValue pointer')
             return TruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
 
         def __set__(self, truth_value):
