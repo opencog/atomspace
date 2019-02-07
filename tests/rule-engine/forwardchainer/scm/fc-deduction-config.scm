@@ -11,7 +11,7 @@
 (use-modules (opencog rule-engine))
 
 ;; Useful to run the unit tests without having to install opencog
-(load-from-path "opencog/scm/opencog/rule-engine/rule-engine-utils.scm")
+(load-from-path "rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;

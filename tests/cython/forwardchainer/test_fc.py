@@ -17,9 +17,10 @@ class FCTest(TestCase):
 
     def init(self):
         scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
-        scheme_eval(self.atomspace, '(add-to-load-path "../../../opencog/scm/opencog/rule-engine")')
         scm_dir = os.environ["SCM_DIR"]
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
+        ure_utils_dir = os.environ["URE_UTILS_DIR"]
+        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(ure_utils_dir))
 
     def test_forward_chainer_instantiation(self):
         chainer = ForwardChainer(self.atomspace,
@@ -60,4 +61,5 @@ class FCTest(TestCase):
 
 if __name__ == '__main__':
     os.environ["SCM_DIR"] = "../../rule-engine/forwardchainer/scm"
+    os.environ["URE_UTILS_DIR"] = "../../../opencog/scm/opencog/rule-engine"
     unittest.main()
