@@ -18,10 +18,8 @@ class FCTest(TestCase):
     def init(self):
         scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
         scm_dir = os.environ["SCM_DIR"]
-        print('scm dir:', scm_dir)
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
         ure_utils_dir = os.environ["URE_UTILS_DIR"]
-        print('ure utils dir:', ure_utils_dir)
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(ure_utils_dir))
 
     def test_forward_chainer_instantiation(self):
