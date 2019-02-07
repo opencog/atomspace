@@ -33,13 +33,6 @@ cdef class TruthValue(Value):
     cdef _count(self):
         return self._ptr().get_count()
 
-    def __richcmp__(TruthValue h1, TruthValue h2, int op):
-        " @todo support the rest of the comparison operators"
-        if op == 2: # ==
-            return deref(h1._ptr()) == deref(h2._ptr())
-
-        raise ValueError, "TruthValue does not yet support most comparison operators"
-
     cdef cTruthValue* _ptr(self):
         return <cTruthValue*>(self.get_c_value_ptr().get())
 
@@ -49,18 +42,3 @@ cdef class TruthValue(Value):
     def truth_value_ptr_object(self):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
 
-    def __str__(self):
-        cs = string(self._ptr().to_string().c_str())
-        return cs.decode('UTF-8')
-
-    def __repr__(self):
-        cs = string(self._ptr().to_string().c_str())
-        return cs.decode('UTF-8')
-
-#    @staticmethod
-#    def confidence_to_count(double conf):
-#        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
-#
-#    @staticmethod
-#    def count_to_confidence(double count):
-#        return (<cSimpleTruthValue*> 0).countToConfidence(count)
