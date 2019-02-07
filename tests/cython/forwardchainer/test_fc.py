@@ -15,10 +15,11 @@ class FCTest(TestCase):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
 
+    def init(self):
         scheme_eval(self.atomspace, '(add-to-load-path "../../..")')
         scheme_eval(self.atomspace, '(add-to-load-path "../../../opencog/scm/opencog/rule-engine")')
         scm_dir = os.environ["SCM_DIR"]
-        load_scm(self.atomspace, scm_dir + "/fc-deduction-config.scm")
+        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
 
     def test_forward_chainer_instantiation(self):
         chainer = ForwardChainer(self.atomspace,
@@ -27,6 +28,9 @@ class FCTest(TestCase):
         self.assertIsNotNone(chainer)
 
     def test_fc_deduction(self):
+        self.init()
+        scheme_eval(self.atomspace, '(load-from-path "fc-deduction-config.scm")')
+
         A = ConceptNode("A")
         B = ConceptNode("B")
         C = ConceptNode("C")
