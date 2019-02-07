@@ -8,7 +8,7 @@ cdef class ValuePtr:
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
 
     @staticmethod
-    cdef ValuePtr create(cValuePtr shared_ptr):
+    cdef ValuePtr create(cValuePtr& shared_ptr):
         """Factory method to construct ValuePtr from C++ cValuePtr"""
         cdef ValuePtr value_ptr = ValuePtr.__new__(ValuePtr)
         value_ptr.shared_ptr = shared_ptr
@@ -18,7 +18,7 @@ cdef class Value:
     """C++ Value object wrapper for Python clients"""
 
     @staticmethod
-    cdef Value create(cValuePtr shared_ptr):
+    cdef Value create(cValuePtr& shared_ptr):
         """Factory method to construct Value from C++ cValuePtr using ValuePtr
         instance."""
         return Value(ValuePtr.create(shared_ptr))
