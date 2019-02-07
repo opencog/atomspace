@@ -31,9 +31,12 @@ deliver that answer (the questions are just other graphs).
 Another important feature is that many Atomese Atoms are "active", and
 cause things to happen when executed. The pattern matcher is a natural
 place to trigger these. Thus, Atoms can lie dormant until a query causes
-them to run.
+them to run. This is particularly useful for interacting with external
+systems, to process sensor input and perform control (for example, to
+process input from robotic sensors or game-world inputs, and to then
+control the action of the robot or game-world character.)
 
-The simplest example of this is the GreaterThanLink. As a
+The simplest example of an "active" link is the GreaterThanLink. As a
 knowledge-base, it is impossible to passively store all possible
 greater-than relationships between integers: there's a countable
 infinity of them. The GreaterThanLink, when triggered during a search,
@@ -45,6 +48,23 @@ known a-priori. Thus, the reasoning engine can make logical deductions
 about what GreaterThanLink would have done, if it had been called.
 Thus, it is both declarative (asserting a fact) and active (returns an
 actual answer, if you ask it).
+
+More complex examples include the arithmetic links: PlusLink and
+TimesLink, which can add an multiply numbers; the ValueOfLink, which can
+obtain numeric values, the PredicateFormulaLink, which can evaluate
+predicateds on inputs, and the GroundedPredicateNode, which can convert
+external stimuli into Atomese predicates.
+
+These "active" link types can be composed to describe processing
+pipelines and systems that are both accessible to reasoning and learning
+(because they encode "knowledge" of the pipeline) and at the same time,
+these processing pipleines can actually "do" whatever it is they are
+wired up to do.  One can imagine the Atoms as describing pipes or
+plumbing, and the values flowing through them as water flowing through
+the pipes. The AtomSpace holds the current configuration of the pipes;
+the query subsystem is used to edit and change the configuration; the
+values move through the configuration.
+
 
 Preliminaries
 -------------
@@ -58,6 +78,7 @@ example to the guile prompt. You might find it easier to bulk-load
 the example, `(load-from-path "some-example.scm")` and then bounce
 around inside of it.
 
+
 Basic Examples
 --------------
 The first four examples provide a basic introduction to basic
@@ -66,6 +87,7 @@ pattern matching.
 * `satisfaction.scm` -- Determining satisfiability of a query.
 * `glob.scm`         -- Matching multiple atoms at once.
 * `choice.scm`       -- Using the ChoiceLink to explore alternatives.
+
 
 Presence and Absence
 --------------------
@@ -89,6 +111,7 @@ are the logics of theorem-proving, in general.)
 * `absent.scm`       -- Using the AbsentLink.
 * `value-of.scm`     -- Looking for high or low TruthValues.
 
+
 Pattern Recognition
 -------------------
 It is sometimes useful to invert a query. One might want to find all
@@ -99,10 +122,16 @@ in them, that would have matched up, if aligned properly.
 
 This inverted search for ungrounded patterns is very useful for building
 a rule-engine. Given a rule-set, it allows one to figure out very
-quickly which rules can be chained together. (Crudely speaking, one
-can think of the recognizer as being kind-of-like a RETE algorithm).
+quickly which rules can be chained together. Crudely speaking, one
+can think of the recognizer as being kind-of-like a RETE algorithm.
+
+The DualLink is particularly useful for constructing stimulus-response
+("SRAI") systems, such a chatbots, where an input utterance (the
+"stimulus") needs to be matched to any one of dozens of different chatbot
+responses, depending on the current chat topic and other knowledge.
 
 * `recognizer.scm`    -- Implementing AIML with DualLink.
+
 
 Types
 -----
@@ -125,6 +154,7 @@ dependent types.
 
 * `define.scm`         -- DefineLinks give names to sub-patterns.
 * `type-signature.scm` -- Using signatures and type constructors.
+
 
 Virtual Links
 -------------
@@ -157,6 +187,45 @@ that combinatorial explosion.
 
 * `virtual.scm`         -- Using virtual links.
 
+
+Interacting with External Systems
+---------------------------------
+Atomese can be used to perform scripting to control external systems
+(e.g. robots) in response to external stimuli (e.g. sensory inputs).
+The scripts themselves are just collections of atoms, held in the
+AtomSpace, describing behaviors and processing pipelines. The "active"
+atom types can actually process data and perform actions, according to
+the current configuration. The missing link is getting data to and from
+the AtomSpace; this is provided by the GroundedPredicateNode and the
+GroundedSchemaNode, which interface to code written in python, scheme
+and C/C++, and can be used to import sensor data into the AtomSpace,
+as well as to control robots or game characters outside the AtomSpace.
+
+* `gsn.scm`            -- When a match is found, call a callback.
+* `gsn-truth.scm`      -- Altering TruthValues in a callback.
+* `gpn.scm`            -- Callback decides: is there a match?
+* `sequence.scm`       -- Using GPN's to execute a sequence of tasks.
+* `condition.scm`      -- Actions taken can depend on preconditions.
+
+
+State Machines
+--------------
+State machines are a popular control strategy for robots and other
+systems, and are an alternative to behavior trees (which were
+demonstrated in earlier examples).
+
+The pattern matcher is powerful enough to write state machines without
+any further ado.  The pattern matcher itself is implemented as a stack
+machine. As a result, it is fairly easy to implement state machines
+simply by writing down the transition graphs (transition functions)
+for them.
+
+* `fsm-basic.scm`     -- A Deterministic Finite State Machine (FSM).
+* `fsm-full.scm`      -- A generic deterministic FSM constructor.
+* `fsm-mealy.scm`     -- A generic Mealy machine constructor.
+* `markov-chain.scm`  -- A Markov chain (probabilistic FSM) based on fsm-full.
+
+
 Filtering and Mapping
 ---------------------
 Given a set of Atoms, one might want to filter out only portions of that
@@ -186,32 +255,6 @@ filtering and mapping, done sideways.
 
 * `filter.scm`         -- Filtering sets of atoms with PutLink.
 * `map.scm`            -- Extracting and re-writing with MapLink.
-
-
-Triggering Side-Effects
------------------------
-The pattern matcher can be used to trigger side-effects, when a pattern
-is matched.  This includes the execution of arbitrary code, both as
-"black-box" code, as well as "clear-box" Atomese.
-
-* `gsn.scm`            -- When a match is found, call a callback.
-* `gsn-truth.scm`      -- Altering TruthValues in a callback.
-* `gpn.scm`            -- Callback decides: is there a match?
-* `sequence.scm`       -- Using GPN's to execute a sequence of tasks.
-* `condition.scm`      -- Actions taken can depend on preconditions.
-
-State Machines
---------------
-The pattern matcher is powerful enough to write state machines without
-any further ado.  The pattern matcher itself is implemented as a stack
-machine. As a result, it is fairly easy to implement state machines
-simply by writing down the transition graphs (transition functions)
-for them.
-
-* `fsm-basic.scm`     -- A Deterministic Finite State Machine (FSM).
-* `fsm-full.scm`      -- A generic deterministic FSM constructor.
-* `fsm-mealy.scm`     -- A generic Mealy machine constructor.
-* `markov-chain.scm`  -- A Markov chain (probabilistic FSM) based on fsm-full.
 
 Unfinished examples
 -------------------
