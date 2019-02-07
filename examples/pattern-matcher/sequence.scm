@@ -1,7 +1,23 @@
 ;
 ; sequence.scm -- Behavior sequences
 ;
-; Demonstrate using the GroundedPredicateNode to provide a simple
+; Demonstrate using behavior trees to interact with external systems,
+; such as robots or game worlds.  Behavior trees (see Wikipedia:
+; https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
+; are commonly used in game worlds to control non-player characters
+; and to perform AI stimulus-response action sequences ("SRAI").
+;
+; The SatisfactionLink, combined with the SequentialAndLink, implements
+; the concept of a behavior tree "sequence node", and so writing
+; behavior trees in Atomese is straight-forward. (See also ParallelLink
+; and JoinLink for general scripting in multiple threads).
+;
+; Interacting with external systems in Atomese can be accomplished with
+; GroundedPredicateNode and with GroundedSchemaNode. This example
+; demonstrates how behavior scripting can be used to obtain input from
+; external systems.
+;
+; This example uses the GroundedPredicateNode to provide a simple
 ; behavior sequence: i.e. a set of steps that are conditionally played
 ; out, depending on whether the predicate returns true of false.
 ; There are no variables in this demo; thus, the sequence is not
@@ -12,9 +28,6 @@
 ; output, and no graph-rewriting occurs, thus a BindLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
-; The SatisfactionLink, combined with the SequentialAndLink, implements
-; the concept of a behavior tree "sequence node". See
-; https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
 ;
 (use-modules (opencog) (opencog exec))
 
