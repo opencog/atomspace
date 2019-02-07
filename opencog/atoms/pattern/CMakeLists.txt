@@ -36,6 +36,7 @@ ENDIF (CYGWIN)
 INSTALL (FILES
 	BindLink.h
 	DualLink.h
+	GetLink.h
 	PatternLink.h
 	Pattern.h
 	PatternTerm.h
