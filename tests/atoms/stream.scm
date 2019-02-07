@@ -4,7 +4,7 @@
 ; Every time that it is accessed, it generates a different set
 ; of random floating-point values.
 ;
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
 ; First, define a key and an atom, and attach an ordinary value
 ; to the atom, for the given key.

@@ -41,7 +41,6 @@ class BCTest(TestCase):
 
         scheme_eval(self.atomspace, '(use-modules (opencog))')
         scheme_eval(self.atomspace, '(use-modules (opencog exec))')
-        scheme_eval(self.atomspace, '(use-modules (opencog query))')
         scheme_eval(self.atomspace, '(use-modules (opencog rule-engine))')
         scheme_eval(self.atomspace, '(load-from-path "bc-deduction-config.scm")')
 

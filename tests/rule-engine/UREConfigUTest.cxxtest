@@ -21,7 +21,7 @@ public:
 
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
-		_eval.eval("(use-modules (opencog) (opencog query))");
+		_eval.eval("(use-modules (opencog))");
 
 		// Load the simple crisp system example to test it
 		std::string eval_output =
