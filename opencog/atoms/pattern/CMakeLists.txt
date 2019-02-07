@@ -23,15 +23,9 @@ TARGET_LINK_LIBRARIES(lambda
 	${COGUTIL_LIBRARY}
 )
 
-IF (CYGWIN)
-    INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-    INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
 
 INSTALL (FILES
 	BindLink.h
@@ -41,5 +35,6 @@ INSTALL (FILES
 	Pattern.h
 	PatternTerm.h
 	PatternUtils.h
+	SatisfactionLink.h
 	DESTINATION "include/opencog/atoms/pattern"
 )
