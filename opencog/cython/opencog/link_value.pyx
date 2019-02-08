@@ -1,13 +1,16 @@
 
+def createLinkValue(arg):
+    cdef shared_ptr[cLinkValue] c_ptr
+    if (isinstance(arg, list)):
+        c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector(arg)))
+    else:
+        c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector([arg])))
+    return LinkValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
 cdef class LinkValue(Value):
 
-    def __init__(self, arg):
-        cdef cValuePtr result
-        if (isinstance(arg, list)):
-            result = createLinkValue(LinkValue.list_of_values_to_vector(arg))
-        else:
-            result = createLinkValue(LinkValue.list_of_values_to_vector([arg]))
-        super(LinkValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
+    def __init__(self, ptr_holder):
+        super(LinkValue, self).__init__(ptr_holder)
 
     def to_list(self):
         return LinkValue.vector_of_values_to_list(

@@ -1,13 +1,16 @@
 
+def createStringValue(arg):
+    cdef shared_ptr[cStringValue] c_ptr
+    if (isinstance(arg, list)):
+        c_ptr.reset(new cStringValue(StringValue.list_of_strings_to_vector(arg)))
+    else:
+        c_ptr.reset(new cStringValue(<string>(arg.encode('UTF-8'))))
+    return StringValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
 cdef class StringValue(Value):
 
-    def __init__(self, arg):
-        cdef cValuePtr result
-        if (isinstance(arg, list)):
-            result = createStringValue(StringValue.list_of_strings_to_vector(arg))
-        else:
-            result = createStringValue(<string>(arg.encode('UTF-8')))
-        super(StringValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
+    def __init__(self, ptr_holder):
+        super(StringValue, self).__init__(ptr_holder)
 
     def to_list(self):
         return StringValue.vector_of_strings_to_list(
