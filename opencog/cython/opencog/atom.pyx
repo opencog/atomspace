@@ -24,8 +24,7 @@ cdef class Atom(Value):
         UNDEFINED or doesn't exist in AtomSpace """
         if self.handle:
             return self.atomspace.is_valid(self)
-        else:
-            return False
+        return False
 
     property atomspace:
         def __get__(self):
