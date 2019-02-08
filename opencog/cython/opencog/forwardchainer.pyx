@@ -44,7 +44,7 @@ cdef class ForwardChainer:
         cdef set[cHandle].iterator it = res_handle_set.begin()
         while it != res_handle_set.end():
             handle = deref(it)
-            list.append(Atom.create(handle, self._as))
+            list.append(Atom.createAtom(handle, self._as))
             inc(it)
 
         result_set = self._as.add_link(types.SetLink, list)
