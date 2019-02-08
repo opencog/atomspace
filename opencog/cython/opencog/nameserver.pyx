@@ -1,5 +1,6 @@
 from atomspace cimport cNameServer, nameserver, NOTYPE, string, Type
 from libc.string cimport strcmp
+import sys
 
 
 # Dynamically construct a "types" module.
@@ -64,3 +65,17 @@ def get_refreshed_types():
     global types
     types = type('atom_types', (), generate_type_module())
     return types
+
+def create_value_by_type(type, ptr_holder, atomspace = None):
+    type_name = get_type_name(type)
+
+    thismodule = sys.modules[__name__]
+    clazz = getattr(thismodule, type_name, None)
+    if clazz is not None:
+        return clazz(ptr_holder)
+
+    cdef cValue *c_ptr = (<cValuePtr&>((<PtrHolder>ptr_holder).shared_ptr)).get()
+    if c_ptr.is_atom() and atomspace is not None:
+        return Atom(ptr_holder, atomspace)
+
+    raise TypeError("Python API for " + type_name + " is not implemented yet")

@@ -164,10 +164,11 @@ cdef class Atom(Value):
     def get_value(self, key):
         cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))
-        if (value != NULL):
-            return Value.create(value)
-        else:
+        if value.get() == NULL:
             return None
+        return create_value_by_type(value.get().get_type(),
+                                    PtrHolder.create(<shared_ptr[void]&>value),
+                                    self.atomspace)
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
