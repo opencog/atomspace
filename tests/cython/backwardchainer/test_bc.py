@@ -1,7 +1,6 @@
 import os
 from unittest import TestCase
 from opencog.scheme_wrapper import scheme_eval
-from opencog.atomspace import TruthValue
 from opencog.backwardchainer import BackwardChainer
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog

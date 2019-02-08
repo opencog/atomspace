@@ -1,7 +1,8 @@
-from opencog.atomspace cimport Atom, AtomSpace, TruthValue
+from opencog.atomspace cimport Atom, AtomSpace
 from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
 from opencog.atomspace cimport tv_ptr, strength_t, count_t
 from cython.operator cimport dereference as deref
+from opencog.type_constructors import TruthValue
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")

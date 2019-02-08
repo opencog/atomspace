@@ -255,7 +255,8 @@ public:
 
         // Define python functions for use by scheme.
         python->eval(
-            "from opencog.atomspace import types, Atom, TruthValue\n"
+            "from opencog.atomspace import types, Atom\n"
+            "from opencog.type_constructors import TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
             "    print ('add_link(',atom1,',',atom2,') = ', link)\n"

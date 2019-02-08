@@ -9,8 +9,9 @@ total execution time
 
 __author__ = 'Cosmo Harrigan'
 
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
+from opencog.type_constructors import TruthValue
 atomspace = AtomSpace()
 
 NUMBER_OF_ITERATIONS = 50000

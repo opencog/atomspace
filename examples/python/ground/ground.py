@@ -1,5 +1,5 @@
 import sys
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.atomspace import types
 from opencog.type_constructors import *
 from opencog.bindlink import execute_atom

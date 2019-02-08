@@ -1,6 +1,6 @@
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport Atom
-from opencog.atomspace cimport cHandle, AtomSpace, TruthValue
+from opencog.atomspace cimport cHandle, AtomSpace
 from opencog.atomspace import types
 from backwardchainer cimport cBackwardChainer
 

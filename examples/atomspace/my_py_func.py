@@ -5,8 +5,9 @@
 # example. The code below is called, when a GroundedSchemaNode and
 # a GroundedPredicateNode is triggered.
 #
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.atomspace import types
+from opencog.type_constructors import TruthValue
 
 asp = AtomSpace()
 

@@ -1,7 +1,7 @@
 from unittest import TestCase
 import os
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, types
+from opencog.atomspace import AtomSpace, Atom, types
 from opencog.bindlink import af_bindlink, execute_atom, evaluate_atom
 
 from opencog.type_constructors import *

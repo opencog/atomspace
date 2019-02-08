@@ -27,8 +27,9 @@
 ; whitespace indentation is used to define a multi-line block of python
 ; code.
 (python-eval "
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.atomspace import types
+from opencog.type_constructors import TruthValue
 
 def foo(atspace):
     TV = TruthValue(0.42, 0.69)
@@ -50,7 +51,7 @@ def foo(atspace):
 ; using (in the current thread).
 (python-eval "
 from opencog.scheme_wrapper import scheme_eval_as
-from opencog.atomspace import TruthValue
+from opencog.type_constructors import TruthValue
 from opencog.atomspace import types
 
 # Get the atomspace...

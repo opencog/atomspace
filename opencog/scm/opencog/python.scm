@@ -31,8 +31,9 @@
 
     A more complicated example:
       (python-eval \"
-      from opencog.atomspace import AtomSpace, TruthValue
+      from opencog.atomspace import AtomSpace
       from opencog.atomspace import types
+      from opencog.type_constructors import TruthValue
 
       def foo(asp):
           TV = TruthValue(0.42, 0.69)

@@ -6,7 +6,7 @@
 An example of using values via Python API
 """
 
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.scheme_wrapper import scheme_eval_v
 
