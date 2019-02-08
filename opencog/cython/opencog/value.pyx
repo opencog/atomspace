@@ -1,36 +1,36 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef class ValuePtr:
-    """C++ ValuePtr object wrapper for Python clients. Cython cannot create
+cdef class PtrHolder:
+    """C++ shared_ptr object wrapper for Python clients. Cython cannot create
     Python object constructor which gets C++ pointer. This class is used to
     wrap pointer and make it possible to initialize Value in usual
     constructor (see
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
 
     @staticmethod
-    cdef ValuePtr create(cValuePtr shared_ptr):
-        """Factory method to construct ValuePtr from C++ cValuePtr"""
-        cdef ValuePtr value_ptr = ValuePtr.__new__(ValuePtr)
-        value_ptr.shared_ptr = shared_ptr
-        return value_ptr
+    cdef PtrHolder create(shared_ptr[void]& ptr):
+        """Factory method to construct PtrHolder from C++ shared_ptr"""
+        cdef PtrHolder ptr_holder = PtrHolder.__new__(PtrHolder)
+        ptr_holder.shared_ptr = ptr
+        return ptr_holder
 
 cdef class Value:
     """C++ Value object wrapper for Python clients"""
 
     @staticmethod
-    cdef Value create(cValuePtr shared_ptr):
-        """Factory method to construct Value from C++ cValuePtr using ValuePtr
-        instance."""
-        return Value(ValuePtr.create(shared_ptr))
+    cdef Value create(cValuePtr& ptr):
+        """Factory method to construct Value from C++ cValuePtr using
+        PtrHolder instance."""
+        return Value(PtrHolder.create(<shared_ptr[void]&>ptr))
 
-    def __init__(self, value_ptr):
-        if (<ValuePtr>value_ptr).shared_ptr.get() == NULL:
-            raise AttributeError('ValuePtr contains NULL reference')
-        self.value_ptr = value_ptr
+    def __init__(self, ptr_holder):
+        if (<PtrHolder>ptr_holder).shared_ptr.get() == NULL:
+            raise AttributeError('PtrHolder contains NULL reference')
+        self.ptr_holder = ptr_holder
 
     cdef cValuePtr get_c_value_ptr(self):
-        """Return C++ ValuePtr instance"""
-        return self.value_ptr.shared_ptr
+        """Return C++ shared_ptr from PtrHolder instance"""
+        return <cValuePtr&>(self.ptr_holder.shared_ptr)
 
     property type:
          def __get__(self):

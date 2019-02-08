@@ -18,7 +18,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        result.append(Atom.create(handle, atomspace))
+        result.append(Atom.createAtom(handle, atomspace))
         inc(handle_iter)
     return result
 
@@ -96,7 +96,7 @@ cdef class AtomSpace:
         cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom.create(result, self);
+        atom = Atom.createAtom(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -117,7 +117,7 @@ cdef class AtomSpace:
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom.create(result, self);
+        atom = Atom.createAtom(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -263,7 +263,7 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     return atomspace
 
 cdef api object py_atom(const cHandle& h, object atomspace):
-    cdef Atom atom = Atom.create(h, atomspace)
+    cdef Atom atom = Atom.createAtom(h, atomspace)
     return atom
 
 def create_child_atomspace(object atomspace):

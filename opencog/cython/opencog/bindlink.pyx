@@ -7,14 +7,14 @@ def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
                                           deref(atom.handle))
-    cdef Atom result = Atom.create(c_result, atomspace)
+    cdef Atom result = Atom.createAtom(c_result, atomspace)
     return result
 
 def execute_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("execute_atom atom is: None")
     cdef cHandle c_result = c_execute_atom(atomspace.atomspace,
                                            deref(atom.handle))
-    return Atom.create(c_result, atomspace)
+    return Atom.createAtom(c_result, atomspace)
 
 def evaluate_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("evaluate_atom atom is: None")

@@ -8,11 +8,6 @@
 #
 
 from opencog.atomspace import AtomSpace, types
-from atomspace cimport (cValuePtr, createFloatValue, createStringValue,
-                        createLinkValue, Value, cValuePtr)
-from libcpp.vector cimport vector
-from libcpp.string cimport string
-
 from opencog.atomspace import TruthValue, FloatValue, StringValue, LinkValue
 
 atomspace = None

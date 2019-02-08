@@ -7,7 +7,7 @@ cdef class StringValue(Value):
             result = createStringValue(StringValue.list_of_strings_to_vector(arg))
         else:
             result = createStringValue(<string>(arg.encode('UTF-8')))
-        super(StringValue, self).__init__(ValuePtr.create(result))
+        super(StringValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
 
     def to_list(self):
         return StringValue.vector_of_strings_to_list(

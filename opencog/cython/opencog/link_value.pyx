@@ -7,7 +7,7 @@ cdef class LinkValue(Value):
             result = createLinkValue(LinkValue.list_of_values_to_vector(arg))
         else:
             result = createLinkValue(LinkValue.list_of_values_to_vector([arg]))
-        super(LinkValue, self).__init__(ValuePtr.create(result))
+        super(LinkValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
 
     def to_list(self):
         return LinkValue.vector_of_values_to_list(

@@ -7,7 +7,7 @@ cdef class FloatValue(Value):
             result = createFloatValue(FloatValue.list_of_doubles_to_vector(arg))
         else:
             result = createFloatValue(<double>arg)
-        super(FloatValue, self).__init__(ValuePtr.create(result))
+        super(FloatValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
 
     def to_list(self):
         return FloatValue.vector_of_doubles_to_list(
