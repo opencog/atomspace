@@ -2,6 +2,11 @@ from cython.operator cimport dereference as deref
 from libcpp.memory cimport shared_ptr
 from atomspace cimport cTruthValue, cSimpleTruthValue, tv_ptr, Value
 
+def createTruthValue(strength = 1.0, confidence = 1.0):
+    cdef tv_ptr c_ptr
+    c_ptr.reset(new cSimpleTruthValue(strength, confidence))
+    return TruthValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
 cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
         a relationship or term. In OpenCog there are a number of TruthValue
@@ -10,10 +15,8 @@ cdef class TruthValue(Value):
 
         @todo Support IndefiniteTruthValue, DistributionalTV, NullTV etc
     """
-    def __init__(self, strength=1.0, confidence=0.0):
-        cdef tv_ptr c_ptr
-        c_ptr.reset(new cSimpleTruthValue(strength, confidence))
-        super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    def __init__(self, ptr_holder):
+        super(TruthValue, self).__init__(ptr_holder)
 
     property mean:
         def __get__(self): return self._mean()

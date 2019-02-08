@@ -53,7 +53,7 @@ cdef class Atom(Value):
             tvp = atom_ptr.getTruthValue()
             if (not tvp.get()):
                 raise AttributeError('cAtom returned NULL TruthValue pointer')
-            return TruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
+            return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
 
         def __set__(self, truth_value):
             try:
@@ -210,7 +210,7 @@ cdef class Atom(Value):
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
     def truth_value(self, mean, count):
-        self.tv = TruthValue(mean, count)
+        self.tv = createTruthValue(mean, count)
         return self
 
     def handle_ptr(self):
