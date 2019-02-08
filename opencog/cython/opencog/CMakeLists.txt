@@ -220,66 +220,36 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
-##################### forward chainer #####################
+##################### URE #####################
 
-CYTHON_ADD_MODULE_PYX(forwardchainer
-	"forwardchainer.pxd"
+CYTHON_ADD_MODULE_PYX(ure
+	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
 	opencog_atom_types
 	"../../rule-engine/forwardchainer/ForwardChainer.h"
-	ruleengine
-)
-
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "forwardchainer.cpp")
-
-# opencog.forwardchaine Python bindings
-ADD_LIBRARY(forwardchainer_cython
-	forwardchainer.cpp
-)
-
-TARGET_LINK_LIBRARIES(forwardchainer_cython
-	atomspace_cython
-	type_constructors
-	ruleengine
-	${PYTHON_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(forwardchainer_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME forwardchainer)
-
-INSTALL (TARGETS
-	forwardchainer_cython
-	DESTINATION "${PYTHON_DEST}")
-
-##################### backward chainer #####################
-
-CYTHON_ADD_MODULE_PYX(backwardchainer
-	"backwardchainer.pxd"
-	opencog_atom_types
 	"../../rule-engine/backwardchainer/BackwardChainer.h"
 	ruleengine
 )
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "backwardchainer.cpp")
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
 
-# opencog.backwardchainer Python bindings
-ADD_LIBRARY(backwardchainer_cython
-	backwardchainer.cpp
+# opencog.ure Python bindings
+ADD_LIBRARY(ure_cython
+	ure.cpp
 )
 
-TARGET_LINK_LIBRARIES(backwardchainer_cython
+TARGET_LINK_LIBRARIES(ure_cython
 	atomspace_cython
 	type_constructors
 	ruleengine
 	${PYTHON_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
+SET_TARGET_PROPERTIES(ure_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME backwardchainer)
+	OUTPUT_NAME ure)
 
 INSTALL (TARGETS
-	backwardchainer_cython
+	ure_cython
 	DESTINATION "${PYTHON_DEST}")
 
 ##################################################
