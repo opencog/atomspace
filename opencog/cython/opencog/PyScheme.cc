@@ -38,6 +38,7 @@ static void do_init()
 	thread_is_inited = true;
 
 	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
+	evaluator->clear_pending();
 	evaluator->eval(
 		"(define cog-initial-as (cog-atomspace))"
 		"(if (eq? cog-initial-as #f)"
@@ -53,6 +54,7 @@ std::string opencog::eval_scheme(AtomSpace* as, const std::string &s)
 	do_init();
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
+	evaluator->clear_pending();
 	std::string scheme_return_value = evaluator->eval(s);
 
 	// If there's an error, the scheme_return_value will contain
@@ -80,6 +82,7 @@ ValuePtr opencog::eval_scheme_v(AtomSpace* as, const std::string &s)
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 
 	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
+	evaluator->clear_pending();
 	ValuePtr scheme_return_value = evaluator->eval_v(s);
 
 	if (evaluator->eval_error())
@@ -100,6 +103,7 @@ Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 
 	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
+	evaluator->clear_pending();
 	Handle scheme_return_value = evaluator->eval_h(s);
 
 	if (evaluator->eval_error())
@@ -118,6 +122,7 @@ AtomSpace* opencog::eval_scheme_as(const std::string &s)
 #ifdef HAVE_GUILE
 	do_init();
 	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
+	evaluator->clear_pending();
 	AtomSpace* as = evaluator->eval_as(s);
 
 	if (nullptr == as)

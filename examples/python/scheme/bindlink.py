@@ -15,9 +15,6 @@ from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
 
 atomspace = AtomSpace()
 
-# Add to scheme's %load-path directory to serach for opencog guile modules
-scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
-
 # Import opencog modules required for using `cog-execute!` in scheme_eval
 scheme_eval(atomspace, "(use-modules (opencog))")
 scheme_eval(atomspace, "(use-modules (opencog exec))")

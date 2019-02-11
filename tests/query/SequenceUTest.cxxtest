@@ -42,8 +42,6 @@ public:
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-
-		eval->eval("(use-modules (opencog query))");
 	}
 
 	~SequenceUTest()
@@ -52,8 +50,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp(void);
@@ -63,6 +59,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_presence(void);
 	void test_fallback(void);
 	void test_pass_presence(void);
+	void test_trivial(void);
 	void test_or_put(void);
 };
 
@@ -261,6 +258,32 @@ void SequenceUTest::test_pass_presence(void)
 #endif
 
 	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Trivial SequenceLink unit test.
+ * Actually, this is testing BindLink, as a surrogate for a trivial
+ * SequenceLink. This trivial case was failing yesterday... :-/
+ */
+void SequenceUTest::test_trivial(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/seq-trivial.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! get-something)");
+	TS_ASSERT_EQUALS(result->get_arity(), 1);
+
+	result = eval->eval_h("(cog-execute! get-nothing)");
+	TS_ASSERT_EQUALS(result->get_arity(), 0);
+
+	result = eval->eval_h("(cog-execute! get-not-true)");
+	TS_ASSERT_EQUALS(result->get_arity(), 0);
+
+	result = eval->eval_h("(cog-execute! get-not-false)");
+	TS_ASSERT_EQUALS(result->get_arity(), 1);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

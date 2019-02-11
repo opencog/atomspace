@@ -3,29 +3,30 @@
 ;
 ; Demonstration of using GroundedPredicateNodes to accept
 ; or reject a match (impose a match condition) followed by the
-; use of GroudnedSchemaNodes to perform some action, depending
+; use of GroundedSchemaNodes to perform some action, depending
 ; on whether or not the predicate accepted the match.
 ;
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
-; The function will be used as the condition that will be checked, to
-; see if the subsequent action should be taken or not. It returns a
-; TruthValue of true or false, depending on whether its argument is the
-; ConceptNode "good" or "bad". If it is neither, it throws an error.
+; Define a condition that will be checked, to see if a subsequent action
+; should be taken or not. It returns a TruthValue of true or false,
+; depending on whether its argument is the ConceptNode "good" or "bad".
+; If it is neither, it throws an error.
 (define (truf x)
+	(format #t "Perform condition check on: ~A\n" x)
 	(cond
-		((equal? x (Concept "good")) (cog-new-stv 1 1))
-		((equal? x (Concept "bad")) (cog-new-stv 0 1))
+		((equal? x (Concept "good")) (SimpleTruthValue 1 1))
+		((equal? x (Concept "bad")) (SimpleTruthValue 0 1))
 		(else (throw 'whats-up-jack "you done it wrong"))
 	)
 )
 
-; This defines the action to be taken, if the (pre-)condition holds.
-; Its more or less trivial, printing it's argument and then returning
-; it wrapped up in an ImplicationLink.
+; Define the action to be taken, if the (pre-)condition holds. The
+; action defined here is more or less trivial, printing it's argument
+; and then returning it wrapped up in an ImplicationLink.
 (define (konsekwens x)
-	(display "Taken action on the atom ") (display x) (newline)
-	; Must return an atom, or undefined.
+	(format #t "Take action on the atom: ~A\n" x)
+	; Must return an atom!
 	(Implication x x)
 )
 

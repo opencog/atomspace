@@ -44,6 +44,6 @@ cdef class BackwardChainer:
 
     def get_results(self):
         cdef cHandle res_handle = self.chainer.get_results()
-        cdef Atom result = Atom.create(res_handle, self._as)
+        cdef Atom result = Atom.createAtom(res_handle, self._as)
         return result
 

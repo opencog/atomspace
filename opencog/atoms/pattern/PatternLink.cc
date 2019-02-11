@@ -75,8 +75,14 @@ void PatternLink::common_init(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
+	// XXX FIXME; long-term, this should be replaced by a check to
+	// see if a link inherits from EvaluatableLink. However, this can
+	// only be done after all existing BindLinks have been converted to
+	// use PresentLink... so this might not be practical to fix, for a
+	// while.
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+	                     OR_LINK, SEQUENTIAL_OR_LINK,
+	                     NOT_LINK, TRUE_LINK, FALSE_LINK});
 
 	// Icky. Yuck. Some pre-historic API's do not set the pattern body.
 	// These appear only in the unit tests, never in real code. For now,

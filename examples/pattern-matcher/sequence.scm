@@ -1,9 +1,25 @@
 ;
 ; sequence.scm -- Behavior sequences
 ;
-; Demonstrate using the GroundedPredicateNode to provide a simple
+; Demonstrate using behavior trees to interact with external systems,
+; such as robots or game worlds.  Behavior trees (see Wikipedia:
+; https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
+; are commonly used in game worlds to control non-player characters
+; and to perform AI stimulus-response action sequences ("SRAI").
+;
+; The SatisfactionLink, combined with the SequentialAndLink, implements
+; the concept of a behavior tree "sequence node", and so writing
+; behavior trees in Atomese is straight-forward. (See also ParallelLink
+; and JoinLink for general scripting in multiple threads).
+;
+; Interacting with external systems in Atomese can be accomplished with
+; GroundedPredicateNode and with GroundedSchemaNode. This example
+; demonstrates how behavior scripting can be used to obtain input from
+; external systems.
+;
+; This example uses the GroundedPredicateNode to provide a simple
 ; behavior sequence: i.e. a set of steps that are conditionally played
-; out, depending on whether the predicate node returns true of false.
+; out, depending on whether the predicate returns true of false.
 ; There are no variables in this demo; thus, the sequence is not
 ; a graph search, but is rather a straight-forward if-else sequence
 ; evaluation.
@@ -12,9 +28,6 @@
 ; output, and no graph-rewriting occurs, thus a BindLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
-; The SatisfactionLink, combined with the SequentialAndLink, implement
-; the concept of a behavior tree "sequence node". See
-; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -29,6 +42,7 @@
 ; and throw an exception if neither.  Increment counters so that we
 ; can verify that this was invoked.
 (define (stop-go atom)
+	(format #t "Got called with this: ~A\n" (cog-name atom))
 	(cond
 		((equal? atom green-light) (begin (set! num-green (+ 1 num-green)) (stv 1 1)))
 		((equal? atom red-light) (begin (set! num-red (+ 1 num-red)) (stv 0 1)))
@@ -71,7 +85,7 @@
 
 (define (start-again)
 	(cog-evaluate! traffic-lights)
-	(simple-format #t "Went through ~A green lights and ~A  red lights\n"
+	(format #t "Have seen ~A green lights and ~A  red lights\n"
 		num-green num-red))
 
 ;;; Try the below.  This should result in an exception being thrown.
@@ -92,7 +106,7 @@
 (define hot-rodding
 	(Satisfaction
 		(VariableList)  ; no variables
-		(SequentialOr   ; <==== unlike before, this it OR
+		(SequentialOr   ; <==== unlike before, this is OR
 			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
 				(List red-light))
