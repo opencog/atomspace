@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest import TestCase
 
-from opencog.forwardchainer import ForwardChainer
+from opencog.ure import ForwardChainer
 from opencog.scheme_wrapper import load_scm, scheme_eval
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
