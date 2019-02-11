@@ -60,7 +60,12 @@ class BCTest(TestCase):
 
         chainer.do_chain()
         results = chainer.get_results()
-        resultAC = results.get_out()[0]
+        resultAC = None
+        for result in results.get_out():
+            if result.get_out()[0].name == "A":
+                resultAC = result
+                break
+        self.assertTrue(resultAC is not None)
         self.assertTrue(resultAC.tv == AB.tv)
         self.assertEquals("A", resultAC.get_out()[0].name)
         self.assertEquals("C", resultAC.get_out()[1].name)
