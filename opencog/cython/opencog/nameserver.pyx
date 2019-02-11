@@ -72,7 +72,7 @@ def create_value_by_type(type, ptr_holder, atomspace = None):
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)
     if clazz is not None:
-        return clazz(ptr_holder)
+        return clazz(ptr_holder = ptr_holder)
 
     cdef cValue *c_ptr = (<cValuePtr&>((<PtrHolder>ptr_holder).shared_ptr)).get()
     if c_ptr.is_atom() and atomspace is not None:
