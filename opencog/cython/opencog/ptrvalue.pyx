@@ -6,7 +6,7 @@ cdef class PtrValue(Value):
         if obj is not None:
             Py_INCREF(obj)
             cvalue = createPtrValue(<void*>obj, decref)
-            super(PtrValue, self).__init__(ValuePtr.create(cvalue))
+            super(PtrValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>cvalue))
         else:
             super(PtrValue, self).__init__(value_ptr)
 
@@ -17,5 +17,4 @@ cdef void decref(void* obj):
     Py_DECREF(<object>obj)
 
 def valueToPtrValue(value):
-    return PtrValue(value_ptr =
-                    ValuePtr.create((<Value>value).get_c_value_ptr()))
+    return PtrValue(value_ptr = (<Value>value).ptr_holder)
