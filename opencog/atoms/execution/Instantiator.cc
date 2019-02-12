@@ -420,22 +420,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return Handle::UNDEFINED;
 	}
 
-	if (MAP_LINK == t)
-	{
-		if (_eager)
-		{
-			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-			MapLinkPtr mlp(MapLinkCast(createLink(oset_results, t)));
-			return mlp->execute(_as);
-		}
-		else
-		{
-			MapLinkPtr mlp(MapLinkCast(expr));
-			return mlp->execute(_as);
-		}
-	}
-
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
@@ -453,8 +437,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
-			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-			return HandleCast(flp->execute());
+			Handle flp(createLink(oset_results, t));
+			return HandleCast(flp->execute(_as, silent));
 		}
 		else
 		{
@@ -463,8 +447,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			return HandleCast(flp->execute());
+			return HandleCast(expr->execute(_as, silent));
 		}
 	}
 
@@ -472,7 +455,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return HandleCast(expr->execute(_as));
+		return HandleCast(expr->execute(_as, silent));
 	}
 
 	// Ideally, we should not evaluate any EvaluatableLinks.
@@ -605,8 +588,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 				if (hg) oset_results.push_back(hg);
 			}
 		}
-		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-		ValuePtr pap(flp->execute());
+		Handle flp(createLink(oset_results, t));
+		ValuePtr pap(flp->execute(_as, silent));
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;

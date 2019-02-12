@@ -53,7 +53,7 @@ ValueOfLink::ValueOfLink(const Link &l)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.
-ValuePtr ValueOfLink::execute()
+ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
 	if (2 != ary)

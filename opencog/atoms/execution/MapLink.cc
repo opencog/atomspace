@@ -373,7 +373,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	return Handle::UNDEFINED;
 }
 
-Handle MapLink::execute(AtomSpace* scratch) const
+ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 {
 	const Handle& valh = _outgoing[1];
 
