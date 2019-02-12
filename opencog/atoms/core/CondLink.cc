@@ -22,9 +22,9 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "CondLink.h"
-#include "EvaluationLink.h"
 
 using namespace opencog;
 
