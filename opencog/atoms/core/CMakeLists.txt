@@ -6,6 +6,7 @@ ADD_LIBRARY (atomcore
 	ArityLink.cc
 	AttentionValueOfLink.cc
 	Checkers.cc
+	CondLink.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
@@ -51,6 +52,7 @@ INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	ArityLink.h
+	CondLink.h
 	Context.h
 	DefineLink.h
 	DeleteLink.h
