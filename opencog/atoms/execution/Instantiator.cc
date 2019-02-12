@@ -26,9 +26,6 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/MapLink.h>
-#include <opencog/atoms/core/CondLink.h>
-#include <opencog/atoms/reduct/FoldLink.h>
 
 #include "Instantiator.h"
 
@@ -562,7 +559,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// hold off on a "good fix", until the instantiate-to-values
 	// experiment progresses further.  More generally, there are
 	// several blockers:
-	// * Circular shared-lib dependencies prevent lazy evaluation
 	// * The need to instantiate in an atomspace (viz GetLink)
 	//   impedes lazy evaluations.
 	Type t = expr->get_type();
