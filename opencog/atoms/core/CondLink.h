@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/CondLink.h
+ * opencog/atoms/core/CondLink.h
  *
  * Copyright (C) 2019 Kasim Ebrahim
  * All Rights Reserved
@@ -41,7 +41,7 @@ protected:
 public:
 	CondLink(const HandleSeq&, Type=COND_LINK);
 
-	virtual Handle execute(AtomSpace* = nullptr) const;
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };

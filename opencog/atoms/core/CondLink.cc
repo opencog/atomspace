@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/CondLink.cc
+ * opencog/atoms/core/CondLink.cc
  *
  * Copyright (C) 2019 Kasim Ebrahim
  *
@@ -84,12 +84,12 @@ CondLink::CondLink(const HandleSeq &oset, Type t)
 	init();
 }
 
-Handle CondLink::execute(AtomSpace *scratch) const
+ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 {
-	TruthValuePtr tvp;
 	Instantiator inst(scratch);
-	for (unsigned i = 0; i < conds.size(); ++i) {
-		tvp = EvaluationLink::do_evaluate(scratch, conds[i]);
+	for (unsigned i = 0; i < conds.size(); ++i)
+	{
+		TruthValuePtr tvp(EvaluationLink::do_evaluate(scratch, conds[i]));
 		if (tvp->get_mean() > 0.5)
 			return HandleCast(inst.instantiate(exps[i], HandleMap()));
 	}
