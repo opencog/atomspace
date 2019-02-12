@@ -641,6 +641,9 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
 
+// Conditional based on crisp boolean value from TV.
+COND_LINK <- FUNCTION_LINK
+
 // ====================================================================
 // Grammatical inference on time series
 // The generic structure encoded here would be:

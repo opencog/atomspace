@@ -27,6 +27,7 @@
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/MapLink.h>
+#include <opencog/atoms/core/CondLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include "Instantiator.h"

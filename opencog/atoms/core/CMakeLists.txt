@@ -35,6 +35,7 @@ ADD_LIBRARY (atomcore
 	ValueOfLink.cc
 	Variables.cc
 	VariableList.cc
+	CondLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -79,5 +80,6 @@ INSTALL (FILES
 	ValueOfLink.h
 	Variables.h
 	VariableList.h
+	CondLink.h
 	DESTINATION "include/opencog/atoms/core"
 )
