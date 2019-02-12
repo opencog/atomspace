@@ -10,6 +10,7 @@
 from opencog.atomspace import (createFloatValue, createLinkValue,
                                 createStringValue, createTruthValue)
 from opencog.atomspace import AtomSpace, types
+from opencog.atomspace import createGroundedObjectNode
 
 atomspace = None
 def set_type_ctor_atomspace(new_atomspace):
@@ -29,3 +30,7 @@ def StringValue(arg):
 
 def TruthValue(strength=1.0, confidence=1.0):
     return createTruthValue(strength, confidence)
+
+def GroundedObjectNode(name, obj):
+    return createGroundedObjectNode(name, obj, atomspace)
+

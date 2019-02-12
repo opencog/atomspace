@@ -68,7 +68,9 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"../../atoms/truthvalue/TruthValue.h" "../../atoms/truthvalue/SimpleTruthValue.h"
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
-	"ptrvalue.pyx"
+	"ptrvalue.pyx" "ptrvalue.pxd"
+	"grounded_object_node.pyx" "grounded_object_node.pxd"
+	"PythonGroundedObject.h"
 )
 
 # list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
@@ -106,6 +108,7 @@ INSTALL (FILES
 	__init__.py
 	atomspace.pxd
 	ptrvalue.pxd
+	grounded_object_node.pxd
 	DESTINATION "include/opencog/cython/opencog"
 )
 
