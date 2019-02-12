@@ -62,43 +62,83 @@ RandomNumberLink::RandomNumberLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-// Pattern matching hack. The pattern matcher returns sets of atoms;
-// if that set contains numbers or something numeric, then unwrap it.
-static NumberNodePtr unwrap_set(Handle h)
+static double get_dbl(const Handle& h)
 {
-	if (SET_LINK == h->get_type())
+	Type t = h->get_type();
+	if (NUMBER_NODE == t)
+	{
+		NumberNodePtr na(NumberNodeCast(h));
+		return na->get_value();
+	}
+	return 0.0;
+}
+
+// The pattern matcher returns sets of atoms; if that set contains
+// numbers or something that when executed, returns numbers, then
+// unwrap it.
+static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
+{
+	Type t = h->get_type();
+	if (NUMBER_NODE == t)
+	{
+		NumberNodePtr na(NumberNodeCast(h));
+		return std::vector<double>(na->get_value());
+	}
+	if (SET_LINK == t)
 	{
 		if (0 == h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting a number, got the empty set!\n");
-		if (1 != h->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Expecting only one number, got more than that: %s",
-				h->to_string().c_str());
-		h = h->getOutgoingAtom(0);
+		std::vector<double> nums;
+		for (const Handle& ho: h->getOutgoingSet())
+		{
+			nums.push_back(get_dbl(ho));
+		}
+		return nums;
 	}
 
-	NumberNodePtr na(NumberNodeCast(h));
-	if (nullptr == na)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a number, got this: %s",
+	// if (nameserver().isA(t, FLOAT_VALUE))
+	{
+	
+	}
+
+	throw SyntaxException(TRACE_INFO,
+		"Expecting a number, got this: %s",
 			h->to_string().c_str());
-	return na;
+	return std::vector<double>();
 }
 
 
-ValuePtr RandomNumberLink::execute()
+ValuePtr RandomNumberLink::execute(AtomSpace *as)
 {
-	// XXX FIXME so that this also works with values.
-	NumberNodePtr nmin(unwrap_set(_outgoing[0]));
-	NumberNodePtr nmax(unwrap_set(_outgoing[1]));
+	std::vector<double> nmin(unwrap_set(as, _outgoing[0]));
+	std::vector<double> nmax(unwrap_set(as, _outgoing[1]));
 
-	double cept = nmin->get_value();
-	double slope = nmax->get_value() - cept;
+	size_t len = nmax.size();
+	if (nmin.size() != len)
+		throw SyntaxException(TRACE_INFO,
+			"Unmatched number of bounds: %d vs. %d",
+				nmin.size(), nmax.size());
 
-	double ary = slope * randy.randdouble() + cept;
+	if (1 == len)
+	{
+		double cept = nmin[0];
+		double slope = nmax[0] - cept;
+		double ary = slope * randy.randdouble() + cept;
 
-	return ValuePtr(createNumberNode(ary));
+		return ValuePtr(createNumberNode(ary));
+	}
+
+	HandleSeq oset;
+	for (size_t i=0; i< len; i++)
+	{
+		double cept = nmin[i];
+		double slope = nmax[i] - cept;
+		double ary = slope * randy.randdouble() + cept;
+
+		oset.push_back(HandleCast(createNumberNode(ary)));
+	}
+	return ValuePtr(createLink(oset, SET_LINK));
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
