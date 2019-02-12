@@ -79,6 +79,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
 	atomspace.cpp
+	PythonGroundedObject.cc
 )
 
 # The atomspace_api.h must be generated before PythonEval is compiled, thus

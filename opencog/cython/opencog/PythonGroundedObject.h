@@ -23,19 +23,38 @@
 #ifndef _OPENCOG_PYTHON_GROUNDED_OBJECT_H
 #define _OPENCOG_PYTHON_GROUNDED_OBJECT_H
 
+#include <Python.h>
+#include <opencog/atoms/execution/GroundedObject.h>
+
 namespace opencog
 {
 
 class PythonGroundedObject : public GroundedObject
 {
+private:
+
+	PyObject* object;
+
 public:
 
-	PythonGroundedObject(PyObject *object) { }
+	PythonGroundedObject(PyObject *object) : object(object)
+	{
+		Py_INCREF(this->object);
+	}
+
+	virtual ~PythonGroundedObject()
+	{
+		Py_DECREF(object);
+	}
 
 	virtual GroundedFunction get_method(std::string const& method_name)
 	{
-		throw opencog::RuntimeException(TRACE_INFO, "Not implemented");
+		return std::bind(&PythonGroundedObject::invoke, this, method_name,
+				std::placeholders::_1, std::placeholders::_2);
 	}
+
+	virtual ValuePtr invoke(std::string const& method_name,
+							AtomSpace* atomspace, ValuePtr const& _args);
 };
 
 }

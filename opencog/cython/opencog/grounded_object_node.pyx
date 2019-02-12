@@ -16,3 +16,13 @@ cdef class GroundedObjectNode(Atom):
     def __init__(self, ptr_holder, atomspace):
         super(GroundedObjectNode, self).__init__(ptr_holder, atomspace)
 
+cdef api cValuePtr call_python_method(object obj, const string& method_name,
+                                      cAtomSpace* atomspace, const cValuePtr&
+                                      _args):
+    method = getattr(obj, method_name.c_str().decode())
+    args = create_value_by_type(_args.get().get_type(),
+                                PtrHolder.create(<shared_ptr[void]&>_args),
+                                AtomSpace_factory(atomspace))
+    cdef Value result = method(args)
+    return result.get_c_value_ptr()
+
