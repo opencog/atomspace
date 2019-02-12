@@ -63,6 +63,8 @@ public:
 	void test_nondefault_exp(void);
 
 	void test_wrapped_exp();
+
+	void test_grounded_cond();
 };
 
 void CondLinkUTest::tearDown(void)
@@ -114,6 +116,21 @@ void CondLinkUTest::test_wrapped_exp()
 	Handle result = eval->eval_h("(cog-execute! listwrapped)");
 
 	Handle baz = eval->eval_h("(NumberNode 1)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_grounded_cond()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! grounded-cond)");
+
+	Handle baz = eval->eval_h("(NumberNode 2)");
 	printf("got %s", result->to_string().c_str());
 	printf("expected %s\n", baz->to_string().c_str());
 

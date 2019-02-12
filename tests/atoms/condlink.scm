@@ -57,3 +57,19 @@
 	 (TrueLink )
 	 (NumberNode 2)))
 )
+
+(define (grounded_cond1 ) (cog-new-stv 0 0))
+
+(define (grounded_cond2 ) (cog-new-stv 1 1))
+
+(define grounded-cond
+ (CondLink
+	(Evaluation
+		(GroundedPredicate "scm:grounded_cond1")
+		(List ))
+	(NumberNode 1)
+
+	(Evaluation
+		(GroundedPredicate "scm:grounded_cond2")
+		(List ))
+	(NumberNode 2)))
