@@ -2,7 +2,7 @@ import unittest
 
 from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog, finalize_opencog
-from opencog.atomspace import PtrValue, valueToPtrValue
+from opencog.atomspace import PtrValue
 from opencog.type_constructors import ConceptNode
 
 class PtrValueTest(unittest.TestCase):
@@ -29,7 +29,7 @@ class PtrValueTest(unittest.TestCase):
         key = ConceptNode("key")
         container.set_value(key, PtrValue(obj))
 
-        value = valueToPtrValue(container.get_value(key))
+        value = container.get_value(key)
 
         ref = value.value()
         self.assertEqual(ref.name, "some object")
