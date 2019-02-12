@@ -82,7 +82,7 @@ static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
 	if (NUMBER_NODE == t)
 	{
 		NumberNodePtr na(NumberNodeCast(h));
-		return std::vector<double>(na->get_value());
+		return std::vector<double>(1, na->get_value());
 	}
 	if (SET_LINK == t)
 	{
@@ -109,7 +109,7 @@ static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
 }
 
 
-ValuePtr RandomNumberLink::execute(AtomSpace *as)
+ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 {
 	std::vector<double> nmin(unwrap_set(as, _outgoing[0]));
 	std::vector<double> nmax(unwrap_set(as, _outgoing[1]));

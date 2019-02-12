@@ -52,7 +52,7 @@ public:
 	RandomNumberLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual ValuePtr execute(AtomSpace*);
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
