@@ -80,7 +80,6 @@ static double get_dbl(AtomSpace* as, bool silent, const Handle& h)
 	}
 	throw SyntaxException(TRACE_INFO,
 		"Expecting a number, got %s", h->to_string().c_str());
-	return 0.0;
 }
 
 // The pattern matcher returns sets of atoms; if that set contains
