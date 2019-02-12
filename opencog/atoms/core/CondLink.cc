@@ -20,8 +20,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "CondLink.h"
@@ -86,14 +84,19 @@ CondLink::CondLink(const HandleSeq &oset, Type t)
 
 ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 {
-	Instantiator inst(scratch);
 	for (unsigned i = 0; i < conds.size(); ++i)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(scratch, conds[i]));
 		if (tvp->get_mean() > 0.5)
-			return HandleCast(inst.instantiate(exps[i], HandleMap()));
+		{
+			if (exps[i]->is_executable())
+				return exps[i]->execute(scratch, silent);
+			return exps[i];
+		}
 	}
-	return HandleCast(inst.instantiate(default_exp, HandleMap()));
+	if (default_exp->is_executable())
+		return default_exp->execute(scratch, silent);
+	return default_exp;
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)
