@@ -6,6 +6,7 @@ ADD_LIBRARY (atomcore
 	ArityLink.cc
 	AttentionValueOfLink.cc
 	Checkers.cc
+	CondLink.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
@@ -35,7 +36,6 @@ ADD_LIBRARY (atomcore
 	ValueOfLink.cc
 	Variables.cc
 	VariableList.cc
-	CondLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -52,6 +52,7 @@ INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	ArityLink.h
+	CondLink.h
 	Context.h
 	DefineLink.h
 	DeleteLink.h
@@ -80,6 +81,5 @@ INSTALL (FILES
 	ValueOfLink.h
 	Variables.h
 	VariableList.h
-	CondLink.h
 	DESTINATION "include/opencog/atoms/core"
 )
