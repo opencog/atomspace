@@ -262,7 +262,7 @@ public:
         throw RuntimeException(TRACE_INFO,
             "Not executable! %s", to_string().c_str());
     }
-    virtual ValuePtr execute(void) { return execute(_atom_space); }
+    virtual ValuePtr execute(void) { return execute(_atom_space, false); }
     virtual bool is_executable() const { return false; }
 
     /** Returns the handle of the atom. */
