@@ -81,7 +81,7 @@ void CondLinkUTest::test_singleton()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
 
 	Handle result = eval->eval_h("(cog-execute! single)");
 
@@ -96,7 +96,7 @@ void CondLinkUTest::test_nondefault_exp()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
 
 	Handle result = eval->eval_h("(cog-execute! nondefault)");
 
@@ -111,7 +111,7 @@ void CondLinkUTest::test_wrapped_exp()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
 
 	Handle result = eval->eval_h("(cog-execute! listwrapped)");
 
@@ -126,7 +126,7 @@ void CondLinkUTest::test_grounded_cond()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/condlink.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
 
 	Handle result = eval->eval_h("(cog-execute! grounded-cond)");
 
