@@ -2,7 +2,7 @@ from cython.operator cimport dereference as deref
 from opencog.atomspace cimport Atom
 from opencog.atomspace cimport cHandle, AtomSpace, TruthValue
 from opencog.atomspace import types
-from backwardchainer cimport cBackwardChainer
+from ure cimport cBackwardChainer
 
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods

@@ -1,13 +1,16 @@
 
+def createFloatValue(arg):
+    cdef shared_ptr[cFloatValue] c_ptr
+    if (isinstance(arg, list)):
+        c_ptr.reset(new cFloatValue(FloatValue.list_of_doubles_to_vector(arg)))
+    else:
+        c_ptr.reset(new cFloatValue(<double>arg))
+    return FloatValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
 cdef class FloatValue(Value):
 
-    def __init__(self, arg):
-        cdef cValuePtr result
-        if (isinstance(arg, list)):
-            result = createFloatValue(FloatValue.list_of_doubles_to_vector(arg))
-        else:
-            result = createFloatValue(<double>arg)
-        super(FloatValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>result))
+    def __init__(self, ptr_holder):
+        super(FloatValue, self).__init__(ptr_holder)
 
     def to_list(self):
         return FloatValue.vector_of_doubles_to_list(

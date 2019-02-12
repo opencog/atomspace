@@ -48,8 +48,7 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	PythonEval
 	utilities_cython
 	atomspace_cython
-	forwardchainer_cython
-	backwardchainer_cython
+	ure_cython
 	atomspace
 	${COGUTIL_LIBRARY}
 )

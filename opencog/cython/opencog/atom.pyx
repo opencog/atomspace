@@ -24,8 +24,7 @@ cdef class Atom(Value):
         UNDEFINED or doesn't exist in AtomSpace """
         if self.handle:
             return self.atomspace.is_valid(self)
-        else:
-            return False
+        return False
 
     property atomspace:
         def __get__(self):
@@ -53,7 +52,7 @@ cdef class Atom(Value):
             tvp = atom_ptr.getTruthValue()
             if (not tvp.get()):
                 raise AttributeError('cAtom returned NULL TruthValue pointer')
-            return TruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
+            return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
 
         def __set__(self, truth_value):
             try:
@@ -164,10 +163,11 @@ cdef class Atom(Value):
     def get_value(self, key):
         cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))
-        if (value != NULL):
-            return Value.create(value)
-        else:
+        if value.get() == NULL:
             return None
+        return create_value_by_type(value.get().get_type(),
+                                    PtrHolder.create(<shared_ptr[void]&>value),
+                                    self.atomspace)
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
@@ -210,7 +210,7 @@ cdef class Atom(Value):
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
     def truth_value(self, mean, count):
-        self.tv = TruthValue(mean, count)
+        self.tv = createTruthValue(mean, count)
         return self
 
     def handle_ptr(self):

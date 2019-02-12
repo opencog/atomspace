@@ -36,7 +36,6 @@ cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
-
 # Value
 cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
     cdef cppclass cValue "opencog::Value":
@@ -220,22 +219,21 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
-        const vector[double]& value() const;
-
-    cdef cValuePtr createFloatValue(...)
+        cFloatValue(double value)
+        cFloatValue(const vector[double]& values)
+        const vector[double]& value() const
 
 # StringValue
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
-        const vector[string]& value() const;
-
-    cdef cValuePtr createStringValue(...)
+        cStringValue(const string& value)
+        cStringValue(const vector[string]& values)
+        const vector[string]& value() const
 
 # LinkValue
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
-        const vector[cValuePtr]& value() const;
-
-    cdef cValuePtr createLinkValue(...)
+        cLinkValue(const vector[cValuePtr]& values)
+        const vector[cValuePtr]& value() const
 
 include "ptrvalue.pxd"
