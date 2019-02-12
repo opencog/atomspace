@@ -644,7 +644,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
-		ValuePtr pap(ValueOfLinkCast(evelnk)->execute());
+		ValuePtr pap(evelnk->execute());
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
 			return EvaluationLink::do_eval_scratch(as,
