@@ -60,5 +60,5 @@
 (ExecutionLink
    (SchemaNode "URE:complexity-penalty")
    (ConceptNode "URE")
-   (NumberNode "0.1")
+   (NumberNode "1")
 )
