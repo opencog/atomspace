@@ -453,7 +453,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
-			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
+			Handle flp(createLink(oset_results, t));
 			return HandleCast(flp->execute());
 		}
 		else
@@ -463,8 +463,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			return HandleCast(flp->execute());
+			return HandleCast(expr->execute());
 		}
 	}
 
