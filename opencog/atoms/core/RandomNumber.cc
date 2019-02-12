@@ -62,7 +62,7 @@ RandomNumberLink::RandomNumberLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-static double get_dbl(const Handle& h)
+static double get_dbl(AtomSpace* as, bool silent, const Handle& h)
 {
 	Type t = h->get_type();
 	if (NUMBER_NODE == t)
@@ -70,13 +70,24 @@ static double get_dbl(const Handle& h)
 		NumberNodePtr na(NumberNodeCast(h));
 		return na->get_value();
 	}
+	if (h->is_executable())
+	{
+		ValuePtr vp = h->execute(as, silent);
+		if (vp->is_atom())
+			return get_dbl(as, silent, HandleCast(vp));
+		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			return FloatValueCast(vp)->value().at(0);
+	}
+	throw SyntaxException(TRACE_INFO,
+		"Expecting a number, got %s", h->to_string().c_str());
 	return 0.0;
 }
 
 // The pattern matcher returns sets of atoms; if that set contains
 // numbers or something that when executed, returns numbers, then
 // unwrap it.
-static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
+static std::vector<double> unwrap_set(AtomSpace *as, bool silent,
+                                      const Handle& h)
 {
 	Type t = h->get_type();
 	if (NUMBER_NODE == t)
@@ -92,14 +103,19 @@ static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
 		std::vector<double> nums;
 		for (const Handle& ho: h->getOutgoingSet())
 		{
-			nums.push_back(get_dbl(ho));
+			nums.push_back(get_dbl(as, silent, ho));
 		}
 		return nums;
 	}
 
-	// if (nameserver().isA(t, FLOAT_VALUE))
+	if (h->is_executable())
 	{
-	
+		ValuePtr vp = h->execute(as, silent);
+		if (vp->is_atom())
+			return unwrap_set(as, silent, HandleCast(vp));
+
+		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			return FloatValueCast(vp)->value();
 	}
 
 	throw SyntaxException(TRACE_INFO,
@@ -108,11 +124,13 @@ static std::vector<double> unwrap_set(AtomSpace *as, const Handle& h)
 	return std::vector<double>();
 }
 
-
+/// RandomNumberLink always returns either a NumberNode, or a
+/// set of NumberNodes.  This is in contrast to a RandomValue,
+/// which always returns a vector of doubles.
 ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 {
-	std::vector<double> nmin(unwrap_set(as, _outgoing[0]));
-	std::vector<double> nmax(unwrap_set(as, _outgoing[1]));
+	std::vector<double> nmin(unwrap_set(as, silent, _outgoing[0]));
+	std::vector<double> nmax(unwrap_set(as, silent, _outgoing[1]));
 
 	size_t len = nmax.size();
 	if (nmin.size() != len)
