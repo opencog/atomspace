@@ -32,8 +32,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(QuotationUTest execution smob atomspace)
 	ADD_CXXTEST(FormulaUTest)
 	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
-	ADD_CXXTEST(CondLinkUTest)
-	TARGET_LINK_LIBRARIES(CondLinkUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
