@@ -631,6 +631,9 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
+// Conditional based on crisp boolean value from TV.
+COND_LINK <- FUNCTION_LINK
+
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
@@ -640,9 +643,6 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
-
-// Conditional based on crisp boolean value from TV.
-COND_LINK <- FUNCTION_LINK
 
 // ====================================================================
 // Grammatical inference on time series
