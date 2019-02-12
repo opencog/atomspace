@@ -588,8 +588,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 				if (hg) oset_results.push_back(hg);
 			}
 		}
-		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-		ValuePtr pap(flp->execute());
+		Handle flp(createLink(oset_results, t));
+		ValuePtr pap(flp->execute(_as, silent));
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;

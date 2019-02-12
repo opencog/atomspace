@@ -267,11 +267,10 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		if (not fvars.empty())
 		{
 			flh = fvars.substitute_nocheck(flh, cargs);
-			flp = FunctionLinkCast(flh);
 		}
 
 		// Expecting a FunctionLink without variables.
-		ValuePtr v(flp->execute());
+		ValuePtr v(flh->execute());
 		FloatValuePtr fv(FloatValueCast(v));
 		nums.push_back(fv->value()[0]);
 	}
@@ -622,9 +621,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
 				throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
 
-			ValuePtr v(FunctionLinkCast(h)->execute());
+			ValuePtr v(h->execute());
 			FloatValuePtr fv(FloatValueCast(v));
-			nums.push_back(fv->value()[0]);
+			nums.push_back(fv->value().at(0));
 		}
 		return createSimpleTruthValue(nums);
 	}
