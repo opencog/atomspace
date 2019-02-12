@@ -124,6 +124,13 @@ static std::vector<double> unwrap_set(AtomSpace *as, bool silent,
 	return std::vector<double>();
 }
 
+static Handle get_ran(double cept, double nmax)
+{
+	// Linear algebra slope-intercept formula.
+	double slope = nmax - cept;
+	return HandleCast(createNumberNode(slope * randy.randdouble() + cept));
+}
+
 /// RandomNumberLink always returns either a NumberNode, or a
 /// set of NumberNodes.  This is in contrast to a RandomValue,
 /// which always returns a vector of doubles.
@@ -139,23 +146,12 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 				nmin.size(), nmax.size());
 
 	if (1 == len)
-	{
-		double cept = nmin[0];
-		double slope = nmax[0] - cept;
-		double ary = slope * randy.randdouble() + cept;
-
-		return ValuePtr(createNumberNode(ary));
-	}
+		return get_ran(nmin[0], nmax[0]);
 
 	HandleSeq oset;
 	for (size_t i=0; i< len; i++)
-	{
-		double cept = nmin[i];
-		double slope = nmax[i] - cept;
-		double ary = slope * randy.randdouble() + cept;
+		oset.push_back(get_ran(nmin[i], nmax[i]));
 
-		oset.push_back(HandleCast(createNumberNode(ary)));
-	}
 	return ValuePtr(createLink(oset, SET_LINK));
 }
 
