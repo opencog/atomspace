@@ -641,6 +641,9 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
 
+// Conditional based on crisp boolean value from TV.
+COND_LINK <- FUNCTION_LINK
+
 // ====================================================================
 // Grammatical inference on time series
 // The generic structure encoded here would be:
@@ -658,19 +661,3 @@ CONNECTOR <- LINK              // Link-grammar connector
 CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
-
-// Conditional based on crisp boolean value from TV. Might have two structure
-//
-// wrapped with ListLink
-//      CondLink
-//          ListLink
-//              GreaterThan     ; any evaluable link [condition]
-//                  Number 5
-//                  Number 2
-//              Number 0        ;[expression]
-//
-// flattened
-//      CondLink
-//          TrueLink        ;[condition]
-//          Number 1        ;[expression]
-COND_LINK <- FUNCTION_LINK
