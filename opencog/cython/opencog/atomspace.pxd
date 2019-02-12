@@ -236,3 +236,4 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
 
+include "ptrvalue.pxd"

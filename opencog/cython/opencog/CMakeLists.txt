@@ -68,6 +68,7 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"../../atoms/truthvalue/TruthValue.h" "../../atoms/truthvalue/SimpleTruthValue.h"
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
+	"ptrvalue.pyx"
 )
 
 # list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
@@ -104,6 +105,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	ptrvalue.pxd
 	DESTINATION "include/opencog/cython/opencog"
 )
 
