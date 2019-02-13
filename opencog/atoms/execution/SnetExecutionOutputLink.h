@@ -30,6 +30,10 @@ namespace opencog
 
 class SnetExecutionOutputLink : public ExecutionOutputLink
 {
+private:
+
+	bool forward_to_execution_output_link;
+
 public:
 	SnetExecutionOutputLink(const HandleSeq& oset, Type t);
 

@@ -29,14 +29,17 @@ using namespace opencog;
 SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
 	: ExecutionOutputLink(oset, t)
 {
+	forward_to_execution_output_link =
+		!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK);
 }
 
 ValuePtr SnetExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
-	if (!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK))
+	if (forward_to_execution_output_link)
 		return ExecutionOutputLink::execute(as, silent);
 
-	GroundedFunctionLinkPtr grounded_link = CastFromHandle<GroundedFunctionLink>(getOutgoingAtom(0));
+	GroundedFunctionLinkPtr grounded_link =
+		CastFromHandle<GroundedFunctionLink>(getOutgoingAtom(0));
 	ValuePtr args = getOutgoingAtom(1);
 	return grounded_link->get_function()(as, args);
 }
