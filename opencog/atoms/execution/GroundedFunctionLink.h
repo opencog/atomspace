@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GROUNDED_SCHEMA_LINK_H
-#define _OPENCOG_GROUNDED_SCHEMA_LINK_H
+#ifndef _OPENCOG_GROUNDED_FUNCTION_LINK_H
+#define _OPENCOG_GROUNDED_FUNCTION_LINK_H
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/execution/GroundedObject.h>
@@ -42,5 +42,5 @@ using GroundedFunctionLinkPtr = std::shared_ptr<GroundedFunctionLink>;
 
 }
 
-#endif /* _OPENCOG_GROUNDED_SCHEMA_LINK_H */
+#endif /* _OPENCOG_GROUNDED_FUNCTION_LINK_H */
 
