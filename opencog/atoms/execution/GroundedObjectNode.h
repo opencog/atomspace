@@ -43,6 +43,7 @@ public:
 	GroundedObjectNode(const std::string& name,
 			const std::shared_ptr<GroundedObject>& object);
 
+	void set_object(const std::shared_ptr<GroundedObject>& object);
 	GroundedObject& get_object() const;
 
 	static Handle factory(const Handle&);

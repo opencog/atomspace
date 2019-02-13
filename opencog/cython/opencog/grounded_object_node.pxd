@@ -8,11 +8,12 @@ cdef extern from "opencog/atoms/execution/GroundedObject.h" namespace "opencog":
 cdef extern from "PythonGroundedObject.h":
     cdef cppclass cPythonGroundedObject "opencog::PythonGroundedObject" (cGroundedObject):
         cPythonGroundedObject(PyObject* object)
-        pass
+        object get_object() const
 
 cdef extern from "opencog/atoms/execution/GroundedObjectNode.h" namespace "opencog":
     cdef cppclass cGroundedObjectNode "opencog::GroundedObjectNode":
-        pass
+        void set_object(const shared_ptr[cGroundedObject]& object)
+        cGroundedObject& get_object() const
 
     ctypedef shared_ptr[cGroundedObjectNode] cGroundedObjectNodePtr "opencog::GroundedObjectNodePtr"
 

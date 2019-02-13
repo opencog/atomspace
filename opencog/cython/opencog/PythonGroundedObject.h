@@ -43,6 +43,8 @@ public:
 	virtual GroundedFunction get_method(std::string const& method_name);
 	virtual ValuePtr invoke(std::string const& method_name,
 							AtomSpace* atomspace, ValuePtr const& _args);
+
+	PyObject* get_object() const { return object; }
 };
 
 }

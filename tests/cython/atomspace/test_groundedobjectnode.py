@@ -29,6 +29,13 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(result, ConceptNode("arg"))
 
+    def test_set_object(self):
+        grounded_object_node = GroundedObjectNode("test_grounded_object_node",
+                                                  TestObject("some object"))
+        grounded_object_node.set_object(TestObject("other object"))
+
+        self.assertEqual(grounded_object_node.get_object().name, "other object")
+
 class TestObject:
     def __init__(self, name):
         self.name = name

@@ -4,7 +4,7 @@ from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
 def createGroundedObjectNode(name, obj, atomspace):
-    cdef shared_ptr[cPythonGroundedObject] o_ptr
+    cdef shared_ptr[cGroundedObject] o_ptr
     o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj))
     node_ptr = cCreateGroundedObjectNode(<bytes>(name.encode()), o_ptr)
 
@@ -15,6 +15,17 @@ cdef class GroundedObjectNode(Atom):
 
     def __init__(self, ptr_holder, atomspace):
         super(GroundedObjectNode, self).__init__(ptr_holder, atomspace)
+
+    def set_object(self, obj):
+        cdef shared_ptr[cGroundedObject] o_ptr
+        o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj))
+        cdef cGroundedObjectNode* gon = <cGroundedObjectNode*>(self.get_c_value_ptr().get())
+        gon.set_object(o_ptr)
+
+    def get_object(self):
+        cdef cGroundedObjectNode* gon = <cGroundedObjectNode*>(self.get_c_value_ptr().get())
+        return (<cPythonGroundedObject&>(gon.get_object())).get_object()
+
 
 cdef api cValuePtr call_python_method(object obj, const string& method_name,
                                       cAtomSpace* atomspace, const cValuePtr&
