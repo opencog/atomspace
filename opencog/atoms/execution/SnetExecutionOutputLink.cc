@@ -33,10 +33,10 @@ SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
 
 ValuePtr SnetExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
-	if (!nameserver().isA(get_schema()->get_type(), GROUNDED_SCHEMA_LINK))
+	if (!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK))
 		return ExecutionOutputLink::execute(as, silent);
 
-	GroundedSchemaLinkPtr grounded_link = CastFromHandle<GroundedSchemaLink>(getOutgoingAtom(0));
+	GroundedFunctionLinkPtr grounded_link = CastFromHandle<GroundedFunctionLink>(getOutgoingAtom(0));
 	ValuePtr args = getOutgoingAtom(1);
 	return grounded_link->get_function()(as, args);
 }

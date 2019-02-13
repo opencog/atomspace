@@ -23,12 +23,12 @@
 #ifndef _OPENCOG_DOT_LINK_H
 #define _OPENCOG_DOT_LINK_H
 
-#include <opencog/atoms/execution/GroundedSchemaLink.h>
+#include <opencog/atoms/execution/GroundedFunctionLink.h>
 
 namespace opencog
 {
 
-class DotLink : public GroundedSchemaLink
+class DotLink : public GroundedFunctionLink
 {
 private:
 	GroundedObject& get_object() const;
@@ -36,7 +36,7 @@ private:
 
 public:
 	DotLink(const HandleSeq& output_set, Type type)
-		: GroundedSchemaLink(output_set, type) { }
+		: GroundedFunctionLink(output_set, type) { }
 	virtual GroundedFunction get_function() const;
 
 	static Handle factory(const Handle&);

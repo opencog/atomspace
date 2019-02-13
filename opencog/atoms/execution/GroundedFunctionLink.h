@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedSchemaLink.h
+ * opencog/atoms/execution/GroundedFunctionLink.h
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -29,17 +29,16 @@
 namespace opencog
 {
 
-class GroundedSchemaLink : public Link
+class GroundedFunctionLink : public Link
 {
 public:
-	GroundedSchemaLink(const HandleSeq& output_set, Type type)
+	GroundedFunctionLink(const HandleSeq& output_set, Type type)
 		: Link(output_set, type) { }
 	virtual GroundedFunction get_function() const = 0;
 
-	static Handle factory(const Handle&);
 };
 
-using GroundedSchemaLinkPtr = std::shared_ptr<GroundedSchemaLink>;
+using GroundedFunctionLinkPtr = std::shared_ptr<GroundedFunctionLink>;
 
 }
 
