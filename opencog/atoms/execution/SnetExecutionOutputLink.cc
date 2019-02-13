@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/execution/DotLink.h>
+#include <opencog/atoms/execution/GroundedFunctionLink.h>
 
 #include "SnetExecutionOutputLink.h"
 

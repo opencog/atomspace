@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/DotLink.cc
+ * opencog/atoms/execution/GetMethodLink.cc
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -22,32 +22,32 @@
 
 #include <opencog/atoms/execution/GroundedObjectNode.h>
 
-#include "DotLink.h"
+#include "GetMethodLink.h"
 
 using namespace opencog;
 
-GroundedObject& DotLink::get_object() const
+GroundedObject& GetMethodLink::get_object() const
 {
 	return CastFromHandle<GroundedObjectNode>(getOutgoingAtom(0))->get_object();
 }
 
-const std::string& DotLink::get_method_name() const
+const std::string& GetMethodLink::get_method_name() const
 {
 	return getOutgoingAtom(1)->get_name();
 }
 
-GroundedFunction DotLink::get_function() const
+GroundedFunction GetMethodLink::get_function() const
 {
 	return get_object().get_method(get_method_name());
 }
 
-auto DotLinkCast = CastFromHandle<DotLink>;
+auto GetMethodLinkCast = CastFromHandle<GetMethodLink>;
 
 template<typename ... Args>
-static DotLinkPtr createDotLink(Args&& ... args)
+static GetMethodLinkPtr createGetMethodLink(Args&& ... args)
 {
-	return std::make_shared<DotLink>(std::forward<Args>(args)...);
+	return std::make_shared<GetMethodLink>(std::forward<Args>(args)...);
 }
 
-DEFINE_LINK_FACTORY(DotLink, DOT_LINK)
+DEFINE_LINK_FACTORY(GetMethodLink, GET_METHOD_LINK)
 
