@@ -23,25 +23,49 @@
 #include <string>
 
 #include "PythonGroundedObject.h"
+
+/*
+ * Methods which uses atomspace_api.h header should be defined in separate
+ * compilation unit otherwise call_python_method() will be declared later then
+ * used.
+ */
 #include "atomspace_api.h"
 
 using namespace opencog;
 
-/**
- * This method should be defined in separate compilation unit otherwise
- * call_python_method() will be declared later then used.
- */
+static void load_cython_proxies()
+{
+	if (!Py_IsInitialized())
+		throw RuntimeException(TRACE_INFO, "Python is expected to be "
+				"initialized when using Python specific part of API");
+	import_opencog__atomspace();
+}
+
+PythonGroundedObject::PythonGroundedObject(PyObject *object) : object(object)
+{
+	static int cython_proxies_loaded = 0;
+	if (!cython_proxies_loaded)
+	{
+		load_cython_proxies();
+		cython_proxies_loaded = 1;
+	}
+	Py_INCREF(this->object);
+}
+
+PythonGroundedObject::~PythonGroundedObject()
+{
+	Py_DECREF(object);
+}
+
+GroundedFunction PythonGroundedObject::get_method(std::string const& method_name)
+{
+	return std::bind(&PythonGroundedObject::invoke, this, method_name,
+			std::placeholders::_1, std::placeholders::_2);
+}
+
 ValuePtr PythonGroundedObject::invoke(std::string const& method_name,
 						AtomSpace* atomspace, ValuePtr const& _args)
 {
 	return call_python_method(object, method_name, atomspace, _args);
 }
 
-/**
- * This constructor loads Cython opencog.atomspace "cdef api" definitions, in
- * particulart call_python_method().
- */
-static __attribute__ ((constructor)) void init(void)
-{
-	import_opencog__atomspace();
-}

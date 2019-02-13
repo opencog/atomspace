@@ -37,22 +37,10 @@ private:
 
 public:
 
-	PythonGroundedObject(PyObject *object) : object(object)
-	{
-		Py_INCREF(this->object);
-	}
+	PythonGroundedObject(PyObject *object);
+	virtual ~PythonGroundedObject();
 
-	virtual ~PythonGroundedObject()
-	{
-		Py_DECREF(object);
-	}
-
-	virtual GroundedFunction get_method(std::string const& method_name)
-	{
-		return std::bind(&PythonGroundedObject::invoke, this, method_name,
-				std::placeholders::_1, std::placeholders::_2);
-	}
-
+	virtual GroundedFunction get_method(std::string const& method_name);
 	virtual ValuePtr invoke(std::string const& method_name,
 							AtomSpace* atomspace, ValuePtr const& _args);
 };
