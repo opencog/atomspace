@@ -45,7 +45,7 @@ INSTALL (FILES
 	SnetExecutionOutputLink.h
 	GroundedObject.h
 	GroundedObjectNode.h
-	GroundedSchemaLink.h
+	GroundedFunctionLink.h
 	GetMethodLink.h
 	DESTINATION "include/opencog/atoms/execution"
 )
