@@ -230,6 +230,28 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
+/// Check for alpha equivalence
+static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "AlphaEqualLink expects two arguments");
+
+	Instantiator inst(as);
+	Handle h0(HandleCast(inst.execute(oset[0], silent)));
+	Handle h1(HandleCast(inst.execute(oset[1], silent)));
+
+	Variables v0, v1;
+	v0.find_variables(h0);
+	v1.find_variables(h1);
+
+	if (v0.is_equal(v1))
+		return TruthValue::TRUE_TV();
+	else
+		return TruthValue::FALSE_TV();
+}
+
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
                                   const HandleSeq& cargs)
@@ -410,6 +432,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (EQUAL_LINK == t)
 	{
 		return equal(scratch, evelnk, silent);
+	}
+	else if (ALPHA_EQUAL_LINK == t)
+	{
+		return alpha_equal(scratch, evelnk, silent);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
