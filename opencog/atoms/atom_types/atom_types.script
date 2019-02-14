@@ -560,6 +560,10 @@ GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
+// AlphaEqualLink tests to see if both sides are the same, up to an
+// alpha-renaming of any variables that they may have.
+ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
 

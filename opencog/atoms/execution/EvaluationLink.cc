@@ -230,6 +230,45 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
+/// Check for alpha equivalence. If the link contains no free
+/// variables, then this behaves the same as EqualLink. If the
+/// link does contain free variables, and they are in the same
+/// location, and can be alpha-converted to one-another, then yes,
+/// they're equal. If the two expressions cannot be alpha-converted
+/// one into another, then false.
+static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "AlphaEqualLink expects two arguments");
+
+	Instantiator inst(as);
+	Handle h0(HandleCast(inst.execute(oset[0], silent)));
+	Handle h1(HandleCast(inst.execute(oset[1], silent)));
+
+	// Are they strictly equal? Good!
+	if (h0 == h1)
+		return TruthValue::TRUE_TV();
+
+	// Not strictly equal. Are they alpha convertable?
+	Variables v0, v1;
+	v0.find_variables(h0);
+	v1.find_variables(h1);
+
+	// If the variables are not alpha-convertable, then
+	// there is no possibility of equality.
+	if (not v0.is_equal(v1))
+		return TruthValue::FALSE_TV();
+
+	// Actually alpha-convert, and compare.
+	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
+	if (*((AtomPtr)h0) != *((AtomPtr)h1a))
+		return TruthValue::FALSE_TV();
+
+	return TruthValue::TRUE_TV();
+}
+
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
 static TruthValuePtr eval_formula(const Handle& predform,
                                   const HandleSeq& cargs)
@@ -410,6 +449,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (EQUAL_LINK == t)
 	{
 		return equal(scratch, evelnk, silent);
+	}
+	else if (ALPHA_EQUAL_LINK == t)
+	{
+		return alpha_equal(scratch, evelnk, silent);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
