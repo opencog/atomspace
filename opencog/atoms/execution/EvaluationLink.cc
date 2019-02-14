@@ -242,6 +242,11 @@ static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	Handle h0(HandleCast(inst.execute(oset[0], silent)));
 	Handle h1(HandleCast(inst.execute(oset[1], silent)));
 
+	// Are they strictly equal? Good!
+	if (h0 == h1)
+		return TruthValue::TRUE_TV();
+
+	// Not strictly equal. Are they alpha convertable?
 	Variables v0, v1;
 	v0.find_variables(h0);
 	v1.find_variables(h1);
