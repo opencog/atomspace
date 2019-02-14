@@ -110,6 +110,7 @@ INSTALL (FILES
 	atomspace.pxd
 	ptrvalue.pxd
 	grounded_object_node.pxd
+	PythonGroundedObject.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 

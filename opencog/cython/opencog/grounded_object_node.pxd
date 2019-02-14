@@ -5,7 +5,7 @@ cdef extern from "opencog/atoms/execution/GroundedObject.h" namespace "opencog":
     cdef cppclass cGroundedObject "opencog::GroundedObject":
         pass
 
-cdef extern from "PythonGroundedObject.h":
+cdef extern from "opencog/cython/opencog/PythonGroundedObject.h":
     cdef cppclass cPythonGroundedObject "opencog::PythonGroundedObject" (cGroundedObject):
         cPythonGroundedObject(PyObject* object)
         object get_object() const
