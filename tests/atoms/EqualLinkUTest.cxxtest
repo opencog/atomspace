@@ -121,6 +121,8 @@ void EqualLinkUTest::test_alpha()
 
 	Handle equal_23 = L(EQUAL_LINK, x_plus_2, x_plus_3);
 	Handle alpha_23 = L(ALPHA_EQUAL_LINK, x_plus_2, x_plus_3);
+	Handle equal_xx = L(EQUAL_LINK, x_plus_3, x_plus_3);
+	Handle alpha_xx = L(ALPHA_EQUAL_LINK, x_plus_3, x_plus_3);
 	Handle equal_xy = L(EQUAL_LINK, x_plus_3, y_plus_3);
 	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
 
@@ -130,6 +132,12 @@ void EqualLinkUTest::test_alpha()
 
 	tv = EvaluationLink::do_evaluate(&_as, alpha_23);
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
 	tv = EvaluationLink::do_evaluate(&_as, equal_xy);
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false

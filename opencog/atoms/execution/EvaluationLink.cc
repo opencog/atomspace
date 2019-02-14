@@ -230,7 +230,12 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		return TruthValue::FALSE_TV();
 }
 
-/// Check for alpha equivalence
+/// Check for alpha equivalence. If the link contains no free
+/// variables, then this behaves the same as EqualLink. If the
+/// link does contain free variables, and they are in the same
+/// location, and can be alpha-converted to one-another, then yes,
+/// they're equal. If the two expressions cannot be alpha-converted
+/// one into another, then false.
 static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
