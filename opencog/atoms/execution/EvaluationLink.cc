@@ -251,10 +251,17 @@ static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	v0.find_variables(h0);
 	v1.find_variables(h1);
 
-	if (v0.is_equal(v1))
-		return TruthValue::TRUE_TV();
-	else
+	// If the variables are not alpha-convertable, then
+	// there is no possibility of equality.
+	if (not v0.is_equal(v1))
 		return TruthValue::FALSE_TV();
+
+	// Actually alpha-convert, and compare.
+	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
+	if (*((AtomPtr)h0) != *((AtomPtr)h1a))
+		return TruthValue::FALSE_TV();
+
+	return TruthValue::TRUE_TV();
 }
 
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
