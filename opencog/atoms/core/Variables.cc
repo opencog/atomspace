@@ -519,7 +519,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
  */
 bool Variables::is_type(const HandleSeq& hseq) const
 {
-	// The arity must be one for there to be a match.
+	// The arities must be equal for there to be a match.
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
 
@@ -529,6 +529,27 @@ bool Variables::is_type(const HandleSeq& hseq) const
 		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
+}
+
+/**
+ * Return true if we contain just a single variable, and this one
+ * variable is of type gtype (or is untyped). A typical use is that
+ * gtype==VARIABLE_LIST.
+ */
+bool Variables::is_type(Type gtype) const
+{
+	if (1 != varseq.size()) return false;
+
+	// Are there any type restrictions?
+	const Handle& var = varseq[0];
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	if (_simple_typemap.end() == tit) return true;
+	const TypeSet &tchoice = tit->second;
+
+	// There are type restrictions; do they match?
+	TypeSet::const_iterator allow = tchoice.find(gtype);
+	if (allow != tchoice.end()) return true;
+	return false;
 }
 
 /**
