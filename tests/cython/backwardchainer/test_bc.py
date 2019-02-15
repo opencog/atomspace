@@ -5,7 +5,7 @@ from opencog.scheme_wrapper import scheme_eval
 from opencog.atomspace import TruthValue
 from opencog.ure import BackwardChainer
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog
+from opencog.utilities import initialize_opencog, finalize_opencog
 import __main__
 
 
@@ -30,7 +30,7 @@ class BCTest(TestCase):
 
     def tearDown(self):
         finalize_opencog()
-        del self.space
+        del self.atomspace
 
     def init(self):
         project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
