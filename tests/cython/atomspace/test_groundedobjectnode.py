@@ -3,7 +3,7 @@ import unittest
 from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import (GroundedObjectNode,
-                                       ApplyLink, GetMethodLink,
+                                       ApplyLink, MethodOfLink,
                                        ListLink, ConceptNode)
 from opencog.bindlink import execute_atom
 
@@ -21,7 +21,7 @@ class GroundedObjectNodeTest(unittest.TestCase):
         grounded_object_node = GroundedObjectNode("test_grounded_object_node",
                                                   TestObject("some object"))
         exec_link = ApplyLink(
-                        GetMethodLink(grounded_object_node, ConceptNode("foo")),
+                        MethodOfLink(grounded_object_node, ConceptNode("foo")),
                         ListLink(ConceptNode("arg"))
                         )
 

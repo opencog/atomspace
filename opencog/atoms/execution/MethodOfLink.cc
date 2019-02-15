@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GetMethodLink.cc
+ * opencog/atoms/execution/MethodOfLink.cc
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/execution/GroundedObjectNode.h>
 
-#include "GetMethodLink.h"
+#include "MethodOfLink.h"
 
 using namespace opencog;
 
@@ -38,42 +38,42 @@ static void check_type(const ValuePtr& value, const Type& type, const std::strin
 	}
 }
 
-void GetMethodLink::check_outgoing_type(int index, const Type& type)
+void MethodOfLink::check_outgoing_type(int index, const Type& type)
 {
 	std::string location = std::to_string(index) + " outgoing link of " + 
 		nameserver().getTypeName(get_type());
 	check_type(getOutgoingAtom(index), type, location);
 }
 
-GetMethodLink::GetMethodLink(const HandleSeq& output_set, Type type)
+MethodOfLink::MethodOfLink(const HandleSeq& output_set, Type type)
 	: GroundedFunctionLink(output_set, type)
 {
 	check_outgoing_type(0, GROUNDED_OBJECT_NODE);
 	check_outgoing_type(1, NODE);
 }
 
-GroundedObject* GetMethodLink::get_object() const
+GroundedObject* MethodOfLink::get_object() const
 {
 	return CastFromHandle<GroundedObjectNode>(getOutgoingAtom(0))->get_object();
 }
 
-const std::string& GetMethodLink::get_method_name() const
+const std::string& MethodOfLink::get_method_name() const
 {
 	return getOutgoingAtom(1)->get_name();
 }
 
-GroundedFunction GetMethodLink::get_function() const
+GroundedFunction MethodOfLink::get_function() const
 {
 	return get_object()->get_method(get_method_name());
 }
 
-auto GetMethodLinkCast = CastFromHandle<GetMethodLink>;
+auto MethodOfLinkCast = CastFromHandle<MethodOfLink>;
 
 template<typename ... Args>
-static GetMethodLinkPtr createGetMethodLink(Args&& ... args)
+static MethodOfLinkPtr createMethodOfLink(Args&& ... args)
 {
-	return std::make_shared<GetMethodLink>(std::forward<Args>(args)...);
+	return std::make_shared<MethodOfLink>(std::forward<Args>(args)...);
 }
 
-DEFINE_LINK_FACTORY(GetMethodLink, GET_METHOD_LINK)
+DEFINE_LINK_FACTORY(MethodOfLink, METHOD_OF_LINK)
 

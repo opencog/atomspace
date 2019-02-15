@@ -88,7 +88,7 @@ public:
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
 			al(APPLY_LINK,
-				al(GET_METHOD_LINK,
+				al(METHOD_OF_LINK,
 					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "foo")
 				),
@@ -108,7 +108,7 @@ public:
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
 			al(APPLY_LINK,
-				al(GET_METHOD_LINK,
+				al(METHOD_OF_LINK,
 					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "inc")
 				),

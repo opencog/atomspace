@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GetMethodLink.h
+ * opencog/atoms/execution/MethodOfLink.h
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -20,15 +20,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GET_METHOD_LINK_H
-#define _OPENCOG_GET_METHOD_LINK_H
+#ifndef _OPENCOG_METHOD_OF_LINK_H
+#define _OPENCOG_METHOD_OF_LINK_H
 
 #include <opencog/atoms/execution/GroundedFunctionLink.h>
 
 namespace opencog
 {
 
-class GetMethodLink : public GroundedFunctionLink
+class MethodOfLink : public GroundedFunctionLink
 {
 private:
 	GroundedObject* get_object() const;
@@ -37,15 +37,15 @@ private:
 	void check_outgoing_type(int index, const Type& type);
 
 public:
-	GetMethodLink(const HandleSeq& output_set, Type type);
+	MethodOfLink(const HandleSeq& output_set, Type type);
 	virtual GroundedFunction get_function() const;
 
 	static Handle factory(const Handle&);
 };
 
-using GetMethodLinkPtr = std::shared_ptr<GetMethodLink>;
+using MethodOfLinkPtr = std::shared_ptr<MethodOfLink>;
 
 }
 
-#endif /* _OPENCOG_GET_METHOD_LINK_H */
+#endif /* _OPENCOG_METHOD_OF_LINK_H */
 
