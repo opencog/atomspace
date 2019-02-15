@@ -35,6 +35,12 @@ GroundedObjectNode::GroundedObjectNode(const std::string& name,
 	set_object(object);
 }
 
+bool GroundedObjectNode::has_object() const
+{
+	ValuePtr ptr_value = getValue(GroundedObjectNode::ptrKey);
+	return (bool)ptr_value;
+}
+
 void GroundedObjectNode::set_object(const std::shared_ptr<GroundedObject>& object)
 {
 	PtrValuePtr ptrValue = createPtrValue(object);

@@ -40,9 +40,13 @@ public:
 	GroundedObjectNode(Type type, const std::string& name)
 		: Node(type, name) { }
 
+	GroundedObjectNode(const std::string& name)
+		: Node(GROUNDED_OBJECT_NODE, name) { }
+
 	GroundedObjectNode(const std::string& name,
 			const std::shared_ptr<GroundedObject>& object);
 
+	bool has_object() const;
 	void set_object(const std::shared_ptr<GroundedObject>& object);
 	GroundedObject* get_object() const;
 
