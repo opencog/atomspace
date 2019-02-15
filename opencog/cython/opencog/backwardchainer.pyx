@@ -41,6 +41,7 @@ cdef class BackwardChainer:
 
     def __del__(self):
         del self.chainer
+        self._as = None
 
     def do_chain(self):
         return self.chainer.do_chain()
