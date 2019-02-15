@@ -78,11 +78,12 @@ void SchemeSmob::release_as (AtomSpace *as)
 
 		// (Recursively) decrement the use count on the parent.
 		// We had incremented it earlier, in `ss_new_as`, when
-		// creating it.
+		// creating it. Do not delete it, unless the guile gc
+		// asks us to.
 		if (env and deleteable_as.end() != deleteable_as.find(env))
 		{
-			--deleteable_as[env];
-			if (0 == deleteable_as[env]) release_as(env);
+			if (0 < deleteable_as[env])
+				--deleteable_as[env];
 		}
 	}
 }
