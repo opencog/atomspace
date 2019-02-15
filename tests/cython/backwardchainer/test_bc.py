@@ -28,6 +28,10 @@ class BCTest(TestCase):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
 
+    def tearDown(self):
+        finalize_opencog()
+        del self.space
+
     def init(self):
         project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(project_source_dir))
