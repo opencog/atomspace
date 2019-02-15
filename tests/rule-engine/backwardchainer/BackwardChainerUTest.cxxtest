@@ -594,7 +594,7 @@ void BackwardChainerUTest::test_criminal()
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer tr_bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
 	                      Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
-	tr_bc.get_config().set_maximum_iterations(50);
+	tr_bc.get_config().set_maximum_iterations(100);
 	tr_bc.do_chain();
 
 	results = tr_bc.get_results();
