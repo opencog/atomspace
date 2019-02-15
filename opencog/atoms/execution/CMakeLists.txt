@@ -14,7 +14,7 @@ ADD_LIBRARY (execution
 	Instantiator.cc
 	MapLink.cc
 	LibraryManager.cc
-	SnetExecutionOutputLink.cc
+	ApplyLink.cc
 	GroundedObjectNode.cc
 	GetMethodLink.cc
 )
@@ -42,7 +42,7 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
-	SnetExecutionOutputLink.h
+	ApplyLink.h
 	GroundedObject.h
 	GroundedObjectNode.h
 	GroundedFunctionLink.h

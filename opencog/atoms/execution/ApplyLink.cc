@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/SnetExecutionOutputLink.cc
+ * opencog/atoms/execution/ApplyLink.cc
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -22,18 +22,18 @@
 
 #include <opencog/atoms/execution/GroundedFunctionLink.h>
 
-#include "SnetExecutionOutputLink.h"
+#include "ApplyLink.h"
 
 using namespace opencog;
 
-SnetExecutionOutputLink::SnetExecutionOutputLink(const HandleSeq& oset, Type t)
+ApplyLink::ApplyLink(const HandleSeq& oset, Type t)
 	: ExecutionOutputLink(oset, t)
 {
 	forward_to_execution_output_link =
 		!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK);
 }
 
-ValuePtr SnetExecutionOutputLink::execute(AtomSpace* as, bool silent)
+ValuePtr ApplyLink::execute(AtomSpace* as, bool silent)
 {
 	if (forward_to_execution_output_link)
 		return ExecutionOutputLink::execute(as, silent);
@@ -44,13 +44,13 @@ ValuePtr SnetExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	return grounded_link->get_function()(as, args);
 }
 
-auto SnetExecutionOutputLinkCast = CastFromHandle<SnetExecutionOutputLink>;
+auto ApplyLinkCast = CastFromHandle<ApplyLink>;
 
 template<typename ... Args>
-static inline SnetExecutionOutputLinkPtr createSnetExecutionOutputLink(Args&&... args)
+static inline ApplyLinkPtr createApplyLink(Args&&... args)
 {
-	return std::make_shared<SnetExecutionOutputLink>(std::forward<Args>(args)...);
+	return std::make_shared<ApplyLink>(std::forward<Args>(args)...);
 }
 
-DEFINE_LINK_FACTORY(SnetExecutionOutputLink, SNET_EXECUTION_OUTPUT_LINK)
+DEFINE_LINK_FACTORY(ApplyLink, APPLY_LINK)
 

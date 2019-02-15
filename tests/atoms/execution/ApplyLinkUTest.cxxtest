@@ -1,5 +1,5 @@
 /*
- * tests/atoms/execution/SnetExecutionOutputLinkUTest.cxxtest
+ * tests/atoms/execution/ApplyLinkUTest.cxxtest
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -66,7 +66,7 @@ public:
 	}
 };
 
-class SnetExecutionOutputLinkUTest : public CxxTest::TestSuite
+class ApplyLinkUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace atomspace;
@@ -87,7 +87,7 @@ public:
 		Instantiator inst(&atomspace);
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
-			al(SNET_EXECUTION_OUTPUT_LINK,
+			al(APPLY_LINK,
 				al(GET_METHOD_LINK,
 					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "foo")
@@ -107,7 +107,7 @@ public:
 		Instantiator inst(&atomspace);
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
 		Handle eol =
-			al(SNET_EXECUTION_OUTPUT_LINK,
+			al(APPLY_LINK,
 				al(GET_METHOD_LINK,
 					aa(createGroundedObjectNode("foo", foo)),
 					an(CONCEPT_NODE, "inc")

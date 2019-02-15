@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/SnetExecutionOutputLink.h
+ * opencog/atoms/execution/ApplyLink.h
  *
  * Copyright (C) 2019 OpenCog Foundation
  * All Rights Reserved
@@ -20,31 +20,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SNET_EXECUTION_OUTPUT_LINK_H
-#define _OPENCOG_SNET_EXECUTION_OUTPUT_LINK_H
+#ifndef _OPENCOG_APPLY_LINK_H
+#define _OPENCOG_APPLY_LINK_H
 
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 namespace opencog
 {
 
-class SnetExecutionOutputLink : public ExecutionOutputLink
+class ApplyLink : public ExecutionOutputLink
 {
 private:
 
 	bool forward_to_execution_output_link;
 
 public:
-	SnetExecutionOutputLink(const HandleSeq& oset, Type t);
+	ApplyLink(const HandleSeq& oset, Type t);
 
 	virtual ValuePtr execute(AtomSpace* as, bool silent = false);
 
 	static Handle factory(const Handle&);
 };
 
-using SnetExecutionOutputLinkPtr = std::shared_ptr<SnetExecutionOutputLink>;
+using ApplyLinkPtr = std::shared_ptr<ApplyLink>;
 
 }
 
-#endif // _OPENCOG_SNET_EXECUTION_OUTPUT_LINK_H
+#endif // _OPENCOG_APPLY_LINK_H
 
