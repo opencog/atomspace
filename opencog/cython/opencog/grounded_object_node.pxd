@@ -13,7 +13,7 @@ cdef extern from "opencog/cython/opencog/PythonGroundedObject.h":
 cdef extern from "opencog/atoms/execution/GroundedObjectNode.h" namespace "opencog":
     cdef cppclass cGroundedObjectNode "opencog::GroundedObjectNode":
         void set_object(const shared_ptr[cGroundedObject]& object)
-        cGroundedObject& get_object() const
+        cGroundedObject* get_object() except +
 
     ctypedef shared_ptr[cGroundedObjectNode] cGroundedObjectNodePtr "opencog::GroundedObjectNodePtr"
 

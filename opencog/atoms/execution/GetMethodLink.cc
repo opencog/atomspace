@@ -52,7 +52,7 @@ GetMethodLink::GetMethodLink(const HandleSeq& output_set, Type type)
 	check_outgoing_type(1, NODE);
 }
 
-GroundedObject& GetMethodLink::get_object() const
+GroundedObject* GetMethodLink::get_object() const
 {
 	return CastFromHandle<GroundedObjectNode>(getOutgoingAtom(0))->get_object();
 }
@@ -64,7 +64,7 @@ const std::string& GetMethodLink::get_method_name() const
 
 GroundedFunction GetMethodLink::get_function() const
 {
-	return get_object().get_method(get_method_name());
+	return get_object()->get_method(get_method_name());
 }
 
 auto GetMethodLinkCast = CastFromHandle<GetMethodLink>;

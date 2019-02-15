@@ -41,13 +41,14 @@ void GroundedObjectNode::set_object(const std::shared_ptr<GroundedObject>& objec
 	setValue(GroundedObjectNode::ptrKey, ValueCast(ptrValue));
 }
 
-GroundedObject& GroundedObjectNode::get_object() const
+GroundedObject* GroundedObjectNode::get_object() const
 {
-	return *static_cast<GroundedObject*>(
-			CastFromValue<PtrValue>(
-				getValue(GroundedObjectNode::ptrKey)
-			)->value()
-		);
+	ValuePtr ptr_value = getValue(GroundedObjectNode::ptrKey);
+	if (!ptr_value)
+		throw RuntimeException(TRACE_INFO,
+				"Trying to get object from empty GroundedObjectNode");
+	return static_cast<GroundedObject*>(
+			CastFromValue<PtrValue>(ptr_value)->value());
 }
 
 auto GroundedObjectNodeCast = CastFromHandle<GroundedObjectNode>;

@@ -24,8 +24,8 @@ cdef class GroundedObjectNode(Atom):
 
     def get_object(self):
         cdef cGroundedObjectNode* gon = <cGroundedObjectNode*>(self.get_c_value_ptr().get())
-        return (<cPythonGroundedObject&>(gon.get_object())).get_object()
-
+        cdef cPythonGroundedObject* py_gon = <cPythonGroundedObject*>gon.get_object()
+        return py_gon.get_object()
 
 cdef api cValuePtr call_python_method(object obj, const string& method_name,
                                       cAtomSpace* atomspace, const cValuePtr&
