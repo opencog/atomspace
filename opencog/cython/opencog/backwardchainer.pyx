@@ -39,6 +39,9 @@ cdef class BackwardChainer:
                                         deref(focus_set.handle))
         self._as = _as
 
+    def __del__(self):
+        del self.chainer
+
     def do_chain(self):
         return self.chainer.do_chain()
 
