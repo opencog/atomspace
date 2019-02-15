@@ -49,7 +49,7 @@ GetMethodLink::GetMethodLink(const HandleSeq& output_set, Type type)
 	: GroundedFunctionLink(output_set, type)
 {
 	check_outgoing_type(0, GROUNDED_OBJECT_NODE);
-	check_outgoing_type(1, CONCEPT_NODE);
+	check_outgoing_type(1, NODE);
 }
 
 GroundedObject& GetMethodLink::get_object() const
