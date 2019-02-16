@@ -32,7 +32,6 @@ using namespace opencog;
 const std::string UREConfig::top_rbs_name = "URE";
 
 // Parameters
-const std::string UREConfig::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfig::max_iter_name = "URE:maximum-iterations";
 const std::string UREConfig::complexity_penalty_name = "URE:complexity-penalty";
 const std::string UREConfig::fc_retry_exhausted_sources_name = "URE:FC:retry-exhausted-sources";
@@ -59,11 +58,6 @@ const RuleSet& UREConfig::get_rules() const
 RuleSet& UREConfig::get_rules()
 {
 	return _common_params.rules;
-}
-
-bool UREConfig::get_attention_allocation() const
-{
-	return _common_params.attention_alloc;
 }
 
 int UREConfig::get_maximum_iterations() const
@@ -101,11 +95,6 @@ std::string UREConfig::get_maximum_iterations_str() const
 	if (_common_params.max_iter < 0)
 		return "+inf";
 	return std::to_string(_common_params.max_iter);
-}
-
-void UREConfig::set_attention_allocation(bool aa)
-{
-	_common_params.attention_alloc = aa;
 }
 
 void UREConfig::set_maximum_iterations(int mi)
@@ -166,9 +155,6 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 
 	// Fetch maximum number of iterations
 	_common_params.max_iter = fetch_num_param(max_iter_name, rbs, -1);
-
-	// Fetch attention allocation parameter
-	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
 
 	// Fetch complexity penalty parameter
 	_common_params.complexity_penalty =
