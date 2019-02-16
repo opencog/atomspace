@@ -12,7 +12,6 @@ ADD_LIBRARY (smob
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
 	SchemeSmobAS.cc
-	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc

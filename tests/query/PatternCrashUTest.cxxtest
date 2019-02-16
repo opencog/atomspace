@@ -122,8 +122,8 @@ void PatternCrashUTest::test_one_thing(void)
 	             (ConceptNode "Tweety")
 	             (ConceptNode "Yello")
 	             )
-	            (BindLink (av 0 0 0)
-	             (VariableList (av 0 0 0)
+	            (BindLink
+	             (VariableList
 	              (VariableNode "$A")
 	              (VariableNode "$B")
 	              )
