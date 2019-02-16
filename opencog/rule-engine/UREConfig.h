@@ -60,7 +60,6 @@ public:
 	// Common
 	const RuleSet& get_rules() const;
 	RuleSet& get_rules();
-	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
 	double get_complexity_penalty() const;
 	// FC
@@ -79,7 +78,6 @@ public:
 	///////////////////////////////////////////////////////////////////
 
 	// Common
-	void set_attention_allocation(bool);
 	void set_maximum_iterations(int);
 	// FC
 	void set_retry_exhausted_sources(bool);
@@ -96,10 +94,6 @@ public:
 	// inherit. It should corresponds to a ConceptNode in the
 	// AtomSpace.
 	static const std::string top_rbs_name;
-
-	// Name of the PredicateNode outputting whether attention
-	// allocation is enabled or not
-	static const std::string attention_alloc_name;
 
 	// Name of the SchemaNode outputing the maximum iterations
 	// parameter
@@ -130,7 +124,6 @@ private:
 	// Parameter common to the forward and backward chainer.
 	struct CommonParameters {
 		RuleSet rules;
-		bool attention_alloc;
 		int max_iter;           // If negative then disabled
 
 		// This parameter biases source or inference tree selection

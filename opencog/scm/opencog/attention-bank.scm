@@ -18,6 +18,55 @@
 )
 
 ;; -----------------------------------------------------
+;
+(define-public (cog-new-av STI LTI VLTI)
+"
+ cog-new-av STI LTI VLTI
+    Create an AttentionValue with the given STI, LTI and VLTI.
+    Unlike atoms, attention values are ephemeral: they are
+    automatically garbage-collected when no longer needed.
+
+    Example:
+        ; Create a new attention value:
+        guile> (cog-new-av 10 20 0)
+"
+	(cog-new-value 'AttentionValue STI LTI VLTI)
+)
+
+(define-public (cog-av? EXP)
+"
+ cog-av? EXP
+    Return #t if EXP is an attention value, else return #f
+
+    Example:
+       ; Define a simple attention value
+       guile> (define x (cog-new-av 15 25 0))
+       guile> (define y (+ 2 2))
+       guile> (cog-av? x)
+       #t
+       guile> (cog-av? y)
+       #f
+"
+	(if (cog-value? EXP) (eq? (cog-type EXP) 'AttentionValue) #f)
+)
+
+(define-public (cog-av->alist AV)
+"
+ cog-av->alist AV
+    Convert an attention value AV to an association list (alist).
+
+    Example:
+       guile> (define x (cog-new-av 99 88 0))
+       guile> (cog-av->alist x)
+       ((sti . 99) (lti . 88) (vlti . 0))
+"
+	(define avl (cog-value->list AV))
+	(acons 'sti (car avl)
+	(acons 'lti (cadr avl)
+	(acons 'vlti (caddr avl) '())))
+)
+
+;; -----------------------------------------------------
 
 (set-procedure-property! cog-av 'documentation
 "
