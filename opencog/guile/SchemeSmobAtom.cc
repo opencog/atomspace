@@ -90,17 +90,6 @@ SCM SchemeSmob::ss_number (SCM satom)
 	return num;
 }
 
-SCM SchemeSmob::ss_type (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-type");
-	Type t = h->get_type();
-	const std::string &tname = nameserver().getTypeName(t);
-	SCM str = scm_from_utf8_string(tname.c_str());
-	SCM sym = scm_string_to_symbol(str);
-
-	return sym;
-}
-
 SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");

@@ -334,8 +334,8 @@
 
 (set-procedure-property! cog-type 'documentation
 "
- cog-type ATOM
-    Return the type of ATOM.
+ cog-type EXP
+    Return the type of EXP, where EXP is a Value or an Atom.
 
     Example:
        ; Define a node
@@ -835,7 +835,7 @@
 (set-procedure-property! cog-get-types 'documentation
 "
  cog-get-types
-    Return a list of all of the atom types in the system.
+    Return a list of all of the atom and value types in the system.
 
     Example:
         guile> (cog-get-types)
@@ -843,8 +843,8 @@
 
 (set-procedure-property! cog-type? 'documentation
 "
- cog-type? SYMOBL
-    Return #t if the SYMOBL names an atom type, else return #f
+ cog-type? SYMBOL
+    Return #t if the SYMBOL names a value or atom type, else return #f
 
     Example:
         guile> (cog-type? 'ConceptNode)
@@ -855,8 +855,8 @@
 
 (set-procedure-property! cog-node-type? 'documentation
 "
- cog-node-type? SYMOBL
-    Return #t if the SYMOBL names an node type, else return #f
+ cog-node-type? SYMBOL
+    Return #t if the SYMBOL names an node type, else return #f
 
     Example:
         guile> (cog-node-type? 'ConceptNode)
