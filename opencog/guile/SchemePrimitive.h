@@ -390,9 +390,9 @@ protected:
 		}
 		return rc;
 	}
-	SCM scm_from(AttentionValuePtr av)
+	SCM scm_from(const AttentionValuePtr& av)
 	{
-		return SchemeSmob::av_to_scm(av);
+		return SchemeSmob::protom_to_scm(ValueCast(av));
 	}
 	SCM scm_from(TruthValuePtr tv)
 	{
