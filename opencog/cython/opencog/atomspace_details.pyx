@@ -54,8 +54,8 @@ cdef class AtomSpace:
     def __dealloc__(self):
         if self.owns_atomspace:
             if self.atomspace:
-                del self.atomspace
                 attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
+                del self.atomspace
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):

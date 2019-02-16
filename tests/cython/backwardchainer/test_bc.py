@@ -73,6 +73,7 @@ class BCTest(TestCase):
         self.assertTrue(resultAC.tv == AB.tv)
         self.assertEquals("A", resultAC.get_out()[0].name)
         self.assertEquals("C", resultAC.get_out()[1].name)
+        del chainer
 
     def test_conjunction_fuzzy_with_virtual_evaluation(self):
         """Test for correct vardecl parameter initialization in BackwardChainer
@@ -105,6 +106,7 @@ class BCTest(TestCase):
         bc.do_chain()
         results = bc.get_results()
         self.assertTrue(len(results.get_out()) == 2)
+        del bc
 
 
 if __name__ == '__main__':

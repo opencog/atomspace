@@ -34,6 +34,7 @@ private:
 
 public:
 	BackwardChainerUTest();
+	~BackwardChainerUTest();
 
 	void setUp();
 	void tearDown();
@@ -86,6 +87,11 @@ BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
 	_eval.eval("(use-modules (opencog))");
 	_eval.eval("(use-modules (opencog rule-engine))");
 	_eval.eval("(use-modules (opencog logger))");
+}
+
+BackwardChainerUTest::~BackwardChainerUTest()
+{
+	delete _bc;
 }
 
 void BackwardChainerUTest::setUp()
