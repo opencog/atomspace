@@ -90,7 +90,6 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
-	attentionbank
 	atomspace
 	${PYTHON_LIBRARIES}
 )

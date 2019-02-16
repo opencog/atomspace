@@ -45,16 +45,13 @@ cdef class AtomSpace:
         if (addr == 0) :
             self.atomspace = new cAtomSpace()
             self.owns_atomspace = True
-            attentionbank(self.atomspace)
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
             self.owns_atomspace = False
-            attentionbank(self.atomspace)
 
     def __dealloc__(self):
         if self.owns_atomspace:
             if self.atomspace:
-                attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
                 del self.atomspace
 
     def __richcmp__(as_1, as_2, int op):
@@ -212,25 +209,6 @@ cdef class AtomSpace:
         cdef bint subt = subtype
         self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
-
-    def get_atoms_by_av(self, lower_bound, upper_bound=None):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        if upper_bound is not None:
-            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-                    lower_bound, upper_bound)
-        else:
-            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-                    lower_bound)
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-    def get_atoms_in_attentional_focus(self):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        attentionbank(self.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
-        return convert_handle_seq_to_python_list(handle_vector, self)
 
     @classmethod
     def include_incoming(cls, atoms):
