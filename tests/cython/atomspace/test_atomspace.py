@@ -278,7 +278,6 @@ class AtomTest(TestCase):
         a1 = Node("test1", tv)
 
         a2 = Node("test2")
-        a2.av = {"sti": 10, "lti": 1, "vlti": True}
         a2.tv = TruthValue(0.1, 0.3)
 
         l = Link(a1, a2)
@@ -293,7 +292,7 @@ class AtomTest(TestCase):
 
         a2_expected = "(Node \"test2\") ; [{0}]\n".format(space_uuid)
         a2_expected_long = \
-            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}]\n"\
+            "(Node \"test2\" (stv 0.100000 0.300000)) ; [{0}]\n"\
             .format(space_uuid)
 
         l_expected = \
