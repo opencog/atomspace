@@ -358,10 +358,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));
 	register_proc("cog-atomspace-rw!",     0, 1, 0, C(ss_as_mark_readwrite));
 
-	// Attention values
-	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
-
-	// Atom types
+	// Value types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));

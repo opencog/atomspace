@@ -181,9 +181,6 @@ private:
 	static std::map<AtomSpace*, int> deleteable_as;
 	static void as_ref_count(SCM, AtomSpace *);
 
-	// Attention values
-	static SCM ss_new_av(SCM, SCM, SCM);
-
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);

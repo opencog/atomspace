@@ -19,7 +19,7 @@
 
 ;; -----------------------------------------------------
 ;
-(set-procedure-property! cog-new-av 'documentation
+(define-public (cog-new-av STI LTI VLTI)
 "
  cog-new-av STI LTI VLTI
     Create an AttentionValue with the given STI, LTI and VLTI.
@@ -29,7 +29,9 @@
     Example:
         ; Create a new attention value:
         guile> (cog-new-av 10 20 0)
-")
+"
+	(cog-new-value 'AttentionValue STI LTI VLTI)
+)
 
 (define-public (cog-av? EXP)
 "
@@ -61,7 +63,7 @@
 	(define avl (cog-value->list AV))
 	(acons 'sti (car avl)
 	(acons 'lti (cadr avl)
-	(acons 'vlti (caddr avl) '()))))
+	(acons 'vlti (caddr avl) '())))
 )
 
 ;; -----------------------------------------------------
