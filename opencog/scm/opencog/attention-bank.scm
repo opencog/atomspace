@@ -31,7 +31,7 @@
         guile> (cog-new-av 10 20 0)
 ")
 
-(set-procedure-property! cog-av? 'documentation
+(define-public (cog-av? EXP)
 "
  cog-av? EXP
     Return #t if EXP is an attention value, else return #f
@@ -44,7 +44,9 @@
        #t
        guile> (cog-av? y)
        #f
-")
+"
+	(if (cog-value? EXP) (eq? (cog-type EXP) 'AttentionValue) #f)
+)
 
 (set-procedure-property! cog-av->alist 'documentation
 "

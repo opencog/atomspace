@@ -57,22 +57,6 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 }
 
 /* ============================================================== */
-/**
- * Return true if the scm is an attention value
- */
-SCM SchemeSmob::ss_av_p (SCM s)
-{
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa) return SCM_BOOL_F;
-
-	if (pa->get_type() == ATTENTION_VALUE)
-		return SCM_BOOL_T;
-
-	scm_remember_upto_here_1(s);
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
 
 AttentionValuePtr SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
 {
