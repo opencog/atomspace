@@ -58,7 +58,7 @@ cdef class Atom(Value):
             try:
                 assert isinstance(truth_value, TruthValue)
             except AssertionError:
-                raise TypeError("atom.av property needs a TruthValue object")
+                raise TypeError("atom.tv property needs a TruthValue object")
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return
