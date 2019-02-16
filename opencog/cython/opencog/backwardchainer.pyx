@@ -39,11 +39,21 @@ cdef class BackwardChainer:
                                         deref(focus_set.handle))
         self._as = _as
 
+    # according to PEP 442, the below simply won't work.
+    # def __del__(self):
+    # def __dealloc__(self):
+    #    del self.chainer
+    #    self._as = None
+
     def do_chain(self):
         return self.chainer.do_chain()
 
     def get_results(self):
         cdef cHandle res_handle = self.chainer.get_results()
         cdef Atom result = Atom.createAtom(res_handle, self._as)
-        return result
 
+        # Delete the chainer now. There does not appear to be
+        # any other way of avoiding the mem leak. See PEP 442
+        # for details.
+        del self.chainer
+        return result
