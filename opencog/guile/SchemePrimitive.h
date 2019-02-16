@@ -21,6 +21,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -280,7 +281,7 @@ protected:
 	AttentionValuePtr scm_to(SCM args, size_t idx, const AttentionValuePtr) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_protom(arg, scheme_name, idx);
+		return AttentionValueCast(SchemeSmob::verify_protom(arg, scheme_name, idx));
 	}
 	TruthValuePtr scm_to(SCM args, size_t idx, const TruthValuePtr) const
 	{
