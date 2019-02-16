@@ -23,7 +23,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/atom_types/types.h>
 
-#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -208,7 +207,6 @@ private:
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
-	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,

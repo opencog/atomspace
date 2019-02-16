@@ -280,7 +280,7 @@ protected:
 	AttentionValuePtr scm_to(SCM args, size_t idx, const AttentionValuePtr) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_av(arg, scheme_name, idx);
+		return SchemeSmob::verify_protom(arg, scheme_name, idx);
 	}
 	TruthValuePtr scm_to(SCM args, size_t idx, const TruthValuePtr) const
 	{
