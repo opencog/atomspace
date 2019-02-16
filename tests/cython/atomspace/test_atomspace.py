@@ -222,15 +222,6 @@ class AtomTest(TestCase):
         a.tv = TruthValue(0.1, 10)
         self.assertEqual(a.tv, TruthValue(0.1, 10))
 
-    def test_w_attention_value(self):
-        a = Node("test2")
-
-        self.assertEqual(a.av, {'lti': 0, 'sti': 0, 'vlti': False})
-
-        # test set av
-        a.av = { "sti": 10, "lti": 1, "vlti": True }
-        self.assertEqual(a.av, {'sti': 10, 'lti': 1, 'vlti': True})
-
     def test_out(self):
         # test get out
         a1 = Node("test2")
