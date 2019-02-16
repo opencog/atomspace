@@ -102,8 +102,6 @@ cdef class TruthValue(Value):
 
 
 # Atom
-ctypedef public short av_type
-
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
     pass
 
