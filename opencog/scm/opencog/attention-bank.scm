@@ -48,7 +48,7 @@
 	(if (cog-value? EXP) (eq? (cog-type EXP) 'AttentionValue) #f)
 )
 
-(set-procedure-property! cog-av->alist 'documentation
+(define-public (cog-av->alist AV)
 "
  cog-av->alist AV
     Convert an attention value AV to an association list (alist).
@@ -57,7 +57,12 @@
        guile> (define x (cog-new-av 99 88 0))
        guile> (cog-av->alist x)
        ((sti . 99) (lti . 88) (vlti . 0))
-")
+"
+	(define avl (cog-value->list AV))
+	(acons 'sti (car avl)
+	(acons 'lti (cadr avl)
+	(acons 'vlti (caddr avl) '()))))
+)
 
 ;; -----------------------------------------------------
 

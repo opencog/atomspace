@@ -69,27 +69,4 @@ AttentionValuePtr SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
 	return av;
 }
 
-/**
- * Return association list holding contents of an attention value
- */
-SCM SchemeSmob::ss_av_get_value (SCM s)
-{
-	AttentionValuePtr av = verify_av(s, "cog-av->alist");
-
-	SCM sti =scm_from_double(av->getSTI());
-	SCM lti = scm_from_double(av->getLTI());
-	SCM vlti = scm_from_double(av->getVLTI());
-
-	SCM ssti = scm_from_utf8_symbol("sti");
-	SCM slti = scm_from_utf8_symbol("lti");
-	SCM svlti = scm_from_utf8_symbol("vlti");
-	scm_remember_upto_here_1(s);
-
-	SCM rc = SCM_EOL;
-	rc = scm_acons(svlti, vlti, rc);
-	rc = scm_acons(slti, lti, rc);
-	rc = scm_acons(ssti, sti, rc);
-	return rc;
-}
-
 /* ===================== END OF FILE ============================ */

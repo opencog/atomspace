@@ -183,7 +183,6 @@ private:
 
 	// Attention values
 	static SCM ss_new_av(SCM, SCM, SCM);
-	static SCM ss_av_get_value(SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
