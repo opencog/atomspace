@@ -15,38 +15,6 @@
 using namespace opencog;
 
 /* ============================================================== */
-/**
- * Search for an attention value in a list of values.
- * Return the attention value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
- */
-AttentionValuePtr SchemeSmob::get_av_from_list(SCM slist)
-{
-	while (scm_is_pair(slist))
-	{
-		SCM sval = SCM_CAR(slist);
-		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
-		{
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			switch (misctype)
-			{
-				case COG_PROTOM: {
-					ValuePtr pa(scm_to_protom(sval));
-					AttentionValuePtr av(AttentionValueCast(pa));
-					if (av) return av;
-				}
-				default:
-					break;
-			}
-		}
-
-		slist = SCM_CDR(slist);
-	}
-
-	return nullptr;
-}
-
-/* ============================================================== */
 
 std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 {

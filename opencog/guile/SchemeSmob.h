@@ -196,7 +196,6 @@ private:
 	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
-	static AttentionValuePtr get_av_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
 
 	// Logger
