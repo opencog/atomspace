@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/AttentionValueOfLink.h
+ * opencog/attentionbank/avalue/AttentionValueOfLink.h
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
