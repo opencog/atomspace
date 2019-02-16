@@ -56,7 +56,7 @@ void TVUTest::test_guile()
 
 	SchemeEval eval(&_as);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	std::string rv = eval.eval("(use-modules (opencog attention-bank))");
+	std::string rv = eval.eval("(use-modules (opencog))");
 	TS_ASSERT(not eval.eval_error());
 	printf("Result from use-modules is %s\n", rv.c_str());
 	rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-test.scm\")");
