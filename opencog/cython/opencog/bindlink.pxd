@@ -7,9 +7,3 @@ cdef extern from "opencog/atoms/execution/EvaluationLink.h" namespace "opencog":
 
 cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
     cdef cHandle c_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
-
-cdef extern from "opencog/attentionbank/AFImplicator.h" namespace "opencog":
-    # C++:
-    #   Handle af_bindlink(AtomSpace*, Handle);
-    #
-    cdef cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, cHandle)

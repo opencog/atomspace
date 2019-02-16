@@ -3,13 +3,6 @@ from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
 from opencog.atomspace cimport tv_ptr, strength_t, count_t
 from cython.operator cimport dereference as deref
 
-def af_bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("af_bindlink atom is: None")
-    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
-                                          deref(atom.handle))
-    cdef Atom result = Atom.createAtom(c_result, atomspace)
-    return result
-
 def execute_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("execute_atom atom is: None")
     cdef cHandle c_result = c_execute_atom(atomspace.atomspace,
