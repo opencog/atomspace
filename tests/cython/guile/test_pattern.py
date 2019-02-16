@@ -35,16 +35,19 @@ class SchemeTest(TestCase):
     # Make sure the loaded atom is what we think it is.
     def test_b_load_file(self):
 
+        print("Enter load-file test\n")
         status = scheme_eval(self.space, '(load-from-path "tests/cython/guile/basic_unify.scm")')
         self.assertTrue(status)
 
+        print("Loaded file\n")
         a1 = self.space.add_node(types.ConceptNode, "hello")
         self.assertTrue(a1)
 
+        print("Added atom\n")
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
         self.assertEquals(a1.tv, expected)
-        # print a1.tv, expected
+        print("Got=" + str(a1.tv) + " expected=" + str(expected))
 
     # Run some basic evaluation tests
     def test_c_eval(self):
