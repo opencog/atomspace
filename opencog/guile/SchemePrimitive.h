@@ -394,9 +394,9 @@ protected:
 	{
 		return SchemeSmob::protom_to_scm(ValueCast(av));
 	}
-	SCM scm_from(TruthValuePtr tv)
+	SCM scm_from(const TruthValuePtr& tv)
 	{
-		return SchemeSmob::tv_to_scm(tv);
+		return SchemeSmob::protom_to_scm(ValueCast(tv));
 	}
 	SCM scm_from(const ValuePtr& pa)
 	{

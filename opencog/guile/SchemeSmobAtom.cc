@@ -107,7 +107,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	return tv_to_scm(h->getTruthValue());
+	return protom_to_scm(ValueCast(h->getTruthValue()));
 }
 
 /**

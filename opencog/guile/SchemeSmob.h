@@ -72,7 +72,6 @@ private:
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ValuePtr&);
-	static SCM tv_to_scm(const TruthValuePtr&);
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static ValuePtr make_value(Type, SCM);
