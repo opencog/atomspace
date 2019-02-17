@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
 	ArityLink.cc
-	AttentionValueOfLink.cc
 	Checkers.cc
 	CondLink.cc
 	Context.cc

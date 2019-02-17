@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
 #include "AttentionValueOfLink.h"
 
 using namespace opencog;

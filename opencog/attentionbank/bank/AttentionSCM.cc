@@ -9,7 +9,7 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/guile/SchemePrimitive.h>
 
 namespace opencog {
@@ -24,7 +24,7 @@ class AttentionSCM
 		AttentionSCM(void);
 		~AttentionSCM();
 
-		AttentionValuePtr get_av(const Handle&);
+		ValuePtr get_av(const Handle&);
 		Handle set_av(const Handle&, const ValuePtr&);
 		Handle inc_vlti(const Handle&);
 		Handle dec_vlti(const Handle&);
@@ -42,7 +42,7 @@ class AttentionSCM
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/attentionbank/AFImplicator.h>
+#include <opencog/attentionbank/bank/AFImplicator.h>
 
 using namespace opencog;
 
@@ -92,9 +92,9 @@ AttentionSCM::~AttentionSCM()
 {
 }
 
-AttentionValuePtr AttentionSCM::get_av(const Handle& h)
+ValuePtr AttentionSCM::get_av(const Handle& h)
 {
-	return opencog::get_av(h);
+	return ValueCast(opencog::get_av(h));
 }
 
 Handle AttentionSCM::set_av(const Handle& h, const ValuePtr& av)
