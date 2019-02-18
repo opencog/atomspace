@@ -10,7 +10,6 @@
 ;; Define the rule base ci-rbs by inheriting from the predefined top
 ;; rule base call "URE"
 (define ci-rbs (ConceptNode "ci-rbs"))
-(Inheritance ci-rbs (ConceptNode "URE"))
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
