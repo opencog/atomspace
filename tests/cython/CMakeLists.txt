@@ -117,7 +117,7 @@ MESSAGE(STATUS "duuuude Nose: ${NOSETESTS_EXECUTABLE}")
 MESSAGE(STATUS "duuude cmake: ${CMAKE_SOURCE_DIR}")
 #		ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
 #			${CMAKE_SOURCE_DIR}/tests/cython/guile/)
-		ADD_TEST(CythonGuile gdb python3 -x gdb.cmds)
+		ADD_TEST(CythonGuile gdb -batch -x gdb.cmds python3)
 		SET_PROPERTY(TEST CythonGuile
 			PROPERTY ENVIRONMENT "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
 				"PYTHONDONTWRITEBYTECODE=1"
