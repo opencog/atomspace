@@ -767,7 +767,7 @@ bool PatternLink::add_dummies()
 /// to to connect evaluatable terms.  Thus, for example, for a clause
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable. Tracning halts as soon as something that isn't a
+/// evaluatable. Tracing halts as soon as something that isn't a
 /// connective is encountered.
 void PatternLink::trace_connectives(const TypeSet& connectives,
                                     const Handle& term,
