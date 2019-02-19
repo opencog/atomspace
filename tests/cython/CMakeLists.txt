@@ -95,8 +95,9 @@ IF (HAVE_NOSETESTS)
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
 
-		ADD_TEST(CythonForwardchainer ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
+		ADD_TEST(CythonForwardchainer gdb -batch -x /ws/atomspace/tests/cython/gdb.bc.cmds python3)
+		# ADD_TEST(CythonForwardchainer ${NOSETESTS_EXECUTABLE} -vs
+		#	${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
 		SET_PROPERTY(TEST CythonForwardchainer
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"

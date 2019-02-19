@@ -1,0 +1,5 @@
+handle SIGPWR nostop noprint
+handle SIGXCPU nostop noprint
+r /usr/bin/nosetests3 -vs /ws/atomspace/tests/cython/backwardchainer/
+bt
+q
