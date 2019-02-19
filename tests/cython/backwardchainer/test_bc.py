@@ -41,12 +41,16 @@ class BCTest(TestCase):
     def test_bc_deduction(self):
         """port of crisp.scm from examples/rule-engine/simple"""
 
+        print ("Enter test_bc_deduction")
         self.init()
 
+        print ("test_bc_deduction: pre scheme eval")
         scheme_eval(self.atomspace, '(use-modules (opencog))')
         scheme_eval(self.atomspace, '(use-modules (opencog exec))')
         scheme_eval(self.atomspace, '(use-modules (opencog rule-engine))')
+        print ("test_bc_deduction: pre scheme load")
         scheme_eval(self.atomspace, '(load-from-path "bc-deduction-config.scm")')
+        print ("test_bc_deduction: post scheme load")
 
         A = ConceptNode("A", TruthValue(1, 1))
         B = ConceptNode("B")
@@ -56,14 +60,18 @@ class BCTest(TestCase):
         BC = InheritanceLink(B, C)
         BC.tv = TruthValue(1, 1)
         crisprbs = ConceptNode("crisp-rule-base")
-        InheritanceLink(crisprbs, ConceptNode("URE"))
+        # InheritanceLink(crisprbs, ConceptNode("URE"))
+        print ("test_bc_deduction: pre backchain ctor")
         chainer = BackwardChainer(self.atomspace,
                                   ConceptNode("URE"),
                                   InheritanceLink(VariableNode("$who"), C),
                                   TypedVariableLink(VariableNode("$who"), TypeNode("ConceptNode")))
 
+        print ("test_bc_deduction: post backchain ctor")
         chainer.do_chain()
+        print ("test_bc_deduction: post chaining")
         results = chainer.get_results()
+        print ("test_bc_deduction: post results")
         resultAC = None
         for result in results.get_out():
             if result.get_out()[0].name == "A":
