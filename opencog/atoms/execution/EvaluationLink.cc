@@ -30,6 +30,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -320,20 +321,15 @@ static TruthValuePtr eval_formula(const Handle& predform,
 	return createSimpleTruthValue(nums);
 }
 
-
+/** Return true if the SatisfactionLink can be "trivially" evaluated. */
 static bool is_evaluatable_sat(const Handle& satl)
 {
 	if (1 != satl->get_arity())
 		return false;
 
-	return false;
-#if 0
-XXX Fixme -- this is a desirable optimization, but we cannot make it
-here.
 	PatternLinkPtr plp(PatternLinkCast(satl));
 
 	return 0 == plp->get_variables().varseq.size();
-#endif
 }
 
 /** Return true, if `thish` is tail-recursive */
