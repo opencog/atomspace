@@ -49,8 +49,33 @@ class SchemeTest(TestCase):
         self.assertEquals(a1.tv, expected)
         print("Got=" + str(a1.tv) + " expected=" + str(expected))
 
+    # Create lots of large, random strings, try to trick guile gc
+    # into running, while in the python context. We want to make
+    # sure that gc works while we are in the python interpreter.
+    # Guile gc uses the SIGPWR and SIGXCPU signals, which seems
+    # to sometimes manifest in strange circle-ci failures!? ???
+    def test_c_gc(self):
+        print("Enter garbage-collection-test\n")
+        status = scheme_eval(self.space, '(define n 0)')
+        self.assertTrue(status)
+        status = scheme_eval(self.space, """
+            (for-each
+                (lambda (y)
+                    (let* ((bigstr (list->string (map
+                                (lambda (x)
+                                    (integer->char (+ 48 (modulo (+ x y) 79))))
+                                (iota 900))))
+                           (biglst (string->list bigstr))
+                           (revstr (reverse-list->string biglst)))
+                        (set! n (+ 1 n))))
+                    (iota 2000))""")
+        self.assertTrue(status)
+        status = scheme_eval(self.space, '(gc-stats)')
+        self.assertTrue(status)
+        print("Finish garbage-coolection-test\n")
+
     # Run some basic evaluation tests
-    def test_c_eval(self):
+    def test_d_eval(self):
         basic = scheme_eval_h(self.space,
             "(ConceptNode \"whatever\" (stv 0.5 0.5))")
 
