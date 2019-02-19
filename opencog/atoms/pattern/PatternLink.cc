@@ -639,6 +639,16 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+#if DONT_DO_THIS_ANY_MORE
+The code that is if-defed out here does not seem to be a good idea.
+Or rather, I cannot currently think of a good use-case for it.
+If code needs to be executed before a pattern match is performed, then
+maybe one should ... do it some other way? Instead of doing it
+automatically? Or something?  The below seems like a half-baked,
+incomplete idea for something neat, but that was never fully thought
+out, spec'ed, implmeneted, documented, explained... So I'm commenting
+it out.
+
 		// Subclasses of FunctionLink, e.g. ExecutionOutputLink,
 		// but also PlusLink, TimesLink are all executable. They
 		// need to be executed *before* pattern matching, but after
@@ -674,6 +684,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
+#endif
 
 		if (is_virtual)
 			virtual_clauses.emplace_back(clause);
