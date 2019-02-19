@@ -81,10 +81,11 @@ void SchemeSmob::release_as (AtomSpace *as)
 		// We had incremented it earlier, in `ss_new_as`, when
 		// creating it. Do not delete it, unless the guile gc
 		// asks us to.
-		if (env and deleteable_as.end() != deleteable_as.find(env))
+		while (env and deleteable_as.end() != deleteable_as.find(env))
 		{
 			if (0 < deleteable_as[env])
 				--deleteable_as[env];
+			env = env->get_environ();
 		}
 	}
 }
@@ -304,34 +305,34 @@ SCM SchemeSmob::ss_get_as (void)
 void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
 {
 	AtomSpace* oas = ss_to_atomspace(old_as);
-	if (oas != nas)
+	if (oas == nas) return;
+
+	std::lock_guard<std::mutex> lck(as_mtx);
+	if (deleteable_as.end() != deleteable_as.find(nas))
 	{
-		std::lock_guard<std::mutex> lck(as_mtx);
-		if (deleteable_as.end() != deleteable_as.find(nas))
+		++deleteable_as[nas];
+	}
+	else
+	{
+		AtomSpace* env = nas->get_environ();
+		if (env and deleteable_as.end() != deleteable_as.find(env))
+			++deleteable_as[env];
+	}
+
+	if (oas)
+	{
+		if (deleteable_as.end() != deleteable_as.find(oas))
 		{
-			++deleteable_as[nas];
+			if (0 < deleteable_as[oas])
+				--deleteable_as[oas];
 		}
 		else
 		{
-			AtomSpace* env = nas->get_environ();
+			AtomSpace* env = oas->get_environ();
 			if (env and deleteable_as.end() != deleteable_as.find(env))
-				++deleteable_as[env];
-		}
-		if (oas)
-		{
-			if (deleteable_as.end() != deleteable_as.find(oas))
 			{
-				if (0 < deleteable_as[oas])
-					--deleteable_as[oas];
-			}
-			else
-			{
-				AtomSpace* env = oas->get_environ();
-				if (env and deleteable_as.end() != deleteable_as.find(env))
-				{
-					if (0 < deleteable_as[env])
-						--deleteable_as[env];
-				}
+				if (0 < deleteable_as[env])
+					--deleteable_as[env];
 			}
 		}
 	}
@@ -365,7 +366,13 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	as_ref_count(ss_get_as(), nas);
+	// Do NOT do the following: it is tempting, but wrong.
+	// as_ref_count(ss_get_as(), nas);
+	// Why? Because this function is called from the evaluator, only,
+	// and it's likely that the use-count on "saved_as" will drop to
+	// zero, which would be undesirable. At any rate, the calls to
+	// this function always come in matched pairs, so its pointless
+	// to do more than the minimum amount of work.
 
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }

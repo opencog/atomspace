@@ -67,11 +67,14 @@ class BCTest(TestCase):
                                   InheritanceLink(VariableNode("$who"), C),
                                   TypedVariableLink(VariableNode("$who"), TypeNode("ConceptNode")))
 
+        scheme_eval(self.atomspace, '(gc)')
         print ("test_bc_deduction: post backchain ctor")
         chainer.do_chain()
         print ("test_bc_deduction: post chaining")
+        scheme_eval(self.atomspace, '(gc)')
         results = chainer.get_results()
         print ("test_bc_deduction: post results")
+        scheme_eval(self.atomspace, '(gc)')
         resultAC = None
         for result in results.get_out():
             if result.get_out()[0].name == "A":
