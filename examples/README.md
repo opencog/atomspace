@@ -25,7 +25,4 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 * c++-api       - Examples of using the C++ programming API. The use of
                   C++ is discouraged for all but subsystem maintainers.
 
-* c++-attentionbank - Examples of using the C++ programming API to the
-                  Economic Attention Allocation (ECAN) subsystem.
-
 * c++-guile     - Example of how to create a guile wrapper for C++ code.
