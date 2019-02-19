@@ -32,6 +32,7 @@ INSTALL (FILES
 	AFImplicator.h
 	AtomBins.h
 	AttentionBank.h
+	AttentionalFocusCB.h
 	AVUtils.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
