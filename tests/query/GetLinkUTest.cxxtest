@@ -350,7 +350,7 @@ void GetLinkUTest::test_quote_equal(void)
 /*
  * Basic PlusLink pattern with GetLink unit test.
  */
-void ExecutablePatternUTest::test_plus_pattern_get(void)
+void GetLinkUTest::test_plus_pattern_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
