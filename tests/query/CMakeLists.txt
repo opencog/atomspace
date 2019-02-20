@@ -54,6 +54,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
+	ADD_CXXTEST(ExecutablePatternUTest)
 	ADD_CXXTEST(NotLinkUTest)
 	ADD_CXXTEST(GetStateUTest)
 	ADD_CXXTEST(DeepTypeUTest)
@@ -134,6 +135,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/disco-vars.scm
     ${PROJECT_BINARY_DIR}/tests/query/disco-vars.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/executable-pattern.scm
+		${PROJECT_BINARY_DIR}/tests/query/executable-pattern.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm
     ${PROJECT_BINARY_DIR}/tests/query/finite-state-machine.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/get-link.scm
