@@ -170,29 +170,32 @@ exciting directions to pursue. The system is clean and flexible, and
 ready to move up to the next level.
 
 ### Atoms and Values
-Currently, one of the primary conceptual and performance splits
-are between "Atoms" and "Values". Atoms are:
+One of the primary conceptual distinctions in Atomese are between
+"Atoms" and "Values". The distinction is made for both usability and
+performance.  Atoms are:
 
 * Used to represent graphs, networks, and long-term stable graphical relations.
-* Indexed (by the AtomSpace) and enable the rapid search and traversal of graphs.
+* Indexed (by the AtomSpace), which enables the rapid search and traversal of graphs.
 * Globally unique, and thus unambiguous anchor points for data.
 * Immutable: can only be created and destroyed, and are effectively static and unchanging.
-* Large, bulky, heavy-weight.
+* Large, bulky, heavy-weight (because indexes are neccessarily bulky).
 
 By contrast, Values, and valuations in general, are:
 * A way of holding on to rapidly-changing data, including streaming data.
 * Hold "truth values" and "probabilities", which change over time as new
   evidence is accumulated.
-* Provide a per-Atom key-value store (noSQL database).
+* Provide a per-Atom key-value store (a mini noSQL database per-Atom).
 * Are not indexed, and are accessible only by direct reference.
-* Small, fast, fleeting.
+* Small, fast, fleeting (no indexes!)
 
 Thus, for example, a piece of knowledge, or some proposition would be
 stored as an Atom.  As new evidence accumulates, the truth value of the
 proposition is adjusted. Other fleeting changes, or general free-form
 annotations can be stored as Values.  Essentially, the AtomSpace looks
 like a database-of-databases; each atom is a key-value database; the
-atoms are related to one-another as a graph.
+atoms are related to one-another as a graph. The graph is searchable,
+editable; it holds rules and relations and ontologies and axioms.
+Values are the data that stream and flow through this network.
 
 ### More info
 The primary documentation for the atomspace and Atomese is here:
@@ -207,24 +210,29 @@ The main project site is at https://opencog.org
 
 New Developers; Pre-requisite skills
 ====================================
+Most users should almost surely focus thier attention on one of the
+high-level systems built on top of the AtomSpace. The rest of this
+section is aimed at anyone who wants to work *inside* of the AtomSpace.
+
+Most users/developers should think of the AtomSpace as being kind-of-like
+an operating system kernel, or the guts of a database: its complex, and
+you don't need to know how the innards work to use the system. These
+innards are best left to committed systems programmers and research
+scientists; there is no easy way for junior programmers to participate,
+at least, not without a lot of hard work and study.  Its incredibly
+exciting, though, if you know what you're doing.
+
 The AtomSpace is a relatively mature system, and thus fairly complex.
 Because other users depend on it, it is not very "hackable"; it needs
 to stay relatively stable.  Despite this, it is simultaneously a
 research platform for discovering the proper way of adequately
 representing knowledge in a way that is useful for general intelligence.
 It turns out that knowledge representation is not easy.  This project
-is a good place to explore it, if you're interested in that sort of thing.
-
-Most developers should think of the AtomSpace as being kind-of-like an
-operating system kernel, or the guts of a database: its complex, and
-you don't need to know how the innards work to use the system. These
-innards are best left to committed systems programmers and research
-scientists; there is no easy way for junior programmers to participate,
-at least, not without a lot of hard work and study.
+is a -good- excellent place to explore it, if you're interested in that
+sort of thing.
 
 Experience in any of the following areas will make things easier for
-you; in fact, if you are good at any of these, please seriously consider
-joining the project.
+you; in fact, if you are good at any of these ... we want you. Bad.
 
 * Database internals; query optimization.
 * Logic programming; Prolog.
@@ -234,16 +242,23 @@ joining the project.
 * Theorem-proving systems; Type theory.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
+* GPU processing pipelines, lighting-shading piplelines, CUDA, OpenCL.
+* Dataflow in GPU's for neural bets.
 
-Basically, Atomese is a mash-up of ideas taken from all of the above fields.
-It's kind-of trying to do and be all of these, all at once, and to find the
-right balance between all of them. Again: the goal is knowledge representation
-for general intelligence. Building something that the AGI developers can use.
+Basically, Atomese is a mash-up of ideas taken from all of the above
+fields.  It's kind-of trying to do and be all of these, all at once,
+and to find the right balance between all of them. Again: the goal is
+knowledge representation for general intelligence. Building something
+that the AGI developers can use.
+
+We've gotten quite far; we've got a good, clean code-base, more-or-less,
+and we're ready to kick it to the next level. The above gives a hint of
+the directions that are now open and ready to be explored.
 
 If you don't have at least some fair grounding in one of the above,
 you'll be lost, and find it hard to contribute.  If you do know something
 about any of these topics, then please dive into the open bug list. Fixing
-bugs is the #1 best way of learning the internals of a system.
+bugs is the #1 best way of learning the internals of any system.
 
 Key Development Goals
 =====================
@@ -355,19 +370,19 @@ Essentially all Linux distributions will provide these packages.
 
 ###### guile
 * Embedded scheme REPL (version 2.2.2 or newer is required)
-* https://www.gnu.org/software/guile/guile.html 
-* For ubuntu bionic/cosmic  `apt-get install guile-2.2-dev` 
+* https://www.gnu.org/software/guile/guile.html
+* For ubuntu bionic/cosmic  `apt-get install guile-2.2-dev`
+
+###### cxxtest
+* Test framework
+* Required for running unit tests. Breaking unit tests is verboten!
+* https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ### Optional Prerequisites
 
 The following packages are optional. If they are not installed, some
 optional parts of the AtomSpace will not be built.  The CMake command,
 during the build, will be more precise as to which parts will not be built.
-
-###### cxxtest
-* Test framework
-* Optional but recommended; required for running unit tests.
-* https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ###### Cython
 * C bindings for Python. (version 0.23 or higher)
@@ -405,7 +420,9 @@ Perform the following steps at the shell prompt:
     mkdir build
     cd build
     cmake ..
-    make -j4
+    make -j
+    sudo make install
+    make -j test
 ```
 Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.
@@ -416,7 +433,11 @@ the structure of the source directory root.
 To build and run the unit tests, from the `./build` directory enter
 (after building opencog as above):
 ```
-    make -j4 test ARGS=-j4
+    make -j test
+```
+Most tests (just not the database tests) can be run in parallel:
+```
+    make -j test ARGS=-j4
 ```
 
 ### Install
@@ -442,7 +463,7 @@ implementation.  An extensive set of examples can be found in the
 Python is more familiar than scheme to most programmers, and it offers
 another way of interfacing to the atomspace. Unfortunately, it is not
 as easy and simple to use as scheme; it also has various technical issues.
-Thus it is significantly less-used than scheme in the OpenCog project.
+Thus, it is significantly less-used than scheme in the OpenCog project.
 None-the-less, it remains vital for various applications. See the
 [`/examples/python`](/examples/python) directory for how to use python
 with the AtomSpace.
