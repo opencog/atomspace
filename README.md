@@ -2,21 +2,19 @@ OpenCog AtomSpace
 =================
 
 <!--
+XXX FIXME find the correct IP addr.
 master:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-master)](http://61.92.69.39:8080/job/ci-atomspace-master)
 stable:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-stable)](http://61.92.69.39:8080/job/ci-atomspace-stable)
 -->
 
-The OpenCog AtomSpace is a knowledge representation (KR) database and
-the associated query/reasoning engine to fetch and manipulate that data,
-and perform reasoning on it. Data is represented in the form of graphs,
-and more generally, as hypergraphs; thus the AtomSpace is a kind of
-graph database, the query engine is a general graph re-writing system,
-and the rule-engine is a generalized rule-driven inferencing system.
-The vertices and edges of a graph, known as "Atoms", are used to
-represent not only "data", but also "procedures"; thus, many graphs
-are executable programs as well as data structures.
+The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
+database, an associated query engine and graph-re-writing system,
+and a rule-driven inferencing engine that can apply and manipulate
+sequences of rules to perform reasoning. It is a layer that sits
+on top of ordinary distrbuted (graph) databases, providing a large
+variety of advanced features not otherwise available.
 
 The AtomSpace is a platform for building Artificial General Intelligence
 (AGI) systems. It provides the central knowledge representation component
@@ -24,9 +22,42 @@ for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
 
-However, it turns out that knowledge representation is hard, and so the
-AtomSpace is also a platform for active scientific research on knowledge
-representation, knowledge discovery and knowledge manipulation.
+Data as Graphs
+==============
+Data is represented in the form of graphs; more precisely, as typed,
+directed hypergraphs.  The vertices and edges of a graph, known as
+"Atoms", are used to represent not only "data", but also "procedures";
+thus, many graphs are executable programs as well as data structures.
+Associated with each Atom (each vertex or edge of the graph) is a
+key-value database, meant for hold transient, (rapidly) time-varying
+"Values", ideal for holding audio or video streams, or even GPU
+processing streams, such as deep-learning, dataflow networks.
+
+The query language allows arbitrarily-complex queries to be specified,
+joining together arbitrary subgraphs with arbitrary relations between
+variables. Unlike any other graph database, the queries are themselves
+represented as graphs, and so can be stored in the AtomSpace. This
+enables numerous new possiblities. Just like ordinary databases, a
+a single query can find all matching graphs. Unlike others, this
+can be run in reverse: a single graph can be used to find all
+queries that would have matched it. Reverse queries are extremely
+common in chatbot systems, where one must fish out a limited set of
+rules from out of a big sea of possibilities. We beleive that (as of
+this writing) that there is no other general-purpose database system
+out there that supports reverse queries.
+
+But this is just the tip of the iceberg. There's much more.  There are
+many features in the AtomSpace that are not found in ordinary graph
+databases or other systems.  Thus, the AtomSpace can be thought of as
+a processing layer on top of existing distributed processing systems,
+providing a number of advanced features and capabilities.
+
+As it turns out that knowledge representation is hard, so it also turns
+out that the AtomSpace is a platform for active scientific research
+on knowledge representation, knowledge discovery and knowledge
+amanipulation.  If you are comfortable with extremely complex
+mathematical theory, and just also happen to be extremely comfortable
+writing code, you are invited -- encouraged -- to join the project.
 
 
 Using Atomese and the AtomSpace
