@@ -13,7 +13,7 @@ The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
 database, an associated query engine and graph-re-writing system,
 and a rule-driven inferencing engine that can apply and manipulate
 sequences of rules to perform reasoning. It is a layer that sits
-on top of ordinary distrbuted (graph) databases, providing a large
+on top of ordinary distributed (graph) databases, providing a large
 variety of advanced features not otherwise available.
 
 The AtomSpace is a platform for building Artificial General Intelligence
@@ -37,12 +37,12 @@ The query language allows arbitrarily-complex queries to be specified,
 joining together arbitrary subgraphs with arbitrary relations between
 variables. Unlike any other graph database, the queries are themselves
 represented as graphs, and so can be stored in the AtomSpace. This
-enables numerous new possiblities. Just like ordinary databases, a
+enables numerous new possibilities. Just like ordinary databases, a
 a single query can find all matching graphs. Unlike others, this
 can be run in reverse: a single graph can be used to find all
 queries that would have matched it. Reverse queries are extremely
 common in chatbot systems, where one must fish out a limited set of
-rules from out of a big sea of possibilities. We beleive that (as of
+rules from out of a big sea of possibilities. We believe that (as of
 this writing) that there is no other general-purpose database system
 out there that supports reverse queries.
 
@@ -55,7 +55,7 @@ providing a number of advanced features and capabilities.
 As it turns out that knowledge representation is hard, so it also turns
 out that the AtomSpace is a platform for active scientific research
 on knowledge representation, knowledge discovery and knowledge
-amanipulation.  If you are comfortable with extremely complex
+manipulation.  If you are comfortable with extremely complex
 mathematical theory, and just also happen to be extremely comfortable
 writing code, you are invited -- encouraged -- to join the project.
 
@@ -137,7 +137,7 @@ intermediate language, something you might find inside of a compiler,
 a bit like CIL or Gimple. However, it is both far more flexible and
 powerful than these, and also far less efficient. Adventurous souls
 are invited to create a compiler to GNU Lighting, CIL, Java bytecode
-or the bytcode of your choice; or maybe to a GPU backend, or even
+or the bytecode of your choice; or maybe to a GPU backend, or even
 more complex data-processing systems, such as TensorFlow.
 
 In its current form, Atomese was primarily designed to allow the
@@ -178,7 +178,7 @@ performance.  Atoms are:
 * Indexed (by the AtomSpace), which enables the rapid search and traversal of graphs.
 * Globally unique, and thus unambiguous anchor points for data.
 * Immutable: can only be created and destroyed, and are effectively static and unchanging.
-* Large, bulky, heavy-weight (because indexes are neccessarily bulky).
+* Large, bulky, heavy-weight (because indexes are necessarily bulky).
 
 By contrast, Values, and valuations in general, are:
 * A way of holding on to rapidly-changing data, including streaming data.
@@ -210,7 +210,7 @@ The main project site is at https://opencog.org
 
 New Developers; Pre-requisite skills
 ====================================
-Most users should almost surely focus thier attention on one of the
+Most users should almost surely focus their attention on one of the
 high-level systems built on top of the AtomSpace. The rest of this
 section is aimed at anyone who wants to work *inside* of the AtomSpace.
 
@@ -242,7 +242,7 @@ you; in fact, if you are good at any of these ... we want you. Bad.
 * Theorem-proving systems; Type theory.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
-* GPU processing pipelines, lighting-shading piplelines, CUDA, OpenCL.
+* GPU processing pipelines, lighting-shading pipelines, CUDA, OpenCL.
 * Dataflow in GPU's for neural bets.
 
 Basically, Atomese is a mash-up of ideas taken from all of the above
@@ -309,7 +309,7 @@ some important design decisions to be made. Developers have not begun
 to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
-2018-2022 timeframe.
+2018-2022 time-frame.
 
 
 ### Sheaf theory
@@ -371,7 +371,7 @@ Essentially all Linux distributions will provide these packages.
 ###### guile
 * Embedded scheme REPL (version 2.2.2 or newer is required)
 * https://www.gnu.org/software/guile/guile.html
-* For ubuntu bionic/cosmic  `apt-get install guile-2.2-dev`
+* For Ubuntu bionic/cosmic  `apt-get install guile-2.2-dev`
 
 ###### cxxtest
 * Test framework
