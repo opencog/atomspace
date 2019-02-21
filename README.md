@@ -170,7 +170,7 @@ exciting directions to pursue. The system is clean and flexible, and
 ready to move up to the next level.
 
 ### Atoms and Values
-One of the primary conceptual distinctions in Atomese are between
+One of the primary conceptual distinctions in Atomese is between
 "Atoms" and "Values". The distinction is made for both usability and
 performance.  Atoms are:
 
