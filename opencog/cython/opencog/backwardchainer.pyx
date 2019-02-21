@@ -12,6 +12,8 @@ from ure cimport cBackwardChainer
 cdef class BackwardChainer:
     cdef cBackwardChainer * chainer
     cdef AtomSpace _as
+    cdef AtomSpace _trace_as
+    cdef AtomSpace _control_as
 # scheme interface
 #    (define* (cog-bc rbs target
 #                 #:key
@@ -38,12 +40,8 @@ cdef class BackwardChainer:
                                         <cAtomSpace*> (NULL if control_as is None else control_as.atomspace),
                                         deref(focus_set.handle))
         self._as = _as
-
-    # according to PEP 442, the below simply won't work.
-    # def __del__(self):
-    # def __dealloc__(self):
-    #    del self.chainer
-    #    self._as = None
+        self._trace_as = trace_as
+        self._control_as = control_as
 
     def do_chain(self):
         return self.chainer.do_chain()
@@ -51,9 +49,11 @@ cdef class BackwardChainer:
     def get_results(self):
         cdef cHandle res_handle = self.chainer.get_results()
         cdef Atom result = Atom.createAtom(res_handle, self._as)
-
-        # Delete the chainer now. There does not appear to be
-        # any other way of avoiding the mem leak. See PEP 442
-        # for details.
-        del self.chainer
         return result
+
+    def __dealloc__(self):
+        self._control_as = None
+        self._trace_as = None
+        self._as = None
+        del self.chainer
+
