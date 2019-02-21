@@ -195,7 +195,9 @@ annotations can be stored as Values.  Essentially, the AtomSpace looks
 like a database-of-databases; each atom is a key-value database; the
 atoms are related to one-another as a graph. The graph is searchable,
 editable; it holds rules and relations and ontologies and axioms.
-Values are the data that stream and flow through this network.
+Values are the data that stream and flow through this network, like 
+water through pipes. Atoms define the pipes, the connectivity. Values
+flow and change.
 
 ### More info
 The primary documentation for the atomspace and Atomese is here:
