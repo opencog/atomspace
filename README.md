@@ -439,6 +439,8 @@ Most tests (just not the database tests) can be run in parallel:
 ```
     make -j test ARGS=-j4
 ```
+The database tests *will* fail if run in parallel: they will step on
+one-another.
 
 ### Install
 
