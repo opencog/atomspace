@@ -65,7 +65,7 @@ Using Atomese and the AtomSpace
 The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
 platform. It is probably easiest to think of it as kind-of-like an operating
 system kernel: you don't need to know how it works to use it.  You probably
-don't need to tinker with it. It just works, and its there when you need it.
+don't need to tinker with it. It just works, and it's there when you need it.
 
 End-users and application developers will want to use one of the existing
 "app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
@@ -94,10 +94,10 @@ A  Theoretical Overview
 =======================
 The AtomSpace is a mashup of a large variety of concepts from
 mathematical logic, theorem proving, graph theory, database theory,
-type theory and knowledge representation. Its hard to provide a
-coherent overview without throwing around a lot of "big words" and
-"big concepts".  We're trying to get a lot of things done, here,
-and there's no particularly simple or effective way of doing it
+type theory, model theory and knowledge representation. Its hard to
+provide a coherent overview without throwing around a lot of "big words"
+and "big concepts".  We're trying to get a lot of things done, here,
+and there's no particularly simple or effective way of explaining it
 without a lot of foundational theory.
 
 ### Atom Types
@@ -127,13 +127,27 @@ designed for automation and machine learning.  That is, like any
 knowledge representation system, the data and procedures encoded
 in "Atomese" are meant to be accessed by other automated subsystems
 manipulating and querying and inferencing over the data/programs.
-Also, viewed as a programming language, it can be very slow and
-inefficient and not scalable; it was not designed with efficiency
-and programming tasks in mind, nor with scalability; but rather, it
-was designed to allow the generalized manipulation of networks of
-probabilistic data by means of rules and inferences and reasoning
-systems.  It extends the idea of probabilistic logic networks to a
-generalized system for automatically manipulating and managing data.
+
+Aside from the various advanced features, Atomese also has some very
+basic and familiar atom types: atoms for arithmetic operations like
+"plus" and "times", conditional operators, like "greater-than" or
+"equals", control operations like "sequential and" and "cond", as
+well as settable state. This makes Atomese resemble a kind of
+intermediate language, something you might find inside of a compiler,
+a bit like CIL or Gimple. However, it is both far more flexible and
+powerful than these, and also far less efficient. Adventurous souls
+are invited to create a compiler to GNU Lighting, CIL, Java bytecode
+or the bytcode of your choice; or maybe to a GPU backend, or even
+more complex data-processing systems, such as TensorFlow.
+
+In its current form, Atomese was primarily designed to allow the
+generalized manipulation of large networks of probabilistic data by
+means of rules and inferences and reasoning systems.  It extends the
+idea of probabilistic logic networks to a generalized system for
+algorithmically manipulating and managing data. The current, actual
+design has been heavily influenced by practical experience with
+natural-language processing, question answering, inferencing and
+the specific needs of robot control.
 
 The use of the AtomSpace, and the operation and utility of Atomese,
 remains a topic of ongoing research and design experimentation, as
@@ -148,6 +162,12 @@ and "Atomese" is the current best-effort KR system for satisfying
 all these various needs in an integrated way.  It is likely to
 change, as the various current short-comings, design flaws,
 performance and scalability issues are corrected.
+
+Active researchers and theoreticians are invited to join! The current
+codebase is *finally* clean and well-organized enough that a large
+number of possibilities have opened up, offering many different and
+exciting directions to pursue. The system is clean and flexible, and
+ready to move up to the next level.
 
 ### Atoms and Values
 Currently, one of the primary conceptual and performance splits
