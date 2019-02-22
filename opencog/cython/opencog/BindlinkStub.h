@@ -26,7 +26,7 @@
 
 namespace opencog {
 
-Handle do_execute(AtomSpace*, Handle);
+ValuePtr do_execute(AtomSpace*, Handle);
 
 } // namespace opencog
 
