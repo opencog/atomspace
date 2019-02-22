@@ -35,3 +35,4 @@ for f in ${BASEDIR}/coverage/*.info; do
     mv $f ${BASEDIR}/coverage/old
 done
 echo "All done!"
+echo "Coverage reports are in ${BASEDIR}/lcov; use web browser to view."
