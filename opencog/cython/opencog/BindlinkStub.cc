@@ -8,11 +8,9 @@
 
 using namespace opencog;
 
-// XXX FIXME -- signature should be
-// ValuePtr opencog::do_execute(AtomSpace* atomspace, Handle h)
-Handle opencog::do_execute(AtomSpace* atomspace, Handle h)
+ValuePtr opencog::do_execute(AtomSpace* atomspace, Handle h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
-	return HandleCast(pap);
+	return pap;
 }

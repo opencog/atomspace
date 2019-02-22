@@ -122,6 +122,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         string get_name()
         vector[cHandle] getOutgoingSet()
 
+    cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
