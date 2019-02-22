@@ -506,11 +506,16 @@ IF (CXXTEST_FOUND)
 			# -
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			COMMENT "Running tests with coverage..."
+		)
+		ADD_CUSTOM_TARGET(html
+			DEPENDS test
+			WORKING_DIRECTORY coverage
 			# This script combines the coverage analysis of each test,
 			# then creates html in tests/lcov
-			# Note: this should now be run separately...
-			#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
-			COMMENT "Running tests with coverage..."
+			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
+			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+			COMMENT "Generating lcov report..."
 		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# If this is a build with coverage enabled then test normally
