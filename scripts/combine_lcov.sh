@@ -20,7 +20,7 @@ echo Command is: lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/a
     --remove ${BASEDIR}/coverage/alltemp.info \
         /usr/include/\* \
         ${BUILD_DIR}/tests/\*
-lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
+time lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
     --remove ${BASEDIR}/coverage/alltemp.info \
         /usr/include/\* \
         ${BUILD_DIR}/tests/\*
