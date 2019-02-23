@@ -498,7 +498,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(covtest
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -508,9 +508,9 @@ IF (CXXTEST_FOUND)
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
 			COMMENT "Running tests with coverage..."
 		)
-		ADD_CUSTOM_TARGET(html
-			DEPENDS test
-			WORKING_DIRECTORY coverage
+		ADD_CUSTOM_TARGET(test
+			DEPENDS covtest
+			WORKING_DIRECTORY ./
 			# This script combines the coverage analysis of each test,
 			# then creates html in tests/lcov
 			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
@@ -518,7 +518,7 @@ IF (CXXTEST_FOUND)
 			COMMENT "Generating lcov report..."
 		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# If this is a build with coverage enabled then test normally
+		# Coverage is disabled; test normally
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
