@@ -68,7 +68,9 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"../../atoms/truthvalue/TruthValue.h" "../../atoms/truthvalue/SimpleTruthValue.h"
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
-	"ptrvalue.pyx"
+	"ptrvalue.pyx" "ptrvalue.pxd"
+	"grounded_object_node.pyx" "grounded_object_node.pxd"
+	"PythonGroundedObject.h"
 )
 
 # list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
@@ -77,6 +79,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
 	atomspace.cpp
+	PythonGroundedObject.cc
 )
 
 # The atomspace_api.h must be generated before PythonEval is compiled, thus
@@ -106,6 +109,8 @@ INSTALL (FILES
 	__init__.py
 	atomspace.pxd
 	ptrvalue.pxd
+	grounded_object_node.pxd
+	PythonGroundedObject.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 

@@ -14,6 +14,9 @@ ADD_LIBRARY (execution
 	Instantiator.cc
 	MapLink.cc
 	LibraryManager.cc
+	ApplyLink.cc
+	GroundedObjectNode.cc
+	MethodOfLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -39,6 +42,11 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
+	ApplyLink.h
+	GroundedObject.h
+	GroundedObjectNode.h
+	GroundedFunctionLink.h
+	MethodOfLink.h
 	DESTINATION "include/opencog/atoms/execution"
 )
 

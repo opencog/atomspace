@@ -50,6 +50,10 @@ public:
 	PtrValue(void* ptr, Deleter deleter)
 		: Value(PTR_VALUE), ptr(ptr, deleter) {}
 
+	template<typename T>
+	PtrValue(const std::shared_ptr<T>& ptr)
+		: Value(PTR_VALUE), ptr(ptr) {}
+
 	virtual ~PtrValue() {}
 
 	/** Returns the pointer */
@@ -63,6 +67,12 @@ public:
 };
 
 typedef std::shared_ptr<const PtrValue> PtrValuePtr;
+
+static inline ValuePtr ValueCast(const PtrValuePtr& a)
+{
+	return std::dynamic_pointer_cast<Value>(std::const_pointer_cast<PtrValue>(a));
+}
+
 static inline PtrValuePtr PtrValueCast(const ValuePtr& a)
 {
 	return std::dynamic_pointer_cast<const PtrValue>(a);
