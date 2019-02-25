@@ -249,3 +249,5 @@ def create_child_atomspace(object atomspace):
     cdef AtomSpace result = AtomSpace_factory(child)
     result.owns_atomspace = True
     return result
+
+
