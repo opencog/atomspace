@@ -33,6 +33,7 @@ cdef class AtomSpace:
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
     #cdef bint owns_atomspace
+    #cdef object parent_atomspace
 
     def __cinit__(self):
         self.owns_atomspace = False
@@ -41,13 +42,14 @@ cdef class AtomSpace:
     # basically, pass an int, and cast it to the C++ pointer.  This
     # works, but is not very safe, and has a certain feeling of "ick"
     # about it.  But I can't find any better way.
-    def __init__(self, long addr = 0):
+    def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
             self.atomspace = new cAtomSpace()
             self.owns_atomspace = True
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
             self.owns_atomspace = False
+        self.parent_atomspace = parent
 
     def __dealloc__(self):
         if self.owns_atomspace:
@@ -245,6 +247,7 @@ def create_child_atomspace(object atomspace):
     cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
     cdef AtomSpace result = AtomSpace_factory(child)
     result.owns_atomspace = True
+    result.parent_atomspace = atomspace
     return result
 
 

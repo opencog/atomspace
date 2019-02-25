@@ -52,8 +52,7 @@ cdef class BackwardChainer:
         return result
 
     def __dealloc__(self):
-        self._control_as = None
-        self._trace_as = None
-        self._as = None
         del self.chainer
-
+        self._trace_as = None
+        self._control_as = None
+        self._as = None
