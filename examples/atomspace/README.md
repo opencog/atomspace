@@ -149,7 +149,6 @@ everything else depends on.
 ```
 (use-modules (opencog))
 (use-modules (opencog atom-types))
-(use-modules (opencog attention-bank))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog persist))
@@ -162,6 +161,7 @@ There are other modules provided in other projects and repos. Here is
 a reasonably up-to-date list of modules provided by OpenCog:
 ```
 (use-modules (opencog agi-bio))
+(use-modules (opencog attention-bank))
 (use-modules (opencog cogserver))
 (use-modules (opencog ghost))
 (use-modules (opencog nlp aiml))
