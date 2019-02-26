@@ -146,12 +146,7 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
-#ifdef CACHED_IMPLICATOR
-	CachedDefaultImplicator cachedImpl(as);
-	Implicator& impl = cachedImpl;
-#else
 	DefaultImplicator impl(as);
-#endif
 	impl.max_results = SIZE_MAX;
 	// Now perform the search.
 	return do_imply(as, get_handle(), impl);

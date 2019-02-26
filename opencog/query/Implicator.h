@@ -64,14 +64,6 @@ class Implicator :
 		Handle implicand;
 		size_t max_results;
 
-#ifdef CACHED_IMPLICATOR
-		virtual void ready(AtomSpace* asp)
-		{ inst.ready(asp); max_results = SIZE_MAX; }
-
-		virtual void clear()
-		{ inst.clear(); implicand = Handle::UNDEFINED; }
-#endif
-
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln);
 

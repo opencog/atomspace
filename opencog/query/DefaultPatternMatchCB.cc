@@ -147,34 +147,6 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	delete _instor;
 }
 
-#ifdef CACHED_IMPLICATOR
-void DefaultPatternMatchCB::ready(AtomSpace* as)
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor->ready(_temp_aspace);
-
-	_as = as;
-}
-
-void DefaultPatternMatchCB::clear()
-{
-	_vars = nullptr;
-	_dynamic = nullptr;
-	_have_evaluatables = false;
-	_globs = nullptr;
-
-	_have_variables = false;
-	_pattern_body = Handle::UNDEFINED;
-
-	release_transient_atomspace(_temp_aspace);
-	_temp_aspace = nullptr;
-	_instor->clear();
-
-	_optionals_present = false;
-	_as = nullptr;
-}
-#endif
-
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
