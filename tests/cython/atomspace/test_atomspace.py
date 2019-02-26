@@ -200,14 +200,15 @@ class AtomSpaceTest(TestCase):
 
     def test_context_mgr_tmp(self):
         a = ConceptNode('a')
-        return
         with tmp_atomspace() as tmp_as:
              b = ConceptNode('b')
              self.assertTrue(a in self.space)
+             # verify that current default atomspace is tmp_as
              self.assertFalse(b in self.space)
         c = ConceptNode('c')
+        # verify that current default atomspace is self.space
         self.assertTrue(c in self.space)
-        self.assertFalse(c in tmp_as)
+
 
 class AtomTest(TestCase):
 
