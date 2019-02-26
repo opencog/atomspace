@@ -59,7 +59,7 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 
 	SatisfyingSet sater(as);
-	satisfy(sater);
+	this->satisfy(sater);
 
 	// Create the satisfying set, and cache it.
 	Handle satset(createUnorderedLink(sater._satisfying_set, SET_LINK));
