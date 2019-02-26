@@ -139,8 +139,6 @@ Handle BindLink::get_rewrite(void) const
  * values are completely ignored during pattern matching; if a set of
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
- *
- * See the do_imply function documentation for details.
  */
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
@@ -148,9 +146,78 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 
 	DefaultImplicator impl(as);
 	impl.max_results = SIZE_MAX;
-	// Now perform the search.
-	return do_imply(as, get_handle(), impl);
+	impl.implicand = this->get_implicand();
+
+	/*
+	 * The `do_conn_check` flag stands for "do connectivity check"; if the
+	 * flag is set, and the pattern is disconnected, then an error will be
+	 * thrown. The URE explicitly allows disconnected graphs.
+	 *
+	 * Set the default to always allow disconnected graphs. This will
+	 * get naive users into trouble, but there are legit uses, not just
+	 * in the URE, for doing disconnected searches.
+	 */
+	bool do_conn_check=false;
+	this->imply(impl, do_conn_check);
+
+	// If we got a non-empty answer, just return it.
+	if (0 < impl.get_result_list().size())
+	{
+		// The result_list contains a list of the grounded expressions.
+		// (The order of the list has no significance, so it's really a set.)
+		// Put the set into a SetLink, cache it, and return that.
+		Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+		// Shoot. XXX FIXME. Most of the unit tests require that the atom
+		// that we return is in the atomspace. But it would be nice if we
+		// could defer this indefinitely, until its really needed.
+		rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+
+		this->set_rewrite(rewr);
+		return rewr;
+	}
+
+	// If we are here, then there were zero matches.
+	//
+	// There are certain useful queries, where the goal of the query
+	// is to determine that some clause or set of clauses are absent
+	// from the AtomSpace. If the clauses are jointly not found, after
+	// a full and exhaustive search, then we want to run the implicator,
+	// and perform some action. Easier said than done, this code is
+	// currently a bit of a hack. It seems to work, per the AbsentUTest
+	// but is perhaps a bit fragile in its assumptions.
+	//
+	// Theoretical background: the atomspace can be thought of as a
+	// Kripke frame: it holds everything we know "right now". The
+	// AbsentLink is a check for what we don't know, right now.
+	const Pattern& pat = this->get_pattern();
+	DefaultPatternMatchCB* intu =
+		dynamic_cast<DefaultPatternMatchCB*>(&impl);
+	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
+	    and not intu->optionals_present())
+	{
+		Handle h(HandleCast(impl.inst.execute(impl.implicand, true)));
+		impl.insert_result(h);
+	}
+
+	// Create a set holding all results of the implication, and cache it.
+	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+	this->set_rewrite(rewr);
+
+	return rewr;
 }
+
+/* ================================================================= */
 
 DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 
