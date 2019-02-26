@@ -133,26 +133,32 @@ Handle BindLink::get_rewrite(void) const
 /* ================================================================= */
 
 /**
- * Simplified utility
+ * Evaluate a pattern and rewrite rule embedded in a BindLink
  *
- * The `do_conn_check` flag stands for "do connectivity check"; if the
- * flag is set, and the pattern is disconnected, then an error will be
- * thrown. The URE explicitly allows disconnected graphs.
- *
- * Set the default to always allow disconnected graphs. This will
- * get naive users into trouble, but there are legit uses, not just
- * in the URE, for doing disconnected searches.
+ * Use the default implicator to find pattern-matches. Associated truth
+ * values are completely ignored during pattern matching; if a set of
+ * atoms that could be a ground are found in the atomspace, then they
+ * will be reported.
  */
-static Handle do_imply(AtomSpace* as,
-                       const Handle& hbindlink,
-                       Implicator& impl,
-                       bool do_conn_check=false)
+ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
-	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (nullptr == as) as = _atom_space;
 
-	impl.implicand = bl->get_implicand();
+	DefaultImplicator impl(as);
+	impl.max_results = SIZE_MAX;
+	impl.implicand = this->get_implicand();
 
-	bl->imply(impl, do_conn_check);
+	/*
+	 * The `do_conn_check` flag stands for "do connectivity check"; if the
+	 * flag is set, and the pattern is disconnected, then an error will be
+	 * thrown. The URE explicitly allows disconnected graphs.
+	 *
+	 * Set the default to always allow disconnected graphs. This will
+	 * get naive users into trouble, but there are legit uses, not just
+	 * in the URE, for doing disconnected searches.
+	 */
+	bool do_conn_check=false;
+	this->imply(impl, do_conn_check);
 
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_list().size())
@@ -170,7 +176,7 @@ static Handle do_imply(AtomSpace* as,
 		rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
-		bl->set_rewrite(rewr);
+		this->set_rewrite(rewr);
 		return rewr;
 	}
 
@@ -187,7 +193,7 @@ static Handle do_imply(AtomSpace* as,
 	// Theoretical background: the atomspace can be thought of as a
 	// Kripke frame: it holds everything we know "right now". The
 	// AbsentLink is a check for what we don't know, right now.
-	const Pattern& pat = bl->get_pattern();
+	const Pattern& pat = this->get_pattern();
 	DefaultPatternMatchCB* intu =
 		dynamic_cast<DefaultPatternMatchCB*>(&impl);
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
@@ -206,32 +212,12 @@ static Handle do_imply(AtomSpace* as,
 	// could defer this indefinitely, until its really needed.
 	rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	bl->set_rewrite(rewr);
+	this->set_rewrite(rewr);
 
 	return rewr;
 }
 
 /* ================================================================= */
-
-/**
- * Evaluate a pattern and rewrite rule embedded in a BindLink
- *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
- *
- * See the do_imply function documentation for details.
- */
-ValuePtr BindLink::execute(AtomSpace* as, bool silent)
-{
-	if (nullptr == as) as = _atom_space;
-
-	DefaultImplicator impl(as);
-	impl.max_results = SIZE_MAX;
-	// Now perform the search.
-	return do_imply(as, get_handle(), impl);
-}
 
 DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 
