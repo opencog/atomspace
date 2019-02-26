@@ -107,29 +107,6 @@ void BindLink::extract_variables(const HandleSeq& oset)
 }
 
 /* ================================================================= */
-// Cache of the most results obtained from the most recent run
-// of the pattern matcher.
-
-static const Handle& rewrite_key(void)
-{
-	static Handle rk(createNode(PREDICATE_NODE, "*-PatternRewriteKey-*"));
-	return rk;
-}
-
-/// Store a cache of the most recent pattern rewrite as a value,
-/// obtainable via a "well-known" key: "*-PatternRewriteKey-*"
-void BindLink::set_rewrite(const Handle& rewr)
-{
-	setValue(rewrite_key(), rewr);
-}
-
-/// Return the cached value of the most recent rewrite.
-Handle BindLink::get_rewrite(void) const
-{
-	return HandleCast(getValue(rewrite_key()));
-}
-
-/* ================================================================= */
 /* ================================================================= */
 
 /**
@@ -176,7 +153,6 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 		rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
-		this->set_rewrite(rewr);
 		return rewr;
 	}
 
@@ -212,7 +188,6 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	// could defer this indefinitely, until its really needed.
 	rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	this->set_rewrite(rewr);
 
 	return rewr;
 }

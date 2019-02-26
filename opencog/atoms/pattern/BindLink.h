@@ -43,10 +43,6 @@ protected:
 	void extract_variables(const HandleSeq& oset);
 
 public:
-	// Cache the rewrite results
-	void set_rewrite(const Handle&);
-
-public:
 	BindLink(const HandleSeq&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	BindLink(const Handle& body, const Handle& rewrite);
@@ -55,9 +51,6 @@ public:
 	bool imply(PatternMatchCallback&,
 	           bool check_connectivity=false);
 	const Handle& get_implicand(void) { return _implicand; }
-
-	// Return the cached implication results
-	Handle get_rewrite() const;
 
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
