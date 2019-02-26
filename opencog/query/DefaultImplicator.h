@@ -51,8 +51,6 @@ class DefaultImplicator:
 	}
 };
 
-Handle do_imply(AtomSpace*, const Handle&, Implicator&, bool=false);
-
 }; // namespace opencog
 
 #endif // _OPENCOG_DEFAULT_IMPLICATOR_H
