@@ -182,29 +182,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
 # ----------------------------------------------------------
-# Optional and obsolete Hypertable library, for atomspace persistence
-
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-	SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
-
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
-
-ELSE (HYPERTABLE_FOUND)
-	# The FindHypertable.cmake file already prints a message.
-	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
-	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
-
-ENDIF (HYPERTABLE_FOUND)
-
-# ----------------------------------------------------------
 # Google Protobuf library
 # The protocol buffer compiler is needed for ZMQ-based persistence.
 FIND_PACKAGE(Protobuf)
@@ -633,7 +610,6 @@ SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
-SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
