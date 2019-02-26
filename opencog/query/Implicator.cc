@@ -50,10 +50,10 @@ bool Implicator::grounding(const HandleMap &var_soln,
 
 	// Ignore the case where the URE creates ill-formed links (due to
 	// rules producing nothing). Ideally this should be treated as a
-	// user error, that is the user should design rule pre-conditions
+	// user error, that is, the user should design rule pre-conditions
 	// to prevent them from producing nothing.  In practice it is
-	// difficult to insure so meanwhile this try-catch is used. See
-	// issue #950 and pull req #962. XXX FIXME later.
+	// difficult to insure, so meanwhile this try-catch is used.
+	// See issue #950 and pull req #962. XXX FIXME later.
 	try {
 		Handle h(HandleCast(inst.instantiate(implicand, var_soln, true)));
 		insert_result(h);
@@ -67,8 +67,11 @@ void Implicator::insert_result(const Handle& h)
 {
 	if (h and _result_set.end() == _result_set.find(h))
 	{
-		_result_set.insert(h);
-		_result_list.push_back(h);
+		// Insert atom into the atomspace immediately, so that
+		// it becomes visible in other threads.
+		Handle has = _as->add_atom(h);
+		_result_set.insert(has);
+		_result_list.push_back(has);
 	}
 }
 

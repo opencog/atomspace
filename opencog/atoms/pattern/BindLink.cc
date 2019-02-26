@@ -122,7 +122,6 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 
 	DefaultImplicator impl(as);
-	impl.max_results = SIZE_MAX;
 	impl.implicand = this->get_implicand();
 
 	/*

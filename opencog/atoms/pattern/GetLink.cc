@@ -59,7 +59,6 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 
 	SatisfyingSet sater(as);
-	sater.max_results = SIZE_MAX;
 	satisfy(sater);
 
 	// Create the satisfying set, and cache it.
