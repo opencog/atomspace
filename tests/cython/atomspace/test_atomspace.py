@@ -4,7 +4,7 @@ from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import initialize_opencog, finalize_opencog, tmp_atomspace
 
 from time import sleep
 
@@ -197,6 +197,18 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(a3 in self.space)
 
         self.assertEquals(len(self.space), 3)
+
+    def test_context_mgr_tmp(self):
+        a = ConceptNode('a')
+        with tmp_atomspace() as tmp_as:
+             b = ConceptNode('b')
+             self.assertTrue(a in self.space)
+             # verify that current default atomspace is tmp_as
+             self.assertFalse(b in self.space)
+        c = ConceptNode('c')
+        # verify that current default atomspace is self.space
+        self.assertTrue(c in self.space)
+
 
 class AtomTest(TestCase):
 
