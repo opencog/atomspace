@@ -55,6 +55,7 @@ cdef class AtomSpace:
         if self.owns_atomspace:
             if self.atomspace:
                 del self.atomspace
+        self.parent_atomspace = None
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
