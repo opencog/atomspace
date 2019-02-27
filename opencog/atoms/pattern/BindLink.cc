@@ -108,6 +108,35 @@ void BindLink::extract_variables(const HandleSeq& oset)
 
 /* ================================================================= */
 /* ================================================================= */
+/**
+ * Evaluate a BindLink
+ *
+ * Given a BindLink containing variable declarations, a predicate and
+ * an implicand, this method will "evaluate" the implication, matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    BindLink
+ *       VariableList
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       AndList
+ *          etc ...
+ *
+ * Evaluation proceeds as decribed in the "do_imply()" function below.
+ * The whole point of the BindLink is to do nothing more than
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the variables.
+ */
+bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
+{
+	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
+		throw InvalidParamException(TRACE_INFO,
+		                            "BindLink consists of multiple "
+		                            "disconnected components!");
+
+	return PatternLink::satisfy(pmc);
+}
 
 /**
  * Evaluate a pattern and rewrite rule embedded in a BindLink

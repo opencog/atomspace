@@ -71,8 +71,6 @@ namespace opencog
 /// components; the components themselves are connected only by
 /// virtual links.
 ///
-/// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
-/// link, and return a truth value.
 class PatternLink;
 typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 class PatternLink : public PrenexLink
