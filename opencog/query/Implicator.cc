@@ -71,7 +71,6 @@ void Implicator::insert_result(const Handle& h)
 		// it becomes visible in other threads.
 		Handle has = _as->add_atom(h);
 		_result_set.insert(has);
-		_result_list.push_back(has);
 	}
 }
 

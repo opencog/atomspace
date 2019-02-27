@@ -57,7 +57,6 @@ class Implicator :
 	protected:
 		AtomSpace* _as;
 		HandleSet _result_set;
-		HandleSeq _result_list;
 
 	public:
 		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
@@ -71,8 +70,6 @@ class Implicator :
 		virtual void insert_result(const Handle&);
 		virtual const HandleSet& get_result_set() const
 		{ return _result_set; }
-		virtual const HandleSeq& get_result_list() const
-		{ return _result_list; }
 };
 
 }; // namespace opencog

@@ -139,7 +139,7 @@ HandleSet BindLink::do_execute(AtomSpace* as, bool silent)
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_set().size())
 	{
-		// The result_list contains a list of the grounded expressions.
+		// The result_set contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
 		return impl.get_result_set();
 	}
