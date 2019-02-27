@@ -219,8 +219,8 @@ in only two places: to find a set of starting points for the search
 which new graphs are inserted (during graph-re-writing).
 
 
-Clauses and Groundings
-----------------------
+Example: Clauses and Groundings
+-------------------------------
 
 An AtomSpace hypergraph is most easily understood as a collection of
 trees formed by the "outgoing set" of an AtomSpace Link.  Each internal
@@ -259,24 +259,43 @@ English language sentence "John threw a ball":
     _obj(throw, ball)
 
 There are two ways of drawing a graph to represent the above. In
-linguistics, one simply draws labelled arrows.
+linguistics, one simply draws labelled arrows. In the AtomSpace,
+there are no "labelled arrows"; there are only Nodes and Links.
+Nodes are just labels, and nothing else; Links are n-ary collections
+of other Nodes or Links, and have no label at all. (Nodes correspond
+to the notion of "constants" and "variables" in mathematical logic
+(aka "model theory") and Links correspond to terms and relations.)
 
-distinct graphical interpretations of this dependency
-parse: the one commonly used in linguistics, and the one we want to
-use here; they are not the same.  In linguistics, "throw" would be the
-head word, and there would be labelled arrows pointing from the head
-word to the subject and the object (the labels on the arrows being
-_subj and _obj)
+The natural AtomSpace representation for the above is as a pair of
+trees, two levels deep. It's drawn as ASCII-art, here:
+```
+         ListLink
+         /       \
+        v         \
+     Node:_obj     \
+                    v
+                 ListLink
+                 /       \
+                v         v
+          Node:throw    Node:ball
+```
+which can be written more compactly by using indentation to denote
+nesting:
+```
+    ListLink
+         Node "_obj"
+         ListLink
+              Node "throw"
+              Node "ball"
+```
+or even more compactly using parenthesis ("S-expressions"):
+```
+   (ListLink (Node "_obj") (ListLink (Node "throw") (Node "ball")))
+```
 
-As a hypergraph, this consists of two trees.  The first tree has
-"_subj" as the root, with "throw" and "John" as leaves underneath it.
-Likewise, _obj is a tree. These two trees form the incidence graph of
-the hypergraph. Note that these two trees share a common node:
-"throw", that serves to join them together into one connected graph.
-
-In OpenCog, links cannot have names; only nodes can. Thus, the actual
-representation of the above parse, in OpenCog, will be:
-
+In practice, more the Node and Link types are more specific. The actual
+representation will be:
+```
     EvaluationLink
        PredicateNode "_subj"
        ListLink
@@ -288,27 +307,27 @@ representation of the above parse, in OpenCog, will be:
        ListLink
           WordNode "throw"
           WordNode "ball"
-
-Here, the indentation level describes the tree structure. The links
-and nodes are indicated by name: the nodes are always leaves of the
-tree. The two trees or clauses above share a single, common node: that
-for "throw".
+```
+Here, the indentation level describes the tree structure. The Links
+and Nodes are indicated by name: the Nodes are always leaves of the
+tree. The two trees (i.e. "clauses") above share a single, common Node:
+that for "throw".
 
 For the above example, pattern matching can be used to form a simple
 question-answering system, by "filling in the blanks".  The dependency
 parse for the question "What did John throw?" can be written as:
-
+```
     _subj(throw, John)
     _obj(throw, _$qVar)
-
+```
 By comparing to the previous graph, it is obvious that the variable
-_$qVar can be directly matched to the word "ball", thus answering the
+`_$qVar` can be directly matched to the word "ball", thus answering the
 question.  This illustrates the simplest use of the system, as a
 kind-of fill-in-the-blanks solver, for elementary-school word
 problems: "What did John throw? John threw a ____."
 
 The solution or answer is "ball". This is refered to as a "grounding"
-for the "variable" "_$qVar".   The terminology of "grounding" and
+for the "variable" `_$qVar`.   The terminology of "grounding" and
 "variable" is meant to be identical to the terminology commonly used
 in textbooks on model theory, lambda calculus and first-order logic:
 these are the very same ideas, expressed as hypergraphs.  In
@@ -319,7 +338,7 @@ pattern matcher matches against is an "expression" or "sentence"
 containing variables.  The act of finding groundings for the variables
 is identical to performing variable "unification".
 
-The pattern matcher uses VariableNodes to represent variables. The
+The pattern matcher uses `VariableNodes` to represent variables. The
 proper representation for the above query is thus:
 
     EvaluationLink
@@ -333,29 +352,41 @@ The query pattern is essentially a boolean-and of these clauses: all
 of the clauses must be satisfied (with the exception of optional
 clauses; see later discussion for this).  All clauses MUST contain at
 least one variable: if they do not, they are constant clauses, and are
-ignored.  This is because constant clauses are "trivial": the
-groundings for them can only be themselves, trivially, and so nothings
-needs be done.
-
-The clauses are partitioned in to connected components. A set of
-clauses is connected if there is a transitive path through all of
-them, that is if they share directly or indirectly the same variables.
+ignored.  This is because constant clauses are "trivial": the groundings
+for them can only be themselves, trivially, and so nothings needs be
+done.
 
 
 Algorithm overview
-------------------
+==================
 
 The following sections present the algorithm details.
 
 ### Terminology
 
-The incidence graph of a hypergraph is called the "Levi graph".
-Levi graphs are bipartite; although the algorithm does not make
-use of this.
+* A "clause" is a tree, typically containing one or more variables.
 
-A solution that assigns a value to a variable is called a "grounding"
-of that variable. Graphs that contain variables will sometimes be
-called ungrounded graphs.
+* A "pattern", "template" or "query" is a set of clauses. All three
+  words are used interchangably to mean the same thing: some graph
+  that is supposed to be matched.
+
+* A "term" is a subtree of a clause.
+
+* A "grounding" is a proposed substitution for a variable. A term
+  containing a grounding must be isomorphic to the term containing
+  the variable, after the variable is substituted-for. (They must
+  be identical.)
+
+* A "solution" is a graph that provides a grounding for the query. The
+  solution must be self-consistent, in that each distinct variable has
+  only one distinct grounding (for that solution) and the solution-graph
+  is identical to the query-graph, after the variables are subtituted by
+  thier grounds.
+
+* A "satisfying set" is the set of groundings of variables that provide
+  a consistent solution.
+
+* An "ungrounded graph" is a graph that has one or more variables in it.
 
 ### The Basic Algorithmic Idea
 
