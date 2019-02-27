@@ -182,15 +182,34 @@ will be reported once for each such singleton. This situation would
 surely never occur during any sort of "typical" usage. See the
 ArcanaUTest::test_repeats() unit test for an example.)
 
-The algorithm performs a fair amount of pre-traversal setup and error
-checking, such as finding the common variables that connect different
-clauses together, and initializing and setting up maps to make traversal
-easier.  This setup time is non-trivial.  Thus, for the simplest
-patterns, it might be faster (and probably simpler) for the user to
-obtain the desired graphs directly, instead of using the pattern
-matcher.  The strength of the pattern matcher is its ability to handle
-large, complex graphs with multiple variables interacting in difficult
-ways (or even graphs with no constant nodes in them at all!)
+The algorithm splits naturally into two steps: an analysis/compilation
+step, and a runtime step. The analysis step is quite complex, extracting
+structure from the pattern in such a way as to make the actual run-time
+match run quickly. The idea is that a pattern might be specified once,
+but then re-used (re-run) many times. Thus, it is important for it to
+run quickly, at the expense of longer compile times. Analysis includes:
+
+* Extraction of variable locations.
+* Identification of evaluatable terms.
+* Identification of those unordered sets whose permuations will need
+  to be explored.
+* Determination of whether the template-graph is fully connected, or
+  is a product of disjoint graphs. Disjoint subgraphs can be each
+  matched individually; the final solution-set is meareely a product of
+  the solution-sets of the disjoint pieces.
+* Determination of whether the template-graph is fully connected, after
+  all virtual terms have been removed. If it consists of disjoint
+  pieces, then these are grounded first, and then re-assembled by
+  evaluating the virtual links.
+
+Pattern compliation is non-trivial.  Thus, in certain very simple cases,
+it might be faster (and probably simpler) for you, the user, to obtain
+the desired graphs directly, instead of using the pattern matcher. Of
+course, this looses generality, and forces you to write strange custom
+code. The effort may or may not be worth it.  The strength of the
+pattern matcher is its ability to handle large, complex graphs with
+multiple variables interacting in difficult ways (or even graphs with
+no constant nodes in them at all!)
 
 The subgraph isomomorphism algorithm itself does not make use of or
 require the atomspace: it simply traces connections between links by
@@ -198,6 +217,7 @@ traversing the incoming and outgoing sets. The atomspace is required
 in only two places: to find a set of starting points for the search
 (e.g. by finding all nodes of a given type), and as the location into
 which new graphs are inserted (during graph-re-writing).
+
 
 Clauses and Groundings
 ----------------------
