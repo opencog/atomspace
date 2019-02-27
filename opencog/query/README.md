@@ -1,27 +1,39 @@
+# Query Processing / Pattern Matching Runtime
 
-#                 Query Processing/Pattern Matching
-                          ----------------
-               Linas Vepstas <linasvepstas@gmail.com>
-                        Created 18 March 2008
-                      Revised on 6 November 2014
+Pattern querying in the atomspace is split into two parts: a "compile"
+step, and a "execute/run" step. Pattern compilation is done by code in
+the `opencog/atoms/pattern` directory. Pattern execution is done by
+code in this directory. Compilation has to be done only once per
+pattern; after that, the query can be run quickly many times.
 
+This README gives a general overview of both steps.
 
-This directory contains code that implements a subgraph isomorphism
-algorithm, and then uses this algorithm to support several functions,
-including query processing, graph-rewriting, graph satisfiaibility and
-"satsifiability modulo theories".  Forward and backward chaining are
-implemented separately, in the rule-engine directory.
+Performing a query of a graphical pattern ca be thought of in several
+ways. One way is to think of it as "solving the subgraph isomoprhism
+problem", which is exactly what the code here does.
 
-The first part of the file describes the generic algorithm; the second
-part describes some of its applications to query processing, graph
-rewriting, unification, satisfiability and satsifiability module theories.
+The subgraph isomorphism algorithm implemented here is used for many
+different atomspace functions, including graph-database query processing,
+inverted query search, graph-rewriting, graph satisfiaibility and
+"satsifiability modulo theories".
+
+In addition, graph patterns can be thought of as "rewrite rules" or
+"productions", and thus can be chained together in sequences to perform
+inferencing, natural deducation and parsing.  Forward and backward
+chaining are implemented separately, in the `opencog/rule-engine`
+directory.
+
+The first part of this README describes the generic algorithm; the
+second part describes some of its applications to query processing,
+graph rewriting, unification, satisfiability and satsifiability modulo
+theories.
 
 A simple example of one possible use of this code is shown in the file
-"/examples/pattern-matcher/simple.scm".
+[`simple.scm`](/examples/pattern-matcher/simple.scm).
+
 
 A Quick Sketch
 --------------
-
 The basic idea is that one can specify a pattern or template, in the
 form of a graph, some of whose nodes are variables.  The pattern
 matcher can then find all other graphs that match the given template,
@@ -50,21 +62,30 @@ substituing for the variables. Thus, one has:
    thought of as being "satisfied", in the sense of "satisfiability".
    Thus, the pattern matcher is a (graphical) satisfiability solver.
 
+ * The query-pattern is iteself represented as a graph, and is stored in
+   the atomspace. This means that "inverse queries" can be performed.
+   For example, given a graph with no variables in it, one can search
+   for all queries that would return this graph. This function is
+   commonly employed in chatbots, where the pattern-with-no-variables
+   is the sentence that was heard, and the matching patterns-with-variables
+   are anchors to all of the ways in which the input could be responded
+   to.
+ 
  * Certain subgraphs are "evaluatable", other subgraphs are
    "executable". Evaluatable graphs are those that can be evaluated, in
-   the sense of functional programming; the result of evaluation is a
-   truth value. Executable graphs are likewise, except that the result
+   the sense of functional programming, and the result of evaluation is
+   a truth value. Executable graphs are likewise, except that the result
    is another graph.
 
- * During the pattern search, both the evaluatable and the executable
-   subgraphs are evaluated, and the matching/unification is done on the
-   results. This implies that the pattern amtcher is a "satsifiability
-   modulo theories" solver: when it determines that two subgraphs are
-   equal, it is applying the "equational theory" given by functions
-   (graphs) that are evaluatable. A simple arithmetic theory is
-   built-in, and thus, for example, the pattern matcher can prove that
-   the equation 5 = 2 + 3 holds (is satsified, modulo the theory of
-   addition), while 7 + x = 3 + x is false (not satsifiable).
+ * During the pattern search, the evaluatable subgraphs are evaluated
+   to determine if they evaluate to "true", thus allowing the search
+   to continue.  This implies that the pattern matcher is a kind of
+   "satsifiability modulo theories" solver: when it determines that
+   two subgraphs are equal, it is applying the "equational theory"
+   given by functions (graphs) that are evaluatable. Simple arithmetic
+   theory is built-in, and thus, for example, the pattern matcher can
+   prove that the equation 5 = 2 + 3 holds (is satsified, modulo the
+   theory of addition), while 7 + x = 3 + x is false (not satsifiable).
 
 
 Subgraph Isomorphism Discovery
@@ -854,3 +875,9 @@ TODO
 
  * Study the following some more: prolog, minikanren, mercury, curry
    (logic programming languague), godel (logic programming language)
+
+Document Status
+---------------
+Created by Linas Vepstas <linasvepstas@gmail.com>
+Created on 18 March 2008
+Revised on 6 November 2014
