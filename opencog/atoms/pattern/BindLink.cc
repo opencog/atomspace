@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/DefaultImplicator.h>
 
 #include "BindLink.h"
@@ -138,12 +138,12 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	this->imply(impl, do_conn_check);
 
 	// If we got a non-empty answer, just return it.
-	if (0 < impl.get_result_list().size())
+	if (0 < impl.get_result_set().size())
 	{
-		// The result_list contains a list of the grounded expressions.
+		// The result_set contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
 		// Put the set into a SetLink, cache it, and return that.
-		Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+		Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
@@ -180,7 +180,7 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Create a set holding all results of the implication, and cache it.
-	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+	Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
 
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
 	// Shoot. XXX FIXME. Most of the unit tests require that the atom
