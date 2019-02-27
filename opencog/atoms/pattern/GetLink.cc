@@ -72,7 +72,6 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	// could defer this indefinitely, until its really needed.
 	satset = as->add_atom(satset);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	set_groundings(satset);
 
 	return satset;
 }
