@@ -5,6 +5,7 @@ ADD_LIBRARY(query-engine
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatchEngine.cc
+	PatternLinkRuntime.cc
 	Recognizer.cc
 	Satisfier.cc
 )
