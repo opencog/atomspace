@@ -68,7 +68,6 @@ void Implicator::insert_result(const Handle& h)
 	if (h and _result_set.end() == _result_set.find(h))
 	{
 		_result_set.insert(h);
-		_result_list.push_back(h);
 	}
 }
 
