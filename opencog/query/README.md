@@ -413,91 +413,55 @@ solutions are to be searched for, the algorithm will backtrack to the
 most recent unexplored part of the universe, poping the stack as it
 backtracks. In this sense, the algorithm resembles a pushdown automaton.
 Since pushdown automata are associated with context-free languages,
-the subgraph isomorphism problem is essentially a problem in
+the subgraph isomorphism problem is effectively a problem in
 recognizing a context-free language.
 
 
 ### Currently Implemented Algorithm
 
-1. In the following, the word "atom" may refer to either a hypergraph
-   node, or a hypergraph link. Corresponding to every hypergraph is
-   an incidence graph. The atoms of a hypergraph are vertices of
-   the incidence graph. The convention used here is that the incidence
-   graph is a directed graph; thus, only hypergraph links have
-   outgoing incidence graph edges; whereas hypergraph nodes have
-   no outgoing incidence graph edges.
+1. The search-variables in the input pattern must be explicitly
+   declared. Only these explicitly-declared variables will be grounded.
+   Any other variables that have not been explictly declared will be
+   treated as constants. The explicitly-declared variables are called
+   "bound variables". Any other variables in the input pattern are
+   called "free variables".
 
-   The implemented algorithm makes direct use of the incidence
-   graph, and only indirectly to the hypergraph. The insistence
-   on making the incidence graph be a directed graph helps make
-   traversal more direct and removes ambiguity.
+2. During pattern compilation, the location of each variable in the
+   query is extracted, and cahced in a map.
 
-   [OpenCog-specific remarks are in square brackets.  In OpenCog, the
-   outgoing incidence graph edges are given by the "outgoing set" of
-   the atom. Given an OpenCog Link, its outgoing set forms a tree.
-   A collection of such trees is a hypergraph.]
+3. A connectivity map is created, indicating which clauses share common
+   variables. This is used during traversal, to select the next clause
+   to explore. See `PatternMatchEngine::_connectivity_map`. That is,
+   once a clause is fully grounded, one can then start on matching
+   the next clause: the next clause is one that has at least one
+   variable that has already been grounded.
 
-2. Input consists a sequence of the roots of incidence trees, that is,
-   of a list of subgraphs of the incidence graph that are trees.  Thus,
-   by definition, the incidence tree root must be a hypergraph link,
-   as hypergraph node cannot, by definition, have a non-trivial
-   incidence tree under it.  Each tree is, by definition, directed.
-   These trees are also refered to as "clauses", below [and in the code].
-   This is because such trees in OpenCog often play the role of logical
-   clauses (i.e. clauses and sentences, as defined in first-order
-   logic).  Subtrees of a clause are usually refered to as "terms"
-   (as in "term algebra"). That is, the word "clause" is used when
-   talking about a rooted tree; the word "term" is used when talking
-   about it's subtrees. This helps avoid some of the confusion about
-   the various different "trees" in the code.
+4. Actually, there's a whole-lotta stuff that is done during pattern
+   compilation, including the extraction of optional clauses, the
+   extraction of virtual terms, extraction of evaluatable predicates,
+   which are not matched, but are instead evaluated for truth/falsehood.
+   See the other README's and the cod itself for details.
 
-   Thus, for example: the clause _subj(row, Steve) has _subj at the
-   root of the tree, with "row" and "Steve" as leaves.
+5. Acceptance of a proposed grounding is done by by means of callbacks,
+   in the `class PatternMatchCallback` structure. These include
+   callbacks that can accept or reject a Node or Link match, a callback
+   that is called before a Link match is even started, a calllback
+   to accept or reject a single grounded clause, etc. See the file
+   `PatternMatchCallback.h` for details. The `DefaultPatternMatchCB`
+   provides a very reasonable set of default callbacks that work
+   in "the expected way"; there are a handful of other special-purpose
+   callbacks to solve various problems.
 
-   Distinct trees may have common vertices.  The common vertices act
-   to join together the trees into a partition of connected graph
-   components.  The algorithm will find all groundings for each
-   component separately, and form the final answer as the cartesian
-   product of all component grounding sets.  The graph as a whole may
-   contain loops (the decomposition into trees keeps the algorithm
-   from having to explicitly accommodate loops).
+6. A starting point for the search is selected. The starting point is
+   usually a constant atom that occurs in one of the clauses. Usually,
+   the constant term with the smallest incoming set is selected; this
+   is called the "thinnest term", under the beleif that this will result
+   in the most efficient search. When there are no constant terms in
+   any of the clauses, different techniques are used to pick a starting
+   location.  The algorithms for picking the starting points are
+   provided in default callbacks, in `InitiateSearchCB`. These can be
+   overloaded for custom searches.
 
-   A list of the common, or shared, vertices is made; this list is
-   used later in the algorithm, to find all trees connected to a
-   specific vertex. [This list is implemented as
-   PatternMatchEngine::_connectivity_map. The shared vertices are
-   variables.]
-
-   The universe graph may have any structure whatsoever; there are no
-   limitations put on it, other than that it must be "well-founded",
-   i.e. must not contain any infinite recursive graphs.
-
-3. Input includes a list of the bound variables in the clauses.
-   Thus, for example _obj(row,_$qVar) has _$qVar as the variable
-   to be solved for. The list serves to explicitly identify the
-   variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf vertices; that is,
-   variables may match links. There must be at least one variable,
-   as otherwise the graph is constant, and there is nothing to be
-   done.  The variables are called "bound" simply because they have
-   been called out; whereas "free variables" are variables that may
-   occur in the clauses, but, because they have not been identified
-   to the algorithm, they will not be grounded, but will instead be
-   treated as if they were constants.
-
-4. Node equivalence is determined by means of a callback; the user
-   may implement any notion at all of "equivalence".  In particular,
-   the equivalence callback may be used as an alternate way to perform
-   variable bindings, with the callback itself determining when a
-   node is variable, and what the allowed bindings to it may be.
-   The callback is free to consider node truth values, attention
-   values, or anything else, in determining whether to accept or
-   reject a candidate grounding.  Link equivalence is likewise
-   governed by a callback.
-
-   [The node equivalence callback is implemented in
-   PatternMatchCallback::node_match(). The link equivalence callback is
-   PatternMatchCallback::link_match().]
 
 5. Pick the first tree. Get the type of the root atom of the
    first tree. Get a list of all atoms in the universe of this type.
