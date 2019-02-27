@@ -42,7 +42,7 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
-	virtual HandleSeq do_execute(AtomSpace*, bool silent);
+	virtual HandleSet do_execute(AtomSpace*, bool silent);
 
 public:
 	BindLink(const HandleSeq&, Type=BIND_LINK);

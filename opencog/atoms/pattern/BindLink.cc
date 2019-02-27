@@ -117,7 +117,7 @@ void BindLink::extract_variables(const HandleSeq& oset)
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-HandleSeq BindLink::do_execute(AtomSpace* as, bool silent)
+HandleSet BindLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
@@ -137,11 +137,11 @@ HandleSeq BindLink::do_execute(AtomSpace* as, bool silent)
 	this->imply(impl, do_conn_check);
 
 	// If we got a non-empty answer, just return it.
-	if (0 < impl.get_result_list().size())
+	if (0 < impl.get_result_set().size())
 	{
 		// The result_list contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
-		return impl.get_result_list();
+		return impl.get_result_set();
 	}
 
 	// If we are here, then there were zero matches.
@@ -168,7 +168,7 @@ HandleSeq BindLink::do_execute(AtomSpace* as, bool silent)
 	}
 
 	// Create a set holding all results of the implication, and cache it.
-	return impl.get_result_list();
+	return impl.get_result_set();
 }
 
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)

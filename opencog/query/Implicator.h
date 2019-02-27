@@ -56,7 +56,7 @@ class Implicator :
 {
 	protected:
 		AtomSpace* _as;
-		UnorderedHandleSet _result_set;
+		HandleSet _result_set;
 		HandleSeq _result_list;
 
 	public:
@@ -69,7 +69,7 @@ class Implicator :
 		                       const HandleMap &term_soln);
 
 		virtual void insert_result(const Handle&);
-		virtual const UnorderedHandleSet& get_result_set() const
+		virtual const HandleSet& get_result_set() const
 		{ return _result_set; }
 		virtual const HandleSeq& get_result_list() const
 		{ return _result_list; }
