@@ -50,9 +50,6 @@ public:
 	BindLink(const Handle& body, const Handle& rewrite);
 	explicit BindLink(const Link &l);
 
-	bool imply(PatternMatchCallback&,
-	           bool check_connectivity=false);
-
 	const Handle& get_implicand(void) { return _implicand; }
 
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

@@ -109,10 +109,10 @@ void BindLink::extract_variables(const HandleSeq& oset)
 /* ================================================================= */
 /* ================================================================= */
 /**
- * Evaluate a BindLink
+ * Execute a BindLink
  *
  * Given a BindLink containing variable declarations, a predicate and
- * an implicand, this method will "evaluate" the implication, matching
+ * an implicand, this method will "execute" the implication, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
  *
@@ -123,23 +123,9 @@ void BindLink::extract_variables(const HandleSeq& oset)
  *       AndList
  *          etc ...
  *
- * Evaluation proceeds as decribed in the "do_imply()" function below.
  * The whole point of the BindLink is to do nothing more than
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
- */
-bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
-{
-	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
-		throw InvalidParamException(TRACE_INFO,
-		                            "BindLink consists of multiple "
-		                            "disconnected components!");
-
-	return PatternLink::satisfy(pmc);
-}
-
-/**
- * Evaluate a pattern and rewrite rule embedded in a BindLink
  *
  * Use the default implicator to find pattern-matches. Associated truth
  * values are completely ignored during pattern matching; if a set of
@@ -163,7 +149,12 @@ HandleSet BindLink::do_execute(AtomSpace* as, bool silent)
 	 * in the URE, for doing disconnected searches.
 	 */
 	bool do_conn_check=false;
-	this->imply(impl, do_conn_check);
+	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
+		throw InvalidParamException(TRACE_INFO,
+		                            "BindLink consists of multiple "
+		                            "disconnected components!");
+
+	this->PatternLink::satisfy(impl);
 
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_set().size())

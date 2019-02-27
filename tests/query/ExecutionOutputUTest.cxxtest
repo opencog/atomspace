@@ -242,7 +242,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	// Now perform the search.
 	DefaultImplicator simpl(&as);
 	simpl.implicand = situation->get_implicand();
-	situation->imply(simpl, &as);
+	situation->satisfy(simpl);
 
 	// The result_list contains a list of the grounded expressions.
 	Handle res = *simpl.get_result_set().begin();
@@ -252,7 +252,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	// Now perform the search.
 	DefaultImplicator pimpl(&as);
 	pimpl.implicand = predicament->get_implicand();
-	predicament->imply(pimpl, &as);
+	predicament->satisfy(pimpl);
 
 	// The result_list contains a list of the grounded expressions.
 	Handle del = *pimpl.get_result_set().begin();
