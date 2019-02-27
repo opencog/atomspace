@@ -222,34 +222,35 @@ which new graphs are inserted (during graph-re-writing).
 Clauses and Groundings
 ----------------------
 
-The OpenCog hypergraph is most easily understood in terms of its
-corresponding incidence graph (or "Levi graph"). This, in turn, is best
-understood as a collection of trees formed by the "outgoing set" of an
-OpenCog Link.  Each internal node of a tree is a link (as only links
-have outgoing sets), and each leaf of a tree being a node (as nodes do
-not have outgoing sets).  Thus, the outgoing set of an OpenCog Link
-forms the downward-branching part of a tree.  The incidence graph is
-then a collection of such trees, sharing common nodes or links.  The
-incidence graph is an ordinary graph, not a hypergraph, and thus is
-perhaps easier to visualize.
+An AtomSpace hypergraph is most easily understood as a collection of
+trees formed by the "outgoing set" of an AtomSpace Link.  Each internal
+vertex of a tree is called a "Link".  Each leaf of a tree is called
+a "Node". The trees are not disjoint, however: Nodes and Links can be
+shared. In the AtomSpace, every Node and Link is forced to be unique;
+it is impossible to have two have two Nodes or Links that are identical.
+(This is analogous to the common uniqueness constraint in ordinary
+databases: for any physical item, you typically want to have only one
+corresponding database record.)
 
-The pattern matcher was initially designed to search only for
-connected incidence graphs but now supports disconnected graphs.
+When trees share common Nodes or Links, they become connected. When they
+share many of them, they become entangled. Thus, the Atomspace contents
+don't so much resemble a "forest of trees" as they resmble a dense
+matted structure like felt, or, more acurately, a rhizome. (Search for
+pictures, if you don't know what that is.) Mathematicaly, the proper
+name for the structure is an "incidence graph", or, even more properly,
+a bipartite "Levi Graph".
 
-Note: At this time, neither the OpenCog AtomSpace, nor the pattern
-matcher support infinite, recursive subtrees.  That is, a given
-incidence graph cannot/must-not have itself as a subtree.  This is
-analogous to well-founded sets in set theory.  The tree formed by
-outgoing sets must be finite.  Specifying a recursive subtree to the
-pattern matcher risks infinite loops (although these could be
-mitigated, if desired), and, likewise, infinite loops if inserted
-into the atomspace.  Thus, the incidence trees must be finite
-(although they do not need to be acyclic: different parts of the tree
-may share common subtrees).
+Normally, all trees are finite in size.  There is a way of defining
+infinite trees, as patchwork of finite subtrees quilted together into
+a recursive structure.  This can be done with either the DefineLink
+(which is static) or the StateLink (which is mutable). The pattern
+matcher supports the traversal of such infinite trees: it merely stops
+at the boundaries of the repeated segements.
 
-In the discussion below, and in the code, these trees are also called
-"clauses".  More specifically, the input to the pattern matcher is
-given by a list of clauses to be matched.
+In the discussion below, and in the code, these trees are usually called
+"clauses". This is in distinction to "terms", which are sub-trees of the
+clauses.  The input to the pattern matcher is given by a set of clauses
+to be matched.
 
 Consider the following example taken from a dependency parse of the
 English language sentence "John threw a ball":
@@ -257,7 +258,10 @@ English language sentence "John threw a ball":
     _subj(throw, John)
     _obj(throw, ball)
 
-There are two distinct graphical interpretations of this dependency
+There are two ways of drawing a graph to represent the above. In
+linguistics, one simply draws labelled arrows.
+
+distinct graphical interpretations of this dependency
 parse: the one commonly used in linguistics, and the one we want to
 use here; they are not the same.  In linguistics, "throw" would be the
 head word, and there would be labelled arrows pointing from the head
