@@ -80,7 +80,7 @@ substituing for the variables. Thus, one has:
    is the sentence that was heard, and the matching patterns-with-variables
    are anchors to all of the ways in which the input could be responded
    to.
- 
+
  * Certain subgraphs are "evaluatable", other subgraphs are
    "executable". Evaluatable graphs are those that can be evaluated, in
    the sense of functional programming, and the result of evaluation is
@@ -526,32 +526,51 @@ recognizing a context-free language.
    explicitly done with the crisp-boolean-logic callback.
 
 
-### Virtual Links
+### Relations (Virtual Links)
 
-Not mentioned above is a new whiz-bang feature: support for
-VirtualLinks, which are links that do not actually exist in the
-AtomSpace, but are evaluated on the fly, as needed.  The
-prototypical such link is GreaterThanLink, which evaluates to
-"exists" if the schema in it returns true; else it "doesn't
-exist".  That is, a GreaterThanLink will match in the pattern
-when its schema evaluates to true, behaving as if it existed in
-the AtomSpace, else it behaves as if it does not exist in the
-AtomSpace (and thus can't ground/match/unify).  This bit of
-fraudulent trickery requires a bit of work: in short, all other
-parts of the hypergraph are grounded first, leading to a possible
-combinatoric explosion of goundings; these are then passed through
-the virtual links to determine if a match has occured or not.
-The code to do this is in PatternMatch::recursive_virtual()
-(instead of in the engine proper, where you might expect it to be).
+A pattern may consist of query-terms, which must be explicitly
+grounded, as term-algebra-terms, and also "relations", which are
+a kind of term that evaluates to a true/false value. When a relation
+evaluates to false, that particular associated grounding is rejected;
+otherwise it is accepted, and the remainder of the serch is performed.
 
-Note that the preliminary grounding is done by removing all virtual
-links from the hypegraph. This will typically result in a set of
-hypergraphs that are no longer connected.  Each connected component
-is grounded, and then these are offered up to the virtual link,
-which either virtually (and so there is a match) or does not exist
-(so there is no match).  Note that having multiple disconnected
-compoents thus leads to a multiplicatively explosive search space
-to explore.
+Relations are implemented as VirtualLinks. These encapsulate
+algorithmically-determined relations. The primordial example is
+`GreaterThanLink`, which is evaluated on-the-fly to determine it's
+truth-hood. It is called "virtual" because it is impossbible to
+store every-possible greater-than relation between numbers: there
+is an infinity of these. This is in direct contrast to non-virtual,
+concrete knowledge declarations: e.g. "every cat is an animal" which
+can be evaluated to be true or false, but which will be concretely
+present in the AtomSpace. Concrete, explict knowledge delcaration
+is needed, because there is no generic algorithm that can evaluate
+the truth-hood of "every X is a Y".
+
+Not all virtual links are relations; the arithmetic links: `PlusLink`,
+`TimesLink`, etc. are virtual, but do not have true/false evaluation
+results.
+
+Relations are handled in two steps. During pattern compilation, all
+relations are removed fom the pattrn, and then the pattern is analyzed
+for connectivity. In the general case, the pattern will decompose into
+multiple, disjoint connected components, with the virtual links being
+the only connection between them.
+
+During run-time, each dijsoint component is indpendently grounded. Then,
+each combinatoric possibility of each grounding is brought together,
+submitted to the relation links as candidates. If the virtual link
+evaluates to true, then this combination is accepted. Processing
+proceeds until all components have been assembled, and all virtual
+relation links have been considered. The resulting combination is
+reported. Then, backtracking resumes, to examine the next possible
+combination.
+
+Note that having multiple disconnected components joined only by
+virtual links leads to a multiplicatively explosive set of combinations
+to examine. (Luckily, if there is only one virtual link, then this
+combinatoric explosion can be avoided, and regular grounding can be
+done. Alternately, a query may consist of only one connected component,
+with relations links spanning parts of it.)
 
 ### Unordered Links
 
@@ -559,7 +578,7 @@ The use of unordered links within a pattern provides a special
 challange for the pattern matcher. This is because each possible
 permuation of an unordered link must be explored.  Consider, for
 example, the search pattern:
-
+```
     AndLink
        SetLink
           VariableNode $a
@@ -567,7 +586,7 @@ example, the search pattern:
        ListLink
           VariableNode $a
           ConceptNode "fizz"
-
+```
 If the universe contains the graphs:
 
     SetLink
