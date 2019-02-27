@@ -117,7 +117,7 @@ void BindLink::extract_variables(const HandleSeq& oset)
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-ValuePtr BindLink::execute(AtomSpace* as, bool silent)
+HandleSeq BindLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
@@ -141,18 +141,7 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	{
 		// The result_list contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
-		// Put the set into a SetLink, cache it, and return that.
-		Handle rewr(createLink(impl.get_result_list(), SET_LINK));
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-		// Shoot. XXX FIXME. Most of the unit tests require that the atom
-		// that we return is in the atomspace. But it would be nice if we
-		// could defer this indefinitely, until its really needed.
-		rewr = as->add_atom(rewr);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
-		return rewr;
+		return impl.get_result_list();
 	}
 
 	// If we are here, then there were zero matches.
@@ -179,15 +168,25 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Create a set holding all results of the implication, and cache it.
-	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+	return impl.get_result_list();
+}
 
+ValuePtr BindLink::execute(AtomSpace* as, bool silent)
+{
+	HandleSeq results(do_execute(as, silent));
+
+	// The result_list contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, cache it, and return that.
+	Handle rewr(createLink(results, SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
 	// Shoot. XXX FIXME. Most of the unit tests require that the atom
 	// that we return is in the atomspace. But it would be nice if we
 	// could defer this indefinitely, until its really needed.
 	rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
 	return rewr;
 }
 

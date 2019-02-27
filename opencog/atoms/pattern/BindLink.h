@@ -42,6 +42,8 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
+	virtual HandleSeq do_execute(AtomSpace*, bool silent);
+
 public:
 	BindLink(const HandleSeq&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
@@ -50,6 +52,7 @@ public:
 
 	bool imply(PatternMatchCallback&,
 	           bool check_connectivity=false);
+
 	const Handle& get_implicand(void) { return _implicand; }
 
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
