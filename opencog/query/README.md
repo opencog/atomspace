@@ -462,104 +462,61 @@ recognizing a context-free language.
    provided in default callbacks, in `InitiateSearchCB`. These can be
    overloaded for custom searches.
 
+7. Search begins with the clause containing the thinnest term. Search
+   is performed upwards (i.e. following the edges in the incoming set).
+   Each edge in the incoming set forms a distinct grounding possibility,
+   thus, the current search state is pushed onto a stack; this is then
+   popped, when exploration of that edge has completed. See
+   `PatternMatchEngine::explore_neighborhood()` for details.
 
-5. Pick the first tree. Get the type of the root atom of the
-   first tree. Get a list of all atoms in the universe of this type.
-   These are the "candidate groundings".  Iterate over this list.
-   The iterator is the next step below (step 6).
+8. When an unordered set is encountered in the search, each possible
+   permuatation of that set forms a distinct grounding possibility.
+   Thus, the current permutation is pushed onto a stack; this is then
+   popped, when all possible permuations have been considered.
 
-   [This step is implemented in PatternMatchEngine::match(), which
-   calls PatternMatchEngine::explore_neighborhood() for each candidate
-   root. The fetching of the list is provided by a user-defined
-   algorithm.  The default callback DefaultPatternMatchCB::initiate_search()
-   implements this by querying the atomspace for all atoms of a given
-   type corresponding to some clause, and starting the search there.
-   This default behaviour can be over-ridden with a user-dupplied
-   callback.]
+9. The `ChoiceLink` provides an explicit menu of terms to be grounded.
+   Only one term in the menu needs to be grounded. Thus, each term
+   in the `ChoiceLink` forms a distinct grounding possibility. The
+   current choice is pushed onto a stack, and popped after the
+   exploration of that choice has completed.
 
-6. Initiate a recursive tree matching algorithm, comparing the
-   incidence tree of the first clause to that rooted at the
-   candidate grounding.
+10. The `GlobNode` is a `VariableNode` that can be grounded by multiple
+   adjacent list elements. This is in contrast to `VariableNode`s, which
+   can be grounded by only one Atom at a time. `GlobNode`s are analogous
+   to the concept of "globbing" in regex matching: they effectively
+   embody more-or-less exactly the same idea. Each possible distinct
+   grounding of a `GlobNode` represents a distinct branch to explore.
+   Thus, the current glob grounding is pushed onto a stack, and popped
+   after the the possibilities of that glob have been completely
+   explored.
 
-   First, the tree matching algo checks to see if the given
-   node in the term is a variable; if so, then the match
-   is considered to be successful. The node-match callback is
-   invoked to decide whether this grounding is to be accepted;
-   if it is, then the corresponding node in the universe is
-   recorded as a grounding.
+11. After a clause is fully grounded, exploration proceeds to another
+   clause that is connected to it: i.e. containing a variable that has
+   already been grounded. As this represents another exploration
+   possibility, another stack of currently-grounded clauses is
+   maintained. See `PatternMatchEngine::get_next_untried_clause()`
+   for details.
 
-   If the clause itself is found in the universe, it is rejected.
+12. Partial solutions are recorded in `PatternMatchEngine::var_grounding`
+   and `PatternMatchEngine::clause_grounding`. These are recorded on
+   the stack, for hopefully "obvious" reasons.
 
-   If the atom is a link, the link-match callback is invoked to
-   determine whether its an acceptable grounding.
+   (Multiple solution graphs may overlap.  Thus, if the universe
+   contains the statement: "John threw a ball and a rock." and the
+   query is "What did John throw?", then there are two valid subgraph
+   matches: "John threw a ball" and "John threw a rock".  Both of these
+   solutions contain a common subgraph, "John threw...", which must be
+   reachable, and must be reconsidered, after one solution is proposed.
+   In particular, this implies that the partial solution state must be
+   kept on stack, so that the backtracking can be performed to find
+   other, overlapping solutions.)
 
-   The tree matching algorithm recurses to subtrees; recursion
-   is terminated when a mismatch is found.
+13. When all clauses have been fully grounded, a solution is reported.
+   After this, additional solutions are searched for, by progressively
+   popping the various stacks, and exploring other previously-unexplored
+   possibilities.
 
-   [This step is implemented in PatternMatchEngine::tree_compare().]
-
-   After an entire clause has been grounded, another callback, the
-   clause-match callback, is called. This callback may reject the
-   grounding of the clause as a whole.
-
-7. Assuming a single tree has been successfully matched in the previous
-   step, the next step is to find a clause that has not yet been
-   grounded.  This is done by examining the list of all (variable)
-   nodes that are shared between the most recently grounded clause,
-   looking for an unsolved clause.
-
-   [This is implemented in PatternMatchEngine::get_next_untried_clause()]
-
-8. If an unsolved tree is found, then tree-matching, as described in
-   step 6, resumes. However, the tree matching resumes at the shared
-   node of the ungrounded tree. The ungrounded tree is recursively walked
-   upwards, towards its root, with a tree match attempted at every stage.
-
-   The upwards recursion uses a stack to track state; this is required
-   in the case of there being multiple possible matches to a tree:
-   after finding one match, the stack may be popped to explore other
-   possible matches.  Push and pop callbacks are provided, in case the
-   callback also needs to maintain stack state.
-
-   If the upwards recursion reaches the root of the clause, the
-   clause is now considered to be solved. Go to step 7, to find
-   other unsolved clauses.
-
-   [This is implemented by two routines: PatternMatchEngine::
-   do_term_up() and PatternMatchEngine::explore_up_branches(). These
-   two routines alternate calls to each other, by traversing the
-   *incoming* set of the current node in the clause, and the candidate
-   solution node.  The incoming set takes one "upwards" in the tree.]
-
-   [The stack of current state is maintained by PatternMatchEngine::
-   clause_stacks_push(), PatternMatchEngine::clause_stacks_pop(),
-   etc.]
-
-   [Partial solutions are recorded in PatternMatchEngine::var_grounding
-   and PatternMatchEngine::clause_grounding.  These partial solutions
-   must also be kept on stack, as a failed match at a later stage means
-   that backtracking must be done. Since the partial solutions are used
-   to find unsolved clauses, care must be taken that the partial
-   solution is correct after backtracking: i.e. they must be popped
-   as failed matches are encountered.]
-
-   Note that multiple solution graphs may overlap.  Thus, if the
-   universe contains the statement: "John threw a ball and a rock."
-   and the query is "What did John throw?", then there are two
-   valid subgraph matches: "John threw a ball" and "John threw
-   a rock".  Both of these solutions contain a common subgraph,
-   "John threw...", which must be reachable, and reconsidered,
-   after one solution is proposed. In particular, this implies
-   that the partial solution state must also be kept on stack,
-   so that the backtracking can be performed to find other,
-   overlapping solutions.
-
-9. If no ungrounded tree is found, then the matching is complete.
-   The full grounding is reported via callback.  The callback may
-   indicate that the search be terminated, or that it continue to
-   find other possible solutions.
-
-   In addition to a list of clauses that MUST be grounded, the algorithm
+14. In addition to a list of clauses that MUST be grounded, the algorithm
    accepts a list of clauses that need only be optionally grounded. The
    optional list is exactly that: if no grounding is found, that's OK,
    and a solution is still reported for the must-list. The optional
