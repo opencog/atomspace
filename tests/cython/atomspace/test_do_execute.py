@@ -15,7 +15,17 @@ class DoExecuteTest(unittest.TestCase):
         finalize_opencog()
         del self.atomspace
 
-    def test_do_execute(self):
+    def test_do_execute_value(self):
+        key = PredicateNode("key")
+        atom = ConceptNode("atom")
+        atom.set_value(key, FloatValue([1, 2, 3]))
+
+        value_of_link = ValueOfLink(atom, key)
+
+        res = execute_atom(atomspace, value_of_link)
+        self.assertEqual(FloatValue([1, 2, 3]), res)
+
+    def test_do_execute_atom(self):
         (DefineLink(
             DefinedSchemaNode('add'),
             LambdaLink(
