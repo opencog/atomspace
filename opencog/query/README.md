@@ -588,7 +588,7 @@ example, the search pattern:
           ConceptNode "fizz"
 ```
 If the universe contains the graphs:
-
+```
     SetLink
        ConceptNode "dribble"
        ConceptNode "bubble"
@@ -596,10 +596,10 @@ If the universe contains the graphs:
     ListLink
        ConceptNode "bubble"
        ConceptNode "fizz"
-
-then one must consider that $a might be grounded by "bubble" (and
-so a match is found), or that $a could have been grounded by
-"dribble" (although this is not consistent with the ListLink, and
+```
+then one must consider that `$a` might be grounded by "bubble" (and
+so a match is found), or that `$a` could have been grounded by
+"dribble" (although this is not consistent with the `ListLink`, and
 so no overall match exists).  That is, all possible permutations of
 the SetLink must be considered when searching for groundings. This
 can lead to a combinatoric explosion.
@@ -612,12 +612,12 @@ A) One is at the bottom, and is searching upwards, and encounters
    an unordered link as a parent of the current atom.
 
 B) One is at the bottom, moving upwards, and during the (downward)
-   tree_compare's that must be performed at each stage, there is
+   `tree_compare()`'s that must be performed at each stage, there is
    an unordered set somwhere in a subtree.
 
 C) Situations A) and B) can occur in a nested fashion, so that an
    unordered link may have another unordered link inside of it.
-   All of this is happening within the smae clause.
+   All of this is happening within the same clause.
 
 D) There may be other unordered links in other clauses (possibly
    sharing variables with the unordered links in this clause).
@@ -628,28 +628,22 @@ downward tree-compare effectively looks like situation B).
 Situation D) is easily dealt with by using the existing
 backtracking infrastructure, and so presents no new challanges.
 
-Situations A, B and C are currently (Nov 2014) only paritally
-handled, and are buggy.  Its all very confusing.
-See github bug #1091 for details.
+Performance
+-----------
+All fo the uses of the word "combinatoric explosion" in the above may
+have you alarmed. Not to worry. Performance is fast! In "typical"
+datasets containing many millions of atoms, all "typical" queries run
+in milliseconds or less.  This is in part because, at least so far, most
+"typical" knowledge-graphs have a Zipfian distribution and connectivity,
+which means that there are very few extremely large subgraphs. By
+starting the search with the "thinest" subgraph, one almost never
+encounters these fat graphs, and so they don't have to be explored.
 
-
-Open Questions
---------------
-
-In many ways, the above algorithm resembles that of a recursive descent
-parser.  However, it does a *lot* of backtracking during its solution
-search. It is thoroughly unclear as to whether the hypergraph
-pattern-matching problem can be reformulated to resemble an LL(k)
-grammar, so that linear-time predictive parsing techniques can be used.
-
-In many ways, the above algorithm resembles a boolean satsifiability
-problem, except that, instead of having a two-valued true/false logic,
-it is a many-valued logic (with each variable ranging over the
-universe of allowed values for that variable).  Can any kind of a
-modern boolean-SAT algorithm be applied to solve this problem quickly,
-efficiently?  Is there a way of cribbing ideas from the DPLL algorithm
-to help solve this?  This is entirely unclear to me...
-
+Tutorials and Examples
+----------------------
+The `opencog/examples/pattern-matcher` directory contains twenty-five
+distinct, different tutorial-examples that progressively demonstrate
+the various features of the system.
 
 Summary
 -------
@@ -660,66 +654,43 @@ specifics of the actual data layout, or of node equivalences in the
 data.  The only restriction made is that the input, query graph,
 has been decomposed into a set of trees.
 
-[On OpenCog, the entire implementation is in PatternMatchEngine.[h, .cc].]
+Miscellany
+==========
+You can stop reading now. The below are just some random remarks of
+rather low importance, that might be useful to someone for something.
 
-Example Code
-------------
-The test/query directory contains several test cases checking on this
-functionality. The BigPatternUTest test case is a small, simple, clear
-example of using the simple forward chainer.
+Open Questions
+--------------
 
+In many ways, the above algorithm resembles that of a recursive descent
+parser.  However, it does a *lot* of backtracking during its solution
+search. It is thoroughly unclear as to whether the hypergraph
+pattern-matching problem can be reformulated to resemble an LL(k)
+grammar, so that linear-time predictive parsing techniques can be used.
 
-Satisfiability Modulo Theories
-------------------------------
+(Probably not!? The situation might be analogous to the difference
+between a nondeterministic finite automaton, and a regular one: the
+description can be exponentially smaller; the corresponding
+deterministic automaton is exponentially larger. So also here: perhaps
+there is an equivalent LL(k) grammar, but it is exponentially larger,
+thus negating the linear-timer performance. Or something like that.
+This is just hand-waving.)
 
-The final decision on matching to a given query pattern is delegated
-to a callback. This allows for considerable flexibility in controlling
-matching for hypergraphs that represent crisp logic statements, or those
-that use probalistic logic, for ranking matches by quality, or many
-other theories of logic.
-
-Callbacks are provided to accept or reject individual node and link
-groundings, and to accept of reject the grounding of individual clauses.
-In addition, the "optional clause" mechanism provides a means of
-pattern rejection. This can be done by specifying the pattern to be
-rejected as "optional": thus, if it is not found, a solution is reported;
-but if it is found, then the callback can reject the solution.
-The callback is free to examine truth values, STI/LTI, etc. in
-accepting or rejecting any given grounding.  The pattern matcher
-performs backtracking; if the matchers maintain state, then they can
-use the push and pop callbacks to piggy-back on the built-in
-back-tracker.
-
-The "optional" mechanism can also be used to implement approximate
-matching, by specifying the parts of the graph that would be "nice
-to match", but not strictly required.
-
-Evaluatable terms (terms and clauses that need to be evaluated at
-run-time to determine thier truth values) are evaluated in the
-evaluate_sentence() callback.  See PatternMatchCallback.h for details:
-in brief, though, this is where the basic conception of "truth" is
-implemented. Crisp-logic theories would implement true/false truth
-values, with and-or-not as the logical connectives. Probabilistic
-theories would implement Bayesian or measure-theoretic "truth values"
-ranging between 0.0 and 1.0; the logical connectives and-or-not would
-correspond to set-intersection, set-union, set-compliment. Other
-theories can implement arbitrary formulas here.
-
-One generic callback is provided:
-
- * The DefaultPatternMatchCB. This callback implements node and link
-   match methods that accept only strict node/link matches, unless a
-   node is of type VariableNode, in which case the match is also
-   accepted. All evaluatable terms (those containing a
-   GroundedPredicateNode) are evaluated, and the resulting truth
-   value is treated as "true" if the TV is greater than 0.5; else
-   it is treated as false.
+In many ways, the above algorithm resembles a boolean satsifiability
+problem, except that, instead of having a two-valued true/false logic,
+it is a many-valued logic (with each variable ranging over the
+universe of allowed values for that variable). The standard technique
+for solving boolean-SAT is to examine the graph, trim away all trees
+that are not multiply connected, ground the remaining
+multipley-connected knot at the center of things, and then re-attach the
+trees. Perhaps something similar could be done here? Would it actually
+be faster? I suppose that depends on the actual query...
 
 
 Forward Chainer
 ---------------
 
-The PatternMatch::imply() method implements a critical component for a
+The `PatternMatch::imply()` method implements a critical component for a
 forward chainer: it is able to accept a BindLink, containing a pattern
 and a rewriting rule, and basically implement a form of IF ... THEN
 ... statement, expressed as an OpenCog hypergraph.
@@ -732,7 +703,7 @@ variables are found, then a hypegraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
 grounding, a SetLink of all grounded implicands is returned.
 
-Thus, the PattnerMatch::imply() method can be used to implement a
+Thus, the `PatternbMatch::imply()` method can be used to implement a
 simple forward-chainer. For example, one may create a collection of
 BindLinks. Then, calling each in turn, from a loop, will cause each to
 be evaluated. Thus, N iterations of the loop is equivalent to chaining
@@ -831,7 +802,7 @@ TODO
 ----
  * API change: Instead of returning results wrapped in a huge SetLink,
    the results should be returned, linked to some anchor. Huge SetLinks
-   suck. There's an open github issue for this.
+   suck. There's an open github issue for this: issue #1502.
 
  * Performance: If a bind-link is of the form `(Bind $X $Y body term)`
    and variabile $Y does not appear anywhere in term, then repeated
@@ -853,50 +824,9 @@ TODO
    in the same atomspace that the bindlink is in.  Thus should be fetched
    directly from the bind-link, and not passed as a third-party parameter.
 
- * Enhancement: Add support for VariableLink, so that, for example,
-   (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
-   any arity-2 link (as long as the type constraints are obeyed).
-
- * Performance improvement: Steal an idea from DPLL, viz
-   unit_propagate.  That is, start with those clauses that have only a
-   single variable in them, ground that, and propagate.  Not sure, I
-   think this could should improve run-time.  Perhaps there are other
-   ideas to steal, e.g. from zChaff?
-
-   Anyway, the next clause to be selected is chosen by
-   get_next_untried_clause(); there is a XXX note in there about this.
-
- * Invent a callback so that ChoiceLink can become a random-choice or
-   a Bayesian-probability-choice, etc. This is sort-of done, already,
-   but more additional/experimental callbacks are needed.
-
- * Enhancement: Add support for IfLink, which would have the semantics
-   'if (some-condition-during-search) then match-this else match-that'
-   This would need to be an extension of GreaterThanLink, which has
-   the semantics of 'if (some-condition-during-search) then
-   trivial-always-match else trivial-impossible-match.'
-
- * Enhancement: Allow variable type declarations to occur anywhere in
-   the body, not just at the top. This is because variable-type
-   restirctions are essentially a kind-of special-case GPN, restricting
-   the accept or reject... except that it is applied immediately, upon
-   the initial attempt at variable grounding.
-
- * Enhancement: Add support for ExecutionOutputLink in the body of the
-   pattern. Thus, given a specific groundings, the EOL is evaluated,
-   resulting in a new sub-pattern to be grounded, until backtracking.
-
- * Enhancement: allow user to bind a handle name to a subset of the
-   match. This would be handy to reduce the verbosity of writing down
-   the consequent part (e.g. if we matched clauses a,b,c, then the
-   output could be just clause b only, and it would be nice to just say
-   'clause b' instead of spelling it out.)
-
- * Study the following some more: prolog, minikanren, mercury, curry
-   (logic programming languague), godel (logic programming language)
-
 Document Status
 ---------------
 Created by Linas Vepstas <linasvepstas@gmail.com>
 Created on 18 March 2008
 Revised on 6 November 2014
+Revised on 17 February 2019
