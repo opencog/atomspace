@@ -1,5 +1,12 @@
 # Query Processing / Pattern Matching Runtime
 
+Query processing and pattern-matching is a form of "fill-in-the-blanks"
+operation. Given a template pattern, with "blanks" in it, a search is
+performed for all graphs that match, and can "fill in" those "blanks".
+Each "blank" is called a "variable", and each (sub-)graph that can "fit"
+into that "blank" or "hole" is called a "grounding". The pattern matcher
+finds groundings for variables.
+
 Pattern querying in the atomspace is split into two parts: a "compile"
 step, and a "execute/run" step. Pattern compilation is done by code in
 the `opencog/atoms/pattern` directory. Pattern execution is done by
@@ -8,7 +15,7 @@ pattern; after that, the query can be run quickly many times.
 
 This README gives a general overview of both steps.
 
-Performing a query of a graphical pattern ca be thought of in several
+Performing a query of a graphical pattern can be thought of in several
 ways. One way is to think of it as "solving the subgraph isomoprhism
 problem", which is exactly what the code here does.
 
@@ -90,6 +97,14 @@ substituing for the variables. Thus, one has:
    prove that the equation 5 = 2 + 3 holds (is satsified, modulo the
    theory of addition), while 7 + x = 3 + x is false (not satsifiable).
 
+ * Queries can also test for term-absence, i.e. to reject matches when
+   some portion of the template pattern is present.  This is confusingly
+   similar to the concept of "negation", but is subtly different:
+   absence of a term is not the same as falsity. In particular, there is
+   no "law of the excluded middle" (it simply does not make sense for
+   term absence) and so the matching algorithm can be said to implement
+   a form of "intuitionistic logic".
+
 
 Subgraph Isomorphism Discovery
 ------------------------------
@@ -97,44 +112,46 @@ Subgraph Isomorphism Discovery
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism problem requires one to find the corresponding
 smaller graph within the universe graph.  The smaller graph may include
-one or more variable nodes or links; these denote variables which will
-be given values (groundings): a variable will match any corresponding
-node or link in the universe, as long as it occurs in the correct
-location. Thus, subgraph matching defacto performs a kind of "variable
-unification", and can be used to perform query processing, to "fill in
-the blanks".
+one or more variables; these will be given groundings. That is, a variable
+might match any corresponding node or link in the universe, as long as it
+occurs in the correct "location" of the surrounding graph. Thus,
+subgraph matching defacto performs a kind of "variable unification", and
+can be used to perform query processing, to "fill in the blanks".
 
 The subgraph matching algorithm implemented here is more or less
 completely general.  The API to it provides for user-defined callbacks
 that can be used to modify the search:
 
- * define what constitutes a 'match' (for individual nodes, links and
+ * Define what constitutes a 'match' (for individual nodes, links and
    clauses),
- * support for optional clauses (portions of the subgraph, which if
+ * Support for optional clauses (portions of the subgraph, which if
    found, are also returned; commonly used to reject certain types of
    patterns),
- * support for search-order ranking (re-ordering the incoming set,
+ * Support for search-order ranking (re-ordering the incoming set,
    e.g. by priority), or even truncation of the incoming set.
- * support for the search start location (again, to potentialy limit
+ * Support for the search start location (again, to potentialy limit
    the total search).
- * solution acceptance callback, to provide on-the-fly reporting, and
+ * Solution acceptance callback, to provide on-the-fly reporting, and
    limit the total number of groundings reported.
- * support for a back-tracking callback. During the search, the
+ * Support for a back-tracking callback. During the search, the
    pattern matcher will typically need to backtrack; this callback
    allows user-defined algorithms to push and pop stacks as
    appropriate, as well.
 
-An additional very important feature is support for 'virtual'
+An additional, very important feature is support for 'virtual'
 hypergraphs: those that are not pre-existing in the fixed universe
 (i.e. in the atomspace), but are only defined algorithmically, by a
 predicate function that returns a yes/no answer about their existence.
-An example would be a greater-than hypergraph that 'virtually' exists
-only if a right-hand number is greater than a left-hand number.
-Clearly, pre-loading the atomspace with every possible number, and
-every possible number-pair is impossible; thus virtual hypergraphs
-provide these relations on-the-fly, as needed.  The pattern matcher
-is able to correctly find subgraphs that contain such virtual
-hypergraphs.
+An example would be "greater-than": this graph 'virtually' exists,
+but only if the number on the right-hand-side is greater than the
+number on the left-hand side.  Clearly, it is impossible for the
+atomspace to contain every possible number (there are nfinitely
+many numbers!), and so it cannot possibly contain all possible
+number-pairs. However, computing the "greater-than" operation is
+very easy: its just some short, simple algorithm.  Thus, virtual
+hypergraphs provide a way of computing relations on-the-fly, as needed.
+The pattern matcher is able to correctly find subgraphs that contain
+such virtual hypergraphs.
 
 Another important and perhaps under-appreciated function is the
 ability to search through unordered links.  When the query subgraph
@@ -145,11 +162,15 @@ explored.  This increases the size of the search space by
 combinatorial factors, and requires a significantly more complex
 algorithm to deal with nested unordered links.
 
-The algorithm itself performs an exhaustive search, and can therefore,
-under certain circumstances, encounter a combinatorial explosion of
-the search space, leading to very long run-times.  This is not usually
-the case for most ordinary problems, but can occur for large problems
-containing hundreds of unordered links and/or virtual nodes.
+The algorithm itself performs an exhaustive search, and can therefore
+in principle encounter a combinatorial explosion of the search space,
+leading to very long run-times.  This appears not to happen for most
+"ordinary" problems, so is usually not a practical issue. However, it
+is not hard to create a problem with several large unordered links that
+have to be grounded, together with a slowly-runnning virtual link:
+for example, matching an unordered set with N variables in it, with the
+"foo" relation: this will generate N-factorial solutions, and will take
+N-factorial times runtime-of-foo to complete the search.
 
 Under "normal" circumstances, the algorithm reports each result
 exactly once.  However, in certain graphs having a common subexpression,
