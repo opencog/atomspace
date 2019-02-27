@@ -4,7 +4,6 @@ ADD_LIBRARY(query-engine
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	InitiateSearchCB.cc
-	PatternMatch.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
 	Satisfier.cc

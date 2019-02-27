@@ -25,7 +25,6 @@
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include "DefaultImplicator.h"
-#include "PatternMatch.h"
 
 using namespace opencog;
 
