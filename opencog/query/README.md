@@ -43,24 +43,27 @@ substituing for the variables. Thus, one has:
    to define a query statement, and ask for all graphs that match. This
    makes the atomspace a kind of graphical database.
 
- * Given the variable values returned by the query, one can create new
-   graphs, thus, one has a graph re-writing facility.
+ * When a variable in the pattern matches some (sub-)graph, that match
+   is called a "grounding". When all of the variables in the entire
+   pattern can be consistently grounded, one can say that the query
+   pattern is "satisfied", in the mathematical sense of "satisfiability".
+   Thus, the pattern matcher is a (graphical) satisfiability solver.
 
- * The pattern is specified as a collection of trees; it is the union
-   of these trees that defines the graph.  The vertexes in the tree are
-   typed (they are OpenCog "Atoms"), and so each tree can be understood
-   as a term. in the sense of a "term algebra".
+ * Given the variable groundings returned by the query, one can create
+   new graphs. Thus, the pattern matcher is a natural foundation for
+   graph re-writing.
+
+ * The template pattern is specified as a collection of trees; it is
+   the union of these trees that defines the query graph.  The vertexes
+   in the tree are typed (in the Comp-Sci sense of "Type Theory"; they
+   are AtomSpace "Atoms"). Thus, each tree can be understood to be a
+   "term", in the sense of a "term algebra" (this is a concept from the
+   theory of "term rewriting", derived from mathematical logic.)
 
  * The same variable can appear in different parts of the template. All
-   solutions must therefore have the same value for that variable, thus,
-   the pattern matcher performs "unification".  Variables can be
-   substituted either by vertexes, or by graphs; so the form of
-   unification is not mereley on values, but on terms/expressions.
-
- * When a value is found for a variable, that value is called a
-   "grounding". When the entire pattern can be grounded, it can be
-   thought of as being "satisfied", in the sense of "satisfiability".
-   Thus, the pattern matcher is a (graphical) satisfiability solver.
+   solutions must therefore have the same grounding for that variable,
+   thus, the pattern matcher performs "unification".  The pattern
+   matcher can unify N terms at the same time (and not just two).
 
  * The query-pattern is iteself represented as a graph, and is stored in
    the atomspace. This means that "inverse queries" can be performed.
