@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/DefaultImplicator.h>
 
 #include "BindLink.h"
@@ -173,12 +173,10 @@ HandleSeq BindLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq results(do_execute(as, silent));
-
 	// The result_list contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.
-	Handle rewr(createLink(results, SET_LINK));
+	Handle rewr(createUnorderedLink(do_execute(as, silent), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
