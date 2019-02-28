@@ -626,7 +626,7 @@ std::string PythonEval::build_python_error_message(
     errorStringStream << "Python error";
 
     if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << " in" << function_name;
+        errorStringStream << " in " << function_name;
 
     PyObject* pyErrorString = PyObject_Str(pyError);
 #if PY_MAJOR_VERSION == 2
