@@ -419,6 +419,9 @@ recognizing a context-free language.
 
 ### Currently Implemented Algorithm
 
+Additional detailed discussion can be found in a different README file:
+the [README-Algorithm](README-Algorithm.md) file.
+
 1. The search-variables in the input pattern must be explicitly
    declared. Only these explicitly-declared variables will be grounded.
    Any other variables that have not been explicitly declared will be
