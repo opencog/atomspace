@@ -355,9 +355,9 @@ PATTERN_LINK <- PRENEX_LINK
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 
-// Finds all groundings, return TV
+// Finds all groundings, return binary truth value (true/false)
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK
-// Finds all groundings, return LinkValue
+// Finds all groundings, returns generic Value
 SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
@@ -365,8 +365,11 @@ SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
 // declarative.  Likewise, BindLink is exactly the same thing as an
 // ImplicationLink, except that its imperative, not declarative.
 // Both return SetLinks holding the results.
+// QueryLink is identical to BindLink, except it returns a LinkValue
+// holding the result, instead of a SetLink. (Less atomspace pollution).
 GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
-BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
+QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
+BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
 
 // Adjoint to the GetLink. This is "adjoint" in the sense that the roles
 // of the pattern and the grounding are reversed: given a grounding, the

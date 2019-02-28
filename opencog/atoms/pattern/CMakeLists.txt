@@ -10,6 +10,7 @@ ADD_LIBRARY (lambda
 	PatternTerm.cc
 	PatternUtils.cc
 	Pattern.cc
+	QueryLink.cc
 	SatisfactionLink.cc
 )
 
@@ -35,6 +36,7 @@ INSTALL (FILES
 	Pattern.h
 	PatternTerm.h
 	PatternUtils.h
+	QueryLink.h
 	SatisfactionLink.h
 	DESTINATION "include/opencog/atoms/pattern"
 )
