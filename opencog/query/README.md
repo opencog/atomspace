@@ -7,7 +7,7 @@ Each "blank" is called a "variable", and each (sub-)graph that can "fit"
 into that "blank" or "hole" is called a "grounding". The pattern matcher
 finds groundings for variables.
 
-Pattern querying in the atomspace is split into two parts: a "compile"
+Pattern querying in the AtomSpace is split into two parts: a "compile"
 step, and a "execute/run" step. Pattern compilation is done by code in
 the `opencog/atoms/pattern` directory. Pattern execution is done by
 code in this directory. Compilation has to be done only once per
@@ -16,23 +16,23 @@ pattern; after that, the query can be run quickly many times.
 This README gives a general overview of both steps.
 
 Performing a query of a graphical pattern can be thought of in several
-ways. One way is to think of it as "solving the subgraph isomoprhism
+ways. One way is to think of it as "solving the subgraph isomorphism
 problem", which is exactly what the code here does.
 
 The subgraph isomorphism algorithm implemented here is used for many
-different atomspace functions, including graph-database query processing,
-inverted query search, graph-rewriting, graph satisfiaibility and
-"satsifiability modulo theories".
+different AtomSpace functions, including graph-database query processing,
+inverted query search, graph-rewriting, graph satisfiability and
+"satisfiability modulo theories".
 
 In addition, graph patterns can be thought of as "rewrite rules" or
 "productions", and thus can be chained together in sequences to perform
-inferencing, natural deducation and parsing.  Forward and backward
+inferencing, natural deduction and parsing.  Forward and backward
 chaining are implemented separately, in the `opencog/rule-engine`
 directory.
 
 The first part of this README describes the generic algorithm; the
 second part describes some of its applications to query processing,
-graph rewriting, unification, satisfiability and satsifiability modulo
+graph rewriting, unification, satisfiability and satisfiability modulo
 theories.
 
 A simple example of one possible use of this code is shown in the file
@@ -44,11 +44,11 @@ A Quick Sketch
 The basic idea is that one can specify a pattern or template, in the
 form of a graph, some of whose nodes are variables.  The pattern
 matcher can then find all other graphs that match the given template,
-substituing for the variables. Thus, one has:
+substituting for the variables. Thus, one has:
 
  * A Hypergraph Query Language (HQL), that, much like SQL, allows you
    to define a query statement, and ask for all graphs that match. This
-   makes the atomspace a kind of graphical database.
+   makes the AtomSpace a kind of graphical database.
 
  * When a variable in the pattern matches some (sub-)graph, that match
    is called a "grounding". When all of the variables in the entire
@@ -72,8 +72,8 @@ substituing for the variables. Thus, one has:
    thus, the pattern matcher performs "unification".  The pattern
    matcher can unify N terms at the same time (and not just two).
 
- * The query-pattern is iteself represented as a graph, and is stored in
-   the atomspace. This means that "inverse queries" can be performed.
+ * The query-pattern is itself represented as a graph, and is stored in
+   the AtomSpace. This means that "inverse queries" can be performed.
    For example, given a graph with no variables in it, one can search
    for all queries that would return this graph. This function is
    commonly employed in chatbots, where the pattern-with-no-variables
@@ -90,12 +90,12 @@ substituing for the variables. Thus, one has:
  * During the pattern search, the evaluatable subgraphs are evaluated
    to determine if they evaluate to "true", thus allowing the search
    to continue.  This implies that the pattern matcher is a kind of
-   "satsifiability modulo theories" solver: when it determines that
+   "satisfiability modulo theories" solver: when it determines that
    two subgraphs are equal, it is applying the "equational theory"
    given by functions (graphs) that are evaluatable. Simple arithmetic
    theory is built-in, and thus, for example, the pattern matcher can
-   prove that the equation 5 = 2 + 3 holds (is satsified, modulo the
-   theory of addition), while 7 + x = 3 + x is false (not satsifiable).
+   prove that the equation 5 = 2 + 3 holds (is satisfied, modulo the
+   theory of addition), while 7 + x = 3 + x is false (not satisfiable).
 
  * Queries can also test for term-absence, i.e. to reject matches when
    some portion of the template pattern is present.  This is confusingly
@@ -115,7 +115,7 @@ smaller graph within the universe graph.  The smaller graph may include
 one or more variables; these will be given groundings. That is, a variable
 might match any corresponding node or link in the universe, as long as it
 occurs in the correct "location" of the surrounding graph. Thus,
-subgraph matching defacto performs a kind of "variable unification", and
+subgraph matching de-facto performs a kind of "variable unification", and
 can be used to perform query processing, to "fill in the blanks".
 
 The subgraph matching algorithm implemented here is more or less
@@ -129,7 +129,7 @@ that can be used to modify the search:
    patterns),
  * Support for search-order ranking (re-ordering the incoming set,
    e.g. by priority), or even truncation of the incoming set.
- * Support for the search start location (again, to potentialy limit
+ * Support for the search start location (again, to potentially limit
    the total search).
  * Solution acceptance callback, to provide on-the-fly reporting, and
    limit the total number of groundings reported.
@@ -140,12 +140,12 @@ that can be used to modify the search:
 
 An additional, very important feature is support for 'virtual'
 hypergraphs: those that are not pre-existing in the fixed universe
-(i.e. in the atomspace), but are only defined algorithmically, by a
+(i.e. in the AtomSpace), but are only defined algorithmically, by a
 predicate function that returns a yes/no answer about their existence.
 An example would be "greater-than": this graph 'virtually' exists,
 but only if the number on the right-hand-side is greater than the
 number on the left-hand side.  Clearly, it is impossible for the
-atomspace to contain every possible number (there are nfinitely
+AtomSpace to contain every possible number (there are infinitely
 many numbers!), and so it cannot possibly contain all possible
 number-pairs. However, computing the "greater-than" operation is
 very easy: its just some short, simple algorithm.  Thus, virtual
@@ -167,7 +167,7 @@ in principle encounter a combinatorial explosion of the search space,
 leading to very long run-times.  This appears not to happen for most
 "ordinary" problems, so is usually not a practical issue. However, it
 is not hard to create a problem with several large unordered links that
-have to be grounded, together with a slowly-runnning virtual link:
+have to be grounded, together with a slowly-running virtual link:
 for example, matching an unordered set with N variables in it, with the
 "foo" relation: this will generate N-factorial solutions, and will take
 N-factorial times runtime-of-foo to complete the search.
@@ -191,18 +191,18 @@ run quickly, at the expense of longer compile times. Analysis includes:
 
 * Extraction of variable locations.
 * Identification of evaluatable terms.
-* Identification of those unordered sets whose permuations will need
+* Identification of those unordered sets whose permutations will need
   to be explored.
 * Determination of whether the template-graph is fully connected, or
   is a product of disjoint graphs. Disjoint subgraphs can be each
-  matched individually; the final solution-set is meareely a product of
+  matched individually; the final solution-set is merely a product of
   the solution-sets of the disjoint pieces.
 * Determination of whether the template-graph is fully connected, after
   all virtual terms have been removed. If it consists of disjoint
   pieces, then these are grounded first, and then re-assembled by
   evaluating the virtual links.
 
-Pattern compliation is non-trivial.  Thus, in certain very simple cases,
+Pattern compilation is non-trivial.  Thus, in certain very simple cases,
 it might be faster (and probably simpler) for you, the user, to obtain
 the desired graphs directly, instead of using the pattern matcher. Of
 course, this looses generality, and forces you to write strange custom
@@ -211,9 +211,9 @@ pattern matcher is its ability to handle large, complex graphs with
 multiple variables interacting in difficult ways (or even graphs with
 no constant nodes in them at all!)
 
-The subgraph isomomorphism algorithm itself does not make use of or
-require the atomspace: it simply traces connections between links by
-traversing the incoming and outgoing sets. The atomspace is required
+The subgraph isomorphism algorithm itself does not make use of or
+require the AtomSpace: it simply traces connections between links by
+traversing the incoming and outgoing sets. The AtomSpace is required
 in only two places: to find a set of starting points for the search
 (e.g. by finding all nodes of a given type), and as the location into
 which new graphs are inserted (during graph-re-writing).
@@ -233,19 +233,19 @@ databases: for any physical item, you typically want to have only one
 corresponding database record.)
 
 When trees share common Nodes or Links, they become connected. When they
-share many of them, they become entangled. Thus, the Atomspace contents
-don't so much resemble a "forest of trees" as they resmble a dense
-matted structure like felt, or, more acurately, a rhizome. (Search for
-pictures, if you don't know what that is.) Mathematicaly, the proper
+share many of them, they become entangled. Thus, the AtomSpace contents
+don't so much resemble a "forest of trees" as they resemble a dense
+matted structure like felt, or, more accurately, a rhizome. (Search for
+pictures, if you don't know what that is.) Mathematically, the proper
 name for the structure is an "incidence graph", or, even more properly,
 a bipartite "Levi Graph".
 
 Normally, all trees are finite in size.  There is a way of defining
 infinite trees, as patchwork of finite subtrees quilted together into
-a recursive structure.  This can be done with either the DefineLink
-(which is static) or the StateLink (which is mutable). The pattern
+a recursive structure.  This can be done with either the `DefineLink`
+(which is static) or the `StateLink` (which is mutable). The pattern
 matcher supports the traversal of such infinite trees: it merely stops
-at the boundaries of the repeated segements.
+at the boundaries of the repeated segments.
 
 In the discussion below, and in the code, these trees are usually called
 "clauses". This is in distinction to "terms", which are sub-trees of the
@@ -326,7 +326,7 @@ question.  This illustrates the simplest use of the system, as a
 kind-of fill-in-the-blanks solver, for elementary-school word
 problems: "What did John throw? John threw a ____."
 
-The solution or answer is "ball". This is refered to as a "grounding"
+The solution or answer is "ball". This is referred to as a "grounding"
 for the "variable" `_$qVar`.   The terminology of "grounding" and
 "variable" is meant to be identical to the terminology commonly used
 in textbooks on model theory, lambda calculus and first-order logic:
@@ -367,7 +367,7 @@ The following sections present the algorithm details.
 * A "clause" is a tree, typically containing one or more variables.
 
 * A "pattern", "template" or "query" is a set of clauses. All three
-  words are used interchangably to mean the same thing: some graph
+  words are used interchangeably to mean the same thing: some graph
   that is supposed to be matched.
 
 * A "term" is a subtree of a clause.
@@ -380,8 +380,8 @@ The following sections present the algorithm details.
 * A "solution" is a graph that provides a grounding for the query. The
   solution must be self-consistent, in that each distinct variable has
   only one distinct grounding (for that solution) and the solution-graph
-  is identical to the query-graph, after the variables are subtituted by
-  thier grounds.
+  is identical to the query-graph, after the variables are substituted by
+  their grounds.
 
 * A "satisfying set" is the set of groundings of variables that provide
   a consistent solution.
@@ -410,7 +410,7 @@ several groundings, the algorithm maintains a stack to hold intermediate
 groundings, as the universe is explored. A solution is declared when
 every tree has been grounded. If no grounding is found, or if additional
 solutions are to be searched for, the algorithm will backtrack to the
-most recent unexplored part of the universe, poping the stack as it
+most recent unexplored part of the universe, popping the stack as it
 backtracks. In this sense, the algorithm resembles a pushdown automaton.
 Since pushdown automata are associated with context-free languages,
 the subgraph isomorphism problem is effectively a problem in
@@ -421,13 +421,13 @@ recognizing a context-free language.
 
 1. The search-variables in the input pattern must be explicitly
    declared. Only these explicitly-declared variables will be grounded.
-   Any other variables that have not been explictly declared will be
+   Any other variables that have not been explicitly declared will be
    treated as constants. The explicitly-declared variables are called
    "bound variables". Any other variables in the input pattern are
    called "free variables".
 
 2. During pattern compilation, the location of each variable in the
-   query is extracted, and cahced in a map.
+   query is extracted, and cached in a map.
 
 3. A connectivity map is created, indicating which clauses share common
    variables. This is used during traversal, to select the next clause
@@ -445,7 +445,7 @@ recognizing a context-free language.
 5. Acceptance of a proposed grounding is done by by means of callbacks,
    in the `class PatternMatchCallback` structure. These include
    callbacks that can accept or reject a Node or Link match, a callback
-   that is called before a Link match is even started, a calllback
+   that is called before a Link match is even started, a callback
    to accept or reject a single grounded clause, etc. See the file
    `PatternMatchCallback.h` for details. The `DefaultPatternMatchCB`
    provides a very reasonable set of default callbacks that work
@@ -455,7 +455,7 @@ recognizing a context-free language.
 6. A starting point for the search is selected. The starting point is
    usually a constant atom that occurs in one of the clauses. Usually,
    the constant term with the smallest incoming set is selected; this
-   is called the "thinnest term", under the beleif that this will result
+   is called the "thinnest term", under the belief that this will result
    in the most efficient search. When there are no constant terms in
    any of the clauses, different techniques are used to pick a starting
    location.  The algorithms for picking the starting points are
@@ -470,9 +470,9 @@ recognizing a context-free language.
    `PatternMatchEngine::explore_neighborhood()` for details.
 
 8. When an unordered set is encountered in the search, each possible
-   permuatation of that set forms a distinct grounding possibility.
+   permutation of that set forms a distinct grounding possibility.
    Thus, the current permutation is pushed onto a stack; this is then
-   popped, when all possible permuations have been considered.
+   popped, when all possible permutations have been considered.
 
 9. The `ChoiceLink` provides an explicit menu of terms to be grounded.
    Only one term in the menu needs to be grounded. Thus, each term
@@ -483,7 +483,7 @@ recognizing a context-free language.
 10. The `GlobNode` is a `VariableNode` that can be grounded by multiple
    adjacent list elements. This is in contrast to `VariableNode`s, which
    can be grounded by only one Atom at a time. `GlobNode`s are analogous
-   to the concept of "globbing" in regex matching: they effectively
+   to the concept of "globing" in regex matching: they effectively
    embody more-or-less exactly the same idea. Each possible distinct
    grounding of a `GlobNode` represents a distinct branch to explore.
    Thus, the current glob grounding is pushed onto a stack, and popped
@@ -532,17 +532,17 @@ A pattern may consist of query-terms, which must be explicitly
 grounded, as term-algebra-terms, and also "relations", which are
 a kind of term that evaluates to a true/false value. When a relation
 evaluates to false, that particular associated grounding is rejected;
-otherwise it is accepted, and the remainder of the serch is performed.
+otherwise it is accepted, and the remainder of the search is performed.
 
 Relations are implemented as VirtualLinks. These encapsulate
 algorithmically-determined relations. The primordial example is
 `GreaterThanLink`, which is evaluated on-the-fly to determine it's
-truth-hood. It is called "virtual" because it is impossbible to
+truth-hood. It is called "virtual" because it is impossible to
 store every-possible greater-than relation between numbers: there
 is an infinity of these. This is in direct contrast to non-virtual,
 concrete knowledge declarations: e.g. "every cat is an animal" which
 can be evaluated to be true or false, but which will be concretely
-present in the AtomSpace. Concrete, explict knowledge delcaration
+present in the AtomSpace. Concrete, explicit knowledge declaration
 is needed, because there is no generic algorithm that can evaluate
 the truth-hood of "every X is a Y".
 
@@ -551,12 +551,12 @@ Not all virtual links are relations; the arithmetic links: `PlusLink`,
 results.
 
 Relations are handled in two steps. During pattern compilation, all
-relations are removed fom the pattrn, and then the pattern is analyzed
+relations are removed from the pattern, and then the pattern is analyzed
 for connectivity. In the general case, the pattern will decompose into
 multiple, disjoint connected components, with the virtual links being
 the only connection between them.
 
-During run-time, each dijsoint component is indpendently grounded. Then,
+During run-time, each disjoint component is independently grounded. Then,
 each combinatoric possibility of each grounding is brought together,
 submitted to the relation links as candidates. If the virtual link
 evaluates to true, then this combination is accepted. Processing
@@ -575,8 +575,8 @@ with relations links spanning parts of it.)
 ### Unordered Links
 
 The use of unordered links within a pattern provides a special
-challange for the pattern matcher. This is because each possible
-permuation of an unordered link must be explored.  Consider, for
+challenge for the pattern matcher. This is because each possible
+permutation of an unordered link must be explored.  Consider, for
 example, the search pattern:
 ```
     AndLink
@@ -605,15 +605,15 @@ the SetLink must be considered when searching for groundings. This
 can lead to a combinatoric explosion.
 
 Backtracking through unordered links is a challenge. To better
-understand this challange, there are four distinct scenarios that
-can occur during pattern matcing.  These are:
+understand this challenge, there are four distinct scenarios that
+can occur during pattern matching.  These are:
 
 A) One is at the bottom, and is searching upwards, and encounters
    an unordered link as a parent of the current atom.
 
 B) One is at the bottom, moving upwards, and during the (downward)
    `tree_compare()`'s that must be performed at each stage, there is
-   an unordered set somwhere in a subtree.
+   an unordered set somewhere in a subtree.
 
 C) Situations A) and B) can occur in a nested fashion, so that an
    unordered link may have another unordered link inside of it.
@@ -626,11 +626,11 @@ Note that, for situation A), as one continues to move upwards, the
 downward tree-compare effectively looks like situation B).
 
 Situation D) is easily dealt with by using the existing
-backtracking infrastructure, and so presents no new challanges.
+backtracking infrastructure, and so presents no new challenges.
 
 Performance
 -----------
-All fo the uses of the word "combinatoric explosion" in the above may
+All of the uses of the word "combinatoric explosion" in the above may
 have you alarmed. Not to worry. Performance is fast! In "typical"
 datasets containing many millions of atoms, all "typical" queries run
 in milliseconds or less.  This is in part because, at least so far, most
@@ -676,13 +676,13 @@ there is an equivalent LL(k) grammar, but it is exponentially larger,
 thus negating the linear-timer performance. Or something like that.
 This is just hand-waving.)
 
-In many ways, the above algorithm resembles a boolean satsifiability
+In many ways, the above algorithm resembles a boolean satisfiability
 problem, except that, instead of having a two-valued true/false logic,
 it is a many-valued logic (with each variable ranging over the
 universe of allowed values for that variable). The standard technique
 for solving boolean-SAT is to examine the graph, trim away all trees
 that are not multiply connected, ground the remaining
-multipley-connected knot at the center of things, and then re-attach the
+multiply-connected knot at the center of things, and then re-attach the
 trees. Perhaps something similar could be done here? Would it actually
 be faster? I suppose that depends on the actual query...
 
@@ -693,13 +693,13 @@ Forward Chainer
 The `PatternMatch::imply()` method implements a critical component for a
 forward chainer: it is able to accept a BindLink, containing a pattern
 and a rewriting rule, and basically implement a form of IF ... THEN
-... statement, expressed as an OpenCog hypergraph.
+... statement, expressed as an AtomSpace hypergraph.
 
 Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand".
 The predicate is presumed to contain VariableNodes, while the implicand
 is a hypergraph making used of those VariableNodes.  The predicate is
 run through the pattern-matching engine. When groundings for the
-variables are found, then a hypegraph is created based on the implicand,
+variables are found, then a hypergraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
 grounding, a SetLink of all grounded implicands is returned.
 
@@ -777,7 +777,7 @@ would not be hard.  In practice, its a little more subtle than that:
 we've glossed over the idea that truth values could be queryable, or
 that truth values would need to have some minimum/maximum value, or
 that atom types could be queryable.  Also, the representation of RelEx
-expressions in OpenCog is considerably more complicated than the above.
+expressions in Atomese is considerably more complicated than the above.
 
 To overcome these difficulties, it is strongly suggested (would make
 sense) to create the actual query language from within the scheme
@@ -788,7 +788,7 @@ user.
 
 What is currently implemented is "English as a query language". That is,
 queries are posed in English, such as "What did John throw?". These are
-parsed by RelEx and turned into OpenCog hypergraphs with embedded query
+parsed by RelEx and turned into Atomese hypergraphs with embedded query
 variables (_$qVar) in them.  The code in this directory will process
 these queries, and return values for _$qVar.
 
@@ -805,7 +805,7 @@ TODO
    suck. There's an open github issue for this: issue #1502.
 
  * Performance: If a bind-link is of the form `(Bind $X $Y body term)`
-   and variabile $Y does not appear anywhere in term, then repeated
+   and variable $Y does not appear anywhere in term, then repeated
    groundings for $Y can be avoided, and should be avoided.
 
  * Performance: If a bind-link is of the form `(Bind variables term term)`
@@ -817,11 +817,11 @@ TODO
    BindLink and the SetLink that the results came in. This is ...
    annoyingly inefficient. Also not inherently thread-safe.  It can
    be worked around by placing the BindLink, and the search results
-   in a temporary atomspace, but this is ... kind-of-ish icky?
+   in a temporary AtomSpace, but this is ... kind-of-ish icky?
    Can we do something nicer, here?
 
- * Atomspaces are done wrong. Grounding whould always be performed
-   in the same atomspace that the bindlink is in.  Thus should be fetched
+ * AtomSpaces are done wrong. Grounding should always be performed
+   in the same AtomSpace that the BindLink is in.  Thus should be fetched
    directly from the bind-link, and not passed as a third-party parameter.
 
 Document Status
