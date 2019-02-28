@@ -301,8 +301,8 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == t) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(t, QUERY_LINK)) return;
 	if (DUAL_LINK == t) return;
 	init();
 }
@@ -319,8 +319,8 @@ PatternLink::PatternLink(const Link& l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == tscope) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(tscope, QUERY_LINK)) return;
 	if (DUAL_LINK == tscope) return;
 	init();
 }

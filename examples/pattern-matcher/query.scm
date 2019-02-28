@@ -26,21 +26,26 @@
 
 (use-modules (opencog) (opencog exec))
 
-; Define a very simple satisfaction link.
-(define satlink
-	(Satisfaction
+; Create three bits of "knowledge".
+(Evaluation
+	(Predicate "foobar") (List (Concept "funny") (Concept "thing")))
+(Evaluation
+	(Predicate "foobar") (List (Concept "funny") (Concept "story")))
+(Evaluation
+	(Predicate "foobar") (List (Concept "funny") (Concept "joke")))
+
+; Define a simple query. It looks for the funny stuff, and attaches
+; the result to an AnchorNode
+(define query
+	(Query
+		(TypedVariable (Variable "$x") (Type 'ConceptNode))
 		(Evaluation
 			(Predicate "foobar")
-			(List
-				(Concept "funny")
-				(Variable "$x")))))
-
-; Create something that will satisfy the above.
-(Evaluation
-	(Predicate "foobar")
-	(List
-		(Concept "funny")
-		(Concept "thing")))
+			(List (Concept "funny") (Variable "$x")))
+		(ListLink
+			(Anchor "*-query reults -*")
+			(Implication (Variable "$x") (Concept "laughable")))
+	))
 
 ; Actually run it - this should return TrueTV i.e. `(stv 1 1)`
 ; because the SatisfactionLink is satisfiable.
