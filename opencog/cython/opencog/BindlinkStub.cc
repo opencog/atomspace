@@ -12,5 +12,7 @@ ValuePtr opencog::do_execute(AtomSpace* atomspace, Handle h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
+	if (pap and pap->is_atom())
+		return atomspace->add_atom(HandleCast(pap));
 	return pap;
 }

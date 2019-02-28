@@ -292,16 +292,18 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
 	Instantiator inst(&as);
-	Handle expected = an(NUMBER_NODE, "42"),
-		result = HandleCast(inst.execute(twice21));
+	Handle expected = an(NUMBER_NODE, "42");
+	Handle result = HandleCast(inst.execute(twice21));
+	result = as.add_atom(result);
 
 	TS_ASSERT_EQUALS(expected, result);
 
 	// should work with variable inside the ListLink too
 
-	Handle N21_LST = al(LIST_LINK, N21),
-	       twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST),
-	       result_lst = HandleCast(inst.execute(twice21_lst));
+	Handle N21_LST = al(LIST_LINK, N21);
+	Handle twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST);
+	Handle result_lst = HandleCast(inst.execute(twice21_lst));
+	result_lst = as.add_atom(result_lst);
 
 	TS_ASSERT_EQUALS(expected, result_lst);
 
