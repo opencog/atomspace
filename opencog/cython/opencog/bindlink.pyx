@@ -11,8 +11,6 @@ def execute_atom(AtomSpace atomspace, Atom atom):
     cdef cValuePtr c_value_ptr = c_execute_atom(atomspace.atomspace,
                                            deref(atom.handle))
     type = deref(c_value_ptr).get_type()
-    if is_a(type, types.Atom):
-        return Atom.createAtom(handle_cast(c_value_ptr), atomspace)
     cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[void]&>c_value_ptr)
     return create_value_by_type(type, ptr_holder, atomspace)
 
