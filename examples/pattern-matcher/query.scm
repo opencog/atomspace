@@ -47,21 +47,6 @@
 			(Implication (Variable "$x") (Concept "laughable")))
 	))
 
-; Actually run it - this should return TrueTV i.e. `(stv 1 1)`
-; because the SatisfactionLink is satisfiable.
-(cog-evaluate! satlink)
-
-; Print a list of all the keys attached to the SatisfactionLink.
-(cog-keys satlink)
-
-; The one and only key printed above should be the below.
-(define pgk (Predicate "*-PatternGroundingsKey-*"))
-
-; Get the value associated with this key.
-; Ah Ha!  It should print `(Concept "thing")` which is the
-; value that grounded the `(Variable "$x")`.
-;
-; This value is cached indefinitely - until the next time that
-; the SatisfactionLink is evaluated. If it evaluates to false,
-; the old cached value is NOT cleared!
-(cog-value satlink pgk)
+; Actually run it - this should return all of the results, wrapped
+; in a LinkValue.
+(cog-execute! query)
