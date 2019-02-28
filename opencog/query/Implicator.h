@@ -55,10 +55,11 @@ class Implicator :
 	public virtual PatternMatchCallback
 {
 	protected:
+		AtomSpace* _as;
 		HandleSet _result_set;
 
 	public:
-		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
 		Instantiator inst;
 		Handle implicand;
 		size_t max_results;

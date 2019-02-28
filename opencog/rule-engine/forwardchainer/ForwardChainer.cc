@@ -402,7 +402,7 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 			BindLinkPtr bl = BindLinkCast(rhcpy);
 			FocusSetPMCB fs_pmcb(&derived_rule_as, &_kb_as);
 			fs_pmcb.implicand = bl->get_implicand();
-			bl->imply(fs_pmcb, false);
+			bl->satisfy(fs_pmcb);
 			add_result_set(_focus_set_as, fs_pmcb.get_result_set());
 		}
 		// Search the whole atomspace.

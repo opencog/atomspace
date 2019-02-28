@@ -357,13 +357,14 @@ PATTERN_LINK <- PRENEX_LINK
 
 // Finds all groundings, return TV
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK
-// Finds all groundings, return SetLink
+// Finds all groundings, return LinkValue
 SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
 // declarative.  Likewise, BindLink is exactly the same thing as an
 // ImplicationLink, except that its imperative, not declarative.
+// Both return SetLinks holding the results.
 GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
 BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
 

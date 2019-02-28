@@ -108,21 +108,35 @@ void BindLink::extract_variables(const HandleSeq& oset)
 
 /* ================================================================= */
 /* ================================================================= */
-
 /**
- * Evaluate a pattern and rewrite rule embedded in a BindLink
+ * Execute a BindLink
+ *
+ * Given a BindLink containing variable declarations, a predicate and
+ * an implicand, this method will "execute" the implication, matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    BindLink
+ *       VariableList
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       AndList
+ *          etc ...
+ *
+ * The whole point of the BindLink is to do nothing more than
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the variables.
  *
  * Use the default implicator to find pattern-matches. Associated truth
  * values are completely ignored during pattern matching; if a set of
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-ValuePtr BindLink::execute(AtomSpace* as, bool silent)
+HandleSet BindLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
 	DefaultImplicator impl(as);
-	impl.max_results = SIZE_MAX;
 	impl.implicand = this->get_implicand();
 
 	/*
@@ -135,25 +149,19 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	 * in the URE, for doing disconnected searches.
 	 */
 	bool do_conn_check=false;
-	this->imply(impl, do_conn_check);
+	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
+		throw InvalidParamException(TRACE_INFO,
+		                            "BindLink consists of multiple "
+		                            "disconnected components!");
+
+	this->PatternLink::satisfy(impl);
 
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_set().size())
 	{
 		// The result_set contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
-		// Put the set into a SetLink, cache it, and return that.
-		Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-		// Shoot. XXX FIXME. Most of the unit tests require that the atom
-		// that we return is in the atomspace. But it would be nice if we
-		// could defer this indefinitely, until its really needed.
-		rewr = as->add_atom(rewr);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
-		return rewr;
+		return impl.get_result_set();
 	}
 
 	// If we are here, then there were zero matches.
@@ -175,20 +183,28 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		Handle h(HandleCast(impl.inst.execute(impl.implicand, true)));
-		impl.insert_result(h);
+		HandleSet result;
+		result.insert(HandleCast(impl.inst.execute(impl.implicand, true)));
+		return result;
 	}
 
-	// Create a set holding all results of the implication, and cache it.
-	Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
+	return HandleSet();
+}
 
+ValuePtr BindLink::execute(AtomSpace* as, bool silent)
+{
+	// The result_list contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, cache it, and return that.
+	Handle rewr(createUnorderedLink(do_execute(as, silent), SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
 	// Shoot. XXX FIXME. Most of the unit tests require that the atom
 	// that we return is in the atomspace. But it would be nice if we
 	// could defer this indefinitely, until its really needed.
 	rewr = as->add_atom(rewr);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
 	return rewr;
 }
 

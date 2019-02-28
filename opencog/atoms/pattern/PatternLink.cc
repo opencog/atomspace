@@ -868,11 +868,6 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	}
 }
 
-// Hack alert: The line below should not be here. Though some refactoring
-// regarding shared libraries circular dependencies (liblambda and libquery)
-// needs to be done before this becomes fixable...
-const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
-
 void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.cnf_clauses)
