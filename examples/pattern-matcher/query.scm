@@ -44,7 +44,7 @@
 			(Predicate "foobar")
 			(List (Concept "funny") (Variable "$x")))
 		(ListLink
-			(Anchor "*-query results -*")
+			(Anchor "*-query results-*")
 			(Implication (Variable "$x") (Concept "laughable")))
 	))
 
@@ -52,45 +52,38 @@
 ; in a LinkValue.
 (cog-execute! query)
 
+; Take a look at the incoming set of the anchor point, and verify
+; that the expected content is there.
+(cog-incoming-set (Anchor "*-query results-*"))
+
 ; Define a second stage to the processing pipeline
 (define absurd
 	(Query
 		(TypedVariable (Variable "$x") (Type 'ConceptNode))
-		(ListLink
-			(Anchor "*-query results -*")
-			(Implication (Variable "$x") (Concept "laughable")))
-
-		; After matching the above, perform the below.
-		(SequentialAnd
-			; First, delete the attachment to the anchor
-			(True (Delete
-				(ListLink
-					(Anchor "*-query results -*")
-					(Implication (Variable "$x") (Concept "laughable")))))
-
-			; Next, create an attachment to the second stage
-			(True
-				(ListLink
-					(Anchor "*-risible results -*")
-					(Implication (Variable "$x") (Concept "ludicrous")))))
-	))
-
-(define absurd
-	(Query
-		(TypedVariable (Variable "$x") (Type 'ConceptNode))
 		(And
+			; Search at the earlier anchor point.
 			(Present (ListLink
-				(Anchor "*-query results -*")
+				(Anchor "*-query results-*")
 				(Implication (Variable "$x") (Concept "laughable"))))
+
+			; Immediately dettach from that anchor, by deleting the
+			; ListLink that couples the two together.
 			(True (Delete (ListLink
-				(Anchor "*-query results -*")
+				(Anchor "*-query results-*")
 				(Implication (Variable "$x") (Concept "laughable"))))))
 
-		; After matching the above, perform the below.
-		; Next, create an attachment to the second stage
+		; After matching the above, create an attachment to the
+		; second stage anchor point.
 		(ListLink
-			(Anchor "*-risible results -*")
+			(Anchor "*-risible results-*")
 			(Implication (Variable "$x") (Concept "ludicrous")))
 	))
 
+; Run the query. See what happens.
 (cog-execute! absurd)
+
+; Verify that the old anchor point has been vacated, as expected.
+(cog-incoming-set (Anchor "*-query results-*"))
+
+; Verify that the results are now at the new anchor
+(cog-incoming-set (Anchor "*-risible results-*"))
