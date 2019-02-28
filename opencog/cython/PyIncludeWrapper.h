@@ -11,6 +11,8 @@
 #undef _XOPEN_SOURCE
 #endif
 #include <Python.h>
+// Include header for Python traceback forward declaration
+#include <frameobject.h>
 #ifdef _GNU_SOURCE
 #pragma pop_macro("_POSIX_C_SOURCE")
 #pragma pop_macro("_XOPEN_SOURCE")
