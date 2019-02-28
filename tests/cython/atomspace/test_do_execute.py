@@ -22,8 +22,9 @@ class DoExecuteTest(unittest.TestCase):
 
         value_of_link = ValueOfLink(atom, key)
 
-        res = execute_atom(atomspace, value_of_link)
-        self.assertEqual(FloatValue([1, 2, 3]), res)
+        value = execute_atom(atomspace, value_of_link)
+        self.assertEqual(FloatValue([1, 2, 3]), value)
+        self.assertEqual([1, 2, 3], value.to_list())
 
     def test_do_execute_atom(self):
         (DefineLink(
