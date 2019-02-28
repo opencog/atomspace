@@ -1,15 +1,20 @@
-from opencog.atomspace cimport Atom, AtomSpace, TruthValue
-from opencog.atomspace cimport cHandle, cAtomSpace, cTruthValue
-from opencog.atomspace cimport tv_ptr, strength_t, count_t
+from opencog.atomspace cimport Atom, AtomSpace, TruthValue, PtrHolder
+from opencog.atomspace cimport cAtomSpace, cTruthValue
+from opencog.atomspace cimport tv_ptr, strength_t, count_t, shared_ptr
 from opencog.atomspace cimport handle_cast
 from cython.operator cimport dereference as deref
+
+from opencog.atomspace import is_a, types, create_value_by_type
 
 def execute_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("execute_atom atom is: None")
     cdef cValuePtr c_value_ptr = c_execute_atom(atomspace.atomspace,
                                            deref(atom.handle))
-    cdef cHandle c_result = handle_cast(c_value_ptr)
-    return Atom.createAtom(c_result, atomspace)
+    type = deref(c_value_ptr).get_type()
+    cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[void]&>c_value_ptr)
+    return create_value_by_type(type, ptr_holder, atomspace)
+
+
 
 def evaluate_atom(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("evaluate_atom atom is: None")
