@@ -829,7 +829,7 @@ TODO
 
 Document Status
 ---------------
-Created by Linas Vepstas <linasvepstas@gmail.com>
-Created on 18 March 2008
-Revised on 6 November 2014
-Revised on 17 February 2019
+* Created by Linas Vepstas <linasvepstas@gmail.com>
+* Created on 18 March 2008
+* Revised on 6 November 2014
+* Revised on 17 February 2019
