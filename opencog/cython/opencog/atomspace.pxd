@@ -196,6 +196,7 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap)
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
+    cdef object parent_atomspace
 
 
 # FloatValue
