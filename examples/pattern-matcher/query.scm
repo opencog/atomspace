@@ -20,8 +20,9 @@
 ; results, even while others are still being found.
 ;
 ; This example uses an AchorNode to establish a "well-known location",
-; the ParallelLink to run multiple threads, and other trickery to create
-; a parallel processing pipeline.
+; the ParallelLink to run multiple threads, and a DeleteLink to dettach
+; results from the AnchorLink. The result is a toy parallel processing
+; pipeline.
 ;
 
 (use-modules (opencog) (opencog exec))
@@ -43,10 +44,53 @@
 			(Predicate "foobar")
 			(List (Concept "funny") (Variable "$x")))
 		(ListLink
-			(Anchor "*-query reults -*")
+			(Anchor "*-query results -*")
 			(Implication (Variable "$x") (Concept "laughable")))
 	))
 
 ; Actually run it - this should return all of the results, wrapped
 ; in a LinkValue.
 (cog-execute! query)
+
+; Define a second stage to the processing pipeline
+(define absurd
+	(Query
+		(TypedVariable (Variable "$x") (Type 'ConceptNode))
+		(ListLink
+			(Anchor "*-query results -*")
+			(Implication (Variable "$x") (Concept "laughable")))
+
+		; After matching the above, perform the below.
+		(SequentialAnd
+			; First, delete the attachment to the anchor
+			(True (Delete
+				(ListLink
+					(Anchor "*-query results -*")
+					(Implication (Variable "$x") (Concept "laughable")))))
+
+			; Next, create an attachment to the second stage
+			(True
+				(ListLink
+					(Anchor "*-risible results -*")
+					(Implication (Variable "$x") (Concept "ludicrous")))))
+	))
+
+(define absurd
+	(Query
+		(TypedVariable (Variable "$x") (Type 'ConceptNode))
+		(And
+			(Present (ListLink
+				(Anchor "*-query results -*")
+				(Implication (Variable "$x") (Concept "laughable"))))
+			(True (Delete (ListLink
+				(Anchor "*-query results -*")
+				(Implication (Variable "$x") (Concept "laughable"))))))
+
+		; After matching the above, perform the below.
+		; Next, create an attachment to the second stage
+		(ListLink
+			(Anchor "*-risible results -*")
+			(Implication (Variable "$x") (Concept "ludicrous")))
+	))
+
+(cog-execute! absurd)
