@@ -27,6 +27,7 @@
 
 (use-modules (opencog) (opencog exec))
 
+; -------------
 ; Create three bits of "knowledge".
 (Evaluation
 	(Predicate "foobar") (List (Concept "funny") (Concept "thing")))
@@ -35,6 +36,7 @@
 (Evaluation
 	(Predicate "foobar") (List (Concept "funny") (Concept "joke")))
 
+; -------------
 ; Define a simple query. It looks for the funny stuff, and attaches
 ; the result to an AnchorNode
 (define query
@@ -56,6 +58,7 @@
 ; that the expected content is there.
 (cog-incoming-set (Anchor "*-query results-*"))
 
+; -------------
 ; Define a second stage to the processing pipeline
 (define absurd
 	(Query
@@ -87,3 +90,48 @@
 
 ; Verify that the results are now at the new anchor
 (cog-incoming-set (Anchor "*-risible results-*"))
+
+; -------------
+; Now define a third stage of processing. This will generate output,
+; i.e. it will print something to stdout.
+;
+(define (report-stuff NODE-A NODE-B)
+	(format #t "I think that ~A is ~A\n"
+		(cog-name NODE-A) (cog-name NODE-B))
+	(SimpleTruthValue 1 1))
+
+(define output
+	(Query
+		(VariableList
+			(TypedVariable (Variable "$x") (Type 'ConceptNode))
+			(TypedVariable (Variable "$y") (Type 'ConceptNode)))
+		(And
+			; Search at the earlier anchor point.
+			(Present (ListLink
+				(Anchor "*-risible results-*")
+				(Implication (Variable "$x") (Variable "$y"))))
+
+			; Immediately dettach from that anchor, by deleting the
+			; ListLink that couples the two together.
+			(True (Delete (ListLink
+				(Anchor "*-risible results-*")
+				(Implication (Variable "$x") (Variable "$y"))))))
+
+		; After matching the above, print a report.
+		(ExecutionOutput
+			(GroundedSchema "scm:report-stuff")
+			(ListLink (Variable "$x") (Variable "$y")))
+	))
+
+; Run it. Verify that it works.
+(cog-execute! output)
+
+; Run it a second time, verify that all inputs have been consumed.
+(cog-execute! output)
+
+; Double-check that inputs have been consumed, by looking at the atnchor
+; point.
+(cog-incoming-set (AnchorNode "*-risible results-*"))
+
+; -------------
+; Now, assemble an automated processing pipeline.
