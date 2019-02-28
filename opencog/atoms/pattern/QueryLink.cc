@@ -24,9 +24,9 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/DefaultImplicator.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "QueryLink.h"
 
@@ -193,22 +193,16 @@ HandleSet QueryLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
 {
-	// The result_list contains a list of the grounded expressions.
+	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
-	// Put the set into a SetLink, cache it, and return that.
-	Handle rewr(createUnorderedLink(do_execute(as, silent), SET_LINK));
+	HandleSet rewr = do_execute(as, silent);
 
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-	// Shoot. XXX FIXME. Most of the unit tests require that the atom
-	// that we return is in the atomspace. But it would be nice if we
-	// could defer this indefinitely, until its really needed.
-	rewr = as->add_atom(rewr);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	return rewr;
+	std::vector<ValuePtr> vali;
+	for (const Handle& h : rewr)
+		vali.push_back(h);
+
+	return createLinkValue(vali);
 }
-
-/* ================================================================= */
 
 DEFINE_LINK_FACTORY(QueryLink, QUERY_LINK)
 
