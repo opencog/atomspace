@@ -183,12 +183,12 @@ HandleSet BindLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		Handle h(HandleCast(impl.inst.execute(impl.implicand, true)));
-		impl.insert_result(h);
+		HandleSet result;
+		result.insert(HandleCast(impl.inst.execute(impl.implicand, true)));
+		return result;
 	}
 
-	// Create a set holding all results of the implication, and cache it.
-	return impl.get_result_set();
+	return HandleSet();
 }
 
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)

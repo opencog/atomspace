@@ -30,22 +30,20 @@
 namespace opencog {
 
 /**
- * Very rough, crude, experimental prototype for the idea that
- * pattern recognition is the dual of pattern matching.
+ * Pattern recognition is the dual of pattern matching.
  * That is, rather than using one query pattern to search a large
  * collection of data, this does the opposite: given a single piece of
  * data, it searches for all rules/queries which apply to it.
  *
- * The file /examples/aiml/recog.scm provides a very simple example.
- * The implementation here is very minimalistic, and does many things
- * wrong:
- * -- it fails to perform any type-checking to make sure the variable
- *    constraints are satisfied.
- * -- AIML wants a left-to-right traversal, this does an omni-
- *    directional exploration. (which is OK, but is not how AIML is
- *    defined...)
- * -- This hasn't been thought through thoroughly. There are almost
- *    surely some weird gotcha's.
+ * The file /examples/pattern-matcher/recog.scm provides a simple
+ * example: it implements a pseudo-AIML lookup, where an input sentence
+ * (for example, `I love you`) will match the rewrite rules
+ *    `I * you   --> I * you too`
+ *    `I love *  --> I like * a lot!`
+ *
+ * The is, the constant clause `I love you` can be recognized as
+ * grounding two different graphs with variables in them: the graph
+ * `I * you` and `I love *`.
  */
 class Recognizer :
    public virtual DefaultPatternMatchCB
