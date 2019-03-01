@@ -135,12 +135,12 @@ public:
 	}
 
 	ValuePtr instantiate(const Handle& expr,
-	                         const HandleMap& vars,
-	                         bool silent=false);
+	                     const HandleMap& vars,
+	                     bool silent=false);
 	ValuePtr execute(const Handle& expr, bool silent=false)
 	{
 		// If no actual instantiation is involved, then do not consume
-		// quotations, as it might change the semantics. (??)
+		// quotations, as it might change the semantics. (Huh ??)
 		_consume_quotations = false;
 		return instantiate(expr, HandleMap(), silent);
 	}

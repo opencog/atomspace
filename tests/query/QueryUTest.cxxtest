@@ -1,0 +1,107 @@
+/*
+ * tests/query/QueryUTest.cxxtest
+ *
+ * Copyright (C) 2017 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class QueryUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+
+public:
+	QueryUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+
+		as = new AtomSpace();
+		SchemeEval* eval = SchemeEval::get_evaluator(as);
+		eval->eval("(use-modules (opencog exec))");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	~QueryUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_basic(void);
+};
+
+void QueryUTest::tearDown(void)
+{
+}
+
+void QueryUTest::setUp(void)
+{
+}
+
+/*
+ * Basic QueryLink unit test.
+ */
+void QueryUTest::test_basic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/query.scm\")");
+	TS_ASSERT_EQUALS(false, eval->eval_error());
+
+	// Can we create it?
+	Handle h = eval->eval_h("(Query (List (Variable \"x\")) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(h->get_type(), QUERY_LINK);
+
+	// Can we execute it?
+	ValuePtr sv = h->execute(as);
+	TS_ASSERT_EQUALS(sv->get_type(), LINK_VALUE);
+	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
+
+	// A more complex query
+	ValuePtr v = eval->eval_v("(cog-execute! query)");
+	TS_ASSERT_EQUALS(v->get_type(), LINK_VALUE);
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+#undef al
+#undef an

@@ -22,35 +22,23 @@
 #ifndef _OPENCOG_BIND_LINK_H
 #define _OPENCOG_BIND_LINK_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class BindLink : public PatternLink
+class BindLink : public QueryLink
 {
 protected:
 	void init(void);
-
-	/// The rewrite term
-	Handle _implicand;
-
-	// Overwrite PatternLink::extract_variables as BindLink has one
-	// more outgoing for the rewrite rule. In addition this method
-	// will initialize the rewrite term _implicand.
-	void extract_variables(const HandleSeq& oset);
-
-	virtual HandleSet do_execute(AtomSpace*, bool silent);
 
 public:
 	BindLink(const HandleSeq&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	BindLink(const Handle& body, const Handle& rewrite);
 	explicit BindLink(const Link &l);
-
-	const Handle& get_implicand(void) { return _implicand; }
 
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 

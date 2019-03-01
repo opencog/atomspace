@@ -693,7 +693,7 @@ be faster? I suppose that depends on the actual query...
 Forward Chainer
 ---------------
 
-The `PatternMatch::imply()` method implements a critical component for a
+The `PatternLink::satisfy()` method implements a critical component for a
 forward chainer: it is able to accept a BindLink, containing a pattern
 and a rewriting rule, and basically implement a form of IF ... THEN
 ... statement, expressed as an AtomSpace hypergraph.
@@ -706,7 +706,7 @@ variables are found, then a hypergraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
 grounding, a SetLink of all grounded implicands is returned.
 
-Thus, the `PatternbMatch::imply()` method can be used to implement a
+Thus, the `PatternLink::satisfy()` method can be used to implement a
 simple forward-chainer. For example, one may create a collection of
 BindLinks. Then, calling each in turn, from a loop, will cause each to
 be evaluated. Thus, N iterations of the loop is equivalent to chaining

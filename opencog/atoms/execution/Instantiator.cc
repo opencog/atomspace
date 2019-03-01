@@ -536,8 +536,8 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                       const HandleMap &vars,
-                                       bool silent)
+                                   const HandleMap &vars,
+                                   bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
@@ -590,6 +590,19 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
+	}
+
+	// If there is a SatisfyingLink, we have to perform it
+	// and return the satisfying set.
+	if (nameserver().isA(t, SATISFYING_LINK))
+	{
+		return expr->execute(_as, silent);
+	}
+
+	// The thread-links are ambiguously executable/evaluatable.
+	if (nameserver().isA(t, PARALLEL_LINK))
+	{
+		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
 	// Instantiate.

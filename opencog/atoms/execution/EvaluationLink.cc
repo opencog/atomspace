@@ -586,7 +586,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			{
 				Instantiator inst(as);
 				Handle result(HandleCast(inst.execute(term, silent)));
-				scratch->add_atom(result);
+				if (result) scratch->add_atom(result);
 			}
 		}
 		if (TRUE_LINK == t)
