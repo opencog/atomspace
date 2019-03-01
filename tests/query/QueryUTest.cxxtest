@@ -63,9 +63,6 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void Setter(void);
-	void Getter(void);
-
 	void test_basic(void);
 };
 
@@ -85,13 +82,22 @@ void QueryUTest::test_basic(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	SchemeEval* eval = SchemeEval::get_evaluator(as);
-	std::string rc = eval->eval("(load-from-path \"tests/query/query.scm\")");
-printf("duuude its %s<<<\n", rc.c_str());
+	eval->eval("(load-from-path \"tests/query/query.scm\")");
 	TS_ASSERT_EQUALS(false, eval->eval_error());
 
-	ValuePtr v = eval->eval_v("(cog-execute! \"query\")");
+	// Can we create it?
+	Handle h = eval->eval_h("(Query (List (Variable \"x\")) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(h->get_type(), QUERY_LINK);
 
+	// Can we execute it?
+	ValuePtr sv = h->execute(as);
+	TS_ASSERT_EQUALS(sv->get_type(), LINK_VALUE);
+	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
+
+	// A more complex query
+	ValuePtr v = eval->eval_v("(cog-execute! query)");
 	TS_ASSERT_EQUALS(v->get_type(), LINK_VALUE);
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
