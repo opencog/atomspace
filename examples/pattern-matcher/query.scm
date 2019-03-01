@@ -96,8 +96,10 @@
 ; i.e. it will print something to stdout.
 ;
 (define (report-stuff NODE-A NODE-B)
-	(format #t "I think that ~A is ~A\n"
-		(cog-name NODE-A) (cog-name NODE-B))
+	(format #t "I think that ~A is ~A. -- ~A\n"
+		(cog-name NODE-A) (cog-name NODE-B)
+		(strftime "%c" (localtime (current-time)))
+	)
 	(SimpleTruthValue 1 1))
 
 (define output
@@ -135,3 +137,30 @@
 
 ; -------------
 ; Now, assemble an automated processing pipeline.
+
+(define threads
+	(Parallel
+		(SequentialAnd
+			(True query)
+			(True (Sleep (Number 4)))
+			(True query)
+			(True (Sleep (Number 4)))
+			(True query))
+
+		(SequentialAnd
+			(True (Sleep (Number 1)))
+			(True absurd)
+			(True (Sleep (Number 4)))
+			(True absurd)
+			(True (Sleep (Number 4)))
+			(True absurd))
+
+		(SequentialAnd
+			(True (Sleep (Number 2)))
+			(True output)
+			(True (Sleep (Number 4)))
+			(True output)
+			(True (Sleep (Number 4)))
+			(True output))
+	))
+
