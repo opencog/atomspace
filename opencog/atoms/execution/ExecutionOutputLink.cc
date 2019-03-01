@@ -43,6 +43,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
+	    VARIABLE_NODE != schema->get_type() and
 	    UNQUOTE_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
