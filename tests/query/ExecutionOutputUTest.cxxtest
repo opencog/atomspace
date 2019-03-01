@@ -22,9 +22,12 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 #include "imply.h"
 
@@ -62,6 +65,7 @@ public:
 	void test_query_exec(void);
 	void test_clear_box_single_argument(void);
 	void test_clear_box_single_argument_link(void);
+	void test_value(void);
 };
 
 #define an as.add_node
@@ -183,11 +187,7 @@ void ExecutionOutputUTest::test_exec(void)
  * Test execution of variables.
  * During pattern matching, variables can bind to ExecutionOutputLinks
  * If they are then repeated in the implcand, the ExecutionOutputLink
- * must be exeucted there, with the resulting answer returned.
- *
- * Err. XXX maybe. Shouldn't the ExecutionOutputLink be executed when
- * its found??  Well, for now, we're doing what we do here. This may need
- * to change.
+ * must be executed there, with the resulting answer returned.
  */
 void ExecutionOutputUTest::test_varsub(void)
 {
@@ -273,6 +273,10 @@ void ExecutionOutputUTest::test_query_exec(void)
 
 	Handle exec_query = eval.eval_h("exec-query");
 	Handle results = satisfying_set(&as, exec_query);
+	TS_ASSERT_EQUALS(results->get_arity(), 4);
+
+	exec_query = eval.eval_h("quote-exec-query");
+	results = satisfying_set(&as, exec_query);
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -330,6 +334,22 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 		result = HandleCast(inst.execute(exec));
 
 	TS_ASSERT_EQUALS(expected, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ExecutionOutputUTest::test_value(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-gsn.scm\")");
+
+	ValuePtr result = eval.eval_v("(cog-execute! exec-query-handle)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	ValueSeq vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), UNORDERED_LINK);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
