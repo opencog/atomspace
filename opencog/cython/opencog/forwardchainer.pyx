@@ -51,5 +51,5 @@ cdef class ForwardChainer:
         return result_set
 
     def __dealloc__(self):
-        self._as = None
         del self.chainer
+        self._as = None
