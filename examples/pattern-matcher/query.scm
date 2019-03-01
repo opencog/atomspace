@@ -4,7 +4,7 @@
 ; QueryLink usage example.
 ;
 ; The QueryLink and the BindLink are both very similar; both search
-; the atomspace for groundings of the query pattern, and then perform
+; the AtomSpace for groundings of the query pattern, and then perform
 ; a re-write, based on the results. The only difference between the two
 ; is that the BindLink returns a SetLink containing the results, whereas
 ; the QueryLink returns a LinkValue containing the results. This makes
@@ -19,9 +19,9 @@
 ; processing can happen in parallel: processing can start on some
 ; results, even while others are still being found.
 ;
-; This example uses an AchorNode to establish a "well-known location",
-; a QueryLink to attache them there, and a DeleteLink to dettach results
-; from the AnchorLink. The  ParallelLink is used to run multiple threads,
+; This example uses an AnchorNode to establish a "well-known location",
+; a QueryLink to attache them there, and a DeleteLink to detach results
+; from the AnchorNode. The  ParallelLink is used to run multiple threads,
 ; and SleepLink to slow it down enough to see what is happening.
 ;
 ; Taken as a whole, it demos a toy parallel processing pipeline.
@@ -71,7 +71,7 @@
 				(Anchor "*-query results-*")
 				(Implication (Variable "$x") (Concept "laughable"))))
 
-			; Immediately dettach from that anchor, by deleting the
+			; Immediately detach from that anchor, by deleting the
 			; ListLink that couples the two together.
 			(True (Delete (ListLink
 				(Anchor "*-query results-*")
@@ -115,7 +115,7 @@
 				(Anchor "*-risible results-*")
 				(Implication (Variable "$x") (Variable "$y"))))
 
-			; Immediately dettach from that anchor, by deleting the
+			; Immediately detach from that anchor, by deleting the
 			; ListLink that couples the two together.
 			(True (Delete (ListLink
 				(Anchor "*-risible results-*")
@@ -133,7 +133,7 @@
 ; Run it a second time, verify that all inputs have been consumed.
 (cog-execute! output)
 
-; Double-check that inputs have been consumed, by looking at the atnchor
+; Double-check that inputs have been consumed, by looking at the anchor
 ; point.
 (cog-incoming-set (AnchorNode "*-risible results-*"))
 
