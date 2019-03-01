@@ -13,16 +13,18 @@
 ;
 ; Although both can be run in parallel (i.e. run in different threads),
 ; there's almost no point to doing so for the BindLink, since you have
-; to wait for it to complete, and drop the result SetLink on your
-; doorstep. By contrast, they QueryLink can drop off results at a
-; "well-known location" in the atomspace, as they appear, so that
+; to wait for it to complete, and provide you with the resulting
+; SetLink. By contrast, the QueryLink can drop off results at a
+; "well-known location" in the AtomSpace, as they appear, so that
 ; processing can happen in parallel: processing can start on some
 ; results, even while others are still being found.
 ;
 ; This example uses an AchorNode to establish a "well-known location",
-; the ParallelLink to run multiple threads, and a DeleteLink to dettach
-; results from the AnchorLink. The result is a toy parallel processing
-; pipeline.
+; a QueryLink to attache them there, and a DeleteLink to dettach results
+; from the AnchorLink. The  ParallelLink is used to run multiple threads,
+; and SleepLink to slow it down enough to see what is happening.
+;
+; Taken as a whole, it demos a toy parallel processing pipeline.
 ;
 
 (use-modules (opencog) (opencog exec))
@@ -188,5 +190,7 @@
 			(True output))
 	))
 
-; Run the multi-threaded pipeline
+; Run the multi-threaded pipeline. This should print some fairly verbose
+; messages, which hopefully makes clear what is going on.
+;
 ; (cog-execute! threads)
