@@ -69,6 +69,7 @@ public:
 
     void test_parallel(void);
     void test_join(void);
+    void test_throw(void);
 };
 
 void ParallelUTest::tearDown(void)
@@ -208,6 +209,29 @@ void ParallelUTest::test_join(void)
     // The Join is an AndLink...
     double mean = tvp->get_mean();
     TS_ASSERT_LESS_THAN(mean, 0.5);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ParallelLink, JoinLink exceptions
+ */
+void ParallelUTest::test_throw(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    TS_ASSERT_THROWS_NOTHING(eval->eval_tv("(cog-evaluate!  pllel-bad)"));
+    TS_ASSERT_EQUALS(false, eval->eval_error());
+
+    TS_ASSERT_THROWS_ANYTHING(eval->eval_tv("(cog-evaluate! wait-bad)"));
+    TS_ASSERT_EQUALS(true, eval->eval_error());
+
+    TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute!  pllel-bad)"));
+    TS_ASSERT_EQUALS(false, eval->eval_error());
+
+    TS_ASSERT_THROWS_ANYTHING(eval->eval_v("(cog-execute! wait-bad)"));
+    TS_ASSERT_EQUALS(true, eval->eval_error());
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -358,14 +358,29 @@ static void thread_eval(AtomSpace* as,
                         const Handle& evelnk, AtomSpace* scratch,
                         bool silent)
 {
-	EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	try
+	{
+		EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	}
+	catch (const std::exception& ex)
+	{
+		logger().warn("Caught exception in thread:\n%s", ex.what());
+	}
 }
 
 static void thread_eval_tv(AtomSpace* as,
                            const Handle& evelnk, AtomSpace* scratch,
-                           bool silent, TruthValuePtr* tv)
+                           bool silent, TruthValuePtr* tv,
+                           std::exception_ptr* returned_ex)
 {
-	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	try
+	{
+		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	}
+	catch (const std::exception& ex)
+	{
+		*returned_ex = std::current_exception();
+	}
 }
 
 /// do_evaluate -- evaluate any Node or Link types that can meaningfully
@@ -533,14 +548,18 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// Create a collection of joinable threads.
 		std::vector<std::thread> thread_set;
-		for (size_t i=0; i< arity; i++)
+		std::exception_ptr ex;
+		for (size_t i=0; i<arity; i++)
 		{
 			thread_set.push_back(std::thread(&thread_eval_tv,
-				as, oset[i], scratch, silent, &tvp[i]));
+				as, oset[i], scratch, silent, &tvp[i], &ex));
 		}
 
 		// Wait for it all to come together.
 		for (std::thread& t : thread_set) t.join();
+
+		// Were there any exceptions? If so, rethrow.
+		if (ex) std::rethrow_exception(ex);
 
 		// Return the logical-AND of the returned truth values
 		for (const TruthValuePtr& tv: tvp)
