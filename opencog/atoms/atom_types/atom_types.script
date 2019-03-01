@@ -358,7 +358,7 @@ PATTERN_LINK <- PRENEX_LINK
 // Finds all groundings, return binary truth value (true/false)
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK
 // Finds all groundings, returns generic Value
-SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
+SATISFYING_LINK <- PATTERN_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is

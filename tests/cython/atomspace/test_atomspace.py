@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import opencog.atomspace
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
@@ -219,6 +220,14 @@ class AtomTest(TestCase):
     def tearDown(self):
         finalize_opencog()
         del self.space
+
+    def test_create_child_atomspace(self):
+        """
+        Test that parent atomspace will not be deleted before child
+        """
+        a = opencog.atomspace.AtomSpace()
+        b = opencog.atomspace.create_child_atomspace(a)
+        del a
 
     def test_creation(self):
         a = Node("test1")
