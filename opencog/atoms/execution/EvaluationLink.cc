@@ -370,9 +370,17 @@ static void thread_eval(AtomSpace* as,
 
 static void thread_eval_tv(AtomSpace* as,
                            const Handle& evelnk, AtomSpace* scratch,
-                           bool silent, TruthValuePtr* tv)
+                           bool silent, TruthValuePtr* tv,
+                           std::exception_ptr returned_ex)
 {
-	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	try
+	{
+		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+	}
+	catch (const std::exception& ex)
+	{
+		returned_ex = std::current_exception();
+	}
 }
 
 /// do_evaluate -- evaluate any Node or Link types that can meaningfully
@@ -540,14 +548,23 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// Create a collection of joinable threads.
 		std::vector<std::thread> thread_set;
-		for (size_t i=0; i< arity; i++)
+		std::vector<std::exception_ptr> exception_set;
+		for (size_t i=0; i<arity; i++)
 		{
+			std::exception_ptr ex;
+			exception_set.push_back(ex);
 			thread_set.push_back(std::thread(&thread_eval_tv,
-				as, oset[i], scratch, silent, &tvp[i]));
+				as, oset[i], scratch, silent, &tvp[i], ex));
 		}
 
 		// Wait for it all to come together.
 		for (std::thread& t : thread_set) t.join();
+
+		// Were there any exceptions? If so, rethrow.
+		for (const std::exception_ptr& exptr : exception_set)
+		{
+			if (exptr) std::rethrow_exception(exptr);
+		}
 
 		// Return the logical-AND of the returned truth values
 		for (const TruthValuePtr& tv: tvp)
