@@ -599,6 +599,12 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return expr->execute(_as, silent);
 	}
 
+	// The thread-links are ambiguously executable/evaluatable.
+	if (nameserver().isA(t, PARALLEL_LINK))
+	{
+		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+	}
+
 	// Instantiate.
 	Handle grounded(walk_tree(expr, silent));
 
