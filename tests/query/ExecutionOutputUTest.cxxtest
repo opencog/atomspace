@@ -351,5 +351,34 @@ void ExecutionOutputUTest::test_value(void)
 	for (const ValuePtr& va : vals)
 		TS_ASSERT_EQUALS(va->get_type(), UNORDERED_LINK);
 
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-link-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), LINK_VALUE);
+
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-string-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), STRING_VALUE);
+
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+	{
+		TS_ASSERT_EQUALS(va->get_type(), SIMPLE_TRUTH_VALUE);
+		TruthValuePtr stv = TruthValueCast(va);
+		TS_ASSERT_EQUALS(stv->get_mean(), 0.6);
+		TS_ASSERT_EQUALS(stv->get_confidence(), 0.3);
+	}
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
