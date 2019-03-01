@@ -132,7 +132,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-HandleSet QueryLink::do_execute(AtomSpace* as, bool silent)
+ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
@@ -183,25 +183,19 @@ HandleSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		HandleSet result;
-		result.insert(HandleCast(impl.inst.execute(impl.implicand, true)));
+		ValueSet result;
+		result.insert(impl.inst.execute(impl.implicand, true));
 		return result;
 	}
 
-	return HandleSet();
+	return ValueSet();
 }
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
 {
 	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
-	HandleSet rewr = do_execute(as, silent);
-
-	std::vector<ValuePtr> vali;
-	for (const Handle& h : rewr)
-		vali.push_back(h);
-
-	return createLinkValue(vali);
+	return createLinkValue(do_execute(as, silent));
 }
 
 DEFINE_LINK_FACTORY(QueryLink, QUERY_LINK)

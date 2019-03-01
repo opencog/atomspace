@@ -98,6 +98,7 @@ public:
 typedef std::shared_ptr<Value> ValuePtr;
 
 typedef std::vector<ValuePtr> ValueSeq;
+typedef std::set<ValuePtr> ValueSet;
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
