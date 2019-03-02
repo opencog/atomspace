@@ -376,8 +376,8 @@ void ExecutionOutputUTest::test_value(void)
 	{
 		TS_ASSERT_EQUALS(va->get_type(), SIMPLE_TRUTH_VALUE);
 		TruthValuePtr stv = TruthValueCast(va);
-		TS_ASSERT_EQUALS(stv->get_mean(), 0.6);
-		TS_ASSERT_EQUALS(stv->get_confidence(), 0.3);
+		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
+		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
