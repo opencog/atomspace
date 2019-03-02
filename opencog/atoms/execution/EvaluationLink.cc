@@ -457,7 +457,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
 		      evelnk->getOutgoingAtom(0), scratch, silent));
-		return 0.5 < tv->get_mean();
+		return tv->get_mean() < 0.5;
 	}
 	else if (AND_LINK == t)
 	{
@@ -491,7 +491,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
 		if (is_trec) arity--;
 
-		// Loop at least once. If tail-recurive, loop forever.
+		// Loop at least once. If tail-recursive, loop forever.
 		do
 		{
 			for (size_t i=0; i<arity; i++)
@@ -592,6 +592,8 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
+
+	return false;
 }
 
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
