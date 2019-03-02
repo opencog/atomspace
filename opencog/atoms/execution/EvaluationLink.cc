@@ -178,13 +178,6 @@ static double get_numeric_value(const ValuePtr& pap, bool silent)
 	return std::nan("");
 }
 
-static TruthValuePtr bool_to_tv(bool truf)
-{
-	if (truf) return TruthValue::TRUE_TV();
-	return TruthValue::FALSE_TV();
-}
-
-
 /// Perform a GreaterThan check
 static bool greater(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -378,6 +371,13 @@ static void thread_eval_tv(AtomSpace* as,
 	}
 }
 
+static TruthValuePtr bool_to_tv(bool truf)
+{
+	if (truf) return TruthValue::TRUE_TV();
+	return TruthValue::FALSE_TV();
+}
+
+
 /// do_evaluate -- evaluate any Node or Link types that can meaningfully
 /// result in a truth value.
 ///
@@ -410,6 +410,35 @@ static void thread_eval_tv(AtomSpace* as,
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
+static bool crisp_eval_scratch(AtomSpace* as,
+                               const Handle& evelnk,
+                               AtomSpace* scratch,
+                               bool silent)
+{
+	Type t = evelnk->get_type();
+
+	if (IDENTICAL_LINK == t)
+	{
+		return identical(evelnk);
+	}
+	else if (EQUAL_LINK == t)
+	{
+		return equal(scratch, evelnk, silent);
+	}
+	else if (ALPHA_EQUAL_LINK == t)
+	{
+		return alpha_equal(scratch, evelnk, silent);
+	}
+	else if (GREATER_THAN_LINK == t)
+	{
+		return greater(scratch, evelnk, silent);
+	}
+
+	throwSyntaxException(silent,
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		evelnk->to_string().c_str());
+}
+
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               const Handle& evelnk,
                                               AtomSpace* scratch,
@@ -447,22 +476,6 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		                                sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
-	}
-	else if (IDENTICAL_LINK == t)
-	{
-		return bool_to_tv(identical(evelnk));
-	}
-	else if (EQUAL_LINK == t)
-	{
-		return bool_to_tv(equal(scratch, evelnk, silent));
-	}
-	else if (ALPHA_EQUAL_LINK == t)
-	{
-		return bool_to_tv(alpha_equal(scratch, evelnk, silent));
-	}
-	else if (GREATER_THAN_LINK == t)
-	{
-		return bool_to_tv(greater(scratch, evelnk, silent));
 	}
 	else if (NOT_LINK == t)
 	{
@@ -705,11 +718,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return TruthValueCast(pap);
 	}
 
-	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet. Cannot evaluate %s",
-		evelnk->to_string().c_str());
-
-	return TruthValuePtr(); // not reached
+	return bool_to_tv(crisp_eval_scratch(as, evelnk, scratch, silent));
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
