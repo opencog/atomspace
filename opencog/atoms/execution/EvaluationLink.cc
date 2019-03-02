@@ -258,57 +258,6 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	return (*((AtomPtr)h0) == *((AtomPtr)h1a));
 }
 
-/// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
-static TruthValuePtr eval_formula(const Handle& predform,
-                                  const HandleSeq& cargs)
-{
-	// Collect up two floating point values.
-	std::vector<double> nums;
-	for (const Handle& h: predform->getOutgoingSet())
-	{
-		// An ordinary number.
-		if (NUMBER_NODE == h->get_type())
-		{
-			nums.push_back(NumberNodeCast(h)->get_value());
-			continue;
-		}
-
-		// In case the user wanted to wrap everything in a
-		// LambdaLink. I don't understand why this is needed,
-		// but it seems to make some people feel better, so
-		// we support it.
-		Handle flh(h);
-		if (LAMBDA_LINK == h->get_type())
-		{
-			// Set flh and fall through, where it is executed.
-			flh = LambdaLinkCast(h)->beta_reduce(cargs);
-		}
-
-		// At this point, we expect a FunctionLink of some kind.
-		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
-
-		// If the FunctionLink has free variables in it,
-		// reduce them with the provided arguments.
-		FunctionLinkPtr flp(FunctionLinkCast(flh));
-		const FreeVariables& fvars = flp->get_vars();
-		if (not fvars.empty())
-		{
-			flh = fvars.substitute_nocheck(flh, cargs);
-		}
-
-		// Expecting a FunctionLink without variables.
-		ValuePtr v(flh->execute());
-		FloatValuePtr fv(FloatValueCast(v));
-		nums.push_back(fv->value()[0]);
-	}
-
-	// XXX FIXME; if we are given more than two floats, then
-	// perhaps we should create some other kind of TruthValue?
-	// Maybe a distributional one ?? Or a CountTV ??
-	return createSimpleTruthValue(nums);
-}
-
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -606,6 +555,57 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		evelnk->to_string().c_str());
 
 	return false;
+}
+
+/// Evaluate a formula defined by a PREDICATE_FORMULA_LINK
+static TruthValuePtr eval_formula(const Handle& predform,
+                                  const HandleSeq& cargs)
+{
+	// Collect up two floating point values.
+	std::vector<double> nums;
+	for (const Handle& h: predform->getOutgoingSet())
+	{
+		// An ordinary number.
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
+
+		// In case the user wanted to wrap everything in a
+		// LambdaLink. I don't understand why this is needed,
+		// but it seems to make some people feel better, so
+		// we support it.
+		Handle flh(h);
+		if (LAMBDA_LINK == h->get_type())
+		{
+			// Set flh and fall through, where it is executed.
+			flh = LambdaLinkCast(h)->beta_reduce(cargs);
+		}
+
+		// At this point, we expect a FunctionLink of some kind.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+
+		// If the FunctionLink has free variables in it,
+		// reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			flh = fvars.substitute_nocheck(flh, cargs);
+		}
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flh->execute());
+		FloatValuePtr fv(FloatValueCast(v));
+		nums.push_back(fv->value()[0]);
+	}
+
+	// XXX FIXME; if we are given more than two floats, then
+	// perhaps we should create some other kind of TruthValue?
+	// Maybe a distributional one ?? Or a CountTV ??
+	return createSimpleTruthValue(nums);
 }
 
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
