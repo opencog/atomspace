@@ -417,6 +417,41 @@ static bool crisp_eval_scratch(AtomSpace* as,
 {
 	Type t = evelnk->get_type();
 
+	// Logical constants
+	if (TRUE_LINK == t or FALSE_LINK == t)
+	{
+		// Assume that the link is wrapping something executable (or
+		// evaluatable), which we execute (or evaluate), but then
+		// ignore the result.  The executable ones, we need to put the
+		// result in the (scratch) atomspace ... but in either case,
+		// we ignore the TV on it. We are doing this for the side-effects,
+		// of course -- the True/FalseLinks are pure side-effect atoms.
+		//
+		// We instantiate/evaluate in the main atomspace, however.
+		// This is subtle, so listen-up: one of the side effects
+		// might involve evaluating some condition, which then pokes
+		// atoms into the atomspace, to signal some event or state.
+		// These cannot be discarded. This is explictly tested by
+		// SequenceUTest::test_or_put().
+		if (0 < evelnk->get_arity())
+		{
+			const Handle& term = evelnk->getOutgoingAtom(0);
+			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
+			{
+				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
+			}
+			else
+			{
+				Instantiator inst(as);
+				Handle result(HandleCast(inst.execute(term, silent)));
+				if (result) scratch->add_atom(result);
+			}
+		}
+		if (TRUE_LINK == t) true;
+		return false;
+	}
+
+	// Arity-two relations
 	if (IDENTICAL_LINK == t)
 	{
 		return identical(evelnk);
@@ -586,39 +621,6 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			thr.detach();
 		}
 		return TruthValue::TRUE_TV();
-	}
-	else if (TRUE_LINK == t or FALSE_LINK == t)
-	{
-		// Assume that the link is wrapping something executable (or
-		// evaluatable), which we execute (or evaluate), but then
-		// ignore the result.  The executable ones, we need to put the
-		// result in the (scratch) atomspace ... but in either case,
-		// we ignore the TV on it. We are doing this for the side-effects,
-		// of course -- the True/FalseLinks are pure side-effect atoms.
-		//
-		// We instantiate/evaluate in the main atomspace, however.
-		// This is subtle, so listen-up: one of the side effects
-		// might involve evaluating some condition, which then pokes
-		// atoms into the atomspace, to signal some event or state.
-		// These cannot be discarded. This is explictly tested by
-		// SequenceUTest::test_or_put().
-		if (0 < evelnk->get_arity())
-		{
-			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
-			{
-				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
-			}
-			else
-			{
-				Instantiator inst(as);
-				Handle result(HandleCast(inst.execute(term, silent)));
-				if (result) scratch->add_atom(result);
-			}
-		}
-		if (TRUE_LINK == t)
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
 	}
 	else if (SATISFACTION_LINK == t)
 	{
