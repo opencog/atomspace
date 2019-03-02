@@ -608,6 +608,180 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	return false;
 }
 
+/// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
+///
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode, the
+///     DefinedPredicateNode and the PredicateFormulasLink.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
+///
+/// For the special case of GroundedPredicateNode, the arguments are
+/// "eager-evaluated", because it is assumed that the GPN is unaware
+/// of the concept of lazy evaluation, and can't do it itself.  In
+/// all other cases, lazy evaluation is done (i.e. no evaluation is
+/// done, if it is not needed.)
+///
+/// The arguments are then inserted into the predicate, and the
+/// predicate as a whole is then evaluated.
+///
+TruthValuePtr do_eval_with_args(AtomSpace* as,
+                                const Handle& pn,
+                                const HandleSeq& cargs,
+                                bool silent)
+{
+	Type pntype = pn->get_type();
+	if (DEFINED_PREDICATE_NODE == pntype)
+	{
+		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->get_type();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->get_type();
+		}
+
+		if (PREDICATE_FORMULA_LINK == dtype)
+		{
+			return eval_formula(defn, cargs);
+		}
+
+		// If its not a LambdaLink, then I don't know what to do...
+		if (LAMBDA_LINK != dtype)
+			throw SyntaxException(TRACE_INFO,
+				"Expecting definition to be a LambdaLink, got %s",
+				defn->to_string().c_str());
+
+		// Treat LambdaLink as if it were a PutLink -- perform
+		// the beta-reduction, and evaluate the result.
+		LambdaLinkPtr lam(LambdaLinkCast(defn));
+		Handle reduct = lam->beta_reduce(cargs);
+		return EvaluationLink::do_evaluate(as, reduct, silent);
+	}
+
+	// Like a GPN, but the entire function is declared in the
+	// AtomSpace.
+	if (PREDICATE_FORMULA_LINK == pntype)
+	{
+		return eval_formula(pn, cargs);
+	}
+
+	if (GROUNDED_PREDICATE_NODE != pntype)
+	{
+		// Throw a silent exception; this is called in some try..catch blocks.
+		throw NotEvaluatableException();
+	}
+
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle lh(createLink(cargs, LIST_LINK));
+	Handle args(force_execute(as, lh, silent));
+
+	// Get the schema name.
+	const std::string& schema = pn->get_name();
+	// printf ("Grounded schema name: %s\n", schema.c_str());
+
+	// A very special-case C++ comparison.
+	// This compares two NumberNodes, by their numeric value.
+	// Hard-coded in C++ for speed. (well, and for convenience ...)
+	if (0 == schema.compare("c++:greater"))
+	{
+		return bool_to_tv(greater(as, args, silent));
+	}
+
+	// A very special-case C++ comparison.
+	// This compares a set of atoms, verifying that they are all different.
+	// Hard-coded in C++ for speed. (well, and for convenience ...)
+	if (0 == schema.compare("c++:exclusive"))
+	{
+		Arity sz = args->get_arity();
+		for (Arity i=0; i<sz-1; i++) {
+			Handle h1(args->getOutgoingAtom(i));
+			for (Arity j=i+1; j<sz; j++) {
+				Handle h2(args->getOutgoingAtom(j));
+				if (h1 == h2) return TruthValue::FALSE_TV();
+			}
+		}
+		return TruthValue::TRUE_TV();
+	}
+
+	// At this point, we only run scheme and python schemas.
+	if (0 == schema.compare(0, 4, "scm:", 4))
+	{
+#ifdef HAVE_GUILE
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+
+		SchemeEval* applier = get_evaluator_for_scheme(as);
+		return applier->apply_tv(schema.substr(pos), args);
+#else
+		throw RuntimeException(TRACE_INFO,
+			"This binary does not have scheme support in it; "
+			"Cannot evaluate scheme GroundedPredicateNode!");
+#endif /* HAVE_GUILE */
+	}
+
+	if (0 == schema.compare(0, 3, "py:", 3))
+	{
+#ifdef HAVE_CYTHON
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
+
+		// Be sure to specify the atomspace in which to work!
+		PythonEval &applier = PythonEval::instance();
+		return applier.apply_tv(as, schema.substr(pos), args);
+#else
+		throw RuntimeException(TRACE_INFO,
+			"This binary does not have python support in it; "
+			"Cannot evaluate python GroundedPredicateNode!");
+#endif /* HAVE_CYTHON */
+	}
+
+	// Generic shared-library foreign-function interface.
+	// Currently used only by the Haskell bindings.
+	//
+	// Extract the language, library and function
+	std::string lang, lib, fun;
+	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
+	if (lang == "lib")
+	{
+		void* sym = LibraryManager::getFunc(lib,fun);
+
+		// Convert the void* pointer to the correct function type.
+		TruthValuePtr* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
+
+		// Evaluate the predicate
+		TruthValuePtr* res = func(as, &args);
+		TruthValuePtr result;
+		if(res != NULL)
+		{
+			result = *res;
+			free(res);
+		}
+
+		if (nullptr == result)
+			throwSyntaxException(silent,
+			        "Invalid return value from predicate %s\nArgs: %s",
+			        pn->to_string().c_str(),
+			        oc_to_string(cargs).c_str());
+
+		return result;
+	}
+
+	// Unkown proceedure type.
+	throw RuntimeException(TRACE_INFO,
+	     "Cannot evaluate unknown GroundedPredicateNode: %s",
+	      schema.c_str());
+}
+
 /// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a fuzzy or probabilistic truth value. See description
 /// for `crisp_eval_scratch()`, up above, for a general explanation.
@@ -771,180 +945,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           bool silent)
 {
 	return do_eval_scratch(as, evelnk, as, silent);
-}
-
-/// do_eval_with_args -- evaluate a PredicateNode with arguments.
-///
-/// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the PredicateFormulasLink.
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// For the special case of GroundedPredicateNode, the arguments are
-/// "eager-evaluated", because it is assumed that the GPN is unaware
-/// of the concept of lazy evaluation, and can't do it itself.  In
-/// all other cases, lazy evaluation is done (i.e. no evaluation is
-/// done, if it is not needed.)
-///
-/// The arguments are then inserted into the predicate, and the
-/// predicate as a whole is then evaluated.
-///
-TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
-                                          const Handle& pn,
-                                          const HandleSeq& cargs,
-                                          bool silent)
-{
-	Type pntype = pn->get_type();
-	if (DEFINED_PREDICATE_NODE == pntype)
-	{
-		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->get_type();
-
-		// Allow recursive definitions. This can be handy.
-		while (DEFINED_PREDICATE_NODE == dtype)
-		{
-			defn = DefineLink::get_definition(defn);
-			dtype = defn->get_type();
-		}
-
-		if (PREDICATE_FORMULA_LINK == dtype)
-		{
-			return eval_formula(defn, cargs);
-		}
-
-		// If its not a LambdaLink, then I don't know what to do...
-		if (LAMBDA_LINK != dtype)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting definition to be a LambdaLink, got %s",
-				defn->to_string().c_str());
-
-		// Treat LambdaLink as if it were a PutLink -- perform
-		// the beta-reduction, and evaluate the result.
-		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(cargs);
-		return do_evaluate(as, reduct, silent);
-	}
-
-	// Like a GPN, but the entire function is declared in the
-	// AtomSpace.
-	if (PREDICATE_FORMULA_LINK == pntype)
-	{
-		return eval_formula(pn, cargs);
-	}
-
-	if (GROUNDED_PREDICATE_NODE != pntype)
-	{
-		// Throw a silent exception; this is called in some try..catch blocks.
-		throw NotEvaluatableException();
-	}
-
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle lh(createLink(cargs, LIST_LINK));
-	Handle args(force_execute(as, lh, silent));
-
-	// Get the schema name.
-	const std::string& schema = pn->get_name();
-	// printf ("Grounded schema name: %s\n", schema.c_str());
-
-	// A very special-case C++ comparison.
-	// This compares two NumberNodes, by their numeric value.
-	// Hard-coded in C++ for speed. (well, and for convenience ...)
-	if (0 == schema.compare("c++:greater"))
-	{
-		return bool_to_tv(greater(as, args, silent));
-	}
-
-	// A very special-case C++ comparison.
-	// This compares a set of atoms, verifying that they are all different.
-	// Hard-coded in C++ for speed. (well, and for convenience ...)
-	if (0 == schema.compare("c++:exclusive"))
-	{
-		Arity sz = args->get_arity();
-		for (Arity i=0; i<sz-1; i++) {
-			Handle h1(args->getOutgoingAtom(i));
-			for (Arity j=i+1; j<sz; j++) {
-				Handle h2(args->getOutgoingAtom(j));
-				if (h1 == h2) return TruthValue::FALSE_TV();
-			}
-		}
-		return TruthValue::TRUE_TV();
-	}
-
-	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0, 4, "scm:", 4))
-	{
-#ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		SchemeEval* applier = get_evaluator_for_scheme(as);
-		return applier->apply_tv(schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have scheme support in it; "
-			"Cannot evaluate scheme GroundedPredicateNode!");
-#endif /* HAVE_GUILE */
-	}
-
-	if (0 == schema.compare(0, 3, "py:", 3))
-	{
-#ifdef HAVE_CYTHON
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
-
-		// Be sure to specify the atomspace in which to work!
-		PythonEval &applier = PythonEval::instance();
-		return applier.apply_tv(as, schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have python support in it; "
-			"Cannot evaluate python GroundedPredicateNode!");
-#endif /* HAVE_CYTHON */
-	}
-
-	// Generic shared-library foreign-function interface.
-	// Currently used only by the Haskell bindings.
-	//
-	// Extract the language, library and function
-	std::string lang, lib, fun;
-	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
-	if (lang == "lib")
-	{
-		void* sym = LibraryManager::getFunc(lib,fun);
-
-		// Convert the void* pointer to the correct function type.
-		TruthValuePtr* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Evaluate the predicate
-		TruthValuePtr* res = func(as, &args);
-		TruthValuePtr result;
-		if(res != NULL)
-		{
-			result = *res;
-			free(res);
-		}
-
-		if (nullptr == result)
-			throwSyntaxException(silent,
-			        "Invalid return value from predicate %s\nArgs: %s",
-			        pn->to_string().c_str(),
-			        oc_to_string(cargs).c_str());
-
-		return result;
-	}
-
-	// Unkown proceedure type.
-	throw RuntimeException(TRACE_INFO,
-	     "Cannot evaluate unknown GroundedPredicateNode: %s",
-	      schema.c_str());
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
