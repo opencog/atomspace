@@ -178,8 +178,15 @@ static double get_numeric_value(const ValuePtr& pap, bool silent)
 	return std::nan("");
 }
 
+static TruthValuePtr bool_to_tv(bool truf)
+{
+	if (truf) return TruthValue::TRUE_TV();
+	return TruthValue::FALSE_TV();
+}
+
+
 /// Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const Handle& h, bool silent)
+static bool greater(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -193,28 +200,22 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h, bool silent)
 	double v0 = get_numeric_value(pap0, silent);
 	double v1 = get_numeric_value(pap1, silent);
 
-	if (v0 > v1)
-		return TruthValue::TRUE_TV();
-	else
-		return TruthValue::FALSE_TV();
+	return (v0 > v1);
 }
 
 /// Check for syntactic equality
-static TruthValuePtr identical(const Handle& h)
+static bool identical(const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 		     "IdenticalLink expects two arguments");
 
-	if (oset[0] == oset[1])
-		return TruthValue::TRUE_TV();
-	else
-		return TruthValue::FALSE_TV();
+	return (oset[0] == oset[1]);
 }
 
 /// Check for semantic equality
-static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
+static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -225,10 +226,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 	Handle h0(HandleCast(inst.execute(oset[0], silent)));
 	Handle h1(HandleCast(inst.execute(oset[1], silent)));
 
-	if (h0 == h1)
-		return TruthValue::TRUE_TV();
-	else
-		return TruthValue::FALSE_TV();
+	return (h0 == h1);
 }
 
 /// Check for alpha equivalence. If the link contains no free
@@ -237,7 +235,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 /// location, and can be alpha-converted to one-another, then yes,
 /// they're equal. If the two expressions cannot be alpha-converted
 /// one into another, then false.
-static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
+static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -250,7 +248,7 @@ static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 
 	// Are they strictly equal? Good!
 	if (h0 == h1)
-		return TruthValue::TRUE_TV();
+		return true;
 
 	// Not strictly equal. Are they alpha convertable?
 	Variables v0, v1;
@@ -260,14 +258,11 @@ static TruthValuePtr alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	// If the variables are not alpha-convertable, then
 	// there is no possibility of equality.
 	if (not v0.is_equal(v1))
-		return TruthValue::FALSE_TV();
+		return false;
 
 	// Actually alpha-convert, and compare.
 	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
-	if (*((AtomPtr)h0) != *((AtomPtr)h1a))
-		return TruthValue::FALSE_TV();
-
-	return TruthValue::TRUE_TV();
+	return (*((AtomPtr)h0) == *((AtomPtr)h1a));
 }
 
 /// Evalaute a formula defined by a PREDICATE_FORMULA_LINK
@@ -455,19 +450,19 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (IDENTICAL_LINK == t)
 	{
-		return identical(evelnk);
+		return bool_to_tv(identical(evelnk));
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(scratch, evelnk, silent);
+		return bool_to_tv(equal(scratch, evelnk, silent));
 	}
 	else if (ALPHA_EQUAL_LINK == t)
 	{
-		return alpha_equal(scratch, evelnk, silent);
+		return bool_to_tv(alpha_equal(scratch, evelnk, silent));
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, evelnk, silent);
+		return bool_to_tv(greater(scratch, evelnk, silent));
 	}
 	else if (NOT_LINK == t)
 	{
@@ -807,7 +802,7 @@ TruthValuePtr EvaluationLink::do_eval_with_args(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, args, silent);
+		return bool_to_tv(greater(as, args, silent));
 	}
 
 	// A very special-case C++ comparison.
