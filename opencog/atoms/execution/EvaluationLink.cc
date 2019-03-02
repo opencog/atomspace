@@ -378,27 +378,35 @@ static TruthValuePtr bool_to_tv(bool truf)
 }
 
 
-/// do_evaluate -- evaluate any Node or Link types that can meaningfully
-/// result in a truth value.
+/// `crisp_eval_sratch()` -- evaluate any Atoms that can meaningfully
+/// result in a crisp-logic, binary true/false truth value.
 ///
-/// For example, evaluating a TrueLink returns TruthValue::TRUE_TV, and
-/// evaluating a FalseLink returns TruthValue::FALSE_TV.  Evaluating
-/// AndLink, OrLink returns the binary and/or of their respective
-/// arguments.  A wide variety of Link types are evaluatable, this
-/// handles them all.
+/// There are two general kinds "truth values" that we are concerned
+/// about.  For many cases, the "truth value" is explicitly a crisp,
+/// binary Boolean-logic truth value, being either "true" or "false"
+/// and having no other qusi-ambiguous, fuzzy or probabilistic
+/// interpretation. Examples include the logical constants TrueLink,
+/// FalseLink, and the logical connectives NotLink, AndLink, OrLink.
+/// Yes, it is possible for these to have other interpretations, e.g.
+/// probabilistic interpretations. That is not what we are doing here:
+/// we are working with uninterpreted logical constants and connectives.
+/// The `crisp_eval_scratch()` function handles the evaluation of Atoms
+/// that have a natural crisp-truth interpretation.
 ///
-/// If the argument is an EvaluationLink with a GPN in it, it should
-/// have the following structure:
+/// A different class of Atoms will naturally have fuzzy or
+/// probabilistic valuations associated with them. These are evaluated
+/// by the `do_eval_scratch()` function.
 ///
-///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
-///         ListLink
-///             SomeAtom
-///             OtherAtom
+/// Both kinds can be mixed together with one-another. An implicit
+/// conversion from crisp-to-fuzzy and back is performed, when needed,
+/// when appropriate. Maybe this is a design flaw? Maybe we should force
+/// the user to declare an explicit conversion?
 ///
-/// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for haskell.  This method will then invoke `func_name`
-/// on the provided ListLink of arguments.
+/// The implementation here is one big giant case-statement. It works.
+/// In the long-run, it might be better to just have C++ classes for
+/// each distinct atom type, and have an `evaluate()` method on each.
+/// Whatever. Performance is probably about the same, and for just right
+/// now, this is straight-forward and it works.
 ///
 /// This function takes TWO atomspace arguments!  The first is the
 /// "main" atomspace, the second is a "scratch" or "temporary"
@@ -600,6 +608,25 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	return false;
 }
 
+/// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully
+/// result in a fuzzy or probabilistic truth value. See description
+/// for `crisp_eval_scratch()`, up above, for a general explanation.
+/// This function handles miscellaneous Atoms that don't have a natural
+/// interpretation in terms of crisp truth values.
+///
+/// If the argument is an EvaluationLink with a GPN in it, it should
+/// have the following structure:
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for haskell.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
+///
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               const Handle& evelnk,
                                               AtomSpace* scratch,
