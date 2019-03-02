@@ -447,10 +447,88 @@ static bool crisp_eval_scratch(AtomSpace* as,
 				if (result) scratch->add_atom(result);
 			}
 		}
-		if (TRUE_LINK == t) true;
+		if (TRUE_LINK == t) return true;
 		return false;
 	}
 
+	// -------------------------
+	// Crisp-binary-valued Boolean Logical connectives
+	if (NOT_LINK == t)
+	{
+		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+		      evelnk->getOutgoingAtom(0), scratch, silent));
+		return 0.5 < tv->get_mean();
+	}
+	else if (AND_LINK == t)
+	{
+		for (const Handle& h : evelnk->getOutgoingSet())
+		{
+			TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+			          h, scratch, silent));
+			if (tv->get_mean() < 0.5)
+				return false;
+		}
+		return true;
+	}
+	else if (OR_LINK == t)
+	{
+		for (const Handle& h : evelnk->getOutgoingSet())
+		{
+			TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+			               h, scratch, silent));
+			if (0.5 < tv->get_mean())
+				return true;
+		}
+		return false;
+	}
+	else if (SEQUENTIAL_AND_LINK == t)
+	{
+		const HandleSeq& oset = evelnk->getOutgoingSet();
+		size_t arity = oset.size();
+		if (0 == arity) return true;
+
+		// Is this tail-recursive? If so, then handle it.
+		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
+		if (is_trec) arity--;
+
+		// Loop at least once. If tail-recurive, loop forever.
+		do
+		{
+			for (size_t i=0; i<arity; i++)
+			{
+				TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+				            oset[i], scratch, silent));
+				if (tv->get_mean() < 0.5)
+					return false;
+			}
+		} while (is_trec);
+		return true;
+	}
+	else if (SEQUENTIAL_OR_LINK == t)
+	{
+		const HandleSeq& oset = evelnk->getOutgoingSet();
+		size_t arity = oset.size();
+		if (0 == arity) return false;
+
+		// Is this tail-recursive? If so, then handle it.
+		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
+		if (is_trec) arity--;
+
+		// Loop at least once. If tail-recurive, loop forever.
+		do
+		{
+			for (size_t i=0; i<arity; i++)
+			{
+				TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+				             oset[i], scratch, silent));
+				if (0.5 < tv->get_mean())
+					return true;
+			}
+		} while (is_trec);
+		return false;
+	}
+
+	// -------------------------
 	// Arity-two relations
 	if (IDENTICAL_LINK == t)
 	{
@@ -511,77 +589,6 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		                                sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
-	}
-	else if (NOT_LINK == t)
-	{
-		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0),
-		                                 scratch, silent));
-		return SimpleTruthValue::createTV(
-		              1.0 - tv->get_mean(), tv->get_confidence());
-	}
-	else if (AND_LINK == t)
-	{
-		for (const Handle& h : evelnk->getOutgoingSet())
-		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch, silent));
-			if (tv->get_mean() < 0.5)
-				return tv;
-		}
-		return TruthValue::TRUE_TV();
-	}
-	else if (OR_LINK == t)
-	{
-		for (const Handle& h : evelnk->getOutgoingSet())
-		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch, silent));
-			if (0.5 < tv->get_mean())
-				return tv;
-		}
-		return TruthValue::FALSE_TV();
-	}
-	else if (SEQUENTIAL_AND_LINK == t)
-	{
-		const HandleSeq& oset = evelnk->getOutgoingSet();
-		size_t arity = oset.size();
-		if (0 == arity) return TruthValue::TRUE_TV();
-
-		// Is this tail-recursive? If so, then handle it.
-		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
-		if (is_trec) arity--;
-
-		// Loop at least once. If tail-recurive, loop forever.
-		do
-		{
-			for (size_t i=0; i<arity; i++)
-			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch, silent));
-				if (tv->get_mean() < 0.5)
-					return tv;
-			}
-		} while (is_trec);
-		return TruthValue::TRUE_TV();
-	}
-	else if (SEQUENTIAL_OR_LINK == t)
-	{
-		const HandleSeq& oset = evelnk->getOutgoingSet();
-		size_t arity = oset.size();
-		if (0 == arity) return TruthValue::FALSE_TV();
-
-		// Is this tail-recursive? If so, then handle it.
-		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
-		if (is_trec) arity--;
-
-		// Loop at least once. If tail-recurive, loop forever.
-		do
-		{
-			for (size_t i=0; i<arity; i++)
-			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch, silent));
-				if (0.5 < tv->get_mean())
-					return tv;
-			}
-		} while (is_trec);
-		return TruthValue::FALSE_TV();
 	}
 	else if (JOIN_LINK == t)
 	{
