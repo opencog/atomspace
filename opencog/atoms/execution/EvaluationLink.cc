@@ -491,10 +491,8 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-				            oset[i], scratch, silent));
-				if (tv->get_mean() < 0.5)
-					return false;
+				bool tv = crisp_eval_scratch(as, oset[i], scratch, silent);
+				if (not tv) return false;
 			}
 		} while (is_trec);
 		return true;
@@ -514,10 +512,8 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-				             oset[i], scratch, silent));
-				if (0.5 < tv->get_mean())
-					return true;
+				bool tv = crisp_eval_scratch(as, oset[i], scratch, silent);
+				if (tv) return true;
 			}
 		} while (is_trec);
 		return false;
@@ -582,6 +578,19 @@ static bool crisp_eval_scratch(AtomSpace* as,
 			thr.detach();
 		}
 		return true;
+	}
+
+	// A handful of link types that should be auto-converted into
+	// crisp truth values.  (SatisfactinLink is already crisp; but
+	// the current API does not allow it to report that. XXX FIXME).
+	if (EVALUATION_LINK == t or
+	    SATISFACTION_LINK == t or
+	    DEFINED_PREDICATE_NODE == t)
+	{
+		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
+		                evelnk, scratch, silent));
+		if (0.5 < tv->get_mean()) return true;
+		return false;
 	}
 
 	throwSyntaxException(silent,
