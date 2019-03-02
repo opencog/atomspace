@@ -102,7 +102,7 @@ FIND_PACKAGE(CogUtil CONFIG)
 IF (COGUTIL_FOUND)
 	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
 	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
+	SET(HAVE_COGUTIL 1)
 ELSE (COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
@@ -588,7 +588,7 @@ SET(DEPENDENCY_LIST
 	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
-        "libpq-dev (>=9.3.24)"
+	"libpq-dev (>=9.3.24)"
 	"libcogutil-dev (>= 2.0.2)"
 )
 
