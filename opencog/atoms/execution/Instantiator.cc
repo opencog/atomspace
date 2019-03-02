@@ -97,6 +97,77 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	return changed;
 }
 
+// ExecutionOutputLinks get special treatment.
+//
+// Even for the case of lazy execution, we still have to do eager
+// execution of the arguments passed to the ExOutLink.  This is
+// because the ExOutLink is a black box, and we cannot guess what
+// it might do.  It would be great if the authors of ExOutLinks
+// did the lazy execution themselves... but this is too much to
+// ask for. So we always eager-evaluate those args.
+Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
+{
+	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
+
+	// At this time, the GSN or the DSN is always in position 0
+	// of the outgoing set, and the ListLink of arguments is always
+	// in position 1.  Someday in the future, there may be a variable
+	// declaration; we punt on that.
+	Handle sn(eolp->get_schema());
+	Handle args(eolp->get_args());
+
+	// If its a DSN, obtain the correct body for it.
+	if (DEFINED_SCHEMA_NODE == sn->get_type())
+		sn = DefineLink::get_definition(sn);
+
+	// If its an anonymous function link, execute it here.
+	if (LAMBDA_LINK == sn->get_type())
+	{
+		LambdaLinkPtr flp(LambdaLinkCast(sn));
+
+		// Two-step process. First, plug the arguments into the
+		// function; i.e. perform beta-reduction. Second, actually
+		// execute the result. We execute by just calling walk_tree
+		// again.
+		Handle body(flp->get_body());
+		Variables vars(flp->get_variables());
+
+		// Perform substitution on the args, only.
+		if (_eager)
+		{
+			args = walk_tree(args, silent);
+		}
+		else
+		{
+			args = beta_reduce(args, *_vmap);
+		}
+		const Type& arg_type = args->get_type();
+		// unpack list link
+		const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
+		                                              HandleSeq{args});
+		Handle beta_reduced(vars.substitute_nocheck(body, oset));
+		return walk_tree(beta_reduced, silent);
+	}
+
+	// Perform substitution on the args, only.
+	if (_eager)
+	{
+		// XXX I don't get it ... something is broken here, because
+		// the ExecutionOutputLink below *also* performs eager
+		// execution of its arguments. So the step below should not
+		// be needed -- yet, it is ... Funny thing is, it only
+		// breaks the BackwardChainerUTest ... why?
+		args = walk_tree(args, silent);
+	}
+	else
+	{
+		args = beta_reduce(args, *_vmap);
+	}
+
+	Type t = expr->get_type();
+	return createLink(t, sn, args);
+}
+
 Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
 	Type t = expr->get_type();
@@ -331,76 +402,17 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return expr;
 	}
 
-	// ExecutionOutputLinks get special treatment.
-	//
-	// Even for the case of lazy execution, we still have to do eager
-	// execution of the arguments passed to the ExOutLink.  This is
-	// because the ExOutLink is a black box, and we cannot guess what
-	// it might do.  It would be great if the authors of ExOutLinks
-	// did the lazy execution themselves... but this is too much to
-	// ask for. So we always eager-evaluate those args.
+	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
-		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-
-		// At this time, the GSN or the DSN is always in position 0
-		// of the outgoing set, and the ListLink of arguments is always
-		// in position 1.  Someday in the future, there may be a variable
-		// declaration; we punt on that.
-		Handle sn(eolp->get_schema());
-		Handle args(eolp->get_args());
-
-		// If its a DSN, obtain the correct body for it.
-		if (DEFINED_SCHEMA_NODE == sn->get_type())
-			sn = DefineLink::get_definition(sn);
-
-		// If its an anonymous function link, execute it here.
-		if (LAMBDA_LINK == sn->get_type())
+		Handle eolh = reduce_exout(expr, silent);
+		t = eolh->get_type();
+		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		{
-			LambdaLinkPtr flp(LambdaLinkCast(sn));
-
-			// Two-step process. First, plug the arguments into the
-			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_tree
-			// again.
-			Handle body(flp->get_body());
-			Variables vars(flp->get_variables());
-
-			// Perform substitution on the args, only.
-			if (_eager)
-			{
-				args = walk_tree(args, silent);
-			}
-			else
-			{
-				args = beta_reduce(args, *_vmap);
-			}
-			const Type& arg_type = args->get_type();
-			// unpack list link
-			const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
-			                                              HandleSeq{args});
-			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree(beta_reduced, silent);
+			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
+			return HandleCast(geolp->execute(_as, silent));
 		}
-
-		// Perform substitution on the args, only.
-		if (_eager)
-		{
-			// XXX I don't get it ... something is broken here, because
-			// the ExecutionOutputLink below *also* performs eager
-			// execution of its arguments. So the step below should not
-			// be needed -- yet, it is ... Funny thing is, it only
-			// breaks the BackwardChainerUTest ... why?
-			args = walk_tree(args, silent);
-		}
-		else
-		{
-			args = beta_reduce(args, *_vmap);
-		}
-
-		Handle eolh = createLink(t, sn, args);
-		ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-		return HandleCast(geolp->execute(_as, silent));
+		return eolh;
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -597,6 +609,19 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
 		return expr->execute(_as, silent);
+	}
+
+	// ExecutionOutputLinks
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+	{
+		Handle eolh = reduce_exout(expr, silent);
+		t = eolh->get_type();
+		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		{
+			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
+			return geolp->execute(_as, silent);
+		}
+		return eolh;
 	}
 
 	// The thread-links are ambiguously executable/evaluatable.

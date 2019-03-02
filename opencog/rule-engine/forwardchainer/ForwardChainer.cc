@@ -370,21 +370,6 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 		}
 	};
 
-	auto add_result_set = [&](AtomSpace& as, const HandleSet& hs) {
-		for (const Handle& h : hs)
-		{
-			Type t = h->get_type();
-			// If it's a List or Set then add all the results. That
-			// kinda means that to infer List or Set themselves you
-			// need to Quote them.
-			if (t == LIST_LINK or t == SET_LINK)
-				for (const Handle& hc : h->getOutgoingSet())
-					results.insert(as.add_atom(hc));
-			else
-				results.insert(as.add_atom(h));
-		}
-	};
-
 	// Wrap in try/catch in case the pattern matcher can't handle it
 	try
 	{
@@ -403,7 +388,10 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 			FocusSetPMCB fs_pmcb(&derived_rule_as, &_kb_as);
 			fs_pmcb.implicand = bl->get_implicand();
 			bl->satisfy(fs_pmcb);
-			add_result_set(_focus_set_as, fs_pmcb.get_result_set());
+			HandleSeq rslts;
+			for (const ValuePtr& v: fs_pmcb.get_result_set())
+				rslts.push_back(HandleCast(v));
+			add_results(_focus_set_as, rslts);
 		}
 		// Search the whole atomspace.
 		else {

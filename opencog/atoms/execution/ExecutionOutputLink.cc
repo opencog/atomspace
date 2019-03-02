@@ -43,6 +43,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
+	    VARIABLE_NODE != schema->get_type() and
 	    UNQUOTE_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
@@ -114,10 +115,10 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 /// Expects "cargs" to be a ListLink unless there is only one argument
 /// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as,
-                                       const Handle& gsn,
-                                       const Handle& cargs,
-                                       bool silent)
+ValuePtr ExecutionOutputLink::do_execute(AtomSpace* as,
+                                         const Handle& gsn,
+                                         const Handle& cargs,
+                                         bool silent)
 {
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->to_short_string()
 	              << "with arguments: " << cargs->to_short_string();
@@ -136,25 +137,20 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	std::string lang, lib, fun;
 	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
 
-	Handle result;
+	ValuePtr result;
 
 	// At this point, we only run scheme, python schemas and functions from
 	// libraries loaded at runtime.
 	if (lang == "scm")
 	{
-#ifdef HAVE_GUILE
 		SchemeEval* applier = get_evaluator_for_scheme(as);
-		result = applier->apply(fun, args);
+		result = applier->apply_v(fun, args);
 
 		// Exceptions were already caught, before leaving guile mode,
 		// so we can't rethrow.  Just throw a new exception.
 		if (applier->eval_error())
 			throw RuntimeException(TRACE_INFO,
-			                       "Failed evaluation; see logfile for stack trace.");
-#else
-		throw RuntimeException(TRACE_INFO,
-		                       "Cannot evaluate scheme GroundedSchemaNode!");
-#endif /* HAVE_GUILE */
+			         "Failed evaluation; see logfile for stack trace.");
 	}
 	else if (lang == "py")
 	{
@@ -198,10 +194,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// code returns nothing, then a null-pointer-dereference is
 	// likely, a bit later down the line, leading to a crash.
 	// So head this off at the pass.
-	if (nullptr == result) {
+	if (nullptr == result)
+	{
 		// If silent is true, return a simpler and non-logged
-		// exception, which may, in some contexts, be considerably
-		// faster than the one below.
+		// exception, which may, in some contexts, will be
+		// considerably faster than a RuntimeException.
 		if (silent)
 			throw NotEvaluatableException();
 
@@ -211,7 +208,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		                       cargs->to_string().c_str());
 	}
 
-	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
+	LAZY_LOG_FINE << "Result: " << result->to_string();
 	return result;
 }
 

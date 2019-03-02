@@ -75,7 +75,10 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.
-	Handle rewr(createUnorderedLink(do_execute(as, silent), SET_LINK));
+	ValueSet rslt(do_execute(as, silent));
+	HandleSeq hlist;
+	for (const ValuePtr& v: rslt) hlist.emplace_back(HandleCast(v));
+	Handle rewr(createUnorderedLink(hlist, SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE

@@ -35,8 +35,8 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	HandleSeq hlist;
-	for (const Handle& h: impl.get_result_set())
-		hlist.push_back(h);
+	for (const ValuePtr& v: impl.get_result_set())
+		hlist.push_back(HandleCast(v));
 	Handle gl = as->add_link(LIST_LINK,hlist);
 	return gl;
 }

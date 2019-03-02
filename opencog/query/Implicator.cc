@@ -54,22 +54,28 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	// difficult to insure, so meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
 	try {
-		Handle h(HandleCast(inst.instantiate(implicand, var_soln, true)));
-		insert_result(h);
+		ValuePtr v(inst.instantiate(implicand, var_soln, true));
+		insert_result(v);
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
 }
 
-void Implicator::insert_result(const Handle& h)
+void Implicator::insert_result(const ValuePtr& v)
 {
-	if (h and _result_set.end() == _result_set.find(h))
+	if (v and _result_set.end() == _result_set.find(v))
 	{
 		// Insert atom into the atomspace immediately, so that
 		// it becomes visible in other threads.
-		Handle has = _as->add_atom(h);
-		_result_set.insert(has);
+		if (v->is_atom())
+		{
+			_result_set.insert(_as->add_atom(HandleCast(v)));
+		}
+		else
+		{
+			_result_set.insert(v);
+		}
 	}
 }
 
