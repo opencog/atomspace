@@ -547,6 +547,48 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		return greater(scratch, evelnk, silent);
 	}
 
+	// -------------------------
+	// Multi-threading primitives
+	if (JOIN_LINK == t)
+	{
+		const HandleSeq& oset = evelnk->getOutgoingSet();
+		size_t arity = oset.size();
+		std::vector<TruthValuePtr> tvp(arity);
+
+		// Create a collection of joinable threads.
+		std::vector<std::thread> thread_set;
+		std::exception_ptr ex;
+		for (size_t i=0; i<arity; i++)
+		{
+			thread_set.push_back(std::thread(&thread_eval_tv,
+				as, oset[i], scratch, silent, &tvp[i], &ex));
+		}
+
+		// Wait for it all to come together.
+		for (std::thread& t : thread_set) t.join();
+
+		// Were there any exceptions? If so, rethrow.
+		if (ex) std::rethrow_exception(ex);
+
+		// Return the logical-AND of the returned truth values
+		for (const TruthValuePtr& tv: tvp)
+		{
+			if (0.5 > tv->get_mean())
+				return false;
+		}
+		return true;
+	}
+	else if (PARALLEL_LINK == t)
+	{
+		// Create and detach threads; return immediately.
+		for (const Handle& h : evelnk->getOutgoingSet())
+		{
+			std::thread thr(&thread_eval, as, h, scratch, silent);
+			thr.detach();
+		}
+		return true;
+	}
+
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
@@ -589,45 +631,6 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		                                sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
-	}
-	else if (JOIN_LINK == t)
-	{
-		const HandleSeq& oset = evelnk->getOutgoingSet();
-		size_t arity = oset.size();
-		std::vector<TruthValuePtr> tvp(arity);
-
-		// Create a collection of joinable threads.
-		std::vector<std::thread> thread_set;
-		std::exception_ptr ex;
-		for (size_t i=0; i<arity; i++)
-		{
-			thread_set.push_back(std::thread(&thread_eval_tv,
-				as, oset[i], scratch, silent, &tvp[i], &ex));
-		}
-
-		// Wait for it all to come together.
-		for (std::thread& t : thread_set) t.join();
-
-		// Were there any exceptions? If so, rethrow.
-		if (ex) std::rethrow_exception(ex);
-
-		// Return the logical-AND of the returned truth values
-		for (const TruthValuePtr& tv: tvp)
-		{
-			if (0.5 > tv->get_mean())
-				return tv;
-		}
-		return TruthValue::TRUE_TV();
-	}
-	else if (PARALLEL_LINK == t)
-	{
-		// Create and detach threads; return immediately.
-		for (const Handle& h : evelnk->getOutgoingSet())
-		{
-			std::thread thr(&thread_eval, as, h, scratch, silent);
-			thr.detach();
-		}
-		return TruthValue::TRUE_TV();
 	}
 	else if (SATISFACTION_LINK == t)
 	{
