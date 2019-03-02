@@ -455,18 +455,15 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	// Crisp-binary-valued Boolean Logical connectives
 	if (NOT_LINK == t)
 	{
-		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-		      evelnk->getOutgoingAtom(0), scratch, silent));
-		return tv->get_mean() < 0.5;
+		return not crisp_eval_scratch(as,
+		      evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-			          h, scratch, silent));
-			if (tv->get_mean() < 0.5)
-				return false;
+			bool tv = crisp_eval_scratch(as, h, scratch, silent);
+			if (not tv) return false;
 		}
 		return true;
 	}
@@ -474,10 +471,8 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-			               h, scratch, silent));
-			if (0.5 < tv->get_mean())
-				return true;
+			bool tv = crisp_eval_scratch(as, h, scratch, silent);
+			if (tv) return true;
 		}
 		return false;
 	}
