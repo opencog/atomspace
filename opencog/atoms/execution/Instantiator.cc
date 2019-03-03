@@ -665,9 +665,10 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// Evaluate, if possible.
 	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
 	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
-#endif
 
 	// Evaluate, crisp-binary-boolean tv links, if possible.
+	// This actually passes unit tests, but seems pointless, without
+	// some corresponding grand design that unifies things correctly.
 	if (vp)
 	{
 		Type t = vp->get_type();
@@ -681,6 +682,8 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 			return pap;
 		}
 	}
+#endif
+
 	return vp;
 }
 
