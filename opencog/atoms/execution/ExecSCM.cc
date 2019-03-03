@@ -28,15 +28,12 @@ static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
-	Handle rh(HandleCast(pap));
-	if (NULL != rh)
-		pap = atomspace->add_atom(rh);
-#if 0
 	if (pap and pap->is_atom())
 	{
-		pap = atomspace->add_atom(HandleCast(pap));
+		Handle h(HandleCast(pap));
+if (nullptr == h) { printf("wtf!! %s<<\n", pap->to_string().c_str()); exit(1); }
+		if (h) pap = atomspace->add_atom(h);
 	}
-#endif
 	return pap;
 }
 
