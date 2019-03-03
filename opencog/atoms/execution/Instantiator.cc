@@ -661,6 +661,19 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// collapsing the evaluatable/executable hierarchies into one
 	// is not possible, without clarifying a lot of the back-n-forth
 	// implicit casting, movement of data...
+	//
+	// That is, the current design of Atomese makes a large number
+	// of implicit decisions about when things should and should not
+	// be evaluated. Many of these decisions are buried in the link-types
+	// themselves. Most of these implicit behaviors seem "natural", but
+	// they also do not adhere to any grand plan ... its ad-hoc.
+	// Thus, we cannot just mash together evaluation and execution
+	// without reviewing all of these implicit and "natural" behaviors
+	// and maybe modifying them.  For example, maybe we need some
+	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
+	// to force evaluation/executation at crtain points, instead of
+	// just making it all implicit. Or maybe there is some other,
+	// better design...
 
 	// Evaluate, if possible.
 	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
