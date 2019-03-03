@@ -28,10 +28,15 @@ static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
+	Handle rh(HandleCast(pap));
+	if (NULL != rh)
+		pap = atomspace->add_atom(rh);
+#if 0
 	if (pap and pap->is_atom())
 	{
 		pap = atomspace->add_atom(HandleCast(pap));
 	}
+#endif
 	return pap;
 }
 
