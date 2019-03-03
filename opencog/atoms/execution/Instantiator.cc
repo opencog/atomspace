@@ -652,7 +652,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// something more efficient, here?
 	ValuePtr vp(instantiate(expr, HandleMap(), silent));
 
-// #if NICE_IDEA_BUT_FAILS
+#if NICE_IDEA_BUT_FAILS
 	// If the result of execution is an evaluatable link, viz, something
 	// that could return a truth value when evaluated, then do the
 	// evaluation now, on the spot, and return the truth value.
@@ -663,12 +663,16 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// implicit casting, movement of data...
 
 	// Evaluate, if possible.
-	// if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
+	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
+	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
+#endif
 
+	// Evaluate, crisp-binary-boolean tv links, if possible.
 	if (vp)
 	{
 		Type t = vp->get_type();
 		if (EQUAL_LINK == t or
+		    IDENTICAL_LINK == t or
 		    GREATER_THAN_LINK == t)
 		{
 			Handle h(HandleCast(vp));
