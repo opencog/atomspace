@@ -633,33 +633,71 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Instantiate.
 	Handle grounded(walk_tree(expr, silent));
 
-#if NICE_IDEA_BUT_FAILS
-	// As above: if the result of execution is an evaluatable link,
-	// viz, something that could return a truth value when evaluated,
-	// then do the evaluation now, on the spot, and return the truth
-	// value.  XXX Again, just like above, this is kind-of-ish hacky
-	// to do it here. More correctly, this would need to be done
-	// in-line, in the walk_tree() code. Right now, we cannot actually
-	// do this, as (1) it would be inefficient, as it requires lots
-	// of casts to and from Handle, and (2) at least ten unit tests fail.
-	// The unit tests would need to be reviewed on a case-by-case basis,
-	// and design/architecture changes would need to be made.
-	t = grounded->get_type();
-	if (TRUTH_VALUE_OF_LINK == t or
-	    EQUAL_LINK == t or
-	    GREATER_THAN_LINK == t)
-	{
-		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
-		ValuePtr pap(ValueCast(tvp));
-		return pap;
-	}
-#endif
-
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
+	// XXX FIXME Can we defer the addition to the atomspace to an even
+	// later time??
 	return _as->add_atom(grounded);
+}
+
+ValuePtr Instantiator::execute(const Handle& expr, bool silent)
+{
+	// Since we do not actually instantiate anything, we should not
+	// consume quotations. (as it might change the semantics. (Huh ??))
+	_consume_quotations = false;
+
+	// XXX FIXME, since the variable map is empty, maybe we can do
+	// something more efficient, here?
+	ValuePtr vp(instantiate(expr, HandleMap(), silent));
+
+#if NICE_IDEA_BUT_FAILS
+	// If the result of execution is an evaluatable link, viz, something
+	// that could return a truth value when evaluated, then do the
+	// evaluation now, on the spot, and return the truth value.
+	// There are several problems with this; the biggest is that
+	// about 1/4th of the unit tests fail (39 out of 138). So just
+	// collapsing the evaluatable/executable hierarchies into one
+	// is not possible, without clarifying a lot of the back-n-forth
+	// implicit casting, movement of data...
+	//
+	// That is, the current design of Atomese makes a large number
+	// of implicit decisions about when things should and should not
+	// be evaluated. Many of these decisions are buried in the link-types
+	// themselves. Most of these implicit behaviors seem "natural", but
+	// they also do not adhere to any grand plan ... its ad-hoc.
+	// Thus, we cannot just mash together evaluation and execution
+	// without reviewing all of these implicit and "natural" behaviors
+	// and maybe modifying them.  For example, maybe we need some
+	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
+	// to force evaluation/executation at crtain points, instead of
+	// just making it all implicit. Or maybe there is some other,
+	// better design...
+
+	// Evaluate, if possible.
+	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
+	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
+
+	// Evaluate, crisp-binary-boolean tv links, if possible.
+	// This actually passes unit tests, but seems pointless, without
+	// some corresponding grand design that unifies things correctly.
+	if (vp)
+	{
+		Type t = vp->get_type();
+		if (EQUAL_LINK == t or
+		    IDENTICAL_LINK == t or
+		    GREATER_THAN_LINK == t)
+		{
+			Handle h(HandleCast(vp));
+			TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, h));
+			ValuePtr pap(ValueCast(tvp));
+			return pap;
+		}
+	}
+#endif
+
+	return vp;
 }
 
 /* ===================== END OF FILE ===================== */
