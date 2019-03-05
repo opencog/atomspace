@@ -219,7 +219,6 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
 
-
 cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
      cdef cAtom * atom_ptr = <cAtom*>h.get()
      if atom_ptr == NULL:  # avoid null-pointer deref
@@ -237,3 +236,8 @@ cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
          return False
      raise RuntimeError("Argument is not link and not node")
 
+# TODO: find proper way to work with dependencies includes into atomspace.pxd
+# means that we need to add these files at each library which depends on
+# atomspace.pxd, see CMakeLists.txt
+include "ptrvalue.pxd"
+include "grounded_object_node.pxd"

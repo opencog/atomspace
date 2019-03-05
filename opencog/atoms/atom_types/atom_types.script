@@ -21,6 +21,8 @@ STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
 
+PTR_VALUE <- VALUE 		// value which represends pointer to the object
+
 // ===========================================================
 // All of the different flavors of truth values
 TRUTH_VALUE                <- FLOAT_VALUE
@@ -460,6 +462,8 @@ ATTRACTION_LINK <- ORDERED_LINK
 // as 10kg, 10s, $10, etc.
 QUANTITY_LINK <- ORDERED_LINK
 
+GROUNDED_OBJECT_NODE <- NODE
+
 // ==============================================================
 // Types and type constructors.
 
@@ -597,6 +601,10 @@ FUNCTION_LINK <- FREE_LINK
 // FunctionLinks do not have this restriction: indeed, the actual
 // function they perform is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+
+APPLY_LINK <- EXECUTION_OUTPUT_LINK
+GROUNDED_FUNCTION_LINK <- ORDERED_LINK
+METHOD_OF_LINK <- GROUNDED_FUNCTION_LINK
 
 // Return the indicated value on the indicated atom.
 // XXX FIXME - Not all ValueOfLinks are actually numeric; but there

@@ -9,6 +9,8 @@ ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
 
+ADD_SUBDIRECTORY (execution)
+
 IF(HAVE_GUILE)
 	ADD_CXXTEST(HashUTest)
 	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
@@ -69,3 +71,4 @@ TARGET_LINK_LIBRARIES(StreamUTest clearbox execution smob atomspace)
 
 ADD_CXXTEST(IdenticalLinkUTest)
 TARGET_LINK_LIBRARIES(IdenticalLinkUTest execution atomspace)
+

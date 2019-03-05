@@ -1,0 +1,113 @@
+/*
+ * tests/atoms/value/PtrValueUTest.h
+ *
+ * Copyright (C) 2019 Vitaly Bogdanov
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/value/PtrValue.h>
+
+using namespace opencog;
+
+class PtrValueUTest : public CxxTest::TestSuite
+{
+private:
+
+	static void noop(void* ptr) {}
+
+public:
+	void test_constructor(void) {
+		int n = 10;
+
+		PtrValuePtr value = createPtrValue(&n, noop);
+		
+		TS_ASSERT(value.get() != NULL);
+		TS_ASSERT(value->value() == &n);
+		TS_ASSERT_EQUALS(*(int*)value->value(), n);
+	}
+
+	void test_constructor_shared_ptr(void) {
+		int n = 10;
+
+		PtrValuePtr value = createPtrValue(std::shared_ptr<int>(&n, noop));
+
+		TS_ASSERT(value.get() != NULL);
+		TS_ASSERT(value->value() == &n);
+		TS_ASSERT_EQUALS(*(int*)value->value(), n);
+	}
+
+	void test_equals(void) {
+		int n = 42;
+
+		PtrValuePtr a = createPtrValue(&n, noop);
+		PtrValuePtr b = createPtrValue(&n, noop);
+		
+		TS_ASSERT(*a == *b);
+		TS_ASSERT(!(*a != *b));
+	}
+
+	void test_not_equals(void) {
+		int n = 42;
+		int k = 42;
+
+		PtrValuePtr a = createPtrValue(&n, noop);
+		PtrValuePtr b = createPtrValue(&k, noop);
+		
+		TS_ASSERT(*a != *b);
+		TS_ASSERT(!(*a == *b));
+	}
+
+	void test_to_string(void) {
+		PtrValuePtr value =
+			createPtrValue(reinterpret_cast<void*>(0x123456789ABCDEF0), noop);
+
+		std::string str = value->to_string(" ");
+
+		TS_ASSERT_EQUALS(str, " (PtrValue 0x123456789abcdef0)\n");
+	}
+
+	class RefCounter {
+	public:
+		int counter = 1;
+
+		static void decref(void *ptr) {
+			static_cast<RefCounter*>(ptr)->counter--;
+		}
+	};
+
+	void test_decref_called(void) {
+		RefCounter counter;
+
+		{
+			PtrValuePtr value = createPtrValue(&counter, &RefCounter::decref);
+		}
+
+		TS_ASSERT_EQUALS(counter.counter, 0);
+	}
+
+	void test_decref_called_shared_ptr(void) {
+		RefCounter counter;
+
+		{
+			PtrValuePtr value = createPtrValue(
+				std::shared_ptr<RefCounter>(&counter, &RefCounter::decref));
+		}
+
+		TS_ASSERT_EQUALS(counter.counter, 0);
+	}
+};
