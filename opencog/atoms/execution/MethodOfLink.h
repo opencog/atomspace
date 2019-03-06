@@ -34,8 +34,6 @@ private:
 	GroundedObject* get_object() const;
 	const std::string& get_method_name() const;
 
-	void check_outgoing_type(int index, const Type& type);
-
 public:
 	MethodOfLink(const HandleSeq& output_set, Type type);
 	virtual GroundedFunction get_function() const;
