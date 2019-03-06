@@ -236,9 +236,9 @@ public:
 
     /**
      * Utility method to check type of the outgoing set item.
-     * \param index index of item in outgoing set
-     * \param type expected type of the item
-     * \throws SyntaxException if actual type is not equal to expected.
+     * @param index index of item in outgoing set
+     * @param type expected type of the item
+     * @throws SyntaxException if actual type is not equal to expected.
      */
     void check_outgoing_type(int index, const Type& type);
 };
