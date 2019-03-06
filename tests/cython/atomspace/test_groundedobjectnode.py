@@ -29,6 +29,34 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(result, ConceptNode("arg"))
 
+    def test_call_grounded_object_no_arguments(self):
+        grounded_object_node = GroundedObjectNode("test_grounded_object_node",
+                                                  TestObject("some object"))
+        exec_link = ApplyLink(
+                        MethodOfLink(grounded_object_node,
+                                     ConceptNode("noarguments")),
+                        ListLink()
+                    )
+
+        result = execute_atom(self.space,  exec_link)
+
+        self.assertEqual(result, ConceptNode("empty"))
+
+    def test_call_grounded_object_predicate_two_args(self):
+        grounded_object_node = GroundedObjectNode("test_grounded_object_node",
+                                                  TestObject("some object"))
+        exec_link = ApplyLink(
+                        MethodOfLink(grounded_object_node, ConceptNode("second")),
+                        ListLink(
+                            ConceptNode("firstArg"),
+                            ConceptNode("secondArg")
+                        )
+                    )
+
+        result = execute_atom(self.space,  exec_link)
+
+        self.assertEqual(result, ConceptNode("secondArg"))
+
     def test_set_object(self):
         grounded_object_node = GroundedObjectNode("test_grounded_object_node",
                                                   TestObject("some object"))
@@ -42,10 +70,18 @@ class GroundedObjectNodeTest(unittest.TestCase):
         self.assertTrue(grounded_object_node.get_object() is None)
 
 class TestObject:
+
     def __init__(self, name):
         self.name = name
-    def foo(self, args):
-        return args.out[0]
+
+    def foo(self, arg):
+        return arg
+
+    def noarguments(self):
+        return ConceptNode("empty")
+
+    def second(self, first, second):
+        return second
 
 if __name__ == '__main__':
     unittest.main()
