@@ -31,6 +31,11 @@ ApplyLink::ApplyLink(const HandleSeq& oset, Type t)
 {
 	forward_to_execution_output_link =
 		!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK);
+	if (!forward_to_execution_output_link)
+	{
+		check_outgoing_type(0, GROUNDED_FUNCTION_LINK);
+		check_outgoing_type(1, LIST_LINK);
+	}
 }
 
 ValuePtr ApplyLink::execute(AtomSpace* as, bool silent)

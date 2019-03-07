@@ -1,4 +1,5 @@
-from opencog.atomspace cimport cCreateGroundedObjectNode, cPythonGroundedObject
+from opencog.atomspace cimport (cAtom, cCreateGroundedObjectNode,
+                                cPythonGroundedObject)
 from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
@@ -40,9 +41,9 @@ cdef api cValuePtr call_python_method(object obj, const string& method_name,
                                       cAtomSpace* atomspace, const cValuePtr&
                                       _args):
     method = getattr(obj, method_name.c_str().decode())
-    args = create_value_by_type(_args.get().get_type(),
-                                PtrHolder.create(<shared_ptr[void]&>_args),
-                                AtomSpace_factory(atomspace))
-    cdef Value result = method(args)
+    assert _args.get().is_link()
+    args = convert_handle_seq_to_python_list(
+        (<cAtom*>_args.get()).getOutgoingSet(), AtomSpace_factory(atomspace))
+    cdef Value result = method(*args)
     return result.get_c_value_ptr()
 

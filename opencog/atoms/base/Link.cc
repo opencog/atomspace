@@ -185,3 +185,23 @@ ContentHash Link::compute_hash() const
 	_content_hash = hsh;
 	return _content_hash;
 }
+
+static void check_type(const ValuePtr& value, const Type& type, const std::string& location)
+{
+    if (!nameserver().isA(value->get_type(), type))
+    {
+        throw SyntaxException(TRACE_INFO,
+                "%s or subclass is expected as %s, actual parameter type is %s",
+                nameserver().getTypeName(type),
+                location,
+                nameserver().getTypeName(value->get_type()));
+    }
+}
+
+void Link::check_outgoing_type(int index, const Type& type)
+{
+    std::string location = std::to_string(index) + " outgoing link of " +
+        nameserver().getTypeName(get_type());
+    check_type(getOutgoingAtom(index), type, location);
+}
+
