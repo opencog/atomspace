@@ -74,11 +74,15 @@ cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace):
 
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)
-    if clazz is not None:
-        return clazz(ptr_holder = ptr_holder)
-
     cdef cValue *c_ptr = value.get()
+    if clazz is not None:
+        if c_ptr.is_atom():
+            return clazz(ptr_holder = ptr_holder, atomspace = atomspace)
+        else:
+            return clazz(ptr_holder = ptr_holder)
+
     if c_ptr.is_atom() and atomspace is not None:
-        return Atom(ptr_holder, atomspace)
+        return Atom(ptr_holder = ptr_holder, atomspace = atomspace)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
+
