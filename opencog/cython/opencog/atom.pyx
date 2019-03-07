@@ -73,9 +73,7 @@ cdef class Atom(Value):
             deref((<Atom>key).handle))
         if value.get() == NULL:
             return None
-        return create_value_by_type(value.get().get_type(),
-                                    PtrHolder.create(<shared_ptr[void]&>value),
-                                    self.atomspace)
+        return create_python_value_from_c_value(value, self.atomspace)
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()

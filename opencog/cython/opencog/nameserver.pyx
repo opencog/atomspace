@@ -1,4 +1,5 @@
-from atomspace cimport cNameServer, nameserver, NOTYPE, string, Type
+from atomspace cimport (cNameServer, nameserver, NOTYPE, string, Type,
+                        AtomSpace, PtrHolder)
 from libc.string cimport strcmp
 import sys
 
@@ -66,15 +67,17 @@ def get_refreshed_types():
     types = type('atom_types', (), generate_type_module())
     return types
 
-def create_value_by_type(type, ptr_holder, atomspace = None):
+cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace):
+    type = value.get().get_type()
     type_name = get_type_name(type)
+    ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
 
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)
     if clazz is not None:
         return clazz(ptr_holder = ptr_holder)
 
-    cdef cValue *c_ptr = (<cValuePtr&>((<PtrHolder>ptr_holder).shared_ptr)).get()
+    cdef cValue *c_ptr = value.get()
     if c_ptr.is_atom() and atomspace is not None:
         return Atom(ptr_holder, atomspace)
 
