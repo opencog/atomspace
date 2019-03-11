@@ -24,6 +24,7 @@
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
@@ -64,6 +65,9 @@ ValueOfUTest::ValueOfUTest(void)
 {
 	logger().set_level(Logger::INFO);
 	logger().set_print_to_stdout_flag(true);
+
+	// Hack to force library to load to work around linking bug.
+	createPlusLink(HandleSeq());
 }
 
 void ValueOfUTest::setUp(void)

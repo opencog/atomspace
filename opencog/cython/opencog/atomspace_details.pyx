@@ -18,7 +18,8 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        result.append(Atom(void_from_candle(handle), atomspace))
+        value = create_python_value_from_c_value(<cValuePtr&>handle, atomspace)
+        result.append(value)
         inc(handle_iter)
     return result
 
@@ -33,6 +34,7 @@ cdef class AtomSpace:
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
     #cdef bint owns_atomspace
+    #cdef object parent_atomspace
 
     def __cinit__(self):
         self.owns_atomspace = False
@@ -41,21 +43,20 @@ cdef class AtomSpace:
     # basically, pass an int, and cast it to the C++ pointer.  This
     # works, but is not very safe, and has a certain feeling of "ick"
     # about it.  But I can't find any better way.
-    def __init__(self, long addr = 0):
+    def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
             self.atomspace = new cAtomSpace()
             self.owns_atomspace = True
-            attentionbank(self.atomspace)
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
             self.owns_atomspace = False
-            attentionbank(self.atomspace)
+        self.parent_atomspace = parent
 
     def __dealloc__(self):
         if self.owns_atomspace:
             if self.atomspace:
                 del self.atomspace
-                attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
+        self.parent_atomspace = None
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -96,7 +97,7 @@ cdef class AtomSpace:
         cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom(void_from_candle(result), self);
+        atom = Atom.createAtom(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -117,7 +118,7 @@ cdef class AtomSpace:
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom(void_from_candle(result), self);
+        atom = Atom.createAtom(result, self);
         if tv :
             atom.tv = tv
         return atom
@@ -162,7 +163,8 @@ cdef class AtomSpace:
         """
         if self.atomspace == NULL:
             return None
-        self.atomspace.set_value(deref(atom.handle), deref(key.handle), value.shared_ptr)
+        self.atomspace.set_value(deref(atom.handle), deref(key.handle),
+                                 value.get_c_value_ptr())
 
     def set_truthvalue(self, Atom atom, TruthValue tv):
         """ Set the truth value on atom
@@ -174,10 +176,7 @@ cdef class AtomSpace:
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
-        if isinstance(atom, Atom):
-            return self.is_valid(atom)
-        else:
-            return False
+        return is_in_atomspace(self.atomspace, deref((<Atom>(atom)).handle))
 
     # Maybe this should be called __repr__ ???
     def __str__(self):
@@ -212,48 +211,6 @@ cdef class AtomSpace:
         self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
-    def get_atoms_by_av(self, lower_bound, upper_bound=None):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        if upper_bound is not None:
-            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-                    lower_bound, upper_bound)
-        else:
-            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-                    lower_bound)
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-    def get_atoms_in_attentional_focus(self):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        attentionbank(self.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-    # Deprecated. Who uses this? Anyone? Is it useful for anyone?
-    def get_predicates(self,
-                       Atom target,
-                       Type predicate_type = types.PredicateNode,
-                       subclasses=True):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        cdef bint want_subclasses = subclasses
-        handle_vector = c_get_predicates(deref(target.handle), predicate_type,
-                                         want_subclasses)
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-    # Deprecated. Who uses this? Anyone? Is it useful for anyone?
-    def get_predicates_for(self, Atom target, Atom predicate):
-        if self.atomspace == NULL:
-            return None
-        cdef vector[cHandle] handle_vector
-        handle_vector = c_get_predicates_for(deref(target.handle),
-                                             deref(predicate.handle))
-        return convert_handle_seq_to_python_list(handle_vector, self)
-
-
     @classmethod
     def include_incoming(cls, atoms):
         """
@@ -284,6 +241,15 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(PANDLE lptr, object atomspace):
-    cdef Atom atom = Atom(lptr, atomspace)
+cdef api object py_atom(const cHandle& h, object atomspace):
+    cdef Atom atom = Atom.createAtom(h, atomspace)
     return atom
+
+def create_child_atomspace(object atomspace):
+    cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef AtomSpace result = AtomSpace_factory(child)
+    result.owns_atomspace = True
+    result.parent_atomspace = atomspace
+    return result
+
+

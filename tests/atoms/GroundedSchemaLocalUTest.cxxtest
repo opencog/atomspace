@@ -23,6 +23,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/LibraryManager.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 using namespace opencog;
@@ -91,7 +92,7 @@ void GroundedSchemaLocalUTest::test_local_schema()
 		    N(CONCEPT_NODE, "Arg2"),
 		    N(CONCEPT_NODE, "Arg3"))
 		    );
-	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
+	Handle result = HandleCast(eol->execute(as));
 	logger().debug() << "Result is this:\n" << result->to_string();
 	Handle expected = N(CONCEPT_NODE, "Arg1");
 
@@ -110,7 +111,7 @@ void GroundedSchemaLocalUTest::test_local_schema_no_sep()
 		L(EXECUTION_OUTPUT_LINK,
 		  N(GROUNDED_SCHEMA_NODE, "lib:safe_car"),
 		  N(CONCEPT_NODE, "Arg"));
-	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
+	Handle result = HandleCast(eol->execute(as));
 	logger().debug() << "Result is this:\n" << result->to_string();
 	Handle expected = N(CONCEPT_NODE, "Arg");
 
@@ -140,8 +141,8 @@ void GroundedSchemaLocalUTest::test_local_predicate()
 	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
 	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
 
-	TruthValuePtr result1 = EvaluationLinkCast(evl1)->evaluate(as);
-	TruthValuePtr result2 = EvaluationLinkCast(evl2)->evaluate(as);
+	TruthValuePtr result1 = evl1->evaluate(as);
+	TruthValuePtr result2 = evl2->evaluate(as);
  	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
 	TruthValuePtr expected1 = TruthValue::TRUE_TV();
 	TruthValuePtr expected2 = TruthValue::FALSE_TV();

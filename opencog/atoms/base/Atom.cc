@@ -78,6 +78,12 @@ equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
     return hl == hr;
 }
 
+// Overloading operator<< for Incoming Set
+ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
+{
+    return out << opencog::oc_to_string(iset);
+}
+
 } // namespace std
 
 namespace opencog {

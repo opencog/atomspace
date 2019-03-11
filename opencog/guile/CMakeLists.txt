@@ -1,3 +1,6 @@
+
+ADD_SUBDIRECTORY (modules)
+
 INCLUDE_DIRECTORIES(
 	${GUILE_INCLUDE_DIR}
 )
@@ -9,20 +12,11 @@ ADD_LIBRARY (smob
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
 	SchemeSmobAS.cc
-	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 	SchemeSmobValue.cc
 	SchemeSmobLogger.cc
-)
-
-ADD_LIBRARY (logger
-	LoggerSCM.cc
-)
-
-ADD_LIBRARY (randgen
-	RandGenSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(smob
@@ -36,7 +30,7 @@ TARGET_LINK_LIBRARIES(smob
 	${NO_AS_NEEDED}
 	clearbox
 	lambda
-	# execution
+	execution
 	atomcore
 	atombase
 	truthvalue
@@ -45,33 +39,10 @@ TARGET_LINK_LIBRARIES(smob
 	${COGUTIL_LIBRARY}
 )
 
-TARGET_LINK_LIBRARIES(logger
-	ruleengine # for cog-ure-logger XXX FIXME this is insane. WTF!??
-	smob
-	${GUILE_LIBRARIES}
-	${COGUTIL_LIBRARY}
+INSTALL (TARGETS smob
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
-
-TARGET_LINK_LIBRARIES(randgen
-	smob
-	${GUILE_LIBRARIES}
-	${COGUTIL_LIBRARY}
-)
-
-# XXX FIXME: We should also be installing `ln -s` links into one of
-# these eight locations:
-#    /usr/lib/guile/2.0/extensions
-#    /usr/local/lib/guile/2.0/extensions
-#    /usr/lib64/guile/2.0/extensions
-#    /usr/local/lib64/guile/2.0/extensions
-#    /usr/lib/guile/2.2/extensions
-#    /usr/local/lib/guile/2.2/extensions
-#    /usr/lib64/guile/2.2/extensions
-#    /usr/local/lib64/guile/2.2/extensions
-# ... but which one?  what a pain.
-INSTALL (TARGETS smob EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-INSTALL (TARGETS logger EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-INSTALL (TARGETS randgen EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h

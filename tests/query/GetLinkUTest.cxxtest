@@ -2,6 +2,7 @@
  * tests/query/GetLinkUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2019 Kasimebrahim
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,9 +24,9 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
+#include "imply.h"
 
 using namespace opencog;
 
@@ -47,7 +48,7 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	}
@@ -58,8 +59,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp(void);
@@ -74,6 +73,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_not_equal(void);
 	void test_disconnected_const_eval(void);
 	void test_quote_equal(void);
+	void test_plus_pattern_get(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -345,5 +345,27 @@ void GetLinkUTest::test_quote_equal(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/*
+ * Basic PlusLink pattern with GetLink unit test.
+ */
+void GetLinkUTest::test_plus_pattern_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/executable-pattern.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-execute! plus-pattern)");
+	Handle hans = eval->eval_h(
+			"(SetLink "
+					"(ListLink (NumberNode 3) (NumberNode 5)))");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 #undef al
 #undef an

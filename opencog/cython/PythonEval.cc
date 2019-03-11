@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -57,7 +58,7 @@ using namespace opencog;
 PythonEval* PythonEval::singletonInstance = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
-const char* NO_FUNCTION_NAME = NULL;
+const char* NO_FUNCTION_NAME = "";
 const int SIMPLE_STRING_SUCCESS = 0;
 const int SIMPLE_STRING_FAILURE = -1;
 const int MISSING_FUNC_CODE = -1;
@@ -65,6 +66,7 @@ const int MISSING_FUNC_CODE = -1;
 // The Python functions can't take const flags.
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+static void *_dlso = nullptr;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
@@ -279,6 +281,10 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Don't initialize twice
+    if (already_initialized) return;
+    already_initialized = true;
+
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
@@ -289,21 +295,12 @@ void opencog::global_python_initialize()
     // is as old as the wind. The solution of using dlopen() is given
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
-#if PY_MAJOR_VERSION < 3
-    dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
-#else
-    dlopen("libpython3.5.so", RTLD_LAZY | RTLD_GLOBAL);
-#endif
+
+    // Should result in PYLIBNAME being "libpython3.5.so", etc.
+#define PYLIBNAME "libpython" TOSTRING(PY_MAJOR_VERSION) "." TOSTRING(PY_MINOR_VERSION) ".so"
+    _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
     logger().info("[global_python_initialize] Start");
-
-    // Don't initialize twice
-    if (already_initialized) {
-        return;
-    }
-
-    // Remember this initialization.
-    already_initialized = true;
 
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
@@ -369,10 +366,12 @@ void opencog::global_python_finalize()
     {
         PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
+        if (_dlso) dlclose(_dlso);
     }
 
     // No longer initialized.
     already_initialized = false;
+    _dlso = nullptr;
 
     logger().debug("[global_python_finalize] Finish");
 }
@@ -595,9 +594,9 @@ void PythonEval::print_dictionary(PyObject* pyDict)
         if (not PyBytes_Check(pyKey))
         {
             pyStr = PyUnicode_AsEncodedString(pyKey, "UTF-8", "strict");
+            Py_DECREF(pyKey);
             pyKey = pyStr;
         }
-        if (pyStr) Py_DECREF(pyStr);
 
         const char* c_name = PyBytes_AsString(pyKey);
         printf("Dict item %d is %s\n", i, c_name);
@@ -612,47 +611,92 @@ void PythonEval::print_dictionary(PyObject* pyDict)
 
 /**
  * Build the Python error message for the current error.
- *
- * Only call this when PyErr_Occurred() returns a non-null PyObject*.
  */
-void PythonEval::build_python_error_message(const char* function_name,
-                                            std::string& errorMessage)
+std::string PythonEval::build_python_error_message(
+                                     const std::string& function_name)
 {
-    PyObject *pyErrorType, *pyError, *pyTraceback, *pyErrorString;
-    std::stringstream errorStringStream;
-
     // Get the error from Python.
+    PyObject *pyErrorType, *pyError, *pyTraceback;
     PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
 
+    if (not pyError) return "No error!";
+
     // Construct the error message string.
-    errorStringStream << "Python error ";
+    std::stringstream errorStringStream;
+    errorStringStream << "Python error";
+
     if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << "in " << function_name;
-    if (pyError) {
-        pyErrorString = PyObject_Str(pyError);
+        errorStringStream << " in " << function_name;
+
+    PyObject* pyErrorString = PyObject_Str(pyError);
 #if PY_MAJOR_VERSION == 2
-        char* pythonErrorString = PyBytes_AsString(pyErrorString);
+    char* pythonErrorString = PyBytes_AsString(pyErrorString);
 #else
-        const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+    const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
 #endif
-        if (pythonErrorString) {
-            errorStringStream << ": " << pythonErrorString << ".";
-        } else {
-            errorStringStream << ": Undefined Error";
-        }
-
-        // Cleanup the references. NOTE: The traceback can be NULL even
-        // when the others aren't.
-        Py_DECREF(pyErrorType);
-        Py_DECREF(pyError);
-        Py_DECREF(pyErrorString);
-        if (pyTraceback)
-            Py_DECREF(pyTraceback);
-
+    if (pythonErrorString) {
+        errorStringStream << ": " << pythonErrorString << ".";
     } else {
-        errorStringStream << ": Undefined Error";
+        errorStringStream << ": Undescribed Error.";
     }
-    errorMessage = errorStringStream.str();
+
+    // Print the traceback, too, if it is provided.
+    if (pyTraceback)
+    {
+#if PY_MAJOR_VERSION == 2
+        PyObject* pyTBString = PyObject_Str(pyTraceback);
+        char* tb = PyBytes_AsString(pyTBString);
+        errorStringStream << "\nTraceback: " << tb;
+        Py_DECREF(pyTBString);
+#else
+        errorStringStream << "\nTraceback (most recent call last):\n";
+
+        PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
+
+        while (pyTracebackObject != NULL) {
+
+            int line_number = pyTracebackObject-> tb_lineno;
+            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
+            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
+
+            errorStringStream << "File \"" << filename <<"\", ";
+            errorStringStream << "line " << line_number <<", ";
+            errorStringStream << "in " << code_name <<"\n";
+
+            pyTracebackObject = pyTracebackObject -> tb_next;
+        }
+#endif
+    }
+
+    // Cleanup the references. NOTE: The traceback can be NULL even
+    // when the others aren't.
+    Py_DECREF(pyErrorType);
+    Py_DECREF(pyError);
+    Py_DECREF(pyErrorString);
+    if (pyTraceback)
+        Py_DECREF(pyTraceback);
+
+    return errorStringStream.str();
+}
+
+// Check for errors in a script.
+void PythonEval::throw_on_error()
+{
+    if (not PyErr_Occurred()) return;
+
+    std::string errorString = build_python_error_message(NO_FUNCTION_NAME);
+    PyErr_Clear();
+
+    // Clear the evaluator state; else future input is garbaged up.
+    _input_line = "";
+    _paren_count = 0;
+    _pending_input = false;
+    _eval_done = true;
+    _caught_error = true;
+
+    // If there was an error, throw an exception so the user knows the
+    // script had a problem.
+    throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 }
 
 /**
@@ -663,7 +707,7 @@ void PythonEval::build_python_error_message(const char* function_name,
  * does everything that PyRun_SimpleString does except it does not
  * call PyErr_Print() and PyErr_Clear().
  */
-void PythonEval::execute_string(const char* command)
+std::string PythonEval::execute_string(const char* command)
 {
     // We use Py_file_input here, instead of Py_single_input, because
     // Py_single_input spews errors on blank lines.  However, the
@@ -681,38 +725,33 @@ void PythonEval::execute_string(const char* command)
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
 
+    // Check for error before collecting the result.
+    throw_on_error();
+
+    std::string retval;
     if (pyResult)
+    {
+        PyObject* obrep = PyObject_Repr(pyResult);
+#if PY_MAJOR_VERSION < 3
+        retval = PyString_AsString(obrep);
+#else
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(obrep))
+        {
+            pyStr = PyUnicode_AsEncodedString(obrep, "UTF-8", "strict");
+            Py_DECREF(obrep);
+            obrep = pyStr;
+        }
+        retval = PyBytes_AS_STRING(obrep);
+#endif
+        Py_DECREF(obrep);
         Py_DECREF(pyResult);
+    }
 
     PyObject *f = PySys_GetObject((char *) "stdout");
     if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
-}
 
-int PythonEval::argument_count(PyObject* pyFunction)
-{
-    PyObject* pyFunctionCode;
-    PyObject* pyArgumentCount;
-    int argumentCount;
-
-    // Get the 'function.func_code.co_argcount' Python internal attribute.
-    pyFunctionCode = PyObject_GetAttrString(pyFunction, "__code__");
-    if (pyFunctionCode) {
-        pyArgumentCount = PyObject_GetAttrString(pyFunctionCode, "co_argcount");
-        if (pyArgumentCount) {
-            argumentCount = PyLong_AsLong(pyArgumentCount);
-        }  else {
-            Py_DECREF(pyFunctionCode);
-            return MISSING_FUNC_CODE;
-        }
-    } else {
-        return MISSING_FUNC_CODE;
-    }
-
-    // Cleanup the reference counts.
-    Py_DECREF(pyFunctionCode);
-    Py_DECREF(pyArgumentCount);
-
-    return argumentCount;
+    return retval;
 }
 
 /**
@@ -839,9 +878,10 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     if (!pyUserFunc) {
         if(pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
+        const char * moduleName = PyModule_GetName(pyModule);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found!",
-            moduleFunction.c_str());
+            "Python function '%s' not found in module '%s'!",
+            moduleFunction.c_str(), moduleName);
     }
 
     // Promote the borrowed reference for pyUserFunc since it will
@@ -858,16 +898,6 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
             "Python function '%s' not callable!", moduleFunction.c_str());
     }
 
-    // Get the expected argument count.
-    int expectedArgumentCount = this->argument_count(pyUserFunc);
-    if (expectedArgumentCount == MISSING_FUNC_CODE) {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str());
-    }
-
     // Get the actual argument count, passed in the ListLink.
     if (arguments->get_type() != LIST_LINK) {
         Py_DECREF(pyUserFunc);
@@ -875,20 +905,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-
-    // Now make sure the expected count matches the actual argument count.
     int actualArgumentCount = arguments->get_arity();
-    // If this is really a method, it has 'self' argument, which is passed automatically
-    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
-    if (expectedArgumentCount != actualArgumentCount) {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' which expects '%d arguments,"
-            " called with %d arguments!", moduleFunction.c_str(),
-            expectedArgumentCount, actualArgumentCount);
-    }
-
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
@@ -899,8 +916,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     {
         // Place a Python atom object for this handle into the tuple.
 
-        long int patom = (long int) &h;
-        PyObject* pyAtom = py_atom(patom, pyAtomSpace);
+        PyObject* pyAtom = py_atom(h, pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
@@ -924,8 +940,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     if (PyErr_Occurred())
     {
         // Construct the error message and throw an exception.
-        std::string errorString;
-        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        std::string errorString =
+            build_python_error_message(moduleFunction);
+        PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
@@ -1057,10 +1074,9 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject *pyError, *pyModule, *pyObject, *pyUserFunc;
+    PyObject *pyModule, *pyObject, *pyUserFunc;
     PyObject *pyDict;
     std::string functionName;
-    std::string errorString;
 
     // Grab the GIL.
     PyGILState_STATE gstate;
@@ -1103,7 +1119,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
-    // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
+    // PyObject_GetAttrString already returns new reference, so we
+    // do this only for PyDict_GetItemString().
     if(nullptr == pyObject) Py_INCREF(pyUserFunc);
     if(pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
@@ -1114,30 +1131,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not callable!", moduleFunction.c_str());
-    }
-
-    // Get the expected argument count.
-    int expectedArgumentCount = this->argument_count(pyUserFunc);
-    // If this is really a method, it has 'self' argument, which is passed automatically
-    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
-    if (expectedArgumentCount == MISSING_FUNC_CODE)
-    {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str());
-    }
-
-    // Make sure the argument count is 1 (just the atomspace)
-    if (1 != expectedArgumentCount)
-    {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' which expects '%d arguments,"
-            " should have one atomspace argument!",
-            moduleFunction.c_str(), expectedArgumentCount);
     }
 
     // Create the Python tuple for the function call with python
@@ -1159,16 +1152,14 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     Py_DECREF(pyArguments);
 
     // Check for errors.
-    pyError = PyErr_Occurred();
-    if (pyError)
+    if (PyErr_Occurred())
     {
         // Construct the error message and throw an exception.
-        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        std::string errorString =
+            build_python_error_message(moduleFunction);
+        PyErr_Clear();
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
 
     // Release the GIL. No Python API allowed beyond this point.
@@ -1182,32 +1173,25 @@ std::string PythonEval::apply_script(const std::string& script)
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
+    throw_on_error();
+
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
-    this->execute_string(script.c_str());
+    std::string rc = execute_string(script.c_str());
 
-    bool errorRunningScript = false;
-    std::string errorString;
-
-    // Check for errors in the script.
-    if (PyErr_Occurred())
-    {
-        // Remember the error and get the error string for the throw below.
-        errorRunningScript = true;
-        this->build_python_error_message(NO_FUNCTION_NAME, errorString);
-    }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-
-    // If there was an error, throw an exception so the user knows the
-    // script had a problem.
-    if (errorRunningScript)
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-    return "";
+    throw_on_error();
+    return rc;
 }
 
 void PythonEval::add_to_sys_path(std::string path)
@@ -1461,6 +1445,8 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 void PythonEval::begin_eval()
 {
     _eval_done = false;
+    _caught_error = false;
+    _pending_input = false;
     _result = "";
 }
 
@@ -1538,20 +1524,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
-    // This is the cogserver shell-freindly evaluator. We must
-    // stop all exceptions thrown in other layers, or else we
-    // will crash the cogserver. Pass the exception message to
-    // the user, who can read and contemplate it: it is almost
-    // surely a syntax error in the python code.
-    try
-    {
-        this->apply_script(_input_line);
-    }
-    catch (const RuntimeException &e)
-    {
-        _result += e.get_message();
-        _result += "\n";
-    }
+    _result = apply_script(_input_line);
+
     _input_line = "";
     _paren_count = 0;
     _pending_input = false;
@@ -1563,6 +1537,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     return;
 
 wait_for_more:
+    _caught_error = false;
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;

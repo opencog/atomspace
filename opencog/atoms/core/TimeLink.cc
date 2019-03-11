@@ -59,7 +59,7 @@ TimeLink::TimeLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-ValuePtr TimeLink::execute() const
+ValuePtr TimeLink::execute(AtomSpace* as, bool silent)
 {
 	// time_t now = time(nullptr);
 	struct timeval tv;

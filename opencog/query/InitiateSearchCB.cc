@@ -27,11 +27,11 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
+#include "Substitutor.h"
 
 using namespace opencog;
 
@@ -47,10 +47,6 @@ using namespace opencog;
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_nameserver(nameserver())
 {
-#ifdef CACHED_IMPLICATOR
-	InitiateSearchCB::clear();
-	InitiateSearchCB::ready(as);
-#else
 	_variables = nullptr;
 	_pattern = nullptr;
 	_dynamic = nullptr;
@@ -63,31 +59,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_choices.clear();
  	_search_fail = false;
 	_as = as;
-#endif
 }
-
-#ifdef CACHED_IMPLICATOR
-void InitiateSearchCB::ready(AtomSpace* as)
-{
-	_as = as;
-}
-
-void InitiateSearchCB::clear()
-{
-	_variables = nullptr;
-	_pattern = nullptr;
-	_dynamic = nullptr;
-	_pl = nullptr;
-
-	_root = Handle::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
-
-	_curr_clause = 0;
-	_choices.clear();
- 	_search_fail = false;
-	_as = nullptr;
-}
-#endif
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)

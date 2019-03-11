@@ -22,10 +22,9 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"
@@ -36,14 +35,30 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
+ForwardChainer::ForwardChainer(AtomSpace& kb_as,
+                               AtomSpace& rb_as,
+                               const Handle& rbs,
                                const Handle& source,
                                const Handle& vardecl,
-                               const HandleSeq& focus_set,
-                               source_selection_mode sm)
-	: _as(as), _config(as, rbs), _sources(_config, source, vardecl), _fcstat(as)
+                               const HandleSeq& focus_set)
+	: _kb_as(kb_as),
+	  _rb_as(rb_as),
+	  _config(rb_as, rbs),
+	  _sources(_config, source, vardecl),
+	  _fcstat(kb_as)
 {
 	init(source, vardecl, focus_set);
+}
+
+ForwardChainer::ForwardChainer(AtomSpace& kb_as,
+                               const Handle& rbs,
+                               const Handle& source,
+                               const Handle& vardecl,
+                               const HandleSeq& focus_set)
+	: ForwardChainer(kb_as,
+	                 rbs->getAtomSpace() ? *rbs->getAtomSpace() : kb_as,
+	                 rbs, source, vardecl, focus_set)
+{
 }
 
 ForwardChainer::~ForwardChainer()
@@ -189,7 +204,7 @@ void ForwardChainer::apply_all_rules()
 
 		// Update
 		_fcstat.add_inference_record(_iteration,
-		                             _as.add_node(CONCEPT_NODE, "dummy-source"),
+		                             _kb_as.add_node(CONCEPT_NODE, "dummy-source"),
 		                             rule, uhs);
 	}
 }
@@ -249,7 +264,7 @@ RuleSet ForwardChainer::get_valid_rules(const Source& source)
 		if (rule.is_meta())
 			continue;
 
-		const AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
+		const AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _kb_as);
 		RuleTypedSubstitutionMap urm =
 			rule.unify_source(source.body, source.vardecl, &ref_as);
 		RuleSet unified_rules = Rule::strip_typed_substitution(urm);
@@ -358,7 +373,7 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 	// Wrap in try/catch in case the pattern matcher can't handle it
 	try
 	{
-		AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
+		AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _kb_as);
 		AtomSpace derived_rule_as(&ref_as);
 		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
 
@@ -370,15 +385,18 @@ HandleSet ForwardChainer::apply_rule(const Rule& rule)
 			// never be able to find this new undesired atom created
 			// from partial grounding.
 			BindLinkPtr bl = BindLinkCast(rhcpy);
-			FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+			FocusSetPMCB fs_pmcb(&derived_rule_as, &_kb_as);
 			fs_pmcb.implicand = bl->get_implicand();
-			bl->imply(fs_pmcb, &_focus_set_as, false);
-			add_results(_focus_set_as, fs_pmcb.get_result_list());
+			bl->satisfy(fs_pmcb);
+			HandleSeq rslts;
+			for (const ValuePtr& v: fs_pmcb.get_result_set())
+				rslts.push_back(HandleCast(v));
+			add_results(_focus_set_as, rslts);
 		}
 		// Search the whole atomspace.
 		else {
-			Handle h = bindlink(&_as, rhcpy);
-			add_results(_as, h->getOutgoingSet());
+			Handle h = HandleCast(rhcpy->execute(&_kb_as));
+			add_results(_kb_as, h->getOutgoingSet());
 		}
 	}
 	catch (...) {}
@@ -399,7 +417,7 @@ void ForwardChainer::expand_meta_rules()
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	size_t rules_size = _rules.size();
-	_rules.expand_meta_rules(_as);
+	_rules.expand_meta_rules(_kb_as);
 
 	if (rules_size != _rules.size()) {
 		ure_logger().debug() << "The rule set has gone from "

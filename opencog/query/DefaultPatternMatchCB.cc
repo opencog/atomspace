@@ -21,14 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atomutils/FindUtils.h>
-
-#include <opencog/util/algorithm.h>
 
 #include "DefaultPatternMatchCB.h"
 
@@ -147,34 +146,6 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	// Delete the instantiator.
 	delete _instor;
 }
-
-#ifdef CACHED_IMPLICATOR
-void DefaultPatternMatchCB::ready(AtomSpace* as)
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor->ready(_temp_aspace);
-
-	_as = as;
-}
-
-void DefaultPatternMatchCB::clear()
-{
-	_vars = nullptr;
-	_dynamic = nullptr;
-	_have_evaluatables = false;
-	_globs = nullptr;
-
-	_have_variables = false;
-	_pattern_body = Handle::UNDEFINED;
-
-	release_transient_atomspace(_temp_aspace);
-	_temp_aspace = nullptr;
-	_instor->clear();
-
-	_optionals_present = false;
-	_as = nullptr;
-}
-#endif
 
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
@@ -300,8 +271,11 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 		//     if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
 		// because that prevents searches for narrowly-typed grounds
 		// (as is done in the ForwardChainerUTest, see bug #934)
+		// Alternately, a single variable can match an entire
+		// VariableList (per bug #2070).
 		if (*_pat_bound_vars != *_gnd_bound_vars
-		    and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
+		      and not _pat_bound_vars->is_type(VARIABLE_LIST)
+		      and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
 		{
 			_pat_bound_vars = nullptr;
 			_gnd_bound_vars = nullptr;
@@ -686,7 +660,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 /* ======================================================== */
 
 /**
- * This implements the evaluation of a classical boolean-logic
+ * This implements the evaluation of a classical binary-logic
  * "sentence": a well-formed formula with no free variables,
  * having a crisp true/false truth value.  Here, "top" holds
  * the sentence (with variables), 'gnds' holds the bindings of
@@ -710,9 +684,6 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	            top->to_short_string().c_str());
 
 	const HandleSeq& oset = top->getOutgoingSet();
-	if (0 == oset.size())
-		throw InvalidParamException(TRACE_INFO,
-		   "Expecting logical connective to have at least one child!");
 
 	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
@@ -799,8 +770,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	// If we are here, then what we have is some atom that is not
 	// normally "truth-valued". We can do one of three things:
 	// a) Throw an exception and complain.
-	// b) Invent a new link type: GetTruthValueLink, that 'returns'
-	//    the TV of the atom that it wraps.
+	// b) Tell user that they must use the TruthValueOfLink, which
+	//   'returns' the TV of the atom that it wraps.
 	// c) Do the above, without inventing a new link type.
 	// The below implements choice (c): i.e. it gets the TV of this
 	// atom, and checks to see if it is greater than 0.5 or not.

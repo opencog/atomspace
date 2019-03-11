@@ -1,12 +1,11 @@
 import os
+import unittest
 from unittest import TestCase
 from opencog.scheme_wrapper import scheme_eval
 from opencog.atomspace import TruthValue
-from opencog.backwardchainer import BackwardChainer
+from opencog.ure import BackwardChainer
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog
-from opencog.scheme_wrapper import load_scm
-import opencog.logger
+from opencog.utilities import initialize_opencog, finalize_opencog
 import __main__
 
 
@@ -14,10 +13,11 @@ def run_predicate(a, b):
     print(a.name)
     print(b.name)
     if a.name == "Item0" and b.name == "large":
-    	return TruthValue(0.8, 1.0)
+        return TruthValue(0.8, 1.0)
     if a.name == "Item1" and b.name == "small":
-    	return TruthValue(0.8, 1.0)
+        return TruthValue(0.8, 1.0)
     return TruthValue(0.2, 0.8)
+
 
 __main__.run_predicate = run_predicate
 
@@ -27,41 +27,75 @@ class BCTest(TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
+
+    def tearDown(self):
+        finalize_opencog()
+        del self.atomspace
+
+    def init(self):
+        project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
+        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(project_source_dir))
+        scheme_eval(self.atomspace,
+                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "tests/rule-engine/backwardchainer/scm"))
+
+    def test_bc_deduction(self):
+        """port of crisp.scm from examples/rule-engine/simple"""
+
+        print ("Enter test_bc_deduction")
+        self.init()
+
+        print ("test_bc_deduction: pre scheme eval")
         scheme_eval(self.atomspace, '(use-modules (opencog))')
         scheme_eval(self.atomspace, '(use-modules (opencog exec))')
-        scheme_eval(self.atomspace, '(use-modules (opencog query))')
-        scheme_eval(self.atomspace, '(use-modules (opencog logger))')
         scheme_eval(self.atomspace, '(use-modules (opencog rule-engine))')
-        scm_dir = os.environ["SCM_DIR"]
-        scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
+        print ("test_bc_deduction: pre scheme load")
+        scheme_eval(self.atomspace, '(load-from-path "bc-deduction-config.scm")')
+        print ("test_bc_deduction: post scheme load")
 
-    def test_crisp(self):
-        """port of crisp.scm from examples/rule-engine/simple"""
-        scheme_eval(self.atomspace, '(load-from-path "crisp-config.scm")')
-        A = PredicateNode("A", TruthValue(1, 1))
-        B = PredicateNode("B")
-        C = PredicateNode("C")
-        AB = ImplicationLink(A, B)
+        A = ConceptNode("A", TruthValue(1, 1))
+        B = ConceptNode("B")
+        C = ConceptNode("C")
+        AB = InheritanceLink(A, B)
         AB.tv = TruthValue(1, 1)
-        BC = ImplicationLink(B, C)
+        BC = InheritanceLink(B, C)
         BC.tv = TruthValue(1, 1)
         crisprbs = ConceptNode("crisp-rule-base")
-        InheritanceLink(crisprbs, ConceptNode("URE"))
-        trace_as = AtomSpace()
-        scheme_eval(self.atomspace, '(crisp-fc (ImplicationLink (stv 1 1) (PredicateNode "A") (PredicateNode "B")))')
-        chainer = BackwardChainer(self.atomspace, crisprbs, C)
+        # InheritanceLink(crisprbs, ConceptNode("URE"))
+        print ("test_bc_deduction: pre backchain ctor")
+        chainer = BackwardChainer(self.atomspace,
+                                  ConceptNode("URE"),
+                                  InheritanceLink(VariableNode("$who"), C),
+                                  TypedVariableLink(VariableNode("$who"), TypeNode("ConceptNode")))
+
+        scheme_eval(self.atomspace, '(gc)')
+        print ("test_bc_deduction: post backchain ctor")
         chainer.do_chain()
+        print ("test_bc_deduction: post chaining")
+        scheme_eval(self.atomspace, '(gc)')
         results = chainer.get_results()
-        self.assertTrue(results.get_out()[0].name == "C")
-        self.assertTrue(results.get_out()[0].tv == AB.tv)
+        print ("test_bc_deduction: post results")
+        scheme_eval(self.atomspace, '(gc)')
+        resultAC = None
+        for result in results.get_out():
+            if result.get_out()[0].name == "A":
+                resultAC = result
+                break
+        self.assertTrue(resultAC is not None)
+        self.assertTrue(resultAC.tv == AB.tv)
+        self.assertEquals("A", resultAC.get_out()[0].name)
+        self.assertEquals("C", resultAC.get_out()[1].name)
+        del chainer
 
     def test_conjunction_fuzzy_with_virtual_evaluation(self):
         """Test for correct vardecl parameter initialization in BackwardChainer
 
-	vardecl = VariableList() would cause empty set as backward chaining result
+        vardecl = VariableList() would cause empty set as backward chaining result
         vardecl = UNDEFINED should produce two results: (Item0, large), (Item1, small)
-	"""
-        scheme_eval(self.atomspace, '(load-from-path "conjunction-rule-base-config.scm")')
+        """
+
+        self.init()
+
+        scheme_eval(self.atomspace, '(load-from-path "fuzzy-conjunction-introduction-config.scm")')
         rbs = ConceptNode("conjunction-rule-base")
 
         item0 = ConceptNode("Item0")
@@ -83,3 +117,9 @@ class BCTest(TestCase):
         bc.do_chain()
         results = bc.get_results()
         self.assertTrue(len(results.get_out()) == 2)
+        del bc
+
+
+if __name__ == '__main__':
+    os.environ["PROJECT_SOURCE_DIR"] = "../../.."
+    unittest.main()

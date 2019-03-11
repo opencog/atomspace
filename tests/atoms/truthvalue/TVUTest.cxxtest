@@ -1,0 +1,84 @@
+/*
+ * tests/atoms/truthvalue/TVUTest.cxxtest
+ *
+ * Copyright (C) 2019 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class TVUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	TVUTest(void);
+
+	void test_guile();
+};
+
+TVUTest::TVUTest(void)
+{
+	logger().set_level(Logger::INFO);
+	logger().set_print_to_stdout_flag(true);
+}
+
+// ====================================================================
+// Make sure the scheme bindings work.
+void TVUTest::test_guile()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(&_as);
+	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	std::string rv = eval.eval("(use-modules (opencog))");
+	TS_ASSERT(not eval.eval_error());
+	printf("Result from use-modules is %s\n", rv.c_str());
+	rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-test.scm\")");
+	TS_ASSERT(not eval.input_pending());
+	TS_ASSERT(not eval.eval_error());
+	printf("Result from loading is %s\n", rv.c_str());
+	rv = eval.eval("(getenv \"LTDL_LIBRARY_PATH\")");
+	printf("The libtool path is %s\n", rv.c_str());
+	rv = eval.eval("(getenv \"LD_LIBRARY_PATH\")");
+	printf("The loader path is %s\n", rv.c_str());
+
+	TruthValuePtr tva = eval.eval_tv("(cog-tv (Concept \"aaa\"))");
+	TS_ASSERT(tva != nullptr);
+	printf("     got: %s ", tva->to_string().c_str());
+	printf("expected SimpleTruthValue\n");
+	TS_ASSERT(tva->get_type() == SIMPLE_TRUTH_VALUE);
+
+	TruthValuePtr tvb = eval.eval_tv("(cog-tv (Concept \"bbb\"))");
+	TS_ASSERT(tvb != nullptr);
+	printf("     got: %s ", tvb->to_string().c_str());
+	printf("expected CountTruthValue\n");
+	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

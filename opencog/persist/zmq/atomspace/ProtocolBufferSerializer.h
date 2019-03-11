@@ -31,7 +31,6 @@
 #include <string>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
@@ -52,18 +51,6 @@ namespace opencog {
 class ProtocolBufferSerializer {
     static void deserializeAtom(const ZMQAtomMessage& atomMessage, Atom& atom);
 //    static void serializeAtom(Atom& atom, ZMQAtomMessage* atomMessage);
-
-//    static void deserializeAttentionValue(
-//            const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-//            AttentionValue& av);
-//    static void serializeAttentionValue(
-//            AttentionValue& av, ZMQAttentionValueHolderMessage* attentionValueHolderMessage);
-//    static void deserializeAttentionValueHolder(
-//            const ZMQAttentionValueHolderMessage& attentionValueHolderMessage,
-//            AttentionValueHolder& attentionValueHolder);
-//    static void serializeAttentionValueHolder(
-//            AttentionValueHolder& attentionValueHolder,
-//            ZMQAttentionValueHolderMessage *attentionValueHolderMessage);
 
     static NodePtr deserializeNode(const ZMQAtomMessage& atomMessage);
     static LinkPtr deserializeLink(const ZMQAtomMessage& atomMessage);

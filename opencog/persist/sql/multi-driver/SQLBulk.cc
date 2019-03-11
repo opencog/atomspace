@@ -309,4 +309,14 @@ void SQLAtomStorage::store(const AtomTable &table)
 		(unsigned long) _store_count, (int) secs, (int) rate);
 }
 
+void SQLAtomStorage::storeAtomSpace(AtomSpace* atomspace)
+{
+	store(atomspace->get_atomtable());
+}
+
+void SQLAtomStorage::loadAtomSpace(AtomSpace* atomspace)
+{
+	load(atomspace->get_atomtable());
+}
+
 /* ============================= END OF FILE ================= */

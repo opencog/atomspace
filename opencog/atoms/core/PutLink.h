@@ -36,9 +36,9 @@ namespace opencog
  * version of MemberLink, with arguments reversed.
  *
  * A beta redex is a concatentation or composition of a combinator, and
- * a list of values.  Typically, the combinator will be a LambdaLink,
+ * a list of arguments.  Typically, the combinator will be a LambdaLink,
  * typically with N declared variables in it. To go with it, the PutLink
- * expects a list of N values to be plugged in for these variables.
+ * expects a list of N arguments to be plugged in for these variables.
  * Thus, for example:
  * (Put (Lambda (Variable "x") ...stuff...) (Concept "foo"))
  * when reduced, will plug "foo" into ...stuff...
@@ -51,7 +51,7 @@ namespace opencog
  * (Put (Plus (Number 6) (Number 8)) (List (Number 5) (Number 9)))
  *
  * The natural form for a beta redex is in the unreduced
- * form: the values are not (yet) substituted for the variables; they
+ * form: the arguments are not (yet) substituted for the variables; they
  * are simply sitting there, ready and waiting for that reduction to
  * happen.
  *
@@ -67,17 +67,17 @@ namespace opencog
  * them, and then wrap the answers back up with a SetLink.
  *
  * Another "enhancement" is that when there are N>1 variables, the
- * values must be wrapped in a ListLink, to be consistent with other
+ * arguments must be wrapped in a ListLink, to be consistent with other
  * parts of atomese. However, for N=1, the ListLink is optional.
  */
 class PutLink : public PrenexLink
 {
 protected:
-	/// The values that are to be placed into the body.
-	Handle _values;
+	/// The arguments that are to be placed into the body.
+	Handle _arguments;
 
 	void init(void);
-	void static_typecheck_values(void);
+	void static_typecheck_arguments(void);
 
 	Handle do_reduce(void) const;
 
@@ -86,8 +86,8 @@ public:
 	PutLink(const Link& l);
 	virtual ~PutLink() {}
 
-	// PutLink values may be e second or the third outset elt.
-	Handle get_values() { return _values; }
+	// PutLink arguments may be the second or the third outgoing-set elt.
+	Handle get_arguments() { return _arguments; }
 	virtual Handle reduce(void);
 
 	static Handle factory(const Handle&);

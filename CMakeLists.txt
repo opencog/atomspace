@@ -51,75 +51,6 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
-IF (CMAKE_COMPILER_IS_GNUCXX)
-	# version 5.0 of gcc is required for passing non-trivially
-	# copyable class via C varargs
-
-	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
-	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-
-	IF (APPLE)
-		CMAKE_POLICY(SET CMP0042 NEW)  # Something about MACOSX_RPATH
-
-		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
-		SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-		SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
-		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-		# Vital to do this otherwise unresolved symbols everywhere:
-		SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-
-		# The Apple linker does not support the --no-as-needed flag.
-		SET(NO_AS_NEEDED "")
-
-	ELSE (APPLE)
-		SET(CMAKE_C_FLAGS "-Wall -fPIC")
-		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
-		SET(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3 -fstack-protector")
-		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-		# -flto is good for performance, but wow is it slow to link...
-		# XXX disable for now ... its just to painful, in daily life.
-		# ... except that the buildbot needs this, to pass unit tests.
-		# Current failure is in libatomcore, which depends on atomutils
-		# (ldd -r libatomcore.so shows unresolved symbols.)
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
-
-		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
-		LINK_LIBRARIES(pthread)
-
-		# Workaround for circular dependencies problem. This causes
-		# LINK_LIBRARIES to appear twice in the linker line; the
-		# second appearance has the effect of resolving any circular
-		# dependencies left over from the first specification.
-		# See pull request #642 for more discussion.
-		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
-	ENDIF (APPLE)
-
-	# 1) -Wno-variadic-macros is to avoid warnings regarding using
-	# variadic in macro OC_ASSERT (the warning warns that this is only
-	# available from C99, lol!)
-	#
-	# 2) -fopenmp for multithreading support
-	#
-	# 3) -std=gnu++11 for C++11 and GNU extensions support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++11")
-
-	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
-	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
-	SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-
-	# Options for generating gcov code coverage output
-	SET(CMAKE_C_FLAGS_COVERAGE "-O0 -g -fprofile-arcs -ftest-coverage -fno-inline")
-	SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_C_FLAGS_COVERAGE} -fno-default-inline")
-	# Might be needed for some combinations of ln and gcc
-	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		LINK_LIBRARIES(gcov)
-	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-ENDIF (CMAKE_COMPILER_IS_GNUCXX)
-
 # The default case for non-profile builds is to use shared libraries. So don't
 # use explicit SHARED in the ADD_LIBRARY calls in CMakeLists.txt instances or
 # this flag won't work since it only affects the default.
@@ -169,17 +100,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Cogutil
 FIND_PACKAGE(CogUtil CONFIG)
 IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
+	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
 	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
+	SET(HAVE_COGUTIL 1)
 ELSE (COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
 
 # add the 'cmake' directory from cogutil to search path
 list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
-
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
+include(OpenCogGccOptions)
+include(Summary)
 
 # ----------------------------------------------------------
 # Check for boost. We need dynamic-linked, threaded libs by default.
@@ -188,7 +119,7 @@ SET(Boost_USE_MULTITHREADED ON)
 SET(MIN_BOOST 1.46)
 
 # Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS date_time filesystem serialization system thread)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
@@ -249,29 +180,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-
-# ----------------------------------------------------------
-# Optional and obsolete Hypertable library, for atomspace persistence
-
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-	SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
-
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
-
-ELSE (HYPERTABLE_FOUND)
-	# The FindHypertable.cmake file already prints a message.
-	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
-	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
-
-ENDIF (HYPERTABLE_FOUND)
 
 # ----------------------------------------------------------
 # Google Protobuf library
@@ -348,16 +256,32 @@ IF(HAVE_PY_INTERP)
 	FIND_PACKAGE(Cython 0.23.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
-		# Find python destination dir for python bindings because it may
-		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
 
-		# Hack together some reasonable install location.
-		SET(PYTHON_DEST
-			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		# Find python destination dir for python bindings
+		# because it may differ on each operating system.
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
+
+		# Chop off leading /usr
+		STRING(REPLACE "/usr" ${CMAKE_INSTALL_PREFIX} PYTHON_DEST "${PYTHON_DEST}")
+		# Replace new line at end
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+
+		# thunk
+		SET(PYTHON_ROOT "${PYTHON_DEST}")
+		SET(PYTHON_DEST "${PYTHON_DEST}/opencog")
+
 		MESSAGE(STATUS
-			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+			"Python install dir: ${PYTHON_DEST}" )
 
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
@@ -366,14 +290,14 @@ IF(HAVE_PY_INTERP)
 	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	IF (PYTHON3INTERP_FOUND)
+	IF (PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
 	ELSE ()
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
 	IF (NOT NOSETESTS_EXECUTABLE)
-		MESSAGE(STATUS "nosetest not found: needed for python tests")
-	endif ()
+		MESSAGE(STATUS "nosetests not found: needed for python tests")
+	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
 		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
@@ -410,17 +334,17 @@ MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 # ----------------------------------------------------------
 # Mandatory Postgres
 
-FIND_PACKAGE(PGSQL REQUIRED)
+FIND_PACKAGE(PGSQL 9.5 REQUIRED)
 IF (PGSQL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
 	ADD_DEFINITIONS(-DHAVE_PGSQL_STORAGE)
 	SET(HAVE_PGSQL_STORAGE 1)
 	SET(PGSQL_FOUND 1)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was found.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
 ELSE (PGSQL_FOUND)
 	SET(PGSQL_FOUND 0)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
 ENDIF (PGSQL_FOUND)
 MESSAGE(STATUS "${PGSQL_DIR_MESSAGE}")
 
@@ -551,7 +475,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(covtest
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -559,14 +483,19 @@ IF (CXXTEST_FOUND)
 			# -
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			# This script combines the coverage analysis of each test,
-			# then creates html in tests/lcov
-			# Note: this should now be run separately...
-			#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
 			COMMENT "Running tests with coverage..."
 		)
+		ADD_CUSTOM_TARGET(test
+			DEPENDS covtest
+			WORKING_DIRECTORY ./
+			# This script combines the coverage analysis of each test,
+			# then creates html in tests/lcov
+			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
+			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+			COMMENT "Generating lcov report..."
+		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# If this is a build with coverage enabled then test normally
+		# Coverage is disabled; test normally
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
@@ -579,6 +508,11 @@ IF (CXXTEST_FOUND)
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
+	)
+	ADD_CUSTOM_TARGET(test_guile
+		WORKING_DIRECTORY tests/scm
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Guile and Python-bridge tests..."
 	)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
@@ -654,7 +588,7 @@ SET(DEPENDENCY_LIST
 	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
-        "libpq-dev (>=9.3.24)"
+	"libpq-dev (>=9.3.24)"
 	"libcogutil-dev (>= 2.0.2)"
 )
 
@@ -676,7 +610,6 @@ SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
-SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)

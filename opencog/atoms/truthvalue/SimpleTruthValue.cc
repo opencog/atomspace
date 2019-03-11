@@ -24,12 +24,10 @@
  *
  */
 
-#include <math.h>
-#include <typeinfo>
-
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/value/ValueFactory.h>
 #include "SimpleTruthValue.h"
 
 //#define DPRINTF printf
@@ -38,6 +36,12 @@
 using namespace opencog;
 
 count_t SimpleTruthValue::DEFAULT_K = 800.0;
+
+SimpleTruthValue::SimpleTruthValue(const std::vector<double>& v)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
+{
+	_value = v;
+}
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, confidence_t c)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
@@ -85,7 +89,7 @@ count_t SimpleTruthValue::get_count() const
 {
     // Formula from PLN book.
     confidence_t cf = std::min(_value[CONFIDENCE], 0.9999998);
-    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
+    return static_cast<count_t>(DEFAULT_K * cf / (1.0 - cf));
 }
 
 confidence_t SimpleTruthValue::get_confidence() const
@@ -150,3 +154,6 @@ bool SimpleTruthValue::operator==(const Value& rhs) const
         return false;
     return true;
 }
+
+DEFINE_VALUE_FACTORY(SIMPLE_TRUTH_VALUE,
+	createSimpleTruthValue, std::vector<double>)

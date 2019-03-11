@@ -22,10 +22,12 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 #include "imply.h"
 
@@ -63,6 +65,7 @@ public:
 	void test_query_exec(void);
 	void test_clear_box_single_argument(void);
 	void test_clear_box_single_argument_link(void);
+	void test_value(void);
 };
 
 #define an as.add_node
@@ -184,11 +187,7 @@ void ExecutionOutputUTest::test_exec(void)
  * Test execution of variables.
  * During pattern matching, variables can bind to ExecutionOutputLinks
  * If they are then repeated in the implcand, the ExecutionOutputLink
- * must be exeucted there, with the resulting answer returned.
- *
- * Err. XXX maybe. Shouldn't the ExecutionOutputLink be executed when
- * its found??  Well, for now, we're doing what we do here. This may need
- * to change.
+ * must be executed there, with the resulting answer returned.
  */
 void ExecutionOutputUTest::test_varsub(void)
 {
@@ -243,20 +242,20 @@ void ExecutionOutputUTest::test_varsub(void)
 	// Now perform the search.
 	DefaultImplicator simpl(&as);
 	simpl.implicand = situation->get_implicand();
-	situation->imply(simpl, &as);
+	situation->satisfy(simpl);
 
 	// The result_list contains a list of the grounded expressions.
-	Handle res = simpl.get_result_list()[0];
+	Handle res = HandleCast(*simpl.get_result_set().begin());
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
 	// Now perform the search.
 	DefaultImplicator pimpl(&as);
 	pimpl.implicand = predicament->get_implicand();
-	predicament->imply(pimpl, &as);
+	predicament->satisfy(pimpl);
 
 	// The result_list contains a list of the grounded expressions.
-	Handle del = pimpl.get_result_list()[0];
+	Handle del = HandleCast(*pimpl.get_result_set().begin());
 	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 
@@ -274,6 +273,10 @@ void ExecutionOutputUTest::test_query_exec(void)
 
 	Handle exec_query = eval.eval_h("exec-query");
 	Handle results = satisfying_set(&as, exec_query);
+	TS_ASSERT_EQUALS(results->get_arity(), 4);
+
+	exec_query = eval.eval_h("quote-exec-query");
+	results = satisfying_set(&as, exec_query);
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -293,16 +296,18 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
 	Instantiator inst(&as);
-	Handle expected = an(NUMBER_NODE, "42"),
-		result = HandleCast(inst.execute(twice21));
+	Handle expected = an(NUMBER_NODE, "42");
+	Handle result = HandleCast(inst.execute(twice21));
+	result = as.add_atom(result);
 
 	TS_ASSERT_EQUALS(expected, result);
 
 	// should work with variable inside the ListLink too
 
-	Handle N21_LST = al(LIST_LINK, N21),
-	       twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST),
-	       result_lst = HandleCast(inst.execute(twice21_lst));
+	Handle N21_LST = al(LIST_LINK, N21);
+	Handle twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST);
+	Handle result_lst = HandleCast(inst.execute(twice21_lst));
+	result_lst = as.add_atom(result_lst);
 
 	TS_ASSERT_EQUALS(expected, result_lst);
 
@@ -329,6 +334,51 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 		result = HandleCast(inst.execute(exec));
 
 	TS_ASSERT_EQUALS(expected, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ExecutionOutputUTest::test_value(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-gsn.scm\")");
+
+	ValuePtr result = eval.eval_v("(cog-execute! exec-query-handle)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	ValueSeq vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), UNORDERED_LINK);
+
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-link-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), LINK_VALUE);
+
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-string-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+		TS_ASSERT_EQUALS(va->get_type(), STRING_VALUE);
+
+	//------------
+	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
+	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	vals = LinkValueCast(result)->value();
+	TS_ASSERT_EQUALS(vals.size(), 3);
+	for (const ValuePtr& va : vals)
+	{
+		TS_ASSERT_EQUALS(va->get_type(), SIMPLE_TRUTH_VALUE);
+		TruthValuePtr stv = TruthValueCast(va);
+		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
+		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -45,15 +45,19 @@ protected:
 	std::vector<ValuePtr> _value;
 
 public:
-	LinkValue(const std::vector<ValuePtr>& v)
-		: Value(LINK_VALUE), _value(v) {}
+	LinkValue(const ValueSeq& vlist)
+		: Value(LINK_VALUE), _value(vlist) {}
+
+	LinkValue(const ValueSet& vset)
+		: Value(LINK_VALUE)
+	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
 
 	virtual ~LinkValue() {}
 
 	const std::vector<ValuePtr>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent) const;
+	virtual std::string to_string(const std::string& indent = "") const;
 
 	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const Value&) const;

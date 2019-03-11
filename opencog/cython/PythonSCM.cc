@@ -69,6 +69,23 @@ PythonSCM::PythonSCM()
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
+
+	// Tell python where the atomspace python modules are installed.
+	// Without this, one gets the common cryptic error message:
+	//     ImportError: No module named 'opencog'
+	const char* currpath = secure_getenv("PYTHONPATH");
+	if (currpath)
+	{
+		std::string prep = currpath;
+		prep += ":";
+		prep += PYTHON_ROOT;
+		setenv("PYTHONPATH", prep.c_str(), 0);
+	}
+	else
+	{
+		setenv("PYTHONPATH", PYTHON_ROOT, 0);
+	}
+
 	scm_with_guile(init_in_guile, this);
 }
 
@@ -79,7 +96,19 @@ void* PythonSCM::init_in_guile(void* self)
 
 	// Make sure that guile and python are using the same atomspace.
 	// This will avoid assorted confusion.
-	PythonEval::instance(SchemeSmob::ss_get_env_as("python-eval"));
+	AtomSpace* as = SchemeSmob::ss_get_env_as("python-eval");
+	PythonEval& pev = PythonEval::instance(as);
+
+	// This feels hacky, I guess, but I cannot figure out any other
+	// way of telling python which atomspace it is supposed to use
+	// by default.
+	pev.eval("from opencog.atomspace import AtomSpace");
+	pev.eval("from opencog.type_constructors import set_type_ctor_atomspace");
+	char buf[301];
+	snprintf(buf, 300, "set_type_ctor_atomspace(AtomSpace(%ld))\n",
+		(uint64_t) as);
+	pev.eval(buf);
+
 	return NULL;
 }
 

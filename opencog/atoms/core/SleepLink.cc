@@ -69,21 +69,36 @@ SleepLink::SleepLink(const Link &l)
 
 /// Return number of seconds left to sleep.
 /// Normally, this is zero, unless the sleep was interrupted.
-ValuePtr SleepLink::execute() const
+ValuePtr SleepLink::execute(AtomSpace*as, bool silent)
 {
-	Handle time(_outgoing[0]);
-	FunctionLinkPtr flp(FunctionLinkCast(time));
-	if (flp)
-		time = HandleCast(flp->execute());
+	// Try to come up with a number, either from executing, or directly
+	Handle time(_outgoing.at(0));
+	double length = 0.0;
+	if (time->is_executable())
+	{
+		ValuePtr vp = time->execute(as, silent);
+		if (vp->is_atom())
+		{
+			time = HandleCast(vp);
+		}
+		else if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+		{
+			time = nullptr;
+			length = FloatValueCast(vp)->value().at(0);
+		}
+	}
 
-	NumberNodePtr nsle = NumberNodeCast(time);
-	if (nullptr == nsle)
-		throw RuntimeException(TRACE_INFO,
-			"Expecting an NumberNode, got %s",
-				(nullptr == time) ? "<invalid handle>" :
-					nameserver().getTypeName(time->get_type()).c_str());
+	if (time)
+	{
+		NumberNodePtr nsle = NumberNodeCast(time);
+		if (nullptr == nsle)
+			throw RuntimeException(TRACE_INFO,
+				"Expecting a number, got %s",
+					(nullptr == _outgoing.at(0)) ? "<invalid handle>" :
+						_outgoing.at(0)->to_string().c_str());
 
-	double length = nsle->get_value();
+		length = nsle->get_value();
+	}
 	unsigned int secs = floor(length);
 	useconds_t usec = 1000000 * (length - secs);
 	

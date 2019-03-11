@@ -19,7 +19,6 @@ ADD_GUILE_MODULE (FILES
 )
 
 ADD_GUILE_MODULE (FILES
-	opencog/attention-bank.scm
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/logger.scm
@@ -28,6 +27,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/query.scm
 	opencog/rule-engine.scm
 	opencog/test-runner.scm
+	opencog/type-utils.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
@@ -47,14 +47,6 @@ IF (PGSQL_FOUND OR ODBC_FOUND)
 		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (PGSQL_FOUND OR ODBC_FOUND)
-
-# Currently, this is broken, and doesn't work. Don't install it.
-# IF (PGSQL_FOUND)
-# 	ADD_GUILE_MODULE (FILES
-# 		opencog/persist-pgsql.scm
-# 		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
-# 	)
-# ENDIF (PGSQL_FOUND)
 
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES

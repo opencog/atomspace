@@ -1,191 +1,150 @@
 ;
-; Guile assert/retract example.
+; get-put.scm -- The two halves of a query.
 ;
-; The cog-execute! function is used to assert facts, or retract them
-; from the AtomSpace.  The idea of asserting and retracting facts is
-; taken from ProLog, where the system as a whole behave like a database,
-; and there must be a way of adding records, or removing them from the
-; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
-; and the PutLink and DeleteLink provide a way to add and remove
-; statements when they are executed.
+; The BindLink example showed how one can create a query, run it, and
+; simultaneously use the query results to create new data in the
+; AtomSpace. In fact, this process can be split into two: a "Get"
+; part that performs the query, and a "Put" part that performs the
+; graph re-writing.
 ;
-(use-modules (opencog))
-(use-modules (opencog exec))
-(use-modules (opencog query))
+; If BindLink is thought of as logical implication:
+;	 For all x, P(x) implies Q(x)
+; then GetLink is the first half:
+;	 For all x, P(x) implies a set {all x that satisfy P(x)}
+; while PutLink is the second half:
+;	 Create the set {Q(x)} given some other set {x}
+; The PutLink is a form of "beta-reduction" or "substitution" or
+; "pasting": for each `x` in the set {x} it just pastes `x` into `Q(x)`.
+;
+; Every BindLink is equivalent to a Get-Put pair. This example
+; demonstrates this explicitly.
+;
+; Splitting a query into a satisfying set, followed by a beta-reduction
+; can sometimes allow a more flexible approach to managing the
+; knowledgebase. In some sense, Get and Put are opposites: whatever
+; one of them does, the other can undo. In this example, a query is
+; made for P(x) and then Q(x) is created. But one could, instead,
+; create Q(x) first, and then ask for it later. In the language of
+; category theory, Get and Put are adjoint functors.
+;
+(use-modules (opencog) (opencog exec))
 
-; A utility function to print all EvaluationLinks in the AtomSpace.
-(define (show-eval-links)
-	(cog-map-type (lambda (h) (display h) #f) 'EvaluationLink))
+; Place some data into the atomspace. This is the same as in the
+; BindLink example.
+;
+(Evaluation (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
+(Evaluation (Predicate "_obj") (List (Concept "make") (Concept "statue")))
+(Evaluation (Predicate "_obj") (List (Concept "make") (Concept "brick")))
 
-; The EvaluationLink won't be added until this is reduced.
-; When it is reduced, the ListLink will be substitited for the
-; variable $x, creating the fully-assembled EvaluationLink.
-(define to-be-added
-	(PutLink
-		(EvaluationLink
-		    (PredicateNode "some property")
-          (VariableNode "$x"))
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "B-dom-ness"))))
+(Evaluation (Predicate "from") (List (Concept "make") (Concept "clay")))
 
-; Verify that the atomspace contains no EvaluationLinks:
-(show-eval-links)
+; Create a query, an "inner join" of several interesting clauses.
+;
+; This searches for all triples (verb, thing, substance) that
+; simultaneously satisfy two clauses:
+;
+;			_obj(verb, thing) AND from(verb, substance)
+;
+; This is an "inner join" because `verb` must be the same in both
+; clauses.
 
-; Now, actually create the EvaluationLink.
-(cog-execute! to-be-added)
-
-; Take a look again:
-(show-eval-links)
-
-; One way to view the result of having run the PutLink is to
-; use the GetLink with the same pattern.  Thus, the GetLink
-; below has a satisfying set that corresponds to the PutLink
-; above.
-
-(define get-value
+(define get-satisfying-set
 	(GetLink
-		(EvaluationLink
-			(PredicateNode "some property")
-			(VariableNode "$x"))))
+		(VariableList	; Variable declaration (optional)
+			(Variable "$verb")
+			(Variable "$var0")
+			(Variable "$var1")
+		)
 
-; The cog-execute! function will return the value(s) that
-; the GetLink finds.  If only one value satsifies the query, then
-; that is returned. Else a SetLink is returned. Equivalently,
-; the cog-execute! function will do the same thing.
-(cog-execute! get-value)
-(cog-execute! get-value)
-
-; The PutLink below causes the put-link above to be un-done.
-; It explicitly specifies the same parts as were specified above,
-; but when these are assembled, it causes the DeleteLink to
-; run and remove them.  That is, it is impossible to insert
-; a DeleteLink into the atomspace, if it does not have any
-; variables in it. Attempting such an insertion will cause the
-; body of the DeleteLink to be removed.
-(define remove-thing-ab
-	(PutLink
-		(DeleteLink
+		; The distinct clauses are wrapped by an AndLink.
+		(AndLink
+			; Look for _obj($verb, $var0)
+			(Evaluation
+				(Predicate "_obj")
+				(ListLink
+					(Variable "$verb") ; This will match: (Concept "make")
+					(Variable "$var0") ; This will match: (Concept "pottery")
+				)
+			)
+			; Look for from($verb, $var1)
 			(EvaluationLink
-				(PredicateNode "some property")
-				(VariableNode "$x")))
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "B-dom-ness"))))
+				(Predicate "from")
+				(ListLink
+					(Variable "$verb") ; This will match: (Concept "make")
+					(Variable "$var1") ; This will match: (Concept "clay")
+				)
+			)
+		)
+	)
+)
 
-; Force its removal.
-(cog-execute! remove-thing-ab)
+; Run the pattern-matcher. This matches both required clauses,
+; and creates a set of all matching results.
+(cog-execute! get-satisfying-set)
 
-; Look for it; it should be absent.
-(cog-execute! get-value)
-; Double-check it's absence.
-(show-eval-links)
+; Optional: save the results from the query in a scheme variable.
+; In general, this is discouraged; however, it will make this example
+; easier to understand (we hope!)
 
-; Add it back in:
-(cog-execute! to-be-added)
-(cog-execute! get-value)
+(define the-sat-set (cog-execute! get-satisfying-set))
 
-; ... and so on. We can now continue to remove it and add it
-; back in repeatedly.
-(cog-execute! remove-thing-ab)
-(cog-execute! get-value)
-(cog-execute! to-be-added)
-(cog-execute! get-value)
+: The above is just a big SetLink containing all of the results of
+; the search.
 
-
-; It is also useful to generically remove any atom matching
-; a pattern description. This can be done by combining the
-; PutLink with a GetLink performing a query. The below uses
-; the GetLink to find groundings for the variable $x, and then
-; passes those groundings to the PutLink/DeleteLink combination,
-; which removes them.
-;
-(define remove-some-property
+; Define a beta-reduction.
+(define reduction-rule
 	(PutLink
-		(DeleteLink
-			(EvaluationLink
-				(PredicateNode "some property")
-				(VariableNode "$x")))
-		(GetLink
-			(EvaluationLink
-				(PredicateNode "some property")
-				(VariableNode "$x")))))
+		; A variable declaration is mandatory, whenever there are
+		; more than one variables. It is required, so that one can
+		; know the order (the sequence) of the variables. If there
+		; is only one variable, it does not need to be declared.
+		(VariableList
+			(Variable "$verb")
+			(Variable "$var0")
+			(Variable "$var1"))
 
-; Now, remove the EvaluationLink
-(cog-execute! remove-some-property)
-(cog-execute! get-value)
+		; The "output" of the re-write; the `Q(x)` part of the
+		; implication.
+		(Evaluation
+			(Predicate "make_from")
+			(List (Variable "$var0") (Variable "$var1")))
 
-; We can now add and remove over and over:
-(cog-execute! to-be-added)
-(cog-execute! get-value)
+		; The "input" to the re-write; some set of `x`'s that will
+		; be pasted into `Q(x)`. This is just the SetLink computed
+		; earlier.
+		the-sat-set
+	))
 
-(cog-execute! remove-some-property)
-(cog-execute! get-value)
+; Now, run the reduction rule.
+(cog-execute! reduction-rule)
 
-; And do it again, for good luck:
-(cog-execute! to-be-added)
-(cog-execute! get-value)
-(cog-execute! remove-some-property)
-(cog-execute! get-value)
-
-
-; ------------------------------------------------
-; The simplest way to combine Delete/Get/Put to maintain state is to
-; use the StateLink.  StateLinks do not even have to be executed;
-; simply using them changes the state. See state.scm for details.
+; There is no need to cache the intermediate values returned by GetLink.
+; They can be piped, dynamically, on-the-fly, to the PutLink.  This
+; looks almost identical to the above PutLink, except that the "input"
+; is not a SetLink, its a GetLink.
 ;
-; Thus for example:
-
-(StateLink
-	(PredicateNode "some property")
-	(ListLink
-		(ConceptNode "thing A")
-		(ConceptNode "alternative B")))
-
-(define get-state
-	(GetLink
-		(StateLink
-			(PredicateNode "some property")
-			(VariableNode "$x"))))
-
-(cog-execute! get-state)
-
-(StateLink
-	(PredicateNode "some property")
-	(ListLink
-		(ConceptNode "thing A")
-		(ConceptNode "The V alternative")))
-
-(cog-execute! get-state)
-
-(StateLink
-	(PredicateNode "some property")
-	(ListLink
-		(ConceptNode "thing A")
-		(ConceptNode "first alternative again")))
-
-(cog-execute! get-state)
-
-; ... and so on, ad infinitum
-
-; ------------------------------------------------
-; DefineLink can be used to specify the body of a PutLink.
-; Thus, for example:
-
-(DefineLink
-	(DefinedSchemaNode "colored things")
-	(LambdaLink
-		(InheritanceLink
-			(ConceptNode "color")
-			(VariableNode "$yyy"))))
-
-(cog-execute!
+(define find-and-rewrite-rule
 	(PutLink
-		(DefinedSchemaNode "colored things")
-		(ConceptNode "green")))
 
-; Will cause the following to be created:
-;
-; (InheritanceLink
-;    (ConceptNode "color")
-;    (ConceptNode "green"))
+		; Using a dollar sign in variables is just a goofy convention.
+		; There is no technical need to stick to that convention.
+		(VariableList
+			(Variable "verb")
+			(Variable "thing")
+			(Variable "stuff"))
+
+		(Evaluation
+			(Predicate "make_from")
+			(List (Variable "thing") (Variable "stuff")))
+
+		; The is the GetLink, defined earlier.
+		get-satisfying-set
+	))
+
+; Now, run the combined Get-Put structure:
+(cog-execute! find-and-rewrite-rule)
+
+; The results reported by this rule are *identical* to the results
+; that the BindLink rule, from the BindLink example would report.
+; This Get-Put combination behaves in an identical fashion to a
+; single BindLink.  It just split up the operation into parts.

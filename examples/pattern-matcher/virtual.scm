@@ -1,5 +1,5 @@
 ;
-; Demo illustrating the internal workings of virtual links.
+; virtual.scm --  Demo the internal workings of virtual links.
 ;
 ; Virtual links are links that are not stored as data in the atomspace,
 ; but are instead evaluated "on the fly", as needed.  An example of
@@ -19,8 +19,8 @@
 ; such that $y < $x (the city is larger than the country)
 ;
 ; In the above, one graph component is the set of assertions about
-; cities and thier population. The other graph component is the set of
-; assertions about countries and thier populations.  These two sets
+; cities and their population. The other graph component is the set of
+; assertions about countries and their populations.  These two sets
 ; must then be pair-wise compared.
 ;
 ; There are similar queries which do not split into disconnected
@@ -39,25 +39,25 @@
 (use-modules (opencog exec))
 
 ; Define three cities
-(Evaluation (Predicate "phone") (ListLink (Concept "Paris") (Number 10)))
-(Evaluation (Predicate "pop") (ListLink (Concept "Paris") (Number 5)))
-(Evaluation (Predicate "org") (ListLink (Concept "Paris") (Concept "city")))
+(Evaluation (Predicate "phone") (List (Concept "Paris") (Number 10)))
+(Evaluation (Predicate "pop") (List (Concept "Paris") (Number 5)))
+(Evaluation (Predicate "org") (List (Concept "Paris") (Concept "city")))
 
-(Evaluation (Predicate "phone") (ListLink (Concept "Berlin") (Number 10)))
-(Evaluation (Predicate "pop") (ListLink (Concept "Berlin") (Number 15)))
-(Evaluation (Predicate "org") (ListLink (Concept "Berlin") (Concept "city")))
+(Evaluation (Predicate "phone") (List (Concept "Berlin") (Number 10)))
+(Evaluation (Predicate "pop") (List (Concept "Berlin") (Number 15)))
+(Evaluation (Predicate "org") (List (Concept "Berlin") (Concept "city")))
 
-(Evaluation (Predicate "phone") (ListLink (Concept "Hong Kong") (Number 10)))
-(Evaluation (Predicate "pop") (ListLink (Concept "Hong Kong") (Number 20)))
-(Evaluation (Predicate "org") (ListLink (Concept "Hong Kong") (Concept "city")))
+(Evaluation (Predicate "phone") (List (Concept "Hong Kong") (Number 10)))
+(Evaluation (Predicate "pop") (List (Concept "Hong Kong") (Number 20)))
+(Evaluation (Predicate "org") (List (Concept "Hong Kong") (Concept "city")))
 
 
 ; Define two countries
-(Evaluation (Predicate "pop") (ListLink (Concept "Barbados") (Number 7)))
-(Evaluation (Predicate "org") (ListLink (Concept "Barbados") (Concept "country")))
+(Evaluation (Predicate "pop") (List (Concept "Barbados") (Number 7)))
+(Evaluation (Predicate "org") (List (Concept "Barbados") (Concept "country")))
 
-(Evaluation (Predicate "pop") (ListLink (Concept "Japan") (Number 30)))
-(Evaluation (Predicate "org") (ListLink (Concept "Japan") (Concept "country")))
+(Evaluation (Predicate "pop") (List (Concept "Japan") (Number 30)))
+(Evaluation (Predicate "org") (List (Concept "Japan") (Concept "country")))
 
 ; Define a greater-than function. Aside from returning true/false if
 ; the greater-than relation holds or not, it also counts the number of
@@ -74,14 +74,14 @@
 (define phone-inversion
 (Get (And
 	(Evaluation (Predicate "phone")
-		 (ListLink (Variable "$city") (Variable "#phone")))
+		 (List (Variable "$city") (Variable "#phone")))
 	(Evaluation (Predicate "pop")
-		 (ListLink (Variable "$city") (Variable "#pop")))
+		 (List (Variable "$city") (Variable "#pop")))
 	;;(GreaterThan
 	;;	(Variable "#phone") (Variable "#pop"))
 	(Evaluation
 		(GroundedPredicate "scm: cmp")
-		(ListLink (Variable "#phone") (Variable "#pop")))
+		(List (Variable "#phone") (Variable "#pop")))
 	))
 )
 
@@ -99,16 +99,16 @@ cnt
 (define pop-inversion
 (Get (And
 	(Evaluation (Predicate "org")
-		 (ListLink (Variable "$city") (Concept "city")))
+		 (List (Variable "$city") (Concept "city")))
 	(Evaluation (Predicate "pop")
-		 (ListLink (Variable "$city") (Variable "#city-pop")))
+		 (List (Variable "$city") (Variable "#city-pop")))
 	(Evaluation (Predicate "org")
-		 (ListLink (Variable "$state") (Concept "country")))
+		 (List (Variable "$state") (Concept "country")))
 	(Evaluation (Predicate "pop")
-		 (ListLink (Variable "$state") (Variable "#state-pop")))
+		 (List (Variable "$state") (Variable "#state-pop")))
 	(EvaluationLink
 		(GroundedPredicateNode "scm: cmp")
-		(ListLink (Variable "#city-pop") (Variable "#state-pop")))
+		(List (Variable "#city-pop") (Variable "#state-pop")))
 	))
 )
 
@@ -119,6 +119,6 @@ cnt
 ; Display the count.
 cnt
 ; The above should display 6 = 2 x 3 as there are two countries to be
-; compared to three cities.  The comparisons muct be down pair-wise,
+; compared to three cities.  The comparisons must be down pair-wise,
 ; resulting in a combinatoric explosion in the number of comparisons to
 ; be performed.

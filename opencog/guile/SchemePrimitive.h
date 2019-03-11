@@ -156,7 +156,6 @@ protected:
 // H_HHH  -- pointmem (the 3D spatial API)
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
-// H_HZ   -- cog-bind-first-n
 // I_V    -- cogutil RandGen
 // P_H    -- FunctionWrapper
 // S_AS   -- CogServerSCM::start_server()
@@ -278,11 +277,6 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_atomspace(arg, scheme_name, idx);
 	}
-	AttentionValuePtr scm_to(SCM args, size_t idx, const AttentionValuePtr) const
-	{
-		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_av(arg, scheme_name, idx);
-	}
 	TruthValuePtr scm_to(SCM args, size_t idx, const TruthValuePtr) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
@@ -391,13 +385,9 @@ protected:
 		}
 		return rc;
 	}
-	SCM scm_from(AttentionValuePtr av)
+	SCM scm_from(const TruthValuePtr& tv)
 	{
-		return SchemeSmob::av_to_scm(av);
-	}
-	SCM scm_from(TruthValuePtr tv)
-	{
-		return SchemeSmob::tv_to_scm(tv);
+		return SchemeSmob::protom_to_scm(ValueCast(tv));
 	}
 	SCM scm_from(const ValuePtr& pa)
 	{

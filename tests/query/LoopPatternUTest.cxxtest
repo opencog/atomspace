@@ -21,8 +21,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"

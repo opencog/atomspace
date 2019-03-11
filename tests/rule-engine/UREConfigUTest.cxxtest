@@ -21,7 +21,7 @@ public:
 
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
-		_eval.eval("(use-modules (opencog) (opencog query))");
+		_eval.eval("(use-modules (opencog))");
 
 		// Load the simple crisp system example to test it
 		std::string eval_output =
@@ -37,8 +37,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void test_read_config()
@@ -50,7 +48,6 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 		UREConfig cr(_as, rbs);
 
 		TS_ASSERT_EQUALS(cr.get_rules().size(), 2);
-		TS_ASSERT_EQUALS(cr.get_attention_allocation(), false);
 		TS_ASSERT_EQUALS(cr.get_maximum_iterations(), 20);
 	}
 };

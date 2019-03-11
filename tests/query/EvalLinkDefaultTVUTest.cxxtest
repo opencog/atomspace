@@ -24,8 +24,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 using namespace opencog;
 
@@ -51,7 +51,6 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		this->as = new AtomSpace();
 		this->eval = new SchemeEval(as);
-		this->eval->eval("(use-modules (opencog query))");
 		this->eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
@@ -63,8 +62,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-		int rc = CxxTest::TestTracker::tracker().suiteFailed();
-		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void test_query_evallink(){

@@ -17,8 +17,6 @@ ENDIF (HAVE_GUILE)
 
 LINK_LIBRARIES(
 	atomspace
-	clearbox
-	execution
 	${GUILE_LIBRARIES}
 )
 
@@ -30,7 +28,6 @@ ADD_CXXTEST(PythonEvalUTest)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
-	clearbox
 	PythonEval
 	atomspace_cython
 	${COGUTIL_LIBRARY}
@@ -51,7 +48,7 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	PythonEval
 	utilities_cython
 	atomspace_cython
-	backwardchainer_cython
+	ure_cython
 	atomspace
 	${COGUTIL_LIBRARY}
 )
@@ -80,6 +77,17 @@ IF (HAVE_NOSETESTS)
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
+		# All of the subsequent cython unit tests  depend on having
+		# guile working. So test guile first, and then the others.
+		ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/guile/)
+		SET_PROPERTY(TEST CythonGuile
+			PROPERTY ENVIRONMENT "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+				"PYTHONDONTWRITEBYTECODE=1"
+				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+		SET_PROPERTY(TEST CythonGuile
+			PROPERTY DEPENDS atomspace_cython scheme_wrapper)
+
 		ADD_TEST(CythonUtilities ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
 		SET_TESTS_PROPERTIES(CythonUtilities
@@ -98,23 +106,21 @@ IF (HAVE_NOSETESTS)
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
 
+		ADD_TEST(CythonForwardchainer ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
+		SET_PROPERTY(TEST CythonForwardchainer
+			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
+				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer"
+				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
+
 		ADD_TEST(CythonBackwardchainer ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/backwardchainer/)
 		SET_PROPERTY(TEST CythonBackwardchainer
 			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-		        "SCM_DIR=${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer/scm"
-			"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer")
+				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer"
+				"LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/guile/modules:$ENV{LD_LIBRARY_PATH}")
 	ENDIF (HAVE_ATOMSPACE)
-
-	IF (HAVE_ATOMSPACE AND HAVE_GUILE)
-		ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/guile/)
-		SET_TESTS_PROPERTIES(CythonGuile
-			PROPERTIES
-			DEPENDS atomspace_cython
-			DEPENDS scheme_wrapper
-			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
-	ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 ENDIF (HAVE_NOSETESTS)

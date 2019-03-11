@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_LIBRARAY_MANAGER_H
 #define _OPENCOG_LIBRARAY_MANAGER_H
 
-#include <dlfcn.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 class LibraryManager
@@ -34,6 +34,35 @@ private:
 public:
 	static void* getFunc(std::string libName,std::string funcName);
 	static void setLocalFunc(std::string libName, std::string funcName, void* func);
+	/**
+	 * Given a grounded schema name like "py: foo", extract
+	 * 1. the language, like "py"
+	 * 2. the library, like "" if there is none
+	 * 3. the function, like "foo"
+	 */
+	static void lang_lib_fun(const std::string& schema,
+	                         std::string& lang,
+	                         std::string& lib,
+	                         std::string& fun);
 };
 
+
+namespace opencog
+{
+/**
+ * setLocalPredicate("foo", boo) enables creating GroundedPredicateNode
+ * with the name "lib:\\foo",  which will call boo on evaluation of
+ * corresponding EvaluationLink.
+ */
+void setLocalPredicate(std::string funcName,
+                       TruthValuePtr* (*func)(AtomSpace *, Handle*));
+
+/**
+ * setLocalSchema("foo", boo) enables creating GroundedSchemaNode with
+ * the name "lib:\\foo", which will call boo on execution of corresponding
+ * ExecutionOutputLink.
+ */
+void setLocalSchema(std::string funcName,
+                    Handle* (*func)(AtomSpace *, Handle*));
+};
 #endif //_OPENCOG_LIBRARAY_MANAGER_H

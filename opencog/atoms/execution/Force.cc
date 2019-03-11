@@ -43,8 +43,8 @@ using namespace opencog;
 /// recursive.
 ///
 /// When executing, if the results are different, the new results
-/// are added to the atomspace. We need to do this, because scheme,
-/// and python expects to find their arguments in the atomspace.
+/// are added to the atomspace. We need to do this, because scheme
+/// and python expect to find their arguments in the atomspace.
 /// Users who do not want to pollute the atomspace should use a
 /// temporary (scratch) atomspace.
 ///

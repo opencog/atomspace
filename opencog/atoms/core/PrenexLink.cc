@@ -21,13 +21,10 @@
 
 #include <string>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
-#include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "PrenexLink.h"
 
@@ -89,7 +86,9 @@ Handle PrenexLink::reassemble(Type prenex,
 	// prenexed.  Check for PutLink to avoid infinite recursion.
 	if (PUT_LINK != prenex and not final_varlist.empty() and
 	    nameserver().isA(prenex, PRENEX_LINK))
+	{
 		return Handle(createLink(prenex, vdecl, newbod));
+	}
 
 	// Otherwise, we are done with the beta-reduction.
 	return newbod;
@@ -158,16 +157,16 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	//
 	// The above is a function that expects three arguments: x,y,z.
 	// Lets compose it with a function that takes one argument, but
-	// returns three values (function coposition):
+	// returns three results (function composition):
 	//
-	// (define func-returns-three-values
+	// (define func-returns-three-results
 	//    (Lambda (Variable "$w")
 	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
 	//
 	// Composing these two should return a function that takes one
 	// argument, namely $w.
 	//
-	//    (Put func-with-three-args func-returns-three-values)
+	//    (Put func-with-three-args func-returns-three-results)
 	//
 	// We expect as a result:
 	//
@@ -176,7 +175,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// Note that this is NOT compatible with beta-reduction in classical
 	// lambda calculus, which would leave $w free. We really want to
 	// eta-convert this, and keep $w bound, so that it looks like
-	// ordinary function composition. Atomese is not lambda calculus.
+	// ordinary function composition. Atomese is not lambda calculus!
 
 	// ------- Lets begin.
 	// For a valid eta conversion, there must be just one argument,
@@ -233,7 +232,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 {
 	HandleMap vm = vmap;
 
-	// If any of the mapped values are ScopeLinks, we need to discover
+	// If any of the mapped arguments are ScopeLinks, we need to discover
 	// and collect up the variables that they bind. We also need to
 	// make sure that they are "fresh", i.e. don't have naming
 	// collisions.
@@ -257,12 +256,12 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			continue;
 		}
 
-		Type valuetype = pare->second->get_type();
+		Type argtype = pare->second->get_type();
 
 		// If we are here, then var will be beta-reduced.
-		// But if the value is another variable, then alpha-convert,
-		// instead.
-		if (VARIABLE_NODE == valuetype)
+		// But if the argument is another variable, then
+		// alpha-convert, instead.
+		if (VARIABLE_NODE == argtype)
 		{
 			Handle alt = collect(vtool, var, pare->second,
 			                     final_varlist, used_vars, issued);
@@ -272,11 +271,11 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		}
 
 		// If we are here, then var will be beta-reduced.
-		// Is the value a PrenexLink? If so, we need to disassmeble
+		// Is the argument a PrenexLink? If so, we need to disassmeble
 		// it, yank out the variables, and then reassemble it
 		// again, so that the variables are declared in the
 		// outer-most scope.
-		if (nameserver().isA(valuetype, PRENEX_LINK))
+		if (nameserver().isA(argtype, PRENEX_LINK))
 		{
 			PrenexLinkPtr sc = PrenexLinkCast(pare->second);
 			const Variables& bound = sc->get_variables();
@@ -288,7 +287,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			if (nullptr == body)
 			{
 				throw SyntaxException(TRACE_INFO,
-				                      "PrenexLink given a malformed value=%s",
+				                      "PrenexLink given a malformed argument=%s",
 				                      sc->to_string().c_str());
 			}
 
@@ -312,7 +311,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			// were multiple variables, and they weren's all LambdaLinks,
 			// for example. In that case, things are borked, and there's
 			// a bug here.  For now, we punt.
-			prenex = valuetype;
+			prenex = argtype;
 		}
 	}
 

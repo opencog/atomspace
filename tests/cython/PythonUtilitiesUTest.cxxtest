@@ -33,14 +33,14 @@ public:
 
     void testOpencogInitializationFinalization() {
 
-        // Create a atomspace.
+        // Create an atomspace.
         AtomSpace* atomSpace = new AtomSpace();
 
-        // Initialize OpenCog standalone.
-        initialize_opencog(atomSpace);
+        // Initialize Python.
+        initialize_python(atomSpace);
 
-        // Stop OpenCog standalone.
-        finalize_opencog();
+        // Stop Python.
+        finalize_python();
 
         // Delete the atom space.
         delete atomSpace;
@@ -50,11 +50,11 @@ public:
         // Create a atomspace.
         atomSpace = new AtomSpace();
 
-        // Initialize OpenCog standalone.
-        initialize_opencog(atomSpace);
+        // Initialize Python.
+        initialize_python(atomSpace);
 
-        // Stop OpenCog standalone.
-        finalize_opencog();
+        // Stop Python.
+        finalize_python();
 
         // Delete the atom space.
         delete atomSpace;

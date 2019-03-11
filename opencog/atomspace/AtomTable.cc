@@ -83,6 +83,8 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
 {
     _as = holder;
     _environ = parent;
+    if (_environ) _environ->_num_nested++;
+    _num_nested = 0;
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
     _size = 0;
     _num_nodes = 0;
@@ -121,6 +123,10 @@ AtomTable::~AtomTable()
             }
         }
     }
+    if (_environ) _environ->_num_nested--;
+    if (0 != _num_nested)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - deleteing atomtable with subtables!");
 }
 
 void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
@@ -131,6 +137,7 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
 
     // Set the new parent environment and holder atomspace.
     _environ = parent;
+    if (_environ) _environ->_num_nested++;
     _as = holder;
 }
 
@@ -144,6 +151,7 @@ void AtomTable::clear_transient()
     clear_all_atoms();
 
     // Clear the  parent environment and holder atomspace.
+    if (_environ) _environ->_num_nested--;
     _environ = NULL;
     _as = NULL;
 
@@ -387,7 +395,9 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, else crazy things go wrong.
+    // private copy of the atom, because each atom instance keeps a pointer to
+    // the atomspace. This pointer is used to get UUID, send signals, implement
+    // getAtomSpace() and getAtomTable() methods.
     else if (atom == orig)
     {
         if (atom->is_node())

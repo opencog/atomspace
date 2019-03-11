@@ -27,8 +27,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
@@ -144,13 +144,13 @@ void FreeVariables::find_variables(const Handle& h)
 
 HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
 {
-	HandleSeq values;
+	HandleSeq arguments;
 	for (const Handle& var : varseq)
 	{
 		HandleMap::const_iterator it = varmap.find(var);
-		values.push_back(it == varmap.end() ? var : it->second);
+		arguments.push_back(it == varmap.end() ? var : it->second);
 	}
-	return values;
+	return arguments;
 }
 
 void FreeVariables::erase(const Handle& var)
@@ -161,7 +161,7 @@ void FreeVariables::erase(const Handle& var)
 	// Remove from index
 	index.erase(var);
 
-	// Remove from varseq and update all values in the subsequent
+	// Remove from varseq and update all arguments in the subsequent
 	// index as they have changed.
 	auto it = std::find(varseq.begin(), varseq.end(), var);
 	if (it != varseq.end()) {
@@ -233,7 +233,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	bool unquoted = quotation.is_unquoted();
 
 	// If we are not in a quote context, and `term` is a variable,
-	// then just return the corresponding value.
+	// then just return the corresponding argument.
 	if (unquoted)
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
@@ -309,8 +309,8 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	HandleSeq oset;
 	for (const Handle& h : term->getOutgoingSet())
 	{
-		// GlobNodes are matched with a list of one or more values.
-		// Those values need to be in-lined, stripping off the list
+		// GlobNodes are matched with a list of one or more arguments.
+		// Those arguments need to be in-lined, stripping off the list
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
@@ -468,7 +468,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		Type htype = val->get_type();
 		TypeSet::const_iterator allow = tchoice.find(htype);
 
-		// If the value has the simple type, then we are good to go;
+		// If the argument has the simple type, then we are good to go;
 		// we are done.  Else, fall through, and see if one of the
 		// others accept the match.
 		if (allow != tchoice.end()) return true;
@@ -519,7 +519,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
  */
 bool Variables::is_type(const HandleSeq& hseq) const
 {
-	// The arity must be one for there to be a match.
+	// The arities must be equal for there to be a match.
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
 
@@ -529,6 +529,27 @@ bool Variables::is_type(const HandleSeq& hseq) const
 		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
+}
+
+/**
+ * Return true if we contain just a single variable, and this one
+ * variable is of type gtype (or is untyped). A typical use is that
+ * gtype==VARIABLE_LIST.
+ */
+bool Variables::is_type(Type gtype) const
+{
+	if (1 != varseq.size()) return false;
+
+	// Are there any type restrictions?
+	const Handle& var = varseq[0];
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	if (_simple_typemap.end() == tit) return true;
+	const TypeSet &tchoice = tit->second;
+
+	// There are type restrictions; do they match?
+	TypeSet::const_iterator allow = tchoice.find(gtype);
+	if (allow != tchoice.end()) return true;
+	return false;
 }
 
 /**
@@ -576,7 +597,7 @@ bool Variables::is_upper_bound(const Handle& glob, size_t n) const
 
 /* ================================================================= */
 /**
- * Substitute the given values for the variables occuring in a tree.
+ * Substitute the given arguments for the variables occuring in a tree.
  * That is, perform beta-reduction.  This is a lot like applying the
  * function `func` to the argument list `args`, except that no actual
  * evaluation is performed; only substitution.
@@ -605,7 +626,7 @@ bool Variables::is_upper_bound(const Handle& glob, size_t n) const
  *      ConceptNode "one"
  *      NumberNode 2.0000
  *
- * then the returned value will be
+ * then the returned result will be
  *
  *   EvaluationLink
  *      PredicateNode "something"
@@ -613,7 +634,7 @@ bool Variables::is_upper_bound(const Handle& glob, size_t n) const
  *          NumberNode 2.0000    ; note reversed order here, also
  *          ConceptNode "one"
  *
- * That is, the values `one` and `2.0` were substituted for `$a` and `$b`.
+ * That is, the arguments `one` and `2.0` were substituted for `$a` and `$b`.
  *
  * The `func` can be, for example, a single variable name(!) In this
  * case, the corresponding `arg` is returned. So, for example, if the
@@ -645,10 +666,10 @@ Handle Variables::substitute(const Handle& func,
 
 	// XXX TODO type-checking could be lazy; if the function is not
 	// actually using one of the args, it's type should not be checked.
-	// Viz., one of the values might be undefined, and that's OK, if that
-	// value is never actually used.  Fixing this requires a cut-n-paste
-	// of the substitute_nocheck code. I'm too lazy to do this ... no one
-	// wants this whizzy-ness just right yet.
+	// Viz., one of the arguments might be undefined, and that's OK,
+	// if that argument is never actually used.  Fixing this requires a
+	// cut-n-paste of the substitute_nocheck code. I'm too lazy to do
+	// this ... no one wants this whizzy-ness just right yet.
 	if (not is_type(args))
 	{
 		if (silent) throw TypeCheckException();

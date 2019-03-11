@@ -20,28 +20,22 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# module init
-file(MAKE_DIRECTORY opencog)
-file(COPY opencog/__init__.py DESTINATION opencog)
-##
+# Python Module init
+FILE(MAKE_DIRECTORY opencog)
+FILE(COPY opencog/__init__.py DESTINATION opencog)
 
 ADD_LIBRARY(PythonEval
 	PythonEval.cc
-	load-file.cc
 )
 
 ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	atombase
-	atomspace
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )
-
-IF(HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(PythonEval smob)
-ENDIF(HAVE_GUILE)
 
 INSTALL (TARGETS PythonEval EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
@@ -56,6 +50,7 @@ INSTALL (FILES
 # called from scheme.
 #
 IF(HAVE_GUILE)
+	ADD_DEFINITIONS(-DPYTHON_ROOT="${PYTHON_ROOT}")
 	ADD_LIBRARY(PythonSCM
 		PythonSCM.cc
 	)
@@ -66,5 +61,8 @@ IF(HAVE_GUILE)
 		smob
 	)
 
-    INSTALL (TARGETS PythonSCM EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+   INSTALL (TARGETS PythonSCM
+		EXPORT AtomSpaceTargets
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
 ENDIF(HAVE_GUILE)

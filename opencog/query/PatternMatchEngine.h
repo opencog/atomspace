@@ -252,6 +252,8 @@ public:
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
 	// Handy-dandy utilities
+	static void print_solution(const HandleMap &vars,
+	                           const HandleMap &clauses);
 	static void log_solution(const HandleMap &vars,
 	                         const HandleMap &clauses);
 

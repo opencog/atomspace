@@ -22,8 +22,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 using namespace opencog;
 
@@ -45,7 +45,6 @@ public:
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 		_eval.eval("(use-modules (opencog logger))");
-		_eval.eval("(use-modules (opencog query))");
 	}
 
 	~NestedPutUTest()
@@ -53,8 +52,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-		int rc = CxxTest::TestTracker::tracker().suiteFailed();
-		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp();

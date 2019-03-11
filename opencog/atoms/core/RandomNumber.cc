@@ -62,43 +62,96 @@ RandomNumberLink::RandomNumberLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-// Pattern matching hack. The pattern matcher returns sets of atoms;
-// if that set contains numbers or something numeric, then unwrap it.
-static NumberNodePtr unwrap_set(Handle h)
+static double get_dbl(AtomSpace* as, bool silent, const Handle& h)
 {
-	if (SET_LINK == h->get_type())
+	Type t = h->get_type();
+	if (NUMBER_NODE == t)
+	{
+		NumberNodePtr na(NumberNodeCast(h));
+		return na->get_value();
+	}
+	if (h->is_executable())
+	{
+		ValuePtr vp = h->execute(as, silent);
+		if (vp->is_atom())
+			return get_dbl(as, silent, HandleCast(vp));
+		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			return FloatValueCast(vp)->value().at(0);
+	}
+	throw SyntaxException(TRACE_INFO,
+		"Expecting a number, got %s", h->to_string().c_str());
+}
+
+// The pattern matcher returns sets of atoms; if that set contains
+// numbers or something that when executed, returns numbers, then
+// unwrap it.
+static std::vector<double> unwrap_set(AtomSpace *as, bool silent,
+                                      const Handle& h)
+{
+	Type t = h->get_type();
+	if (NUMBER_NODE == t)
+	{
+		NumberNodePtr na(NumberNodeCast(h));
+		return std::vector<double>(1, na->get_value());
+	}
+	if (SET_LINK == t)
 	{
 		if (0 == h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting a number, got the empty set!\n");
-		if (1 != h->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Expecting only one number, got more than that: %s",
-				h->to_string().c_str());
-		h = h->getOutgoingAtom(0);
+		std::vector<double> nums;
+		for (const Handle& ho: h->getOutgoingSet())
+		{
+			nums.push_back(get_dbl(as, silent, ho));
+		}
+		return nums;
 	}
 
-	NumberNodePtr na(NumberNodeCast(h));
-	if (nullptr == na)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a number, got this: %s",
+	if (h->is_executable())
+	{
+		ValuePtr vp = h->execute(as, silent);
+		if (vp->is_atom())
+			return unwrap_set(as, silent, HandleCast(vp));
+
+		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			return FloatValueCast(vp)->value();
+	}
+
+	throw SyntaxException(TRACE_INFO,
+		"Expecting a number, got this: %s",
 			h->to_string().c_str());
-	return na;
+	return std::vector<double>();
 }
 
-
-ValuePtr RandomNumberLink::execute() const
+static Handle get_ran(double cept, double nmax)
 {
-	// XXX FIXME so that this also works with values.
-	NumberNodePtr nmin(unwrap_set(_outgoing[0]));
-	NumberNodePtr nmax(unwrap_set(_outgoing[1]));
+	// Linear algebra slope-intercept formula.
+	double slope = nmax - cept;
+	return HandleCast(createNumberNode(slope * randy.randdouble() + cept));
+}
 
-	double cept = nmin->get_value();
-	double slope = nmax->get_value() - cept;
+/// RandomNumberLink always returns either a NumberNode, or a
+/// set of NumberNodes.  This is in contrast to a RandomValue,
+/// which always returns a vector of doubles.
+ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
+{
+	std::vector<double> nmin(unwrap_set(as, silent, _outgoing[0]));
+	std::vector<double> nmax(unwrap_set(as, silent, _outgoing[1]));
 
-	double ary = slope * randy.randdouble() + cept;
+	size_t len = nmax.size();
+	if (nmin.size() != len)
+		throw SyntaxException(TRACE_INFO,
+			"Unmatched number of bounds: %d vs. %d",
+				nmin.size(), nmax.size());
 
-	return ValuePtr(createNumberNode(ary));
+	if (1 == len)
+		return get_ran(nmin[0], nmax[0]);
+
+	HandleSeq oset;
+	for (size_t i=0; i< len; i++)
+		oset.push_back(get_ran(nmin[i], nmax[i]));
+
+	return ValuePtr(createLink(oset, SET_LINK));
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);

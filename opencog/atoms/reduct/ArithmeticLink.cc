@@ -161,7 +161,10 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 {
 	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
 	{
-		ValuePtr red(FunctionLinkCast(vptr)->execute());
+		ValuePtr red(HandleCast(vptr)->execute());
+
+		// It would probably be better to throw a silent exception, here?
+		if (nullptr == red) return vptr;
 		if (*red == *vptr) return vptr;
 		vptr = red;
 	}
@@ -170,7 +173,7 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 
 // ===========================================================
 /// execute() -- Execute the expression
-ValuePtr ArithmeticLink::execute() const
+ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
 {
 	return delta_reduce();
 }

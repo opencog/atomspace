@@ -36,57 +36,54 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-// For OC_TO_STRING_INDENT
-#include <opencog/atoms/base/Handle.h>
-
 namespace opencog {
 
 const strength_t MAX_TRUTH  = 1.0;
 
 std::string TruthValue::to_short_string(const std::string& indent) const
 {
-    return to_string(indent);
+	return to_string(indent);
 }
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
-    // True, but no confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0f));
-    return instance;
+	// True, but no confidence.
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0f));
+	return instance;
 }
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
-    // True, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0f));
-    return instance;
+	// True, with maximum confidence.
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0f));
+	return instance;
 }
 
 TruthValuePtr TruthValue::FALSE_TV()
 {
-    // False, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0f));
-    return instance;
+	// False, with maximum confidence.
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0f));
+	return instance;
 }
 
 TruthValuePtr TruthValue::TRIVIAL_TV()
 {
-    // False, with no confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
-    return instance;
+	// False, with no confidence.
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
+	return instance;
 }
 
 bool TruthValue::isDefaultTV() const
 {
-    TruthValuePtr dtv = DEFAULT_TV();
-    if (dtv.get() == this) return true;
-    if (get_type() == dtv->get_type() and
-        get_mean() == dtv->get_mean() and
-        get_confidence() == dtv->get_confidence())
-    {
-        return true;
-    }
-    return false;
+	TruthValuePtr dtv = DEFAULT_TV();
+	if (dtv.get() == this) return true;
+	if (get_type() == dtv->get_type() and
+	    get_mean() == dtv->get_mean() and
+	    get_confidence() == dtv->get_confidence())
+	{
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -94,48 +91,48 @@ bool TruthValue::isDefaultTV() const
  */
 bool TruthValue::isDefinedTV() const
 {
-    TruthValuePtr dtv = DEFAULT_TV();
-    if (dtv.get() == this) return true;
-    if (get_type() == dtv->get_type() and
-        get_mean() == dtv->get_mean() and
-        get_confidence() == dtv->get_confidence())
-    {
-        return true;
-    }
+	TruthValuePtr dtv = DEFAULT_TV();
+	if (dtv.get() == this) return true;
+	if (get_type() == dtv->get_type() and
+	    get_mean() == dtv->get_mean() and
+	    get_confidence() == dtv->get_confidence())
+	{
+		return true;
+	}
 
-    dtv = TRUE_TV();
-    if (dtv.get() == this) return true;
+	dtv = TRUE_TV();
+	if (dtv.get() == this) return true;
 
-    dtv = FALSE_TV();
-    if (dtv.get() == this) return true;
+	dtv = FALSE_TV();
+	if (dtv.get() == this) return true;
 
-    dtv = TRIVIAL_TV();
-    if (dtv.get() == this) return true;
+	dtv = TRIVIAL_TV();
+	if (dtv.get() == this) return true;
 
-    dtv = TRUE_TV();
-    if (get_type() == dtv->get_type() and
-        get_mean() == dtv->get_mean() and
-        get_confidence() == dtv->get_confidence())
-    {
-        return true;
-    }
+	dtv = TRUE_TV();
+	if (get_type() == dtv->get_type() and
+	    get_mean() == dtv->get_mean() and
+	    get_confidence() == dtv->get_confidence())
+	{
+		return true;
+	}
 
-    dtv = FALSE_TV();
-    if (get_type() == dtv->get_type() and
-        get_mean() == dtv->get_mean() and
-        get_confidence() == dtv->get_confidence())
-    {
-        return true;
-    }
+	dtv = FALSE_TV();
+	if (get_type() == dtv->get_type() and
+	    get_mean() == dtv->get_mean() and
+	    get_confidence() == dtv->get_confidence())
+	{
+		return true;
+	}
 
-    dtv = TRIVIAL_TV();
-    if (get_type() == dtv->get_type() and
-        get_mean() == dtv->get_mean() and
-        get_confidence() == dtv->get_confidence())
-    {
-        return true;
-    }
-    return false;
+	dtv = TRIVIAL_TV();
+	if (get_type() == dtv->get_type() and
+	    get_mean() == dtv->get_mean() and
+	    get_confidence() == dtv->get_confidence())
+	{
+		return true;
+	}
+	return false;
 }
 
 bool TruthValue::nearly_equal(double a, double b)
@@ -156,10 +153,10 @@ bool TruthValue::nearly_equal(double a, double b)
 TruthValuePtr
 TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
 {
-    if (other->get_confidence() > get_confidence()) {
-        return other;
-    }
-    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+	if (other->get_confidence() > get_confidence()) {
+		return other;
+	}
+	return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
 }
 
 TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)

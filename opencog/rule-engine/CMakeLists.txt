@@ -26,9 +26,8 @@ ADD_DEPENDENCIES(ruleengine
 
 TARGET_LINK_LIBRARIES(ruleengine
 	lambda
-	query
+	query-engine
 	execution
-	atomutils
 	atomspace
 	atomspaceutils
 	unify

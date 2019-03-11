@@ -2,11 +2,7 @@ from unittest import TestCase
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import stub_bindlink, bindlink, single_bindlink,\
-                             first_n_bindlink, af_bindlink, \
-                             satisfaction_link, satisfying_set, \
-                             satisfying_element, first_n_satisfying_set, \
-                             execute_atom, evaluate_atom
+from opencog.bindlink import execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
@@ -79,20 +75,6 @@ class BindlinkTest(TestCase):
         # finalize_opencog()
         # del self.atomspace
 
-    def test_stub_bindlink(self):
-
-        # Remember the starting atomspace size. This test should not
-        # change the atomspace.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
-        atom = stub_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None)
-
-        # Check the ending atomspace size, it should be the same.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size)
-
     def _check_result_setlink(self, atom, expected_arity):
 
         # Check if the atom is a SetLink
@@ -107,32 +89,12 @@ class BindlinkTest(TestCase):
         self.assertEquals(atom.arity, expected_arity)
 
     def test_bindlink(self):
-        atom = bindlink(self.atomspace, self.bindlink_atom)
+        atom = execute_atom(self.atomspace, self.bindlink_atom)
+        print("Bindlink found: " + str(atom))
         self._check_result_setlink(atom, 3)
-
-    def test_single_bindlink(self):
-        atom = single_bindlink(self.atomspace, self.bindlink_atom)
-        self._check_result_setlink(atom, 1)
-
-    def test_first_n_bindlink(self):
-        atom = first_n_bindlink(self.atomspace, self.bindlink_atom, 5)
-        self._check_result_setlink(atom, 3)
-
-    def test_af_bindlink(self):
-        atom = af_bindlink(self.atomspace, self.bindlink_atom)
-        # The SetLink is empty. ??? Should it be.
-        self._check_result_setlink(atom, 0)
 
     def test_satisfying_set(self):
-        atom = satisfying_set(self.atomspace, self.getlink_atom)
-        self._check_result_setlink(atom, 3)
-
-    def test_satisfying_element(self):
-        atom = satisfying_element(self.atomspace, self.getlink_atom)
-        self._check_result_setlink(atom, 1)
-
-    def test_first_n_satisfying_set(self):
-        atom = first_n_satisfying_set(self.atomspace, self.getlink_atom, 5)
+        atom = execute_atom(self.atomspace, self.getlink_atom)
         self._check_result_setlink(atom, 3)
 
     def test_satisfy(self):
@@ -166,8 +128,8 @@ class BindlinkTest(TestCase):
             )
         )
 
-        atom = satisfaction_link(self.atomspace, satisfaction_atom)
-        self.assertTrue(atom is not None and atom.mean <= 0.5)
+        tv = evaluate_atom(self.atomspace, satisfaction_atom)
+        self.assertTrue(tv is not None and tv.mean <= 0.5)
         self.assertEquals(green_count(), 2)
         self.assertEquals(red_count(), 1)
 

@@ -28,6 +28,7 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
+#include "DLScheme.h"
 #include "ExecutionOutputLink.h"
 #include "Force.h"
 #include "LibraryManager.h"
@@ -36,9 +37,13 @@ using namespace opencog;
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
+	// Derived types do thier own validation.
+	if (EXECUTION_OUTPUT_LINK != get_type()) return;
+
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
+	    VARIABLE_NODE != schema->get_type() and
 	    UNQUOTE_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
@@ -50,14 +55,14 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (EXECUTION_OUTPUT_LINK != t)
+	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
 		                      "Expection an ExecutionOutputLink!");
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
-		                      "ExecutionOutputLink must have schema and args! Got arity=%d",
-		                      oset.size());
+		       "ExecutionOutputLink must have schema and args! Got arity=%d",
+		        oset.size());
 
 	check_schema(oset[0]);
 }
@@ -94,7 +99,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
+ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
 	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
@@ -110,10 +115,10 @@ Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 /// Expects "cargs" to be a ListLink unless there is only one argument
 /// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as,
-                                       const Handle& gsn,
-                                       const Handle& cargs,
-                                       bool silent)
+ValuePtr ExecutionOutputLink::do_execute(AtomSpace* as,
+                                         const Handle& gsn,
+                                         const Handle& cargs,
+                                         bool silent)
 {
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->to_short_string()
 	              << "with arguments: " << cargs->to_short_string();
@@ -130,27 +135,22 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// Extract the language, library and function
 	std::string lang, lib, fun;
-	lang_lib_fun(schema, lang, lib, fun);
+	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
 
-	Handle result;
+	ValuePtr result;
 
 	// At this point, we only run scheme, python schemas and functions from
 	// libraries loaded at runtime.
 	if (lang == "scm")
 	{
-#ifdef HAVE_GUILE
-		SchemeEval* applier = SchemeEval::get_evaluator(as);
-		result = applier->apply(fun, args);
+		SchemeEval* applier = get_evaluator_for_scheme(as);
+		result = applier->apply_v(fun, args);
 
 		// Exceptions were already caught, before leaving guile mode,
 		// so we can't rethrow.  Just throw a new exception.
 		if (applier->eval_error())
 			throw RuntimeException(TRACE_INFO,
-			                       "Failed evaluation; see logfile for stack trace.");
-#else
-		throw RuntimeException(TRACE_INFO,
-		                       "Cannot evaluate scheme GroundedSchemaNode!");
-#endif /* HAVE_GUILE */
+			         "Failed evaluation; see logfile for stack trace.");
 	}
 	else if (lang == "py")
 	{
@@ -182,7 +182,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			free(res);
 		}
 	}
-	else {
+	else
+	{
 		// Unkown proceedure type
 		throw RuntimeException(TRACE_INFO,
 		                       "Cannot evaluate unknown Schema %s",
@@ -193,10 +194,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// code returns nothing, then a null-pointer-dereference is
 	// likely, a bit later down the line, leading to a crash.
 	// So head this off at the pass.
-	if (nullptr == result) {
+	if (nullptr == result)
+	{
 		// If silent is true, return a simpler and non-logged
-		// exception, which may, in some contexts, be considerably
-		// faster than the one below.
+		// exception, which may, in some contexts, will be
+		// considerably faster than a RuntimeException.
 		if (silent)
 			throw NotEvaluatableException();
 
@@ -206,42 +208,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		                       cargs->to_string().c_str());
 	}
 
-	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
+	LAZY_LOG_FINE << "Result: " << result->to_string();
 	return result;
 }
 
-void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
-                                       std::string& lang,
-                                       std::string& lib,
-                                       std::string& fun)
-{
-	std::string::size_type pos = schema.find(":");
-	if (pos == std::string::npos)
-		return;
-
-	lang = schema.substr(0, pos);
-
-	// Move past the colon and strip leading white-space
-	do { pos++; } while (' ' == schema[pos]);
-
-	if (lang == "lib") {
-		// Get the name of the Library and Function. They should be
-		// separated by '\'. If no library the separator may be omitted.
-		std::size_t seppos = schema.find("\\");
-		if (seppos == std::string::npos) { // No library
-			lib = "";
-			fun = schema.substr(pos);
-		} else {                  // Possible library
-			lib = schema.substr(pos, seppos - pos);
-			fun = schema.substr(seppos + 1);
-		}
-	} else
-		fun = schema.substr(pos);
-}
-
 DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
-
-void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
-{
-	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
-}

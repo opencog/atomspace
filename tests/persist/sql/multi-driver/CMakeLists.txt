@@ -57,6 +57,7 @@ ENDIF (PSQL_EXECUTABLE)
 
 LINK_LIBRARIES(
     atomspace
+    persist
     persist-sql
 )
 
@@ -70,9 +71,19 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(MultiPersistUTest)
     ADD_CXXTEST(MultiUserUTest)
 
+    # Hacky attempt to try to make unit tests run in series
+    # and not in parallel. ... make each depend on the last one.
+    # They cannot be run in parallel, they all use the same database.
+    ADD_DEPENDENCIES(ValueSaveUTest BasicSaveUTest)
+    ADD_DEPENDENCIES(PersistUTest ValueSaveUTest)
+    ADD_DEPENDENCIES(DeleteUTest PersistUTest)
+    ADD_DEPENDENCIES(MultiPersistUTest DeleteUTest)
+    ADD_DEPENDENCIES(MultiUserUTest MultiPersistUTest)
+
     IF (HAVE_GUILE)
         ADD_CXXTEST(FetchUTest)
         TARGET_LINK_LIBRARIES(FetchUTest execution)
+        ADD_DEPENDENCIES(FetchUTest MultiUserUTest)
     ENDIF (HAVE_GUILE)
 
 ELSE (DB_IS_CONFIGURED)

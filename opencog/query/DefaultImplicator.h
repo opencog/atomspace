@@ -43,22 +43,6 @@ class DefaultImplicator:
 			InitiateSearchCB(asp),
 			DefaultPatternMatchCB(asp) {}
 
-#ifdef CACHED_IMPLICATOR
-	virtual void ready(AtomSpace* asp)
-	{
-		Implicator::ready(asp);
-		InitiateSearchCB::ready(asp);
-		DefaultPatternMatchCB::ready(asp);
-	}
-
-	virtual void clear()
-	{
-		Implicator::clear();
-		InitiateSearchCB::clear();
-		DefaultPatternMatchCB::clear();
-	}
-#endif
-
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
 	{
@@ -66,18 +50,6 @@ class DefaultImplicator:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 };
-
-#ifdef CACHED_IMPLICATOR
-class CachedDefaultImplicator {
-	static DefaultImplicator* _cached_implicator;
-	public:
-		CachedDefaultImplicator(AtomSpace*asp);
-		~CachedDefaultImplicator();
-		operator Implicator&() { return *_cached_implicator; }
-};
-#endif
-
-Handle do_imply(AtomSpace*, const Handle&, Implicator&, bool);
 
 }; // namespace opencog
 

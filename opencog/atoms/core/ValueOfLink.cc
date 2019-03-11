@@ -53,13 +53,22 @@ ValueOfLink::ValueOfLink(const Link &l)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.
-ValuePtr ValueOfLink::execute() const
+ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
 	if (2 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
-	return _outgoing[0]->getValue(_outgoing[1]);
+	ValuePtr pap = _outgoing[0]->getValue(_outgoing[1]);
+	if (pap) return pap;
+
+	if (silent)
+		throw NotEvaluatableException();
+
+	throw InvalidParamException(TRACE_INFO,
+		"No such key %s on atom %s",
+		_outgoing[1]->to_string().c_str(),
+		_outgoing[0]->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

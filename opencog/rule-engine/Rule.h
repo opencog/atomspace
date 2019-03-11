@@ -40,7 +40,10 @@ class Rule;
 class RuleSet : public std::set<Rule>
 {
 public:
-	// Run all meta rules and insert the resulting rules back in the rule set.
+	/**
+	 * Run all meta rules over as and insert the resulting rules back
+	 * in the rule set.
+	 */
 	void expand_meta_rules(AtomSpace& as);
 
 	/**
@@ -160,12 +163,6 @@ public:
 	 * inconvenient for combining multiple scope links, in the way
 	 * that the backward chainer does when building forward chaining
 	 * strategies.
-	 *
-	 * Nil, can you explain what the problem above actually is, and
-	 * open a bug report, illustrating it? No hacks should be required:
-	 * the alpha conversion should already be doing exactly the right
-	 * thing, in every situation.  What is the "inconvenience"? What
-	 * is the problem that you are trying to work around?
 	 *
 	 * TODO: support backward rule form.
 	 */

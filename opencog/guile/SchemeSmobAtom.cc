@@ -14,10 +14,9 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
-#include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -91,17 +90,6 @@ SCM SchemeSmob::ss_number (SCM satom)
 	return num;
 }
 
-SCM SchemeSmob::ss_type (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-type");
-	Type t = h->get_type();
-	const std::string &tname = nameserver().getTypeName(t);
-	SCM str = scm_from_utf8_string(tname.c_str());
-	SCM sym = scm_string_to_symbol(str);
-
-	return sym;
-}
-
 SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
@@ -119,7 +107,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	return tv_to_scm(h->getTruthValue());
+	return protom_to_scm(ValueCast(h->getTruthValue()));
 }
 
 /**

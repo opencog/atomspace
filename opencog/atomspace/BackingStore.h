@@ -52,7 +52,7 @@ class BackingStore
 		 * will have all values attached to it, that the backing
 		 * store knows about.
 		 */
-		virtual Handle getLink(Type, const HandleSeq&) const = 0;
+		virtual Handle getLink(Type, const HandleSeq&) = 0;
 
 		/**
 		 * Return a Node with the indicated type and name, if it
@@ -60,7 +60,7 @@ class BackingStore
 		 * all values attached to it, that the backing store knows
 		 * about.
 		 */
-		virtual Handle getNode(Type, const char *) const = 0;
+		virtual Handle getNode(Type, const char *) = 0;
 
 		/**
 		 * Put the entire incoming set of the indicated handle into
@@ -84,9 +84,11 @@ class BackingStore
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.
 		 * If the atom is already in storage, this will update it's
-		 * truth value, etc.
+		 * truth value, etc. If the `synchronous` flag is set, this
+		 * method will not return until the atom has actually been stored.
+		 * (Not all backends will respect this flag.)
 		 */
-		virtual void storeAtom(const Handle&) = 0;
+		virtual void storeAtom(const Handle&, bool synchronous = false) = 0;
 
 		/**
 		 * Remove the indicated atom from the backing store.
@@ -113,28 +115,6 @@ class BackingStore
 		 * (Mostly the unit tests, at this time.)
 		 */
 		virtual void barrier() = 0;
-
-		/**
-		 * Returns true if the backing store will ignore this type.
-		 * This is used for performance optimization, as asking the
-		 * backend to retreive an atom can take a long time. If an atom
-		 * is of this given type, it will not be fetched.
-		 */
-		virtual bool ignoreType(Type t) const {
-			 return (_ignored_types.end() != _ignored_types.find(t));
-		}
-
-		/**
-		 * Returns true if the backing store will ignore this atom,
-		 * either because it is of an ignorable type, or is a link
-		 * which contains an atom that is of an ignorable type.
-		 */
-		virtual bool ignoreAtom(const Handle&) const;
-
-		/**
-		 * The set of ignored atom types.
-		 */
-		TypeSet _ignored_types;
 
 		/**
 		 * Register this backing store with the atomspace.

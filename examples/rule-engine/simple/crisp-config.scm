@@ -10,10 +10,6 @@
 
 ; Define a new rule base (aka rule-based system)
 (define crisp-rbs (ConceptNode "crisp-rule-base"))
-(InheritanceLink
-   crisp-rbs
-   (ConceptNode "URE")
-)
 
 ; Create helper functions to call the forward and backward chainer on
 ; that system

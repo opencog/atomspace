@@ -50,7 +50,8 @@ public:
 	ArithmeticLink(const Link& l);
 
 	virtual ValuePtr delta_reduce(void) const;
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute(AtomSpace*, bool);
+	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

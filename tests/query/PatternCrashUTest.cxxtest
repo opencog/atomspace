@@ -23,7 +23,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
@@ -122,8 +122,8 @@ void PatternCrashUTest::test_one_thing(void)
 	             (ConceptNode "Tweety")
 	             (ConceptNode "Yello")
 	             )
-	            (BindLink (av 0 0 0)
-	             (VariableList (av 0 0 0)
+	            (BindLink
+	             (VariableList
 	              (VariableNode "$A")
 	              (VariableNode "$B")
 	              )

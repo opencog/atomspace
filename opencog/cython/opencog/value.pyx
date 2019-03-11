@@ -1,60 +1,40 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef Value createProtoAtom(cValuePtr shared_ptr):
-    """Factory method to construct Value from C++ ValuePtr (see
-    http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
-    for example)"""
-    cdef Value proto_atom = Value.__new__(Value)
-    proto_atom.shared_ptr = shared_ptr
-    return proto_atom
+cdef class PtrHolder:
+    """C++ shared_ptr object wrapper for Python clients. Cython cannot create
+    Python object constructor which gets C++ pointer. This class is used to
+    wrap pointer and make it possible to initialize Value in usual
+    constructor (see
+    http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
 
-cdef list vector_of_doubles_to_list(const vector[double]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    while it != cpp_vector.const_end():
-        list.append(deref(it))
-        inc(it)
-    return list
-
-cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    while it != cpp_vector.const_end():
-        list.append((<bytes>deref(it).c_str()).decode('UTF-8'))
-        inc(it)
-    return list
-
-cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
-    list = []
-    it = cpp_vector.const_begin()
-    cdef cValuePtr value
-    while it != cpp_vector.const_end():
-        value = deref(it)
-        if is_a(deref(value).get_type(), types.Value):
-            list.append(createProtoAtom(value))
-        else:
-            # TODO: Support Atoms as members of LinkValue requires inheriting
-            # Atom from Value and constructor to create Atom from cHandle.
-            raise TypeError('Only Values are supported '
-                            'as members of LinkValue')
-        inc(it)
-    return list
-
-cdef cValue* get_value_ptr(Value protoAtom):
-    """Return plain C++ Value pointer, raise AttributeError if
-    pointer is nullptr"""
-    cdef cValue* ptr = protoAtom.shared_ptr.get()
-    if ptr == NULL:
-        raise AttributeError('Value contains NULL reference')
-    else:
-        return ptr
+    @staticmethod
+    cdef PtrHolder create(shared_ptr[void]& ptr):
+        """Factory method to construct PtrHolder from C++ shared_ptr"""
+        cdef PtrHolder ptr_holder = PtrHolder.__new__(PtrHolder)
+        ptr_holder.shared_ptr = ptr
+        return ptr_holder
 
 cdef class Value:
     """C++ Value object wrapper for Python clients"""
 
+    @staticmethod
+    cdef Value create(cValuePtr& ptr):
+        """Factory method to construct Value from C++ cValuePtr using
+        PtrHolder instance."""
+        return Value(PtrHolder.create(<shared_ptr[void]&>ptr))
+
+    def __init__(self, ptr_holder):
+        if (<PtrHolder>ptr_holder).shared_ptr.get() == NULL:
+            raise AttributeError('PtrHolder contains NULL reference')
+        self.ptr_holder = ptr_holder
+
+    cdef cValuePtr get_c_value_ptr(self):
+        """Return C++ shared_ptr from PtrHolder instance"""
+        return <cValuePtr&>(self.ptr_holder.shared_ptr)
+
     property type:
          def __get__(self):
-             return get_value_ptr(self).get_type()
+             return self.get_c_value_ptr().get().get_type()
 
     property type_name:
         def __get__(self):
@@ -73,23 +53,13 @@ cdef class Value:
         return is_a(self.type, type)
 
     def to_list(self):
-        if self.is_a(types.FloatValue):
-            return vector_of_doubles_to_list(
-                &((<cFloatValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.StringValue):
-            return vector_of_strings_to_list(
-                &((<cStringValue*>get_value_ptr(self)).value()))
-        elif self.is_a(types.LinkValue):
-            return vector_of_values_to_list(
-                &((<cLinkValue*>get_value_ptr(self)).value()))
-        else:
-            raise TypeError('Type {} is not supported'.format(self.type()))
+        raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
-        return get_value_ptr(self).to_string().decode('UTF-8')
+        return self.get_c_value_ptr().get().to_string().decode('UTF-8')
 
     def short_string(self):
-        return get_value_ptr(self).to_short_string().decode('UTF-8')
+        return self.get_c_value_ptr().get().to_short_string().decode('UTF-8')
 
     def __str__(self):
         return self.short_string()
@@ -101,8 +71,8 @@ cdef class Value:
         if not isinstance(other, Value):
             raise TypeError('Value cannot be compared with {}'
                             .format(type(other)))
-        cdef cValue* self_ptr = get_value_ptr(<Value>self)
-        cdef cValue* other_ptr = get_value_ptr(<Value>other)
+        cdef cValue* self_ptr = (<Value>self).get_c_value_ptr().get()
+        cdef cValue* other_ptr = (<Value>other).get_c_value_ptr().get()
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         elif op == Py_NE:

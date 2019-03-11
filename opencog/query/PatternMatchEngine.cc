@@ -24,16 +24,16 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
 
-
 using namespace opencog;
+
 /* ======================================================== */
 /**
  * Pattern Match Engine Overview
@@ -2197,6 +2197,20 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 /* ======================================================== */
 
 #ifdef DEBUG
+void PatternMatchEngine::print_solution(
+	const HandleMap &vars,
+	const HandleMap &clauses)
+{
+	Logger::Level save = logger().get_level();
+	logger().set_level("fine");
+	logger().set_timestamp_flag(false);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_print_level_flag(false);
+	log_solution(vars, clauses);
+
+	logger().set_level(save);
+}
+
 void PatternMatchEngine::log_solution(
 	const HandleMap &vars,
 	const HandleMap &clauses)

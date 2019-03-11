@@ -44,6 +44,7 @@ public:
 	void tearDown() {}
 
 	void test_equality();
+	void test_alpha();
 };
 
 #define N _as.add_node
@@ -100,6 +101,49 @@ void EqualLinkUTest::test_equality()
 
 	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
 	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test alpha-conversion equality
+void EqualLinkUTest::test_alpha()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle x_plus_2 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$x"), N(NUMBER_NODE, "2"));
+
+	Handle x_plus_3 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$x"), N(NUMBER_NODE, "3"));
+
+	Handle y_plus_3 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$y"), N(NUMBER_NODE, "3"));
+
+	Handle equal_23 = L(EQUAL_LINK, x_plus_2, x_plus_3);
+	Handle alpha_23 = L(ALPHA_EQUAL_LINK, x_plus_2, x_plus_3);
+	Handle equal_xx = L(EQUAL_LINK, x_plus_3, x_plus_3);
+	Handle alpha_xx = L(ALPHA_EQUAL_LINK, x_plus_3, x_plus_3);
+	Handle equal_xy = L(EQUAL_LINK, x_plus_3, y_plus_3);
+	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_23);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_23);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_xy);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_xy);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

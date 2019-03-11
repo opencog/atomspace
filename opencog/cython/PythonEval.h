@@ -78,13 +78,11 @@ class PythonEval : public GenericEval
         // Python utility functions
         PyObject* call_user_function(const std::string& func,
                                      Handle varargs);
-        void build_python_error_message(const char* function_name,
-                                        std::string& errorMessage);
+        std::string build_python_error_message(const std::string&);
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
-        void execute_string(const char* command);
-        int argument_count(PyObject* pyFunction);
+        std::string execute_string(const char* command);
         PyObject* find_object(const PyObject* pyModule,
                               const std::string& objectName);
         void module_for_function(const std::string& moduleFunction,
@@ -135,6 +133,7 @@ class PythonEval : public GenericEval
         std::string _result;
         int _paren_count;
         void eval_expr_line(const std::string&);
+        void throw_on_error();
 
     public:
         PythonEval(AtomSpace*);

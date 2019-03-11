@@ -1,11 +1,13 @@
 ;
-; A demonstration of using type signatures aka "deep types" during
-; pattern matching.  Type signatures are a way of specifying the type
-; of a hypergraph.  This can be used to restrict the search space during
-; a pattrn match: by default, types are checked during a search, and
-; variable groundings must respect the variable type.
+; type-signature.scm -- Using type signatures and type constructors.
 ;
-(use-modules (opencog) (opencog query) (opencog exec))
+; A demonstration of using type signatures during pattern matching.
+; Type signatures are a way of specifying the type of a hypergraph.
+; This can be used to restrict the search space during a pattern
+; match: by default, types are checked during a search, and variable
+; groundings must respect the variable type.
+;
+(use-modules (opencog) (opencog exec))
 
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))
@@ -46,31 +48,31 @@
 ; A more complex example
 
 ; More data:
-(EvaluationLink
+(Evaluation
 	(PredicateNode "foo")
-	(ListLink (ConceptNode "bingo") (ConceptNode "yes!")))
+	(List (ConceptNode "bingo") (ConceptNode "yes!")))
 
-(EvaluationLink
+(Evaluation
 	(AnchorNode "bar")
-	(ListLink (ConceptNode "hurrah") (ConceptNode "yay!")))
+	(List (ConceptNode "hurrah") (ConceptNode "yay!")))
 
-(EvaluationLink
+(Evaluation
 	(ConceptNode "baz")
-	(ListLink (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
+	(List (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
 
 ; A search pattern that looks for predicates or grounded predicates.
 (define predicate-search
-	(GetLink
+	(Get
 		(TypedVariable
 			(Variable "$x")
 			(Signature
-				(EvaluationLink
+				(Evaluation
 					(TypeChoice
-						(TypeNode "PredicateNode")
-						(TypeNode "AnchorNode"))
-					(ListLink
+						(Type "PredicateNode")
+						(Type "AnchorNode"))
+					(List
 						(Type "ConceptNode") (Type "ConceptNode")))))
-		(AndLink (Variable "$x"))))
+		(And (Variable "$x"))))
 
 (cog-execute! predicate-search)
 

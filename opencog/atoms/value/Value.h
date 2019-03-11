@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PROTO_ATOM_H
-#define _OPENCOG_PROTO_ATOM_H
+#ifndef _OPENCOG_VALUE_H
+#define _OPENCOG_VALUE_H
 
 #include <memory>
 #include <string>
@@ -67,7 +67,7 @@ public:
 	}
 
 	/**
-	 * Returns a string representation of the proto-atom.
+	 * Returns a string representation of the value.
 	 */
 	virtual std::string to_string(const std::string& indent) const = 0;
 	virtual std::string to_short_string(const std::string& indent) const
@@ -80,16 +80,16 @@ public:
 	std::string to_short_string() const { return to_short_string(""); }
 
 	/**
-	 * Returns whether two proto-atoms are equal.
+	 * Returns whether two values are equal.
 	 *
-	 * @return true if the proto-atoms are equal, false otherwise.
+	 * @return true if the values are equal, false otherwise.
 	 */
 	virtual bool operator==(const Value&) const = 0;
 
 	/**
-	 * Returns whether two proto-atoms are different.
+	 * Returns whether two values are different.
 	 *
-	 * @return true if the proto-atoms are different, false otherwise.
+	 * @return true if the values are different, false otherwise.
 	 */
 	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
@@ -97,7 +97,8 @@ public:
 
 typedef std::shared_ptr<Value> ValuePtr;
 
-typedef std::vector<ValuePtr> ProtomSeq;
+typedef std::vector<ValuePtr> ValueSeq;
+typedef std::set<ValuePtr> ValueSet;
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
@@ -105,6 +106,45 @@ typedef std::vector<ValuePtr> ProtomSeq;
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
+
+/**
+ * Cast ValuePtr to the specific Value subclass. This function is defined only
+ * for T which are subclasses of Value.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Value, T>::value, std::shared_ptr<T> >::type
+CastFromValue(const ValuePtr& value)
+{
+	return std::dynamic_pointer_cast<T>(value);
+}
+
+/**
+ * Cast specific Value subclass to ValuePtr. This function is defined only
+ * for T which are subclasses of Value.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Value, T>::value, ValuePtr >::type
+CastToValue(const std::shared_ptr<const T>& value)
+{
+	return std::dynamic_pointer_cast<Value>(std::const_pointer_cast<T>(value));
+}
+
+class Atom;
+
+/**
+ * Create Value of specific type using appropriate constructor. This function
+ * is defined only for T which are subclasses of Value.
+ */
+template<typename T, typename ... Args>
+static inline
+typename std::enable_if<
+	std::is_base_of<Value, T>::value && !std::is_base_of<Atom, T>::value,
+	std::shared_ptr<T> >::type
+createValue(Args&&... args) {
+	return std::make_shared<T>(std::forward<Args>(args)...);
+}
 
 /** @}*/
 } // namespace opencog
@@ -120,4 +160,4 @@ namespace std
     }
 } // ~namespace std
 
-#endif // _OPENCOG_PROTO_ATOM_H
+#endif // _OPENCOG_VALUE_H

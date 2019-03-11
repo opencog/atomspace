@@ -1,13 +1,13 @@
 ;
-; Probabilistic Finite State Machine (Markov Chain) Demo.
+; markov-chain.scm -- Probabilistic Finite State Machine (Markov Chain).
 ;
-; Based on fsm-full.scm, this defines a very simple four-state Markov
+; Based on `fsm-full.scm`, this defines a very simple four-state Markov
 ; chain, using the same states as the demo FSM's. The difference here is
-; that the transitions are specified probabilistically; mutiple
+; that the transitions are specified probabilistically; multiple
 ; transitions may occur; each transition has a fixed probability.
 ;
 ; Another way to look at this is an example of matrix multiplication.
-; The state of a Markov chain is a vector, and the state transtions
+; The state of a Markov chain is a vector, and the state transitions
 ; can be understood as a matrix (a Markov matrix, where the columns
 ; sum to one).  One iteration of the probabilistic state machine
 ; corresponds to one matrix multiplication.
@@ -15,61 +15,48 @@
 ; In either viewpoint, the numbers, which are probabilities, are
 ; stored in the "strength" portion of a SimpleTruthValue.
 ;
-; The run this, you probably need to do this:
-;
-; OCDIR=home/home/yourname/opencog
-; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
-;
-; Add the following to your ~/.guile file:
-; (add-to-load-path "/home/yourname/opencog/build")
-; (add-to-load-path "/home/yourname/opencog/opencog/scm")
+; The easiest way to run this is to load this file:
 ; (add-to-load-path ".")
-;
-; Start guile:
-; guile
-;
-; and then load this file:
 ; (load-from-path "markov-chain.scm")
 ;
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.
 
 (use-modules (opencog))
-(use-modules (opencog query))
 
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state
 ;; transition matrix.
-(define my-trans (ConceptNode "My Chain's Transition Rule"))
-(define my-state (AnchorNode "My Chain's Current State"))
-(define my-nexts (AnchorNode "My Chain's Next State"))
+(define my-trans (Concept "My Chain's Transition Rule"))
+(define my-state (Anchor "My Chain's Current State"))
+(define my-nexts (Anchor "My Chain's Next State"))
 
-;; The inital state of the Markov chain.  It starts with 100%
+;; The initial state of the Markov chain.  It starts with 100%
 ;; probability in this state.
-(ListLink (stv 1 1)
+( (stv 1 1)
 	my-state
-	(ConceptNode "initial state")
+	(Concept "initial state")
 )
-(ListLink (stv 0 1)
+( (stv 0 1)
 	my-state
-	(ConceptNode "green")
+	(Concept "green")
 )
-(ListLink (stv 0 1)
+( (stv 0 1)
 	my-state
-	(ConceptNode "yellow")
+	(Concept "yellow")
 )
-(ListLink (stv 0 1)
+( (stv 0 1)
 	my-state
-	(ConceptNode "red")
+	(Concept "red")
 )
 
 ;; --------------------------------------------------------------------
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The set of allowed state transitions.  Its a triangular cycle,
+;; of green going to yellow going to red going back to green.
+;; The initial state transitions into green (and is never visited again).
 ;;
 ;; Each rule is labelled with the "my-fsm", so that rules for
-;; different FSM's do not clash with one-another.  A ConextLink is used
+;; different FSM's do not clash with one-another.  A ContextLink is used
 ;; because that will allow this example to generalize: Context's are
 ;; usually used to  express conditional probabilities, so that
 ;;
@@ -77,91 +64,91 @@
 ;;         A
 ;;         B
 ;;
-;; representes the probibility of B contiditoned on A, and the TV holds
+;; represents the probability of B conditioned on A, and the TV holds
 ;; the numeric value for P(B|A).  In this case, A is the current state
-;; of the machine, and B the the next state of theh machine, so that P(B|A)
+;; of the machine, and B the the next state of the machine, so that P(B|A)
 ;; is the probability of transitioning to state B give that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
 ;;
 
-; Transition from initial to green with 90% proability.
+; Transition from initial to green with 90% probability.
 (ContextLink (stv 0.9 1)
-	(ConceptNode "initial state")
-	(ListLink
+	(Concept "initial state")
+	(
 		my-trans
-		(ConceptNode "green")
+		(Concept "green")
 	)
 )
 
 ; Transition from initial state to yellow with 10% probability.
 (ContextLink (stv 0.1 1)
-	(ConceptNode "initial state")
-	(ListLink
+	(Concept "initial state")
+	(
 		my-trans
-		(ConceptNode "yellow")
+		(Concept "yellow")
 	)
 )
 
 ; Stay in the initial state with probability zero
 (ContextLink (stv 0.0 1)
-	(ConceptNode "initial state")
-	(ListLink
+	(Concept "initial state")
+	(
 		my-trans
-		(ConceptNode "initial state")
+		(Concept "initial state")
 	)
 )
 
 ; Transition from green to yellow with 90% probability
 (ContextLink (stv 0.9 1)
-	(ConceptNode "green")
-	(ListLink
+	(Concept "green")
+	(
 		my-trans
-		(ConceptNode "yellow")
+		(Concept "yellow")
 	)
 )
 
 ; Transition from green to red with 10% probability
 (ContextLink (stv 0.1 1)
-	(ConceptNode "green")
-	(ListLink
+	(Concept "green")
+	(
 		my-trans
-		(ConceptNode "red")
+		(Concept "red")
 	)
 )
 
 ; Transition from yellow to red with 90% probability
 (ContextLink (stv 0.9 1)
-	(ConceptNode "yellow")
-	(ListLink
+	(Concept "yellow")
+	(
 		my-trans
-		(ConceptNode "red")
+		(Concept "red")
 	)
 )
 
 ; Transition from yellow to green with 10% probability
 (ContextLink (stv 0.1 1)
-	(ConceptNode "yellow")
-	(ListLink
+	(Concept "yellow")
+	(
 		my-trans
-		(ConceptNode "green")
+		(Concept "green")
 	)
 )
 
 ; Transition from red to green with 90% probability
 (ContextLink (stv 0.9 1)
-	(ConceptNode "red")
-	(ListLink
+	(Concept "red")
+	(
 		my-trans
-		(ConceptNode "green")
+		(Concept "green")
 	)
 )
 
 ; Stay in the red state with 10% probability
 (ContextLink (stv 0.1 1)
-	(ConceptNode "red")
-	(ListLink
+	(Concept "red")
+	(
 		my-trans
-		(ConceptNode "red")
+		(Concept "red")
 	)
 )
 
@@ -174,42 +161,42 @@
 ;;;
 (define (create-chain-stepper chain-name chain-next chain-state)
 	(define curr-state
-		(ListLink
+		(
 			chain-state
-			(VariableNode "$curr-state")
+			(Variable "$curr-state")
 		)
 	)
 	(define state-trans
 		(ContextLink
-			(VariableNode "$curr-state")
-			(ListLink
+			(Variable "$curr-state")
+			(
 				chain-name
-				(VariableNode "$next-state")
+				(Variable "$next-state")
 			)
 		)
 	)
 	(define next-state
-		(ListLink
+		(
 			chain-next
-			(VariableNode "$next-state")
+			(Variable "$next-state")
 		)
 	)
-	(BindLink
+	(Bind
 		;; We will need to find the current and the next state
 		(VariableList
-			(VariableNode "$curr-state")
-			(VariableNode "$next-state")
+			(Variable "$curr-state")
+			(Variable "$next-state")
 		)
-		(AndLink
+		(And
 			;; If we are in the current state ...
 			curr-state
 			;; ... and there is a transition to another state...
 			state-trans
 		)
 		;; ... then adjust the probability...
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: accum-probability")
-			(ListLink
+		(ExecutionOutput
+			(GroundedSchema "scm: accum-probability")
+			(
 				next-state
 				state-trans
 				curr-state
@@ -267,13 +254,13 @@
 ;;; 3) delete the next state-vector.
 ;;; The below implements steps 1 and 3
 (define (create-chain-deleter chain-state)
-	(BindLink
-		(VariableNode "$state")
+	(Bind
+		(Variable "$state")
         ;; Find the state vector...
-        (ListLink chain-state (VariableNode "$state"))
+        (List chain-state (Variable "$state"))
         ;; Delete the state vector.
-        (DeleteLink
-           (ListLink chain-state (VariableNode "$state"))
+        (Delete
+           (List chain-state (Variable "$state"))
 		)
 	)
 )
@@ -287,21 +274,21 @@
 	(begin (cog-set-tv! b (cog-tv a)) b))
 
 (define (create-chain-copier chain-to chain-from)
-	(BindLink
-		(VariableNode "$state")
+	(Bind
+		(Variable "$state")
         ;; Find the copy-from state vector...
-        (ListLink
+        (List
             chain-from
-            (VariableNode "$state")
+            (Variable "$state")
         )
         ;; Copy it to the copy-to state vector.
         ;; We need to use an execution-output link to copy
         ;; the tv values from one to the other.
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm:copy-tv")
-            (ListLink
-                (ListLink chain-to (VariableNode "$state"))
-                (ListLink chain-from (VariableNode "$state"))
+        (ExecutionOutput
+            (GroundedSchema "scm:copy-tv")
+            (List
+                (List chain-to (Variable "$state"))
+                (List chain-from (Variable "$state"))
 			)
 		)
 	)
@@ -312,33 +299,33 @@
 ;; This combines the copy and delete operation into one.
 ;; It should be a bit faster.
 (define (create-chain-move chain-to chain-from)
-	(BindLink
+	(Bind
 		; Constrain the allowed types on the variable;
 		; we only want to copy the actual state, and not
 		; (for example) the subgraphs of this link.
-		(TypedVariableLink
-			(VariableNode "$state")
-			(TypeNode "ConceptNode")
+		(TypedVariable
+			(Variable "$state")
+			(Type "Concept")
 		)
         ;; Find the copy-from state vector...
-        (ListLink
+        (List
             chain-from
-            (VariableNode "$state")
+            (Variable "$state")
 		)
-        (AndLink
+        (And
             ;; Copy it to the copy-to state vector.
             ;; We need to use an execution-output link to copy
             ;; the tv values from one to the other.
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm:copy-tv")
-                (ListLink
-                    (ListLink chain-to (VariableNode "$state"))
-                    (ListLink chain-from (VariableNode "$state"))
+            (ExecutionOutput
+                (GroundedSchema "scm:copy-tv")
+                (List
+                    (List chain-to (Variable "$state"))
+                    (List chain-from (Variable "$state"))
                 )
             )
             ;; Delete the copy-from state vector
-            (DeleteLink
-                (ListLink chain-from (VariableNode "$state"))
+            (Delete
+                (List chain-from (Variable "$state"))
 			)
 		)
 	)
@@ -348,28 +335,17 @@
 ;; Create a utility to show the state probabilities
 
 (define (show-state state-vect)
-	(define (get-tv atom)
-		(cog-tv (ListLink state-vect atom)))
+	(define (get-tv atom) (cog-tv (List state-vect atom)))
 
-	(display "State vector for ")
-	(display (cog-name state-vect))
-	(newline)
+	(format #t "State vector for ~A\n" (cog-name state-vect))
 
-	(display "Initial state: ")
-	(display (get-tv (ConceptNode "initial state")))
-	(newline)
+	(format #t "Initial state: ~A\n" (get-tv (Concept "initial state")))
 
-	(display "Green state: ")
-	(display (get-tv (ConceptNode "green")))
-	(newline)
+	(format #t "Green state: ~A\n" (get-tv (Concept "green")))
 
-	(display "Yellow state: ")
-	(display (get-tv (ConceptNode "yellow")))
-	(newline)
+	(format #t "Yellow state: ~A\n" (get-tv (Concept "yellow")))
 
-	(display "Red state: ")
-	(display (get-tv (ConceptNode "red")))
-	(newline)
+	(format #t "Red state: ~A\n" (get-tv (Concept "red")))
 )
 
 ;; --------------------------------------------------------------------

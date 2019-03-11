@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <dlfcn.h>
+
 #include "LibraryManager.h"
 
 using namespace opencog;
@@ -67,4 +69,45 @@ void* LibraryManager::getFunc(std::string libName, std::string funcName)
 	}
 
 	return sym;
+}
+
+void LibraryManager::lang_lib_fun(const std::string& schema,
+                                  std::string& lang,
+                                  std::string& lib,
+                                  std::string& fun)
+{
+	std::string::size_type pos = schema.find(":");
+	if (pos == std::string::npos)
+		return;
+
+	lang = schema.substr(0, pos);
+
+	// Move past the colon and strip leading white-space
+	do { pos++; } while (' ' == schema[pos]);
+
+	if (lang == "lib") {
+		// Get the name of the Library and Function. They should be
+		// separated by '\'. If no library the separator may be omitted.
+		std::size_t seppos = schema.find("\\");
+		if (seppos == std::string::npos) { // No library
+			lib = "";
+			fun = schema.substr(pos);
+		} else {                  // Possible library
+			lib = schema.substr(pos, seppos - pos);
+			fun = schema.substr(seppos + 1);
+		}
+	} else
+		fun = schema.substr(pos);
+}
+
+void opencog::setLocalSchema(std::string funcName,
+                             Handle* (*func)(AtomSpace *, Handle*))
+{
+	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
+}
+
+void opencog::setLocalPredicate(std::string funcName,
+                                TruthValuePtr* (*func)(AtomSpace *, Handle*))
+{
+   LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }

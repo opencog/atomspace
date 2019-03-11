@@ -26,9 +26,6 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/MapLink.h>
-#include <opencog/atoms/reduct/FoldLink.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "Instantiator.h"
 
@@ -98,6 +95,77 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 		}
 	}
 	return changed;
+}
+
+// ExecutionOutputLinks get special treatment.
+//
+// Even for the case of lazy execution, we still have to do eager
+// execution of the arguments passed to the ExOutLink.  This is
+// because the ExOutLink is a black box, and we cannot guess what
+// it might do.  It would be great if the authors of ExOutLinks
+// did the lazy execution themselves... but this is too much to
+// ask for. So we always eager-evaluate those args.
+Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
+{
+	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
+
+	// At this time, the GSN or the DSN is always in position 0
+	// of the outgoing set, and the ListLink of arguments is always
+	// in position 1.  Someday in the future, there may be a variable
+	// declaration; we punt on that.
+	Handle sn(eolp->get_schema());
+	Handle args(eolp->get_args());
+
+	// If its a DSN, obtain the correct body for it.
+	if (DEFINED_SCHEMA_NODE == sn->get_type())
+		sn = DefineLink::get_definition(sn);
+
+	// If its an anonymous function link, execute it here.
+	if (LAMBDA_LINK == sn->get_type())
+	{
+		LambdaLinkPtr flp(LambdaLinkCast(sn));
+
+		// Two-step process. First, plug the arguments into the
+		// function; i.e. perform beta-reduction. Second, actually
+		// execute the result. We execute by just calling walk_tree
+		// again.
+		Handle body(flp->get_body());
+		Variables vars(flp->get_variables());
+
+		// Perform substitution on the args, only.
+		if (_eager)
+		{
+			args = walk_tree(args, silent);
+		}
+		else
+		{
+			args = beta_reduce(args, *_vmap);
+		}
+		const Type& arg_type = args->get_type();
+		// unpack list link
+		const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
+		                                              HandleSeq{args});
+		Handle beta_reduced(vars.substitute_nocheck(body, oset));
+		return walk_tree(beta_reduced, silent);
+	}
+
+	// Perform substitution on the args, only.
+	if (_eager)
+	{
+		// XXX I don't get it ... something is broken here, because
+		// the ExecutionOutputLink below *also* performs eager
+		// execution of its arguments. So the step below should not
+		// be needed -- yet, it is ... Funny thing is, it only
+		// breaks the BackwardChainerUTest ... why?
+		args = walk_tree(args, silent);
+	}
+	else
+	{
+		args = beta_reduce(args, *_vmap);
+	}
+
+	Type t = expr->get_type();
+	return createLink(t, sn, args);
 }
 
 Handle Instantiator::walk_tree(const Handle& expr, bool silent)
@@ -210,12 +278,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (_eager)
 		{
 			ppp = PutLinkCast(expr);
-			// Execute the values in the PutLink before doing the
-			// beta-reduction. Execute the PutLink only after the
-			// beta-reduction has been done.
-			Handle pvals = ppp->get_values();
-			Handle gargs = walk_tree(pvals, silent);
-			if (gargs != pvals)
+			// Execute the arguments in the PutLink before doing
+			// the beta-reduction. Execute the PutLink only after
+			// the beta-reduction has been done.
+			Handle pargs = ppp->get_arguments();
+			Handle gargs = walk_tree(pargs, silent);
+			if (gargs != pargs)
 			{
 				HandleSeq groset;
 				if (ppp->get_vardecl())
@@ -250,9 +318,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step three: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
 		// result has a GroundedPredicateNode, we need to run it now.
-		// We do, however, ignore the resulting TV, which is also
-		// awkward.  I'm confused about how to handle this best.
-		// The behavior tree uses this!
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		//
 		// The DontExecLink is a weird hack to halt evaluation.
@@ -271,7 +336,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				else
 				{
 					try {
-						EvaluationLink::do_evaluate(_as, plo, true);
+						TruthValuePtr tvp =
+							EvaluationLink::do_evaluate(_as, plo, true);
+						plo->setTruthValue(tvp);
 					}
 					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
@@ -335,75 +402,17 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return expr;
 	}
 
-	// ExecutionOutputLinks get special treatment.
-	//
-	// Even for the case of lazy execution, we still have to do eager
-	// execution of the arguments passed to the ExOutLink.  This is
-	// because the ExOutLink is a black box, and we cannot guess what
-	// it might do.  It would be great if the authors of ExOutLinks
-	// did the lazy execution themselves... but this is too much to
-	// ask for. So we always eager-evaluate those args.
-	if (EXECUTION_OUTPUT_LINK == t)
+	// ExecutionOutputLinks
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
-		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-
-		// At this time, the GSN or the DSN is always in position 0
-		// of the outgoing set, and the ListLink of arguments is always
-		// in position 1.  Someday in the future, there may be a variable
-		// declaration; we punt on that.
-		Handle sn(eolp->get_schema());
-		Handle args(eolp->get_args());
-
-		// If its a DSN, obtain the correct body for it.
-		if (DEFINED_SCHEMA_NODE == sn->get_type())
-			sn = DefineLink::get_definition(sn);
-
-		// If its an anonymous function link, execute it here.
-		if (LAMBDA_LINK == sn->get_type())
+		Handle eolh = reduce_exout(expr, silent);
+		t = eolh->get_type();
+		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		{
-			LambdaLinkPtr flp(LambdaLinkCast(sn));
-
-			// Two-step process. First, plug the arguments into the
-			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_tree
-			// again.
-			Handle body(flp->get_body());
-			Variables vars(flp->get_variables());
-
-			// Perform substitution on the args, only.
-			if (_eager)
-			{
-				args = walk_tree(args, silent);
-			}
-			else
-			{
-				args = beta_reduce(args, *_vmap);
-			}
-			const Type& arg_type = args->get_type();
-			// unpack list link
-			const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
-			                                              HandleSeq{args});
-			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree(beta_reduced, silent);
+			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
+			return HandleCast(geolp->execute(_as, silent));
 		}
-
-		// Perform substitution on the args, only.
-		if (_eager)
-		{
-			// XXX I don't get it ... something is broken here, because
-			// the ExecutionOutputLink below *also* performs eager
-			// execution of its arguments. So the step below should not
-			// be needed -- yet, it is ... Funny thing is, it only
-			// breaks the BackwardChainerUTest ... why?
-			args = walk_tree(args, silent);
-		}
-		else
-		{
-			args = beta_reduce(args, *_vmap);
-		}
-
-		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
-		return geolp->execute(_as, silent);
+		return eolh;
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -419,22 +428,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				_as->remove_atom(h, true);
 		}
 		return Handle::UNDEFINED;
-	}
-
-	if (MAP_LINK == t)
-	{
-		if (_eager)
-		{
-			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-			MapLinkPtr mlp(MapLinkCast(createLink(oset_results, t)));
-			return mlp->execute(_as);
-		}
-		else
-		{
-			MapLinkPtr mlp(MapLinkCast(expr));
-			return mlp->execute(_as);
-		}
 	}
 
 	// Fire any other function links, not handled above.
@@ -454,8 +447,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
-			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-			return HandleCast(flp->execute());
+			Handle flp(createLink(oset_results, t));
+			return HandleCast(flp->execute(_as, silent));
 		}
 		else
 		{
@@ -464,16 +457,15 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			return HandleCast(flp->execute());
+			return HandleCast(expr->execute(_as, silent));
 		}
 	}
 
 	// If there is a SatisfyingLink, we have to perform it
-	// and return the saisfying set.
+	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return satisfying_set(_as, expr);
+		return HandleCast(expr->execute(_as, silent));
 	}
 
 	// Ideally, we should not evaluate any EvaluatableLinks.
@@ -490,6 +482,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
+	}
+
+	// Do not reduce PredicateFormulaLink. That is because it contains
+	// formulas that we will need to re-evaluate in the future, so we
+	// must not clobber them.
+	if (PREDICATE_FORMULA_LINK == t)
+	{
+		return expr;
 	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
@@ -548,8 +548,8 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                       const HandleMap &vars,
-                                       bool silent)
+                                   const HandleMap &vars,
+                                   bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
@@ -571,7 +571,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// hold off on a "good fix", until the instantiate-to-values
 	// experiment progresses further.  More generally, there are
 	// several blockers:
-	// * Circular shared-lib dependencies prevent lazy evaluation
 	// * The need to instantiate in an atomspace (viz GetLink)
 	//   impedes lazy evaluations.
 	Type t = expr->get_type();
@@ -598,43 +597,107 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 				if (hg) oset_results.push_back(hg);
 			}
 		}
-		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-		ValuePtr pap(flp->execute());
+		Handle flp(createLink(oset_results, t));
+		ValuePtr pap(flp->execute(_as, silent));
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
 	}
 
+	// If there is a SatisfyingLink, we have to perform it
+	// and return the satisfying set.
+	if (nameserver().isA(t, SATISFYING_LINK))
+	{
+		return expr->execute(_as, silent);
+	}
+
+	// ExecutionOutputLinks
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+	{
+		Handle eolh = reduce_exout(expr, silent);
+		t = eolh->get_type();
+		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		{
+			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
+			return geolp->execute(_as, silent);
+		}
+		return eolh;
+	}
+
+	// The thread-links are ambiguously executable/evaluatable.
+	if (nameserver().isA(t, PARALLEL_LINK))
+	{
+		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+	}
+
 	// Instantiate.
 	Handle grounded(walk_tree(expr, silent));
-
-#if NICE_IDEA_BUT_FAILS
-	// As above: if the result of execution is an evaluatable link,
-	// viz, something that could return a truth value when evaluated,
-	// then do the evaluation now, on the spot, and return the truth
-	// value.  XXX Again, just like above, this is kind-of-ish hacky
-	// to do it here. More correctly, this would need to be done
-	// in-line, in the walk_tree() code. Right now, we cannot actually
-	// do this, as (1) it would be inefficient, as it requires lots
-	// of casts to and from Handle, and (2) at least ten unit tests fail.
-	// The unit tests would need to be reviewed on a case-by-case basis,
-	// and design/architecture changes would need to be made.
-	t = grounded->get_type();
-	if (TRUTH_VALUE_OF_LINK == t or
-	    EQUAL_LINK == t or
-	    GREATER_THAN_LINK == t)
-	{
-		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
-		ValuePtr pap(ValueCast(tvp));
-		return pap;
-	}
-#endif
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
+	// XXX FIXME Can we defer the addition to the atomspace to an even
+	// later time??
 	return _as->add_atom(grounded);
+}
+
+ValuePtr Instantiator::execute(const Handle& expr, bool silent)
+{
+	// Since we do not actually instantiate anything, we should not
+	// consume quotations. (as it might change the semantics. (Huh ??))
+	_consume_quotations = false;
+
+	// XXX FIXME, since the variable map is empty, maybe we can do
+	// something more efficient, here?
+	ValuePtr vp(instantiate(expr, HandleMap(), silent));
+
+#if NICE_IDEA_BUT_FAILS
+	// If the result of execution is an evaluatable link, viz, something
+	// that could return a truth value when evaluated, then do the
+	// evaluation now, on the spot, and return the truth value.
+	// There are several problems with this; the biggest is that
+	// about 1/4th of the unit tests fail (39 out of 138). So just
+	// collapsing the evaluatable/executable hierarchies into one
+	// is not possible, without clarifying a lot of the back-n-forth
+	// implicit casting, movement of data...
+	//
+	// That is, the current design of Atomese makes a large number
+	// of implicit decisions about when things should and should not
+	// be evaluated. Many of these decisions are buried in the link-types
+	// themselves. Most of these implicit behaviors seem "natural", but
+	// they also do not adhere to any grand plan ... its ad-hoc.
+	// Thus, we cannot just mash together evaluation and execution
+	// without reviewing all of these implicit and "natural" behaviors
+	// and maybe modifying them.  For example, maybe we need some
+	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
+	// to force evaluation/executation at crtain points, instead of
+	// just making it all implicit. Or maybe there is some other,
+	// better design...
+
+	// Evaluate, if possible.
+	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
+	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
+
+	// Evaluate, crisp-binary-boolean tv links, if possible.
+	// This actually passes unit tests, but seems pointless, without
+	// some corresponding grand design that unifies things correctly.
+	if (vp)
+	{
+		Type t = vp->get_type();
+		if (EQUAL_LINK == t or
+		    IDENTICAL_LINK == t or
+		    GREATER_THAN_LINK == t)
+		{
+			Handle h(HandleCast(vp));
+			TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, h));
+			ValuePtr pap(ValueCast(tvp));
+			return pap;
+		}
+	}
+#endif
+
+	return vp;
 }
 
 /* ===================== END OF FILE ===================== */

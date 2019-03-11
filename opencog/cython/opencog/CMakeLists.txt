@@ -60,9 +60,11 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 	OUTPUT_NAME logger)
 
 ###################### atomspace ####################################
+
 CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "nameserver.pyx" "truth_value.pyx"
-	"atomspace_details.pyx" "value.pyx" opencog_atom_types
+	"atomspace_details.pyx" "value.pyx" "float_value.pyx" "string_value.pyx"
+	"link_value.pyx" opencog_atom_types
 	"../../atoms/truthvalue/TruthValue.h" "../../atoms/truthvalue/SimpleTruthValue.h"
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
@@ -73,7 +75,6 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
-	Cast.cc
 	atomspace.cpp
 )
 
@@ -89,19 +90,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
-	attentionbank
-	execution
 	atomspace
-	atomutils
-	clearbox
-	atomspaceutils
-	truthvalue
-	atomcore
-	atomspace
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -113,13 +103,14 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
-	Cast.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
 ############################## type constructors #####################
+
 CYTHON_ADD_MODULE_PYX(type_constructors
-	"atomspace.pxd" opencog_atom_types )
+	"atomspace.pxd" opencog_atom_types
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
 
@@ -128,6 +119,7 @@ ADD_LIBRARY(type_constructors
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
+	${NO_AS_NEEDED}
 	atomspace
 	${PYTHON_LIBRARIES}
 )
@@ -138,8 +130,10 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 
 
 ############################## utilities #####################
+
 CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" opencog_atom_types )
+	"atomspace.pxd" opencog_atom_types
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
 
@@ -150,13 +144,9 @@ ADD_LIBRARY(utilities_cython
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
-	clearbox
 	atomspace
 	type_constructors
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
@@ -164,9 +154,11 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	OUTPUT_NAME utilities)
 
 ############################## bindlink #####################
+
 CYTHON_ADD_MODULE_PYX(bindlink
-	"atomspace.pxd" opencog_atom_types
-	"../../query/BindLinkAPI.h")
+	"atomspace.pxd"
+	opencog_atom_types
+)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
@@ -177,11 +169,8 @@ ADD_LIBRARY(bindlink_cython
 
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
-	query
-	execution
+	atomspace
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
@@ -198,21 +187,25 @@ INSTALL (TARGETS
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
+
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../load-file.h")
+		"load-file.h"
+		"PyScheme.h"
+		"atomspace.pxd"
+		opencog_atom_types
+	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 	ADD_LIBRARY(scheme_wrapper
+		load-file
 		PyScheme
 		scheme_wrapper.cpp
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		atomspace_cython
-		query
-		execution
+		atomspace
 		smob
 		${PYTHON_LIBRARIES}
 	)
@@ -226,34 +219,40 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
-##################### backward chainer #####################
-CYTHON_ADD_MODULE_PYX(backwardchainer "backwardchainer.pxd" opencog_atom_types
-	                      "../../rule-engine/backwardchainer/BackwardChainer.h" ruleengine)
+##################### URE #####################
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "backwardchainer.cpp")
-
-# opencog.backwardchainer Python bindings
-ADD_LIBRARY(backwardchainer_cython
-        backwardchainer.cpp
-)
-
-TARGET_LINK_LIBRARIES(backwardchainer_cython
-        atomspace_cython
-        type_constructors
+CYTHON_ADD_MODULE_PYX(ure
+	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
+	opencog_atom_types
+	"../../rule-engine/forwardchainer/ForwardChainer.h"
+	"../../rule-engine/backwardchainer/BackwardChainer.h"
 	ruleengine
-        ${COGUTIL_LIBRARY}
-        ${PYTHON_LIBRARIES}
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
 )
 
-SET_TARGET_PROPERTIES(backwardchainer_cython PROPERTIES
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
+
+# opencog.ure Python bindings
+ADD_LIBRARY(ure_cython
+	ure.cpp
+)
+
+TARGET_LINK_LIBRARIES(ure_cython
+	atomspace_cython
+	type_constructors
+	ruleengine
+	${PYTHON_LIBRARIES}
+)
+
+SET_TARGET_PROPERTIES(ure_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME backwardchainer)
+	OUTPUT_NAME ure)
 
 INSTALL (TARGETS
-	backwardchainer_cython
+	ure_cython
 	DESTINATION "${PYTHON_DEST}")
+
+##################################################
+# Tell python where to find modules.
 
 INSTALL (FILES
 	__init__.py

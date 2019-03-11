@@ -12,10 +12,9 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	atomspace
+	persist
+	persist-sql
 	smob
-	clearbox
-	execution
-	${GUILE_LIBRARIES}
 )
 
 ADD_CXXTEST(VectorAPIUTest)

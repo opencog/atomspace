@@ -4,7 +4,7 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass amsart
+\textclass article
 \begin_preamble
 \usepackage{url} 
 
@@ -96,6 +96,15 @@ Sheaves: A Topological Approach to Big Data
 
 \begin_layout Author
 Linas Vepštas
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
@@ -118,6 +127,41 @@ This document develops general concepts useful for extracting knowledge
  of a sheaf.
  In essence, this paper introduces the basic concepts of sheaf theory into
  the domain of graphical datasets.
+\end_layout
+
+\begin_layout Abstract
+DRAFT: This is an unfinished draft; the last 1/4th of the document needs
+ a complete make-over.
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+Hanson Robotics; SingularityNET; <linasvepstas@gmail.com>
+\end_layout
+
+\begin_layout Address
+ACM Subject Classification:
+\begin_inset Newline newline
+\end_inset
+
+• Theory of computation—Models of computation;500,
+\begin_inset Newline newline
+\end_inset
+
+• Theory of computation—Formal languages and automata theory—Grammars and
+ context-free languages;500,
+\begin_inset Newline newline
+\end_inset
+
+• Theory of computation—Design and analysis of algorithms—Graph algorithms
+ analysis;500
 \end_layout
 
 \begin_layout Section*
@@ -317,7 +361,7 @@ After this comes a lighting review of how data mining, pattern mining and
  algorithms implement the gluing axiom of sheaves, viz, that gluing and
  parsing are the same thing.
  The final part examines polymorphic behavior.
- Polymoprhism is that point where syntax begins to touch semantics, where
+ Polymorphism is that point where syntax begins to touch semantics, where
  deep structure becomes distinguished from surface structure.
 \end_layout
 
@@ -1210,7 +1254,7 @@ Why sections?
 \end_layout
 
 \begin_layout Standard
-Whats the point of introducing this seemingly non-standard approach to something
+What's the point of introducing this seemingly non-standard approach to something
  that looks a lot like graph theory? There are several reasons.
 \end_layout
 
@@ -2618,7 +2662,7 @@ error correcting code
 \begin_inset Quotes erd
 \end_inset
 
-, is a process by which the validity of the dashed red path is checked,
+, is a process by which the validity of the dashed green path is checked,
  and failing paths discarded.
  For natural language, the dashed red path must be a grammatically correct
  sequence of words.
@@ -4667,7 +4711,7 @@ fly
 
 , one above another.
  Each phrase or section can be visualized as a botanical branch or botanical
- leaf branching off the central stalk.The projection of all of the stalks
+ leaf branching off the central stalk. The projection of all of the stalks
  obtained from collocation is shown below, in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -6099,7 +6143,7 @@ The general sheaf, as depicted here, holds much more data than just the
  might be a challenge.
  The stalk field is meant to be a half-way point: it can hold more information
  than the base alone, but still be computationally manageable.
- For example, the sme dataset discussed previously, containing 10 million
+ For example, the same dataset discussed previously, containing 10 million
  sentences composed of 130K words has been found to contain 6 million seeds;
  these are observed on average of 2.5 times each, although the distribution
  is roughly Zipfian: a few are observed hundreds of thousands of times,
@@ -6166,7 +6210,7 @@ all the same
 \end_inset
 
 : examples of molecules.
- In practice, forcing such unification seems to be a loosing proposition.
+ In practice, forcing such unification seems to be a losing proposition.
  The goal of the technology here is to detect, observe and model fine details
  of structure, and not to mash everything into one bag.
 \end_layout
@@ -6524,7 +6568,7 @@ In the above, the notation
 \begin_inset Formula $V$
 \end_inset
 
- of the base space
+ of the base space 
 \begin_inset Formula $B$
 \end_inset
 
@@ -6662,10 +6706,11 @@ In the above, the phrase
 \begin_layout Standard
 Gluing is perhaps not as trivial as it sounds.
  It will be seen later on that gluing is essentially the same thing as parsing.
- Obtaining a successful parse is the same thing as obtained a valid section.
+ Obtaining a successful parse is the same thing as assembling a valid section
+ ut of the parts.
  In the case of natural language, a parse succeeds if and only if a sentence
  is grammatically valid.
- But of course! the sections of a natural language sheaf are exactly the
+ But of course! The sections of a natural language sheaf are exactly the
  grammatical sentences.
 \end_layout
 
@@ -6870,16 +6915,25 @@ If one considers biochemistry, and use the Krebs cycle (the citric acid
  This is a loop; it's essentially exothermic, or a kind of pump, in that
  the loop always goes around in one direction.
  The edges are directional.
- Its a cycle not only in a biological sense, but also in th mathematical
+ Its a cycle not only in a biological sense, but also in the mathematical
  sense: it can be considered to be the boundary of a 2-cell.
  The Krebs cycle is not the only cycle in biochemistry, and many of these
  cycles share common edges.
  In essence, there's a whole bunch of 2-cells in biochemistry, and they're
  all tangent to one-another.
  That is, there are chain complexes in biochemistry.
- What's their homology? Are there 3-cells in biochemistry? I suspect that
- this question has not been asked before, or that its answer is unknown.
- Perhaps this is not a surprise; we have not had the tools to 
+ Is there interesting homology? Perhaps not, as this would require some
+ 2-cells to run 
+\begin_inset Quotes eld
+\end_inset
+
+backwards
+\begin_inset Quotes erd
+\end_inset
+
+, and that seems unlikely.
+ That would imply that there are no 3-cells in biochemistry.
+ But who knows; we have not had the tools to 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7453,8 +7507,68 @@ er divergence are popular.
 \end_layout
 
 \begin_layout Standard
-Why might this work? Well, this correlation matrix embodies the very meaning
- of 
+Why might this work? The point is that if 
+\begin_inset Formula $\lnot actions$
+\end_inset
+
+ contains words like 
+\begin_inset Formula $book$
+\end_inset
+
+ or 
+\begin_inset Formula $tree$
+\end_inset
+
+, then sentences like 
+\begin_inset Quotes eld
+\end_inset
+
+Mary book
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Adam tree
+\begin_inset Quotes erd
+\end_inset
+
+ are not likely to be observed; if 
+\begin_inset Formula $\lnot names$
+\end_inset
+
+ includes words like 
+\begin_inset Formula $green$
+\end_inset
+
+ or 
+\begin_inset Formula $the$
+\end_inset
+
+, then sentences like 
+\begin_inset Quotes eld
+\end_inset
+
+green walked
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+the ran
+\begin_inset Quotes erd
+\end_inset
+
+ should be rare.
+ 
+\end_layout
+
+\begin_layout Standard
+The correlation matrix embodies the very meaning of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7474,8 +7588,9 @@ diagonalization
 \end_inset
 
 ? Well, probably not.
- The correlation there might be low or non-existent.
- It might be hard to compute, and, in the current context, its seems not
+ The correlation there might be low - pairs would be inconsistent as to
+ how compatible they are.
+ It might be hard to compute, and, in the current context, it seems not
  to be wanted.
 \end_layout
 
@@ -8033,6 +8148,25 @@ x
 
 \begin_layout Standard
 foo
+\end_layout
+
+\begin_layout Standard
+orig neural net: 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+More
+\end_layout
+
+\begin_layout Standard
+This: https://becominghuman.ai/how-does-word2vecs-skip-gram-work-f92e0525def4
 \end_layout
 
 \begin_layout Subsection*
@@ -9195,7 +9329,7 @@ cture grammars (HPSG) are essentially isomorphic.
 The final step is to realize that most introductory textbooks describe parsers
  for a context-free grammar, and that, for general instructional purposes,
  such parsers are sufficient to work with HPSG.
- The priamry issue with HPSG and context-free language parsers is that they
+ The primary issue with HPSG and context-free language parsers is that they
  obscure the notion of linking together pieces; this is one reason why dependenc
 y grammars are often favored: they make clear that it is the linkage between
  various words that has a primary psychological role in the human understanding
@@ -9621,7 +9755,7 @@ parts of speech
 
 , but they are hyperfine-grained.
  The count is overwhelming.
- So, although it is techinically correct to call them 
+ So, although it is technically correct to call them 
 \begin_inset Quotes eld
 \end_inset
 

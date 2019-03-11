@@ -52,7 +52,7 @@ TruthValueOfLink::TruthValueOfLink(const Link &l)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the TruthValue
-ValuePtr TruthValueOfLink::execute() const
+ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
 	if (1 != ary)
@@ -61,6 +61,102 @@ ValuePtr TruthValueOfLink::execute() const
 	return ValueCast(_outgoing[0]->getTruthValue());
 }
 
+// =============================================================
+
+StrengthOfLink::StrengthOfLink(const HandleSeq& oset, Type t)
+	: ValueOfLink(oset, t)
+{
+	if (not nameserver().isA(t, STRENGTH_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an StrengthOfLink, got %s", tname.c_str());
+	}
+}
+
+StrengthOfLink::StrengthOfLink(const Link &l)
+	: ValueOfLink(l)
+{
+	// Type must be as expected
+	Type tscope = l.get_type();
+	if (not nameserver().isA(tscope, STRENGTH_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an StrengthOfLink, got %s", tname.c_str());
+	}
+}
+
+// ---------------------------------------------------------------
+
+/// When executed, this will return the Strengths of all of the
+/// atoms in the outgoing set.
+ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
+{
+	std::vector<double> strengths;
+
+	for (const Handle& h : _outgoing)
+	{
+		// Cannot take the strength of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
+		strengths.push_back(h->getTruthValue()->get_mean());
+	}
+
+	return createFloatValue(strengths);
+}
+
+// =============================================================
+
+ConfidenceOfLink::ConfidenceOfLink(const HandleSeq& oset, Type t)
+	: ValueOfLink(oset, t)
+{
+	if (not nameserver().isA(t, CONFIDENCE_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an ConfidenceOfLink, got %s", tname.c_str());
+	}
+}
+
+ConfidenceOfLink::ConfidenceOfLink(const Link &l)
+	: ValueOfLink(l)
+{
+	// Type must be as expected
+	Type tscope = l.get_type();
+	if (not nameserver().isA(tscope, CONFIDENCE_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an ConfidenceOfLink, got %s", tname.c_str());
+	}
+}
+
+// ---------------------------------------------------------------
+
+/// When executed, this will return the Confidences of all of the
+/// atoms in the outgoing set.
+ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
+{
+	std::vector<double> confids;
+
+	for (const Handle& h : _outgoing)
+	{
+		// Cannot take the confidence of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
+		confids.push_back(h->getTruthValue()->get_confidence());
+	}
+
+	return createFloatValue(confids);
+}
+
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)
+DEFINE_LINK_FACTORY(StrengthOfLink, STRENGTH_OF_LINK)
+DEFINE_LINK_FACTORY(ConfidenceOfLink, CONFIDENCE_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

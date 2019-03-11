@@ -1,5 +1,5 @@
 ;
-; Very Simple Finite State Machine (FSM) Demo.
+; fsm-basic.scm -- Very Simple Finite State Machine (FSM) Demo.
 ;
 ; This defines a very simple four-state finite state machine: an initial
 ; state, and a cycle of three state: green, yellow, red. It then uses a
@@ -10,65 +10,45 @@
 ; truly general-purpose FSM, in such a way that multiple FSM's can be run
 ; at the same time.
 ;
-; The run this, you probably need to do this:
-;
-; OCDIR=home/home/yourname/opencog
-; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
-;
-; Add the following to your ~/.guile file:
-; (add-to-load-path "/home/yourname/opencog/build")
-; (add-to-load-path "/home/yourname/opencog/opencog/scm")
-; (add-to-load-path ".")
-;
-; Start guile:
-; guile
-;
-; and then load this file:
-; (load-from-path "fsm-basic.scm")
-;
-; Then, scroll to the bottom, and some of the commented-out
-; examples.
-
 (use-modules (opencog))
-(use-modules (opencog query))
 
 ;; Set of possible states of the state machine.
 ;; The definition of this set is not strictly needed; it is not used
 ;; for anything in the demo code below.
-(SetLink
-	(ConceptNode "initial state")
-	(ConceptNode "green")
-	(ConceptNode "yellow")
-	(ConceptNode "red")
+(Set
+	(Concept "initial state")
+	(Concept "green")
+	(Concept "yellow")
+	(Concept "red")
 )
 
-;; The inital state of the FSM
-(ListLink
-	(AnchorNode "Current State")
-	(ConceptNode "initial state")
+;; The initial state of the FSM
+(List
+	(Anchor "Current State")
+	(Concept "initial state")
 )
 
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
-(ListLink
-	(ConceptNode "initial state")
-	(ConceptNode "green")
+;; The set of allowed state transitions.  Its a triangular cycle,
+;; of green going to yellow going to red going back to green.
+;; The initial state transitions into green (and is never visited again).
+(List
+	(Concept "initial state")
+	(Concept "green")
 )
 
-(ListLink
-	(ConceptNode "green")
-	(ConceptNode "yellow")
+(List
+	(Concept "green")
+	(Concept "yellow")
 )
 
-(ListLink
-	(ConceptNode "yellow")
-	(ConceptNode "red")
+(List
+	(Concept "yellow")
+	(Concept "red")
 )
 
-(ListLink
-	(ConceptNode "red")
-	(ConceptNode "green")
+(List
+	(Concept "red")
+	(Concept "green")
 )
 
 
@@ -85,35 +65,35 @@
 ;;; the transition rules for one machine would not get used accidentally
 ;;; for another machine.
 (define take-one-step
-	(BindLink
+	(Bind
 		;; We will need to find the current and the next state
 		(VariableList
-			(VariableNode "$curr-state")
-			(VariableNode "$next-state")
+			(Variable "$curr-state")
+			(Variable "$next-state")
 		)
-		(AndLink
+		(And
 			;; If we are in the current state ...
-			(ListLink
-				(AnchorNode "Current State")
-				(VariableNode "$curr-state")
+			(List
+				(Anchor "Current State")
+				(Variable "$curr-state")
 			)
 			;; ... and there is a transition to another state...
-			(ListLink
-				(VariableNode "$curr-state")
-				(VariableNode "$next-state")
+			(List
+				(Variable "$curr-state")
+				(Variable "$next-state")
 			)
 		)
-		(AndLink
-			;; ... then transistion to the next state ...
-			(ListLink
-				(AnchorNode "Current State")
-				(VariableNode "$next-state")
+		(And
+			;; ... then transition to the next state ...
+			(List
+				(Anchor "Current State")
+				(Variable "$next-state")
 			)
 			;; ... and leave the current state.
-			(DeleteLink
-				(ListLink
-					(AnchorNode "Current State")
-					(VariableNode "$curr-state")
+			(Delete
+				(List
+					(Anchor "Current State")
+					(Variable "$curr-state")
 				)
 			)
 		)
@@ -121,10 +101,10 @@
 )
 
 ;; Take on step of the FSM
-;(cog-bind-single take-one-step)
+;(cog-execute! take-one-step)
 ;
 ;;; Take three more steps;
-;;; Try it!  See what appens!
-;(cog-bind-single take-one-step)
-;(cog-bind-single take-one-step)
-;(cog-bind-single take-one-step)
+;;; Try it!  See what happens!
+;(cog-execute! take-one-step)
+;(cog-execute! take-one-step)
+;(cog-execute! take-one-step)

@@ -39,8 +39,8 @@ public:
 	TruthValueOfLink(const HandleSeq&, Type=TRUTH_VALUE_OF_LINK);
 	TruthValueOfLink(const Link &l);
 
-	// Return a pointer to the atom being specified.
-	virtual ValuePtr execute() const;
+	// Return a pointer to the extracted value.
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
@@ -52,6 +52,56 @@ static inline TruthValueOfLinkPtr TruthValueOfLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TruthValueOfLink>(a); }
 
 #define createTruthValueOfLink std::make_shared<TruthValueOfLink>
+
+// ====================================================================
+
+/// The StrengthOfLink returns the strength of a truth value on the
+/// indicated atom. (Strength is the first of the sequence of floats).
+///
+class StrengthOfLink : public ValueOfLink
+{
+public:
+	StrengthOfLink(const HandleSeq&, Type=STRENGTH_OF_LINK);
+	StrengthOfLink(const Link &l);
+
+	// Return a pointer to the extracted value.
+	virtual ValuePtr execute(AtomSpace*, bool);
+
+	static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<StrengthOfLink> StrengthOfLinkPtr;
+static inline StrengthOfLinkPtr StrengthOfLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<StrengthOfLink>(h); }
+static inline StrengthOfLinkPtr StrengthOfLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<StrengthOfLink>(a); }
+
+#define createStrengthOfLink std::make_shared<StrengthOfLink>
+
+// ====================================================================
+
+/// The ConfidenceOfLink returns the confidence of a truth value on the
+/// indicated atom. (Confidence is the first of the sequence of floats).
+///
+class ConfidenceOfLink : public ValueOfLink
+{
+public:
+	ConfidenceOfLink(const HandleSeq&, Type=CONFIDENCE_OF_LINK);
+	ConfidenceOfLink(const Link &l);
+
+	// Return a pointer to the extracted value.
+	virtual ValuePtr execute(AtomSpace*, bool);
+
+	static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<ConfidenceOfLink> ConfidenceOfLinkPtr;
+static inline ConfidenceOfLinkPtr ConfidenceOfLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<ConfidenceOfLink>(h); }
+static inline ConfidenceOfLinkPtr ConfidenceOfLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ConfidenceOfLink>(a); }
+
+#define createConfidenceOfLink std::make_shared<ConfidenceOfLink>
 
 /** @}*/
 }

@@ -35,6 +35,8 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Handle.h>
 
+class ClassServerUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -47,6 +49,8 @@ namespace opencog
  */
 class ClassServer
 {
+    friend class ::ClassServerUTest;
+
 public:
     // Currently, we provide factories only for atoms, not for
     // values. TruthValues could use a factory, but, for now,
@@ -73,9 +77,12 @@ private:
     mutable std::vector<AtomFactory*> _atomFactory;
     mutable std::vector<Validator*> _validator;
 
-    void spliceFactory(Type, AtomFactory*);
+    template<typename T>
+    void splice(std::vector<T>&, Type, T);
 
     const NameServer & _nameServer;
+
+    AtomFactory* getFactory(Type) const;
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
@@ -85,7 +92,6 @@ public:
      * Declare a factory for an atom type.
      */
     void addFactory(Type, AtomFactory*);
-    AtomFactory* getFactory(Type) const;
 
     /**
      * Declare a validator for an atom type.
@@ -102,6 +108,9 @@ public:
 
 ClassServer& classserver();
 
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+
 #define DEFINE_LINK_FACTORY(CNAME,CTYPE)                          \
                                                                   \
 Handle CNAME::factory(const Handle& base)                         \
@@ -109,21 +118,13 @@ Handle CNAME::factory(const Handle& base)                         \
    /* If it's castable, nothing to do. */                         \
    if (CNAME##Cast(base)) return base;                            \
                                                                   \
-   /* Look to see if we have static typechecking to do */         \
-   ClassServer::Validator* checker =                              \
-       classserver().getValidator(base->get_type());              \
-                                                                  \
-   /* Well, is it OK, or not? */                                  \
-   if (checker and not checker(base))                             \
-       throw SyntaxException(TRACE_INFO,                          \
-           "Invalid Atom syntax: %s", base->to_string().c_str()); \
-                                                                  \
    Handle h(create##CNAME(base->getOutgoingSet(), base->get_type())); \
    return h;                                                      \
 }                                                                 \
                                                                   \
 /* This runs when the shared lib is loaded. */                    \
-static __attribute__ ((constructor)) void init(void)              \
+static __attribute__ ((constructor)) void                         \
+   TOKENPASTE2(init, __COUNTER__)(void)                           \
 {                                                                 \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }
@@ -138,7 +139,8 @@ Handle CNAME::factory(const Handle& base)                         \
 }                                                                 \
                                                                   \
 /* This runs when the shared lib is loaded. */                    \
-static __attribute__ ((constructor)) void init(void)              \
+static __attribute__ ((constructor)) void                         \
+   TOKENPASTE2(init, __COUNTER__)(void)                           \
 {                                                                 \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }

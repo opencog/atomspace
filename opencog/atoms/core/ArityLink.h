@@ -51,7 +51,7 @@ public:
 	ArityLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };

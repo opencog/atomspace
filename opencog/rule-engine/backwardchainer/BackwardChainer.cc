@@ -25,7 +25,6 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/unify/Unify.h>
 
 #include "BackwardChainer.h"
@@ -33,7 +32,9 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
+BackwardChainer::BackwardChainer(AtomSpace& kb_as,
+                                 AtomSpace& rb_as,
+                                 const Handle& rbs,
                                  const Handle& target,
                                  const Handle& vardecl,
                                  AtomSpace* trace_as,
@@ -43,16 +44,35 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _config(as, rbs),
-	  _bit(as, target, vardecl, bitnode_fitness),
+	: _kb_as(kb_as),
+	  _rb_as(rb_as),
+	  _config(_rb_as, rbs),
+	  _bit(kb_as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _trace_recorder(trace_as),
 	  _control(_config, _bit, target, control_as),
 	  _rules(_control.rules),
-	  _iteration(0), _last_expansion_andbit(nullptr)
+	  _iteration(0),
+	  _last_expansion_andbit(nullptr)
 {
 	// Record the target in the trace atomspace
 	_trace_recorder.target(target);
+}
+
+BackwardChainer::BackwardChainer(AtomSpace& kb_as,
+                                 const Handle& rbs,
+                                 const Handle& target,
+                                 const Handle& vardecl,
+                                 AtomSpace* trace_as,
+                                 AtomSpace* control_as,
+                                 const Handle& focus_set,
+                                 const BITNodeFitness& bitnode_fitness,
+                                 const AndBITFitness& andbit_fitness)
+	: BackwardChainer(kb_as,
+	                  rbs->getAtomSpace() ? *rbs->getAtomSpace() : kb_as,
+	                  rbs, target, vardecl, trace_as, control_as,
+	                  focus_set, bitnode_fitness, andbit_fitness)
+{
 }
 
 UREConfig& BackwardChainer::get_config()
@@ -114,7 +134,7 @@ bool BackwardChainer::termination()
 Handle BackwardChainer::get_results() const
 {
 	HandleSeq results(_results.begin(), _results.end());
-	return _as.add_link(SET_LINK, results);
+	return _kb_as.add_link(SET_LINK, results);
 }
 
 void BackwardChainer::expand_meta_rules()
@@ -122,7 +142,7 @@ void BackwardChainer::expand_meta_rules()
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	size_t rules_size = _rules.size();
-	_rules.expand_meta_rules(_as);
+	_rules.expand_meta_rules(_kb_as);
 
 	// If the rule set has changed we need to reset the exhausted
 	// flags.
@@ -239,7 +259,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 {
 	// Temporary atomspace to not pollute _as with intermediary
 	// results
-	AtomSpace tmp_as(&_as);
+	AtomSpace tmp_as(&_kb_as);
 
 	// Run the FCS and add the results, if any, in _as.
 	//
@@ -252,10 +272,13 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	// alternatively modify some HypotheticalLink wrapping the atoms
 	// of concerns instead of the atoms themselves, and only modify
 	// the atoms if there are existing results to copy back to _as.
-	Handle hresult = bindlink(&tmp_as, fcs);
+	//
+	// TODO: Maybe we could take advantage of the new read-only
+	// capabilities of the AtomSpace.
+	Handle hresult = HandleCast(fcs->execute(&tmp_as));
 	HandleSeq results;
 	for (const Handle& result : hresult->getOutgoingSet())
-		results.push_back(_as.add_atom(result));
+		results.push_back(_kb_as.add_atom(result));
 	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
 

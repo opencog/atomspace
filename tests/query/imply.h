@@ -1,5 +1,5 @@
 
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultImplicator.h>
@@ -30,11 +30,14 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	DefaultImplicator impl(as);
 	impl.implicand = himplicand;
 
-	bl->imply(impl, as);
+	bl->satisfy(impl);
 
-	// The result_list contains a list of the grounded expressions.
+	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = as->add_link(LIST_LINK, impl.get_result_list());
+	HandleSeq hlist;
+	for (const ValuePtr& v: impl.get_result_set())
+		hlist.push_back(HandleCast(v));
+	Handle gl = as->add_link(LIST_LINK,hlist);
 	return gl;
 }
 
@@ -48,4 +51,16 @@ static inline void match(PatternMatchCallback& pmcb,
 {
 	PatternLinkPtr slp(createPatternLink(vars, clauses));
 	slp->satisfy(pmcb);
+}
+
+static inline Handle bindlink(AtomSpace* as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return HandleCast(hlink->execute(as));
+}
+
+static inline Handle satisfying_set(AtomSpace* as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return HandleCast(hlink->execute(as));
 }

@@ -1190,4 +1190,14 @@ void SchemeEval::init_scheme(void)
 	SchemeEval sch;
 }
 
+extern "C" {
+// Thin wrapper for easy dlopen/dlsym dynamic loading
+opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
+{
+	return opencog::SchemeEval::get_evaluator(as);
+}
+
+};
+
+
 /* ===================== END OF FILE ============================ */

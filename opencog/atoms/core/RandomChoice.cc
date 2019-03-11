@@ -122,18 +122,17 @@ RandomChoiceLink::RandomChoiceLink(const Link &l)
 
 // XXX FIXME - fix this so it can also choose a single value
 // out of a vector of values.
-ValuePtr RandomChoiceLink::execute() const
+ValuePtr RandomChoiceLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
 	if (0 == ary) return ValuePtr();
 
-	Handle ofirst = _outgoing[0];
+	Handle ofirst(_outgoing[0]);
 
 	// We need to have our first arg to be a set or a list or
 	// something of that sort.
-	FunctionLinkPtr flp(FunctionLinkCast(ofirst));
-	if (flp)
-		ofirst = HandleCast(flp->execute());
+	if (ofirst->is_executable())
+		ofirst = HandleCast(ofirst->execute(as, silent));
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
@@ -150,11 +149,11 @@ ValuePtr RandomChoiceLink::execute() const
 			const HandleSeq& oset = h->getOutgoingSet();
 			if (2 != oset.size()) goto uniform;
 
-			Handle hw = oset[0];
-			FunctionLinkPtr flp(FunctionLinkCast(hw));
-			if (nullptr != flp)
-				hw = HandleCast(flp->execute());
+			Handle hw(oset[0]);
+			if (hw->is_executable())
+				hw = HandleCast(hw->execute(as, silent));
 
+			// XXX TODO if execute() above returns FloatValue, use that!
 			NumberNodePtr nn(NumberNodeCast(hw));
 			if (nullptr == nn) // goto uniform;
 				throw SyntaxException(TRACE_INFO,
@@ -190,9 +189,9 @@ uniform:
 		std::vector<double> weights;
 		for (Handle h : ofirst->getOutgoingSet())
 		{
-			FunctionLinkPtr flp(FunctionLinkCast(h));
-			if (nullptr != flp)
-				h = HandleCast(flp->execute());
+			// XXX FIXME, also allow a FloatValue!!
+			if (h->is_executable())
+				h = HandleCast(h->execute(as, silent));
 
 			NumberNodePtr nn(NumberNodeCast(h));
 			if (nullptr == nn)

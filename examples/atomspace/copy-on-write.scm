@@ -1,12 +1,12 @@
 ;
-; Example of copy-on-write into overlay AtomSpaces.
+; copy-on-write.scm -- Copy-on-write into overlay AtomSpaces.
 ;
-; The goal is to demonstrate how to use read-write atomspaces
-; layered on top of a read-only atomspace.
+; The goal is to demonstrate how to use read-write AtomSpaces
+; layered on top of a read-only AtomSpace.
 ;
-; This creates two atomspaces: the base atomspace, which
+; This creates two AtomSpaces: the base AtomSpace, which
 ; will be marked read-only (after adding atoms to it),
-; and an overlay atomspace, which will remain read-write.
+; and an overlay AtomSpace, which will remain read-write.
 ; Atoms and truth values can be manipulated in the overlay,
 ; without damaging atoms in the base space.
 ;
@@ -18,13 +18,13 @@
 ;
 (use-modules (opencog))
 
-; Create atoms in the base atomspace.
+; Create atoms in the base AtomSpace.
 (define a (Concept "a"))
 (define b (Concept "b"))
 
 (cog-set-tv! a (cog-new-stv 0.1 0.1))
 
-; Mark the current atomspace as read-only.
+; Mark the current AtomSpace as read-only.
 ; New atoms can no longer be created.
 (cog-atomspace-ro!)
 (define c (Concept "c"))
@@ -33,28 +33,33 @@
 ; Truth values can no longer be changed.
 (cog-set-tv! a (cog-new-stv 0.2 0.2))
 (cog-prt-atomspace)
+
 ; Create an overlay (that will be read-write)
-;
 (define base (cog-atomspace))
 (define ovly (cog-new-atomspace base))
 (cog-set-atomspace! ovly)
 
 ; Alter the TV on atom a -- this causes a copy-on-write (COW)
-; into the overlay atomspace.
+; of atom a into the overlay atomspace.
 (cog-set-tv! a (cog-new-stv 0.3 0.3))
 (cog-prt-atomspace)
 (cog-set-tv! a (cog-new-stv 0.4 0.4))
 (cog-prt-atomspace)
 
-; But in the base atomspace, we still have the original.
+; The base atomspace still holds the original, unmodified atom.
 (cog-set-atomspace! base)
 (cog-prt-atomspace)
 
-; And the overlay still contains the modified atom.
+; The overlay contains only the modified atom.
 (cog-set-atomspace! ovly)
 (cog-prt-atomspace)
 
-; Verify Links in the overlay
+; Create a Link, and verify that it sits in the overlay.
+; Pay attention to where the atoms in the Link sit: some will be
+; in the base space, and some will be in the overlay. Which is where
+; depends on how each scheme symbol got bound to an atom. This can
+; be a source of confusion.
+;
 (OrderedLink a b)  ; note that a is in the base
 (define averly (Concept "a")) ; get the overlay version
 (ListLink averly b)

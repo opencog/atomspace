@@ -23,7 +23,7 @@
 
 #include <math.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -225,7 +225,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	// The vartype is either a single type name, or a list of typenames.
 	if (TYPE_NODE == t)
 	{
-		Type vt = TypeNodeCast(vartype)->get_value();
+		Type vt = TypeNodeCast(vartype)->get_kind();
 		if (vt != ATOM)  // Atom type is same as untyped.
 		{
 			TypeSet ts = {vt};
@@ -234,7 +234,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	}
 	else if (TYPE_INH_NODE == t)
 	{
-		Type vt = TypeNodeCast(vartype)->get_value();
+		Type vt = TypeNodeCast(vartype)->get_kind();
 		TypeSet ts;
 		TypeSet::iterator it = ts.begin();
 		nameserver().getChildren(vt, std::inserter(ts, it));
@@ -242,7 +242,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	}
 	else if (TYPE_CO_INH_NODE == t)
 	{
-		Type vt = TypeNodeCast(vartype)->get_value();
+		Type vt = TypeNodeCast(vartype)->get_kind();
 		TypeSet ts;
 		TypeSet::iterator it = ts.begin();
 		nameserver().getChildren(vt, std::inserter(ts, it));
@@ -262,7 +262,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			Type var_type = ht->get_type();
 			if (TYPE_NODE == var_type)
 			{
-				Type vt = TypeNodeCast(ht)->get_value();
+				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt) typeset.insert(vt);
 			}
 			else if (SIGNATURE_LINK == var_type)

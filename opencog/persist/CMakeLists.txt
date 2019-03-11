@@ -1,10 +1,4 @@
 
-# The hypertable code never worked, and according to bug #567,
-# it doesn't compile either.
-# IF (HYPERTABLE_FOUND AND HAVE_EXPAT)
-#    ADD_SUBDIRECTORY (hypertable)
-# ENDIF (HYPERTABLE_FOUND AND HAVE_EXPAT)
-
 IF (HAVE_GEARMAN AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (gearman)
 ENDIF(HAVE_GEARMAN AND HAVE_GUILE)

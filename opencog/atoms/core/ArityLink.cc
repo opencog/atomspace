@@ -53,19 +53,19 @@ ArityLink::ArityLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-ValuePtr ArityLink::execute() const
+/// Return the Arity, as a NumberNode.  Contrast this with
+/// ArityValueOf, which returns a FloatValue, instead.
+ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = 0;
 	for (const Handle& h : _outgoing)
 	{
-		FunctionLinkPtr flp(FunctionLinkCast(h));
-		if (nullptr != flp)
+		if (h->is_executable())
 		{
-			ValuePtr pap(h);
-			pap = flp->execute();
+			ValuePtr pap(h->execute(as, silent));
 			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
 
-			// XXX TODO sum up lingth of values
+			// XXX TODO sum up length of values. (!?)
 		}
 		else
 		{

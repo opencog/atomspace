@@ -8,7 +8,6 @@
 
 #include <opencog/util/random.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 
@@ -67,11 +66,6 @@ public:
 		_eval.eval("(use-modules (opencog rule-engine))");
 		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
-	}
-	~ForwardChainerUTest()
-	{
-		int rc = CxxTest::TestTracker::tracker().suiteFailed();
-		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp();

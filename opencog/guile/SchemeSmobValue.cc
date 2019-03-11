@@ -22,6 +22,20 @@
 using namespace opencog;
 
 /* ============================================================== */
+/** Return the type of a value/atom */
+
+SCM SchemeSmob::ss_type (SCM svalue)
+{
+	ValuePtr pa(verify_protom(svalue, "cog-type"));
+	Type t = pa->get_type();
+	const std::string &tname = nameserver().getTypeName(t);
+	SCM str = scm_from_utf8_string(tname.c_str());
+	SCM sym = scm_string_to_symbol(str);
+
+	return sym;
+}
+
+/* ============================================================== */
 /** Return true if s is a value */
 
 SCM SchemeSmob::ss_value_p (SCM s)
@@ -138,13 +152,6 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (FLOAT_VALUE == t)
-	{
-		std::vector<double> valist;
-		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
 	if (OCTO_VALUE == t)
 	{
 		SCM sl = svalue_list;
@@ -169,6 +176,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			dim = verify_int(svalue, "cog-new-value", 2);
 		}
 		return valueserver().create(t, dim);
+	}
+
+	// Catch and handle generic FloatValues not named above.
+	if (nameserver().isA(t, FLOAT_VALUE))
+	{
+		std::vector<double> valist;
+		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
 	if (LINK_VALUE == t)

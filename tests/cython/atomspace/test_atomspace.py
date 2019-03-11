@@ -1,10 +1,11 @@
 from unittest import TestCase
 
+import opencog.atomspace
 from opencog.atomspace import AtomSpace, TruthValue, Atom
-from opencog.atomspace import types, is_a, get_type, get_type_name
+from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import initialize_opencog, finalize_opencog, tmp_atomspace
 
 from time import sleep
 
@@ -26,10 +27,10 @@ class AtomSpaceTest(TestCase):
         self.space.add_node(types.Node, "node" )
 
         # Test with not a proper truthvalue
-        self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 
+        self.assertRaises(TypeError, self.space.add_node, types.Node, "test",
                 0, True)
         # Test with bad type
-        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test", 
+        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test",
                 TruthValue(0.5, 0.8))
 
         # From here on out we'll use the more compact type constructors
@@ -63,7 +64,7 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3).truth_value(0.5, 0.8)
         self.assertTrue(l3 is not None)
-        
+
         # Should fail when adding an intentionally bad type
         caught = False
         try:
@@ -102,30 +103,6 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(new_tv.mean, 0.75)
         self.assertAlmostEqual(new_tv.confidence, 0.9, places=4)
 
-    def test_attention_value(self):
-        node = Node("test")
-
-        # check values come back as assigned
-        node.sti = 1
-        node.lti = 2
-        node.vlti = 3
-        assert node.sti == 1
-        assert node.lti == 2
-        assert node.vlti == 3
-
-        # Check increment and decrement for vlti
-        node.decrement_vlti()
-        assert node.vlti == 2
-        node.increment_vlti()
-        assert node.vlti == 3
-
-        # Check dictionary setting and getting of av property.
-        node.av = {"sti": 4, "lti": 5, "vlti": 6}
-        assert node.sti == 4
-        assert node.lti == 5
-        assert node.vlti == 6
-        assert node.av == {"sti": 4, "lti": 5, "vlti": 6}
-
     def test_get_by_type(self):
         a1 = Node("test1")
         a2 = ConceptNode("test2")
@@ -141,7 +118,7 @@ class AtomSpaceTest(TestCase):
         l1 = InheritanceLink(a1, a2)
         result = self.space.get_atoms_by_type(types.Link)
         self.assertTrue(l1 in result)
-        
+
         # test non-recursive subtype
         result = self.space.get_atoms_by_type(types.Node, subtype=False)
         self.assertTrue(a1 in result)
@@ -151,31 +128,6 @@ class AtomSpaceTest(TestCase):
         # test empty
         result = self.space.get_atoms_by_type(types.AnchorNode, subtype=False)
         self.assertEqual(len(result), 0)
-
-    def test_get_by_av(self):
-        a1 = ConceptNode("test1")
-        a2 = ConceptNode("test2")
-        a3 = InheritanceLink(a1, a2)
-        a4 = ConceptNode("test4")
-        a5 = ConceptNode("test5")
-
-        a1.sti = 10
-        a2.sti = 5
-        a3.sti = 4
-        a4.sti = 1
-
-        #ImportanceIndex is Asynchronus give it some time
-        sleep(1)
-
-        result = self.space.get_atoms_by_av(4, 10)
-        print ("The atoms-by-av result is ", result)
-        assert len(result) == 3
-        assert set(result) == set([a1, a2, a3])
-        assert a4 not in result
-
-        result = self.space.get_atoms_in_attentional_focus()
-        assert len(result) == 4
-        assert set(result) == set([a1, a2, a3, a4])
 
     def test_incoming_by_type(self):
         a1 = Node("test1")
@@ -232,75 +184,32 @@ class AtomSpaceTest(TestCase):
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
         self.space.clear()
-        self.assertEquals(self.space.size(), 0) 
-        self.assertEquals(len(self.space), 0) 
+        self.assertEquals(self.space.size(), 0)
+        self.assertEquals(len(self.space), 0)
 
     def test_container_methods(self):
-        self.assertEquals(len(self.space), 0) 
+        self.assertEquals(len(self.space), 0)
         a1 = Node("test1")
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
-        
+
         self.assertTrue(a1 in self.space)
         self.assertTrue(a2 in self.space)
         self.assertTrue(a3 in self.space)
 
         self.assertEquals(len(self.space), 3)
 
-    def test_get_predicates(self):
-        dog = ConceptNode("dog")
-        mammal = ConceptNode("mammal")
-        canine = ConceptNode("canine")
-        animal = ConceptNode("animal")
-        dog_mammal = ListLink(dog, mammal)
-        dog_canine = ListLink(dog, canine)
-        dog_animal = ListLink(dog, animal)
-        isA = PredicateNode("IsA")
-        dogIsAMammal = EvaluationLink(isA, dog_mammal)
-        dogIsACanine = EvaluationLink(isA, dog_canine)
-        dogIsAAnimal = EvaluationLink(isA, dog_animal)
+    def test_context_mgr_tmp(self):
+        a = ConceptNode('a')
+        with tmp_atomspace() as tmp_as:
+             b = ConceptNode('b')
+             self.assertTrue(a in self.space)
+             # verify that current default atomspace is tmp_as
+             self.assertFalse(b in self.space)
+        c = ConceptNode('c')
+        # verify that current default atomspace is self.space
+        self.assertTrue(c in self.space)
 
-        dog_predicates = self.space.get_predicates(dog)
-        self.assertEquals(len(dog_predicates), 3)
-
-        count = 0
-        for dogIs in self.space.get_predicates(dog):
-            count += 1
-        self.assertEquals(count, 3)
-
-    def test_get_predicates_for(self):
-        dog = ConceptNode("dog")
-        mammal = ConceptNode("mammal")
-        canine = ConceptNode("canine")
-        animal = ConceptNode("animal")
-        dog_mammal = ListLink(dog, mammal)
-        dog_canine = ListLink(dog, canine)
-        dog_animal = ListLink(dog, animal)
-        isA = PredicateNode("IsA")
-        dogIsAMammal = EvaluationLink(isA, dog_mammal)
-        dogIsACanine = EvaluationLink(isA, dog_canine)
-        dogIsAAnimal = EvaluationLink(isA, dog_animal)
-
-        human = ConceptNode("human")
-        dog_human = ListLink(dog, human)
-        loves = PredicateNode("loves")
-        dogLovesHumans = EvaluationLink(loves, dog_human)
-
-        dog_predicates = self.space.get_predicates_for(dog, isA)
-        self.assertEquals(len(dog_predicates), 3)
-
-        dog_predicates = self.space.get_predicates_for(dog, loves)
-        self.assertEquals(len(dog_predicates), 1)
-
-        count = 0
-        for dogIsA in self.space.get_predicates_for(dog, isA):
-            count += 1
-        self.assertEquals(count, 3)
-
-        count = 0
-        for dogLoves in self.space.get_predicates_for(dog, loves):
-            count += 1
-        self.assertEquals(count, 1)
 
 class AtomTest(TestCase):
 
@@ -311,6 +220,14 @@ class AtomTest(TestCase):
     def tearDown(self):
         finalize_opencog()
         del self.space
+
+    def test_create_child_atomspace(self):
+        """
+        Test that parent atomspace will not be deleted before child
+        """
+        a = opencog.atomspace.AtomSpace()
+        b = opencog.atomspace.create_child_atomspace(a)
+        del a
 
     def test_creation(self):
         a = Node("test1")
@@ -325,15 +242,6 @@ class AtomTest(TestCase):
         # test set tv
         a.tv = TruthValue(0.1, 10)
         self.assertEqual(a.tv, TruthValue(0.1, 10))
-        
-    def test_w_attention_value(self):
-        a = Node("test2")
-
-        self.assertEqual(a.av, {'lti': 0, 'sti': 0, 'vlti': False})
-
-        # test set av
-        a.av = { "sti": 10, "lti": 1, "vlti": True }
-        self.assertEqual(a.av, {'sti': 10, 'lti': 1, 'vlti': True})
 
     def test_out(self):
         # test get out
@@ -377,6 +285,13 @@ class AtomTest(TestCase):
         self.assertEqual(l.type_name, "Link")
         self.assertEqual(a.type_name, "Node")
 
+    def test_create_child_atomspace(self):
+        test = ConceptNode("test")
+        b = create_child_atomspace(self.space)
+        test2 = b.add_node(types.ConceptNode, 'test2')
+        self.assertTrue(test in b.get_atoms_by_type(types.ConceptNode))
+        self.assertTrue(test2 in b.get_atoms_by_type(types.ConceptNode))
+        self.assertTrue(test2 not in self.space.get_atoms_by_type(types.ConceptNode))
 
     def test_strings(self):
         # set up a link and atoms
@@ -384,7 +299,6 @@ class AtomTest(TestCase):
         a1 = Node("test1", tv)
 
         a2 = Node("test2")
-        a2.av = {"sti": 10, "lti": 1, "vlti": True}
         a2.tv = TruthValue(0.1, 0.3)
 
         l = Link(a1, a2)
@@ -399,7 +313,7 @@ class AtomTest(TestCase):
 
         a2_expected = "(Node \"test2\") ; [{0}]\n".format(space_uuid)
         a2_expected_long = \
-            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}]\n"\
+            "(Node \"test2\" (stv 0.100000 0.300000)) ; [{0}]\n"\
             .format(space_uuid)
 
         l_expected = \

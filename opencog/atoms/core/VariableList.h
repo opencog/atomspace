@@ -84,11 +84,11 @@ public:
 	bool is_type(const HandleSeq& hseq) const { return _varlist.is_type(hseq); }
 
 	// Given the tree `tree` containing variables in it, create and
-	// return a new tree with the indicated values `vals` substituted
-	// for the variables. The vals must pass the typecheck, else an
+	// return a new tree with the indicated arguments `args` substituted
+	// for the variables. The `args` must pass the typecheck, else an
 	// exception is thrown.
-	Handle substitute(const Handle& tree, const HandleSeq& vals) const
-		{ return _varlist.substitute(tree, vals); }
+	Handle substitute(const Handle& tree, const HandleSeq& args) const
+		{ return _varlist.substitute(tree, args); }
 
 	static Handle factory(const Handle&);
 };

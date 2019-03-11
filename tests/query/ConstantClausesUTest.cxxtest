@@ -23,8 +23,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 using namespace std;
 using namespace opencog;
@@ -55,8 +55,6 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
-		int rc = CxxTest::TestTracker::tracker().suiteFailed();
-		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp();
@@ -412,7 +410,7 @@ void ConstantClausesUTest::test_mixed_clauses_1()
 	Handle mary = an(CONCEPT_NODE, "Mary"),
 		edward = an(CONCEPT_NODE, "Edward");
 
-	eval.eval("(load-from-path \"friends.scm\")");
+	eval.eval("(load-from-path \"constant-clauses.scm\")");
 
 	Handle result = eval.eval_h("(cog-execute! mixed-clauses)"),
 		expected = al(SET_LINK, edward, mary);

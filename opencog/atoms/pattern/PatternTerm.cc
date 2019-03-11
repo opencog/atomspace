@@ -26,6 +26,8 @@
 
 namespace opencog {
 
+const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
+
 PatternTerm::PatternTerm()
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),

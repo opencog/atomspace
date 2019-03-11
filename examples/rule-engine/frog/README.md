@@ -27,7 +27,7 @@ for using the pattern matcher, and the rule-engine module for using
 URE.
 
 ```scheme
-(use-modules (opencog query))
+(use-modules (opencog exec))
 (use-modules (opencog rule-engine))
 ```
 
@@ -147,7 +147,8 @@ We can now run the forward chainer
 ```scheme
 (cog-fc ci-rbs source)
 ```
-to get the result that fritz is a frog and fritz is green.
+to get the result that fritz is a frog and fritz is green (amongst
+other results).
 
 ## Forward Chainer (using the frog rule base)
 

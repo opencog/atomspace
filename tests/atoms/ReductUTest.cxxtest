@@ -42,7 +42,7 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		opencog_exec_init();
+		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~ReductUTest()
@@ -60,6 +60,7 @@ public:
 	void test_arithmetic(void);
 	void test_setlink(void);
 	void test_minus(void);
+	void test_plus_minus(void);
 	void test_execution(void);
 };
 
@@ -312,6 +313,126 @@ void ReductUTest::test_minus(void)
 		"(Divide (Number 1) (Variable \"$x\"))"
 	);
 	TS_ASSERT_EQUALS(dx, edx);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test Plus with Minus.
+ */
+void ReductUTest::test_plus_minus(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle p43m1 = eval->eval_h(
+		"(cog-execute! (Plus (Number 43) (Minus (Variable \"x\") (Number 1))))"
+	);
+	printf("expecting x+42: %s\n", p43m1->to_short_string().c_str());
+
+	Handle p42 = eval->eval_h("(Plus (Variable \"x\") (Number 42))");
+	TS_ASSERT_EQUALS(p43m1, p42);
+
+	// ---------
+	Handle p41p1 = eval->eval_h(
+		"(cog-execute! (Plus (Number 41) (Minus (Number 1) (Variable \"x\"))))"
+	);
+	printf("expecting 42-x: %s\n", p41p1->to_short_string().c_str());
+
+	Handle m42 = eval->eval_h("(Minus (Number 42) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(p41p1, m42);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (Plus (Number 2) (Minus (Variable \"x\") (Number 2))))"
+	);
+	printf("expecting x: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ========================================================
+
+	Handle m43p1 = eval->eval_h(
+		"(cog-execute! (Minus (Number 43) (Plus (Variable \"x\") (Number 1))))"
+	);
+	printf("expecting 42-x: %s\n", m43p1->to_short_string().c_str());
+
+	Handle m42x = eval->eval_h("(Minus (Number 42) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(m43p1, m42x);
+
+	// ---------
+	Handle p1m43 = eval->eval_h(
+		"(cog-execute! (Minus (Plus (Number 1) (Variable \"x\")) (Number 43)))"
+	);
+	printf("expecting x-42: %s\n", p1m43->to_short_string().c_str());
+
+	Handle mx42 = eval->eval_h("(Plus (Variable \"x\") (Number -42))");
+	TS_ASSERT_EQUALS(p1m43, mx42);
+
+	// ---------
+	Handle mpzero = eval->eval_h(
+		"(cog-execute! (Minus (Plus (Variable \"x\") (Number 2)) (Number 2)))"
+	);
+	printf("expecting x: %s\n", mpzero->to_short_string().c_str());
+
+	Handle emp = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(mpzero, emp);
+
+	// ========================================================
+	Handle t6d2 = eval->eval_h(
+		"(cog-execute! (Times (Number 6) (Divide (Variable \"x\") (Number 2))))"
+	);
+	printf("expecting 3x: %s\n", t6d2->to_short_string().c_str());
+
+	Handle t3 = eval->eval_h("(Times (Variable \"x\") (Number 3))");
+	TS_ASSERT_EQUALS(t6d2, t3);
+
+	// ---------
+	Handle t6t2 = eval->eval_h(
+		"(cog-execute! (Times (Number 6) (Divide (Number 2) (Variable \"x\"))))"
+	);
+	printf("expecting 12/x: %s\n", t6t2->to_short_string().c_str());
+
+	Handle d12 = eval->eval_h("(Divide (Number 12) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(t6t2, d12);
+
+	// ---------
+	Handle one = eval->eval_h(
+		"(cog-execute! (Times (Number 5) (Divide (Variable \"x\") (Number 5))))"
+	);
+	printf("expecting x: %s\n", one->to_short_string().c_str());
+
+	Handle eone = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(one, eone);
+
+	// ========================================================
+	Handle d6t2 = eval->eval_h(
+		"(cog-execute! (Divide (Number 6) (Times (Variable \"x\") (Number 2))))"
+	);
+	printf("expecting 3/x: %s\n", d6t2->to_short_string().c_str());
+
+	Handle d3 = eval->eval_h("(Divide (Number 3) (Variable \"x\"))");
+	TS_ASSERT_EQUALS(d6t2, d3);
+
+	// ---------
+	Handle d6x2 = eval->eval_h(
+		"(cog-execute! (Divide (Times (Number 6) (Variable \"x\")) (Number 2)))"
+	);
+	printf("expecting 3x: %s\n", d6x2->to_short_string().c_str());
+
+	Handle x3 = eval->eval_h("(Times (Variable \"x\") (Number 3))");
+	TS_ASSERT_EQUALS(d6x2, x3);
+
+	// ---------
+	Handle done = eval->eval_h(
+		"(cog-execute! (Divide (Times (Variable \"x\") (Number 5)) (Number 5)))"
+	);
+	printf("expecting x: %s\n", done->to_short_string().c_str());
+
+	Handle edone = eval->eval_h("(Variable \"x\")");
+	TS_ASSERT_EQUALS(done, edone);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);

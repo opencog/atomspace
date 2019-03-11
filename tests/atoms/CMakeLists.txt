@@ -1,6 +1,17 @@
 
+ADD_SUBDIRECTORY (atom_types)
+
+ADD_SUBDIRECTORY (base)
+
+ADD_SUBDIRECTORY (core)
+
 ADD_SUBDIRECTORY (truthvalue)
+
+ADD_SUBDIRECTORY (value)
+
 IF(HAVE_GUILE)
+	ADD_CXXTEST(HashUTest)
+	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest smob atomspace)
 	ADD_CXXTEST(MapLinkUTest)
@@ -19,12 +30,12 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(PutLinkUTest execution smob atomspace)
 	ADD_CXXTEST(QuotationUTest)
 	TARGET_LINK_LIBRARIES(QuotationUTest execution smob atomspace)
-	ADD_CXXTEST(HashUTest)
-	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
+	ADD_CXXTEST(FormulaUTest)
+	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
-TARGET_LINK_LIBRARIES(AlphaConvertUTest query execution lambda atomspace)
+TARGET_LINK_LIBRARIES(AlphaConvertUTest execution lambda atomspace)
 
 ADD_CXXTEST(BetaReduceUTest)
 TARGET_LINK_LIBRARIES(BetaReduceUTest atomspace)

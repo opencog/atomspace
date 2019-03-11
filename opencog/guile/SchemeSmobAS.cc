@@ -19,24 +19,11 @@ using namespace opencog;
 // to update this map.  The map contains a use-count for the number of
 // threads that are currently using this atomspace as the current
 // atomspace.  When the count drops to zero, the atomspace will be
-// reaped if the number of SCM references also drops to zero (and the
-// GC runs).
+// reaped if the guile GC finds that the number of SCM references
+// has also dropped to zero.
+
 std::mutex SchemeSmob::as_mtx;
 std::map<AtomSpace*, int> SchemeSmob::deleteable_as;
-
-AtomSpace* SchemeSmob::encrypt(AtomSpace* as)
-{
-	if (as == nullptr)
-		return as;
-	return (AtomSpace*)((long int)as xor 0x5555555555555555);
-}
-
-AtomSpace* SchemeSmob::decrypt(AtomSpace* as)
-{
-	// Encryption and decryption happen to be the same
-	return encrypt(as);
-}
-
 
 /* ============================================================== */
 
@@ -52,12 +39,13 @@ std::string SchemeSmob::as_to_string(const AtomSpace *as)
 /* ============================================================== */
 /**
  * Create SCM object wrapping the atomspace.
- * Do NOT take over memory management of it!
+ * Guile will try to memory-manage it; the deleteable_as will be
+ * used to track foreign vs. internal references.
  */
-SCM SchemeSmob::make_as (AtomSpace *as)
+SCM SchemeSmob::make_as(AtomSpace *as)
 {
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, encrypt(as));
+	SCM_NEWSMOB (smob, cog_misc_tag, as);
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
 	return smob;
 }
@@ -80,7 +68,6 @@ void SchemeSmob::release_as (AtomSpace *as)
 	std::unique_lock<std::mutex> lck(as_mtx);
 	auto has = deleteable_as.find(as);
 	if (deleteable_as.end() == has) return;
-	deleteable_as[as] --;
 
 	if (0 == deleteable_as[as])
 	{
@@ -88,10 +75,18 @@ void SchemeSmob::release_as (AtomSpace *as)
 		deleteable_as.erase(has);
 		lck.unlock();
 		delete as;
+		lck.lock();
 
 		// (Recursively) decrement the use count on the parent.
-		// XXX This is confusing, I'm not sure its right.
-		if (env) release_as(env);
+		// We had incremented it earlier, in `ss_new_as`, when
+		// creating it. Do not delete it, unless the guile gc
+		// asks us to.
+		while (env and deleteable_as.end() != deleteable_as.find(env))
+		{
+			if (0 < deleteable_as[env])
+				--deleteable_as[env];
+			env = env->get_environ();
+		}
 	}
 }
 
@@ -110,53 +105,18 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	// Only the internally-created atomspaces are trackable.
 	std::lock_guard<std::mutex> lck(as_mtx);
-	deleteable_as[as] = 1;
+	deleteable_as[as] = 0;
 
-	// Don't delete the parent, as long as its in use by a child
-	// (that guile still has a reference to).
+	// Guile might have discarded all references to the parent; but
+	// we must not delete it, as long as a child is still referencing
+	// it.  The issue is that guile-gc does not know about this
+	// reference, so we have to track it manually.
 	while (parent and deleteable_as.end() != deleteable_as.find(parent))
 	{
 		deleteable_as[parent]++;
 		parent = parent->get_environ();
 	}
 
-#define WORK_AROUND_GUILE_20_GC_BUG
-#ifdef WORK_AROUND_GUILE_20_GC_BUG
-	// Below is a work-around to a bug.  You can trigger this bug
-	// with the code below;  it will crash, because the initial
-	// AS gets erroneously garbage-collected.  Guile is trying
-	// to release the main AS every time through the loop.  I can't
-	// figure out why.
-/******
-(use-modules (opencog))
-(use-modules (opencog exec))
-
-(define  n 0)
-(define (prt)
-   (set! n (+ n 1))
-   (format #t "yaaaa ~a ~a\n" n cog-initial-as) (usleep 200000)
-   (gc)
-   (format #t "post-gc ~a\n" cog-initial-as)
-   (if (< n 200) (stv 1 1) (stv 0 1)))
-
-(DefineLink
-   (DefinedPredicateNode "loopy")
-   (SatisfactionLink
-      (SequentialAndLink
-         (EvaluationLink
-            (GroundedPredicateNode "scm:prt") (ListLink))
-         (DefinedPredicateNode "loopy")
-      )))
-
-(cog-evaluate! (DefinedPredicateNode "loopy"))
-*******/
-	static bool first = true;
-	if (first)
-	{
-		first = false;
-		deleteable_as[as] = 2002001000;
-	}
-#endif
 	return make_as(as);
 }
 
@@ -193,7 +153,7 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 	if (COG_AS != misctype)
 		return nullptr;
 
-	AtomSpace* as = decrypt((AtomSpace *) SCM_SMOB_DATA(sas));
+	AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
 	scm_remember_upto_here_1(sas);
 	return as;
 }
@@ -322,27 +282,59 @@ SCM SchemeSmob::ss_get_as (void)
 }
 
 /// The current atomspace for the current thread must not be deleted
-/// under any circumstances. Thus each thread increments a use-count
-/// on the atomspace (stored in deleteable_as).  Atomspaces that are
-/// not current in any thread, and also have no SCM smobs pointing
-/// at them may be deleted by the gc.  This will cause atoms to
-/// disappear, if the user is not careful ...
+/// under any circumstances (even if guile thinks that there are no
+/// references to it). Thus, each thread increments a use-count on the
+/// atomspace (the use-count is stored in deleteable_as).  When the
+/// guile-gc finds atomspaces that have no SCM smobs pointing at them,
+/// it will call `release_as()` to delete them. If those atomspaces
+/// also have a zero use-count (because no threads are using them),
+/// then we can safely delete them (and the atoms they contain).
 ///
-/// Oh, wait: only atomspaces that were internally created (i.e.
-/// created by a scheme call) are eligible for deletion.  We may
-/// also be given atomspaces that magically appeared from the outside
-/// world --- we do NOT track those for deletion.
+/// Only atomspaces that were internally created (i.e. created by a
+/// scheme call) are eligible for deletion.  We may also be given
+/// atomspaces that magically appeared from the outside world --- we
+/// do NOT track those for deletion (nor do we delete them).
+///
+/// ... However, a common scenario seems to be that the new atomspace
+/// is a temp atomspace, created in the pattern matcher, the pattern
+/// minor or somewhere else, and it's parent is the old atomspace
+/// (which we are tracking). That means that the old atomspace is still
+/// in use: its the parent of an untracked child. So we need to
+/// increment in this case as well, lest the use-count drop to zero.
 ///
 void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
 {
 	AtomSpace* oas = ss_to_atomspace(old_as);
-	if (oas != nas)
+	if (oas == nas) return;
+
+	std::lock_guard<std::mutex> lck(as_mtx);
+	if (deleteable_as.end() != deleteable_as.find(nas))
 	{
-		std::lock_guard<std::mutex> lck(as_mtx);
-		if (deleteable_as.end() != deleteable_as.find(nas))
-			deleteable_as[nas]++;
-		if (oas and deleteable_as.end() != deleteable_as.find(oas))
-			deleteable_as[oas] --;
+		++deleteable_as[nas];
+	}
+	else
+	{
+		AtomSpace* env = nas->get_environ();
+		if (env and deleteable_as.end() != deleteable_as.find(env))
+			++deleteable_as[env];
+	}
+
+	if (oas)
+	{
+		if (deleteable_as.end() != deleteable_as.find(oas))
+		{
+			if (0 < deleteable_as[oas])
+				--deleteable_as[oas];
+		}
+		else
+		{
+			AtomSpace* env = oas->get_environ();
+			if (env and deleteable_as.end() != deleteable_as.find(env))
+			{
+				if (0 < deleteable_as[env])
+					--deleteable_as[env];
+			}
+		}
 	}
 }
 
@@ -374,7 +366,13 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	as_ref_count(ss_get_as(), nas);
+	// Do NOT do the following: it is tempting, but wrong.
+	// as_ref_count(ss_get_as(), nas);
+	// Why? Because this function is called from the evaluator, only,
+	// and it's likely that the use-count on "saved_as" will drop to
+	// zero, which would be undesirable. At any rate, the calls to
+	// this function always come in matched pairs, so its pointless
+	// to do more than the minimum amount of work.
 
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }

@@ -24,10 +24,10 @@
 #include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
-#include <opencog/atomutils/FindUtils.h>
 
 #include "BindLink.h"
 #include "DualLink.h"
@@ -51,6 +51,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
+	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -74,8 +75,14 @@ void PatternLink::common_init(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
+	// XXX FIXME; long-term, this should be replaced by a check to
+	// see if a link inherits from EvaluatableLink. However, this can
+	// only be done after all existing BindLinks have been converted to
+	// use PresentLink... so this might not be practical to fix, for a
+	// while.
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+	                     OR_LINK, SEQUENTIAL_OR_LINK,
+	                     NOT_LINK, TRUE_LINK, FALSE_LINK});
 
 	// Icky. Yuck. Some pre-historic API's do not set the pattern body.
 	// These appear only in the unit tests, never in real code. For now,
@@ -294,8 +301,8 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == t) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(t, QUERY_LINK)) return;
 	if (DUAL_LINK == t) return;
 	init();
 }
@@ -312,8 +319,8 @@ PatternLink::PatternLink(const Link& l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == tscope) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(tscope, QUERY_LINK)) return;
 	if (DUAL_LINK == tscope) return;
 	init();
 }
@@ -453,20 +460,17 @@ void PatternLink::locate_globs(HandleSeq& clauses)
 
 /* ================================================================= */
 /**
- * A simple validatation a collection of clauses for correctness.
- *
- * Every clause should contain at least one variable in it; clauses
- * that are constants and can be trivially discarded.
+ * Make sure that each declared variable appears in some clause.
+ * We can't ground variables that don't show up in a clause; there's
+ * just no way to know.  Throw, because they are presumably there due
+ * to programmer error. Quoted variables are constants, and so don't
+ * count.
  */
 void PatternLink::validate_clauses(HandleSet& vars,
                                    HandleSeq& clauses,
                                    HandleSeq& constants)
 
 {
-	// Make sure that each declared variable appears in some clause.
-	// We won't (can't) ground variables that don't show up in a
-	// clause.  They are presumably there due to programmer error.
-	// Quoted variables are constants, and so don't count.
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
@@ -635,6 +639,16 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+#if DONT_DO_THIS_ANY_MORE
+The code that is if-defed out here does not seem to be a good idea.
+Or rather, I cannot currently think of a good use-case for it.
+If code needs to be executed before a pattern match is performed, then
+maybe one should ... do it some other way? Instead of doing it
+automatically? Or something?  The below seems like a half-baked,
+incomplete idea for something neat, but that was never fully thought
+out, spec'ed, implmeneted, documented, explained... So I'm commenting
+it out.
+
 		// Subclasses of FunctionLink, e.g. ExecutionOutputLink,
 		// but also PlusLink, TimesLink are all executable. They
 		// need to be executed *before* pattern matching, but after
@@ -670,6 +684,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
+#endif
 
 		if (is_virtual)
 			virtual_clauses.emplace_back(clause);
@@ -704,11 +719,12 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///    (GetLink (Equal (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
-/// If the ImplicationLink is suitably simple, it can be added
-/// added s a ordinary clause, and searched for as if it was "present".
+/// If the ImplicationLink is suitably simple, it can be added added
+/// as an ordinary clause, and searched for as if it was "present".
+///
 /// XXX FIXME: the code here assumes that the situation is indeed
 /// simple: more complex cases are not handled correctly.  Doing this
-/// correctly would require iteratating again, and examining the
+/// correctly would require iterating again, and examining the
 /// contents of the left and right side of the EqualLink... ugh.
 ///
 bool PatternLink::add_dummies()
@@ -762,7 +778,7 @@ bool PatternLink::add_dummies()
 /// to to connect evaluatable terms.  Thus, for example, for a clause
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable. Tracning halts as soon as something that isn't a
+/// evaluatable. Tracing halts as soon as something that isn't a
 /// connective is encountered.
 void PatternLink::trace_connectives(const TypeSet& connectives,
                                     const Handle& term,
@@ -852,11 +868,6 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	}
 }
 
-// Hack alert: The line below should not be here. Though some refactoring
-// regarding shared libraries circular dependencies (liblambda and libquery)
-// needs to be done before this becomes fixable...
-const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
-
 void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.cnf_clauses)
@@ -921,56 +932,31 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 }
 
 /* ================================================================= */
-// Cache of the most results obtained from the most recent run
-// of the pattern matcher.
 
-static const Handle& groundings_key(void)
+void PatternLink::remove_constant_clauses(void)
 {
-	static Handle gk(createNode(PREDICATE_NODE, "*-PatternGroundingsKey-*"));
-	return gk;
-}
-
-void PatternLink::remove_constant_clauses(const AtomSpace& queried_as)
-{
-	// Make sure that the user did not pass in bogus clauses
-	// in the queried atomspace.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	//
-	// XXX This removal *should* be happening at pattern compile time.
-	// It was moved here, to pattern execution time, by pull req #1444
-	// but it remains unclear why this check needed to be deferred
-	// like this. This is causing other issues, so Um ??? wtf?
+	// Remove clauses that don't alter the search. Any clause that
+	// fails to contain a variable, or fails to be evaluatable, will
+	// not affect the search in any way, because it is trivially
+	// satisfiable (and is always satisfied). Thus, its pointless
+	// to try to match them; they will always match.
 	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns, queried_as);
+	                              _component_patterns);
 	if (bogus)
 	{
-		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, to_string().c_str());
-		for (const Handle& h: _pat.constants)
+		if (logger().is_debug_enabled())
 		{
-			logger().warn("%s: Removed %s",
-			              __FUNCTION__, h->to_string().c_str());
+			logger().debug("%s: Constant clauses removed from pattern %s",
+			           __FUNCTION__, to_string().c_str());
+			for (const Handle& h: _pat.constants)
+			{
+				logger().debug("%s: Removed %s",
+				          __FUNCTION__, h->to_string().c_str());
+			}
 		}
-
 		_num_comps = _components.size();
 		make_connectivity_map(_pat.cnf_clauses);
 	}
-}
-
-/// Store a cache of the most recent variable groundings as a value,
-/// obtainable via a "well-known" key: "*-PatternGroundingsKey-*"
-void PatternLink::set_groundings(const Handle& grnd)
-{
-	setValue(groundings_key(), grnd);
-}
-
-/// Return the cached value of the most recent variable groundings.
-Handle PatternLink::get_groundings(void) const
-{
-	return HandleCast(getValue(groundings_key()));
 }
 
 /* ================================================================= */

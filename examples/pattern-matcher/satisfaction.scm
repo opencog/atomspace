@@ -1,28 +1,28 @@
 ;
-; satisfaction.scm
+; satisfaction.scm -- Determining satisfiability of a query.
 ;
 ; SatisfactionLink usage example.
 ;
-; Using the SatisfacionLink is fairly straightforward; what this
+; Using the SatisfactionLink is fairly straightforward; what this
 ; example shows is how to obtain the variable grounding that caused
 ; the satisfaction to be fulfilled.
 ;
 
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ; Define a very simple satisfaction link.
 (define satlink
-	(SatisfactionLink
-		(EvaluationLink
-			(PredicateNode "foobar")
-			(ListLink
+	(Satisfaction
+		(Evaluation
+			(Predicate "foobar")
+			(List
 				(Concept "funny")
 				(Variable "$x")))))
 
 ; Create something that will satisfy the above.
-(EvaluationLink
-	(PredicateNode "foobar")
-	(ListLink
+(Evaluation
+	(Predicate "foobar")
+	(List
 		(Concept "funny")
 		(Concept "thing")))
 
@@ -34,7 +34,7 @@
 (cog-keys satlink)
 
 ; The one and only key printed above should be the below.
-(define pgk (PredicateNode "*-PatternGroundingsKey-*"))
+(define pgk (Predicate "*-PatternGroundingsKey-*"))
 
 ; Get the value associated with this key.
 ; Ah Ha!  It should print `(Concept "thing")` which is the

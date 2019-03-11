@@ -1,10 +1,22 @@
 ;
-; Example of using values that are time-varying streams of data.
-; Here, the stream is modelled by the `RandomStream`.
+; stream.scm -- Time-varying streams of data
+;
+; Values are suitable for holding time-varying streams of data.
+; They are designed to accomplish this with a minimum of CPU cycles
+; spent in the AtomSpace, by serving as wrappers for time-varying
+; data being processed elsewhere (e.g. on GPU's, by external systems
+; such as tensorflow, or network processes, such as ROS nodes.)
+;
+; There is a trick to achieve this: the StreamValue does not actually
+; store any time-varying data. Instead, it just holds a reference to
+; where the actual data really is, and only returns a value when asked
+; for it.
+;
+; Here, the time-varying stream is modelled by the `RandomStream`.
 ; Every time that it is accessed, it generates a different set
 ; of random floating-point values.
 ;
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
 ; First, define a key and an atom, and attach an ordinary value
 ; to the atom, for the given key.
@@ -46,7 +58,7 @@
 (define flipkey (PredicateNode "*-coinflip-*"))
 (cog-set-value! c flipkey (GreaterThan (Number 0.5) (ValueOf c k)))
 
-; The flipkey above should generate a stream of true and false truthvalues
+; The flipkey above should generate a stream of true and false TruthValues
 ; Note that cog-evaluate! is being used here, to get truth values, and not
 ; cog-execute! (which would only return the value, without evaluating it.)
 (cog-evaluate! (ValueOf c flipkey))
@@ -55,7 +67,7 @@
 (cog-evaluate! (ValueOf c flipkey))
 (cog-evaluate! (ValueOf c flipkey))
 
-; Its more efficeint to do this:
+; Its more efficient to do this:
 (define coin-tv (ValueOf c flipkey))
 (cog-evaluate! coin-tv)
 (cog-evaluate! coin-tv)
