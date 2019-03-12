@@ -31,6 +31,6 @@ def StringValue(arg):
 def TruthValue(strength=1.0, confidence=1.0):
     return createTruthValue(strength, confidence)
 
-def GroundedObjectNode(name, obj = None):
-    return createGroundedObjectNode(name, obj, atomspace)
+def GroundedObjectNode(name, obj = None, unwrap_args = False):
+    return createGroundedObjectNode(name, obj, atomspace, unwrap_args)
 

@@ -41,7 +41,9 @@ static void load_cython_proxies()
 	import_opencog__atomspace();
 }
 
-PythonGroundedObject::PythonGroundedObject(PyObject *object) : object(object)
+PythonGroundedObject::PythonGroundedObject(PyObject *object, bool unwrap_args)
+	: object(object)
+	, unwrap_args(unwrap_args)
 {
 	static int cython_proxies_loaded = 0;
 	if (!cython_proxies_loaded)
@@ -64,8 +66,8 @@ GroundedFunction PythonGroundedObject::get_method(std::string const& method_name
 }
 
 ValuePtr PythonGroundedObject::invoke(std::string const& method_name,
-						AtomSpace* atomspace, ValuePtr const& _args)
+						AtomSpace* atomspace, ValuePtr const& args)
 {
-	return call_python_method(object, method_name, atomspace, _args);
+	return call_python_method(unwrap_args, object, method_name, atomspace, args);
 }
 

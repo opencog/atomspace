@@ -72,6 +72,23 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertTrue(grounded_object_node.get_object() is None)
 
+    def test_call_grounded_object_without_explicit_wrapping(self):
+        exec_link = ApplyLink(
+                        MethodOfLink(
+                            GroundedObjectNode("obj", TestObject("obj"),
+                                               unwrap_args = True),
+                            ConceptNode("plain_multiply")
+                        ),
+                        ListLink(
+                            GroundedObjectNode("a", 6),
+                            GroundedObjectNode("b", 7)
+                        )
+                    )
+
+        result = execute_atom(self.space, exec_link)
+
+        self.assertEqual(result.value(), 42)
+
 class TestObject:
 
     def __init__(self, name):
@@ -85,6 +102,9 @@ class TestObject:
 
     def get_second(self, first, second):
         return second
+
+    def plain_multiply(self, a, b):
+        return a * b
 
 if __name__ == '__main__':
     unittest.main()
