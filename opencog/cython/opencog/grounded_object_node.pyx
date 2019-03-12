@@ -51,6 +51,7 @@ cdef api cValuePtr call_python_method(bool unwrap_args, object obj,
 cdef cValuePtr call_unwrapped_args(object method, const cValuePtr& _args):
     args = convert_vector_of_grounded_objects_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
     result = method(*args)
+    Py_INCREF(result)
     return createPtrValue(<void*>result, decref)
 
 cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
