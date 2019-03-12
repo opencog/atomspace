@@ -25,9 +25,9 @@ cdef class GroundedObjectNode(Atom):
     cdef cGroundedObjectNode* get_c_grounded_object_node_ptr(self):
         return <cGroundedObjectNode*>(self.get_c_value_ptr().get())
 
-    def set_object(self, obj):
+    def set_object(self, obj, unwrap_args = False):
         cdef shared_ptr[cGroundedObject] o_ptr
-        o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, False))
+        o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, unwrap_args))
         self.get_c_grounded_object_node_ptr().set_object(o_ptr)
 
     def get_object(self):
