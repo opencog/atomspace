@@ -75,14 +75,17 @@ void SchemeSmob::release_as (AtomSpace *as)
 		deleteable_as.erase(has);
 		lck.unlock();
 		delete as;
+		lck.lock();
 
 		// (Recursively) decrement the use count on the parent.
 		// We had incremented it earlier, in `ss_new_as`, when
-		// creating it.
-		if (env and deleteable_as.end() != deleteable_as.find(env))
+		// creating it. Do not delete it, unless the guile gc
+		// asks us to.
+		while (env and deleteable_as.end() != deleteable_as.find(env))
 		{
-			--deleteable_as[env];
-			if (0 == deleteable_as[env]) release_as(env);
+			if (0 < deleteable_as[env])
+				--deleteable_as[env];
+			env = env->get_environ();
 		}
 	}
 }
@@ -280,7 +283,7 @@ SCM SchemeSmob::ss_get_as (void)
 
 /// The current atomspace for the current thread must not be deleted
 /// under any circumstances (even if guile thinks that there are no
-/// eferences to it). Thus, each thread increments a use-count on the
+/// references to it). Thus, each thread increments a use-count on the
 /// atomspace (the use-count is stored in deleteable_as).  When the
 /// guile-gc finds atomspaces that have no SCM smobs pointing at them,
 /// it will call `release_as()` to delete them. If those atomspaces
@@ -292,16 +295,46 @@ SCM SchemeSmob::ss_get_as (void)
 /// atomspaces that magically appeared from the outside world --- we
 /// do NOT track those for deletion (nor do we delete them).
 ///
+/// ... However, a common scenario seems to be that the new atomspace
+/// is a temp atomspace, created in the pattern matcher, the pattern
+/// minor or somewhere else, and it's parent is the old atomspace
+/// (which we are tracking). That means that the old atomspace is still
+/// in use: its the parent of an untracked child. So we need to
+/// increment in this case as well, lest the use-count drop to zero.
+///
 void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
 {
 	AtomSpace* oas = ss_to_atomspace(old_as);
-	if (oas != nas)
+	if (oas == nas) return;
+
+	std::lock_guard<std::mutex> lck(as_mtx);
+	if (deleteable_as.end() != deleteable_as.find(nas))
 	{
-		std::lock_guard<std::mutex> lck(as_mtx);
-		if (deleteable_as.end() != deleteable_as.find(nas))
-			++deleteable_as[nas];
-		if (oas and deleteable_as.end() != deleteable_as.find(oas))
-			--deleteable_as[oas];
+		++deleteable_as[nas];
+	}
+	else
+	{
+		AtomSpace* env = nas->get_environ();
+		if (env and deleteable_as.end() != deleteable_as.find(env))
+			++deleteable_as[env];
+	}
+
+	if (oas)
+	{
+		if (deleteable_as.end() != deleteable_as.find(oas))
+		{
+			if (0 < deleteable_as[oas])
+				--deleteable_as[oas];
+		}
+		else
+		{
+			AtomSpace* env = oas->get_environ();
+			if (env and deleteable_as.end() != deleteable_as.find(env))
+			{
+				if (0 < deleteable_as[env])
+					--deleteable_as[env];
+			}
+		}
 	}
 }
 
@@ -333,7 +366,13 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	as_ref_count(ss_get_as(), nas);
+	// Do NOT do the following: it is tempting, but wrong.
+	// as_ref_count(ss_get_as(), nas);
+	// Why? Because this function is called from the evaluator, only,
+	// and it's likely that the use-count on "saved_as" will drop to
+	// zero, which would be undesirable. At any rate, the calls to
+	// this function always come in matched pairs, so its pointless
+	// to do more than the minimum amount of work.
 
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }

@@ -110,6 +110,7 @@ are the logics of theorem-proving, in general.)
 * `presence.scm`     -- Testing for the presence of an Atom.
 * `absent.scm`       -- Using the AbsentLink.
 * `value-of.scm`     -- Looking for high or low TruthValues.
+* `query.scm`        -- Running queries in parallel.
 
 
 Pattern Recognition

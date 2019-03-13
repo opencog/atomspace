@@ -1,0 +1,138 @@
+/*
+ * tests/atoms/core/CondLinkUTest.cxxtest
+ *
+ * Copyright (C) 2019 Kasim Ebrahim
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class CondLinkUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval *eval;
+
+public:
+	CondLinkUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		eval->eval("(use-modules (opencog exec))");
+	}
+
+	~CondLinkUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+
+	void tearDown(void);
+
+	void test_singleton(void);
+
+	void test_nondefault_exp(void);
+
+	void test_wrapped_exp();
+
+	void test_grounded_cond();
+};
+
+void CondLinkUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void CondLinkUTest::setUp(void)
+{
+	as->clear();
+}
+
+void CondLinkUTest::test_singleton()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! single)");
+
+	Handle baz = eval->eval_h("(Number -1)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_nondefault_exp()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! nondefault)");
+
+	Handle baz = eval->eval_h("(Number 5)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_wrapped_exp()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! listwrapped)");
+
+	Handle baz = eval->eval_h("(NumberNode 1)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}
+
+void CondLinkUTest::test_grounded_cond()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! grounded-cond)");
+
+	Handle baz = eval->eval_h("(NumberNode 2)");
+	printf("got %s", result->to_string().c_str());
+	printf("expected %s\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+}

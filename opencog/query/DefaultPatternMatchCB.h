@@ -126,10 +126,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
 		static void release_transient_atomspace(AtomSpace* atomspace);
 
-#ifdef CACHED_IMPLICATOR
-		virtual void ready(AtomSpace*);
-		virtual void clear();
-#endif
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;
 		bool eval_term(const Handle& pat, const HandleMap& gnds);

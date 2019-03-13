@@ -23,7 +23,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/atom_types/types.h>
 
-#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -72,8 +71,6 @@ private:
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ValuePtr&);
-	static SCM tv_to_scm(const TruthValuePtr&);
-	static SCM av_to_scm(const AttentionValuePtr&);
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static ValuePtr make_value(Type, SCM);
@@ -181,11 +178,6 @@ private:
 	static std::map<AtomSpace*, int> deleteable_as;
 	static void as_ref_count(SCM, AtomSpace *);
 
-	// Attention values
-	static SCM ss_new_av(SCM, SCM, SCM);
-	static SCM ss_av_p(SCM);
-	static SCM ss_av_get_value(SCM);
-
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
@@ -196,7 +188,6 @@ private:
 	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
-	static AttentionValuePtr get_av_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
 
 	// Logger
@@ -216,7 +207,6 @@ private:
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
-	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
@@ -250,7 +240,6 @@ public:
 	// Utility printing functions
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
-	static std::string av_to_string(const AttentionValuePtr&);
 	static std::string tv_to_string(const TruthValuePtr&);
 };
 

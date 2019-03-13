@@ -1,5 +1,7 @@
 ;; Used by ExecutionOutputUTest::test_query_exec
 
+(use-modules (opencog) (opencog exec))
+
 ;; Grounds
 
 (ExecutionOutput
@@ -17,6 +19,9 @@
 ;; Query
 
 (define exec-query
+  (Get (ExecutionOutput (Variable "$schema") (Variable "$arg"))))
+
+(define quote-exec-query
   (Get
     (Quote
       (ExecutionOutput

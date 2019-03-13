@@ -149,7 +149,6 @@
 ;; below is the ure config for this example:
 
 (define Einstein-rbs (ConceptNode "Einstein-rbs"))
-(Inheritance Einstein-rbs (ConceptNode "URE"))
 
 
 ;; Associate the rules to the rule base 

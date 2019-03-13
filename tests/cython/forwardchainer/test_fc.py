@@ -5,7 +5,7 @@ from unittest import TestCase
 from opencog.ure import ForwardChainer
 from opencog.scheme_wrapper import load_scm, scheme_eval
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog
+from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.atomspace import TruthValue
 
 
@@ -14,6 +14,10 @@ class FCTest(TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
+
+    def tearDown(self):
+        finalize_opencog()
+        del self.atomspace
 
     def init(self):
         project_source_dir = os.environ["PROJECT_SOURCE_DIR"]

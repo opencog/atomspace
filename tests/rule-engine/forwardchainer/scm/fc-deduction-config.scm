@@ -20,10 +20,6 @@
 
 ;; Define a new rule base (aka rule-based system)
 (define fc-deduction-rbs (ConceptNode "fc-deduction-rule-base"))
-(InheritanceLink
-   fc-deduction-rbs
-   (ConceptNode "URE")
-)
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's

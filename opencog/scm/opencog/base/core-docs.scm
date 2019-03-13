@@ -334,8 +334,8 @@
 
 (set-procedure-property! cog-type 'documentation
 "
- cog-type ATOM
-    Return the type of ATOM.
+ cog-type EXP
+    Return the type of EXP, where EXP is a Value or an Atom.
 
     Example:
        ; Define a node
@@ -714,43 +714,6 @@
 
 ; ===================================================================
 ;
-(set-procedure-property! cog-new-av 'documentation
-"
- cog-new-av STI LTI VLTI
-    Create an AttentionValue with the given STI, LTI and VLTI.
-    Unlike atoms, attention values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    Example:
-        ; Create a new attention value:
-        guile> (cog-new-av 10 20 0)
-")
-
-(set-procedure-property! cog-av? 'documentation
-"
- cog-av? EXP
-    Return #t if EXP is an attention value, else return #f
-
-    Example:
-       ; Define a simple attention value
-       guile> (define x (cog-new-av 15 25 0))
-       guile> (define y (+ 2 2))
-       guile> (cog-av? x)
-       #t
-       guile> (cog-av? y)
-       #f
-")
-
-(set-procedure-property! cog-av->alist 'documentation
-"
- cog-av->alist AV
-    Convert an attention value AV to an association list (alist).
-
-    Example:
-       guile> (define x (cog-new-av 99 88 0))
-       guile> (cog-av->alist x)
-       ((sti . 99) (lti . 88) (vlti . 0))
-")
 
 (set-procedure-property! cog-new-value 'documentation
 "
@@ -872,7 +835,7 @@
 (set-procedure-property! cog-get-types 'documentation
 "
  cog-get-types
-    Return a list of all of the atom types in the system.
+    Return a list of all of the atom and value types in the system.
 
     Example:
         guile> (cog-get-types)
@@ -880,8 +843,8 @@
 
 (set-procedure-property! cog-type? 'documentation
 "
- cog-type? SYMOBL
-    Return #t if the SYMOBL names an atom type, else return #f
+ cog-type? SYMBOL
+    Return #t if the SYMBOL names a value or atom type, else return #f
 
     Example:
         guile> (cog-type? 'ConceptNode)
@@ -892,8 +855,8 @@
 
 (set-procedure-property! cog-node-type? 'documentation
 "
- cog-node-type? SYMOBL
-    Return #t if the SYMOBL names an node type, else return #f
+ cog-node-type? SYMBOL
+    Return #t if the SYMBOL names an node type, else return #f
 
     Example:
         guile> (cog-node-type? 'ConceptNode)

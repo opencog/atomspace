@@ -24,9 +24,8 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/TypeUtils.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "BindLink.h"
 
@@ -42,10 +41,6 @@ void BindLink::init(void)
 			"Expecting a BindLink, got %s", tname.c_str());
 	}
 
-	extract_variables(_outgoing);
-	unbundle_clauses(_body);
-	common_init();
-	setup_components();
 	_pat.redex_name = "anonymous BindLink";
 }
 
@@ -60,101 +55,39 @@ BindLink::BindLink(const Handle& body, const Handle& rewrite)
 {}
 
 BindLink::BindLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+	: QueryLink(hseq, t)
 {
 	init();
 }
 
 BindLink::BindLink(const Link &l)
-	: PatternLink(l)
+	: QueryLink(l)
 {
 	init();
 }
 
 /* ================================================================= */
-///
-/// Find and unpack variable declarations, if any; otherwise, just
-/// find all free variables.
-///
-/// On top of that initialize _body and _implicand with the
-/// clauses and the rewrite rule.
-///
-void BindLink::extract_variables(const HandleSeq& oset)
-{
-	size_t sz = oset.size();
-	if (sz < 2 or 3 < sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
-
-	// If the outgoing set size is two, then there are no variable
-	// declarations; extract all free variables.
-	if (2 == sz)
-	{
-		_body = oset[0];
-		_implicand = oset[1];
-		_varlist.find_variables(oset[0]);
-		return;
-	}
-
-	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
-	_vardecl = oset[0];
-	_body = oset[1];
-	_implicand = oset[2];
-
-	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
-}
-
-/* ================================================================= */
-// Cache of the most results obtained from the most recent run
-// of the pattern matcher.
-
-static const Handle& rewrite_key(void)
-{
-	static Handle rk(createNode(PREDICATE_NODE, "*-PatternRewriteKey-*"));
-	return rk;
-}
-
-/// Store a cache of the most recent pattern rewrite as a value,
-/// obtainable via a "well-known" key: "*-PatternRewriteKey-*"
-void BindLink::set_rewrite(const Handle& rewr)
-{
-	setValue(rewrite_key(), rewr);
-}
-
-/// Return the cached value of the most recent rewrite.
-Handle BindLink::get_rewrite(void) const
-{
-	return HandleCast(getValue(rewrite_key()));
-}
-
-/* ================================================================= */
 /* ================================================================= */
 
-/**
- * Evaluate a pattern and rewrite rule embedded in a BindLink
- *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
- *
- * See the do_imply function documentation for details.
- */
+/** Wrap query results in a SetLink, place them in the AtomSpace. */
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
-	if (nullptr == as) as = _atom_space;
+	// The result_set contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, cache it, and return that.
+	ValueSet rslt(do_execute(as, silent));
+	HandleSeq hlist;
+	for (const ValuePtr& v: rslt) hlist.emplace_back(HandleCast(v));
+	Handle rewr(createUnorderedLink(hlist, SET_LINK));
 
-#ifdef CACHED_IMPLICATOR
-	CachedDefaultImplicator cachedImpl(as);
-	Implicator& impl = cachedImpl;
-#else
-	DefaultImplicator impl(as);
-#endif
-	impl.max_results = SIZE_MAX;
-	// Now perform the search.
-	return do_imply(as, get_handle(), impl);
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+	return rewr;
 }
 
 DEFINE_LINK_FACTORY(BindLink, BIND_LINK)

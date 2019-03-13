@@ -54,16 +54,20 @@ GetLink::GetLink(const Link &l)
 
 /* ================================================================= */
 
-ValuePtr GetLink::execute(AtomSpace* as, bool silent)
+HandleSet GetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
 	SatisfyingSet sater(as);
-	sater.max_results = SIZE_MAX;
-	satisfy(sater);
+	this->satisfy(sater);
 
+	return sater._satisfying_set;
+}
+
+ValuePtr GetLink::execute(AtomSpace* as, bool silent)
+{
 	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(sater._satisfying_set, SET_LINK));
+	Handle satset(createUnorderedLink(do_execute(as, silent), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
@@ -72,7 +76,6 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	// could defer this indefinitely, until its really needed.
 	satset = as->add_atom(satset);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
-	set_groundings(satset);
 
 	return satset;
 }

@@ -1,7 +1,9 @@
+from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
+from cython.operator cimport dereference as deref
 
 cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
@@ -102,8 +104,6 @@ cdef class TruthValue(Value):
 
 
 # Atom
-ctypedef public short av_type
-
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
     pass
 
@@ -124,6 +124,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         string get_name()
         vector[cHandle] getOutgoingSet()
 
+    cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
@@ -189,32 +190,14 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void clear()
         bint remove_atom(cHandle h, bint recursive)
 
+
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
+    cdef object parent_atomspace
 
-cdef extern from "opencog/attentionbank/AVUtils.h" namespace "opencog":
-    cdef av_type get_sti(const cHandle&)
-    cdef av_type get_lti(const cHandle&)
-    cdef av_type get_vlti(const cHandle&)
-
-cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
-    cdef cppclass cAttentionBank "opencog::AttentionBank":
-        void set_sti(const cHandle&, av_type stiValue)
-        void set_lti(const cHandle&, av_type ltiValue)
-        void inc_vlti(const cHandle&)
-        void dec_vlti(const cHandle&)
-
-        # get by STI range
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
-
-        # get from AttentionalFocus
-        output_iterator get_handle_set_in_attentional_focus(output_iterator)
-
-    cdef cAttentionBank attentionbank(cAtomSpace*)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
@@ -235,6 +218,23 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
+
+cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
+     cdef cAtom * atom_ptr = <cAtom*>h.get()
+     if atom_ptr == NULL:  # avoid null-pointer deref
+         return False
+     cdef Type t
+     t = deref(atom_ptr).get_type()
+     if deref(atom_ptr).is_node():
+         if deref(atomspace).get_handle(t, deref(atom_ptr).get_name()):
+             return True
+         return False
+     cdef vector[cHandle] handle_vector = deref(atom_ptr).getOutgoingSet()
+     if deref(atom_ptr).is_link():
+         if deref(atomspace).get_handle(t, handle_vector):
+             return True
+         return False
+     raise RuntimeError("Argument is not link and not node")
 
 # TODO: find proper way to work with dependencies includes into atomspace.pxd
 # means that we need to add these files at each library which depends on

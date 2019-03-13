@@ -1,13 +1,12 @@
 import unittest
+import re
 
 from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
 
-@unittest.skip('Not implemented, see comment to '
-               'vector_of_values_to_list()')
 class LinkValueContainingAtomsTest(unittest.TestCase):
-    
+
     def setUp(self):
         self.space = AtomSpace()
         initialize_opencog(self.space)
@@ -24,7 +23,7 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
         value = LinkValue([FloatValue(1), StringValue('foo'),
                            ConceptNode('bar')])
         self.assertTrue(value is not None)
-    
+
     def test_value_equals(self):
         self.assertEqual(LinkValue(StringValue('foo')),
                          LinkValue([StringValue('foo')]))
@@ -58,9 +57,14 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
     def test_str(self):
         value = LinkValue([FloatValue(1), StringValue('foo'),
                            ConceptNode('bar')])
-        self.assertEqual('(LinkValue\n    (FloatValue 42)\n    '
-                         '(StringValue "foo")\n    (ConceptNode "bar")\n)\n',
-                         str(value))
+        print(str(value))
+        self.assertTrue(re.fullmatch(
+            '\(LinkValue\n'
+            '    \(FloatValue 1\)\n'
+            '    \(StringValue "foo"\)\n'
+            '    \(ConceptNode "bar"\) ; \[\d+\]\[\d+\]\n'
+            '\)\n',
+            str(value)))
 
     def test_is_a(self):
         value = LinkValue([FloatValue(1), StringValue('foo'), 
@@ -72,3 +76,5 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
         self.assertFalse(value.is_link())
         self.assertTrue(value.is_a(types.Value))
 
+if __name__ == '__main__':
+    unittest.main()

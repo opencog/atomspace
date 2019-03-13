@@ -17,6 +17,10 @@ def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 
+def get_type_ctor_atomspace():
+    global atomspace
+    return atomspace
+
 include "opencog/atoms/atom_types/core_types.pyx"
 
 def FloatValue(arg):

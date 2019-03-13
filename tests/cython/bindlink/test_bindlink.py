@@ -2,7 +2,7 @@ from unittest import TestCase
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import af_bindlink, execute_atom, evaluate_atom
+from opencog.bindlink import execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
@@ -92,11 +92,6 @@ class BindlinkTest(TestCase):
         atom = execute_atom(self.atomspace, self.bindlink_atom)
         print("Bindlink found: " + str(atom))
         self._check_result_setlink(atom, 3)
-
-    def test_af_bindlink(self):
-        atom = af_bindlink(self.atomspace, self.bindlink_atom)
-        # The SetLink is empty. ??? Should it be.
-        self._check_result_setlink(atom, 0)
 
     def test_satisfying_set(self):
         atom = execute_atom(self.atomspace, self.getlink_atom)

@@ -36,10 +36,10 @@ namespace opencog
 class ExecutionOutputLink : public FunctionLink
 {
 private:
-	static Handle do_execute(AtomSpace*,
-	                         const Handle& schema,
-	                         const Handle& args,
-	                         bool silent=false);
+	static ValuePtr do_execute(AtomSpace*,
+	                           const Handle& schema,
+	                           const Handle& args,
+	                           bool silent=false);
 
 protected:
 	void check_schema(const Handle& schema) const;
