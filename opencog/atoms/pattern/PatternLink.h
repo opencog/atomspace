@@ -71,8 +71,6 @@ namespace opencog
 /// components; the components themselves are connected only by
 /// virtual links.
 ///
-/// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
-/// link, and return a truth value.
 class PatternLink;
 typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 class PatternLink : public PrenexLink
@@ -134,10 +132,6 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-public:
-	// Cache the most recent resuts of the pattern match
-	void set_groundings(const Handle&);
-
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -177,9 +171,6 @@ public:
 	void remove_constant_clauses(void);
 
 	bool satisfy(PatternMatchCallback&) const;
-
-	// Return the cached variable groundings.
-	Handle get_groundings() const;
 
 	void debug_log(void) const;
 

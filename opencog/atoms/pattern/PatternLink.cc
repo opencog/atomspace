@@ -301,8 +301,8 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == t) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(t, QUERY_LINK)) return;
 	if (DUAL_LINK == t) return;
 	init();
 }
@@ -319,8 +319,8 @@ PatternLink::PatternLink(const Link& l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == tscope) return;
+	// QueryLink, BindLink use a different initialization sequence.
+	if (nameserver().isA(tscope, QUERY_LINK)) return;
 	if (DUAL_LINK == tscope) return;
 	init();
 }
@@ -639,6 +639,16 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+#if DONT_DO_THIS_ANY_MORE
+The code that is if-defed out here does not seem to be a good idea.
+Or rather, I cannot currently think of a good use-case for it.
+If code needs to be executed before a pattern match is performed, then
+maybe one should ... do it some other way? Instead of doing it
+automatically? Or something?  The below seems like a half-baked,
+incomplete idea for something neat, but that was never fully thought
+out, spec'ed, implmeneted, documented, explained... So I'm commenting
+it out.
+
 		// Subclasses of FunctionLink, e.g. ExecutionOutputLink,
 		// but also PlusLink, TimesLink are all executable. They
 		// need to be executed *before* pattern matching, but after
@@ -674,6 +684,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
+#endif
 
 		if (is_virtual)
 			virtual_clauses.emplace_back(clause);
@@ -767,7 +778,7 @@ bool PatternLink::add_dummies()
 /// to to connect evaluatable terms.  Thus, for example, for a clause
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable. Tracning halts as soon as something that isn't a
+/// evaluatable. Tracing halts as soon as something that isn't a
 /// connective is encountered.
 void PatternLink::trace_connectives(const TypeSet& connectives,
                                     const Handle& term,
@@ -857,11 +868,6 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	}
 }
 
-// Hack alert: The line below should not be here. Though some refactoring
-// regarding shared libraries circular dependencies (liblambda and libquery)
-// needs to be done before this becomes fixable...
-const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
-
 void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.cnf_clauses)
@@ -926,14 +932,6 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 }
 
 /* ================================================================= */
-// Cache of the most results obtained from the most recent run
-// of the pattern matcher.
-
-static const Handle& groundings_key(void)
-{
-	static Handle gk(createNode(PREDICATE_NODE, "*-PatternGroundingsKey-*"));
-	return gk;
-}
 
 void PatternLink::remove_constant_clauses(void)
 {
@@ -959,19 +957,6 @@ void PatternLink::remove_constant_clauses(void)
 		_num_comps = _components.size();
 		make_connectivity_map(_pat.cnf_clauses);
 	}
-}
-
-/// Store a cache of the most recent variable groundings as a value,
-/// obtainable via a "well-known" key: "*-PatternGroundingsKey-*"
-void PatternLink::set_groundings(const Handle& grnd)
-{
-	setValue(groundings_key(), grnd);
-}
-
-/// Return the cached value of the most recent variable groundings.
-Handle PatternLink::get_groundings(void) const
-{
-	return HandleCast(getValue(groundings_key()));
 }
 
 /* ================================================================= */

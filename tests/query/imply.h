@@ -30,11 +30,14 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	DefaultImplicator impl(as);
 	impl.implicand = himplicand;
 
-	bl->imply(impl);
+	bl->satisfy(impl);
 
-	// The result_list contains a list of the grounded expressions.
+	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = as->add_link(LIST_LINK, impl.get_result_list());
+	HandleSeq hlist;
+	for (const ValuePtr& v: impl.get_result_set())
+		hlist.push_back(HandleCast(v));
+	Handle gl = as->add_link(LIST_LINK,hlist);
 	return gl;
 }
 

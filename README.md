@@ -1,20 +1,20 @@
 OpenCog AtomSpace
 =================
 
+<!--
+XXX FIXME find the correct IP addr.
 master:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-master)](http://61.92.69.39:8080/job/ci-atomspace-master)
 stable:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-stable)](http://61.92.69.39:8080/job/ci-atomspace-stable)
+-->
 
-The OpenCog AtomSpace is a knowledge representation (KR) database and
-the associated query/reasoning engine to fetch and manipulate that data,
-and perform reasoning on it. Data is represented in the form of graphs,
-and more generally, as hypergraphs; thus the AtomSpace is a kind of
-graph database, the query engine is a general graph re-writing system,
-and the rule-engine is a generalized rule-driven inferencing system.
-The vertices and edges of a graph, known as "Atoms", are used to
-represent not only "data", but also "procedures"; thus, many graphs
-are executable programs as well as data structures.
+The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
+database, an associated query engine and graph-re-writing system,
+and a rule-driven inferencing engine that can apply and manipulate
+sequences of rules to perform reasoning. It is a layer that sits
+on top of ordinary distributed (graph) databases, providing a large
+variety of advanced features not otherwise available.
 
 The AtomSpace is a platform for building Artificial General Intelligence
 (AGI) systems. It provides the central knowledge representation component
@@ -22,9 +22,42 @@ for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
 
-However, it turns out that knowledge representation is hard, and so the
-AtomSpace is also a platform for active scientific research on knowledge
-representation, knowledge discovery and knowledge manipulation.
+Data as Graphs
+==============
+Data is represented in the form of graphs; more precisely, as typed,
+directed hypergraphs.  The vertices and edges of a graph, known as
+"Atoms", are used to represent not only "data", but also "procedures";
+thus, many graphs are executable programs as well as data structures.
+Associated with each Atom (each vertex or edge of the graph) is a
+key-value database, meant for hold transient, (rapidly) time-varying
+"Values", ideal for holding audio or video streams, or even GPU
+processing streams, such as deep-learning, dataflow networks.
+
+The query language allows arbitrarily-complex queries to be specified,
+joining together arbitrary subgraphs with arbitrary relations between
+variables. Unlike any other graph database, the queries are themselves
+represented as graphs, and so can be stored in the AtomSpace. This
+enables numerous new possibilities. Just like ordinary databases, a
+a single query can find all matching graphs. Unlike others, this
+can be run in reverse: a single graph can be used to find all
+queries that would have matched it. Reverse queries are extremely
+common in chatbot systems, where one must fish out a limited set of
+rules from out of a big sea of possibilities. We believe that (as of
+this writing) that there is no other general-purpose database system
+out there that supports reverse queries.
+
+But this is just the tip of the iceberg. There's much more.  There are
+many features in the AtomSpace that are not found in ordinary graph
+databases or other systems.  Thus, the AtomSpace can be thought of as
+a processing layer on top of existing distributed processing systems,
+providing a number of advanced features and capabilities.
+
+As it turns out that knowledge representation is hard, so it also turns
+out that the AtomSpace is a platform for active scientific research
+on knowledge representation, knowledge discovery and knowledge
+manipulation.  If you are comfortable with extremely complex
+mathematical theory, and just also happen to be extremely comfortable
+writing code, you are invited -- encouraged -- to join the project.
 
 
 Using Atomese and the AtomSpace
@@ -32,7 +65,7 @@ Using Atomese and the AtomSpace
 The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
 platform. It is probably easiest to think of it as kind-of-like an operating
 system kernel: you don't need to know how it works to use it.  You probably
-don't need to tinker with it. It just works, and its there when you need it.
+don't need to tinker with it. It just works, and it's there when you need it.
 
 End-users and application developers will want to use one of the existing
 "app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
@@ -61,10 +94,10 @@ A  Theoretical Overview
 =======================
 The AtomSpace is a mashup of a large variety of concepts from
 mathematical logic, theorem proving, graph theory, database theory,
-type theory and knowledge representation. Its hard to provide a
-coherent overview without throwing around a lot of "big words" and
-"big concepts".  We're trying to get a lot of things done, here,
-and there's no particularly simple or effective way of doing it
+type theory, model theory and knowledge representation. Its hard to
+provide a coherent overview without throwing around a lot of "big words"
+and "big concepts".  We're trying to get a lot of things done, here,
+and there's no particularly simple or effective way of explaining it
 without a lot of foundational theory.
 
 ### Atom Types
@@ -94,13 +127,27 @@ designed for automation and machine learning.  That is, like any
 knowledge representation system, the data and procedures encoded
 in "Atomese" are meant to be accessed by other automated subsystems
 manipulating and querying and inferencing over the data/programs.
-Also, viewed as a programming language, it can be very slow and
-inefficient and not scalable; it was not designed with efficiency
-and programming tasks in mind, nor with scalability; but rather, it
-was designed to allow the generalized manipulation of networks of
-probabilistic data by means of rules and inferences and reasoning
-systems.  It extends the idea of probabilistic logic networks to a
-generalized system for automatically manipulating and managing data.
+
+Aside from the various advanced features, Atomese also has some very
+basic and familiar atom types: atoms for arithmetic operations like
+"plus" and "times", conditional operators, like "greater-than" or
+"equals", control operations like "sequential and" and "cond", as
+well as settable state. This makes Atomese resemble a kind of
+intermediate language, something you might find inside of a compiler,
+a bit like CIL or Gimple. However, it is both far more flexible and
+powerful than these, and also far less efficient. Adventurous souls
+are invited to create a compiler to GNU Lighting, CIL, Java bytecode
+or the bytecode of your choice; or maybe to a GPU backend, or even
+more complex data-processing systems, such as TensorFlow.
+
+In its current form, Atomese was primarily designed to allow the
+generalized manipulation of large networks of probabilistic data by
+means of rules and inferences and reasoning systems.  It extends the
+idea of probabilistic logic networks to a generalized system for
+algorithmically manipulating and managing data. The current, actual
+design has been heavily influenced by practical experience with
+natural-language processing, question answering, inferencing and
+the specific needs of robot control.
 
 The use of the AtomSpace, and the operation and utility of Atomese,
 remains a topic of ongoing research and design experimentation, as
@@ -116,30 +163,41 @@ all these various needs in an integrated way.  It is likely to
 change, as the various current short-comings, design flaws,
 performance and scalability issues are corrected.
 
+Active researchers and theoreticians are invited to join! The current
+codebase is *finally* clean and well-organized enough that a large
+number of possibilities have opened up, offering many different and
+exciting directions to pursue. The system is clean and flexible, and
+ready to move up to the next level.
+
 ### Atoms and Values
-Currently, one of the primary conceptual and performance splits
-are between "Atoms" and "Values". Atoms are:
+One of the primary conceptual distinctions in Atomese is between
+"Atoms" and "Values". The distinction is made for both usability and
+performance.  Atoms are:
 
 * Used to represent graphs, networks, and long-term stable graphical relations.
-* Indexed (by the AtomSpace) and enable the rapid search and traversal of graphs.
+* Indexed (by the AtomSpace), which enables the rapid search and traversal of graphs.
 * Globally unique, and thus unambiguous anchor points for data.
 * Immutable: can only be created and destroyed, and are effectively static and unchanging.
-* Large, bulky, heavy-weight.
+* Large, bulky, heavy-weight (because indexes are necessarily bulky).
 
 By contrast, Values, and valuations in general, are:
 * A way of holding on to rapidly-changing data, including streaming data.
 * Hold "truth values" and "probabilities", which change over time as new
   evidence is accumulated.
-* Provide a per-Atom key-value store (noSQL database).
+* Provide a per-Atom key-value store (a mini noSQL database per-Atom).
 * Are not indexed, and are accessible only by direct reference.
-* Small, fast, fleeting.
+* Small, fast, fleeting (no indexes!)
 
 Thus, for example, a piece of knowledge, or some proposition would be
 stored as an Atom.  As new evidence accumulates, the truth value of the
 proposition is adjusted. Other fleeting changes, or general free-form
 annotations can be stored as Values.  Essentially, the AtomSpace looks
 like a database-of-databases; each atom is a key-value database; the
-atoms are related to one-another as a graph.
+atoms are related to one-another as a graph. The graph is searchable,
+editable; it holds rules and relations and ontologies and axioms.
+Values are the data that stream and flow through this network, like 
+water through pipes. Atoms define the pipes, the connectivity. Values
+flow and change.
 
 ### More info
 The primary documentation for the atomspace and Atomese is here:
@@ -154,24 +212,29 @@ The main project site is at https://opencog.org
 
 New Developers; Pre-requisite skills
 ====================================
+Most users should almost surely focus their attention on one of the
+high-level systems built on top of the AtomSpace. The rest of this
+section is aimed at anyone who wants to work *inside* of the AtomSpace.
+
+Most users/developers should think of the AtomSpace as being kind-of-like
+an operating system kernel, or the guts of a database: its complex, and
+you don't need to know how the innards work to use the system. These
+innards are best left to committed systems programmers and research
+scientists; there is no easy way for junior programmers to participate,
+at least, not without a lot of hard work and study.  Its incredibly
+exciting, though, if you know what you're doing.
+
 The AtomSpace is a relatively mature system, and thus fairly complex.
 Because other users depend on it, it is not very "hackable"; it needs
 to stay relatively stable.  Despite this, it is simultaneously a
 research platform for discovering the proper way of adequately
 representing knowledge in a way that is useful for general intelligence.
 It turns out that knowledge representation is not easy.  This project
-is a good place to explore it, if you're interested in that sort of thing.
-
-Most developers should think of the AtomSpace as being kind-of-like an
-operating system kernel, or the guts of a database: its complex, and
-you don't need to know how the innards work to use the system. These
-innards are best left to committed systems programmers and research
-scientists; there is no easy way for junior programmers to participate,
-at least, not without a lot of hard work and study.
+is a -good- excellent place to explore it, if you're interested in that
+sort of thing.
 
 Experience in any of the following areas will make things easier for
-you; in fact, if you are good at any of these, please seriously consider
-joining the project.
+you; in fact, if you are good at any of these ... we want you. Bad.
 
 * Database internals; query optimization.
 * Logic programming; Prolog.
@@ -181,16 +244,23 @@ joining the project.
 * Theorem-proving systems; Type theory.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
+* GPU processing pipelines, lighting-shading pipelines, CUDA, OpenCL.
+* Dataflow in GPU's for neural bets.
 
-Basically, Atomese is a mash-up of ideas taken from all of the above fields.
-It's kind-of trying to do and be all of these, all at once, and to find the
-right balance between all of them. Again: the goal is knowledge representation
-for general intelligence. Building something that the AGI developers can use.
+Basically, Atomese is a mash-up of ideas taken from all of the above
+fields.  It's kind-of trying to do and be all of these, all at once,
+and to find the right balance between all of them. Again: the goal is
+knowledge representation for general intelligence. Building something
+that the AGI developers can use.
+
+We've gotten quite far; we've got a good, clean code-base, more-or-less,
+and we're ready to kick it to the next level. The above gives a hint of
+the directions that are now open and ready to be explored.
 
 If you don't have at least some fair grounding in one of the above,
 you'll be lost, and find it hard to contribute.  If you do know something
 about any of these topics, then please dive into the open bug list. Fixing
-bugs is the #1 best way of learning the internals of a system.
+bugs is the #1 best way of learning the internals of any system.
 
 Key Development Goals
 =====================
@@ -241,7 +311,7 @@ some important design decisions to be made. Developers have not begun
 to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
-2018-2022 timeframe.
+2018-2022 time-frame.
 
 
 ### Sheaf theory
@@ -302,19 +372,19 @@ Essentially all Linux distributions will provide these packages.
 
 ###### guile
 * Embedded scheme REPL (version 2.2.2 or newer is required)
-* https://www.gnu.org/software/guile/guile.html 
-* For ubuntu bionic/cosmic  `apt-get install guile-2.2-dev` 
+* https://www.gnu.org/software/guile/guile.html
+* For Ubuntu bionic/cosmic  `apt-get install guile-2.2-dev`
+
+###### cxxtest
+* Test framework
+* Required for running unit tests. Breaking unit tests is verboten!
+* https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ### Optional Prerequisites
 
 The following packages are optional. If they are not installed, some
 optional parts of the AtomSpace will not be built.  The CMake command,
 during the build, will be more precise as to which parts will not be built.
-
-###### cxxtest
-* Test framework
-* Optional but recommended; required for running unit tests.
-* https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ###### Cython
 * C bindings for Python. (version 0.23 or higher)
@@ -329,7 +399,7 @@ during the build, will be more precise as to which parts will not be built.
 
 ###### Postgres
 * Distributed, multi-client networked storage.
-* Needed for "remembering" things between shutdowns.
+* Needed for "remembering" between shutdowns (and for distributed AtomSpace)
 * https://postgres.org | `apt-get install postgresql postgresql-client libpq-dev`
 
 ###### ZeroMQ (version 3.2.4 or higher)
@@ -352,7 +422,9 @@ Perform the following steps at the shell prompt:
     mkdir build
     cd build
     cmake ..
-    make -j4
+    make -j
+    sudo make install
+    make -j test
 ```
 Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.
@@ -363,8 +435,14 @@ the structure of the source directory root.
 To build and run the unit tests, from the `./build` directory enter
 (after building opencog as above):
 ```
-    make -j4 test ARGS=-j4
+    make -j test
 ```
+Most tests (just not the database tests) can be run in parallel:
+```
+    make -j test ARGS=-j4
+```
+The database tests *will* fail if run in parallel: they will step on
+one-another.
 
 ### Install
 
@@ -389,7 +467,7 @@ implementation.  An extensive set of examples can be found in the
 Python is more familiar than scheme to most programmers, and it offers
 another way of interfacing to the atomspace. Unfortunately, it is not
 as easy and simple to use as scheme; it also has various technical issues.
-Thus it is significantly less-used than scheme in the OpenCog project.
+Thus, it is significantly less-used than scheme in the OpenCog project.
 None-the-less, it remains vital for various applications. See the
 [`/examples/python`](/examples/python) directory for how to use python
 with the AtomSpace.

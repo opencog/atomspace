@@ -2197,6 +2197,20 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 /* ======================================================== */
 
 #ifdef DEBUG
+void PatternMatchEngine::print_solution(
+	const HandleMap &vars,
+	const HandleMap &clauses)
+{
+	Logger::Level save = logger().get_level();
+	logger().set_level("fine");
+	logger().set_timestamp_flag(false);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_print_level_flag(false);
+	log_solution(vars, clauses);
+
+	logger().set_level(save);
+}
+
 void PatternMatchEngine::log_solution(
 	const HandleMap &vars,
 	const HandleMap &clauses)

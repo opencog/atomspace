@@ -1,10 +1,11 @@
 from unittest import TestCase
 
+import opencog.atomspace
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import initialize_opencog, finalize_opencog, tmp_atomspace
 
 from time import sleep
 
@@ -102,30 +103,6 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(new_tv.mean, 0.75)
         self.assertAlmostEqual(new_tv.confidence, 0.9, places=4)
 
-    def test_attention_value(self):
-        node = Node("test")
-
-        # check values come back as assigned
-        node.sti = 1
-        node.lti = 2
-        node.vlti = 3
-        assert node.sti == 1
-        assert node.lti == 2
-        assert node.vlti == 3
-
-        # Check increment and decrement for vlti
-        node.decrement_vlti()
-        assert node.vlti == 2
-        node.increment_vlti()
-        assert node.vlti == 3
-
-        # Check dictionary setting and getting of av property.
-        node.av = {"sti": 4, "lti": 5, "vlti": 6}
-        assert node.sti == 4
-        assert node.lti == 5
-        assert node.vlti == 6
-        assert node.av == {"sti": 4, "lti": 5, "vlti": 6}
-
     def test_get_by_type(self):
         a1 = Node("test1")
         a2 = ConceptNode("test2")
@@ -151,31 +128,6 @@ class AtomSpaceTest(TestCase):
         # test empty
         result = self.space.get_atoms_by_type(types.AnchorNode, subtype=False)
         self.assertEqual(len(result), 0)
-
-    def test_get_by_av(self):
-        a1 = ConceptNode("test1")
-        a2 = ConceptNode("test2")
-        a3 = InheritanceLink(a1, a2)
-        a4 = ConceptNode("test4")
-        a5 = ConceptNode("test5")
-
-        a1.sti = 10
-        a2.sti = 5
-        a3.sti = 4
-        a4.sti = 1
-
-        #ImportanceIndex is Asynchronus give it some time
-        sleep(1)
-
-        result = self.space.get_atoms_by_av(4, 10)
-        print ("The atoms-by-av result is ", result)
-        assert len(result) == 3
-        assert set(result) == set([a1, a2, a3])
-        assert a4 not in result
-
-        result = self.space.get_atoms_in_attentional_focus()
-        assert len(result) == 4
-        assert set(result) == set([a1, a2, a3, a4])
 
     def test_incoming_by_type(self):
         a1 = Node("test1")
@@ -247,6 +199,18 @@ class AtomSpaceTest(TestCase):
 
         self.assertEquals(len(self.space), 3)
 
+    def test_context_mgr_tmp(self):
+        a = ConceptNode('a')
+        with tmp_atomspace() as tmp_as:
+             b = ConceptNode('b')
+             self.assertTrue(a in self.space)
+             # verify that current default atomspace is tmp_as
+             self.assertFalse(b in self.space)
+        c = ConceptNode('c')
+        # verify that current default atomspace is self.space
+        self.assertTrue(c in self.space)
+
+
 class AtomTest(TestCase):
 
     def setUp(self):
@@ -256,6 +220,14 @@ class AtomTest(TestCase):
     def tearDown(self):
         finalize_opencog()
         del self.space
+
+    def test_create_child_atomspace(self):
+        """
+        Test that parent atomspace will not be deleted before child
+        """
+        a = opencog.atomspace.AtomSpace()
+        b = opencog.atomspace.create_child_atomspace(a)
+        del a
 
     def test_creation(self):
         a = Node("test1")
@@ -270,15 +242,6 @@ class AtomTest(TestCase):
         # test set tv
         a.tv = TruthValue(0.1, 10)
         self.assertEqual(a.tv, TruthValue(0.1, 10))
-
-    def test_w_attention_value(self):
-        a = Node("test2")
-
-        self.assertEqual(a.av, {'lti': 0, 'sti': 0, 'vlti': False})
-
-        # test set av
-        a.av = { "sti": 10, "lti": 1, "vlti": True }
-        self.assertEqual(a.av, {'sti': 10, 'lti': 1, 'vlti': True})
 
     def test_out(self):
         # test get out
@@ -336,7 +299,6 @@ class AtomTest(TestCase):
         a1 = Node("test1", tv)
 
         a2 = Node("test2")
-        a2.av = {"sti": 10, "lti": 1, "vlti": True}
         a2.tv = TruthValue(0.1, 0.3)
 
         l = Link(a1, a2)
@@ -351,7 +313,7 @@ class AtomTest(TestCase):
 
         a2_expected = "(Node \"test2\") ; [{0}]\n".format(space_uuid)
         a2_expected_long = \
-            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}]\n"\
+            "(Node \"test2\" (stv 0.100000 0.300000)) ; [{0}]\n"\
             .format(space_uuid)
 
         l_expected = \

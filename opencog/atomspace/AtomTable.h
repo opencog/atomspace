@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_ATOMTABLE_H
 #define _OPENCOG_ATOMTABLE_H
 
+#include <atomic>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -121,6 +122,7 @@ private:
     /// operation. Viz, other computers on the network may have a copy
     /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
+    std::atomic_int _num_nested;
     UUID _uuid;
 
     // The AtomSpace that is holding us (if any). Needed for DeleteLink operation

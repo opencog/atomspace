@@ -322,7 +322,7 @@ bool ControlPolicy::match(const Handle& pattern, const Handle& term,
 		impl = tmp_as.add_link(IMPLICATION_SCOPE_LINK,
 		                       vardecl, pattern, rewrite),
 		tmp_term = tmp_as.add_atom(term),
-		result = MapLink(impl, tmp_term).execute(&tmp_as);
+		result = HandleCast(MapLink(impl, tmp_term).execute(&tmp_as, false));
 
 	return (bool)result;
 }

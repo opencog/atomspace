@@ -49,3 +49,7 @@ cdef class ForwardChainer:
 
         result_set = self._as.add_link(types.SetLink, list)
         return result_set
+
+    def __dealloc__(self):
+        del self.chainer
+        self._as = None

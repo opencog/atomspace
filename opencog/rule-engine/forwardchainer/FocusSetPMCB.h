@@ -57,7 +57,7 @@ public:
                            const HandleMap &term_soln)
     {
         Handle h(HandleCast(_inst->instantiate(implicand, var_soln, true)));
-        if (h) _result_list.push_back(h);
+        if (h) insert_result(h);
 
         return false;
     }

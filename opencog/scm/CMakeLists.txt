@@ -19,7 +19,6 @@ ADD_GUILE_MODULE (FILES
 )
 
 ADD_GUILE_MODULE (FILES
-	opencog/attention-bank.scm
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/logger.scm

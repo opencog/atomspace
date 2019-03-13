@@ -200,10 +200,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 /* ============================================================== */
 
-SCM SchemeSmob::tv_to_scm (const TruthValuePtr& tv)
-{
-	return protom_to_scm(ValueCast(tv));
-}
+#define tv_to_scm(TV) protom_to_scm(ValueCast(TV))
 
 /**
  * Create a new simple truth value, with indicated mean and confidence.

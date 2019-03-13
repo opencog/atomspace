@@ -418,6 +418,7 @@ void MultiAtomSpace::test_nest_scm(void)
 	CHKERR;
 	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
 
+	evaluator->eval("(set! nest-as #f) (gc)(sleep 1)(gc)");
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -500,6 +501,7 @@ void MultiAtomSpace::test_arg_scm(void)
 	CHKERR;
 	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
 
+	evaluator->eval("(set! arg-as #f) (gc)(sleep 1)(gc)");
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

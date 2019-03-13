@@ -55,31 +55,21 @@ class Implicator :
 	public virtual PatternMatchCallback
 {
 	protected:
-		UnorderedHandleSet _result_set;
-		HandleSeq _result_list;
+		AtomSpace* _as;
+		ValueSet _result_set;
+		void insert_result(const ValuePtr&);
 
 	public:
-		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
 		Instantiator inst;
 		Handle implicand;
 		size_t max_results;
 
-#ifdef CACHED_IMPLICATOR
-		virtual void ready(AtomSpace* asp)
-		{ inst.ready(asp); max_results = SIZE_MAX; }
-
-		virtual void clear()
-		{ inst.clear(); implicand = Handle::UNDEFINED; }
-#endif
-
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln);
 
-		virtual void insert_result(const Handle&);
-		virtual const UnorderedHandleSet& get_result_set() const
+		virtual const ValueSet& get_result_set() const
 		{ return _result_set; }
-		virtual const HandleSeq& get_result_list() const
-		{ return _result_list; }
 };
 
 }; // namespace opencog

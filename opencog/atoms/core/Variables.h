@@ -216,7 +216,11 @@ struct Variables : public FreeVariables,
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
-	bool is_type(const Handle& h) const;
+	bool is_type(const Handle&) const;
+
+	// Return true if we are holding a single variable, and it can
+	// be the indicated type.
+	bool is_type(Type) const;
 
 	// Return true if we are holding the variable `var`, and `val`
 	// satisfies the type restrictions that apply to `var`.

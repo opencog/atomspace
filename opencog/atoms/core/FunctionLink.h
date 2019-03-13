@@ -73,6 +73,7 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
+	virtual bool is_executable(void) const { return true; }
 	static Handle factory(const Handle&);
 };
 

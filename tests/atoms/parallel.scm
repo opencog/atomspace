@@ -35,3 +35,13 @@
 			(EvaluationLink
 				(GroundedPredicate "scm:incr") (List)))
 	))
+
+; throw exception
+(define pllel-bad
+	(Parallel (SequentialAnd
+		(EvaluationLink (GroundedPredicate "scm:insdfasdfascr") (List)))))
+
+; throw exception
+(define wait-bad
+	(Join (SequentialAnd
+		(EvaluationLink (GroundedPredicate "scm:insdfasdfascr") (List)))))

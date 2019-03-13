@@ -102,7 +102,7 @@ FIND_PACKAGE(CogUtil CONFIG)
 IF (COGUTIL_FOUND)
 	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
 	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
+	SET(HAVE_COGUTIL 1)
 ELSE (COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
@@ -180,29 +180,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-
-# ----------------------------------------------------------
-# Optional and obsolete Hypertable library, for atomspace persistence
-
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-	SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
-
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
-
-ELSE (HYPERTABLE_FOUND)
-	# The FindHypertable.cmake file already prints a message.
-	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
-	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
-
-ENDIF (HYPERTABLE_FOUND)
 
 # ----------------------------------------------------------
 # Google Protobuf library
@@ -498,7 +475,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(covtest
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -506,14 +483,19 @@ IF (CXXTEST_FOUND)
 			# -
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			# This script combines the coverage analysis of each test,
-			# then creates html in tests/lcov
-			# Note: this should now be run separately...
-			#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
 			COMMENT "Running tests with coverage..."
 		)
+		ADD_CUSTOM_TARGET(test
+			DEPENDS covtest
+			WORKING_DIRECTORY ./
+			# This script combines the coverage analysis of each test,
+			# then creates html in tests/lcov
+			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
+			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+			COMMENT "Generating lcov report..."
+		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# If this is a build with coverage enabled then test normally
+		# Coverage is disabled; test normally
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
@@ -606,7 +588,7 @@ SET(DEPENDENCY_LIST
 	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
-        "libpq-dev (>=9.3.24)"
+	"libpq-dev (>=9.3.24)"
 	"libcogutil-dev (>= 2.0.2)"
 )
 
@@ -628,7 +610,6 @@ SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
-SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)

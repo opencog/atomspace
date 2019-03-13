@@ -92,6 +92,14 @@ UNORDERED_LINK <- LINK
 // when they are evaluated.
 EVALUATABLE_LINK <- LINK
 
+// Crisp binary true/false output. Link types that, when evaluated,
+// naturally yeild a true/false value.
+CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
+
+// Numeric-output link. Generates either NumberNodes or FloatValues
+// upon execution.
+NUMERIC_OUTPUT_LINK <- LINK
+
 // Boolean-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be EvaluatableLinks.
 BOOLEAN_LINK <- LINK
@@ -101,10 +109,6 @@ BOOLEAN_LINK <- LINK
 // that can evaluate to NumberNodes: viz NumericOutputLinks, or
 // numeric values (derived from FloatValue).
 NUMERIC_LINK <- LINK
-
-// Numeric-output link. Generates either NumberNodes or FloatValues
-// upon execution.
-NUMERIC_OUTPUT_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
@@ -147,13 +151,13 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
 // sequential execution until the first failure or the first success.
 //
-TRUE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-FALSE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
-OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
-NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
+FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
+AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
 // The ChoiceLink states that a choice must be made.  Like a restaurant
@@ -180,7 +184,7 @@ CHOICE_LINK <- ORDERED_LINK
 // the same atom is present more than once, or what order it was in, it
 // is an unordered link, and  duplicates are eliminated.
 //
-PRESENT_LINK <- SET_LINK,EVALUATABLE_LINK
+PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -357,17 +361,21 @@ PATTERN_LINK <- PRENEX_LINK
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 
-// Finds all groundings, return TV
-SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK
-// Finds all groundings, return SetLink
-SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK
+// Finds all groundings, return binary truth value (true/false)
+SATISFACTION_LINK <- PATTERN_LINK,CRISP_OUTPUT_LINK
+// Finds all groundings, returns generic Value
+SATISFYING_LINK <- PATTERN_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
 // declarative.  Likewise, BindLink is exactly the same thing as an
 // ImplicationLink, except that its imperative, not declarative.
+// Both return SetLinks holding the results.
+// QueryLink is identical to BindLink, except it returns a LinkValue
+// holding the result, instead of a SetLink. (Less atomspace pollution).
 GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
-BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
+QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
+BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
 
 // Adjoint to the GetLink. This is "adjoint" in the sense that the roles
 // of the pattern and the grounding are reversed: given a grounding, the
@@ -416,8 +424,8 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // Actually, these probably should inherit from PrenexLink, because
 // we typically want to maintain these in prenex normal form.
 // XXX These are not actually used anywhere, or even implemented.
-FORALL_LINK <- SCOPE_LINK,EVALUATABLE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK,EVALUATABLE_LINK
+FORALL_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
 
 // Concept constructor
 SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
@@ -564,6 +572,10 @@ GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
+// AlphaEqualLink tests to see if both sides are the same, up to an
+// alpha-renaming of any variables that they may have.
+ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
 
@@ -638,6 +650,9 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Conditional based on crisp boolean value from TV.
+COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK

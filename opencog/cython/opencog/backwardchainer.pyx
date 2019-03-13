@@ -12,6 +12,8 @@ from ure cimport cBackwardChainer
 cdef class BackwardChainer:
     cdef cBackwardChainer * chainer
     cdef AtomSpace _as
+    cdef AtomSpace _trace_as
+    cdef AtomSpace _control_as
 # scheme interface
 #    (define* (cog-bc rbs target
 #                 #:key
@@ -38,6 +40,8 @@ cdef class BackwardChainer:
                                         <cAtomSpace*> (NULL if control_as is None else control_as.atomspace),
                                         deref(focus_set.handle))
         self._as = _as
+        self._trace_as = trace_as
+        self._control_as = control_as
 
     def do_chain(self):
         return self.chainer.do_chain()
@@ -47,3 +51,8 @@ cdef class BackwardChainer:
         cdef Atom result = Atom.createAtom(res_handle, self._as)
         return result
 
+    def __dealloc__(self):
+        del self.chainer
+        self._trace_as = None
+        self._control_as = None
+        self._as = None

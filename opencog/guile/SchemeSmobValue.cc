@@ -22,6 +22,20 @@
 using namespace opencog;
 
 /* ============================================================== */
+/** Return the type of a value/atom */
+
+SCM SchemeSmob::ss_type (SCM svalue)
+{
+	ValuePtr pa(verify_protom(svalue, "cog-type"));
+	Type t = pa->get_type();
+	const std::string &tname = nameserver().getTypeName(t);
+	SCM str = scm_from_utf8_string(tname.c_str());
+	SCM sym = scm_string_to_symbol(str);
+
+	return sym;
+}
+
+/* ============================================================== */
 /** Return true if s is a value */
 
 SCM SchemeSmob::ss_value_p (SCM s)

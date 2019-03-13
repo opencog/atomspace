@@ -1,6 +1,11 @@
 
 Query and Satisfaction
 ======================
+The atoms in this directory work with the pattern matcher to describe
+searches and queries of the AtomSpace. A general explanation of pattern
+matching can be found in the pattern-matching
+[README](opencog/query/README.md) file (as well as the wiki). Please
+review those resources first!
 
 The atoms in this directory memoize (cache) the patterns specified by
 the SatisfactionLink and the BindLink.  This helps avoid having to
@@ -11,17 +16,16 @@ The SatisfactionLink and BindLink implicitly assume (have to assume)
 that they will run with the DefaultPatternMatchCB, or variants thereof.
 However, the current implementation does allow them to actually run
 with other callbacks as well, so weird stuff may happen due to this
-implicit assumption. By contrast, the ConcreteLink tries not to make
-such assumptions, or, at least, to make fewer of them.
+implicit assumption.
 
 
 Basic Intro
 -----------
 What follows is a basic intro to satisfiability and grounding.
 
-The BindLink::imply() method is used to "evaluate" a BindLink.  The
-BindLink serves to declare the variables present in predicate and the
-implicand (the rewrite term).
+The `PatternLink::satisfy()` method is used to "evaluate" a BindLink.
+The BindLink serves to declare the variables present in predicate and
+the implicand (the rewrite term).
 
 Given a BindLink, this method will "evaluate" it, matching
 the predicate, and creating a grounded implicand, assuming the
@@ -109,16 +113,3 @@ or any quantifier whatsoever.
 Note that this method can be used to create a simple forward-chainer:
 One need only to take a set of implication links, and call this
 method repeatedly on them, until one is exhausted.
-
-TO-DO List
-==========
-
-Type Restrictions
------------------
-It could make sense to store type restrictions with a new VariableNode
-class. This would offer a minor performance improvement: type
-restrictions would not have to be looked up in a map, as currently
-implemented.  On the other hand, this could be a major headache: every
-variable would have to be globally unique, as otherwise, the type
-restrictions would clash with one another.  This would also make
-type equations hard to enforce.  Hmm. So maybe this is a bad idea...

@@ -66,9 +66,6 @@ TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 	Handle satgrd = as->add_atom(sater._ground);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
-	// Cache the variable groundings. OpenPsi wants this.
-	set_groundings(satgrd);
-
 	return sater._result;
 }
 

@@ -1,5 +1,5 @@
 /*
- * tests/atoms/truthvalue/TVandAVUTest.cxxtest
+ * tests/atoms/truthvalue/TVUTest.cxxtest
  *
  * Copyright (C) 2019 Linas Vepstas
  * All Rights Reserved
@@ -22,7 +22,6 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
@@ -32,18 +31,18 @@ using namespace opencog;
 #define al _as.add_link
 #define an _as.add_node
 
-class TVandAVUTest : public CxxTest::TestSuite
+class TVUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 
 public:
-	TVandAVUTest(void);
+	TVUTest(void);
 
 	void test_guile();
 };
 
-TVandAVUTest::TVandAVUTest(void)
+TVUTest::TVUTest(void)
 {
 	logger().set_level(Logger::INFO);
 	logger().set_print_to_stdout_flag(true);
@@ -51,16 +50,16 @@ TVandAVUTest::TVandAVUTest(void)
 
 // ====================================================================
 // Make sure the scheme bindings work.
-void TVandAVUTest::test_guile()
+void TVUTest::test_guile()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	SchemeEval eval(&_as);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	std::string rv = eval.eval("(use-modules (opencog attention-bank))");
+	std::string rv = eval.eval("(use-modules (opencog))");
 	TS_ASSERT(not eval.eval_error());
 	printf("Result from use-modules is %s\n", rv.c_str());
-	rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-and-av.scm\")");
+	rv = eval.eval("(load-from-path \"tests/atoms/truthvalue/tv-test.scm\")");
 	TS_ASSERT(not eval.input_pending());
 	TS_ASSERT(not eval.eval_error());
 	printf("Result from loading is %s\n", rv.c_str());
@@ -80,14 +79,6 @@ void TVandAVUTest::test_guile()
 	printf("     got: %s ", tvb->to_string().c_str());
 	printf("expected CountTruthValue\n");
 	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
-
-	ValuePtr vav = eval.eval_v("(cog-av (Concept \"aaa\"))");
-	TS_ASSERT(vav != nullptr);
-	AttentionValuePtr av = AttentionValueCast(vav);
-	TS_ASSERT(av != nullptr);
-	printf("     got: %s ", av->to_string().c_str());
-	printf("expected AttentionValue\n");
-	TS_ASSERT(av->get_type() == ATTENTION_VALUE);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

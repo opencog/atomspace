@@ -100,6 +100,9 @@ private:
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
+	/// Substitute, but do not execute ExecutionOutputLinks
+	Handle reduce_exout(const Handle& exout, bool silent=false);
+
 	/**
 	 * Return true iff the following atom type may not match to
 	 * itself, that is a scope, an evaluatable, used as logic
@@ -135,15 +138,10 @@ public:
 	}
 
 	ValuePtr instantiate(const Handle& expr,
-	                         const HandleMap& vars,
-	                         bool silent=false);
-	ValuePtr execute(const Handle& expr, bool silent=false)
-	{
-		// If no actual instantiation is involved, then do not consume
-		// quotations, as it might change the semantics. (??)
-		_consume_quotations = false;
-		return instantiate(expr, HandleMap(), silent);
-	}
+	                     const HandleMap& vars,
+	                     bool silent=false);
+
+	ValuePtr execute(const Handle& expr, bool silent=false);
 };
 
 } // namespace opencog

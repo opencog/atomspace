@@ -1,5 +1,5 @@
 /*
- * PatternMatch.cc
+ * PatternLinkRuntime.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -28,9 +28,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 
-#include "PatternMatch.h"
-#include "PatternMatchEngine.h"
-#include "DefaultPatternMatchCB.h"
+// #include "PatternMatchEngine.h"
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 using namespace opencog;
 
@@ -137,7 +136,7 @@ class PMCGroundings : public PatternMatchCallback
  *
  * Return false if no solution is found, true otherwise.
  */
-bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
+static bool recursive_virtual(PatternMatchCallback& cb,
             const HandleSeq& virtuals,
             const HandleSeq& negations, // currently ignored
             const HandleMap& var_gnds,
@@ -303,41 +302,6 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  * satisfied.  A future extension could allow the use of MatchOrLinks
  * to support multiple exclusive disjuncts. See the README for more info.
  */
-
-/* ================================================================= */
-/* ================================================================= */
-/**
- * Evaluate a BindLink
- *
- * Given a BindLink containing variable declarations, a predicate and
- * an implicand, this method will "evaluate" the implication, matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
- *
- *    BindLink
- *       VariableList
- *          VariableNode "$var0"
- *          VariableNode "$var1"
- *       AndList
- *          etc ...
- *
- * Evaluation proceeds as decribed in the "do_imply()" function below.
- * The whole point of the BindLink is to do nothing more than
- * to indicate the bindings of the variables, and (optionally) limit
- * the types of acceptable groundings for the variables.
- */
-bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
-{
-	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
-		throw InvalidParamException(TRACE_INFO,
-		                            "BindLink consists of multiple "
-		                            "disconnected components!");
-
-	return PatternLink::satisfy(pmc);
-}
-
-/* ================================================================= */
-
 bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 {
 	// If there is just one connected component, we don't have to
@@ -347,9 +311,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	{
 		PatternMatchEngine pme(pmcb);
 
-#ifdef DEBUG
 		debug_log();
-#endif
 
 		pme.set_pattern(_varlist, _pat);
 		pmcb.set_pattern(_varlist, _pat);
@@ -447,9 +409,9 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	HandleMap empty_pg;
 	HandleSeq optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
-	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
-	                                       empty_vg, empty_pg,
-	                                       comp_var_gnds, comp_term_gnds);
+	return recursive_virtual(pmcb, _virtual, optionals,
+	                         empty_vg, empty_pg,
+	                         comp_var_gnds, comp_term_gnds);
 }
 
 /* ===================== END OF FILE ===================== */

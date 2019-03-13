@@ -147,34 +147,6 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	delete _instor;
 }
 
-#ifdef CACHED_IMPLICATOR
-void DefaultPatternMatchCB::ready(AtomSpace* as)
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor->ready(_temp_aspace);
-
-	_as = as;
-}
-
-void DefaultPatternMatchCB::clear()
-{
-	_vars = nullptr;
-	_dynamic = nullptr;
-	_have_evaluatables = false;
-	_globs = nullptr;
-
-	_have_variables = false;
-	_pattern_body = Handle::UNDEFINED;
-
-	release_transient_atomspace(_temp_aspace);
-	_temp_aspace = nullptr;
-	_instor->clear();
-
-	_optionals_present = false;
-	_as = nullptr;
-}
-#endif
-
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
@@ -299,8 +271,11 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 		//     if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
 		// because that prevents searches for narrowly-typed grounds
 		// (as is done in the ForwardChainerUTest, see bug #934)
+		// Alternately, a single variable can match an entire
+		// VariableList (per bug #2070).
 		if (*_pat_bound_vars != *_gnd_bound_vars
-		    and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
+		      and not _pat_bound_vars->is_type(VARIABLE_LIST)
+		      and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
 		{
 			_pat_bound_vars = nullptr;
 			_gnd_bound_vars = nullptr;
