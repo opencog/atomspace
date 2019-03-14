@@ -148,7 +148,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
 	setup_typemap();
 
-	std::lock_guard<std::mutex> create_lock(_store_mutex);
+	std::unique_lock<std::mutex> create_lock(_store_mutex);
 
 	UUID uuid = check_uuid(h);
 	if (TLB::INVALID_UUID != uuid) return;
@@ -266,7 +266,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	catch (const SilentException& ex)
 	{
 		_tlbuf.removeAtom(uuid);
-		_store_mutex.unlock();
+		create_lock.unlock();
 		do_store_single_atom(h, aheight);
 	}
 
