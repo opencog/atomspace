@@ -59,8 +59,6 @@ namespace opencog
  *  @{
  */
 
-/// This class can only be used safely as a singleton; however, this
-/// singleton can be used by multiple threads.
 class SQLAtomStorage : public BackingStore
 {
 	private:
