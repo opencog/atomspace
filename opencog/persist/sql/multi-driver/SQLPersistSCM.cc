@@ -118,8 +118,12 @@ void SQLPersistSCM::do_close(void)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
 
-    // The destructor might run for a while before its done.
-    // So null out _store first, and then actuall call the dtor.
+    // The destructor might run for a while before its done; it will
+    // be emptying the pending store queues, which might take a while.
+    // So unhook the atomspace first -- this will prevent new writes
+    // from accidentally being queued. (It will also drain the queues)
+    // Only then actually call the dtor.
+    //
     // We should probably be doing this under a lock, to prevent
     // two racing threads that are both trying to close the
     // connection. But who would be crazy enough to want to do that?

@@ -626,7 +626,7 @@ std::string PythonEval::build_python_error_message(
     errorStringStream << "Python error";
 
     if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << " in" << function_name;
+        errorStringStream << " in " << function_name;
 
     PyObject* pyErrorString = PyObject_Str(pyError);
 #if PY_MAJOR_VERSION == 2
@@ -643,14 +643,29 @@ std::string PythonEval::build_python_error_message(
     // Print the traceback, too, if it is provided.
     if (pyTraceback)
     {
-        PyObject* pyTBString = PyObject_Str(pyTraceback);
 #if PY_MAJOR_VERSION == 2
+        PyObject* pyTBString = PyObject_Str(pyTraceback);
         char* tb = PyBytes_AsString(pyTBString);
-#else
-        const char* tb = PyUnicode_AsUTF8(pyTBString);
-#endif
         errorStringStream << "\nTraceback: " << tb;
         Py_DECREF(pyTBString);
+#else
+        errorStringStream << "\nTraceback (most recent call last):\n";
+
+        PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
+
+        while (pyTracebackObject != NULL) {
+
+            int line_number = pyTracebackObject-> tb_lineno;
+            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
+            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
+
+            errorStringStream << "File \"" << filename <<"\", ";
+            errorStringStream << "line " << line_number <<", ";
+            errorStringStream << "in " << code_name <<"\n";
+
+            pyTracebackObject = pyTracebackObject -> tb_next;
+        }
+#endif
     }
 
     // Cleanup the references. NOTE: The traceback can be NULL even
