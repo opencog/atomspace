@@ -18,7 +18,8 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        result.append(Atom.createAtom(handle, atomspace))
+        value = create_python_value_from_c_value(<cValuePtr&>handle, atomspace)
+        result.append(value)
         inc(handle_iter)
     return result
 
