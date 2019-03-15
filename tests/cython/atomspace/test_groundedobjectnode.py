@@ -87,7 +87,7 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         result = execute_atom(self.space, exec_link)
 
-        self.assertEqual(result.value(), 42)
+        self.assertEqual(result.get_object(), 42)
 
     def test_set_object_without_arguments_wrapping(self):
         grounded_object_node = GroundedObjectNode("obj", TestObject("some object"))
@@ -107,8 +107,7 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         result = execute_atom(self.space, exec_link)
 
-        self.assertEqual(result.value(), 42)
-
+        self.assertEqual(result.get_object(), 42)
 
 class TestObject:
 

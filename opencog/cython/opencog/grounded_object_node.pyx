@@ -17,6 +17,13 @@ def createGroundedObjectNode(name, obj, atomspace, unwrap_args):
     return GroundedObjectNode(PtrHolder.create(<shared_ptr[void]&>node_ptr),
                               atomspace)
 
+cdef cGroundedObjectNodePtr create_grounded_object_node_from_python_object(object obj, bool unwrap_args):
+    cdef shared_ptr[cGroundedObject] o_ptr
+    o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, unwrap_args))
+    cdef shared_ptr[cGroundedObjectNode] node_ptr
+    node_ptr.reset(new cGroundedObjectNode("", o_ptr))
+    return node_ptr
+
 cdef class GroundedObjectNode(Atom):
 
     def __init__(self, ptr_holder, atomspace):
@@ -51,7 +58,8 @@ cdef api cValuePtr call_python_method(bool unwrap_args, object obj,
 cdef cValuePtr call_unwrapped_args(object method, const cValuePtr& _args):
     args = convert_vector_of_grounded_objects_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
     result = method(*args)
-    return create_ptr_value_from_python_object(result)
+    Py_INCREF(result)
+    return <cValuePtr>create_grounded_object_node_from_python_object(result, True)
 
 cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
