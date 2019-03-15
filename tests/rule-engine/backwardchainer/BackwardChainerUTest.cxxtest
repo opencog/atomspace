@@ -52,9 +52,12 @@ public:
 	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
 	void test_criminal();
-	// TODO: re-enable the following tests
-	void test_induction();
-	void test_focus_set();
+	// TODO: re-enable when GlobNode is supported
+	void xtest_green_balls();
+	// TODO: re-enable when meta rule is supported
+	void xtest_induction();
+	// TODO: re-enable when focus set is supported (if ever)
+	void xtest_focus_set();
 };
 
 BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
@@ -619,7 +622,34 @@ void BackwardChainerUTest::test_criminal()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_induction()
+void BackwardChainerUTest::xtest_green_balls()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	load_from_path("green-balls-kb.scm");
+	load_from_path("green-balls-rb.scm");
+	load_from_path("green-balls-targets.scm");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
+
+	Handle target = _eval.eval_h("target-known-evidence");
+
+	BackwardChainer bc(_as, top_rbs, target);
+	// See green-balls-rb.scm to change the number of iterations and
+	// other parameters
+	bc.do_chain();
+
+	Handle results = bc.get_results(),
+		top_result = results->getOutgoingAtom(0);
+
+	logger().debug() << "results = " << oc_to_string(results);
+
+	TS_ASSERT_LESS_THAN(0.9, top_result->getTruthValue()->get_mean());
+	TS_ASSERT_LESS_THAN(0.9, top_result->getTruthValue()->get_confidence());
+}
+
+void BackwardChainerUTest::xtest_induction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -640,16 +670,15 @@ void BackwardChainerUTest::test_induction()
 	bc.do_chain();
 
 	// TODO: fixme, for that we need to support BIT expansion over meta rule
-	// TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
 	// TODO: determine the expected confidence, which depends on the
 	// number of instances the induction is based on
-	// TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
-	TS_ASSERT(true);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_focus_set()
+void BackwardChainerUTest::xtest_focus_set()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -701,8 +730,7 @@ void BackwardChainerUTest::test_focus_set()
 		expected = al(SET_LINK, soln1);
 
 	// Re-enable when focus set is supported
-	TS_ASSERT(true);
-	// TS_ASSERT_EQUALS(results, expected);
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
