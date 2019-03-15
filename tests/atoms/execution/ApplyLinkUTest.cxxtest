@@ -26,6 +26,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/execution/GroundedObject.h>
 #include <opencog/atoms/execution/GroundedObjectNode.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/base/Link.h>
 
 using namespace opencog;
 
@@ -50,6 +52,16 @@ public:
 			return std::bind(&GroundedObjectExample::inc, this,
 								std::placeholders::_1, std::placeholders::_2);
 		}
+		if (method_name == "mul")
+		{
+			return std::bind(&GroundedObjectExample::mul, this,
+								std::placeholders::_1, std::placeholders::_2);
+		}
+		if (method_name == "sum")
+		{
+			return std::bind(&GroundedObjectExample::sum, this,
+								std::placeholders::_1, std::placeholders::_2);
+		}
 		throw RuntimeException(TRACE_INFO, "Method \"%s\" is not implemented",
 								method_name.c_str());
 	}
@@ -63,6 +75,30 @@ public:
 	{
 		++counter;
 		return Handle::UNDEFINED;
+	}
+
+	double toFloat(const ValuePtr& value)
+	{
+		if (value->get_type() == FLOAT_VALUE) {
+			return CastFromValue<FloatValue>(value)->value()[0];
+		}
+		if (value->get_type() == NUMBER_NODE) {
+			return CastFromValue<NumberNode>(value)->get_value();
+		}
+		throw RuntimeException(TRACE_INFO, "Unexpected value type %s",
+				nameserver().getTypeName(value->get_type()).c_str());
+	}
+
+	ValuePtr mul(AtomSpace* atomspace, ValuePtr const& args)
+	{
+		HandleSeq list = CastFromValue<Link>(args)->getOutgoingSet();
+		return createNumberNode(toFloat(list[0]) * toFloat(list[1]));
+	}
+
+	ValuePtr sum(AtomSpace* atomspace, ValuePtr const& args)
+	{
+		HandleSeq list = CastFromValue<Link>(args)->getOutgoingSet();
+		return createNumberNode(toFloat(list[0]) + toFloat(list[1]));
 	}
 };
 
@@ -82,7 +118,7 @@ public:
 		atomspace.clear();
 	}
 
-	void test_execute_dot_link_return_parameter_back()
+	void test_execute_method_of_link_return_parameter_back()
 	{
 		Instantiator inst(&atomspace);
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
@@ -102,7 +138,7 @@ public:
 		TS_ASSERT_EQUALS(an(CONCEPT_NODE, "arg"), result);
 	}
 
-	void test_execute_dot_link_change_object_state()
+	void test_execute_method_of_link_change_object_state()
 	{
 		Instantiator inst(&atomspace);
 		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
@@ -118,5 +154,26 @@ public:
 		ValuePtr result = inst.execute(eol);
 
 		TS_ASSERT_EQUALS(1, foo->counter);
+	}
+
+	void test_execute_apply_link_as_argument()
+	{
+		Instantiator inst(&atomspace);
+		std::shared_ptr<GroundedObjectExample> foo(new GroundedObjectExample());
+		GroundedObjectNodePtr obj = createGroundedObjectNode("foo", foo);
+		Handle applyLink = al(APPLY_LINK,
+			al(METHOD_OF_LINK, aa(obj), an(CONCEPT_NODE, "mul")),
+			al(LIST_LINK,
+				an(NUMBER_NODE, "6.0"),
+				al(APPLY_LINK,
+					al(METHOD_OF_LINK, aa(obj), an(CONCEPT_NODE, "sum")),
+					al(LIST_LINK, an(NUMBER_NODE, "3.0"), an(NUMBER_NODE, "4.0"))
+				)
+			)
+		);
+
+		NumberNodePtr result = CastFromValue<NumberNode>(inst.execute(applyLink));
+
+		TS_ASSERT_EQUALS(42, result->get_value());
 	}
 };
