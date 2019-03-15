@@ -109,6 +109,26 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(result.get_object(), 42)
 
+    def test_nested_call_without_arguments_wrapping(self):
+        obj = GroundedObjectNode("obj", TestObject("obj"), unwrap_args = True)
+        exec_link = ApplyLink(
+                        MethodOfLink(obj, ConceptNode("plain_multiply")),
+                        ListLink(
+                            GroundedObjectNode("a", 6),
+                            ApplyLink(
+                                MethodOfLink(obj, ConceptNode("plain_sum")),
+                                ListLink(
+                                    GroundedObjectNode("b", 3),
+                                    GroundedObjectNode("c", 4)
+                                )
+                            )
+                        )
+                    )
+
+        result = execute_atom(self.space, exec_link)
+
+        self.assertEqual(result.get_object(), 42)
+
 class TestObject:
 
     def __init__(self, name):
@@ -122,6 +142,9 @@ class TestObject:
 
     def get_second(self, first, second):
         return second
+
+    def plain_sum(self, a, b):
+        return a + b
 
     def plain_multiply(self, a, b):
         return a * b
