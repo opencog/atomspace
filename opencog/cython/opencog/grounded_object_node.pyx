@@ -65,7 +65,9 @@ cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
         assert handle.get().get_type() == types.GroundedObjectNode
         gon = <cGroundedObjectNode*>(handle.get())
         py_gon = <cPythonGroundedObject*>gon.get_object()
-        result.append(py_gon.get_object())
+        obj = py_gon.get_object()
+        Py_INCREF(obj)
+        result.append(obj)
         inc(handle_iter)
     return result
 
