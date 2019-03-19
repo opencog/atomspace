@@ -1,7 +1,6 @@
 LINK_LIBRARIES(
 	ruleengine
 	atomspace
-	clearbox
 	logger
 )
 
