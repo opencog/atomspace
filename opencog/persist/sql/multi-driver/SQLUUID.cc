@@ -167,6 +167,16 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(UUID maxuuid)
 	Response rp(that->conn_pool);
 	rp.exec(create.c_str());
 
+	std::string select_increment;
+	if (that->_server_version < 100000)
+	{
+		select_increment = "SELECT increment_by FROM ";
+	}
+	else
+	{
+		select_increment = "SELECT increment FROM ";
+	}
+
 	std::string reset =
 		"DO $$"
 		"DECLARE "
@@ -177,11 +187,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(UUID maxuuid)
 		+ std::to_string(that->_initial_conn_pool_size) +
 		" THEN"
 		"      under := " + std::to_string(maxuuid + 1) +
-#if PG_VERSION_NUM < 100000
-		"            - (SELECT increment_by FROM " + poolname + ");"
-#else
-		"            - (SELECT increment FROM " + poolname + ");"
-#endif
+		"            - (" + select_increment + poolname + ");"
 		"      IF (1 < under) THEN "
 		"         RAISE NOTICE 'Set " + poolname + " sequence to %', under;"
 		"         PERFORM (SELECT setval('" + poolname + "', under));"
@@ -192,7 +198,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(UUID maxuuid)
 	rp.exec(reset.c_str());
 
 	rp.intval = 0;
-	rp.exec("SELECT increment_by FROM " + poolname + ";");
+	rp.exec(select_increment + poolname + ";");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	_uuid_pool_increment = rp.intval;
 
