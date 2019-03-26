@@ -186,6 +186,8 @@ public:
 	Unify(const Handle& lhs, const Handle& rhs,
 	      const Handle& lhs_vardecl=Handle::UNDEFINED,
 	      const Handle& rhs_vardecl=Handle::UNDEFINED);
+	Unify(const Handle& lhs, const Handle& rhs,
+	      const Variables& lhs_vars, const Variables& rhs_vars);
 
 	/**
 	 * Generate typed substitution rules, given a satisfiable
@@ -742,6 +744,8 @@ std::string oc_to_string(const Unify::TypedBlockSeq& tbs,
 std::string oc_to_string(const Unify::Partitions& par,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::HandleCHandleMap::value_type& hch,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::TypedSubstitution& ts,
                          const std::string& indent=empty_string);

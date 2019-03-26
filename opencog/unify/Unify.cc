@@ -1107,7 +1107,8 @@ std::string oc_to_string(const Unify::Partitions& par, const std::string& indent
 	return ss.str();
 }
 
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent)
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm,
+                         const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "size = " << hchm.size() << std::endl;
@@ -1122,7 +1123,19 @@ std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string&
 	return ss.str();
 }
 
-std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent)
+std::string oc_to_string(const Unify::HandleCHandleMap::value_type& hch,
+                         const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "atom:" << std::endl
+	   << oc_to_string(hch.first, indent + OC_TO_STRING_INDENT);
+	ss << indent << "catom:" << std::endl
+	   << oc_to_string(hch.second, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
+
+std::string oc_to_string(const Unify::TypedSubstitution& ts,
+                         const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "substitution:" << std::endl
@@ -1132,7 +1145,8 @@ std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& 
 	return ss.str();
 }
 
-std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent)
+std::string oc_to_string(const Unify::TypedSubstitutions& tss,
+                         const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "size = " << tss.size() << std::endl;
