@@ -27,6 +27,7 @@
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
+#include <boost/algorithm/cxx11/all_of.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -744,9 +745,8 @@ void BIT::reset_exhausted_flags()
 
 bool BIT::andbits_exhausted() const
 {
-	return std::all_of(andbits.begin(), andbits.end(),
-	                   [](const AndBIT& andbit) {
-		                   return andbit.exhausted; });
+	return boost::algorithm::all_of(andbits, [](const AndBIT& andbit) {
+			return andbit.exhausted; });
 }
 
 bool BIT::is_in(const RuleTypedSubstitutionPair& rule,
