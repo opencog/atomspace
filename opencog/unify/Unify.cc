@@ -164,6 +164,17 @@ Unify::Unify(const Handle& lhs, const Handle& rhs,
 	set_variables(lhs, rhs, lhs_vardecl, rhs_vardecl);
 }
 
+Unify::Unify(const Handle& lhs, const Handle& rhs,
+             const Variables& lhs_vars, const Variables& rhs_vars)
+{
+	// Set terms to unify
+	_lhs = lhs;
+	_rhs = rhs;
+
+	// Set _variables
+	_variables = merge_variables(lhs_vars, rhs_vars);
+}
+
 Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
                                                      const Handle& pre) const
 {
