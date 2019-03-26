@@ -186,6 +186,8 @@ public:
 	Unify(const Handle& lhs, const Handle& rhs,
 	      const Handle& lhs_vardecl=Handle::UNDEFINED,
 	      const Handle& rhs_vardecl=Handle::UNDEFINED);
+	Unify(const Handle& lhs, const Handle& rhs,
+	      const Variables& lhs_vars, const Variables& rhs_vars);
 
 	/**
 	 * Generate typed substitution rules, given a satisfiable
@@ -453,8 +455,8 @@ private:
 	 * Unify lhs and rhs. _lhs_vardecl and _rhs_vardecl should be set
 	 * prior to run this method.
 	 *
-	 * Could probably optimize by memoizing unify, due to subunify
-	 * being called redundantly.
+	 * TODO: could probably optimize by memoizing unify, due to
+	 * subunify being called redundantly.
 	 */
 	SolutionSet unify(const CHandle& lhs, const CHandle& rhs) const;
 	SolutionSet unify(const Handle& lhs, const Handle& rhs,
@@ -546,13 +548,13 @@ private:
 	 * one. During this fusion new unification problems may arise
 	 * (TODO: explain why) thus possibly multiple partitions will be
 	 * returned.
-	*/
+	 */
 	SolutionSet join(const Partition& partition, const TypedBlock &block) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
 	 * assumed that all blocks have elements in common.
-	*/
+	 */
 	TypedBlock join(const TypedBlockSeq& common_blocks,
 	                const TypedBlock& block) const;
 
@@ -586,11 +588,11 @@ private:
 
 	/**
 	 * Calculate type intersection.
-     *
-     * What we would like:
-     * ==================
-     *
-     * For example: say you have for a block
+	 *
+	 * What we would like:
+	 * ==================
+	 *
+	 * For example: say you have for a block
 	 * with
 	 *
 	 * X
@@ -612,28 +614,28 @@ private:
 	 * which is supposed to represent the set of all potential groundings
 	 * that may satisfy that block.
 	 *
-     * What we have:
-     * ============
-     *
-     * The type is represented by the term itself. For instance, to
+	 * What we have:
+	 * ============
+	 *
+	 * The type is represented by the term itself. For instance, to
 	 * take the example above, the terms and their types are
-     *
+	 *
 	 * X:X
 	 * ListLink(Y):ListLink(Y)
 	 * ListLink(Z):ListLink(Z)
-     *
-     * and their intersection is the most restricted one, for that one
-     * looks at the type declarations of X, Y and Z. So assuming that
-     * Y has type Node and Z has type ConceptNode, then Z is most
-     * resticted, so the result of their intersection will be
-     *
-     * ListLink(Z)
-     *
-     * In case the intersection is empty, then Handle::UNDEFINED is
-     * returned.
-     *
-     * A contextual handle is returned to keep track of scoped
-     * variable, which are essentially considered as constant.
+	 *
+	 * and their intersection is the most restricted one, for that one
+	 * looks at the type declarations of X, Y and Z. So assuming that
+	 * Y has type Node and Z has type ConceptNode, then Z is most
+	 * resticted, so the result of their intersection will be
+	 *
+	 * ListLink(Z)
+	 *
+	 * In case the intersection is empty, then Handle::UNDEFINED is
+	 * returned.
+	 *
+	 * A contextual handle is returned to keep track of scoped
+	 * variable, which are essentially considered as constant.
 	 */
 public:
 	CHandle type_intersection(const CHandle& lch, const CHandle& rch) const;
@@ -742,6 +744,8 @@ std::string oc_to_string(const Unify::TypedBlockSeq& tbs,
 std::string oc_to_string(const Unify::Partitions& par,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::HandleCHandleMap::value_type& hch,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::TypedSubstitution& ts,
                          const std::string& indent=empty_string);
