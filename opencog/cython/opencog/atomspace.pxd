@@ -168,6 +168,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cAtomSpace()
         cAtomSpace(cAtomSpace * parent)
 
+        cHandle add_atom(cHandle handle) except +
+
         cHandle add_node(Type t, string s) except +
         cHandle add_node(Type t, string s, tv_ptr tvn) except +
 

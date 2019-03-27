@@ -129,6 +129,13 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(result.get_object(), 42)
 
+    def test_create_grounded_object_node_without_object(self):
+        first = GroundedObjectNode("obj", TestObject("obj"))
+        second = GroundedObjectNode("obj")
+
+        self.assertEqual(second, first)
+
+
 class TestObject:
 
     def __init__(self, name):
