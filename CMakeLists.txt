@@ -182,37 +182,39 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
 # ----------------------------------------------------------
+### DEACTIVATED AS IT'S NOT USED, AND INCOMPATIBILITY WITH TENSORFLOW BASE 1.12 was found
+###
 # Google Protobuf library
 # The protocol buffer compiler is needed for ZMQ-based persistence.
-FIND_PACKAGE(Protobuf)
-IF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
+# FIND_PACKAGE(Protobuf)
+# IF (PROTOBUF_FOUND
+# 		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+#	SET(HAVE_PROTOBUF 0)
+#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+#
+# ELSE (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	# If we are here, then we are missing either the libraries, or the
+#	# compiler. React appropriately.
+#	IF (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
-	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-	SET(HAVE_PROTOBUF 1)
-	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-
-ELSE (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	# If we are here, then we are missing either the libraries, or the
-	# compiler. React appropriately.
-	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-
-ENDIF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+# ENDIF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
 # Python and Cython
@@ -364,18 +366,20 @@ ELSE (VALGRIND_FOUND)
 ENDIF (VALGRIND_FOUND)
 
 # ----------------------------------------------------------
+### DEACTIVATED AS IT'S NOT USED, AND INCOMPATIBILITY WITH TENSORFLOW BASE 1.12 was found
+###
 # Optional and almost obsolete...
 # Remove after the REST interfaces get fixed.
 # ZeroMQ
-FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQLIB 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+# FIND_PACKAGE(ZMQ 3.2.4)
+# IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
+#	ADD_DEFINITIONS(-DHAVE_ZMQ)
+#	SET(HAVE_ZMQLIB 1)
+#	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
+# ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
+#	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+# ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
+# MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
 # ===============================================================
 # Get atomspace version
@@ -461,10 +465,12 @@ IF(HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
 ENDIF(HAVE_COGUTIL)
 
+### DEACTIVATED AS IT'S NOT USED, AND INCOMPATIBILITY WITH TENSORFLOW BASE 1.12 was found
+###
 # Both protobuf and also zmq are needed to build ZMQ API.
-IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-	SET(HAVE_ZMQ 1)
-ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+# IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+#	SET(HAVE_ZMQ 1)
+# ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
@@ -615,6 +621,6 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
 SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
-SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
+# SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
