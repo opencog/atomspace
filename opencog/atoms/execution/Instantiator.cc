@@ -113,7 +113,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	// of the outgoing set, and the ListLink of arguments is always
 	// in position 1.  Someday in the future, there may be a variable
 	// declaration; we punt on that.
-	Handle sn(eolp->get_schema());
+	Handle sn(walk_tree(eolp->get_schema(), silent));
 	Handle args(eolp->get_args());
 
 	// If its a DSN, obtain the correct body for it.
