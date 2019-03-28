@@ -2,10 +2,9 @@ import unittest
 
 from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog, finalize_opencog
-from opencog.type_constructors import (GroundedObjectNode,
-                                       ApplyLink, MethodOfLink,
-                                       ListLink, ConceptNode)
+from opencog.type_constructors import *
 from opencog.bindlink import execute_atom
+import __main__
 
 class GroundedObjectNodeTest(unittest.TestCase):
 
@@ -135,6 +134,33 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(second, first)
 
+    def test_call_from_pattern_matcher(self):
+        first = GroundedObjectNode("first", TestObject("first"))
+        second = GroundedObjectNode("second", TestObject("second"))
+        bind_link = BindLink(
+                        TypedVariableLink(VariableNode("$X"),
+                            TypeNode("GroundedObjectNode")),
+                        AndLink(
+                            EvaluationLink(
+                                GroundedPredicateNode("py: return_true"),
+                                ApplyLink(
+                                    MethodOfLink(VariableNode("$X"),
+                                        ConceptNode("get_argument")),
+                                    ListLink(ConceptNode("result"))
+                                )
+                            )
+                        ),
+                        VariableNode("$X")
+                    )
+
+        result = execute_atom(self.space, bind_link)
+
+        self.assertEqual(result, SetLink(first, second))
+
+def return_true(atom):
+    return TruthValue(1.0, 1.0)
+
+__main__.return_true = return_true
 
 class TestObject:
 
