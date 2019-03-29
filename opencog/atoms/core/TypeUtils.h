@@ -145,6 +145,8 @@ ValuePtr type_compose(const Handle&, const ValuePtr&);
  *
  * 2. If nothing is left after filtering it returns Handle::UNDEFINED
  *
+ * 3. If vardecl is Handle::UNDEFINED, then return Handle::UNDEFINED
+ *
  * Also, the resulting variable declaration will not be added to any
  * AtomSpace, it's up to the user to possibly do it.
  */
