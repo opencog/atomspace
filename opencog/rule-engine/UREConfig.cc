@@ -145,8 +145,8 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 	for (const Handle& rule_name : fetch_rule_names(rbs))
 	{
 		OC_ASSERT(rule_name->get_type() == DEFINED_SCHEMA_NODE,
-		          "The rule: \n%s \n is not a DefinedSchemaNode."
-		          "A rule needs an alias and to be defined a DefinedSchemaNode.\n"
+		          "The rule: \n%s \n is not a DefinedSchemaNode. "
+		          "A rule needs an alias and to be defined as a DefinedSchemaNode.\n"
 		          "Please check rules in /atomspace/examples/rule-engine for example.\n\n",
 		          rule_name->to_short_string().c_str());
 
