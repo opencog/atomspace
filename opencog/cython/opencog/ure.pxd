@@ -3,7 +3,7 @@ from libcpp.vector cimport vector
 from opencog.atomspace cimport cHandle, cAtomSpace
 
 
-cdef extern from "opencog/rule-engine/forwardchainer/ForwardChainer.h" namespace "opencog":
+cdef extern from "opencog/ure/forwardchainer/ForwardChainer.h" namespace "opencog":
     cdef cppclass cForwardChainer "opencog::ForwardChainer":
         cForwardChainer(cAtomSpace& kb_as,
                         cAtomSpace& rb_as,
@@ -16,25 +16,25 @@ cdef extern from "opencog/rule-engine/forwardchainer/ForwardChainer.h" namespace
         set[cHandle] get_chaining_result() const
 
 
-cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::BITNodeFitness":
+cdef extern from "opencog/ure/backwardchainer/Fitness.h" namespace "opencog::BITNodeFitness":
     cdef cppclass BitNodeFitnessType:
         pass
 
 
-cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::AndBITNodeFitness":
+cdef extern from "opencog/ure/backwardchainer/Fitness.h" namespace "opencog::AndBITNodeFitness":
     cdef cppclass AndBitFitnessType:
         pass
 
-cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::AndBITFitness::FitnessType":
+cdef extern from "opencog/ure/backwardchainer/Fitness.h" namespace "opencog::AndBITFitness::FitnessType":
     cdef AndBitFitnessType Uniform
     cdef AndBitFitnessType Trace
 
 
-cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::BITNodeFitness::FitnessType":
+cdef extern from "opencog/ure/backwardchainer/Fitness.h" namespace "opencog::BITNodeFitness::FitnessType":
     cdef BitNodeFitnessType MaximizeConfidence
 
 
-cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog":
+cdef extern from "opencog/ure/backwardchainer/Fitness.h" namespace "opencog":
     cdef cppclass ContentHash:
         pass
 
@@ -46,7 +46,7 @@ cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "open
                       const set[ContentHash]& tr);
 
 
-cdef extern from "opencog/rule-engine/backwardchainer/BackwardChainer.h" namespace "opencog":
+cdef extern from "opencog/ure/backwardchainer/BackwardChainer.h" namespace "opencog":
     cdef cppclass cBackwardChainer "opencog::BackwardChainer":
         cBackwardChainer(cAtomSpace& _as,
                         const cHandle& rbs,

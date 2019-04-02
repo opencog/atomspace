@@ -27,7 +27,7 @@ inverted query search, graph-rewriting, graph satisfiability and
 In addition, graph patterns can be thought of as "rewrite rules" or
 "productions", and thus can be chained together in sequences to perform
 inferencing, natural deduction and parsing.  Forward and backward
-chaining are implemented separately, in the `opencog/rule-engine`
+chaining are implemented separately, in the `opencog/ure`
 directory.
 
 The first part of this README describes the generic algorithm; the

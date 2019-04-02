@@ -333,7 +333,7 @@ tensor-algebra in those theories, and replace them by sheaves. A
 
 Some primitive, basic infrastructure has been built. Huge remaining
 work items are using neural nets to perform the tensor-like factorization
-of sheaves, and to redesign the rule-engine to use sheaf-type theorem
+of sheaves, and to redesign the rule engine to use sheaf-type theorem
 proving techniques.
 
 

@@ -22,7 +22,7 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/rule-engine/URELogger.h>
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeModule.h>
 #include "../SchemePrimitive.h"
 

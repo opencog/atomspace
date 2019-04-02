@@ -14,8 +14,8 @@ Perhaps the most novel aspect is that the queries themselves are also
 graphs, and so that they too can be stored in the knowledgebase.  This
 in turn enables a kind of recursive query processing.
 
-By storing queries as graphs, one can build a rule-engine, by writing
-each rule as a query. The rule-engine performs a "meta"-query,
+By storing queries as graphs, one can build a rule engine, by writing
+each rule as a query. The rule engine performs a "meta"-query,
 selecting appropriate rules, so as to chain them together. The rule
 engine in turn can serve as a foundation for inferencing, theorem-
 proving, logical deduction, common-sense reasoning, and the like.
@@ -122,7 +122,7 @@ in it (a "ground term"), it can find all graphs that do have variables
 in them, that would have matched up, if aligned properly.
 
 This inverted search for ungrounded patterns is very useful for building
-a rule-engine. Given a rule-set, it allows one to figure out very
+a rule engine. Given a rule-set, it allows one to figure out very
 quickly which rules can be chained together. Crudely speaking, one
 can think of the recognizer as being kind-of-like a RETE algorithm.
 

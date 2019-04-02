@@ -34,7 +34,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (query)
 
 	# Reasoning depends on query, above.
-	ADD_SUBDIRECTORY (rule-engine)
+	ADD_SUBDIRECTORY (ure)
 
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
 		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")
