@@ -36,10 +36,10 @@ class BCTest(TestCase):
         project_source_dir = os.environ["PROJECT_SOURCE_DIR"]
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(project_source_dir))
         scheme_eval(self.atomspace,
-                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "tests/rule-engine/backwardchainer/scm"))
+                    '(add-to-load-path "{0}/{1}")'.format(project_source_dir, "tests/ure/backwardchainer/scm"))
 
     def test_bc_deduction(self):
-        """port of crisp.scm from examples/rule-engine/simple"""
+        """port of crisp.scm from examples/ure/simple"""
 
         print ("Enter test_bc_deduction")
         self.init()
@@ -47,7 +47,7 @@ class BCTest(TestCase):
         print ("test_bc_deduction: pre scheme eval")
         scheme_eval(self.atomspace, '(use-modules (opencog))')
         scheme_eval(self.atomspace, '(use-modules (opencog exec))')
-        scheme_eval(self.atomspace, '(use-modules (opencog rule-engine))')
+        scheme_eval(self.atomspace, '(use-modules (opencog ure))')
         print ("test_bc_deduction: pre scheme load")
         scheme_eval(self.atomspace, '(load-from-path "bc-deduction-config.scm")')
         print ("test_bc_deduction: post scheme load")

@@ -70,7 +70,7 @@
 (set-procedure-property! cog-ure-logger 'documentation
 "
  cog-ure-logger
-    Return the rule-engine logger.
+    Return the ure logger.
 ")
 
 (set-procedure-property! cog-logger-get-filename-of-logger 'documentation

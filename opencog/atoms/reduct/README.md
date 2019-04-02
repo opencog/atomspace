@@ -44,7 +44,7 @@ bytecode of some kind. Maybe the JVM, but maybe also GNU Lightening.
 The code here also implements term reduction. It is very ad-hoc. It
 works, it's awkward, its hard to write, its not easy to extend. The
 correct solution for term reduction would be to create an actual algebra
-system: that is, to write a bunch of rule-engine rules that perform
+system: that is, to write a bunch of rule engine rules that perform
 algebraic reduction. This would be more maintainable than reduct in C++.
 
 By "term reduction", I mean reducing expressions like x+x to 2x, or

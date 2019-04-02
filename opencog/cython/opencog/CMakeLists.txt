@@ -224,9 +224,9 @@ ENDIF (HAVE_GUILE)
 CYTHON_ADD_MODULE_PYX(ure
 	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
 	opencog_atom_types
-	"../../rule-engine/forwardchainer/ForwardChainer.h"
-	"../../rule-engine/backwardchainer/BackwardChainer.h"
-	ruleengine
+	"../../ure/forwardchainer/ForwardChainer.h"
+	"../../ure/backwardchainer/BackwardChainer.h"
+	ure
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
@@ -239,7 +239,7 @@ ADD_LIBRARY(ure_cython
 TARGET_LINK_LIBRARIES(ure_cython
 	atomspace_cython
 	type_constructors
-	ruleengine
+	ure
 	${PYTHON_LIBRARIES}
 )
 

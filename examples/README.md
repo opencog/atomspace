@@ -16,7 +16,7 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 
 * gearman       - Using `gearman` for simple distributed processing.
 
-* rule-engine   - Provide example of a simple crisp inference system
+* ure           - Provide example of a simple crisp inference system
                   using the unified rule engine.
 
 * python        - Python usage examples.

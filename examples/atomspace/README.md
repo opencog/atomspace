@@ -153,7 +153,7 @@ everything else depends on.
 (use-modules (opencog logger))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 (use-modules (opencog type-utils))
 ```
 
