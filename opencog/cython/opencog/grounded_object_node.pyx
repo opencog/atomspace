@@ -58,7 +58,6 @@ cdef api cValuePtr call_python_method(bool unwrap_args, void* obj,
 cdef cValuePtr call_unwrapped_args(object method, const cValuePtr& _args):
     args = convert_vector_of_grounded_objects_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
     result = method(*args)
-    Py_INCREF(result)
     return <cValuePtr>create_grounded_object_node_from_python_object(result, True)
 
 cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
@@ -74,7 +73,6 @@ cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
         gon = <cGroundedObjectNode*>(handle.get())
         py_gon = <cPythonGroundedObject*>gon.get_object()
         obj = <object>py_gon.get_object()
-        Py_INCREF(obj)
         result.append(obj)
         inc(handle_iter)
     return result
