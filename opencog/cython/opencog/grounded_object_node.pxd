@@ -8,8 +8,8 @@ cdef extern from "opencog/atoms/execution/GroundedObject.h" namespace "opencog":
 
 cdef extern from "opencog/cython/opencog/PythonGroundedObject.h":
     cdef cppclass cPythonGroundedObject "opencog::PythonGroundedObject" (cGroundedObject):
-        cPythonGroundedObject(PyObject* object, bool unwrap_args)
-        object get_object() const
+        cPythonGroundedObject(void* object, bool unwrap_args)
+        void* get_object() const
 
 cdef extern from "opencog/atoms/execution/GroundedObjectNode.h" namespace "opencog":
     cdef cppclass cGroundedObjectNode "opencog::GroundedObjectNode":
