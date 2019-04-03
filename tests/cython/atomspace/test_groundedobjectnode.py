@@ -5,6 +5,7 @@ from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 from opencog.bindlink import execute_atom
 import __main__
+import sys
 
 class GroundedObjectNodeTest(unittest.TestCase):
 
@@ -156,6 +157,14 @@ class GroundedObjectNodeTest(unittest.TestCase):
         result = execute_atom(self.space, bind_link)
 
         self.assertEqual(result, SetLink(first, second))
+
+    def test_get_object(self):
+        obj = TestObject("some object")
+        gon = GroundedObjectNode("a", obj)
+        refc = sys.getrefcount(obj)
+
+        name = gon.get_object().name
+        self.assertEqual(refc, sys.getrefcount(obj))
 
 def return_true(atom):
     return TruthValue(1.0, 1.0)
