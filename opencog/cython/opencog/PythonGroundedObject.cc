@@ -41,7 +41,7 @@ static void load_cython_proxies()
 	import_opencog__atomspace();
 }
 
-PythonGroundedObject::PythonGroundedObject(PyObject *object, bool unwrap_args)
+PythonGroundedObject::PythonGroundedObject(void *object, bool unwrap_args)
 	: object(object)
 	, unwrap_args(unwrap_args)
 {

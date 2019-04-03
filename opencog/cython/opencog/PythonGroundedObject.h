@@ -33,19 +33,19 @@ class PythonGroundedObject : public GroundedObject
 {
 private:
 
-	PyObject* object;
+	void* object;
 	bool unwrap_args;
 
 public:
 
-	PythonGroundedObject(PyObject *object, bool unwrap_args);
+	PythonGroundedObject(void *object, bool unwrap_args);
 	virtual ~PythonGroundedObject();
 
 	virtual GroundedFunction get_method(std::string const& method_name);
 	virtual ValuePtr invoke(std::string const& method_name,
 							AtomSpace* atomspace, ValuePtr const& _args);
 
-	PyObject* get_object() const { return object; }
+	void* get_object() const { return object; }
 };
 
 }

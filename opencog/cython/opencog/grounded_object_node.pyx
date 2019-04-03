@@ -9,7 +9,7 @@ def createGroundedObjectNode(name, obj, atomspace, unwrap_args):
     cdef shared_ptr[cGroundedObjectNode] node_ptr
     cdef string node_name = <bytes>(name.encode())
     if obj is not None:
-        o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, unwrap_args))
+        o_ptr.reset(new cPythonGroundedObject(<void*>obj, unwrap_args))
         node_ptr.reset(new cGroundedObjectNode(node_name, o_ptr))
     else:
         node_ptr.reset(new cGroundedObjectNode(node_name))
@@ -19,7 +19,7 @@ def createGroundedObjectNode(name, obj, atomspace, unwrap_args):
 
 cdef cGroundedObjectNodePtr create_grounded_object_node_from_python_object(object obj, bool unwrap_args):
     cdef shared_ptr[cGroundedObject] o_ptr
-    o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, unwrap_args))
+    o_ptr.reset(new cPythonGroundedObject(<void*>obj, unwrap_args))
     cdef shared_ptr[cGroundedObjectNode] node_ptr
     node_ptr.reset(new cGroundedObjectNode("", o_ptr))
     return node_ptr
@@ -34,7 +34,7 @@ cdef class GroundedObjectNode(Atom):
 
     def set_object(self, obj, unwrap_args = False):
         cdef shared_ptr[cGroundedObject] o_ptr
-        o_ptr.reset(new cPythonGroundedObject(<PyObject*>obj, unwrap_args))
+        o_ptr.reset(new cPythonGroundedObject(<void*>obj, unwrap_args))
         self.get_c_grounded_object_node_ptr().set_object(o_ptr)
 
     def get_object(self):
@@ -42,13 +42,13 @@ cdef class GroundedObjectNode(Atom):
         if not gon.has_object():
             return None
         cdef cPythonGroundedObject* py_gon = <cPythonGroundedObject*>gon.get_object()
-        return py_gon.get_object()
+        return <object>py_gon.get_object()
 
-cdef api cValuePtr call_python_method(bool unwrap_args, object obj,
+cdef api cValuePtr call_python_method(bool unwrap_args, void* obj,
                                       const string& method_name,
                                       cAtomSpace* atomspace, const cValuePtr&
                                       args):
-    method = getattr(obj, method_name.c_str().decode())
+    method = getattr(<object>obj, method_name.c_str().decode())
     assert args.get().is_link()
     if unwrap_args:
         return call_unwrapped_args(method, args)
@@ -73,7 +73,7 @@ cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
         assert handle.get().get_type() == types.GroundedObjectNode
         gon = <cGroundedObjectNode*>(handle.get())
         py_gon = <cPythonGroundedObject*>gon.get_object()
-        obj = py_gon.get_object()
+        obj = <object>py_gon.get_object()
         Py_INCREF(obj)
         result.append(obj)
         inc(handle_iter)
