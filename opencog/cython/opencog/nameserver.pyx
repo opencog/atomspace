@@ -67,7 +67,7 @@ def get_refreshed_types():
     types = type('atom_types', (), generate_type_module())
     return types
 
-cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace):
+cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspace):
     type = value.get().get_type()
     type_name = get_type_name(type)
     ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)

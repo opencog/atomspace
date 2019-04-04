@@ -3,7 +3,7 @@ cdef class Atom(Value):
 
     @staticmethod
     cdef Atom createAtom(const cHandle& handle, AtomSpace a):
-        return Atom(PtrHolder.create(<shared_ptr[void]&>handle), a)
+        return create_python_value_from_c_value(<const cValuePtr&>handle, a)
 
     def __init__(self, ptr_holder, atomspace):
         super(Atom, self).__init__(ptr_holder)
