@@ -201,7 +201,7 @@ cdef class AtomSpace:
     cdef object parent_atomspace
 
 
-cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace)
+cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspace)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
