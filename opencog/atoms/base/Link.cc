@@ -195,9 +195,9 @@ static void check_type(const ValuePtr& value, const Type& type, const std::strin
     {
         throw SyntaxException(TRACE_INFO,
                 "%s or subclass is expected as %s, actual parameter type is %s",
-                nameserver().getTypeName(type),
-                location,
-                nameserver().getTypeName(value->get_type()));
+                nameserver().getTypeName(type).c_str(),
+                location.c_str(),
+                nameserver().getTypeName(value->get_type()).c_str());
     }
 }
 
