@@ -21,7 +21,8 @@ cdef cGroundedObjectNodePtr create_grounded_object_node_from_python_object(objec
     cdef shared_ptr[cGroundedObject] o_ptr
     o_ptr.reset(new cPythonGroundedObject(<void*>obj, unwrap_args))
     cdef shared_ptr[cGroundedObjectNode] node_ptr
-    node_ptr.reset(new cGroundedObjectNode("", o_ptr))
+    name = "python-%X" % id(obj)
+    node_ptr.reset(new cGroundedObjectNode(<bytes>name.encode(), o_ptr))
     return node_ptr
 
 cdef class GroundedObjectNode(Atom):
