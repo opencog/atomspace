@@ -103,6 +103,23 @@ cdef class TruthValue(Value):
     cdef tv_ptr* _tvptr(self)
 
 
+cdef extern from  "opencog/atoms/truthvalue/TTruthValue.h" namespace "opencog":
+    ctypedef shared_ptr[const cTTruthValue] ttv_ptr "opencog::TTruthValuePtr"
+    cdef cppclass cTTruthValue "opencog::TTruthValue"(cTruthValue):
+        cTTruthValue(object)
+        strength_t get_mean()
+        confidence_t get_confidence()
+        count_t get_count()
+        #tv_ptr DEFAULT_TV()
+        string to_string()
+        bint operator==(cTruthValue h)
+        bint operator!=(cTruthValue h)
+        void * getPtr()
+
+    cdef ttv_ptr createTTruthValue(...)
+
+
+
 # Atom
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
     pass

@@ -55,3 +55,63 @@ cdef class TruthValue(Value):
     def truth_value_ptr_object(self):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
 
+
+
+MEAN = 0
+CONFIDENCE = 1
+
+try:
+    import torch
+    class TTruthValueWrapper(torch.Tensor):
+
+        @staticmethod
+        def __new__(cls, *args):
+           if len(args) == 1:
+               assert(len(args[0]) == 2)
+               instance = super().__new__(cls, *args)
+           elif len(args) == 2:
+               instance = super().__new__(cls, args)
+           else:
+               raise RuntimeError("Expecting tuple of two number, \
+                       tensor of len 2 or two numbers, got {0}".format(args))
+           return instance
+
+        @property
+        def mean(self):
+            return self[MEAN]
+
+        @property
+        def confidence(self):
+            return self[CONFIDENCE]
+
+
+except ModuleNotFoundError as e:
+    print("Torch not found, torch truth value will not be available")
+
+
+cdef class TTruthValue(TruthValue):
+    cdef object ttv
+    def __init__(self, *args, **kwargs):
+        cdef tv_ptr c_ptr
+        cdef cTTruthValue * this_ptr
+        ptr_holder = kwargs.get('ptr_holder', None)
+        if ptr_holder is not None:
+            super(TruthValue, self).__init__(ptr_holder=ptr_holder)
+            this_ptr = <cTTruthValue*>self.get_c_value_ptr().get()
+            self.ttv = <object>(deref(this_ptr).getPtr())
+        else:
+            self.ttv = TTruthValueWrapper(*args)
+            c_ptr = <tv_ptr>createTTruthValue(<PyObject*>self.ttv)
+            super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
+    cdef _mean(self):
+        return self.ttv.mean
+
+    cdef _confidence(self):
+        return self.ttv.confidence
+
+    def torch(self):
+        return self.ttv
+
+    def __str__(self):
+        return 'TTruthValue(' + str(self.ttv) + ')'
