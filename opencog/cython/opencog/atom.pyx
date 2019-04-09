@@ -52,7 +52,7 @@ cdef class Atom(Value):
             tvp = atom_ptr.getTruthValue()
             if (not tvp.get()):
                 raise AttributeError('cAtom returned NULL TruthValue pointer')
-            return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
+            return create_python_value_from_c_value(<shared_ptr[cValue]&>tvp, self.atomspace)
 
         def __set__(self, truth_value):
             try:
