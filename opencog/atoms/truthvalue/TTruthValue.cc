@@ -77,7 +77,9 @@ count_t TTruthValue::get_count()  const {
 
 TruthValuePtr TTruthValue::clone() const {
     PyObject * tensor = (PyObject*)(this->ptr);
+    PyGILState_STATE state = PyGILState_Ensure();
     PyObject * res_obj = PyObject_CallMethod(tensor, "clone", NULL);
+    PyGILState_Release(state);
     if(res_obj == nullptr){
          throw RuntimeException(TRACE_INFO, "failed to clone object");
     }
