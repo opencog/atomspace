@@ -12,12 +12,12 @@ ADD_LIBRARY (truthvalue
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
+        TruthValue.cc
 )
 
 if(HAVE_CYTHON)
    set_property(TARGET truthvalue
            APPEND PROPERTY SOURCES
-           TruthValue.cc
            TTruthValue.cc)
 endif(HAVE_CYTHON)
 
@@ -28,6 +28,13 @@ TARGET_LINK_LIBRARIES(truthvalue
 	value
 	${COGUTIL_LIBRARY}
 )
+if(HAVE_CYTHON)
+	TARGET_LINK_LIBRARIES(truthvalue
+	        ${PYTHON_LIBRARIES}
+	)
+endif(HAVE_CYTHON)
+
+
 
 INSTALL (TARGETS truthvalue EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
