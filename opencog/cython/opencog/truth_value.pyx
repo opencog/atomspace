@@ -56,6 +56,9 @@ cdef class TruthValue(Value):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
 
 
+class SimpleTruthValue(TruthValue):
+    pass
+
 
 MEAN = 0
 CONFIDENCE = 1
