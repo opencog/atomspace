@@ -5,6 +5,7 @@ from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 from opencog.bindlink import execute_atom
 import __main__
+import sys
 
 class GroundedObjectNodeTest(unittest.TestCase):
 
@@ -157,10 +158,40 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         self.assertEqual(result, SetLink(first, second))
 
+    def test_get_object(self):
+        obj = TestObject("some object")
+        gon = GroundedObjectNode("a", obj)
+        refc = sys.getrefcount(obj)
+
+        name = gon.get_object().name
+        self.assertEqual(refc, sys.getrefcount(obj))
+    def test_pass_correctly_wrapped_args_to_python_grounded_predicate_node(self):
+        obj = GroundedObjectNode("obj", TestObject("some obj"), unwrap_args = True)
+        bindlink = BindLink(
+                TypedVariableLink(VariableNode("$X"),
+                                  TypeNode("GroundedObjectNode")),
+                AndLink(
+                    EvaluationLink(
+                        GroundedPredicateNode("py: float_to_truth_value"),
+                        ApplyLink(MethodOfLink(VariableNode("$X"),
+                                               ConceptNode("truth")),
+                                  ListLink()))
+                ),
+                VariableNode("$X")
+        )
+
+        result = execute_atom(self.space, bindlink)
+
+        self.assertEqual(result, SetLink(obj))
+
 def return_true(atom):
     return TruthValue(1.0, 1.0)
 
+def float_to_truth_value(atom):
+    return TruthValue(*atom.get_object())
+
 __main__.return_true = return_true
+__main__.float_to_truth_value = float_to_truth_value
 
 class TestObject:
 
@@ -181,6 +212,9 @@ class TestObject:
 
     def plain_multiply(self, a, b):
         return a * b
+
+    def truth(self):
+        return (1.0, 1.0)
 
 if __name__ == '__main__':
     unittest.main()
