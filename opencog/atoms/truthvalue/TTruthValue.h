@@ -45,6 +45,7 @@ class TTruthValue: public TruthValue
 {
 private:
     PyObject * ptr;
+    unsigned int _count;
 
     float getAttr(std::string attrname) const;
 public:

@@ -28,7 +28,7 @@
 using namespace opencog;
 
 
-TTruthValue::TTruthValue(PyObject * p):TruthValue(TTRUTH_VALUE), ptr(p){
+TTruthValue::TTruthValue(PyObject * p):TruthValue(TTRUTH_VALUE), ptr(p), _count(1){
    PyGILState_STATE state = PyGILState_Ensure();
    Py_INCREF(p);
    PyGILState_Release(state);
@@ -71,7 +71,7 @@ confidence_t TTruthValue::get_confidence()  const {
 
 
 count_t TTruthValue::get_count()  const {
-    return 1;
+    return this->_count;
 }
 
 
