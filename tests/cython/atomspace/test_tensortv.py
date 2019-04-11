@@ -1,13 +1,19 @@
 from unittest import TestCase
 
 from opencog.bindlink import execute_atom
-from opencog.atomspace import TTruthValue
 from opencog.atomspace import AtomSpace, types
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 
-from torch import tensor
-import torch
+
+torch_found = True
+try:
+    from opencog.atomspace import TTruthValue
+    from torch import tensor
+    import torch
+except ImportError as e:
+    print("torch not found")
+    torch_found = False
 
 
 class TensorTVTest(TestCase):
@@ -17,6 +23,8 @@ class TensorTVTest(TestCase):
         initialize_opencog(self.space)
 
     def test_tv(self):
+        if not torch_found:
+            return
         v = TTruthValue(0.4, 0.5)
         delta = 0.0000001
         self.assertTrue(float(v.mean) - 0.4 < delta)
@@ -33,6 +41,7 @@ class TensorTVTest(TestCase):
 
         res = (execute_atom(atomspace, StrengthOfLink(c)))
         self.assertTrue(res.to_list()[0] - 0.4 < delta)
+        self.assertTrue(c.tv.count == 1.0)
 
     def tearDown(self):
         finalize_opencog()

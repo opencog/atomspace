@@ -88,7 +88,7 @@ try:
             return self[CONFIDENCE]
 
 
-except ModuleNotFoundError as e:
+except ImportError as e:
     print("Torch not found, torch truth value will not be available")
 
 

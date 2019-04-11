@@ -12,9 +12,14 @@ ADD_LIBRARY (truthvalue
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
-	TruthValue.cc
-	TTruthValue.cc
 )
+
+if(HAVE_CYTHON)
+   set_property(TARGET truthvalue
+           APPEND PROPERTY SOURCES
+           TruthValue.cc
+           TTruthValue.cc)
+endif(HAVE_CYTHON)
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(truthvalue opencog_atom_types)
