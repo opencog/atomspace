@@ -1,3 +1,10 @@
+if(HAVE_CYTHON)
+	INCLUDE_DIRECTORIES(
+        	${PYTHON_INCLUDE_DIRS}
+        	${CMAKE_CURRENT_SOURCE_DIR}
+        	${CMAKE_CURRENT_BINARY_DIR})
+endif(HAVE_CYTHON)
+
 ADD_LIBRARY (truthvalue
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
@@ -6,6 +13,7 @@ ADD_LIBRARY (truthvalue
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
+	TTruthValue.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -28,5 +36,6 @@ INSTALL (FILES
 	SimpleTruthValue.h
 	EvidenceCountTruthValue.h
 	TruthValue.h
+	TTruthValue.h
 	DESTINATION "include/opencog/atoms/truthvalue"
 )
