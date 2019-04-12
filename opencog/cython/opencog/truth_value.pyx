@@ -7,6 +7,7 @@ def createTruthValue(strength = 1.0, confidence = 1.0):
     c_ptr.reset(new cSimpleTruthValue(strength, confidence))
     return TruthValue(ptr_holder = PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
+
 cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
         a relationship or term. In OpenCog there are a number of TruthValue
@@ -115,6 +116,10 @@ cdef class TTruthValue(TruthValue):
 
     def torch(self):
         return self.ttv
+
+    def __getitem__(self, idx):
+        assert 0 <= idx <= 1
+        return self.ttv[idx]
 
     def __str__(self):
         return 'TTruthValue(' + str(self.ttv) + ')'
