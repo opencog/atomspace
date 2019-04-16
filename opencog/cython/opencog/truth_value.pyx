@@ -66,7 +66,7 @@ CONFIDENCE = 1
 
 try:
     import torch
-    class TTruthValueWrapper(torch.Tensor):
+    class TorchTruthValueWrapper(torch.Tensor):
 
         @staticmethod
         def __new__(cls, *args):
@@ -93,19 +93,19 @@ except ImportError as e:
     print("Torch not found, torch truth value will not be available")
 
 
-cdef class TTruthValue(TruthValue):
+cdef class TorchTruthValue(TruthValue):
     cdef object ttv
     def __init__(self, *args, **kwargs):
         cdef tv_ptr c_ptr
-        cdef cTTruthValue * this_ptr
+        cdef cTorchTruthValue * this_ptr
         ptr_holder = kwargs.get('ptr_holder', None)
         if ptr_holder is not None:
             super(TruthValue, self).__init__(ptr_holder=ptr_holder)
-            this_ptr = <cTTruthValue*>self.get_c_value_ptr().get()
+            this_ptr = <cTorchTruthValue*>self.get_c_value_ptr().get()
             self.ttv = <object>(deref(this_ptr).getPtr())
         else:
-            self.ttv = TTruthValueWrapper(*args)
-            c_ptr = <tv_ptr>createTTruthValue(<PyObject*>self.ttv)
+            self.ttv = TorchTruthValueWrapper(*args)
+            c_ptr = <tv_ptr>createTorchTruthValue(<PyObject*>self.ttv)
             super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
     cdef _mean(self):
@@ -122,4 +122,4 @@ cdef class TTruthValue(TruthValue):
         return self.ttv[idx]
 
     def __str__(self):
-        return 'TTruthValue(' + str(self.ttv) + ')'
+        return 'TorchTruthValue(' + str(self.ttv) + ')'

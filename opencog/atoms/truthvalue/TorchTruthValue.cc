@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/truthvalue/TTruthValue.cc
+ * opencog/atoms/truthvalue/TorchTruthValue.cc
  *
  * Written by Anatoly Belikov <abelikov@singularitynet.io>
  * All Rights Reserved
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/truthvalue/TTruthValue.h>
+#include <opencog/atoms/truthvalue/TorchTruthValue.h>
 #include "SimpleTruthValue.h"
 
 #include <Python.h>
@@ -28,13 +28,13 @@
 using namespace opencog;
 
 
-TTruthValue::TTruthValue(PyObject * p):TruthValue(TTRUTH_VALUE), ptr(p), _count(1){
+TorchTruthValue::TorchTruthValue(PyObject * p):TruthValue(TORCH_TRUTH_VALUE), ptr(p), _count(1){
    PyGILState_STATE state = PyGILState_Ensure();
    Py_INCREF(p);
    PyGILState_Release(state);
 };
 
-float TTruthValue::getAttr(std::string p_attrname) const{
+float TorchTruthValue::getAttr(std::string p_attrname) const{
     PyGILState_STATE state = PyGILState_Ensure();
     PyObject * tensor = (PyObject*)(this->ptr);
     PyObject * const attrname = PyUnicode_FromString(p_attrname.c_str());
@@ -42,7 +42,7 @@ float TTruthValue::getAttr(std::string p_attrname) const{
     PyObject * float_obj = nullptr;
     Py_DECREF(attrname);
     bool failed = false;
-    double result;
+    double result = -1.0;
     if (res_obj){
         float_obj = PyObject_CallMethod(res_obj, "__float__", NULL);
         if(float_obj) {
@@ -60,22 +60,22 @@ float TTruthValue::getAttr(std::string p_attrname) const{
 }
 
 
-strength_t TTruthValue::get_mean()  const {
+strength_t TorchTruthValue::get_mean()  const {
     return this->getAttr("mean");
 }
 
 
-confidence_t TTruthValue::get_confidence()  const {
+confidence_t TorchTruthValue::get_confidence()  const {
     return this->getAttr("confidence");
 }
 
 
-count_t TTruthValue::get_count()  const {
+count_t TorchTruthValue::get_count()  const {
     return this->_count;
 }
 
 
-TruthValuePtr TTruthValue::clone() const {
+TruthValuePtr TorchTruthValue::clone() const {
     PyObject * tensor = (PyObject*)(this->ptr);
     PyGILState_STATE state = PyGILState_Ensure();
     PyObject * res_obj = PyObject_CallMethod(tensor, "clone", NULL);
@@ -83,27 +83,27 @@ TruthValuePtr TTruthValue::clone() const {
     if(res_obj == nullptr){
          throw RuntimeException(TRACE_INFO, "failed to clone object");
     }
-    return createTTruthValue(res_obj);
+    return createTorchTruthValue(res_obj);
 }
 
-bool TTruthValue::operator==(const Value& other) const {
+bool TorchTruthValue::operator==(const Value& other) const {
      return this == &other;
 }
 
-TruthValuePtr TTruthValue::merge(const TruthValuePtr& other,
+TruthValuePtr TorchTruthValue::merge(const TruthValuePtr& other,
                                       const MergeCtrl& mc) const
 {
             throw RuntimeException(TRACE_INFO,
                                    "merge is not implemented");
 }
 
-TTruthValue::~TTruthValue(){
+TorchTruthValue::~TorchTruthValue(){
     PyGILState_STATE state = PyGILState_Ensure();
     Py_DECREF(this->ptr);
     PyGILState_Release(state);
 }
 
-void * TTruthValue::getPtr(){
+void * TorchTruthValue::getPtr(){
     return this->ptr;
 }
 

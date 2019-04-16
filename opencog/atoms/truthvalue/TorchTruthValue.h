@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/truthvalue/TTruthValue.h
+ * opencog/atoms/truthvalue/TorchTruthValue.h
  *
  * Written by Anatoly Belikov <abelikov@singularitynet.io>
  * All Rights Reserved
@@ -36,12 +36,12 @@ namespace opencog
 {
 
 /*
- * class TTruthValue holds pointer to torch.Tensor wrapper.
+ * class TorchTruthValue holds pointer to torch.Tensor wrapper.
  * methods such as get_mean, get_confidence call this python wrapper.
  * Otherwise it is similiar to SimpleTruthValue.
  */
 
-class TTruthValue: public TruthValue
+class TorchTruthValue: public TruthValue
 {
 private:
     PyObject * ptr;
@@ -49,8 +49,8 @@ private:
 
     float getAttr(std::string attrname) const;
 public:
-    TTruthValue(const TTruthValue &) = delete;
-    TTruthValue(PyObject * p);
+    TorchTruthValue(const TorchTruthValue &) = delete;
+    TorchTruthValue(PyObject * p);
     virtual strength_t get_mean()  const;
     virtual confidence_t get_confidence()  const;
     virtual count_t get_count()  const;
@@ -59,15 +59,15 @@ public:
     virtual bool operator==(const Value&) const;
     virtual TruthValuePtr merge(const TruthValuePtr& other,
                                 const MergeCtrl& mc) const;
-    virtual ~TTruthValue();
+    virtual ~TorchTruthValue();
     virtual void * getPtr();
 
 };
 
-typedef std::shared_ptr<TTruthValue> TTruthValuePtr;
+typedef std::shared_ptr<TorchTruthValue> TorchTruthValuePtr;
 template<typename ... Type>
-static inline TTruthValuePtr createTTruthValue(Type&&...  args) {
-   return std::make_shared<TTruthValue>(std::forward<Type>(args)...);
+static inline TorchTruthValuePtr createTorchTruthValue(Type&&...  args) {
+   return std::make_shared<TorchTruthValue>(std::forward<Type>(args)...);
 }
 
 
