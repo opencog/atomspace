@@ -332,6 +332,14 @@
 )
 
 ; -----------------------------------------------------------------------
+(define-public (cog-get-all-roots)
+  (define roots '())
+  (define (cons-roots x) (set! roots (cons x roots)))
+  (traverse-roots cons-roots)
+  roots
+)
+
+; -----------------------------------------------------------------------
 (define-public (cog-count-atoms atom-type)
 "
   cog-count-atoms -- Count of the number of atoms of given type
@@ -1260,6 +1268,7 @@
 'cog-report-counts
 'cog-get-root
 'cog-get-all-nodes
+'cog-get-all-roots
 'cog-get-partner
 'cog-pred-get-partner
 'cog-filter
