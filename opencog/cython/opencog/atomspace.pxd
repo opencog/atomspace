@@ -107,7 +107,7 @@ cdef extern from  "opencog/atoms/truthvalue/TTruthValue.h" namespace "opencog":
     ctypedef shared_ptr[const cTTruthValue] ttv_ptr "opencog::TTruthValuePtr"
     cdef cppclass cTTruthValue "opencog::TTruthValue"(cTruthValue):
         cTTruthValue(object)
-        strength_t get_mean()
+        strength_t get_mean() except +
         confidence_t get_confidence()
         count_t get_count()
         #tv_ptr DEFAULT_TV()
