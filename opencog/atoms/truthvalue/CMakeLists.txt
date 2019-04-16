@@ -18,7 +18,7 @@ ADD_LIBRARY (truthvalue
 if(HAVE_CYTHON)
    set_property(TARGET truthvalue
            APPEND PROPERTY SOURCES
-	   TorchTruthValue.cc)
+	   TensorTruthValue.cc)
 endif(HAVE_CYTHON)
 
 # Without this, parallel make will race and crap up the generated files.
@@ -48,6 +48,6 @@ INSTALL (FILES
 	SimpleTruthValue.h
 	EvidenceCountTruthValue.h
 	TruthValue.h
-	TorchTruthValue.h
+	TensorTruthValue.h
 	DESTINATION "include/opencog/atoms/truthvalue"
 )

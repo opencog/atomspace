@@ -103,10 +103,10 @@ cdef class TruthValue(Value):
     cdef tv_ptr* _tvptr(self)
 
 
-cdef extern from  "opencog/atoms/truthvalue/TorchTruthValue.h" namespace "opencog":
-    ctypedef shared_ptr[const cTorchTruthValue] ttv_ptr "opencog::TorchTruthValuePtr"
-    cdef cppclass cTorchTruthValue "opencog::TorchTruthValue"(cTruthValue):
-        cTorchTruthValue(object)
+cdef extern from  "opencog/atoms/truthvalue/TensorTruthValue.h" namespace "opencog":
+    ctypedef shared_ptr[const cTensorTruthValue] ttv_ptr "opencog::TensorTruthValuePtr"
+    cdef cppclass cTensorTruthValue "opencog::TensorTruthValue"(cTruthValue):
+        cTensorTruthValue(object)
         strength_t get_mean() except +
         confidence_t get_confidence()
         count_t get_count()
@@ -116,7 +116,7 @@ cdef extern from  "opencog/atoms/truthvalue/TorchTruthValue.h" namespace "openco
         bint operator!=(cTruthValue h)
         void * getPtr()
 
-    cdef ttv_ptr createTorchTruthValue(...)
+    cdef ttv_ptr createTensorTruthValue(...)
 
 
 

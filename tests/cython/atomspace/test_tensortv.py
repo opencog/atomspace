@@ -8,10 +8,10 @@ from opencog.type_constructors import *
 
 torch_found = True
 try:
-    from opencog.atomspace import TorchTruthValue
+    from opencog.atomspace import TensorTruthValue
     from torch import tensor
     import torch
-    TTruthValue = TorchTruthValue
+    TTruthValue = TensorTruthValue
 except ImportError as e:
     print("torch not found")
     torch_found = False
