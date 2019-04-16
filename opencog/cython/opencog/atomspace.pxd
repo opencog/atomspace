@@ -108,7 +108,7 @@ cdef extern from  "opencog/atoms/truthvalue/TorchTruthValue.h" namespace "openco
     cdef cppclass cTorchTruthValue "opencog::TorchTruthValue"(cTruthValue):
         cTorchTruthValue(object)
         strength_t get_mean() except +
-        confidence_t get_confidence()
+        confidence_t get_confidence() except +
         count_t get_count()
         #tv_ptr DEFAULT_TV()
         string to_string()
