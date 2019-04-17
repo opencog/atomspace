@@ -11,7 +11,6 @@ try:
     from opencog.atomspace import TensorTruthValue
     from torch import tensor
     import torch
-    TTruthValue = TensorTruthValue
 except ImportError as e:
     print("torch not found")
     torch_found = False
@@ -26,11 +25,11 @@ class TensorTVTest(TestCase):
     def test_tv(self):
         if not torch_found:
             return
-        v = TTruthValue(0.4, 0.5)
+        v = TensorTruthValue(0.4, 0.5)
         delta = 0.0000001
         self.assertTrue(float(v.mean) - 0.4 < delta)
         self.assertTrue(float(v.confidence) - 0.5 < delta)
-        self.assertTrue(isinstance(eval(str(v)), TTruthValue))
+        self.assertTrue(isinstance(eval(str(v)), TensorTruthValue))
 
         c = ConceptNode('c')
         c.tv = v
