@@ -7,6 +7,7 @@ def createTruthValue(strength = 1.0, confidence = 1.0):
     c_ptr.reset(new cSimpleTruthValue(strength, confidence))
     return TruthValue(ptr_holder = PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
+
 cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
         a relationship or term. In OpenCog there are a number of TruthValue
@@ -55,3 +56,74 @@ cdef class TruthValue(Value):
     def truth_value_ptr_object(self):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
 
+
+class SimpleTruthValue(TruthValue):
+    pass
+
+
+MEAN = 0
+CONFIDENCE = 1
+
+try:
+    import torch
+    class TensorTruthValueWrapper(torch.Tensor):
+
+        @staticmethod
+        def __new__(cls, *args):
+           if len(args) == 1:
+               assert(len(args[0]) == 2)
+               instance = super().__new__(cls, *args)
+           elif len(args) == 2:
+               instance = super().__new__(cls, args)
+           else:
+               raise RuntimeError("Expecting tuple of two number, \
+                       tensor of len 2 or two numbers, got {0}".format(args))
+           return instance
+
+        @property
+        def mean(self):
+            return self[MEAN]
+
+        @property
+        def confidence(self):
+            return self[CONFIDENCE]
+
+        def __str__(self):
+            return 'TensorTruthValue({0}, {1})'.format(self.mean,
+                                                       self.confidence)
+
+
+except ImportError as e:
+    print("Torch not found, torch truth value will not be available")
+
+
+cdef class TensorTruthValue(TruthValue):
+    cdef object ttv
+    def __init__(self, *args, **kwargs):
+        cdef tv_ptr c_ptr
+        cdef cTensorTruthValue * this_ptr
+        ptr_holder = kwargs.get('ptr_holder', None)
+        if ptr_holder is not None:
+            super(TruthValue, self).__init__(ptr_holder=ptr_holder)
+            this_ptr = <cTensorTruthValue*>self.get_c_value_ptr().get()
+            self.ttv = <object>(deref(this_ptr).getPtr())
+        else:
+            self.ttv = TensorTruthValueWrapper(*args)
+            c_ptr = <tv_ptr>createTensorTruthValue(<PyObject*>self.ttv)
+            super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+
+    cdef _mean(self):
+        return self.ttv.mean
+
+    cdef _confidence(self):
+        return self.ttv.confidence
+
+    def torch(self):
+        return self.ttv
+
+    def __getitem__(self, idx):
+        assert 0 <= idx <= 1
+        return self.ttv[idx]
+
+    def __str__(self):
+        return str(self.ttv)
