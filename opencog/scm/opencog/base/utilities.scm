@@ -333,6 +333,13 @@
 
 ; -----------------------------------------------------------------------
 (define-public (cog-get-all-roots)
+"
+  cog-get-all-roots -- Return the list of all root atoms.
+
+  cog-get-all-roots
+  Return the list of all root atoms, that is atoms with
+  no incoming set.
+"
   (define roots '())
   (define (cons-roots x) (set! roots (cons x roots)))
   (traverse-roots cons-roots)
