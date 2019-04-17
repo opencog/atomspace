@@ -88,6 +88,10 @@ try:
         def confidence(self):
             return self[CONFIDENCE]
 
+        def __str__(self):
+            return 'TensorTruthValue({0}, {1})'.format(self.mean,
+                                                       self.confidence)
+
 
 except ImportError as e:
     print("Torch not found, torch truth value will not be available")
@@ -122,4 +126,4 @@ cdef class TensorTruthValue(TruthValue):
         return self.ttv[idx]
 
     def __str__(self):
-        return 'TensorTruthValue(' + str(self.ttv) + ')'
+        return str(self.ttv)

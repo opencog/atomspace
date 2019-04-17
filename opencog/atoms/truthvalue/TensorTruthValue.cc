@@ -21,9 +21,8 @@
  */
 
 #include <opencog/atoms/truthvalue/TensorTruthValue.h>
-#include "SimpleTruthValue.h"
-
 #include <Python.h>
+
 
 using namespace opencog;
 
@@ -107,4 +106,20 @@ void * TensorTruthValue::getPtr(){
     return this->ptr;
 }
 
-
+std::string TensorTruthValue::to_string(const std::string&) const {
+    PyGILState_STATE state = PyGILState_Ensure();
+    PyObject * str = PyObject_Str(this->ptr);
+    if(str == nullptr){
+         PyGILState_Release(state);
+         throw RuntimeException(TRACE_INFO, "error calling __str__ on python object");
+    }
+#if PY_MAJOR_VERSION == 2
+    const char * tmp = PyBytes_AsString(str);
+#else
+    const char * tmp = PyUnicode_AsUTF8(str);
+#endif
+    std::string result = std::string(tmp);
+    Py_DECREF(str);
+    PyGILState_Release(state);
+    return result;
+}

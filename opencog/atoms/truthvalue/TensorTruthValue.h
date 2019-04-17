@@ -61,7 +61,7 @@ public:
                                 const MergeCtrl& mc) const;
     virtual ~TensorTruthValue();
     virtual void * getPtr();
-
+    virtual std::string to_string(const std::string&) const;
 };
 
 typedef std::shared_ptr<TensorTruthValue> TensorTruthValuePtr;
