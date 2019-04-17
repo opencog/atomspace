@@ -18,6 +18,7 @@
 ; -- clear -- extract all atoms in the atomspace.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
