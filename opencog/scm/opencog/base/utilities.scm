@@ -18,6 +18,7 @@
 ; -- clear -- extract all atoms in the atomspace.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
@@ -329,6 +330,21 @@
   underneath these top-most atoms.
 "
 	(traverse-roots display)
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-get-all-roots)
+"
+  cog-get-all-roots -- Return the list of all root atoms.
+
+  cog-get-all-roots
+  Return the list of all root atoms, that is atoms with
+  no incoming set.
+"
+  (define roots '())
+  (define (cons-roots x) (set! roots (cons x roots)))
+  (traverse-roots cons-roots)
+  roots
 )
 
 ; -----------------------------------------------------------------------
@@ -1260,6 +1276,7 @@
 'cog-report-counts
 'cog-get-root
 'cog-get-all-nodes
+'cog-get-all-roots
 'cog-get-partner
 'cog-pred-get-partner
 'cog-filter
