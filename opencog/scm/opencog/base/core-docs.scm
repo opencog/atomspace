@@ -861,7 +861,8 @@
 (set-procedure-property! cog-type? 'documentation
 "
  cog-type? SYMBOL
-    Return #t if the SYMBOL names a value or atom type, else return #f
+    Return #t if the SYMBOL names a Value or Atom type, else return #f
+    Equivalent to (cog-subtype? 'Value SYMBOL)
 
     Example:
         guile> (cog-type? 'ConceptNode)
@@ -873,7 +874,8 @@
 (set-procedure-property! cog-node-type? 'documentation
 "
  cog-node-type? SYMBOL
-    Return #t if the SYMBOL names an node type, else return #f
+    Return #t if the SYMBOL names an Node type, else return #f.
+    Equivalent to (cog-subtype? 'Node SYMBOL)
 
     Example:
         guile> (cog-node-type? 'ConceptNode)
@@ -887,7 +889,8 @@
 (set-procedure-property! cog-link-type? 'documentation
 "
  cog-link-type? SYMBOL
-    Return #t if the SYMBOL names a link type, else return #f
+    Return #t if the SYMBOL names a Link type, else return #f.
+    Equivalent to (cog-subtype? 'Link SYMBOL)
 
     Example:
         guile> (cog-link-type? 'ConceptNode)
