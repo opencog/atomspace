@@ -520,56 +520,64 @@
 "
  cog-new-stv MEAN CONFIDENCE
     Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
+    Equivalent to (cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
-    Throws errors if mean and confidence are not floating-point
-    values.
+    Throws error if MEAN and CONMFIDENCE are not numeric values.
     Example:
         ; Create a new simple truth value:
         guile> (cog-new-stv 0.7 0.9)
-")
-
-(set-procedure-property! cog-new-etv 'documentation
-"
- cog-new-etv POSITIVE-COUNT TOTAL-COUNT
-    Create an EvidenceCountTruthValue with the given POSITIVE-COUNT
-    and TOTAL-COUNT. Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    The total count is optional in the sense that any value below the
-    positive count will be considered undefined.
-
-    Throws errors if positive-count and total-count are not
-    floating-point values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-etv 100 150)
 ")
 
 (set-procedure-property! cog-new-ctv 'documentation
 "
  cog-new-ctv MEAN CONFIDENCE COUNT
     Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Unlike atoms, truth values are ephemeral: they are automatically
+    Equivalent to
+    (cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
-    Throws errors if mean, confidence and count are not floating-point
-    values.
+    Throws error if MEAN, CONFIDENCE and COUNT are not numeric values.
     Example:
         ; Create a new count truth value:
         guile> (cog-new-ctv 0.7 0.9 44.0)
+")
+
+(set-procedure-property! cog-new-etv 'documentation
+"
+ cog-new-etv POSITIVE-COUNT TOTAL-COUNT
+    Create an EvidenceCountTruthValue with the given POSITIVE-COUNT
+    and TOTAL-COUNT. Equivalent to
+    (cog-new-value 'EvidenceCountTruthValue POSITIVE-COUNT TOTAL-COUNT)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    The total count is optional in the sense that any value below the
+    positive count will be considered undefined.
+
+    Throws error if positive-count and total-count are not numeric
+    values.
+    Example:
+        ; Create a new simple truth value:
+        guile> (cog-new-etv 100 150)
 ")
 
 (set-procedure-property! cog-new-itv 'documentation
 "
  cog-new-itv LOWER UPPER CONFIDENCE
     Create an IndefiniteTruthValue with the given LOWER, UPPER and
-    CONFIDENCE.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
+    CONFIDENCE.  Equivalent to
+    (cog-new-value 'IndefiniteTruthValue LOWER UPPER CONFIDENCE)
 
-    Throws errors if lower, upper and confidence are not floating-point
-    values.
+    Unlike Atoms, Values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws error if LOWER, UPPER and CONFIDENCE are not numeric values.
     Example:
         ; Create a new indefinite truth value:
         guile> (cog-new-itv 0.7 0.9 0.6)
@@ -579,11 +587,13 @@
 "
  cog-new-ptv MEAN CONFIENCE COUNT
     Create a ProbabilisticTruthValue with the given MEAN, CONFIDENCE
-    and COUNT.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
+    and COUNT.  Equivalent to
+    (cog-new-value 'ProbabilisticTruthValue MEAN CONFIENCE COUNT)
 
-    Throws errors if mean, confidence and count are not floating-point
-    values.
+    Unlike Atoms, Values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws errors if MEAN, CONFIDENCE and COUNT are not numeric values.
     Example:
         ; Create a new probabilistic truth value:
         guile> (cog-new-ptv 0.7 0.9 44.0)
@@ -593,11 +603,12 @@
 "
  cog-new-ftv MEAN CONFIDENCE
     Create a FuzzyTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
+    Equivalent to (cog-new-value 'FuzzyTruthValue MEAN CONFIENCE)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
-    Throws errors if mean and confidence are not floating-point
-    values.
+    Throws error if MEAN or CONFIDENCE are not numeric values.
     Example:
         ; Create a new fuzzy truth value:
         guile> (cog-new-ftv 0.7 0.9)
@@ -606,7 +617,8 @@
 (set-procedure-property! cog-tv? 'documentation
 "
  cog-tv? EXP
-    Return #t if EXP is a truth value, else return #f
+    Return #t if EXP is a TruthValue, else return #f
+    Equivalent to (cog-subtype? 'TruthValue (cog-type EXP))
 
     Example:
        ; Define a simple truth value
@@ -621,31 +633,36 @@
 (set-procedure-property! cog-stv? 'documentation
 "
  cog-stv? EXP
-    Return #t if EXP is a SimpleTruthValue, else return #f
+    Return #t if EXP is a SimpleTruthValue, else return #f.
+    Equivalent to (equal? 'SimpleTruthValue (cog-type EXP))
 ")
 
 (set-procedure-property! cog-ctv? 'documentation
 "
  cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f
+    Return #t if EXP is a CountTruthValue, else return #f.
+    Equivalent to (equal? 'CountTruthValue (cog-type EXP))
 ")
 
 (set-procedure-property! cog-itv? 'documentation
 "
  cog-itv? EXP
-    Return #t if EXP is a IndefiniteTruthValue, else return #f
+    Return #t if EXP is a IndefiniteTruthValue, else return #f.
+    Equivalent to (equal? 'IndefiniteTruthValue (cog-type EXP))
 ")
 
 (set-procedure-property! cog-ptv? 'documentation
 "
  cog-ptv? EXP
-    Return #t if EXP is a ProbablisticTruthValue, else return #f
+    Return #t if EXP is a ProbablisticTruthValue, else return #f.
+    Equivalent to (equal? 'ProbabilisticTruthValue (cog-type EXP))
 ")
 
 (set-procedure-property! cog-ftv? 'documentation
 "
  cog-ftv? EXP
-    Return #t if EXP is a FuzzyTruthValue, else return #f
+    Return #t if EXP is a FuzzyTruthValue, else return #f.
+    Equivalent to (equal? 'FuzzyTruthValue (cog-type EXP))
 ")
 
 (set-procedure-property! cog-tv 'documentation
