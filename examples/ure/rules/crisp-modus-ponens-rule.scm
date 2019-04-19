@@ -41,10 +41,10 @@
 
 (define (crisp-modus-ponens-formula AB A B)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB)))
+        ((sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB)))
       (if (and (>= sA 0.5) (>= cA 0.5) (>= sAB 0.5) (>= cAB 0.5))
           (cog-set-tv! B (stv 1 1)))))
 

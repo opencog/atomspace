@@ -42,14 +42,14 @@
 
 (define (pln-formula-simple-modus-ponens-side-effect-free AB)
     (let
-        ((sA (cog-stv-strength (gar AB)))
-         (cA (cog-stv-confidence (gar AB))))
+        ((sA (cog-mean (gar AB)))
+         (cA (cog-confidence (gar AB))))
             (stv                          ; Strength
                 (*
-                    (cog-stv-strength AB)
+                    (cog-mean AB)
                     sA)
                 (+                        ; Confidence
-                    (cog-stv-confidence AB)
+                    (cog-confidence AB)
                     cA))))
 
 ; Associate a name to the rule
