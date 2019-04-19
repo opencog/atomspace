@@ -73,6 +73,17 @@
 	(if (eq? pos-cnt #f) 0 pos-cnt)
 )
 
+; --------------------------------------------------------------
+;
+(define-public (cog-atom-incr atom cnt)
+"
+  cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
+
+  DEPRECATED! Use cog-inc-count! instead!
+"
+   (cog-inc-count! atom cnt)
+)
+
 ; ===================================================================
 ; Simple wrappers for TruthValues
 

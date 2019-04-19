@@ -9,10 +9,8 @@
 ; which is useful for working with EvaluationLink's.
 ;
 ; Utilities include:
-; -- abbreviations for working with truth values (stv, ctv, etc.)
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- for-each-except loop.
-; -- cog-atom-incr --  Increment count truth value on "atom" by "cnt".
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
 ; -- clear -- extract all atoms in the atomspace.
@@ -123,17 +121,6 @@
 		)
 	)
 	(loop lst)
-)
-
-; --------------------------------------------------------------
-;
-(define-public (cog-atom-incr atom cnt)
-"
-  cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
-
-  DEPRECATED! Use cog-inc-count! instead!
-"
-	(cog-inc-count! atom cnt)
 )
 
 ; --------------------------------------------------------------------
