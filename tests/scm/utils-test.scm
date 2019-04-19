@@ -3,7 +3,7 @@
 
 ; test count truth value incrementation
 (define counter (ConceptNode "asdf"))
-(define (test-incr-cnt) (cog-atom-incr counter 1))
+(define (test-incr-cnt) (cog-inc-count! counter 1))
 
 ; test cog-get-partner
 (define partner (ConceptNode "partner"))

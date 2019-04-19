@@ -4,18 +4,15 @@
 ; Useful utilities for working with truth values.
 ;
 ; Utilities provided:
-; -- cog-merge-tv! -- merge truth values on atom
-; -- cog-merge-hi-conf-tv! -- different merge style
-; -- cog-stv-strength -- SimpleTruthValue strength of an atom
+; -- cog-merge-tv! -- Merge truth values on atom
+; -- cog-merge-hi-conf-tv! -- Different merge style
 ; -- cog-stv-strength-above -- Filter atoms with TV strength above a threshold
 ; -- cog-stv-strength-below -- Filter atoms with TV strength below a threshold
-; -- cog-stv-confidence -- TruthValue confidence of an atom
-; -- cog-stv-confidence-above -- Filter atoms with TV confidence above a threshold
-; -- cog-stv-confidence-below -- Filter atoms with TV confidence below a threshold
-; -- cog-stv-count -- TruthValue count of an atom
+; -- cog-stv-confidence-above -- Filter atoms with TV conf above a threshold
+; -- cog-stv-confidence-below -- Filter atoms with TV conf below a threshold
 ; -- cog-stv-count-above -- Filter atoms with TV count above a threshold
 ; -- cog-stv-count-below -- Filter atoms with TV count below a threshold
-; -- cog-stv-positive-filter -- Filter atoms with positive TV strength and count
+; -- cog-stv-positive-filter -- Filter with positive TV strength and count
 ;
 ;
 ; Copyright (c) 2014 Cosmo Harrigan
@@ -50,16 +47,6 @@
   cog-stv-count DEPRECATED! Use cog-count instead!
 "
 	(cog-count ATOM)
-)
-
-;
-(define-public (cog-atom-incr atom cnt)
-"
-  cog-atom-incr -- Increment count truth value on 'atom' by 'cnt'
-
-  DEPRECATED! Use cog-inc-count! instead!
-"
-   (cog-inc-count! atom cnt)
 )
 
 ; ===================================================================
