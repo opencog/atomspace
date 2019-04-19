@@ -6,49 +6,9 @@
 ; Utilities provided:
 ; -- cog-merge-tv! -- Merge truth values on atom
 ; -- cog-merge-hi-conf-tv! -- Different merge style
-; -- cog-stv-strength-above -- Filter atoms with TV strength above a threshold
-; -- cog-stv-strength-below -- Filter atoms with TV strength below a threshold
-; -- cog-stv-confidence-above -- Filter atoms with TV conf above a threshold
-; -- cog-stv-confidence-below -- Filter atoms with TV conf below a threshold
-; -- cog-stv-count-above -- Filter atoms with TV count above a threshold
-; -- cog-stv-count-below -- Filter atoms with TV count below a threshold
-; -- cog-stv-positive-filter -- Filter with positive TV strength and count
-;
 ;
 ; Copyright (c) 2014 Cosmo Harrigan
 ;
-
-; ===================================================================
-
-(define-public (tv-non-null-conf? TV)
-"
-  Return #t if the confidence of tv is positive, #f otherwise.
-  Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
-"
-	(< 0 (cog-tv-confidence TV))
-)
-
-(define-public (cog-stv-strength ATOM)
-"
-  cog-stv-strength DEPRECATED! Use cog-mean instead
-"
-	(cog-mean ATOM)
-)
-
-(define-public (cog-stv-confidence ATOM)
-"
-  cog-stv-confidence DEPRECATED! Use cog-confidence instead!
-"
-	(cog-confidence ATOM)
-)
-
-(define-public (cog-stv-count ATOM)
-"
-  cog-stv-count DEPRECATED! Use cog-count instead!
-"
-	(cog-count ATOM)
-)
-
 ; ===================================================================
 ; Simple wrappers for TruthValues
 
@@ -189,15 +149,6 @@
 	(cog-subtype? 'TruthValue (cog-type EXP))
 )
 
-(define-public (cog-stv? EXP)
-"
- cog-stv? EXP
-    Return #t if EXP is a SimpleTruthValue, else return #f.
-    Equivalent to (equal? 'SimpleTruthValue (cog-type EXP))
-"
-	(equal? 'SimpleTruthValue (cog-type EXP))
-)
-
 (define-public (cog-ctv? EXP)
 "
  cog-ctv? EXP
@@ -205,33 +156,6 @@
     Equivalent to (equal? 'CountTruthValue (cog-type EXP))
 "
 	(equal? 'CountTruthValue (cog-type EXP))
-)
-
-(define-public (cog-itv? EXP)
-"
- cog-itv? EXP
-    Return #t if EXP is a IndefiniteTruthValue, else return #f.
-    Equivalent to (equal? 'IndefiniteTruthValue (cog-type EXP))
-"
-	(equal? 'IndefiniteTruthValue (cog-type EXP))
-)
-
-(define-public (cog-ptv? EXP)
-"
- cog-ptv? EXP
-    Return #t if EXP is a ProbablisticTruthValue, else return #f.
-    Equivalent to (equal? 'ProbabilisticTruthValue (cog-type EXP))
-"
-	(equal? 'ProbabilisticTruthValue (cog-type EXP))
-)
-
-(define-public (cog-ftv? EXP)
-"
- cog-ftv? EXP
-    Return #t if EXP is a FuzzyTruthValue, else return #f.
-    Equivalent to (equal? 'FuzzyTruthValue (cog-type EXP))
-"
-	(equal? 'FuzzyTruthValue (cog-type EXP))
 )
 
 ; ===================================================================
@@ -296,66 +220,3 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-stv-strength-above y z)
-"
-  cog-stv-strength-above
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue strength above the threshold
-  (Compatible with atoms that have a SimpleTruthValue)
-"
-	(filter (lambda (x) (> (cog-mean x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-strength-below y z)
-"
-  cog-stv-strength-below
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue strength above the threshold
-  (Compatible with atoms that have a SimpleTruthValue)
-"
-	(filter (lambda (x) (< (cog-mean x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-confidence-above y z)
-"
-  cog-stv-confidence-above
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue confidence above the threshold
-"
-	(filter (lambda (x) (> (cog-confidence x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-confidence-below y z)
-"
-  cog-stv-confidence-below
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue confidence above the threshold
-"
-	(filter (lambda (x) (< (cog-confidence x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-count-above y z)
-"
-  cog-stv-count-above
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue count above the threshold
-"
-	(filter (lambda (x) (> (cog-count x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-count-below y z)
-"
-  cog-stv-count-below
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with TruthValue count above the threshold
-"
-	(filter (lambda (x) (< (cog-count x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-stv-positive-filter x)
-"
-  cog-stv-positive-filter
-  Given a list of atoms, returns a list containing the subset that has
-  truth value count > 0 and truth value strength > 0
-"
-	(cog-stv-strength-above 0 (cog-stv-count-above 0 x)))

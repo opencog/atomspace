@@ -64,10 +64,10 @@
 ;; -----------------------------------------------------------------------------
 
 (define (fc-deduction-formula AC AB BC)
-    (let (  (sAB (cog-stv-strength AB))
-            (cAB (cog-stv-confidence AB))
-            (sBC (cog-stv-strength BC))
-            (cBC (cog-stv-confidence BC)))
+    (let (  (sAB (cog-mean AB))
+            (cAB (cog-confidence AB))
+            (sBC (cog-mean BC))
+            (cBC (cog-confidence BC)))
         (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
             (cog-set-tv! AC (stv 1 1)))))
 

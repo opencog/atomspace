@@ -87,14 +87,14 @@
 ;; here.
 (define (conjunction-fuzzy-eval an)
   (let* ((outg (cog-outgoing-set an))
-         (min-s-atom (min-element-by-key outg cog-stv-strength))
-         (min-c-atom (min-element-by-key outg cog-stv-confidence))
-         (min-s (cog-stv-strength min-s-atom))
-         (min-c (cog-stv-confidence min-s-atom)))
+         (min-s-atom (min-element-by-key outg cog-mean))
+         (min-c-atom (min-element-by-key outg cog-confidence))
+         (min-s (cog-mean min-s-atom))
+         (min-c (cog-confidence min-s-atom)))
     (stv min-s min-c)))
 
 (define (true-enough-bool a)
-  (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
+  (let ((s (cog-mean a)) (c (cog-confidence a)))
     (and (> s 0.5) (> c 0.5))))
 
 (define (true-enough a)

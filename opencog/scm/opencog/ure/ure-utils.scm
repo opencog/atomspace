@@ -684,7 +684,7 @@
 "
   Return TrueTV iff A's confidence is greater than 0
 "
-  (bool->tv (> (cog-stv-confidence A) 0)))
+  (bool->tv (> (cog-confidence A) 0)))
 
 (define-public (gt-zero-confidence-eval A)
 "

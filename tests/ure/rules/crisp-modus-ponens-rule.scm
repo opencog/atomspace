@@ -37,7 +37,7 @@
 ; -----------------------------------------------------------------------------
 
 (define (true-enough-bool a)
-  (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
+  (let ((s (cog-mean a)) (c (cog-confidence a)))
     (and (> s 0.5) (> c 0.5))))
 
 (define (true-enough a)
