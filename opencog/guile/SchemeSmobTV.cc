@@ -199,65 +199,6 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 }
 
 /* ============================================================== */
-/**
- * Return true if the scm is a truth value
- */
-SCM SchemeSmob::ss_tv_p (SCM s)
-{
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa) return SCM_BOOL_F;
-
-	if (nameserver().isA(pa->get_type(), TRUTH_VALUE))
-		return SCM_BOOL_T;
-
-	scm_remember_upto_here_1(s);
-	return SCM_BOOL_F;
-}
-
-/**
- * Return true if the scm is a truth value
- */
-inline SCM SchemeSmob::tv_p (SCM s, Type wanted)
-{
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa) return SCM_BOOL_F;
-
-	if (wanted == pa->get_type()) return SCM_BOOL_T;
-	scm_remember_upto_here_1(s);
-	return SCM_BOOL_F;
-}
-
-SCM SchemeSmob::ss_stv_p (SCM s)
-{
-	return tv_p(s, SIMPLE_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_ctv_p (SCM s)
-{
-	return tv_p(s, COUNT_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_itv_p (SCM s)
-{
-	return tv_p(s, INDEFINITE_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_ptv_p (SCM s)
-{
-	return tv_p(s, PROBABILISTIC_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_ftv_p (SCM s)
-{
-	return tv_p(s, FUZZY_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_etv_p (SCM s)
-{
-	return tv_p(s, EVIDENCE_COUNT_TRUTH_VALUE);
-}
-
-/* ============================================================== */
 
 TruthValuePtr SchemeSmob::scm_to_tv(SCM stv)
 {

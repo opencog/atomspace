@@ -139,14 +139,6 @@ private:
 	static SCM ss_subtype_p(SCM, SCM);
 
 	// Truth values
-	static SCM ss_tv_p(SCM);
-	static SCM tv_p(SCM, Type);
-	static SCM ss_stv_p(SCM);
-	static SCM ss_ctv_p(SCM);
-	static SCM ss_itv_p(SCM);
-	static SCM ss_ptv_p(SCM);
-	static SCM ss_ftv_p(SCM);
-	static SCM ss_etv_p(SCM);
 	static SCM ss_tv_get_value(SCM);
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);

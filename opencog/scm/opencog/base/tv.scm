@@ -21,6 +21,72 @@
 ; Copyright (c) 2014 Cosmo Harrigan
 ;
 
+; ===================================================================
+
+(define-public (cog-tv? EXP)
+"
+ cog-tv? EXP
+    Return #t if EXP is a TruthValue, else return #f
+    Equivalent to (cog-subtype? 'TruthValue (cog-type EXP))
+
+    Example:
+       ; Define a simple truth value
+       guile> (define x (cog-new-stv 0.7 0.9))
+       guile> (define y (+ 2 2))
+       guile> (cog-tv? x)
+       #t
+       guile> (cog-tv? y)
+       #f
+"
+	(cog-subtype? 'TruthValue (cog-type EXP))
+)
+
+(define-public (cog-stv? EXP)
+"
+ cog-stv? EXP
+    Return #t if EXP is a SimpleTruthValue, else return #f.
+    Equivalent to (equal? 'SimpleTruthValue (cog-type EXP))
+"
+	(equal? 'SimpleTruthValue (cog-type EXP))
+)
+
+(define-public (cog-ctv? EXP)
+"
+ cog-ctv? EXP
+    Return #t if EXP is a CountTruthValue, else return #f.
+    Equivalent to (equal? 'CountTruthValue (cog-type EXP))
+"
+	(equal? 'CountTruthValue (cog-type EXP))
+)
+
+(define-public (cog-itv? EXP)
+"
+ cog-itv? EXP
+    Return #t if EXP is a IndefiniteTruthValue, else return #f.
+    Equivalent to (equal? 'IndefiniteTruthValue (cog-type EXP))
+"
+	(equal? 'IndefiniteTruthValue (cog-type EXP))
+)
+
+(define-public (cog-ptv? EXP)
+"
+ cog-ptv? EXP
+    Return #t if EXP is a ProbablisticTruthValue, else return #f.
+    Equivalent to (equal? 'ProbabilisticTruthValue (cog-type EXP))
+"
+	(equal? 'ProbabilisticTruthValue (cog-type EXP))
+)
+
+(define-public (cog-ftv? EXP)
+"
+ cog-ftv? EXP
+    Return #t if EXP is a FuzzyTruthValue, else return #f.
+    Equivalent to (equal? 'FuzzyTruthValue (cog-type EXP))
+"
+	(equal? 'FuzzyTruthValue (cog-type EXP))
+)
+
+; ===================================================================
 ; -----------------------------------------------------------------------
 (define-public (cog-merge-tv! ATOM TV)
 " cog-merge-tv! -- merge truth values on atom"

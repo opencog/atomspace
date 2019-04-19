@@ -517,57 +517,6 @@
 
 ; ===================================================================
 
-(set-procedure-property! cog-tv? 'documentation
-"
- cog-tv? EXP
-    Return #t if EXP is a TruthValue, else return #f
-    Equivalent to (cog-subtype? 'TruthValue (cog-type EXP))
-
-    Example:
-       ; Define a simple truth value
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (define y (+ 2 2))
-       guile> (cog-tv? x)
-       #t
-       guile> (cog-tv? y)
-       #f
-")
-
-(set-procedure-property! cog-stv? 'documentation
-"
- cog-stv? EXP
-    Return #t if EXP is a SimpleTruthValue, else return #f.
-    Equivalent to (equal? 'SimpleTruthValue (cog-type EXP))
-")
-
-(set-procedure-property! cog-ctv? 'documentation
-"
- cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f.
-    Equivalent to (equal? 'CountTruthValue (cog-type EXP))
-")
-
-(set-procedure-property! cog-itv? 'documentation
-"
- cog-itv? EXP
-    Return #t if EXP is a IndefiniteTruthValue, else return #f.
-    Equivalent to (equal? 'IndefiniteTruthValue (cog-type EXP))
-")
-
-(set-procedure-property! cog-ptv? 'documentation
-"
- cog-ptv? EXP
-    Return #t if EXP is a ProbablisticTruthValue, else return #f.
-    Equivalent to (equal? 'ProbabilisticTruthValue (cog-type EXP))
-")
-
-(set-procedure-property! cog-ftv? 'documentation
-"
- cog-ftv? EXP
-    Return #t if EXP is a FuzzyTruthValue, else return #f.
-    Equivalent to (equal? 'FuzzyTruthValue (cog-type EXP))
-")
-
 (set-procedure-property! cog-tv 'documentation
 "
  cog-tv ATOM

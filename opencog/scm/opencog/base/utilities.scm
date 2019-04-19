@@ -118,7 +118,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; Simple wrappers
+; Simple wrappers for TruthValues
 
 (define-public (cog-new-stv MEAN CONFIDENCE)
 "
