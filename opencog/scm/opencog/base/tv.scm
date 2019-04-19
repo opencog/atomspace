@@ -317,7 +317,7 @@
 			(list (cons 'mean (car vl)) (cons 'confidence (cadr vl))
 				(cons 'count (caddr vl))))
 
-		((#f) '())
+		(else '())
 	)
 )
 
