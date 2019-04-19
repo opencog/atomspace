@@ -67,15 +67,6 @@
 ; See below; the compiler step is not needed for guile-2.1
 (use-modules (system base compile)) ;; needed for compiler
 
-(define-public (av sti lti vlti) (cog-new-av sti lti vlti))
-
-(define-public (stv mean conf) (cog-new-stv mean conf))
-(define-public (itv lower upper conf) (cog-new-itv lower upper conf))
-(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
-(define-public (ptv mean conf count) (cog-new-ptv mean conf count))
-(define-public (ftv mean conf) (cog-new-ftv mean conf))
-(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
-
 ; Fetch the mean, confidence and count of a TV.
 (define-public (tv-mean TV)
 "
@@ -125,6 +116,51 @@
 	(define pos-cnt (assoc-ref (cog-tv->alist TV) 'positive-count))
 	(if (eq? pos-cnt #f) 0 pos-cnt)
 )
+
+; -----------------------------------------------------------------------
+; Simple wrappers
+
+(define-public (cog-new-stv MEAN CONFIDENCE)
+"
+ cog-new-stv MEAN CONFIDENCE
+    Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
+    Equivalent to (cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws error if MEAN and CONFIDENCE are not numeric values.
+    Example:
+        ; Create a new simple truth value:
+        guile> (cog-new-stv 0.7 0.9)
+"
+	(cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
+)
+
+(define-public (cog-new-ctv MEAN CONFIDENCE COUNT)
+"
+ cog-new-ctv MEAN CONFIDENCE COUNT
+    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
+    Equivalent to
+    (cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
+
+    Unlike Atoms, Values are ephemeral: they are automatically
+    garbage-collected when no longer needed.
+
+    Throws error if MEAN, CONFIDENCE and COUNT are not numeric values.
+    Example:
+        ; Create a new count truth value:
+        guile> (cog-new-ctv 0.7 0.9 44.0)
+"
+	(cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
+)
+
+(define-public (stv mean conf) (cog-new-stv mean conf))
+(define-public (itv lower upper conf) (cog-new-itv lower upper conf))
+(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
+(define-public (ptv mean conf count) (cog-new-ptv mean conf count))
+(define-public (ftv mean conf) (cog-new-ftv mean conf))
+(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.

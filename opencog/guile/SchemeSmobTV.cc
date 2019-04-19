@@ -202,27 +202,6 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 #define tv_to_scm(TV) protom_to_scm(ValueCast(TV))
 
-/**
- * Create a new simple truth value, with indicated mean and confidence.
- */
-SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-
-	TruthValuePtr tv = SimpleTruthValue::createTV(mean, confidence);
-	return tv_to_scm(tv);
-}
-
-SCM SchemeSmob::ss_new_ctv (SCM smean, SCM sconfidence, SCM scount)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-	double count = scm_to_double(scount);
-
-	TruthValuePtr tv = CountTruthValue::createTV(mean, confidence, count);
-	return tv_to_scm(tv);
-}
 
 SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 {

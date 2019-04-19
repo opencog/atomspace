@@ -516,36 +516,6 @@
 ")
 
 ; ===================================================================
-(set-procedure-property! cog-new-stv 'documentation
-"
- cog-new-stv MEAN CONFIDENCE
-    Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
-    Equivalent to (cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
-
-    Unlike Atoms, Values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws error if MEAN and CONMFIDENCE are not numeric values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-stv 0.7 0.9)
-")
-
-(set-procedure-property! cog-new-ctv 'documentation
-"
- cog-new-ctv MEAN CONFIDENCE COUNT
-    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Equivalent to
-    (cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
-
-    Unlike Atoms, Values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws error if MEAN, CONFIDENCE and COUNT are not numeric values.
-    Example:
-        ; Create a new count truth value:
-        guile> (cog-new-ctv 0.7 0.9 44.0)
-")
 
 (set-procedure-property! cog-new-etv 'documentation
 "
