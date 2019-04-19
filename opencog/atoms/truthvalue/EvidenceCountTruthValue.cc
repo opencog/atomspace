@@ -30,6 +30,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 
+#include <opencog/atoms/value/ValueFactory.h>
 #include "EvidenceCountTruthValue.h"
 
 //#define DPRINTF printf
@@ -38,6 +39,12 @@
 using namespace opencog;
 
 count_t EvidenceCountTruthValue::DEFAULT_K = 800.0;
+
+EvidenceCountTruthValue::EvidenceCountTruthValue(const std::vector<double>& v)
+	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
+{
+	_value = v;
+}
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
@@ -170,3 +177,6 @@ bool EvidenceCountTruthValue::operator==(const Value& rhs) const
 		and (!is_count_valid() or
 		     close_enough(get_count(), ectv->get_count()));
 }
+
+DEFINE_VALUE_FACTORY(EVIDENCE_COUNT_TRUTH_VALUE,
+   createEvidenceCountTruthValue, std::vector<double>)
