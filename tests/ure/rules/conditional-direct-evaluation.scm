@@ -52,7 +52,7 @@
          ;; Calculate the TV based on the evidence
          (tv (evidence->tv antecedent-terms consequent-terms)))
 
-    (if (tv-non-null-conf? tv)
+    (if (< 0 (cog-tv-confidence tv))
         (cog-merge-hi-conf-tv! I tv))))
 
 ;; Given a list of values and a lambda link generate a list of terms
