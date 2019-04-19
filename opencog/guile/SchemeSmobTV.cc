@@ -36,63 +36,6 @@
 using namespace opencog;
 
 /* ============================================================== */
-
-#ifdef USE_KEYWORD_LIST_NOT_USED
-/**
- * Search for a truth value (demarked by #:tv) in a list of key-value
- * pairs.  Return the truth value if found, else return null.
- * Throw errors if the list is not strictly just key-value pairs
- *
- * XXX This code is not currently used, since it seems pointless
- * to have key-value pairs for this function. After all, an atom
- * can only have one truth value ever -- if we find a truth value, we
- * use it. We don't really need a key to tell us that its a truth value.
- * So punt, and get truth values implicitly. Meanwhile, this code is
- * stubbed out, for a rainy day, in case we need to resurrect key-value
- * pairs in the future.
- */
-static TruthValuePtr get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
-{
-	if (!scm_is_pair(kvp)) return NULL;
-
-	do
-	{
-		SCM skey = SCM_CAR(kvp);
-
-		// Verify that the first item is a keyword.
-		if (!scm_is_keyword(skey))
-			scm_wrong_type_arg_msg(subrname, pos, skey, "keyword");
-
-		skey = scm_keyword_to_symbol(skey);
-		skey = scm_symbol_to_string(skey);
-		char * key = scm_to_utf8_string(skey);
-
-		kvp = SCM_CDR(kvp);
-		pos ++;
-		if (!scm_is_pair(kvp))
-		{
-			scm_wrong_type_arg_msg(subrname, pos, kvp, "value following keyword");
-		}
-
-		if (0 == strcmp(key, "tv"))
-		{
-			SCM sval = SCM_CAR(kvp);
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			if (misctype != COG_SIMPLE_TV)
-				scm_wrong_type_arg_msg(subrname, pos, sval, "opencog truth value");
-			return scm_to_tv(sval);
-		}
-		free(key);
-
-		kvp = SCM_CDR(kvp);
-		pos ++;
-	}
-	while (scm_is_pair(kvp));
-
-	return NULL;
-}
-#endif /* USE_KEYWORD_LIST_NOT_USED */
-
 /**
  * Search for a truth value in a list of values.
  * Return the truth value if found, else return null.
@@ -199,14 +142,6 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 }
 
 /* ============================================================== */
-
-TruthValuePtr SchemeSmob::scm_to_tv(SCM stv)
-{
-	ValuePtr pa(scm_to_protom(stv));
-	TruthValuePtr tv(TruthValueCast(pa));
-
-	return tv;
-}
 
 TruthValuePtr SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 {

@@ -74,7 +74,6 @@ private:
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static ValuePtr make_value(Type, SCM);
-	static TruthValuePtr scm_to_tv(SCM);
 
 	static std::vector<double> scm_to_float_list (SCM);
 	static std::vector<ValuePtr> scm_to_protom_list (SCM);
@@ -100,7 +99,7 @@ private:
 	static SCM ss_handle(SCM);
 	static SCM ss_atom_less_p(SCM, SCM);
 
-	// Get list endcoded in a value
+	// Access the list encoded in a value
 	static SCM ss_value_to_list(SCM);
 	static SCM ss_value_ref(SCM, SCM);
 

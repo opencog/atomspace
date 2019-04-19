@@ -112,6 +112,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 
 /**
  * Return the truth value mean on the atom.
+ * This is meant to be the fastest possible way of accessing the mean.
  */
 SCM SchemeSmob::ss_get_mean(SCM satom)
 {
@@ -121,6 +122,7 @@ SCM SchemeSmob::ss_get_mean(SCM satom)
 
 /**
  * Return the truth value confidence on the atom.
+ * This is meant to be the fastest possible way of accessing the confidence.
  */
 SCM SchemeSmob::ss_get_confidence(SCM satom)
 {
@@ -130,6 +132,7 @@ SCM SchemeSmob::ss_get_confidence(SCM satom)
 
 /**
  * Return the truth value count on the atom.
+ * This is meant to be the fastest possible way of accessing the count.
  */
 SCM SchemeSmob::ss_get_count(SCM satom)
 {

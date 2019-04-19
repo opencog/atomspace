@@ -96,11 +96,7 @@
 ;; Return #t is the strength of the TV of A is above 0.5 and its
 ;; confidence is above zero.
 (define (true-enough? A)
-  (let* (
-         (TV (cog-tv A))
-         (s (tv-mean TV))
-         (c (tv-conf TV)))
-    (and (> s 0.5) (> c 0))))
+  (and (> (cog-mean A) 0.5) (> (cog-conf A) 0)))
 
 (define (implication-scope-direct-evaluation-formula P Q)
   (let* (

@@ -4,52 +4,21 @@
 ; Useful utilities for working with truth values.
 ;
 ; Utilities provided:
-; -- cog-merge-tv! -- merge truth values on atom
-; -- cog-merge-hi-conf-tv! -- different merge style
-; -- cog-stv-strength -- SimpleTruthValue strength of an atom
+; -- cog-merge-tv! -- Merge truth values on atom
+; -- cog-merge-hi-conf-tv! -- Different merge style
 ; -- cog-stv-strength-above -- Filter atoms with TV strength above a threshold
 ; -- cog-stv-strength-below -- Filter atoms with TV strength below a threshold
-; -- cog-stv-confidence -- TruthValue confidence of an atom
-; -- cog-stv-confidence-above -- Filter atoms with TV confidence above a threshold
-; -- cog-stv-confidence-below -- Filter atoms with TV confidence below a threshold
-; -- cog-stv-count -- TruthValue count of an atom
+; -- cog-stv-confidence-above -- Filter atoms with TV conf above a threshold
+; -- cog-stv-confidence-below -- Filter atoms with TV conf below a threshold
 ; -- cog-stv-count-above -- Filter atoms with TV count above a threshold
 ; -- cog-stv-count-below -- Filter atoms with TV count below a threshold
-; -- cog-stv-positive-filter -- Filter atoms with positive TV strength and count
+; -- cog-stv-positive-filter -- Filter with positive TV strength and count
 ;
 ;
 ; Copyright (c) 2014 Cosmo Harrigan
 ;
 
 ; ===================================================================
-
-; Fetch the mean, confidence and count of a TV.
-(define-public (tv-mean TV)
-"
-  Warning: this function is obsolete, use cog-tv-mean instead
-
-  Return the floating-point mean (strength) of a TruthValue.
-  Deprecated; use cog-tv-mean instead.
-"
-	(cog-tv-mean TV)
-)
-
-(define-public (cog-stv-strength ATOM)
-"
-  cog-stv-strength DEPRECATED! Use cog-tv-mean instead
-"
-	(cog-tv-mean (cog-tv ATOM))
-)
-
-(define-public (tv-conf TV)
-"
-  Warning: this function is obsolete, use cog-tv-confidence instead
-
-  Return the floating-point confidence of a TruthValue.
-  Deprecated; use cog-tv-confidence instead.
-"
-	(cog-tv-confidence TV)
-)
 
 (define-public (tv-non-null-conf? TV)
 "
@@ -59,42 +28,25 @@
 	(< 0 (cog-tv-confidence TV))
 )
 
-(define-public (cog-stv-confidence ATOM)
+(define-public (cog-stv-strength ATOM)
 "
-  cog-stv-confidence DEPRECATED! Use cog-tv-confidence instead!
+  cog-stv-strength DEPRECATED! Use cog-mean instead
 "
-	(cog-tv-confidence (cog-tv ATOM))
+	(cog-mean ATOM)
 )
 
-;
-; Simple truth values won't have a count. Its faster to just check
-; for #f than to call (cog-ctv? tv)
-(define-public (tv-count TV)
+(define-public (cog-stv-confidence ATOM)
 "
-  Warning: this function is obsolete, use cog-tv-count instead
-
-  Return the floating-point count of a CountTruthValue.
-  Deprecated; use cog-tv-count instead.
+  cog-stv-confidence DEPRECATED! Use cog-confidence instead!
 "
-	(cog-tv-count TV)
+	(cog-confidence ATOM)
 )
 
 (define-public (cog-stv-count ATOM)
 "
-  cog-stv-count DEPRECATED! Use cog-tv-count instead!
+  cog-stv-count DEPRECATED! Use cog-count instead!
 "
-	(cog-tv-count (cog-tv ATOM))
-)
-
-; --------------------------------------------------------------
-;
-(define-public (cog-atom-incr atom cnt)
-"
-  cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
-
-  DEPRECATED! Use cog-inc-count! instead!
-"
-   (cog-inc-count! atom cnt)
+	(cog-count ATOM)
 )
 
 ; ===================================================================
@@ -351,7 +303,7 @@
   with TruthValue strength above the threshold
   (Compatible with atoms that have a SimpleTruthValue)
 "
-	(filter (lambda (x) (> (cog-tv-mean (cog-tv x)) y)) z))
+	(filter (lambda (x) (> (cog-mean x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-strength-below y z)
@@ -361,7 +313,7 @@
   with TruthValue strength above the threshold
   (Compatible with atoms that have a SimpleTruthValue)
 "
-	(filter (lambda (x) (< (cog-tv-mean (cog-tv x)) y)) z))
+	(filter (lambda (x) (< (cog-mean x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-confidence-above y z)
@@ -370,7 +322,7 @@
   Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
   with TruthValue confidence above the threshold
 "
-	(filter (lambda (x) (> (cog-tv-confidence (cog-tv x)) y)) z))
+	(filter (lambda (x) (> (cog-confidence x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-confidence-below y z)
@@ -379,7 +331,7 @@
   Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
   with TruthValue confidence above the threshold
 "
-	(filter (lambda (x) (< (cog-tv-confidence (cog-tv x)) y)) z))
+	(filter (lambda (x) (< (cog-confidence x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-count-above y z)
@@ -388,7 +340,7 @@
   Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
   with TruthValue count above the threshold
 "
-	(filter (lambda (x) (> (cog-tv-count (cog-tv x)) y)) z))
+	(filter (lambda (x) (> (cog-count x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-count-below y z)
@@ -397,7 +349,7 @@
   Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
   with TruthValue count above the threshold
 "
-	(filter (lambda (x) (< (cog-tv-count (cog-tv x)) y)) z))
+	(filter (lambda (x) (< (cog-count x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-positive-filter x)
