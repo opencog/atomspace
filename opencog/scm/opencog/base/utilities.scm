@@ -1285,7 +1285,6 @@
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
-'av
 'stv
 'itv
 'ctv
