@@ -28,27 +28,6 @@
 	(< 0 (cog-tv-confidence TV))
 )
 
-(define-public (cog-stv-strength ATOM)
-"
-  cog-stv-strength DEPRECATED! Use cog-mean instead
-"
-	(cog-mean ATOM)
-)
-
-(define-public (cog-stv-confidence ATOM)
-"
-  cog-stv-confidence DEPRECATED! Use cog-confidence instead!
-"
-	(cog-confidence ATOM)
-)
-
-(define-public (cog-stv-count ATOM)
-"
-  cog-stv-count DEPRECATED! Use cog-count instead!
-"
-	(cog-count ATOM)
-)
-
 ; ===================================================================
 ; Simple wrappers for TruthValues
 
