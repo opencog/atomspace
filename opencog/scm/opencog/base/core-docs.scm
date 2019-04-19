@@ -408,7 +408,8 @@
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
+    should be faster, performance-wise.
 
     Example:
        ; Define two nodes and two links between them:
@@ -454,7 +455,8 @@
     Return those atoms in the outgoing set of ATOM that are of type TYPE.
     This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM)), but
+    should be faster, performance-wise.
 ")
 
 (set-procedure-property! cog-handle 'documentation

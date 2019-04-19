@@ -339,7 +339,8 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 }
 
 /**
- * Return the truth value mean
+ * Return the truth value mean.
+ * This is meant to be the fastest-possible of getting the mean.
  */
 SCM SchemeSmob::ss_tv_get_mean(SCM s)
 {
@@ -349,6 +350,7 @@ SCM SchemeSmob::ss_tv_get_mean(SCM s)
 
 /**
  * Return the truth value confidence
+ * This is meant to be the fastest-possible of getting the confidence.
  */
 SCM SchemeSmob::ss_tv_get_confidence(SCM s)
 {
@@ -358,6 +360,7 @@ SCM SchemeSmob::ss_tv_get_confidence(SCM s)
 
 /**
  * Return the truth value count
+ * This is meant to be the fastest-possible of getting the count.
  */
 SCM SchemeSmob::ss_tv_get_count(SCM s)
 {
