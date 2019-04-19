@@ -551,17 +551,6 @@
        (stv 0.9 0.8)
 ")
 
-(set-procedure-property! cog-tv->alist 'documentation
-"
- cog-tv->alist TV
-    Convert the truth value TV to an association list (alist).
-
-    Example:
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (cog-tv->alist x)
-       ((mean . 0.7) (confidence . 0.9))
-")
-
 (set-procedure-property! cog-tv-mean 'documentation
 "
  cog-tv-mean TV

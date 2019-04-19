@@ -135,7 +135,6 @@ private:
 	static SCM ss_subtype_p(SCM, SCM);
 
 	// Truth values
-	static SCM ss_tv_get_value(SCM);
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
 	static SCM ss_tv_get_count(SCM);

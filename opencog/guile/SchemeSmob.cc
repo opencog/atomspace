@@ -327,7 +327,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
-	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
 	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
