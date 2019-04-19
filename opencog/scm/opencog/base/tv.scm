@@ -17,17 +17,6 @@
 ;
 ; Copyright (c) 2014 Cosmo Harrigan
 ;
-
-; ===================================================================
-
-(define-public (tv-non-null-conf? TV)
-"
-  Return #t if the confidence of tv is positive, #f otherwise.
-  Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
-"
-	(< 0 (cog-tv-confidence TV))
-)
-
 ; ===================================================================
 ; Simple wrappers for TruthValues
 
