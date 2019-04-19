@@ -199,50 +199,6 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 }
 
 /* ============================================================== */
-
-#define tv_to_scm(TV) protom_to_scm(ValueCast(TV))
-
-
-SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
-{
-	double lower = scm_to_double(slower);
-	double upper = scm_to_double(supper);
-	double confidence = scm_to_double(sconfidence);
-
-	TruthValuePtr tv = IndefiniteTruthValue::createTV(lower, upper, confidence);
-	return tv_to_scm(tv);
-}
-
-SCM SchemeSmob::ss_new_ptv (SCM smean, SCM sconfidence, SCM scount)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-	double count = scm_to_double(scount);
-
-	TruthValuePtr tv = ProbabilisticTruthValue::createTV(mean, confidence, count);
-	return tv_to_scm(tv);
-}
-
-SCM SchemeSmob::ss_new_ftv (SCM smean, SCM sconfidence)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-
-	float cnt = FuzzyTruthValue::confidenceToCount(confidence);
-	TruthValuePtr tv = FuzzyTruthValue::createTV(mean, cnt);
-	return tv_to_scm(tv);
-}
-
-SCM SchemeSmob::ss_new_etv (SCM sposcount, SCM stotalcount)
-{
-	double pos_count = scm_to_double(sposcount);
-	double total_count = scm_to_double(stotalcount);
-
-	TruthValuePtr tv = EvidenceCountTruthValue::createTV(pos_count, total_count);
-	return tv_to_scm(tv);
-}
-
-/* ============================================================== */
 /**
  * Return true if the scm is a truth value
  */
@@ -468,6 +424,7 @@ SCM SchemeSmob::ss_tv_get_count(SCM s)
 	return scm_from_double(tv->get_count());
 }
 
+#define tv_to_scm(TV) protom_to_scm(ValueCast(TV))
 
 SCM SchemeSmob::ss_tv_merge (SCM sta, SCM stb)
 {

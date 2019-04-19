@@ -326,10 +326,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
-	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
-	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
-	register_proc("cog-new-etv",           2, 0, 0, C(ss_new_etv));
 	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
 	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
