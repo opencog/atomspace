@@ -265,6 +265,7 @@ void SchemeSmob::module_init(void*)
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/file-utils.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));
 }
@@ -348,10 +349,6 @@ void SchemeSmob::register_procs()
 	// Value types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
-	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
-	register_proc("cog-value-type?",       1, 0, 0, C(ss_value_type_p));
-	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
-	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 

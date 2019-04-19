@@ -710,49 +710,6 @@
         guile> (cog-get-types)
 ")
 
-(set-procedure-property! cog-type? 'documentation
-"
- cog-type? SYMBOL
-    Return #t if the SYMBOL names a Value or Atom type, else return #f
-    Equivalent to (cog-subtype? 'Value SYMBOL)
-
-    Example:
-        guile> (cog-type? 'ConceptNode)
-        #t
-        guile> (cog-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-node-type? 'documentation
-"
- cog-node-type? SYMBOL
-    Return #t if the SYMBOL names an Node type, else return #f.
-    Equivalent to (cog-subtype? 'Node SYMBOL)
-
-    Example:
-        guile> (cog-node-type? 'ConceptNode)
-        #t
-        guile> (cog-node-type? 'ListLink)
-        #f
-        guile> (cog-node-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-link-type? 'documentation
-"
- cog-link-type? SYMBOL
-    Return #t if the SYMBOL names a Link type, else return #f.
-    Equivalent to (cog-subtype? 'Link SYMBOL)
-
-    Example:
-        guile> (cog-link-type? 'ConceptNode)
-        #f
-        guile> (cog-link-type? 'ListLink)
-        #t
-        guile> (cog-link-type? 'FlorgleBarf)
-        #f
-")
-
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
