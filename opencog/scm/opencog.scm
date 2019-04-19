@@ -66,7 +66,7 @@
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
-; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 266
+; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
 (load-from-path "opencog/base/core-docs.scm")
 
@@ -75,6 +75,7 @@
 (load-from-path "opencog/base/atom-cache.scm")
 (load-from-path "opencog/base/apply.scm")
 (load-from-path "opencog/base/tv.scm")
+(load-from-path "opencog/base/types.scm")
 (load-from-path "opencog/base/file-utils.scm")
 (load-from-path "opencog/base/debug-trace.scm")
 

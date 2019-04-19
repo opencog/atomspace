@@ -26,6 +26,7 @@
 #include <math.h>
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/value/ValueFactory.h>
 #include "IndefiniteTruthValue.h"
 
 //#define DPRINTF printf
@@ -137,6 +138,12 @@ IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
     copy(source);
 }
 
+IndefiniteTruthValue::IndefiniteTruthValue(const std::vector<double>& v)
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
+{
+    _value = v;
+}
+
 IndefiniteTruthValue::IndefiniteTruthValue(const ValuePtr& source)
        : TruthValue(INDEFINITE_TRUTH_VALUE)
 {
@@ -222,3 +229,6 @@ std::string IndefiniteTruthValue::to_string(const std::string& indent) const
             symmetric);
     return buf;
 }
+
+DEFINE_VALUE_FACTORY(INDEFINITE_TRUTH_VALUE,
+   createIndefiniteTruthValue, std::vector<double>)
