@@ -460,14 +460,6 @@ interface.
          guile> (cog-tv x)
          (stv 0.9 0.8)
 
-=== cog-tv->alist ===
-      Convert a truth value to an association list (alist).
-
-      Example:
-         guile> (define x (cog-new-stv 0.7 0.9))
-         guile> (cog-tv->alist x)
-         ((mean . 0.699999988079071) (confidence . 0.899999976158142))
-
 === cog-get-types ===
       Return a list of all of the atom types in the system.
 
