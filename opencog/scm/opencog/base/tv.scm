@@ -160,44 +160,6 @@
 
 ; ===================================================================
 
-(define-public (cog-tv->alist TV)
-"
- cog-tv->alist TV
-    Convert the truth value TV to an association list (alist).
-
-    Example:
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (cog-tv->alist x)
-       ((mean . 0.7) (confidence . 0.9))
-"
-	(define vl (cog-value->list TV))
-	(case (cog-type TV)
-		((SimpleTruthValue)
-			(list (cons 'mean (car vl)) (cons 'confidence (cadr vl))))
-
-		((CountTruthValue)
-			(list (cons 'mean (car vl)) (cons 'confidence (cadr vl))
-				(cons 'count (caddr vl))))
-
-		((IndefiniteTruthValue)
-			(list (cons 'lower (car vl)) (cons 'upper (cadr vl))
-				(cons 'confidence-level (caddr vl))))
-
-		((EvidenceCountTruthValue)
-			(list (cons 'positive-count (car vl)) (cons 'count (cadr vl))))
-
-		((FuzzyTruthValue)
-			(list (cons 'mean (car vl)) (cons 'confidence (cadr vl))))
-
-		((ProbabilisticTruthValue)
-			(list (cons 'mean (car vl)) (cons 'confidence (cadr vl))
-				(cons 'count (caddr vl))))
-
-		(else '())
-	)
-)
-
-; -----------------------------------------------------------------------
 (define-public (tv-positive-count TV)
 "
   Return the floating-point positive count of a EvidenceCountTruthValue.

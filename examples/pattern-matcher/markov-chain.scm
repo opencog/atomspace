@@ -215,14 +215,13 @@
 
 ;;; Get the probability on atom. The probability is assumed to be stored
 ;;; in the "mean" component of a SimpleTruthValue.
-(define (get-prob atom)
-	(assoc-ref (cog-tv->alist (cog-tv atom)) 'mean))
+(define (get-prob atom) (cog-mean atom))
 
 ;;; Return true if the TV on the atom is the default TV.
 ;;; For our purposes, we treat it as the default if the confidence is
 ;;; below 0.5 (since we later set confidence to 1.0)
 (define (is-default-tv? atom)
-	(not (< 0.5 (assoc-ref (cog-tv->alist (cog-tv atom)) 'confidence))))
+	(not (< 0.5 (cog-confidence atom))))
 
 ;;; Set a probability value on the atom.
 (define (set-prob atom value)
