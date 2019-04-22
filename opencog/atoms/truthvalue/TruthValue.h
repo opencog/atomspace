@@ -147,8 +147,6 @@ public:
 	virtual confidence_t get_confidence()  const = 0;
 	virtual count_t get_count()  const = 0;
 
-	virtual TruthValuePtr clone() const  = 0;
-
 	/**
 	 * Merge this TV object with the given TV object argument.
 	 * It always returns a new TV object with the result of the merge,

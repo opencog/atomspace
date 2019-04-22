@@ -161,11 +161,6 @@ public:
             std::make_shared<const IndefiniteTruthValue>(v));
     }
 
-    TruthValuePtr clone() const
-    {
-        return std::make_shared<IndefiniteTruthValue>(*this);
-    }
-
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
     static strength_t diffError;
     static strength_t s; //Nil : not that sure s should be strength_t
