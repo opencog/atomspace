@@ -104,11 +104,6 @@ public:
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const FuzzyTruthValue>(pap));
     }
-
-    TruthValuePtr clone() const
-    {
-        return std::make_shared<FuzzyTruthValue>(*this);
-    }
 };
 
 /** @}*/

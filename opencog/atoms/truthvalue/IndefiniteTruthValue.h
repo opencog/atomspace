@@ -124,7 +124,7 @@ public:
     std::string to_string(const std::string&) const;
 
     // clone method
-    static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
+    static IndefiniteTruthValuePtr createITV(const TruthValuePtr& tv)
     {
         if (tv->get_type() != INDEFINITE_TRUTH_VALUE)
             throw RuntimeException(TRACE_INFO, "Cannot clone non-indefinite TV");
@@ -132,7 +132,7 @@ public:
             static_cast<const IndefiniteTruthValue&>(*tv));
     }
 
-    static TruthValuePtr createTV(TruthValuePtr tv)
+    static TruthValuePtr createTV(const TruthValuePtr& tv)
     {
         return std::static_pointer_cast<const TruthValue>(createITV(tv));
     }
@@ -159,11 +159,6 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const IndefiniteTruthValue>(v));
-    }
-
-    TruthValuePtr clone() const
-    {
-        return std::make_shared<IndefiniteTruthValue>(*this);
     }
 
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
