@@ -379,6 +379,46 @@ public:
         }
     }
 
+    void testClone() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            TruthValuePtr clon = std::make_shared<IndefiniteTruthValue>(*tvs[i]);
+            IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
+            TS_ASSERT(fabs(clonedTv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(clonedTv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(clonedTv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
+            //compute diff using a method provided with the UTest
+            strength_t computedDiff = computeDiff(clonedTv->getL(), clonedTv->getU(),
+                                             default_k, clonedTv->getConfidenceLevel());
+            TS_ASSERT(isApproxEq(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+            TS_ASSERT(clonedTv->isSymmetric());
+            TS_ASSERT(fabs(clonedTv->get_mean() - means[i]) <= ERROR_THRESHOLD);
+            count_t expectedCount = count(ls[i], us[i]);
+            confidence_t expectedConfidence = confidence(ls[i], us[i]);
+            TS_ASSERT(fabs(clonedTv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(clonedTv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
+        }
+        // Changes all attributes and check if clone still works fine.
+        tvs[0]->setL(ls[1]);
+        tvs[0]->setU(us[1]);
+        tvs[0]->setConfidenceLevel(IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL + 0.1f);
+        tvs[0]->setDiff(0.1f);
+        //tvs[0]->setSymmetric(false); Cannot call this yet because it thows an exception (asymmetric indefinite tv is not implemented)
+        tvs[0]->setMean(means[1]);
+        TruthValuePtr clon = std::make_shared<IndefiniteTruthValue>(*tvs[0]);
+        IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
+        TS_ASSERT(fabs(clonedTv->getL()  - ls[1]) <= FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(clonedTv->getU()  - us[1]) <= FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(clonedTv->getConfidenceLevel() - (IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL + 0.1f)) <= ERROR_THRESHOLD);
+        TS_ASSERT(fabs(clonedTv->getDiff() - 0.1f) <= ERROR_THRESHOLD);
+        //TS_ASSERT(!clonedTv->isSymmetric());
+        TS_ASSERT(clonedTv->isSymmetric());
+        TS_ASSERT(fabs(clonedTv->get_mean() - means[1]) <= ERROR_THRESHOLD);
+        count_t expectedCount = count(ls[1], us[1]);
+        confidence_t expectedConfidence = confidence(ls[1], us[1]);
+        TS_ASSERT(fabs(clonedTv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+        TS_ASSERT(fabs(clonedTv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
+    }
+
     void testSetAndGetFirstOrderDistribution() {
         for (unsigned int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];
