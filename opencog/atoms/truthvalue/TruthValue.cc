@@ -48,21 +48,21 @@ std::string TruthValue::to_short_string(const std::string& indent) const
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
 	// True, but no confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0f));
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
 	return instance;
 }
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
 	// True, with maximum confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0f));
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0));
 	return instance;
 }
 
 TruthValuePtr TruthValue::FALSE_TV()
 {
 	// False, with maximum confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0f));
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 1.0));
 	return instance;
 }
 
@@ -75,7 +75,7 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
 
 bool TruthValue::isDefaultTV() const
 {
-	TruthValuePtr dtv = DEFAULT_TV();
+	static TruthValuePtr dtv(DEFAULT_TV());
 	if (dtv.get() == this) return true;
 	if (get_type() == dtv->get_type() and
 	    get_mean() == dtv->get_mean() and
