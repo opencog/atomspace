@@ -78,6 +78,7 @@ public:
 	void test_consume_quotations_2();
 	void test_consume_quotations_3();
 	void test_consume_quotations_4();
+	void test_consume_quotations_5();
 };
 
 #define NA _asa.add_node
@@ -332,6 +333,29 @@ void RewriteLinkUTest::test_consume_quotations_4()
 	// gpn is evaluatable
 	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
 		expected = _eval.eval_h("consumed-quoted-grounded-predicate-argument");
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void RewriteLinkUTest::test_consume_quotations_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Test simple RewriteLink
+	Handle vardecl = al(VARIABLE_LIST),
+		quoted_clause = _eval.eval_h("quoted-not-X");
+
+	// LocalQuoteLink should not be removed because NotLink is
+	// interpreted as a logical connector by the pattern matcher in
+	// that context.
+	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clause, true),
+		expected = quoted_clause;
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
