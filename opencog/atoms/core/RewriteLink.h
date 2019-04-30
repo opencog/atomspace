@@ -103,6 +103,13 @@ protected:
 	 */
 	static bool is_scope_bound_to_ancestor(const Variables& variables, const Handle& h);
 
+	/**
+	 * Return true if the type if the type is AND_LINK, OR_LINK or
+	 * NOT_LINK, as when used at the root of the pattern body these
+	 * links act as logical connectors.
+	 */
+	static bool is_logical_connector(Type);
+
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
