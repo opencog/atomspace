@@ -83,20 +83,19 @@ capabilities.  Guile runs as an interpreter/compiler, providing a
 read-evaluate-print loop (REPL), called `guile`. It is started at
 the terminal shell prompt.
 
-Before starting guile, you have to tell guile where to find the OpenCog
-modules.  The best way to do this is to add the below to your `~/.guile`
-file.  These will then run every time you start guile.
-```
-(add-to-load-path "/usr/local/share/opencog/scm")
-(add-to-load-path ".")
-```
-
-To get your keyboard arrow keys to work, so that you can do command-line
-editing, you should add the below to your `~/.guile` file as well.
+It is convenient to preconfigure guile to make things smoother. One is
+to enable automated command-line editing (i.e. get the arrow keys to
+work). Do this by editing `~/.guile` and adding the lines:
 ```
 (use-modules (ice-9 readline))
 (activate-readline)
 ```
+It's also convenient to be able to quickly load files from the current
+directory; do this by adding:
+```
+(add-to-load-path ".")
+```
+The above will be auto-run every time you start guile.
 
 Finally, start guile:
 ```
