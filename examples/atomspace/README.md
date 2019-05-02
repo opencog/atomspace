@@ -27,13 +27,17 @@ typically encountered:
 
 Most of the querying and pattern matching examples are in the
 [**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
-a good idea of the basics from the demos here, go an explore the
+a good idea of the basics from the demos here, go and explore the
 examples there.
 
 Introductory Examples
 ---------------------
 It is recommended that you go through the examples in the order given.
-These are "basic" demos that all users should know.
+These are "basic" demos that all users should know. Open each of these
+in your favorite text editor, and start reading. Cut-and-paste from the
+text-editor to the guile prompt: this gives you a chance to see what
+happens, and how the system reacts. (But read the "Introduction" below,
+first).
 
 * `basic.scm`          -- How to start the guile shell.
 * `knowledge.scm`      -- Representing knowledge.
@@ -90,11 +94,6 @@ work). Do this by editing `~/.guile` and adding the lines:
 (use-modules (ice-9 readline))
 (activate-readline)
 ```
-It's also convenient to be able to quickly load files from the current
-directory; do this by adding:
-```
-(add-to-load-path ".")
-```
 The above will be auto-run every time you start guile.
 
 Finally, start guile:
@@ -116,7 +115,7 @@ After the opencog module is loaded, you can create atoms "as usual" e.g.
 You can load other scm files (for example, "foobar.scm") by saying:
 
 ```
-(load-from-path "foobar.scm")
+(load "./foobar.scm")
 ```
 
 Most functions have documentation, which can be viewed by saying

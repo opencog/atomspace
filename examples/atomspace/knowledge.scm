@@ -86,8 +86,9 @@
 				(Type "ConceptNode")))))
 
 ; The above can be used during type-checking, to verify that certain
-; data strctures are of the above format. See
+; data structures are in the expected format. See
 ;     https://wiki.opencog.org/w/SignatureLink
 ; and
 ;     https://wiki.opencog.org/w/TypedAtomLink
-; for more info.
+; for more info. Again -- signautes are a very advanced topic; you can
+; ignore this for now. Just know that they exist.
