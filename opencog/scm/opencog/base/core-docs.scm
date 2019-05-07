@@ -317,6 +317,20 @@
        \"abc\"
 ")
 
+(set-procedure-property! cog-to-str 'documentation
+"
+ cog-to-str ATOM
+    Returns a string representation of the atom.
+
+    Example:
+       guile> (define x (InheritanceLink
+       ...    (ConceptNode \"a\")
+       ...    (ConceptNode \"abc\")))
+       guile> (cog-to-str x)
+       \"(InheritanceLink\\n  (ConceptNode \\\"a\\\") ; [8001299452654485352][1]\\n
+       (ConceptNode \\\"abc\\\") ; [999309931590247926][1]\\n) ; [13306105520802316249][1]\\n\"
+")
+
 (set-procedure-property! cog-number 'documentation
 "
  cog-number NUMBER-NODE

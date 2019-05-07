@@ -439,4 +439,16 @@ SCM SchemeSmob::ss_is_closed(SCM satom)
 	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
 }
 
+/**
+ * Return the string rep of atom/graph
+ */
+SCM SchemeSmob::ss_to_string (SCM satom)
+{
+	std::string atom_str;
+	Handle h = verify_handle(satom, "cog-to-str");
+	if (h->is_atom()) atom_str = oc_to_string(h, atom_str);
+	SCM str = scm_from_utf8_string(atom_str.c_str());
+	return str;
+}
+
 /* ===================== END OF FILE ============================ */

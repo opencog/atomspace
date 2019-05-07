@@ -119,6 +119,7 @@ private:
 	static SCM ss_get_confidence(SCM);
 	static SCM ss_get_count(SCM);
 	static SCM ss_keys(SCM);
+	static SCM ss_to_string(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
