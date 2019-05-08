@@ -445,7 +445,7 @@ SCM SchemeSmob::ss_is_closed(SCM satom)
 SCM SchemeSmob::ss_to_string (SCM satom)
 {
 	std::string atom_str;
-	Handle h = verify_handle(satom, "cog-to-str");
+	Handle h = verify_handle(satom, "atom->string");
 	if (h->is_atom()) atom_str = oc_to_string(h, atom_str);
 	SCM str = scm_from_utf8_string(atom_str.c_str());
 	return str;
