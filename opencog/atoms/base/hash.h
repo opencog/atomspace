@@ -50,8 +50,8 @@ typename std::enable_if<sizeof(ContentHash) < sizeof(T), ContentHash>::type fnv1
 							  "sizeof(ChunkType)");
 	static_assert(sizeof(T) <= 65535, "the implementation can't handle more than 65535 bytes");
 	const ChunkType * buf = (const ChunkType *)&buf_t;
-	ushort count = 0;
-	constexpr const ushort num_iter = (size / sizeof(ChunkType));
+	unsigned short count = 0;
+	constexpr const unsigned short num_iter = (size / sizeof(ChunkType));
 	while (count < num_iter)
 	{
 		hval ^= (ContentHash) (*(buf+count));
