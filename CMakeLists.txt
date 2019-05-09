@@ -181,6 +181,15 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
+
+# ----------------------------------------------------------
+# secure_getenv
+CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
+IF (HAVE_SECURE_GETENV)
+	ADD_DEFINITIONS(-DHAVE_SECURE_GETENV)
+ENDIF (HAVE_SECURE_GETENV)
+
+
 # ----------------------------------------------------------
 # Google Protobuf library
 # The protocol buffer compiler is needed for ZMQ-based persistence.
