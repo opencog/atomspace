@@ -768,6 +768,10 @@
     Set the current atomspace for this thread to ATOMSPACE. Every
     thread has it's own current atomspace, to which all atom-processing
     operations apply.  Returns the previous atomspace for this thread.
+
+    Warning: if the previous atomspace is not the primary atomspace
+    and is not referenced anywhere, the garbage collector will delete it
+    alongside its content, even if some of its content is referenced.
 ")
 
 (set-procedure-property! cog-atomspace? 'documentation
