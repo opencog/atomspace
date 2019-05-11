@@ -150,9 +150,9 @@ protected:
 	                         Quotation quotation=Quotation()) const;
 };
 
-typedef std::map<Handle, const TypeSet> VariableTypeMap;
-typedef std::map<Handle, const HandleSet> VariableDeepTypeMap;
-typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
+typedef std::map<Handle, TypeSet> VariableTypeMap;
+typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
+typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
