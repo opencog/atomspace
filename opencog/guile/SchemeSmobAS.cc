@@ -353,6 +353,11 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 	scm_fluid_set_x(atomspace_fluid, new_as);
 
+	// Force garbage-collection right now. The goal here is to
+	// immediately expose user-land bugs, forcing crashes if the
+	// user attempts to access atoms in the old atomspace, if it
+	// was dtor'ed and finalized due to lack of references.
+	scm_gc();
 	return old_as;
 }
 
