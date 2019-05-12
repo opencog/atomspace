@@ -45,7 +45,7 @@ public:
 	BITNodeFitness(FitnessType ft=MaximizeConfidence);
 
 	// Fitness type
-	const FitnessType type;
+	FitnessType type;
 
 	// Fitness attributes
 	std::function<double(const BITNode&)> function;
