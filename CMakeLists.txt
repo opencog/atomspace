@@ -275,12 +275,10 @@ IF(HAVE_PY_INTERP)
 		# Find python destination dir for python bindings
 		# because it may differ on each operating system.
 		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib(True, False, '${CMAKE_INSTALL_PREFIX}'))"
 			OUTPUT_VARIABLE PYTHON_DEST
 		)
 
-		# Chop off leading /usr
-		STRING(REPLACE "/usr" ${CMAKE_INSTALL_PREFIX} PYTHON_DEST "${PYTHON_DEST}")
 		# Replace new line at end
 		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
 		IF ("${PYTHON_DEST}" STREQUAL "")
