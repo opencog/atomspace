@@ -1127,37 +1127,35 @@
 )
 
 ; -----------------------------------------------------------------------
-;
-; XXX FIXME. The two arguments to this function are backwards.
-; The AS should come first, then the list.
-; XXX FIXME why is #t being returned ???
-(define-public (cog-cp LST AS)
+
+(define-public (cog-cp AS LST)
 "
-  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and
-  returns #t on success.
+  cog-cp AS LST - Copy the atoms in LST to the given atomspace AS and
+  returns the list of copied atoms.
 "
   (define initial-as (cog-atomspace))
 
-  (if (equal? AS initial-as)
-    (error "Destination atomspace is the same as the current atomspace\n"))
-
-  ; Switch to destination atomspace.
+  ;; Switch to destination atomspace.
   (cog-set-atomspace! AS)
 
-  ; The creation of a SetLink or any other link would result in the atoms
-  ; being inserted in the current atomspace.
-  (cog-delete (Set LST))
-  ; Switch back to initial atomspace.
-  (cog-set-atomspace! initial-as)
-  #t
+  (let* (;; The creation of a ListLink or any other link would result
+         ;; in the atoms being inserted in the current atomspace.
+         (LST-list (List LST))
+         (LST-cp (cog-outgoing-set LST-list)))
+    (cog-delete LST-list)
+    ;; Switch back to initial atomspace.
+    (cog-set-atomspace! initial-as)
+    ;; Return the copied list
+    LST-cp)
 )
 
 ; -----------------------------------------------------------------------
 (define-public (cog-cp-all AS)
 "
-  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns #t on success.
+  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS
+                  and returns the list of copied atoms on success.
 "
-  (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
+  (cog-cp AS (apply append (map cog-get-atoms (cog-get-types))))
 )
 
 (define-public (cog-get-all-subtypes atom-type)
