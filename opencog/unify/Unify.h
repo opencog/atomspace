@@ -177,7 +177,7 @@ public:
 	// TODO: maybe we could simplify a great deal of code by replacing
 	// Handle by Variables.
 	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
-	typedef TypedSubstitutions::value_type TypedSubstitution;
+	typedef std::pair<HandleCHandleMap, Handle> TypedSubstitution;
 
 	/**
 	 * Ctor. Initialize for the unification of lhs and rhs, with
@@ -748,6 +748,8 @@ std::string oc_to_string(const Unify::HandleCHandleMap& hchm,
 std::string oc_to_string(const Unify::HandleCHandleMap::value_type& hch,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::TypedSubstitution& ts,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::TypedSubstitutions::value_type& ts,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Unify::TypedSubstitutions& tss,
                          const std::string& indent=empty_string);

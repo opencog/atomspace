@@ -24,11 +24,13 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
-// Copied/pasted from gcc 4.9 utility. Remove as soon as C++14 is
-// enabled and gcc 4.9 is a minimum requirement.
+// Remove as soon as C++14 is enabled and gcc 4.9 or clang is a minimum requirement.
 #if __cplusplus <= 201103L
 
 namespace std {
+
+#if defined(_GLIBCXX_STRING)
+  // Copied/pasted from gcc 4.9 utility.
   /// Class template integer_sequence
   template<typename _Tp, _Tp... _Idx>
     struct integer_sequence
@@ -66,8 +68,39 @@ namespace std {
   /// Alias template index_sequence_for
   template<typename... _Types>
     using index_sequence_for = make_index_sequence<sizeof...(_Types)>;
-}
 
+#elif defined(_LIBCPP_VERSION)
+	// Copied/pasted  from libc++ v1 utility
+	template<class _Tp, _Tp... _Ip>
+	struct _LIBCPP_TEMPLATE_VIS integer_sequence
+	{
+	    typedef _Tp value_type;
+	    static_assert( is_integral<_Tp>::value,
+	                  "std::integer_sequence can only be instantiated with an integral type" );
+	    static
+	    _LIBCPP_INLINE_VISIBILITY
+	    constexpr
+	    size_t
+	    size() noexcept { return sizeof...(_Ip); }
+	};
+
+	template<size_t... _Ip>
+	    using index_sequence = integer_sequence<size_t, _Ip...>;
+
+	template <class _Tp, _Tp _Ep>
+	using __make_integer_sequence = __make_integer_seq<integer_sequence, _Tp, _Ep>;
+
+	template<class _Tp, _Tp _Np>
+	    using make_integer_sequence = __make_integer_sequence<_Tp, _Np>;
+
+	template<size_t _Np>
+	    using make_index_sequence = make_integer_sequence<size_t, _Np>;
+
+	template<class... _Tp>
+	    using index_sequence_for = make_index_sequence<sizeof...(_Tp)>;
+#endif
+
+}
 #endif
 
 namespace opencog {

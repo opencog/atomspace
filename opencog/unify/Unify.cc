@@ -1156,6 +1156,17 @@ std::string oc_to_string(const Unify::TypedSubstitution& ts,
 	return ss.str();
 }
 
+std::string oc_to_string(const Unify::TypedSubstitutions::value_type& ts,
+                         const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "substitution:" << std::endl
+	   << oc_to_string(ts.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "vardecl:" << std::endl
+	   << oc_to_string(ts.second, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
+
 std::string oc_to_string(const Unify::TypedSubstitutions& tss,
                          const std::string& indent)
 {

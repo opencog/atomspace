@@ -115,7 +115,7 @@ public:
         }
 
         if (fptr)
-            return (*fptr)(arg...);
+            return (*fptr)(&arg...);
 
         throw IndexErrorException(TRACE_INFO,
             "No factory found for Value type %d and arguments.", vtype);
