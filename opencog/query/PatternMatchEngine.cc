@@ -540,7 +540,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		if (has_glob)
 		{
-			// Each glob comparision steps the glob state forwards.
+			// Each glob comparison steps the glob state forwards.
 			// Each different permutation has to start with the
 			// same glob state as before. So save and restore state.
 			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
@@ -1624,14 +1624,13 @@ bool PatternMatchEngine::do_next_clause(void)
 		logmsg("Joining variable is", joiner);
 		logmsg("Joining grounding is", var_grounding[joiner]); })
 
-		// Else, start solving the next unsolved clause. Note: this is
-		// a recursive call, and not a loop. Recursion is halted when
+		// Start solving the next unsolved clause. Note: this is a
+		// recursive call, and not a loop. Recursion is halted when
 		// the next unsolved clause has no grounding.
 		//
-		// We continue our search at the atom that "joins" (is shared
-		// in common) between the previous (solved) clause, and this
-		// clause. If the "join" was a variable, look up its grounding;
-		// else the join is a 'real' atom.
+		// We continue our search at the variable/glob that "joins"
+		// (is shared in common) between the previous (solved) clause,
+		// and this clause.
 
 		clause_accepted = false;
 		Handle hgnd(var_grounding[joiner]);
