@@ -886,10 +886,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
-	// If the current node is a bound variable store this information for
-	// later checks. The flag telling whether the term subtree contains
-	// any bound variable is set by addBoundVariable() method for all terms
-	// on the path up to the root (unless it has been set already).
+	// If the current node is a bound variable, store this as a
+	// bool flag, recursively, up into the parent tree, for later use.
+	// The addBoundVariable() method walks upwards into the parent to
+	// set this flag.
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
 	    and not ptm->getQuotation().is_quoted()
