@@ -31,32 +31,51 @@ using namespace opencog;
 
 class CoverTreeTest :  public CxxTest::TestSuite
 {
+	CoverTree<double> ct;
 public:
 	CoverTreeTest() {}
 
-	void setUp() {}
-
-	void tearDown() {}
-
-	void testNearestNeighbor()
+	void setUp()
 	{
-		CoverTree<double> ct = CoverTree<double>(1);
+		ct = CoverTree<double>(1);
 		ct.insert(DVec{0.1},1);
 		ct.insert(DVec{0.2},1);
 		ct.insert(DVec{0.3},1);
 		ct.insert(DVec{0.4},1);
 		ct.insert(DVec{0.5},1);
+	}
 
+	void tearDown() {}
+
+	void testIsValid()
+	{
+		TS_ASSERT_EQUALS(ct.is_valid(),true);
+	}
+
+	void testNearestNeighbor()
+	{
 		const CoverTreeNode<double> * res1 = ct.findNearestNeighbor(DVec{0.41});
 		const CoverTreeNode<double> * res2 = ct.findNearestNeighbor(DVec{0.39});
 		const CoverTreeNode<double> * res3 = ct.findNearestNeighbor(DVec{0.25});
 
-		//std::cout << res1->pos << std::endl;
-		//std::cout << res2->pos << std::endl;
-		//std::cout << res3->pos << std::endl;
 		TS_ASSERT_EQUALS(res1->pos,DVec{0.4});
 		TS_ASSERT_EQUALS(res2->pos,DVec{0.4});
 		TS_ASSERT_EQUALS(res3->pos,DVec{0.3});
 	}
 
+	/*
+	 * Insert Order does lead to a differently structured Tree
+	 * but it should still be considered equal.
+	 */
+	void testComparison()
+	{
+		CoverTree<double> ct2 = CoverTree<double>(1);
+		ct2.insert(DVec{0.5},1);
+		ct2.insert(DVec{0.4},1);
+		ct2.insert(DVec{0.3},1);
+		ct2.insert(DVec{0.2},1);
+		ct2.insert(DVec{0.1},1);
+
+		TS_ASSERT_EQUALS(ct,ct2);
+	}
 };

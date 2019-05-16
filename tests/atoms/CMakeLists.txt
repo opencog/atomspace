@@ -1,5 +1,3 @@
-ADD_SUBDIRECTORY (distvalue)
-
 ADD_SUBDIRECTORY (atom_types)
 
 ADD_SUBDIRECTORY (base)
@@ -9,6 +7,8 @@ ADD_SUBDIRECTORY (core)
 ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
+
+ADD_SUBDIRECTORY (distvalue)
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(HashUTest)
