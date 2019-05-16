@@ -1458,8 +1458,9 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string() << " of clause UUID = "
-	              << clause_root.value() << " has ground, move upwards";})
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
+	              << " of clause UUID = " << clause_root.value()
+	              << " has ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
@@ -2064,18 +2065,21 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	// evaluate to true or false.
 	if (not is_evaluatable(clause))
 	{
+		DO_LOG({logger().fine("Clause is matchable; start matching it");})
+
 		// Check if the pattern has globs in it, and record the glob_state.
 		// Do this *before* exploring the term.
 		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
 
-		DO_LOG({logger().fine("Clause is matchable; start matching it");})
 		bool found = explore_term_branches(term, grnd, clause);
 
-		// If there may be another way to ground it differently to the same
-		// candidate, do it until exhausted.
+		// If no solution was found, and there are globs, then there may
+		// still be another way to ground the glob differently, to this
+		// same candidate caluse. So try that, and do it until exhausted.
 		while (not found and has_glob and _glob_state.size() > gstate_size)
 		{
+			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
 		}
 
@@ -2106,7 +2110,9 @@ void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
                                           const Handle& hg)
 {
 	const Handle& hp = ptm->getHandle();
-	// Likely a closed pattern, no need to save it
+
+	// If this is a closed pattern, not containing any variables,
+	// then there is no need to save it.
 	if (hp == hg)
 		return;
 
