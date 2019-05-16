@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY (distvalue)
 
 ADD_SUBDIRECTORY (atom_types)
 
