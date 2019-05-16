@@ -1,0 +1,80 @@
+/*
+ * Copyright (C) 2019 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <random>
+
+#include <opencog/atoms/distvalue/CTHist.h>
+
+using namespace opencog;
+
+class CTHistTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+	CTHistTest() {}
+
+	void setUp() {std::cout << std::endl;}
+
+	void tearDown() {}
+
+	void testCHist()
+	{
+		CTHist<double> hist = CTHist<double>(5,1);
+		hist.insert(DVec{0.1},1);
+		hist.insert(DVec{0.9},1);
+		hist.insert(DVec{0.2},1);
+		hist.insert(DVec{0.8},1);
+		hist.insert(DVec{0.3},1);
+		hist.insert(DVec{0.7},1);
+		hist.insert(DVec{0.4},1);
+		hist.insert(DVec{0.6},1);
+		hist.insert(DVec{0.5},1);
+		//hist.print();
+
+		TS_ASSERT_EQUALS(hist.is_valid(),true);
+
+		hist = CTHist<double>(5,1);
+		hist.insert(DVec{0.5},1);
+		hist.insert(DVec{0.6},1);
+		hist.insert(DVec{0.4},1);
+		hist.insert(DVec{0.7},1);
+		hist.insert(DVec{0.3},1);
+		hist.insert(DVec{0.8},1);
+		hist.insert(DVec{0.2},1);
+		hist.insert(DVec{0.9},1);
+		hist.insert(DVec{0.1},1);
+		//hist.print();
+		TS_ASSERT_EQUALS(hist.is_valid(),true);
+
+		CTHist<double> mhist = hist.mirrorLinf();
+		CTHist<double> mhist_exp = CTHist<double>(5,1);
+		mhist_exp.insert(DVec{0.2},1);
+		mhist_exp.insert(DVec{0.8},1);
+		mhist_exp.insert(DVec{0.4},3);
+		mhist_exp.insert(DVec{0.5},3);
+		mhist_exp.insert(DVec{0.6},3);
+		//mhist.print();
+		//mhist_exp.print();
+		TS_ASSERT_EQUALS(mhist,mhist_exp);
+	}
+};

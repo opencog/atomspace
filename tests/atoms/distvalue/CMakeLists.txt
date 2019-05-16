@@ -4,3 +4,4 @@ LINK_LIBRARIES(
 )
 
 ADD_CXXTEST(CoverTreeTest)
+ADD_CXXTEST(CTHistTest)

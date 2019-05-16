@@ -40,7 +40,7 @@ public:
 		ct = CoverTree<double>(1);
 		ct.insert(DVec{0.1},1);
 		ct.insert(DVec{0.2},1);
-		ct.insert(DVec{0.3},1);
+		ct.insert(DVec{0.3},3);
 		ct.insert(DVec{0.4},1);
 		ct.insert(DVec{0.5},1);
 	}
@@ -50,6 +50,15 @@ public:
 	void testIsValid()
 	{
 		TS_ASSERT_EQUALS(ct.is_valid(),true);
+	}
+
+	void testGet()
+	{
+		TS_ASSERT_EQUALS(ct.get(DVec{0.1}),1)
+		TS_ASSERT_EQUALS(ct.get(DVec{0.2}),1)
+		TS_ASSERT_EQUALS(ct.get(DVec{0.3}),3)
+		TS_ASSERT_EQUALS(ct.get(DVec{0.4}),1)
+		TS_ASSERT_EQUALS(ct.get(DVec{0.5}),1)
 	}
 
 	void testNearestNeighbor()
@@ -72,7 +81,7 @@ public:
 		CoverTree<double> ct2 = CoverTree<double>(1);
 		ct2.insert(DVec{0.5},1);
 		ct2.insert(DVec{0.4},1);
-		ct2.insert(DVec{0.3},1);
+		ct2.insert(DVec{0.3},3);
 		ct2.insert(DVec{0.2},1);
 		ct2.insert(DVec{0.1},1);
 

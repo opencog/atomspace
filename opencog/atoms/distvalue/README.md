@@ -19,8 +19,13 @@ To efficently work with these Histograms they utilize a Cover Tree for storage.
 
 CoverTree
 ---------
-CoverTrees are a data structure designed to speed up nearest neighbor search, which can easily be augmented to consider direction aswell.
-This is important for us because when we have mutliple distributions about the same underlying variable the bins will likely not line up. But if we can find out which bins of one distribution are closest to bins of the other distribution we can remap one of them to matcher the other.
-Additionaly because CoverTrees require only a distanc metric to construct they work well in N-dimensions.
+CoverTrees are a data structure designed to speed up nearest neighbor search.
+And because CoverTrees require only a distanc metric to construct they work well in N-dimensions which is important for us.
 More detailed information can be found in the paper "Faster Cover Trees" by Mike Izbicki and Christian R. Shelton
 https://izbicki.me/public/papers/icml2015-faster-cover-trees.pdf
+
+CTHist
+------
+A Histogram based on a CoverTree. This is basically a CoverTree with some addtions and alterations. Primarly that it has a maximum number of elements. This necesitates some changes to the insert function so when we have already inserted the max number of elements any addtional data points will get merged with their nearest neighbor.
+We also add a modified nearest neighbor search that considers direction. Which is necesary to find the Nodes surrounding a point, so we can average their values to get an aporixmation of the value at the given point. 
+This is important for us because when we have mutliple distributions about the same underlying variable the bins will likely not line up. So if we can remap one Distribution by taking the bins of the other and getting the averaged value for those bins in the Distribution we can solve this.

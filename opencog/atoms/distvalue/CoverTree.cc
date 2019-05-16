@@ -170,11 +170,9 @@ CoverTree<val_t>::findNearestNeighbor_(const CoverTreeNode<val_t> & x,
 }
 
 template <typename val_t>
-int
-CoverTree<val_t>::findNearestNeighbor_(const CoverTreeNode<val_t> & x,
-									   int curr_idx,
-									   int best_idx,
-									   int level,int & ret_level,int & parent)
+int CoverTree<val_t>::findNearestNeighbor_(const CoverTreeNode<val_t> & x,
+										   int curr_idx, int best_idx, int level,
+										   int & ret_level, int & parent)
 {
 	CoverTreeNode<val_t> & p = _nodes[curr_idx];
 	CoverTreeNode<val_t> * y = &_nodes[best_idx];
@@ -507,5 +505,8 @@ void opencog::update_count(CoverTree<double>& ct,const double n)
 	ct *= tmp;
 }
 
+#include <opencog/atoms/distvalue/CTHist.h>
+
 template class CoverTree<double>;
 template class CoverTree<CoverTree<double>>;
+template class CoverTree<CTHist<double>>;
