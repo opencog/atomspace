@@ -180,7 +180,7 @@ private:
 	// Stacks containing partial groundings.
 	typedef HandleMap SolnMap;
 	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> term_solutn_stack;
+	std::stack<SolnMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;

@@ -1917,7 +1917,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	              _clause_stack_depth);})
 
 	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
@@ -1938,7 +1938,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_pmc.pop();
 
 	// The grounding stacks are handled differently.
-	POPSTK(term_solutn_stack, clause_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(issued_stack, issued);
 
@@ -1962,13 +1962,13 @@ void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
 #if 0
-	OC_ASSERT(0 == term_solutn_stack.size());
+	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == perm_stack.size());
 #else
-	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
+	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
@@ -1979,19 +1979,19 @@ void PatternMatchEngine::clause_stacks_clear(void)
 void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(term_solutn_stack, clause_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
 }
 
 void PatternMatchEngine::solution_drop(void)
 {
 	var_solutn_stack.pop();
-	term_solutn_stack.pop();
+	_clause_solutn_stack.pop();
 }
 
 /* ======================================================== */
