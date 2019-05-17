@@ -75,6 +75,7 @@ public:
 	void test_gnest(void);
 	void test_partition(void);
 	void test_pivot(void);
+	void test_multi_pivot(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -657,6 +658,31 @@ void GlobUTest::test_pivot(void)
 
 	Handle pivot = eval->eval_h("(cog-execute! glob-pivot)");
 	printf("pivot got %s\n", pivot->to_string().c_str());
+	TS_ASSERT_EQUALS(1, pivot->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"	(ListLink"
+		"		(ConceptNode \"blah\")))"
+	);
+	TS_ASSERT_EQUALS(pivot, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test pivoting around multiple common GlobNodes.
+ * Same as above, but trickier.
+ */
+void GlobUTest::test_multi_pivot(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-multi-pivot.scm\")");
+
+	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
+	printf("multi-pivot got %s\n", pivot->to_string().c_str());
 	TS_ASSERT_EQUALS(1, pivot->get_arity());
 
 	Handle response = eval->eval_h(

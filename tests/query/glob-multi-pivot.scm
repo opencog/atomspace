@@ -1,0 +1,50 @@
+
+; multi-pivot version of glob-pivot.scm
+; 
+;
+(use-modules (opencog) (opencog exec))
+
+(EvaluationLink
+	(PredicateNode "pred-1")
+	(ListLink (ConceptNode "blah")))
+
+(EvaluationLink
+	(PredicateNode "pred-2")
+	(ListLink (ConceptNode "blah")))
+
+(MemberLink
+	(OrderedLink (ConceptNode "blah"))
+	(ConceptNode "class-1"))
+
+(MemberLink
+	(OrderedLink (ConceptNode "blah"))
+	(ConceptNode "class-2"))
+
+(define glob-multi-pivot
+	(GetLink
+		(TypedVariableLink
+			(GlobNode "$G")
+			(TypeSetLink
+				(TypeNode "ConceptNode")
+				(IntervalLink (NumberNode 1) (NumberNode -1))
+			)
+		)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "pred-1")
+				(ListLink (GlobNode "$G")))
+
+			(EvaluationLink
+				(PredicateNode "pred-2")
+				(ListLink (GlobNode "$G")))
+
+			(MemberLink
+				(OrderedLink (GlobNode "$G"))
+				(ConceptNode "class-1"))
+
+			(MemberLink
+				(OrderedLink (GlobNode "$G"))
+				(ConceptNode "class-2"))
+		)
+	)
+)
