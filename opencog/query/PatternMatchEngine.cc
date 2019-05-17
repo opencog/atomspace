@@ -1198,6 +1198,16 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 ///
 bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
+                                             const Handle& clause)
+{
+	// Check if the pattern has globs in it.
+	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+		return explore_upglob_branches(ptm, hg, clause);
+	return explore_upvar_branches(ptm, hg, clause);
+}
+
+bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
                                              const Handle& clause_root)
 {
 	// Move up the solution graph, looking for a match.
@@ -1208,8 +1218,33 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << "It's grounding " << hg->to_string()
 	              << " has " << sz << " branches";})
 
-	// Check if the pattern has globs in it.
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		              << " for term=" << ptm->to_string()
+		              << " propose=" << iset[i]->to_string();})
+
+		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		if (found) break;
+	}
+
+	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+	return found;
+}
+
+bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
+                                             const Handle& clause_root)
+{
+	// Move up the solution graph, looking for a match.
+	IncomingSet iset = _pmc.get_incoming_set(hg);
+	size_t sz = iset.size();
+	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
+
 	size_t gstate_size = SIZE_MAX;
 
 	bool found = false;
@@ -1229,28 +1264,23 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		// _glob_state size before and after seems to be an OK way to
 		// quickly check if we can move on to the next one or not.
 		std::map<GlobPair, GlobState> saved_glob_state;
-		if (has_glob)
-		{
-			saved_glob_state = _glob_state;
-			gstate_size = _glob_state.size();
-		}
+		saved_glob_state = _glob_state;
+		gstate_size = _glob_state.size();
 
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
+		while (not found and _glob_state.size() > gstate_size)
 		{
 			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		}
 
 		// Restore the saved state, for the next go-around.
-		if (has_glob)
-			_glob_state = saved_glob_state;
+		_glob_state = saved_glob_state;
 
 		if (found) break;
 	}
-
 	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
 	return found;
 }
@@ -1389,8 +1419,8 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
-	              << " solved by " << hg.value() << ", move up";})
+	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
+	              << " solved by " << hg->to_string() << ", move up";})
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
