@@ -677,6 +677,7 @@ void GlobUTest::test_pivot(void)
  */
 void GlobUTest::test_multi_pivot(void)
 {
+#if 0
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/glob-multi-pivot.scm\")");
@@ -694,4 +695,5 @@ void GlobUTest::test_multi_pivot(void)
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
+#endif
 }
