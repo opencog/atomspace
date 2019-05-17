@@ -1203,8 +1203,10 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->to_string()
-	              << " have " << sz << " branches";})
+	DO_LOG({LAZY_LOG_FINE << "Looking upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
 	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
@@ -1458,8 +1460,14 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
+#if 1
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
-	              << " of clause UUID = " << clause_root.value()
+	              << " of clause hash = " << clause_root.value()
+	              << " has ground, move upwards";})
+#endif
+
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->getHandle()->to_string()
+	              << " of clause = " << clause_root->to_string()
 	              << " has ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
