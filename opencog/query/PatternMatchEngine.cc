@@ -1814,7 +1814,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 	{
 		HandlePair glbt({glob, clpr.second});
 		const auto& ptms = _pat->connected_terms_map.find(glbt);
-		if (ptms != _pat->connected_terms_map.end())
+		if (ptms != _pat->connected_terms_map.end() and
+		    1 < ptms->second.size())
 		{
 			for (const PatternTermPtr& ptm : ptms->second)
 			{
@@ -1828,7 +1829,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 			}
 		}
 	}
-	return Handle::UNDEFINED;
+	return glob;
 }
 
 /// Same as above, but with three boolean flags:  if not set, then only
@@ -1869,12 +1870,9 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 			if (GLOB_NODE == v->get_type())
 			{
 				Handle embed = get_glob_embedding(v);
-				if (embed)
-				{
-					const Handle& tg = var_grounding[embed];
-					std::size_t incoming_set_size = tg->getIncomingSetSize();
-					thick_vars.insert(std::make_pair(incoming_set_size, embed));
-				}
+				const Handle& tg = var_grounding[embed];
+				std::size_t incoming_set_size = tg->getIncomingSetSize();
+				thick_vars.insert(std::make_pair(incoming_set_size, embed));
 			}
 			else
 			{
