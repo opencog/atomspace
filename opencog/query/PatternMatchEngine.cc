@@ -1804,30 +1804,37 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 
 /// get_glob_embedding() -- given glob node, return term that it grounds.
 ///
-/// If a GlobNode has a grounding, then there is some corresponding
-/// term which contains that globNode and is grounded. Return that
-/// term -- it will be used to as the pivot point to the next ungrounded
-/// clause.
+/// If a GlobNode has a grounding, then there is always some
+/// corresponding term which contains that grounded GlobNode and is
+/// grounded. If that term appears in two (or more) clauses, then
+/// return it, so that it is used as the pivot point to the next
+/// ungrounded clause.  If there is no such term, then just  return the
+/// glob.
 Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 {
-	for (auto clpr : _pat->connectivity_map)
+	// Find some clause, any clause at all, containg the glob.
+	auto clpr = _pat->connectivity_map.find(glob);
+
+	// If the glob is in only one clause, there is no connectivity map.
+	if (_pat->connectivity_map.end() == clpr) return glob;
+
+	// Typically, the glob appears only once in the clause, so
+	// there is only one PatternTerm. The loop really isn't needed.
+	HandlePair glbt({glob, clpr->second});
+	const auto& ptms = _pat->connected_terms_map.find(glbt);
+	for (const PatternTermPtr& ptm : ptms->second)
 	{
-		HandlePair glbt({glob, clpr.second});
-		const auto& ptms = _pat->connected_terms_map.find(glbt);
-		if (ptms != _pat->connected_terms_map.end() and
-		    1 < ptms->second.size())
-		{
-			for (const PatternTermPtr& ptm : ptms->second)
-			{
-				const PatternTermPtr& parent = ptm->getParent();
-				if (parent)
-				{
-					const Handle& embed = parent->getHandle();
-					const auto& gnd = var_grounding.find(embed);
-					if (var_grounding.end() != gnd) return embed;
-				}
-			}
-		}
+		// Here, ptm is the glob itself. It will almost surely
+		// be in some term. The test for nullptr will surely never
+		// trigger.
+		const PatternTermPtr& parent = ptm->getParent();
+		if (nullptr == parent) return glob;
+
+		// If this term appears in more than one clause, then it
+		// can be used as a pivot.
+		const Handle& embed = parent->getHandle();
+		if (1 < _pat->connectivity_map.count(embed))
+			return embed;
 	}
 	return glob;
 }
