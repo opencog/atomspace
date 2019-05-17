@@ -20,6 +20,11 @@
 	(OrderedLink (ConceptNode "blah"))
 	(ConceptNode "class-2"))
 
+(MemberLink
+	(ConceptNode "blah")
+	(ConceptNode "class-3"))
+
+; ---------------------------------------------
 (define glob-multi-pivot
 	(GetLink
 		(TypedVariableLink
@@ -45,6 +50,39 @@
 			(MemberLink
 				(OrderedLink (GlobNode "$G"))
 				(ConceptNode "class-2"))
+		)
+	)
+)
+
+; ---------------------------------------------
+(define glob-chase-pivot
+	(GetLink
+		(VariableList
+			(Variable "$cls")
+			(TypedVariableLink
+				(GlobNode "$G")
+				(TypeSetLink
+					(TypeNode "ConceptNode")
+					(IntervalLink (NumberNode 1) (NumberNode -1))
+				)
+			)
+		)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "pred-1")
+				(ListLink (GlobNode "$G")))
+
+			(EvaluationLink
+				(PredicateNode "pred-2")
+				(ListLink (GlobNode "$G")))
+
+			(MemberLink
+				(OrderedLink (GlobNode "$G"))
+				(ConceptNode "class-1"))
+
+			(MemberLink
+				(GlobNode "$G")
+				(Variable "$cls"))
 		)
 	)
 )
