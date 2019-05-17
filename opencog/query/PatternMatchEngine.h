@@ -159,6 +159,7 @@ private:
 	bool do_next_clause(void);
 	bool clause_accepted;
 	void get_next_untried_clause(void);
+	Handle get_glob_embedding(const Handle&);
 	bool get_next_thinnest_clause(bool, bool, bool);
 	unsigned int thickness(const Handle&, const HandleSet&);
 	Handle next_clause;

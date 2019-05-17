@@ -1802,6 +1802,35 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 	return count;
 }
 
+/// get_glob_embedding() -- given glob node, return term that it grounds.
+///
+/// If a GlobNode has a grounding, then there is some corresponding
+/// term which contains that globNode and is grounded. Return that
+/// term -- it will be used to as the pivot point to the next ungrounded
+/// clause.
+Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
+{
+	for (auto clpr : _pat->connectivity_map)
+	{
+		HandlePair glbt({glob, clpr.second});
+		const auto& ptms = _pat->connected_terms_map.find(glbt);
+		if (ptms != _pat->connected_terms_map.end())
+		{
+			for (const PatternTermPtr& ptm : ptms->second)
+			{
+				const PatternTermPtr& parent = ptm->getParent();
+				if (parent)
+				{
+					const Handle& embed = parent->getHandle();
+					const auto& gnd = var_grounding.find(embed);
+					if (var_grounding.end() != gnd) return embed;
+				}
+			}
+		}
+	}
+	return Handle::UNDEFINED;
+}
+
 /// Same as above, but with three boolean flags:  if not set, then only
 /// those clauses satsifying the criterion are considered, else all
 /// clauses are considered.
@@ -1830,11 +1859,28 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 	for (const Handle &v : _varlist->varset)
 	{
-		auto gnd = var_grounding.find(v);
+		const auto& gnd = var_grounding.find(v);
 		if (gnd != var_grounding.end())
 		{
-			std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
-			thick_vars.insert(std::make_pair(incoming_set_size, v));
+			// We cannot use GlobNode's directly as joiners, because
+			// we don't know how they fit. Instead, we have to fish
+			// out a term that contains a grounded glob, and use
+			// that term as the joiner.
+			if (GLOB_NODE == v->get_type())
+			{
+				Handle embed = get_glob_embedding(v);
+				if (embed)
+				{
+					const Handle& tg = var_grounding[embed];
+					std::size_t incoming_set_size = tg->getIncomingSetSize();
+					thick_vars.insert(std::make_pair(incoming_set_size, embed));
+				}
+			}
+			else
+			{
+				std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
+				thick_vars.insert(std::make_pair(incoming_set_size, v));
+			}
 		}
 		else ungrounded_vars.insert(v);
 	}
