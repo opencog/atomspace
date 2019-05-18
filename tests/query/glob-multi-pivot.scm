@@ -25,6 +25,50 @@
 	(ConceptNode "class-3"))
 
 ; ---------------------------------------------
+
+(define glob-unify-plain
+	(GetLink
+		(TypedVariableLink
+			(GlobNode "$G")
+			(TypeSetLink
+				(TypeNode "ConceptNode")
+				(IntervalLink (NumberNode 1) (NumberNode -1))
+			)
+		)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "pred-1")
+				(ListLink (GlobNode "$G")))
+
+			(MemberLink
+				(GlobNode "$G")
+				(ConceptNode "class-3"))
+		)
+	)
+)
+
+(define glob-unify-tall
+	(GetLink
+		(TypedVariableLink
+			(GlobNode "$G")
+			(TypeSetLink
+				(TypeNode "ConceptNode")
+				(IntervalLink (NumberNode 1) (NumberNode -1))
+			)
+		)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "pred-1")
+				(ListLink (GlobNode "$G")))
+
+			(MemberLink
+				(OrderedLink (GlobNode "$G"))
+				(ConceptNode "class-1"))
+		)
+	)
+)
+
+; ---------------------------------------------
 (define glob-multi-pivot
 	(GetLink
 		(TypedVariableLink

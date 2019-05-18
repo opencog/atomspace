@@ -677,23 +677,33 @@ void GlobUTest::test_pivot(void)
  */
 void GlobUTest::test_multi_pivot(void)
 {
-#if 0
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/glob-multi-pivot.scm\")");
-
-	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
-	printf("multi-pivot got %s\n", pivot->to_string().c_str());
-	TS_ASSERT_EQUALS(1, pivot->get_arity());
-
 	Handle response = eval->eval_h(
 		"(SetLink"
 		"	(ListLink"
 		"		(ConceptNode \"blah\")))"
 	);
+
+	Handle plain = eval->eval_h("(cog-execute! glob-unify-plain)");
+	printf("unify-plain got %s\n", plain->to_string().c_str());
+	TS_ASSERT_EQUALS(1, plain->get_arity());
+	TS_ASSERT_EQUALS(plain, response);
+
+	Handle tall = eval->eval_h("(cog-execute! glob-unify-tall)");
+	printf("unify-tall got %s\n", tall->to_string().c_str());
+	TS_ASSERT_EQUALS(1, tall->get_arity());
+	TS_ASSERT_EQUALS(tall, response);
+
+#if 0
+	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
+	printf("multi-pivot got %s\n", pivot->to_string().c_str());
+	TS_ASSERT_EQUALS(1, pivot->get_arity());
+
 	TS_ASSERT_EQUALS(pivot, response);
+#endif
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
-#endif
 }
