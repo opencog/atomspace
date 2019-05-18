@@ -69,6 +69,36 @@
 )
 
 ; ---------------------------------------------
+
+(define glob-chase-pivot
+	(GetLink
+		(VariableList
+			(Variable "$cls")
+			(TypedVariableLink
+				(GlobNode "$G")
+				(TypeSetLink
+					(TypeNode "ConceptNode")
+					(IntervalLink (NumberNode 1) (NumberNode -1))
+				)
+			)
+		)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "pred-1")
+				(ListLink (GlobNode "$G")))
+
+			(EvaluationLink
+				(PredicateNode "pred-2")
+				(ListLink (GlobNode "$G")))
+
+			(MemberLink
+				(GlobNode "$G")
+				(Variable "$cls"))
+		)
+	)
+)
+
+; ---------------------------------------------
 (define glob-multi-pivot
 	(GetLink
 		(TypedVariableLink
@@ -99,7 +129,7 @@
 )
 
 ; ---------------------------------------------
-(define glob-chase-pivot
+(define glob-chase-multi-pivot
 	(GetLink
 		(VariableList
 			(Variable "$cls")
