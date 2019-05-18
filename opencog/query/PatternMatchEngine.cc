@@ -1206,6 +1206,9 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	return explore_upvar_branches(ptm, hg, clause);
 }
 
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// is specifying a VariableNode only. This is a straighforward
+/// loop over the incoming set, and nothing more.
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
                                              const Handle& clause_root)
@@ -1233,12 +1236,20 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	return found;
 }
 
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// has a GlobNode in it. In this case, we need to loop over the
+/// inconoming, just as above, and also loop over differrent glob
+/// grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
                                              const Handle& clause_root)
 {
-	// Move up the solution graph, looking for a match.
-	IncomingSet iset = _pmc.get_incoming_set(hg);
+	IncomingSet iset;
+	if (nullptr == hg->getAtomSpace())
+		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0));
+	else
+		iset = _pmc.get_incoming_set(hg);
+
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
 	              << ptm->getHandle()->to_string()
@@ -1247,6 +1258,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 	size_t gstate_size = SIZE_MAX;
 
+	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
