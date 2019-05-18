@@ -1198,18 +1198,67 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 ///
 bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
+                                             const Handle& clause)
+{
+	// Check if the pattern has globs in it.
+	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+		return explore_upglob_branches(ptm, hg, clause);
+	return explore_upvar_branches(ptm, hg, clause);
+}
+
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// is specifying a VariableNode only. This is a straighforward
+/// loop over the incoming set, and nothing more.
+bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
                                              const Handle& clause_root)
 {
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->to_string()
-	              << " have " << sz << " branches";})
+	DO_LOG({LAZY_LOG_FINE << "Looking upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
 
-	// Check if the pattern has globs in it.
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		              << " for term=" << ptm->to_string()
+		              << " propose=" << iset[i]->to_string();})
+
+		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		if (found) break;
+	}
+
+	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+	return found;
+}
+
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// has a GlobNode in it. In this case, we need to loop over the
+/// inconoming, just as above, and also loop over differrent glob
+/// grounding possibilities.
+bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
+                                             const Handle& clause_root)
+{
+	IncomingSet iset;
+	if (nullptr == hg->getAtomSpace())
+		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0));
+	else
+		iset = _pmc.get_incoming_set(hg);
+
+	size_t sz = iset.size();
+	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
+
 	size_t gstate_size = SIZE_MAX;
 
+	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
@@ -1227,28 +1276,23 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		// _glob_state size before and after seems to be an OK way to
 		// quickly check if we can move on to the next one or not.
 		std::map<GlobPair, GlobState> saved_glob_state;
-		if (has_glob)
-		{
-			saved_glob_state = _glob_state;
-			gstate_size = _glob_state.size();
-		}
+		saved_glob_state = _glob_state;
+		gstate_size = _glob_state.size();
 
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
+		while (not found and _glob_state.size() > gstate_size)
 		{
 			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		}
 
 		// Restore the saved state, for the next go-around.
-		if (has_glob)
-			_glob_state = saved_glob_state;
+		_glob_state = saved_glob_state;
 
 		if (found) break;
 	}
-
 	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
 	return found;
 }
@@ -1387,8 +1431,8 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
-	              << " solved by " << hg.value() << ", move up";})
+	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
+	              << " solved by " << hg->to_string() << ", move up";})
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
@@ -1458,8 +1502,14 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
+#if 1
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
-	              << " of clause UUID = " << clause_root.value()
+	              << " of clause hash = " << clause_root.value()
+	              << " has ground, move upwards";})
+#endif
+
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->getHandle()->to_string()
+	              << " of clause = " << clause_root->to_string()
 	              << " has ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
@@ -1812,11 +1862,23 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 /// glob.
 Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 {
-	// Find some clause, any clause at all, containg the glob.
-	auto clpr = _pat->connectivity_map.find(glob);
-
 	// If the glob is in only one clause, there is no connectivity map.
-	if (_pat->connectivity_map.end() == clpr) return glob;
+	if (0 == _pat->connectivity_map.count(glob)) return glob;
+
+	// Find some clause, any clause at all, containg the glob,
+	// that has not been grounded so far. We need to do this because
+	// the glob might appear in three clauses, with two of them
+	// grounded by a common term, and the third ungrounded
+	// with no common term.
+	auto clauses =  _pat->connectivity_map.equal_range(glob);
+	auto clpr = clauses.first;
+	for (; clpr != clauses.second; clpr++)
+	{
+		if (issued.end() == issued.find(clpr->second)) break;
+	}
+
+	// Glob is not in any ungrounded clauses.
+	if (clpr == clauses.second) return glob;
 
 	// Typically, the glob appears only once in the clause, so
 	// there is only one PatternTerm. The loop really isn't needed.
@@ -1833,7 +1895,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 		// If this term appears in more than one clause, then it
 		// can be used as a pivot.
 		const Handle& embed = parent->getHandle();
-		if (1 < _pat->connectivity_map.count(embed))
+		if ((var_grounding.end() != var_grounding.find(embed)) and
+		    (1 < _pat->connectivity_map.count(embed)))
 			return embed;
 	}
 	return glob;

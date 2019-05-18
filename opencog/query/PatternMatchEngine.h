@@ -229,6 +229,10 @@ private:
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
+	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
 	bool explore_link_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
