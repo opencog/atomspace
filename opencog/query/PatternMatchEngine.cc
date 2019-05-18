@@ -1862,11 +1862,23 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 /// glob.
 Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 {
-	// Find some clause, any clause at all, containg the glob.
-	auto clpr = _pat->connectivity_map.find(glob);
-
 	// If the glob is in only one clause, there is no connectivity map.
-	if (_pat->connectivity_map.end() == clpr) return glob;
+	if (0 == _pat->connectivity_map.count(glob)) return glob;
+
+	// Find some clause, any clause at all, containg the glob,
+	// that has not been grounded so far. We need to do this because
+	// the glob might appear in three clauses, with two of them
+	// grounded by a common term, and the third ungrounded
+	// with no common term.
+	auto clauses =  _pat->connectivity_map.equal_range(glob);
+	auto clpr = clauses.first;
+	for (; clpr != clauses.second; clpr++)
+	{
+		if (issued.end() == issued.find(clpr->second)) break;
+	}
+
+	// Glob is not in any ungrounded clauses.
+	if (clpr == clauses.second) return glob;
 
 	// Typically, the glob appears only once in the clause, so
 	// there is only one PatternTerm. The loop really isn't needed.
@@ -1883,7 +1895,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 		// If this term appears in more than one clause, then it
 		// can be used as a pivot.
 		const Handle& embed = parent->getHandle();
-		if (1 < _pat->connectivity_map.count(embed))
+		if ((var_grounding.end() != var_grounding.find(embed)) and
+		    (1 < _pat->connectivity_map.count(embed)))
 			return embed;
 	}
 	return glob;
