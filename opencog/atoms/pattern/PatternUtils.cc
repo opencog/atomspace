@@ -20,8 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <boost/range/algorithm/find.hpp>
-
 #include <opencog/atoms/core/FindUtils.h>
 #include "PatternUtils.h"
 
@@ -80,7 +78,8 @@ bool remove_constants(const HandleSet& vars,
 		i = pat.clauses.erase(i);
 
 		// remove the clause from components and component_patterns
-		auto j = boost::find(components, HandleSeq{clause});
+		auto j = std::find(components.begin(), components.end(),
+		                   HandleSeq{clause});
 		if (j != components.end())
 		{
 			components.erase(j);
@@ -93,12 +92,12 @@ bool remove_constants(const HandleSet& vars,
 		}
 
 		// remove the clause from _pattern_mandatory.
-		auto m = boost::find(pat.mandatory, clause);
+		auto m = std::find(pat.mandatory.begin(), pat.mandatory.end(), clause);
 		if (m != pat.mandatory.end())
 			pat.mandatory.erase(m);
 
 		// remove the clause from _cnf_clauses.
-		auto c = boost::find(pat.cnf_clauses, clause);
+		auto c = std::find(pat.cnf_clauses.begin(), pat.cnf_clauses.end(), clause);
 		if (c != pat.cnf_clauses.end())
 			pat.cnf_clauses.erase(c);
 
