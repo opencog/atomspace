@@ -20,8 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <boost/range/algorithm/find.hpp>
-
 #include <opencog/atoms/core/FindUtils.h>
 #include "PatternUtils.h"
 
@@ -30,25 +28,24 @@ using namespace opencog;
 namespace opencog {
 
 /**
- * Remove constant clauses from the list of clauses if they are in
- * the queried atomspace.
- *
- * Make sure that every clause contains at least one variable;
- * if not, remove the clause from the list of clauses.
+ * Remove constant clauses from the list of clauses. Every clause
+ * should contain at least one variable, or it should be evaluatable.
+ * If does not, or is not, remove the clause from the list of clauses.
  *
  * The core idea is that pattern matching against a constant expression
  * "doesn't make sense" -- the constant expression will always match to
  * itself and is thus "trivial".  In principle, the programmer should
  * never include constants in the list of clauses ... but, due to
  * programmer error, this can happen, and will lead to failures during
- * pattern matching. Thus, the routine below can be used to validate
- * the input.
+ * pattern matching. Thus, the routine below can be used to clean up
+ * the pattern-matcher input.
  *
  * Terms that contain GroundedSchema or GroundedPredicate nodes can
- * have side-effects, and are thus not really constants. They must be
- * evaluated during the pattern search. Terms that contain
- * DefinedPredicate or DefinedSchema nodes are simply not known until
- * runtime evaluation/execution.
+ * have side-effects, and are thus are not constants, even if they
+ * don't contain any variables. They must be kept around, and must be
+ * evaluated during the pattern search.  The definitions of
+ * DefinedPredicate or DefinedSchema nodes cannot be accessed until
+ * runtime evaluation/execution, so these too must be kept.
  *
  * The match for EvaluatableLink's is meant to solve the problem of
  * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
@@ -78,11 +75,11 @@ bool remove_constants(const HandleSet& vars,
 			++i; continue;
 		}
 
-		pat.constants.emplace_back(clause);
 		i = pat.clauses.erase(i);
 
 		// remove the clause from components and component_patterns
-		auto j = boost::find(components, HandleSeq{clause});
+		auto j = std::find(components.begin(), components.end(),
+		                   HandleSeq{clause});
 		if (j != components.end())
 		{
 			components.erase(j);
@@ -95,12 +92,12 @@ bool remove_constants(const HandleSet& vars,
 		}
 
 		// remove the clause from _pattern_mandatory.
-		auto m = boost::find(pat.mandatory, clause);
+		auto m = std::find(pat.mandatory.begin(), pat.mandatory.end(), clause);
 		if (m != pat.mandatory.end())
 			pat.mandatory.erase(m);
 
 		// remove the clause from _cnf_clauses.
-		auto c = boost::find(pat.cnf_clauses, clause);
+		auto c = std::find(pat.cnf_clauses.begin(), pat.cnf_clauses.end(), clause);
 		if (c != pat.cnf_clauses.end())
 			pat.cnf_clauses.erase(c);
 

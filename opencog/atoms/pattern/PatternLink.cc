@@ -51,22 +51,13 @@ void PatternLink::common_init(void)
 		return;
 	}
 
+	validate_variables(_varlist.varset, _pat.clauses);
 	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
-	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box and clear-box clauses.
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
-
-	// Same as above but for constant clauses. The fixed clauses (non
-	// virtual because with less than 2 variables) are pushed into a
-	// dummy container, constant_fixed as they are not useful for
-	// subsequent component analysis.
-	HandleSeq constant_fixed;
-	unbundle_virtual(_varlist.varset, _pat.constants,
-	                 constant_fixed, _virtual, _pat.black);
-
 	_num_virts = _virtual.size();
 
 	add_dummies();
@@ -115,7 +106,6 @@ void PatternLink::common_init(void)
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
-		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
@@ -466,9 +456,8 @@ void PatternLink::locate_globs(HandleSeq& clauses)
  * to programmer error. Quoted variables are constants, and so don't
  * count.
  */
-void PatternLink::validate_clauses(HandleSet& vars,
-                                   HandleSeq& clauses,
-                                   HandleSeq& constants)
+void PatternLink::validate_variables(HandleSet& vars,
+                                     const HandleSeq& clauses)
 
 {
 	for (const Handle& v : vars)
@@ -929,34 +918,6 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-}
-
-/* ================================================================= */
-
-void PatternLink::remove_constant_clauses(void)
-{
-	// Remove clauses that don't alter the search. Any clause that
-	// fails to contain a variable, or fails to be evaluatable, will
-	// not affect the search in any way, because it is trivially
-	// satisfiable (and is always satisfied). Thus, its pointless
-	// to try to match them; they will always match.
-	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns);
-	if (bogus)
-	{
-		if (logger().is_debug_enabled())
-		{
-			logger().debug("%s: Constant clauses removed from pattern %s",
-			           __FUNCTION__, to_string().c_str());
-			for (const Handle& h: _pat.constants)
-			{
-				logger().debug("%s: Removed %s",
-				          __FUNCTION__, h->to_string().c_str());
-			}
-		}
-		_num_comps = _components.size();
-		make_connectivity_map(_pat.cnf_clauses);
-	}
 }
 
 /* ================================================================= */

@@ -29,9 +29,6 @@ std::string Pattern::to_string(const std::string& indent) const
 	if (not clauses.empty())
 		ss << indent << "clauses:" << std::endl
 		   << oc_to_string(clauses, indent + OC_TO_STRING_INDENT);
-	if (not constants.empty())
-		ss << indent << "constants:" << std::endl
-		   << oc_to_string(constants, indent + OC_TO_STRING_INDENT);
 	if (not mandatory.empty())
 		ss << indent << "mandatory:" << std::endl
 		   << oc_to_string(mandatory, indent + OC_TO_STRING_INDENT);
