@@ -1,7 +1,7 @@
 ;;
 ;; seq-presence.scm
 ;;
-;; Test the PresentLink inside a SequentialAnLink.
+;; Test the PresentLink inside a SequentialAndLink.
 ;;
 ;; Check to see if the atomspace contains the link
 ;;    (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
