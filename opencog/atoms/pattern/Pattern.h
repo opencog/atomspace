@@ -83,9 +83,6 @@ struct Pattern
 	/// The actual clauses. Set by unbundle_clauses().
 	HandleSeq        clauses;
 
-	/// The removed constant clauses. Set by unbundle_clauses().
-	HandleSeq        constants;
-
 	/// The cnf_clauses are the clauses, but with the AbsentLink removed.
 	/// This simplifies graph discovery, so that when they are found,
 	/// they can be rejected (e.g. are not absent).

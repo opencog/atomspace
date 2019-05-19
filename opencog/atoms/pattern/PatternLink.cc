@@ -58,15 +58,6 @@ void PatternLink::common_init(void)
 	// Locate the black-box and clear-box clauses.
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
-
-	// Same as above but for constant clauses. The fixed clauses (non
-	// virtual because with less than 2 variables) are pushed into a
-	// dummy container, constant_fixed as they are not useful for
-	// subsequent component analysis.
-	HandleSeq constant_fixed;
-	unbundle_virtual(_varlist.varset, _pat.constants,
-	                 constant_fixed, _virtual, _pat.black);
-
 	_num_virts = _virtual.size();
 
 	add_dummies();

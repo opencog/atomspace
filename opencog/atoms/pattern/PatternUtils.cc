@@ -77,7 +77,6 @@ bool remove_constants(const HandleSet& vars,
 			++i; continue;
 		}
 
-		pat.constants.emplace_back(clause);
 		i = pat.clauses.erase(i);
 
 		// remove the clause from components and component_patterns
