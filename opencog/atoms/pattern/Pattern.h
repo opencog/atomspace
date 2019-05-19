@@ -83,6 +83,11 @@ struct Pattern
 	/// The actual clauses. Set by unbundle_clauses().
 	HandleSeq        clauses;
 
+	/// Clauses that might be virtual. Set by unbundle_clauses().
+	HandleSeq        unquoted_clauses;
+	/// Clauses that are never virtual. Set by unbundle_clauses().
+	HandleSeq        quoted_clauses;
+
 	/// The cnf_clauses are the clauses, but with the AbsentLink removed.
 	/// This simplifies graph discovery, so that when they are found,
 	/// they can be rejected (e.g. are not absent).

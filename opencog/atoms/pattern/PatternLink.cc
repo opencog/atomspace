@@ -56,7 +56,8 @@ void PatternLink::common_init(void)
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box and clear-box clauses.
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
+	_fixed = _pat.quoted_clauses;
+	unbundle_virtual(_varlist.varset, _pat.unquoted_clauses,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
 
@@ -256,12 +257,15 @@ PatternLink::PatternLink(const HandleSet& vars,
 /// a list of clauses to solve.  This is currently kind-of crippled,
 /// since no variable type restricions are possible, and no optionals,
 /// either.  This is used only for backwards-compatibility API's.
+/// XXX No one, except unit tests, use these deprecated API's. These
+/// old unit tests should be removed.
 PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
+	_pat.unquoted_clauses = clauses;
 	common_init();
 	setup_components();
 }
@@ -342,6 +346,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	if (PRESENT_LINK == t)
 	{
 		_pat.clauses = hbody->getOutgoingSet();
+		_pat.quoted_clauses = hbody->getOutgoingSet();
 	}
 	else if (AND_LINK == t)
 	{
@@ -355,10 +360,31 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				const HandleSeq& pset = ho->getOutgoingSet();
 				for (const Handle& ph : pset)
+				{
 					_pat.clauses.emplace_back(ph);
+					_pat.quoted_clauses.emplace_back(ph);
+				}
+			}
+			else if (ABSENT_LINK == ot)
+			{
+				// We insist on an arity of 1, because anything else is
+				// ambiguous: consider absent(A B) is that: "both A and B must
+				// be absent"?  Or is it "if any of A and B are absent, then .."
+				if (1 != ho->get_arity())
+					throw InvalidParamException(TRACE_INFO,
+						"AbsentLink can have an arity of one only!");
+
+				const Handle& inv(ho->getOutgoingAtom(0));
+				_pat.clauses.emplace_back(ho);
+				// _pat.optionals.insert(inv);
+				// _pat.cnf_clauses.emplace_back(inv);
+				_pat.unquoted_clauses.emplace_back(inv);
 			}
 			else
+			{
 				_pat.clauses.emplace_back(ho);
+				_pat.unquoted_clauses.emplace_back(ho);
+			}
 		}
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
@@ -371,11 +397,13 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		unbundle_clauses_rec(connectives, oset);
 
 		_pat.clauses.emplace_back(hbody);
+		_pat.unquoted_clauses.emplace_back(hbody);
 	}
 	else
 	{
 		// There's just one single clause!
 		_pat.clauses.emplace_back(hbody);
+		_pat.unquoted_clauses.emplace_back(hbody);
 	}
 }
 
@@ -392,7 +420,10 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 		{
 			const HandleSeq& pset = ho->getOutgoingSet();
 			for (const Handle& ph : pset)
+			{
 				_pat.clauses.emplace_back(ph);
+				_pat.quoted_clauses.emplace_back(ph);
+			}
 		}
 		else if (ABSENT_LINK == ot)
 		{

@@ -101,6 +101,16 @@ bool remove_constants(const HandleSet& vars,
 		if (c != pat.cnf_clauses.end())
 			pat.cnf_clauses.erase(c);
 
+		// remove the clause from quoted_clauses.
+		c = std::find(pat.quoted_clauses.begin(), pat.quoted_clauses.end(), clause);
+		if (c != pat.quoted_clauses.end())
+			pat.quoted_clauses.erase(c);
+
+		// remove the clause from unquoted_clauses.
+		c = std::find(pat.unquoted_clauses.begin(), pat.unquoted_clauses.end(), clause);
+		if (c != pat.unquoted_clauses.end())
+			pat.unquoted_clauses.erase(c);
+
 		modified = true;
 	}
 

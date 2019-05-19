@@ -54,6 +54,15 @@ std::string Pattern::to_string(const std::string& indent) const
 		ss << indent << "executable_holders:" << std::endl
 		   << oc_to_string(executable_holders,
 		                   indent + OC_TO_STRING_INDENT);
+	if (not quoted_clauses.empty())
+		ss << indent << "quoted clauses:" << std::endl
+		   << oc_to_string(quoted_clauses, indent + OC_TO_STRING_INDENT);
+	if (not unquoted_clauses.empty())
+		ss << indent << "unquoted clauses:" << std::endl
+		   << oc_to_string(unquoted_clauses, indent + OC_TO_STRING_INDENT);
+	if (not cnf_clauses.empty())
+		ss << indent << "cnf clauses:" << std::endl
+		   << oc_to_string(cnf_clauses, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
