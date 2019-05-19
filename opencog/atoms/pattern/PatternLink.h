@@ -167,8 +167,6 @@ public:
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	void remove_constant_clauses(void);
-
 	bool satisfy(PatternMatchCallback&) const;
 
 	void debug_log(void) const;

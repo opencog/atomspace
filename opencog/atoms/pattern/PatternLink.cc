@@ -51,8 +51,8 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	validate_variables(_varlist.varset, _pat.clauses);
+	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box and clear-box clauses.
@@ -927,34 +927,6 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
-}
-
-/* ================================================================= */
-
-void PatternLink::remove_constant_clauses(void)
-{
-	// Remove clauses that don't alter the search. Any clause that
-	// fails to contain a variable, or fails to be evaluatable, will
-	// not affect the search in any way, because it is trivially
-	// satisfiable (and is always satisfied). Thus, its pointless
-	// to try to match them; they will always match.
-	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns);
-	if (bogus)
-	{
-		if (logger().is_debug_enabled())
-		{
-			logger().debug("%s: Constant clauses removed from pattern %s",
-			           __FUNCTION__, to_string().c_str());
-			for (const Handle& h: _pat.constants)
-			{
-				logger().debug("%s: Removed %s",
-				          __FUNCTION__, h->to_string().c_str());
-			}
-		}
-		_num_comps = _components.size();
-		make_connectivity_map(_pat.cnf_clauses);
-	}
 }
 
 /* ================================================================= */
