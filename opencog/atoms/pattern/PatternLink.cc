@@ -257,6 +257,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 /// a list of clauses to solve.  This is currently kind-of crippled,
 /// since no variable type restricions are possible, and no optionals,
 /// either.  This is used only for backwards-compatibility API's.
+/// XXX No one, except unit tests, use these deprecated API's. These
+/// old unit tests should be removed.
 PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
