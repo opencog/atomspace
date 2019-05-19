@@ -52,7 +52,7 @@ void PatternLink::common_init(void)
 	}
 
 	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
-	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
+	validate_variables(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box and clear-box clauses.
@@ -115,7 +115,6 @@ void PatternLink::common_init(void)
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
-		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
@@ -466,9 +465,8 @@ void PatternLink::locate_globs(HandleSeq& clauses)
  * to programmer error. Quoted variables are constants, and so don't
  * count.
  */
-void PatternLink::validate_clauses(HandleSet& vars,
-                                   HandleSeq& clauses,
-                                   HandleSeq& constants)
+void PatternLink::validate_variables(HandleSet& vars,
+                                     const HandleSeq& clauses)
 
 {
 	for (const Handle& v : vars)

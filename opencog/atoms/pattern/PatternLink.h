@@ -99,9 +99,8 @@ protected:
 
 	void locate_defines(HandleSeq& clauses);
 	void locate_globs(HandleSeq& clauses);
-	void validate_clauses(HandleSet& vars,
-	                      HandleSeq& clauses,
-	                      HandleSeq& constants);
+	void validate_variables(HandleSet& vars,
+	                        const HandleSeq& clauses);
 
 	void extract_optionals(const HandleSet &vars,
 	                       const HandleSeq &component);
