@@ -95,8 +95,8 @@ protected:
 
 	bool record_literal(const Handle&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
-	void unbundle_clauses_rec(const TypeSet&,
-	                          const HandleSeq&,
+	void unbundle_clauses_rec(const Handle&,
+	                          const TypeSet&,
 	                          bool reverse=false);
 
 	void locate_defines(const HandleSeq& clauses);

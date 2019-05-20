@@ -395,8 +395,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// working with the DefaultPatternMatchCB, which uses these.
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-		const HandleSeq& oset = hbody->getOutgoingSet();
-		unbundle_clauses_rec(connectives, oset);
+		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
@@ -412,11 +411,13 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
 /// groundable clauses.
-void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
-                                       const HandleSeq& nest,
+void PatternLink::unbundle_clauses_rec(const Handle& bdy,
+                                       const TypeSet& connectives,
                                        bool reverse)
 {
-	for (const Handle& ho : nest)
+	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
+	const HandleSeq& oset = bdy->getOutgoingSet();
+	for (const Handle& ho : oset)
 	{
 		Type ot = ho->get_type();
 		if (record_literal(ho, reverse))
@@ -425,8 +426,7 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
-			if (NOT_LINK == ot) reverse = not reverse;
-			unbundle_clauses_rec(connectives, ho->getOutgoingSet(), reverse);
+			unbundle_clauses_rec(ho, connectives, reverse);
 		}
 	}
 }
