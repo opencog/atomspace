@@ -2,6 +2,7 @@ ADD_LIBRARY (distvalue
 	DVecUtils.cc
 	CoverTree.cc
 	CTHist.cc
+	DistributionalValue.cc
 )
 
 TARGET_LINK_LIBRARIES(distvalue
@@ -12,5 +13,6 @@ INSTALL (FILES
 	DVecUtils.h
 	CoverTree.h
 	CTHist.h
+	DistributionalValue.h
 	DESTINATION "include/opencog/atoms/distvalue"
 )

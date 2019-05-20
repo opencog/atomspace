@@ -302,7 +302,10 @@ CTHist<val_t> CTHist<val_t>::mirrorLinf() const
 template <typename val_t>
 CTHist<val_t> CTHist<val_t>::merge(const CTHist<val_t>& t1, const CTHist<val_t>& t2)
 {
-	CTHist<val_t> res = CTHist(t1._size,t1._dims);
+	if (t1._dims != t2._dims)
+		throw RuntimeException(TRACE_INFO,"Can't merge dimensions don't align.");
+
+	CTHist<val_t> res = CTHist(max(t1._size,t2._size),t1._dims);
 	for (auto elem : t1._nodes)
 	{
 		elem.children = std::vector<int>();

@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+#include <iomanip>
+
+#include <opencog/atoms/distvalue/DistributionalValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class DVTest :  public CxxTest::TestSuite
+{
+private:
+	DistributionalValuePtr dv;
+
+public:
+	DVTest() {}
+
+	void setUp()
+	{
+		//std::cout << std::endl;
+
+		CTHist<double> hist0 = CTHist<double>(3,1);
+		hist0.insert(DVec{0.85},20);
+		hist0.insert(DVec{0.5},10);
+
+		dv = DistributionalValue::createDV(hist0);
+	}
+
+	void tearDown() {}
+
+	void testMean()
+	{
+		//std::cout << "Test Mean:\n" << std::flush;
+		auto m = dv->bin_means();
+		TS_ASSERT_EQUALS(m[DVec{0.5}], 1.0/3.0);
+		TS_ASSERT_EQUALS(m[DVec{0.85}], 2.0/3.0);
+	}
+
+	void testMode()
+	{
+		//std::cout << "Test Mode:\n" << std::flush;
+		auto m = dv->bin_modes();
+		TS_ASSERT_EQUALS(m[DVec{0.5}], 9.0/28.0);
+		TS_ASSERT_EQUALS(m[DVec{0.85}], 19.0/28.0);
+	}
+
+	void testContainedMeans()
+	{
+		//std::cout << "Test Contained Means:\n" << std::flush;
+		DVecSeq inp = DVecSeq{DVec{0.25},DVec{0.6},DVec{0.75}};
+		DistributionalValuePtr remaped = dv->remap(inp);
+
+		TS_ASSERT_EQUALS(remaped->bin_means()[DVec{0.25}], 0.0);
+		TS_ASSERT_EQUALS(remaped->bin_means()[DVec{0.6}], 0.428571428571428547638078043746645562350749969482421875);
+		TS_ASSERT_EQUALS(remaped->bin_means()[DVec{0.75}], 0.5714285714285713968507707249955274164676666259765625);
+
+		//std::cout << std::setprecision(100);
+		//std::cout << remaped->bin_means()[DVec{0.25}] << std::endl;
+		//std::cout << remaped->bin_means()[DVec{0.6}] << std::endl;
+		//std::cout << remaped->bin_means()[DVec{0.75}] << std::endl;
+	}
+};
