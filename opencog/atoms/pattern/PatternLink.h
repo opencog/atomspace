@@ -151,7 +151,7 @@ public:
 	            const VariableTypeMap& typemap,
 	            const GlobIntervalMap& intervalmap,
 	            const HandleSeq& component,
-	            const HandleSet& optionals);
+	            const HandleSeq& optionals);
 
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,

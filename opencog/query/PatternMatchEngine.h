@@ -59,7 +59,9 @@ private:
 	const Pattern* _pat;
 
 	bool is_optional(const Handle& h) {
-		return (_pat->optionals.count(h) != 0); }
+		// return (_pat->optionals.count(h) != 0); }
+		const HandleSeq& o(_pat->optionals);
+		return o.end() != std::find(o.begin(), o.end(), h); }
 
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }

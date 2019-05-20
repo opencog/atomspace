@@ -191,7 +191,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const VariableTypeMap& typemap,
                          const GlobIntervalMap& intervalmap,
                          const HandleSeq& compo,
-                         const HandleSet& opts)
+                         const HandleSeq& opts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	// First, lets deal with the vars. We have discarded the original
@@ -224,7 +224,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 		auto it = boost::find_if(opts, h_is_in);
 		if (it != opts.end())
 		{
-			_pat.optionals.insert(*it);
+			_pat.optionals.emplace_back(*it);
 			_pat.clauses.emplace_back(*it);
 		}
 		else
@@ -435,7 +435,7 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 					"AbsentLink can have an arity of one only!");
 
 			const Handle& inv(ho->getOutgoingAtom(0));
-			_pat.optionals.insert(inv);
+			_pat.optionals.emplace_back(inv);
 			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else if (connectives.find(ot) != connectives.end())
@@ -525,7 +525,7 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 					"AbsentLink can have an arity of one only!");
 
 			const Handle& inv(h->getOutgoingAtom(0));
-			_pat.optionals.insert(inv);
+			_pat.optionals.emplace_back(inv);
 			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else

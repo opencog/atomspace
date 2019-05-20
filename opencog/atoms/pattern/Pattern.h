@@ -99,7 +99,7 @@ struct Pattern
 	/// The optional clauses don't have to be grounded, but they might be.
 	/// This is where the absent clauses are held, so e.g. if these do get
 	/// grounded, they might be rejected (depending on the callback).
-	HandleSet optionals;    // Optional clauses
+	HandleSeq optionals;    // Optional clauses
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
