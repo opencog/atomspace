@@ -102,9 +102,6 @@ protected:
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
-	void extract_optionals(const HandleSet &vars,
-	                       const HandleSeq &component);
-
 	void unbundle_virtual(const HandleSet& vars,
 	                      const HandleSeq& clauses,
 	                      HandleSeq& concrete_clauses,

@@ -59,7 +59,6 @@ void PatternLink::common_init(void)
 	validate_variables(_varlist.varset, all_clauses);
 
 	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
-	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
@@ -213,9 +212,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 
 	// Next, the body... there's no _body for lambda. The compo is
 	// the mandatory clauses; we have to reconstruct the optionals.
-	// We cannot use `extract_optionals()` because opts have been
-	// stripped already.
-
 	for (const Handle& h : compo)
 	{
 		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
@@ -264,6 +260,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
 	_pat.unquoted_clauses = clauses;
+	_pat.mandatory = clauses;
 	common_init();
 	setup_components();
 }
@@ -345,6 +342,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	{
 		_pat.clauses = hbody->getOutgoingSet();
 		_pat.quoted_clauses = hbody->getOutgoingSet();
+		_pat.mandatory = hbody->getOutgoingSet();
 	}
 	else if (AND_LINK == t)
 	{
@@ -361,6 +359,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				{
 					_pat.clauses.emplace_back(ph);
 					_pat.quoted_clauses.emplace_back(ph);
+					_pat.mandatory.emplace_back(ph);
 				}
 			}
 			else if (ABSENT_LINK == ot)
@@ -381,6 +380,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				_pat.clauses.emplace_back(ho);
 				_pat.unquoted_clauses.emplace_back(ho);
+				_pat.mandatory.emplace_back(ho);
 			}
 		}
 	}
@@ -395,6 +395,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		_pat.clauses.emplace_back(hbody);
 		_pat.unquoted_clauses.emplace_back(hbody);
+		_pat.mandatory.emplace_back(hbody);
 	}
 	else if (ABSENT_LINK == t)
 	{
@@ -415,6 +416,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// There's just one single clause!
 		_pat.clauses.emplace_back(hbody);
 		_pat.unquoted_clauses.emplace_back(hbody);
+		_pat.mandatory.emplace_back(hbody);
 	}
 }
 
@@ -434,6 +436,7 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 			{
 				_pat.clauses.emplace_back(ph);
 				_pat.quoted_clauses.emplace_back(ph);
+				_pat.mandatory.emplace_back(ph);
 			}
 		}
 		else if (ABSENT_LINK == ot)
@@ -509,25 +512,6 @@ void PatternLink::validate_variables(HandleSet& vars,
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
 			   v->to_short_string().c_str());
-		}
-	}
-}
-
-/* ================================================================= */
-/**
- * Given the initial list of variables and clauses, separate these into
- * the mandatory, optional and fuzzy clauses.
- */
-void PatternLink::extract_optionals(const HandleSet &vars,
-                                    const HandleSeq &component)
-{
-	// Split in positive and negative clauses
-	for (const Handle& h : component)
-	{
-		Type t = h->get_type();
-		if (ABSENT_LINK != t)
-		{
-			_pat.mandatory.emplace_back(h);
 		}
 	}
 }
