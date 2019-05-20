@@ -219,11 +219,9 @@ PatternLink::PatternLink(const HandleSet& vars,
 		if (it != opts.end())
 		{
 			_pat.optionals.emplace_back(*it);
-			_pat.clauses.emplace_back(*it);
 		}
 		else
 		{
-			_pat.clauses.emplace_back(h);
 			_pat.mandatory.emplace_back(h);
 		}
 	}
@@ -258,7 +256,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_varlist.varset = vars;
-	_pat.clauses = clauses;
 	_pat.unquoted_clauses = clauses;
 	_pat.mandatory = clauses;
 	common_init();
@@ -340,7 +337,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	_pat.body = hbody;
 	if (PRESENT_LINK == t)
 	{
-		_pat.clauses = hbody->getOutgoingSet();
 		_pat.quoted_clauses = hbody->getOutgoingSet();
 		_pat.mandatory = hbody->getOutgoingSet();
 	}
@@ -357,7 +353,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				const HandleSeq& pset = ho->getOutgoingSet();
 				for (const Handle& ph : pset)
 				{
-					_pat.clauses.emplace_back(ph);
 					_pat.quoted_clauses.emplace_back(ph);
 					_pat.mandatory.emplace_back(ph);
 				}
@@ -372,13 +367,11 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 						"AbsentLink can have an arity of one only!");
 
 				const Handle& inv(ho->getOutgoingAtom(0));
-				_pat.clauses.emplace_back(ho);
 				_pat.optionals.emplace_back(inv);
 				_pat.quoted_clauses.emplace_back(inv);
 			}
 			else
 			{
-				_pat.clauses.emplace_back(ho);
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
 			}
@@ -393,7 +386,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		unbundle_clauses_rec(connectives, oset);
 
-		_pat.clauses.emplace_back(hbody);
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
@@ -407,14 +399,12 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				"AbsentLink can have an arity of one only!");
 
 		const Handle& inv(hbody->getOutgoingAtom(0));
-		_pat.clauses.emplace_back(hbody);
 		_pat.optionals.emplace_back(inv);
 		_pat.quoted_clauses.emplace_back(inv);
 	}
 	else
 	{
 		// There's just one single clause!
-		_pat.clauses.emplace_back(hbody);
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
@@ -434,7 +424,6 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 			const HandleSeq& pset = ho->getOutgoingSet();
 			for (const Handle& ph : pset)
 			{
-				_pat.clauses.emplace_back(ph);
 				_pat.quoted_clauses.emplace_back(ph);
 				_pat.mandatory.emplace_back(ph);
 			}
@@ -751,7 +740,6 @@ bool PatternLink::add_dummies()
 			const Handle& left = t->getOutgoingAtom(0);
 			if (any_unquoted_in_tree(left, _varlist.varset))
 			{
-				_pat.clauses.emplace_back(left);
 				_pat.mandatory.emplace_back(left);
 				_fixed.emplace_back(left);
 			}
@@ -759,7 +747,6 @@ bool PatternLink::add_dummies()
 			const Handle& right = t->getOutgoingAtom(1);
 			if (any_unquoted_in_tree(right, _varlist.varset))
 			{
-				_pat.clauses.emplace_back(right);
 				_pat.mandatory.emplace_back(right);
 				_fixed.emplace_back(right);
 			}

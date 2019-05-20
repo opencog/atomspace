@@ -284,7 +284,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
-	if (_pattern->clauses.empty()) {
+	if (_pattern->mandatory.empty() and _pattern->optionals.empty()) {
 		_search_fail = true;
 		return false;
 	}

@@ -80,13 +80,10 @@ struct Pattern
 	/// The original body containing the link (if any).
 	Handle           body;
 
-	/// The actual clauses. Set by unbundle_clauses().
-	HandleSeq        clauses;
-
-	/// Clauses that might be virtual. Set by unbundle_clauses().
-	HandleSeq        unquoted_clauses;
 	/// Clauses that are never virtual. Set by unbundle_clauses().
 	HandleSeq        quoted_clauses;
+	/// Clauses that might be virtual. Set by unbundle_clauses().
+	HandleSeq        unquoted_clauses;
 
 	/// The mandatory clauses must be grounded.
 	HandleSeq        mandatory;
