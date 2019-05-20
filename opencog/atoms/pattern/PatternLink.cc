@@ -737,11 +737,13 @@ it out.
 ///
 bool PatternLink::add_dummies()
 {
+	if (0 < _pat.quoted_clauses.size()) return false;
+
 	// The below is almost but not quite the same as
-	// if (0 < _fixed.size()) return; because fixe can be
+	// if (0 < _fixed.size()) return; because fixed can be
 	// non-zero, if the virtual term has only one variable
 	// in it.
-	for (const Handle& cl : _pat.clauses)
+	for (const Handle& cl : _pat.unquoted_clauses)
 	{
 		// if (0 == _pat.evaluatable_holders.count(cl)) return;
 		if (0 == _pat.evaluatable_terms.count(cl)) return false;
