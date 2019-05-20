@@ -374,8 +374,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 				const Handle& inv(ho->getOutgoingAtom(0));
 				_pat.clauses.emplace_back(ho);
-				// _pat.optionals.insert(inv);
-				_pat.unquoted_clauses.emplace_back(inv);
+				_pat.optionals.emplace_back(inv);
+				_pat.quoted_clauses.emplace_back(inv);
 			}
 			else
 			{
