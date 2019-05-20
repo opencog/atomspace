@@ -93,10 +93,11 @@ protected:
 	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
-	bool record_literal(const Handle&);
+	bool record_literal(const Handle&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
 	void unbundle_clauses_rec(const TypeSet&,
-	                          const HandleSeq&);
+	                          const HandleSeq&,
+	                          bool reverse=false);
 
 	void locate_defines(const HandleSeq& clauses);
 	void locate_globs(const HandleSeq& clauses);

@@ -318,11 +318,11 @@ PatternLink::PatternLink(const Link& l)
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
 /// but are taken as a request to search for and ground these terms in
 /// the form they are given, in tier literal form, without evaluation.
-bool PatternLink::record_literal(const Handle& h)
+bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
 	// Pull clauses out of a PresentLink
-	if (PRESENT_LINK == typ)
+	if (PRESENT_LINK == typ or (reverse and ABSENT_LINK == typ))
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
@@ -333,7 +333,7 @@ bool PatternLink::record_literal(const Handle& h)
 	}
 
 	// Pull clauses out of an AbsentLink
-	if (ABSENT_LINK == typ)
+	if (ABSENT_LINK == typ or (reverse and PRESENT_LINK == typ))
 	{
 		// We insist on an arity of 1, because anything else is
 		// ambiguous: consider absent(A B) is that: "both A and B must
@@ -351,7 +351,6 @@ bool PatternLink::record_literal(const Handle& h)
 	return false;
 }
 
-///
 /// Unpack the clauses.
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
@@ -414,17 +413,20 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// embedded inside some evaluatable clause.  Note these as literal,
 /// groundable clauses.
 void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
-                                       const HandleSeq& nest)
+                                       const HandleSeq& nest,
+                                       bool reverse)
 {
 	for (const Handle& ho : nest)
 	{
-		if (record_literal(ho))
+		Type ot = ho->get_type();
+		if (record_literal(ho, reverse))
 		{
 			/* no-op */
 		}
-		else if (connectives.find(ho->get_type()) != connectives.end())
+		else if (connectives.find(ot) != connectives.end())
 		{
-			unbundle_clauses_rec(connectives, ho->getOutgoingSet());
+			if (NOT_LINK == ot) reverse = not reverse;
+			unbundle_clauses_rec(connectives, ho->getOutgoingSet(), reverse);
 		}
 	}
 }
