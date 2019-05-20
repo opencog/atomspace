@@ -312,6 +312,45 @@ PatternLink::PatternLink(const Link& l)
 }
 
 /* ================================================================= */
+
+/// Make a note of any clauses that must be present (or absent)
+/// in the pattern in thier literal form, i.e. uninterpreted.
+/// Any evaluatable terms appearing in these clauses are NOT evaluated,
+/// but are taken as a request to search for and ground these terms in
+/// the form they are given, in tier literal form, without evaluation.
+bool PatternLink::record_literal(const Handle& h)
+{
+	Type typ = h->get_type();
+	// Pull clauses out of a PresentLink
+	if (PRESENT_LINK == typ)
+	{
+		for (const Handle& ph : h->getOutgoingSet())
+		{
+			_pat.quoted_clauses.emplace_back(ph);
+			_pat.mandatory.emplace_back(ph);
+		}
+		return true;
+	}
+
+	// Pull clauses out of an AbsentLink
+	if (ABSENT_LINK == typ)
+	{
+		// We insist on an arity of 1, because anything else is
+		// ambiguous: consider absent(A B) is that: "both A and B must
+		// be absent"?  Or is it "if any of A and B are absent, then .."
+		if (1 != h->get_arity())
+			throw InvalidParamException(TRACE_INFO,
+				"AbsentLink can have an arity of one only!");
+
+		const Handle& inv(h->getOutgoingAtom(0));
+		_pat.optionals.emplace_back(inv);
+		_pat.quoted_clauses.emplace_back(inv);
+		return true;
+	}
+
+	return false;
+}
+
 ///
 /// Unpack the clauses.
 ///
@@ -335,42 +374,16 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// SequentialAndLink itself also has to be evaluated, so we add it
 	// too.
 	_pat.body = hbody;
-	if (PRESENT_LINK == t)
+	if (record_literal(hbody))
 	{
-		_pat.quoted_clauses = hbody->getOutgoingSet();
-		_pat.mandatory = hbody->getOutgoingSet();
+		/* no-op */
 	}
 	else if (AND_LINK == t)
 	{
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			Type ot = ho->get_type();
-			// If there is a PresentLink hiding under the AndLink
-			// then pull clauses out of it.
-			if (PRESENT_LINK == ot)
-			{
-				const HandleSeq& pset = ho->getOutgoingSet();
-				for (const Handle& ph : pset)
-				{
-					_pat.quoted_clauses.emplace_back(ph);
-					_pat.mandatory.emplace_back(ph);
-				}
-			}
-			else if (ABSENT_LINK == ot)
-			{
-				// We insist on an arity of 1, because anything else is
-				// ambiguous: consider absent(A B) is that: "both A and B must
-				// be absent"?  Or is it "if any of A and B are absent, then .."
-				if (1 != ho->get_arity())
-					throw InvalidParamException(TRACE_INFO,
-						"AbsentLink can have an arity of one only!");
-
-				const Handle& inv(ho->getOutgoingAtom(0));
-				_pat.optionals.emplace_back(inv);
-				_pat.quoted_clauses.emplace_back(inv);
-			}
-			else
+			if (not record_literal(ho))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -389,19 +402,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
-	else if (ABSENT_LINK == t)
-	{
-		// We insist on an arity of 1, because anything else is
-		// ambiguous: consider absent(A B) is that: "both A and B must
-		// be absent"?  Or is it "if any of A and B are absent, then .."
-		if (1 != hbody->get_arity())
-			throw InvalidParamException(TRACE_INFO,
-				"AbsentLink can have an arity of one only!");
-
-		const Handle& inv(hbody->getOutgoingAtom(0));
-		_pat.optionals.emplace_back(inv);
-		_pat.quoted_clauses.emplace_back(inv);
-	}
 	else
 	{
 		// There's just one single clause!
@@ -410,37 +410,19 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
-/// Search for any PRESENT_LINK or ABSENT_LINK's that are
-/// recusively embedded inside some evaluatable clause.  Expose these
-/// as first-class, groundable clauses.
+/// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
+/// embedded inside some evaluatable clause.  Note these as literal,
+/// groundable clauses.
 void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
                                        const HandleSeq& nest)
 {
 	for (const Handle& ho : nest)
 	{
-		Type ot = ho->get_type();
-		if (PRESENT_LINK == ot)
+		if (record_literal(ho))
 		{
-			const HandleSeq& pset = ho->getOutgoingSet();
-			for (const Handle& ph : pset)
-			{
-				_pat.quoted_clauses.emplace_back(ph);
-				_pat.mandatory.emplace_back(ph);
-			}
+			/* no-op */
 		}
-		else if (ABSENT_LINK == ot)
-		{
-			// We insist on an arity of 1, because anything else is
-			// ambiguous: consider absent(A B) is that: "both A and B must
-			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != ho->get_arity())
-				throw InvalidParamException(TRACE_INFO,
-					"AbsentLink can have an arity of one only!");
-
-			const Handle& inv(ho->getOutgoingAtom(0));
-			_pat.optionals.emplace_back(inv);
-		}
-		else if (connectives.find(ot) != connectives.end())
+		else if (connectives.find(ho->get_type()) != connectives.end())
 		{
 			unbundle_clauses_rec(connectives, ho->getOutgoingSet());
 		}
