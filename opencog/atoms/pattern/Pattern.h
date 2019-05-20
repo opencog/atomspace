@@ -104,11 +104,6 @@ struct Pattern
 	HandleSet evaluatable_terms;   // smallest term that is evaluatable
 	HandleSet evaluatable_holders; // holds something evaluatable.
 
-	/// Executable terms are those that inherit from FunctionLink;
-	/// this includes ExecutionOutputLink's.
-	HandleSet executable_terms;    // smallest term that is executable
-	HandleSet executable_holders;  // holds something executable.
-
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).
 	HandleSet defined_terms;    // The DPN/DSN itself.

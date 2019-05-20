@@ -49,14 +49,6 @@ std::string Pattern::to_string(const std::string& indent) const
 		ss << indent << "evaluatable_holders:" << std::endl
 		   << oc_to_string(evaluatable_holders,
 		                   indent + OC_TO_STRING_INDENT);
-	if (not executable_terms.empty())
-		ss << indent << "executable_terms:" << std::endl
-		   << oc_to_string(executable_terms,
-		                   indent + OC_TO_STRING_INDENT);
-	if (not executable_holders.empty())
-		ss << indent << "executable_holders:" << std::endl
-		   << oc_to_string(executable_holders,
-		                   indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 

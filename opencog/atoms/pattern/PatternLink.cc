@@ -610,53 +610,6 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
-#if DONT_DO_THIS_ANY_MORE
-The code that is if-defed out here does not seem to be a good idea.
-Or rather, I cannot currently think of a good use-case for it.
-If code needs to be executed before a pattern match is performed, then
-maybe one should ... do it some other way? Instead of doing it
-automatically? Or something?  The below seems like a half-baked,
-incomplete idea for something neat, but that was never fully thought
-out, spec'ed, implmeneted, documented, explained... So I'm commenting
-it out.
-
-		// Subclasses of FunctionLink, e.g. ExecutionOutputLink,
-		// but also PlusLink, TimesLink are all executable. They
-		// need to be executed *before* pattern matching, but after
-		// any variables in them have been grounded, so that the
-		// pattern match is performed on the result of the execution.
-		// Thus, these are treated by the same virtual-graph algo as
-		// the virtual links.
-		FindAtoms feol(FUNCTION_LINK, true);
-		feol.search_set(clause);
-
-		for (const Handle& sh : feol.varset)
-		{
-			// There is an exception with ExecutionOutputLink that
-			// needs to have a grounded schema node in order to be
-			// executable. If they have non grounded schema node then
-			// their execution is themselves (i.e. they are not
-			// executable).
-			if (sh->get_type() != EXECUTION_OUTPUT_LINK or
-			    sh->getOutgoingAtom(0)->get_type() == GROUNDED_SCHEMA_NODE)
-			{
-				_pat.executable_terms.insert(sh);
-				_pat.executable_holders.insert(sh);
-				add_to_map(_pat.in_executable, sh, sh);
-				// But they're virtual only if they have two or more
-				// unquoted, bound variables in them. Otherwise, they
-				// can be evaluated on the spot.
-				if (2 <= num_unquoted_in_tree(sh, vars))
-				{
-					is_virtual = true;
-					is_black = true;
-				}
-			}
-		}
-		for (const Handle& sh : feol.holders)
-			_pat.executable_holders.insert(sh);
-#endif
-
 		if (is_virtual)
 			virtual_clauses.emplace_back(clause);
 		else
@@ -922,8 +875,6 @@ void PatternLink::debug_log(void) const
 		ss << "Mandatory " << cl << ":";
 		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
 			ss << " (evaluatable)";
-		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-			ss << " (executable)";
 		ss << std::endl;
 		ss << h->to_short_string();
 		logger().fine() << ss.str();
@@ -940,8 +891,6 @@ void PatternLink::debug_log(void) const
 			ss << "Optional clause " << cl << ":";
 			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
 				ss << " (evaluatable)";
-			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-				ss << " (executable)";
 			ss << std::endl;
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
