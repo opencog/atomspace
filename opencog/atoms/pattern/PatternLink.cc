@@ -318,11 +318,12 @@ PatternLink::PatternLink(const Link& l)
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
 /// but are taken as a request to search for and ground these terms in
 /// the form they are given, in tier literal form, without evaluation.
-bool PatternLink::record_literal(const Handle& h)
+bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
 	// Pull clauses out of a PresentLink
-	if (PRESENT_LINK == typ)
+	if ((not reverse and PRESENT_LINK == typ) or
+	    (reverse and ABSENT_LINK == typ))
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
@@ -333,7 +334,8 @@ bool PatternLink::record_literal(const Handle& h)
 	}
 
 	// Pull clauses out of an AbsentLink
-	if (ABSENT_LINK == typ)
+	if ((not reverse and ABSENT_LINK == typ) or
+	    (reverse and PRESENT_LINK == typ))
 	{
 		// We insist on an arity of 1, because anything else is
 		// ambiguous: consider absent(A B) is that: "both A and B must
@@ -351,7 +353,6 @@ bool PatternLink::record_literal(const Handle& h)
 	return false;
 }
 
-///
 /// Unpack the clauses.
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
@@ -383,7 +384,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			if (not record_literal(ho))
+			if (NOT_LINK == ho->get_type())
+			{
+				if (not record_literal(ho->getOutgoingAtom(0), true))
+				{
+					_pat.unquoted_clauses.emplace_back(ho);
+					_pat.mandatory.emplace_back(ho);
+				}
+			}
+			else if (not record_literal(ho))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -395,9 +404,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// XXX FIXME, Just like in trace_connectives, assume we are
 		// working with the DefaultPatternMatchCB, which uses these.
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-		const HandleSeq& oset = hbody->getOutgoingSet();
-		unbundle_clauses_rec(connectives, oset);
+		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
@@ -413,18 +421,22 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
 /// groundable clauses.
-void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
-                                       const HandleSeq& nest)
+void PatternLink::unbundle_clauses_rec(const Handle& bdy,
+                                       const TypeSet& connectives,
+                                       bool reverse)
 {
-	for (const Handle& ho : nest)
+	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
+	const HandleSeq& oset = bdy->getOutgoingSet();
+	for (const Handle& ho : oset)
 	{
-		if (record_literal(ho))
+		Type ot = ho->get_type();
+		if (record_literal(ho, reverse))
 		{
 			/* no-op */
 		}
-		else if (connectives.find(ho->get_type()) != connectives.end())
+		else if (connectives.find(ot) != connectives.end())
 		{
-			unbundle_clauses_rec(connectives, ho->getOutgoingSet());
+			unbundle_clauses_rec(ho, connectives, reverse);
 		}
 	}
 }
