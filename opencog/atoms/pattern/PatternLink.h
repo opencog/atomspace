@@ -93,17 +93,15 @@ protected:
 	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
+	bool record_literal(const Handle&);
 	void unbundle_clauses(const Handle& body);
 	void unbundle_clauses_rec(const TypeSet&,
 	                          const HandleSeq&);
 
-	void locate_defines(HandleSeq& clauses);
-	void locate_globs(HandleSeq& clauses);
+	void locate_defines(const HandleSeq& clauses);
+	void locate_globs(const HandleSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
-
-	void extract_optionals(const HandleSet &vars,
-	                       const HandleSeq &component);
 
 	void unbundle_virtual(const HandleSet& vars,
 	                      const HandleSeq& clauses,
@@ -151,7 +149,7 @@ public:
 	            const VariableTypeMap& typemap,
 	            const GlobIntervalMap& intervalmap,
 	            const HandleSeq& component,
-	            const HandleSet& optionals);
+	            const HandleSeq& optionals);
 
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,

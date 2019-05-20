@@ -66,7 +66,7 @@ bool remove_constants(const HandleSet& vars,
 
 	// Caution: this loop modifies the clauses list!
 	HandleSeq::iterator i;
-	for (i = pat.clauses.begin(); i != pat.clauses.end();)
+	for (i = pat.mandatory.begin(); i != pat.mandatory.end();)
 	{
 		Handle clause(*i);
 
@@ -75,7 +75,7 @@ bool remove_constants(const HandleSet& vars,
 			++i; continue;
 		}
 
-		i = pat.clauses.erase(i);
+		i = pat.mandatory.erase(i);
 
 		// remove the clause from components and component_patterns
 		auto j = std::find(components.begin(), components.end(),
@@ -91,23 +91,8 @@ bool remove_constants(const HandleSet& vars,
 			}
 		}
 
-		// remove the clause from _pattern_mandatory.
-		auto m = std::find(pat.mandatory.begin(), pat.mandatory.end(), clause);
-		if (m != pat.mandatory.end())
-			pat.mandatory.erase(m);
-
-		// remove the clause from _cnf_clauses.
-		auto c = std::find(pat.cnf_clauses.begin(), pat.cnf_clauses.end(), clause);
-		if (c != pat.cnf_clauses.end())
-			pat.cnf_clauses.erase(c);
-
-		// remove the clause from quoted_clauses.
-		c = std::find(pat.quoted_clauses.begin(), pat.quoted_clauses.end(), clause);
-		if (c != pat.quoted_clauses.end())
-			pat.quoted_clauses.erase(c);
-
 		// remove the clause from unquoted_clauses.
-		c = std::find(pat.unquoted_clauses.begin(), pat.unquoted_clauses.end(), clause);
+		auto c = std::find(pat.unquoted_clauses.begin(), pat.unquoted_clauses.end(), clause);
 		if (c != pat.unquoted_clauses.end())
 			pat.unquoted_clauses.erase(c);
 

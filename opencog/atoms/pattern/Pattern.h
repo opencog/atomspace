@@ -80,18 +80,10 @@ struct Pattern
 	/// The original body containing the link (if any).
 	Handle           body;
 
-	/// The actual clauses. Set by unbundle_clauses().
-	HandleSeq        clauses;
-
-	/// Clauses that might be virtual. Set by unbundle_clauses().
-	HandleSeq        unquoted_clauses;
 	/// Clauses that are never virtual. Set by unbundle_clauses().
 	HandleSeq        quoted_clauses;
-
-	/// The cnf_clauses are the clauses, but with the AbsentLink removed.
-	/// This simplifies graph discovery, so that when they are found,
-	/// they can be rejected (e.g. are not absent).
-	HandleSeq        cnf_clauses;  // AbsentLink removed!
+	/// Clauses that might be virtual. Set by unbundle_clauses().
+	HandleSeq        unquoted_clauses;
 
 	/// The mandatory clauses must be grounded.
 	HandleSeq        mandatory;
@@ -99,7 +91,7 @@ struct Pattern
 	/// The optional clauses don't have to be grounded, but they might be.
 	/// This is where the absent clauses are held, so e.g. if these do get
 	/// grounded, they might be rejected (depending on the callback).
-	HandleSet optionals;    // Optional clauses
+	HandleSeq optionals;    // Optional clauses
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
@@ -111,11 +103,6 @@ struct Pattern
 	/// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
 	HandleSet evaluatable_terms;   // smallest term that is evaluatable
 	HandleSet evaluatable_holders; // holds something evaluatable.
-
-	/// Executable terms are those that inherit from FunctionLink;
-	/// this includes ExecutionOutputLink's.
-	HandleSet executable_terms;    // smallest term that is executable
-	HandleSet executable_holders;  // holds something executable.
 
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).

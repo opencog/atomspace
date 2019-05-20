@@ -1043,14 +1043,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	auto gnd = var_grounding.find(hp);
 	if (gnd != var_grounding.end()) return (gnd->second == hg);
 
-	// If the pattern link is executable, then we should execute, and
-	// use the result of that execution. (This isn't implemented yet,
-	// because all variables in an executable link need to be grounded,
-	// before the execution can occur... thus, this needs to be handled
-	// a lot like a VirtualLink.)
-	if (is_executable(hp))
-		throw RuntimeException(TRACE_INFO, "Not implemented!!");
-
 	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute

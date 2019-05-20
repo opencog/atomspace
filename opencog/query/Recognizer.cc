@@ -72,7 +72,7 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 
 bool Recognizer::initiate_search(PatternMatchEngine* pme)
 {
-	const HandleSeq& clauses = _pattern->cnf_clauses;
+	const HandleSeq& clauses = _pattern->mandatory;
 
 	_cnt = 0;
 	for (const Handle& h: clauses)
