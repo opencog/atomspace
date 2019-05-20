@@ -60,9 +60,6 @@ std::string Pattern::to_string(const std::string& indent) const
 	if (not unquoted_clauses.empty())
 		ss << indent << "unquoted clauses:" << std::endl
 		   << oc_to_string(unquoted_clauses, indent + OC_TO_STRING_INDENT);
-	if (not cnf_clauses.empty())
-		ss << indent << "cnf clauses:" << std::endl
-		   << oc_to_string(cnf_clauses, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 

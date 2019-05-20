@@ -101,15 +101,7 @@ void PatternLink::common_init(void)
 	// handled during search by a single PatternLink. The multi-clause
 	// grounding mechanism is not required for that case.
 	if (1 == _num_comps)
-	{
-		// Each component is in connection-order. By re-assigning to
-		// _pat.cnf_clauses, they get placed in that order, thus giving
-		// a minor performance boost during clause traversal.
-		// Gurk. This does not work currently; the evaluatables have been
-		// stripped out of the component. I think this is a bug ...
-		// _pat.cnf_clauses = _components[0];
-	   make_connectivity_map(_pat.cnf_clauses);
-	}
+	   make_connectivity_map(_pat.mandatory);
 
 	make_term_trees();
 }
@@ -213,11 +205,11 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_varlist._glob_intervalmap.insert(*imit);
 	}
 
-	// Next, the body... there's no _body for lambda. The compo is the
-	// cnf_clauses; we have to reconstruct the optionals.  We cannot
-	// use extract_optionals because opts have been stripped already.
+	// Next, the body... there's no _body for lambda. The compo is
+	// the mandatory clauses; we have to reconstruct the optionals.
+	// We cannot use `extract_optionals()` because opts have been
+	// stripped already.
 
-	_pat.cnf_clauses = compo;
 	for (const Handle& h : compo)
 	{
 		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
@@ -237,7 +229,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	locate_globs(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
+	unbundle_virtual(_varlist.varset, _pat.mandatory,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
@@ -245,7 +237,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_components.emplace_back(compo);
 	_num_comps = 1;
 
-	make_connectivity_map(_pat.cnf_clauses);
+	make_connectivity_map(_pat.mandatory);
 	_pat.redex_name = "Unpacked component of a virtual link";
 
 	make_term_trees();
@@ -377,7 +369,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				const Handle& inv(ho->getOutgoingAtom(0));
 				_pat.clauses.emplace_back(ho);
 				// _pat.optionals.insert(inv);
-				// _pat.cnf_clauses.emplace_back(inv);
 				_pat.unquoted_clauses.emplace_back(inv);
 			}
 			else
@@ -436,7 +427,6 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 
 			const Handle& inv(ho->getOutgoingAtom(0));
 			_pat.optionals.emplace_back(inv);
-			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
@@ -526,12 +516,10 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 
 			const Handle& inv(h->getOutgoingAtom(0));
 			_pat.optionals.emplace_back(inv);
-			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else
 		{
 			_pat.mandatory.emplace_back(h);
-			_pat.cnf_clauses.emplace_back(h);
 		}
 	}
 }
@@ -770,7 +758,6 @@ bool PatternLink::add_dummies()
 			if (any_unquoted_in_tree(left, _varlist.varset))
 			{
 				_pat.clauses.emplace_back(left);
-				_pat.cnf_clauses.emplace_back(left);
 				_pat.mandatory.emplace_back(left);
 				_fixed.emplace_back(left);
 			}
@@ -779,7 +766,6 @@ bool PatternLink::add_dummies()
 			if (any_unquoted_in_tree(right, _varlist.varset))
 			{
 				_pat.clauses.emplace_back(right);
-				_pat.cnf_clauses.emplace_back(right);
 				_pat.mandatory.emplace_back(right);
 				_fixed.emplace_back(right);
 			}
@@ -832,10 +818,10 @@ void PatternLink::trace_connectives(const TypeSet& connectives,
  */
 void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
-	for (const Handle& h : _pat.cnf_clauses)
-	{
+	for (const Handle& h : _pat.mandatory)
 		make_map_recursive(h, h);
-	}
+	for (const Handle& h : _pat.optionals)
+		make_map_recursive(h, h);
 
 	// Save some minor amount of space by erasing those atoms that
 	// participate in only one clause. These atoms cannot be used
@@ -890,7 +876,12 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 
 void PatternLink::make_term_trees()
 {
-	for (const Handle& clause : _pat.cnf_clauses)
+	for (const Handle& clause : _pat.mandatory)
+	{
+		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		make_term_tree_recursive(clause, clause, root_term);
+	}
+	for (const Handle& clause : _pat.optionals)
 	{
 		PatternTermPtr root_term(std::make_shared<PatternTerm>());
 		make_term_tree_recursive(clause, clause, root_term);

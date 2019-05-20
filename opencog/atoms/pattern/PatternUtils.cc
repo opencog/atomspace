@@ -96,13 +96,8 @@ bool remove_constants(const HandleSet& vars,
 		if (m != pat.mandatory.end())
 			pat.mandatory.erase(m);
 
-		// remove the clause from _cnf_clauses.
-		auto c = std::find(pat.cnf_clauses.begin(), pat.cnf_clauses.end(), clause);
-		if (c != pat.cnf_clauses.end())
-			pat.cnf_clauses.erase(c);
-
 		// remove the clause from quoted_clauses.
-		c = std::find(pat.quoted_clauses.begin(), pat.quoted_clauses.end(), clause);
+		auto c = std::find(pat.quoted_clauses.begin(), pat.quoted_clauses.end(), clause);
 		if (c != pat.quoted_clauses.end())
 			pat.quoted_clauses.erase(c);
 
