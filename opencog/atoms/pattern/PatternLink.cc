@@ -396,6 +396,20 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.clauses.emplace_back(hbody);
 		_pat.unquoted_clauses.emplace_back(hbody);
 	}
+	else if (ABSENT_LINK == t)
+	{
+		// We insist on an arity of 1, because anything else is
+		// ambiguous: consider absent(A B) is that: "both A and B must
+		// be absent"?  Or is it "if any of A and B are absent, then .."
+		if (1 != hbody->get_arity())
+			throw InvalidParamException(TRACE_INFO,
+				"AbsentLink can have an arity of one only!");
+
+		const Handle& inv(hbody->getOutgoingAtom(0));
+		_pat.clauses.emplace_back(hbody);
+		_pat.optionals.emplace_back(inv);
+		_pat.quoted_clauses.emplace_back(inv);
+	}
 	else
 	{
 		// There's just one single clause!
@@ -511,19 +525,7 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 	for (const Handle& h : component)
 	{
 		Type t = h->get_type();
-		if (ABSENT_LINK == t)
-		{
-			// We insist on an arity of 1, because anything else is
-			// ambiguous: consider absent(A B) is that: "both A and B must
-			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != h->get_arity())
-				throw InvalidParamException(TRACE_INFO,
-					"AbsentLink can have an arity of one only!");
-
-			const Handle& inv(h->getOutgoingAtom(0));
-			_pat.optionals.emplace_back(inv);
-		}
-		else
+		if (ABSENT_LINK != t)
 		{
 			_pat.mandatory.emplace_back(h);
 		}
