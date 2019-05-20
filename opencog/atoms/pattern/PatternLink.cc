@@ -322,7 +322,8 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
 	// Pull clauses out of a PresentLink
-	if (PRESENT_LINK == typ or (reverse and ABSENT_LINK == typ))
+	if ((not reverse and PRESENT_LINK == typ) or
+	    (reverse and ABSENT_LINK == typ))
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
@@ -333,7 +334,8 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	}
 
 	// Pull clauses out of an AbsentLink
-	if (ABSENT_LINK == typ or (reverse and PRESENT_LINK == typ))
+	if ((not reverse and ABSENT_LINK == typ) or
+	    (reverse and PRESENT_LINK == typ))
 	{
 		// We insist on an arity of 1, because anything else is
 		// ambiguous: consider absent(A B) is that: "both A and B must
@@ -382,7 +384,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			if (not record_literal(ho))
+			if (NOT_LINK == ho->get_type())
+			{
+				if (not record_literal(ho->getOutgoingAtom(0), true))
+				{
+					_pat.unquoted_clauses.emplace_back(ho);
+					_pat.mandatory.emplace_back(ho);
+				}
+			}
+			else if (not record_literal(ho))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -394,7 +404,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// XXX FIXME, Just like in trace_connectives, assume we are
 		// working with the DefaultPatternMatchCB, which uses these.
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.unquoted_clauses.emplace_back(hbody);
