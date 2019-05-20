@@ -38,8 +38,9 @@ using namespace opencog;
 
 void PatternLink::common_init(void)
 {
-	locate_defines(_pat.clauses);
-	locate_globs(_pat.clauses);
+	locate_defines(_pat.unquoted_clauses);
+	locate_globs(_pat.unquoted_clauses);
+	locate_globs(_pat.quoted_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
