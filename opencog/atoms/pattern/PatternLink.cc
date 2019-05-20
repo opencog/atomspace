@@ -436,7 +436,7 @@ void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
 	}
 }
 
-void PatternLink::locate_defines(HandleSeq& clauses)
+void PatternLink::locate_defines(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -451,7 +451,7 @@ void PatternLink::locate_defines(HandleSeq& clauses)
 	}
 }
 
-void PatternLink::locate_globs(HandleSeq& clauses)
+void PatternLink::locate_globs(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
