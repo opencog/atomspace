@@ -52,7 +52,12 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	validate_variables(_varlist.varset, _pat.clauses);
+	// Make sure every variable appears in some clause.
+	HandleSeq all_clauses(_pat.unquoted_clauses);
+	all_clauses.insert(all_clauses.end(),
+	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
+	validate_variables(_varlist.varset, all_clauses);
+
 	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -82,7 +87,7 @@ void PatternLink::common_init(void)
 	// just work around this, but eventually XXX FIXME.
 	if (nullptr == _pat.body)
 	{
-		for (const Handle& term : _pat.clauses)
+		for (const Handle& term : _pat.unquoted_clauses)
 			trace_connectives(connectives, term);
 	}
 	else
@@ -226,8 +231,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_pat.mandatory.emplace_back(h);
 		}
 	}
-	locate_defines(_pat.clauses);
-	locate_globs(_pat.clauses);
+	locate_defines(compo);
+	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_varlist.varset, _pat.mandatory,
