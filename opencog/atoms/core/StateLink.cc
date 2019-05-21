@@ -98,6 +98,10 @@ void StateLink::install()
 		StateLinkPtr old_state(StateLinkCast(defl));
 		if (not old_state->is_closed()) continue;
 
+		// Make sure we are visible in the atomspace, before the swap.
+		AtomSpace *as = old_state->getAtomSpace();
+		setAtomSpace(as);
+
 		// Atomic update of the incoming set.
 		const LinkPtr& new_state = LinkCast(get_handle());
 		alias->swap_atom(old_state, new_state);
@@ -106,8 +110,6 @@ void StateLink::install()
 		_outgoing[1]->insert_atom(new_state);
 
 		// Remove the old StateLink too. It must be no more.
-		AtomSpace *as = old_state->getAtomSpace();
-		// setAtomSpace(as);
 		as->remove_atom(defl->get_handle(), true);
 		swapped = true;
 	}
