@@ -107,13 +107,13 @@ class Atom
     friend class DeleteLink;      // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
+protected:
     //! Sets the AtomSpace in which this Atom is inserted.
-    void setAtomSpace(AtomSpace *);
+    virtual void setAtomSpace(AtomSpace *);
 
     //! Returns the AtomTable in which this Atom is inserted.
     AtomTable *getAtomTable() const;
 
-protected:
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
     mutable char _flags;
