@@ -39,7 +39,6 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
@@ -311,33 +310,6 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     return Handle::UNDEFINED;
 }
 
-// Special atom types support.
-AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
-{
-    // Very special handling for DeleteLink's
-    if (DELETE_LINK == atom_type) {
-        DeleteLinkPtr delp(DeleteLinkCast(atom));
-        // If it can be cast, then its not an open term.
-        if (nullptr != delp)
-            return delp;
-
-        // Trying to create a closed-term DeleteLink will throw.
-        // This is a sign that we need to remove stuff.
-        try {
-            delp = createDeleteLink(*LinkCast(atom));
-        }
-        catch (...) {
-            LinkPtr lp(LinkCast(atom));
-            for (Handle ho : lp->getOutgoingSet()) {
-                this->extract(ho);
-            }
-            return Handle();
-        }
-        return delp;
-    }
-    return atom;
-}
-
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
@@ -368,10 +340,6 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 
     AtomPtr orig(atom);
     Type atom_type = atom->get_type();
-
-    // Certain DeleteLinks can never be added!
-    atom = cast_factory(atom_type, atom);
-    if (nullptr == atom) return Handle();
 
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable

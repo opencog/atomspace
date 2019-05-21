@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "DeleteLink.h"
@@ -51,6 +50,11 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 		if (VARIABLE_NODE != t)
 			as->extract_atom(h, true);
 	}
+
+	// The AtomSpace code seems to want this exception, so that
+	// the atom gets deleted from the backingstore too.  But we could
+	// just as easily call `as->delete_atom()` above!?
+	// throw DeleteException();
 }
 
 #if 0
