@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include "StateLink.h"
 
 using namespace opencog;
@@ -71,6 +72,20 @@ Handle StateLink::get_state(const Handle& alias)
 Handle StateLink::get_link(const Handle& alias)
 {
 	return get_unique(alias, STATE_LINK, true);
+}
+
+void StateLink::setAtomSpace(AtomSpace * as)
+{
+	// If the handleset is closed (no free variables), then
+	// only one copy of the atom can exist in the atomspace.
+	if (not is_closed())
+	{
+		Atom::setAtomSpace(as);
+		return;
+	}
+	Handle old_state = get_link(get_alias());
+	as->extract_atom(old_state, true);
+	Atom::setAtomSpace(as);
 }
 
 DEFINE_LINK_FACTORY(StateLink, STATE_LINK);
