@@ -44,6 +44,7 @@ class DeleteLink : public FreeLink
 {
 protected:
 	void init(void);
+	void setAtomSpace(AtomSpace *);
 public:
 	DeleteLink(const HandleSeq&);
 

@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/FindUtils.h>
+// #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "DeleteLink.h"
 
@@ -30,24 +30,32 @@ using namespace opencog;
 
 void DeleteLink::init(void)
 {
-	// The handleset must contain a variable in it, somewhere.
-	// If it doesn't, then the entire handleset should be deleted
-	// (removed from the atomspace). We can't do this at constructor
-	// time, because we don't know the atomspace yet.  So we hack
-	// around this by throwing at constructor time.
-	//
 	FreeLink::init();
-	if (0 == _vars.varseq.size())
-		// throw DeleteException();
-		throw InvalidParamException(TRACE_INFO,
-			"Cannot create a fully grounded DeleteLink!");
+}
+
+void DeleteLink::setAtomSpace(AtomSpace * as)
+{
+	// The handleset must contain a variable in it, somewhere.
+	// If it doesn't, then the entire handleset is to be deleted
+	// (removed from the atomspace).
+	if (0 <= _vars.varseq.size())
+	{
+		Atom::setAtomSpace(as);
+		return;
+	}
+
+	const HandleSeq& oset = _outgoing;
+	for (const Handle& h : oset)
+	{
+		Type t = h->get_type();
+		if (VARIABLE_NODE != t)
+			as->extract_atom(h, true);
+	}
 }
 
 #if 0
 /*****
-Well, we cannot really implement this here; but this is what
-it should actually do.  We can't implement it here, because
-fully-grounded DeleteLink's cannot exist.
+Hmm. This seems not to be needed, right now.
 ****/
 Handle DeleteLink::execute(AtomSpace * as) const
 {
