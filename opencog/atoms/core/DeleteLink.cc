@@ -47,8 +47,7 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 	for (const Handle& h : oset)
 	{
 		Type t = h->get_type();
-		if (VARIABLE_NODE != t)
-			as->extract_atom(h, true);
+		as->extract_atom(h, true);
 	}
 
 	// The AtomSpace code seems to want this exception, so that
