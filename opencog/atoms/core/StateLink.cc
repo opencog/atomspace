@@ -78,13 +78,27 @@ void StateLink::setAtomSpace(AtomSpace * as)
 {
 	// If the handleset is closed (no free variables), then
 	// only one copy of the atom can exist in the atomspace.
-	if (not is_closed())
+	if (nullptr == as or not is_closed())
 	{
 		Atom::setAtomSpace(as);
 		return;
 	}
-	Handle old_state = get_link(get_alias());
-	as->extract_atom(old_state, true);
+
+	// Find all existing copies of this particular StateLink
+	// in this particular AtomSpace (There should be only one).
+	// Remove it.
+	const Handle& alias = get_alias();
+	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
+	for (const LinkPtr& defl : defs)
+	{
+		if (defl->getOutgoingAtom(0) == alias)
+		{
+			StateLinkPtr slp(StateLinkCast(defl));
+			if (slp.get() == this) continue;
+			if (not slp->is_closed()) continue;
+			as->remove_atom(defl->get_handle(), true);
+		}
+	}
 	Atom::setAtomSpace(as);
 }
 
