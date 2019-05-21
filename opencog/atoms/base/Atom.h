@@ -104,7 +104,8 @@ class Atom
 {
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
-    friend class DeleteLink;      // Needs to call getAtomTable()
+    friend class Link;            // Needs to call install_atom()
+    friend class StateLink;       // Needs to call swap_atom()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 protected:
@@ -196,6 +197,8 @@ protected:
     void insert_atom(const LinkPtr&);
     void remove_atom(const LinkPtr&);
     void swap_atom(const LinkPtr&, const LinkPtr&);
+    virtual void install();
+    virtual void remove();
 
     virtual ContentHash compute_hash() const = 0;
 

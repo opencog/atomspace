@@ -46,7 +46,7 @@ class StateLink : public UniqueLink
 {
 protected:
 	void init();
-	void setAtomSpace(AtomSpace *);
+	virtual void install();
 public:
 	StateLink(const HandleSeq&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);

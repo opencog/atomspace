@@ -185,3 +185,21 @@ ContentHash Link::compute_hash() const
 	_content_hash = hsh;
 	return _content_hash;
 }
+
+/// Place `this` into the incoming set of each outgoing atom.
+///
+void Link::install()
+{
+	LinkPtr llc(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->insert_atom(llc);
+}
+
+void Link::remove()
+{
+	LinkPtr lll(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->remove_atom(lll);
+}

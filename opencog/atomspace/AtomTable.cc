@@ -396,16 +396,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     }
 
     atom->copyValues(Handle(orig));
-
-    if (atom->is_link()) {
-        // Build the incoming set of outgoing atom h.
-        size_t arity = atom->get_arity();
-        LinkPtr llc(LinkCast(atom));
-        for (size_t i = 0; i < arity; i++) {
-            llc->_outgoing[i]->insert_atom(llc);
-        }
-    }
-
+    atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
 
@@ -708,12 +699,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    if (atom->is_link()) {
-        LinkPtr lll(LinkCast(atom));
-        for (AtomPtr a : lll->_outgoing) {
-            a->remove_atom(lll);
-        }
-    }
+    // Remove atom from other incoming sets.
+    atom->remove();
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and
