@@ -43,12 +43,8 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 		return;
 	}
 
-	const HandleSeq& oset = _outgoing;
-	for (const Handle& h : oset)
-	{
-		Type t = h->get_type();
+	for (const Handle& h : _outgoing)
 		as->extract_atom(h, true);
-	}
 
 	// The AtomSpace code seems to want this exception, so that
 	// the atom gets deleted from the backingstore too.  But we could
