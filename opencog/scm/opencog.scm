@@ -61,7 +61,7 @@
 		(cog-set-atomspace! cog-initial-as)))
 
 ; Load core atom types.
-(load-from-path "opencog/base/core_types.scm")
+(load-from-path "opencog/atoms/atom_types/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
