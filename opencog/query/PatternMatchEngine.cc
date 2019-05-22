@@ -1696,7 +1696,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(joiner, undef, var_grounding);
+			bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 			DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
 			if (not match) {
 				clause_stacks_pop();
