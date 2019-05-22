@@ -194,9 +194,16 @@ void DistributionalValue::add_evidence(const DVec& pos,double count)
 }
 
 DistributionalValuePtr
-DistributionalValue::merge(const DistributionalValuePtr & other) const
+DistributionalValue::merge(DistributionalValuePtr other) const
 {
 	CTHist<double> hist = CTHist<double>::merge(_value,other->_value);
+	return createDV(hist);
+}
+
+DistributionalValuePtr
+DistributionalValue::join(DistributionalValuePtr other) const
+{
+	CTHist<double> hist = CTHist<double>::join(_value,other->_value);
 	return createDV(hist);
 }
 
@@ -243,4 +250,10 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	}
 
 	return ss.str();
+}
+
+std::string oc_to_string(const DistributionalValuePtr& dvp,
+                         const std::string& indent)
+{
+	return dvp->to_string(indent);
 }

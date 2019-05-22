@@ -109,7 +109,8 @@ public:
 	/*
 	 * These Functions are just passed through from CTHist<double>
 	 */
-	DistributionalValuePtr merge(const DistributionalValuePtr&) const;
+	DistributionalValuePtr merge(DistributionalValuePtr) const;
+	DistributionalValuePtr join(DistributionalValuePtr) const;
 	DistributionalValuePtr remap(const DVecSeq&) const;
 	DistributionalValuePtr mirrorLinf() const;
 
@@ -135,11 +136,7 @@ static inline ValuePtr ValueCast(const DistributionalValuePtr & dv)
 }
 
 std::string oc_to_string(const DistributionalValuePtr& dvp,
-                         const std::string& indent)
-{
-	return dvp->to_string(indent);
-}
-
+                         const std::string& indent);
 } // namespace opencog
 
 /** @}*/

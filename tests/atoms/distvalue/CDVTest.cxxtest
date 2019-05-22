@@ -1,0 +1,121 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+#include <iomanip>
+
+#include <opencog/atoms/distvalue/DistributionalValue.h>
+#include <opencog/atoms/distvalue/ConditionalDV.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class CDVTest :  public CxxTest::TestSuite
+{
+private:
+
+	ConditionalDVPtr cdv;
+	DistributionalValuePtr dv;
+	DVec keys[9];
+
+public:
+	CDVTest()
+	{
+	}
+
+	void setUp()
+	{
+		std::cout << std::endl;
+
+		keys[0] = DVec{0.125};
+		keys[1] = DVec{0.375};
+		keys[2] = DVec{0.625};
+		keys[3] = DVec{0.875};
+
+		keys[4] = DVec{0.15};
+		keys[5] = DVec{0.5};
+		keys[6] = DVec{0.85};
+
+		keys[7] = DVec{0.25};
+		keys[8] = DVec{0.75};
+
+		CTHist<double> hist0 = CTHist<double>(4,1);
+		hist0.insert(keys[5],10);
+		hist0.insert(keys[6],20);
+
+		dv = DistributionalValue::createDV(hist0);
+
+		CTHist<double> hist1 = CTHist<double>(4,1);
+		hist1.insert(keys[0],30);
+		hist1.insert(keys[1],30);
+
+
+		CTHist<double> hist2 = CTHist<double>(4,1);
+		hist2.insert(keys[2],30);
+		hist2.insert(keys[3],30);
+
+		CDVrep rep = CDVrep(3,1);
+		rep.insert(keys[7],hist1);
+		rep.insert(keys[8],hist2);
+
+		cdv = ConditionalDV::createCDV(rep);
+    }
+
+	void tearDown() {}
+
+	void testUncoditonal()
+	{
+        std::cout << dv->to_string() << std::endl
+                  << cdv->to_string() << std::endl << std::flush;
+		DistributionalValuePtr dvres = cdv->get_unconditional(dv);
+
+		CTHist<double> dvc1 = CTHist<double>(4,1);
+		dvc1.insert(keys[0],5);
+		dvc1.insert(keys[1],5);
+		dvc1.insert(keys[2],25);
+		dvc1.insert(keys[3],25);
+
+		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc1);
+        std::cout << "Res1:\n"
+		          << dvres->to_string() << std::endl
+		          << dvexp->to_string() << std::endl << std::flush;
+		TS_ASSERT_EQUALS(*dvres,*dvexp);
+	}
+
+	void testGetJoint()
+	{
+		DistributionalValuePtr dvres = cdv->get_joint_probability(dv);
+
+        CTHist<double> dvc = CTHist<double>(9,2);
+		dvc.insert(DVec{keys[5][0],keys[0][0]},2.5);
+		dvc.insert(DVec{keys[5][0],keys[1][0]},2.5);
+		dvc.insert(DVec{keys[5][0],keys[2][0]},2.5);
+		dvc.insert(DVec{keys[5][0],keys[3][0]},2.5);
+		dvc.insert(DVec{keys[6][0],keys[2][0]},10);
+		dvc.insert(DVec{keys[6][0],keys[3][0]},10);
+
+		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc);
+
+		TS_ASSERT_EQUALS(dvres->value(),dvc);
+	}
+};

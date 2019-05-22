@@ -38,7 +38,7 @@ void CTHist<val_t>::insert(const DVec & pos,const val_t & value)
 template <typename val_t>
 void CTHist<val_t>::insert(const CoverTreeNode<val_t> & x)
 {
-	if (_elem_count == 0)
+	if (_elem_count == 0 && false)
 	{
 		for (unsigned int i = 0; i < x.pos.size(); i++)
 		{
@@ -241,20 +241,13 @@ CTHist<val_t>::findNeighborInDir(const CoverTreeNode<val_t> & n,
 
 
 template <typename val_t>
-CTHist<val_t>& CTHist<val_t>::operator+=(const CTHist<val_t>& val)
-{
-	*this = merge(*this,val);
-	return *this;
-}
-
-template <typename val_t>
 CTHist<val_t> CTHist<val_t>::remap(const DVecSeq & val) const
 {
 	if (val[0].size() != _dims)
 		throw RuntimeException(TRACE_INFO,"Wrong number of dims to remap.");
 
 	CTHist<val_t> res = CTHist<val_t>(val.size(),_dims);
-	double sum;
+	double sum = 0;
 	for (DVec pos : val)
 	{
 		val_t tmp = get_avg(pos);
@@ -303,24 +296,61 @@ template <typename val_t>
 CTHist<val_t> CTHist<val_t>::merge(const CTHist<val_t>& t1, const CTHist<val_t>& t2)
 {
 	if (t1._dims != t2._dims)
-		throw RuntimeException(TRACE_INFO,"Can't merge dimensions don't align.");
+		throw RuntimeException(TRACE_INFO,"Can't merge! Dimensions don't align.");
 
 	CTHist<val_t> res = CTHist(max(t1._size,t2._size),t1._dims);
 	for (auto elem : t1._nodes)
 	{
 		elem.children = std::vector<int>();
 		res.insert(elem);
-		//res.print();
 	}
 
 	for (auto elem : t2._nodes)
 	{
 		elem.children = std::vector<int>();
 		res.insert(elem);
-		//res.print();
 	}
 
 	return res;
+}
+
+template <typename val_t>
+void CTHist<val_t>::merge(const CTHist<val_t>& other)
+{
+	if (_dims != other._dims)
+		throw RuntimeException(TRACE_INFO,"Can't merge! Dimensions don't align.");
+
+	for (auto elem : other._nodes)
+	{
+		elem.children = std::vector<int>();
+		insert(elem);
+	}
+}
+
+template <typename val_t>
+CTHist<val_t> CTHist<val_t>::join(const CTHist<val_t>& t1, const CTHist<val_t>& t2)
+{
+	CTHist<val_t> res = CTHist(t1._size * t2._size,t1._dims + t2._dims);
+	for (auto elem1 : t1._nodes)
+	{
+		for (auto elem2 : t2._nodes)
+		{
+			DVec k;
+			k.insert(k.end(),elem1.pos.begin(),elem1.pos.end());
+			k.insert(k.end(),elem2.pos.begin(),elem2.pos.end());
+			val_t tmp = elem1.value + elem2.value;
+			res.insert(k,tmp);
+		}
+	}
+	res *=  (t1.total_count() + t2.total_count()) / res.total_count();
+	return res;
+}
+
+template <typename val_t>
+CTHist<val_t>& CTHist<val_t>::operator+=(const CTHist<val_t>& val)
+{
+	merge(val);
+	return *this;
 }
 
 template class CTHist<double>;

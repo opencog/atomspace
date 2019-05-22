@@ -115,7 +115,9 @@ public:
 		: CoverTree<val_t>(dims) , _size(s)
 	{
 		lower_limits = DVec(dims);
+		std::fill(lower_limits.begin(),lower_limits.end(),0.0);
 		upper_limits = DVec(dims);
+		std::fill(upper_limits.begin(),upper_limits.end(),1.0);
 	}
 
 	int size() const {return _size;};
@@ -143,9 +145,19 @@ public:
 	CTHist<val_t> mirrorLinf() const;
 
 	/*
-	 * Merge to CTHists into 1
+	 * Merge 2 CTHists into 1 without modifying them
 	 */
 	static CTHist<val_t> merge(const CTHist<val_t>&, const CTHist<val_t>&);
+
+	/*
+	 * Join 2 CTHists into joint distribution
+	 */
+	static CTHist<val_t> join(const CTHist<val_t>&, const CTHist<val_t>&);
+
+	/*
+	 * Merge into this CTHist<val_t>
+	 */
+	void merge(const CTHist<val_t>& other);
 
 	/*
 	 * Operator version of merge

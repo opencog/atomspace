@@ -27,6 +27,7 @@
 #include <cmath>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
 
 #include <opencog/atoms/distvalue/CoverTree.h>
 
@@ -296,9 +297,12 @@ void CoverTree<val_t>::insert_rec(int node_idx,
                                   int level)
 {
 	const CoverTreeNode<val_t> & x = _nodes[node_idx];
+	//Can only happen when inserting a new Node
+	//when reinserting a already existing node it's guranted to be uniqe
 	if (dist(x,p) == 0)
 	{
 		p.value += x.value;
+		_nodes.pop_back();
 		return;
 	}
 
@@ -322,7 +326,9 @@ val_t CoverTree<val_t>::get(const DVec & pos) const
 	if (nearest->pos == pos)
 		return nearest->value;
 	else
+	{
 		throw RuntimeException(TRACE_INFO,"No node with given postion in the Histogram.");
+	}
 }
 
 template <typename val_t>
@@ -432,7 +438,7 @@ bool CoverTree<val_t>::operator==(const CoverTree<val_t>& other) const
 		try
 		{
 			val_t oval = other.get(elem.pos);
-			if (oval != elem.value)
+			if (!eq_count(oval, elem.value))
 				return false;
 		}
 		catch (const RuntimeException & e)
@@ -492,6 +498,17 @@ double opencog::get_count(const double v)
 double opencog::get_count(const CoverTree<double>& ct)
 {
 	return ct.total_count();
+}
+
+bool opencog::eq_count(const double v1,const double v2)
+{
+	return is_approx_eq_ulp(v1,v2,24);
+}
+
+bool opencog::eq_count(const CoverTree<double> & ct1,
+                       const CoverTree<double> & ct2)
+{
+	return ct1 == ct2;
 }
 
 void opencog::update_count(double & v,const double n)
