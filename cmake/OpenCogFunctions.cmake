@@ -124,7 +124,7 @@ FUNCTION(ADD_GUILE_MODULE)
 
             # Specify module paths.
             STRING(REGEX MATCH
-                "^(${PREFIX_DIR_PATH})([a-z0-9/-_]+)*/([a-z0-9-_]+)" ""
+                "^(${PREFIX_DIR_PATH})([_a-z0-9/-]+)*/([_a-z0-9-]+)" ""
                 ${SCM_MODULE_DESTINATION})
 
             # MODULE_NAME: it is equal to the MODULE_DESTINATION directory name
