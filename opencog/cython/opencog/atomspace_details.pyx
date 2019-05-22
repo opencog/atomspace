@@ -85,6 +85,12 @@ cdef class AtomSpace:
             atom = self.add_link(t, out, tv)
         return atom
 
+    def add_atom(self, Atom atom):
+        cdef cHandle result = self.atomspace.add_atom(atom.get_c_handle())
+        if result == result.UNDEFINED:
+            return None
+        return create_python_value_from_c_value(<cValuePtr&>result, self)
+
     def add_node(self, Type t, atom_name, TruthValue tv=None):
         """ Add Node to AtomSpace
         @todo support [0.5,0.5] format for TruthValue.
@@ -242,8 +248,7 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     return atomspace
 
 cdef api object py_atom(const cHandle& h, object atomspace):
-    cdef Atom atom = Atom.createAtom(h, atomspace)
-    return atom
+    return Atom.createAtom(h, atomspace)
 
 def create_child_atomspace(object atomspace):
     cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
