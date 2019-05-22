@@ -39,8 +39,6 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -398,38 +396,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     }
 
     atom->copyValues(Handle(orig));
-
-    if (atom->is_link()) {
-        if (STATE_LINK == atom_type) {
-            // If this is a closed StateLink, (i.e. has no variables)
-            // then make sure that the old state gets removed from the
-            // atomtable. The atomtable must contain no more than one
-            // closed state at a time.  Also: we must be careful to
-            // update the incoming set in an atomic fashion, so that
-            // the pattern matcher never finds two closed StateLinks
-            // for any one given alias.  Any number of non-closed
-            // StateLinks are allowed.
-
-            StateLinkPtr slp(StateLinkCast(atom));
-            if (slp->is_closed()) {
-                try {
-                    Handle alias = slp->get_alias();
-                    Handle old_state = StateLink::get_link(alias);
-                    atom->setAtomSpace(_as);
-                    alias->swap_atom(LinkCast(old_state), slp);
-                    extract(old_state, true);
-                } catch (const InvalidParamException& ex) {}
-            }
-        }
-
-        // Build the incoming set of outgoing atom h.
-        size_t arity = atom->get_arity();
-        LinkPtr llc(LinkCast(atom));
-        for (size_t i = 0; i < arity; i++) {
-            llc->_outgoing[i]->insert_atom(llc);
-        }
-    }
-
+    atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
 
@@ -732,12 +699,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    if (atom->is_link()) {
-        LinkPtr lll(LinkCast(atom));
-        for (AtomPtr a : lll->_outgoing) {
-            a->remove_atom(lll);
-        }
-    }
+    // Remove atom from other incoming sets.
+    atom->remove();
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and
