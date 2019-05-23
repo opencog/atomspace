@@ -52,7 +52,7 @@ predicate can be satisfied. Thus, for example, given the structure
             VariableNode "$var0"
             VariableNode "$var1"
 
-Then, if the atomspace also contains a parsed version of the English
+Then, if the AtomSpace also contains a parsed version of the English
 sentence "Pottery is made from clay", that is, if it contains the
 hypergraph
 
@@ -76,7 +76,7 @@ bindings are referred to as the 'groundings' or 'solutions' to the
 variables. So, e.g. $var0 is 'grounded' by "pottery".
 
 Next, a grounded copy of the implicand is then created; that is,
-the following hypergraph is created and added to the atomspace:
+the following hypergraph is created and added to the AtomSpace:
 
    EvaluationLink
       PredicateNode "make_from"
@@ -97,7 +97,7 @@ variable may lead to unexpected results.)
 
 Pattern-matching proceeds by finding groundings for these variables.
 When a pattern match is found, the variables can be understood as
-being grounded by some explicit terms in the atomspace. This
+being grounded by some explicit terms in the AtomSpace. This
 grounding is then used to create a grounded version of the
 (ungrounded) implicand. That is, the variables in the implicand are
 substituted by their grounding values.  This method then returns a
@@ -105,7 +105,7 @@ list of all of the grounded implicands that were created.
 
 The act of pattern-matching to the predicate of the implication has
 an implicit 'for-all' flavour to it: the pattern is matched to 'all'
-matches in the atomspace.  However, with a suitably defined
+matches in the AtomSpace.  However, with a suitably defined
 PatternMatchCallback, the search can be terminated at any time, and
 so this method can be used to implement a 'there-exists' predicate,
 or any quantifier whatsoever.

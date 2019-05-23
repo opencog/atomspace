@@ -10,7 +10,7 @@ and [Link](http://wiki.opencog.org/w/Link).
 ClassServer
 ===========
 The ClassServer provides a factory for creating Atoms of different
-types, given only thier type (and, for Nodes, the string giving the node
+types, given only their type (and, for Nodes, the string giving the node
 name; for Links, the atom sequence).
 
 The ClassServer also provides a simple constructor-time type-checking
@@ -18,7 +18,7 @@ and type-validation system. Many atoms can be thought of as "taking
 inputs", while others "generate outputs", and the type-validation system
 can check that these constraints are obeyed, at the time that the C++
 class is first constructed.  There are also other type-checking and
-type validation systems in the atomspace, this is just one of them.
+type validation systems in the AtomSpace, this is just one of them.
 
 At this time, the type validation system works closely with the
 following types, declared in the
