@@ -53,6 +53,12 @@ void get_connected_components(const HandleSet& vars,
                               HandleSeqSeq& compset,
                               HandleSetSeq& compvars);
 
+void get_bridged_components(const HandleSet& vars,
+                            const HandleSeq& clauses,
+                            const HandleSeq& opts,
+                            HandleSeqSeq& compset,
+                            HandleSetSeq& compvars);
+
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_UTILS_H

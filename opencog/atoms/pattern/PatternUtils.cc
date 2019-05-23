@@ -231,6 +231,92 @@ void get_connected_components(const HandleSet& vars,
 	}
 }
 
+// Unfortunately for us, the list of clauses that we were given
+// includes the optionals. It might be nice if this was fixed
+// upstream, but that seems to be hard. XXX FIXME. So, here,
+// we brute-force remove them.
+static HandleSeq get_nonopts(const HandleSeq& clauses,
+                             const HandleSeq& opts)
+{
+	HandleSeq nonopts;
+	for (const Handle& h: clauses)
+	{
+		bool is_opt = false;
+		for (const Handle& opt: opts)
+		{
+			if (h == opt) { is_opt = true; break; }
+		}
+		if (not is_opt) nonopts.emplace_back(h);
+	}
+	return nonopts;
+}
+
+void get_bridged_components(const HandleSet& vars,
+                            const HandleSeq& clauses,
+                            const HandleSeq& opts,
+                            HandleSeqSeq& components,
+                            HandleSetSeq& component_vars)
+{
+	if (0 == opts.size())
+	{
+		get_connected_components(vars, clauses, components, component_vars);
+		return;
+	}
+
+	// Some optionals bridge across components; others simply
+	// connect to some of them. We need to figure out which is which.
+
+	HandleSeq nonopts(get_nonopts(clauses, opts));
+	if (0 == nonopts.size())
+	{
+		get_connected_components(vars, opts, components, component_vars);
+		return;
+	}
+
+	get_connected_components(vars, nonopts, components, component_vars);
+
+	// Now try to attach opts.
+	for (const Handle& opt: opts)
+	{
+		// Count how many components this opt might attach to.
+		size_t cnt = 0;
+		for (const HandleSet& vars: component_vars)
+		{
+			if (any_unquoted_in_tree(opt, vars)) cnt++;
+		}
+
+		// If its not attached to anything, create a new component.
+		if (0 == cnt)
+		{
+			components.push_back({opt});
+
+			FindAtoms fv(vars);
+			fv.search_set(opt);
+			component_vars.emplace_back(fv.varset);
+		}
+		else if (1 == cnt)
+		{
+			// Attach it to that one component.
+			get_connected_components(vars, {opt}, components, component_vars);
+		}
+
+		// else `(1 < cnt)` and its a bridge. Do nothing.
+	}
+
+	// The above loop has a very subtle bug, which I am going to
+	// ignore, because its hard to fix, and unlikely to get triggered.
+	// Yet, it could happen: so here goes. If one opt clause shares
+	// variables with another opt clause, yet each of these two
+	// share variables with two distinctly different components,
+	// then these two opts, together, bridge between the components.
+	// The user might want to reject such bridges, but allow each
+	// opt individually, as long as they don't bridge. As of today,
+	// specifying this kind of pattern would take some hard work,
+	// (I'm not sure its even possible with toeay's API) and so it
+	// seems very unlikely that any user would want this, and thus
+	// very unlikely that they'll hit this bug.
+}
+
 } // namespace opencog
 
 /* ===================== END OF FILE ===================== */
