@@ -103,23 +103,6 @@ cdef class TruthValue(Value):
     cdef tv_ptr* _tvptr(self)
 
 
-cdef extern from  "opencog/atoms/truthvalue/TensorTruthValue.h" namespace "opencog":
-    ctypedef shared_ptr[const cTensorTruthValue] ttv_ptr "opencog::TensorTruthValuePtr"
-    cdef cppclass cTensorTruthValue "opencog::TensorTruthValue"(cTruthValue):
-        cTensorTruthValue(object)
-        strength_t get_mean() except +
-        confidence_t get_confidence() except +
-        count_t get_count()
-        #tv_ptr DEFAULT_TV()
-        string to_string()
-        bint operator==(cTruthValue h)
-        bint operator!=(cTruthValue h)
-        void * getPtr()
-
-    cdef ttv_ptr createTensorTruthValue(...)
-
-
-
 # Atom
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
     pass
@@ -185,8 +168,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cAtomSpace()
         cAtomSpace(cAtomSpace * parent)
 
-        cHandle add_atom(cHandle handle) except +
-
         cHandle add_node(Type t, string s) except +
         cHandle add_node(Type t, string s, tv_ptr tvn) except +
 
@@ -218,7 +199,7 @@ cdef class AtomSpace:
     cdef object parent_atomspace
 
 
-cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspace)
+cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
@@ -240,6 +221,7 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
 
+
 cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
      cdef cAtom * atom_ptr = <cAtom*>h.get()
      if atom_ptr == NULL:  # avoid null-pointer deref
@@ -257,8 +239,3 @@ cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
          return False
      raise RuntimeError("Argument is not link and not node")
 
-# TODO: find proper way to work with dependencies includes into atomspace.pxd
-# means that we need to add these files at each library which depends on
-# atomspace.pxd, see CMakeLists.txt
-include "ptrvalue.pxd"
-include "grounded_object_node.pxd"
