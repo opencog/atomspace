@@ -33,7 +33,7 @@ VALUATION <- VALUE      // (atom,key,value) triple
 // these resemble the truth values of "fuzzy logic", and so on.
 //
 // Many atoms and operations on atoms explicitly require truth values
-// -- for example, Predicatenodes and EvaluationLinks -- and so these
+// -- for example, PredicateNodes and EvaluationLinks -- and so these
 // are vital and centrally important for getting things to work.
 //
 TRUTH_VALUE                <- FLOAT_VALUE
@@ -89,7 +89,7 @@ PREDICATE_NODE <- NODE
 // at Atom creation time. The mechanism that employs these fails
 // to handle "deep types", so this is kind-of inadequate for
 // strong type checking. In fact, doing it this way is kind of
-// a cheesey hack - really, there should be some ArrowLink
+// a cheesy hack - really, there should be some ArrowLink
 // associated to each atom type, and that should determine the
 // behavior of the atom. But, for now, we do it the hacky way.
 // Basically, it works, and it handles most of the basic cases
@@ -111,7 +111,7 @@ PREDICATE_NODE <- NODE
 EVALUATABLE_LINK <- LINK
 
 // Crisp binary true/false output. Link types that, when evaluated,
-// naturally yeild a true/false value.
+// naturally yield a true/false value.
 CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
 
 // Numeric-output link. Generates either NumberNodes or FloatValues
@@ -220,12 +220,12 @@ JOIN_LINK <- PARALLEL_LINK
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
 // These embody some of the common and recurring themes from predicate
 // logic, model theory, term rewriting and lambda calculus. There is
-// no strict correspondance, however, as there is no formal unification
+// no strict correspondence, however, as there is no formal unification
 // of these theories -- its just a leveraging of common themes.
 //
 // These are used to implement the pattern matcher, and everything built
 // from the pattern matcher, including the query system and the rule
-// engine. In that sense, thier definitions are "strict", else the
+// engine. In that sense, their definitions are "strict", else the
 // pattern matcher will fail.
 
 // A Variable.  Use Lambda's to hide these. Use types to type them.
@@ -399,7 +399,7 @@ DUAL_LINK <- SATISFYING_LINK
 // Basic Knowledge-Representation types.
 //
 // EvaluationLinks record the result of evaluating a predicate.
-// That is, given some elements, they indicate wether the predicate is
+// That is, given some elements, they indicate whether the predicate is
 // true or false (or has some other truth value) on those elements.
 EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
@@ -492,14 +492,14 @@ INTERVAL_LINK <- ORDERED_LINK
 ANCHOR_NODE <- NODE
 
 // ====================================================================
-// Relations. A "relation" is a subset of a cartesian product, or more
+// Relations. A "relation" is a subset of a Cartesian product, or more
 // generally, something that can have a subobject classifier. Examples
 // include "relations" from model theory, and "relations" from
 // "relational algebra" (e.g. SQL).
 //
 // Relations always have an associated subobject classifier. For naive
 // set theory, this is the indicator function, having values of
-// true/false, indicating set membership. For atomese, the subject
+// true/false, indicating set membership. For Atomese, the subject
 // classifier is explicitly always a TRUTH_VALUE.
 
 // A VirtualLink is equivalent to an EvaluationLink, with a
@@ -647,8 +647,8 @@ SECTION <- ORDERED_LINK        // Sheaf section, connector set
 // return any value, including Atoms, and not just TruthValues.
 PROCEDURE_NODE <- NODE
 
-// Grounded preoceedures/predicates/schemas are "jets", which replace
-// inefficient code with efficent implementations in an ad-hoc kind of
+// Grounded procedures/predicates/schemas are "jets", which replace
+// inefficient code with efficient implementations in an ad-hoc kind of
 // way. They accelerate code that would otherwise be impractical to
 // express or execute in Atomese. See for example
 // http://lambda-the-ultimate.org/node/5482 for discussion of jets.
@@ -661,7 +661,7 @@ DEFINED_SCHEMA_NODE <- SCHEMA_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // Special cases of PredicateNodes.
-// DefinedPredicateNodes are used to make human-written atomese easier
+// DefinedPredicateNodes are used to make human-written Atomese easier
 // to read by humans. They have no other fundamental usefulness...
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
@@ -746,5 +746,5 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 // Mystery link used by PLN
 ATTRACTION_LINK <- ORDERED_LINK
 
-// Mysetery link. What does this do ??? Can we get rid of it?
+// Mystery link. What does this do ??? Can we get rid of it?
 EXECUTION_LINK <- ORDERED_LINK
