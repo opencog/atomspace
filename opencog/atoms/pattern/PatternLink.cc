@@ -639,7 +639,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///
 ///    (GetLink (GreaterThan (Number 42) (Variable $x)))
 ///
-/// The only clause here is the GreaterThan, and its virtual
+/// The only clause here is the GreaterThan, and it is virtual
 /// (evaluatable) so we know that in general it cannot be found in
 /// the atomspace.   Due to the pattern-matcher design, matching will
 /// fail unless there is at least one PresentLink/AbsentLink clause.
@@ -655,7 +655,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///    (GetLink (Equal (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
-/// If the ImplicationLink is suitably simple, it can be added added
+/// If the ImplicationLink is suitably simple, it can be added
 /// as an ordinary clause, and searched for as if it was "present".
 ///
 /// XXX FIXME: the code here assumes that the situation is indeed

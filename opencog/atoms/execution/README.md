@@ -11,7 +11,7 @@ Vocabulary
 Some vocabulary:
 
 * "Substitution" or "beta reduction" means the substitution of values
-  for thier place holders.
+  for their place holders.
   There are several variants:
   -- The substitution of grounded values for variables (done by look-up
      in a map from variables to values)
@@ -39,21 +39,21 @@ abstract level, the two are the same thing; we just use the word
 
 Design complexity
 -----------------
-The design has gotten complex due to mutiple reasons.  But first,
+The design has gotten complex due to multiple reasons.  But first,
 here is why execution is complex:
 
 * Execution must be done recursively, starting at the leafs.
   That is, most (but not all) functions require the function
-  arguments to be in thier final reduced 'value' form, before
+  arguments to be in their final reduced 'value' form, before
   the function can be executed.  That is, execution does NOT
   commute with substitution.
 
 * There is no clear distinction between lazy execution and eager
-  executation in the current design. The current code base is a
+  execution in the current design. The current code base is a
   mixture of both. Eager execution is "easier": some external agent
   executes all of the arguments to a function before calling the
   function itself.  Although this is easy, it leads to assorted
-  difficulties, most noticably in MapLink, and in tail recursion.
+  difficulties, most noticeably in MapLink, and in tail recursion.
   Lazy execution allows a function to execute an argument only if
   it actually needs the value of that argument.  This requires some
   cleverness in the function itself. If there is any beta-reduction
@@ -61,12 +61,12 @@ here is why execution is complex:
   outside agent).  This leads to some tension and confusion in the
   order of operations.
 
-* Substitution has to be done recursviely, but with care: Not all
+* Substitution has to be done recursively, but with care: Not all
   variables are free; not all variables are bound. Thus, for example,
   the PutLink has two parts: all variables in the body of the PutLink
   are bound, but all variables in the value-list are free.  Thus,
   if there is variable substitution outside of PutLink, only the
-  free variables can be subsituted!
+  free variables can be substituted!
 
 * The beta reduction of PutLink does commute with execution.
   That is, execution can be performed either before or after
@@ -74,22 +74,22 @@ here is why execution is complex:
   DeleteLink's, if execution is done before beta reduction.
 
 * The execution of black-box links requires that the argument atoms
-  be placed into the atomspace, prior to execution. This is for two
+  be placed into the AtomSpace, prior to execution. This is for two
   reasons:
-  -- Both python and guile rely on the atomspace to find atoms.
+  -- Both python and guile rely on the AtomSpace to find atoms.
      If the argument to a scheme/python function is not in the
-     atomspace, bad things (crashes, exceptions) will happen.
+     AtomSpace, bad things (crashes, exceptions) will happen.
   -- Black-box functions potentially need to examine the TV on the
      atom.  It is impossible to get an accurate TV value for an
-     atom, unless that atom has been fished out of the atomspace.
+     atom, unless that atom has been fished out of the AtomSpace.
 
-* The execution of the Deletelink cannot be done by itself, i.e.
+* The execution of the DeleteLink cannot be done by itself, i.e.
   by it's own execute() method. This is because fully grounded
   (fully closed) DeleteLinks are forbidden, and cannot be inserted
-  into the atomspace: thus, deletion needs to happen outside of
-  its own execute() method.  This could be avoided if the atomspace
+  into the AtomSpace: thus, deletion needs to happen outside of
+  its own execute() method.  This could be avoided if the AtomSpace
   told the atom when it was being inserted, but, right now, the
-  atomspace does not send an "insert" message to the atoms being
+  AtomSpace does not send an "insert" message to the atoms being
   inserted.
 
 * Execution is currently done in a mix of eager and delayed (lazy)
@@ -100,7 +100,7 @@ here is why execution is complex:
   -- RandomChoiceLink: only one branch (randomly chosen) can be
      executed.  Execution of the other branches will lead to unwanted
      effects.
-  -- SequantialAnd, SequentialOr: later atoms ust be evaluated only
+  -- SequantialAnd, SequentialOr: later atoms must be evaluated only
      if the earlier atoms evaluated to true/false, respectively. Note
      that both of these links support tail recursion.
 
@@ -121,13 +121,13 @@ the XXX in FunctionLink and in the AtomTable can be fixed.
 Garbage Collection
 ------------------
 There's an implementation flaw that is hard to fix, right now, but
-should be fixed.  When black-box links are encountered, thier
-arguments are placed into the atomspace.  This is required for the
+should be fixed.  When black-box links are encountered, their
+arguments are placed into the AtomSpace.  This is required for the
 two reasons given above: TV values need to be fished out of the
-atomspace, and also, python/scheme can't work with atoms that are not
-in the atomspace.
+AtomSpace, and also, python/scheme can't work with atoms that are not
+in the AtomSpace.
 
-What this means is that execution/evaluation leaves the atomspace
+What this means is that execution/evaluation leaves the AtomSpace
 littered with partial results, and no effective way to clean them up
 or garbage collect them.  Perhaps attention allocation can eventually do
 this, but that is a very distant, abstract mechanism. Something more
@@ -174,7 +174,7 @@ stored in the GSN/GPN atom.
 The problem is that this makes the Atom fatter still (every Atom would
 need to have an SCM in it, a PyObject in it, an Hs for Haskell...)
 The alternative would be to use a map to store only the affected atoms.
-The map should live in the atomspace, because deleted atoms would have
+The map should live in the AtomSpace, because deleted atoms would have
 to be removed from the map, as well.  Thus, there would need to be a
 calls such as this:
 
