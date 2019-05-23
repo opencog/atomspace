@@ -95,8 +95,8 @@ void PatternLink::common_init(void)
 	}
 
 	// Split the non-virtual clauses into connected components
-	get_connected_components(_varlist.varset, _fixed,
-	                         _components, _component_vars);
+	get_bridged_components(_varlist.varset, _fixed, _pat.optionals,
+	                       _components, _component_vars);
 	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
