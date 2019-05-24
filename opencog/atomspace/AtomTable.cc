@@ -337,7 +337,6 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         return atom->get_handle();
 
     AtomPtr orig(atom);
-    Type atom_type = atom->get_type();
 
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
@@ -357,23 +356,18 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(closet, atom_type);
+        atom = createLink(closet, atom->get_type());
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
     // private copy of the atom, because each atom instance keeps a pointer to
     // the atomspace. This pointer is used to get UUID, send signals, implement
     // getAtomSpace() and getAtomTable() methods.
-    else if (atom == orig)
-    {
-        if (atom->is_node())
-            atom = createNode(*NodeCast(atom));
-        else if (atom->is_link())
-            atom = createLink(*LinkCast(atom));
-        else
-            throw RuntimeException(TRACE_INFO,
-               "AtomTable - expecting an Atom!");
-    }
+    else if (atom->is_node())
+        atom = createNode(*NodeCast(atom));
+    else
+        throw RuntimeException(TRACE_INFO,
+           "AtomTable - expecting an Atom!");
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
