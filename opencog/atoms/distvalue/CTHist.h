@@ -46,7 +46,6 @@ class CTHist : public CoverTree<val_t> ,
 	//members either by using this->member or with using declarations as follows
 	using CoverTree<val_t>::_root_idx;
 	using CoverTree<val_t>::_root_level;
-	using CoverTree<val_t>::_elem_count;
 	using CoverTree<val_t>::_total_count;
 	using CoverTree<val_t>::_dims;
 	using CoverTree<val_t>::_nodes;
@@ -59,10 +58,10 @@ class CTHist : public CoverTree<val_t> ,
 	using CoverTree<val_t>::insert_rec;
 
 	//Maximum Number of Elements of CTHist
-	int _size;
+	size_t _max_size;
 	//We store the highest and lowest value for each dimension we have ever seen
-	DVec upper_limits;
-	DVec lower_limits;
+	DVec _upper_limits;
+	DVec _lower_limits;
 
 	/*
 	 * Merge Node x with it's NearestNeighbor
@@ -98,8 +97,7 @@ class CTHist : public CoverTree<val_t> ,
 	 * used in remap, can't be public as it requires normalization
 	 * and can return invalid val_t if it's a CTHist
 	 */
-	val_t get_avg(DVec pos) const;
-
+	val_t get_avg(const DVec & pos) const;
 
 	//Default Constructructor
 	//Use with care as it doesn't creat a properly initialized CTHist
@@ -112,15 +110,17 @@ public:
 	using CoverTree<val_t>::get;
 
 	CTHist(int s, size_t dims)
-		: CoverTree<val_t>(dims) , _size(s)
+		: CoverTree<val_t>(dims) , _max_size(s)
 	{
-		lower_limits = DVec(dims);
-		std::fill(lower_limits.begin(),lower_limits.end(),0.0);
-		upper_limits = DVec(dims);
-		std::fill(upper_limits.begin(),upper_limits.end(),1.0);
+		_lower_limits = DVec(dims);
+		std::fill(_lower_limits.begin(),_lower_limits.end(),0.0);
+		_upper_limits = DVec(dims);
+		std::fill(_upper_limits.begin(),_upper_limits.end(),1.0);
 	}
 
-	int size() const {return _size;};
+	int max_size() const {return _max_size;};
+	DVec lower_limits() const {return _lower_limits;};
+	DVec upper_limits() const {return _upper_limits;};
 
 	/*
 	 * Insert Node x into CTHist
@@ -133,6 +133,12 @@ public:
 	 * Remap the Histogram onto a different configuration of bins.
 	 */
 	CTHist<val_t> remap(const DVecSeq & val) const;
+
+	/*
+	 * Update the Limits of this CTHist with new ones
+	 * checks if the new limits are actually lower / higher
+	 */
+	void update_limits(const DVec & lower, const DVec & upper);
 
 	/*
 	 * Get the minimum and maximus count of all elements

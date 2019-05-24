@@ -97,6 +97,12 @@ public:
 
 	using Value::to_string;
 	std::string to_string(const std::string&) const;
+
+	friend std::ostream& operator<<(std::ostream& os, const ConditionalDVPtr& t)
+	{
+		os << t->to_string() << std::endl;
+		return os;
+	}
 };
 
 static inline ConditionalDVPtr ConditionalDVCast(const ValuePtr& pa)

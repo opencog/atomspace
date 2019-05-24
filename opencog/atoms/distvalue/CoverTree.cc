@@ -68,17 +68,15 @@ bool CoverTreeNode<val_t>::operator==(const CoverTreeNode<val_t>& other) const
 
 template <typename val_t>
 CoverTree<val_t>::CoverTree()
-	: _root_idx(-1) , _root_level(0) , _elem_count(0) ,
-	_total_count(0) , _dims(1) {}
+	: _root_idx(-1) , _root_level(0) , _total_count(0) , _dims(1) {}
 
 template <typename val_t>
 CoverTree<val_t>::CoverTree(int dims)
-	:  _root_idx(-1) , _root_level(0) , _elem_count(0) ,
-	_total_count(0) , _dims(dims) {}
+	:  _root_idx(-1) , _root_level(0) , _total_count(0) , _dims(dims) {}
 
 template <typename val_t>
 CoverTree<val_t>::CoverTree(CoverTreeNode<val_t> n,int dims)
-	:  _root_idx(-1) , _root_level(0) , _elem_count(1) , _dims(dims) {
+	:  _root_idx(-1) , _root_level(0) , _dims(dims) {
 	_nodes.push_back(n);
 	_root_idx = _nodes.size() - 1;
     _total_count = get_count(n.value);
@@ -221,15 +219,14 @@ template <typename val_t>
 void CoverTree<val_t>::insert(const CoverTreeNode<val_t> & x)
 {
 	if (x.pos.size() != _dims)
-		throw RuntimeException(TRACE_INFO,"Wrong Number of Dimensions.");
+		throw RuntimeException(TRACE_INFO,"Can't Insert. Wrong Number of Dimensions.");
 
 	_total_count += get_count(x.value);
 
-	if (_elem_count == 0)
+	if (_nodes.size() == 0)
 	{
 		_nodes.push_back(x);
-		_root_idx = _nodes.size() - 1;
-		_elem_count = 1;
+		_root_idx = 0;
 		return;
 	}
 
@@ -250,14 +247,12 @@ void CoverTree<val_t>::insert(const CoverTreeNode<val_t> & x)
 		_root_level = ceilf(log2(d));
 		_nodes.push_back(x);
 		_nodes[_root_idx].children.push_back(_nodes.size() - 1);
-		_elem_count++;
 		return;
 	}
 
 	int node_idx = _nodes.size();
 	_nodes.push_back(x);
 	insert(node_idx,_root_idx,_root_level);
-	_elem_count++;
 }
 
 template <typename val_t>
@@ -427,7 +422,7 @@ bool CoverTree<val_t>::operator!=(const CoverTree<val_t>& other) const
 template <typename val_t>
 bool CoverTree<val_t>::operator==(const CoverTree<val_t>& other) const
 {
-	if (_elem_count != other._elem_count)
+	if (_nodes.size() != other._nodes.size())
 		return false;
 
 	if (_dims != other._dims)
@@ -461,7 +456,7 @@ std::string CoverTree<val_t>::to_string() const
 	std::vector<int> nodes = std::vector<int>{_root_idx};
 	std::vector<int> next;
 
-	ss << "Elem_Count: " << _elem_count << std::endl;
+	ss << "Elem_Count: " << _nodes.size() << std::endl;
 	ss << "Total: " << _total_count << std::endl;
 	while (true)
 	{

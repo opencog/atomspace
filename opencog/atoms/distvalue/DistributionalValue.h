@@ -91,10 +91,11 @@ public:
 	double get_mean_for(double) const;
 	double get_var_for(double) const;
 
-	//Get the mode/mean/var for a certain bin
+	//Get the mode/mean/var/count for a certain bin
 	double get_mean(const DVec&) const;
 	double get_mode(const DVec&) const;
 	double get_var(const DVec&) const;
+	double get_count(const DVec &) const;
 
 	//Get the mode/mean/var for all bins
 	std::map<DVec,double> bin_modes() const;

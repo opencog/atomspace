@@ -77,8 +77,6 @@ class CoverTree
 protected:
 	int _root_idx;
 	int _root_level;
-	//Count of the number of elements in the Tree
-	int _elem_count;
 	//Sum of the counts of all Nodes in the Tree
 	double _total_count;
 	//Number of Dimensions of this Tree
@@ -146,13 +144,14 @@ public:
 	CoverTree(CoverTreeNode<val_t> n, int dims);
 
 	//Some Getters for Intersing Variables
-	int elem_count() const {return _elem_count;};
+	int elem_count() const {return _nodes.size();};
 	size_t dims() const {return _dims;};
 	double total_count() const {return _total_count;};
 
 	/*
 	 * Insert a Node into the Tree
-	 * Public Interface deals with special cases if _elem_count = 0 or 1
+	 * Public Interface deals with special cases if there no or only 1 node
+	 * in the Tree
 	 */
 	void insert(const DVec&, const val_t&);
 	void insert(const CoverTreeNode<val_t> & x);
@@ -206,12 +205,12 @@ public:
 	bool operator!=(const CoverTree<val_t>& other) const;
 	bool operator==(const CoverTree<val_t>& other) const;
 
-	CoverTreeNode<val_t>& operator[](int idx)
+	CoverTreeNode<val_t> & operator[](int idx)
 	{
 		return _nodes[idx];
 	}
 
-	CoverTreeNode<val_t> operator[](int idx) const
+	const CoverTreeNode<val_t> & operator[](int idx) const
 	{
 		return _nodes[idx];
 	}

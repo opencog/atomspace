@@ -96,9 +96,9 @@ std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
  */
 DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr condDist) const
 {
-	auto size = _value[0].value.size();
+	auto max_size = _value[0].value.max_size();
 	auto dims = _value[0].value.dims();
-	CTHist<double> res = CTHist<double>(size,dims);
+	CTHist<double> res = CTHist<double>(max_size,dims);
 	double sum = 0;
 
 	DVecSeq keys = condDist->_value.get_posvec();
@@ -115,33 +115,57 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr c
 //Given a Distribution of the Condition calculate a Joint Probability distribution
 DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValuePtr base) const
 {
-	auto s1 = base->_value.size();
-	auto d1 = base->_value.dims();
-	auto s2 = _value.begin()->value.size();
-	auto d2 = _value.begin()->value.dims();
+	size_t s1 = base->_value.max_size();
+	size_t d1 = base->_value.dims();
+	size_t s2 = _value.begin()->value.max_size();
+	size_t d2 = _value.begin()->value.dims();
 	CTHist<double> res = CTHist<double>(s1*s2,d1+d2);
 	DVecSeq ivsBASE = base->_value.get_posvec();
 
 	ConditionalDVPtr remaped = remap(ivsBASE);
 
-	for (auto k1 : remaped->value().get_posvec())
+	DVec lower = base->_value.lower_limits();
+	DVec upper = base->_value.upper_limits();
+	for (unsigned int i = 0; i < lower.size(); i++)
+	{
+		if (_value.lower_limits()[i] < lower[i])
+			lower[i] = _value.lower_limits()[i];
+		if (_value.upper_limits()[i] > upper[i])
+			upper[i] = _value.upper_limits()[i];
+	}
+
+	DVec lower2 = _value[0].value.lower_limits();
+	DVec upper2 = _value[0].value.upper_limits();
+
+	for (DVec k1 : remaped->value().get_posvec())
 	{
 		DistributionalValuePtr uncond =
 			DistributionalValue::createDV(remaped->value().get(k1));
 		DVecSeq ivsTHIS = uncond->_value.get_posvec();
 
-		for (auto k2 : ivsTHIS)
+		for (unsigned int i = 0; i < lower2.size(); i++)
+		{
+			if (uncond->_value.lower_limits()[i] < lower2[i])
+				lower2[i] = uncond->_value.lower_limits()[i];
+			if (uncond->_value.upper_limits()[i] > upper2[i])
+				upper2[i] = uncond->_value.upper_limits()[i];
+		}
+
+		for (DVec k2 : ivsTHIS)
 		{
 			DVec k;
 			k.insert(k.end(),k1.begin(),k1.end());
 			k.insert(k.end(),k2.begin(),k2.end());
 
 			//Res count based on base count
-			auto v1 = base->_value.get(k1);
-			auto v2 = uncond->get_mean(k2);
+			double v1 = base->_value.get(k1);
+			double v2 = uncond->get_mean(k2);
 			res.insert(k,v1 * v2);
 		}
 	}
+	lower.insert(lower.end(),lower2.begin(),lower2.end());
+	upper.insert(upper.end(),upper2.begin(),upper2.end());
+	res.update_limits(lower,upper);
 	return DistributionalValue::createDV(res);
 }
 
@@ -201,7 +225,7 @@ bool ConditionalDV::operator==(const Value& other) const
 std::string ConditionalDV::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	if (_value.size() == 0)
+	if (_value.elem_count() == 0)
 		ss << "Empty ConditionalDV" << std::endl;
 	for (auto elem : _value)
 	{

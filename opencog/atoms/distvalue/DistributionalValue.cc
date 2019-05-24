@@ -177,6 +177,11 @@ double DistributionalValue::get_var(const DVec &val) const
 	return get_var_for(_value.get(val));
 }
 
+double DistributionalValue::get_count(const DVec &val) const
+{
+	return _value.get(val);
+}
+
 double DistributionalValue::total_count() const
 {
 	return _value.total_count();
@@ -228,7 +233,7 @@ bool DistributionalValue::operator==(const Value& other) const
 std::string DistributionalValue::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	if (_value.size() == 0)
+	if (_value.elem_count() == 0)
 		ss << "Empty DistributionalValue" << std::endl;
 
 	ss << "DistributionalValue: \n";
