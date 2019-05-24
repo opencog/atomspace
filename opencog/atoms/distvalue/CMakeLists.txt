@@ -5,10 +5,16 @@ ADD_LIBRARY (distvalue
 	DistributionalValue.cc
 	ConditionalDV.cc
 	DVFormulas.cc
+	DistributionalValueSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(distvalue
+	smob
 	${COGUTIL_LIBRARY}
+)
+
+INSTALL (TARGETS distvalue EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
@@ -18,5 +24,6 @@ INSTALL (FILES
 	DistributionalValue.h
 	ConditionalDV.h
 	DVFormulas.h
+	DistributionalValueSCM.h
 	DESTINATION "include/opencog/atoms/distvalue"
 )
