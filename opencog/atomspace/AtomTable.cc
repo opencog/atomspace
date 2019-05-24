@@ -305,15 +305,12 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 
     Handle orig(atom);
 
-    // If this atom is in some other atomspace or not in any atomspace,
-    // then we need to clone it. We cannot insert it into this atomtable
-    // as-is.  (We already know that its not in this atomspace, or its
-    // environ.)
+    // Make a copy of the atom that the user gave us. Attempting
+    // to take over the memory management of whatever the user
+    // gives use is just asking for trouble. Its safer to keep our
+    // own private copy.
     if (atom->is_link()) {
-        // Well, if the link was in some other atomspace, then
-        // the outgoing set will probably be too. (It might not
-        // be if the other atomspace is a child of this one).
-        // So we recursively clone that too.
+        // Insert the outgoing set of this link.
         HandleSeq closet;
         // Reserving space improves emplace_back performance by 2x
         closet.reserve(atom->get_arity());
@@ -592,8 +589,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 //
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
-                if (iset[i]->getAtomTable() != NULL and
-                    (not iset[i]->getAtomTable()->in_environ(handle) or
+                AtomTable* itab = iset[i]->getAtomTable();
+                if (nullptr != itab and
+                    (not itab->in_environ(handle) or
                      not iset[i]->isMarkedForRemoval()))
                 {
                     Logger::Level lev = logger().get_backtrace_level();
@@ -653,10 +651,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // Remove atom from other incoming sets.
     atom->remove();
 
-    // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm too lazy to fix, and
-    // am hoping no one will notice. This will probably need to be fixed
-    // someday.
     atom->setAtomSpace(nullptr);
 
     result.insert(atom);
