@@ -42,6 +42,7 @@ class SchemeSmob
 	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
 	friend class LoggerSCM;
+	friend class DistributionalValueSCM;
 
 private:
 
