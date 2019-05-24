@@ -229,11 +229,22 @@ void AtomTable::clear()
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     AtomPtr a(createNode(t,n));
-    return getNodeHandle(a);
+    return getHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
+    AtomPtr a(createLink(seq, t));
+    return getHandle(a);
+}
+
+/// Find an equivalent atom that is exactly the same as the arg. If
+/// such an atom is in the table, it is returned, else the return
+/// is the bad handle.
+Handle AtomTable::lookupHandle(const AtomPtr& a) const
+{
+    if (nullptr == a) return Handle::UNDEFINED;
+
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -247,42 +258,13 @@ Handle AtomTable::getNodeHandle(const AtomPtr& a) const
     }
 
     if (_environ)
-        return _environ->getHandle(a);
+        return _environ->lookupHandle(a);
+
     return Handle::UNDEFINED;
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
-{
-    AtomPtr a(createLink(seq, t));
-    return getLinkHandle(a);
-}
-
-Handle AtomTable::getLinkHandle(const AtomPtr& a) const
-{
-    // Start searching to see if we have this atom.
-    ContentHash ch = a->get_hash();
-
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    // So ... check to see if we have it or not.
-    auto range = _atom_store.equal_range(ch);
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (*((AtomPtr) bkt->second) == *a) {
-            return bkt->second;
-        }
-    }
-
-    if (_environ) {
-        return _environ->getHandle(a);
-    }
-    return Handle::UNDEFINED;
-}
-
-/// Find an equivalent atom that is exactly the same as the arg. If
-/// such an atom is in the table, it is returned, else the return
-/// is the bad handle.
+/// Ask the atom if it belongs to this Atomtable. If so, we're done.
+/// Otherwise, search for an equivalent atom that we might be holding.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
@@ -290,12 +272,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (in_environ(a))
         return a->get_handle();
 
-    if (a->is_node())
-        return getNodeHandle(a);
-    else if (a->is_link())
-        return getLinkHandle(a);
-
-    return Handle::UNDEFINED;
+    return lookupHandle(a);
 }
 
 #if 0
@@ -365,12 +342,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
-        Handle hcheck;
-        if (orig->is_node())
-            hcheck = getNodeHandle(orig);
-        else if (orig->is_link())
-            hcheck = getLinkHandle(orig);
-
+        Handle hcheck(lookupHandle(orig));
         if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
     }
 
