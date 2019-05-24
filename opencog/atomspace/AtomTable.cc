@@ -259,16 +259,6 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 
 Handle AtomTable::getLinkHandle(const AtomPtr& a) const
 {
-    // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not, then reject the whole mess. XXX Why? So what?
-    // If the hash-checking, below, is good, then everything should be
-    // just fine. XXX Except BackwardChainerUTest fails myseriously,
-    // when we skip this test. Not sure why. Strange. XXX FIXME.
-    for (const Handle& ho : a->getOutgoingSet()) {
-        Handle rh(getHandle(ho));
-        if (not rh) return rh;
-    }
-
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
 
@@ -336,7 +326,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     if (not force and in_environ(atom))
         return atom->get_handle();
 
-    AtomPtr orig(atom);
+    Handle orig(atom);
 
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
@@ -384,7 +374,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
     }
 
-    atom->copyValues(Handle(orig));
+    atom->copyValues(orig);
     atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
