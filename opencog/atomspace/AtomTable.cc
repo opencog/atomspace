@@ -348,11 +348,11 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         }
         atom = createLink(closet, atom->get_type());
     }
-    else if (atom->is_node())
-        atom = createNode(*NodeCast(atom));
     else
-        throw RuntimeException(TRACE_INFO,
-           "AtomTable - expecting an Atom!");
+        atom = createNode(*NodeCast(atom));
+
+    // Force computation of hash external to the locked section.
+    ContentHash hash = atom->get_hash();
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
@@ -385,7 +385,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     _size_by_type[atom->_type] ++;
 
     Handle h(atom->get_handle());
-    _atom_store.insert({atom->get_hash(), h});
+    _atom_store.insert({hash, h});
 
 #ifdef CHECK_ATOM_HASH_COLLISION
     auto its = _atom_store.equal_range(atom->get_hash());
