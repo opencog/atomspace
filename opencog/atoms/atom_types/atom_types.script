@@ -44,6 +44,11 @@ FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 
+
+//DistributionalValues
+DISTRIBUTIONAL_VALUE <- VALUE
+CONDITIONAL_DISTRIBUTIONAL_VALUE <- VALUE
+
 // ===========================================================
 // A base class for time-varying (floating-point) values.
 // XXX TODO we need other base classes for other kinds of varying values.
@@ -131,6 +136,10 @@ TYPE_OUTPUT_LINK <- LINK
 SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+
+//Like ListLink but without special handeling if used as argument
+//Probably temorary
+PRODUCT_LINK <- ORDERED_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
