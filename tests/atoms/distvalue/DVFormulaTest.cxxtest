@@ -1,0 +1,203 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/atoms/distvalue/DistributionalValue.h>
+#include <opencog/atoms/distvalue/ConditionalDV.h>
+#include <opencog/atoms/distvalue/DVFormulas.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class DVFormulaTest :  public CxxTest::TestSuite
+{
+private:
+
+	DistributionalValuePtr dvs[4];
+	DVec keys[17];
+
+public:
+	DVFormulaTest()
+	{
+	}
+
+	void setUp()
+	{
+		std::cout << std::endl;
+		keys[0] = DVec{0.125};
+		keys[1] = DVec{0.375};
+		keys[2] = DVec{0.625};
+		keys[3] = DVec{0.875};
+
+		keys[4] = DVec{0.15};
+		keys[5] = DVec{0.5};
+		keys[6] = DVec{0.85};
+
+		keys[7] = DVec{0.25};
+		keys[8] = DVec{0.75};
+
+		keys[9]  = DVec{0.15, 0.25};
+		keys[10] = DVec{0.5 , 0.25};
+		keys[11] = DVec{0.85, 0.25};
+		keys[12] = DVec{0.15, 0.75};
+		keys[13] = DVec{0.5 , 0.75};
+		keys[14] = DVec{0.85, 0.75};
+
+		keys[15] = DVec{0.375, 0.25};
+		keys[16] = DVec{0.375, 0.75};
+
+		CTHist<double> hist0 = CTHist<double>(2,1);
+		hist0.insert(keys[5],10);
+		hist0.insert(keys[6],20);
+
+		dvs[0] = DistributionalValue::createDV(hist0);
+
+		CTHist<double> hist1 = CTHist<double>(2,1);
+		hist1.insert(keys[0],30);
+		hist1.insert(keys[1],30);
+
+		dvs[1] = DistributionalValue::createDV(hist1);
+
+		CTHist<double> hist2 = CTHist<double>(2,1);
+		hist2.insert(keys[2],30);
+		hist2.insert(keys[3],30);
+
+		dvs[2] = DistributionalValue::createDV(hist2);
+
+		CTHist<double> hist3 = CTHist<double>(10,2);
+		hist3.insert(keys[9],10);
+		hist3.insert(keys[10],10);
+		hist3.insert(keys[11],10);
+		hist3.insert(keys[12],10);
+		hist3.insert(keys[13],10);
+		hist3.insert(keys[14],10);
+		hist3.insert(keys[15],10);
+		hist3.insert(keys[16],10);
+
+		dvs[3] = DistributionalValue::createDV(hist3);
+	}
+
+	void tearDown() {}
+
+	void testTest()
+	{
+	}
+
+	void notestJointToCDV()
+	{
+		//CTHist<double> hist1 = CTHist<double>(3,1);
+		//hist1.insert(DVec{0.25},20);
+		//hist1.insert(DVec{0.75},20);
+
+		//DistributionalValuePtr dv1 = DistributionalValue::createDV(hist1);
+
+		//CTHist<double> hist2 = CTHist<double>(6,2);
+		//hist2.insert(DVec{0.25,0.25},10);
+		//hist2.insert(DVec{0.25,0.75},0);
+		//hist2.insert(DVec{0.5,0.25},5);
+		//hist2.insert(DVec{0.5,0.75},5);
+		//hist2.insert(DVec{0.75,0.25},0);
+		//hist2.insert(DVec{0.75,0.75},10);
+
+		//DistributionalValuePtr dv2 = DistributionalValue::createDV(hist2);
+
+		//ConditionalDVPtr res = DVFormulas::joint_to_cdv(dv2,dv1,1);
+		ConditionalDVPtr res = DVFormulas::joint_to_cdv(dvs[3],dvs[0],1);
+
+		std::cout << "Res: \n";
+		std::cout << res;
+
+		//CTHist<double> hist2 = CTHist<double>(2,1);
+		//hist2.insert(keys[7],11.25);
+		//hist2.insert(keys[8],11.25);
+
+		//CTHist<double> hist3 = CTHist<double>(2,1);
+		//hist3.insert(keys[7],5.625);
+		//hist3.insert(keys[8],5.625);
+
+		//CDVrep cdvr = CDVrep(3,1);
+		//cdvr.insert(keys[5],hist2);
+		//cdvr.insert(keys[6],hist3);
+
+		//std::cout << "CDVR: \n";
+		//cdvr.print();
+
+		//ConditionalDVPtr cdv = ConditionalDV::createCDV(cdvr);
+		//TS_ASSERT_EQUALS(*cdv,*res);
+	}
+
+	void testSumJoint()
+	{
+		DistributionalValuePtr res = DVFormulas::sum_joint(dvs[3],1);
+
+		CTHist<double> hist = CTHist<double>(4,1);
+		hist.insert(keys[1],20);
+		hist.insert(keys[4],20);
+		hist.insert(keys[5],20);
+		hist.insert(keys[6],20);
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
+		//std::cout << "Res: \n";
+		//res->value().print();
+		//std::cout << "DV: \n";
+		//dv->value().print();
+		TS_ASSERT_EQUALS(*dv,*res);
+	}
+
+	void testConjuction()
+	{
+		DistributionalValuePtr res = DVFormulas::conjunction(dvs[0],dvs[1]);
+		//std::cout << "DV0: \n";
+		//dvs[0]->value().print();
+		//std::cout << "DV1: \n";
+		//dvs[1]->value().print();
+
+		CTHist<double> hist = CTHist<double>(2,1);
+		hist.insert(keys[0],15);
+		hist.insert(keys[1],15);
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
+		//std::cout << "Res: \n";
+		//res->value().print();
+		//std::cout << "DV: \n";
+		//dv->value().print();
+		TS_ASSERT_EQUALS(*dv,*res)
+	}
+
+	void testDisjunction()
+	{
+		DistributionalValuePtr res = DVFormulas::disjunction(dvs[0],dvs[1]);
+
+		CTHist<double> hist = CTHist<double>(2,1);
+		hist.insert(keys[5],10);
+		hist.insert(keys[6],20);
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
+		//std::cout << "Res: \n";
+		//res->value().print();
+		//std::cout << "DV: \n";
+		//dv->value().print();
+		TS_ASSERT_EQUALS(*dv,*res)
+	}
+};
