@@ -54,7 +54,6 @@ const bool DONT_CHECK_TRUTH_VALUES = false;
 class AtomSpace
 {
     friend class Atom;               // Needs to call get_atomtable()
-    friend class AtomStorage;
     friend class BackingStore;
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
