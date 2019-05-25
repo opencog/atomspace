@@ -96,11 +96,6 @@ std::recursive_mutex PythonEval::_mtx;
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
-    DATADIR"/python",                    // install directory
-    #ifndef WIN32
-    "/usr/local/share/opencog/python",
-    "/usr/share/opencog/python",
-    #endif // !WIN32
     NULL
 };
 
