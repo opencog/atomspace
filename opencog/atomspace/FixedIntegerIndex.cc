@@ -31,6 +31,11 @@ size_t FixedIntegerIndex::size(void) const
 	return cnt;
 }
 
+void FixedIntegerIndex::clear(void)
+{
+	for (auto& s : idx) s.clear();
+}
+
 bool FixedIntegerIndex::contains_duplicate() const
 {
 	for (const AtomSet& atoms : idx)
