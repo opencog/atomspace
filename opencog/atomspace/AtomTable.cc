@@ -156,12 +156,7 @@ void AtomTable::clear_transient()
 
 void AtomTable::clear_all_atoms()
 {
-    // For now, this only works for transient atomspaces which do not
-    // index the atoms. So throw an exception to warn against use in
-    // normal atomspaces.
-    if (not _transient)
-        throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - clear_all_atoms called on non-transient atom table.");
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     // Reset the size to zero.
     _size = 0;
@@ -173,20 +168,14 @@ void AtomTable::clear_all_atoms()
     for (Type type = ATOM; type < total_types; type++)
         _size_by_type[type] = 0;
 
+    // Clear the type-index
+    if (not _transient) typeIndex.clear();
+
     // Clear the atoms in the set.
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atom_space = nullptr;
-
-        // If this is a link we need to remove this atom from the incoming
-        // sets for any atoms in this atom's outgoing set. See note in
-        // the analogous loop in ~AtomTable above.
-        if (atom_to_clear->is_link()) {
-            LinkPtr link_to_clear = LinkCast(atom_to_clear);
-            for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
-                atom_in_out_set->remove_atom(link_to_clear);
-            }
-        }
+        atom_to_clear->remove();
     }
 
     // Clear the atom store. This will delete all the atoms since
@@ -197,6 +186,7 @@ void AtomTable::clear_all_atoms()
 
 void AtomTable::clear()
 {
+#ifdef SLOW_BUT_BCAREFUL_CLEAR
     if (_transient)
     {
         // Do the fast clear since we're a transient atom table.
@@ -224,6 +214,11 @@ void AtomTable::clear()
         OC_ASSERT(_num_nodes == 0);
         OC_ASSERT(_num_links == 0);
     }
+#else
+
+    // Always do the fast clear.
+    clear_all_atoms();
+#endif
 }
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
