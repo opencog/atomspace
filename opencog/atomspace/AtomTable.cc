@@ -144,6 +144,8 @@ void AtomTable::clear_transient()
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - clear_transient called on non-transient atom table.");
 
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     // Clear all the atoms
     clear_all_atoms();
 
@@ -151,13 +153,10 @@ void AtomTable::clear_transient()
     if (_environ) _environ->_num_nested--;
     _environ = NULL;
     _as = NULL;
-
 }
 
 void AtomTable::clear_all_atoms()
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
     // Reset the size to zero.
     _size = 0;
     _num_nodes = 0;
@@ -186,6 +185,8 @@ void AtomTable::clear_all_atoms()
 
 void AtomTable::clear()
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
 #define FAST_CLEAR 1
 #ifdef FAST_CLEAR
     // Always do the fast clear.
