@@ -186,7 +186,15 @@ void AtomTable::clear_all_atoms()
 
 void AtomTable::clear()
 {
-#ifdef SLOW_BUT_BCAREFUL_CLEAR
+#define FAST_CLEAR 1
+#ifdef FAST_CLEAR
+    // Always do the fast clear.
+    clear_all_atoms();
+#else
+    // This is a stunningly inefficient way to clear the atomtable!
+    // This will take minutes on any decent-sized atomspace!
+    // However, due to the code in extract(), it does a lot of error
+    // checking.
     if (_transient)
     {
         // Do the fast clear since we're a transient atom table.
@@ -198,8 +206,6 @@ void AtomTable::clear()
 
         getHandleSetByType(allNodes, NODE, true, false);
 
-        // XXX FIXME TODO This is a stunningly inefficient way to clear the
-        // atomtable! This will take minutes on any decent-sized atomspace!
         for (Handle h: allNodes) extract(h, true);
 
         allNodes.clear();
@@ -214,10 +220,6 @@ void AtomTable::clear()
         OC_ASSERT(_num_nodes == 0);
         OC_ASSERT(_num_links == 0);
     }
-#else
-
-    // Always do the fast clear.
-    clear_all_atoms();
 #endif
 }
 
