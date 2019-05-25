@@ -229,11 +229,22 @@ void AtomTable::clear()
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     AtomPtr a(createNode(t,n));
-    return getNodeHandle(a);
+    return getHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
+    AtomPtr a(createLink(seq, t));
+    return getHandle(a);
+}
+
+/// Find an equivalent atom that is exactly the same as the arg. If
+/// such an atom is in the table, it is returned, else the return
+/// is the bad handle.
+Handle AtomTable::lookupHandle(const AtomPtr& a) const
+{
+    if (nullptr == a) return Handle::UNDEFINED;
+
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -247,52 +258,13 @@ Handle AtomTable::getNodeHandle(const AtomPtr& a) const
     }
 
     if (_environ)
-        return _environ->getHandle(a);
+        return _environ->lookupHandle(a);
+
     return Handle::UNDEFINED;
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
-{
-    AtomPtr a(createLink(seq, t));
-    return getLinkHandle(a);
-}
-
-Handle AtomTable::getLinkHandle(const AtomPtr& a) const
-{
-    // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not, then reject the whole mess. XXX Why? So what?
-    // If the hash-checking, below, is good, then everything should be
-    // just fine. XXX Except BackwardChainerUTest fails myseriously,
-    // when we skip this test. Not sure why. Strange. XXX FIXME.
-    for (const Handle& ho : a->getOutgoingSet()) {
-        Handle rh(getHandle(ho));
-        if (not rh) return rh;
-    }
-
-    // Start searching to see if we have this atom.
-    ContentHash ch = a->get_hash();
-
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    // So ... check to see if we have it or not.
-    auto range = _atom_store.equal_range(ch);
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (*((AtomPtr) bkt->second) == *a) {
-            return bkt->second;
-        }
-    }
-
-    if (_environ) {
-        return _environ->getHandle(a);
-    }
-    return Handle::UNDEFINED;
-}
-
-/// Find an equivalent atom that is exactly the same as the arg. If
-/// such an atom is in the table, it is returned, else the return
-/// is the bad handle.
+/// Ask the atom if it belongs to this Atomtable. If so, we're done.
+/// Otherwise, search for an equivalent atom that we might be holding.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
@@ -300,12 +272,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (in_environ(a))
         return a->get_handle();
 
-    if (a->is_node())
-        return getNodeHandle(a);
-    else if (a->is_link())
-        return getLinkHandle(a);
-
-    return Handle::UNDEFINED;
+    return lookupHandle(a);
 }
 
 #if 0
@@ -336,18 +303,14 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     if (not force and in_environ(atom))
         return atom->get_handle();
 
-    AtomPtr orig(atom);
-    Type atom_type = atom->get_type();
+    Handle orig(atom);
 
-    // If this atom is in some other atomspace or not in any atomspace,
-    // then we need to clone it. We cannot insert it into this atomtable
-    // as-is.  (We already know that its not in this atomspace, or its
-    // environ.)
+    // Make a copy of the atom that the user gave us. Attempting
+    // to take over the memory management of whatever the user
+    // gives use is just asking for trouble. Its safer to keep our
+    // own private copy.
     if (atom->is_link()) {
-        // Well, if the link was in some other atomspace, then
-        // the outgoing set will probably be too. (It might not
-        // be if the other atomspace is a child of this one).
-        // So we recursively clone that too.
+        // Insert the outgoing set of this link.
         HandleSeq closet;
         // Reserving space improves emplace_back performance by 2x
         closet.reserve(atom->get_arity());
@@ -357,23 +320,13 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(closet, atom_type);
+        atom = createLink(closet, atom->get_type());
     }
+    else
+        atom = createNode(*NodeCast(atom));
 
-    // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, because each atom instance keeps a pointer to
-    // the atomspace. This pointer is used to get UUID, send signals, implement
-    // getAtomSpace() and getAtomTable() methods.
-    else if (atom == orig)
-    {
-        if (atom->is_node())
-            atom = createNode(*NodeCast(atom));
-        else if (atom->is_link())
-            atom = createLink(*LinkCast(atom));
-        else
-            throw RuntimeException(TRACE_INFO,
-               "AtomTable - expecting an Atom!");
-    }
+    // Force computation of hash external to the locked section.
+    ContentHash hash = atom->get_hash();
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
@@ -386,16 +339,11 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
-        Handle hcheck;
-        if (orig->is_node())
-            hcheck = getNodeHandle(orig);
-        else if (orig->is_link())
-            hcheck = getLinkHandle(orig);
-
+        Handle hcheck(lookupHandle(orig));
         if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
     }
 
-    atom->copyValues(Handle(orig));
+    atom->copyValues(orig);
     atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
@@ -406,7 +354,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     _size_by_type[atom->_type] ++;
 
     Handle h(atom->get_handle());
-    _atom_store.insert({atom->get_hash(), h});
+    _atom_store.insert({hash, h});
 
 #ifdef CHECK_ATOM_HASH_COLLISION
     auto its = _atom_store.equal_range(atom->get_hash());
@@ -641,8 +589,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 //
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
-                if (iset[i]->getAtomTable() != NULL and
-                    (not iset[i]->getAtomTable()->in_environ(handle) or
+                AtomTable* itab = iset[i]->getAtomTable();
+                if (nullptr != itab and
+                    (not itab->in_environ(handle) or
                      not iset[i]->isMarkedForRemoval()))
                 {
                     Logger::Level lev = logger().get_backtrace_level();
@@ -702,10 +651,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // Remove atom from other incoming sets.
     atom->remove();
 
-    // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm too lazy to fix, and
-    // am hoping no one will notice. This will probably need to be fixed
-    // someday.
     atom->setAtomSpace(nullptr);
 
     result.insert(atom);
