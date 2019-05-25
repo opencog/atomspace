@@ -45,12 +45,13 @@ typedef std::unordered_set<Atom*> AtomSet;
 #endif
 
 /**
- * Implements an integer index as an RB-tree (C++ set) That is, given
- * an atom Type, this returns all of the Handles for that Type.
+ * Implements a vector of AtomSets; each AtomSet is a hash table of
+ * Atom pointers.  Thus, given an Atom Type, this can quickly find
+ * all of the Atoms of that Type.
  *
  * The primary interface for this is an iterator, and that is because
  * the index will typically contain millions of atoms, and this is far
- * too much to try to return in some temporary array.  Iterating is much
+ * too much to try to copy into some temporary array.  Iterating is much
  * faster.
  *
  * @todo The iterator is NOT thread-safe against the insertion or
