@@ -551,67 +551,15 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // return a non-zero value if the incoming set has weak pointers to
     // deleted atoms. Thus, a second check is made for strong pointers,
     // since getIncomingSet() converts weak to strong.
-    if (0 < handle->getIncomingSetSize())
+    if (not recursive and 0 < handle->getIncomingSetSize())
     {
         IncomingSet iset(handle->getIncomingSet());
         if (0 < iset.size())
         {
-            if (not recursive)
-            {
-                // User asked for a non-recursive remove, and the
-                // atom is still referenced. So, do nothing.
-                handle->unsetRemovalFlag();
-                return result;
-            }
-
-            // Check for an invalid condition that should not occur. See:
-            // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
-            size_t ilen = iset.size();
-            for (size_t i=0; i<ilen; i++)
-            {
-                // Its OK if the atom being extracted is in a link
-                // that is not currently in any atom space, or if that
-                // link is in a child subspace, in which case, we
-                // extract from the child.
-                //
-                // A bit of a race can happen: when the unlock is
-                // done below, to send the removed signal, another
-                // thread can sneak in and get to here, if it is
-                // deleting a different atom with an overlapping incoming
-                // set.  Since the incoming set hasn't yet been updated
-                // (that happens after re-acquiring the lock),
-                // it will look like the incoming set has not yet been
-                // fully cleared.  Well, it hasn't been, but as long as
-                // we are marked for removal, things should end up OK.
-                //
-                // XXX this might not be exactly thread-safe, if
-                // other atomspaces are involved...
-                AtomTable* itab = iset[i]->getAtomTable();
-                if (nullptr != itab and
-                    (not itab->in_environ(handle) or
-                     not iset[i]->isMarkedForRemoval()))
-                {
-                    Logger::Level lev = logger().get_backtrace_level();
-                    logger().set_backtrace_level(Logger::ERROR);
-                    logger().warn() << "AtomTable::extract() internal error";
-                    logger().warn() << "Non-empty incoming set of size "
-                                    << ilen << " First trouble at " << i;
-                    logger().warn() << "This atomtable=" << ((void*) this)
-                                    << " other atomtale=" << ((void*) iset[i]->getAtomTable())
-                                    << " in_environ=" << iset[i]->getAtomTable()->in_environ(handle);
-                    logger().warn() << "This atom: " << handle->to_string();
-                    for (size_t j=0; j<ilen; j++) {
-                        logger().warn() << "Atom j=" << j << " " << iset[j]->to_string();
-                        logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
-                                        << " Table: " << ((void*) iset[j]->getAtomTable());
-                    }
-                    logger().set_backtrace_level(lev);
-                    atom->unsetRemovalFlag();
-                    throw RuntimeException(TRACE_INFO,
-                        "Internal Error: Cannot extract an atom with "
-                        "a non-empty incoming set!");
-                }
-            }
+            // User asked for a non-recursive remove, and the
+            // atom is still referenced. So, do nothing.
+            handle->unsetRemovalFlag();
+            return result;
         }
     }
 
