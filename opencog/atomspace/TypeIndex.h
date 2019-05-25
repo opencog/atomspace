@@ -28,13 +28,21 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atomspace/FixedIntegerIndex.h>
+
+class AtomSpaceUTest;
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+// This is very costly and only used to get deterministic behavior
+#ifdef REPRODUCIBLE_ATOMSPACE
+typedef std::set<Atom*, content_based_atom_ptr_less> AtomSet
+#else
+typedef std::unordered_set<Atom*> AtomSet;
+#endif
 
 /**
  * Implements an integer index as an RB-tree (C++ set) That is, given
@@ -49,21 +57,50 @@ namespace opencog
  * removal of atoms!  Either inserting or removing an atom will cause
  * the iterator references to be freed, leading to mystery crashes!
  */
-class TypeIndex : public FixedIntegerIndex
+class TypeIndex
 {
+	friend class ::AtomSpaceUTest;
+
 	private:
-		size_t num_types;
+		std::vector<AtomSet> _idx;
+		size_t _num_types;
 	public:
 		TypeIndex(void);
 		void resize(void);
 		void insertAtom(Atom* a)
 		{
-			insert(a->get_type(), a);
+			AtomSet& s(_idx.at(a->get_type()));
+			s.insert(a);
 		}
 		void removeAtom(Atom* a)
 		{
-			remove(a->get_type(), a);
+			AtomSet& s(_idx.at(a->get_type()));
+			s.erase(a);
 		}
+
+		size_t size(Type t)
+		{
+			AtomSet& s(_idx.at(t));
+			return s.size();
+		}
+
+		size_t size(void) const
+		{
+			size_t cnt = 0;
+			for (const auto& s : _idx)
+				cnt += s.size();
+			return cnt;
+		}
+
+		void clear(void)
+		{
+			for (auto& s : _idx) s.clear();
+		}
+
+		// Return true if there exists some index containing duplicated
+		// atoms (equal by content). Used during unit tests.
+		bool contains_duplicate() const;
+		bool contains_duplicate(const AtomSet& atoms) const;
 
 		class iterator
 			: public HandleIterator
