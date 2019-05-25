@@ -145,3 +145,10 @@ ClassServer& opencog::classserver()
 	static std::unique_ptr<ClassServer> instance(new ClassServer(nameserver()));
 	return *instance;
 }
+
+// Make sure that the classserver gets initialized when this
+// shared lib gets loaded for the first time.
+static __attribute__ ((constructor)) void classserver_init(void)
+{
+	opencog::classserver();
+}
