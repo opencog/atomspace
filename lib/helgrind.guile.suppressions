@@ -1,0 +1,47 @@
+{
+   <GC_mark>
+   Helgrind:Race
+   fun:GC_mark_from
+   fun:GC_do_local_mark
+   fun:GC_mark_local
+   ...
+}
+{
+   <GC_associated_lock_not_held>
+   Helgrind:Misc
+   fun:pthread_cond_broadcast_WRK
+   fun:GC_notify_all_marker
+   fun:GC_mark_local
+   fun:GC_help_marker
+   fun:GC_mark_thread
+   fun:mythread_wrapper
+   fun:start_thread
+   fun:clone
+}
+{
+   <GC_clear_stack>
+   Helgrind:Race
+   fun:GC_clear_stack
+   ...
+}
+{
+   <GC_suspend_handler>
+   Helgrind:Race
+   ...
+   fun:GC_suspend_handler_inner
+   fun:GC_suspend_handler
+   ...
+}
+{
+   <oc_immortal_thread>
+   Helgrind:Race
+   fun:_ZL15immortal_threadv
+   ...
+}
+{
+   <oc_init>
+   Helgrind:Race
+   fun:init_only_once
+   fun:_ZN7opencog10SchemeEvalC1EPNS_9AtomSpaceE
+   ...
+}
