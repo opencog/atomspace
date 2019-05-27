@@ -79,16 +79,20 @@ public:
         // and we cannot know what vtype is at compile time.
         // So we have to do one run-time lookup, in a vector.
         static std::vector<ValueFactory> fax;
+        static std::atomic_flag spinlock(ATOMIC_FLAG_INIT);
 
         ValueFactory fptr = nullptr;
+        while (spinlock.test_and_set(std::memory_order_acquire));
         try
         {
             fptr = fax.at(vtype);
         }
         catch(...) {}
+        spinlock.clear(std::memory_order_release);
 
         if (nullptr == fptr)
         {
+            while (spinlock.test_and_set(std::memory_order_acquire));
             try
             {
                 // First, find the list of factories for this type.
@@ -112,6 +116,7 @@ public:
                 }
             }
             catch(...) {}
+            spinlock.clear(std::memory_order_release);
         }
 
         if (fptr)
