@@ -79,20 +79,17 @@ public:
         // and we cannot know what vtype is at compile time.
         // So we have to do one run-time lookup, in a vector.
         static std::vector<ValueFactory> fax;
-        static std::atomic_flag spinlock(ATOMIC_FLAG_INIT);
+        static std::mutex mtx;
 
         ValueFactory fptr = nullptr;
-        while (spinlock.test_and_set(std::memory_order_acquire));
         try
         {
             fptr = fax.at(vtype);
         }
         catch(...) {}
-        spinlock.clear(std::memory_order_release);
 
         if (nullptr == fptr)
         {
-            while (spinlock.test_and_set(std::memory_order_acquire));
             try
             {
                 // First, find the list of factories for this type.
@@ -108,15 +105,19 @@ public:
                     if (fr.args == expected_args)
                     {
                         fptr = fr.func;
-                        if (fax.size() <= vtype)
-                            fax.resize(vtype+1);
-                        fax[vtype] = fr.func;
+
+                        std::lock_guard<std::mutex> lck(mtx);
+                        std::vector<ValueFactory> newfax(fax);
+                        if (newfax.size() <= vtype)
+                            newfax.resize(vtype+1);
+                        newfax[vtype] = fr.func;
+                        // swap here allows lookup to be lockless.
+                        fax.swap(newfax);
                         break;
                     }
                 }
             }
             catch(...) {}
-            spinlock.clear(std::memory_order_release);
         }
 
         if (fptr)
