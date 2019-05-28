@@ -104,10 +104,10 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr c
 	DVecSeq keys = condDist->_value.get_posvec();
 	CDVrep remaped = _value.remap(keys);
 
-	for (auto v : condDist->_value)
+	for (auto v : remaped)
 	{
-		double val = condDist->get_mean_for(v.value);
-		res += remaped.get(v.pos) * val;
+		double val = condDist->get_mean(v.pos);
+		res += v.value * val;
 	}
 	return std::make_shared<const DistributionalValue>(res);
 }

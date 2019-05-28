@@ -41,6 +41,8 @@ class CTHist : public CoverTree<val_t> ,
 	friend class CoverTree<CTHist<double>>;
 	friend class CTHist<double>;
 	friend class CTHist<CTHist<double>>;
+	friend class CoverTreeNode<double>;
+	friend class CoverTreeNode<CTHist<double>>;
 
 	//When inheriting from a class template we need to explicitly refere to it's
 	//members either by using this->member or with using declarations as follows
@@ -113,9 +115,7 @@ public:
 		: CoverTree<val_t>(dims) , _max_size(s)
 	{
 		_lower_limits = DVec(dims);
-		std::fill(_lower_limits.begin(),_lower_limits.end(),0.0);
 		_upper_limits = DVec(dims);
-		std::fill(_upper_limits.begin(),_upper_limits.end(),1.0);
 	}
 
 	int max_size() const {return _max_size;};

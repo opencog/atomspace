@@ -91,8 +91,6 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	}
 	for (auto & elem : res)
 	{
-		//std::cout << elem.pos << "," << elem.value << "\n"
-				  //<< min(counts[elem.pos],dv2remap->get_count(elem.pos)) << std::endl;
 		elem.value *= counts[elem.pos];
 	}
 

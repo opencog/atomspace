@@ -69,7 +69,7 @@ public:
 	DistributionalValue();
 	DistributionalValue(const CTHist<double>&);
 	//Create a DV from mean and count
-	DistributionalValue(double, double);
+	DistributionalValue(double, double, bool = false);
 
 	const CTHist<double>& value() const { return _value; }
 

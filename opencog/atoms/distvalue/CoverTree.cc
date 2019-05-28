@@ -519,6 +519,9 @@ void opencog::update_count(CoverTree<double>& ct,const double n)
 
 #include <opencog/atoms/distvalue/CTHist.h>
 
+template class CoverTreeNode<double>;
 template class CoverTree<double>;
+template class CoverTreeNode<CoverTree<double>>;
 template class CoverTree<CoverTree<double>>;
+template class CoverTreeNode<CTHist<double>>;
 template class CoverTree<CTHist<double>>;

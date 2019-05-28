@@ -47,14 +47,23 @@ DistributionalValue::DistributionalValue(const CTHist<double> &hist)
 //Not recommended as it results in a DV with only 1 singleton set
 //which in some calculations is unusalbe as the chance of overlaps in the
 //Sets/Bins is small
-DistributionalValue::DistributionalValue(double mode,double conf)
-	: Value(DISTRIBUTIONAL_VALUE) , _value(1,1)
+DistributionalValue::DistributionalValue(double mode,double conf,bool fuzzy)
+	: Value(DISTRIBUTIONAL_VALUE) , _value(fuzzy ? 1 : 2 ,1)
 {
 	confidence_t cf = std::min(conf, 0.9999998);
 	double count = (DEFAULT_K * cf / (1.0 - cf));
 	//DV Bin with count 0 is undefined
 	count = std::max(count, 0.0000002);
-	_value.insert(DVec{mode},count);
+
+	if (fuzzy)
+	{
+		_value.insert(DVec{mode},count);
+	}
+	else
+	{
+		_value.insert(DVec{0.0},count * (1 - mode));
+		_value.insert(DVec{1.0},count * mode);
+	}
 }
 
 DistributionalValuePtr DistributionalValue::TRUE_TV()

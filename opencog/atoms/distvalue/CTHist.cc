@@ -38,7 +38,7 @@ void CTHist<val_t>::insert(const DVec & pos,const val_t & value)
 template <typename val_t>
 void CTHist<val_t>::insert(const CoverTreeNode<val_t> & x)
 {
-	if (_nodes.size() == 0 && false)
+	if (_nodes.size() == 0)
 	{
 		for (unsigned int i = 0; i < x.pos.size(); i++)
 		{

@@ -52,16 +52,14 @@ public:
 		keys[2] = DVec{0.625};
 		keys[3] = DVec{0.875};
 
-		keys[4] = DVec{0.15};
-		keys[5] = DVec{0.5};
-		keys[6] = DVec{0.85};
-
-		keys[7] = DVec{0.25};
-		keys[8] = DVec{0.75};
+		keys[4] = DVec{0.25};
+		keys[5] = DVec{0.75};
 
 		CTHist<double> hist0 = CTHist<double>(4,1);
-		hist0.insert(keys[5],10);
-		hist0.insert(keys[6],20);
+		hist0.insert(keys[0],10);
+		hist0.insert(keys[1],20);
+		hist0.insert(keys[2],30);
+		hist0.insert(keys[3],40);
 
 		dv = DistributionalValue::createDV(hist0);
 
@@ -75,8 +73,8 @@ public:
 		hist2.insert(keys[3],30);
 
 		CDVrep rep = CDVrep(3,1);
-		rep.insert(keys[7],hist1);
-		rep.insert(keys[8],hist2);
+		rep.insert(keys[4],hist1);
+		rep.insert(keys[5],hist2);
 
 		cdv = ConditionalDV::createCDV(rep);
     }
@@ -85,36 +83,40 @@ public:
 
 	void testUncoditonal()
 	{
-        std::cout << dv->to_string() << std::endl
-                  << cdv->to_string() << std::endl << std::flush;
+        //std::cout << dv->to_string() << std::endl
+        //          << cdv->to_string() << std::endl << std::flush;
 		DistributionalValuePtr dvres = cdv->get_unconditional(dv);
 
 		CTHist<double> dvc1 = CTHist<double>(4,1);
-		dvc1.insert(keys[0],5);
-		dvc1.insert(keys[1],5);
-		dvc1.insert(keys[2],25);
-		dvc1.insert(keys[3],25);
+		dvc1.insert(keys[0],6.75);
+		dvc1.insert(keys[1],6.75);
+		dvc1.insert(keys[2],8.25);
+		dvc1.insert(keys[3],8.25);
 
 		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc1);
-        std::cout << "Res1:\n"
-		          << dvres->to_string() << std::endl
-		          << dvexp->to_string() << std::endl << std::flush;
+        //std::cout << "Res1:\n"
+		//          << dvres->to_string() << std::endl
+		//          << dvexp->to_string() << std::endl << std::flush;
 		TS_ASSERT_EQUALS(*dvres,*dvexp);
 	}
 
 	void testGetJoint()
 	{
 		DistributionalValuePtr dvres = cdv->get_joint_probability(dv);
+		//std::cout << dvres << std::endl;
 
-        CTHist<double> dvc = CTHist<double>(9,2);
-		dvc.insert(DVec{keys[5][0],keys[0][0]},2.5);
-		dvc.insert(DVec{keys[5][0],keys[1][0]},2.5);
-		dvc.insert(DVec{keys[5][0],keys[2][0]},2.5);
-		dvc.insert(DVec{keys[5][0],keys[3][0]},2.5);
-		dvc.insert(DVec{keys[6][0],keys[2][0]},10);
-		dvc.insert(DVec{keys[6][0],keys[3][0]},10);
+        CTHist<double> dvc = CTHist<double>(8,2);
+		dvc.insert(DVec{keys[1][0],keys[0][0]},7.5);
+		dvc.insert(DVec{keys[1][0],keys[1][0]},7.5);
+		dvc.insert(DVec{keys[1][0],keys[2][0]},2.5);
+		dvc.insert(DVec{keys[1][0],keys[3][0]},2.5);
+		dvc.insert(DVec{keys[2][0],keys[0][0]},3.75);
+		dvc.insert(DVec{keys[2][0],keys[1][0]},3.75);
+		dvc.insert(DVec{keys[2][0],keys[2][0]},11.25);
+		dvc.insert(DVec{keys[2][0],keys[3][0]},11.25);
 
 		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc);
+		//std::cout << dvexp << std::endl;
 
 		TS_ASSERT_EQUALS(dvres->value(),dvc);
 	}

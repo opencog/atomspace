@@ -39,11 +39,11 @@ public:
 
 	void setUp()
 	{
-		//std::cout << std::endl;
+		std::cout << std::endl;
 
 		CTHist<double> hist0 = CTHist<double>(3,1);
-		hist0.insert(DVec{0.85},20);
 		hist0.insert(DVec{0.5},10);
+		hist0.insert(DVec{0.85},20);
 
 		dv = DistributionalValue::createDV(hist0);
 	}
