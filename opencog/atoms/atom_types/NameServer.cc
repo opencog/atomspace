@@ -36,14 +36,16 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/util/exceptions.h>
 
-//#define DPRINTF printf
-#define DPRINTF(...)
+
+// Maximum number of values that can be defined without error.
+#define MAX_NUM_VALUE 64
 
 using namespace opencog;
 
 NameServer::NameServer(void)
 {
-	nTypes = 0;
+	nTypes = 1;
+	nValues = 1;
 	_maxDepth = 0;
 	_tmod = 0;
 }
@@ -123,6 +125,24 @@ Type NameServer::declType(const Type parent, const std::string& name)
     std::unique_lock<std::mutex> l(type_mutex);
     // Assign type code and increment type counter.
     type = nTypes++;
+
+    if (0 == ATOM or parent < ATOM)
+    {
+        if (0 == ATOM and 0 == name.compare("Atom"))
+        {
+            type = MAX_NUM_VALUE;
+            nTypes = MAX_NUM_VALUE + 1;
+        }
+        else
+        {
+            if (MAX_NUM_VALUE <= nValues)
+                throw InvalidParamException(TRACE_INFO,
+                    "Maximum number %d of Value declarations exceeded!\n"
+                    "Increase MAX_NUM_VALUE in NameServer.cc and recompile!\n",
+                    MAX_NUM_VALUE);
+            type = nValues++;
+        }
+    }
 
     // Resize inheritanceMap container.
     inheritanceMap.resize(nTypes);

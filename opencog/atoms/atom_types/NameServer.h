@@ -73,6 +73,7 @@ private:
     mutable int _tmod;
 
     Type nTypes;
+    Type nValues;
     Type _maxDepth;
 
     std::vector< std::vector<bool> > inheritanceMap;
