@@ -210,6 +210,12 @@ bool NameServer::isDefined(const std::string& typeName) const
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
+bool NameServer::isDefined(Type t) const
+{
+    std::lock_guard<std::mutex> l(type_mutex);
+    return (1 <= t and t < nValues) or (ATOM <= t and t < nTypes);
+}
+
 Type NameServer::getType(const std::string& typeName) const
 {
     std::lock_guard<std::mutex> l(type_mutex);

@@ -245,6 +245,7 @@ public:
      * Returns whether a class with name 'typeName' is defined.
      */
     bool isDefined(const std::string& typeName) const;
+    bool isDefined(Type) const;
 
     /**
      * Returns the type of a given class.
