@@ -332,10 +332,13 @@ SCM SchemeSmob::ss_get_types (void)
 	Type t = nameserver().getNumberOfClasses();
 	while (1) {
 		t--;
-		const std::string &tname = nameserver().getTypeName(t);
-		SCM str = scm_from_utf8_string(tname.c_str());
-		SCM sym = scm_string_to_symbol(str);
-		list = scm_cons(sym, list);
+		if (nameserver().isDefined(t))
+		{
+			const std::string &tname = nameserver().getTypeName(t);
+			SCM str = scm_from_utf8_string(tname.c_str());
+			SCM sym = scm_string_to_symbol(str);
+			list = scm_cons(sym, list);
+		}
 		if (0 == t) break;
 	}
 
