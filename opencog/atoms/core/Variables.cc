@@ -307,6 +307,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
+	bool changed = false;
 	for (const Handle& h : term->getOutgoingSet())
 	{
 		// GlobNodes are matched with a list of one or more arguments.
@@ -317,14 +318,21 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
 			if (glst->is_node())
 				return glst;
+
+			changed = true;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
 		}
 		else
-			oset.emplace_back(
-				substitute_scoped(h, args, silent, index_map, quotation));
+		{
+			Handle sub(substitute_scoped(h, args, silent, index_map, quotation));
+			if (sub != h) changed = true;
+			oset.emplace_back(sub);
+		}
 	}
 
+	// Return the original atom, if it was not modified.
+	if (not changed) return term;
 	return createLink(oset, term->get_type());
 }
 
