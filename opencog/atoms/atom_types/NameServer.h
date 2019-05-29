@@ -68,6 +68,10 @@ private:
      */
     mutable std::mutex type_mutex;
 
+    /* Only one module can add types at a time. */
+    mutable std::mutex _module_mutex;
+    mutable int _tmod;
+
     Type nTypes;
     Type _maxDepth;
 
