@@ -152,17 +152,6 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (OCTO_VALUE == t)
-	{
-		SCM sl = svalue_list;
-		SCM satom = SCM_CAR(sl);
-		SCM svalue = SCM_CDR(sl);
-		Handle hlist = verify_handle(satom, "cog-new-value", 2);
-		HandleSeq hseq = hlist->getOutgoingSet();
-		std::vector<double> valist = verify_float_list(svalue, "cog-new-value", 2);
-		return valueserver().create(t, hseq, valist);
-	}
-
 	if (RANDOM_STREAM == t)
 	{
 		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
