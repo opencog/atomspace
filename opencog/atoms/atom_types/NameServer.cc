@@ -44,7 +44,7 @@ using namespace opencog;
 
 NameServer::NameServer(void)
 {
-	nTypes = 1;
+	nTypes = MAX_NUM_VALUE + 1;
 	nValues = 1;
 	_maxDepth = 0;
 	_tmod = 0;
@@ -123,15 +123,13 @@ Type NameServer::declType(const Type parent, const std::string& name)
     }
 
     std::unique_lock<std::mutex> l(type_mutex);
-    // Assign type code and increment type counter.
-    type = nTypes++;
 
+    // Assign type code and increment type counter.
     if (0 == ATOM or parent < ATOM)
     {
         if (0 == ATOM and 0 == name.compare("Atom"))
         {
             type = MAX_NUM_VALUE;
-            nTypes = MAX_NUM_VALUE + 1;
         }
         else
         {
@@ -142,6 +140,10 @@ Type NameServer::declType(const Type parent, const std::string& name)
                     MAX_NUM_VALUE);
             type = nValues++;
         }
+    }
+    else
+    {
+        type = nTypes++;
     }
 
     // Resize inheritanceMap container.
