@@ -322,16 +322,22 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		id = al(LAMBDA_LINK, X, X),
-		AB = al(INHERITANCE_LINK, A, B),
-		exec = al(EXECUTION_OUTPUT_LINK, id, AB);
+	Handle AB =
+		al(INHERITANCE_LINK,
+			an(CONCEPT_NODE, "A"),
+			an(CONCEPT_NODE, "B"));
+
+	Handle identity =
+		al(LAMBDA_LINK,
+			an(VARIABLE_NODE, "$X"),
+			an(VARIABLE_NODE, "$X"));
+
+	Handle exec =
+		al(EXECUTION_OUTPUT_LINK, identity, AB);
 
 	Instantiator inst(&as);
-	Handle expected = AB,
-		result = HandleCast(inst.execute(exec));
+	Handle expected = AB;
+	Handle result = HandleCast(inst.execute(exec));
 
 	TS_ASSERT_EQUALS(expected, result);
 
