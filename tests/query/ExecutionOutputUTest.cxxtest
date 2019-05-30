@@ -22,6 +22,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -66,6 +67,7 @@ public:
 	void test_clear_box_single_argument(void);
 	void test_clear_box_single_argument_link(void);
 	void test_value(void);
+	void test_recursion(void);
 };
 
 #define an as.add_node
@@ -385,6 +387,27 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
 		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
 	}
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// This tests recursion of ExecutionOutputLinks, on a classic algo:
+// the factorial algo.  This test does not actually test the pattern
+// matcher, and so does not really belong in this directory...
+void ExecutionOutputUTest::test_recursion(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-factorial.scm\")");
+
+	Handle result = eval.eval_h(
+		"(cog-execute! (ExecutionOutput"
+		"     (DefinedSchema \"factorial\") (Number 5)))");
+
+	TS_ASSERT_EQUALS(result->get_type(), NUMBER_NODE);
+	double ans = NumberNodeCast(result)->get_value();
+
+	TS_ASSERT_DELTA(ans, 120.0, 1.0e-6);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
