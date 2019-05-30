@@ -68,6 +68,7 @@ public:
 	void test_clear_box_single_argument_link(void);
 	void test_value(void);
 	void test_recursion(void);
+	void test_lambda(void);
 };
 
 #define an as.add_node
@@ -408,6 +409,32 @@ void ExecutionOutputUTest::test_recursion(void)
 	double ans = NumberNodeCast(result)->get_value();
 
 	TS_ASSERT_DELTA(ans, 120.0, 1.0e-6);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// This tests reconstructing a lambda link with a matched variable
+// declaration and body
+void ExecutionOutputUTest::test_lambda(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-lambda.scm\")");
+	Handle bl = eval.eval_h("bl");
+
+	Instantiator inst(&as);
+	Handle result = HandleCast(inst.execute(bl));
+	Handle expect = al(SET_LINK,
+	                   al(LAMBDA_LINK,
+	                      an(VARIABLE_NODE, "$X"),
+	                      al(EVALUATION_LINK,
+	                         an(PREDICATE_NODE, "P"),
+	                         an(CONCEPT_NODE, "A"))));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(expect, result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

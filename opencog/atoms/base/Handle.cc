@@ -269,6 +269,16 @@ std::string oc_to_string(const HandleMapSeq& hms, const std::string& indent)
 	return ss.str();
 }
 
+std::string oc_to_string(const HandleMapSeqSeq& hmss, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hmss.size() << std::endl;
+	for (unsigned i = 0; i < hmss.size(); i++)
+		ss << indent << "--- maps[" << i << "] ---" << std::endl
+		   << oc_to_string(hmss[i], indent + OC_TO_STRING_INDENT);
+	return ss.str();	
+}
+
 std::string oc_to_string(const HandleMapSet& hms, const std::string& indent)
 {
 	std::stringstream ss;
