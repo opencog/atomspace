@@ -572,11 +572,11 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		t = eolh->get_type();
-		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		while (eolh->is_executable())
 		{
-			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-			return geolp->execute(_as, silent);
+			ValuePtr vp(eolh->execute(_as, silent));
+			if (not vp->is_atom()) return vp;
+			eolh = HandleCast(vp);
 		}
 		return eolh;
 	}
