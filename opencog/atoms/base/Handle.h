@@ -199,6 +199,9 @@ typedef std::map<Handle, HandleSet> HandleMultimap;
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
 
+//! a sequence of sequences of ordered handle maps
+typedef std::vector<HandleMapSeq> HandleMapSeqSeq;
+
 //! a set of ordered handle maps
 typedef std::set<HandleMap> HandleMapSet;
 
@@ -311,6 +314,8 @@ std::string oc_to_string(const HandleMap::value_type& hmv,
 std::string oc_to_string(const HandleMultimap& hmm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMapSeqSeq& hmss,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSet& hms,
                          const std::string& indent=empty_string);

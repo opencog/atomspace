@@ -125,49 +125,87 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	{
 		LambdaLinkPtr flp(LambdaLinkCast(sn));
 
-		// Two-step process. First, plug the arguments into the
-		// function; i.e. perform beta-reduction. Second, actually
-		// execute the result. We execute by just calling walk_tree
-		// again.
+		// Three-step process. First, beta-reduce the args; second,
+		// plug the args into the function. Third, execute (not here,
+		// but by the caller).
 		Handle body(flp->get_body());
 		Variables vars(flp->get_variables());
 
 		// Perform substitution on the args, only.
-		if (_eager)
-		{
-			args = walk_tree(args, silent);
-		}
-		else
-		{
-			args = beta_reduce(args, *_vmap);
-		}
-		const Type& arg_type = args->get_type();
+		args = beta_reduce(args, *_vmap);
+
 		// unpack list link
-		const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
-		                                              HandleSeq{args});
-		Handle beta_reduced(vars.substitute_nocheck(body, oset));
-		return walk_tree(beta_reduced, silent);
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+				args->getOutgoingSet(): HandleSeq{args});
+
+		return vars.substitute_nocheck(body, oset);
+	}
+
+#define PLN_NEEDS_UNQUOTING 1
+#if PLN_NEEDS_UNQUOTING
+	// PLN quotes its arguments, which now need to be unquoted.
+	// This is required by PLNRulesUTest and specifically by
+	// PLNRulesUTest::test_closed_lambda_introduction
+	// PLNRulesUTest::test_implication_scope_to_implication
+	// PLNRulesUTest::test_implication_and_lambda_factorization
+	Type at0 = args->get_type();
+	bool done = false;
+	if ((LIST_LINK == at0 or IMPLICATION_LINK == at0) and
+	     0 < args->get_arity())
+	{
+		Handle a1 = args->getOutgoingAtom(0);
+		Type at1 = a1->get_type();
+		if (QUOTE_LINK == at1 or
+		    (IMPLICATION_LINK == at1 and
+		     QUOTE_LINK == a1->getOutgoingAtom(0)->get_type()) or
+		    (IMPLICATION_LINK == at0 and
+		     QUOTE_LINK == args->getOutgoingAtom(1)->get_type()))
+		{
+			args = walk_tree(args);
+			done = true;
+		}
 	}
 
 	// Perform substitution on the args, only.
-	if (_eager)
-	{
-		// XXX I don't get it ... something is broken here, because
-		// the ExecutionOutputLink below *also* performs eager
-		// execution of its arguments. So the step below should not
-		// be needed -- yet, it is ... Funny thing is, it only
-		// breaks the BackwardChainerUTest ... why?
-		args = walk_tree(args, silent);
-	}
-	else
-	{
-		args = beta_reduce(args, *_vmap);
-	}
+	if (not done) args = beta_reduce(args, *_vmap);
+#else
+	// Perform substitution on the args, only.
+	args = beta_reduce(args, *_vmap);
+#endif
 
 	Type t = expr->get_type();
 	return createLink(t, sn, args);
 }
 
+/// walk_tree() performs a kind-of eager-evaluation of function arguments.
+/// The code in here is a mashup of several different ideas that are not
+/// cleanly separated from each other. Roughly, it goes like so:
+///
+/// First, walk downwards to the leaves of the tree. As we return back up,
+/// if any variables are encountered, then replace those variables with
+/// the groundings held in _vmap.
+///
+/// Second, during the above process, if any executable functions are
+/// encountered, then execute them. This is "eager-execution".  The
+/// results of that execution are plugged into the tree, and so we keep
+/// returning upwards, back to the root.
+///
+/// The problem with eager execution is that it disallows recursive
+/// functions: if `f(x)` itself calls `f`, then eager execution results
+/// in the infinite loop `f(f(f(f(....))))` that never terminates, the
+/// problem being that any possible termination condition inside of `f`
+/// is never hit. (c.f. The textbook-classic recursive implementation of
+/// factorial.)
+///
+/// This can be contrasted with `beta_reduce()` up above, which performs
+/// the substitution only, but does NOT perform an execution at all.
+///
+/// So, here's the funny bit: sometimes, `walk_tree` does do
+/// lazy-execution, sometimes. In the current version, when it
+/// encounters a function to be executed, it mostly just performs the
+/// substitution on the function args, and then executes the function.
+/// Its up to the function itself to get more done, as neded.
+///
 Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
 	Type t = expr->get_type();
@@ -406,11 +444,11 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		t = eolh->get_type();
-		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		while (eolh->is_executable())
 		{
-			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-			return HandleCast(geolp->execute(_as, silent));
+			ValuePtr vp(eolh->execute(_as, silent));
+			eolh = HandleCast(vp);
+			if (not vp->is_atom()) return eolh;
 		}
 		return eolh;
 	}
@@ -433,36 +471,11 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
-		if (_eager)
-		{
-			// Perform substitution on all arguments before applying the
-			// function itself. XXX FIXME -- We can almost but not quite
-			// avoid eager execution here ... however, many links, e.g.
-			// the RandomChoiceLink will typically take a GetLink as an
-			// argument, and, due to the stupid, fucked-up CMake
-			// shared-library dependency problem, we cannot get
-			// FunctionLinks to perform thier own evaluation of arguments.
-			// So we have to do eager evaluation, here.  This stinks, and
-			// needs fixing.
-			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-
-			Handle flp(createLink(oset_results, t));
-			return HandleCast(flp->execute(_as, silent));
-		}
-		else
-		{
-			// At this time, no FunctionLink that is outside of an
-			// ExecutionOutputLink ever has a variable declaration.
-			// Also, the number of arguments is not fixed, its always variadic.
-			// Perform substitution on all arguments before applying the
-			// function itself.
-			return HandleCast(expr->execute(_as, silent));
-		}
+		return HandleCast(expr->execute(_as, silent));
 	}
 
-	// If there is a SatisfyingLink, we have to perform it
-	// and return the satisfying set.
+	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
+	// we have to perform it and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
 		return HandleCast(expr->execute(_as, silent));
@@ -599,7 +612,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		}
 		Handle flp(createLink(oset_results, t));
 		ValuePtr pap(flp->execute(_as, silent));
-		if (pap->is_atom())
+		if (_as and pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
 	}
@@ -615,11 +628,11 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		t = eolh->get_type();
-		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		while (eolh->is_executable())
 		{
-			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-			return geolp->execute(_as, silent);
+			ValuePtr vp(eolh->execute(_as, silent));
+			if (not vp->is_atom()) return vp;
+			eolh = HandleCast(vp);
 		}
 		return eolh;
 	}
@@ -639,7 +652,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// some time by doing it just once, right here, in one big batch.
 	// XXX FIXME Can we defer the addition to the atomspace to an even
 	// later time??
-	return _as->add_atom(grounded);
+	if (_as) return _as->add_atom(grounded);
+	return grounded;
 }
 
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)

@@ -142,8 +142,8 @@ static bool recursive_virtual(PatternMatchCallback& cb,
             const HandleMap& var_gnds,
             const HandleMap& term_gnds,
             // copies, NOT references!
-            std::vector<HandleMapSeq> comp_var_gnds,
-            std::vector<HandleMapSeq> comp_term_gnds)
+            HandleMapSeqSeq comp_var_gnds,
+            HandleMapSeqSeq comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -360,8 +360,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 #endif
 
-	std::vector<HandleMapSeq> comp_term_gnds;
-	std::vector<HandleMapSeq> comp_var_gnds;
+	HandleMapSeqSeq comp_term_gnds;
+	HandleMapSeqSeq comp_var_gnds;
 
 	for (size_t i = 0; i < _num_comps; i++)
 	{
