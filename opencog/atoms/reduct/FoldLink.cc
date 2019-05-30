@@ -81,6 +81,10 @@ ValuePtr FoldLink::delta_reduce(void) const
 		// Well, we lied; this is not pure delta-reduction. If the
 		// arguments to fold are executable atoms, then execute them,
 		// and fold in the results.
+		//
+		// Performance ... maybe it is faster to call the nameserver
+		// instead?
+		// if (nameserver().isA(h->get_type(), FUNCTION_LINK))
 		if (h->is_atom() and h->is_executable())
 		{
 			expr = kons(h->execute(), expr);
