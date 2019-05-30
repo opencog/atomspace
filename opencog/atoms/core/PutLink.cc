@@ -410,7 +410,21 @@ Handle PutLink::do_reduce(void) const
 	// arguments to plug in.
 	if (LIST_LINK == vtype)
 	{
-		const HandleSeq& oset = _arguments->getOutgoingSet();
+		// One of the unit tests requires that, for nested PutLinks,
+		// we must first reduce the deeper one, before we reduct this
+		// one. And I guess that makes sense, right?  But perhaps,
+		// instead of doing `if (PUT_LINK == h->get_type())` below, we
+		// should instead do `if (h->is_executable())` intead?
+		// But what if `h` is not itself executable, but one of it's
+		// deeper elements is? What then? Oy, this is a mess.
+		HandleSeq oset;
+		for (const Handle& h: _arguments->getOutgoingSet())
+		{
+			if (PUT_LINK == h->get_type())
+				oset.push_back(HandleCast(h->execute()));
+			else
+				oset.push_back(h);
+		}
 		return reddy(subs, oset);
 	}
 
