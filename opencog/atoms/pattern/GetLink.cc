@@ -74,7 +74,7 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	// Shoot. XXX FIXME. Most of the unit tests require that the atom
 	// that we return is in the atomspace. But it would be nice if we
 	// could defer this indefinitely, until its really needed.
-	satset = as->add_atom(satset);
+	if (as) satset = as->add_atom(satset);
 #endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
 	return satset;
