@@ -132,7 +132,8 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		Variables vars(flp->get_variables());
 
 		// Perform substitution on the args, only.
-		args = beta_reduce(args, *_vmap);
+		if (not _vmap->empty())
+			args = beta_reduce(args, *_vmap);
 
 		// unpack list link
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
