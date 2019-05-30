@@ -388,11 +388,11 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		t = eolh->get_type();
-		if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+		while (eolh->is_executable())
 		{
-			ExecutionOutputLinkPtr geolp(ExecutionOutputLinkCast(eolh));
-			return HandleCast(geolp->execute(_as, silent));
+			ValuePtr vp(eolh->execute(_as, silent));
+			eolh = HandleCast(vp);
+			if (not vp->is_atom()) return eolh;
 		}
 		return eolh;
 	}
