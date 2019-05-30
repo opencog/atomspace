@@ -427,36 +427,11 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
-		if (_eager)
-		{
-			// Perform substitution on all arguments before applying the
-			// function itself. XXX FIXME -- We can almost but not quite
-			// avoid eager execution here ... however, many links, e.g.
-			// the RandomChoiceLink will typically take a GetLink as an
-			// argument, and, due to the stupid, fucked-up CMake
-			// shared-library dependency problem, we cannot get
-			// FunctionLinks to perform thier own evaluation of arguments.
-			// So we have to do eager evaluation, here.  This stinks, and
-			// needs fixing.
-			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-
-			Handle flp(createLink(oset_results, t));
-			return HandleCast(flp->execute(_as, silent));
-		}
-		else
-		{
-			// At this time, no FunctionLink that is outside of an
-			// ExecutionOutputLink ever has a variable declaration.
-			// Also, the number of arguments is not fixed, its always variadic.
-			// Perform substitution on all arguments before applying the
-			// function itself.
-			return HandleCast(expr->execute(_as, silent));
-		}
+		return HandleCast(expr->execute(_as, silent));
 	}
 
-	// If there is a SatisfyingLink, we have to perform it
-	// and return the satisfying set.
+	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
+	// we have to perform it and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
 		return HandleCast(expr->execute(_as, silent));
