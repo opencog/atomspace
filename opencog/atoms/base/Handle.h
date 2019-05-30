@@ -199,6 +199,9 @@ typedef std::map<Handle, HandleSet> HandleMultimap;
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
 
+//! a sequence of sequences of ordered handle maps
+typedef std::vector<HandleMapSeq> HandleMapSeqSeq;
+
 //! a set of ordered handle maps
 typedef std::set<HandleMap> HandleMapSet;
 
