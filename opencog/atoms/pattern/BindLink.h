@@ -40,6 +40,7 @@ public:
 	BindLink(const Handle& body, const Handle& rewrite);
 	explicit BindLink(const Link &l);
 
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);
