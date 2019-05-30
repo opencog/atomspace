@@ -594,7 +594,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// some time by doing it just once, right here, in one big batch.
 	// XXX FIXME Can we defer the addition to the atomspace to an even
 	// later time??
-	return _as->add_atom(grounded);
+	if (_as) return _as->add_atom(grounded);
+	return grounded;
 }
 
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
