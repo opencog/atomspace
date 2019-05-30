@@ -144,6 +144,18 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	// Perform substitution on the args, only.
 	args = beta_reduce(args, *_vmap);
 
+#define PLN_NEEDS_UNQUOTING 1
+#if PLN_NEEDS_UNQUOTING
+	// PLN quotes its arguments, which now need to be unquoted.
+	// This is required by PLNRulesUTest and specifically by
+	// PLNRulesUTest::test_closed_lambda_introduction
+	if (LIST_LINK == args->get_type() and
+	    QUOTE_LINK == args->getOutgoingAtom(0)->get_type())
+	{
+		args = walk_tree(args);
+	}
+#endif
+
 	Type t = expr->get_type();
 	return createLink(t, sn, args);
 }
