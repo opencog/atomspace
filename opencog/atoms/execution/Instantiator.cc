@@ -150,12 +150,17 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	// This is required by PLNRulesUTest and specifically by
 	// PLNRulesUTest::test_closed_lambda_introduction
 	// PLNRulesUTest::test_implication_scope_to_implication
-	if (LIST_LINK == args->get_type())
+	// PLNRulesUTest::test_implication_and_lambda_factorization
+	Type at0 = args->get_type();
+	if (LIST_LINK == at0 or IMPLICATION_LINK == at0)
 	{
-		Handle a1 = args-> getOutgoingAtom(0);
-		if (QUOTE_LINK == a1->get_type() or
-		    (IMPLICATION_LINK == a1->get_type() and
-           QUOTE_LINK == a1->getOutgoingAtom(0)->get_type()))
+		Handle a1 = args->getOutgoingAtom(0);
+		Type at1 = a1->get_type();
+		if (QUOTE_LINK == at1 or
+		    (IMPLICATION_LINK == at1 and
+		     QUOTE_LINK == a1->getOutgoingAtom(0)->get_type()) or
+		    (IMPLICATION_LINK == at0 and
+		     QUOTE_LINK == args->getOutgoingAtom(1)->get_type()))
 		{
 			args = walk_tree(args);
 		}
