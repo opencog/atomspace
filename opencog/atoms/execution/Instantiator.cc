@@ -144,19 +144,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	}
 
 	// Perform substitution on the args, only.
-	if (_eager)
-	{
-		// XXX I don't get it ... something is broken here, because
-		// the ExecutionOutputLink below *also* performs eager
-		// execution of its arguments. So the step below should not
-		// be needed -- yet, it is ... Funny thing is, it only
-		// breaks the BackwardChainerUTest ... why?
-		args = walk_tree(args, silent);
-	}
-	else
-	{
-		args = beta_reduce(args, *_vmap);
-	}
+	args = beta_reduce(args, *_vmap);
 
 	Type t = expr->get_type();
 	return createLink(t, sn, args);
