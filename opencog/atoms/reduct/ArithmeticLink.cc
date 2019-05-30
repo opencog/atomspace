@@ -167,6 +167,17 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 		if (nullptr == red) return vptr;
 		if (*red == *vptr) return vptr;
 		vptr = red;
+
+	}
+
+	// The FunctionLink might be a GetLink, which returns a SetLink
+	// of results. If the SetLink is wrapping only one value, then
+	// unwrap it and return that value.
+	if (SET_LINK == vptr->get_type())
+	{
+		Handle setl(HandleCast(vptr));
+		if (1 == setl->get_arity())
+			vptr = setl->getOutgoingAtom(0);
 	}
 	return vptr;
 }
