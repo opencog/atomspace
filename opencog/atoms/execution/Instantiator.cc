@@ -177,6 +177,35 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	return createLink(t, sn, args);
 }
 
+/// walk_tree() performs a kind-of eager-evaluation of function arguments.
+/// The code in here is a mashup of several different ideas that are not
+/// cleanly separated from each other. Roughly, it goes like so:
+///
+/// First, walk downwards to the leaves of the tree. As we return back up,
+/// if any variables are encountered, then replace those variables with
+/// the groundings held in _vmap.
+///
+/// Second, during the above process, if any executable functions are
+/// encountered, then execute them. This is "eager-execution".  The
+/// results of that execution are plugged into the tree, and so we keep
+/// returning upwards, back to the root.
+///
+/// The problem with eager execution is that it disallows recursive
+/// functions: if `f(x)` itself calls `f`, then eager execution results
+/// in the infinite loop `f(f(f(f(....))))` that never terminates, the
+/// problem being that any possible termination condition inside of `f`
+/// is never hit. (c.f. The textbook-classic recursive implementation of
+/// factorial.)
+///
+/// This can be contrasted with `beta_reduce()` up above, which performs
+/// the substitution only, but does NOT perform an execution at all.
+///
+/// So, here's the funny bit: sometimes, `walk_tree` does do
+/// lazy-execution, sometimes. In the current version, when it
+/// encounters a function to be executed, it mostly just performs the
+/// substitution on the function args, and then executes the function.
+/// Its up to the function itself to get more done, as neded.
+///
 Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
 	Type t = expr->get_type();
