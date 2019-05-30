@@ -141,9 +141,6 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		return vars.substitute_nocheck(body, oset);
 	}
 
-	// Perform substitution on the args, only.
-	args = beta_reduce(args, *_vmap);
-
 #define PLN_NEEDS_UNQUOTING 1
 #if PLN_NEEDS_UNQUOTING
 	// PLN quotes its arguments, which now need to be unquoted.
@@ -152,6 +149,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	// PLNRulesUTest::test_implication_scope_to_implication
 	// PLNRulesUTest::test_implication_and_lambda_factorization
 	Type at0 = args->get_type();
+	bool done = false;
 	if ((LIST_LINK == at0 or IMPLICATION_LINK == at0) and
 	     0 < args->get_arity())
 	{
@@ -164,8 +162,15 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		     QUOTE_LINK == args->getOutgoingAtom(1)->get_type()))
 		{
 			args = walk_tree(args);
+			done = true;
 		}
 	}
+
+	// Perform substitution on the args, only.
+	if (not done) args = beta_reduce(args, *_vmap);
+#else
+	// Perform substitution on the args, only.
+	args = beta_reduce(args, *_vmap);
 #endif
 
 	Type t = expr->get_type();
