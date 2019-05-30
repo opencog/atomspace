@@ -152,7 +152,8 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	// PLNRulesUTest::test_implication_scope_to_implication
 	// PLNRulesUTest::test_implication_and_lambda_factorization
 	Type at0 = args->get_type();
-	if (LIST_LINK == at0 or IMPLICATION_LINK == at0)
+	if ((LIST_LINK == at0 or IMPLICATION_LINK == at0) and
+	     0 < args->get_arity())
 	{
 		Handle a1 = args->getOutgoingAtom(0);
 		Type at1 = a1->get_type();
