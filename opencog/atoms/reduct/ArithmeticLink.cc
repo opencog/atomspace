@@ -90,10 +90,9 @@ ValuePtr ArithmeticLink::delta_reduce(void) const
 
 	ValuePtr red(alp->FoldLink::delta_reduce());
 
-	Handle h(HandleCast(red));
-	if (nullptr == h) return red;
+	if (nullptr == red or not red->is_atom()) return red;
 
-	alp = ArithmeticLinkCast(h);
+	alp = ArithmeticLinkCast(HandleCast(red));
 	if (nullptr == alp) return red;
 	return alp->reorder();
 }
