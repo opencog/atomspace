@@ -315,6 +315,8 @@ std::string oc_to_string(const HandleMultimap& hmm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMapSeqSeq& hmss,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSet& hms,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandlePairSeq& hps,
