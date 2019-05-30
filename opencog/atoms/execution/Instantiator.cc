@@ -125,10 +125,9 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	{
 		LambdaLinkPtr flp(LambdaLinkCast(sn));
 
-		// Two-step process. First, plug the arguments into the
-		// function; i.e. perform beta-reduction. Second, actually
-		// execute the result. We execute by just calling walk_tree
-		// again.
+		// Three-step process. First, beta-reduce the args; second,
+		// plug the args into the function. Third, execute (not here,
+		// but by the caller).
 		Handle body(flp->get_body());
 		Variables vars(flp->get_variables());
 
@@ -139,8 +138,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		// unpack list link
 		const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
 		                                              HandleSeq{args});
-		Handle beta_reduced(vars.substitute_nocheck(body, oset));
-		return walk_tree(beta_reduced, silent);
+		return vars.substitute_nocheck(body, oset);
 	}
 
 	// Perform substitution on the args, only.
