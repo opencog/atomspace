@@ -895,7 +895,7 @@ void PutLinkUTest::test_recursive_compose()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test recursive function compostion can be performed.
+	// Test that recursive function composition is performed correctly.
 	//
 	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
 	// (define f2 (Lambda
