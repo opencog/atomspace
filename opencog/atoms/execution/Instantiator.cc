@@ -133,11 +133,11 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 
 		// Perform substitution on the args, only.
 		args = beta_reduce(args, *_vmap);
-		const Type& arg_type = args->get_type();
 
 		// unpack list link
-		const HandleSeq& oset(arg_type == LIST_LINK ? args->getOutgoingSet():
-		                                              HandleSeq{args});
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+				args->getOutgoingSet(): HandleSeq{args});
+
 		return vars.substitute_nocheck(body, oset);
 	}
 
@@ -554,7 +554,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		}
 		Handle flp(createLink(oset_results, t));
 		ValuePtr pap(flp->execute(_as, silent));
-		if (pap->is_atom())
+		if (_as and pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
 	}
