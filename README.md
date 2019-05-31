@@ -90,8 +90,14 @@ repos, including:
   (as-moses repo)
 
 
-A  Theoretical Overview
-=======================
+Examples
+========
+If you are impatient, a good way to learn the AtomSpace is to run the
+example demos. [Start with these.](examples/atomspace)
+
+
+A Theoretical Overview
+======================
 The AtomSpace is a mashup of a large variety of concepts from
 mathematical logic, theorem proving, graph theory, database theory,
 type theory, model theory and knowledge representation. Its hard to
