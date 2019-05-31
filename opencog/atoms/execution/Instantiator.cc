@@ -60,9 +60,9 @@ static Handle beta_reduce(const Handle& expr, const HandleMap& vmap)
 	return crud.substitute_nocheck(expr, vals);
 }
 
-/// Same as walk tree, except that it handles a handle sequence,
+/// Same as walk tree, except that it operates on a handle sequence,
 /// instead of a single handle. The returned result is in oset_results.
-/// Returns true if the results differ from the input, i.e. if the
+/// Returns `true` if the results differ from the input, i.e. if the
 /// result of execution/evaluation changed something.
 bool Instantiator::walk_sequence(HandleSeq& oset_results,
                                  const HandleSeq& expr,
@@ -97,14 +97,14 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	return changed;
 }
 
-// ExecutionOutputLinks get special treatment.
-//
-// Even for the case of lazy execution, we still have to do eager
-// execution of the arguments passed to the ExOutLink.  This is
-// because the ExOutLink is a black box, and we cannot guess what
-// it might do.  It would be great if the authors of ExOutLinks
-// did the lazy execution themselves... but this is too much to
-// ask for. So we always eager-evaluate those args.
+/// ExecutionOutputLinks get special treatment.
+///
+/// Even for the case of lazy execution, we still have to do eager
+/// execution of the arguments passed to the ExOutLink.  This is
+/// because the ExOutLink is a black box, and we cannot guess what
+/// it might do.  It would be great if the authors of ExOutLinks
+/// did the lazy execution themselves... but this is too much to
+/// ask for. So we always eager-evaluate those args.
 Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 {
 	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
@@ -183,8 +183,8 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 /// cleanly separated from each other. Roughly, it goes like so:
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
-/// if any variables are encountered, then replace those variables with
-/// the groundings held in _vmap.
+/// if any free variables are encountered, then replace those variables
+/// with the groundings held in _vmap.
 ///
 /// Second, during the above process, if any executable functions are
 /// encountered, then execute them. This is "eager-execution".  The
@@ -205,7 +205,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 /// lazy-execution, sometimes. In the current version, when it
 /// encounters a function to be executed, it mostly just performs the
 /// substitution on the function args, and then executes the function.
-/// Its up to the function itself to get more done, as neded.
+/// Its up to the function itself to get more done, as needed.
 ///
 Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
@@ -388,6 +388,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				throw NotEvaluatableException();
 			throw SyntaxException(TRACE_INFO, "body is ill-formed");
 		}
+
 		Type bt = body->get_type();
 		if (Quotation::is_quotation_type(bt))
 		{
@@ -396,10 +397,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			body = walk_tree(body->getOutgoingAtom(0), silent);
 			body = createLink(bt, body);
 			_needless_quotation = true;
-		} else
+		}
+		else
 		{
 			body = walk_tree(body, silent);
 		}
+
 		// Reconstruct Lambda, if it has changed
 		if (ll->get_vardecl() != vardecl or ll->get_body() != body)
 		{
@@ -437,6 +440,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
+		// XXX I don't get it... don't we need to perform var
+		// substitution here? Is this just not tested?
 		return HandleCast(expr->execute(_as, silent));
 	}
 
@@ -601,6 +606,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// The thread-links are ambiguously executable/evaluatable.
 	if (nameserver().isA(t, PARALLEL_LINK))
 	{
+		// XXX Don't we need to plug in the vars, first!?
+		// Maybe this is just not tested?
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
@@ -620,7 +627,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
 	// Since we do not actually instantiate anything, we should not
-	// consume quotations. (as it might change the semantics. (Huh ??))
+	// consume quotations (as it might change the semantics.)
+	// We are not instantiating anything, because the map is empty.
 	_consume_quotations = false;
 
 	// XXX FIXME, since the variable map is empty, maybe we can do
@@ -646,7 +654,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// without reviewing all of these implicit and "natural" behaviors
 	// and maybe modifying them.  For example, maybe we need some
 	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
-	// to force evaluation/executation at crtain points, instead of
+	// to force evaluation/executation at certain points, instead of
 	// just making it all implicit. Or maybe there is some other,
 	// better design...
 
