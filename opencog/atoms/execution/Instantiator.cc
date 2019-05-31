@@ -303,7 +303,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		// Step one: perform vairable substituions
+		// Step one: perform variable substituions
 		Handle hexpr(beta_reduce(expr, *_vmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
@@ -329,7 +329,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		//
 		// The DontExecLink is a weird hack to halt evaluation.
 		// We unwrap it and throw it away when encountered.
-		// Some long-term fix is needed that avoids this step-three
+		// Some long-term fix is needed that avoids this step-four
 		// entirely.
 		if (SET_LINK == rex->get_type())
 		{
