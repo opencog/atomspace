@@ -310,6 +310,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step two: beta-reduce.
 		Handle red(HandleCast(ppp->execute(_as, silent)));
 
+		// TODO -- Maybe the PutLink should also do everything below,
+		// itself? i.e. we should not have to do the below for it,
+		// right? The right answer is somewhat ... hazy.
 		if (nullptr == red)
 			return red;
 
@@ -409,14 +412,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return expr;
 	}
 
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		Handle eolh = reduce_exout(expr, silent);
-		// if (not eolh->is_executable()) return eolh;
-		return HandleCast(eolh->execute(_as, silent));
-	}
-
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
 	if (DELETE_LINK == t)
@@ -430,6 +425,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				_as->remove_atom(h, true);
 		}
 		return Handle::UNDEFINED;
+	}
+
+	// ExecutionOutputLinks
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+	{
+		Handle eolh = reduce_exout(expr, silent);
+		return HandleCast(eolh->execute(_as, silent));
 	}
 
 	// Fire any other function links, not handled above.
