@@ -41,6 +41,8 @@ private:
 	                           const Handle& args,
 	                           bool silent=false);
 
+	ValuePtr execute_once(AtomSpace* as, bool silent=false);
+
 protected:
 	void check_schema(const Handle& schema) const;
 

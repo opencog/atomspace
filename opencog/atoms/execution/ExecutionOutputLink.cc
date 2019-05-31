@@ -102,6 +102,21 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
+	ValuePtr vp(execute_once(as, silent));
+	if (not vp->is_atom()) return vp;
+
+	Handle res(HandleCast(vp));
+	while (res->is_executable())
+	{
+		vp = res->execute(as, silent);
+		if (not vp->is_atom()) return vp;
+		res = HandleCast(vp);
+	}
+	return vp;
+}
+
+ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
+{
 	Handle sn(_outgoing[0]);
 	Handle args(_outgoing[1]);
 	Type snt = sn->get_type();
