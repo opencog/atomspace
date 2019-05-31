@@ -48,10 +48,14 @@
 ;
 ; -------------------------------------------------
 ; Demo steps:
-; * Configure, as described above. The below assumes that Postgres
-;   is running at the network address 10.70.70.2 -- change as needed.
-; * Log in on two different machines connected by a network. They are
-;   called "A" and "B" below.
+; * Make sure that you understand how to run database operations on a
+;   single node first -- see the demo example `persistance.scm`.
+;   This includes installing and configuring PostreSQL as described
+;   [here](../../opencog/persist/sql/README.md)
+; * The below assumes that Postgres is running at the network address
+;   10.70.70.2 -- change this as needed (and use DNS).
+; * Log in (ssh) on two different machines connected by a network.
+;   They are called "A" and "B" below.
 ; * Get to the guile command prompt on both machines.
 ; * Be prepared to cut-n-paste from this file to both machines.
 ; * Follow instructions below.
