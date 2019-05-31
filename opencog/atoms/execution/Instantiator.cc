@@ -413,13 +413,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		while (eolh->is_executable())
-		{
-			ValuePtr vp(eolh->execute(_as, silent));
-			eolh = HandleCast(vp);
-			if (not vp->is_atom()) return eolh;
-		}
-		return eolh;
+		// if (not eolh->is_executable()) return eolh;
+		return HandleCast(eolh->execute(_as, silent));
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -597,13 +592,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		while (eolh->is_executable())
-		{
-			ValuePtr vp(eolh->execute(_as, silent));
-			if (not vp->is_atom()) return vp;
-			eolh = HandleCast(vp);
-		}
-		return eolh;
+		if (not eolh->is_executable()) return eolh;
+		return eolh->execute(_as, silent);
 	}
 
 	// The thread-links are ambiguously executable/evaluatable.
