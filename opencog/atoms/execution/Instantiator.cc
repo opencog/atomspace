@@ -310,6 +310,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step two: beta-reduce.
 		Handle red(HandleCast(ppp->execute(_as, silent)));
 
+		// TODO -- Maybe the PutLink should also do everything below,
+		// itself? i.e. we should not have to do the below for it,
+		// right? The right answer is somewhat ... hazy.
 		if (nullptr == red)
 			return red;
 
@@ -409,19 +412,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return expr;
 	}
 
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		Handle eolh = reduce_exout(expr, silent);
-		while (eolh->is_executable())
-		{
-			ValuePtr vp(eolh->execute(_as, silent));
-			eolh = HandleCast(vp);
-			if (not vp->is_atom()) return eolh;
-		}
-		return eolh;
-	}
-
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
 	if (DELETE_LINK == t)
@@ -435,6 +425,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				_as->remove_atom(h, true);
 		}
 		return Handle::UNDEFINED;
+	}
+
+	// ExecutionOutputLinks
+	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
+	{
+		Handle eolh = reduce_exout(expr, silent);
+		return HandleCast(eolh->execute(_as, silent));
 	}
 
 	// Fire any other function links, not handled above.
@@ -597,13 +594,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
 		Handle eolh = reduce_exout(expr, silent);
-		while (eolh->is_executable())
-		{
-			ValuePtr vp(eolh->execute(_as, silent));
-			if (not vp->is_atom()) return vp;
-			eolh = HandleCast(vp);
-		}
-		return eolh;
+		if (not eolh->is_executable()) return eolh;
+		return eolh->execute(_as, silent);
 	}
 
 	// The thread-links are ambiguously executable/evaluatable.
