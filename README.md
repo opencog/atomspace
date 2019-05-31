@@ -93,7 +93,8 @@ repos, including:
 Examples
 ========
 If you are impatient, a good way to learn the AtomSpace is to run the
-example demos. [Start with these.](examples/atomspace)
+example demos. [Start with these.](examples/atomspace) Then move on to
+the [pattern-matcher examples](examples/pattern-matcher).
 
 
 A Theoretical Overview
