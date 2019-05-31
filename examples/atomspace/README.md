@@ -63,6 +63,7 @@ be effective.
 
 * `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
+* `factorial.scm`      -- Recursive numerical programming.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
