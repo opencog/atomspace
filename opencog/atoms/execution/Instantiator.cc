@@ -34,8 +34,8 @@ using namespace opencog;
 Instantiator::Instantiator(AtomSpace* as)
 	: _as(as), _vmap(nullptr), _halt(false),
 	  _consume_quotations(true),
-	  _needless_quotation(true),
-	  _eager(true) {}
+	  _needless_quotation(true)
+	  {}
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
@@ -132,7 +132,8 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		Variables vars(flp->get_variables());
 
 		// Perform substitution on the args, only.
-		args = beta_reduce(args, *_vmap);
+		if (not _vmap->empty())
+			args = beta_reduce(args, *_vmap);
 
 		// unpack list link
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
@@ -299,52 +300,20 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		goto mere_recursive_call;
 	}
 
-	// Reduce PutLinks. There are two ways to do this: eager execution
-	// and lazy execution.  The algos are this:
-	//
-	//    Eager: first, execute the arguments to the Put, then beta-
-	//    reduce, then execute again.
-	//
-	//    Lazy: beta-reduce first, then execute.  Lazy can sometimes
-	//    avoid un-needed executions, although it can sometimes lead to
-	//    more of them. Lazy has better control over infinite recursion.
-	//
+	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		PutLinkPtr ppp;
+		// Step one: perform variable substituions
+		Handle hexpr(beta_reduce(expr, *_vmap));
+		PutLinkPtr ppp(PutLinkCast(hexpr));
 
-		if (_eager)
-		{
-			ppp = PutLinkCast(expr);
-			// Execute the arguments in the PutLink before doing
-			// the beta-reduction. Execute the PutLink only after
-			// the beta-reduction has been done.
-			Handle pargs = ppp->get_arguments();
-			Handle gargs = walk_tree(pargs, silent);
-			if (gargs != pargs)
-			{
-				HandleSeq groset;
-				if (ppp->get_vardecl())
-					groset.emplace_back(ppp->get_vardecl());
-				groset.emplace_back(ppp->get_body());
-				groset.emplace_back(gargs);
-				ppp = createPutLink(groset);
-			}
-		}
-		else
-		{
-			Handle hexpr(beta_reduce(expr, *_vmap));
-			ppp = PutLinkCast(hexpr);
-		}
-
-		// Step one: beta-reduce.
-		ppp->make_silent(silent);
-		Handle red(ppp->reduce());
+		// Step two: beta-reduce.
+		Handle red(HandleCast(ppp->execute(_as, silent)));
 
 		if (nullptr == red)
 			return red;
 
-		// Step two: execute the resulting body.
+		// Step three: execute the resulting body.
 		// (unless its not executable)
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
@@ -353,14 +322,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (nullptr == rex)
 			return rex;
 
-		// Step three: XXX this is awkward, but seems to be needed...
+		// Step four: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
 		// result has a GroundedPredicateNode, we need to run it now.
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		//
 		// The DontExecLink is a weird hack to halt evaluation.
 		// We unwrap it and throw it away when encountered.
-		// Some long-term fix is needed that avoids this step-three
+		// Some long-term fix is needed that avoids this step-four
 		// entirely.
 		if (SET_LINK == rex->get_type())
 		{

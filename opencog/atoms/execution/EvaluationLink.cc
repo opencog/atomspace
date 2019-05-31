@@ -873,7 +873,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			pl = createPutLink(goset);
 		}
 		// Step (2)
-		Handle red = pl->reduce();
+		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
 		return do_eval_scratch(as, red, scratch, silent);
