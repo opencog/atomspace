@@ -756,6 +756,18 @@
   See also: cog-get-atoms TYPE - returns a list of atoms of TYPE.
 ")
 
+(set-procedure-property! cog-count-atoms 'documentation
+"
+  cog-count-atoms -- Count of the number of atoms of given type
+
+  cog-count-atoms ATOM-TYPE
+  Return a count of the number of atoms of the given type `ATOM-TYPE`.
+
+  Example usage:
+     (display (cog-count-atoms 'ConceptNode))
+  will display a count of all atoms of type 'ConceptNode
+")
+
 (set-procedure-property! cog-atomspace 'documentation
 "
  cog-atomspace
