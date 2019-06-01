@@ -422,6 +422,17 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	return SCM_BOOL_F;
 }
 
+/**
+ * Return a count of the number of atoms of the indicated type
+ */
+SCM SchemeSmob::ss_count (SCM stype)
+{
+	Type t = verify_type(stype, "cog-count-atoms");
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	size_t cnt = as->get_num_atoms_of_type(t);
+	return scm_from_size_t(cnt);
+}
+
 SCM SchemeSmob::ss_get_free_variables(SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-free-variables");

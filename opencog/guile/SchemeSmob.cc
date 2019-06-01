@@ -350,6 +350,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
+	register_proc("cog-count-atoms",       1, 0, 0, C(ss_count));
 
 	// Iterators
 	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
