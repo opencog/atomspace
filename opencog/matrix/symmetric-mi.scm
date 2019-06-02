@@ -82,19 +82,26 @@
 
 		; Cache the totals, so that we can avoid fetching them,
 		; over and over. They only tricky part here is that the
-		; totals might not yet be available when this objct is
+		; totals might not yet be available when this object is
 		; defined.
 		(define (set-mtm-total)
 			(if (not mtm-total)
 				(set! mtm-total
 					(catch #t (lambda () (trans-obj 'total-mtm-count))
-						(lambda (key . args) #f)))))
+						(lambda (key . args) #f))))
+			(if (eq? 0 mtm-total)
+				(throw 'no-transpose-data 'mtm-mi
+					"No transpose data availble for this dataset!")))
 
 		(define (set-mmt-total)
 			(if (not mmt-total)
 				(set! mmt-total
 					(catch #t (lambda () (trans-obj 'total-mmt-count))
-						(lambda (key . args) #f)))))
+						(lambda (key . args) #f))))
+			(if (eq? 0 mmt-total)
+				(throw 'no-transpose-data 'mmt-mi
+					"No transpose data availble for this dataset!")))
+
 
 		; -------------
 		; Return the vector product of column A and column B
