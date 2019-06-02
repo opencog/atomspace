@@ -1,0 +1,5 @@
+handle SIGPWR nostop noprint
+handle SIGXCPU nostop noprint
+r
+bt
+q

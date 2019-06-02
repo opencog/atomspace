@@ -71,6 +71,8 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(MultiPersistUTest)
     ADD_CXXTEST(MultiUserUTest)
 
+ADD_TEST(FoobarTest gdb -batch -x /ws/atomspace/tests/persist/sql/multi-driver/gdb.cmds ValueSaveUTest)
+
     IF (HAVE_GUILE)
         ADD_CXXTEST(FetchUTest)
         TARGET_LINK_LIBRARIES(FetchUTest execution)
