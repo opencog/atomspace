@@ -486,6 +486,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 
 	rp.store = this;
 	rp.atom = atom;
+	rp.table = &table;
 	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
 	rp.atom = nullptr;
 }
