@@ -106,6 +106,7 @@ class Atom
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
+    friend class SQLAtomStorage;  // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 protected:
