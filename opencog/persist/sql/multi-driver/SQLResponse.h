@@ -342,6 +342,8 @@ class SQLAtomStorage::Response
 			{
 				PseudoPtr pu(store->petAtom(key));
 				hkey = store->get_recursive_if_not_exists(pu);
+				hkey = table->add(hkey, false);
+				store->_tlbuf.addAtom(hkey, key);
 			}
 
 			ValuePtr pap = store->doUnpackValue(*this);
