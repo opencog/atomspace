@@ -205,13 +205,9 @@ class SQLAtomStorage::Response
 			if (nullptr == h)
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
-				Handle atom(store->get_recursive_if_not_exists(p));
-				h = table->getHandle(atom);
-				if (nullptr == h)
-				{
-					h = table->add(atom, false);
-					store->_tlbuf.addAtom(h, uuid);
-				}
+				h = store->get_recursive_if_not_exists(p);
+				h = table->add(h, false);
+				store->_tlbuf.addAtom(h, uuid);
 			}
 			else
 			{
