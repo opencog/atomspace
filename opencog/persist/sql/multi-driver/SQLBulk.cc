@@ -147,7 +147,7 @@ void SQLAtomStorage::load(AtomTable &table)
 {
 	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
-	_load_count = 0;
+	size_t start_count = _load_count;
 	max_height = getMaxObservedHeight();
 	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
 		max_nrec, max_height);
@@ -193,8 +193,8 @@ void SQLAtomStorage::load(AtomTable &table)
 
 	time_t secs = time(0) - bulk_start;
 	double rate = ((double) _load_count) / secs;
-	printf("Finished loading %lu atoms in total in %d seconds (%d per second)\n",
-		(unsigned long) _load_count, (int) secs, (int) rate);
+	printf("Finished loading %zu atoms in total in %d seconds (%d per second)\n",
+		(_load_count - start_count), (int) secs, (int) rate);
 	bulk_load = false;
 
 	// synchrnonize!
@@ -206,7 +206,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	rethrow();
 
 	UUID max_nrec = getMaxObservedUUID();
-	_load_count = 0;
+	size_t start_count = _load_count;
 
 	// For links, assume a worst-case height.
 	// For nodes, its easy ... max_height is zero.
@@ -254,8 +254,8 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 		               "Loaded %lu atoms of type %d at height %d\n",
 			_load_count - cur, db_atom_type, hei);
 	}
-	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
-		(unsigned long) _load_count);
+	logger().debug("SQLAtomStorage::loadType: Finished loading %zu atoms in total\n",
+		_load_count- start_count);
 
 	// Synchronize!
 	table.barrier();
