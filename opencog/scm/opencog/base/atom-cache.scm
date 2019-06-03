@@ -31,11 +31,11 @@
   make-afunc-cache AFUNC -- Return a caching version of AFUNC.
 
   Here, AFUNC is a function that takes a single atom as an argument,
-  and returns some object associated with that atom.
+  and returns some scheme object associated with that atom.
 
   This returns a function that returns the same values that AFUNC would
   return, for the same argument; but if a cached value is available,
-  then return just that, instead of calling AFUNC a second time.  This
+  then that is returned, instead of calling AFUNC a second time.  This
   is useful whenever AFUNC is cpu-intensive, taking a long time to
   compute.  In order for the cache to be valid, the value of AFUNC must
   not depend on side-effects, because it will be called at most once.
@@ -70,6 +70,10 @@
   atom into the set. Calling it with #f as the argument returns the
   entire set as a list.
 
+  When inserting an atom, this returns #t if the given atom was already
+  in the set, otherwise it returns #f. Thus, it can be used to avoid
+  repeated computations on some given atom.
+
   Example Usage:
      (define atom-set (make-atom-set))
      (atom-set (Concept \"ABC\"))
@@ -87,7 +91,14 @@
 
 	(lambda (ITEM)
 		(if ITEM
-			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			; If already in the set, return #t
+			(if (hashx-ref atom-hash atom-assoc cache ITEM #f)
+				#t
+				; Else if not in set, add to set, and return #f
+				(begin
+					(hashx-set! atom-hash atom-assoc cache ITEM #t)
+					#f))
+			; If not item, then return entire set.
 			(let ((ats '()))
 				(hash-for-each-handle
 					(lambda (PR) (set! ats (cons (car PR) ats)))
