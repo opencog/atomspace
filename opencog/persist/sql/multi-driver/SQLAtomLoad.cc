@@ -100,7 +100,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 
 		// Corrupted databases can have outoging sets that refer
 		// to non-existent atoms. This is rare, but has happened.
-		// WIthout this check, the null-pointer deref will crash.
+		// Without this check, the null-pointer deref will crash.
 		if (nullptr == po)
 			throw IOException(TRACE_INFO,
 				"SQLAtomStorage::get_recursive_if_not_exists: "
