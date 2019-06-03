@@ -65,9 +65,27 @@ GroundedFunction PythonGroundedObject::get_method(std::string const& method_name
 			std::placeholders::_1, std::placeholders::_2);
 }
 
+class PyLockGIL
+{
+
+private:
+	PyGILState_STATE gstate;
+
+public:
+	PyLockGIL() : gstate(PyGILState_Ensure())
+	{
+	}
+
+	~PyLockGIL()
+	{
+		PyGILState_Release(gstate);
+	}
+};
+
 ValuePtr PythonGroundedObject::invoke(std::string const& method_name,
 						AtomSpace* atomspace, ValuePtr const& args)
 {
+	PyLockGIL gil;
 	return call_python_method(unwrap_args, object, method_name, atomspace, args);
 }
 
