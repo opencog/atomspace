@@ -611,6 +611,13 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
   errors for missing values. If this is not set, then any missing value
   will cause an error to be thrown.
 
+  The dataset needs to be populated with valid data, before the getters
+  can actually return anything. (The getters do NOT compute the
+  requested valued \"on the fly\".)  The needed values can be generated
+  with the `make-compute-freq` and `make-batch-mi` classes.  It is
+  probably most convenient to use `batch-all-pair-mi` to compute
+  everything at once, and save to to the database, all in one go.
+
   The methods are as below.  PAIR is the pair (x,y)
 
   'pair-freq PAIR    -- return P(x,y)
