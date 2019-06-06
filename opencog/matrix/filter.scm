@@ -68,14 +68,18 @@
 			(r-size 0)
 		)
 
+		; Cache the result of filtering basuis elements
+		(define cache-left-pred (make-afunc-cache LEFT-BASIS-PRED))
+		(define cache-right-pred (make-afunc-cache RIGHT-BASIS-PRED))
+
 		; ---------------
 		; Filter out rows and columns that pass the left and right
 		; predicates.
 		(define (do-left-basis)
-			(filter LEFT-BASIS-PRED (stars-obj 'left-basis)))
+			(filter cache-left-pred (stars-obj 'left-basis)))
 
 		(define (do-right-basis)
-			(filter RIGHT-BASIS-PRED (stars-obj 'right-basis)))
+			(filter cache-right-pred (stars-obj 'right-basis)))
 
 		; ---------------
 		; Use the cached value, if its there.
@@ -103,7 +107,7 @@
 			(filter
 				(lambda (LITEM)
 					(and
-						(LEFT-BASIS-PRED LITEM)
+						(cache-left-pred LITEM)
 						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
 				(stars-obj 'left-duals RITEM)))
 
@@ -111,7 +115,7 @@
 			(filter
 				(lambda (RITEM)
 					(and
-						(RIGHT-BASIS-PRED RITEM)
+						(cache-right-pred RITEM)
 						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
 				(stars-obj 'right-duals LITEM)))
 
@@ -129,13 +133,13 @@
 					; Convert all left-right pairs into real pairs
 					(lambda (LBASE) (LLOBJ 'get-pair LBASE RITEM))
 					; Get all the left-elements corresponding to RITEM
-					(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))))
+					(filter cache-left-pred (stars-obj 'left-duals RITEM)))))
 
 		(define (do-right-stars LITEM)
 			(filter PAIR-PRED
 				(map
 					(lambda (RBASE) (LLOBJ 'get-pair LITEM RBASE))
-					(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))))
+					(filter cache-right-pred (stars-obj 'right-duals LITEM)))))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
