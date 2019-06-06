@@ -239,7 +239,7 @@
 
   Note that for (define STARS (add-pair-stars LLOBJ))
   the list returned by
-    (map (lambda (d) (LLOBJ 'get-pair ROW d)) (STARS 'right-duals ROW))
+    (map (lambda (COL) (LLOBJ 'get-pair ROW COL)) (STARS 'right-duals ROW))
   should be equal to the list
     (STARS 'right-stars ROW)
   and so this offers two different ways of iterating over the same

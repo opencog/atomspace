@@ -1,10 +1,10 @@
 ;
 ; filter.scm
 ;
-; Define API's for filtering the matrixes, e.g. by removing entries
-; with low counts.
+; Define API's for filtering the matrixes, e.g. by removing rows,
+; columns or individual entries with low counts.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017, 2019 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -43,20 +43,16 @@
 ; objects are not able to support.
 
 (define-public (add-generic-filter LLOBJ
-	LEFT-BASIS-PRED RIGHT-BASIS-PRED
-	LEFT-STAR-PRED RIGHT-STAR-PRED
-	PAIR-PRED ID-STR RENAME)
+	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED
+   ID-STR RENAME)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
-  rows that satisfy the predicates are retained.
+  rows and individual entries that satisfy the predicates are retained.
 
   The LEFT-BASIS-PRED and RIGHT-BASIS-PRED should be functions that
   accept atoms in the left and right basis, and return #t if they
-  should be kept.
-
-  The LEFT-STAR-PRED and RIGHT-STAR-PRED should be functions that
-  accept left and right wild-card pairs, and return #t if they should
-  be kept.
+  should be kept. If these predicates return #f, that row or column
+  will not appear in the filtered matrix.
 
   The PAIR-PRED should be a function to that accepts individual matrix
   entries. It is applied whenever the 'get-pair or 'get-count methods
@@ -106,17 +102,20 @@
 		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
-		(define (do-left-stars ITEM)
-			(filter
-				(lambda (PAIR)
-					(and (LEFT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
-				(stars-obj 'left-stars ITEM)))
+		(define (do-left-stars RITEM)
+			; Apply the pair-pred cutoff
+			(filter PAIR-PRED
+				(map
+					; Convert all left-right pairs into real pairs
+					(lambda (LBASE) (LLOBJ 'get-pair LBASE RITEM))
+					; Get all the left-elements corresponding to RITEM
+					(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))
 
-		(define (do-right-stars ITEM)
-			(filter
-				(lambda (PAIR)
-					(and (RIGHT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
-				(stars-obj 'right-stars ITEM)))
+		(define (do-right-stars LITEM)
+			(filter PAIR-PRED
+				(map
+					(lambda (RBASE) (LLOBJ 'get-pair LITEM RBASE))
+					(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
@@ -241,6 +240,8 @@
 		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
+xxxxxxxxxx
+there is no left-element
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
 			(< LEFT-CUT (sup-obj 'right-count (LLOBJ 'left-element PAIR))))
