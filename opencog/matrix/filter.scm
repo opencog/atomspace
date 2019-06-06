@@ -100,6 +100,20 @@
 			r-size)
 
 		; ---------------
+		; Return only those duals that pass the cutoff.
+		;
+		(define (do-left-duals RITEM)
+			; Get all the left-elements corresponding to RITEM
+			(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))
+
+		(define (do-right-duals LITEM)
+			(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))
+
+		; Cache the results above, so that we don't recompute over and over.
+		(define cache-left-duals (make-afunc-cache do-left-duals))
+		(define cache-right-duals (make-afunc-cache do-right-duals))
+
+		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
 		(define (do-left-stars RITEM)
@@ -109,13 +123,13 @@
 					; Convert all left-right pairs into real pairs
 					(lambda (LBASE) (LLOBJ 'get-pair LBASE RITEM))
 					; Get all the left-elements corresponding to RITEM
-					(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))
+					(cache-left-duals RITEM))))
 
 		(define (do-right-stars LITEM)
 			(filter PAIR-PRED
 				(map
 					(lambda (RBASE) (LLOBJ 'get-pair LITEM RBASE))
-					(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))
+					(cache-right-duals LITEM))))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
@@ -140,12 +154,14 @@
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
-				((left-stars)       cache-left-stars)
-				((right-stars)      cache-right-stars)
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
 				((right-basis-size) get-right-size)
+				((left-stars)       cache-left-stars)
+				((right-stars)      cache-right-stars)
+				((left-duals)       cache-left-duals)
+				((right-duals)      cache-right-duals)
 				(else               (LLOBJ 'provides meth))))
 
 		; -------------
@@ -154,12 +170,14 @@
 			(case message
 				((name)             (get-name))
 				((id)               (get-id))
-				((left-stars)       (apply cache-left-stars args))
-				((right-stars)      (apply cache-right-stars args))
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
+				((left-stars)       (apply cache-left-stars args))
+				((right-stars)      (apply cache-right-stars args))
+				((left-duals)       (apply cache-left-duals args))
+				((right-duals)      (apply cache-right-duals args))
 				((get-pair)         (apply get-item-pair args))
 				((get-count)        (apply get-pair-count args))
 				((provides)         (apply provides args))
