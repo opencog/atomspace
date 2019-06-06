@@ -100,14 +100,24 @@
 			r-size)
 
 		; ---------------
-		; Return only those duals that pass the cutoff.
+		; Return only those duals that pass the cutoffs.
 		;
 		(define (do-left-duals RITEM)
 			; Get all the left-elements corresponding to RITEM
-			(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))
+			(filter
+				(lambda (LITEM)
+					(and
+						(LEFT-BASIS-PRED LITEM)
+						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
+				(stars-obj 'left-duals RITEM)))
 
 		(define (do-right-duals LITEM)
-			(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))
+			(filter
+				(lambda (RITEM)
+					(and
+						(RIGHT-BASIS-PRED RITEM)
+						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
+				(stars-obj 'right-duals LITEM)))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-duals (make-afunc-cache do-left-duals))
@@ -123,13 +133,13 @@
 					; Convert all left-right pairs into real pairs
 					(lambda (LBASE) (LLOBJ 'get-pair LBASE RITEM))
 					; Get all the left-elements corresponding to RITEM
-					(cache-left-duals RITEM))))
+					(filter LEFT-BASIS-PRED (stars-obj 'left-duals RITEM)))))
 
 		(define (do-right-stars LITEM)
 			(filter PAIR-PRED
 				(map
 					(lambda (RBASE) (LLOBJ 'get-pair LITEM RBASE))
-					(cache-right-duals LITEM))))
+					(filter RIGHT-BASIS-PRED (stars-obj 'right-duals LITEM)))))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
@@ -137,12 +147,11 @@
 
 		; ---------------
 		; Apply the pair-cut to each pair.
-;xxxxxx this is broken.
 		(define (get-item-pair L-ATOM R-ATOM)
-			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair L-ATOM R-ATOM) '()))
+			(if (PAIR-PRED (LLOBJ 'get-pair L-ATOM R-ATOM)) '()))
 
 		(define (get-pair-count PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR) 0))
+			(if (PAIR-PRED (LLOBJ 'get-count PAIR)) 0))
 
 		; ---------------
 		(define (get-name)
@@ -190,7 +199,8 @@
 				; For example: 'pair-freq which we don't, can't filter.
 				; Or any of the various subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
-					(format #f "Sorry, method ~A not available on filter!" message))))
+					(format #f "Sorry, method ~A not available on filter!"
+						 message))))
 		)))
 
 ; ---------------------------------------------------------------------
@@ -205,19 +215,19 @@
   just returns fewer rows, columns and individual entries.
 
   The filtering is done 'on demand', on a row-by-row, column-by-column
-  basis.  Computations of the left and right stars are cached, sot that
+  basis.  Computations of the left and right stars are cached, so that
   they are not recomputed for each request.
 
   Note that by removing rows and columns, the frequencies that were
   computed for the entire matrix will no longer sum to 1.0 for the
   filtered submatrix.  Likewise, row and column subtotals, and any
-  marginals will no long sum or behave as in the whole dataset.  If
-  accurate values for these are needed, then they would need to be
-  recomputed for the reduced matrix. The 'filters? method, and the
-  RENAME argument provide a way for dealing with this.
+  marginals will no longer sum or behave as in the whole dataset.
+  If accurate values for these are needed, then they would need to
+  be recomputed for the reduced matrix. The 'filters? method, and
+  the RENAME argument provide a way for dealing with this.
 
   If the RENAME argument is #t, then the other various API's will use
-  an special key name, created from the 'id of this filter, to access
+  a special key name, created from the 'id of this filter, to access
   frequencies and marginals. This allows filtered frequencies and
   marginals to be stored with the matrix.  If the RENAME argument is #f,
   then all access to the frequencies and marginals will be through the
@@ -232,9 +242,9 @@
   Let N(*,y) be the column subtotals, AKA the left-subtotals.
   Let N(x,*) be the row subtotals, AKA the right subtotals.
 
-  This object removes all columns where  N(*,y) <= RIGHT-CUT and where
-  N(x,*) <= LEFT-CUT.  Pairs are not reported in the 'left-stars and
-  'right-stars methods when N(x,y) <= PAIR-CUT.
+  This object removes all columns where  N(*,y) <= RIGHT-CUT and all
+  rows where N(x,*) <= LEFT-CUT.  Pairs are not reported in the
+  'left-stars and 'right-stars methods when N(x,y) <= PAIR-CUT.
 
   The net effect of the cuts is that when LEFT-CUT is increased, the
   left-dimension of the dataset drops; likewise on the right.
