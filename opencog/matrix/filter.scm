@@ -37,10 +37,6 @@
 (use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
-; XXX TODO -- redesign this to use left-duals and right-duals instead
-; of left-stars and right-stars. The real goal here is to get rid of
-; the 'left-element and 'right-element methods, which some of the
-; objects are not able to support.
 
 (define-public (add-generic-filter LLOBJ
 	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED
@@ -245,6 +241,8 @@
   This object removes all columns where  N(*,y) <= RIGHT-CUT and all
   rows where N(x,*) <= LEFT-CUT.  Pairs are not reported in the
   'left-stars and 'right-stars methods when N(x,y) <= PAIR-CUT.
+  Likewise, duals are not reported when the corresponding pair fails
+  the PAIR-CUT.
 
   The net effect of the cuts is that when LEFT-CUT is increased, the
   left-dimension of the dataset drops; likewise on the right.
@@ -265,29 +263,16 @@
 		(define (right-basis-pred ITEM)
 			(< RIGHT-CUT (sup-obj 'left-count ITEM)))
 
-		; ---------------
-		; Return only those stars that pass the cutoff.
-		;
-xxxxxxxxxx
-there is no left-element
-		; See comments above: LEFT-CUT < right-wild-count is correct.
-		(define (left-stars-pred PAIR)
-			(< LEFT-CUT (sup-obj 'right-count (LLOBJ 'left-element PAIR))))
-
-		(define (right-stars-pred PAIR)
-			(< RIGHT-CUT (sup-obj 'left-count (LLOBJ 'right-element PAIR))))
-
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
 		(define id-str
-			(format #f "cut-~D-~D-~D"
+			(format #f "subtotal-cut-~D-~D-~D"
 				LEFT-CUT RIGHT-CUT PAIR-CUT))
 
 		; ---------------
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
-			left-stars-pred right-stars-pred
 			pair-pred id-str RENAME)
 	)
 )
@@ -316,16 +301,7 @@ there is no left-element
 			(lambda (knockout) (equal? knockout ITEM))
 			RIGHT-KNOCKOUT)))
 
-	; ---------------
-	; Return only those stars that pass the cutoff.
-	(define (left-stars-pred PAIR)
-		(left-basis-pred (LLOBJ 'left-element PAIR)))
-
-	(define (right-stars-pred PAIR)
-		(right-basis-pred (LLOBJ 'right-element PAIR)))
-
-	(define (pair-pred PAIR)
-		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))
+	(define (pair-pred PAIR) #t)
 
 	(define id-str
 		(format #f "knockout-~D-~D"
@@ -334,7 +310,6 @@ there is no left-element
 	; ---------------
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
-		left-stars-pred right-stars-pred
 		pair-pred id-str RENAME)
 )
 
