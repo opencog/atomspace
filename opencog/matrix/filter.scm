@@ -150,8 +150,12 @@
 		(define (get-item-pair L-ATOM R-ATOM)
 			(if (PAIR-PRED (LLOBJ 'get-pair L-ATOM R-ATOM)) '()))
 
-		(define (get-pair-count PAIR)
+		(define (get-count PAIR)
 			(if (PAIR-PRED (LLOBJ 'get-count PAIR)) 0))
+
+		(define (get-pair-count L-ATOM R-ATOM)
+			(define stats-atom (get-item-pair L-ATOM R-ATOM))
+			(if (null? stats-atom) 0 (LLOBJ 'get-count stats-atom)))
 
 		; ---------------
 		(define (get-name)
@@ -188,13 +192,17 @@
 				((left-duals)       (apply cache-left-duals args))
 				((right-duals)      (apply cache-right-duals args))
 				((get-pair)         (apply get-item-pair args))
-				((get-count)        (apply get-pair-count args))
+				((get-count)        (apply get-count args))
+				((get-pair-count)   (apply get-pair-count args))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
 				((pair-type)        (apply LLOBJ (cons message args)))
+				((left-wildcard)    (apply LLOBJ (cons message args)))
+				((right-wildcard)   (apply LLOBJ (cons message args)))
+				((wild-wild)        (apply LLOBJ (cons message args)))
 				; Block anything that might have to be filtered.
 				; For example: 'pair-freq which we don't, can't filter.
 				; Or any of the various subtotals and marginals.
