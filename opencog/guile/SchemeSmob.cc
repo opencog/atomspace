@@ -314,7 +314,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	register_proc("cog-incoming-size",     1, 0, 0, C(ss_incoming_size));
 	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
+	register_proc("cog-incoming-size-by-type", 2, 0, 0, C(ss_incoming_size_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));

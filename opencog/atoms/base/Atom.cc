@@ -439,6 +439,23 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     return result;
 }
 
+size_t Atom::getIncomingSetSizeByType(Type type) const
+{
+    if (nullptr == _incoming_set) return 0;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return 0;
+
+    size_t cnt = 0;
+    for (const WinkPtr& w : bucket->second)
+    {
+        LinkPtr h(w.lock());
+        if (h) cnt++;
+    }
+    return cnt;
+}
+
 std::string Atom::id_to_string() const
 {
     return

@@ -376,6 +376,9 @@ public:
     /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type type) const;
 
+    /** Return the size of the incoming set, for the given type. */
+    size_t getIncomingSetSizeByType(Type type) const;
+
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
     virtual std::string to_short_string(const std::string& indent) const = 0;
