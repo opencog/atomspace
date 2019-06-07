@@ -286,6 +286,31 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 }
 
 /* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of an atom.
+ */
+SCM SchemeSmob::ss_incoming_size (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size");
+	size_t sz = h->getIncomingSetSize();
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of type stype
+ * of the atom.
+ */
+SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
+	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
+
+	size_t sz = h->getIncomingSetSizeByType(t);
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
 
 /**
  * Apply proceedure proc to all atoms of type stype
