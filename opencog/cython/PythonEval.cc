@@ -262,7 +262,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // The import_opencog__atomspace() call above sets the
     // py_atomspace() function pointer if the cython module load
     // succeeded. But the function pointer will be NULL if the
-    // opencopg.atomspace cython module failed to load. Avert
+    // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
     if (nullptr == py_atomspace) {

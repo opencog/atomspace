@@ -415,7 +415,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
 
 # -------------------------------------------------
 # Library configuration
