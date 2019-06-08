@@ -596,7 +596,7 @@
 	(display "Done computing and saving -log P(x,*) and P(*,y)\n")
 
 	; Now, the individual pair mi's
-	(display "Going to do individual pair MI\n")
+	(display "Going to compute and store individual pair MI\n")
 	(elapsed-secs)
 	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
 				(lambda (atom-list) (for-each store-atom atom-list)))))
