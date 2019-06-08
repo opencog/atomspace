@@ -45,6 +45,22 @@
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
   rows and individual entries that satisfy the predicates are retained.
 
+  This provides the same methods as the `add-pair-stars` object; it is
+  a replacement of that object, for all practical purposes. Thus, given
+  some matrix, this object provides a way of accessing a smaller,
+  lower-dimensional version of that matrix, by knocking out rows,
+  columns and individual entries.
+
+  Note, however, that the full-sized matrix will typically have
+  marginals associated with it (such as totals over columns and rows)
+  and that those marginals will typically become invalid for the
+  smaller matrix (because totals over columns and rows for the smaller
+  matrix are necessarily different). This filter does NOT attempt to
+  recompute those marginals!  It is up  to the user to track these!
+  The ID-STR can be used to give this submatrix a unique name, and
+  therefore can be used as a tag, when recomputing marginals for the
+  smaller matrix.
+
   The LEFT-BASIS-PRED and RIGHT-BASIS-PRED should be functions that
   accept atoms in the left and right basis, and return #t if they
   should be kept. If these predicates return #f, that row or column
