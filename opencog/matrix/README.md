@@ -64,6 +64,22 @@ be described in terms of it's adjacency matrix. This directory provides
 tools to work with a graph from the point of view of its being an
 adjacency matrix.
 
+Thus, generically, a "matrix" in the AtomSpace is simply a collection of
+Atoms, all of the same kind and general structure, with some
+identifiable sub-part, called "the rows", or the "left atoms", and some
+other identifiable sub-part, called "the columns", or the "right atoms".
+As long as one can easily identify all of the Atoms that belong to the
+collection, and one can identify two distinct sub-parts, one has
+everything one needs to identify pairs `(left, right)` aka
+`(row, column)` aka `(x,y)`.  To get a matrix, one needs one more thing:
+a Value, some Value, any Value, holding a floating-point number for each
+pair. This number is called `N(x,y)`. This number can represent any
+numeric data at all.  In the prototypical usage, this number is an
+observation count obtained by sensory data flowing in from the outside
+world. It dosn't have to be - the matrix toolset provided here is
+generic, intended to be useful for any AtomSpace data that meets the
+requirement of having a numeric value attached to a collection of pairs.
+
 The tools implemented here include:
 
  * Row and column subtotals (i.e. "marginals").
