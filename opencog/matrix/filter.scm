@@ -152,7 +152,7 @@
 			(if (PAIR-PRED PAIR) PAIR '()))
 
 		(define (get-count PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR)) 0)
+			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR) 0))
 
 		(define (get-pair-count L-ATOM R-ATOM)
 			(define stats-atom (get-item-pair L-ATOM R-ATOM))
