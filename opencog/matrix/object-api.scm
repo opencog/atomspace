@@ -237,6 +237,11 @@
 
   'right-stars ROW - Likewise, but returns the set (ROW, *).
 
+  'get-all-elts - Return a list of all elements in the matrix.
+      Caution: this may be very large, and thus take a long time to
+      compute.  The result is not cached, so if you call this a second
+      time, this list will be recomputed from scratch!
+
   Note that for (define STARS (add-pair-stars LLOBJ))
   the list returned by
     (map (lambda (COL) (LLOBJ 'get-pair ROW COL)) (STARS 'right-duals ROW))
@@ -480,6 +485,24 @@
 			(atomic-box-set! dual-r-miss '()))
 
 		;-------------------------------------------
+		; Perform a query to find all (non-marginal) matrix entries
+		; in the matrix. Return a list of them.
+		(define (get-all-pairs)
+			(define uleft (uniquely-named-variable))
+			(define uright (uniquely-named-variable))
+			(define term (LLOBJ 'make-pair uleft uright))
+			(define setlnk (cog-execute! (Bind
+				(VariableList
+					(TypedVariable uleft (Type (symbol->string left-type)))
+					(TypedVariable uright (Type (symbol->string right-type))))
+				term term)))
+			(define all-pairs (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uleft)
+			(cog-extract-recursive uright)
+			all-pairs)
+
+		;-------------------------------------------
 
 		; Provide default methods, but only if the low-level object
 		; does not already provide them. In practice, this is used in
@@ -495,6 +518,7 @@
 				(f-right-stars (overload 'right-stars get-right-stars))
 				(f-left-duals (overload 'left-duals get-left-duals))
 				(f-right-duals (overload 'right-duals get-right-duals))
+				(f-get-all-elts (overload 'get-all-elts get-all-pairs))
 				(f-clobber (overload 'clobber clobber)))
 
 			;-------------------------------------------
@@ -513,6 +537,7 @@
 					((right-stars)      f-right-stars)
 					((left-duals)       f-left-duals)
 					((right-duals)      f-right-duals)
+					((get-all-elts)     f-get-all-elts)
 					((clobber)          f-clobber)
 					(else               (LLOBJ 'provides meth))))
 
@@ -528,6 +553,7 @@
 					((right-stars)      (apply f-right-stars args))
 					((left-duals)       (apply f-left-duals args))
 					((right-duals)      (apply f-right-duals args))
+					((get-all-elts)     (f-get-all-elts))
 					((clobber)          (f-clobber))
 					((provides)         (apply provides args))
 					(else               (apply LLOBJ (cons message args))))
