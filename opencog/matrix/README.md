@@ -100,36 +100,36 @@ method that returns the count, given the pair.
 
 FAQ
 ---
-Q: Why isn't this in C++?  Surely, numerical computations would be
+**Q:** Why isn't this in C++?  Surely, numerical computations would be
    a lot faster in C++, right?
 
-A: Yes, probably. But its a lot easier to write scheme code than
+**A:** Yes, probably. But its a lot easier to write scheme code than
    it is to write C++ code, and so prototyping in scheme just made
    more sense. It was just-plain simpler, faster, easier (for me).
    You are invited to take the lessons learned, and re-implement
    in C++.
 
-Q: What were the lessons learned?
+**Q:** What were the lessons learned?
 
-A: The number #1 most important lesson is that the filter object
+**A:** The number #1 most important lesson is that the filter object
    is the most important object: it controls what data you want
    to keep, and what data you want to discard, and it needs to
    run "underneath", as a foundation to everything else.
 
-Q: Really, C++ is sooo fast...
+**Q:** Really, C++ is sooo fast...
 
-A: Yes, but since the data is stored in values associated with
+**A:** Yes, but since the data is stored in values associated with
    atoms in the atomspace, adding numbers together is NOT the
    bottleneck. Accessing Atom Values *is* the bottleneck. Finding
    a good performance optimization for the atom values framework
    is a lot harder.
 
-Q: Why don't you just export all your data to SciPy or to Gnu R, or to
+**Q:** Why don't you just export all your data to SciPy or to Gnu R, or to
    Octave, or MatLab, for that matter, and just do your data analytics
    there?  That way, you don't need to re-implement all these basic
    statistical algorithms!
 
-A: That sounds nice, but frankly, it's too much work for me. Maybe you
+**A:** That sounds nice, but frankly, it's too much work for me. Maybe you
    can do this.  Seriously, its just a lot easier (for me) to create
    and use the code here, than to struggle mightily with those packages.
 
@@ -150,11 +150,11 @@ A: That sounds nice, but frankly, it's too much work for me. Maybe you
    the RAM needed to export all of these different cut and filtered
    datasets?  Maybe you can, its just not trivial.
 
-Q: But if I did want to do it for Gnu R, how could I do it?
+**Q:** But if I did want to do it for Gnu R, how could I do it?
 
-A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
+**A:** You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    Quote:
-   The Rcpp package provides C++ classes that greatly facilitate
+   *The Rcpp package provides C++ classes that greatly facilitate
    interfacing C or C++ code in R packages using the .Call() interface
    provided by R. Rcpp provides matching C++ classes for a large
    number of basic R data types. Hence, a package author can keep his
@@ -163,11 +163,11 @@ A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    structures can be accessed as easily at the C++ level, and used in
    the normal manner. The mapping of data types works in both
    directions. It is as straightforward to pass data from R to C++,
-   as it is it return data from C++ to R.
+   as it is it return data from C++ to R.*
 
-Q: Any other design issues?
+**Q:** Any other design issues?
 
-A: Yes. As currently structured, all of these classes assume that your
+**A:** Yes. As currently structured, all of these classes assume that your
    data is readily available in RAM. They will not work correctly, if
    your dataset is too big to fit into RAM.  At the time of this
    writing, a single atom takes about 1.5KBytes or so, so a dataset
