@@ -237,6 +237,11 @@
 
   'right-stars ROW - Likewise, but returns the set (ROW, *).
 
+  'get-all-elts - Return a list of all elements in the matrix.
+      Caution: this may be very large, and thus take a long time to
+      compute.  The result is not cached, so if you call this a second
+      time, this list will be recomputed from scratch!
+
   Note that for (define STARS (add-pair-stars LLOBJ))
   the list returned by
     (map (lambda (COL) (LLOBJ 'get-pair ROW COL)) (STARS 'right-duals ROW))
