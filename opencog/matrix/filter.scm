@@ -158,6 +158,9 @@
 			(define stats-atom (get-item-pair L-ATOM R-ATOM))
 			(if (null? stats-atom) 0 (LLOBJ 'get-count stats-atom)))
 
+		(define (get-all-elts)
+			(filter PAIR-PRED (LLOBJ 'get-all-elts)))
+
 		; ---------------
 		(define (get-name)
 			(string-append (LLOBJ 'name) " " ID-STR))
@@ -176,6 +179,7 @@
 				((right-stars)      cache-right-stars)
 				((left-duals)       cache-left-duals)
 				((right-duals)      cache-right-duals)
+				((get-all-elts)     get-all-elts)
 				(else               (LLOBJ 'provides meth))))
 
 		; -------------
@@ -195,6 +199,7 @@
 				((get-pair)         (apply get-item-pair args))
 				((get-count)        (apply get-count args))
 				((get-pair-count)   (apply get-pair-count args))
+				((get-all-elts)     (get-all-elts))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 				; Pass through some selected methods
