@@ -400,6 +400,10 @@
   'store-all-elts - Store all non-marginal matrix entries (and the
        attached values, of course).
 
+  'store-all - Store everything pertaining to the matrix: the marginals,
+       the matrix entries, and any 'auxilliary' Atoms, if any (that is,
+       call the 'store-aux method on the LLOBJ).
+
   'store-pairs - Store the provided list of Atoms.
 "
 	(define start-time (current-time))
@@ -467,6 +471,16 @@
 		(define (store-all-elts)
 			(store-pairs (star-obj 'get-all-elts)))
 
+		; Store everything, including auxilliaries
+		(define (store-all)
+			(store-wildcards)
+			(store-all-elts)
+			; Not every LLOBJ will have a store-aux,
+			; so ignore any error from calling it.
+			(catch #t (lambda () (LLOBJ 'store-aux))
+				(lambda (key . args) #f))
+		)
+
 		; ------------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -476,6 +490,7 @@
 				((store-wildcards)      (store-all-wildcards))
 				((store-all-elts)       (store-all-elts))
 				((store-pairs)          (apply store-pairs args))
+				((store-all)            (store-all))
 				(else                   (apply llobj (cons message args))))
 		))
 )
