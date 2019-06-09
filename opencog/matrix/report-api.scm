@@ -533,12 +533,13 @@
 	(define mtm-support (trans-obj 'total-mtm-support))
 	(define mtm-count (trans-obj 'total-mtm-count))
 
+	(format PORT "\n")
 	(if (< 0 mmt-support)
-		(format PORT "MM^T support=~6f count=~6f\b" mmt-support mmt-count)
+		(format PORT "MM^T support=~6f count=~6f\n" mmt-support mmt-count)
 		(format PORT "No MM^T data present\n"))
 
 	(if (< 0 mtm-support)
-		(format PORT "M^TM support=~6f count=~6f\b" mtm-support mtm-count)
+		(format PORT "M^TM support=~6f count=~6f\n" mtm-support mtm-count)
 		(format PORT "No M^TM data present\n"))
 )
 
