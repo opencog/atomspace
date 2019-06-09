@@ -524,6 +524,24 @@
 	(format PORT "RMS Count      ~A    ~A     ~A    ~A\n" lv rv alv arv)
 )))
 
+(define (print-transpose-summary-report LLOBJ PORT)
+
+	(define trans-obj (add-transpose-api LLOBJ))
+
+	(define mmt-support (trans-obj 'total-mmt-support))
+	(define mmt-count (trans-obj 'total-mmt-count))
+	(define mtm-support (trans-obj 'total-mtm-support))
+	(define mtm-count (trans-obj 'total-mtm-count))
+
+	(if (< 0 mmt-support)
+		(format PORT "MM^T support=~6f count=~6f\b" mmt-support mmt-count)
+		(format PORT "No MM^T data present\n"))
+
+	(if (< 0 mtm-support)
+		(format PORT "M^TM support=~6f count=~6f\b" mtm-support mtm-count)
+		(format PORT "No M^TM data present\n"))
+)
+
 (define* (do-print-report LLOBJ PORT)
 	(define (log2 x) (/ (log x) (log 2)))
 
@@ -559,6 +577,7 @@
 			#f))
 
 	(print-support-summary-report LLOBJ PORT)
+	(print-transpose-summary-report LLOBJ PORT)
 )
 
 (define*-public (print-matrix-summary-report LLOBJ
