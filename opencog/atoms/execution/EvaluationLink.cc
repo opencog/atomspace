@@ -558,8 +558,10 @@ static bool crisp_eval_scratch(AtomSpace* as,
 }
 
 /// Evaluate a formula defined by a PREDICATE_FORMULA_LINK
-static TruthValuePtr eval_formula(const Handle& predform,
-                                  const HandleSeq& cargs)
+static TruthValuePtr eval_formula(AtomSpace* as,
+                                  const Handle& predform,
+                                  const HandleSeq& cargs,
+                                  bool silent)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -597,7 +599,7 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		}
 
 		// Expecting a FunctionLink without variables.
-		ValuePtr v(flh->execute());
+		ValuePtr v(flh->execute(as, silent));
 		FloatValuePtr fv(FloatValueCast(v));
 		nums.push_back(fv->value()[0]);
 	}
@@ -645,7 +647,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return eval_formula(defn, cargs);
+			return eval_formula(as, defn, cargs, silent);
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -665,7 +667,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return eval_formula(pn, cargs);
+		return eval_formula(as, pn, cargs, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
