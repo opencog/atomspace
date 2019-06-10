@@ -156,11 +156,11 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
-ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
+ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
 {
 	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
 	{
-		ValuePtr red(HandleCast(vptr)->execute());
+		ValuePtr red(HandleCast(vptr)->execute(as, silent));
 
 		// It would probably be better to throw a silent exception, here?
 		if (nullptr == red) return vptr;

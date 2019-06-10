@@ -67,7 +67,7 @@ void FormulaUTest::test_strength_of()
 	_eval.eval("(Concept \"B\" (stv 0.6 0.9))");
 
 	ValuePtr sof = _eval.eval_v("(cog-execute! (StrengthOf (Concept \"A\")))");
-	printf("Get strenght_of=%s\n", sof->to_string().c_str());
+	printf("Get strength_of=%s\n", sof->to_string().c_str());
 	TS_ASSERT_EQUALS(sof->get_type(), FLOAT_VALUE);
 	FloatValuePtr fvp = FloatValueCast(sof);
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.8), MAXERR);
