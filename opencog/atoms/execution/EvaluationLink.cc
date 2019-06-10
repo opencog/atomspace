@@ -905,10 +905,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				continue;
 			}
 
-			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-				throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+			if (not  h->is_executable())
+				throw SyntaxException(TRACE_INFO, "Expecting an executable Link");
 
-			ValuePtr v(h->execute());
+			ValuePtr v(h->execute(scratch, silent));
 			FloatValuePtr fv(FloatValueCast(v));
 			nums.push_back(fv->value().at(0));
 		}
