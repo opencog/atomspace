@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include "TruthValueOfLink.h"
 
 using namespace opencog;
@@ -58,7 +59,13 @@ ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	return ValueCast(_outgoing[0]->getTruthValue());
+	// We cannot know the TruthValue of the Atom unless we are
+	// working with the unique version that sits in the AtomSpace!
+	Handle ah(as->get_atom(_outgoing[0]));
+	if (ah)
+		return ValueCast(ah->getTruthValue());
+
+	return get_handle();
 }
 
 // =============================================================
@@ -102,7 +109,13 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		strengths.push_back(h->getTruthValue()->get_mean());
+		// We cannot know the TruthValue of the Atom unless we are
+		// working with the unique version that sits in the AtomSpace!
+		Handle ah(as->get_atom(h));
+		if (ah)
+			strengths.push_back(ah->getTruthValue()->get_mean());
+		else
+			return get_handle();
 	}
 
 	return createFloatValue(strengths);
@@ -149,7 +162,13 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		confids.push_back(h->getTruthValue()->get_confidence());
+		// We cannot know the TruthValue of the Atom unless we are
+		// working with the unique version that sits in the AtomSpace!
+		Handle ah(as->get_atom(h));
+		if (ah)
+			confids.push_back(ah->getTruthValue()->get_confidence());
+		else
+			return get_handle();
 	}
 
 	return createFloatValue(confids);
