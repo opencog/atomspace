@@ -59,7 +59,7 @@ void FoldLink::init(void)
 /// Actually, what is implemete here is not pure delta-reduction.
 /// If the arguments to Fold are executale, then they are executed
 /// first, and only then is the delta-reduction performed.
-ValuePtr FoldLink::delta_reduce(void) const
+ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
 
@@ -87,11 +87,11 @@ ValuePtr FoldLink::delta_reduce(void) const
 		// if (nameserver().isA(h->get_type(), FUNCTION_LINK))
 		if (h->is_atom() and h->is_executable())
 		{
-			expr = kons(h->execute(), expr);
+			expr = kons(as, silent, h->execute(as, silent), expr);
 		}
 		else
 		{
-			expr = kons(h, expr);
+			expr = kons(as, silent, h, expr);
 		}
 	}
 

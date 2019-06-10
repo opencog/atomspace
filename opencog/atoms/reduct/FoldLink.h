@@ -43,7 +43,8 @@ class FoldLink : public FunctionLink
 {
 protected:
 	ValuePtr knil;
-	virtual ValuePtr kons(const ValuePtr&, const ValuePtr&) const = 0;
+	virtual ValuePtr kons(AtomSpace*, bool,
+	                      const ValuePtr&, const ValuePtr&) const = 0;
 
 	void init(void);
 
@@ -51,7 +52,8 @@ public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);
 	FoldLink(const Link& l);
 
-   virtual ValuePtr delta_reduce(void) const;
+	// Should probably be renamed to execute() ...
+   virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)

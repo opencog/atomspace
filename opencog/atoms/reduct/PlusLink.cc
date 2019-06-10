@@ -68,7 +68,8 @@ static inline double get_double(const ValuePtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
-ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
+ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
+                        const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(fi));
@@ -117,7 +118,7 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
-		return ap->delta_reduce();
+		return ap->delta_reduce(as, silent);
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
@@ -198,7 +199,7 @@ ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 			// a_plus is now (a+1) or (a+b) as described above.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			ValuePtr a_plus(ap->delta_reduce());
+			ValuePtr a_plus(ap->delta_reduce(as, silent));
 
 			return createTimesLink(exx, HandleCast(a_plus));
 		}
