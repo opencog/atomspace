@@ -24,6 +24,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
 
@@ -158,6 +159,10 @@ Handle ArithmeticLink::reorder(void) const
 
 ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
 {
+	if (DEFINED_SCHEMA_NODE == vptr->get_type())
+	{
+		vptr = DefineLink::get_definition(HandleCast(vptr));
+	}
 	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
 	{
 		ValuePtr red(HandleCast(vptr)->execute(as, silent));
