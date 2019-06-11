@@ -65,7 +65,16 @@ ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 	if (ah)
 		return ValueCast(ah->getTruthValue());
 
-	return get_handle();
+	if (silent)
+		throw SilentException();
+
+	// If the user asked for a TV not in any atomspace,
+	// what should we do? I dunno, so I'm throwing an error.
+	throw InvalidParamException(TRACE_INFO,
+		"Asked for TruthValue of atom not in any atomspace: %s",
+		this->to_string().c_str());
+
+	return Handle();
 }
 
 // =============================================================
@@ -115,7 +124,16 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 		if (ah)
 			strengths.push_back(ah->getTruthValue()->get_mean());
 		else
-			return get_handle();
+		{
+			if (silent)
+				throw SilentException();
+
+			// If the user asked for a TV not in any atomspace,
+			// what should we do? I dunno, so I'm throwing an error.
+			throw InvalidParamException(TRACE_INFO,
+				"Asked for Strength of atom not in any atomspace: %s",
+				this->to_string().c_str());
+		}
 	}
 
 	return createFloatValue(strengths);
@@ -168,7 +186,16 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 		if (ah)
 			confids.push_back(ah->getTruthValue()->get_confidence());
 		else
-			return get_handle();
+		{
+			if (silent)
+				throw SilentException();
+
+			// If the user asked for a TV not in any atomspace,
+			// what should we do? I dunno, so I'm throwing an error.
+			throw InvalidParamException(TRACE_INFO,
+				"Asked for Confidence of atom not in any atomspace: %s",
+				this->to_string().c_str());
+		}
 	}
 
 	return createFloatValue(confids);

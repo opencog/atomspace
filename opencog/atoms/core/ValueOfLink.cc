@@ -69,6 +69,7 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		if (pap) return pap;
 	}
 
+	// Hmm. shouldn't this be SilentException?
 	if (silent)
 		throw NotEvaluatableException();
 
