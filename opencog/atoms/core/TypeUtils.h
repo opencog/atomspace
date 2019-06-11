@@ -212,6 +212,10 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl);
 /**
  * Given a list variables or typed variables, return the
  * corresponding variable declaration.
+ *
+ * If varlist has only one member return a VariableNode or
+ * TypedVariableLink. If varlist is empty, return an empty
+ * VariableList.
  */
 Handle gen_vardecl(const HandleSeq& varlist);
 
