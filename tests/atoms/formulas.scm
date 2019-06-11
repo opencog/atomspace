@@ -169,3 +169,143 @@
 (define (its-conf a b)
 	(Evaluation (DefinedPredicate "mostly-confident") (List a b)))
 
+; --------------------------------------------------
+; Testing naked predicate formulas (issue #2218).
+
+(define naked-pred1
+  (PredicateFormula
+    (Number 1)
+    (Number 1)
+  )
+)
+(define naked-pred2
+  (PredicateFormula
+    (Times
+      (Number 0.5)
+      (Number 1)
+    )
+    (Number 1)
+  )
+)
+(define naked-pred3
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 0.5)
+      (Number 1)
+    )
+  )
+)
+(define apple-is-green (Concept "apple-is-green" (stv 1 0.5)))
+(define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
+(define naked-pred4
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+
+(define (times x y)
+  (cog-execute! (Times x y))
+)
+(define naked-pred5
+  (PredicateFormula
+    (Number 1)
+    (ExecutionOutput
+      (GroundedSchema "scm:times")
+      (List (Number 0.9) (Number 0.5))
+    )
+  )
+)
+
+(define naked-pred-crash1
+  (PredicateFormula
+    (Concept "blabla")
+    (Number 1)
+  )
+)
+(define naked-pred-crash2
+  (PredicateFormula
+    (Number 1)
+    (ExecutionOutput
+      (Lambda (Concept "blabla"))
+      (List)
+    )
+  )
+)
+
+; --------------------------------------------------
+; Testing defined predicate formulas (issue #2218).
+
+(Define
+  (DefinedPredicate "defined-pred1")
+  (PredicateFormula
+    (Number 1)
+    (Number 1)
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred2")
+  (PredicateFormula
+    (Times
+      (Number 1)
+      (Number 0.5)
+    )
+    (Number 1)
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred3")
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred4")
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred-crash1")
+  (PredicateFormula
+    (ExecutionOutput
+      (Lambda (Concept "ahaha"))
+      (List)
+    )
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred-crash2")
+  (PredicateFormula
+    (Number 1)
+    (Concept "saboteur")
+  )
+)
+(define (eval-nullary name)
+  (Evaluation
+    (DefinedPredicate name)
+    (List)
+  )
+)

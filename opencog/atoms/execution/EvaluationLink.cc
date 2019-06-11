@@ -594,11 +594,22 @@ static TruthValuePtr eval_formula(AtomSpace* as,
 		{
 			flh = fvars.substitute_nocheck(flh, cargs);
 		}
-
-		// Expecting a FunctionLink without variables.
-		ValuePtr v(flh->execute(as, silent));
-		FloatValuePtr fv(FloatValueCast(v));
-		nums.push_back(fv->value()[0]);
+                
+                // Expecting a FunctionLink without variables.
+                ValuePtr v(flh->execute(as, silent));
+                Type vtype = v->get_type();
+                if (vtype == NUMBER_NODE) {
+                        nums.push_back(NumberNodeCast(v)->get_value());
+                        continue;
+                }
+                if (nameserver().isA(vtype, FLOAT_VALUE)) {
+                        FloatValuePtr fv(FloatValueCast(v));
+                        nums.push_back(fv->value()[0]);
+                        continue;
+                }
+                
+                // If it is neither NumberNode nor a FloatValue...
+                throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 	}
 
 	// XXX FIXME; if we are given more than two floats, then
@@ -906,8 +917,18 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				throw SyntaxException(TRACE_INFO, "Expecting an executable Link");
 
 			ValuePtr v(h->execute(scratch, silent));
-			FloatValuePtr fv(FloatValueCast(v));
-			nums.push_back(fv->value().at(0));
+                        Type vtype = v->get_type();
+                        if (NUMBER_NODE == vtype) {
+                                nums.push_back(NumberNodeCast(v)->get_value());
+                                continue;
+                        }
+                        if (nameserver().isA(vtype, FLOAT_VALUE)) {
+                                FloatValuePtr fv(FloatValueCast(v));
+                                nums.push_back(fv->value().at(0));
+                                continue;
+                        }
+			
+                        throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 		}
 		return createSimpleTruthValue(nums);
 	}
