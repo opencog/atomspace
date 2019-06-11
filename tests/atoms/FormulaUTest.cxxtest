@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
 #include <math.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
@@ -56,6 +57,8 @@ public:
 	void test_putlink();
 	void test_define();
 	void test_lambda();
+        void test_naked_predicate();
+        void test_defined_predicate();
 };
 
 #define MAXERR 1.0e-12
@@ -318,4 +321,44 @@ void FormulaUTest::test_lambda()
 	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
 
 	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_naked_predicate()
+{
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        
+        for (int i=1; i<=5; i++) {
+                std::string cmd = "(cog-evaluate! naked-pred" + std::to_string(i) + ")";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_NOTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(false, _eval.eval_error());
+        }
+        for (int i=1; i<=2; i++) {
+                std::string cmd = "(cog-evaluate! naked-pred-crash" + std::to_string(i) + ")";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_ANYTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(true, _eval.eval_error());
+        }
+        
+        logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_defined_predicate()
+{
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        
+        for (int i=1; i<=4; i++) {
+                std::string cmd = "(cog-evaluate! (eval-nullary \"defined-pred" + std::to_string(i) + "\"))";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_NOTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(false, _eval.eval_error());
+        }
+        for (int i=1; i<=2; i++) {
+                std::string cmd = "(cog-evaluate! (eval-nullary \"defined-pred-crash" + std::to_string(i) + "\"))";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_ANYTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(true, _eval.eval_error());
+        }
+        
+        logger().info("END TEST: %s", __FUNCTION__);
 }
