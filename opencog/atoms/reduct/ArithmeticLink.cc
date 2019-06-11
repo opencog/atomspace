@@ -163,15 +163,17 @@ ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) co
 	{
 		vptr = DefineLink::get_definition(HandleCast(vptr));
 	}
-	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
+	while (vptr->is_atom())
 	{
-		ValuePtr red(HandleCast(vptr)->execute(as, silent));
+		Handle h(HandleCast(vptr));
+		if (not h->is_executable()) break;
+
+		ValuePtr red(h->execute(as, silent));
 
 		// It would probably be better to throw a silent exception, here?
 		if (nullptr == red) return vptr;
 		if (*red == *vptr) return vptr;
 		vptr = red;
-
 	}
 
 	// The FunctionLink might be a GetLink, which returns a SetLink
