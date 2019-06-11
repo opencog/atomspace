@@ -117,3 +117,55 @@
 		(List
 			(Concept "A")
 			(Concept "B"))))
+
+; --------------------------------------------------
+
+(define atom-a (Concept "A" (stv 0.8 1.0)))
+(define atom-b (Concept "B" (stv 0.6 0.9)))
+(define atom-c (Concept "C"))
+
+(define key (Predicate "key"))
+
+(define iab (Inheritance atom-a atom-b (stv 0.8 0.8)))
+(define ibc (Inheritance atom-b atom-c (stv 0.3 0.3)))
+
+(cog-set-value! iab key (FloatValue 1 2 3))
+(cog-set-value! ibc key (FloatValue 4 5 6))
+
+; The InheritanceLink is not necessarily in any atomspace.
+(Define
+	(DefinedPredicate "its-about-one")
+	(Lambda
+		(VariableList (Variable "$x") (Variable "$y"))
+		(SequentialAnd
+			(GreaterThan
+				(ValueOf (Inheritance (Variable "$x") (Variable "$y"))  key)
+				(Number 0.99))
+			(GreaterThan
+				(Number 1.01)
+				(ValueOf (Inheritance (Variable "$x") (Variable "$y")) key))
+		)))
+
+; Expect (its-one atom-a atom-b) to be true,
+; and (its-one atom-b atom-c) to be false.
+(define (its-one a b)
+	(Evaluation (DefinedPredicate "its-about-one") (List a b)))
+
+(Define
+	(DefinedPredicate "mostly-confident")
+	(Lambda
+		(VariableList (Variable "$x") (Variable "$y"))
+		(SequentialAnd
+			(GreaterThan
+				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y")))
+				(Number 0.75))
+			(GreaterThan
+				(Number 0.85)
+				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y"))))
+		)))
+
+; Expect (its-conf atom-a atom-b) to be true,
+; and (its-conf atom-b atom-c) to be false.
+(define (its-conf a b)
+	(Evaluation (DefinedPredicate "mostly-confident") (List a b)))
+

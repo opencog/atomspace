@@ -38,7 +38,8 @@ class PlusLink : public ArithmeticLink
 {
 protected:
 	static Handle zero;
-	virtual ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
+	virtual ValuePtr kons(AtomSpace*, bool,
+	                      const ValuePtr&, const ValuePtr&) const;
 
 	void init(void);
 
