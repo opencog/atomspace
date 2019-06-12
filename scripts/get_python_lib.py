@@ -6,9 +6,11 @@ if __name__ == '__main__':
     # This is a hack due to the distutils in debian/ubuntu's python3 being misconfigured
     # see discussion https://github.com/opencog/atomspace/issues/1782
     #
-    # If the bug is fixed, this script could be replaced by:
+    # If the bug is fixed, most of this script could be replaced by:
     #
     # from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True, prefix=prefix))
+    #
+    # However, using this would not respect a python virtual environments, so in a way this is better!
     
     prefix = sys.argv[1]
 
