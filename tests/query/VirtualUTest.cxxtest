@@ -86,4 +86,15 @@ void VirtualUTest::test_satisfaction(void)
 
 	Handle mouse = as->add_node(CONCEPT_NODE, "mouse");
 	TS_ASSERT_EQUALS(mouse, mouse_set->getOutgoingAtom(0));
+
+	// -----------------------
+	Handle snail_set = eval->eval_h("(cog-execute! get-snail)");
+	printf("Expecting snail, got %s", snail_set->to_string().c_str());
+
+	TS_ASSERT_EQUALS(1, getarity(snail_set));
+
+	Handle snail = as->add_node(CONCEPT_NODE, "snail");
+	TS_ASSERT_EQUALS(snail, snail_set->getOutgoingAtom(0));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

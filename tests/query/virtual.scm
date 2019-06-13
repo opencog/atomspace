@@ -28,12 +28,11 @@
 		(And
 			(Inheritance (Variable "x") (Concept "animal"))
 
-			; This nested Satsifaction should be treated as
-			; an evaluatable clause by the pattern matcher,
-			; and should be evaluated on demand.
+			; Find some inheritance relation that is not already known.
 			(Satisfaction (Variable "y")
 				(And
 					(Inheritance (Variable "x") (Variable "y"))
+					(Not (Equal (Variable "y") (Concept "animal")))
 					(Not (Equal (Variable "y") (Concept "mammal")))
 				))
 		))
