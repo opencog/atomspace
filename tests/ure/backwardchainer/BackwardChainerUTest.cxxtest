@@ -62,14 +62,14 @@ public:
 
 BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
 {
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
 	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 	ure_logger().set_level(Logger::INFO);
-	// ure_logger().set_timestamp_flag(false);
+	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
-	// ure_logger().set_print_to_stdout_flag(true);
+	ure_logger().set_print_to_stdout_flag(true);
 	randGen().seed(0);
 
 	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
