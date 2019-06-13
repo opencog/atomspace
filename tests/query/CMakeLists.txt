@@ -61,6 +61,7 @@ IF (HAVE_GUILE)
 
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
+	ADD_CXXTEST(VirtualUTest)
 	ADD_CXXTEST(SequenceUTest)
 	ADD_CXXTEST(EvaluationUTest)
 	ADD_CXXTEST(DontExecUTest)
