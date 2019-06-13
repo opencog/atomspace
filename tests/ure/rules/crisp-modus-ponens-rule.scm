@@ -20,7 +20,10 @@
                      (TypedVariable B (TypeChoice LambdaT PredicateT))))
          (precon1 (Evaluation (GroundedPredicate "scm: true-enough") A))
          (precon2 (Evaluation (GroundedPredicate "scm: true-enough") AB))
-         (pattern (And AB precon1 precon2))
+         (pattern (And
+                     ;; No need to include A as it is already in AB
+                     (Present AB)
+                     precon1 precon2))
          (rewrite (ExecutionOutput
                      (GroundedSchema "scm: crisp-modus-ponens-formula")
                      (List B A AB))))
