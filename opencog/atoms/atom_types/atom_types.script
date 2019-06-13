@@ -364,8 +364,6 @@ PATTERN_LINK <- PRENEX_LINK
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 
-// Finds all groundings, return binary truth value (true/false)
-SATISFACTION_LINK <- PATTERN_LINK,CRISP_OUTPUT_LINK
 // Finds all groundings, returns generic Value
 SATISFYING_LINK <- PATTERN_LINK
 
@@ -522,6 +520,10 @@ EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // AlphaEqualLink tests to see if both sides are the same, up to an
 // alpha-renaming of any variables that they may have.
 ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// If the pattern has a grounding (any grounding at all), then
+// return true, else return false. This is a crisp binary true/false.
+SATISFACTION_LINK <- PATTERN_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
