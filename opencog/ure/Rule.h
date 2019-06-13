@@ -189,6 +189,13 @@ public:
 	HandleSeq get_clauses() const;
 
 	/**
+	 * Attempt to return clauses that are non virtual. Specifically, it
+	 * does that by checking the presence of a PresentLink, and if so
+	 * return only the clauses inside that (or those) PresentLink(s).
+	 */
+	HandleSeq get_non_virtual_clauses() const;
+
+	/**
 	 * Return the rule premises, that is the last arguments of the
 	 * rewrite term's ExecutionOutputLink. If the last arguments are
 	 * SetLinks, then return their outgoings as well. That is because
