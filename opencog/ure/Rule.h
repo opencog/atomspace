@@ -181,19 +181,12 @@ public:
 	bool has_cycle() const;     // is some premise equal to conclusion?
 
 	/**
-	 * Return the pattern matcher clauses of the rule. This may not
-	 * necessarily represent the premises of the rule which may be the
-	 * last arguments of the rewrite term, but rather the pattern
-	 * matcher clauses required to trigger that rule.
+	 * Return clauses. Warning: it doesn't not necessarily return all
+	 * clauses, will avoid non virtual clauses in the case PresentLink
+	 * is, as the intend of this function is to be used by
+	 * get_premises().
 	 */
 	HandleSeq get_clauses() const;
-
-	/**
-	 * Attempt to return clauses that are non virtual. Specifically, it
-	 * does that by checking the presence of a PresentLink, and if so
-	 * return only the clauses inside that (or those) PresentLink(s).
-	 */
-	HandleSeq get_non_virtual_clauses() const;
 
 	/**
 	 * Return the rule premises, that is the last arguments of the

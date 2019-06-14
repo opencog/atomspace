@@ -314,24 +314,6 @@ HandleSeq Rule::get_clauses() const
 	Type t = implicant->get_type();
 	HandleSeq hs;
 
-	if (t == AND_LINK or t == OR_LINK or t == PRESENT_LINK)
-		hs = implicant->getOutgoingSet();
-	else
-		hs.push_back(implicant);
-
-	return hs;
-}
-
-HandleSeq Rule::get_non_virtual_clauses() const
-{
-	// If the rule's handle has not been set yet
-	if (not is_valid())
-		return HandleSeq();
-
-	Handle implicant = get_implicant();
-	Type t = implicant->get_type();
-	HandleSeq hs;
-
 	if (t == AND_LINK or t == OR_LINK) {
 		const HandleSeq& oset = implicant->getOutgoingSet();
 		// if there is PresentLink then only return clauses under the
@@ -370,7 +352,7 @@ HandleSeq Rule::get_premises() const
 
 	// If not an ExecutionOutputLink then return the clauses
 	if (premises_as_clauses or rewrite_type != EXECUTION_OUTPUT_LINK)
-		return get_non_virtual_clauses();
+		return get_clauses();
 
 	// Otherwise search the premises in the rewrite term's ExecutionOutputLink
 	HandleSeq premises;

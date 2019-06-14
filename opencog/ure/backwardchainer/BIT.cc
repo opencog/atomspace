@@ -426,10 +426,9 @@ Handle AndBIT::substitute_unified_variables(const Handle& leaf,
 Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
                                   const Rule& rule) const
 {
-	HandleSeq clauses = rule.get_clauses();
 	Handle conclusion = rule.get_conclusion();
-	HandleSeq prs_clauses = get_present_clauses(clauses);
-	HandleSeq virt_clauses = get_virtual_clauses(clauses);
+	HandleSeq prs_clauses = get_present_clauses(rule.get_implicant());
+	HandleSeq virt_clauses = get_virtual_clauses(rule.get_implicant());
 	HandleSeq prs_fcs_clauses = get_present_clauses(fcs_pattern);
 	HandleSeq virt_fcs_clauses = get_virtual_clauses(fcs_pattern);
 
