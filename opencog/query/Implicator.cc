@@ -41,7 +41,7 @@ using namespace opencog;
 bool Implicator::grounding(const HandleMap &var_soln,
                            const HandleMap &term_soln)
 {
-	// PatternMatchEngine::print_solution(term_soln,var_soln);
+	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
 	if (_result_set.size() >= max_results)
