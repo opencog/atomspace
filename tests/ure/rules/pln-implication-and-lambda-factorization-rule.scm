@@ -62,8 +62,7 @@
      (VariableNode "$A2")))
 
 (define implication-and-lambda-factorization-body
-  (LocalQuoteLink                        ; Necessary so the AndLink doesn't
-                                         ; count as a connective
+  (PresentLink
      (AndLink
         (QuoteLink (LambdaLink
            (Unquote (VariableNode "$TyVs-one"))

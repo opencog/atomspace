@@ -18,7 +18,7 @@
         (TypeNode "LambdaLink")
         (TypeNode "ConceptNode"))))
   (AndLink
-    (VariableNode "$f")
+    (Present (VariableNode "$f"))
     (EvaluationLink
       (GroundedPredicateNode "scm: has-arity")
       (ListLink

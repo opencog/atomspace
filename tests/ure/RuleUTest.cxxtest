@@ -392,7 +392,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
 		             al(LIST_LINK, target, body)),
-		expected = al(BIND_LINK, body, rewrite);
+		expected = al(BIND_LINK, al(PRESENT_LINK, body), rewrite);
 
 	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -423,7 +423,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
 		             al(LIST_LINK, target, body)),
-		expected = al(BIND_LINK, P_body_var, body, rewrite);
+		expected = al(BIND_LINK, P_body_var, al(PRESENT_LINK, body), rewrite);
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);
@@ -510,10 +510,11 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 		             "        (TypeNode \"VariableList\")))"
 		             "    (VariableNode \"$P-6266d6f2\")"
 		             "    (VariableNode \"$Q-7005b724\"))"
-		             "  (Quote (ImplicationScopeLink"
-		             "    (Unquote (VariableNode \"$TyVs-6c74a409\"))"
-		             "    (Unquote (VariableNode \"$P-6266d6f2\"))"
-		             "    (Unquote (VariableNode \"$Q-7005b724\"))))"
+		             "  (Present"
+		             "    (Quote (ImplicationScopeLink"
+		             "      (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "      (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "      (Unquote (VariableNode \"$Q-7005b724\")))))"
 		             "  (ExecutionOutputLink"
 		             "    (GroundedSchemaNode \"scm: implication-scope-to-implication-formula\")"
 		             "    (ListLink"
@@ -602,7 +603,7 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 	Handle rule = rules.begin()->first.get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
-		             "  (LocalQuoteLink"
+		             "  (PresentLink"
 		             "    (AndLink"
 		             "      (LambdaLink"
 		             "        (TypedVariableLink"

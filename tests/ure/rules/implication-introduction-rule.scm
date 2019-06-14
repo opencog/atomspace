@@ -32,8 +32,9 @@
 
 (define implication-introduction-body
   (AndLink
-     (VariableNode "$P")
-     (VariableNode "$Q")
+     (PresentLink
+        (VariableNode "$P")
+        (VariableNode "$Q"))
      (NotLink
         (IdenticalLink
            (VariableNode "$P")
