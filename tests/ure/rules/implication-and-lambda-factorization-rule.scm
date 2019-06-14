@@ -62,8 +62,7 @@
         (TypeNode "EvaluationLink"))))
 
 (define implication-and-lambda-factorization-pattern
-  (LocalQuoteLink                   ; Necessary so the AndLink doesn't
-                                    ; count as a connective
+  (Present
      (AndLink
         (QuoteLink (LambdaLink
            (UnquoteLink (VariableNode "$TyVs"))
