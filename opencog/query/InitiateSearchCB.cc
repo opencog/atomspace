@@ -909,4 +909,52 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	_pl->debug_log();})
 }
 
+std::string InitiateSearchCB::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	if (_variables)
+		ss << indent << "_variables:" << std::endl
+		   << _variables->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_pattern)
+		ss << indent << "_pattern:" << std::endl
+		   << _pattern->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_dynamic)
+		ss << indent << "_dynamic:" << std::endl
+		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
+	if (_pl)
+		ss << indent << "_pl:" << std::endl
+		   << _pl->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_root)
+		ss << indent << "_root:" << std::endl
+		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_starter_term)
+		ss << indent << "_starter_term:" << std::endl
+		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;
+	ss << indent << "_curr_clause = " << _curr_clause << std::endl;
+	if (not _choices.empty()) {
+		std::string indent_p = indent  + oc_to_string_indent;
+		std::string indent_pp = indent_p  + oc_to_string_indent;
+		std::string indent_ppp = indent_pp  + oc_to_string_indent;
+		ss << indent << "_choices:" << std::endl;
+		ss << indent_p << "size = " << _choices.size() << std::endl;
+		unsigned i = 0;
+		for (const Choice& ch : _choices) {
+			ss << indent_p << "choice[" << i << "]:" << std::endl
+			   << indent_pp << "clause = " << ch.clause;
+			ss << indent_pp << "best_start:" << std::endl
+			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
+			ss << indent_pp << "start_term:" << std::endl
+			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+		}
+	}
+	ss << indent << "_search_fail = " << _search_fail;
+
+	return ss.str();
+}
+
+std::string oc_to_string(const InitiateSearchCB& iscb, const std::string& indent)
+{
+	return iscb.to_string(indent);
+}
+
 /* ===================== END OF FILE ===================== */
