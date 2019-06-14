@@ -14,25 +14,12 @@
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
-(MemberLink (stv 1 1)
-   conditional-full-instantiation-meta-rule-name
-   ci-rbs
-)
-(MemberLink (stv 1 1)
-   fuzzy-conjunction-introduction-2ary-rule-name
-   ci-rbs
-)
+(ure-add-rule ci-rbs conditional-full-instantiation-meta-rule-name (stv 1 1))
+(ure-add-rule ci-rbs fuzzy-conjunction-introduction-2ary-rule-name (stv 1 1))
 
 ;; termination criteria parameters
-(ExecutionLink
-   (SchemaNode "URE:maximum-iterations")
-   ci-rbs
-   (NumberNode "20")
-)
+(ure-set-maximum-iterations ci-rbs 20)
 
 ;; Attention allocation (set the TV strength to 0 to disable it, 1 to
 ;; enable it)
-(EvaluationLink (stv 0 1)
-   (PredicateNode "URE:attention-allocation")
-   ci-rbs
-)
+(ure-set-attention-allocation ci-rbs #f)

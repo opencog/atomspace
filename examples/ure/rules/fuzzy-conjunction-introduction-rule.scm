@@ -38,7 +38,7 @@
          (type (TypeChoice EvaluationT InheritanceT))
          (gen-typed-variable (lambda (x) (TypedVariable x type)))
          (vardecl (VariableList (map gen-typed-variable variables)))
-         (pattern (And variables))
+         (pattern (Present variables))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: fuzzy-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order

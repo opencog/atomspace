@@ -15,15 +15,17 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C")
-            )
+        )
         (AndLink
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-            (ImplicationLink
-                (VariableNode "$B")
-                (VariableNode "$C")
+            (PresentLink
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B")
+                )
+                (ImplicationLink
+                    (VariableNode "$B")
+                    (VariableNode "$C")
+                )
             )
             ;; To avoid matching (Implication A B) and (Implication B A)
             (NotLink
@@ -50,7 +52,6 @@
         )
     )
 )
-
 
 ;; -----------------------------------------------------------------------------
 ;; Deduction Formula

@@ -19,13 +19,11 @@
 
 ;; Person keeps pet
 (define keep-pet-rule
- (let* (
-          (kp (Predicate "keep-pet"))
-          (like (Predicate "like"))
-          (vA (Variable "$A"))
-          (vX (Variable "$X"))
-          (akx (Evaluation kp (List vA vX)))
-       )
+ (let* ((kp (Predicate "keep-pet"))
+        (like (Predicate "like"))
+        (vA (Variable "$A"))
+        (vX (Variable "$X"))
+        (akx (Evaluation kp (List vA vX))))
   (BindLink
    (VariableList
      (TypedVariable
@@ -33,20 +31,15 @@
         (Type "ConceptNode"))
      (TypedVariable
         vX
-        (Type "ConceptNode"))
-   )
-   (And
+        (Type "ConceptNode")))
+   (Present
      (Inheritance
         vA
         (Concept "person"))
      (Inheritance
         vX
-        (Concept "pet"))
-   )
-   akx
-  )
- )
-)
+        (Concept "pet")))
+   akx)))
 
 (define keep-pet-rule-name
   (DefinedSchemaNode "keep-pet-rule"))
@@ -69,13 +62,11 @@
       (Predicate "keep-pet")
       (List
 	 (Variable "$who")
-	 (Concept "cat")))
-)
+	 (Concept "cat"))))
 
 ;; With the following variable declaration
 (define vd
-  (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode"))
-)
+  (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode")))
 
 ;; We can now call the backward chainer as follows
 (cog-bc Einstein-rbs target #:vardecl vd)
