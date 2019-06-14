@@ -825,14 +825,16 @@ std::string Variables::to_string(const std::string& indent) const
 	ss << FreeVariables::to_string(indent);
 
 	// Simple typemap
+	std::string indent_p = indent + OC_TO_STRING_INDENT;
+	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
 	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << indent << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT)
-		   << indent << "types[" << i << "]:";
+		ss << indent_p << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent_pp)
+		   << indent_p << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << nameserver().getTypeName(t);
 		ss << std::endl;
