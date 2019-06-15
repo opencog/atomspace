@@ -56,6 +56,9 @@ void DistributionalValueSCM::init(void)
 	define_scheme_primitive("cog-new-cdv",
 	                        &DistributionalValueSCM::ss_new_cdv,
 	                        this,"distvalue");
+	define_scheme_primitive("cog-cdv-get-confidence",
+	                        &DistributionalValueSCM::ss_cdv_get_confidence,
+	                        this,"distvalue");
 	define_scheme_primitive("cog-cdv-get-conditions",
 	                        &DistributionalValueSCM::ss_cdv_get_conditions,
 	                        this,"distvalue");
@@ -73,6 +76,13 @@ void DistributionalValueSCM::init(void)
 	                        this,"distvalue");
 	define_scheme_primitive("cog-cdv-join",
 	                        &DistributionalValueSCM::ss_cdv_join,
+	                        this,"distvalue");
+
+	define_scheme_primitive("cog-dv-merge-hi-conf",
+	                        &DistributionalValueSCM::ss_dv_merge_hi_conf,
+	                        this,"distvalue");
+	define_scheme_primitive("cog-cdv-merge-hi-conf",
+	                        &DistributionalValueSCM::ss_cdv_merge_hi_conf,
 	                        this,"distvalue");
 	//define_scheme_primitive("cog-cdv-cde",
 	//                        &DistributionalValueSCM::ss_cdv_cde,
@@ -330,6 +340,13 @@ SCM DistributionalValueSCM::ss_new_cdv(SCM sconds,SCM sdvs)
 	return cdv_to_scm(cdv);
 }
 
+SCM DistributionalValueSCM::ss_cdv_get_confidence(SCM scdv)
+{
+	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-confidence",1);
+	return scm_from_double(cdv->get_confidence());
+}
+
+
 SCM DistributionalValueSCM::ss_cdv_get_conditions(SCM scdv)
 {
 	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-conditions",1);
@@ -383,6 +400,27 @@ SCM DistributionalValueSCM::ss_cdv_join(SCM scdv1,SCM scdv2)
 //	ConditionalDVPtr res = DVFormulas::consequent_disjunction_elemination(cdv1,cdv2);
 //	return cdv_to_scm(res);
 //}
+//
+
+SCM DistributionalValueSCM::ss_dv_merge_hi_conf(SCM sdv1,SCM sdv2)
+{
+	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-merge-hi-conf",1);
+	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-merge-hi-conf",2);
+	if (dv1->get_confidence() > dv2->get_confidence())
+		return sdv1;
+	else
+		return sdv2;
+}
+
+SCM DistributionalValueSCM::ss_cdv_merge_hi_conf(SCM scdv1,SCM scdv2)
+{
+	ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-merge-hi-conf",1);
+	ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-merge-hi-conf",2);
+	if (cdv1->get_confidence() > cdv2->get_confidence())
+		return scdv1;
+	else
+		return scdv2;
+}
 
 void opencog_distvalue_init(void)
 {

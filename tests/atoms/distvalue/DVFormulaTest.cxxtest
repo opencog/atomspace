@@ -182,7 +182,20 @@ public:
 		//res->value().print();
 		//std::cout << "DV: \n";
 		//dv->value().print();
-		TS_ASSERT_EQUALS(*dv,*res)
+		TS_ASSERT_EQUALS(*dv,*res);
+
+
+		CTHist<double> h1 = CTHist<double>(2,1);
+		h1.insert(DVec{0},1728.01);
+		h1.insert(DVec{1},4032.01);
+		DistributionalValuePtr dv1 = DistributionalValue::createDV(h1);
+
+		CTHist<double> h2 = CTHist<double>(2,1);
+		h2.insert(DVec{0},360);
+		h2.insert(DVec{1},6840);
+		DistributionalValuePtr dv2 = DistributionalValue::createDV(h2);
+
+		res = DVFormulas::conjunction(dv1,dv2);
 	}
 
 	void testDisjunction()

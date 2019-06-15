@@ -107,7 +107,9 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr c
 	for (auto v : remaped)
 	{
 		double val = condDist->get_mean(v.pos);
-		res += v.value * val;
+		double vcount = get_count(v.value);
+		double norm = condDist->get_count(v.pos) / vcount;
+		res += (v.value * norm) * val;
 	}
 	return std::make_shared<const DistributionalValue>(res);
 }
@@ -115,6 +117,9 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr c
 //Given a Distribution of the Condition calculate a Joint Probability distribution
 DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValuePtr base) const
 {
+	//std::cout << "conditional\n" << to_string() << std::endl;
+	//std::cout << "condition\n" << base->to_string() << std::endl;
+
 	size_t s1 = base->_value.max_size();
 	size_t d1 = base->_value.dims();
 	size_t s2 = _value.begin()->value.max_size();
@@ -123,6 +128,7 @@ DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValueP
 	DVecSeq ivsBASE = base->_value.get_posvec();
 
 	ConditionalDVPtr remaped = remap(ivsBASE);
+	//std::cout << "remaped\n" << remaped->to_string() << std::endl;
 
 	DVec lower = base->_value.lower_limits();
 	DVec upper = base->_value.upper_limits();
@@ -186,6 +192,12 @@ double ConditionalDV::avg_count() const
 	return res / count;
 }
 
+double ConditionalDV::get_confidence() const
+{
+	int c = total_count();
+	return DistributionalValue::to_conf(c);
+}
+
 // A->C + A->C => A->C
 ConditionalDVPtr ConditionalDV::merge(ConditionalDVPtr other) const
 {
@@ -227,16 +239,12 @@ std::string ConditionalDV::to_string(const std::string& indent) const
 	std::stringstream ss;
 	if (_value.elem_count() == 0)
 		ss << "Empty ConditionalDV" << std::endl;
+
+	ss << "ConditionalDV:\n";
 	for (auto elem : _value)
 	{
-		ss << indent << "{";
-		for (double coord : elem.pos)
-		{
-				ss << coord << ";";
-		}
-		ss.seekp(-1,std::ios_base::end);
-		ss << "} DV: "
-		   << std::endl
+		ss << indent << elem.pos;
+		ss << std::endl
 		   << DistributionalValue(elem.value).to_string(indent + "    ")
 		   << std::endl;
 	}

@@ -72,6 +72,7 @@ public:
 	DistributionalValue(double, double, bool = false);
 
 	const CTHist<double>& value() const { return _value; }
+	CTHist<double>& value() { return _value; }
 
 	//Some Usefull Signletons
 	static DistributionalValuePtr TRUE_TV();

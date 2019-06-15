@@ -48,7 +48,7 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	size_t dv1size = dv1->value().elem_count();
 	size_t dv2size = dv2->value().elem_count();
 
-	CDVrep res = CDVrep(dv1size / dv2size,dv2dims);
+	CDVrep res = CDVrep(dv1size,dv2dims);
 
 	if (dv1dims <= 1)
 		throw RuntimeException(TRACE_INFO,"Can't divide non Joint DV.");
@@ -64,8 +64,6 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	std::sort(keys.begin(),keys.end());
 	keys.erase(std::unique(keys.begin(),keys.end()),keys.end());
 	DistributionalValuePtr dv2remap = dv2->remap(keys);
-
-	std::cout << dv2remap;
 
 	std::map<DVec,double> counts;
 
@@ -112,7 +110,7 @@ DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv, int pos)
 }
 
 
-#define EPSILON 1e-16
+#define EPSILON 1e-15
 
 //Create a Conjuction from 2 DVs
 DistributionalValuePtr
@@ -159,6 +157,7 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 
 	while (not is_within(m1,0.0,EPSILON) && not is_within(m2,0.0,EPSILON))
 	{
+		//std::cout << "m1: " << m1 << " m2: " << m2 << std::endl;
 		//We check which key represents a lower Truthness/Value
 		//This is a fuzzy conjunction so we want to take the min of that
 		if (n1->pos < n2->pos)
@@ -183,6 +182,9 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 			n2 = &hist2[*it2];
 		}
 	}
+
+	//std::cout << "Conjuction:\n";
+	//std::cout << res << "\n";
 
 	return DistributionalValue::createDV(res);
 }

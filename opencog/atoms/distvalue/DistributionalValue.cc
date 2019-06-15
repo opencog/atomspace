@@ -245,7 +245,7 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	if (_value.elem_count() == 0)
 		ss << "Empty DistributionalValue" << std::endl;
 
-	ss << "DistributionalValue: \n";
+	ss << indent << "DistributionalValue: \n";
 	std::vector<int> idxs(_value.elem_count());
 	std::size_t c(0);
     std::generate(std::begin(idxs), std::end(idxs), [&]{ return c++; });
@@ -258,7 +258,8 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 
 	for (int idx : idxs)
 	{
-		ss << "Pos: " << _value[idx].pos
+		ss << indent
+		   << "Pos: " << _value[idx].pos
 		   << " Count: " << _value[idx].value
 		   << " Mean: " << get_mean_for(_value[idx].value) << std::endl;
 	}

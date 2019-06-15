@@ -72,12 +72,16 @@ protected:
 	SCM ss_dv_is_empty(SCM);
 	SCM ss_cdv_is_empty(SCM);
 	SCM ss_new_cdv(SCM, SCM);
+	SCM ss_cdv_get_confidence(SCM);
 	SCM ss_cdv_get_conditions(SCM);
 	SCM ss_cdv_get_unconditonals(SCM);
 	SCM ss_cdv_get_unconditonal(SCM,SCM);
 	SCM ss_cdv_get_joint(SCM,SCM);
 	SCM ss_cdv_merge(SCM,SCM);
 	SCM ss_cdv_join(SCM,SCM);
+
+	SCM ss_dv_merge_hi_conf(SCM,SCM);
+	SCM ss_cdv_merge_hi_conf(SCM,SCM);
 	//SCM ss_cdv_cde(SCM,SCM);
 
 }; // class

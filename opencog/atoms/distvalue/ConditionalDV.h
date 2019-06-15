@@ -85,6 +85,7 @@ public:
 
 	double total_count() const;
 	double avg_count() const;
+	double get_confidence() const;
 
 	//Passed through to CDVrep
 	ConditionalDVPtr merge(ConditionalDVPtr) const;
