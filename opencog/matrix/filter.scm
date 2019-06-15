@@ -78,10 +78,11 @@
   other API's generate predicate keys to obtain values.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
-			(l-basis '())
-			(r-basis '())
+			(l-basis #f)
+			(r-basis #f)
 			(l-size 0)
 			(r-size 0)
+			(all-elts #f)
 		)
 
 		; Cache the result of filtering basuis elements
@@ -100,11 +101,11 @@
 		; ---------------
 		; Use the cached value, if its there.
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (do-left-basis)))
+			(if (not l-basis) (set! l-basis (do-left-basis)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (do-right-basis)))
+			(if (not r-basis) (set! r-basis (do-right-basis)))
 			r-basis)
 
 		(define (get-left-size)
@@ -174,8 +175,22 @@
 			(define stats-atom (get-item-pair L-ATOM R-ATOM))
 			(if (null? stats-atom) 0 (LLOBJ 'get-count stats-atom)))
 
+		; ---------------
+		; Exhaustive loop over pairs. For each left element, get all
+		; right stars; the right-stars already have the pair pred
+		; applied. The atom-set is used to avoid duplicates, but in
+		; the normal scheme of things, there should be no duplicates
+		; so that check is mostly superfluous.
+		(define (do-get-all-elts)
+			(define aset (make-atom-set))
+			(for-each
+				(lambda (litem) (for-each aset (cache-right-stars litem)))
+				(get-left-basis))
+			(aset #f)
+		)
 		(define (get-all-elts)
-			(filter PAIR-PRED (LLOBJ 'get-all-elts)))
+			(if (not all-elts) (set! all-elts (do-get-all-elts)))
+			all-elts)
 
 		; ---------------
 		(define (get-name)
