@@ -534,11 +534,17 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		return true;
 	}
 
+	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
+	    evelnk->is_evaluatable())
+	{
+		TruthValuePtr tv(evelnk->evaluate(scratch, silent));
+		if (0.5 < tv->get_mean()) return true;
+		return false;
+	}
+
 	// A handful of link types that should be auto-converted into
-	// crisp truth values.  (SatisfactinLink is already crisp; but
-	// the current API does not allow it to report that. XXX FIXME).
+	// crisp truth values.
 	if (EVALUATION_LINK == t or
-	    SATISFACTION_LINK == t or
 	    DEFINED_PREDICATE_NODE == t)
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
