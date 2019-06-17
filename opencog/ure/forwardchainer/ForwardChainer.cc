@@ -124,7 +124,7 @@ void ForwardChainer::do_chain()
 	ure_logger().debug("Finished Forward Chaining");
 }
 
-void ForwardChainer::do_step_rec()
+void ForwardChainer::do_step_rec(unsigned jobs)
 {
 	if (not termination()) {
 		do_step();

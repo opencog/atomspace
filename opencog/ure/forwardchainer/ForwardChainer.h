@@ -168,7 +168,7 @@ public:
 	/**
 	 * Recursively call do_step till termination
 	 */
-	void do_step_rec();
+	void do_step_rec(unsigned jobs=1);
 
 	/**
 	 * Perform a single forward chaining inference step.
