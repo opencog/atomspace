@@ -166,6 +166,11 @@ public:
 	void do_chain();
 
 	/**
+	 * Recursively call do_step till termination
+	 */
+	void do_step_rec();
+
+	/**
 	 * Perform a single forward chaining inference step.
 	 */
 	void do_step();

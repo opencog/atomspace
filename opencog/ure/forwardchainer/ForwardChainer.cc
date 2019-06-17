@@ -118,12 +118,18 @@ void ForwardChainer::do_chain()
 		return;
 	}
 
-	while (not termination())
-	{
-		do_step();
-	}
+	// Call do_step till termination
+	do_step_rec();
 
 	ure_logger().debug("Finished Forward Chaining");
+}
+
+void ForwardChainer::do_step_rec()
+{
+	if (not termination()) {
+		do_step();
+		do_step_rec();
+	}
 }
 
 void ForwardChainer::do_step()
