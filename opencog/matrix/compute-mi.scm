@@ -473,7 +473,7 @@
 
 		; Store everything, including auxilliaries
 		(define (store-all)
-			(store-wildcards)
+			(store-all-wildcards)
 			(store-all-elts)
 			; Not every LLOBJ will have a store-aux,
 			; so ignore any error from calling it.
