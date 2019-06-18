@@ -75,11 +75,8 @@ void ForwardChainer::init(const Handle& source,
 
 	// Add focus set atoms and sources to focus_set atomspace
 	if (_search_focus_set) {
-		_focus_set = focus_set;
-
-		for (const Handle& h : _focus_set)
+		for (const Handle& h : focus_set)
 			_focus_set_as.add_atom(h);
-
 		for (const Source& src : _sources.sources)
 			_focus_set_as.add_atom(src.body);
 	}

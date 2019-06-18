@@ -86,7 +86,6 @@ private:
 
 protected:
 	RuleSet _rules; /* loaded rules */
-	HandleSeq _focus_set;
 
 	/**
 	 * choose next source to expand
