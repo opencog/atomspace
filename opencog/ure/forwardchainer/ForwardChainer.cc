@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <future>
+
 #include <opencog/util/random.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -77,6 +79,7 @@ void ForwardChainer::init(const Handle& source,
 	if (_search_focus_set) {
 		for (const Handle& h : focus_set)
 			_focus_set_as.add_atom(h);
+		std::shared_lock lock(_sources_mutex);
 		for (const Source& src : _sources.sources)
 			_focus_set_as.add_atom(src.body);
 	}
@@ -90,6 +93,10 @@ void ForwardChainer::init(const Handle& source,
 
 	// Reset the iteration count and max count
 	_iteration = 0;
+
+	// Multithreading params
+	_jobs = 0;
+	_max_jobs = 4;
 }
 
 UREConfig& ForwardChainer::get_config()
@@ -115,24 +122,38 @@ void ForwardChainer::do_chain()
 		return;
 	}
 
+	if (1 < _max_jobs)
+		ure_logger().set_thread_id_flag(true);
+
 	// Call do_step till termination
 	do_step_rec();
 
 	ure_logger().debug("Finished Forward Chaining");
 }
 
-void ForwardChainer::do_step_rec(unsigned jobs)
+void ForwardChainer::do_step_rec()
 {
 	if (not termination()) {
-		do_step();
-		do_step_rec();
+		if (_jobs < _max_jobs) {
+			auto policy = std::launch::async;
+			_jobs++;
+			auto ft = std::async(policy, [&]() { do_step(); });
+			do_step_rec();
+			ft.wait();
+			_jobs--;
+		} else {
+			// NEXT TODO: problem is free threads only get reclaimed
+			// after do_step completes
+			do_step();
+			do_step_rec();
+		}
 	}
 }
 
 void ForwardChainer::do_step()
 {
-	_iteration++;
-	ure_logger().debug() << "Iteration " << _iteration
+	int local_iteration = _iteration++;
+	ure_logger().debug() << "Iteration " << (local_iteration + 1)
 	                     << "/" << _config.get_maximum_iterations_str();
 
 	// Expand meta rules. This should probably be done on-the-fly in
@@ -166,7 +187,7 @@ void ForwardChainer::do_step()
 
 	// Save trace (before inserting new sources because it will cause
 	// the source pointer to be invalid).
-	_fcstat.add_inference_record(_iteration - 1, source->body, rule, products);
+	_fcstat.add_inference_record(local_iteration, source->body, rule, products);
 
 	// Insert the produced sources in the population of sources
 	_sources.insert(products, *source, prob);
@@ -183,7 +204,7 @@ bool ForwardChainer::termination()
 		terminate = true;
 	}
 	// Terminate if max iterations has been reached
-	else if (_config.get_maximum_iterations() == _iteration) {
+	else if (_config.get_maximum_iterations() <= _iteration) {
 		msg = "reach maximum number of iterations";
 		terminate = true;
 	}

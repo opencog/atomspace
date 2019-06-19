@@ -24,6 +24,10 @@
 #ifndef _OPENCOG_FORWARDCHAINER_H_
 #define _OPENCOG_FORWARDCHAINER_H_
 
+#include <atomic>
+#include <mutex>
+#include <shared_mutex>
+
 #include "../UREConfig.h"
 #include "SourceSet.h"
 #include "FCStat.h"
@@ -65,14 +69,18 @@ private:
 	UREConfig _config;
 
 	// Current iteration
-	int _iteration;
+	std::atomic<int> _iteration;
 
-	bool _search_focus_set;
+	std::atomic<bool> _search_focus_set;
 
 	// Population of sources to expand forward
+	mutable std::shared_mutex _sources_mutex;
 	SourceSet _sources;
 
 	FCStat _fcstat;
+
+	std::atomic<unsigned> _jobs;
+	unsigned _max_jobs;
 
 	void init(const Handle& source,
 	          const Handle& vardecl,
@@ -167,7 +175,7 @@ public:
 	/**
 	 * Recursively call do_step till termination
 	 */
-	void do_step_rec(unsigned jobs=1);
+	void do_step_rec();
 
 	/**
 	 * Perform a single forward chaining inference step.
