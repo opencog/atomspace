@@ -261,6 +261,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		ScopeLinkPtr sco(ScopeLinkCast(term));
 		if (nullptr == sco)
 			sco = createScopeLink(term->getOutgoingSet());
+
 		const Variables& vees = sco->get_variables();
 		bool alpha_hide = false;
 		for (const Handle& v : vees.varseq)
@@ -279,24 +280,6 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			// Make a copy... this is what's computationally expensive.
 			IndexMap hidden_map = index_map;
 
-			// Remove from hidden_map all non variables in case they
-			// contain hidden variables.
-			for (auto it = hidden_map.begin(); it != hidden_map.end();)
-			{
-				if (it->first->get_type() != VARIABLE_NODE)
-				{
-					// TODO: we could additionally check whether the
-					// non-variable contains a variable from vees, thus
-					// allowing more subtree subtitution to take place
-					// which might be faster.
-					it = hidden_map.erase(it);
-				}
-				else
-				{
-					++it;
-				}
-			}
-
 			// Remove the alpha-hidden variables.
 			for (const Handle& v : vees.varseq)
 			{
@@ -306,6 +289,24 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 					hidden_map.erase(idx);
 				}
 			}
+
+			// Also remove everything that is not a variable.
+			// The map will, in general, contain terms that
+			// contain alpha-hidden variables; those also have
+			// to go, or they will mess up the substitution.
+			for (auto it = hidden_map.begin(); it != hidden_map.end();)
+			{
+				Type tt = it->first->get_type();
+				if (tt != VARIABLE_NODE and tt != GLOB_NODE)
+				{
+					it = hidden_map.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+
 
 			// If the hidden map is empty, then there is no more
 			// substitution to be done.
