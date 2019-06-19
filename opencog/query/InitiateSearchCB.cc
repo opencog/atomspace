@@ -940,7 +940,7 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 		unsigned i = 0;
 		for (const Choice& ch : _choices) {
 			ss << indent_p << "choice[" << i << "]:" << std::endl
-			   << indent_pp << "clause = " << ch.clause;
+			   << indent_pp << "clause = " << ch.clause << std::endl;
 			ss << indent_pp << "best_start:" << std::endl
 			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
 			ss << indent_pp << "start_term:" << std::endl
