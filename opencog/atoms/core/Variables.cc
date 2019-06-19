@@ -278,6 +278,25 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		{
 			// Make a copy... this is what's computationally expensive.
 			IndexMap hidden_map = index_map;
+
+			// Remove from hidden_map all non variables in case they
+			// contain hidden variables.
+			for (auto it = hidden_map.begin(); it != hidden_map.end();)
+			{
+				if (it->first->get_type() != VARIABLE_NODE)
+				{
+					// TODO: we could additionally check whether the
+					// non-variable contains a variable from vees, thus
+					// allowing more subtree subtitution to take place
+					// which might be faster.
+					it = hidden_map.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+
 			// Remove the alpha-hidden variables.
 			for (const Handle& v : vees.varseq)
 			{
