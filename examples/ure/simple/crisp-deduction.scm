@@ -39,8 +39,7 @@
 ;;    )
 ;; )
 
-; 2. WARNING: not current working.
-;    Test backward chaining (you need to quite guile and restart to be
+; 2. Test backward chaining (you need to quite guile and restart to be
 ;    sure the results you're getting aren't provided by the forward
 ;    chainer command above)
 
@@ -48,14 +47,10 @@
 ;;                                                  (PredicateNode "C")))
 ;; scheme@(guile-user)> (crisp-deduction-bc AC)
 
-;; Expected output will be empty
-;; $1 = (ListLink
-;; )
-
-; while the TV of AC will be suitably updated.
-
-;; scheme@(guile-user)> AC
-;; $2 = (ImplicationLink (stv 1 0.99999982)
-;;    (PredicateNode "A" (stv 1 0.99999982))
-;;    (PredicateNode "C")
+;; Expected output should be
+;; $2 = (SetLink
+;;    (ImplicationLink (stv 1 1)
+;;       (PredicateNode "A" (stv 1 1))
+;;       (PredicateNode "C")
+;;    )
 ;; )

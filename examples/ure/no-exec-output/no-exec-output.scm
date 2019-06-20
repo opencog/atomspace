@@ -73,7 +73,7 @@
 
 ;;; It should ouput:
 ;;; (SetLink
-;;;    (EvaluationLink (stv 1 1)
+;;;    (EvaluationLink
 ;;;       (PredicateNode "keep-pet")
 ;;;       (ListLink
 ;;;          (ConceptNode "American")
