@@ -26,11 +26,14 @@
 
 using namespace opencog;
 
+#define al as->add_link
+#define an as->add_node
+
 class PresentUTest: public CxxTest::TestSuite
 {
 private:
-		AtomSpace *as;
-		SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
 	PresentUTest(void)
@@ -58,6 +61,7 @@ public:
 	void tearDown(void);
 
 	void test_literal(void);
+	void test_virtual(void);
 };
 
 void PresentUTest::tearDown(void)
@@ -92,3 +96,26 @@ void PresentUTest::test_literal(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+/**
+ * Test PresentLink in conjunction with a virtual link.
+ */
+void PresentUTest::test_virtual(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/present-virtual.scm\")");
+
+	Handle query = eval->eval_h("query");
+	Handle results = HandleCast(query->execute());
+	Handle expected = al(SET_LINK, an(CONCEPT_NODE, "OK"));
+
+	printf("Expecting: %s\n", expected->to_string().c_str());
+	printf("Got: %s\n", results->to_string().c_str());
+	TS_ASSERT_EQUALS(results, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an
