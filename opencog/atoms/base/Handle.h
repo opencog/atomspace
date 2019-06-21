@@ -287,9 +287,6 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-// The reason indent is not an optional argument with default is
-// because gdb doesn't support that, see
-// http://stackoverflow.com/questions/16734783 for more explanation.
 #define OC_TO_STRING_INDENT "  "
 std::string oc_to_string(const Handle& h,
                          const std::string& indent=empty_string);
