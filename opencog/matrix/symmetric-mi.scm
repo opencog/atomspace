@@ -91,7 +91,7 @@
 						(lambda (key . args) #f))))
 			(if (eq? 0 mtm-total)
 				(throw 'no-transpose-data 'mtm-mi
-					"No transpose data availble for this dataset!")))
+					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
 
 		(define (set-mmt-total)
 			(if (not mmt-total)
@@ -100,7 +100,7 @@
 						(lambda (key . args) #f))))
 			(if (eq? 0 mmt-total)
 				(throw 'no-transpose-data 'mmt-mi
-					"No transpose data availble for this dataset!")))
+					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
 
 
 		; -------------
