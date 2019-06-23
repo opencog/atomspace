@@ -185,6 +185,16 @@
   'cache-all has done it's batch computation, it is wise to store the
   results to disk. Do this with `((make-store LLOBJ) 'store-wildcards)`
 
+  Most typical applications do not need both the M^TM and the MM^T
+  products. It is more efficient computationally, and storage-wise,
+  to only compute the side that is needed. For this, use either
+  'all-mtm-marginals or 'all-mmt-marginals in place of 'cache-all.
+
+  Some applications need to recompute individual rows or columns
+  because of some manipulation applied to M. Recomputation (and caching)
+  can be done with the 'set-mtm-marginals and 'set-mmt-marginals
+  methods. They take one argument: the column or row to be recomputed.
+
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
   Wild-cards are as usual:  e.g. D(x,*) = sum_y D(x,y), etc.
@@ -307,26 +317,32 @@
 		; Compute all l_0 and l_1 norms, attach them to the
 		; wildcards, where the transpose-api can find them.
 
+		; XXX FIXME can make this 2x faster by performing
+		; both loops at the same time.
+		(define (set-mtm-marginals ITEM)
+			(define l0 (sum-mtm-support ITEM))
+			(define l1 (sum-mtm-count ITEM))
+			(api-obj 'set-mtm-norms ITEM l0 l1))
+
+		(define (set-mmt-marginals ITEM)
+			(define l0 (sum-mmt-support ITEM))
+			(define l1 (sum-mmt-count ITEM))
+			(api-obj 'set-mmt-norms ITEM l0 l1))
+
 		(define start-time 0)
 		(define (elapsed-secs)
 			(define diff (- (current-time) start-time))
 			(set! start-time (current-time))
 			diff)
 
-		; XXX FIXME can make this 2x faster by performing all both loops
-		; at the same time.
-		(define (mtm-marginals)
+		(define (all-mtm-marginals)
+			; Loop over each item in the right basis ...
 			(elapsed-secs)
-			(for-each
-				(lambda (ITEM)
-					(define l0 (sum-mtm-support ITEM))
-					(define l1 (sum-mtm-count ITEM))
-					(api-obj 'set-mtm-norms ITEM l0 l1))
-				(star-obj 'right-basis))
-
+			(for-each set-mtm-marginals (star-obj 'right-basis))
 			(format #t "Finished mtm norm marginals in ~A secs\n"
 				(elapsed-secs))
 
+			; Compute the grand-totals
 			(let ((mtm-sup (compute-total-mtm-support))
 					(mtm-cnt (compute-total-mtm-count)))
 				(api-obj 'set-mtm-totals mtm-sup mtm-cnt))
@@ -334,17 +350,14 @@
 				(elapsed-secs)))
 
 
-		(define (mmt-marginals)
+		(define (all-mmt-marginals)
+			; Loop over each item in the left basis ...
 			(elapsed-secs)
-			(for-each
-				(lambda (ITEM)
-					(define l0 (sum-mmt-support ITEM))
-					(define l1 (sum-mmt-count ITEM))
-					(api-obj 'set-mmt-norms ITEM l0 l1))
-				(star-obj 'left-basis))
+			(for-each set-mmt-marginals (star-obj 'left-basis))
 			(format #t "Finished mmt norm marginals in ~A secs\n"
 				(elapsed-secs))
 
+			; Compute the grand-totals
 			(let ((mmt-sup (compute-total-mmt-support))
 					(mmt-cnt (compute-total-mmt-count)))
 				(api-obj 'set-mmt-totals mmt-sup mmt-cnt))
@@ -353,8 +366,8 @@
 
 		; Do both at once
 		(define (cache-all)
-			(mmt-marginals)
-			(mtm-marginals))
+			(all-mmt-marginals)
+			(all-mtm-marginals))
 
 		; -------------
 		; Methods on this class.
@@ -372,8 +385,11 @@
 				((total-mmt-support)  (compute-total-mmt-support))
 				((total-mmt-count)    (compute-total-mmt-count))
 
-				((mtm-marginals)      (mtm-marginals))
-				((mmt-marginals)      (mmt-marginals))
+				((set-mtm-marginals)  (apply set-mtm-marginals args))
+				((set-mmt-marginals)  (apply set-mmt-marginals args))
+
+				((all-mtm-marginals)  (all-mtm-marginals))
+				((all-mmt-marginals)  (all-mmt-marginals))
 				((cache-all)          (cache-all))
 
 				((clobber)            (star-obj 'clobber))
