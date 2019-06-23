@@ -125,7 +125,7 @@
 			; on the support-obj for each of the duals. This was saved
 			; on the 'left-wildcard on the dual.  That means that we
 			; need to have the left-marginals all computed.
-			(scomp-obj 'left-marginals)
+			(scomp-obj 'all-left-marginals)
 			(centr-obj 'cache-left)
 			(store-obj 'store-left-marginals)
 		)
@@ -137,7 +137,7 @@
 			(if (LLOBJ 'provides 'make-right-stars)
 				(LLOBJ 'make-right-stars))
 
-			(scomp-obj 'right-marginals)
+			(scomp-obj 'all-right-marginals)
 			(centr-obj 'cache-right)
 			(store-obj 'store-right-marginals)
 		)

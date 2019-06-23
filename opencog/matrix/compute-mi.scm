@@ -574,8 +574,8 @@
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
-	(supp-obj 'left-marginals)
-	(supp-obj 'right-marginals)
+	(supp-obj 'all-left-marginals)
+	(supp-obj 'all-right-marginals)
 
 	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
