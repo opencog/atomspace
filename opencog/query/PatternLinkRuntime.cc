@@ -63,6 +63,9 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(const Handle& link1, const Handle& link2) {
 			return _cb.post_link_match(link1, link2);
 		}
+		void post_link_mismatch(const Handle& link1, const Handle& link2) {
+			_cb.post_link_mismatch(link1, link2);
+		}
 		bool fuzzy_match(const Handle& h1, const Handle& h2) {
 			return _cb.fuzzy_match(h1, h2);
 		}
