@@ -25,8 +25,9 @@
 
 (define closed-lambda-introduction-pattern
   (AndLink
-     (VariableNode "$V")
-     (VariableNode "$B")
+     (PresentLink
+        (VariableNode "$V")
+        (VariableNode "$B"))
      (EvaluationLink
         (GroundedPredicateNode "scm: closed-lambda-introduction-precondition")
         (VariableNode "$B"))))

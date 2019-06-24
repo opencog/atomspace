@@ -68,9 +68,9 @@
 (define vd
   (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode")))
 
-;; We can now call the backward chainer as follows
-(cog-bc Einstein-rbs target #:vardecl vd)
-
+;;; We can now call the backward chainer as follows
+;;; (cog-bc Einstein-rbs target #:vardecl vd)
+;;;
 ;;; It should ouput:
 ;;; (SetLink
 ;;;    (EvaluationLink

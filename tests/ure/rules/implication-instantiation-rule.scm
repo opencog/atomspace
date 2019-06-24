@@ -40,10 +40,11 @@
      (VariableNode "$Q")))
 
 (define implication-instantiation-body
-  (ImplicationScopeLink
-     (VariableNode "$TyVs")
-     (VariableNode "$P")
-     (VariableNode "$Q")))
+  (PresentLink
+    (ImplicationScopeLink
+      (VariableNode "$TyVs")
+      (VariableNode "$P")
+      (VariableNode "$Q"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Implication full instantiation rule ;;

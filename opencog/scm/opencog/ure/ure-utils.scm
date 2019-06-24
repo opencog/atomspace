@@ -539,7 +539,7 @@
 
   Delete any previous one if exists.
 "
-  (ure-set-num-parameter rbs "URE:attention-allocation" value))
+  (ure-set-fuzzy-bool-parameter rbs "URE:attention-allocation" value))
 
 (define (ure-set-maximum-iterations rbs value)
 "

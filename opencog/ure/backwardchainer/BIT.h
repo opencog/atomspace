@@ -334,6 +334,37 @@ private:
 	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const;
 
 	/**
+	 * Create a pattern body given a sequence of present and virtual
+	 * clauses, such that
+	 *
+	 * 1. Wrap in an AndLink if clauses contains multiple virtual and
+	 *    non-virtual clauses.
+	 *
+	 * 2. Wrap in PresentLink if clauses contains multiple non-virtual
+	 *    clauses.
+	 *
+	 * 3. Group under the same PresentLink multiple non-virtual
+	 *    clauses.
+	 *
+	 * 4. Remove redundant clauses.
+	 *
+	 * Clauses are passed by copy because they are modified by the
+	 * method.
+	 */
+	Handle mk_pattern(HandleSeq prs_clauses, HandleSeq virt_clauses) const;
+
+	/**
+	 * Remove redudant atoms in an unordered sequence atoms. As a side
+	 * effect it may re-order it.
+	 */
+	static void remove_redundant(HandleSeq& hs);
+
+	static HandleSeq get_present_clauses(const Handle& pattern);
+	static HandleSeq get_present_clauses(const HandleSeq& clauses);
+	static HandleSeq get_virtual_clauses(const Handle& pattern);
+	static HandleSeq get_virtual_clauses(const HandleSeq& clauses);
+
+	/**
 	 * Merge horizontally 2 ascii art strings, avoiding collision. The
 	 * collision distance is specified in dst, in number of horizontal
 	 * characters.

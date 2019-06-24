@@ -69,12 +69,13 @@
 
 (define implication-scope-direct-evaluation-pattern
   (And
-     (Evaluation
-        (Variable "$P")
-        (Variable "$X"))
-     (Evaluation
-        (Variable "$Q")
-        (Variable "$X"))
+     (PresentLink
+        (Evaluation
+           (Variable "$P")
+           (Variable "$X"))
+        (Evaluation
+           (Variable "$Q")
+           (Variable "$X")))
      (Not
         (Equal
            (Variable "$P")
