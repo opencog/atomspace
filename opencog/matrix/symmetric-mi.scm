@@ -78,7 +78,13 @@
 			(mmt-total #f)
 		)
 
-		(define (log2 x) (* (log x) ol2))
+		; Compute the log base two.  It can happen that log of zero
+		; is requested; this is rare, but can happen when a matrix
+		; has been altered so that the counts on an entire row have
+		; been zeroed, and the 'set-mmt-marginals method is called
+		; on that row.
+		(define (log2 x y)
+			(if (< 0 x) (* (log (/ x y)) ol2) (- (inf))))
 
 		; Cache the totals, so that we can avoid fetching them,
 		; over and over. They only tricky part here is that the
@@ -121,14 +127,14 @@
 			(define margb (trans-obj 'mtm-count COL-B))
 			(define prod (compute-left-product COL-A COL-B))
 			(set-mtm-total)
-			(log2 (/ (* prod mtm-total) (* marga margb))))
+			(log2 (* prod mtm-total) (* marga margb)))
 
 		(define (compute-mtm-mi COL-A COL-B)
 			(define marga (trans-obj 'mtm-count COL-A))
 			(define margb (trans-obj 'mtm-count COL-B))
 			(define prod (compute-left-product COL-A COL-B))
 			(set-mtm-total)
-			(* (log2 (/ (* prod mtm-total) (* marga margb)))
+			(* (log2 (* prod mtm-total) (* marga margb))
 				(/ prod mtm-total)))
 
 		(define (compute-mmt-fmi ROW-A ROW-B)
@@ -136,14 +142,14 @@
 			(define margb (trans-obj 'mmt-count ROW-B))
 			(define prod (compute-right-product ROW-A ROW-B))
 			(set-mmt-total)
-			(log2 (/ (* prod mmt-total) (* marga margb))))
+			(log2 (* prod mmt-total) (* marga margb)))
 
 		(define (compute-mmt-mi ROW-A ROW-B)
 			(define marga (trans-obj 'mmt-count ROW-A))
 			(define margb (trans-obj 'mmt-count ROW-B))
 			(define prod (compute-right-product ROW-A ROW-B))
 			(set-mmt-total)
-			(* (log2 (/ (* prod mmt-total) (* marga margb)))
+			(* (log2 (* prod mmt-total) (* marga margb))
 				(/ prod mmt-total)))
 
 		; -------------
