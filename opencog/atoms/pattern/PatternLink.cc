@@ -58,7 +58,7 @@ void PatternLink::common_init(void)
 	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
 	validate_variables(_varlist.varset, all_clauses);
 
-	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
+	remove_constants(_varlist.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
