@@ -925,4 +925,31 @@ void PatternLink::debug_log(void) const
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
 
+std::string PatternLink::to_long_string(const std::string& indent) const
+{
+	std::string indent_p = indent + oc_to_string_indent;
+	std::stringstream ss;
+	ss << to_string(indent);
+	ss << indent << "_pat:" << std::endl
+	   << oc_to_string(_pat, indent_p) << std::endl;
+	ss << indent << "_fixed:" << std::endl
+	   << oc_to_string(_fixed, indent_p) << std::endl;
+	ss << indent << "_num_virts = " << _num_virts << std::endl;
+	ss << indent << "_virtual:" << std::endl
+	   << oc_to_string(_virtual, indent_p) << std::endl;
+	ss << indent << "_num_comps = " << _num_comps << std::endl;
+	ss << indent << "_components:" << std::endl
+	   << oc_to_string(_components, indent_p) << std::endl;
+	ss << indent << "_component_vars:" << std::endl
+	   << oc_to_string(_component_vars, indent_p) << std::endl;
+	ss << indent << "_component_patterns:" << std::endl
+	   << oc_to_string(_component_patterns, indent_p) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const PatternLink& pl, const std::string& indent)
+{
+	return pl.to_long_string(indent);
+}
+
 /* ===================== END OF FILE ===================== */
