@@ -208,20 +208,20 @@
   norms: those for M^TM and those for MM^T. All methods are likewise
   labelled.
 
-  The mtm-support is equal to sum_x D(x,y) D(x,*)
-  The mtm-support is the number of non-zero entries in a column or row
+  The 'mtm-support is equal to sum_x D(x,y) D(x,*)
+  The 'mtm-support is the number of non-zero entries in a column or row
   of the matrix M^TM. It is the l_0 norm of columns or rows in M^TM.
 
-  The mmt-support is equal to sum_y D(x,y) D(*,y)
+  The 'mmt-support is equal to sum_y D(x,y) D(*,y)
 
-  The mtm-count is the wild-card sum_x N(x,y) N(x,*) for fixed y.
-  The mmt-count is the wild-card sum_y N(x,y) N(*,y) for fixed x.
+  The 'mtm-count is the wild-card sum_x N(x,y) N(x,*) for fixed y.
+  The 'mmt-count is the wild-card sum_y N(x,y) N(*,y) for fixed x.
 
-  The total-mtm-support is sum_x D(x,*) D(x,*)
-  The total-mmt-support is sum_y D(*,y) D(*,y)
+  The 'total-mtm-support is sum_x D(x,*) D(x,*)
+  The 'total-mmt-support is sum_y D(*,y) D(*,y)
 
-  The total-mtm-count is sum_x N(x,*) N(x,*)
-  The total-mmt-count is sum_y N(*,y) N(*,y)
+  The 'total-mtm-count is sum_x N(x,*) N(x,*)
+  The 'total-mmt-count is sum_y N(*,y) N(*,y)
 
   Here, the LLOBJ is expected to be an object, with valid counts
   and count-marginals.
