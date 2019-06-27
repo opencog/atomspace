@@ -15,15 +15,17 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C")
-            )
+        )
         (AndLink
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-            (ImplicationLink
-                (VariableNode "$B")
-                (VariableNode "$C")
+            (PresentLink
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B")
+                )
+                (ImplicationLink
+                    (VariableNode "$B")
+                    (VariableNode "$C")
+                )
             )
             ;; To avoid matching (Implication A B) and (Implication B A)
             (NotLink
@@ -38,19 +40,13 @@
             (ListLink
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (VariableNode "$B")
                     (VariableNode "$C"))
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$C")
-                )
-            )
-        )
-    )
-)
-
+                    (VariableNode "$B"))
+                (ImplicationLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
 
 ;; -----------------------------------------------------------------------------
 ;; Deduction Formula
@@ -59,7 +55,7 @@
 ;; set the TV of A->C to (stv 1 1)
 ;; -----------------------------------------------------------------------------
 
-(define (crisp-deduction-formula AB BC AC)
+(define (crisp-deduction-formula AC AB BC)
     (let
         ((sAB (cog-mean AB))
          (cAB (cog-confidence AB))

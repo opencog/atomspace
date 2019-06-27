@@ -18,7 +18,6 @@
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 ; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
-; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
@@ -270,28 +269,6 @@
   (define (cons-roots x) (set! roots (cons x roots)))
   (traverse-roots cons-roots)
   roots
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-count-atoms atom-type)
-"
-  cog-count-atoms -- Count of the number of atoms of given type
-
-  cog-count-atoms atom-type
-  Return a count of the number of atoms of the given type 'atom-type'
-
-  Example usage:
-  (display (cog-count-atoms 'ConceptNode))
-  will display a count of all atoms of type 'ConceptNode
-"
-	(let ((cnt 0))
-		(define (inc atom)
-			(set! cnt (+ cnt 1))
-			#f
-		)
-		(cog-map-type inc atom-type)
-		cnt
-	)
 )
 
 ; -----------------------------------------------------------------------

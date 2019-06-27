@@ -43,15 +43,13 @@
 ;; and there exists some other pet, Y, 
 ;; that is different from X, then B keeps Y
 (define keep-different-pet-rule
- (let* (
-          (kp (Predicate "keep-pet"))
-          (vA (Variable "$A"))
-          (vB (Variable "$B"))
-          (vX (Variable "$X"))
-          (vY (Variable "$Y"))
-          (akx (Evaluation kp (List vA vX)))
-          (bky (Evaluation kp (List vB vY)))
-       )
+ (let* ((kp (Predicate "keep-pet"))
+        (vA (Variable "$A"))
+        (vB (Variable "$B"))
+        (vX (Variable "$X"))
+        (vY (Variable "$Y"))
+        (akx (Evaluation kp (List vA vX)))
+        (bky (Evaluation kp (List vB vY))))
 
   (BindLink
    (VariableList
@@ -66,31 +64,29 @@
         (Type "ConceptNode"))
      (TypedVariable
         vY
-        (Type "ConceptNode"))
-   )
+        (Type "ConceptNode")))
    (And
-     (Inheritance
-        vA
-        (Concept "person"))
-     (Inheritance
-        vB
-        (Concept "person"))  
-     (Inheritance
-        vX
-        (Concept "pet"))
-     (Inheritance
-        vY
-        (Concept "pet"))
+     (Present
+       (Inheritance
+         vA
+         (Concept "person"))
+       (Inheritance
+         vB
+         (Concept "person"))
+       (Inheritance
+         vX
+         (Concept "pet"))
+       (Inheritance
+         vY
+         (Concept "pet")))
      (NotLink
-        (EqualLink
-           vA
-           vB
-        ))
+       (EqualLink
+         vA
+         vB))
      (NotLink
-        (EqualLink
-           vX
-           vY
-        ))
+       (EqualLink
+         vX
+         vY))
 
      ;; test if the conclusion will conflict with the known truth:
      ;; it's fine if the conclusion doesn't exist in the knowledge base;
@@ -100,78 +96,52 @@
      (Or
         (EvaluationLink
           (GroundedPredicateNode "scm: evaluation-absent")
-          (ListLink kp vA vX)
-        )
+          (ListLink kp vA vX))
         (EvaluationLink
           (GroundedPredicateNode "scm: absolutely-true")
-          (ListLink akx)
-        )
-     )
+          (ListLink akx)))
 
      (Or
         (EvaluationLink
 	   (GroundedPredicateNode "scm: evaluation-absent")
-	   (ListLink kp vB vY)
-        )
+	   (ListLink kp vB vY))
         (EvaluationLink
 	   (GroundedPredicateNode "scm: absolutely-true")
-	   (ListLink bky)
-        )       
- 
-     )
- 
-   )      
+	   (ListLink bky))))      
    
    (ExecutionOutputLink
      (GroundedSchemaNode "scm: keep-different-pet-formula")
-     (ListLink akx bky)
-   )
-   
-  )
- )
-)
+     (ListLink akx bky)))))
 
 (define (keep-different-pet-formula akx bky)
-
     (cog-set-tv! akx (stv 1 1))
-    (cog-set-tv! bky (stv 1 1))
-
-)
+    (cog-set-tv! bky (stv 1 1)))
 
 (define keep-different-pet-rule-name
   (DefinedSchemaNode "keep-different-pet-rule"))
 (Define keep-different-pet-rule-name
         keep-different-pet-rule)
 
-
-
-
 ;; below is the ure config for this example:
 
 (define Einstein-rbs (ConceptNode "Einstein-rbs"))
 
-
 ;; Associate the rules to the rule base 
 (MemberLink (stv 1 1)
    keep-different-pet-rule-name
-   Einstein-rbs
-)
+   Einstein-rbs)
 
 ;; termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
    Einstein-rbs
-   (NumberNode "30")
-)
+   (NumberNode "30"))
 
 ;; Attention allocation (set the TV strength to 0 to disable it, 1 to
 ;; enable it)
 (EvaluationLink (stv 0 1)
    (PredicateNode "URE:attention-allocation")
-   Einstein-rbs
-)
-
-
+   Einstein-rbs)
 
 ;;We can run the backward chainer to find out "Who keeps the cat?" by
 ;;defining a target
@@ -181,21 +151,17 @@
       (Predicate "keep-pet")
       (List
 	 (Variable "$who")
-	 (Concept "cat")))
-)
-
+	 (Concept "cat"))))
 
 ;;with the following variable declaration
 
 (define vd
-  (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode"))
-)
+  (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode")))
 
 (define source
   (Inheritance (stv 1.0 1.0)
    (Concept "American")
-   (Concept "person"))
-)
+   (Concept "person")))
 
 ;; Forward chainer:
 ;; (cog-fc Einstein-rbs (Variable "$x")) 
@@ -218,10 +184,7 @@
 ;   )
 ;)
 
-
 ;;But the backward chainer won't work:
 ;;(cog-bc Einstein-rbs target #:vardecl vd)
 ;; It will output empty result, because it lack of rules.
 ;; Please check out FactToRule.scm for the reason.
-
-

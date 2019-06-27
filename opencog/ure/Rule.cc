@@ -27,6 +27,7 @@
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -303,28 +304,41 @@ bool Rule::has_cycle() const
 	return false;
 }
 
-/**
- * Get the set of members of the implicant which are
- * connected by a root logical link.
- *
- * @return HandleSeq of members of the implicant
- */
 HandleSeq Rule::get_clauses() const
 {
 	// If the rule's handle has not been set yet
 	if (not is_valid())
 		return HandleSeq();
 
-    Handle implicant = get_implicant();
-    Type t = implicant->get_type();
-    HandleSeq hs;
+	Handle implicant = get_implicant();
+	Type t = implicant->get_type();
+	HandleSeq hs;
 
-    if (t == AND_LINK or t == OR_LINK)
-        hs = implicant->getOutgoingSet();
-    else
-        hs.push_back(implicant);
+	if (t == AND_LINK or t == OR_LINK) {
+		const HandleSeq& oset = implicant->getOutgoingSet();
+		// if there is PresentLink then only return clauses under the
+		// PresentLink(s), as the other clauses can be assumed to be
+		// virtual.
+		auto is_present =
+			[](const Handle& h) { return h->get_type() == PRESENT_LINK; };
+		bool has_prsnt_lnk = boost::algorithm::any_of(oset, is_present);
+		if (has_prsnt_lnk) {
+			for (const Handle& h : implicant->getOutgoingSet()) {
+				if (is_present(h)) {
+					hs.insert(hs.end(),
+					          h->getOutgoingSet().begin(), h->getOutgoingSet().end());
+				}
+			}
+		} else {
+			hs = implicant->getOutgoingSet();
+		}
+	} else if (t == PRESENT_LINK) {
+		hs = implicant->getOutgoingSet();
+	} else {
+		hs.push_back(implicant);
+	}
 
-    return hs;
+	return hs;
 }
 
 HandleSeq Rule::get_premises() const

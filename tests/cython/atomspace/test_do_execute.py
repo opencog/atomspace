@@ -22,7 +22,7 @@ class DoExecuteTest(unittest.TestCase):
 
         value_of_link = ValueOfLink(atom, key)
 
-        value = execute_atom(atomspace, value_of_link)
+        value = execute_atom(self.atomspace, value_of_link)
         self.assertEqual(FloatValue([1, 2, 3]), value)
         self.assertEqual([1, 2, 3], value.to_list())
 

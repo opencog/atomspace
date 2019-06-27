@@ -171,6 +171,10 @@ public:
 	void debug_log(void) const;
 
 	static Handle factory(const Handle&);
+
+	// For printing not only the link iteself but all the associated
+	// C++ attributes
+	std::string to_long_string(const std::string& indent) const;
 };
 
 static inline PatternLinkPtr PatternLinkCast(const Handle& h)
@@ -179,6 +183,11 @@ static inline PatternLinkPtr PatternLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<PatternLink>(a); }
 
 #define createPatternLink std::make_shared<PatternLink>
+
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const PatternLink& pl,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 }

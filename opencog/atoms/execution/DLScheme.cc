@@ -21,30 +21,37 @@
  */
 
 #include <dlfcn.h>
+#include <mutex>
 #include <opencog/util/exceptions.h>
 #include "DLScheme.h"
 
 using namespace opencog;
 
-static void* library = nullptr;
 SchemeEval* opencog::get_evaluator_for_scheme(AtomSpace* as)
 {
+	typedef SchemeEval* (*SEGetter)(AtomSpace*);
+	static SEGetter getter = nullptr;
+	if (getter) return getter(as);
+
+	static std::mutex mtx;
+	std::lock_guard<std::mutex> lock(mtx);
+
+	static void* library = nullptr;
 	if (nullptr == library) library = dlopen("libsmob.so", RTLD_LAZY);
 	if (nullptr == library)
 		throw RuntimeException(TRACE_INFO,
 			"Unable to dynamically load libsmob.so: %s",
 			dlerror());
 
-	static void* getev = dlsym(library, "get_scheme_evaluator");
+	static void* getev = nullptr;
+	if (nullptr == getev) getev = dlsym(library, "get_scheme_evaluator");
 	if (nullptr == getev)
 		throw RuntimeException(TRACE_INFO,
 			"Unable to dynamically load scheme evaluator: %s",
 			dlerror());
 
-	typedef SchemeEval* (*SEGetter)(AtomSpace*);
-
 	// static SEGetter getter = std::reinterpret_cast<SEGetter>(getev);
-	static SEGetter getter = (SEGetter) getev;
+	getter = (SEGetter) getev;
 
 	return getter(as);
 }

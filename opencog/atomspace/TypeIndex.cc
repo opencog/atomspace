@@ -20,7 +20,6 @@
  */
 
 #include "TypeIndex.h"
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
 using namespace opencog;
@@ -32,8 +31,25 @@ TypeIndex::TypeIndex(void)
 
 void TypeIndex::resize(void)
 {
-	num_types = nameserver().getNumberOfClasses();
-	FixedIntegerIndex::resize(num_types + 1);
+	_num_types = nameserver().getNumberOfClasses();
+	_idx.resize(_num_types + 1);
+}
+
+bool TypeIndex::contains_duplicate() const
+{
+	for (const AtomSet& atoms : _idx)
+		if (contains_duplicate(atoms))
+			return true;
+	return false;
+}
+
+bool TypeIndex::contains_duplicate(const AtomSet& atoms) const
+{
+	for (AtomSet::const_iterator i = atoms.begin(); i != atoms.end(); ++i)
+		for (AtomSet::const_iterator j = std::next(i); j != atoms.end(); ++j)
+			if (**i == **j)
+				return true;
+	return false;
 }
 
 // ================================================================
@@ -41,11 +57,11 @@ void TypeIndex::resize(void)
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 {
 	iterator it(t, sub);
-	it.send = idx.end();
+	it.send = _idx.end();
 
 	// A subclass of t is NEVER smaller than t.
 	// Thus, we can start our search there.
-	it.s = idx.begin();
+	it.s = _idx.begin();
 	it.s += t;
 	it.currtype = t;
 	it.se = it.s->begin();
@@ -79,11 +95,11 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 
 TypeIndex::iterator TypeIndex::end(void) const
 {
-	iterator it(num_types, false);
-	it.se = idx.at(num_types).end();
-	it.s = idx.end();
-	it.send = idx.end();
-	it.currtype = num_types;
+	iterator it(_num_types, false);
+	it.se = _idx.at(_num_types).end();
+	it.s = _idx.end();
+	it.send = _idx.end();
+	it.currtype = _num_types;
 	return it;
 }
 

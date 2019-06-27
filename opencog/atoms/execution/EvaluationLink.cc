@@ -124,42 +124,43 @@ void throwSyntaxException(bool silent, const char* message...)
 	va_end(args);
 }
 
-/// Pattern matching hack. The pattern matcher returns sets of atoms;
-/// if that set contains a single number, then unwrap it.
-/// See issue #1502 which proposes to eliminate this SetLink hack.
-static NumberNodePtr unwrap_set(Handle h)
+/// Extract a single floating-point double out of an atom, that,
+/// when executed, should yeild a value containing a number.
+/// Viz, either a NumberNode, or a FloatValue.
+static double get_numeric_value(AtomSpace* as, bool silent,
+                                Handle h)
 {
-	if (SET_LINK == h->get_type())
+	Type t = h->get_type();
+	if (DEFINED_SCHEMA_NODE == t)
 	{
-		if (1 != h->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Don't know how to do arithmetic with this: %s",
-				h->to_string().c_str());
-		h = h->getOutgoingAtom(0);
+		h = DefineLink::get_definition(h);
+		t = h->get_type();
 	}
 
-	NumberNodePtr na(NumberNodeCast(h));
-	if (nullptr == na)
+	ValuePtr pap(h);
+	if (h->is_executable())
 	{
-		NodePtr np(NodeCast(h));
-		if (np) na = createNumberNode(*np);
+		pap = h->execute(as, silent);
+		t = pap->get_type();
+
+		// Pattern matching hack. The pattern matcher returns sets of
+		// atoms; if that set contains a single number, then unwrap it.
+		// See issue #1502 which proposes to eliminate this SetLink hack.
+		if (SET_LINK == t)
+		{
+			h = HandleCast(pap);
+			if (1 != h->get_arity())
+				throw SyntaxException(TRACE_INFO,
+					"Don't know how to unwrap this: %s",
+					h->to_string().c_str());
+			pap = h->getOutgoingAtom(0);
+			t = pap->get_type();
+		}
 	}
 
-	if (nullptr == na)
-		throw SyntaxException(TRACE_INFO,
-			"Don't know how to compare this: %s",
-			h->to_string().c_str());
-	return na;
-}
-
-/// Extract a single floating-point double out of a value expected to
-/// contain a number.
-static double get_numeric_value(const ValuePtr& pap, bool silent)
-{
-	Type t = pap->get_type();
-	if (NUMBER_NODE == t or SET_LINK == t)
+	if (NUMBER_NODE == t)
 	{
-		NumberNodePtr n(unwrap_set(HandleCast(pap)));
+		NumberNodePtr n(NumberNodeCast(pap));
 		return n->get_value();
 	}
 
@@ -186,12 +187,8 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 		throw SyntaxException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
 
-	Instantiator inst(as);
-	ValuePtr pap0(inst.execute(oset[0]));
-	ValuePtr pap1(inst.execute(oset[1]));
-
-	double v0 = get_numeric_value(pap0, silent);
-	double v1 = get_numeric_value(pap1, silent);
+	double v0 = get_numeric_value(as, silent, oset[0]);
+	double v1 = get_numeric_value(as, silent, oset[1]);
 
 	return (v0 > v1);
 }
@@ -537,11 +534,17 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		return true;
 	}
 
+	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
+	    evelnk->is_evaluatable())
+	{
+		TruthValuePtr tv(evelnk->evaluate(scratch, silent));
+		if (0.5 < tv->get_mean()) return true;
+		return false;
+	}
+
 	// A handful of link types that should be auto-converted into
-	// crisp truth values.  (SatisfactinLink is already crisp; but
-	// the current API does not allow it to report that. XXX FIXME).
+	// crisp truth values.
 	if (EVALUATION_LINK == t or
-	    SATISFACTION_LINK == t or
 	    DEFINED_PREDICATE_NODE == t)
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
@@ -558,8 +561,10 @@ static bool crisp_eval_scratch(AtomSpace* as,
 }
 
 /// Evaluate a formula defined by a PREDICATE_FORMULA_LINK
-static TruthValuePtr eval_formula(const Handle& predform,
-                                  const HandleSeq& cargs)
+static TruthValuePtr eval_formula(AtomSpace* as,
+                                  const Handle& predform,
+                                  const HandleSeq& cargs,
+                                  bool silent)
 {
 	// Collect up two floating point values.
 	std::vector<double> nums;
@@ -595,11 +600,22 @@ static TruthValuePtr eval_formula(const Handle& predform,
 		{
 			flh = fvars.substitute_nocheck(flh, cargs);
 		}
-
-		// Expecting a FunctionLink without variables.
-		ValuePtr v(flh->execute());
-		FloatValuePtr fv(FloatValueCast(v));
-		nums.push_back(fv->value()[0]);
+                
+                // Expecting a FunctionLink without variables.
+                ValuePtr v(flh->execute(as, silent));
+                Type vtype = v->get_type();
+                if (vtype == NUMBER_NODE) {
+                        nums.push_back(NumberNodeCast(v)->get_value());
+                        continue;
+                }
+                if (nameserver().isA(vtype, FLOAT_VALUE)) {
+                        FloatValuePtr fv(FloatValueCast(v));
+                        nums.push_back(fv->value()[0]);
+                        continue;
+                }
+                
+                // If it is neither NumberNode nor a FloatValue...
+                throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 	}
 
 	// XXX FIXME; if we are given more than two floats, then
@@ -645,7 +661,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 
 		if (PREDICATE_FORMULA_LINK == dtype)
 		{
-			return eval_formula(defn, cargs);
+			return eval_formula(as, defn, cargs, silent);
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -665,7 +681,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 	{
-		return eval_formula(pn, cargs);
+		return eval_formula(as, pn, cargs, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
@@ -873,7 +889,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			pl = createPutLink(goset);
 		}
 		// Step (2)
-		Handle red = pl->reduce();
+		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
 		return do_eval_scratch(as, red, scratch, silent);
@@ -903,12 +919,22 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				continue;
 			}
 
-			if (not nameserver().isA(h->get_type(), FUNCTION_LINK))
-				throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+			if (not  h->is_executable())
+				throw SyntaxException(TRACE_INFO, "Expecting an executable Link");
 
-			ValuePtr v(h->execute());
-			FloatValuePtr fv(FloatValueCast(v));
-			nums.push_back(fv->value().at(0));
+			ValuePtr v(h->execute(scratch, silent));
+                        Type vtype = v->get_type();
+                        if (NUMBER_NODE == vtype) {
+                                nums.push_back(NumberNodeCast(v)->get_value());
+                                continue;
+                        }
+                        if (nameserver().isA(vtype, FLOAT_VALUE)) {
+                                FloatValuePtr fv(FloatValueCast(v));
+                                nums.push_back(fv->value().at(0));
+                                continue;
+                        }
+			
+                        throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 		}
 		return createSimpleTruthValue(nums);
 	}

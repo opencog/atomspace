@@ -57,10 +57,7 @@ namespace opencog {
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const HandleSet& vars,
-                      Pattern& pat,
-                      HandleSeqSeq& components,
-                      HandleSeq& component_patterns)
+bool remove_constants(const HandleSet& vars, Pattern& pat)
 {
 	bool modified = false;
 
@@ -77,24 +74,17 @@ bool remove_constants(const HandleSet& vars,
 
 		i = pat.mandatory.erase(i);
 
-		// remove the clause from components and component_patterns
-		auto j = std::find(components.begin(), components.end(),
-		                   HandleSeq{clause});
-		if (j != components.end())
-		{
-			components.erase(j);
-			if (not component_patterns.empty())
-			{
-				auto cpj = std::next(component_patterns.begin(),
-				                     std::distance(components.begin(), j));
-				component_patterns.erase(cpj);
-			}
-		}
+		// Remove the clause from quoted_clauses.
+		auto qc = std::find(pat.quoted_clauses.begin(),
+		                   pat.quoted_clauses.end(), clause);
+		if (qc != pat.quoted_clauses.end())
+			pat.quoted_clauses.erase(qc);
 
-		// remove the clause from unquoted_clauses.
-		auto c = std::find(pat.unquoted_clauses.begin(), pat.unquoted_clauses.end(), clause);
-		if (c != pat.unquoted_clauses.end())
-			pat.unquoted_clauses.erase(c);
+		// Remove the clause from unquoted_clauses.
+		auto uc = std::find(pat.unquoted_clauses.begin(),
+		                   pat.unquoted_clauses.end(), clause);
+		if (uc != pat.unquoted_clauses.end())
+			pat.unquoted_clauses.erase(uc);
 
 		modified = true;
 	}

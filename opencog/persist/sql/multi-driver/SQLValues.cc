@@ -260,7 +260,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	_valuation_stores++;
 }
 
-// Almost a cut-n-passte of the above, but different.
+// Almost a cut-n-paste of the above, but different.
 SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 {
 	VUID vuid = _vuid_manager.get_uuid();
@@ -321,7 +321,7 @@ ValuePtr SQLAtomStorage::getValue(VUID vuid)
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
 ValuePtr SQLAtomStorage::getValuation(const Handle& key,
-                                          const Handle& atom)
+                                      const Handle& atom)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
@@ -486,6 +486,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 
 	rp.store = this;
 	rp.atom = atom;
+	rp.table = nullptr;
 	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
 	rp.atom = nullptr;
 }

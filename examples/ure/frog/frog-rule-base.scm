@@ -35,7 +35,7 @@
 (define if-croaks-and-eats-flies-then-frog-rule
   (BindLink
     (Variable "$X")
-    (And
+    (Present
       (Evaluation
         (Predicate "croaks")
         (Variable "$X")

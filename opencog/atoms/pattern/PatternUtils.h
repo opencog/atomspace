@@ -39,10 +39,7 @@ namespace opencog {
 
 // Make sure that variables can be found in the clauses.
 // See C file for description
-bool remove_constants(const HandleSet& vars,
-                      Pattern& pat,
-                      HandleSeqSeq& components,
-                      HandleSeq& component_patterns);
+bool remove_constants(const HandleSet& vars, Pattern& pat);
 
 // Return true iff the clause is constant.
 bool is_constant(const HandleSet& vars, const Handle& clause);

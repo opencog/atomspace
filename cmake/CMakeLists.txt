@@ -1,6 +1,7 @@
 INSTALL(FILES
-		OpenCogFunctions.cmake
 		OpenCogAtomTypes.cmake
+		OpenCogCython.cmake
+		OpenCogGuile.cmake
 		OpenCogMacros.cmake
 		DESTINATION
 		${DATADIR}/cmake/)

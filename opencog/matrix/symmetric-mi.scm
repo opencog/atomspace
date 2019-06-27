@@ -78,23 +78,36 @@
 			(mmt-total #f)
 		)
 
-		(define (log2 x) (* (log x) ol2))
+		; Compute the log base two.  It can happen that log of zero
+		; is requested; this is rare, but can happen when a matrix
+		; has been altered so that the counts on an entire row have
+		; been zeroed, and the 'set-mmt-marginals method is called
+		; on that row.
+		(define (log2 x y)
+			(if (< 0 x) (* (log (/ x y)) ol2) (- (inf))))
 
 		; Cache the totals, so that we can avoid fetching them,
 		; over and over. They only tricky part here is that the
-		; totals might not yet be available when this objct is
+		; totals might not yet be available when this object is
 		; defined.
 		(define (set-mtm-total)
 			(if (not mtm-total)
 				(set! mtm-total
 					(catch #t (lambda () (trans-obj 'total-mtm-count))
-						(lambda (key . args) #f)))))
+						(lambda (key . args) #f))))
+			(if (eq? 0 mtm-total)
+				(throw 'no-transpose-data 'mtm-mi
+					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
 
 		(define (set-mmt-total)
 			(if (not mmt-total)
 				(set! mmt-total
 					(catch #t (lambda () (trans-obj 'total-mmt-count))
-						(lambda (key . args) #f)))))
+						(lambda (key . args) #f))))
+			(if (eq? 0 mmt-total)
+				(throw 'no-transpose-data 'mmt-mi
+					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
+
 
 		; -------------
 		; Return the vector product of column A and column B
@@ -114,14 +127,14 @@
 			(define margb (trans-obj 'mtm-count COL-B))
 			(define prod (compute-left-product COL-A COL-B))
 			(set-mtm-total)
-			(log2 (/ (* prod mtm-total) (* marga margb))))
+			(log2 (* prod mtm-total) (* marga margb)))
 
 		(define (compute-mtm-mi COL-A COL-B)
 			(define marga (trans-obj 'mtm-count COL-A))
 			(define margb (trans-obj 'mtm-count COL-B))
 			(define prod (compute-left-product COL-A COL-B))
 			(set-mtm-total)
-			(* (log2 (/ (* prod mtm-total) (* marga margb)))
+			(* (log2 (* prod mtm-total) (* marga margb))
 				(/ prod mtm-total)))
 
 		(define (compute-mmt-fmi ROW-A ROW-B)
@@ -129,14 +142,14 @@
 			(define margb (trans-obj 'mmt-count ROW-B))
 			(define prod (compute-right-product ROW-A ROW-B))
 			(set-mmt-total)
-			(log2 (/ (* prod mmt-total) (* marga margb))))
+			(log2 (* prod mmt-total) (* marga margb)))
 
 		(define (compute-mmt-mi ROW-A ROW-B)
 			(define marga (trans-obj 'mmt-count ROW-A))
 			(define margb (trans-obj 'mmt-count ROW-B))
 			(define prod (compute-right-product ROW-A ROW-B))
 			(set-mmt-total)
-			(* (log2 (/ (* prod mmt-total) (* marga margb)))
+			(* (log2 (* prod mmt-total) (* marga margb))
 				(/ prod mmt-total)))
 
 		; -------------

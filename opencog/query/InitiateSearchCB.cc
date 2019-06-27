@@ -620,7 +620,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Initiate a search by looping over all atoms of the allowed
- * variable types (as set with the set_type_testrictions() method).
+ * variable types (as set with the set_type_restrictions() method).
  * This assumes that the varset contains the variables to be searched
  * over, and that the type restrictions are set up appropriately.
  *
@@ -628,7 +628,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
  * variables, then you probably don't want to use this method, either;
- * you should create somethnig more clever.
+ * you should create something more clever.
  */
 bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 {
@@ -778,7 +778,14 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		// Fail-safe, in case they are all evaluatable.
 		if (nullptr == _root)
-			_root = _starter_term = clauses[0];
+		{
+			_root = clauses[0];
+			auto some_var = _variables->varset.begin();
+			if (some_var == _variables->varset.end())
+				throw FatalErrorException(TRACE_INFO,
+					"Internal Error: There were no variables!");
+			_starter_term = *some_var;
+		}
 	}
 
 	HandleSeq handle_set;
@@ -900,6 +907,54 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	set_pattern(*_variables, *_pattern);
 	DO_LOG({logger().fine("JIT expanded!");
 	_pl->debug_log();})
+}
+
+std::string InitiateSearchCB::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	if (_variables)
+		ss << indent << "_variables:" << std::endl
+		   << _variables->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_pattern)
+		ss << indent << "_pattern:" << std::endl
+		   << _pattern->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_dynamic)
+		ss << indent << "_dynamic:" << std::endl
+		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
+	if (_pl)
+		ss << indent << "_pl:" << std::endl
+		   << _pl->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_root)
+		ss << indent << "_root:" << std::endl
+		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_starter_term)
+		ss << indent << "_starter_term:" << std::endl
+		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;
+	ss << indent << "_curr_clause = " << _curr_clause << std::endl;
+	if (not _choices.empty()) {
+		std::string indent_p = indent  + oc_to_string_indent;
+		std::string indent_pp = indent_p  + oc_to_string_indent;
+		std::string indent_ppp = indent_pp  + oc_to_string_indent;
+		ss << indent << "_choices:" << std::endl;
+		ss << indent_p << "size = " << _choices.size() << std::endl;
+		unsigned i = 0;
+		for (const Choice& ch : _choices) {
+			ss << indent_p << "choice[" << i << "]:" << std::endl
+			   << indent_pp << "clause = " << ch.clause << std::endl;
+			ss << indent_pp << "best_start:" << std::endl
+			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
+			ss << indent_pp << "start_term:" << std::endl
+			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+		}
+	}
+	ss << indent << "_search_fail = " << _search_fail;
+
+	return ss.str();
+}
+
+std::string oc_to_string(const InitiateSearchCB& iscb, const std::string& indent)
+{
+	return iscb.to_string(indent);
 }
 
 /* ===================== END OF FILE ===================== */

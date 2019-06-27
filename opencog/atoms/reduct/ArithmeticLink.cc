@@ -24,6 +24,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
 
@@ -83,17 +84,16 @@ void ArithmeticLink::init(void)
 /// ever-more rules to the rule engine to reduce ever-more interesting
 /// algebraic expressions.
 ///
-ValuePtr ArithmeticLink::delta_reduce(void) const
+ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
 
-	ValuePtr red(alp->FoldLink::delta_reduce());
+	ValuePtr red(alp->FoldLink::delta_reduce(as, silent));
 
-	Handle h(HandleCast(red));
-	if (nullptr == h) return red;
+	if (nullptr == red or not red->is_atom()) return red;
 
-	alp = ArithmeticLinkCast(h);
+	alp = ArithmeticLinkCast(HandleCast(red));
 	if (nullptr == alp) return red;
 	return alp->reorder();
 }
@@ -157,16 +157,33 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
-ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
+ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
 {
-	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
+	if (DEFINED_SCHEMA_NODE == vptr->get_type())
 	{
-		ValuePtr red(HandleCast(vptr)->execute());
+		vptr = DefineLink::get_definition(HandleCast(vptr));
+	}
+	while (vptr->is_atom())
+	{
+		Handle h(HandleCast(vptr));
+		if (not h->is_executable()) break;
+
+		ValuePtr red(h->execute(as, silent));
 
 		// It would probably be better to throw a silent exception, here?
 		if (nullptr == red) return vptr;
 		if (*red == *vptr) return vptr;
 		vptr = red;
+	}
+
+	// The FunctionLink might be a GetLink, which returns a SetLink
+	// of results. If the SetLink is wrapping only one value, then
+	// unwrap it and return that value.
+	if (SET_LINK == vptr->get_type())
+	{
+		Handle setl(HandleCast(vptr));
+		if (1 == setl->get_arity())
+			vptr = setl->getOutgoingAtom(0);
 	}
 	return vptr;
 }
@@ -175,7 +192,7 @@ ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 /// execute() -- Execute the expression
 ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
 {
-	return delta_reduce();
+	return delta_reduce(as, silent);
 }
 
 // ===========================================================

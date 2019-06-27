@@ -58,7 +58,7 @@ void PatternLink::common_init(void)
 	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
 	validate_variables(_varlist.varset, all_clauses);
 
-	remove_constants(_varlist.varset, _pat, _components, _component_patterns);
+	remove_constants(_varlist.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
@@ -639,7 +639,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///
 ///    (GetLink (GreaterThan (Number 42) (Variable $x)))
 ///
-/// The only clause here is the GreaterThan, and its virtual
+/// The only clause here is the GreaterThan, and it is virtual
 /// (evaluatable) so we know that in general it cannot be found in
 /// the atomspace.   Due to the pattern-matcher design, matching will
 /// fail unless there is at least one PresentLink/AbsentLink clause.
@@ -655,7 +655,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 ///    (GetLink (Equal (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
-/// If the ImplicationLink is suitably simple, it can be added added
+/// If the ImplicationLink is suitably simple, it can be added
 /// as an ordinary clause, and searched for as if it was "present".
 ///
 /// XXX FIXME: the code here assumes that the situation is indeed
@@ -924,5 +924,32 @@ void PatternLink::debug_log(void) const
 }
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
+
+std::string PatternLink::to_long_string(const std::string& indent) const
+{
+	std::string indent_p = indent + oc_to_string_indent;
+	std::stringstream ss;
+	ss << to_string(indent);
+	ss << indent << "_pat:" << std::endl
+	   << oc_to_string(_pat, indent_p) << std::endl;
+	ss << indent << "_fixed:" << std::endl
+	   << oc_to_string(_fixed, indent_p) << std::endl;
+	ss << indent << "_num_virts = " << _num_virts << std::endl;
+	ss << indent << "_virtual:" << std::endl
+	   << oc_to_string(_virtual, indent_p) << std::endl;
+	ss << indent << "_num_comps = " << _num_comps << std::endl;
+	ss << indent << "_components:" << std::endl
+	   << oc_to_string(_components, indent_p) << std::endl;
+	ss << indent << "_component_vars:" << std::endl
+	   << oc_to_string(_component_vars, indent_p) << std::endl;
+	ss << indent << "_component_patterns:" << std::endl
+	   << oc_to_string(_component_patterns, indent_p) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const PatternLink& pl, const std::string& indent)
+{
+	return pl.to_long_string(indent);
+}
 
 /* ===================== END OF FILE ===================== */

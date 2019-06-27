@@ -6,12 +6,12 @@ underlying the AtomSpace. This includes:
 
 * The AtomSpace as a knowledgebase - a graph database.
 * Basic querying (pattern-matching) and inference on knowledge.
-* Assigning degrees of truth various facts and inferences.
+* Assigning degrees of truth to various facts and inferences.
 * Complex knowledge-representation tasks, including:
-   -- Setting unique state
-   -- Designing properties
-   -- Assigning values and using key-value pairs efficiently
-   -- Handling rapidly time-varying data (video/audio streams).
+    - Setting unique state
+    - Designing properties
+    - Assigning values and using key-value pairs efficiently
+    - Handling rapidly time-varying data (video/audio streams).
 
 After this come examples for assorted advanced features that are
 typically encountered:
@@ -63,6 +63,7 @@ be effective.
 
 * `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
+* `factorial.scm`      -- Recursive numerical programming.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.

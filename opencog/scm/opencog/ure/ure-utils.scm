@@ -269,6 +269,8 @@
 
 (define-public (ure-add-rule rbs rule-alias . tv)
 "
+  Usage: (ure-add-rule rbs rule-alias . tv)
+
   Given
 
   rbs: a ConceptNode that represents a rulebase,
@@ -283,7 +285,7 @@
 "
   (if (null? tv)
       (MemberLink rule-alias rbs)
-      (MemberLink tv rule-alias rbs)))
+      (MemberLink (car tv) rule-alias rbs)))
 
 (define-public (ure-add-rule-by-name rbs rule-name . tv)
 "
@@ -537,7 +539,7 @@
 
   Delete any previous one if exists.
 "
-  (ure-set-num-parameter rbs "URE:attention-allocation" value))
+  (ure-set-fuzzy-bool-parameter rbs "URE:attention-allocation" value))
 
 (define (ure-set-maximum-iterations rbs value)
 "

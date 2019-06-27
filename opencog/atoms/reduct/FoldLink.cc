@@ -56,7 +56,10 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-ValuePtr FoldLink::delta_reduce(void) const
+/// Actually, what is implemete here is not pure delta-reduction.
+/// If the arguments to Fold are executale, then they are executed
+/// first, and only then is the delta-reduction performed.
+ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
 
@@ -74,7 +77,22 @@ ValuePtr FoldLink::delta_reduce(void) const
 		{
 			h = h->getOutgoingAtom(0);
 		}
-		expr = kons(h, expr);
+
+		// Well, we lied; this is not pure delta-reduction. If the
+		// arguments to fold are executable atoms, then execute them,
+		// and fold in the results.
+		//
+		// Performance ... maybe it is faster to call the nameserver
+		// instead?
+		// if (nameserver().isA(h->get_type(), FUNCTION_LINK))
+		if (h->is_executable())
+		{
+			expr = kons(as, silent, h->execute(as, silent), expr);
+		}
+		else
+		{
+			expr = kons(as, silent, h, expr);
+		}
 	}
 
 	return expr;

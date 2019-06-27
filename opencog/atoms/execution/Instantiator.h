@@ -86,17 +86,14 @@ private:
 	 * of it, replacing the variables in its outgoing by their
 	 * respective groundings.
 	 *
+	 * See comments in the C++ code for a better explanation of
+	 * what this function actually does.
+	 *
 	 * See also the related function VariableList::substitute(),
 	 * which will simply perform a substitution, without performing
-	 * any execution. See also PutLink, which does substituion.
+	 * any execution. See also PutLink, which does substitution.
 	 * (actually, beta reduction).
-	 *
-	 * There are two ways to do this: via eager execution, and via
-	 * lazy execution. Lazy would be nicer, performance-wise, but this
-	 * is still buggy, and unit tests will fail. So do eager execution
-	 * by default.
 	 */
-	bool _eager;
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 

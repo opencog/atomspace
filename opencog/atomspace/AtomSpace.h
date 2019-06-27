@@ -54,7 +54,6 @@ const bool DONT_CHECK_TRUTH_VALUES = false;
 class AtomSpace
 {
     friend class Atom;               // Needs to call get_atomtable()
-    friend class AtomStorage;
     friend class BackingStore;
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
@@ -503,32 +502,6 @@ public:
                         bool subclass=false) const
     {
         return _atom_table.getHandlesByType(result, type, subclass);
-    }
-
-    /* ----------------------------------------------------------- */
-    /* The foreach routines offer an alternative interface
-     * to the getHandleSet API.
-     */
-    /**
-     * Invoke the callback on each handle of the given type.
-     */
-    template<class T>
-    inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(const Handle&), T *data,
-                                       bool subclass=false)
-    {
-        // First we extract, then we loop. This is to avoid holding
-        // the lock for too long. (because we don't know how long
-        // the callback will take.)
-        HandleSet handle_set;
-        get_handleset_by_type(handle_set, atype, subclass);
-
-        // Loop over all handles in the handle set.
-        for (const Handle& h: handle_set) {
-            bool rc = (data->*cb)(h);
-            if (rc) return rc;
-        }
-        return false;
     }
 
     /**

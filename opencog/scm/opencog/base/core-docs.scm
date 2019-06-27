@@ -366,6 +366,7 @@
     Return the incoming set of ATOM.  This set is returned as an
     ordinary scheme list.
 
+    See also: cog-incoming-size, cog-incoming-by-type
     Example:
        ; Define two nodes and a link between them:
        guile> (define x (ConceptNode \"abc\"))
@@ -402,6 +403,27 @@
        #t
 ")
 
+(set-procedure-property! cog-incoming-size 'documentation
+"
+ cog-incoming-size ATOM
+    Return the number of atoms in the incoming set of ATOM.
+
+    See also: cog-incoming-set, cog-incoming-size-by-type
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (Link x y)
+
+       ; Get the size of the incoming set of nodes x and y:
+       guile> (cog-incoming-size x)
+       => 1
+
+       guile> (cog-incoming-size y)
+       => 1
+")
+
 (set-procedure-property! cog-incoming-by-type 'documentation
 "
  cog-incoming-by-type ATOM TYPE
@@ -418,7 +440,7 @@
        guile> (ListLink x y)
        guile> (UnorderedLink x y)
 
-       ; Get the incoming sets of nodes x and y:
+       ; Get all ListLinks that x appears in:
        guile> (cog-incoming-by-type x 'ListLink)
        ((ListLink
           (ConceptNode \"abc\")
@@ -426,12 +448,32 @@
        )
        )
 
+       ; Get all UnorderedLinks that x appears in:
        guile> (cog-incoming-by-type x 'UnorderedLink)
        ((UnorderedLink
           (ConceptNode \"abc\")
           (ConceptNode \"def\")
        )
        )
+")
+
+(set-procedure-property! cog-incoming-size-by-type 'documentation
+"
+ cog-incoming-size-by-type ATOM TYPE
+    Return the number of atoms of type TYPE in the incoming set of ATOM.
+
+    See also: cog-incoming-by-type, cog-incoming-size
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (ListLink x y)
+       guile> (UnorderedLink x y)
+
+       ; Get the number of ListLinks that x appears in:
+       guile> (cog-incoming-size-by-type x 'ListLink)
+       => 1
 ")
 
 (set-procedure-property! cog-outgoing-atom 'documentation
@@ -754,6 +796,18 @@
        guile> (cog-map-type prt-atom 'ConceptNode)
 
   See also: cog-get-atoms TYPE - returns a list of atoms of TYPE.
+")
+
+(set-procedure-property! cog-count-atoms 'documentation
+"
+  cog-count-atoms -- Count of the number of atoms of given type
+
+  cog-count-atoms ATOM-TYPE
+  Return a count of the number of atoms of the given type `ATOM-TYPE`.
+
+  Example usage:
+     (display (cog-count-atoms 'ConceptNode))
+  will display a count of all atoms of type 'ConceptNode
 ")
 
 (set-procedure-property! cog-atomspace 'documentation

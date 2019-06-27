@@ -50,7 +50,7 @@
 (define implication-scope-to-implication-rule
   (BindLink
      implication-scope-to-implication-variables
-     implication-scope-to-implication-body
+     (Present implication-scope-to-implication-body)
      implication-scope-to-implication-rewrite))
 
 (define (implication-scope-to-implication-formula Impl ImplSc)

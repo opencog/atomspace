@@ -69,13 +69,14 @@ static inline double get_double(const ValuePtr& pap)
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-ValuePtr TimesLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
+ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
+                         const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(get_value(fi));
+	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(fj));
+	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
@@ -106,7 +107,7 @@ ValuePtr TimesLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 		}
 		Handle foo(createLink(seq, TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
-		return ap->delta_reduce();
+		return ap->delta_reduce(as, silent);
 	}
 
 	// Are they both numbers?

@@ -426,42 +426,35 @@ Handle AndBIT::substitute_unified_variables(const Handle& leaf,
 Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
                                   const Rule& rule) const
 {
-	HandleSeq clauses = rule.get_clauses();
-	HandlePairSeq conclusions = rule.get_conclusions();
-	OC_ASSERT(conclusions.size() == 1);
-	Handle conclusion = conclusions[0].second;
+	Handle conclusion = rule.get_conclusion();
+	HandleSeq prs_clauses = get_present_clauses(rule.get_implicant());
+	HandleSeq virt_clauses = get_virtual_clauses(rule.get_implicant());
+	HandleSeq prs_fcs_clauses = get_present_clauses(fcs_pattern);
+	HandleSeq virt_fcs_clauses = get_virtual_clauses(fcs_pattern);
 
-	// Simple case where the fcs contains the conclusion itself
-	if (content_eq(fcs_pattern, conclusion))
-		return fcs->getAtomSpace()->add_link(AND_LINK,
-		                                     HandleSeq(clauses.begin(),
-		                                               clauses.end()));
+	// Remove any present fcs clauses that is equal to the conclusion
+	auto eq_to_conclusion = [&](const Handle& h) {
+		                        return content_eq(conclusion, h); };
+	boost::remove_erase_if(prs_fcs_clauses, eq_to_conclusion);
 
-	// The fcs contains a conjunction of clauses
-	OC_ASSERT(fcs_pattern->get_type() == AND_LINK);
-
-	// Remove any fcs clause that:
-	//
-	// 1. is equal to the rule conclusion.
-	//
+	// Remove any virtual fcs clause that:
+	// 1. is equal to the conclusion.
 	// 2. is a precondition that uses that conclusion as argument.
-	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
 	auto to_remove = [&](const Handle& h) {
-		return (is_locally_quoted_eq(h, conclusion)
-		        or is_argument_of(h, conclusion)
-		        or (boost::find(clauses, h) != clauses.end()));
-	};
-	boost::remove_erase_if(fcs_clauses, to_remove);
+		                 return eq_to_conclusion(h)
+			                 or is_argument_of(h, conclusion); };
+	boost::remove_erase_if(virt_fcs_clauses, to_remove);
 
-	// Add the patterns and preconditions associated to the rule
-	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
+	// Add present rule clauses
+	prs_fcs_clauses.insert(prs_fcs_clauses.end(),
+	                       prs_clauses.begin(), prs_clauses.end());
 
-	// Remove redundant clauses
-	boost::sort(fcs_clauses);
-	boost::erase(fcs_clauses,
-	             boost::unique<boost::return_found_end>(fcs_clauses));
+	// Add virtual rule clauses
+	virt_fcs_clauses.insert(virt_fcs_clauses.end(),
+	                        virt_clauses.begin(), virt_clauses.end());
 
-	return fcs->getAtomSpace()->add_link(AND_LINK, fcs_clauses);
+	// Assemble the body
+	return mk_pattern(prs_fcs_clauses, virt_fcs_clauses);
 }
 
 Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
@@ -537,6 +530,68 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)
 		return content_eq(lhs, rhs->getOutgoingAtom(0));
 	return false;
+}
+
+Handle AndBIT::mk_pattern(HandleSeq prs_clauses, HandleSeq virt_clauses) const
+{
+	// Remove redundant clauses
+	remove_redundant(prs_clauses);
+	remove_redundant(virt_clauses);
+
+	// Assemble the body
+	AtomSpace& as = *fcs->getAtomSpace();
+	if (not prs_clauses.empty())
+		virt_clauses.push_back(as.add_link(PRESENT_LINK, prs_clauses));
+	return virt_clauses.empty() ? Handle::UNDEFINED
+		: (virt_clauses.size() == 1 ? virt_clauses.front()
+		   : as.add_link(AND_LINK, virt_clauses));
+}
+
+void AndBIT::remove_redundant(HandleSeq& hs)
+{
+	boost::sort(hs);
+	boost::erase(hs, boost::unique<boost::return_found_end>(hs));
+}
+
+HandleSeq AndBIT::get_present_clauses(const Handle& pattern)
+{
+	if (pattern->get_type() == AND_LINK)
+		return get_present_clauses(pattern->getOutgoingSet());
+	else if (pattern->get_type() == PRESENT_LINK)
+		return pattern->getOutgoingSet();
+	else
+		return {};
+}
+
+HandleSeq AndBIT::get_present_clauses(const HandleSeq& clauses)
+{
+	HandleSeq prs_clauses;
+	for (const Handle& clause : clauses) {
+		if (clause->get_type() == PRESENT_LINK) {
+			const HandleSeq& oset = clause->getOutgoingSet();
+			prs_clauses.insert(prs_clauses.end(), oset.begin(), oset.end());
+		}
+	}
+	return prs_clauses;
+}
+
+HandleSeq AndBIT::get_virtual_clauses(const Handle& pattern)
+{
+	if (pattern->get_type() == AND_LINK)
+		return get_virtual_clauses(pattern->getOutgoingSet());
+	else if (pattern->get_type() == PRESENT_LINK)
+		return {};
+	else
+		return {pattern};
+}
+
+HandleSeq AndBIT::get_virtual_clauses(const HandleSeq& clauses)
+{
+	HandleSeq virt_clauses;
+	for (const Handle& clause : clauses)
+		if (clause->get_type() != PRESENT_LINK)
+			virt_clauses.push_back(clause);
+	return virt_clauses;
 }
 
 std::vector<std::string>

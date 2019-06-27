@@ -37,6 +37,7 @@ public:
 	SatisfactionLink(const HandleSeq&, Type=SATISFACTION_LINK);
 	SatisfactionLink(const Link &l);
 
+	virtual bool is_evaluatable() const { return true; }
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	static Handle factory(const Handle&);
 };

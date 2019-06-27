@@ -275,7 +275,7 @@ IF(HAVE_PY_INTERP)
 		# Find python destination dir for python bindings
 		# because it may differ on each operating system.
 		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib(True, False, '${CMAKE_INSTALL_PREFIX}'))"
+			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/get_python_lib.py" "${CMAKE_INSTALL_PREFIX}"
 			OUTPUT_VARIABLE PYTHON_DEST
 		)
 
@@ -415,7 +415,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
 
 # -------------------------------------------------
 # Library configuration

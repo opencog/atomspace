@@ -136,6 +136,7 @@ private:
     AtomTable& operator=(const AtomTable&) = delete;
     AtomTable(const AtomTable&) = delete;
 
+    void clear_all_atoms();
 public:
 
     /**
@@ -154,7 +155,6 @@ public:
     void ready_transient(AtomTable* parent, AtomSpace* holder);
     void clear_transient();
 
-    void clear_all_atoms();
     void clear();
 
     UUID get_uuid(void) const { return _uuid; }
@@ -201,13 +201,12 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, const std::string&) const;
-    Handle getNodeHandle(const AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(const AtomPtr&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(const Handle& h) const {
         AtomPtr a(h); return getHandle(a);
     }
+    Handle lookupHandle(const AtomPtr&) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -329,18 +328,6 @@ public:
         // Reset to default.
         opencog::setting_omp(opencog::num_threads());
     }
-
-    /* Exposes the type iterators so we can do more complicated
-     * looping without having to create a vector to hold the handles.
-     *
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @return The handle iterator for the given type.
-     */
-    TypeIndex::iterator beginType(Type type, bool subclass) const
-        { return typeIndex.begin(type, subclass); }
-    TypeIndex::iterator endType(void) const
-        { return typeIndex.end(); }
 
     /**
      * Adds an atom to the table. If the atom already is in the

@@ -22,13 +22,15 @@
                 (VariableNode "$C")
                 (TypeNode "ConceptNode")))
         (AndLink
-            (InheritanceLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-            (InheritanceLink
-                (VariableNode "$B")
-                (VariableNode "$C")
+            (PresentLink
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B")
+                )
+                (InheritanceLink
+                    (VariableNode "$B")
+                    (VariableNode "$C")
+                )
             )
             ;; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink

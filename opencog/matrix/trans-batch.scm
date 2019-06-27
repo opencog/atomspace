@@ -125,7 +125,7 @@
 			; on the support-obj for each of the duals. This was saved
 			; on the 'left-wildcard on the dual.  That means that we
 			; need to have the left-marginals all computed.
-			(scomp-obj 'left-marginals)
+			(scomp-obj 'all-left-marginals)
 			(centr-obj 'cache-left)
 			(store-obj 'store-left-marginals)
 		)
@@ -137,7 +137,7 @@
 			(if (LLOBJ 'provides 'make-right-stars)
 				(LLOBJ 'make-right-stars))
 
-			(scomp-obj 'right-marginals)
+			(scomp-obj 'all-right-marginals)
 			(centr-obj 'cache-right)
 			(store-obj 'store-right-marginals)
 		)
@@ -172,7 +172,7 @@
 			; 'mmt-marginals loops over 'left-basis and records
 			; them on 'right-wildcard.  Thus, we need to save
 			; the 'right-wildcard to disk.
-			(trans-obj 'mmt-marginals)
+			(trans-obj 'all-mmt-marginals)
 			(store-obj 'store-right-marginals)
 			(store-obj 'store-left-marginals)
 			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
@@ -182,7 +182,7 @@
 		(define (batch-mtm-marginals)
 
 			(setup-supports)
-			(trans-obj 'mtm-marginals)
+			(trans-obj 'all-mtm-marginals)
 			(store-obj 'store-left-marginals)
 			(store-obj 'store-right-marginals)
 			(display "Done computing and saving sum_x N(x,y) N(x,*)\n")

@@ -121,7 +121,9 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
+	static SCM ss_incoming_size(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
+	static SCM ss_incoming_size_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
 	static SCM ss_outgoing_by_type(SCM, SCM);
 	static SCM ss_outgoing_atom(SCM, SCM);
@@ -132,6 +134,7 @@ private:
 	static SCM ss_get_type(SCM);
 	static SCM ss_get_subtypes(SCM);
 	static SCM ss_subtype_p(SCM, SCM);
+	static SCM ss_count(SCM);
 
 	// Truth values
 	static SCM ss_tv_get_mean(SCM);

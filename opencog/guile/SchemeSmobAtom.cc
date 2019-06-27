@@ -286,6 +286,31 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 }
 
 /* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of an atom.
+ */
+SCM SchemeSmob::ss_incoming_size (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size");
+	size_t sz = h->getIncomingSetSize();
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of type stype
+ * of the atom.
+ */
+SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
+	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
+
+	size_t sz = h->getIncomingSetSizeByType(t);
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
 
 /**
  * Apply proceedure proc to all atoms of type stype
@@ -332,10 +357,13 @@ SCM SchemeSmob::ss_get_types (void)
 	Type t = nameserver().getNumberOfClasses();
 	while (1) {
 		t--;
-		const std::string &tname = nameserver().getTypeName(t);
-		SCM str = scm_from_utf8_string(tname.c_str());
-		SCM sym = scm_string_to_symbol(str);
-		list = scm_cons(sym, list);
+		if (nameserver().isDefined(t))
+		{
+			const std::string &tname = nameserver().getTypeName(t);
+			SCM str = scm_from_utf8_string(tname.c_str());
+			SCM sym = scm_string_to_symbol(str);
+			list = scm_cons(sym, list);
+		}
 		if (0 == t) break;
 	}
 
@@ -417,6 +445,17 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (nameserver().isA(child, parent)) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
+}
+
+/**
+ * Return a count of the number of atoms of the indicated type
+ */
+SCM SchemeSmob::ss_count (SCM stype)
+{
+	Type t = verify_type(stype, "cog-count-atoms");
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	size_t cnt = as->get_num_atoms_of_type(t);
+	return scm_from_size_t(cnt);
 }
 
 SCM SchemeSmob::ss_get_free_variables(SCM satom)

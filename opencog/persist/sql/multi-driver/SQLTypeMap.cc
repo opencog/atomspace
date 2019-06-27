@@ -73,7 +73,7 @@ void SQLAtomStorage::setup_typemap(void)
 	// stored.  So we start by loading a map from SQL (if its there).
 	//
 	// Be careful to initialize the typemap with invalid types,
-	// in case there are unexpected holes in the map!
+	// in case there are (unexpected) holes in the map!
 	for (int i=0; i< TYPEMAP_SZ; i++)
 	{
 		loading_typemap[i] = NOTYPE;
@@ -95,6 +95,8 @@ void SQLAtomStorage::setup_typemap(void)
 		/* If this typename is not yet known, record it */
 		if (-1 == sqid)
 		{
+			if (not nameserver().isDefined(t)) continue;
+
 			const char * tname = nameserver().getTypeName(t).c_str();
 
 			// Let the sql id be the same as the current type number,

@@ -52,6 +52,7 @@ public:
 	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
 	void test_criminal();
+	void test_no_exec_output();
 	// TODO: re-enable when GlobNode is supported
 	void xtest_green_balls();
 	// TODO: re-enable when meta rule is supported
@@ -62,14 +63,14 @@ public:
 
 BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
 {
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
 	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 	ure_logger().set_level(Logger::INFO);
-	// ure_logger().set_timestamp_flag(false);
+	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
-	// ure_logger().set_print_to_stdout_flag(true);
+	ure_logger().set_print_to_stdout_flag(true);
 	randGen().seed(0);
 
 	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
@@ -618,6 +619,38 @@ void BackwardChainerUTest::test_criminal()
 	TS_ASSERT_EQUALS(results, expected);
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_mean());
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_confidence());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test showing we no longer need the ExecutionOutputLink
+void BackwardChainerUTest::test_no_exec_output()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	load_from_path("no-exec-output.scm");
+	randGen().seed(0);
+
+	Handle rbs = _eval.eval_h("Einstein-rbs");
+
+	Handle target = _eval.eval_h("target");
+	Handle vardecl = _eval.eval_h("vd");
+
+	BackwardChainer bc(_as, rbs, target, vardecl);
+	// See no-exec-output.scm to change the number of iterations
+	bc.do_chain();
+
+	Handle results = bc.get_results(),
+		expected = al(SET_LINK, al(EVALUATION_LINK,
+		                           an(PREDICATE_NODE, "keep-pet"),
+		                           al(LIST_LINK,
+		                              an(CONCEPT_NODE, "American"),
+		                              an(CONCEPT_NODE, "cat"))));
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -41,6 +41,8 @@ private:
 	                           const Handle& args,
 	                           bool silent=false);
 
+	ValuePtr execute_once(AtomSpace* as, bool silent=false);
+
 protected:
 	void check_schema(const Handle& schema) const;
 
@@ -49,6 +51,7 @@ public:
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const Link& l);
 
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false);
 
 	Handle get_schema(void) const { return getOutgoingAtom(0); }
