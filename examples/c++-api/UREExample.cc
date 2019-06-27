@@ -1,8 +1,8 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
+#include <opencog/ure/backwardchainer/BackwardChainer.h>
+#include <opencog/ure/forwardchainer/ForwardChainer.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/rule-engine/UREConfig.h>
+#include <opencog/ure/UREConfig.h>
 
 using namespace opencog;
 

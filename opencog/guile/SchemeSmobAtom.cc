@@ -112,6 +112,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 
 /**
  * Return the truth value mean on the atom.
+ * This is meant to be the fastest possible way of accessing the mean.
  */
 SCM SchemeSmob::ss_get_mean(SCM satom)
 {
@@ -121,6 +122,7 @@ SCM SchemeSmob::ss_get_mean(SCM satom)
 
 /**
  * Return the truth value confidence on the atom.
+ * This is meant to be the fastest possible way of accessing the confidence.
  */
 SCM SchemeSmob::ss_get_confidence(SCM satom)
 {
@@ -130,6 +132,7 @@ SCM SchemeSmob::ss_get_confidence(SCM satom)
 
 /**
  * Return the truth value count on the atom.
+ * This is meant to be the fastest possible way of accessing the count.
  */
 SCM SchemeSmob::ss_get_count(SCM satom)
 {
@@ -381,114 +384,6 @@ SCM SchemeSmob::ss_get_type (SCM stype)
 		scm_wrong_type_arg_msg("cog-type->int", 0, stype, "opencog atom type");
 
 	return scm_from_ushort(t);
-}
-
-/**
- * Return true if stype is an atom type
- */
-SCM SchemeSmob::ss_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (nameserver().isValue(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = nameserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-
-	return SCM_BOOL_T;
-}
-
-/**
- * Return true if stype is a value type
- */
-SCM SchemeSmob::ss_value_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (nameserver().isValue(t) and not nameserver().isAtom(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = nameserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (nameserver().isValue(t) and not nameserver().isAtom(t))
-		return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Return true if stype is a node type
- */
-SCM SchemeSmob::ss_node_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (nameserver().isNode(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = nameserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (nameserver().isNode(t)) return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Return true if stype is a link type
- */
-SCM SchemeSmob::ss_link_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (nameserver().isLink(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = nameserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (nameserver().isLink(t)) return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
 }
 
 /**

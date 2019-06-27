@@ -52,6 +52,7 @@ protected:
 	static count_t DEFAULT_K;
 
 public:
+	EvidenceCountTruthValue(const std::vector<double>&);
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
 	EvidenceCountTruthValue(const TruthValue&);
 	EvidenceCountTruthValue(EvidenceCountTruthValue const&);
@@ -92,17 +93,24 @@ public:
 		return std::static_pointer_cast<const TruthValue>(createECTV(pos_count,
 		                                                       total_count));
 	}
+	static TruthValuePtr createTV(const std::vector<double>& v)
+	{
+		return std::static_pointer_cast<const TruthValue>(
+			std::make_shared<const EvidenceCountTruthValue>(v));
+	}
+
 	static TruthValuePtr createTV(const ValuePtr& pap)
 	{
 		return std::static_pointer_cast<const TruthValue>(
 			std::make_shared<const EvidenceCountTruthValue>(pap));
 	}
-
-	TruthValuePtr clone() const
-	{
-		return std::make_shared<EvidenceCountTruthValue>(*this);
-	}
 };
+
+template<typename ... Type>
+static inline TruthValuePtr createEvidenceCountTruthValue(Type&&...  args) {
+   return EvidenceCountTruthValue::createTV(std::forward<Type>(args)...);
+}
+
 
 /** @}*/
 } // namespace opencog

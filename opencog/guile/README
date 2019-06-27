@@ -434,15 +434,6 @@ interface.
          guile> (cog-tv? y)
          #f
 
-=== cog-stv? exp ===
-      Return #t if exp is a SimpleTruthValue, else return #f
-
-=== cog-ctv? exp ===
-      Return #t if exp is a CountTruthValue, else return #f
-
-=== cog-itv? exp ===
-      Return #t if exp is a IndefiniteTruthValue, else return #f
-
 === cog-tv atom ===
       Return the truth-value of the atom.
 
@@ -468,14 +459,6 @@ interface.
          (ConceptNode "def" (stv 0.9 0.8))
          guile> (cog-tv x)
          (stv 0.9 0.8)
-
-=== cog-tv->alist ===
-      Convert a truth value to an association list (alist).
-
-      Example:
-         guile> (define x (cog-new-stv 0.7 0.9))
-         guile> (cog-tv->alist x)
-         ((mean . 0.699999988079071) (confidence . 0.899999976158142))
 
 === cog-get-types ===
       Return a list of all of the atom types in the system.

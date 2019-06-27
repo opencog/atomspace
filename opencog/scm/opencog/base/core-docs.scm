@@ -408,7 +408,8 @@
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
+    should be faster, performance-wise.
 
     Example:
        ; Define two nodes and two links between them:
@@ -454,7 +455,8 @@
     Return those atoms in the outgoing set of ATOM that are of type TYPE.
     This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM)), but
+    should be faster, performance-wise.
 ")
 
 (set-procedure-property! cog-handle 'documentation
@@ -516,137 +518,6 @@
 ")
 
 ; ===================================================================
-(set-procedure-property! cog-new-stv 'documentation
-"
- cog-new-stv MEAN CONFIDENCE
-    Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-stv 0.7 0.9)
-")
-
-(set-procedure-property! cog-new-etv 'documentation
-"
- cog-new-etv POSITIVE-COUNT TOTAL-COUNT
-    Create an EvidenceCountTruthValue with the given POSITIVE-COUNT
-    and TOTAL-COUNT. Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    The total count is optional in the sense that any value below the
-    positive count will be considered undefined.
-
-    Throws errors if positive-count and total-count are not
-    floating-point values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-etv 100 150)
-")
-
-(set-procedure-property! cog-new-ctv 'documentation
-"
- cog-new-ctv MEAN CONFIDENCE COUNT
-    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean, confidence and count are not floating-point
-    values.
-    Example:
-        ; Create a new count truth value:
-        guile> (cog-new-ctv 0.7 0.9 44.0)
-")
-
-(set-procedure-property! cog-new-itv 'documentation
-"
- cog-new-itv LOWER UPPER CONFIDENCE
-    Create an IndefiniteTruthValue with the given LOWER, UPPER and
-    CONFIDENCE.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    Throws errors if lower, upper and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new indefinite truth value:
-        guile> (cog-new-itv 0.7 0.9 0.6)
-")
-
-(set-procedure-property! cog-new-ptv 'documentation
-"
- cog-new-ptv MEAN CONFIENCE COUNT
-    Create a ProbabilisticTruthValue with the given MEAN, CONFIDENCE
-    and COUNT.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    Throws errors if mean, confidence and count are not floating-point
-    values.
-    Example:
-        ; Create a new probabilistic truth value:
-        guile> (cog-new-ptv 0.7 0.9 44.0)
-")
-
-(set-procedure-property! cog-new-ftv 'documentation
-"
- cog-new-ftv MEAN CONFIDENCE
-    Create a FuzzyTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new fuzzy truth value:
-        guile> (cog-new-ftv 0.7 0.9)
-")
-
-(set-procedure-property! cog-tv? 'documentation
-"
- cog-tv? EXP
-    Return #t if EXP is a truth value, else return #f
-
-    Example:
-       ; Define a simple truth value
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (define y (+ 2 2))
-       guile> (cog-tv? x)
-       #t
-       guile> (cog-tv? y)
-       #f
-")
-
-(set-procedure-property! cog-stv? 'documentation
-"
- cog-stv? EXP
-    Return #t if EXP is a SimpleTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ctv? 'documentation
-"
- cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f
-")
-
-(set-procedure-property! cog-itv? 'documentation
-"
- cog-itv? EXP
-    Return #t if EXP is a IndefiniteTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ptv? 'documentation
-"
- cog-ptv? EXP
-    Return #t if EXP is a ProbablisticTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ftv? 'documentation
-"
- cog-ftv? EXP
-    Return #t if EXP is a FuzzyTruthValue, else return #f
-")
 
 (set-procedure-property! cog-tv 'documentation
 "
@@ -678,17 +549,6 @@
        (ConceptNode \"def\" (stv 0.9 0.8))
        guile> (cog-tv x)
        (stv 0.9 0.8)
-")
-
-(set-procedure-property! cog-tv->alist 'documentation
-"
- cog-tv->alist TV
-    Convert the truth value TV to an association list (alist).
-
-    Example:
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (cog-tv->alist x)
-       ((mean . 0.7) (confidence . 0.9))
 ")
 
 (set-procedure-property! cog-tv-mean 'documentation
@@ -841,46 +701,6 @@
         guile> (cog-get-types)
 ")
 
-(set-procedure-property! cog-type? 'documentation
-"
- cog-type? SYMBOL
-    Return #t if the SYMBOL names a value or atom type, else return #f
-
-    Example:
-        guile> (cog-type? 'ConceptNode)
-        #t
-        guile> (cog-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-node-type? 'documentation
-"
- cog-node-type? SYMBOL
-    Return #t if the SYMBOL names an node type, else return #f
-
-    Example:
-        guile> (cog-node-type? 'ConceptNode)
-        #t
-        guile> (cog-node-type? 'ListLink)
-        #f
-        guile> (cog-node-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-link-type? 'documentation
-"
- cog-link-type? SYMBOL
-    Return #t if the SYMBOL names a link type, else return #f
-
-    Example:
-        guile> (cog-link-type? 'ConceptNode)
-        #f
-        guile> (cog-link-type? 'ListLink)
-        #t
-        guile> (cog-link-type? 'FlorgleBarf)
-        #f
-")
-
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
@@ -948,6 +768,10 @@
     Set the current atomspace for this thread to ATOMSPACE. Every
     thread has it's own current atomspace, to which all atom-processing
     operations apply.  Returns the previous atomspace for this thread.
+
+    Warning: if the previous atomspace is not the primary atomspace
+    and is not referenced anywhere, the garbage collector will delete it
+    alongside its content, even if some of its content is referenced.
 ")
 
 (set-procedure-property! cog-atomspace? 'documentation

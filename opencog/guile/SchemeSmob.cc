@@ -259,12 +259,13 @@ void SchemeSmob::module_init(void*)
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
 #endif
 
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/atom_types/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/file-utils.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));
 }
@@ -326,20 +327,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
-	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
-	register_proc("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
-	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
-	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
-	register_proc("cog-new-etv",           2, 0, 0, C(ss_new_etv));
-	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
-	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
-	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
-	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
-	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
-	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
-	register_proc("cog-etv?",              1, 0, 0, C(ss_etv_p));
-	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
 	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
@@ -361,10 +348,6 @@ void SchemeSmob::register_procs()
 	// Value types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
-	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
-	register_proc("cog-value-type?",       1, 0, 0, C(ss_value_type_p));
-	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
-	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 

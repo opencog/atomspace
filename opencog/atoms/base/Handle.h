@@ -181,6 +181,9 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! RAM and has faster iteration.
 typedef std::set<Handle> HandleSet;
 
+//! a set of sets of handles.
+typedef std::set<HandleSet> HandleSetSet;
+
 //! a sequence of sets of handles.
 typedef std::vector<HandleSet> HandleSetSeq;
 
@@ -294,6 +297,8 @@ std::string oc_to_string(const HandleSeq& hs,
 std::string oc_to_string(const HandleSeqSeq& hss,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleSet& ohs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSetSet& ohss,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleSetSeq& ohss,
                          const std::string& indent=empty_string);

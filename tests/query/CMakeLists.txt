@@ -76,6 +76,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
+	ADD_CXXTEST(PresentUTest)
 	ADD_CXXTEST(ScopeUTest)
 	ADD_CXXTEST(NestedPutUTest)
 

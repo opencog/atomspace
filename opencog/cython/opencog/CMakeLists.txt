@@ -7,9 +7,10 @@
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
-MESSAGE(STATUS "Setting python RPATH to ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}")
+MESSAGE(STATUS "Setting python RPATH to ${PYTHON_DEST}")
 SET(CMAKE_SHARED_LINKER_FLAGS
-	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}")
+	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${PYTHON_DEST}")
+SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -231,9 +232,9 @@ ENDIF (HAVE_GUILE)
 CYTHON_ADD_MODULE_PYX(ure
 	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
 	opencog_atom_types
-	"../../rule-engine/forwardchainer/ForwardChainer.h"
-	"../../rule-engine/backwardchainer/BackwardChainer.h"
-	ruleengine
+	"../../ure/forwardchainer/ForwardChainer.h"
+	"../../ure/backwardchainer/BackwardChainer.h"
+	ure
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
@@ -246,7 +247,7 @@ ADD_LIBRARY(ure_cython
 TARGET_LINK_LIBRARIES(ure_cython
 	atomspace_cython
 	type_constructors
-	ruleengine
+	ure
 	${PYTHON_LIBRARIES}
 )
 

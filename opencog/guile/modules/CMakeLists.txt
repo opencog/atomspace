@@ -12,7 +12,7 @@ ADD_LIBRARY (type-utils
 )
 
 TARGET_LINK_LIBRARIES(logger
-	ruleengine # for cog-ure-logger XXX FIXME this is insane. WTF!??
+	ure # for cog-ure-logger XXX FIXME this is insane. WTF!??
 	smob
 	${COGUTIL_LIBRARY}
 )

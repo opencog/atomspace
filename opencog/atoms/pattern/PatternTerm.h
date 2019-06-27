@@ -130,9 +130,8 @@ public:
 
 	void addBoundVariable();
 
-	// Work around gdb's incapability to build a string on the fly,
-	// see http://stackoverflow.com/questions/16734783 for more
-	// explanation.
+	// Work around gdb's inability to build a string on the fly;
+	// See http://stackoverflow.com/questions/16734783 for explanation.
 	std::string to_string() const;
 	std::string to_string(const std::string& indent) const;
 };

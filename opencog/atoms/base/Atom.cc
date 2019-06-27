@@ -329,7 +329,8 @@ void Atom::remove_atom(const LinkPtr& a)
 #endif /* INCOMING_SET_SIGNALS */
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
-    bucket->second.erase(a);
+    if (bucket != _incoming_set->_iset.end())
+        bucket->second.erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -361,6 +362,9 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
 #endif /* INCOMING_SET_SIGNALS */
 }
+
+void Atom::install() {}
+void Atom::remove() {}
 
 size_t Atom::getIncomingSetSize() const
 {

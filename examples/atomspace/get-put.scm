@@ -88,7 +88,7 @@
 
 (define the-sat-set (cog-execute! get-satisfying-set))
 
-: The above is just a big SetLink containing all of the results of
+; The above is just a big SetLink containing all of the results of
 ; the search.
 
 ; Define a beta-reduction.

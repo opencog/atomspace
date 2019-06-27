@@ -16,8 +16,8 @@
 
 # By default Guile return the path to its installation location.
 # Such path will not work for users who wants to compile and install
-# the project with a custom CMAKE_INSTALL_PREFIX. Compiling with 
-# custom PREFIX is a common practice. To support custom PREFIX 
+# the project with a custom CMAKE_INSTALL_PREFIX. Compiling with
+# custom PREFIX is a common practice. To support custom PREFIX
 # this condition is added to override GUILE_SITE_DIR value using
 # `cmake -DGUILE_SITE_DIR=...`.
 IF (NOT DEFINED GUILE_SITE_DIR)
@@ -93,7 +93,6 @@ FUNCTION(ADD_GUILE_MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
-
     # NOTE:  The keyword arguments 'FILES' and 'MODULE_DESTINATION' are
     # required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
@@ -125,7 +124,7 @@ FUNCTION(ADD_GUILE_MODULE)
 
             # Specify module paths.
             STRING(REGEX MATCH
-                "^(${PREFIX_DIR_PATH})([a-z0-9/-]+)*/([a-z0-9-]+)" ""
+                "^(${PREFIX_DIR_PATH})([a-z0-9/-_]+)*/([a-z0-9-_]+)" ""
                 ${SCM_MODULE_DESTINATION})
 
             # MODULE_NAME: it is equal to the MODULE_DESTINATION directory name

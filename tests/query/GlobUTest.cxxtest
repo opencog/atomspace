@@ -74,6 +74,8 @@ public:
 	void test_nest(void);
 	void test_gnest(void);
 	void test_partition(void);
+	void test_pivot(void);
+	void test_multi_pivot(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -640,6 +642,83 @@ void GlobUTest::test_partition(void)
 		"		(ConceptNode \"bar\")))"
 	);
 	TS_ASSERT_EQUALS(parts, response);
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test pivoting around a common GlobNode.
+ * Tests Issue #2167
+ */
+void GlobUTest::test_pivot(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-pivot.scm\")");
+
+	Handle pivot = eval->eval_h("(cog-execute! glob-pivot)");
+	printf("pivot got %s\n", pivot->to_string().c_str());
+	TS_ASSERT_EQUALS(1, pivot->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"	(ListLink"
+		"		(ConceptNode \"blah\")))"
+	);
+	TS_ASSERT_EQUALS(pivot, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test pivoting around multiple common GlobNodes.
+ * Same as above, but trickier.
+ */
+void GlobUTest::test_multi_pivot(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-multi-pivot.scm\")");
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"	(ListLink"
+		"		(ConceptNode \"blah\")))"
+	);
+
+	Handle chesponse = eval->eval_h(
+		"(SetLink"
+		"	(ListLink"
+		"		(ConceptNode \"class-3\")"
+		"		(ListLink"
+		"			(ConceptNode \"blah\"))))"
+	);
+
+	Handle plain = eval->eval_h("(cog-execute! glob-unify-plain)");
+	printf("unify-plain got %s\n", plain->to_string().c_str());
+	TS_ASSERT_EQUALS(1, plain->get_arity());
+	TS_ASSERT_EQUALS(plain, response);
+
+	Handle tall = eval->eval_h("(cog-execute! glob-unify-tall)");
+	printf("unify-tall got %s\n", tall->to_string().c_str());
+	TS_ASSERT_EQUALS(1, tall->get_arity());
+	TS_ASSERT_EQUALS(tall, response);
+
+	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
+	printf("multi-pivot got %s\n", pivot->to_string().c_str());
+	TS_ASSERT_EQUALS(1, pivot->get_arity());
+	TS_ASSERT_EQUALS(pivot, response);
+
+	Handle chase = eval->eval_h("(cog-execute! glob-chase-pivot)");
+	printf("chase-pivot got %s\n", chase->to_string().c_str());
+	TS_ASSERT_EQUALS(1, chase->get_arity());
+	TS_ASSERT_EQUALS(chase, chesponse);
+
+	Handle mhase = eval->eval_h("(cog-execute! glob-chase-multi-pivot)");
+	printf("multi-chase got %s\n", mhase->to_string().c_str());
+	TS_ASSERT_EQUALS(1, mhase->get_arity());
+	TS_ASSERT_EQUALS(mhase, chesponse);
+
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

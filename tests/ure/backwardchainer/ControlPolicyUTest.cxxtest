@@ -1,0 +1,170 @@
+/*
+ * ControlPolicyUTest.cxxtest
+ *
+ *  Created on: Sep 6, 2017
+ *      Authors: Nil Geisweiller
+ */
+
+#include <opencog/ure/backwardchainer/ControlPolicy.h>
+#include <opencog/ure/backwardchainer/BIT.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/ure/URELogger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace std;
+using namespace opencog;
+
+#define cal _control_as.add_link
+#define can _control_as.add_node
+#define dal _dummy_as.add_link
+#define dan _dummy_as.add_node
+
+class ControlPolicyUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _control_as;
+	SchemeEval _eval;
+	ControlPolicy* _cp;
+
+	AtomSpace _dummy_as;
+	UREConfig _dummy_ure_conf;
+	Handle _dummy_target;
+
+	void reset_bc();
+
+public:
+	ControlPolicyUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_fetch_control_rules();
+	void test_is_control_rule_active_1();
+	void test_is_control_rule_active_2();
+};
+
+ControlPolicyUTest::ControlPolicyUTest()
+	: _eval(&_control_as)
+	, _dummy_ure_conf(_dummy_as, dan(CONCEPT_NODE, "dummy-rbs"))
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_timestamp_flag(false);
+	// logger().set_sync_flag(true);
+	logger().set_print_to_stdout_flag(true);
+	ure_logger().set_level(Logger::INFO);
+	// ure_logger().set_timestamp_flag(false);
+	// ure_logger().set_sync_flag(true);
+	// ure_logger().set_print_to_stdout_flag(true);
+	randGen().seed(0);
+
+	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
+		cur_pp_dir = cur_ppp_dir + "/tests",
+		cur_p_dir = cur_pp_dir + "/ure",
+		cur_dir = cur_p_dir + "/backwardchainer",
+		scm_dir = cur_dir + "/scm";
+	vector<string> load_paths = {cur_ppp_dir,
+	                             cur_pp_dir,
+	                             cur_p_dir,
+	                             cur_dir,
+	                             scm_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		_eval.eval(eval_str);
+	}
+
+	// Set dummy target
+	_dummy_target = dan(CONCEPT_NODE, "dummy-target");
+}
+
+void ControlPolicyUTest::setUp()
+{
+}
+
+void ControlPolicyUTest::tearDown()
+{
+	_control_as.clear();
+	delete(_cp);
+}
+
+void ControlPolicyUTest::test_fetch_control_rules()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_eval.eval("(load-from-path \"control-rules.scm\")");
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), _dummy_target, &_control_as);
+
+	Handle rule_1_alias = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
+	HandleSet control_1_rules = _cp->fetch_expansion_control_rules(rule_1_alias);
+	logger().debug() << "control_1_rules = " << oc_to_string(control_1_rules);
+	TS_ASSERT_EQUALS(control_1_rules.size(), 1);
+
+	Handle rule_2_alias = _eval.eval_h("(DefinedSchemaNode \"rule-2\")");
+	HandleSet control_2_rules = _cp->fetch_expansion_control_rules(rule_2_alias);
+	logger().debug() << "control_2_rules = " << oc_to_string(control_2_rules);
+	TS_ASSERT_EQUALS(control_2_rules.size(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ControlPolicyUTest::test_is_control_rule_active_1()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Fetch context sensitive rule
+	_eval.eval("(load-from-path \"control-rules.scm\")");
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), _dummy_target, &_control_as);
+	Handle rule_2_alias = _eval.eval_h("(DefinedSchemaNode \"rule-2\")");
+	HandleSet control_2_rules = _cp->fetch_expansion_control_rules(rule_2_alias);
+	Handle ctrl_rule = *control_2_rules.begin();
+
+	Handle inference_tree = _eval.eval_h("(BindLink"
+	                                     "  (AndLink)"
+	                                     "  (InheritanceLink"
+	                                     "    (ConceptNode \"a\")"
+	                                     "    (ConceptNode \"p\")))");
+	AndBIT andbit(inference_tree);
+
+	Handle leaf = _eval.eval_h("(InheritanceLink"
+	                           "  (ConceptNode \"a\")"
+	                           "  (ConceptNode \"p\"))");
+	BITNode bitnode(leaf);
+
+	TS_ASSERT(_cp->is_control_rule_active(andbit, bitnode, ctrl_rule));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ControlPolicyUTest::test_is_control_rule_active_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Fetch context sensitive rule
+	_eval.eval("(load-from-path \"control-rules.scm\")");
+	Handle target = dal(INHERITANCE_LINK,
+	                    dan(CONCEPT_NODE, "q"),
+	                    dan(CONCEPT_NODE, "u"));
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), target, &_control_as);
+	Handle rule_3_alias = _eval.eval_h("(DefinedSchemaNode \"rule-3\")");
+	HandleSet control_3_rules = _cp->fetch_expansion_control_rules(rule_3_alias);
+	Handle ctrl_rule = *control_3_rules.begin();
+
+	Handle inference_tree = _eval.eval_h("(BindLink"
+	                                     "  (AndLink)"
+	                                     "  (InheritanceLink"
+	                                     "    (ConceptNode \"q\")"
+	                                     "    (ConceptNode \"u\")))");
+	AndBIT andbit(inference_tree);
+
+	Handle leaf = target;
+	BITNode bitnode(leaf);
+
+	// Check that the control rule is not active, since the actual
+	// target doesn't match the pattern target in the control rule.
+	TS_ASSERT(not _cp->is_control_rule_active(andbit, bitnode, ctrl_rule));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

@@ -54,8 +54,6 @@ void DualLink::init(void)
 	// ScopeLink::extract_variables(_outgoing);
 	_body = _outgoing[0];
 
-	_pat.clauses.emplace_back(_body);
-	_pat.cnf_clauses.emplace_back(_body);
 	_pat.mandatory.emplace_back(_body);
 	_fixed.emplace_back(_body);
 

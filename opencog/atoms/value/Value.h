@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
@@ -105,7 +106,10 @@ typedef std::set<ValuePtr> ValueSet;
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const ValuePtr& vp, const std::string& indent);
+std::string oc_to_string(const ValuePtr& vp,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const ValueSeq& vs,
+                         const std::string& indent=empty_string);
 
 /**
  * Cast ValuePtr to the specific Value subclass. This function is defined only

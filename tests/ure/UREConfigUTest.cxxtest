@@ -1,0 +1,53 @@
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include <opencog/ure/UREConfig.h>
+
+using namespace opencog;
+
+class UREConfigUTest : public CxxTest::TestSuite {
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	UREConfigUTest() : _eval(&_as)
+	{
+		// Module loading is borked from the C++ environment, so
+		// add the following paths so that utilities.scm is found.
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog/ure\")");
+
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+		_eval.eval("(use-modules (opencog))");
+
+		// Load the simple crisp system example to test it
+		std::string eval_output =
+			_eval.eval("(load \"" PROJECT_SOURCE_DIR
+			           "/tests/ure/forwardchainer/scm/fc.scm\")");
+		std::cout << "eval_output = " << eval_output << std::endl;
+
+		std::cout << "AtomSpace = " << _as << std::endl;
+	}
+
+	~UREConfigUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void test_read_config()
+	{
+		// Get the ConceptNode corresponding to the rule-based system
+		// to test
+		Handle rbs = _as.get_node(CONCEPT_NODE, "fc-rule-base");
+
+		UREConfig cr(_as, rbs);
+
+		TS_ASSERT_EQUALS(cr.get_rules().size(), 2);
+		TS_ASSERT_EQUALS(cr.get_maximum_iterations(), 20);
+	}
+};

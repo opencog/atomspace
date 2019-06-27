@@ -381,7 +381,7 @@ public:
 
     void testClone() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TruthValuePtr clon = tvs[i]->clone();
+            TruthValuePtr clon = std::make_shared<IndefiniteTruthValue>(*tvs[i]);
             IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
             TS_ASSERT(fabs(clonedTv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
@@ -404,7 +404,7 @@ public:
         tvs[0]->setDiff(0.1f);
         //tvs[0]->setSymmetric(false); Cannot call this yet because it thows an exception (asymmetric indefinite tv is not implemented)
         tvs[0]->setMean(means[1]);
-        TruthValuePtr clon = tvs[0]->clone();
+        TruthValuePtr clon = std::make_shared<IndefiniteTruthValue>(*tvs[0]);
         IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
         TS_ASSERT(fabs(clonedTv->getL()  - ls[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(clonedTv->getU()  - us[1]) <= FLOAT_ACCEPTABLE_ERROR);

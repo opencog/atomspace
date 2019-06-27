@@ -40,6 +40,6 @@ INSTALL (FILES
 # Install the auto-generated atom types as well
 ADD_GUILE_MODULE (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/base"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/atoms/atom_types"
 	DEPENDS opencog_atom_types
 	)

@@ -282,9 +282,9 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  */
 bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
-	// If there are no non constant clauses, abort, will use
-	// no_search instead.
-	if (_pattern->clauses.empty()) {
+	// If there are no non-constant clauses, abort; will use
+	// no_search() instead.
+	if (_pattern->mandatory.empty() and _pattern->optionals.empty()) {
 		_search_fail = true;
 		return false;
 	}
@@ -294,18 +294,18 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// start searching with an optional clause. But if there ARE
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
-	bool try_all = true;
+	bool try_optionals = true;
 	for (const Handle& m : _pattern->mandatory)
 	{
 		if (0 == _pattern->evaluatable_holders.count(m))
 		{
-			try_all = false;
+			try_optionals = false;
 			break;
 		}
 	}
 
 	const HandleSeq& clauses =
-		try_all ?  _pattern->cnf_clauses :  _pattern->mandatory;
+		try_optionals ?  _pattern->optionals :  _pattern->mandatory;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by

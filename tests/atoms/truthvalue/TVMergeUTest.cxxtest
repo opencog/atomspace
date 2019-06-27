@@ -197,7 +197,7 @@ public:
                 TS_ASSERT(fabs(mergedTv->get_mean()  - indefiniteMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("mergedTv->get_count() =%f, indefiniteCounts[i] = %f", mergedTv->get_count(), indefiniteCounts[i]);
                 // Counts can be huge.  So take a ratio, and count significant digits.
-                TS_ASSERT(fabs((mergedTv->get_count() / indefiniteCounts[i]) - 1.0d) < 0.000001);
+                TS_ASSERT(fabs((mergedTv->get_count() / indefiniteCounts[i]) - 1.0l) < 0.000001);
 
                 TS_ASSERT(fabs(mergedTv->get_confidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(mergedTv.get() != tv.get());

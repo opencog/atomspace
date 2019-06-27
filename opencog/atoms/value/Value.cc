@@ -24,6 +24,8 @@
 
 #include "Value.h"
 
+#include <sstream>
+
 namespace opencog
 {
 
@@ -32,6 +34,19 @@ std::string oc_to_string(const ValuePtr& vp, const std::string& indent)
 	if (vp == nullptr)
 		return indent + "null";
 	return vp->to_string(indent);
+}
+
+std::string oc_to_string(const ValueSeq& vs, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << vs.size() << std::endl;
+	size_t i = 0;
+	for (const ValuePtr& vp : vs) {
+		ss << indent << "value[" << i << "]:" << std::endl
+		   << oc_to_string(vp, indent + oc_to_string_indent);
+		i++;
+	}
+	return ss.str();
 }
 
 } // ~namespace std

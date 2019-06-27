@@ -106,7 +106,7 @@ public:
 
     void testClone() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TruthValuePtr clonedTv = tvs[i]->clone();
+            TruthValuePtr clonedTv = std::make_shared<const SimpleTruthValue>(*tvs[i]);
             TS_ASSERT(fabs(clonedTv->get_mean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->get_count()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(clonedTv->get_confidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);

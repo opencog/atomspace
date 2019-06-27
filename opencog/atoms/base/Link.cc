@@ -211,3 +211,20 @@ void Link::check_outgoing_type(int index, const Type& type)
     check_type(getOutgoingAtom(index), type, location);
 }
 
+/// Place `this` into the incoming set of each outgoing atom.
+///
+void Link::install()
+{
+	LinkPtr llc(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->insert_atom(llc);
+}
+
+void Link::remove()
+{
+	LinkPtr lll(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->remove_atom(lll);
+}

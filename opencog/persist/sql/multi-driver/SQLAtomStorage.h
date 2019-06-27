@@ -71,6 +71,8 @@ class SQLAtomStorage : public BackingStore
 
 		void init(const char *);
 		std::string _uri;
+		int _server_version;
+		void get_server_version(void);
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to

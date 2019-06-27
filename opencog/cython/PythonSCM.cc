@@ -73,7 +73,11 @@ PythonSCM::PythonSCM()
 	// Tell python where the atomspace python modules are installed.
 	// Without this, one gets the common cryptic error message:
 	//     ImportError: No module named 'opencog'
-	const char* currpath = secure_getenv("PYTHONPATH");
+	#if HAVE_SECURE_GETENV
+		const char* currpath = secure_getenv("PYTHONPATH");
+	#else
+		const char* currpath = getenv("PYTHONPATH");
+	#endif
 	if (currpath)
 	{
 		std::string prep = currpath;

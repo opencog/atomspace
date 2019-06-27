@@ -57,6 +57,8 @@ protected:
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
+    virtual void install();
+    virtual void remove();
     virtual ContentHash compute_hash() const;
 
 public:

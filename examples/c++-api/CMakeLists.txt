@@ -5,7 +5,7 @@ ADD_EXECUTABLE(ureexample
 	UREExample
 )
 TARGET_LINK_LIBRARIES(ureexample
-	ruleengine
+	ure
 	atomspace
 	${COGUTIL_LIBRARY}
 )

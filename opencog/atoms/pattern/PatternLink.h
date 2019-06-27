@@ -93,18 +93,16 @@ protected:
 	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
+	bool record_literal(const Handle&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
-	void unbundle_clauses_rec(const TypeSet&,
-	                          const HandleSeq&);
+	void unbundle_clauses_rec(const Handle&,
+	                          const TypeSet&,
+	                          bool reverse=false);
 
-	void locate_defines(HandleSeq& clauses);
-	void locate_globs(HandleSeq& clauses);
-	void validate_clauses(HandleSet& vars,
-	                      HandleSeq& clauses,
-	                      HandleSeq& constants);
-
-	void extract_optionals(const HandleSet &vars,
-	                       const HandleSeq &component);
+	void locate_defines(const HandleSeq& clauses);
+	void locate_globs(const HandleSeq& clauses);
+	void validate_variables(HandleSet& vars,
+	                        const HandleSeq& clauses);
 
 	void unbundle_virtual(const HandleSet& vars,
 	                      const HandleSeq& clauses,
@@ -152,7 +150,7 @@ public:
 	            const VariableTypeMap& typemap,
 	            const GlobIntervalMap& intervalmap,
 	            const HandleSeq& component,
-	            const HandleSet& optionals);
+	            const HandleSeq& optionals);
 
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,
@@ -167,8 +165,6 @@ public:
 	// Return the list of fixed and virtual clauses we are holding.
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
-
-	void remove_constant_clauses(void);
 
 	bool satisfy(PatternMatchCallback&) const;
 

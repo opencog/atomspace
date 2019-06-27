@@ -125,7 +125,7 @@ private:
     std::atomic_int _num_nested;
     UUID _uuid;
 
-    // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
+    // The AtomSpace that is holding us (if any).
     AtomSpace* _as;
     bool _transient;
 
@@ -135,8 +135,6 @@ private:
      */
     AtomTable& operator=(const AtomTable&) = delete;
     AtomTable(const AtomTable&) = delete;
-
-    AtomPtr cast_factory(Type atom_type, AtomPtr atom);
 
 public:
 
