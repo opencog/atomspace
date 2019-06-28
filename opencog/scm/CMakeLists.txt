@@ -33,11 +33,15 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
-# Create two copies of (opencog as-config) module, one for build dir, one for install
+# Create three copies of (opencog as-config) module:
 SET(SCM_IN_BUILD_DIR "#t")
+# One for build dir
 CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${GUILE_BIN_DIR}/opencog/as-config.scm)
+# and one for in-place testing of source scm modules
 CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${CMAKE_SOURCE_DIR}/opencog/scm/opencog/as-config.scm)
+
 SET(SCM_IN_BUILD_DIR "#f")
+# One for installing
 CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${GUILE_BIN_DIR}/opencog/as-config-installable.scm)
 INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
 
