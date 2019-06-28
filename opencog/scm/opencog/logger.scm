@@ -6,10 +6,9 @@
 
 (define-module (opencog logger))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-logger "liblogger") "opencog_logger_init")
 
-(load-extension "liblogger" "opencog_logger_init")
 
 ; Declare everything the C++ library provides; this avoid compile-time
 ; warnings when this file gets compiled.

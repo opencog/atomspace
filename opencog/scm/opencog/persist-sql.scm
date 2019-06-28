@@ -4,9 +4,10 @@
 
 (define-module (opencog persist-sql))
 
-(use-modules (opencog))
 
-(load-extension "libpersist-sql" "opencog_persist_sql_init")
+(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
 (export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
 	sql-store sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)

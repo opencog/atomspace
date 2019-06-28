@@ -33,6 +33,14 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
+# Create two copies of (opencog as-config) module, one for build dir, one for install
+SET(SCM_IN_BUILD_DIR "#t")
+CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${GUILE_BIN_DIR}/opencog/as-config.scm)
+CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${CMAKE_SOURCE_DIR}/opencog/scm/opencog/as-config.scm)
+SET(SCM_IN_BUILD_DIR "#f")
+CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${GUILE_BIN_DIR}/opencog/as-config-installable.scm)
+INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
+
 # These guile modules spew "libBlahBlah.so not found" errors,
 # if the user failed to actually build the needed component.
 # So, do not install them if the component is missing.

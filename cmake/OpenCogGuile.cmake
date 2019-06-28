@@ -29,13 +29,13 @@ IF (NOT DEFINED GUILE_SITE_DIR)
 ENDIF()
 ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 
+SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
+
 # ----------------------------------------------------------------------------
 # This configures the install and binary paths for each file, passed to it,
 # based on the value of the variables MODULE_NAME, MODULE_FILE_DIR_PATH and
 # MODULE_DIR_PATH in the PARENT_SCOPE.
 FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME DIR_PATH)
-    SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
-
     # Copy files into build directory mirroring the install path structure,
     # and also set the install path.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")

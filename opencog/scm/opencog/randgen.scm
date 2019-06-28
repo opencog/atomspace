@@ -6,10 +6,9 @@
 
 (define-module (opencog randgen))
 
-; We need this to set the LTDL_LIBRARY_PATH
 (use-modules (opencog))
-
-(load-extension "librandgen" "opencog_randgen_init")
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-exec "librandgen") "opencog_randgen_init")
 
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-randgen-set-seed! 'documentation
