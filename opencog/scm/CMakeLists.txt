@@ -42,7 +42,7 @@ CONFIGURE_FILE(opencog/as-config.scm.in ${CMAKE_SOURCE_DIR}/opencog/scm/opencog/
 
 SET(SCM_IN_BUILD_DIR "#f")
 # One for installing
-CONFIGURE_FILE(opencog/as-config_TEMPLATE.scm ${GUILE_BIN_DIR}/opencog/as-config-installable.scm)
+CONFIGURE_FILE(opencog/as-config.scm.in ${GUILE_BIN_DIR}/opencog/as-config-installable.scm)
 INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
 
 # These guile modules spew "libBlahBlah.so not found" errors,
