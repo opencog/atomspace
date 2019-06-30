@@ -224,7 +224,8 @@ void SchemeSmob::module_init(void*)
 {
 	// The portion of (opencog) done in C++
 	register_procs();
-	// For testing - to avoid requiring manual change of guile load path.
+	// XXX FIXME This is a hack for testing.
+	// It avoids requiring a manual change of guile load path.
 	// Alternatives to always adding this path would be:
 	// - make ctest manage the environment variable GUILE_LOAD_PATH during testing
 	// - set GUILE_LOAD_PATH env var in each test, before initialising Scheme
