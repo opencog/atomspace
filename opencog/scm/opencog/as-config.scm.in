@@ -17,7 +17,7 @@
 
 (define-public opencog-ext-path-smob "@CMAKE_BINARY_DIR@/opencog/guile/")
 (define-public opencog-ext-path-exec "@CMAKE_BINARY_DIR@/opencog/atoms/execution/")
-(define-public opencog-ext-path-dist-gearman "@CMAKE_BINARY_DIR@/opencog/persist/gearman/libdist-gearman.so")
+(define-public opencog-ext-path-dist-gearman "@CMAKE_BINARY_DIR@/opencog/persist/gearman/")
 (define-public opencog-ext-path-logger "@CMAKE_BINARY_DIR@/opencog/guile/modules/")
 (define-public opencog-ext-path-persist "@CMAKE_BINARY_DIR@/opencog/persist/guile/")
 (define-public opencog-ext-path-persist-sql "@CMAKE_BINARY_DIR@/opencog/persist/sql/multi-driver/")
