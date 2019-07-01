@@ -21,6 +21,11 @@ ADD_GUILE_MODULE (FILES
 
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
+
 	opencog/extension.scm
 	opencog/logger.scm
 	opencog/randgen.scm
@@ -33,17 +38,7 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
-# Create three copies of (opencog as-config) module:
-SET(SCM_IN_BUILD_DIR "#t")
-# One for build dir
-CONFIGURE_FILE(opencog/as-config.scm.in ${GUILE_BIN_DIR}/opencog/as-config.scm)
-# and one for in-place testing of source scm modules
-CONFIGURE_FILE(opencog/as-config.scm.in ${CMAKE_SOURCE_DIR}/opencog/scm/opencog/as-config.scm)
 
-SET(SCM_IN_BUILD_DIR "#f")
-# One for installing
-CONFIGURE_FILE(opencog/as-config.scm.in ${GUILE_BIN_DIR}/opencog/as-config-installable.scm)
-INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
 
 # These guile modules spew "libBlahBlah.so not found" errors,
 # if the user failed to actually build the needed component.

@@ -178,3 +178,116 @@ FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
 
     ENDIF()
 ENDFUNCTION(ADD_GUILE_TEST)
+
+# ----------------------------------------------------------------------------
+# Declare a new dummy target representing path configuration for Guile extensions.
+# This must be called, before calling ADD_GUILE_EXTENSION and WRITE_GUILE_CONFIG.
+#
+# CONFIG_TARGET: The new target name
+#
+# MODULE_NAME: A space separated string representing the full guile module.
+# e.g. "opencog as-config". This is passed to (define-module ...) and is used
+# for importing extension paths.
+#
+# TEST_ENV_VAR: An environment variable name. This env var will be checked at run time,
+# and if true, it will force the process to exit if the config is loaded from the system
+# path. This is to ensure that when testing a local build, the system path is not
+# inadvertently taking precendence.
+#
+FUNCTION(DECLARE_GUILE_CONFIG_TARGET CONFIG_TARGET MODULE_NAME TEST_ENV_VAR)
+    ADD_CUSTOM_TARGET(${CONFIG_TARGET} ALL)
+    SET_TARGET_PROPERTIES(${CONFIG_TARGET} PROPERTIES MODULE_NAME "${MODULE_NAME}")
+    SET_TARGET_PROPERTIES(${CONFIG_TARGET} PROPERTIES TEST_ENV_VAR "${TEST_ENV_VAR}")
+ENDFUNCTION(DECLARE_GUILE_CONFIG_TARGET)
+
+# ----------------------------------------------------------------------------
+# Link a compiled guile extension to the config target
+#
+# CONFIG_TARGET: The target previously declared with DECLARE_GUILE_CONFIG
+# 
+# EXTENSION_TARGET: A shared library target that can be loaded as a guile extension.
+#
+# SYMBOL_NAME: The guile symbol to use to define the path to the extension library.
+# In the build directory, this will point to the exact path. When installed this will
+# point to OpenCog's shared library install dir.
+#
+FUNCTION(ADD_GUILE_EXTENSION CONFIG_TARGET EXTENSION_TARGET SYMBOL_NAME)
+    GET_TARGET_PROPERTY(EXT_LIB_PATH ${EXTENSION_TARGET} BINARY_DIR)
+    GET_TARGET_PROPERTY(EXT_LIBS ${CONFIG_TARGET} EXT_LIBS)
+    IF (EXT_LIBS)
+        LIST(APPEND EXT_LIBS "${SYMBOL_NAME}|${EXT_LIB_PATH}")
+    ELSE(EXT_LIBS)
+        SET(EXT_LIBS "${SYMBOL_NAME}|${EXT_LIB_PATH}")
+    ENDIF (EXT_LIBS)
+    SET_TARGET_PROPERTIES(${CONFIG_TARGET} PROPERTIES EXT_LIBS "${EXT_LIBS}")
+ENDFUNCTION(ADD_GUILE_EXTENSION)
+
+# ----------------------------------------------------------------------------
+# Write out a config module, based on all extensions linked to the config target.
+#
+# OUTPUT_FILE: Where to write the file
+#
+# CONFIG_TARGET: The target previously declared with DECLARE_GUILE_CONFIG
+#
+# SCM_IN_BUILD_DIR: Whether to generate a config file for the build dir or for
+# installing to a system dir.
+#
+FUNCTION(WRITE_GUILE_CONFIG OUTPUT_FILE CONFIG_TARGET SCM_IN_BUILD_DIR)
+    set(SCM_BUILD_PATHS "")
+    set(SCM_INSTALL_PATHS "")
+    get_target_property(SYMBOL_PATH_LIST ${CONFIG_TARGET} EXT_LIBS)
+    get_target_property(MODULE_NAME ${CONFIG_TARGET} MODULE_NAME)
+    get_target_property(TEST_ENV_VAR ${CONFIG_TARGET} TEST_ENV_VAR)
+    foreach(PATH_PAIR ${SYMBOL_PATH_LIST})
+        string(REPLACE "|" ";" SYMBOL_AND_PATH ${PATH_PAIR})
+        list(GET SYMBOL_AND_PATH 0 SYMBOL)
+        list(GET SYMBOL_AND_PATH 1 LIBPATH)
+        
+        set(SCM_PATHS "${SCM_PATHS}(define-public ${SYMBOL} \"${LIBPATH}/\")")
+        if(WIN32)
+            set(SCM_PATHS "${SCM_PATHS}\r\n")
+        else()
+            set(SCM_PATHS "${SCM_PATHS}\n")
+        endif()
+        
+        set(INSTALL_PATHS "${INSTALL_PATHS}        (set! ${SYMBOL} install-location)")
+        if(WIN32)
+            set(INSTALL_PATHS "${INSTALL_PATHS}\r\n")
+        else()
+            set(INSTALL_PATHS "${INSTALL_PATHS}\n")
+        endif()
+    endforeach()
+
+    IF (SCM_IN_BUILD_DIR)
+        SET(SCM_IN_BUILD_DIR_BOOL "#t")
+    ELSE (SCM_IN_BUILD_DIR)
+        SET(SCM_IN_BUILD_DIR_BOOL "#f")
+    ENDIF (SCM_IN_BUILD_DIR)
+
+    # It would be nice to use CONFIGURE_FILE, but this cmake module
+    # will be used downstream, so we include the template inline.
+    SET(CONFIG_SRC "
+(define-module (${MODULE_NAME}))
+; CMAKE uses this tag generate different files for in-build
+(define in-build-dir ${SCM_IN_BUILD_DIR_BOOL})
+(define install-location \"${CMAKE_INSTALL_PREFIX}/lib/opencog/\")
+
+${SCM_PATHS}
+
+(if (not in-build-dir)
+    (begin
+        (let ( (is-testing (getenv \"${TEST_ENV_VAR}\")) )
+            (if (eq? is-testing \"1\")
+                (exit)
+            ))
+    
+        ; When installed, all the modules have the same path
+${INSTALL_PATHS}
+    
+    )
+)
+")
+    
+    FILE(WRITE "${OUTPUT_FILE}" "${CONFIG_SRC}")
+    
+ENDFUNCTION(WRITE_GUILE_CONFIG)
