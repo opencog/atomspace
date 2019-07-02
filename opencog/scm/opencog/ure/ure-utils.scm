@@ -21,6 +21,7 @@
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
 ;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
 ;; -- ure-set-complexity-penalty -- Set the URE:complexity-penalty parameter
+;; -- ure-set-jobs -- Set the URE:jobs parameter
 ;; -- ure-set-fc-retry-exhausted-sources -- Set the URE:FC:retry-exhausted-sources parameter
 ;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
 ;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
@@ -79,6 +80,7 @@
                  (attention-allocation *unspecified*)
                  (maximum-iterations *unspecified*)
                  (complexity-penalty *unspecified*)
+                 (jobs *unspecified*)
                  (fc-retry-exhausted-sources *unspecified*))
 "
   Forward Chainer call.
@@ -89,6 +91,7 @@
                  #:attention-allocation aa
                  #:maximum-iterations mi
                  #:complexity-penalty cp
+                 #:jobs jb
                  #:fc-retry-exhausted-sources res)
 
   rbs: ConceptNode representing a rulebase.
@@ -107,11 +110,16 @@
 
   mi: [optional] Maximum number of iterations.
 
-  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+  cp: [optional] Complexity penalty. Controls breadth vs depth search.
       A high value means more breadth. A value of 0 means an equilibrium
       between breadth and depth. A negative value means more depth.
       Possible range is (-inf, +inf) but it's rarely necessary in practice
       to go outside of [-10, 10].
+
+  jb: [optional] Number of jobs to run in parallel. Can speed up reasoning,
+      note that this may alter the results, especially for the forward chainer
+      as the output of a rule application may depend on the output of the other
+      rules.
 
   res: [optional] Whether exhausted sources should be retried. A source is
        exhausted if all its valid rules (so that at least one rule premise
@@ -132,6 +140,8 @@
       (ure-set-maximum-iterations rbs maximum-iterations))
   (if (not (unspecified? complexity-penalty))
       (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? jobs))
+      (ure-set-jobs rbs jobs))
   (if (not (unspecified? fc-retry-exhausted-sources))
       (ure-set-fc-retry-exhausted-sources rbs fc-retry-exhausted-sources))
 
@@ -147,6 +157,7 @@
                  (attention-allocation *unspecified*)
                  (maximum-iterations *unspecified*)
                  (complexity-penalty *unspecified*)
+                 (jobs *unspecified*)
                  (bc-maximum-bit-size *unspecified*)
                  (bc-mm-complexity-penalty *unspecified*)
                  (bc-mm-compressiveness *unspecified*))
@@ -184,11 +195,16 @@
 
   mi: [optional] Maximum number of iterations.
 
-  cp: [optiona] Complexity penalty. Controls breadth vs depth search.
+  cp: [optional] Complexity penalty. Controls breadth vs depth search.
       A high value means more breadth. A value of 0 means an equilibrium
       between breadth and depth. A negative value means more depth.
       Possible range is (-inf, +inf) but it's rarely necessary in practice
       to go outside of [-10, 10].
+
+  jb: [optional] Number of jobs to run in parallel. Can speed up reasoning,
+      note that this may alter the results, especially for the forward chainer
+      as the output of a rule application may depend on the output of the other
+      rules.
 
   mbs: [optional] Maximum size of the inference tree pool to evolve.
 
@@ -210,6 +226,8 @@
       (ure-set-maximum-iterations rbs maximum-iterations))
   (if (not (unspecified? complexity-penalty))
       (ure-set-complexity-penalty rbs complexity-penalty))
+  (if (not (unspecified? jobs))
+      (ure-set-jobs rbs jobs))
   (if (not (unspecified? bc-maximum-bit-size))
       (ure-set-bc-maximum-bit-size rbs bc-maximum-bit-size))
   (if (not (unspecified? bc-mm-complexity-penalty))
@@ -567,6 +585,19 @@
 "
   (ure-set-num-parameter rbs "URE:complexity-penalty" value))
 
+(define (ure-set-jobs rbs value)
+"
+  Set the URE:jobs parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:jobs\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:jobs" value))
+
 (define (ure-set-fc-retry-exhausted-sources rbs value)
 "
   Set the URE:FC:retry-exhausted-sources parameter of a given RBS
@@ -861,6 +892,7 @@
           ure-set-attention-allocation
           ure-set-maximum-iterations
           ure-set-complexity-penalty
+          ure-set-jobs
           ure-set-fc-retry-exhausted-sources
           ure-set-bc-maximum-bit-size
           ure-set-bc-mm-complexity-penalty

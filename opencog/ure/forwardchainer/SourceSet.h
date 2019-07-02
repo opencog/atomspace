@@ -25,8 +25,10 @@
 #define _OPENCOG_SOURCESET_H_
 
 #include <vector>
+#include <mutex>
 
 #include <boost/operators.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
@@ -97,6 +99,10 @@ public:
 
 	// Rules so far applied to that source
 	RuleSet rules;
+
+private:
+	// NEXT TODO: subdivide in smaller and shared mutexes
+	mutable std::mutex _whole_mutex;
 };
 
 /**
@@ -140,9 +146,8 @@ public:
 	// because the source being expanded is modified (it keeps track of
 	// its expansion rules). Alternatively we could use a set and
 	// define Sources::rules as mutable.
-	typedef std::vector<Source> Sources;
-	Sources sources;             // TODO: maybe directly have SourceSet
-                                // inherits from vector<Source>
+	typedef boost::ptr_vector<Source> Sources;
+	Sources sources;
 
 	// True iff all sources have been tried
 	bool exhausted;
@@ -158,9 +163,12 @@ private:
 	const UREConfig& _config;
 };
 
-std::string oc_to_string(const Source& source, const std::string& indent=empty_string);
-std::string oc_to_string(const std::vector<Source>& sources, const std::string& indent=empty_string);
-std::string oc_to_string(const SourceSet& sources, const std::string& indent=empty_string);
+std::string oc_to_string(const Source& source,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const SourceSet::Sources& sources,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const SourceSet& sources,
+                         const std::string& indent=empty_string);
 
 } // ~namespace opencog
 
