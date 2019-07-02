@@ -230,7 +230,7 @@ void SchemeSmob::module_init(void*)
 	// - make ctest manage the environment variable GUILE_LOAD_PATH during testing
 	// - set GUILE_LOAD_PATH env var in each test, before initialising Scheme
 	// - pass an optional load path through SchemeEval/SchemeSmob
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
+	//scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
 
 	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/atom_types/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
