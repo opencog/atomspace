@@ -62,6 +62,7 @@ public:
 	RuleSet& get_rules();
 	int get_maximum_iterations() const;
 	double get_complexity_penalty() const;
+	int get_jobs() const;
 	// FC
 	bool get_retry_exhausted_sources() const;
 	// BC
@@ -79,10 +80,11 @@ public:
 
 	// Common
 	void set_maximum_iterations(int);
+	void set_complexity_penalty(double);
+	void set_jobs(int);
 	// FC
 	void set_retry_exhausted_sources(bool);
 	// BC
-	void set_complexity_penalty(double);
 	void set_mm_complexity_penalty(double);
 	void set_mm_compressiveness(double);
 
@@ -99,9 +101,11 @@ public:
 	// parameter
 	static const std::string max_iter_name;
 
-	// Name of the complexity penalty parameter for the Backward
-	// Chainer
+	// Name of the complexity penalty parameter
 	static const std::string complexity_penalty_name;
+
+	// Name of the jobs parameter
+	static const std::string jobs_name;
 
 	// Name of the PredicateNode outputting whether sources should be
 	// retried after exhaustion
@@ -133,6 +137,13 @@ private:
 		// complexity penalty. One can use negative values, in such
 		// case, the behavior is a run away depth search.
 		double complexity_penalty;
+
+		// This parameter controls the number of jobs used during
+		// reasoning. Note that the number of jobs can have an effect on
+		// the results, especially for the forward chainer because the
+		// result of applying a rule may depend on the output of
+		// applying other rules.
+		int jobs;
 	};
 	CommonParameters _common_params;
 
