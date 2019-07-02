@@ -36,11 +36,13 @@ Source::Source(const Handle& bdy, const Handle& vdcl, double cpx)
 
 bool Source::operator==(const Source& other) const
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	return body == other.body && vardecl == other.vardecl;
 }
 
 bool Source::operator<(const Source& other) const
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	// Sort by complexity to so that simpler sources come first. Then
 	// by content. Makes it easier to prune by complexity. It should
 	// also make sampling a bit faster. And finally the user probabably
@@ -54,12 +56,14 @@ bool Source::operator<(const Source& other) const
 
 void Source::reset_exhausted()
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	exhausted = false;
 	rules.clear();
 }
 
 bool Source::is_exhausted(const Rule& pos_rule) const
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	for (const Rule& rule : rules)
 		if (pos_rule.is_alpha_equivalent(rule))
 			return true;
@@ -68,11 +72,13 @@ bool Source::is_exhausted(const Rule& pos_rule) const
 
 double Source::expand_complexity(double prob) const
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	return complexity - log2(prob);
 }
 
 std::string Source::to_string(const std::string& indent) const
 {
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	std::stringstream ss;
 	ss << indent << "body:" << std::endl
 	   << oc_to_string(body, indent + oc_to_string_indent) << std::endl
@@ -98,7 +104,7 @@ SourceSet::SourceSet(const UREConfig& config,
 			exhausted = true;
 		} else {
 			for (const Handle& src : init_sources)
-				sources.emplace_back(src, init_vardecl);
+				sources.push_back(new Source(src, init_vardecl));
 		}
 	} else {
 		exhausted = true;
@@ -134,17 +140,20 @@ void SourceSet::insert(const HandleSet& products, const Source& src, double prob
 
 	// Insert all new sources
 	for (const Handle& product :  products) {
-		Source new_src(product, empty_variable_list, new_cpx);
+		Source* new_src = new Source(product, empty_variable_list, new_cpx);
 
 		// Make sure it isn't already in the sources
-		if (boost::find(sources, new_src) != sources.end()) {
+		if (boost::find(sources, *new_src) != sources.end()) {
 			LAZY_URE_LOG_DEBUG << "The following source is already in the population: "
-			                   << new_src.body->id_to_string();
+			                   << new_src->body->id_to_string();
+			delete new_src;
 			continue;
 		}
 
 		// Otherwise, insert it while preserving the order
-		sources.insert(boost::lower_bound(sources, new_src), new_src);
+		auto ptr_less = [](const Source& ls, const Source* rs) {
+			                return ls < *rs; };
+		sources.insert(boost::lower_bound(sources, new_src, ptr_less), new_src);
 	}
 }
 
@@ -183,7 +192,7 @@ std::string oc_to_string(const Source& src, const std::string& indent)
 	return src.to_string(indent);
 }
 
-std::string oc_to_string(const std::vector<Source>& sources, const std::string& indent)
+std::string oc_to_string(const SourceSet::Sources& sources, const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "size = " << sources.size() << std::endl;
