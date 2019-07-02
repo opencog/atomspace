@@ -79,7 +79,6 @@ void ForwardChainer::init(const Handle& source,
 	if (_search_focus_set) {
 		for (const Handle& h : focus_set)
 			_focus_set_as.add_atom(h);
-		std::shared_lock lock(_sources_mutex);
 		for (const Source& src : _sources.sources)
 			_focus_set_as.add_atom(src.body);
 	}
@@ -163,6 +162,7 @@ void ForwardChainer::do_step()
 
 	// Select source
 	Source* source = select_source();
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	if (source) {
 		LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl
 		                   << source->to_string();
@@ -240,6 +240,8 @@ HandleSet ForwardChainer::get_chaining_result()
 
 Source* ForwardChainer::select_source()
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
+
 	std::vector<double> weights = _sources.get_weights();
 
 	// Debug log
@@ -268,7 +270,8 @@ Source* ForwardChainer::select_source()
 			ure_logger().debug() << "Reset all exhausted flags to retry them";
 			_sources.reset_exhausted();
 			// Try again
-			select_source();
+			// NEXT TODO: be careful of locks
+			return select_source();
 		} else {
 			_sources.exhausted = true;
 			return nullptr;
@@ -314,6 +317,8 @@ RuleProbabilityPair ForwardChainer::select_rule(const Handle& h)
 
 RuleProbabilityPair ForwardChainer::select_rule(Source& source)
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
+
 	const RuleSet valid_rules = get_valid_rules(source);
 
 	// Log valid rules
@@ -370,6 +375,8 @@ RuleProbabilityPair ForwardChainer::select_rule(const RuleSet& valid_rules)
 
 HandleSet ForwardChainer::apply_rule(const Rule& rule, Source& source)
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
+
 	// Keep track of rule application to not do it again, and apply rule
 	source.rules.insert(rule);
 	return apply_rule(rule);
@@ -440,6 +447,7 @@ void ForwardChainer::validate(const Handle& source)
 
 void ForwardChainer::expand_meta_rules()
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	size_t rules_size = _rules.size();

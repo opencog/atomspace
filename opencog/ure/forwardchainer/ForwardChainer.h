@@ -26,7 +26,7 @@
 
 #include <atomic>
 #include <mutex>
-#include <shared_mutex>
+// #include <shared_mutex>
 
 #include "../UREConfig.h"
 #include "SourceSet.h"
@@ -73,8 +73,11 @@ private:
 
 	std::atomic<bool> _search_focus_set;
 
+	// NEXT TODO: subdivide in smaller and shared mutexes
+	mutable std::mutex _whole_mutex;
+	mutable std::mutex _part_mutex;
+
 	// Population of sources to expand forward
-	mutable std::shared_mutex _sources_mutex;
 	SourceSet _sources;
 
 	FCStat _fcstat;
@@ -173,7 +176,9 @@ public:
 	void do_chain();
 
 	/**
-	 * Recursively call do_step till termination
+	 * Recursively call do_step till termination.
+	 *
+	 * NEXT TODO: replace by a worker pool.
 	 */
 	void do_step_rec();
 
