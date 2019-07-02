@@ -118,6 +118,7 @@ void ForwardChainerUTest::test_do_chain_deduction()
 	// Get the ConceptNode corresponding to the rule-based system to test
 	Handle rbs = an(CONCEPT_NODE, "fc-deduction-rule-base");
 	ForwardChainer fc(_as, rbs, AB);
+	fc.get_config().set_jobs(4);
 	// Run forward chainer
 	fc.do_chain();
 

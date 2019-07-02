@@ -96,7 +96,6 @@ void ForwardChainer::init(const Handle& source,
 
 	// Multithreading params
 	_jobs = 0;
-	_max_jobs = 4;
 }
 
 UREConfig& ForwardChainer::get_config()
@@ -122,7 +121,7 @@ void ForwardChainer::do_chain()
 		return;
 	}
 
-	if (1 < _max_jobs)
+	if (1 < (unsigned)_config.get_jobs())
 		ure_logger().set_thread_id_flag(true);
 
 	// Call do_step till termination
@@ -133,8 +132,12 @@ void ForwardChainer::do_chain()
 
 void ForwardChainer::do_step_rec()
 {
+	// NEXT TODO: problem is free threads only get reclaimed after
+	// do_step completes.
+	//
+	// Solution: use opencog::pool
 	if (not termination()) {
-		if (_jobs < _max_jobs) {
+		if ((_jobs + 1) < (unsigned)_config.get_jobs()) {
 			auto policy = std::launch::async;
 			_jobs++;
 			auto ft = std::async(policy, [&]() { do_step(); });
@@ -142,8 +145,6 @@ void ForwardChainer::do_step_rec()
 			ft.wait();
 			_jobs--;
 		} else {
-			// NEXT TODO: problem is free threads only get reclaimed
-			// after do_step completes
 			do_step();
 			do_step_rec();
 		}
