@@ -25,6 +25,7 @@
 #define _OPENCOG_SOURCESET_H_
 
 #include <vector>
+#include <mutex>
 
 #include <boost/operators.hpp>
 
@@ -97,6 +98,10 @@ public:
 
 	// Rules so far applied to that source
 	RuleSet rules;
+
+private:
+	// NEXT TODO: subdivide in smaller and shared mutexes
+	mutable std::mutex _whole_mutex;
 };
 
 /**
