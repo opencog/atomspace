@@ -278,7 +278,7 @@ Source* ForwardChainer::select_source()
 
 	// Sample sources according to this distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return &rand_element(_sources.sources, dist);
+	return &*std::next(_sources.sources.begin(), dist(randGen()));
 }
 
 RuleSet ForwardChainer::get_valid_rules(const Source& source)
