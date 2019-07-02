@@ -186,12 +186,11 @@ void ForwardChainer::do_step()
 	// Apply rule on source
 	HandleSet products = apply_rule(rule, *source);
 
-	// Save trace (before inserting new sources because it will cause
-	// the source pointer to be invalid).
-	_fcstat.add_inference_record(local_iteration, source->body, rule, products);
-
 	// Insert the produced sources in the population of sources
 	_sources.insert(products, *source, prob);
+
+	// Save trace and results
+	_fcstat.add_inference_record(local_iteration, source->body, rule, products);
 }
 
 bool ForwardChainer::termination()
