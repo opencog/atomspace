@@ -1353,7 +1353,11 @@ void PythonEval::add_modules_from_path(std::string pathString)
         // If the resulting path is a directory or a regular file,
         // then push to loading list.
         struct stat finfo;
-        stat(abspath.c_str(), &finfo);
+        int stat_ret = stat(abspath.c_str(), &finfo);
+        
+        if (stat_ret != 0)
+            return;
+
         if (S_ISDIR(finfo.st_mode)) {
             found = true;
             dirs.push_back(abspath);
@@ -1423,15 +1427,21 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     gstate = PyGILState_Ensure();
 
     struct stat finfo;
-    stat(pathString.c_str(), &finfo);
-
-    if (S_ISDIR(finfo.st_mode))
-        add_module_directory(pathString);
-    else if (S_ISREG(finfo.st_mode))
-        add_module_file(pathString);
-    else
+    int stat_ret = stat(pathString.c_str(), &finfo);
+    
+    if (stat_ret != 0)
         logger().warn() << "Python module path \'" << pathString
                         << "\' can't be found";
+
+    {
+        if (S_ISDIR(finfo.st_mode))
+            add_module_directory(pathString);
+        else if (S_ISREG(finfo.st_mode))
+            add_module_file(pathString);
+        else
+            logger().warn() << "Python module path \'" << pathString
+                            << "\' can't be found";
+    }
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
