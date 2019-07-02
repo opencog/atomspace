@@ -1430,9 +1430,11 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     int stat_ret = stat(pathString.c_str(), &finfo);
     
     if (stat_ret != 0)
+    {
         logger().warn() << "Python module path \'" << pathString
                         << "\' can't be found";
-
+    }
+    else
     {
         if (S_ISDIR(finfo.st_mode))
             add_module_directory(pathString);
