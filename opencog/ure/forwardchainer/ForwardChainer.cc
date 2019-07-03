@@ -240,7 +240,7 @@ HandleSet ForwardChainer::get_chaining_result()
 
 Source* ForwardChainer::select_source()
 {
-	std::lock_guard<std::mutex> lock(_part_mutex);
+	std::unique_lock<std::mutex> lock(_part_mutex);
 
 	std::vector<double> weights = _sources.get_weights();
 
@@ -270,7 +270,7 @@ Source* ForwardChainer::select_source()
 			ure_logger().debug() << "Reset all exhausted flags to retry them";
 			_sources.reset_exhausted();
 			// Try again
-			// NEXT TODO: be careful of locks
+			lock.unlock();
 			return select_source();
 		} else {
 			_sources.exhausted = true;
