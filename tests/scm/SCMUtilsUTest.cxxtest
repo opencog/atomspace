@@ -93,7 +93,7 @@ void SCMUtilsUTest::test_utils(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test cog-atom-incr ---------------------------------
+	// Test cog-inc-count! ---------------------------------
 	Handle counter = evaluator->eval_h("counter");
 	CHKERR;
 
@@ -110,6 +110,24 @@ void SCMUtilsUTest::test_utils(void)
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->get_count()));
+
+	// Test cog-inc-value! ---------------------------------
+
+	evaluator->eval("(test-incr-value)");
+	CHKERR;
+	evaluator->eval("(test-incr-value)");
+	CHKERR;
+	evaluator->eval("(test-incr-value)");
+	CHKERR;
+
+	Handle key = evaluator->eval_h("key");
+	CHKERR;
+	ValuePtr v = counter->getValue(key);
+
+	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, v->get_type());
+	FloatValuePtr fv(FloatValueCast(v));
+	double cnt = fv->value()[3];
+	TSM_ASSERT("wrong value found", fabs(cnt-1.5) < 0.00001);
 
 	// Test cog-get-partner ------------------------------
 	Handle recount = evaluator->eval_h("recount");
