@@ -21,11 +21,6 @@ ADD_GUILE_MODULE (FILES
 
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
-)
-
-ADD_GUILE_MODULE (FILES
-
 	opencog/extension.scm
 	opencog/logger.scm
 	opencog/randgen.scm
@@ -37,8 +32,6 @@ ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
-
-
 
 # These guile modules spew "libBlahBlah.so not found" errors,
 # if the user failed to actually build the needed component.
