@@ -527,15 +527,42 @@
 
 (set-procedure-property! cog-inc-count! 'documentation
 "
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT
+  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
+
+  Increment the count on a CountTruthValue by CNT. The mean and
+  confidence values are left untouched.  CNT may be any floating-point
+  number (positive or negative).
 
   If the current truth value on the ATOM is not a CountTruthValue,
   then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.  The mean and confidence values are left
-  untouched. CNT may be any floating-point number.
+  count set to CNT.
 
   Example usage:
      (cog-inc-count! (ConceptNode \"Answer\") 42.0)
+
+  See also: cog-inc-value! for a generic version
+")
+
+(set-procedure-property! cog-inc-value! 'documentation
+"
+  cog-inc-value! ATOM KEY CNT REF -- Increment value on ATOM by CNT.
+
+  The REF location of the FloatValue at KEY is incremented by CNT.
+  CNT may be any floating-point number (positive or negative).
+  The rest of the FloatValue vector is left untouched.
+
+  If the ATOM does not have any Value at KEY, or if the current Value
+  is not a FloatValue, then a new FloatValue of length (REF+1) is
+  created. If the existing FloatValue is too short, it is extended
+  until it is at least (REF+1) in length.
+
+  Example usage:
+     (cog-inc-value!
+         (ConceptNode \"Question\")
+         (PredicateNode \"Answer\")
+         42.0  0)
+
+  See also: cog-inc-count! for a version that increments the count TV.
 ")
 
 (set-procedure-property! cog-mean 'documentation

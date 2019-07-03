@@ -200,7 +200,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	{
 		FloatValuePtr fv(FloatValueCast(v));
 		new_value = fv->value();
-		if (new_value.size() <= ref) new_value.resize(ref+1, 0.0);
+		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
 	}
 	else
 	{
