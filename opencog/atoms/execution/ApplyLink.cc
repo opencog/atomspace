@@ -23,6 +23,7 @@
 #include <opencog/atoms/execution/GroundedFunctionLink.h>
 
 #include "ApplyLink.h"
+#include "Force.h"
 
 using namespace opencog;
 
@@ -45,7 +46,8 @@ ValuePtr ApplyLink::execute(AtomSpace* as, bool silent)
 
 	GroundedFunctionLinkPtr grounded_link =
 		CastFromHandle<GroundedFunctionLink>(getOutgoingAtom(0));
-	ValuePtr args = getOutgoingAtom(1);
+	Handle args = getOutgoingAtom(1);
+	args = opencog::force_execute(as, args, silent);
 	return grounded_link->get_function()(as, args);
 }
 
