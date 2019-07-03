@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
@@ -12,7 +12,7 @@ from test_functions import green_count, red_count
 __author__ = 'Curtis Faith'
 
 
-class BindlinkTest(TestCase):
+class BindlinkTest(unittest.TestCase):
 
     bindlink_atom = None
     getlink_atom = None
@@ -160,3 +160,6 @@ class BindlinkTest(TestCase):
                 )
             )
         self.assertEquals(result, TruthValue(0.6, 0.234))
+
+if __name__ == "__main__":
+    unittest.main()
