@@ -107,11 +107,7 @@ void VectorAPIUTest::setUp(void)
 
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	CHKERR;
-	eval->eval("(add-to-load-path \"../../..\")");
-	CHKERR;
-	eval->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
-	CHKERR;
-
+	
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	CHKERR;
 	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
