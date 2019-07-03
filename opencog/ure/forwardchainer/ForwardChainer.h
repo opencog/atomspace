@@ -21,8 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FORWARDCHAINERX_H_
-#define _OPENCOG_FORWARDCHAINERX_H_
+#ifndef _OPENCOG_FORWARDCHAINER_H_
+#define _OPENCOG_FORWARDCHAINER_H_
+
+#include <atomic>
+#include <mutex>
+// #include <shared_mutex>
 
 #include "../UREConfig.h"
 #include "SourceSet.h"
@@ -65,14 +69,21 @@ private:
 	UREConfig _config;
 
 	// Current iteration
-	int _iteration;
+	std::atomic<int> _iteration;
 
-	bool _search_focus_set;
+	std::atomic<bool> _search_focus_set;
+
+	// NEXT TODO: subdivide in smaller and shared mutexes
+	mutable std::mutex _whole_mutex;
+	mutable std::mutex _part_mutex;
 
 	// Population of sources to expand forward
 	SourceSet _sources;
 
 	FCStat _fcstat;
+
+	std::atomic<unsigned> _jobs;
+	unsigned _max_jobs;
 
 	void init(const Handle& source,
 	          const Handle& vardecl,
@@ -86,7 +97,6 @@ private:
 
 protected:
 	RuleSet _rules; /* loaded rules */
-	HandleSeq _focus_set;
 
 	/**
 	 * choose next source to expand
@@ -166,6 +176,13 @@ public:
 	void do_chain();
 
 	/**
+	 * Recursively call do_step till termination.
+	 *
+	 * NEXT TODO: replace by a worker pool.
+	 */
+	void do_step_rec();
+
+	/**
 	 * Perform a single forward chaining inference step.
 	 */
 	void do_step();
@@ -183,4 +200,4 @@ public:
 
 } // ~namespace opencog
 
-#endif /* _OPENCOG_FORWARDCHAINERX_H_ */
+#endif /* _OPENCOG_FORWARDCHAINER_H_ */

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <future>
+
 #include <opencog/util/random.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -75,11 +77,8 @@ void ForwardChainer::init(const Handle& source,
 
 	// Add focus set atoms and sources to focus_set atomspace
 	if (_search_focus_set) {
-		_focus_set = focus_set;
-
-		for (const Handle& h : _focus_set)
+		for (const Handle& h : focus_set)
 			_focus_set_as.add_atom(h);
-
 		for (const Source& src : _sources.sources)
 			_focus_set_as.add_atom(src.body);
 	}
@@ -93,6 +92,9 @@ void ForwardChainer::init(const Handle& source,
 
 	// Reset the iteration count and max count
 	_iteration = 0;
+
+	// Multithreading params
+	_jobs = 0;
 }
 
 UREConfig& ForwardChainer::get_config()
@@ -118,18 +120,40 @@ void ForwardChainer::do_chain()
 		return;
 	}
 
-	while (not termination())
-	{
-		do_step();
-	}
+	if (1 < (unsigned)_config.get_jobs())
+		ure_logger().set_thread_id_flag(true);
+
+	// Call do_step till termination
+	do_step_rec();
 
 	ure_logger().debug("Finished Forward Chaining");
 }
 
+void ForwardChainer::do_step_rec()
+{
+	// NEXT TODO: problem is free threads only get reclaimed after
+	// do_step completes.
+	//
+	// Solution: use opencog::pool
+	if (not termination()) {
+		if ((_jobs + 1) < (unsigned)_config.get_jobs()) {
+			auto policy = std::launch::async;
+			_jobs++;
+			auto ft = std::async(policy, [&]() { do_step(); });
+			do_step_rec();
+			ft.wait();
+			_jobs--;
+		} else {
+			do_step();
+			do_step_rec();
+		}
+	}
+}
+
 void ForwardChainer::do_step()
 {
-	_iteration++;
-	ure_logger().debug() << "Iteration " << _iteration
+	int local_iteration = _iteration++;
+	ure_logger().debug() << "Iteration " << (local_iteration + 1)
 	                     << "/" << _config.get_maximum_iterations_str();
 
 	// Expand meta rules. This should probably be done on-the-fly in
@@ -138,6 +162,7 @@ void ForwardChainer::do_step()
 
 	// Select source
 	Source* source = select_source();
+	std::lock_guard<std::mutex> lock(_whole_mutex);
 	if (source) {
 		LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl
 		                   << source->to_string();
@@ -161,12 +186,11 @@ void ForwardChainer::do_step()
 	// Apply rule on source
 	HandleSet products = apply_rule(rule, *source);
 
-	// Save trace (before inserting new sources because it will cause
-	// the source pointer to be invalid).
-	_fcstat.add_inference_record(_iteration - 1, source->body, rule, products);
-
 	// Insert the produced sources in the population of sources
 	_sources.insert(products, *source, prob);
+
+	// Save trace and results
+	_fcstat.add_inference_record(local_iteration, source->body, rule, products);
 }
 
 bool ForwardChainer::termination()
@@ -180,7 +204,7 @@ bool ForwardChainer::termination()
 		terminate = true;
 	}
 	// Terminate if max iterations has been reached
-	else if (_config.get_maximum_iterations() == _iteration) {
+	else if (_config.get_maximum_iterations() <= _iteration) {
 		msg = "reach maximum number of iterations";
 		terminate = true;
 	}
@@ -216,6 +240,8 @@ HandleSet ForwardChainer::get_chaining_result()
 
 Source* ForwardChainer::select_source()
 {
+	std::unique_lock<std::mutex> lock(_part_mutex);
+
 	std::vector<double> weights = _sources.get_weights();
 
 	// Debug log
@@ -244,7 +270,8 @@ Source* ForwardChainer::select_source()
 			ure_logger().debug() << "Reset all exhausted flags to retry them";
 			_sources.reset_exhausted();
 			// Try again
-			select_source();
+			lock.unlock();
+			return select_source();
 		} else {
 			_sources.exhausted = true;
 			return nullptr;
@@ -253,7 +280,7 @@ Source* ForwardChainer::select_source()
 
 	// Sample sources according to this distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return &rand_element(_sources.sources, dist);
+	return &*std::next(_sources.sources.begin(), dist(randGen()));
 }
 
 RuleSet ForwardChainer::get_valid_rules(const Source& source)
@@ -290,6 +317,8 @@ RuleProbabilityPair ForwardChainer::select_rule(const Handle& h)
 
 RuleProbabilityPair ForwardChainer::select_rule(Source& source)
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
+
 	const RuleSet valid_rules = get_valid_rules(source);
 
 	// Log valid rules
@@ -346,6 +375,8 @@ RuleProbabilityPair ForwardChainer::select_rule(const RuleSet& valid_rules)
 
 HandleSet ForwardChainer::apply_rule(const Rule& rule, Source& source)
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
+
 	// Keep track of rule application to not do it again, and apply rule
 	source.rules.insert(rule);
 	return apply_rule(rule);
@@ -416,6 +447,7 @@ void ForwardChainer::validate(const Handle& source)
 
 void ForwardChainer::expand_meta_rules()
 {
+	std::lock_guard<std::mutex> lock(_part_mutex);
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	size_t rules_size = _rules.size();
