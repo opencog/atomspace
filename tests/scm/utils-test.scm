@@ -5,6 +5,9 @@
 (define counter (ConceptNode "asdf"))
 (define (test-incr-cnt) (cog-inc-count! counter 1))
 
+(define key (PredicateNode "key"))
+(define (test-incr-value) (cog-inc-value! counter key 0.5 3))
+
 ; test cog-get-partner
 (define partner (ConceptNode "partner"))
 (define pare (ListLink partner counter))
