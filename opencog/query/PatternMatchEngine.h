@@ -200,12 +200,10 @@ private:
 	unsigned int depth; // Recursion depth for tree_compare.
 
 	typedef enum {
-		CALL_QUOTE,
 		CALL_ORDER,
 		CALL_GLOB,
 		CALL_UNORDER,
 		CALL_CHOICE,
-		CALL_COMP,
 		CALL_SOLN
 	} Caller;   // temporary scaffolding !???
 
