@@ -6,8 +6,8 @@
 (define-module (opencog persist))
 
 (use-modules (opencog))
-
-(load-extension "libpersist" "opencog_persist_init")
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
 
 ; This avoids complaints, when the docs are set, below.
 (export fetch-atom fetch-incoming-set fetch-incoming-by-type

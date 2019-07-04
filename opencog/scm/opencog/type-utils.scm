@@ -4,10 +4,9 @@
 
 (define-module (opencog type-utils))
 
-; We need this to set the LTDL_LIBRARY_PATH
 (use-modules (opencog))
-
-(load-extension "libtype-utils" "opencog_type_utils_init")
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-type-utils "libtype-utils") "opencog_type_utils_init")
 
 ; We need to list everything that was already exported by the shared
 ; library; failure to do so causes warning messages to be printed,
