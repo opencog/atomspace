@@ -49,7 +49,7 @@ INSTALL (FILES
 	MixtureModel.h
 	ActionSelection.h
 	BetaDistribution.h
-   ThompsonSampling.h
+	ThompsonSampling.h
 	DESTINATION "include/opencog/ure"
 )
 
