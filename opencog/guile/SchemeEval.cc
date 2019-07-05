@@ -1116,12 +1116,6 @@ static void return_to_pool(SchemeEval* ev)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-/// This will throw an error if used recursively.  Viz, if the
-/// evaluator evaluates something that causes another evaluator
-/// to be needed for this thread (e.g. an ExecutionOutputLink),
-/// then this very same evaluator would be re-entered, corrupting
-/// its own internal state.  If that happened, the result would be
-/// a hard-to-find & fix bug. So instead, we throw.
 SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
 	static thread_local std::map<AtomSpace*,SchemeEval*> issued;
@@ -1156,13 +1150,6 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 	evaluator->_atomspace = as;
 	issued[as] = evaluator;
 	return evaluator;
-
-#if 0
-	if (evaluator->recursing())
-		throw RuntimeException(TRACE_INFO,
-			"Evaluator thread singleton used recursively!");
-#endif
-
 }
 
 /* ============================================================== */
