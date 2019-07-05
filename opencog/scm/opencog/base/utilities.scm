@@ -983,7 +983,7 @@
     See cog-push-atomspace for an explanation.
 "
 	(begin
-		(if (null-list? cog-atomspace-stack)
+		(if (null-list? (fluid-ref cog-atomspace-stack))
 			(throw 'badpop "More pops than pushes!"))
 
 		; guile gc will eventually garbage-collect this atomspace.
