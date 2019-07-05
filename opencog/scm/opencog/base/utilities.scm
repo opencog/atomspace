@@ -986,14 +986,19 @@
 		(if (null-list? (fluid-ref cog-atomspace-stack))
 			(throw 'badpop "More pops than pushes!"))
 
-		; guile gc will eventually garbage-collect this atomspace.
-		; However, gc might not run for a while; in the meanwhile,
-		; we do all the cruft it contained to be gone. So just
-		; brute-force clear it.
+		; guile gc will eventually garbage-collect this atomspace,
+		; which should clear it. But ... brute-force clear it now,
+		; anyway. Just because...
 		(cog-atomspace-clear)
 		(cog-set-atomspace! (car (fluid-ref cog-atomspace-stack)))
 		(fluid-set! cog-atomspace-stack
 			(cdr (fluid-ref cog-atomspace-stack)))
+
+		; Try to force garbage-collection of the atomspace. The goal
+		; here is to avoid out-of-order gc, where a parent atomspace
+		; in the stack is gc'ed before a child, leading to an assert
+		; in AtomTable.cc about child atomspaces.
+		(gc)
 	))
 
 ; ---------------------------------------------------------------------
