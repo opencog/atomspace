@@ -98,29 +98,13 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
 
 AtomTable::~AtomTable()
 {
-    // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    if (_environ) _environ->_num_nested--;
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
 
-    // No one who shall look at these atoms shall ever again
-    // find a reference to this atomtable.
-    for (auto& pr : _atom_store) {
-        Handle& atom_to_delete = pr.second;
-        atom_to_delete->_atom_space = nullptr;
+    clear_all_atoms();
 
-        // Aiee ... We added this link to every incoming set;
-        // thus, it is our responsibility to remove it as well.
-        // This is a stinky design, but I see no other way,
-        // because it seems that we can't do this in the Atom
-        // destructor (which is where this should be happening).
-        if (atom_to_delete->is_link()) {
-            LinkPtr link_to_delete = LinkCast(atom_to_delete);
-            for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
-                atom_in_out_set->remove_atom(link_to_delete);
-            }
-        }
-    }
-    if (_environ) _environ->_num_nested--;
     if (0 != _num_nested)
         throw opencog::RuntimeException(TRACE_INFO,
            "AtomTable - deleteing atomtable %lu which has subtables!",
