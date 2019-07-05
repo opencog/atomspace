@@ -552,7 +552,8 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// Set global _atomspace variable in the execution environment.
+	// Set the execution environment atomspace (i.e. for this thread)
+	// to the evaluator _atomspace variable.
 	AtomSpace* saved_as = nullptr;
 	if (_atomspace)
 	{
@@ -763,7 +764,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
-	// Set global atomspace variable in the execution environment.
+	// Set per-thread atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
 	if (_atomspace)
 	{
