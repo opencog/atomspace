@@ -986,9 +986,11 @@
 		(if (null-list? (fluid-ref cog-atomspace-stack))
 			(throw 'badpop "More pops than pushes!"))
 
-		; guile gc will eventually garbage-collect this atomspace,
-		; which should clear it. But ... brute-force clear it now,
-		; anyway. Just because...
+		; Guile gc should eventually garbage-collect this atomspace,
+		; which will clear it. But ... even when brute-forcing the
+		; gc to run (as done below), the atomspace seems to hang
+		; around anyway, undeleted. So we brute-force clear it now,
+		; so that at least the atoms do not chew up RAM.
 		(cog-atomspace-clear)
 		(cog-set-atomspace! (car (fluid-ref cog-atomspace-stack)))
 		(fluid-set! cog-atomspace-stack
