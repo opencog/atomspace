@@ -123,7 +123,8 @@ AtomTable::~AtomTable()
     if (_environ) _environ->_num_nested--;
     if (0 != _num_nested)
         throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - deleteing atomtable with subtables!");
+           "AtomTable - deleteing atomtable %lu which has subtables!",
+           _uuid);
 }
 
 void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
