@@ -293,7 +293,7 @@ public:
     void copyValues(const Handle&);
 
     /// Print all of the key-value pairs.
-    virtual std::string valuesToString() const;
+    std::string valuesToString() const;
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;

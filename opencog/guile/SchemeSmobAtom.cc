@@ -164,9 +164,13 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 // Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 {
+	static std::mutex count_mtx;
+
 	Handle h = verify_handle(satom, "cog-inc-count!");
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
+	// Lock so that count updates are atomic!
+	std::lock_guard<std::mutex> lck(count_mtx);
 	TruthValuePtr tv = h->getTruthValue();
 	if (COUNT_TRUTH_VALUE == tv->get_type())
 	{
@@ -175,8 +179,45 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	tv = CountTruthValue::createTV(
 		tv->get_mean(), tv->get_confidence(), cnt);
 
-	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	AtomSpace* as = ss_get_env_as("cog-inc-count!");
 	as->set_truthvalue(h, tv);
+	return satom;
+}
+
+/* ============================================================== */
+// Increment the count of some generic FloatValue.
+// Just like ss_inc_count but generic.
+// key == key for value
+// cnt == how much to increment
+// ref == list-ref, which location to increment.
+SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
+{
+	static std::mutex incr_mtx;
+
+	Handle h = verify_handle(satom, "cog-inc-value!");
+	Handle key = verify_handle(skey, "cog-inc-value!", 2);
+	double cnt = verify_real(scnt, "cog-inc-value!", 3);
+	int ref = verify_int(sref, "cog-inc-value!", 4);
+
+	std::vector<double> new_value;
+
+	// Lock so that count updates are atomic!
+	std::lock_guard<std::mutex> lck(incr_mtx);
+
+	ValuePtr v = h->getValue(key);
+	if (nullptr != v and FLOAT_VALUE == v->get_type())
+	{
+		FloatValuePtr fv(FloatValueCast(v));
+		new_value = fv->value();
+		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
+	}
+	else
+	{
+		new_value.resize(ref+1, 0.0);
+	}
+	new_value[ref] += cnt;
+
+	h->setValue(key, createFloatValue(new_value));
 	return satom;
 }
 

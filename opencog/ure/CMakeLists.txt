@@ -34,6 +34,7 @@ TARGET_LINK_LIBRARIES(ure
 )
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ure smob)
+	ADD_GUILE_EXTENSION(SCM_CONFIG ure "opencog-ext-path-ure")
 ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS ure 
@@ -48,7 +49,7 @@ INSTALL (FILES
 	MixtureModel.h
 	ActionSelection.h
 	BetaDistribution.h
-   ThompsonSampling.h
+	ThompsonSampling.h
 	DESTINATION "include/opencog/ure"
 )
 

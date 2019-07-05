@@ -24,6 +24,7 @@ TARGET_LINK_LIBRARIES(persist-sql
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(persist-sql smob)
+	ADD_GUILE_EXTENSION(SCM_CONFIG persist-sql "opencog-ext-path-persist-sql")
 ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
