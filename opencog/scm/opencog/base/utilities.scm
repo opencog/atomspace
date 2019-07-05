@@ -961,7 +961,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public cog-atomspace-stack '())
+(define-public cog-atomspace-stack (make-fluid '()))
 (define-public (cog-push-atomspace)
 "
  cog-push-atomspace -- Create a temporary atomspace.
@@ -971,7 +971,8 @@
     after popping, all of the atoms placed into it will also be
     deleted (unless they are refered to in some way).
 "
-	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
+	(fluid-set! cog-atomspace-stack
+		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))
 	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
 
 ; ---------------------------------------------------------------------
@@ -990,8 +991,9 @@
 		; we do all the cruft it contained to be gone. So just
 		; brute-force clear it.
 		(cog-atomspace-clear)
-		(cog-set-atomspace! (car cog-atomspace-stack))
-		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+		(cog-set-atomspace! (car (fluid-ref cog-atomspace-stack)))
+		(fluid-set! cog-atomspace-stack
+			(cdr (fluid-ref cog-atomspace-stack)))
 	))
 
 ; ---------------------------------------------------------------------
