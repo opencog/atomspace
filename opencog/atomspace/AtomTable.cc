@@ -159,6 +159,8 @@ void AtomTable::clear_all_atoms()
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atom_space = nullptr;
+
+        // We installed the incoming set; we remove it too.
         atom_to_clear->remove();
     }
 
@@ -171,42 +173,7 @@ void AtomTable::clear_all_atoms()
 void AtomTable::clear()
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-#define FAST_CLEAR 1
-#ifdef FAST_CLEAR
-    // Always do the fast clear.
     clear_all_atoms();
-#else
-    // This is a stunningly inefficient way to clear the atomtable!
-    // This will take minutes on any decent-sized atomspace!
-    // However, due to the code in extract(), it does a lot of error
-    // checking.
-    if (_transient)
-    {
-        // Do the fast clear since we're a transient atom table.
-        clear_all_atoms();
-    }
-    else
-    {
-        HandleSet allNodes;
-
-        getHandleSetByType(allNodes, NODE, true, false);
-
-        for (Handle h: allNodes) extract(h, true);
-
-        allNodes.clear();
-        getHandleSetByType(allNodes, ATOM, true, false);
-        for (Handle h: allNodes) extract(h, true);
-
-        allNodes.clear();
-        getHandleSetByType(allNodes, ATOM, true, false);
-
-        OC_ASSERT(allNodes.size() == 0);
-        OC_ASSERT(_size == 0);
-        OC_ASSERT(_num_nodes == 0);
-        OC_ASSERT(_num_links == 0);
-    }
-#endif
 }
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
