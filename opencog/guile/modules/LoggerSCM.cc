@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeModule.h>
 #include "../SchemePrimitive.h"
 
@@ -39,7 +38,6 @@ protected:
 	virtual void init();
 
 	Logger* do_default_logger();
-	Logger* do_ure_logger();
 	Logger* do_new_logger();
 	std::string do_logger_set_level(Logger*, const std::string& level);
 	std::string do_logger_get_level(const Logger*);
@@ -72,12 +70,6 @@ public:
 Logger* LoggerSCM::do_default_logger()
 {
 	return &logger();
-}
-
-/// Get the URE logger.
-Logger* LoggerSCM::do_ure_logger()
-{
-	return &ure_logger();
 }
 
 /// Create a new logger.
@@ -223,8 +215,6 @@ void LoggerSCM::init(void)
 {
 	define_scheme_primitive("cog-default-logger",
 		&LoggerSCM::do_default_logger, this, "logger");
-	define_scheme_primitive("cog-ure-logger",
-		&LoggerSCM::do_ure_logger, this, "logger");
 	define_scheme_primitive("cog-new-logger",
 		&LoggerSCM::do_new_logger, this, "logger");
 

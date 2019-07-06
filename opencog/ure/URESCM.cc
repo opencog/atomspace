@@ -23,6 +23,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {
@@ -78,6 +79,11 @@ protected:
 
 	Handle get_rulebase_rules(Handle rbs);
 
+	/**
+	 * Return the URE logger
+	 */
+	Logger* do_ure_logger();
+
 public:
 	URESCM();
 };
@@ -104,6 +110,9 @@ void URESCM::init(void)
 
 	define_scheme_primitive("cog-mandatory-args-bc",
 		&URESCM::do_backward_chaining, this, "ure");
+
+	define_scheme_primitive("cog-ure-logger",
+		&URESCM::do_ure_logger, this, "ure");
 }
 
 Handle URESCM::do_forward_chaining(Handle rbs,
@@ -157,6 +166,11 @@ Handle URESCM::do_backward_chaining(Handle rbs,
 	bc.do_chain();
 
 	return bc.get_results();
+}
+
+Logger* URESCM::do_ure_logger()
+{
+	return &ure_logger();
 }
 
 extern "C" {

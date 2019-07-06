@@ -243,6 +243,12 @@
     (cog-mandatory-args-bc rbs target vardecl
                            trace-enabled tas control-enabled cas focus-set)))
 
+(set-procedure-property! cog-ure-logger 'documentation
+"
+ cog-ure-logger
+    Return the ure logger.
+")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URE Configuration Helpers ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -878,6 +884,7 @@
   (export
           cog-fc
           cog-bc
+          cog-ure-logger
           ure-define-add-rule
           ure-add-rule
           ure-add-rule-by-name
