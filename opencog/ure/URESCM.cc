@@ -1,5 +1,5 @@
 /*
- * InferenceSCM.cc
+ * URESCM.cc
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -27,7 +27,7 @@
 
 namespace opencog {
 
-class InferenceSCM : public ModuleWrap
+class URESCM : public ModuleWrap
 {
 protected:
 	virtual void init();
@@ -79,7 +79,7 @@ protected:
 	Handle get_rulebase_rules(Handle rbs);
 
 public:
-	InferenceSCM();
+	URESCM();
 };
 
 } /*end of namespace opencog*/
@@ -93,20 +93,20 @@ public:
 
 using namespace opencog;
 
-InferenceSCM::InferenceSCM() : ModuleWrap("opencog ure") {}
+URESCM::URESCM() : ModuleWrap("opencog ure") {}
 
 /// This is called while (opencog ure) is the current module.
 /// Thus, all the definitions below happen in that module.
-void InferenceSCM::init(void)
+void URESCM::init(void)
 {
 	define_scheme_primitive("cog-mandatory-args-fc",
-		&InferenceSCM::do_forward_chaining, this, "ure");
+		&URESCM::do_forward_chaining, this, "ure");
 
 	define_scheme_primitive("cog-mandatory-args-bc",
-		&InferenceSCM::do_backward_chaining, this, "ure");
+		&URESCM::do_backward_chaining, this, "ure");
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle rbs,
+Handle URESCM::do_forward_chaining(Handle rbs,
                                          Handle source,
                                          Handle vardecl,
                                          Handle focus_set_h)
@@ -123,7 +123,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 	else
 		throw RuntimeException(
 			TRACE_INFO,
-			"InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+			"URESCM::do_forward_chaining - focus set should be SET_LINK type!");
 
 	ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
 	fc.do_chain();
@@ -132,7 +132,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 	return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle rbs,
+Handle URESCM::do_backward_chaining(Handle rbs,
                                           Handle target,
                                           Handle vardecl,
                                           bool trace_enabled,
@@ -165,8 +165,8 @@ void opencog_ure_init(void);
 
 void opencog_ure_init(void)
 {
-	static InferenceSCM inference;
-	inference.module_init();
+	static URESCM ure;
+	ure.module_init();
 }
 
 #endif // HAVE_GUILE

@@ -11,7 +11,7 @@ ADD_LIBRARY(ure
 	forwardchainer/ForwardChainer
 	forwardchainer/SourceSet
 	URELogger
-	InferenceSCM
+	URESCM
 	Rule
 	UREConfig
 	MixtureModel
