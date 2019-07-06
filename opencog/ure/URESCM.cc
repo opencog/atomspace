@@ -1,5 +1,5 @@
 /*
- * InferenceSCM.cc
+ * URESCM.cc
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -23,11 +23,12 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {
 
-class InferenceSCM : public ModuleWrap
+class URESCM : public ModuleWrap
 {
 protected:
 	virtual void init();
@@ -78,8 +79,13 @@ protected:
 
 	Handle get_rulebase_rules(Handle rbs);
 
+	/**
+	 * Return the URE logger
+	 */
+	Logger* do_ure_logger();
+
 public:
-	InferenceSCM();
+	URESCM();
 };
 
 } /*end of namespace opencog*/
@@ -93,23 +99,26 @@ public:
 
 using namespace opencog;
 
-InferenceSCM::InferenceSCM() : ModuleWrap("opencog ure") {}
+URESCM::URESCM() : ModuleWrap("opencog ure") {}
 
 /// This is called while (opencog ure) is the current module.
 /// Thus, all the definitions below happen in that module.
-void InferenceSCM::init(void)
+void URESCM::init(void)
 {
 	define_scheme_primitive("cog-mandatory-args-fc",
-		&InferenceSCM::do_forward_chaining, this, "ure");
+		&URESCM::do_forward_chaining, this, "ure");
 
 	define_scheme_primitive("cog-mandatory-args-bc",
-		&InferenceSCM::do_backward_chaining, this, "ure");
+		&URESCM::do_backward_chaining, this, "ure");
+
+	define_scheme_primitive("cog-ure-logger",
+		&URESCM::do_ure_logger, this, "ure");
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle rbs,
-                                         Handle source,
-                                         Handle vardecl,
-                                         Handle focus_set_h)
+Handle URESCM::do_forward_chaining(Handle rbs,
+                                   Handle source,
+                                   Handle vardecl,
+                                   Handle focus_set_h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
 	HandleSeq focus_set = {};
@@ -123,7 +132,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 	else
 		throw RuntimeException(
 			TRACE_INFO,
-			"InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+			"URESCM::do_forward_chaining - focus set should be SET_LINK type!");
 
 	ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
 	fc.do_chain();
@@ -132,14 +141,14 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 	return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle rbs,
-                                          Handle target,
-                                          Handle vardecl,
-                                          bool trace_enabled,
-                                          AtomSpace *trace_as,
-                                          bool control_enabled,
-                                          AtomSpace *control_as,
-                                          Handle focus_link)
+Handle URESCM::do_backward_chaining(Handle rbs,
+                                    Handle target,
+                                    Handle vardecl,
+                                    bool trace_enabled,
+                                    AtomSpace *trace_as,
+                                    bool control_enabled,
+                                    AtomSpace *control_as,
+                                    Handle focus_link)
 {
 	// A ListLink means that the variable declaration is undefined
 	if (vardecl->get_type() == LIST_LINK)
@@ -159,14 +168,19 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
 	return bc.get_results();
 }
 
+Logger* URESCM::do_ure_logger()
+{
+	return &ure_logger();
+}
+
 extern "C" {
 void opencog_ure_init(void);
 };
 
 void opencog_ure_init(void)
 {
-	static InferenceSCM inference;
-	inference.module_init();
+	static URESCM ure;
+	ure.module_init();
 }
 
 #endif // HAVE_GUILE
