@@ -116,9 +116,9 @@ void URESCM::init(void)
 }
 
 Handle URESCM::do_forward_chaining(Handle rbs,
-                                         Handle source,
-                                         Handle vardecl,
-                                         Handle focus_set_h)
+                                   Handle source,
+                                   Handle vardecl,
+                                   Handle focus_set_h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
 	HandleSeq focus_set = {};
@@ -142,13 +142,13 @@ Handle URESCM::do_forward_chaining(Handle rbs,
 }
 
 Handle URESCM::do_backward_chaining(Handle rbs,
-                                          Handle target,
-                                          Handle vardecl,
-                                          bool trace_enabled,
-                                          AtomSpace *trace_as,
-                                          bool control_enabled,
-                                          AtomSpace *control_as,
-                                          Handle focus_link)
+                                    Handle target,
+                                    Handle vardecl,
+                                    bool trace_enabled,
+                                    AtomSpace *trace_as,
+                                    bool control_enabled,
+                                    AtomSpace *control_as,
+                                    Handle focus_link)
 {
 	// A ListLink means that the variable declaration is undefined
 	if (vardecl->get_type() == LIST_LINK)
