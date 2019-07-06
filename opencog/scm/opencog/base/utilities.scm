@@ -982,8 +982,8 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(begin
-		(if (null-list? (fluid-ref cog-atomspace-stack))
+	(let ((stk-top (fluid-ref cog-atomspace-stack)))
+		(if (null-list? stk-top)
 			(throw 'badpop "More pops than pushes!"))
 
 		; Guile gc should eventually garbage-collect this atomspace,
@@ -992,14 +992,12 @@
 		; around anyway, undeleted. So we brute-force clear it now,
 		; so that at least the atoms do not chew up RAM.
 		(cog-atomspace-clear)
-		(cog-set-atomspace! (car (fluid-ref cog-atomspace-stack)))
-		(fluid-set! cog-atomspace-stack
-			(cdr (fluid-ref cog-atomspace-stack)))
+		(cog-set-atomspace! (car stk-top))
+		(fluid-set! cog-atomspace-stack (cdr stk-top))
 
-		; Try to force garbage-collection of the atomspace. The goal
-		; here is to avoid out-of-order gc, where a parent atomspace
-		; in the stack is gc'ed before a child, leading to an assert
-		; in AtomTable.cc about child atomspaces.
+		; Try to force garbage-collection of the atomspace.
+		(set-car! stk-top '())
+		(set-cdr! stk-top '())
 		(gc)
 	))
 
