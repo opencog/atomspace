@@ -552,7 +552,8 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// Set global _atomspace variable in the execution environment.
+	// Set the execution environment atomspace (i.e. for this thread)
+	// to the evaluator _atomspace variable.
 	AtomSpace* saved_as = nullptr;
 	if (_atomspace)
 	{
@@ -763,7 +764,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
-	// Set global atomspace variable in the execution environment.
+	// Set per-thread atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
 	if (_atomspace)
 	{
@@ -1116,12 +1117,6 @@ static void return_to_pool(SchemeEval* ev)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-/// This will throw an error if used recursively.  Viz, if the
-/// evaluator evaluates something that causes another evaluator
-/// to be needed for this thread (e.g. an ExecutionOutputLink),
-/// then this very same evaluator would be re-entered, corrupting
-/// its own internal state.  If that happened, the result would be
-/// a hard-to-find & fix bug. So instead, we throw.
 SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
 	static thread_local std::map<AtomSpace*,SchemeEval*> issued;
@@ -1156,13 +1151,6 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 	evaluator->_atomspace = as;
 	issued[as] = evaluator;
 	return evaluator;
-
-#if 0
-	if (evaluator->recursing())
-		throw RuntimeException(TRACE_INFO,
-			"Evaluator thread singleton used recursively!");
-#endif
-
 }
 
 /* ============================================================== */

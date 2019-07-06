@@ -98,32 +98,17 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
 
 AtomTable::~AtomTable()
 {
-    // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    if (_environ) _environ->_num_nested--;
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
 
-    // No one who shall look at these atoms shall ever again
-    // find a reference to this atomtable.
-    for (auto& pr : _atom_store) {
-        Handle& atom_to_delete = pr.second;
-        atom_to_delete->_atom_space = nullptr;
+    clear_all_atoms();
 
-        // Aiee ... We added this link to every incoming set;
-        // thus, it is our responsibility to remove it as well.
-        // This is a stinky design, but I see no other way,
-        // because it seems that we can't do this in the Atom
-        // destructor (which is where this should be happening).
-        if (atom_to_delete->is_link()) {
-            LinkPtr link_to_delete = LinkCast(atom_to_delete);
-            for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
-                atom_in_out_set->remove_atom(link_to_delete);
-            }
-        }
-    }
-    if (_environ) _environ->_num_nested--;
     if (0 != _num_nested)
         throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - deleteing atomtable with subtables!");
+           "AtomTable - deleteing atomtable %lu which has subtables!",
+           _uuid);
 }
 
 void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
@@ -174,6 +159,8 @@ void AtomTable::clear_all_atoms()
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atom_space = nullptr;
+
+        // We installed the incoming set; we remove it too.
         atom_to_clear->remove();
     }
 
@@ -186,42 +173,7 @@ void AtomTable::clear_all_atoms()
 void AtomTable::clear()
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-#define FAST_CLEAR 1
-#ifdef FAST_CLEAR
-    // Always do the fast clear.
     clear_all_atoms();
-#else
-    // This is a stunningly inefficient way to clear the atomtable!
-    // This will take minutes on any decent-sized atomspace!
-    // However, due to the code in extract(), it does a lot of error
-    // checking.
-    if (_transient)
-    {
-        // Do the fast clear since we're a transient atom table.
-        clear_all_atoms();
-    }
-    else
-    {
-        HandleSet allNodes;
-
-        getHandleSetByType(allNodes, NODE, true, false);
-
-        for (Handle h: allNodes) extract(h, true);
-
-        allNodes.clear();
-        getHandleSetByType(allNodes, ATOM, true, false);
-        for (Handle h: allNodes) extract(h, true);
-
-        allNodes.clear();
-        getHandleSetByType(allNodes, ATOM, true, false);
-
-        OC_ASSERT(allNodes.size() == 0);
-        OC_ASSERT(_size == 0);
-        OC_ASSERT(_num_nodes == 0);
-        OC_ASSERT(_num_links == 0);
-    }
-#endif
 }
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const

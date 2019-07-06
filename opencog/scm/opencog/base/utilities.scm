@@ -961,7 +961,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public cog-atomspace-stack '())
+(define-public cog-atomspace-stack (make-fluid '()))
 (define-public (cog-push-atomspace)
 "
  cog-push-atomspace -- Create a temporary atomspace.
@@ -971,7 +971,8 @@
     after popping, all of the atoms placed into it will also be
     deleted (unless they are refered to in some way).
 "
-	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
+	(fluid-set! cog-atomspace-stack
+		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))
 	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
 
 ; ---------------------------------------------------------------------
@@ -981,17 +982,23 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(begin
-		(if (null-list? cog-atomspace-stack)
+	(let ((stk-top (fluid-ref cog-atomspace-stack)))
+		(if (null-list? stk-top)
 			(throw 'badpop "More pops than pushes!"))
 
-		; guile gc will eventually garbage-collect this atomspace.
-		; However, gc might not run for a while; in the meanwhile,
-		; we do all the cruft it contained to be gone. So just
-		; brute-force clear it.
+		; Guile gc should eventually garbage-collect this atomspace,
+		; which will clear it. But ... even when brute-forcing the
+		; gc to run (as done below), the atomspace seems to hang
+		; around anyway, undeleted. So we brute-force clear it now,
+		; so that at least the atoms do not chew up RAM.
 		(cog-atomspace-clear)
-		(cog-set-atomspace! (car cog-atomspace-stack))
-		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+		(cog-set-atomspace! (car stk-top))
+		(fluid-set! cog-atomspace-stack (cdr stk-top))
+
+		; Try to force garbage-collection of the atomspace.
+		(set-car! stk-top '())
+		(set-cdr! stk-top '())
+		(gc)
 	))
 
 ; ---------------------------------------------------------------------
