@@ -208,7 +208,6 @@ CYTHON_ADD_MODULE_PYX(ure
 	opencog_atom_types
 	"../../ure/forwardchainer/ForwardChainer.h"
 	"../../ure/backwardchainer/BackwardChainer.h"
-	ure
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
