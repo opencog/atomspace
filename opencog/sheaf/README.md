@@ -45,7 +45,7 @@ In standard mathematical terminology, the spider-body or jigsaw-label
 is called the "germ". It is meant to evoke the idea of a germinating
 seed, as will become clear below.
 
-Diagramatic illustrations of jig-saw puzzle-pieces can be found here:
+Diagrammatic illustrations of jig-saw puzzle-pieces can be found here:
 
 * Sleator, Temperley, [Parsing English with a Link Grammar](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf)
 * Bob Coeke, [New Scientist: Quantum Links Let Computers Read](http://www.cs.ox.ac.uk/people/bob.coecke/NewScientist.pdf)
@@ -84,7 +84,7 @@ which is the structure used in many other parts of OpenCog.
 ```
 This `EvaluationLink`, and the `Section...Connector` structure are meant
 to be sort-of, more-or-less equivalent and interchangeable. (In many
-cases, thy can be taken to be equivalent; however, the `Section...
+cases, they can be taken to be equivalent; however, the `Section...
 Connector` structure is more general and can describe more kinds of
 structures more simply than an EvaluationLink can.  This will be made
 clear below).
@@ -163,7 +163,7 @@ vertexes into a common set, the "germ".
 In graph theory, an edge unambiguously connects two vertexes. By
 contrast, the connectors on a section are a bit more ambiguous: they can
 connect to anything else that is legally connectable: the connectors
-must match, must be contractible.  The connectibility of connectors
+must match, must be contractible.  The connectability of connectors
 are given by rules, but those rules are "user-defined" (although they
 usually match connectors to germs and force edge-label agreement).
 
