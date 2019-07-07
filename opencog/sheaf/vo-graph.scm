@@ -19,10 +19,10 @@
 ; the weights.
 ;
 ; Terminology:
-; A "numa" is a numbered atom; it is an ordered vertex. Its an atom,
+; A "numa" is a NUMbered Atom; it is an ordered vertex. Its an atom,
 ;    and an integer number indicating it's ordering.
 ;
-; An "overt" is the same thing as a numa.
+; An "overt" is the same thing as a numa, short for Ordered VERTex.
 ;
 ; A "wedge" is an edge, consisting of an ordered pair of numa's.
 ;     Note that ordering of the vertexes in the edge give that

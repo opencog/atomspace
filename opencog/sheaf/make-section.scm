@@ -151,8 +151,14 @@
 		(lambda (mlink) (< -1e6 (wedge-get-score mlink)))
 		WEDGE-LIST))
 
-	; Create a list of all of the atoms in the sequence.
-	(define seq-list (delete-duplicates!
+	; Terminology: a "numa" is a NUMbered Atom, its a pair
+	; (cons integer Atom). Its the same thing as an "overt"
+	; "Ordered VERTex".
+	; A "link" is a weighted link: (cons (list lnuma rnuma) float)
+	; A "wedge" Weighted EDGE is the same thing as a link.
+
+	; Create a list of all of the numas in the wedge-list.
+	(define numa-list (delete-duplicates!
 		(fold
 			(lambda (mlnk lst)
 				(cons (wedge-get-left-overt mlnk)
@@ -160,38 +166,40 @@
 			'()
 			good-links)))
 
-	; Return #t if word appears on the left side of mst-lnk
-	(define (is-on-left-side? wrd mlnk)
-		(equal? wrd (wedge-get-left-atom mlnk)))
-	(define (is-on-right-side? wrd mlnk)
-		(equal? wrd (wedge-get-right-atom mlnk)))
+	; Return #t if word appears on the left side of mlnk.
+	; WEDGE must be a weighted edge. (see terminology above).
+	; NUMA must be a "numbered atom".
+	(define (is-on-left-side? NUMA WEDGE)
+		(equal? NUMA (wedge-get-left-overt WEDGE)))
+	(define (is-on-right-side? NUMA WEDGE)
+		(equal? NUMA (wedge-get-right-overt WEDGE)))
 
-	; Given a word, and the mst-parse linkset, create a shorter
-	; seq-list which holds only the words linked to the right.
-	(define (mk-right-seqlist seq mparse)
-		(define wrd (overt-get-atom seq))
+	; Given a numbered-atom NUMA, and the list of wedges WELI,
+	; create a list numas which holds only the numbered atoms
+	; linked to the right of NUMA.
+	(define (mk-right-seqlist NUMA WELI)
 		(map wedge-get-right-overt
 			(filter
-				(lambda (mlnk) (is-on-left-side? wrd mlnk))
-				mparse)))
+				(lambda (wedge) (is-on-left-side? NUMA wedge))
+				WELI)))
 
-	(define (mk-left-seqlist seq mparse)
-		(define wrd (overt-get-atom seq))
+	; Same as above, but other direction.
+	(define (mk-left-seqlist NUMA WELI)
 		(map wedge-get-left-overt
 			(filter
-				(lambda (mlnk) (is-on-right-side? wrd mlnk))
-				mparse)))
+				(lambda (wedge) (is-on-right-side? NUMA wedge))
+				WELI)))
 
-	; Sort a seq-list into ascending order
-	(define (sort-seqlist seq-list)
-		(sort seq-list
+	; Sort a list of numa's into ascending order
+	(define (sort-seqlist NUMA-LIST)
+		(sort NUMA-LIST
 			(lambda (sa sb)
 				(< (overt-get-index sa) (overt-get-index sb)))))
 
-	; Given an atom, the the links, create a section
-	(define (mk-pseudo seq mlist)
-		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
-		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
+	; Given a numa, and a list of wedges, create a Section
+	(define (mk-pseudo NUMA WEDLI)
+		(define left-nus (sort-seqlist (mk-left-seqlist NUMA WEDLI)))
+		(define right-nus (sort-seqlist (mk-right-seqlist NUMA WEDLI)))
 
 		; Create a list of left-connectors
 		(define left-cnc
@@ -199,24 +207,24 @@
 					(Connector
 						(overt-get-atom sw)
 						(ConnectorDir "-")))
-			lefts))
+			left-nus))
 
 		(define right-cnc
 			(map (lambda (sw)
 					(Connector
 						(overt-get-atom sw)
 						(ConnectorDir "+")))
-			rights))
+			right-nus))
 
 		; return the connector-set
 		(Section
-			(overt-get-atom seq)
+			(overt-get-atom NUMA)
 			(ConnectorSeq (append left-cnc right-cnc)))
 	)
 
 	(map
 		(lambda (seq) (mk-pseudo seq WEDGE-LIST))
-		seq-list)
+		numa-list)
 )
 
 ;  ---------------------------------------------------------------------
