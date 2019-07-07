@@ -594,17 +594,17 @@
 
 	(display "Going to do individual pair frequencies\n")
 	(let ((pair-cnt (freq-obj 'cache-all-pair-freqs)))
-		(format #t "Done computing ~A pairs in ~A secs\n"
+		(format #t "Done computing ~A pair frequencies in ~A secs\n"
 				pair-cnt (elapsed-secs)))
 
 	(display "Start computing log P(*,y)\n")
 	(freq-obj 'cache-all-left-freqs)
-	(format #t "Done computing ~A left-wilds in ~A secs\n"
+	(format #t "Done computing ~A left-wild log frequencies in ~A secs\n"
 		(length (wild-obj 'right-basis)) (elapsed-secs))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
 	(freq-obj 'cache-all-right-freqs)
-	(format #t "Done computing ~A right-wilds in ~A secs\n"
+	(format #t "Done computing ~A right-wild log frequencies in ~A secs\n"
 		(length (wild-obj 'left-basis)) (elapsed-secs))
 
 	(store-obj 'store-wildcards)
@@ -631,7 +631,7 @@
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
 
-	(display "Done computing totals; start saving wildcards\n")
+	(display "Done computing entropies; start saving wildcards\n")
 	(store-obj 'store-wildcards)
 
 	(format #t "Finished with MI computations; this took ~4f hours\n"
