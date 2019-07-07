@@ -21,8 +21,9 @@
 ; at the center, and a bunch of legs. In the above, the body is the
 ; atom "foo", and "bar" is one of the legs.  Or rather, "bar" is at
 ; the end of one of the legs, so that foo-bar can be though of as an
-; edge connecting two vertexes. Its a labelled edge - the
-; DirNode is the label.  Formally, the body is called the "germ".
+; edge connecting two vertexes (one vertex is the spider-body; the other
+; vertex is the tip of a leg). Its a labelled edge - the DirNode is the
+; label.  Formally, the body (without the legs) is called the "germ".
 ;
 ; The utilities provide various ways of accessing different parts of
 ; the section, given one of the atoms in a section. So, for example:
@@ -30,11 +31,11 @@
 ;
 ; get-germ-connector-seqs - given the germ, return a list of all
 ;      ConnectorSeq's appearing in sections on the germ.  The
-;      connector sequences are in one-to-one correspondance with
+;      connector sequences are in one-to-one correspondence with
 ;      the sections on the germ.
 ;
 ; get-germ-connectors     - given the germ, return a list of all
-;      Connectors that appear in seme section on the germ.
+;      Connectors that appear in some section on the germ.
 ;
 ; get-germ-endpoints      - given the germ, return a list of all
 ;      endpoints (legs or vertexes) on all sections having that germ.
@@ -43,7 +44,7 @@
 ; Conversely, given one of the other parts, find the germs:
 ;
 ; get-conseq-germs        - given a connector sequence, return all
-;       germs that have this connector sequence in thier section.
+;       germs that have this connector sequence in their section.
 ;       There is one connector sequence per section.
 ;
 ; NOTES:
@@ -51,8 +52,8 @@
 ; This is currently implemented in just plain-old scheme, and should
 ; be fine for general use. However, performance could be much improved
 ; by re-implementing these in C++. Basically, these just do a lot of
-; very simple atom access, and thus the overhead of guile is
-; proportionatly greater.
+; very simple atom accesses, and thus the overhead of guile is
+; proportionately greater.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -91,7 +92,7 @@
 ;
 (define-public (get-germ-connector-seqs GERM)
 "
-  get-germ-connector-seqs GERM - return all connector seqeucences
+  get-germ-connector-seqs GERM - return all connector sequences
   that appear in sections on the GERM. There is one connector sequence
   per section.
 
@@ -110,7 +111,7 @@
 (define-public (get-germ-connectors GERM)
 "
   get-germ-connectors GERM - return all connectors that appear in
-  the connector sequences of sections on the GERM.
+  the connector sequences of (all) sections on the GERM.
 
   Assumes that the sections for the germ are already in the atomspace.
   These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
@@ -131,7 +132,7 @@
   Assumes that the sections for the germ are already in the atomspace.
   These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
 "
-	; Walk over all the connectors, extracting the enpoints.
+	; Walk over all the connectors, extracting the endpoints.
 	(delete-dup-atoms
 		(map
 			(lambda (CNCTR) (cog-outgoing-atom CNCTR 0))
@@ -175,10 +176,10 @@
 (define-public (get-connector-sections CNCTR)
 "
   get-connector-sections CONNECTOR - return all sections that have
-  this connector appearing in thier connector sequence.
+  this connector appearing in their connector sequence.
 
   Assumes that all connector sequences and sections are already in
-  the atomspace; if not, use `fetch-connnector-sections` instead.
+  the atomspace; if not, use `fetch-connector-sections` instead.
 "
 	; get-conseq-sections returns a list, so concatenate them.
 	(delete-dup-atoms
@@ -192,10 +193,10 @@
 (define-public (fetch-connector-sections CNCTR)
 "
   fetch-connector-sections CONNECTOR - return all sections that have
-  this connector appearing in thier connector sequence.
+  this connector appearing in their connector sequence.
 
   Fetches sections and connector sequences from storage (does not
-  assume they have been loaded yet). Use 'get-connnector-sections`
+  assume they have been loaded yet). Use 'get-connector-sections`
   if fetching is not needed.
 "
 	(fetch-incoming-by-type CNCTR 'ConnectorSeq)
@@ -210,8 +211,8 @@
 ;
 (define-public (get-endpoint-sections END)
 "
-  get-endpoing-sections ENDPOINT - return all sections that have this
-  endpoint appearing in a connector in thier connector sequences.
+  get-endpoint-sections ENDPOINT - return all sections that have this
+  endpoint appearing in a connector in their connector sequences.
 
   Assumes that all connector sequences and sections are already in
   the atomspace; if not, use `fetch-endpoint-sections` instead.
@@ -227,12 +228,12 @@
 ;
 (define-public (fetch-endpoint-sections END)
 "
-  fetch-endpoing-sections ENDPOINT - return all sections that have this
+  fetch-endpoint-sections ENDPOINT - return all sections that have this
   endpoint appearing in a connector in a connector sequence.
 
   Fetches connectors, connector sequences and sections from storage
   (does not assume they have been loaded yet). Use
-  'get-connnector-sections` if fetching is not needed.
+  'get-connector-sections` if fetching is not needed.
 "
 	(fetch-incoming-by-type END 'Connector)
 	; fetch-connector-sections returns a list, so concatenate them.
@@ -254,13 +255,13 @@
 ;        (map (lambda (SEC) (cog-outgoing-atom SEC 0))
 ;           (get-whatever-sections THING)))
 ;
-; Unclear which implementation might be faster. Thes have not been
+; Unclear which implementation might be faster. These have not been
 ; tuned for performance.
 ;
 (define-public (get-conseq-germs CONSEQ)
 "
   get-conseq-germs CONSEQ - return all germs that have this connector
-  sequence in thier section. There is one connector sequence per section.
+  sequence in their section. There is one connector sequence per section.
 
   Assumes that all sections are already in the atomspace; if not, use
   `fetch-conseq-germs` instead.
@@ -276,7 +277,7 @@
 (define-public (fetch-conseq-germs CONSEQ)
 "
   fetch-conseq-germs CONSEQ - return all germs that have this connector
-  sequence in thier section. There is one connector sequence per section.
+  sequence in their section. There is one connector sequence per section.
 
   Fetches sections from storage (does not assume they have been loaded
   yet). Use 'get-conseq-germs` if fetching is not needed.
@@ -290,10 +291,10 @@
 (define-public (get-connector-germs CNCTR)
 "
   get-connector-germs CONNECTOR - return all germs that have this
-  connector appearing in thier section.
+  connector appearing in their section.
 
   Assumes that all connector sequences and sections are already in
-  the atomspace; if not, use `fetch-connnector-germs` instead.
+  the atomspace; if not, use `fetch-connector-germs` instead.
 "
 	; get-conseq-germs returns a list, so concatenate them.
 	(delete-dup-atoms
@@ -312,10 +313,10 @@
 (define-public (fetch-connector-germs CNCTR)
 "
   fetch-connector-germs CONNECTOR - return all germs that have this
-  connector appearing in thier section.
+  connector appearing in their section.
 
   Fetches sections and connector sequences from storage (does not
-  assume they have been loaded yet). Use 'get-connnector-germs`
+  assume they have been loaded yet). Use 'get-connector-germs`
   if fetching is not needed.
 "
 	(fetch-incoming-by-type CNCTR 'ConnectorSeq)
@@ -330,8 +331,8 @@
 ;
 (define-public (get-endpoint-germs END)
 "
-  get-endpoing-germs ENDPOINT - return all germs that have this
-  endpoint appearing in a connector in thier section.
+  get-endpoint-germs ENDPOINT - return all germs that have this
+  endpoint appearing in a connector in their section.
 
   Assumes that all connector sequences and sections are already in
   the atomspace; if not, use `fetch-endpoint-germs` instead.
@@ -347,8 +348,8 @@
 ;
 (define-public (fetch-endpoint-germs END)
 "
-  fetch-endpoing-germs ENDPOINT - return all germs that have this
-  endpoint appearing in a connector in thier section.
+  fetch-endpoint-germs ENDPOINT - return all germs that have this
+  endpoint appearing in a connector in their section.
 
   Fetches connectors, connector sequences and sections from storage
   (does not assume they have been loaded yet). Use 'get-endpoint-germs`
