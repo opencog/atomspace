@@ -20,12 +20,12 @@
 ;
 ; Terminology:
 ; A "numa" is a numbered atom; it is an ordered vertex. Its an atom,
-;    and an intgeger number indicating it's ordering.
+;    and an integer number indicating it's ordering.
 ;
 ; An "overt" is the same thing as a numa.
 ;
 ; A "wedge" is an edge, consisting of an ordered pair of numa's.
-;     Note that ordereing of the vertexes in the edge give that
+;     Note that ordering of the vertexes in the edge give that
 ;     edge an implicit directionality. This need NOT correspond
 ;     to the ordinal numbering of the vertexes. That is, an edge
 ;     can point from right to left or from left to right!
@@ -37,7 +37,7 @@
 ; ---------------------------------------------------------------------
 ; The MST parser returns a list of weighted edges, each edge consisting
 ; of a pair of ordered atoms.
-; The functions below unpack each data strcture.
+; The functions below unpack each data structure.
 ;
 ; Get the score of the link.
 (define-public (wedge-get-score lnk) (cdr lnk))
