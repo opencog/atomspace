@@ -23,10 +23,10 @@
 ;        ConnectorSeq
 ;            Connector
 ;                Atom "B"
-;                Label "A-to-B label"
+;                Label "go-to-B label"
 ;            Connector
 ;                Atom "C"
-;                Label "A-to-C label"
+;                Label "go-to-C label"
 ;
 ; which indicates that A is connected to B and to C; viz, that there are
 ; edges (AB) and (AC).  Note that the ConnectorSeq is independent of the
@@ -35,11 +35,16 @@
 ; the same ConnectorSeq as A. Thus, the ConnectorSeq simplifies the
 ; discovery of subgraph isomorphisms.
 ;
-; The ConnectorSeq is an ordered link; it is presumed that, in the
-; general case, that the order of the connectors matter.
+; In order to handle the general case, the ConnectorSeq is an ordered
+; link; it is presumed that, in the general case, that the order of the
+; connectors matter. (Whether the order matters, or not, depends on the
+; type of graph being considered. For example, for graphs that represent
+; temporal sequences, the order matters.)
 ;
 ; In the above example, the edges carry (optional) edge labels
-; indicating the type of the connector.
+; indicating the type of the connector. For example, the edge labels are
+; handy for indicating temporal order, e.g. whether Atom B came before
+; A or after A.
 ;
 ; In everything that follows, it is assumed that all of the vertexes of
 ; the graph are sequentially ordered, i.e. can be laid out in sequence
