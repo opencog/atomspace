@@ -35,7 +35,7 @@
 ; the same ConnectorSeq as A. Thus, the ConnectorSeq simplifies the
 ; discovery of subgraph isomorphisms.
 ;
-; The ConnecorSeq is an ordered link; it is presumed that, in the
+; The ConnectorSeq is an ordered link; it is presumed that, in the
 ; general case, that the order of the connectors matter.
 ;
 ; In the above example, the edges carry (optional) edge labels
@@ -79,7 +79,7 @@
 ; the two endpoints. A single connector is then just a direction (to
 ; the left, to the right) plus the vertex atom at the far end.
 ;
-; The section (aka connector set) is then a sequence of conectors; the
+; The section (aka connector set) is then a sequence of connectors; the
 ; number of connectors in the section exactly equal to the degree of
 ; the vertex in the MST parse: the connector set "describes" the parse
 ; tree, locally.
@@ -107,14 +107,14 @@
 
   The WEDGE-LIST is assumed to be a list of weighted edges. The weights
   are ignored.  The vertexes in the graph are assumed to just be the
-  set of vertexes aht appear at the ends of each edge; these are
+  set of vertexes that appear at the ends of each edge; these are
   extracted automatically, below.  XXX FIXME a better API could just
   pass these in...
 
   The returned sections are a list of SectionLinks, one for each vertex.
   The SectionLink will list (in order) a list of ConnectorLink's, with
   each connector implicitly specifying an edge, by specifying the atom
-  at the far end of the edge.  The connectors are lablled with direction
+  at the far end of the edge.  The connectors are labeled with direction
   marks, '+' and '-', indicating whether the far end is to the right or
   the left of the given vertex.
 
