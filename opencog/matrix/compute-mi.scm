@@ -117,6 +117,14 @@
 (use-modules (opencog))
 (use-modules (opencog persist))
 
+; The guile-2.2 par-for-each implementation sucks, and live-locks
+; for more than about 4-5 threads, and sometimes with less.
+; The guile 2.9.4 par-for-each implemetation actually works; the
+; actual speedup depends on the loop contents.
+(define (maybe-par-for-each F L)
+	(par-for-each F L)
+)
+
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; A progress report utility.
@@ -226,7 +234,7 @@
 						(set! cnt (+ cnt 1)))
 					(wldobj 'right-stars left-item)))
 
-			(for-each right-loop (wldobj 'left-basis))
+			(maybe-par-for-each right-loop (wldobj 'left-basis))
 
 			; Return the total.
 			cnt)
@@ -234,9 +242,9 @@
 		; Compute and cache all of the left-side frequencies.
 		; This computes P(*,y) for all y, in parallel.
 		(define (cache-all-left-freqs)
-			(for-each cache-left-freq (wldobj 'right-basis)))
+			(maybe-par-for-each cache-left-freq (wldobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(for-each cache-right-freq (wldobj 'left-basis)))
+			(maybe-par-for-each cache-right-freq (wldobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -359,11 +367,7 @@
 					))
 			)
 
-			;; XXX Maybe FIXME This could be a par-for-each, to run the
-			; calculations in parallel.  Unfortunately, the current guile
-			; par-for-each implementation sucks, and live-locks for more
-			; than about 4-5 threads.
-			(for-each right-loop lefties)
+			(maybe-par-for-each right-loop lefties)
 
 			; Return a count of the number of pairs.
 			cnt-pairs
@@ -428,7 +432,7 @@
 		; Reset the timer.
 		(elapsed-secs)
 
-		(for-each
+		(maybe-par-for-each
 			(lambda (atom) (if (not (null? atom)) (xlate atom)))
 			all-atoms)
 
@@ -614,7 +618,7 @@
 	(display "Going to compute and store individual pair MI\n")
 	(elapsed-secs)
 	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
-				(lambda (atom-list) (for-each store-atom atom-list)))))
+			(lambda (atom-list) (maybe-par-for-each store-atom atom-list)))))
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
