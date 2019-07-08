@@ -75,7 +75,7 @@
 	(define node-list (sort-numalist (numas-in-wedge-list mst-tree)))
 
 	; Define a losing score.
-	(define bad-mi -1e30)
+	(define min-acceptable-mi -1e15)
 
 	; Given an Left-NUMA, and list NALI of right-numa's, return a
 	; wedge-list connecting NUMA to any of the NALI's, such that
@@ -87,7 +87,7 @@
 					(SCORE-FN (cdr NUMA) (cdr r-numa)
 						(- (car r-numa) (car NUMA))))
 				(define wedge (cons (cons NUMA r-numa) weight))
-				(and (< bad-mi weight)
+				(and (< min-acceptable-mi weight)
 					(not (wedge-cross-any? wedge WELI))
 					wedge))
 			NALI)
@@ -96,7 +96,13 @@
 	; Given a list NALI of numa's, return a wedge-list connecting them
 	; such that none of them intersect an edge in the wedge-list WELI.
 	(define (non-intersecting-links NALI WELI)
-
+		; Tail recursive helper
+		(define (tail-rec nali rslt)
+			(define rest (cdr nali))
+			(if (equal? '() rest) rslt
+				(tail-rec rest
+					(append rslt (inter-links (car nali) rest WELI)))))
+		(if (equal? '() NALI) '() (tail-rec NALI '()))
 	)
 
 xxxxxxxxxx
