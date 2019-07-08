@@ -335,15 +335,15 @@
 	)
 
 	; Find the highest-weight link that doesn't cross.
-	(define (pick-no-cross-best candidates graph-pairs)
+	(define (pick-no-cross-best candidates graph-wedges)
 		; Despite the recursive nature of this call, we always expect
 		; that best isn't nil, unless there's a bug somewhere ...
 		(define best (max-of-pair-list candidates))
-		(if (not (wedge-cross-any? best graph-pairs))
+		(if (not (wedge-cross-any? best graph-wedges))
 			best
 			; Else, remove best from list, and try again.
 			(pick-no-cross-best
-				(set-sub candidates (list best)) graph-pairs)
+				(set-sub candidates (list best)) graph-wedges)
 		)
 	)
 
