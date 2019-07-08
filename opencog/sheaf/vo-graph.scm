@@ -39,37 +39,60 @@
 ; of a pair of ordered atoms.
 ; The functions below unpack each data structure.
 ;
-; Get the score of the link (aka "weighted edge").
-(define-public (wedge-get-score lnk) (cdr lnk))
+(define-public (wedge-get-score lnk)
+"
+  wedge-get-score lnk -- Get the score of the link (aka 'weighted edge').
+"
+	(cdr lnk))
 
-; Get the left numbered-atom (numa) in the link. The num is a scheme
-; pair of the form (number . atom)
 (define-public (wedge-get-left-overt lnk)
+"
+  wedge-get-left-overt lnk -- Get the left numbered-atom (numa) in the
+  link. The numa is a scheme pair of the form (number . atom)
+"
 	(car (car lnk)))
 
 (define-public (wedge-get-right-overt lnk)
+"
+  wedge-get-right-overt lnk -- Get the right numbered-atom (numa) in the
+  link. The numa is a scheme pair of the form (number . atom)
+"
 	(cdr (car lnk)))
 
-; Get the index number out of the numa.
-(define-public (overt-get-index numa) (car numa))
+(define-public (overt-get-index numa)
+"
+  overt-get-index numa -- Get the index number out of the numa.
+"
+	(car numa))
 
-; Get the atom from the numa.
-(define-public (overt-get-atom numa) (cdr numa))
+(define-public (overt-get-atom numa)
+"
+  overt-get-atom numa -- Get the atom from the numa.
+"
+	(cdr numa))
 
-; Get the left atom in the scored link.
 (define-public (wedge-get-left-atom lnk)
+"
+  wedge-get-left-atom lnk -- Get the left atom in the weighted link.
+"
 	(overt-get-atom (wedge-get-left-overt lnk)))
 
-; Get the right atom in the scored link.
 (define-public (wedge-get-right-atom lnk)
+"
+  wedge-get-right-atom lnk -- Get the right atom in the weighted link.
+"
 	(overt-get-atom (wedge-get-right-overt lnk)))
 
-; Get the index of the left atom in the scored link.
 (define-public (wedge-get-left-index lnk)
+"
+  wedge-get-left-index lnk -- Get the index of the left atom in the link.
+"
 	(overt-get-index (wedge-get-left-overt lnk)))
 
-; Get the index of the right word in the scored link.
 (define-public (wedge-get-right-index lnk)
+"
+  wedge-get-right-index lnk -- Get the index of the right word in the link.
+"
 	(overt-get-index (wedge-get-right-overt lnk)))
 
 ; ---------------------------------------------------------------------
