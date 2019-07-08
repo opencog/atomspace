@@ -365,7 +365,7 @@
 	(define stars-obj (add-pair-stars LLOBJ))
 	(define freq-obj (add-pair-freq-api stars-obj))
 
-	(define (pair-pred PAIR) (< FMI-CUT (LLOBJ 'pair-fmi PAIR)))
+	(define (pair-pred PAIR) (< FMI-CUT (freq-obj 'pair-fmi PAIR)))
 
 	(define id-str (format #f "fmi-cut-~6F" FMI-CUT))
 
