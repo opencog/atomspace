@@ -115,11 +115,25 @@
 
 (define-public (sort-numalist NUMA-LIST)
 "
-  sort-numalist NUMA-LIST -- Sort a list of numa's into ascending order.
+  sort-numalist NUMA-LIST -- Sort a list of numas into ascending order.
 "
 	(sort NUMA-LIST
 		(lambda (sa sb)
 			(< (overt-get-index sa) (overt-get-index sb)))))
+
+(define-public (sort-wedgelist WEDGE-LIST)
+"
+  sort-wedgelist WEDGE-LIST -- Sort a list of wedges into ascending order.
+"
+	(sort WEDGE-LIST
+		(lambda (wea web)
+			(define nlea (wedge-get-left-index wea))
+			(define nleb (wedge-get-left-index web))
+			(or (< nlea nleb)
+				(and (= nlea nleb)
+					(< (wedge-get-right-index wea)
+						(wedge-get-right-index web))))))
+)
 
 ; ---------------------------------------------------------------------
 
