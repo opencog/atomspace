@@ -158,48 +158,12 @@
 	; A "wedge" Weighted EDGE is the same thing as a link.
 
 	; Create a list of all of the numas in the wedge-list.
-	(define numa-list (delete-duplicates!
-		(fold
-			(lambda (mlnk lst)
-				(cons (wedge-get-left-overt mlnk)
-					(cons (wedge-get-right-overt mlnk) lst)))
-			'()
-			good-links)))
-
-	; Return #t if word appears on the left side of mlnk.
-	; WEDGE must be a weighted edge. (see terminology above).
-	; NUMA must be a "numbered atom".
-	(define (is-on-left-side? NUMA WEDGE)
-		(equal? NUMA (wedge-get-left-overt WEDGE)))
-	(define (is-on-right-side? NUMA WEDGE)
-		(equal? NUMA (wedge-get-right-overt WEDGE)))
-
-	; Given a numbered-atom NUMA, and the list of wedges WELI,
-	; create a list numas which holds only the numbered atoms
-	; linked to the right of NUMA.
-	(define (mk-right-seqlist NUMA WELI)
-		(map wedge-get-right-overt
-			(filter
-				(lambda (wedge) (is-on-left-side? NUMA wedge))
-				WELI)))
-
-	; Same as above, but other direction.
-	(define (mk-left-seqlist NUMA WELI)
-		(map wedge-get-left-overt
-			(filter
-				(lambda (wedge) (is-on-right-side? NUMA wedge))
-				WELI)))
-
-	; Sort a list of numa's into ascending order
-	(define (sort-seqlist NUMA-LIST)
-		(sort NUMA-LIST
-			(lambda (sa sb)
-				(< (overt-get-index sa) (overt-get-index sb)))))
+	(define numa-list (numas-in-wedge-list good-links))
 
 	; Given a numa, and a list of wedges, create a Section
 	(define (mk-pseudo NUMA WEDLI)
-		(define left-nus (sort-seqlist (mk-left-seqlist NUMA WEDLI)))
-		(define right-nus (sort-seqlist (mk-right-seqlist NUMA WEDLI)))
+		(define left-nus (sort-numalist (left-linked-numas NUMA WEDLI)))
+		(define right-nus (sort-numalist (right-linked-numas NUMA WEDLI)))
 
 		; Create a list of left-connectors
 		(define left-cnc

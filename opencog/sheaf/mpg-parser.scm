@@ -66,23 +66,11 @@
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	; A wedge" is a weighted edge, having the form
-	;    ((left-numa . right-num) . mi).
+	;    ((left-numa . right-num) . weight).
 
 	; Start with the MST parse
 	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN)
 
-	; Sort it into ascending sequential order, first by left-numas
-	; when they are unequal, then by right-numas, if the lefts are
-	; equal.
-	(define ordered-tree
-		(sort mst-tree
-			(lambda (wea web)
-				(define nlea (wedge-get-left-index wea))
-				(define nleb (wedge-get-left-index web))
-				(or (< nlea nleb)
-					(and (= nlea nleb)
-						(< (wedge-get-right-index wea)
-							(wedge-get-right-index web)))))))
 
 xxxxxxxxxx
 	; Define a losing score.

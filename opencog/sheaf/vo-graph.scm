@@ -95,7 +95,76 @@
 "
 	(overt-get-index (wedge-get-right-overt lnk)))
 
+(define-public (numa-on-left-side? NUMA WEDGE)
+"
+  numa-on-left-side? NUMA WEDGE -- return #t if NUMA is on the left.
+
+  Return #t if NUMA appears on the left side of the WEDGE.
+"
+	(equal? NUMA (wedge-get-left-overt WEDGE)))
+
+(define-public (numa-on-right-side? NUMA WEDGE)
+"
+  numa-on-right-side? NUMA WEDGE -- return #t if NUMA is on the right.
+
+  Return #t if NUMA appears on the right side of the WEDGE.
+"
+	(equal? NUMA (wedge-get-right-overt WEDGE)))
+
 ; ---------------------------------------------------------------------
+
+(define-public (sort-numalist NUMA-LIST)
+"
+  sort-numalist NUMA-LIST -- Sort a list of numa's into ascending order.
+"
+	(sort NUMA-LIST
+		(lambda (sa sb)
+			(< (overt-get-index sa) (overt-get-index sb)))))
+
+; ---------------------------------------------------------------------
+
+(define-public (numas-in-wedge-list WELI)
+"
+  numas-in-wedge-list WELI -- Create a list of all of the numas
+  that appear in the wedge-list WELI. The list is de-duplicated;
+  every numa appears only once.
+"
+	(delete-duplicates!
+	(fold
+		(lambda (mlnk lst)
+			(cons (wedge-get-left-overt mlnk)
+				(cons (wedge-get-right-overt mlnk) lst)))
+		'()
+		WELI))
+)
+
+(define-public (right-linked-numas NUMA WELI)
+"
+  right-linked-numas NUMA WELI -- return numas linked to the right.
+
+  Given a numbered-atom NUMA, and the list of wedges WELI,
+  create a list numas which holds only the numbered atoms
+  linked to the right of NUMA.
+"
+	(map wedge-get-right-overt
+		(filter
+			(lambda (wedge) (numa-on-left-side? NUMA wedge))
+			WELI)))
+
+(define-public (left-linked-numas NUMA WELI)
+"
+  left-linked-numas NUMA WELI -- return numas linked to the left.
+
+  Given a numbered-atom NUMA, and the list of wedges WELI,
+  create a list numas which holds only the numbered atoms
+  linked to the left of NUMA.
+"
+	(map wedge-get-left-overt
+		(filter
+			(lambda (wedge) (numa-on-right-side? NUMA wedge))
+			WELI)))
+
+;  ---------------------------------------------------------------------
 
 (define-public (wedge-cross? wedge-a wedge-b)
 "
