@@ -50,7 +50,6 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	PythonEval
 	utilities_cython
 	atomspace_cython
-	ure_cython
 	atomspace
 	${COGUTIL_LIBRARY}
 )
@@ -109,26 +108,6 @@ IF (HAVE_NOSETESTS)
 			DEPENDS bindlink_cython
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
-
-		ADD_TEST(CythonForwardchainer ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/forwardchainer/)
-		SET_PROPERTY(TEST CythonForwardchainer
-			APPEND PROPERTY ENVIRONMENT
-				"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}"
-				"PYTHONDONTWRITEBYTECODE=1"
-				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/forwardchainer"
-				)
-
-		ADD_TEST(CythonBackwardchainer ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/backwardchainer/)
-		SET_PROPERTY(TEST CythonBackwardchainer
-			PROPERTY ENVIRONMENT
-				"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}"
-				"PYTHONDONTWRITEBYTECODE=1"
-				"PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer"
-				)
 	ENDIF (HAVE_ATOMSPACE)
 
 ENDIF (HAVE_NOSETESTS)

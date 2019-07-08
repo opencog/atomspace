@@ -16,13 +16,7 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 
 * gearman       - Using `gearman` for simple distributed processing.
 
-* ure           - Provide example of a simple crisp inference system
-                  using the unified rule engine.
-
 * python        - Python usage examples.
 * haskell       - Haskell usage examples.
-
-* c++-api       - Examples of using the C++ programming API. The use of
-                  C++ is discouraged for all but subsystem maintainers.
 
 * c++-guile     - Example of how to create a guile wrapper for C++ code.

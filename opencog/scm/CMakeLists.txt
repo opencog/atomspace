@@ -26,8 +26,6 @@ ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
 	opencog/persist.scm
 	opencog/query.scm
-	opencog/ure.scm
-	opencog/rule-engine.scm
 	opencog/test-runner.scm
 	opencog/type-utils.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
@@ -63,8 +61,3 @@ IF (HAVE_ZMQ)
 		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
 ENDIF (HAVE_ZMQ)
-
-ADD_GUILE_MODULE (FILES
-	opencog/ure/ure-utils.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/ure"
-)
