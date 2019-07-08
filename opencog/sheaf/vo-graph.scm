@@ -171,7 +171,9 @@
   wedge-cross? wedge-a wedge-b Do a pair of links cross each other?
 
   Return true if a pair of weighted edges cross, else return false.
-  Usefule for constructing planar graphs.
+  If wedge-a and wedge-b define the same edge, they are considered
+  to be crossing.
+  Useful for constructing planar graphs.
 "
 	(define pair-a (car wedge-a)) ; throw away weight
 	(define pair-b (car wedge-b)) ; throw away weight
@@ -187,6 +189,7 @@
 		; All inequalities are strict.
 		(and (< ila ilb) (< ilb ira) (< ira irb))
 		(and (< ilb ila) (< ila irb) (< irb ira))
+		(and (= ila ilb) (= ira irb))
 	)
 )
 

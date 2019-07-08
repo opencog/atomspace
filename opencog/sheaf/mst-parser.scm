@@ -128,6 +128,7 @@
 "
 	; Define a losing score.
 	(define bad-mi -1e30)
+	(define min-acceptable-mi -1e15)
 
 	; Define a losing numa-pair
 	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
@@ -303,11 +304,11 @@
 
 					; Returned value: the weight value for the pair, then the pair.
 					(let ((mi (SCORE-FN try-node brk-node (- brk-num try-num))))
-						(if (< -1e10 mi)
+						(if (< min-acceptable-mi mi)
 							(cons (cons numa brk-numa) mi) #f))
 
 					(let ((mi (SCORE-FN brk-node try-node (- try-num brk-num))))
-						(if (< -1e10 mi)
+						(if (< min-acceptable-mi mi)
 							(cons (cons brk-numa numa) mi) #f))
 				)
 			)
