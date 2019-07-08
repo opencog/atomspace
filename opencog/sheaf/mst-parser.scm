@@ -18,12 +18,12 @@
 ; ordered pairs of atoms. In the typical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
 ; so the MST parse is the tree-parse that maximizes the mutual
-; infomration between pairs of atoms.
+; information between pairs of atoms.
 ;
 ; The algorithm implemented is a basic maximum spanning tree algorithm.
 ; Conceptually, the graph to be spanned by the tree is a clique, with
 ; with every atom in the sequence being connected to every other atom.
-; The edge-lengths are given by the score betweeen atoms.
+; The edge-lengths are given by the score between atoms.
 ;
 ; The spanning tree is then computed. Finally, disjuncts are created
 ; from the resulting parse, by looking at how each atom is attached to
@@ -70,7 +70,7 @@
 "
   Projective, Undirected Maximum Spanning Tree parser.
 
-  Given a sequence of atoms, find an unlabelled, undirected, projective
+  Given a sequence of atoms, find an unlabeled, undirected, projective
   dependency parse of the sequence, by finding a dependency tree that
   maximizes the pair-wise scoring function. This returns a list of
   atom-pairs, together with associated score.  The tree is projective,
@@ -85,7 +85,7 @@
   The most basic choice is to use the mutual information between the
   pair of atoms.  The SCORE-FN should take three arguments: left-atom,
   right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference betwen the
+  atoms are ordered sequentially, this is the difference between the
   ordinal numbers).
 
   The M in MST often stands for 'minimum'; but in this code, the
@@ -112,14 +112,14 @@
   sort of graph entropy. Hmmm...
 
   Another idea is to apply the Dick Hudson Word Grammar landmark
-  transitivity idea, but exactly how this could work for unlabelled
+  transitivity idea, but exactly how this could work for unlabeled
   trees has not been explored.
 
   So, for now, a no-links-cross constraint is hand-coded into the algo.
   Without it, it seems that the pair-MI scores alone give rather unruly
   dependencies (unclear, needs exploration).  So, in the long-run, it
   might be better to instead pick something that combines MI scores with
-  mean-dependency-distance or with hubbiness. See, for example:
+  mean-dependency-distance or with hubiness. See, for example:
   Haitao Liu (2008) “Dependency distance as a metric of language
   comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
   or also:
@@ -128,6 +128,7 @@
 "
 	; Define a losing score.
 	(define bad-mi -1e30)
+	(define min-acceptable-mi -1e15)
 
 	; Define a losing numa-pair
 	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
@@ -135,7 +136,7 @@
 	; Given a list of atoms, create a numbered list of atoms.
 	; The numbering provides a unique ID, needed for the graph algos.
 	; i.e. if the same atom appears twice in a sequence, we need to
-	; distinguish these multiple occurances.  The id does this.
+	; distinguish these multiple occurrences.  The id does this.
 	(define (atom-list->numa-list ATOMS)
 		(define cnt 0)
 		(map
@@ -150,10 +151,11 @@
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
 	; Given a left-numa, and a list of numas to the right of it, pick
-	; an atom from the list that has the highest-MI attachment to the
-	; left atom.  Return a scheme-pair containing selected numa-pair
-	; and it's cost.  Specifically, the given left-numa, and the
-	; discovered right-numa, in the form ((left-numa . right-num) . mi).
+	; an atom from the list that has the highest-weight attachment to
+	; the left atom.  Return a weighted edge containing selected
+	; numa-pair and it's weight.  Specifically, the given left-numa,
+	; and the discovered right-numa, return the form
+	; ((left-numa . right-num) . weight).
 	; The search is made over atom pairs scored by the SCORE-FN.
 	;
 	; The left-numa is assumed to be an scheme-pair, consisting of an ID,
@@ -169,7 +171,7 @@
 						(- (car right-numa) (car left-numa))))
 
 				; Use strict inequality, so that a shorter dependency
-				; length is always prefered.
+				; length is always preferred.
 				(if (< max-mi cur-mi)
 					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
@@ -181,9 +183,9 @@
 	)
 
 	; Given a right-numa, and a list of numas to the left of it, pick
-	; an atom from the list that has the highest-MI attachment to the
+	; an atom from the list that has the highest-weight attachment to the
 	; right atom.  Return a scheme-pair containing selected numa-pair
-	; and it's cost.  Specifically, the given right-numa, and the
+	; and it's weight.  Specifically, the given right-numa, and the
 	; discovered left-numa, in the form ((left-numa . right-num) . mi).
 	; The search is made over atom pairs scored by the SCORE-FN.
 	;
@@ -200,7 +202,7 @@
 						(- (car right-numa) (car left-numa))))
 
 				; Use less-or-equal, so that a shorter dependency
-				; length is always prefered.
+				; length is always preferred.
 				(if (<= max-mi cur-mi)
 					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
@@ -211,8 +213,8 @@
 		)
 	)
 
-	; Given a list of numas, return a costed numa-pair, in the form
-	; ((left-numa . right-num) . mi).
+	; Given a list of numas, return a weighted numa-pair, in the form
+	; ((left-numa . right-num) . weight).
 	;
 	; The search is made over atom pairs scored by the SCORE-FN.
 	;
@@ -240,7 +242,7 @@
 	; Given set-a and set-b, return set-a with all elts of set-b removed.
 	; It is assumed that equal? can be used to compare elements.  This
 	; should work fine for sets of ordinal-numbered atoms, and also for
-	; MI-costed atom-pairs.
+	; weighted edges.
 	(define (set-sub set rm-set)
 		(filter
 			(lambda (item)
@@ -250,9 +252,9 @@
 		)
 	)
 
-	; Of multiple possibilities, pick the one with the highest MI
-	; The choice-list is assumed to be a list of costed numa-pairs,
-	; each costed pair of the form ((left-numa . right-num) . mi).
+	; Of multiple possibilities, pick the one with the highest weight
+	; The choice-list is assumed to be a list of weighted numa-pairs,
+	; each weighted edge of the form ((left-numa . right-num) . weight).
 	(define (max-of-pair-list choice-list)
 
 		; The tail-recursive helper that does all the work.
@@ -279,8 +281,8 @@
 	; The numa-list is assumed to be a list of numas. It is presumed
 	; that the brk-numa does NOT occur in the numa-list.
 	;
-	; The returned list is a list of costed-pairs. Each costed pair is
-	; of the form ((left-numa . right-num) . mi).
+	; The returned list is a list of weighted-pairs. Each weighted pair is
+	; of the form ((left-numa . right-num) . weight).
 	;
 	; This only returns connections, if there are any. This might return
 	; the empty list, if there are no connections at all.
@@ -300,13 +302,13 @@
 				; Ordered pairs, the left-right order matters.
 				(if (< try-num brk-num)
 
-					; Returned value: the MI value for the pair, then the pair.
+					; Returned value: the weight value for the pair, then the pair.
 					(let ((mi (SCORE-FN try-node brk-node (- brk-num try-num))))
-						(if (< -1e10 mi)
+						(if (< min-acceptable-mi mi)
 							(cons (cons numa brk-numa) mi) #f))
 
 					(let ((mi (SCORE-FN brk-node try-node (- try-num brk-num))))
-						(if (< -1e10 mi)
+						(if (< min-acceptable-mi mi)
 							(cons (cons brk-numa numa) mi) #f))
 				)
 			)
@@ -315,9 +317,9 @@
 	)
 
 	; For each connected numbered-atom (numa), find connections between
-	; that and the unconnected numas.  Return a list of MI-costed
-	; connections. Each costed-connection is of the form
-	; ((left-numa . right-num) . mi).
+	; that and the unconnected numas.  Return a list of weighted
+	; connections. Each weighted-connection is of the form
+	; ((left-numa . right-num) . weight).
 	;
 	; The 'bare-numas' is a set of the unconnected atoms, labelled by
 	; an ordinal number denoting sequence order.  The graph-numas is a
@@ -332,46 +334,22 @@
 		)
 	)
 
-	; Return true if a pair of links cross, else return false.
-	(define (cross? cost-pair-a cost-pair-b)
-		(define pair-a (car cost-pair-a)) ; throw away MI
-		(define pair-b (car cost-pair-b)) ; throw away MI
-		(define lwa (car pair-a))  ; left numa of numa-pair
-		(define rwa (cdr pair-a)) ; right numa of numa-pair
-		(define lwb (car pair-b))
-		(define rwb (cdr pair-b))
-		(define ila (car lwa))     ; ordinal number of the atom
-		(define ira (car rwa))
-		(define ilb (car lwb))
-		(define irb (car rwb))
-		(or
-			; All inequalities are strict.
-			(and (< ila ilb) (< ilb ira) (< ira irb))
-			(and (< ilb ila) (< ila irb) (< irb ira))
-		)
-	)
-
-	; Return true if the pair crosses over any pairs in the pair-list
-	(define (cross-any? cost-pair cost-pair-list)
-		(any (lambda (pr) (cross? pr cost-pair)) cost-pair-list)
-	)
-
-	; Find the highest-MI link that doesn't cross.
-	(define (pick-no-cross-best candidates graph-pairs)
+	; Find the highest-weight link that doesn't cross.
+	(define (pick-no-cross-best candidates graph-wedges)
 		; Despite the recursive nature of this call, we always expect
 		; that best isn't nil, unless there's a bug somewhere ...
 		(define best (max-of-pair-list candidates))
-		(if (not (cross-any? best graph-pairs))
+		(if (not (wedge-cross-any? best graph-wedges))
 			best
 			; Else, remove best from list, and try again.
 			(pick-no-cross-best
-				(set-sub candidates (list best)) graph-pairs)
+				(set-sub candidates (list best)) graph-wedges)
 		)
 	)
 
 	; Which numa of the pair is in the numa-list?
 	(define (get-fresh cost-pair numa-list)
-		(define numa-pair (car cost-pair)) ; throw away MI
+		(define numa-pair (car cost-pair)) ; throw away weight
 		(define left-numa (car numa-pair))
 		(define right-numa (cdr numa-pair))
 		(if (any (lambda (numa) (equal? numa left-numa)) numa-list)
@@ -389,13 +367,13 @@
 	;
 	; The numa-list is assumed to be a set of ordinal-numbered atoms;
 	; i.e. scheme-pair of an ordinal number denoting atom-order in
-	; sequwnce, and then the atom.
+	; sequence, and then the atom.
 	;
 	; The nected-numas are likewise.  It is assumed that the numa-list and
 	; the nected-numas are disjoint sets.
 	;
-	; The graph-links are assumed to be a set of MI-costed numa-pairs.
-	; That is, an float-point MI value, followed by a pair of numas.
+	; The graph-links are assumed to be a set of weighted numa-pairs.
+	; That is, a pair of numas followed by a floating-point weight.
 	;
 	(define (*pick-em numa-list graph-links nected-numas)
 
@@ -411,8 +389,8 @@
 		; Find the best link that doesn't cross existing links.
 		(define best (pick-no-cross-best trial-pairs graph-links))
 
-		; There is no such "best link" i.e. we've never obseved it
-		; and so have no MI for it, then we are done.  That is, none
+		; There is no such "best link" i.e. we've never observed it
+		; and so have no weight for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
 		(if (> -1e10 (cdr best))
 			graph-links
@@ -445,11 +423,11 @@
 			; Number the atoms in sequence-order.
 			(numa-list (atom-list->numa-list ATOM-LIST))
 
-			; Find a pair of atoms connected with the largest MI
+			; Find a pair of atoms connected with the largest weight
 			; in the sequence.
 			(start-cost-pair (pick-best-cost-pair numa-list))
 
-			; Discard the MI.
+			; Discard the weight.
 			(start-pair (car start-cost-pair))
 
 			; Add both of these atoms to the connected-list.
