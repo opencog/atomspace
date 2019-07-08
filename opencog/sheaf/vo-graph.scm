@@ -39,7 +39,7 @@
 ; of a pair of ordered atoms.
 ; The functions below unpack each data structure.
 ;
-; Get the score of the link.
+; Get the score of the link (aka "weighted edge").
 (define-public (wedge-get-score lnk) (cdr lnk))
 
 ; Get the left numbered-atom (numa) in the link. The num is a scheme
@@ -60,8 +60,16 @@
 (define-public (wedge-get-left-atom lnk)
 	(overt-get-atom (wedge-get-left-overt lnk)))
 
-; Get the right word in the link. This returns the WordNode.
+; Get the right atom in the scored link.
 (define-public (wedge-get-right-atom lnk)
 	(overt-get-atom (wedge-get-right-overt lnk)))
+
+; Get the index of the left atom in the scored link.
+(define-public (wedge-get-left-index lnk)
+	(overt-get-index (wedge-get-left-overt lnk)))
+
+; Get the index of the right word in the scored link.
+(define-public (wedge-get-right-index lnk)
+	(overt-get-index (wedge-get-right-overt lnk)))
 
 ; ---------------------------------------------------------------------
