@@ -274,9 +274,9 @@
   If the RENAME argument is #t, then the other various API's will use
   a special key name, created from the 'id of this filter, to access
   frequencies and marginals. This allows filtered frequencies and
-  marginals to be stored with the matrix.  If the RENAME argument is #f,
-  then all access to the frequencies and marginals will be through the
-  primary, main predicate keys.
+  marginals to be stored within the same matrix.  If the RENAME
+  argument is #f, then all access to the frequencies and marginals
+  will be through the primary, main predicate keys.
 
   Thus, set RENAME to #f if you just want to cut down on the number of
   rows and columns, but otherwise use the normal data.  But if you need
@@ -296,34 +296,83 @@
   The net effect of the cuts is that when LEFT-CUT is increased, the
   left-dimension of the dataset drops; likewise on the right.
 "
-	(let* ((stars-obj (add-pair-stars LLOBJ))
-			(sup-obj (add-support-api stars-obj))
-		)
+	(define stars-obj (add-pair-stars LLOBJ))
+	(define sup-obj (add-support-api stars-obj))
 
-		; ---------------
-		; Filter out rows and columns that are below-count.
-		;
-		; Yes, we want LEFT-CUT < right-wild-count this looks weird,
-		; but is correct: as LEFT-CUT gets larger, the size of the
-		; left-basis shrinks.
-		(define (left-basis-pred ITEM)
-			(< LEFT-CUT (sup-obj 'right-count ITEM)))
+	; ---------------
+	; Filter out rows and columns that are below-count.
+	;
+	; Yes, we want LEFT-CUT < right-wild-count this looks weird,
+	; but is correct: as LEFT-CUT gets larger, the size of the
+	; left-basis shrinks.
+	(define (left-basis-pred ITEM)
+		(< LEFT-CUT (sup-obj 'right-count ITEM)))
 
-		(define (right-basis-pred ITEM)
-			(< RIGHT-CUT (sup-obj 'left-count ITEM)))
+	(define (right-basis-pred ITEM)
+		(< RIGHT-CUT (sup-obj 'left-count ITEM)))
 
-		(define (pair-pred PAIR)
-			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
+	(define (pair-pred PAIR)
+		(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
-		(define id-str
-			(format #f "subtotal-cut-~D-~D-~D"
-				LEFT-CUT RIGHT-CUT PAIR-CUT))
+	(define id-str
+		(format #f "subtotal-cut-~D-~D-~D"
+			LEFT-CUT RIGHT-CUT PAIR-CUT))
 
-		; ---------------
-		(add-generic-filter LLOBJ
-			left-basis-pred right-basis-pred
-			pair-pred id-str RENAME)
-	)
+	; ---------------
+	(add-generic-filter stars-obj
+		left-basis-pred right-basis-pred pair-pred id-str RENAME)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (add-fmi-filter LLOBJ FMI-CUT RENAME)
+"
+  add-mi-filter LLOBJ - Modify LLOBJ so that any pairs with a
+  fraction MI score less than FMI-CUT are removed. This provides
+  an API compatible with the star-object API; i.e. it provides the
+  same row and column addressability that star-object does, but just
+  returns fewer individual entries.
+
+  The filtering is done 'on demand', on a row-by-row, column-by-column
+  basis.  Computations of the left and right stars are cached, so that
+  they are not recomputed for each request.
+
+  Note that by removing entries, the effective FMI, and the entropy
+  subtotals will no longer obey the relationships used to originally
+  calculate them.  If accurate values are needed for the new, smaller
+  matrix, then they would need to be recomputed. The 'filters? method,
+  and the RENAME argument provide a way for dealing with this.
+
+  If the RENAME argument is #t, then the other various API's will use
+  a special key name, created from the 'id of this filter, to access
+  frequencies and marginals. This allows filtered frequencies and
+  marginals to be stored within the same matrix.  If the RENAME
+  argument is #f, then all access to the frequencies and marginals
+  will be through the primary, main predicate keys.
+
+  Thus, set RENAME to #f if you just want to cut down on the number of
+  entries, but otherwise use the normal data.  But if you need to
+  recompute new values and marginals for the filtered matrix, then
+  set RENAME to #t.
+
+  Precise defintion: Let FMI(x,y) be the (fractional) mutual
+  information for the pair (x,y) (as returned by the 'pair-fmi method
+  on the `add-pair-freq-api` object.)  Pairs are not reported in the
+  'left-stars and 'right-stars methods when FMI(x,y) <= FMI-CUT.
+  Likewise, duals are not reported when the corresponding pair fails
+  the FMI-CUT.
+"
+	(define stars-obj (add-pair-stars LLOBJ))
+	(define freq-obj (add-pair-freq-api stars-obj))
+
+	(define (pair-pred PAIR) (< MI-CUT (LLOBJ 'pair-fmi PAIR)))
+
+	(define id-str (format #f "fmi-cut-~D" MI-CUT))
+
+	(define (true-pred ITEM) #t)
+
+	(add-generic-filter stars-obj true-pred true-pred pair-pred
+		id-str RENAME)
 )
 
 ; ---------------------------------------------------------------------
