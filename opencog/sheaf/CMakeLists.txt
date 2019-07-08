@@ -1,6 +1,7 @@
 ADD_GUILE_MODULE (FILES
 	sheaf.scm
 	make-section.scm
+	mpg-parser.scm
 	mst-parser.scm
 	sections.scm
 	vo-graph.scm

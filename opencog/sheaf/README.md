@@ -475,7 +475,7 @@ skyscrapers, and fails to induce the Aristotelian "formal cause" of
 events.
 
 
-Inferring Grammar
+Infering Grammar
 ----------------
 To observationally infer the grammar of a network, one must observe a
 lot of networks. With each network observation, one may create a set
@@ -512,11 +512,14 @@ The grammar can then be inferred from the distribution of the sections.
 
 MST parsing
 -----------
-The primary tool in this directory is an MST parser. Given a specific
-sequence of events, viz a sequence of atoms, all of the same type, and
-given a large pool of observed dependencies between pairs of events, the
-MST parser will construct a dependency tree such that the score of the
-edges of the dependency tree are maximized.
+The MST parser is a "Maximum Spanning Tree" parser. Given a specific
+ordered sequence of events, viz a sequence of atoms, and given a large
+pool of observed dependencies between pairs of events, the MST parser
+will construct a spanning, planar dependency tree such that:
+
+* The tree is a spanning tree: all nodes are connected.
+* The tree is planar (projective): it is flat, with no crossing edges.
+* The sum-total score of the weights on the edges is maximized.
 
 Typical pair-wise relationships might be indicated as follows, in the
 atomspace:
@@ -534,9 +537,19 @@ The atomspace can hold sparse matrix of such pair-wise data; in a
 certain sense, the atomspace was designed from the get-go to do exactly
 that.
 
-The MST parse just creates a tree connecting all of the atoms in a
-sequence, such that the sum-total (addition) of the scores of all the
-edges in the tree is maximal, as compared to any other tree.
+The MST parse just creates a planar (projective) tree connecting all
+of the atoms in a sequence, such that the sum-total (addition) of the
+scores of all the edges in the tree is maximal, as compared to any
+other tree.
 
 After the MST parse, the section for each vertex in the parse can be
 computed.
+
+MPG parsing
+-----------
+The MPG parser is the "Maximal Planar Graph" parser; it starts with
+the parse tree from an MST parse, and then adds edges, one at a time,
+of the highest score, such that the graph remains planar (no
+intersecting edges.) The result is a graph with the largest possible
+number of edges, such that it is still flat, and such that the edges
+are scored the highest.
