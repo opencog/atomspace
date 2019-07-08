@@ -84,15 +84,18 @@
   for that pair. This numeric score will be maximized during the parse.
   The most basic choice is to use the mutual information between the
   pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-  right-atom and (numeric) distance.
+  right-atom and the (numeric) distance between them (i.e. when the
+  atoms are ordered sequentially, this is the difference betwen the
+  ordinal numbers).
 
-  The M in MST normally stands for 'minimum', but this code maximizes.
+  The M in MST often stands for 'minimum'; but in this code, the
+  score is maximized.
 
   There are many MST algorithms; the choice was made as follows:
   Prim is very easy; but seems too simple to give good results.
-  Kruskal is good, but seems hard to control a no-link-cross constraint. (?)
-  This implements a variant of Borůvka's algo, which seems to be robust,
-  and fast enough for the current needs.
+  Kruskal is good, but it seems hard to control a no-link-crossing
+  constraint with it. This implements a variant of Borůvka's algo,
+  which seems to be robust, and fast enough for the current needs.
 
   It has been benchmarked (using the code in `bench-mst`) to run in
   O(N^3) time, for a sequence of length N. From what I can tell, the
@@ -112,7 +115,7 @@
   transitivity idea, but exactly how this could work for unlabelled
   trees has not been explored.
 
-  So, for now, a no-links-cross constraint is handed-coded into the algo.
+  So, for now, a no-links-cross constraint is hand-coded into the algo.
   Without it, it seems that the pair-MI scores alone give rather unruly
   dependencies (unclear, needs exploration).  So, in the long-run, it
   might be better to instead pick something that combines MI scores with
