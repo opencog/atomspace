@@ -618,7 +618,9 @@
 	(display "Going to compute and store individual pair MI\n")
 	(elapsed-secs)
 	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
-			(lambda (atom-list) (maybe-par-for-each store-atom atom-list)))))
+				; Non-parallel version here; it's parallel in the
+				; outer loop, above.
+				(lambda (atom-list) (for-each store-atom atom-list)))))
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
