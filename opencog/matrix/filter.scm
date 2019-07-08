@@ -367,7 +367,7 @@
 
 	(define (pair-pred PAIR) (< FMI-CUT (LLOBJ 'pair-fmi PAIR)))
 
-	(define id-str (format #f "fmi-cut-~D" FMI-CUT))
+	(define id-str (format #f "fmi-cut-~6F" FMI-CUT))
 
 	(define (true-pred ITEM) #t)
 
