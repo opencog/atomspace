@@ -475,7 +475,7 @@ skyscrapers, and fails to induce the Aristotelian "formal cause" of
 events.
 
 
-Infering Grammar
+Inferring Grammar
 ----------------
 To observationally infer the grammar of a network, one must observe a
 lot of networks. With each network observation, one may create a set
