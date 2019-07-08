@@ -69,7 +69,7 @@
 	;    ((left-numa . right-num) . weight).
 
 	; Start with the MST parse
-	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN))
 
 	; The the list of nodes in it.
 	(define node-list (sort-numalist (numas-in-wedge-list mst-tree)))
@@ -105,19 +105,27 @@
 		(if (equal? '() NALI) '() (tail-rec NALI '()))
 	)
 
-xxxxxxxxxx
-	; Find the highest-MI link that doesn't cross.
-	(define (pick-no-cross-best candidates graph-pairs)
-		; Despite the recursive nature of this call, we always expect
-		; that best isn't nil, unless there's a bug somewhere ...
-		(define best (max-of-pair-list candidates))
-		(if (not (cross-any? best graph-pairs))
-			best
-			; Else, remove best from list, and try again.
-			(pick-no-cross-best
-				(set-sub candidates (list best)) graph-pairs)
-		)
-	)
+	; A candidate list of links to add.
+	(define candidates (non-intersecting-links node-list mst-tree))
+
+	; Candidates sorted by weight
+	(define sorted-cands
+		(sort candidates
+			(lambda (sa sb)
+				(< (wedge-get-score sb) (wedge-get-score sa)))))
+
+	; Add links, one at a time, tail-recusrively.
+	(define (add-link NED CANDS RSLT)
+		; If we've added the requested number, we're done.
+		; If there's nothing left to add, we're done.
+		(if (or (= 0 NED) (equal? '() CANDS)) RSLT
+			; If the candidate edge crosses, skip it and move on.
+			; else add it, and decrement the to-do count.
+			(if (wedge-cross-any? (car CANDS) RSLT)
+				(add-link NED (cdr CANDS) RSLT)
+				(add-link (- NED 1) (cdr CANDS) (cons (car CANDS) RSLT)))))
+
+	(add-link NUM-LOOPS candidates mst-tree)
 )
 
 ; ---------------------------------------------------------------------
