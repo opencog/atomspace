@@ -763,9 +763,9 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// Generic shared-library foreign-function interface.
 	// Currently used only by the Haskell bindings.
 	//
-	// Extract the language, library and function
+	// Extract the language, library and function from schema
 	std::string lang, lib, fun;
-	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
+	LibraryManager::parse_schema(schema, lang, lib, fun);
 	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);

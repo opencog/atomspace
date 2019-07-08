@@ -167,7 +167,7 @@ ValuePtr ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// Extract the language, library and function
 	std::string lang, lib, fun;
-	LibraryManager::lang_lib_fun(schema, lang, lib, fun);
+	LibraryManager::parse_schema(schema, lang, lib, fun);
 
 	ValuePtr result;
 
