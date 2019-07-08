@@ -71,7 +71,7 @@ void* LibraryManager::getFunc(std::string libName, std::string funcName)
 	return sym;
 }
 
-void LibraryManager::lang_lib_fun(const std::string& schema,
+void LibraryManager::parse_schema(const std::string& schema,
                                   std::string& lang,
                                   std::string& lib,
                                   std::string& fun)
