@@ -18,12 +18,12 @@
 ; ordered pairs of atoms. In the typical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
 ; so the MST parse is the tree-parse that maximizes the mutual
-; infomration between pairs of atoms.
+; information between pairs of atoms.
 ;
 ; The algorithm implemented is a basic maximum spanning tree algorithm.
 ; Conceptually, the graph to be spanned by the tree is a clique, with
 ; with every atom in the sequence being connected to every other atom.
-; The edge-lengths are given by the score betweeen atoms.
+; The edge-lengths are given by the score between atoms.
 ;
 ; The spanning tree is then computed. Finally, disjuncts are created
 ; from the resulting parse, by looking at how each atom is attached to
@@ -70,7 +70,7 @@
 "
   Projective, Undirected Maximum Spanning Tree parser.
 
-  Given a sequence of atoms, find an unlabelled, undirected, projective
+  Given a sequence of atoms, find an unlabeled, undirected, projective
   dependency parse of the sequence, by finding a dependency tree that
   maximizes the pair-wise scoring function. This returns a list of
   atom-pairs, together with associated score.  The tree is projective,
@@ -85,7 +85,7 @@
   The most basic choice is to use the mutual information between the
   pair of atoms.  The SCORE-FN should take three arguments: left-atom,
   right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference betwen the
+  atoms are ordered sequentially, this is the difference between the
   ordinal numbers).
 
   The M in MST often stands for 'minimum'; but in this code, the
@@ -112,14 +112,14 @@
   sort of graph entropy. Hmmm...
 
   Another idea is to apply the Dick Hudson Word Grammar landmark
-  transitivity idea, but exactly how this could work for unlabelled
+  transitivity idea, but exactly how this could work for unlabeled
   trees has not been explored.
 
   So, for now, a no-links-cross constraint is hand-coded into the algo.
   Without it, it seems that the pair-MI scores alone give rather unruly
   dependencies (unclear, needs exploration).  So, in the long-run, it
   might be better to instead pick something that combines MI scores with
-  mean-dependency-distance or with hubbiness. See, for example:
+  mean-dependency-distance or with hubiness. See, for example:
   Haitao Liu (2008) “Dependency distance as a metric of language
   comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
   or also:
@@ -135,7 +135,7 @@
 	; Given a list of atoms, create a numbered list of atoms.
 	; The numbering provides a unique ID, needed for the graph algos.
 	; i.e. if the same atom appears twice in a sequence, we need to
-	; distinguish these multiple occurances.  The id does this.
+	; distinguish these multiple occurrences.  The id does this.
 	(define (atom-list->numa-list ATOMS)
 		(define cnt 0)
 		(map
@@ -169,7 +169,7 @@
 						(- (car right-numa) (car left-numa))))
 
 				; Use strict inequality, so that a shorter dependency
-				; length is always prefered.
+				; length is always preferred.
 				(if (< max-mi cur-mi)
 					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
@@ -200,7 +200,7 @@
 						(- (car right-numa) (car left-numa))))
 
 				; Use less-or-equal, so that a shorter dependency
-				; length is always prefered.
+				; length is always preferred.
 				(if (<= max-mi cur-mi)
 					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
@@ -389,7 +389,7 @@
 	;
 	; The numa-list is assumed to be a set of ordinal-numbered atoms;
 	; i.e. scheme-pair of an ordinal number denoting atom-order in
-	; sequwnce, and then the atom.
+	; sequence, and then the atom.
 	;
 	; The nected-numas are likewise.  It is assumed that the numa-list and
 	; the nected-numas are disjoint sets.
@@ -411,7 +411,7 @@
 		; Find the best link that doesn't cross existing links.
 		(define best (pick-no-cross-best trial-pairs graph-links))
 
-		; There is no such "best link" i.e. we've never obseved it
+		; There is no such "best link" i.e. we've never observed it
 		; and so have no MI for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
 		(if (> -1e10 (cdr best))
