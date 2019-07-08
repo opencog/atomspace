@@ -88,30 +88,6 @@ xxxxxxxxxx
 	; Define a losing score.
 	(define bad-mi -1e30)
 
-	; Return true if a pair of links cross, else return false.
-	(define (cross? cost-pair-a cost-pair-b)
-		(define pair-a (car cost-pair-a)) ; throw away MI
-		(define pair-b (car cost-pair-b)) ; throw away MI
-		(define lwa (car pair-a))  ; left numa of numa-pair
-		(define rwa (cdr pair-a)) ; right numa of numa-pair
-		(define lwb (car pair-b))
-		(define rwb (cdr pair-b))
-		(define ila (car lwa))     ; ordinal number of the atom
-		(define ira (car rwa))
-		(define ilb (car lwb))
-		(define irb (car rwb))
-		(or
-			; All inequalities are strict.
-			(and (< ila ilb) (< ilb ira) (< ira irb))
-			(and (< ilb ila) (< ila irb) (< irb ira))
-		)
-	)
-
-	; Return true if the pair crosses over any pairs in the pair-list
-	(define (cross-any? cost-pair cost-pair-list)
-		(any (lambda (pr) (cross? pr cost-pair)) cost-pair-list)
-	)
-
 	; Find the highest-MI link that doesn't cross.
 	(define (pick-no-cross-best candidates graph-pairs)
 		; Despite the recursive nature of this call, we always expect

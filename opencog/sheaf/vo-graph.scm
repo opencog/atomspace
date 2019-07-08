@@ -73,3 +73,38 @@
 	(overt-get-index (wedge-get-right-overt lnk)))
 
 ; ---------------------------------------------------------------------
+
+(define-public (wedge-cross? wedge-a wedge-b)
+"
+  wedge-cross? wedge-a wedge-b Do a pair of links cross each other?
+
+  Return true if a pair of weighted edges cross, else return false.
+  Usefule for constructing planar graphs.
+"
+	(define pair-a (car wedge-a)) ; throw away weight
+	(define pair-b (car wedge-b)) ; throw away weight
+	(define lwa (car pair-a)) ; left  numa of numa-pair
+	(define rwa (cdr pair-a)) ; right numa of numa-pair
+	(define lwb (car pair-b))
+	(define rwb (cdr pair-b))
+	(define ila (car lwa))     ; ordinal number of the atom
+	(define ira (car rwa))
+	(define ilb (car lwb))
+	(define irb (car rwb))
+	(or
+		; All inequalities are strict.
+		(and (< ila ilb) (< ilb ira) (< ira irb))
+		(and (< ilb ila) (< ila irb) (< irb ira))
+	)
+)
+
+(define-public (wedge-cross-any? wedge wedge-list)
+"
+  wedge-cross-any? wedge wedge-list -- does this link cross any others?
+
+  Return true if the wedge crosses over any wedges in the wedge-list.
+"
+	(any (lambda (pr) (wedge-cross? pr wedge)) wedge-list)
+)
+
+; ---------------------------------------------------------------------
