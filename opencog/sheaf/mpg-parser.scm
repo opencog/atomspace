@@ -71,11 +71,35 @@
 	; Start with the MST parse
 	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN)
 
+	; The the list of nodes in it.
+	(define node-list (sort-numalist (numas-in-wedge-list mst-tree)))
 
-xxxxxxxxxx
 	; Define a losing score.
 	(define bad-mi -1e30)
 
+	; Given an Left-NUMA, and list NALI of right-numa's, return a
+	; wedge-list connecting NUMA to any of the NALI's, such that
+	; none of the wedges intersect an edge in the wedge-list WELI.
+	(define (inter-links NUMA NALI WELI)
+		(filter-map
+			(lambda (r-numa)
+				(define weight
+					(SCORE-FN (cdr NUMA) (cdr r-numa)
+						(- (car r-numa) (car NUMA))))
+				(define wedge (cons (cons NUMA r-numa) weight))
+				(and (< bad-mi weight)
+					(not (wedge-cross-any? wedge WELI))
+					wedge))
+			NALI)
+	)
+
+	; Given a list NALI of numa's, return a wedge-list connecting them
+	; such that none of them intersect an edge in the wedge-list WELI.
+	(define (non-intersecting-links NALI WELI)
+
+	)
+
+xxxxxxxxxx
 	; Find the highest-MI link that doesn't cross.
 	(define (pick-no-cross-best candidates graph-pairs)
 		; Despite the recursive nature of this call, we always expect
