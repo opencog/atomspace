@@ -56,5 +56,6 @@ ENDIF (HAVE_GUILE)
 # are fixed, first.
 INSTALL (FILES
 	MapLink.h
-	DESTINATION "include/opencog/atoms/core"
+	LibraryManager.h
+	DESTINATION "include/opencog/atoms/execution"
 )
