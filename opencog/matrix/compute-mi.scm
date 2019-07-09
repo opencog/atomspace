@@ -310,8 +310,8 @@
 			(define (atomic-inc ctr)
 				(define old (atomic-box-ref ctr))
 				(define new (+ 1 old))
-				(if (not (= old (atomic-box-compare-and-swap! ctr old new)))
-					(atomic-inc ctr)))
+				(define swp (atomic-box-compare-and-swap! ctr old new))
+				(if (= old swp) new (atomic-inc ctr)))
 
 			(define start-time (current-time))
 			(define (elapsed-secs)
