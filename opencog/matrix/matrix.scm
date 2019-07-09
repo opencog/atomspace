@@ -4,7 +4,8 @@
 ;
 (define-module (opencog matrix))
 
-; Configuration
+; ---------------------------------------------------------
+; Common configuration
 (use-modules (ice-9 threads))
 
 ; The guile-2.2 par-for-each implementation sucks, and live-locks
@@ -15,6 +16,7 @@
 	(par-for-each F L)
 )
 
+; ---------------------------------------------------------
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.

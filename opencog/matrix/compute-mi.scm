@@ -226,17 +226,19 @@
 						(set! cnt (+ cnt 1)))
 					(wldobj 'right-stars left-item)))
 
-			(maybe-par-for-each right-loop (wldobj 'left-basis))
+			; par-for-each fails massively here in guile-2.9.2
+			(for-each right-loop (wldobj 'left-basis))
 
 			; Return the total.
 			cnt)
 
 		; Compute and cache all of the left-side frequencies.
-		; This computes P(*,y) for all y, in parallel.
+		; This computes P(*,y) for all y.
+		; par-for-each fails here in guile-2.9.2
 		(define (cache-all-left-freqs)
-			(maybe-par-for-each cache-left-freq (wldobj 'right-basis)))
+			(for-each cache-left-freq (wldobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(maybe-par-for-each cache-right-freq (wldobj 'left-basis)))
+			(for-each cache-right-freq (wldobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
