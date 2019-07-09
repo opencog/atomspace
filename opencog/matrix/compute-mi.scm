@@ -114,17 +114,8 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 atomic))
-(use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog persist))
-
-; The guile-2.2 par-for-each implementation sucks, and live-locks
-; for more than about 4-5 threads, and sometimes with less.
-; The guile 2.9.4 par-for-each implemetation actually works; the
-; actual speedup depends on the loop contents.
-(define (maybe-par-for-each F L)
-	(par-for-each F L)
-)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -376,7 +367,10 @@
 					))
 			)
 
-			(maybe-par-for-each right-loop lefties)
+			; This is hog-tied waiting for SQL, running it in parallel
+			; provides no speedup.
+			; (maybe-par-for-each right-loop lefties)
+			(for-each right-loop lefties)
 
 			; Return a count of the number of pairs.
 			(atomic-box-ref cnt-pairs)

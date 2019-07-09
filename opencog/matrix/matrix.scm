@@ -4,6 +4,17 @@
 ;
 (define-module (opencog matrix))
 
+; Configuration
+(use-modules (ice-9 threads))
+
+; The guile-2.2 par-for-each implementation sucks, and live-locks
+; for more than about 4-5 threads, and sometimes with less.
+; The guile 2.9.4 par-for-each implemetation actually works; the
+; actual speedup depends on the loop contents.
+(define (maybe-par-for-each F L)
+	(par-for-each F L)
+)
+
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.

@@ -151,7 +151,7 @@
 		; Loop over all columns.
 		(define (cache-all-left-entropy)
 			(elapsed-secs)
-			(for-each cache-left-entropy (star-obj 'right-basis))
+			(maybe-par-for-each cache-left-entropy (star-obj 'right-basis))
 			(format #t "Finished left entropy subtotals in ~A secs\n"
 				(elapsed-secs))
 		)
@@ -159,7 +159,7 @@
 		; Loop over all rows.
 		(define (cache-all-right-entropy)
 			(elapsed-secs)
-			(for-each cache-right-entropy (star-obj 'left-basis))
+			(maybe-par-for-each cache-right-entropy (star-obj 'left-basis))
 			(format #t "Finished right entropy subtotals in ~A secs\n"
 				(elapsed-secs))
 		)
@@ -167,7 +167,7 @@
 		; Loop over all columns.
 		(define (cache-all-left-mi)
 			(elapsed-secs)
-			(for-each cache-left-mi (star-obj 'right-basis))
+			(maybe-par-for-each cache-left-mi (star-obj 'right-basis))
 			(format #t "Finished left MI subtotals in ~A secs\n"
 				(elapsed-secs))
 		)
@@ -175,7 +175,7 @@
 		; Loop over all rows.
 		(define (cache-all-right-mi)
 			(elapsed-secs)
-			(for-each cache-right-mi (star-obj 'left-basis))
+			(maybe-par-for-each cache-right-mi (star-obj 'left-basis))
 			(format #t "Finished right MI subtotals in ~A secs\n"
 				(elapsed-secs))
 		)
