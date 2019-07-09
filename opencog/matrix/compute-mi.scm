@@ -113,6 +113,7 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 atomic))
 (use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog persist))
@@ -299,11 +300,18 @@
 		; obtained in the inner loop.
 		(define (compute-n-cache-pair-mi CALLBACK)
 			(define lefties (star-obj 'left-basis))
+			(define nlefties (length lefties))
 
 			; progress stats
-			(define cnt-pairs 0)
-			(define cnt-lefties 0)
-			(define nlefties (length lefties))
+			(define cnt-pairs (make-atomic-box 0))
+			(define cnt-lefties (make-atomic-box 0))
+
+			; Atomic increment of counter.
+			(define (atomic-inc ctr)
+				(define old (atomic-box-ref ctr))
+				(define new (+ 1 old))
+				(if (not (= old (atomic-box-compare-and-swap! ctr old new)))
+					(atomic-inc ctr)))
 
 			(define start-time (current-time))
 			(define (elapsed-secs)
@@ -313,7 +321,7 @@
 
 			(define cnt-start 0)
 			(define (elapsed-count cnt)
-				(define diff (- cnt-pairs cnt-start))
+				(define diff (- (atomic-box-ref cnt-pairs) cnt-start))
 				(set! cnt-start cnt)
 				diff)
 
@@ -345,7 +353,7 @@
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi)))
-									(set! cnt-pairs (+ cnt-pairs 1))
+									(atomic-inc cnt-pairs)
 									(frqobj 'set-pair-mi lipr mi fmi)))
 							; Return the atom that is holding the MI value.
 							lipr)
@@ -357,20 +365,21 @@
 							(star-obj 'right-duals left-item)))
 
 						; Print some progress statistics.
-						(set! cnt-lefties (+ cnt-lefties 1))
-						(if (eqv? 0 (modulo cnt-lefties 10000))
+						(if (eqv? 0 (modulo (atomic-inc cnt-lefties) 10000))
 							(let ((secs (elapsed-secs)))
 								(format #t
 									"Done ~A of ~A outer loops in ~A secs, pairs=~A (~6f pairs/sec)\n"
-									cnt-lefties nlefties secs cnt-pairs
-									(/ (elapsed-count cnt-pairs) secs))))
+									(atomic-box-ref cnt-lefties)
+									nlefties secs
+									(atomic-box-ref cnt-pairs)
+									(/ (elapsed-count (atomic-box-ref cnt-pairs)) secs))))
 					))
 			)
 
 			(maybe-par-for-each right-loop lefties)
 
 			; Return a count of the number of pairs.
-			cnt-pairs
+			(atomic-box-ref cnt-pairs)
 		)
 
 		; Methods on this class.
