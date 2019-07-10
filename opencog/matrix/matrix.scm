@@ -13,7 +13,8 @@
 ; The guile 2.9.4 par-for-each implemetation actually works; the
 ; actual speedup depends on the loop contents.
 (define (maybe-par-for-each F L)
-	(par-for-each F L)
+	; (par-for-each F L)
+	(for-each F L)
 )
 
 ; ---------------------------------------------------------
