@@ -23,7 +23,6 @@ IF (CXXTEST_FOUND)
 
 	ADD_SUBDIRECTORY (atomspace)
 	ADD_SUBDIRECTORY (atoms)
-	ADD_SUBDIRECTORY (unify)
 	ADD_SUBDIRECTORY (atomspaceutils)
 
 	# Persistence is for saving/restoring atomspace to disk.
@@ -36,9 +35,6 @@ IF (CXXTEST_FOUND)
 	# Many of the query tests require a working guile, so run
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
-
-	# Reasoning depends on query, above.
-	ADD_SUBDIRECTORY (ure)
 
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
 		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")

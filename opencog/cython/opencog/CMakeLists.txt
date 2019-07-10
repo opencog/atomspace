@@ -190,35 +190,6 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
-##################### URE #####################
-
-CYTHON_ADD_MODULE_PYX(ure
-	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
-	opencog_atom_types
-	"../../ure/forwardchainer/ForwardChainer.h"
-	"../../ure/backwardchainer/BackwardChainer.h"
-)
-
-# opencog.ure Python bindings
-ADD_LIBRARY(ure_cython
-	ure.cpp
-)
-
-TARGET_LINK_LIBRARIES(ure_cython
-	atomspace_cython
-	type_constructors
-	ure
-	${PYTHON_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(ure_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME ure)
-
-INSTALL (TARGETS
-	ure_cython
-	DESTINATION "${PYTHON_DEST}")
-
 ##################################################
 # Tell python where to find modules.
 
