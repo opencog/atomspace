@@ -4,6 +4,25 @@
 ;
 (define-module (opencog matrix))
 
+; ---------------------------------------------------------
+; Common configuration
+(use-modules (ice-9 threads))
+
+; The guile-2.2 par-for-each implementation sucks, and live-locks
+; for more than about 4-5 threads, and sometimes with less.
+; The guile 2.9.4 par-for-each implemetation is mostly not insane;
+; however, it appears to offer no speedup whatsoever over
+; single-threaded operation ... for MI computations. (It does offer
+; perfect 24x speedup on 24 cores for pattern matching... its unclear
+; why it fails to speed up MI computations.)  Disable for now, since
+; none of the matrix code benefits from this.
+; XXX TODO diganose the root cause and report back to guile devels.
+(define (maybe-par-for-each F L)
+	; (par-for-each F L)
+	(for-each F L)
+)
+
+; ---------------------------------------------------------
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
