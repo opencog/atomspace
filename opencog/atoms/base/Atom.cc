@@ -27,10 +27,6 @@
 #include <set>
 #include <sstream>
 
-#ifndef WIN32
-#include <unistd.h>
-#endif
-
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
