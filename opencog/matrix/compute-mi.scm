@@ -114,6 +114,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 atomic))
+(use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog persist))
 
