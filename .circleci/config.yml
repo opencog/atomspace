@@ -124,10 +124,10 @@ jobs:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
           when: always
-      # - persist_to_workspace:
-      #     root: /ws/
-      #     paths:
-      #       - ccache
+      - persist_to_workspace:
+          root: /ws/
+          # paths:
+          #   - ccache
 
   package: #Place holder
     docker:
