@@ -119,8 +119,6 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
-            - cogutil
-            - atomspace
             - ure
             - ccache
 
