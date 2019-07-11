@@ -78,6 +78,52 @@ jobs:
             - atomspace
             - ccache
 
+  ure:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/ure
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install cogutil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Clone URE
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Install URE
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j2 test ARGS=-j2
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - cogutil
+            - atomspace
+            - ure
+            - ccache
+
   opencog:
     docker:
       - image: opencog/opencog-deps
@@ -102,6 +148,9 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install URE
+          command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
           name: Clone OpenCog
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
@@ -150,9 +199,13 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
+      - ure:
+          requires:
+            - atomspace
       - opencog:
           requires:
             - atomspace
+            - ure
       - package:
           requires:
             - opencog
