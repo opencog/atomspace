@@ -37,7 +37,6 @@ class GroundedObjectNodeGilTest(unittest.TestCase):
         finalize_opencog()
         del self.atomspace
 
-    @unittest.skip("Skip until further investigation")
     def test_call_grounded_object_call(self):
         point = Point(2, 3)
 
