@@ -60,7 +60,7 @@ static inline RandomStreamPtr RandomStreamCast(ValuePtr& a)
 	{ return std::dynamic_pointer_cast<RandomStream>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<RandomStream> createRandomStream(Type... args) {
+static inline std::shared_ptr<RandomStream> createRandomStream(Type&&... args) {
 	return std::make_shared<RandomStream>(std::forward<Type>(args)...);
 }
 

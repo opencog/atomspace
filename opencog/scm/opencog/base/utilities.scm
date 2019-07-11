@@ -9,17 +9,15 @@
 ; which is useful for working with EvaluationLink's.
 ;
 ; Utilities include:
-; -- abbreviations for working with truth values (stv, ctv, etc.)
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- for-each-except loop.
-; -- cog-atom-incr --  Increment count truth value on "atom" by "cnt".
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
 ; -- clear -- extract all atoms in the atomspace.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
-; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
@@ -62,68 +60,6 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))  ; needed for par-map par-for-each
-
-; See below; the compiler step is not needed for guile-2.1
-(use-modules (system base compile)) ;; needed for compiler
-
-(define-public (av sti lti vlti) (cog-new-av sti lti vlti))
-
-(define-public (stv mean conf) (cog-new-stv mean conf))
-(define-public (itv lower upper conf) (cog-new-itv lower upper conf))
-(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
-(define-public (ptv mean conf count) (cog-new-ptv mean conf count))
-(define-public (ftv mean conf) (cog-new-ftv mean conf))
-(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
-
-; Fetch the mean, confidence and count of a TV.
-(define-public (tv-mean TV)
-"
-  Warning: this function is obsolete, use cog-tv-mean instead
-
-  Return the floating-point mean (strength) of a TruthValue.
-  Deprecated; use cog-tv-mean instead.
-"
-	(cog-tv-mean TV)
-)
-
-(define-public (tv-conf TV)
-"
-  Warning: this function is obsolete, use cog-tv-confidence instead
-
-  Return the floating-point confidence of a TruthValue.
-  Deprecated; use cog-tv-confidence instead.
-"
-	(cog-tv-confidence TV)
-)
-
-(define-public (tv-non-null-conf? TV)
-"
-  Return #t if the confidence of tv is positive, #f otherwise.
-  Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
-"
-	(< 0 (cog-tv-confidence TV))
-)
-
-;
-; Simple truth values won't have a count. Its faster to just check
-; for #f than to call (cog-ctv? tv)
-(define-public (tv-count TV)
-"
-  Warning: this function is obsolete, use cog-tv-count instead
-
-  Return the floating-point count of a CountTruthValue.
-  Deprecated; use cog-tv-count instead.
-"
-	(cog-tv-count TV)
-)
-
-(define-public (tv-positive-count TV)
-"
-  Return the floating-point positive count of a EvidenceCountTruthValue.
-"
-	(define pos-cnt (assoc-ref (cog-tv->alist TV) 'positive-count))
-	(if (eq? pos-cnt #f) 0 pos-cnt)
-)
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
@@ -184,17 +120,6 @@
 		)
 	)
 	(loop lst)
-)
-
-; --------------------------------------------------------------
-;
-(define-public (cog-atom-incr atom cnt)
-"
-  cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
-
-  DEPRECATED! Use cog-inc-count! instead!
-"
-	(cog-inc-count! atom cnt)
 )
 
 ; --------------------------------------------------------------------
@@ -332,25 +257,18 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-count-atoms atom-type)
+(define-public (cog-get-all-roots)
 "
-  cog-count-atoms -- Count of the number of atoms of given type
+  cog-get-all-roots -- Return the list of all root atoms.
 
-  cog-count-atoms atom-type
-  Return a count of the number of atoms of the given type 'atom-type'
-
-  Example usage:
-  (display (cog-count-atoms 'ConceptNode))
-  will display a count of all atoms of type 'ConceptNode
+  cog-get-all-roots
+  Return the list of all root atoms, that is atoms with
+  no incoming set.
 "
-	(let ((cnt 0))
-		(define (inc atom)
-			(set! cnt (+ cnt 1))
-			#f
-		)
-		(cog-map-type inc atom-type)
-		cnt
-	)
+  (define roots '())
+  (define (cons-roots x) (set! roots (cons x roots)))
+  (traverse-roots cons-roots)
+  roots
 )
 
 ; -----------------------------------------------------------------------
@@ -1186,37 +1104,35 @@
 )
 
 ; -----------------------------------------------------------------------
-;
-; XXX FIXME. The two arguments to this function are backwards.
-; The AS should come first, then the list.
-; XXX FIXME why is #t being returned ???
-(define-public (cog-cp LST AS)
+
+(define-public (cog-cp AS LST)
 "
-  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and
-  returns #t on success.
+  cog-cp AS LST - Copy the atoms in LST to the given atomspace AS and
+  returns the list of copied atoms.
 "
   (define initial-as (cog-atomspace))
 
-  (if (equal? AS initial-as)
-    (error "Destination atomspace is the same as the current atomspace\n"))
-
-  ; Switch to destination atomspace.
+  ;; Switch to destination atomspace.
   (cog-set-atomspace! AS)
 
-  ; The creation of a SetLink or any other link would result in the atoms
-  ; being inserted in the current atomspace.
-  (cog-delete (Set LST))
-  ; Switch back to initial atomspace.
-  (cog-set-atomspace! initial-as)
-  #t
+  (let* (;; The creation of a ListLink or any other link would result
+         ;; in the atoms being inserted in the current atomspace.
+         (LST-list (List LST))
+         (LST-cp (cog-outgoing-set LST-list)))
+    (cog-delete LST-list)
+    ;; Switch back to initial atomspace.
+    (cog-set-atomspace! initial-as)
+    ;; Return the copied list
+    LST-cp)
 )
 
 ; -----------------------------------------------------------------------
 (define-public (cog-cp-all AS)
 "
-  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns #t on success.
+  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS
+                  and returns the list of copied atoms on success.
 "
-  (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
+  (cog-cp AS (apply append (map cog-get-atoms (cog-get-types))))
 )
 
 (define-public (cog-get-all-subtypes atom-type)
@@ -1229,77 +1145,4 @@
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
-; -----------------------------------------------------------------------
-
-; A list of all the public (exported) utilities in this file
-(define cog-utilities (list
-'av
-'stv
-'itv
-'ctv
-'etv
-'tv-mean
-'tv-conf
-'tv-non-null-conf?
-'tv-count
-'gar
-'gdr
-'gadr
-'gddr
-'gaddr
-'gdddr
-'for-each-except
-'cog-atom-incr
-'extract-hypergraph
-'extract-type
-'clear
-'count-all
-'cog-get-atoms
-'cog-prt-atomspace
-'cog-count-atoms
-'cog-report-counts
-'cog-get-root
-'cog-get-all-nodes
-'cog-get-partner
-'cog-pred-get-partner
-'cog-filter
-'cog-chase-link
-'cog-chase-link-chk
-'cog-map-chase-link
-'cog-par-chase-link
-'cog-map-chase-links
-'cog-par-chase-links
-'cog-map-chase-links-chk
-'cog-par-chase-links-chk
-'cog-map-chase-link-dbg
-'cog-map-apply-link
-'cog-get-link
-'cog-get-pred
-'cog-get-reference
-'cog-get-trunk
-'filter-hypergraph
-'cartesian-prod
-'cartesian-prod-list-only
-'min-element-by-key
-'max-element-by-key
-'cog-atomspace-stack
-'cog-push-atomspace
-'cog-pop-atomspace
-'random-string
-'random-node-name
-'choose-var-name
-'random-node
-'random-variable
-'cog-cp
-'cog-cp-all
-'cog-get-all-subtypes
-))
-
-; Compile 'em all.  This should improve performance a bit.
-; XXX FIXME This should be removed when guile-2.2 becomes popular
-; (maybe in 2017?) since 2.2 compiles everything by default.
-(for-each
-	(lambda (symb) (compile symb #:env (current-module)))
-	cog-utilities
-)
 ; ---------------------------------------------------------------------

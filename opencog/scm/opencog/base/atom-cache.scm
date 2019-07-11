@@ -31,11 +31,11 @@
   make-afunc-cache AFUNC -- Return a caching version of AFUNC.
 
   Here, AFUNC is a function that takes a single atom as an argument,
-  and returns some object associated with that atom.
+  and returns some scheme object associated with that atom.
 
   This returns a function that returns the same values that AFUNC would
   return, for the same argument; but if a cached value is available,
-  then return just that, instead of calling AFUNC a second time.  This
+  then that is returned, instead of calling AFUNC a second time.  This
   is useful whenever AFUNC is cpu-intensive, taking a long time to
   compute.  In order for the cache to be valid, the value of AFUNC must
   not depend on side-effects, because it will be called at most once.
@@ -58,6 +58,45 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (make-aset-predicate ATOM-LIST)
+"
+  make-aset-predicate ATOM-LIST - create a fast Atom-set predicate.
+
+  This returns a function - a predicate - that will return #t whenever
+  an atom is in the ATOM-LIST. That is, it maintains a set of atoms,
+  and returns #t whenever the argument is in that set; else returning #f.
+  The goal of this predicate is to run much, much faster than any search
+  of the ATOM-LIST. Under the covers, this maintains a hash-table of the
+  list for fast lookup.
+
+  Example usage:
+     (define atoms (list (Concept \"A\") (Concept \"B\") (Concept \"C\")))
+     (define is-abc? (make-aset-predicate atoms))
+     (is-abc? (Concept \"C\"))
+     => #t
+     (is-abc? (Concept \"D\"))
+     => #f
+"
+   ; Define the local hash table we will use.
+   (define cache (make-hash-table))
+
+   ; Guile needs help computing the hash of an atom.
+   (define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+   (define (atom-assoc ATOM ALIST)
+      (find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
+	; Insert each atom into the hash table.
+	(for-each
+		(lambda (ITEM) (hashx-set! atom-hash atom-assoc cache ITEM #t))
+		ATOM-LIST)
+
+	; Return #t if the atom is in the hash table.
+   (lambda (ITEM)
+      (hashx-ref atom-hash atom-assoc cache ITEM))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (make-atom-set)
 "
   make-atom-set - Return a function that can hold set of atoms.
@@ -69,6 +108,10 @@
   Calling the returned function with an atom in the argument places the
   atom into the set. Calling it with #f as the argument returns the
   entire set as a list.
+
+  When inserting an atom, this returns #t if the given atom was already
+  in the set, otherwise it returns #f. Thus, it can be used to avoid
+  repeated computations on some given atom.
 
   Example Usage:
      (define atom-set (make-atom-set))
@@ -87,12 +130,20 @@
 
 	(lambda (ITEM)
 		(if ITEM
-			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			; If already in the set, return #t
+			(if (hashx-ref atom-hash atom-assoc cache ITEM #f)
+				#t
+				; Else if not in set, add to set, and return #f
+				(begin
+					(hashx-set! atom-hash atom-assoc cache ITEM #t)
+					#f))
+			; If not item, then return entire set.
 			(let ((ats '()))
 				(hash-for-each-handle
 					(lambda (PR) (set! ats (cons (car PR) ats)))
 					cache)
-				ats))))
+				ats)))
+)
 
 ; ---------------------------------------------------------------------
 

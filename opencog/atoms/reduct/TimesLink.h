@@ -38,7 +38,8 @@ class TimesLink : public ArithmeticLink
 {
 protected:
 	static Handle one;
-	ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
+	ValuePtr kons(AtomSpace*, bool,
+	              const ValuePtr&, const ValuePtr&) const;
 
 	void init(void);
 

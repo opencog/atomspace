@@ -6,12 +6,12 @@ underlying the AtomSpace. This includes:
 
 * The AtomSpace as a knowledgebase - a graph database.
 * Basic querying (pattern-matching) and inference on knowledge.
-* Assigning degrees of truth various facts and inferences.
+* Assigning degrees of truth to various facts and inferences.
 * Complex knowledge-representation tasks, including:
-   -- Setting unique state
-   -- Designing properties
-   -- Assigning values and using key-value pairs efficiently
-   -- Handling rapidly time-varying data (video/audio streams).
+    - Setting unique state
+    - Designing properties
+    - Assigning values and using key-value pairs efficiently
+    - Handling rapidly time-varying data (video/audio streams).
 
 After this come examples for assorted advanced features that are
 typically encountered:
@@ -27,13 +27,17 @@ typically encountered:
 
 Most of the querying and pattern matching examples are in the
 [**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
-a good idea of the basics from the demos here, go an explore the
+a good idea of the basics from the demos here, go and explore the
 examples there.
 
 Introductory Examples
 ---------------------
 It is recommended that you go through the examples in the order given.
-These are "basic" demos that all users should know.
+These are "basic" demos that all users should know. Open each of these
+in your favorite text editor, and start reading. Cut-and-paste from the
+text-editor to the guile prompt: this gives you a chance to see what
+happens, and how the system reacts. (But read the "Introduction" below,
+first).
 
 * `basic.scm`          -- How to start the guile shell.
 * `knowledge.scm`      -- Representing knowledge.
@@ -59,6 +63,7 @@ be effective.
 
 * `recursive-loop.scm` -- Writing tail-recursive loops.
 * `random-choice.scm`  -- Numerical programming, including loops.
+* `factorial.scm`      -- Recursive numerical programming.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
@@ -83,20 +88,14 @@ capabilities.  Guile runs as an interpreter/compiler, providing a
 read-evaluate-print loop (REPL), called `guile`. It is started at
 the terminal shell prompt.
 
-Before starting guile, you have to tell guile where to find the OpenCog
-modules.  The best way to do this is to add the below to your `~/.guile`
-file.  These will then run every time you start guile.
-```
-(add-to-load-path "/usr/local/share/opencog/scm")
-(add-to-load-path ".")
-```
-
-To get your keyboard arrow keys to work, so that you can do command-line
-editing, you should add the below to your `~/.guile` file as well.
+It is convenient to preconfigure guile to make things smoother. One is
+to enable automated command-line editing (i.e. get the arrow keys to
+work). Do this by editing `~/.guile` and adding the lines:
 ```
 (use-modules (ice-9 readline))
 (activate-readline)
 ```
+The above will be auto-run every time you start guile.
 
 Finally, start guile:
 ```
@@ -117,7 +116,7 @@ After the opencog module is loaded, you can create atoms "as usual" e.g.
 You can load other scm files (for example, "foobar.scm") by saying:
 
 ```
-(load-from-path "foobar.scm")
+(load "./foobar.scm")
 ```
 
 Most functions have documentation, which can be viewed by saying
@@ -153,7 +152,7 @@ everything else depends on.
 (use-modules (opencog logger))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 (use-modules (opencog type-utils))
 ```
 

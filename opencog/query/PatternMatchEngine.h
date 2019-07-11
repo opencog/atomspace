@@ -59,13 +59,12 @@ private:
 	const Pattern* _pat;
 
 	bool is_optional(const Handle& h) {
-		return (_pat->optionals.count(h) != 0); }
+		// return (_pat->optionals.count(h) != 0); }
+		const HandleSeq& o(_pat->optionals);
+		return o.end() != std::find(o.begin(), o.end(), h); }
 
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
-
-	bool is_executable(const Handle& h) {
-		return (_pat->executable_terms.count(h) != 0); }
 
 	bool is_black(const Handle& h) {
 		return (_pat->black.count(h) != 0); }
@@ -159,6 +158,7 @@ private:
 	bool do_next_clause(void);
 	bool clause_accepted;
 	void get_next_untried_clause(void);
+	Handle get_glob_embedding(const Handle&);
 	bool get_next_thinnest_clause(bool, bool, bool);
 	unsigned int thickness(const Handle&, const HandleSet&);
 	Handle next_clause;
@@ -180,7 +180,7 @@ private:
 	// Stacks containing partial groundings.
 	typedef HandleMap SolnMap;
 	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> term_solutn_stack;
+	std::stack<SolnMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
@@ -200,12 +200,10 @@ private:
 	unsigned int depth; // Recursion depth for tree_compare.
 
 	typedef enum {
-		CALL_QUOTE,
 		CALL_ORDER,
 		CALL_GLOB,
 		CALL_UNORDER,
 		CALL_CHOICE,
-		CALL_COMP,
 		CALL_SOLN
 	} Caller;   // temporary scaffolding !???
 
@@ -227,6 +225,10 @@ private:
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
 	bool explore_link_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);

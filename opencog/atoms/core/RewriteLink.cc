@@ -434,7 +434,9 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	                       (t == PUT_LINK or
 	                        nameserver().isA(t, FUNCTION_LINK) or
 	                        nameserver().isA(t, EVALUATION_LINK) or
-	                        (t == AND_LINK and clause_root) or
+	                        (is_logical_connector(t) and
+	                         quotation_cp.is_locally_quoted() and
+	                         clause_root) or
 	                        is_scope_bound_to_ancestor(variables, h)));
 
 	// Propagate the need for quotation down
@@ -449,7 +451,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	                                        quotation, needless_quotation,
 	                                        clause_root);
 
-	// Propagate the need for quotation up (because in case it is
+	// Propagate the need for quotation up, because in case it is
 	// local, we did not propagate it down.
 	if (need_quotation and quotation_cp.is_locally_quoted())
 		needless_quotation = false;
@@ -506,6 +508,16 @@ bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
 		}
 	}
 	return false;
+}
+
+bool RewriteLink::is_logical_connector(const Handle& h)
+{
+	return is_logical_connector(h->get_type());
+}
+
+bool RewriteLink::is_logical_connector(Type t)
+{
+	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
 /* ================================================================= */

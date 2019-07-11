@@ -79,22 +79,22 @@ SQLPersistSCM::~SQLPersistSCM()
 
 void SQLPersistSCM::do_open(const std::string& uri)
 {
+    if (_backing)
+        throw RuntimeException(TRACE_INFO,
+             "sql-open: Error: Already connected to a database!");
+
     // Unconditionally use the current atomspace, until the next close.
     AtomSpace *as = SchemeSmob::ss_get_env_as("sql-open");
     if (nullptr != as) _as = as;
 
     if (nullptr == _as)
         throw RuntimeException(TRACE_INFO,
-             "sql-open: Error: No atomspace specified!");
+             "sql-open: Error: Can't find the atomspace!");
 
     // Allow only one connection at a time.
     if (_as->isAttachedToBackingStore())
         throw RuntimeException(TRACE_INFO,
-             "sql-open: Error: Atomspace already connected to a storage backend!");
-    if (_backing)
-        throw RuntimeException(TRACE_INFO,
-             "sql-open: Error: Atomspace already connected to a storage backend!");
-
+             "sql-open: Error: Atomspace connected to another storage backend!");
     // Use the postgres driver.
     SQLAtomStorage *store = new SQLAtomStorage(uri);
     if (!store)
@@ -118,19 +118,16 @@ void SQLPersistSCM::do_close(void)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
 
+    SQLAtomStorage *backing = _backing;
+    _backing = nullptr;
+
     // The destructor might run for a while before its done; it will
     // be emptying the pending store queues, which might take a while.
     // So unhook the atomspace first -- this will prevent new writes
     // from accidentally being queued. (It will also drain the queues)
     // Only then actually call the dtor.
-    //
-    // We should probably be doing this under a lock, to prevent
-    // two racing threads that are both trying to close the
-    // connection. But who would be crazy enough to want to do that?
-    _backing->unregisterWith(_as);
-
-    delete _backing;
-    _backing = nullptr;
+    backing->unregisterWith(_as);
+    delete backing;
 }
 
 void SQLPersistSCM::do_load(void)
@@ -159,12 +156,7 @@ void SQLPersistSCM::do_stats(void)
         return;
     }
 
-    if (NULL == _as)
-        printf("sql-stats: AtomSpace not set\n");
-
-    AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
-    printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
-
+    printf("sql-stats: Atomspace holds %lu atoms\n", _as->get_size());
     _backing->print_stats();
 }
 

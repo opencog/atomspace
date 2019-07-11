@@ -60,6 +60,7 @@ IF(HAVE_GUILE)
 		PythonEval
 		smob
 	)
+	ADD_GUILE_EXTENSION(SCM_CONFIG PythonSCM "opencog-ext-path-python-scm")
 
    INSTALL (TARGETS PythonSCM
 		EXPORT AtomSpaceTargets

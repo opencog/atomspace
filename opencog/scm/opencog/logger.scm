@@ -6,10 +6,9 @@
 
 (define-module (opencog logger))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-logger "liblogger") "opencog_logger_init")
 
-(load-extension "liblogger" "opencog_logger_init")
 
 ; Declare everything the C++ library provides; this avoid compile-time
 ; warnings when this file gets compiled.
@@ -36,7 +35,7 @@
 	cog-logger-info-of-logger
 	cog-logger-debug-of-logger
 	cog-logger-fine-of-logger
-        cog-logger-flush-of-logger
+	cog-logger-flush-of-logger
 	cog-logger-get-filename
 	cog-logger-get-level
 	cog-logger-get-component
@@ -56,7 +55,7 @@
 	cog-logger-info
 	cog-logger-debug
 	cog-logger-fine
-        cog-logger-flush
+	cog-logger-flush
 )
 
 ;; Documentation for the functions implemented as C++ code
@@ -70,7 +69,7 @@
 (set-procedure-property! cog-ure-logger 'documentation
 "
  cog-ure-logger
-    Return the rule-engine logger.
+    Return the ure logger.
 ")
 
 (set-procedure-property! cog-logger-get-filename-of-logger 'documentation
@@ -206,7 +205,7 @@
 
 (define (cog-logger-set-stdout! . args)
 "
- cog-logger-set-stdout! [LOGGER] STDOUT
+ cog-logger-set-stdout! [LOGGER] BOOL
     If BOOL is #t, send log messages to stdout; else don't.
     If LOGGER is not provided then use the default logger
 
@@ -222,6 +221,7 @@
     file flushed, before the log request returns. Otherwise, logging
     is carried out in a separate thread (to minimize latency impact on
     the current thread).
+
     If LOGGER is not provided then use the default logger.
 
     Returns the previous setting.
@@ -233,6 +233,7 @@
  cog-logger-set-timestamp! [LOGGER] BOOL
     If BOOL is #t, then a timestamp will be written with each log
     message; else not.
+
     If LOGGER is not provided then use the default logger.
 
     Returns the previous setting.

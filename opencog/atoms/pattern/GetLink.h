@@ -39,6 +39,7 @@ public:
 	GetLink(const HandleSeq&, Type=GET_LINK);
 	explicit GetLink(const Link &l);
 
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);

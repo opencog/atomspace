@@ -96,11 +96,6 @@ std::recursive_mutex PythonEval::_mtx;
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
-    DATADIR"/python",                    // install directory
-    #ifndef WIN32
-    "/usr/local/share/opencog/python",
-    "/usr/share/opencog/python",
-    #endif // !WIN32
     NULL
 };
 
@@ -267,7 +262,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // The import_opencog__atomspace() call above sets the
     // py_atomspace() function pointer if the cython module load
     // succeeded. But the function pointer will be NULL if the
-    // opencopg.atomspace cython module failed to load. Avert
+    // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
     if (nullptr == py_atomspace) {
@@ -1358,7 +1353,11 @@ void PythonEval::add_modules_from_path(std::string pathString)
         // If the resulting path is a directory or a regular file,
         // then push to loading list.
         struct stat finfo;
-        stat(abspath.c_str(), &finfo);
+        int stat_ret = stat(abspath.c_str(), &finfo);
+        
+        if (stat_ret != 0)
+            return;
+
         if (S_ISDIR(finfo.st_mode)) {
             found = true;
             dirs.push_back(abspath);
@@ -1428,15 +1427,23 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     gstate = PyGILState_Ensure();
 
     struct stat finfo;
-    stat(pathString.c_str(), &finfo);
-
-    if (S_ISDIR(finfo.st_mode))
-        add_module_directory(pathString);
-    else if (S_ISREG(finfo.st_mode))
-        add_module_file(pathString);
-    else
+    int stat_ret = stat(pathString.c_str(), &finfo);
+    
+    if (stat_ret != 0)
+    {
         logger().warn() << "Python module path \'" << pathString
                         << "\' can't be found";
+    }
+    else
+    {
+        if (S_ISDIR(finfo.st_mode))
+            add_module_directory(pathString);
+        else if (S_ISREG(finfo.st_mode))
+            add_module_file(pathString);
+        else
+            logger().warn() << "Python module path \'" << pathString
+                            << "\' can't be found";
+    }
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);

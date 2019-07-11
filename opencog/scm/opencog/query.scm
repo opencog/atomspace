@@ -4,8 +4,6 @@
 
 (define-module (opencog query))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
 (use-modules (opencog exec))
 
 (define-public (cog-bind handle)

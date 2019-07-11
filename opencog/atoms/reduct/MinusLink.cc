@@ -65,13 +65,14 @@ static inline double get_double(const ValuePtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
-ValuePtr MinusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
+ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
+                         const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(get_value(fi));
+	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(fj));
+	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers?

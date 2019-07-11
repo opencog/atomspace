@@ -385,6 +385,26 @@
   the left and right wild-card values. The primary utility of this
   class is that it prints a progress report. Its really just a fancy
   wrapper around store-atom, which does the actual work.
+
+  The provided methods are:
+  'store-left-marginals - Store all of the left (row) marginal atoms,
+       and all of the values attached to them. This also stores the
+       wild-wild atom as well.
+
+  'store-right-marginals - Store all of the right (column) marginal
+       atoms, and all of the values attached to them. This also stores
+       the wild-wild atom as well.
+
+  'store-wildcards - Store both left and right marginals.
+
+  'store-all-elts - Store all non-marginal matrix entries (and the
+       attached values, of course).
+
+  'store-all - Store everything pertaining to the matrix: the marginals,
+       the matrix entries, and any 'auxilliary' Atoms, if any (that is,
+       call the 'store-aux method on the LLOBJ).
+
+  'store-pairs - Store the provided list of Atoms.
 "
 	(define start-time (current-time))
 	(define (elapsed-secs)
@@ -443,12 +463,23 @@
 			(store-left-wildcards)
 			(store-right-wildcards))
 
-		; Store all the pairs. These must be provided as a list to us,
-		; because, at this time, we don't have an effective way of working
-		; with the non-zero elements.  Maybe a better solution will become
-		; clear over time...
+		; Store the list of given pairs.
 		(define (store-pairs all-pairs)
 			(store-list (lambda (x) x) all-pairs 100000 "pairs"))
+
+		; Store all elements in the matrix.
+		(define (store-all-elts)
+			(store-pairs (star-obj 'get-all-elts)))
+
+		; Store everything, including auxilliaries
+		(define (store-all)
+			(store-all-wildcards)
+			(store-all-elts)
+			; Not every LLOBJ will have a store-aux,
+			; so ignore any error from calling it.
+			(catch #t (lambda () (LLOBJ 'store-aux))
+				(lambda (key . args) #f))
+		)
 
 		; ------------------
 		; Methods on this class.
@@ -457,7 +488,9 @@
 				((store-left-marginals) (store-left-wildcards))
 				((store-right-marginals)(store-right-wildcards))
 				((store-wildcards)      (store-all-wildcards))
+				((store-all-elts)       (store-all-elts))
 				((store-pairs)          (apply store-pairs args))
+				((store-all)            (store-all))
 				(else                   (apply llobj (cons message args))))
 		))
 )
@@ -541,8 +574,8 @@
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
-	(supp-obj 'left-marginals)
-	(supp-obj 'right-marginals)
+	(supp-obj 'all-left-marginals)
+	(supp-obj 'all-right-marginals)
 
 	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
@@ -578,7 +611,7 @@
 	(display "Done computing and saving -log P(x,*) and P(*,y)\n")
 
 	; Now, the individual pair mi's
-	(display "Going to do individual pair MI\n")
+	(display "Going to compute and store individual pair MI\n")
 	(elapsed-secs)
 	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
 				(lambda (atom-list) (for-each store-atom atom-list)))))

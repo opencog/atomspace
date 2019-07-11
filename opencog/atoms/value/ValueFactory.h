@@ -79,6 +79,7 @@ public:
         // and we cannot know what vtype is at compile time.
         // So we have to do one run-time lookup, in a vector.
         static std::vector<ValueFactory> fax;
+        static std::mutex mtx;
 
         ValueFactory fptr = nullptr;
         try
@@ -104,9 +105,14 @@ public:
                     if (fr.args == expected_args)
                     {
                         fptr = fr.func;
-                        if (fax.size() <= vtype)
-                            fax.resize(vtype+1);
-                        fax[vtype] = fr.func;
+
+                        std::lock_guard<std::mutex> lck(mtx);
+                        std::vector<ValueFactory> newfax(fax);
+                        if (newfax.size() <= vtype)
+                            newfax.resize(vtype+1);
+                        newfax[vtype] = fr.func;
+                        // swap here allows lookup to be lockless.
+                        fax.swap(newfax);
                         break;
                     }
                 }
@@ -115,7 +121,7 @@ public:
         }
 
         if (fptr)
-            return (*fptr)(arg...);
+            return (*fptr)(&arg...);
 
         throw IndexErrorException(TRACE_INFO,
             "No factory found for Value type %d and arguments.", vtype);

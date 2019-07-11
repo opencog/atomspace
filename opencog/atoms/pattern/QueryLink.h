@@ -52,6 +52,7 @@ public:
 
 	const Handle& get_implicand(void) { return _implicand; }
 
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);

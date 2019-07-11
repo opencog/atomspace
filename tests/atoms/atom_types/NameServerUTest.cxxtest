@@ -45,9 +45,15 @@ public:
     {
         Type numClasses = nameserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
+            if (not nameserver().isDefined(t)) continue;
             TS_ASSERT(nameserver().isA(t, t));
-            if (t > ATOM) TS_ASSERT(nameserver().isA(t, NODE)
-                              or nameserver().isA(t, LINK));
+            if (t > ATOM) {
+                TS_ASSERT(nameserver().isA(t, NODE)
+                          or nameserver().isA(t, LINK));
+            }
+            else {
+                TS_ASSERT(nameserver().isA(t, VALUE));
+            }
         }
 
         TS_ASSERT( nameserver().isA(NODE, ATOM));
@@ -78,25 +84,30 @@ public:
 
         nameserver().beginTypeDecls("classy test types");
         Type CS_UTEST_NODE   = nameserver().declType(NODE, "CsUtestNode");
+        Type CS_UTEST_LINK   = nameserver().declType(LIST_LINK, "CsUtestLink");
+        Type CS_UTEST_NODE_2 = nameserver().declType(NODE, "CsUtestNode");
+        Type CS_UTEST_LINK_2 = nameserver().declType(UNORDERED_LINK, "CsUtestLink");
+        nameserver().endTypeDecls();
+
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT(CS_UTEST_NODE   == ntypes);
-        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+1));
         TS_ASSERT( nameserver().isA(CS_UTEST_NODE, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, FLOAT_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, NUMBER_NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK   = nameserver().declType(LIST_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK   == (ntypes + 1));
-        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK, LINK));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK, ORDERED_LINK));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK, LIST_LINK));
-        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, UNORDERED_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK, UNORDERED_LINK));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, FLOAT_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NUMBER_NODE));
 
-        Type CS_UTEST_NODE_2 = nameserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE_2 == ntypes);
-        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( nameserver().isA(CS_UTEST_NODE_2, NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE_2, NUMBER_NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE_2, LINK));
@@ -104,9 +115,7 @@ public:
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, NUMBER_NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK_2 = nameserver().declType(UNORDERED_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK_2 == (ntypes + 1));
-        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, LINK));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, ORDERED_LINK));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, LIST_LINK));
@@ -120,10 +129,36 @@ public:
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK,   NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
 
-        nameserver().endTypeDecls();
-
         bool is_init = nameserver().beginTypeDecls("classy test types");
         TS_ASSERT(is_init);
+
+        // ================================================
+        // Test addition of new Value types,
+        // AFTER addition of new Atom types.
+        // The new Values should fit into place.
+
+        nameserver().beginTypeDecls("classy values");
+        Type CS_UTEST_VALUE = nameserver().declType(VALUE, "CsUtestValue");
+        Type CS_UTEST_FVALUE = nameserver().declType(FLOAT_VALUE, "CsUtestFloatValue");
+        nameserver().endTypeDecls();
+
+        TS_ASSERT( nameserver().isA(CS_UTEST_VALUE,   VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   FLOAT_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   TRUTH_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   ATOM));
+
+        TS_ASSERT( nameserver().isA(CS_UTEST_FVALUE,  VALUE));
+        TS_ASSERT( nameserver().isA(CS_UTEST_FVALUE,  FLOAT_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   TRUTH_VALUE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_FVALUE,  ATOM));
+
+        // Total number of types is unchanged from before.
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
+
+        // Numerical hierarchy is obeyed: all values have
+        // numeric codes that are less than Atom.
+        TS_ASSERT(CS_UTEST_VALUE < ATOM);
+        TS_ASSERT(CS_UTEST_FVALUE < ATOM);
     }
 
     void testIteratorMethods()

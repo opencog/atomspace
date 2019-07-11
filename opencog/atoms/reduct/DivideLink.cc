@@ -64,13 +64,14 @@ static inline double get_double(const ValuePtr& pap)
 }
 
 // No ExpLink or PowLink and so kons is very simple
-ValuePtr DivideLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
+ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
+                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(get_value(fi));
+	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(fj));
+	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers?

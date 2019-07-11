@@ -42,6 +42,7 @@ namespace opencog
 class IndefiniteTruthValue;
 typedef std::shared_ptr<const IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
+
 static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
     { return std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv); }
 
@@ -93,6 +94,8 @@ public:
         DEFAULT_K = k;
     }
 
+
+    IndefiniteTruthValue(const std::vector<double>&);
     IndefiniteTruthValue();
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
@@ -121,7 +124,7 @@ public:
     std::string to_string(const std::string&) const;
 
     // clone method
-    static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
+    static IndefiniteTruthValuePtr createITV(const TruthValuePtr& tv)
     {
         if (tv->get_type() != INDEFINITE_TRUTH_VALUE)
             throw RuntimeException(TRACE_INFO, "Cannot clone non-indefinite TV");
@@ -129,7 +132,7 @@ public:
             static_cast<const IndefiniteTruthValue&>(*tv));
     }
 
-    static TruthValuePtr createTV(TruthValuePtr tv)
+    static TruthValuePtr createTV(const TruthValuePtr& tv)
     {
         return std::static_pointer_cast<const TruthValue>(createITV(tv));
     }
@@ -145,15 +148,17 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
     }
+
     static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const IndefiniteTruthValue>(pap));
     }
 
-    TruthValuePtr clone() const
+    static TruthValuePtr createTV(const std::vector<double>& v)
     {
-        return std::make_shared<IndefiniteTruthValue>(*this);
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const IndefiniteTruthValue>(v));
     }
 
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
@@ -163,6 +168,11 @@ public:
         DEFAULT_CONFIDENCE_LEVEL = c;
     }
 };
+
+template<typename ... Type>
+static inline TruthValuePtr createIndefiniteTruthValue(Type&&...  args) {
+   return IndefiniteTruthValue::createTV(std::forward<Type>(args)...);
+}
 
 /** @}*/
 } // namespace opencog

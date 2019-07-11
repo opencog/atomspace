@@ -7,9 +7,10 @@
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
-MESSAGE(STATUS "Setting python RPATH to ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}")
+MESSAGE(STATUS "Setting python RPATH to ${PYTHON_DEST}")
 SET(CMAKE_SHARED_LINKER_FLAGS
-	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}")
+	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${PYTHON_DEST}")
+SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -17,26 +18,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-f")
-
-# Cythonizes one .pyx file into a .cpp file
-# Additional arguments are dependencies
-MACRO(CYTHON_ADD_MODULE_PYX name)
-	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx ${name}.pxd)
-	ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx)
-	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-	# Allow the user to specify dependencies as optional arguments
-	SET(DEPENDS ${DEPENDS} ${ARGN})
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${name}.cpp
-		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR} -o ${name}.cpp
-				--cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
-		DEPENDS ${DEPENDS}
-		COMMENT "Cythonizing ${name}.pyx")
-ENDMACRO(CYTHON_ADD_MODULE_PYX)
+SET(CYTHON_FLAGS "-2" "-f")
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -231,9 +213,9 @@ ENDIF (HAVE_GUILE)
 CYTHON_ADD_MODULE_PYX(ure
 	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
 	opencog_atom_types
-	"../../rule-engine/forwardchainer/ForwardChainer.h"
-	"../../rule-engine/backwardchainer/BackwardChainer.h"
-	ruleengine
+	"../../ure/forwardchainer/ForwardChainer.h"
+	"../../ure/backwardchainer/BackwardChainer.h"
+	ure
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
@@ -246,7 +228,7 @@ ADD_LIBRARY(ure_cython
 TARGET_LINK_LIBRARIES(ure_cython
 	atomspace_cython
 	type_constructors
-	ruleengine
+	ure
 	${PYTHON_LIBRARIES}
 )
 

@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include "FunctionLink.h"
 #include "ValueOfLink.h"
 
@@ -59,9 +60,16 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	if (2 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
-	ValuePtr pap = _outgoing[0]->getValue(_outgoing[1]);
-	if (pap) return pap;
+	// We cannot know the Value of the Atom unless we are
+	// working with the unique version that sits in the AtomSpace!
+	Handle ah(as->get_atom(_outgoing[0]));
+	if (ah)
+	{
+		ValuePtr pap = ah->getValue(_outgoing[1]);
+		if (pap) return pap;
+	}
 
+	// Hmm. shouldn't this be SilentException?
 	if (silent)
 		throw NotEvaluatableException();
 

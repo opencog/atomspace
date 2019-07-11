@@ -16,7 +16,11 @@ ENDIF (COMMAND CMAKE_POLICY)
 
 IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 	CMAKE_POLICY(SET CMP0037 OLD)
+	CMAKE_POLICY(SET CMP0042 NEW)
 ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+IF (CMAKE_VERSION VERSION_GREATER 3.9.0)
+	CMAKE_POLICY(SET CMP0068 NEW)
+ENDIF (CMAKE_VERSION VERSION_GREATER 3.9.0)
 
 PROJECT(atomspace)
 
@@ -181,6 +185,15 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
+
+# ----------------------------------------------------------
+# secure_getenv
+CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
+IF (HAVE_SECURE_GETENV)
+	ADD_DEFINITIONS(-DHAVE_SECURE_GETENV)
+ENDIF (HAVE_SECURE_GETENV)
+
+
 # ----------------------------------------------------------
 # Google Protobuf library
 # The protocol buffer compiler is needed for ZMQ-based persistence.
@@ -262,12 +275,10 @@ IF(HAVE_PY_INTERP)
 		# Find python destination dir for python bindings
 		# because it may differ on each operating system.
 		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/get_python_lib.py" "${CMAKE_INSTALL_PREFIX}"
 			OUTPUT_VARIABLE PYTHON_DEST
 		)
 
-		# Chop off leading /usr
-		STRING(REPLACE "/usr" ${CMAKE_INSTALL_PREFIX} PYTHON_DEST "${PYTHON_DEST}")
 		# Replace new line at end
 		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
 		IF ("${PYTHON_DEST}" STREQUAL "")
@@ -404,7 +415,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
 
 # -------------------------------------------------
 # Library configuration

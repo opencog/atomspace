@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
 #include <math.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
@@ -55,6 +56,9 @@ public:
 	void test_evalform();
 	void test_putlink();
 	void test_define();
+	void test_lambda();
+        void test_naked_predicate();
+        void test_defined_predicate();
 };
 
 #define MAXERR 1.0e-12
@@ -67,7 +71,7 @@ void FormulaUTest::test_strength_of()
 	_eval.eval("(Concept \"B\" (stv 0.6 0.9))");
 
 	ValuePtr sof = _eval.eval_v("(cog-execute! (StrengthOf (Concept \"A\")))");
-	printf("Get strenght_of=%s\n", sof->to_string().c_str());
+	printf("Get strength_of=%s\n", sof->to_string().c_str());
 	TS_ASSERT_EQUALS(sof->get_type(), FLOAT_VALUE);
 	FloatValuePtr fvp = FloatValueCast(sof);
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[0] - 0.8), MAXERR);
@@ -290,4 +294,71 @@ void FormulaUTest::test_define()
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.9604), MAXERR);
 
 	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_lambda()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	TruthValuePtr tvp = _eval.eval_tv("(cog-evaluate! (its-one atom-a atom-b))");
+	printf("TV for iab=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	tvp = _eval.eval_tv("(cog-evaluate! (its-one atom-b atom-c))");
+	printf("TV for ibc=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	tvp = _eval.eval_tv("(cog-evaluate! (its-conf atom-a atom-b))");
+	printf("TV for iab=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	tvp = _eval.eval_tv("(cog-evaluate! (its-conf atom-b atom-c))");
+	printf("TV for ibc=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_naked_predicate()
+{
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        
+        for (int i=1; i<=5; i++) {
+                std::string cmd = "(cog-evaluate! naked-pred" + std::to_string(i) + ")";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_NOTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(false, _eval.eval_error());
+        }
+        for (int i=1; i<=2; i++) {
+                std::string cmd = "(cog-evaluate! naked-pred-crash" + std::to_string(i) + ")";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_ANYTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(true, _eval.eval_error());
+        }
+        
+        logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_defined_predicate()
+{
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        
+        for (int i=1; i<=4; i++) {
+                std::string cmd = "(cog-evaluate! (eval-nullary \"defined-pred" + std::to_string(i) + "\"))";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_NOTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(false, _eval.eval_error());
+        }
+        for (int i=1; i<=2; i++) {
+                std::string cmd = "(cog-evaluate! (eval-nullary \"defined-pred-crash" + std::to_string(i) + "\"))";
+                printf("Executing %s\n", cmd.c_str());
+                TS_ASSERT_THROWS_ANYTHING(_eval.eval_v(cmd));
+                TS_ASSERT_EQUALS(true, _eval.eval_error());
+        }
+        
+        logger().info("END TEST: %s", __FUNCTION__);
 }

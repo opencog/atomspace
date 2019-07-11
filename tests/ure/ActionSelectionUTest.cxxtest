@@ -1,0 +1,76 @@
+/*
+ * ActionSelectionUTest.cxxtest
+ *
+ *  Created on: Nov 8, 2017
+ *      Authors: Nil Geisweiller
+ */
+
+#include <opencog/ure/ActionSelection.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace std;
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class ActionSelectionUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	ActionSelectionUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_distribution();
+};
+
+ActionSelectionUTest::ActionSelectionUTest()
+{
+}
+
+void ActionSelectionUTest::setUp()
+{
+}
+
+void ActionSelectionUTest::tearDown()
+{
+}
+
+void ActionSelectionUTest::test_distribution()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		A1 = an(NODE, "A1"),
+		A2 = an(NODE, "A2"),
+		A3 = an(NODE, "A3"),
+		A4 = an(NODE, "A4"),
+		A5 = an(NODE, "A5");
+	TruthValuePtr
+		TV1 = SimpleTruthValue::createSTV(0.000000, 0.003793),
+		TV2 = SimpleTruthValue::createSTV(1.000000, 0.001585),
+		TV3 = SimpleTruthValue::createSTV(0.000000, 0.007500),
+		TV4 = SimpleTruthValue::createSTV(0.000000, 0.001611),
+		TV5 = SimpleTruthValue::createSTV(0.001785, 0.001256);
+
+	HandleTVMap a2tv{{A1, TV1}, {A2, TV2}, {A3, TV3}, {A4, TV4}, {A5, TV5}};
+
+	HandleCounter result = ActionSelection(a2tv).distribution(),
+		expected{{A1, 0.026}, {A2, 0.761}, {A3, 0.005}, {A4, 0.091}, {A5, 0.117}};
+
+	const double espilon = 1e-3;
+	TS_ASSERT_DELTA(result[A1], expected[A1], espilon);
+	TS_ASSERT_DELTA(result[A2], expected[A2], espilon);
+	TS_ASSERT_DELTA(result[A3], expected[A3], espilon);
+	TS_ASSERT_DELTA(result[A4], expected[A4], espilon);
+	TS_ASSERT_DELTA(result[A5], expected[A5], espilon);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

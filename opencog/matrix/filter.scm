@@ -1,10 +1,10 @@
 ;
 ; filter.scm
 ;
-; Define API's for filtering the matrixes, e.g. by removing entries
-; with low counts.
+; Define API's for filtering the matrixes, e.g. by removing rows,
+; columns or individual entries with low counts.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017, 2019 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -37,26 +37,34 @@
 (use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
-; XXX TODO -- redesign this to use left-duals and right-duals instead
-; of left-stars and right-stars. The real goal here is to get rid of
-; the 'left-element and 'right-element methods, which some of the
-; objects are not able to support.
 
 (define-public (add-generic-filter LLOBJ
-	LEFT-BASIS-PRED RIGHT-BASIS-PRED
-	LEFT-STAR-PRED RIGHT-STAR-PRED
-	PAIR-PRED ID-STR RENAME)
+	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED
+   ID-STR RENAME)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
-  rows that satisfy the predicates are retained.
+  rows and individual entries that satisfy the predicates are retained.
+
+  This provides the same methods as the `add-pair-stars` object; it is
+  a replacement of that object, for all practical purposes. Thus, given
+  some matrix, this object provides a way of accessing a smaller,
+  lower-dimensional version of that matrix, by knocking out rows,
+  columns and individual entries.
+
+  Note, however, that the full-sized matrix will typically have
+  marginals associated with it (such as totals over columns and rows)
+  and that those marginals will typically become invalid for the
+  smaller matrix (because totals over columns and rows for the smaller
+  matrix are necessarily different). This filter does NOT attempt to
+  recompute those marginals!  It is up  to the user to track these!
+  The ID-STR can be used to give this submatrix a unique name, and
+  therefore can be used as a tag, when recomputing marginals for the
+  smaller matrix.
 
   The LEFT-BASIS-PRED and RIGHT-BASIS-PRED should be functions that
   accept atoms in the left and right basis, and return #t if they
-  should be kept.
-
-  The LEFT-STAR-PRED and RIGHT-STAR-PRED should be functions that
-  accept left and right wild-card pairs, and return #t if they should
-  be kept.
+  should be kept. If these predicates return #f, that row or column
+  will not appear in the filtered matrix.
 
   The PAIR-PRED should be a function to that accepts individual matrix
   entries. It is applied whenever the 'get-pair or 'get-count methods
@@ -70,29 +78,34 @@
   other API's generate predicate keys to obtain values.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
-			(l-basis '())
-			(r-basis '())
+			(l-basis #f)
+			(r-basis #f)
 			(l-size 0)
 			(r-size 0)
+			(all-elts #f)
 		)
+
+		; Cache the result of filtering basuis elements
+		(define cache-left-pred (make-afunc-cache LEFT-BASIS-PRED))
+		(define cache-right-pred (make-afunc-cache RIGHT-BASIS-PRED))
 
 		; ---------------
 		; Filter out rows and columns that pass the left and right
 		; predicates.
 		(define (do-left-basis)
-			(filter LEFT-BASIS-PRED (stars-obj 'left-basis)))
+			(filter cache-left-pred (stars-obj 'left-basis)))
 
 		(define (do-right-basis)
-			(filter RIGHT-BASIS-PRED (stars-obj 'right-basis)))
+			(filter cache-right-pred (stars-obj 'right-basis)))
 
 		; ---------------
 		; Use the cached value, if its there.
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (do-left-basis)))
+			(if (not l-basis) (set! l-basis (do-left-basis)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (do-right-basis)))
+			(if (not r-basis) (set! r-basis (do-right-basis)))
 			r-basis)
 
 		(define (get-left-size)
@@ -104,19 +117,46 @@
 			r-size)
 
 		; ---------------
+		; Return only those duals that pass the cutoffs.
+		;
+		(define (do-left-duals RITEM)
+			; Get all the left-elements corresponding to RITEM
+			(filter
+				(lambda (LITEM)
+					(and
+						(cache-left-pred LITEM)
+						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
+				(stars-obj 'left-duals RITEM)))
+
+		(define (do-right-duals LITEM)
+			(filter
+				(lambda (RITEM)
+					(and
+						(cache-right-pred RITEM)
+						(PAIR-PRED (LLOBJ 'get-pair LITEM RITEM))))
+				(stars-obj 'right-duals LITEM)))
+
+		; Cache the results above, so that we don't recompute over and over.
+		(define cache-left-duals (make-afunc-cache do-left-duals))
+		(define cache-right-duals (make-afunc-cache do-right-duals))
+
+		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
-		(define (do-left-stars ITEM)
-			(filter
-				(lambda (PAIR)
-					(and (LEFT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
-				(stars-obj 'left-stars ITEM)))
+		(define (do-left-stars RITEM)
+			; Apply the pair-pred cutoff
+			(filter PAIR-PRED
+				(map
+					; Convert all left-right pairs into real pairs
+					(lambda (LBASE) (LLOBJ 'get-pair LBASE RITEM))
+					; Get all the left-elements corresponding to RITEM
+					(filter cache-left-pred (stars-obj 'left-duals RITEM)))))
 
-		(define (do-right-stars ITEM)
-			(filter
-				(lambda (PAIR)
-					(and (RIGHT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
-				(stars-obj 'right-stars ITEM)))
+		(define (do-right-stars LITEM)
+			(filter PAIR-PRED
+				(map
+					(lambda (RBASE) (LLOBJ 'get-pair LITEM RBASE))
+					(filter cache-right-pred (stars-obj 'right-duals LITEM)))))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
@@ -124,12 +164,33 @@
 
 		; ---------------
 		; Apply the pair-cut to each pair.
-;xxxxxx this is broken.
 		(define (get-item-pair L-ATOM R-ATOM)
-			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair L-ATOM R-ATOM) '()))
+			(define PAIR (LLOBJ 'get-pair L-ATOM R-ATOM))
+			(if (PAIR-PRED PAIR) PAIR '()))
 
-		(define (get-pair-count PAIR)
+		(define (get-count PAIR)
 			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR) 0))
+
+		(define (get-pair-count L-ATOM R-ATOM)
+			(define stats-atom (get-item-pair L-ATOM R-ATOM))
+			(if (null? stats-atom) 0 (LLOBJ 'get-count stats-atom)))
+
+		; ---------------
+		; Exhaustive loop over pairs. For each left element, get all
+		; right stars; the right-stars already have the pair pred
+		; applied. The atom-set is used to avoid duplicates, but in
+		; the normal scheme of things, there should be no duplicates
+		; so that check is mostly superfluous.
+		(define (do-get-all-elts)
+			(define aset (make-atom-set))
+			(for-each
+				(lambda (litem) (for-each aset (cache-right-stars litem)))
+				(get-left-basis))
+			(aset #f)
+		)
+		(define (get-all-elts)
+			(if (not all-elts) (set! all-elts (do-get-all-elts)))
+			all-elts)
 
 		; ---------------
 		(define (get-name)
@@ -141,12 +202,15 @@
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
-				((left-stars)       cache-left-stars)
-				((right-stars)      cache-right-stars)
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
 				((right-basis-size) get-right-size)
+				((left-stars)       cache-left-stars)
+				((right-stars)      cache-right-stars)
+				((left-duals)       cache-left-duals)
+				((right-duals)      cache-right-duals)
+				((get-all-elts)     get-all-elts)
 				(else               (LLOBJ 'provides meth))))
 
 		; -------------
@@ -155,25 +219,33 @@
 			(case message
 				((name)             (get-name))
 				((id)               (get-id))
-				((left-stars)       (apply cache-left-stars args))
-				((right-stars)      (apply cache-right-stars args))
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
+				((left-stars)       (apply cache-left-stars args))
+				((right-stars)      (apply cache-right-stars args))
+				((left-duals)       (apply cache-left-duals args))
+				((right-duals)      (apply cache-right-duals args))
 				((get-pair)         (apply get-item-pair args))
-				((get-count)        (apply get-pair-count args))
+				((get-count)        (apply get-count args))
+				((get-pair-count)   (apply get-pair-count args))
+				((get-all-elts)     (get-all-elts))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
 				((pair-type)        (apply LLOBJ (cons message args)))
+				((left-wildcard)    (apply LLOBJ (cons message args)))
+				((right-wildcard)   (apply LLOBJ (cons message args)))
+				((wild-wild)        (apply LLOBJ (cons message args)))
 				; Block anything that might have to be filtered.
 				; For example: 'pair-freq which we don't, can't filter.
 				; Or any of the various subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
-					(format #f "Sorry, method ~A not available on filter!" message))))
+					(format #f "Sorry, method ~A not available on filter!"
+						 message))))
 		)))
 
 ; ---------------------------------------------------------------------
@@ -188,19 +260,19 @@
   just returns fewer rows, columns and individual entries.
 
   The filtering is done 'on demand', on a row-by-row, column-by-column
-  basis.  Computations of the left and right stars are cached, sot that
+  basis.  Computations of the left and right stars are cached, so that
   they are not recomputed for each request.
 
   Note that by removing rows and columns, the frequencies that were
   computed for the entire matrix will no longer sum to 1.0 for the
   filtered submatrix.  Likewise, row and column subtotals, and any
-  marginals will no long sum or behave as in the whole dataset.  If
-  accurate values for these are needed, then they would need to be
-  recomputed for the reduced matrix. The 'filters? method, and the
-  RENAME argument provide a way for dealing with this.
+  marginals will no longer sum or behave as in the whole dataset.
+  If accurate values for these are needed, then they would need to
+  be recomputed for the reduced matrix. The 'filters? method, and
+  the RENAME argument provide a way for dealing with this.
 
   If the RENAME argument is #t, then the other various API's will use
-  an special key name, created from the 'id of this filter, to access
+  a special key name, created from the 'id of this filter, to access
   frequencies and marginals. This allows filtered frequencies and
   marginals to be stored with the matrix.  If the RENAME argument is #f,
   then all access to the frequencies and marginals will be through the
@@ -215,9 +287,11 @@
   Let N(*,y) be the column subtotals, AKA the left-subtotals.
   Let N(x,*) be the row subtotals, AKA the right subtotals.
 
-  This object removes all columns where  N(*,y) <= RIGHT-CUT and where
-  N(x,*) <= LEFT-CUT.  Pairs are not reported in the 'left-stars and
-  'right-stars methods when N(x,y) <= PAIR-CUT.
+  This object removes all columns where  N(*,y) <= RIGHT-CUT and all
+  rows where N(x,*) <= LEFT-CUT.  Pairs are not reported in the
+  'left-stars and 'right-stars methods when N(x,y) <= PAIR-CUT.
+  Likewise, duals are not reported when the corresponding pair fails
+  the PAIR-CUT.
 
   The net effect of the cuts is that when LEFT-CUT is increased, the
   left-dimension of the dataset drops; likewise on the right.
@@ -238,27 +312,16 @@
 		(define (right-basis-pred ITEM)
 			(< RIGHT-CUT (sup-obj 'left-count ITEM)))
 
-		; ---------------
-		; Return only those stars that pass the cutoff.
-		;
-		; See comments above: LEFT-CUT < right-wild-count is correct.
-		(define (left-stars-pred PAIR)
-			(< LEFT-CUT (sup-obj 'right-count (LLOBJ 'left-element PAIR))))
-
-		(define (right-stars-pred PAIR)
-			(< RIGHT-CUT (sup-obj 'left-count (LLOBJ 'right-element PAIR))))
-
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
 		(define id-str
-			(format #f "cut-~D-~D-~D"
+			(format #f "subtotal-cut-~D-~D-~D"
 				LEFT-CUT RIGHT-CUT PAIR-CUT))
 
 		; ---------------
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
-			left-stars-pred right-stars-pred
 			pair-pred id-str RENAME)
 	)
 )
@@ -287,16 +350,7 @@
 			(lambda (knockout) (equal? knockout ITEM))
 			RIGHT-KNOCKOUT)))
 
-	; ---------------
-	; Return only those stars that pass the cutoff.
-	(define (left-stars-pred PAIR)
-		(left-basis-pred (LLOBJ 'left-element PAIR)))
-
-	(define (right-stars-pred PAIR)
-		(right-basis-pred (LLOBJ 'right-element PAIR)))
-
-	(define (pair-pred PAIR)
-		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))
+	(define (pair-pred PAIR) #t)
 
 	(define id-str
 		(format #f "knockout-~D-~D"
@@ -305,7 +359,6 @@
 	; ---------------
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
-		left-stars-pred right-stars-pred
 		pair-pred id-str RENAME)
 )
 

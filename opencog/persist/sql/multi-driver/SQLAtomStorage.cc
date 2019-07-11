@@ -127,6 +127,9 @@ void SQLAtomStorage::init(const char * uri)
 
 	if (!connected()) return;
 
+	// Need the server version before init'ing the UUID pool.
+	get_server_version();
+
 	_uuid_manager.that = this;
 	_uuid_manager.reset_uuid_pool(getMaxObservedUUID());
 	_vuid_manager.that = this;
@@ -188,6 +191,15 @@ bool SQLAtomStorage::connected(void)
 	bool have_connection = db_conn->connected();
 	conn_pool.push(db_conn);
 	return have_connection;
+}
+
+/** get_server_version() -- get version of postgres server */
+void SQLAtomStorage::get_server_version(void)
+{
+	Response rp(conn_pool);
+	rp.exec("SHOW server_version_num;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	_server_version = rp.intval;
 }
 
 /// Rethrow asynchronous exceptions caught during atom storage.

@@ -29,7 +29,7 @@ Listed in order of dependency:
  * `atom_types` -- The `atom_types.script` file in this directory
    declares the `Value` and `Atom` type hierarchy. Includes the
    `nameserver`, which provides misc run-time services, describing
-   the type hierachy and the names of types.
+   the type hierarchy and the names of types.
 
  * `value` -- The C++ base class for Atoms and for Values. The
    `FloatValue`, `StringValue` and `LinkValue` are defined here.

@@ -169,3 +169,11 @@
     )
   )
 )
+
+(define quoted-not-X
+  (LocalQuoteLink
+    (NotLink
+      (VariableNode "$X")
+    )
+  )
+)

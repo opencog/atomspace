@@ -1,0 +1,121 @@
+/*
+ * tests/query/PresentUTest.cxxtest
+ *
+ * Copyright (C) 2019 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class PresentUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	PresentUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+		eval->eval("(use-modules (opencog exec))");
+	}
+
+	~PresentUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_literal(void);
+	void test_virtual(void);
+};
+
+void PresentUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void PresentUTest::setUp(void)
+{
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+}
+
+#define getarity(hand) hand->get_arity()
+
+/*
+ * A PresentLink should act as a quotation, i.e. the thing it wraps
+ * should be interpreted as a literal, and not an evaluatable.
+ */
+void PresentUTest::test_literal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/present.scm\")");
+
+	Handle get5 = eval->eval_h("(cog-execute! get5)");
+	Handle ans5 = eval->eval_h("ans5");
+
+	printf("Expecting: %s\n", ans5->to_string().c_str());
+	printf("Got: %s\n", get5->to_string().c_str());
+	TS_ASSERT_EQUALS(get5, ans5);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test PresentLink in conjunction with a virtual link.
+ */
+void PresentUTest::test_virtual(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/present-virtual.scm\")");
+
+	Handle query = eval->eval_h("query");
+	Handle results = HandleCast(query->execute());
+	Handle expected = al(SET_LINK, an(CONCEPT_NODE, "OK"));
+
+	printf("Expecting: %s\n", expected->to_string().c_str());
+	printf("Got: %s\n", results->to_string().c_str());
+	TS_ASSERT_EQUALS(results, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

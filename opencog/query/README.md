@@ -27,7 +27,7 @@ inverted query search, graph-rewriting, graph satisfiability and
 In addition, graph patterns can be thought of as "rewrite rules" or
 "productions", and thus can be chained together in sequences to perform
 inferencing, natural deduction and parsing.  Forward and backward
-chaining are implemented separately, in the `opencog/rule-engine`
+chaining are implemented separately, in the `opencog/ure`
 directory.
 
 The first part of this README describes the generic algorithm; the
@@ -227,7 +227,7 @@ trees formed by the "outgoing set" of an AtomSpace Link.  Each internal
 vertex of a tree is called a "Link".  Each leaf of a tree is called
 a "Node". The trees are not disjoint, however: Nodes and Links can be
 shared. In the AtomSpace, every Node and Link is forced to be unique;
-it is impossible to have two have two Nodes or Links that are identical.
+it is impossible to have two Nodes or Links that are identical.
 (This is analogous to the common uniqueness constraint in ordinary
 databases: for any physical item, you typically want to have only one
 corresponding database record.)
@@ -443,9 +443,9 @@ the [README-Algorithm](README-Algorithm.md) file.
    compilation, including the extraction of optional clauses, the
    extraction of virtual terms, extraction of evaluatable predicates,
    which are not matched, but are instead evaluated for truth/falsehood.
-   See the other README's and the cod itself for details.
+   See the other READMEs and the code itself for details.
 
-5. Acceptance of a proposed grounding is done by by means of callbacks,
+5. Acceptance of a proposed grounding is done by means of callbacks,
    in the `class PatternMatchCallback` structure. These include
    callbacks that can accept or reject a Node or Link match, a callback
    that is called before a Link match is even started, a callback
@@ -639,7 +639,7 @@ datasets containing many millions of atoms, all "typical" queries run
 in milliseconds or less.  This is in part because, at least so far, most
 "typical" knowledge-graphs have a Zipfian distribution and connectivity,
 which means that there are very few extremely large subgraphs. By
-starting the search with the "thinest" subgraph, one almost never
+starting the search with the "thinnest" subgraph, one almost never
 encounters these fat graphs, and so they don't have to be explored.
 
 Tutorials and Examples

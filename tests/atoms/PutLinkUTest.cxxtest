@@ -94,6 +94,7 @@ public:
 	void test_tricky_put_7();
 	void test_quoted_exec();
 	void test_quoted_eval();
+	void test_quoted_lambda();
 };
 
 #define N _as.add_node
@@ -895,7 +896,7 @@ void PutLinkUTest::test_recursive_compose()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test recursive function compostion can be performed.
+	// Test that recursive function composition is performed correctly.
 	//
 	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
 	// (define f2 (Lambda
@@ -1997,6 +1998,67 @@ void PutLinkUTest::test_quoted_eval()
 	Handle put = _eval.eval_h("put-quoted-eval"),
 		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("quoted-eval");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test
+ *
+ * (Put
+ *   (VariableList
+ *     (Variable "$vardecl")
+ *     (Variable "$clause-1")
+ *     (Variable "$clause-2"))
+ *   (Quote
+ *     (Lambda
+ *       (Unquote (Variable "$vardecl"))
+ *       (And
+ *         (Unquote (Variable "$clause-1"))
+ *         (Unquote (Variable "$clause-2")))))
+ *   (List
+ *     (VariableList (Variable "$X") (Variable "$Y"))
+ *     (Inheritance (Concept "A") (Variable "$X"))
+ *     (Inheritance (Concept "$X") (Variable "$Y"))))
+ *
+ * which should return
+ *
+ * (LambdaLink
+ *    (VariableList
+ *       (VariableNode "$X")
+ *       (VariableNode "$Y")
+ *    )
+ *    (AndLink
+ *       (InheritanceLink
+ *          (ConceptNode "$X")
+ *          (VariableNode "$Y")
+ *       )
+ *       (InheritanceLink
+ *          (ConceptNode "A")
+ *          (VariableNode "$X")
+ *       )
+ *    )
+ * )
+ *
+ * That is the quotation should be entirely consumed as the lambda
+ * link is fully constructed at the end of the substitution.
+ */
+void PutLinkUTest::test_quoted_lambda()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted-lambda.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-quoted-conjuction-lambda"),
+		result = HandleCast(inst.execute(put)),
+		expected = _eval.eval_h("put-quoted-conjuction-lambda-result");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);

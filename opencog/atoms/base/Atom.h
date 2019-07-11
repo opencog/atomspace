@@ -104,16 +104,18 @@ class Atom
 {
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
-    friend class DeleteLink;      // Needs to call getAtomTable()
+    friend class Link;            // Needs to call install_atom()
+    friend class StateLink;       // Needs to call swap_atom()
+    friend class SQLAtomStorage;  // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
+protected:
     //! Sets the AtomSpace in which this Atom is inserted.
-    void setAtomSpace(AtomSpace *);
+    virtual void setAtomSpace(AtomSpace *);
 
     //! Returns the AtomTable in which this Atom is inserted.
     AtomTable *getAtomTable() const;
 
-protected:
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
     mutable char _flags;
@@ -196,6 +198,8 @@ protected:
     void insert_atom(const LinkPtr&);
     void remove_atom(const LinkPtr&);
     void swap_atom(const LinkPtr&, const LinkPtr&);
+    virtual void install();
+    virtual void remove();
 
     virtual ContentHash compute_hash() const = 0;
 
@@ -289,7 +293,7 @@ public:
     void copyValues(const Handle&);
 
     /// Print all of the key-value pairs.
-    virtual std::string valuesToString() const;
+    std::string valuesToString() const;
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
@@ -371,6 +375,9 @@ public:
 
     /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type type) const;
+
+    /** Return the size of the incoming set, for the given type. */
+    size_t getIncomingSetSizeByType(Type type) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;

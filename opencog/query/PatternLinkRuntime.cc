@@ -63,6 +63,9 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(const Handle& link1, const Handle& link2) {
 			return _cb.post_link_match(link1, link2);
 		}
+		void post_link_mismatch(const Handle& link1, const Handle& link2) {
+			_cb.post_link_mismatch(link1, link2);
+		}
 		bool fuzzy_match(const Handle& h1, const Handle& h2) {
 			return _cb.fuzzy_match(h1, h2);
 		}
@@ -138,12 +141,12 @@ class PMCGroundings : public PatternMatchCallback
  */
 static bool recursive_virtual(PatternMatchCallback& cb,
             const HandleSeq& virtuals,
-            const HandleSeq& negations, // currently ignored
+            const HandleSeq& optionals,
             const HandleMap& var_gnds,
             const HandleMap& term_gnds,
             // copies, NOT references!
-            std::vector<HandleMapSeq> comp_var_gnds,
-            std::vector<HandleMapSeq> comp_term_gnds)
+            HandleMapSeqSeq comp_var_gnds,
+            HandleMapSeqSeq comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -193,6 +196,13 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 			if (not match) return false;
 		}
 
+		Handle empty;
+		for (const Handle& opt: optionals)
+		{
+			bool match = cb.optional_clause_match(opt, empty, var_gnds);
+			if (not match) return false;
+		}
+
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
@@ -229,7 +239,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
+		bool accept = recursive_virtual(cb, virtuals, optionals, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -353,8 +363,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 #endif
 
-	std::vector<HandleMapSeq> comp_term_gnds;
-	std::vector<HandleMapSeq> comp_var_gnds;
+	HandleMapSeqSeq comp_term_gnds;
+	HandleMapSeqSeq comp_var_gnds;
 
 	for (size_t i = 0; i < _num_comps; i++)
 	{
@@ -407,9 +417,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 #endif
 	HandleMap empty_vg;
 	HandleMap empty_pg;
-	HandleSeq optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
-	return recursive_virtual(pmcb, _virtual, optionals,
+	return recursive_virtual(pmcb, _virtual, _pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 }

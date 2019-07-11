@@ -518,17 +518,49 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  * AbsentLink: a match is possible only if the indicated clauses
  * are absent!
  *
- * We do "accept" self-groundings: as these are not actually
- * clauses that are present -- its merely the pattern finding itself.
+ * To recap:
+ *   If ground is found, return false;
+ *   If no ground is found, return true.
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
                                                   const HandleMap& term_gnds)
 {
-	if (nullptr == grnd) return true; // XXX can this ever happen?
-	if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
-		_optionals_present = true;
-	return false;
+	// If any grounding at all was found, reject it.
+	if (grnd)
+	{
+		if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
+			_optionals_present = true;
+		return false;
+	}
+
+	// No grounding was found directly, but that may be because
+	// this is a virtual-optional clause. That is, this clause
+	// might be bridging across two disconnected components;
+	// some of the component combinations may have a grounding,
+	// while others do not.  So we have to check.
+	Handle gopt;
+	try
+	{
+		gopt = HandleCast(_instor->instantiate(ptrn, term_gnds, true));
+	}
+	catch (const SilentException& ex)
+	{
+		// The instantiation above can throw an exception if the
+		// it is ill-formed. If so, assume the opt clause is absent.
+		_instor->reset_halt();
+		return true;
+	}
+
+	// If the result is a self-match, we don't mind.
+	// Its only bad if something else got built.
+	if (gopt == ptrn) return true;
+
+	// If the grounding we just built can be found in the atomspace,
+	// then we must reject it.
+	if (_as->get_atom(gopt)) return false;
+
+	return true;
 }
 
 /* ======================================================== */
@@ -631,11 +663,11 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		}
 		catch (const SilentException& ex)
 		{
-			// The do_evaluate() above can throw if its given ungrounded
-			// expressions. It can be given ungrounded expressions if
-			// no grounding was found, and a final pass, run by the
-			// search_finished() callback, puts us here. So handle this
-			// case gracefully.
+			// The do_evaluate()/do_eval_scratch() above can throw if
+			// it is given ungrounded expressions. It can be given
+			// ungrounded expressions if no grounding was found, and
+			// a final pass, run by the search_finished() callback,
+			// puts us here. So handle this case gracefully.
 			return false;
 		}
 	}

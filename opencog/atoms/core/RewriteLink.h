@@ -101,7 +101,16 @@ protected:
 	 * Like is_bound_to_ancestor but doesn't assume that the handle is
 	 * a scope, and test for it as well, returning false if it isn't.
 	 */
-	static bool is_scope_bound_to_ancestor(const Variables& variables, const Handle& h);
+	static bool is_scope_bound_to_ancestor(const Variables& variables,
+	                                       const Handle& h);
+
+	/**
+	 * Return true if the type if the type is AND_LINK, OR_LINK or
+	 * NOT_LINK, as when used at the root of the pattern body these
+	 * links act as logical connectors.
+	 */
+	static bool is_logical_connector(Type);
+	static bool is_logical_connector(const Handle&);
 
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
@@ -234,9 +243,14 @@ public:
 	 */
 	Handle consume_quotations() const;
 	static Handle consume_quotations(const Handle& vardecl, const Handle& h,
-	                                 /* Remember if some atom
-	                                  * is the clause root of a
-	                                  * pattern */
+	                                 /* Remember if h is the clause
+	                                  * root of a pattern. This is
+	                                  * necessary because AndLink and
+	                                  * such have different semantics
+	                                  * when they are at the root of
+	                                  * the body as they become logical
+	                                  * connectors for the pattern
+	                                  * matcher. */
 	                                 bool clause_root);
 	static Handle consume_quotations(const Variables& variables, const Handle& h,
 	                                 bool clause_root);

@@ -43,13 +43,13 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
-	ValuePtr get_value(ValuePtr) const;
+	ValuePtr get_value(AtomSpace*, bool, ValuePtr) const;
 
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual ValuePtr delta_reduce(void) const;
+	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 };

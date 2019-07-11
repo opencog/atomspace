@@ -224,47 +224,14 @@ void SchemeSmob::module_init(void*)
 {
 	// The portion of (opencog) done in C++
 	register_procs();
-
-	// Set the library load path, so that other modules can find
-	// thier libraries. Copied from `scm/opencog.scm` and should stay
-	// in sync with that file.  This is NOT needed for ordinary usage
-	// from the guile REPL, but is needed by the unit tests.  The problem
-	// is that the unit tests create SchemeEval class directly, which
-	// causes this code here to run, which defines the opencog scheme
-	// module. Thus, a later `(use-modules opencog)` is a no-op because
-	// guile thinks that it already has done this. But it really hasn't;
-	// the contents of `opencog.scm` were never actually run. So what
-	// we do is to manually run the contents of that file, below.
-	// Something more elegant would be nice.
-	//
-	// lib64 is used by various versions of CentOS
-	scm_c_eval_string(
-		"(define path \"/usr/lib/opencog:/usr/lib64/opencog:/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
-
-	scm_c_eval_string(
-		"(setenv \"LTDL_LIBRARY_PATH\""
-		"   (if (getenv \"LTDL_LIBRARY_PATH\")"
-		"      (string-append (getenv \"LTDL_LIBRARY_PATH\") \":\" path)"
-		"      path))");
-
-#define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
-#ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
-	// Loading files from the project directory is broken by design.
-	// However, the unit tests are broken by design.
-	// We REALLY should not do this, it violates basic laws of security,
-	// usability, debuggability. But some people think that's OK.
-	// Too lazy to fix.  See issue
-	// https://github.com/opencog/atomspace/issues/705 for details.
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
-#endif
-
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
+	
+	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/atom_types/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/file-utils.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));
 }
@@ -306,6 +273,7 @@ void SchemeSmob::register_procs()
 	// TV property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
+	register_proc("cog-inc-value!",        4, 0, 0, C(ss_inc_value));
 
 	// property getters on atoms
 	register_proc("cog-name",              1, 0, 0, C(ss_name));
@@ -313,7 +281,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	register_proc("cog-incoming-size",     1, 0, 0, C(ss_incoming_size));
 	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
+	register_proc("cog-incoming-size-by-type", 2, 0, 0, C(ss_incoming_size_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
@@ -326,20 +296,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
-	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
-	register_proc("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
-	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
-	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
-	register_proc("cog-new-etv",           2, 0, 0, C(ss_new_etv));
-	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
-	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
-	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
-	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
-	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
-	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
-	register_proc("cog-etv?",              1, 0, 0, C(ss_etv_p));
-	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
 	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
@@ -361,12 +317,9 @@ void SchemeSmob::register_procs()
 	// Value types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
-	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
-	register_proc("cog-value-type?",       1, 0, 0, C(ss_value_type_p));
-	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
-	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
+	register_proc("cog-count-atoms",       1, 0, 0, C(ss_count));
 
 	// Iterators
 	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));

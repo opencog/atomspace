@@ -63,8 +63,6 @@ void TVUTest::test_guile()
 	TS_ASSERT(not eval.input_pending());
 	TS_ASSERT(not eval.eval_error());
 	printf("Result from loading is %s\n", rv.c_str());
-	rv = eval.eval("(getenv \"LTDL_LIBRARY_PATH\")");
-	printf("The libtool path is %s\n", rv.c_str());
 	rv = eval.eval("(getenv \"LD_LIBRARY_PATH\")");
 	printf("The loader path is %s\n", rv.c_str());
 

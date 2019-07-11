@@ -261,6 +261,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		ScopeLinkPtr sco(ScopeLinkCast(term));
 		if (nullptr == sco)
 			sco = createScopeLink(term->getOutgoingSet());
+
 		const Variables& vees = sco->get_variables();
 		bool alpha_hide = false;
 		for (const Handle& v : vees.varseq)
@@ -278,6 +279,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		{
 			// Make a copy... this is what's computationally expensive.
 			IndexMap hidden_map = index_map;
+
 			// Remove the alpha-hidden variables.
 			for (const Handle& v : vees.varseq)
 			{
@@ -287,6 +289,24 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 					hidden_map.erase(idx);
 				}
 			}
+
+			// Also remove everything that is not a variable.
+			// The map will, in general, contain terms that
+			// contain alpha-hidden variables; those also have
+			// to go, or they will mess up the substitution.
+			for (auto it = hidden_map.begin(); it != hidden_map.end();)
+			{
+				Type tt = it->first->get_type();
+				if (tt != VARIABLE_NODE and tt != GLOB_NODE)
+				{
+					it = hidden_map.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+
 
 			// If the hidden map is empty, then there is no more
 			// substitution to be done.
@@ -307,6 +327,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
+	bool changed = false;
 	for (const Handle& h : term->getOutgoingSet())
 	{
 		// GlobNodes are matched with a list of one or more arguments.
@@ -317,14 +338,21 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
 			if (glst->is_node())
 				return glst;
+
+			changed = true;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
 		}
 		else
-			oset.emplace_back(
-				substitute_scoped(h, args, silent, index_map, quotation));
+		{
+			Handle sub(substitute_scoped(h, args, silent, index_map, quotation));
+			if (sub != h) changed = true;
+			oset.emplace_back(sub);
+		}
 	}
 
+	// Return the original atom, if it was not modified.
+	if (not changed) return term;
 	return createLink(oset, term->get_type());
 }
 
@@ -817,14 +845,16 @@ std::string Variables::to_string(const std::string& indent) const
 	ss << FreeVariables::to_string(indent);
 
 	// Simple typemap
+	std::string indent_p = indent + OC_TO_STRING_INDENT;
+	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
 	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << indent << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT)
-		   << indent << "types[" << i << "]:";
+		ss << indent_p << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent_pp)
+		   << indent_p << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << nameserver().getTypeName(t);
 		ss << std::endl;

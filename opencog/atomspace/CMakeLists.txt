@@ -4,10 +4,8 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
-	AtomSpaceInit.cc
 	AtomTable.cc
 	BackingStore.cc
-	FixedIntegerIndex.cc
 	TypeIndex.cc
 )
 
@@ -39,7 +37,6 @@ INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
 	BackingStore.h
-	FixedIntegerIndex.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

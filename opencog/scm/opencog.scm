@@ -13,26 +13,11 @@
 (setlocale LC_CTYPE "")
 (setlocale LC_NUMERIC "C")
 
-; libsmob won't be found unless we setenv where to find it!
-; In theory, we should have installed it into one of these locations:
-;    /usr/lib/guile/2.2/extensions
-;    /usr/local/lib/guile/2.2/extensions
-;    /usr/lib64/guile/2.2/extensions
-;    /usr/local/lib64/guile/2.2/extensions
-;
-; But which one? Its a pain, so we wing it, below, and use
-; LTDL_LIBRARY_PATH
-;
-
-; lib64 is used by various versions of CentOS
-(define path "/usr/lib/opencog:/usr/lib64/opencog:/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(setenv "LTDL_LIBRARY_PATH"
-	(if (getenv "LTDL_LIBRARY_PATH")
-		(string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
-		path))
-
 (define-module (opencog))
-(load-extension "libsmob" "opencog_guile_init")
+
+(use-modules (opencog as-config))
+
+(load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
 (use-modules (system base compile))
 
@@ -61,12 +46,12 @@
 		(cog-set-atomspace! cog-initial-as)))
 
 ; Load core atom types.
-(load-from-path "opencog/base/core_types.scm")
+(load-from-path "opencog/atoms/atom_types/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
-; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 266
+; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
 (load-from-path "opencog/base/core-docs.scm")
 
@@ -75,6 +60,7 @@
 (load-from-path "opencog/base/atom-cache.scm")
 (load-from-path "opencog/base/apply.scm")
 (load-from-path "opencog/base/tv.scm")
+(load-from-path "opencog/base/types.scm")
 (load-from-path "opencog/base/file-utils.scm")
 (load-from-path "opencog/base/debug-trace.scm")
 

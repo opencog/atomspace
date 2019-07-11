@@ -25,6 +25,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -101,12 +102,43 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
-	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
-		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
-		return get_handle();
+	ValuePtr vp(execute_once(as, silent));
+	if (not vp->is_atom()) return vp;
+
+	Handle res(HandleCast(vp));
+	while (res->is_executable())
+	{
+		vp = res->execute(as, silent);
+		if (not vp->is_atom()) return vp;
+		res = HandleCast(vp);
+	}
+	return vp;
+}
+
+ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
+{
+	Handle sn(_outgoing[0]);
+	Handle args(_outgoing[1]);
+	Type snt = sn->get_type();
+	if (GROUNDED_SCHEMA_NODE == snt)
+	{
+		return do_execute(as, sn, args, silent);
 	}
 
-	return do_execute(as, _outgoing[0], _outgoing[1], silent);
+	if (DEFINED_SCHEMA_NODE == snt)
+		sn = DefineLink::get_definition(sn);
+
+	if (LAMBDA_LINK == sn->get_type())
+	{
+		LambdaLinkPtr flp(LambdaLinkCast(sn));
+		Handle body(flp->get_body());
+		Variables vars(flp->get_variables());
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+			args->getOutgoingSet(): HandleSeq{args});
+		return vars.substitute_nocheck(body, oset);
+	}
+
+	return get_handle();
 }
 
 /// do_execute -- execute the SchemaNode of the ExecutionOutputLink

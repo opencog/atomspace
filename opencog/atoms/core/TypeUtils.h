@@ -145,6 +145,8 @@ ValuePtr type_compose(const Handle&, const ValuePtr&);
  *
  * 2. If nothing is left after filtering it returns Handle::UNDEFINED
  *
+ * 3. If vardecl is Handle::UNDEFINED, then return Handle::UNDEFINED
+ *
  * Also, the resulting variable declaration will not be added to any
  * AtomSpace, it's up to the user to possibly do it.
  */
@@ -210,6 +212,10 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl);
 /**
  * Given a list variables or typed variables, return the
  * corresponding variable declaration.
+ *
+ * If varlist has only one member return a VariableNode or
+ * TypedVariableLink. If varlist is empty, return an empty
+ * VariableList.
  */
 Handle gen_vardecl(const HandleSeq& varlist);
 

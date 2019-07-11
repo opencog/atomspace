@@ -33,23 +33,9 @@ ADD_GUILE_TEST(SCMOpencogTestRunnerFail scm-opencog-test-runner-fail.scm)
 # of the test result by setting its properties.
 SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 
-# Configure LD_LIBRARY_PATH for loading the libraries used by the guile code,
-# so as to make it possible to run tests before executing "make install".
-SET_PROPERTY(TEST SCMOpencogTestRunnerPass SCMOpencogTestRunnerFail
-	PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile")
-
 # Guile-python bridge requires python
 IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(SCMPython scm-python.scm)
-	SET_PROPERTY(TEST SCMPython
-		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/cython")
-
 	ADD_GUILE_TEST(SCMPythonSharedAtomspace scm-python-shared-atomspace.scm)
-	SET_PROPERTY(TEST SCMPythonSharedAtomspace
-		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/atoms/execution:${PROJECT_BINARY_DIR}/opencog/cython")
-
 	ADD_GUILE_TEST(SCMPythonArity scm-python-arity.scm)
-	SET_PROPERTY(TEST SCMPythonArity
-		PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/atoms/execution:${PROJECT_BINARY_DIR}/opencog/cython")
-
 ENDIF (HAVE_CYTHON)

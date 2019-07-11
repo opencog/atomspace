@@ -39,7 +39,7 @@ class TensorTVTest(TestCase):
         s2 = (c.tv.torch() + t)
         self.assertTrue(str(s1) == str(s2))
 
-        res = (execute_atom(atomspace, StrengthOfLink(c)))
+        res = (execute_atom(self.space, StrengthOfLink(c)))
         self.assertTrue(res.to_list()[0] - 0.4 < delta)
         self.assertTrue(c.tv.count == 1.0)
 

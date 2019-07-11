@@ -61,9 +61,34 @@
 ; only two arguments, no more and no less, and that these must always
 ; be ConceptNodes. You can declare this by writing the following:
 
-(TypedAtom
+(Signature
 	(Evaluation
 		(Predicate "_obj")
 		(ListLink
 			(Type "ConceptNode")
 			(Type "ConceptNode"))))
+
+; The above declares a "signature" with the standard comp-sci meaning:
+;     https://en.wikipedia.org/wiki/Type_signature
+; aka the standard meaning in mathematical logic:
+;     https://en.wikipedia.org/wiki/Signature_(logic)
+;
+; To use it, it is useful to attach a name to it, so that it can be
+; referenced by name:
+
+(TypedAtom
+	(DefinedType "my obj dependency relation")
+	(Signature
+		(Evaluation
+			(Predicate "_obj")
+			(ListLink
+				(Type "ConceptNode")
+				(Type "ConceptNode")))))
+
+; The above can be used during type-checking, to verify that certain
+; data structures are in the expected format. See
+;     https://wiki.opencog.org/w/SignatureLink
+; and
+;     https://wiki.opencog.org/w/TypedAtomLink
+; for more info. Again -- signautes are a very advanced topic; you can
+; ignore this for now. Just know that they exist.

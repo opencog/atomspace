@@ -1,13 +1,7 @@
 OpenCog AtomSpace
 =================
 
-<!--
-XXX FIXME find the correct IP addr.
-master:
-[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-master)](http://61.92.69.39:8080/job/ci-atomspace-master)
-stable:
-[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-stable)](http://61.92.69.39:8080/job/ci-atomspace-stable)
--->
+[![CircleCI](https://circleci.com/gh/opencog/atomspace.svg?style=svg)](https://circleci.com/gh/opencog/atomspace)
 
 The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
 database, an associated query engine and graph-re-writing system,
@@ -90,8 +84,15 @@ repos, including:
   (as-moses repo)
 
 
-A  Theoretical Overview
-=======================
+Examples
+========
+If you are impatient, a good way to learn the AtomSpace is to run the
+example demos. [Start with these.](examples/atomspace) Then move on to
+the [pattern-matcher examples](examples/pattern-matcher).
+
+
+A Theoretical Overview
+======================
 The AtomSpace is a mashup of a large variety of concepts from
 mathematical logic, theorem proving, graph theory, database theory,
 type theory, model theory and knowledge representation. Its hard to
@@ -333,7 +334,7 @@ tensor-algebra in those theories, and replace them by sheaves. A
 
 Some primitive, basic infrastructure has been built. Huge remaining
 work items are using neural nets to perform the tensor-like factorization
-of sheaves, and to redesign the rule-engine to use sheaf-type theorem
+of sheaves, and to redesign the rule engine to use sheaf-type theorem
 proving techniques.
 
 

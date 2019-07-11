@@ -39,9 +39,6 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -147,6 +144,8 @@ void AtomTable::clear_transient()
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - clear_transient called on non-transient atom table.");
 
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     // Clear all the atoms
     clear_all_atoms();
 
@@ -154,18 +153,10 @@ void AtomTable::clear_transient()
     if (_environ) _environ->_num_nested--;
     _environ = NULL;
     _as = NULL;
-
 }
 
 void AtomTable::clear_all_atoms()
 {
-    // For now, this only works for transient atomspaces which do not
-    // index the atoms. So throw an exception to warn against use in
-    // normal atomspaces.
-    if (not _transient)
-        throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - clear_all_atoms called on non-transient atom table.");
-
     // Reset the size to zero.
     _size = 0;
     _num_nodes = 0;
@@ -176,20 +167,14 @@ void AtomTable::clear_all_atoms()
     for (Type type = ATOM; type < total_types; type++)
         _size_by_type[type] = 0;
 
+    // Clear the type-index
+    if (not _transient) typeIndex.clear();
+
     // Clear the atoms in the set.
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atom_space = nullptr;
-
-        // If this is a link we need to remove this atom from the incoming
-        // sets for any atoms in this atom's outgoing set. See note in
-        // the analogous loop in ~AtomTable above.
-        if (atom_to_clear->is_link()) {
-            LinkPtr link_to_clear = LinkCast(atom_to_clear);
-            for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
-                atom_in_out_set->remove_atom(link_to_clear);
-            }
-        }
+        atom_to_clear->remove();
     }
 
     // Clear the atom store. This will delete all the atoms since
@@ -200,6 +185,17 @@ void AtomTable::clear_all_atoms()
 
 void AtomTable::clear()
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+#define FAST_CLEAR 1
+#ifdef FAST_CLEAR
+    // Always do the fast clear.
+    clear_all_atoms();
+#else
+    // This is a stunningly inefficient way to clear the atomtable!
+    // This will take minutes on any decent-sized atomspace!
+    // However, due to the code in extract(), it does a lot of error
+    // checking.
     if (_transient)
     {
         // Do the fast clear since we're a transient atom table.
@@ -211,8 +207,6 @@ void AtomTable::clear()
 
         getHandleSetByType(allNodes, NODE, true, false);
 
-        // XXX FIXME TODO This is a stunningly inefficient way to clear the
-        // atomtable! This will take minutes on any decent-sized atomspace!
         for (Handle h: allNodes) extract(h, true);
 
         allNodes.clear();
@@ -227,16 +221,28 @@ void AtomTable::clear()
         OC_ASSERT(_num_nodes == 0);
         OC_ASSERT(_num_links == 0);
     }
+#endif
 }
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     AtomPtr a(createNode(t,n));
-    return getNodeHandle(a);
+    return getHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
+    AtomPtr a(createLink(seq, t));
+    return getHandle(a);
+}
+
+/// Find an equivalent atom that is exactly the same as the arg. If
+/// such an atom is in the table, it is returned, else the return
+/// is the bad handle.
+Handle AtomTable::lookupHandle(const AtomPtr& a) const
+{
+    if (nullptr == a) return Handle::UNDEFINED;
+
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -250,52 +256,13 @@ Handle AtomTable::getNodeHandle(const AtomPtr& a) const
     }
 
     if (_environ)
-        return _environ->getHandle(a);
+        return _environ->lookupHandle(a);
+
     return Handle::UNDEFINED;
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
-{
-    AtomPtr a(createLink(seq, t));
-    return getLinkHandle(a);
-}
-
-Handle AtomTable::getLinkHandle(const AtomPtr& a) const
-{
-    // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not, then reject the whole mess. XXX Why? So what?
-    // If the hash-checking, below, is good, then everything should be
-    // just fine. XXX Except BackwardChainerUTest fails myseriously,
-    // when we skip this test. Not sure why. Strange. XXX FIXME.
-    for (const Handle& ho : a->getOutgoingSet()) {
-        Handle rh(getHandle(ho));
-        if (not rh) return rh;
-    }
-
-    // Start searching to see if we have this atom.
-    ContentHash ch = a->get_hash();
-
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    // So ... check to see if we have it or not.
-    auto range = _atom_store.equal_range(ch);
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (*((AtomPtr) bkt->second) == *a) {
-            return bkt->second;
-        }
-    }
-
-    if (_environ) {
-        return _environ->getHandle(a);
-    }
-    return Handle::UNDEFINED;
-}
-
-/// Find an equivalent atom that is exactly the same as the arg. If
-/// such an atom is in the table, it is returned, else the return
-/// is the bad handle.
+/// Ask the atom if it belongs to this Atomtable. If so, we're done.
+/// Otherwise, search for an equivalent atom that we might be holding.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
@@ -303,39 +270,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (in_environ(a))
         return a->get_handle();
 
-    if (a->is_node())
-        return getNodeHandle(a);
-    else if (a->is_link())
-        return getLinkHandle(a);
-
-    return Handle::UNDEFINED;
-}
-
-// Special atom types support.
-AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
-{
-    // Very special handling for DeleteLink's
-    if (DELETE_LINK == atom_type) {
-        DeleteLinkPtr delp(DeleteLinkCast(atom));
-        // If it can be cast, then its not an open term.
-        if (nullptr != delp)
-            return delp;
-
-        // Trying to create a closed-term DeleteLink will throw.
-        // This is a sign that we need to remove stuff.
-        try {
-            delp = createDeleteLink(*LinkCast(atom));
-        }
-        catch (...) {
-            LinkPtr lp(LinkCast(atom));
-            for (Handle ho : lp->getOutgoingSet()) {
-                this->extract(ho);
-            }
-            return Handle();
-        }
-        return delp;
-    }
-    return atom;
+    return lookupHandle(a);
 }
 
 #if 0
@@ -366,22 +301,14 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     if (not force and in_environ(atom))
         return atom->get_handle();
 
-    AtomPtr orig(atom);
-    Type atom_type = atom->get_type();
+    Handle orig(atom);
 
-    // Certain DeleteLinks can never be added!
-    atom = cast_factory(atom_type, atom);
-    if (nullptr == atom) return Handle();
-
-    // If this atom is in some other atomspace or not in any atomspace,
-    // then we need to clone it. We cannot insert it into this atomtable
-    // as-is.  (We already know that its not in this atomspace, or its
-    // environ.)
+    // Make a copy of the atom that the user gave us. Attempting
+    // to take over the memory management of whatever the user
+    // gives use is just asking for trouble. Its safer to keep our
+    // own private copy.
     if (atom->is_link()) {
-        // Well, if the link was in some other atomspace, then
-        // the outgoing set will probably be too. (It might not
-        // be if the other atomspace is a child of this one).
-        // So we recursively clone that too.
+        // Insert the outgoing set of this link.
         HandleSeq closet;
         // Reserving space improves emplace_back performance by 2x
         closet.reserve(atom->get_arity());
@@ -391,23 +318,13 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(closet, atom_type);
+        atom = createLink(closet, atom->get_type());
     }
+    else
+        atom = createNode(*NodeCast(atom));
 
-    // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, because each atom instance keeps a pointer to
-    // the atomspace. This pointer is used to get UUID, send signals, implement
-    // getAtomSpace() and getAtomTable() methods.
-    else if (atom == orig)
-    {
-        if (atom->is_node())
-            atom = createNode(*NodeCast(atom));
-        else if (atom->is_link())
-            atom = createLink(*LinkCast(atom));
-        else
-            throw RuntimeException(TRACE_INFO,
-               "AtomTable - expecting an Atom!");
-    }
+    // Force computation of hash external to the locked section.
+    ContentHash hash = atom->get_hash();
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
@@ -420,48 +337,12 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
-        Handle hcheck;
-        if (orig->is_node())
-            hcheck = getNodeHandle(orig);
-        else if (orig->is_link())
-            hcheck = getLinkHandle(orig);
-
+        Handle hcheck(lookupHandle(orig));
         if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
     }
 
-    atom->copyValues(Handle(orig));
-
-    if (atom->is_link()) {
-        if (STATE_LINK == atom_type) {
-            // If this is a closed StateLink, (i.e. has no variables)
-            // then make sure that the old state gets removed from the
-            // atomtable. The atomtable must contain no more than one
-            // closed state at a time.  Also: we must be careful to
-            // update the incoming set in an atomic fashion, so that
-            // the pattern matcher never finds two closed StateLinks
-            // for any one given alias.  Any number of non-closed
-            // StateLinks are allowed.
-
-            StateLinkPtr slp(StateLinkCast(atom));
-            if (slp->is_closed()) {
-                try {
-                    Handle alias = slp->get_alias();
-                    Handle old_state = StateLink::get_link(alias);
-                    atom->setAtomSpace(_as);
-                    alias->swap_atom(LinkCast(old_state), slp);
-                    extract(old_state, true);
-                } catch (const InvalidParamException& ex) {}
-            }
-        }
-
-        // Build the incoming set of outgoing atom h.
-        size_t arity = atom->get_arity();
-        LinkPtr llc(LinkCast(atom));
-        for (size_t i = 0; i < arity; i++) {
-            llc->_outgoing[i]->insert_atom(llc);
-        }
-    }
-
+    atom->copyValues(orig);
+    atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
 
@@ -471,7 +352,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     _size_by_type[atom->_type] ++;
 
     Handle h(atom->get_handle());
-    _atom_store.insert({atom->get_hash(), h});
+    _atom_store.insert({hash, h});
 
 #ifdef CHECK_ATOM_HASH_COLLISION
     auto its = _atom_store.equal_range(atom->get_hash());
@@ -671,66 +552,15 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // return a non-zero value if the incoming set has weak pointers to
     // deleted atoms. Thus, a second check is made for strong pointers,
     // since getIncomingSet() converts weak to strong.
-    if (0 < handle->getIncomingSetSize())
+    if (not recursive and 0 < handle->getIncomingSetSize())
     {
         IncomingSet iset(handle->getIncomingSet());
         if (0 < iset.size())
         {
-            if (not recursive)
-            {
-                // User asked for a non-recursive remove, and the
-                // atom is still referenced. So, do nothing.
-                handle->unsetRemovalFlag();
-                return result;
-            }
-
-            // Check for an invalid condition that should not occur. See:
-            // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
-            size_t ilen = iset.size();
-            for (size_t i=0; i<ilen; i++)
-            {
-                // Its OK if the atom being extracted is in a link
-                // that is not currently in any atom space, or if that
-                // link is in a child subspace, in which case, we
-                // extract from the child.
-                //
-                // A bit of a race can happen: when the unlock is
-                // done below, to send the removed signal, another
-                // thread can sneak in and get to here, if it is
-                // deleting a different atom with an overlapping incoming
-                // set.  Since the incoming set hasn't yet been updated
-                // (that happens after re-acquiring the lock),
-                // it will look like the incoming set has not yet been
-                // fully cleared.  Well, it hasn't been, but as long as
-                // we are marked for removal, things should end up OK.
-                //
-                // XXX this might not be exactly thread-safe, if
-                // other atomspaces are involved...
-                if (iset[i]->getAtomTable() != NULL and
-                    (not iset[i]->getAtomTable()->in_environ(handle) or
-                     not iset[i]->isMarkedForRemoval()))
-                {
-                    Logger::Level lev = logger().get_backtrace_level();
-                    logger().set_backtrace_level(Logger::ERROR);
-                    logger().warn() << "AtomTable::extract() internal error";
-                    logger().warn() << "Non-empty incoming set of size "
-                                    << ilen << " First trouble at " << i;
-                    logger().warn() << "This atomtable=" << ((void*) this)
-                                    << " other atomtale=" << ((void*) iset[i]->getAtomTable())
-                                    << " in_environ=" << iset[i]->getAtomTable()->in_environ(handle);
-                    logger().warn() << "This atom: " << handle->to_string();
-                    for (size_t j=0; j<ilen; j++) {
-                        logger().warn() << "Atom j=" << j << " " << iset[j]->to_string();
-                        logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
-                                        << " Table: " << ((void*) iset[j]->getAtomTable());
-                    }
-                    logger().set_backtrace_level(lev);
-                    atom->unsetRemovalFlag();
-                    throw RuntimeException(TRACE_INFO,
-                        "Internal Error: Cannot extract an atom with "
-                        "a non-empty incoming set!");
-                }
-            }
+            // User asked for a non-recursive remove, and the
+            // atom is still referenced. So, do nothing.
+            handle->unsetRemovalFlag();
+            return result;
         }
     }
 
@@ -764,17 +594,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    if (atom->is_link()) {
-        LinkPtr lll(LinkCast(atom));
-        for (AtomPtr a : lll->_outgoing) {
-            a->remove_atom(lll);
-        }
-    }
+    // Remove atom from other incoming sets.
+    atom->remove();
 
-    // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm too lazy to fix, and
-    // am hoping no one will notice. This will probably need to be fixed
-    // someday.
     atom->setAtomSpace(nullptr);
 
     result.insert(atom);

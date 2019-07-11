@@ -366,6 +366,7 @@
     Return the incoming set of ATOM.  This set is returned as an
     ordinary scheme list.
 
+    See also: cog-incoming-size, cog-incoming-by-type
     Example:
        ; Define two nodes and a link between them:
        guile> (define x (ConceptNode \"abc\"))
@@ -402,13 +403,35 @@
        #t
 ")
 
+(set-procedure-property! cog-incoming-size 'documentation
+"
+ cog-incoming-size ATOM
+    Return the number of atoms in the incoming set of ATOM.
+
+    See also: cog-incoming-set, cog-incoming-size-by-type
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (Link x y)
+
+       ; Get the size of the incoming set of nodes x and y:
+       guile> (cog-incoming-size x)
+       => 1
+
+       guile> (cog-incoming-size y)
+       => 1
+")
+
 (set-procedure-property! cog-incoming-by-type 'documentation
 "
  cog-incoming-by-type ATOM TYPE
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
+    should be faster, performance-wise.
 
     Example:
        ; Define two nodes and two links between them:
@@ -417,7 +440,7 @@
        guile> (ListLink x y)
        guile> (UnorderedLink x y)
 
-       ; Get the incoming sets of nodes x and y:
+       ; Get all ListLinks that x appears in:
        guile> (cog-incoming-by-type x 'ListLink)
        ((ListLink
           (ConceptNode \"abc\")
@@ -425,12 +448,32 @@
        )
        )
 
+       ; Get all UnorderedLinks that x appears in:
        guile> (cog-incoming-by-type x 'UnorderedLink)
        ((UnorderedLink
           (ConceptNode \"abc\")
           (ConceptNode \"def\")
        )
        )
+")
+
+(set-procedure-property! cog-incoming-size-by-type 'documentation
+"
+ cog-incoming-size-by-type ATOM TYPE
+    Return the number of atoms of type TYPE in the incoming set of ATOM.
+
+    See also: cog-incoming-by-type, cog-incoming-size
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (ListLink x y)
+       guile> (UnorderedLink x y)
+
+       ; Get the number of ListLinks that x appears in:
+       guile> (cog-incoming-size-by-type x 'ListLink)
+       => 1
 ")
 
 (set-procedure-property! cog-outgoing-atom 'documentation
@@ -454,7 +497,8 @@
     Return those atoms in the outgoing set of ATOM that are of type TYPE.
     This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM))
+    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM)), but
+    should be faster, performance-wise.
 ")
 
 (set-procedure-property! cog-handle 'documentation
@@ -483,15 +527,42 @@
 
 (set-procedure-property! cog-inc-count! 'documentation
 "
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT
+  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
+
+  Increment the count on a CountTruthValue by CNT. The mean and
+  confidence values are left untouched.  CNT may be any floating-point
+  number (positive or negative).
 
   If the current truth value on the ATOM is not a CountTruthValue,
   then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.  The mean and confidence values are left
-  untouched. CNT may be any floating-point number.
+  count set to CNT.
 
   Example usage:
      (cog-inc-count! (ConceptNode \"Answer\") 42.0)
+
+  See also: cog-inc-value! for a generic version
+")
+
+(set-procedure-property! cog-inc-value! 'documentation
+"
+  cog-inc-value! ATOM KEY CNT REF -- Increment value on ATOM by CNT.
+
+  The REF location of the FloatValue at KEY is incremented by CNT.
+  CNT may be any floating-point number (positive or negative).
+  The rest of the FloatValue vector is left untouched.
+
+  If the ATOM does not have any Value at KEY, or if the current Value
+  is not a FloatValue, then a new FloatValue of length (REF+1) is
+  created. If the existing FloatValue is too short, it is extended
+  until it is at least (REF+1) in length.
+
+  Example usage:
+     (cog-inc-value!
+         (ConceptNode \"Question\")
+         (PredicateNode \"Answer\")
+         42.0  0)
+
+  See also: cog-inc-count! for a version that increments the count TV.
 ")
 
 (set-procedure-property! cog-mean 'documentation
@@ -516,137 +587,6 @@
 ")
 
 ; ===================================================================
-(set-procedure-property! cog-new-stv 'documentation
-"
- cog-new-stv MEAN CONFIDENCE
-    Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-stv 0.7 0.9)
-")
-
-(set-procedure-property! cog-new-etv 'documentation
-"
- cog-new-etv POSITIVE-COUNT TOTAL-COUNT
-    Create an EvidenceCountTruthValue with the given POSITIVE-COUNT
-    and TOTAL-COUNT. Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    The total count is optional in the sense that any value below the
-    positive count will be considered undefined.
-
-    Throws errors if positive-count and total-count are not
-    floating-point values.
-    Example:
-        ; Create a new simple truth value:
-        guile> (cog-new-etv 100 150)
-")
-
-(set-procedure-property! cog-new-ctv 'documentation
-"
- cog-new-ctv MEAN CONFIDENCE COUNT
-    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean, confidence and count are not floating-point
-    values.
-    Example:
-        ; Create a new count truth value:
-        guile> (cog-new-ctv 0.7 0.9 44.0)
-")
-
-(set-procedure-property! cog-new-itv 'documentation
-"
- cog-new-itv LOWER UPPER CONFIDENCE
-    Create an IndefiniteTruthValue with the given LOWER, UPPER and
-    CONFIDENCE.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    Throws errors if lower, upper and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new indefinite truth value:
-        guile> (cog-new-itv 0.7 0.9 0.6)
-")
-
-(set-procedure-property! cog-new-ptv 'documentation
-"
- cog-new-ptv MEAN CONFIENCE COUNT
-    Create a ProbabilisticTruthValue with the given MEAN, CONFIDENCE
-    and COUNT.  Unlike atoms, truth values are ephemeral: they are
-    automatically garbage-collected when no longer needed.
-
-    Throws errors if mean, confidence and count are not floating-point
-    values.
-    Example:
-        ; Create a new probabilistic truth value:
-        guile> (cog-new-ptv 0.7 0.9 44.0)
-")
-
-(set-procedure-property! cog-new-ftv 'documentation
-"
- cog-new-ftv MEAN CONFIDENCE
-    Create a FuzzyTruthValue with the given MEAN and CONFIDENCE.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws errors if mean and confidence are not floating-point
-    values.
-    Example:
-        ; Create a new fuzzy truth value:
-        guile> (cog-new-ftv 0.7 0.9)
-")
-
-(set-procedure-property! cog-tv? 'documentation
-"
- cog-tv? EXP
-    Return #t if EXP is a truth value, else return #f
-
-    Example:
-       ; Define a simple truth value
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (define y (+ 2 2))
-       guile> (cog-tv? x)
-       #t
-       guile> (cog-tv? y)
-       #f
-")
-
-(set-procedure-property! cog-stv? 'documentation
-"
- cog-stv? EXP
-    Return #t if EXP is a SimpleTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ctv? 'documentation
-"
- cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f
-")
-
-(set-procedure-property! cog-itv? 'documentation
-"
- cog-itv? EXP
-    Return #t if EXP is a IndefiniteTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ptv? 'documentation
-"
- cog-ptv? EXP
-    Return #t if EXP is a ProbablisticTruthValue, else return #f
-")
-
-(set-procedure-property! cog-ftv? 'documentation
-"
- cog-ftv? EXP
-    Return #t if EXP is a FuzzyTruthValue, else return #f
-")
 
 (set-procedure-property! cog-tv 'documentation
 "
@@ -678,17 +618,6 @@
        (ConceptNode \"def\" (stv 0.9 0.8))
        guile> (cog-tv x)
        (stv 0.9 0.8)
-")
-
-(set-procedure-property! cog-tv->alist 'documentation
-"
- cog-tv->alist TV
-    Convert the truth value TV to an association list (alist).
-
-    Example:
-       guile> (define x (cog-new-stv 0.7 0.9))
-       guile> (cog-tv->alist x)
-       ((mean . 0.7) (confidence . 0.9))
 ")
 
 (set-procedure-property! cog-tv-mean 'documentation
@@ -841,46 +770,6 @@
         guile> (cog-get-types)
 ")
 
-(set-procedure-property! cog-type? 'documentation
-"
- cog-type? SYMBOL
-    Return #t if the SYMBOL names a value or atom type, else return #f
-
-    Example:
-        guile> (cog-type? 'ConceptNode)
-        #t
-        guile> (cog-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-node-type? 'documentation
-"
- cog-node-type? SYMBOL
-    Return #t if the SYMBOL names an node type, else return #f
-
-    Example:
-        guile> (cog-node-type? 'ConceptNode)
-        #t
-        guile> (cog-node-type? 'ListLink)
-        #f
-        guile> (cog-node-type? 'FlorgleBarf)
-        #f
-")
-
-(set-procedure-property! cog-link-type? 'documentation
-"
- cog-link-type? SYMBOL
-    Return #t if the SYMBOL names a link type, else return #f
-
-    Example:
-        guile> (cog-link-type? 'ConceptNode)
-        #f
-        guile> (cog-link-type? 'ListLink)
-        #t
-        guile> (cog-link-type? 'FlorgleBarf)
-        #f
-")
-
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
@@ -936,6 +825,18 @@
   See also: cog-get-atoms TYPE - returns a list of atoms of TYPE.
 ")
 
+(set-procedure-property! cog-count-atoms 'documentation
+"
+  cog-count-atoms -- Count of the number of atoms of given type
+
+  cog-count-atoms ATOM-TYPE
+  Return a count of the number of atoms of the given type `ATOM-TYPE`.
+
+  Example usage:
+     (display (cog-count-atoms 'ConceptNode))
+  will display a count of all atoms of type 'ConceptNode
+")
+
 (set-procedure-property! cog-atomspace 'documentation
 "
  cog-atomspace
@@ -948,6 +849,10 @@
     Set the current atomspace for this thread to ATOMSPACE. Every
     thread has it's own current atomspace, to which all atom-processing
     operations apply.  Returns the previous atomspace for this thread.
+
+    Warning: if the previous atomspace is not the primary atomspace
+    and is not referenced anywhere, the garbage collector will delete it
+    alongside its content, even if some of its content is referenced.
 ")
 
 (set-procedure-property! cog-atomspace? 'documentation

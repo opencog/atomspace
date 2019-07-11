@@ -22,6 +22,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -67,6 +68,10 @@ public:
 	void test_clear_box_single_argument_link(void);
 	void test_value(void);
 	void test_exec_variable(void);
+	void test_recursion(void);
+	void test_lambda(void);
+	void test_implication_scope(void);
+	void test_variable_schema(void);
 };
 
 #define an as.add_node
@@ -323,16 +328,22 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		id = al(LAMBDA_LINK, X, X),
-		AB = al(INHERITANCE_LINK, A, B),
-		exec = al(EXECUTION_OUTPUT_LINK, id, AB);
+	Handle AB =
+		al(INHERITANCE_LINK,
+			an(CONCEPT_NODE, "A"),
+			an(CONCEPT_NODE, "B"));
+
+	Handle identity =
+		al(LAMBDA_LINK,
+			an(VARIABLE_NODE, "$X"),
+			an(VARIABLE_NODE, "$X"));
+
+	Handle exec =
+		al(EXECUTION_OUTPUT_LINK, identity, AB);
 
 	Instantiator inst(&as);
-	Handle expected = AB,
-		result = HandleCast(inst.execute(exec));
+	Handle expected = AB;
+	Handle result = HandleCast(inst.execute(exec));
 
 	TS_ASSERT_EQUALS(expected, result);
 
@@ -413,3 +424,128 @@ void ExecutionOutputUTest::test_exec_variable(void)
 	TS_ASSERT_EQUALS(result, al(SET_LINK, an(NUMBER_NODE, "42")));
 }
 
+// This tests recursion of ExecutionOutputLinks, on a classic algo:
+// the factorial algo.  This test does not actually test the pattern
+// matcher, and so does not really belong in this directory...
+void ExecutionOutputUTest::test_recursion(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-factorial.scm\")");
+
+	Handle result = eval.eval_h(
+		"(cog-execute! (ExecutionOutput"
+		"     (DefinedSchema \"factorial\") (Number 5)))");
+
+	TS_ASSERT_EQUALS(result->get_type(), NUMBER_NODE);
+	double ans = NumberNodeCast(result)->get_value();
+
+	TS_ASSERT_DELTA(ans, 120.0, 1.0e-6);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// This tests reconstructing a lambda link with a matched variable
+// declaration and body
+void ExecutionOutputUTest::test_lambda(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-lambda.scm\")");
+	Handle bl = eval.eval_h("bl");
+
+	Instantiator inst(&as);
+	Handle result = HandleCast(inst.execute(bl));
+	Handle expect = al(SET_LINK,
+	                   al(LAMBDA_LINK,
+	                      an(VARIABLE_NODE, "$X"),
+	                      al(EVALUATION_LINK,
+	                         an(PREDICATE_NODE, "P"),
+	                         an(CONCEPT_NODE, "A"))));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(expect, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test not touching a closed ImplicationScope in argument of the
+// ExecutionOutputLink, the rewriting term of a BindLink.
+void ExecutionOutputUTest::test_implication_scope(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-implication-scope.scm\")");
+	Handle bl = eval.eval_h("bl");
+
+	Instantiator inst(&as);
+	Handle result = HandleCast(inst.execute(bl));
+	Handle expect = al(SET_LINK,
+	                   al(IMPLICATION_SCOPE_LINK,
+	                      al(EVALUATION_LINK,
+	                         an(PREDICATE_NODE, "P"),
+	                         an(VARIABLE_NODE, "$X")),
+	                      al(EVALUATION_LINK,
+	                         an(PREDICATE_NODE, "Q"),
+	                         an(VARIABLE_NODE, "$X"))));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(expect, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ExecutionOutputUTest::test_variable_schema(void)
+{
+	al(DEFINE_LINK,
+		an(DEFINED_SCHEMA_NODE, "sum"),
+		al(LAMBDA_LINK,
+			al(VARIABLE_LIST,
+				an(VARIABLE_NODE, "x"),
+				an(VARIABLE_NODE, "y")),
+			al(PLUS_LINK,
+				an(VARIABLE_NODE, "x"),
+				an(VARIABLE_NODE, "y"))
+		));
+
+	al(DEFINE_LINK,
+		an(DEFINED_SCHEMA_NODE, "mul"),
+		al(LAMBDA_LINK,
+			al(VARIABLE_LIST,
+				an(VARIABLE_NODE, "x"),
+				an(VARIABLE_NODE, "y")),
+			al(TIMES_LINK,
+				an(VARIABLE_NODE, "x"),
+				an(VARIABLE_NODE, "y"))
+		));
+
+	al(INHERITANCE_LINK,
+		an(DEFINED_SCHEMA_NODE, "mul"),
+		an(CONCEPT_NODE, "current-schema")
+	);
+
+
+	Handle get_link =
+	al(BIND_LINK,
+		al(TYPED_VARIABLE_LINK,
+			an(VARIABLE_NODE, "$SCHEMA"), an(TYPE_NODE, "DefinedSchemaNode")),
+		al(AND_LINK,
+			al(INHERITANCE_LINK,
+				an(VARIABLE_NODE, "$SCHEMA"),
+				an(CONCEPT_NODE, "current-schema")
+		    )
+		),
+		al(EXECUTION_OUTPUT_LINK,
+			an(VARIABLE_NODE, "$SCHEMA"),
+			al(LIST_LINK, an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7"))
+		)
+	);
+	Instantiator inst(&as);
+
+	ValuePtr result = inst.execute(get_link);
+	TS_ASSERT_EQUALS(result, al(SET_LINK, an(NUMBER_NODE, "42")));
+}

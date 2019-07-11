@@ -205,13 +205,9 @@ class SQLAtomStorage::Response
 			if (nullptr == h)
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
-				Handle atom(store->get_recursive_if_not_exists(p));
-				h = table->getHandle(atom);
-				if (nullptr == h)
-				{
-					h = table->add(atom, false);
-					store->_tlbuf.addAtom(h, uuid);
-				}
+				h = store->get_recursive_if_not_exists(p);
+				h = table->add(h, false);
+				store->_tlbuf.addAtom(h, uuid);
 			}
 			else
 			{
@@ -342,6 +338,16 @@ class SQLAtomStorage::Response
 			{
 				PseudoPtr pu(store->petAtom(key));
 				hkey = store->get_recursive_if_not_exists(pu);
+
+				// Try really hard to stick the key into a table.
+				// XXX This is potentially broken, as no other code
+				// ever verifies that the key gets inserted into some
+				// table.  The correct fix is to add AtomTable as a
+				// part of the BackingStore API. XXX TODO FIXME.
+				if (table) hkey = table->add(hkey, false);
+				else if (atom->getAtomTable())
+					hkey = atom->getAtomTable()->add(hkey, false);
+				store->_tlbuf.addAtom(hkey, key);
 			}
 
 			ValuePtr pap = store->doUnpackValue(*this);

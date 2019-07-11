@@ -205,34 +205,44 @@
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
 
-  The left-support-set consists of all pairs (x,y), for fixed y, for
+  The 'left-support-set method return all pairs (x,y), for fixed y, for
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
-  The left-support is the number of non-zero entries in a column.
+  The 'left-support is the number of non-zero entries in a column.
   That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
+  The 'left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
 
-  The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
+  The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
-  The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
+  The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
-  The total-support is sum_x sum_y D(x,y)
+  The 'total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
-  The total-count-left is N(*,*) = sum_x N(x,*)
+  The 'total-count-left is N(*,*) = sum_x N(x,*)
   That is, the total of all count entries in the matrix, with the
   left-sum being done last. It uses the cached, previously-computed
   right-marginal sums N(x,*) to perform the computation, and so this
   computation will fail, if the marginals have not been stored.
 
-  The total-count-right is N(*,*) = sum_y N(*,y)
+  The 'total-count-right is N(*,*) = sum_y N(*,y)
   Same as above, but does the right-sum last. Should yeild the same
   answer, as above, except for rounding errors. Using this method can
   be more convenient, if the right-marginal sums are not available
   (and v.v. if the other marginals are not available.)
+
+  The 'set-left-marginals ITEM requires an argument ITEM from the
+  right basis. It computes the marginals for that ITEM and caches
+  them.  This is useful when some algorithm has modified the matrix,
+  and the marginals for a specific column need to be recomputed.
+
+  The 'set-right-marginals ITEM requires an argument ITEM from the
+  left basis. It computes the marginals for that ITEM and caches them.
+  This is useful when some algorithm has modified the matrix, and the
+  marginals for a specific row need to be recomputed.
 
   Here, the LLOBJ is expected to be an object, with valid counts
   associated with each pair. LLOBJ is expected to have working,
@@ -409,23 +419,30 @@
 		(define (sum-right-norms ITEM)
 			(sum-norms (star-obj 'right-stars ITEM)))
 
+		(define (set-left-marginals ITEM)
+			(define sums (sum-left-norms ITEM))
+			(define l0 (first sums))
+			(define l1 (second sums))
+			(define l2 (sqrt (third sums)))
+			(api-obj 'set-left-norms ITEM l0 l1 l2))
+
+		(define (set-right-marginals ITEM)
+			(define sums (sum-right-norms ITEM))
+			(define l0 (first sums))
+			(define l1 (second sums))
+			(define l2 (sqrt (third sums)))
+			(api-obj 'set-right-norms ITEM l0 l1 l2))
+
 		(define start-time 0)
 		(define (elapsed-secs)
 			(define diff (- (current-time) start-time))
 			(set! start-time (current-time))
 			diff)
 
-		(define (left-marginals)
+		(define (all-left-marginals)
+			; Loop over each item in the right-basis
 			(elapsed-secs)
-			(for-each
-				(lambda (ITEM)
-					(define sums (sum-left-norms ITEM))
-					(define l0 (first sums))
-					(define l1 (second sums))
-					(define l2 (sqrt (third sums)))
-					(api-obj 'set-left-norms ITEM l0 l1 l2))
-				(star-obj 'right-basis))
-
+			(for-each set-left-marginals (star-obj 'right-basis))
 			(format #t "Finished left norm marginals in ~A secs\n"
 				(elapsed-secs))
 
@@ -438,17 +455,10 @@
 				(elapsed-secs))
 		)
 
-		(define (right-marginals)
+		(define (all-right-marginals)
+			; Loop over each item in the left-basis
 			(elapsed-secs)
-			(for-each
-				(lambda (ITEM)
-					(define sums (sum-right-norms ITEM))
-					(define l0 (first sums))
-					(define l1 (second sums))
-					(define l2 (sqrt (third sums)))
-					(api-obj 'set-right-norms ITEM l0 l1 l2))
-				(star-obj 'left-basis))
-
+			(for-each set-right-marginals (star-obj 'left-basis))
 			(format #t "Finished right norm marginals in ~A secs\n"
 				(elapsed-secs))
 
@@ -463,8 +473,8 @@
 
 		; Do both at once
 		(define (cache-all)
-			(left-marginals)
-			(right-marginals))
+			(all-left-marginals)
+			(all-right-marginals))
 
 		; -------------
 		; Methods on this class.
@@ -481,14 +491,17 @@
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
-				((total-support-left) (compute-total-support-from-left))
+				((total-support-left)  (compute-total-support-from-left))
 				((total-support-right) (compute-total-support-from-right))
-				((total-count-left)   (compute-total-count-from-left))
-				((total-count-right)  (compute-total-count-from-right))
+				((total-count-left)    (compute-total-count-from-left))
+				((total-count-right)   (compute-total-count-from-right))
 
-				((left-marginals)     (left-marginals))
-				((right-marginals)    (right-marginals))
-				((cache-all)          (cache-all))
+				((set-left-marginals)  (apply set-left-marginals args))
+				((set-right-marginals) (apply set-right-marginals args))
+
+				((all-left-marginals)  (all-left-marginals))
+				((all-right-marginals) (all-right-marginals))
+				((cache-all)           (cache-all))
 
 ; XXX hack alert. We need something more elegant!?
 ; the language-learning clustering code uses this

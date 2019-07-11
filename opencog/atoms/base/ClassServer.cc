@@ -90,6 +90,7 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 	// declared.
 	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
 	{
+		if (not _nameServer.isDefined(t)) continue;
 		if (_nameServer.isAncestor(t, chi) and
 		    (nullptr == methods[chi] or
 		     ok_to_clobber.end() != ok_to_clobber.find(methods[chi])))
@@ -144,4 +145,11 @@ ClassServer& opencog::classserver()
 {
 	static std::unique_ptr<ClassServer> instance(new ClassServer(nameserver()));
 	return *instance;
+}
+
+// Make sure that the classserver gets initialized when this
+// shared lib gets loaded for the first time.
+static __attribute__ ((constructor)) void classserver_init(void)
+{
+	opencog::classserver();
 }

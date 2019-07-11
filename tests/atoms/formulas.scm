@@ -117,3 +117,195 @@
 		(List
 			(Concept "A")
 			(Concept "B"))))
+
+; --------------------------------------------------
+
+(define atom-a (Concept "A" (stv 0.8 1.0)))
+(define atom-b (Concept "B" (stv 0.6 0.9)))
+(define atom-c (Concept "C"))
+
+(define key (Predicate "key"))
+
+(define iab (Inheritance atom-a atom-b (stv 0.8 0.8)))
+(define ibc (Inheritance atom-b atom-c (stv 0.3 0.3)))
+
+(cog-set-value! iab key (FloatValue 1 2 3))
+(cog-set-value! ibc key (FloatValue 4 5 6))
+
+; The InheritanceLink is not necessarily in any atomspace.
+(Define
+	(DefinedPredicate "its-about-one")
+	(Lambda
+		(VariableList (Variable "$x") (Variable "$y"))
+		(SequentialAnd
+			(GreaterThan
+				(ValueOf (Inheritance (Variable "$x") (Variable "$y"))  key)
+				(Number 0.99))
+			(GreaterThan
+				(Number 1.01)
+				(ValueOf (Inheritance (Variable "$x") (Variable "$y")) key))
+		)))
+
+; Expect (its-one atom-a atom-b) to be true,
+; and (its-one atom-b atom-c) to be false.
+(define (its-one a b)
+	(Evaluation (DefinedPredicate "its-about-one") (List a b)))
+
+(Define
+	(DefinedPredicate "mostly-confident")
+	(Lambda
+		(VariableList (Variable "$x") (Variable "$y"))
+		(SequentialAnd
+			(GreaterThan
+				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y")))
+				(Number 0.75))
+			(GreaterThan
+				(Number 0.85)
+				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y"))))
+		)))
+
+; Expect (its-conf atom-a atom-b) to be true,
+; and (its-conf atom-b atom-c) to be false.
+(define (its-conf a b)
+	(Evaluation (DefinedPredicate "mostly-confident") (List a b)))
+
+; --------------------------------------------------
+; Testing naked predicate formulas (issue #2218).
+
+(define naked-pred1
+  (PredicateFormula
+    (Number 1)
+    (Number 1)
+  )
+)
+(define naked-pred2
+  (PredicateFormula
+    (Times
+      (Number 0.5)
+      (Number 1)
+    )
+    (Number 1)
+  )
+)
+(define naked-pred3
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 0.5)
+      (Number 1)
+    )
+  )
+)
+(define apple-is-green (Concept "apple-is-green" (stv 1 0.5)))
+(define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
+(define naked-pred4
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+
+(define (times x y)
+  (cog-execute! (Times x y))
+)
+(define naked-pred5
+  (PredicateFormula
+    (Number 1)
+    (ExecutionOutput
+      (GroundedSchema "scm:times")
+      (List (Number 0.9) (Number 0.5))
+    )
+  )
+)
+
+(define naked-pred-crash1
+  (PredicateFormula
+    (Concept "blabla")
+    (Number 1)
+  )
+)
+(define naked-pred-crash2
+  (PredicateFormula
+    (Number 1)
+    (ExecutionOutput
+      (Lambda (Concept "blabla"))
+      (List)
+    )
+  )
+)
+
+; --------------------------------------------------
+; Testing defined predicate formulas (issue #2218).
+
+(Define
+  (DefinedPredicate "defined-pred1")
+  (PredicateFormula
+    (Number 1)
+    (Number 1)
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred2")
+  (PredicateFormula
+    (Times
+      (Number 1)
+      (Number 0.5)
+    )
+    (Number 1)
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred3")
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred4")
+  (PredicateFormula
+    (Number 1)
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred-crash1")
+  (PredicateFormula
+    (ExecutionOutput
+      (Lambda (Concept "ahaha"))
+      (List)
+    )
+    (Times
+      (Number 1)
+      (Number 0.5)
+      (StrengthOf apple-is-green)
+      (ConfidenceOf apple-is-red)
+    )
+  )
+)
+(Define
+  (DefinedPredicate "defined-pred-crash2")
+  (PredicateFormula
+    (Number 1)
+    (Concept "saboteur")
+  )
+)
+(define (eval-nullary name)
+  (Evaluation
+    (DefinedPredicate name)
+    (List)
+  )
+)

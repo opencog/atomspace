@@ -44,10 +44,13 @@ class DeleteLink : public FreeLink
 {
 protected:
 	void init(void);
+	void setAtomSpace(AtomSpace *);
 public:
-	DeleteLink(const HandleSeq&);
+	DeleteLink(const HandleSeq&, Type=DELETE_LINK);
 
 	DeleteLink(const Link&);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;

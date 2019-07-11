@@ -221,8 +221,6 @@ void SCMExecutionOutputUTest::test_recursive(void)
 		"(define (make-queen x)"
 		"   (InheritanceLink x (ConceptNode \"queen\")))"
 		"(define (stv mean conf) (cog-new-stv mean conf))"
-		"(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))"
-		"(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))"
 	);
 	CHKEV(eval);
 
@@ -231,8 +229,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	eval->eval(
 		"(define (royal-incr atom cnt)"
 		"   (cog-set-tv! atom"
-		"       (stv (+ (tv-mean (cog-tv atom)) cnt)"
-		"           (tv-conf (cog-tv atom)))))"
+		"       (stv (+ (cog-mean atom) cnt)"
+		"           (cog-confidence atom))))"
 	);
 	CHKEV(eval);
 
@@ -242,7 +240,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// That is, 0.9/0.1 = 9.
 	eval->eval(
 		"(define (royalize x)"
-		"   (if (> (tv-mean (cog-tv x)) 0.9)"
+		"   (if (> (cog-mean x) 0.9)"
 		"      (make-king x)"
 		"      (royalize (royal-incr x 0.1))))"
 	);
@@ -257,7 +255,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// ExecutionOutputLink::do_execute() onto the stack.
 	eval->eval(
 		"(define (promote x)"
-		"   (if (> (tv-mean (cog-tv x)) 0.9)"
+		"   (if (> (cog-mean x) 0.9)"
 		"      (make-queen x)"
 		"      (exe-royalize (royal-incr x 0.01))))"
 	);

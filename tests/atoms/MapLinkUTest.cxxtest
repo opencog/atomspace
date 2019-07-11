@@ -308,13 +308,15 @@ void MapLinkUTest::test_local_quote_map(void)
 
     Instantiator inst(as);
     Handle local_quote_map = eval->eval_h("local-quote-map"),
-	    result = HandleCast(inst.execute(local_quote_map)),
-	    expected = eval->eval_h("local-quote-map-result");
+        result = HandleCast(inst.execute(local_quote_map)),
+        expected1 = eval->eval_h("local-quote-map-result-1"),
+        expected2 = eval->eval_h("local-quote-map-result-2");
 
     printf("result %s", result->to_string().c_str());
-    printf("expected %s\n", expected->to_string().c_str());
+    printf("expected1 %s\n", expected1->to_string().c_str());
+    printf("expected2 %s\n", expected2->to_string().c_str());
 
-    TS_ASSERT(result == expected);
+    TS_ASSERT(result == expected1 or result == expected2);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -327,8 +329,8 @@ void MapLinkUTest::test_quote_arg_map(void)
 
     Instantiator inst(as);
     Handle quote_arg_map = eval->eval_h("quote-arg-map"),
-	    result = HandleCast(inst.execute(quote_arg_map)),
-	    expected = eval->eval_h("quote-arg-map-result");
+        result = HandleCast(inst.execute(quote_arg_map)),
+        expected = eval->eval_h("quote-arg-map-result");
 
     printf("result %s", result->to_string().c_str());
     printf("expected %s\n", expected->to_string().c_str());

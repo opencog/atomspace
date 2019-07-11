@@ -152,17 +152,6 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (OCTO_VALUE == t)
-	{
-		SCM sl = svalue_list;
-		SCM satom = SCM_CAR(sl);
-		SCM svalue = SCM_CDR(sl);
-		Handle hlist = verify_handle(satom, "cog-new-value", 2);
-		HandleSeq hseq = hlist->getOutgoingSet();
-		std::vector<double> valist = verify_float_list(svalue, "cog-new-value", 2);
-		return valueserver().create(t, hseq, valist);
-	}
-
 	if (RANDOM_STREAM == t)
 	{
 		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
@@ -361,7 +350,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	ValuePtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_double)
@@ -400,7 +389,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
    size_t index = verify_size(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
-	if (nameserver().isA(t, FLOAT_VALUE) or nameserver().isA(t, OCTO_VALUE))
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);

@@ -74,7 +74,6 @@ private:
 	static Handle scm_to_handle(SCM);
 	static ValuePtr scm_to_protom(SCM);
 	static ValuePtr make_value(Type, SCM);
-	static TruthValuePtr scm_to_tv(SCM);
 
 	static std::vector<double> scm_to_float_list (SCM);
 	static std::vector<ValuePtr> scm_to_protom_list (SCM);
@@ -100,7 +99,7 @@ private:
 	static SCM ss_handle(SCM);
 	static SCM ss_atom_less_p(SCM, SCM);
 
-	// Get list endcoded in a value
+	// Access the list encoded in a value
 	static SCM ss_value_to_list(SCM);
 	static SCM ss_value_ref(SCM, SCM);
 
@@ -108,6 +107,7 @@ private:
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
+	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
@@ -122,7 +122,9 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
+	static SCM ss_incoming_size(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
+	static SCM ss_incoming_size_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
 	static SCM ss_outgoing_by_type(SCM, SCM);
 	static SCM ss_outgoing_atom(SCM, SCM);
@@ -131,29 +133,11 @@ private:
 	static SCM ss_map_type(SCM, SCM);
 	static SCM ss_get_types(void);
 	static SCM ss_get_type(SCM);
-	static SCM ss_type_p(SCM);
-	static SCM ss_value_type_p(SCM);
-	static SCM ss_node_type_p(SCM);
-	static SCM ss_link_type_p(SCM);
 	static SCM ss_get_subtypes(SCM);
 	static SCM ss_subtype_p(SCM, SCM);
+	static SCM ss_count(SCM);
 
 	// Truth values
-	static SCM ss_new_stv(SCM, SCM);
-	static SCM ss_new_ctv(SCM, SCM, SCM);
-	static SCM ss_new_itv(SCM, SCM, SCM);
-	static SCM ss_new_ptv(SCM, SCM, SCM);
-	static SCM ss_new_ftv(SCM, SCM);
-	static SCM ss_new_etv(SCM, SCM);
-	static SCM ss_tv_p(SCM);
-	static SCM tv_p(SCM, Type);
-	static SCM ss_stv_p(SCM);
-	static SCM ss_ctv_p(SCM);
-	static SCM ss_itv_p(SCM);
-	static SCM ss_ptv_p(SCM);
-	static SCM ss_ftv_p(SCM);
-	static SCM ss_etv_p(SCM);
-	static SCM ss_tv_get_value(SCM);
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
 	static SCM ss_tv_get_count(SCM);

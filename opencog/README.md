@@ -155,15 +155,15 @@ graph. This allows the database to act as a rule engine, holding a large
 number of rules.
 
 
-What is the Rule Engine?
-------------------------
+What is the Unified Rule Engine?
+--------------------------------
 A single graph query (pattern-match query) can be thought of as a single
 graph re-write step: when a graph matches the query, the shape of the
 graph is altered (edited) as a result. Thus, each query can be thought
 of as a "rule", to be applied to the data. If the rule triggers, then
-it runs and transforms the data.  The rule-engine is the infrastructure
-that allows collections of rules to be specified, and manage their
-application.
+it runs and transforms the data.  The Unified Rule Engine (URE) is the
+infrastructure that allows collections of rules to be specified, and
+manage their application.
 
 There are four different ways of managing rules. Two are the traditional
 forward-chaining and backward-chaining algorithms, full analogous to
@@ -213,7 +213,7 @@ important subdirectories:
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.
 
-<dt>rule-engine<dd>Apply arbitrary collections of rules to the atomspace.
+<dt>ure        <dd>Apply arbitrary collections of rules to the atomspace.
                    Provides forward and backward chainers.
 
 <dt>matrix     <dd>Present a view of a subset of the atomspace as a
