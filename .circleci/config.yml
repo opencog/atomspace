@@ -30,9 +30,11 @@ jobs:
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j2 && make -j2 install
             ldconfig
-      - checkout
+      - run:
+          name: Checkout AtomSpace
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
       - restore_cache:
-          name: Restore GCH Cache
+          name: Restore GHC Cache
           keys:
             - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
@@ -95,7 +97,7 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
-          name: Clone URE
+          name: Checkout URE
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure .
       - run:
           name: CMake Configure
@@ -133,7 +135,7 @@ jobs:
       - attach_workspace:
           at: /ws/
       - restore_cache:
-          name: Restore GCH Cache
+          name: Restore GHC Cache
           keys:
             - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
@@ -150,7 +152,7 @@ jobs:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
-          name: Clone OpenCog
+          name: Checkout OpenCog
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
           name: CMake Configure
