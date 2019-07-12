@@ -174,6 +174,16 @@ jobs:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
           when: always
+      - save_cache:
+          name: Save GHC Cache
+          key: ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+          paths:
+            - /root/.stack
+      - save_cache:
+          name: Save Haskell Deps Cache
+          key: haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
+          paths:
+            - /ws/atomspace/opencog/haskell/.stack-work
       - persist_to_workspace:
           root: /ws/
           paths:
