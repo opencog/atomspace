@@ -44,6 +44,15 @@ class GroundedObjectNodeGilTest(unittest.TestCase):
         GroundedObjectNode("x", 3)
         GroundedObjectNode("y", 4)
 
+        for _ in range(3):
+            self.call_apply_link_async_in_schema(5)
+            time.sleep(0.1)
+
+        N = 3 * 5
+        self.assertEqual(2 + 3 * N, point.x)
+        self.assertEqual(3 + 4 * N, point.y)
+
+    def call_apply_link_async_in_schema(self, times):
         scheme_eval(self.atomspace,
                     '''
                     (use-modules
@@ -66,16 +75,10 @@ class GroundedObjectNodeGilTest(unittest.TestCase):
                                 (GroundedObjectNode "x")
                                 (GroundedObjectNode "y"))))
                         (cog-execute! apply-link)
-                        )) 10)
+                        )) %d)
 
-                    (usleep 500)
-                    ''')
-
-        time.sleep(0.2)
-
-        N = 10
-        self.assertEqual(2 + 3 * N, point.x)
-        self.assertEqual(3 + 4 * N, point.y)
+                    (usleep 100)
+                    ''' % times)
 
 
 if __name__ == '__main__':
