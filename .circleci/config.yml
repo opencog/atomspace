@@ -32,7 +32,7 @@ jobs:
             ldconfig
       - checkout
       - restore_cache:
-          name: Restore GCH Cache
+          name: Restore GHC Cache
           keys:
             - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
@@ -136,7 +136,7 @@ jobs:
       - attach_workspace:
           at: /ws/
       - restore_cache:
-          name: Restore GCH Cache
+          name: Restore GHC Cache
           keys:
             - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
