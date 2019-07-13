@@ -363,7 +363,7 @@
 		; There is no such "best link" i.e. we've never observed it
 		; and so have no weight for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
-		(if (> -1e10 (cdr best))
+		(if (>= min-acceptable-mi (cdr best))
 			graph-links
 			(let* (
 
