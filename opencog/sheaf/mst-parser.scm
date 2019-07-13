@@ -346,7 +346,7 @@
 	; The graph-links are assumed to be a set of weighted numa-pairs.
 	; That is, a pair of numas followed by a floating-point weight.
 	;
-	(define (*pick-em numa-list graph-links nected-numas)
+	(define (*pick-em numa-list graph-links nected-numas n-to-do)
 
 		; (format #t "----------------------- \n")
 		; (format #t "enter pick-em with numalist=~A\n" numa-list)
@@ -363,10 +363,9 @@
 		; There is no such "best link" i.e. we've never observed it
 		; and so have no weight for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
-		(if (>= min-acceptable-mi (cdr best))
+		(if (or (= 0 n-to-do) (>= min-acceptable-mi (cdr best)))
 			graph-links
 			(let* (
-
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
 
@@ -384,7 +383,7 @@
 				; If numa-list is null, then we are done. Otherwise, trawl.
 				(if (null? shorter-list)
 					bigger-graph
-					(*pick-em shorter-list bigger-graph more-nected)
+					(*pick-em shorter-list bigger-graph more-nected (- n-to-do 1))
 				)
 			)
 		)
@@ -406,9 +405,11 @@
 	; Create a list of numas that are not yet in the graph.
 	(define discon-list (set-sub numa-list nected-list))
 
+	; If there's no graph, and we can't figure out where to start,
+	; then we are done.
 	(if (eq? '() starting-graph)
 		'()
-		(*pick-em smaller-list starting-graph nected-list))
+		(*pick-em smaller-list starting-graph nected-list NUM-EDGES))
 )
 
 ; ---------------------------------------------------------------------
