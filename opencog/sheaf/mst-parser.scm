@@ -436,7 +436,11 @@
 			; Remove both of these atoms from the atom-list
 			(smaller-list (set-sub numa-list nected-list))
 		)
-		(*pick-em smaller-list (list start-cost-pair) nected-list)
+		; smaller-list never gets smaller, if a start-pair is not
+		; found. (It then goes inf-loop)
+		(if (equal? bad-pair start-cost-pair)
+			'()
+			(*pick-em smaller-list (list start-cost-pair) nected-list))
 	)
 )
 
