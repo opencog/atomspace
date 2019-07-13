@@ -35,7 +35,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (graph-add-mpg GRAPH ATOM-LIST SCORE-FN NUM-EDGES)
+(define-public (graph-add-mpg GRAPH NUMA-LIST SCORE-FN NUM-EDGES)
 "
   Projective, Undirected Maximum Planar Graph (MPG) parser.
 
@@ -54,9 +54,9 @@
   a floating-point weight. The dot represents a scheme pair, built
   with `cons`.
 
-  The ATOM-LIST should be a scheme-list of atoms, all presumably of
-  a uniform atom type. It should be ordered in the same way as the
-  the Atoms appearing in the 'wedges'.
+  The NUMA-LIST should be a scheme-list of ordinally-numbered atoms.
+  This should be a list of scheme pairs `(Num . Atom)` where `Num` is
+  is an ordinal number, and `Atom` is some Atom.
 
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
@@ -82,9 +82,6 @@
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	; A wedge" is a weighted edge, having the form
 	;    ((left-numa . right-num) . weight).
-
-	; The the list of nodes that might get added to the graph.
-	(define node-list (atom-list->numa-list ATOM-LIST))
 
 	; Define a losing score.
 	(define min-acceptable-mi -1e15)
@@ -118,7 +115,7 @@
 	)
 
 	; A candidate list of links to add.
-	(define candidates (non-intersecting-links node-list GRAPH))
+	(define candidates (non-intersecting-links NUMA-LIST GRAPH))
 
 	; Candidates sorted by weight
 	(define sorted-cands
@@ -142,7 +139,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (mpg-parse-atom-seq ATOM-LIST SCORE-FN NUM-LOOPS)
+(define-public (mpg-parse-atom-seq ATOM-LIST SCORE-FN)
 "
   Projective, Undirected Maximum Planar Graph parser.
 
@@ -158,16 +155,15 @@
   pair of atoms, and the distance between them, returns a numeric score
   for that pair. This numeric score will be maximized during the parse.
 
-  The NUM-LOOPS should be an integer, indicating the number of extra
-  edges to add to the MST tree. The highest-scoring edges are added
-  first, until either NUM-LOOPS edges have been added, or it is not
-  possible to add any more edges.
-
   See `graph-add-mpg` for additional details.
 "
+	; Number the atoms in sequence-order.
+	(define numa-list (atom-list->numa-list ATOM-LIST))
+
 	; Start with the MST parse
-	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN))
-	(graph-add-mpg mst-tree ATOM-LIST SCORE-FN NUM-LOOPS)
+	(define mst-tree (graph-add-mst '() numa-list SCORE-FN -1))
+
+	(graph-add-mpg mst-tree numa-list SCORE-FN -1)
 )
 
 ; ---------------------------------------------------------------------
