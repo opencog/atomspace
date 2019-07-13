@@ -61,21 +61,22 @@
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
   for that pair. This numeric score will be maximized during the parse.
-  The most basic choice is to use the mutual information between the
-  pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-  right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference between the
-  ordinal numbers). If no such edge exists or is impossible to score,
-  then minus infinity should be returned; such edges will not be
-  considered. It is invoked as `(SCORE-FN Atom Atom Dist)`.
+  The SCORE-FN should take three arguments: left-atom, right-atom and
+  the (numeric) distance between them (i.e. when the atoms are ordered
+  sequentially, this is the difference between the ordinal numbers).
+  If no such edge exists or is impossible to score, then minus infinity
+  should be returned; such edges will not be considered. This function
+  is invoked as `(SCORE-FN Atom Atom Dist)`.
 
   The NUM-EDGES should be an integer, indicating the number of extra
   edges to add to the GRAPH. The highest-scoring edges are added
   first, until either NUM-EDGES edges have been added, or it is not
   possible to add any more edges.  There are two reasons for not being
   able to add more edges: (1) there is no room or (2) no such edges are
-  recorded in the AtomSpace. To iterate until maximum, pass -1 for
-  NUM-EDGES.
+  recorded in the AtomSpace (they have a score of minus-infinity). To
+  add as many edges as possible, pass -1 for NUM-EDGES.
+
+  This returns a new graph, in the form of a wedge-list.
 "
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)

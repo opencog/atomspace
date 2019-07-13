@@ -66,15 +66,17 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+(define-public (graph-add-mst GRAPH ATOM-LIST SCORE-FN NUM-EDGES)
 "
   Projective, Undirected Maximum Spanning Tree parser.
 
-  Given a sequence of atoms, find an unlabeled, undirected, projective
-  dependency parse of the sequence, by finding a dependency tree that
-  maximizes the pair-wise scoring function. This returns a list of
-  atom-pairs, together with associated score.  The tree is projective,
-  in that no edges cross.
+  Given an existing (possibly empty) GRAPH, extend it by adding up
+  to NUM-EDGES new edges, adding them one at a time, such that each
+  added edge having the highest score possible, and does not interesect
+  any of the existing edges. If NUM-EDGES is set to -1, then as many
+  edges as possible are added, until a planar spanning tree is created,
+  or until it is impossbile to add a new edge (because the edge-score
+  is minus-infinity).
 
   The ATOM-LIST should be a scheme-list of atoms, all presumably of
   a uniform atom type.
@@ -82,49 +84,23 @@
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
   for that pair. This numeric score will be maximized during the parse.
-  The most basic choice is to use the mutual information between the
-  pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-  right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference between the
-  ordinal numbers).
+  The SCORE-FN should take three arguments: left-atom, right-atom and
+  the (numeric) distance between them (i.e. when the atoms are ordered
+  sequentially, this is the difference between the ordinal numbers).
+  If no such edge exists or is impossible to score, then minus infinity
+  should be returned; such edges will not be considered. This function
+  is invoked as `(SCORE-FN Atom Atom Dist)`.
 
-  The M in MST often stands for 'minimum'; but in this code, the
-  score is maximized.
+  The NUM-EDGES should be an integer, indicating the number of extra
+  edges to add to the GRAPH. The highest-scoring edges are added
+  first, until either NUM-EDGES edges have been added, or it is not
+  possible to add any more edges.  There are two reasons for not being
+  able to add more edges: (1) the extension would no longer be a tree,
+  or (2) no such edges are recorded in the AtomSpace (they have a score
+  of minus-infinity). To add as many edges as possible, pass -1 for
+  NUM-EDGES.
 
-  There are many MST algorithms; the choice was made as follows:
-  Prim is very easy; but seems too simple to give good results.
-  Kruskal is good, but it seems hard to control a no-link-crossing
-  constraint with it. This implements a variant of Borůvka's algo,
-  which seems to be robust, and fast enough for the current needs.
-
-  It has been benchmarked (using the code in `bench-mst`) to run in
-  O(N^3) time, for a sequence of length N. From what I can tell, the
-  state-of-the-art projective algo is Eisner, which runs at O(N^3) time.
-  The code here is NOT Eisner! but seems to have comparable run-time.
-
-  The projective (no-edge-cross) constraint might not be required, see
-  R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
-  However, that would require changing the metric from mutual information
-  to something else, perhaps incorporating the dependency distance
-  (as defined by Ferrer-i-Cancho), or possibly the 'hubiness', or some
-  combination.  Since I really, really want to stick to entropy concepts,
-  the mean-dependency-distance metric needs to be re-phrased as some
-  sort of graph entropy. Hmmm...
-
-  Another idea is to apply the Dick Hudson Word Grammar landmark
-  transitivity idea, but exactly how this could work for unlabeled
-  trees has not been explored.
-
-  So, for now, a no-links-cross constraint is hand-coded into the algo.
-  Without it, it seems that the pair-MI scores alone give rather unruly
-  dependencies (unclear, needs exploration).  So, in the long-run, it
-  might be better to instead pick something that combines MI scores with
-  mean-dependency-distance or with hubiness. See, for example:
-  Haitao Liu (2008) “Dependency distance as a metric of language
-  comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
-  or also:
-  Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
-  relationships in dependency trees”, ArXiv 1304.4086
+  This returns a new graph, in the form of a wedge-list.
 "
 	; Define a losing score.
 	(define bad-mi -1e30)
@@ -427,6 +403,70 @@
 			'()
 			(*pick-em smaller-list (list start-cost-pair) nected-list))
 	)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+"
+  Projective, Undirected Maximum Spanning Tree parser.
+
+  Given a sequence of atoms, find an unlabeled, undirected, projective
+  dependency parse of the sequence, by finding a dependency tree that
+  maximizes the pair-wise scoring function. This returns a list of
+  atom-pairs, together with associated score.  The tree is projective,
+  in that no edges cross.
+
+  The ATOM-LIST should be a scheme-list of atoms, all presumably of
+  a uniform atom type.
+
+  The SCORE-FN should be a function that, when give a left-right ordered
+  pair of atoms, and the distance between them, returns a numeric score
+  for that pair. This numeric score will be maximized during the parse.
+  The most basic choice is to use the mutual information between the
+  pair of atoms.
+
+  -----
+  The M in MST often stands for 'minimum'; but in this code, the
+  score is maximized.
+
+  There are many MST algorithms; the choice was made as follows:
+  Prim is very easy; but seems too simple to give good results.
+  Kruskal is good, but it seems hard to control a no-link-crossing
+  constraint with it. This implements a variant of Borůvka's algo,
+  which seems to be robust, and fast enough for the current needs.
+
+  It has been benchmarked (using the code in `bench-mst`) to run in
+  O(N^3) time, for a sequence of length N. From what I can tell, the
+  state-of-the-art projective algo is Eisner, which runs at O(N^3) time.
+  The code here is NOT Eisner! but seems to have comparable run-time.
+
+  The projective (no-edge-cross) constraint might not be required, see
+  R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
+  However, that would require changing the metric from mutual information
+  to something else, perhaps incorporating the dependency distance
+  (as defined by Ferrer-i-Cancho), or possibly the 'hubiness', or some
+  combination.  Since I really, really want to stick to entropy concepts,
+  the mean-dependency-distance metric needs to be re-phrased as some
+  sort of graph entropy. Hmmm...
+
+  Another idea is to apply the Dick Hudson Word Grammar landmark
+  transitivity idea, but exactly how this could work for unlabeled
+  trees has not been explored.
+
+  So, for now, a no-links-cross constraint is hand-coded into the algo.
+  Without it, it seems that the pair-MI scores alone give rather unruly
+  dependencies (unclear, needs exploration).  So, in the long-run, it
+  might be better to instead pick something that combines MI scores with
+  mean-dependency-distance or with hubiness. See, for example:
+  Haitao Liu (2008) “Dependency distance as a metric of language
+  comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
+  or also:
+  Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
+  relationships in dependency trees”, ArXiv 1304.4086
+"
+	; This is just a wrapper
+	(graph-add-mst '() ATOM-LIST SCORE-FN -1)
 )
 
 ; ---------------------------------------------------------------------
