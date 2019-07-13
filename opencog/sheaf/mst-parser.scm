@@ -3,7 +3,7 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Copyright (c) 2014, 2017 Linas Vepstas
+; Copyright (c) 2014, 2017, 2019 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -175,7 +175,7 @@
 	)
 
 	; Given a list of numas, return a weighted numa-pair, in the form
-	; ((left-numa . right-num) . weight).
+	; ((left-numa . right-numa) . weight).
 	;
 	; The search is made over atom pairs scored by the SCORE-FN.
 	;
@@ -197,6 +197,15 @@
 				)
 			)
 		)
+	)
+
+	; Create an initial graph, by finding the edge with the highest
+	; weight in the graph. If there are no such edges, return the
+	; empty list. This can happen if the zero function returns minus
+	; infinity for each potential edge.
+	(define (starting-graph numa-list)
+		(define start-pair (pick-best-cost-pair numa-list))
+		(if (equal? bad-pair start-pair) '() (list start-pair))
 	)
 
 	; Set-subtraction.
@@ -319,7 +328,8 @@
 		)
 	)
 
-	; Find the maximum spanning tree.
+	; Find the maximum spanning tree. Tail-recursive.
+	;
 	; numa-list is the list of unconnected numas, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
 	; nected-numas is a list numas that are part of the tree.
@@ -380,29 +390,25 @@
 		)
 	)
 
-	(let* (
-			; Number the atoms in sequence-order.
-			(numa-list (atom-list->numa-list ATOM-LIST))
+	; Number the atoms in sequence-order.
+	(define numa-list (atom-list->numa-list ATOM-LIST))
 
-			; Find a pair of atoms connected with the largest weight
-			; in the sequence.
-			(start-cost-pair (pick-best-cost-pair numa-list))
+	; If no starting graph specified, then find a pair of atoms
+	; connected with the largest weight in the sequence.
+	(define starting-graph
+		(if (eq? '() GRAPH)
+			(starting-graph numa-list)
+			GRAPH))
 
-			; Discard the weight.
-			(start-pair (car start-cost-pair))
+	; Create a list of numas that are already in the graph.
+	(define nected-list (numas-in-wedge-list starting-graph))
 
-			; Add both of these atoms to the connected-list.
-			(nected-list (list (car start-pair) (cdr start-pair)))
+	; Create a list of numas that are not yet in the graph.
+	(define discon-list (set-sub numa-list nected-list))
 
-			; Remove both of these atoms from the atom-list
-			(smaller-list (set-sub numa-list nected-list))
-		)
-		; smaller-list never gets smaller, if a start-pair is not
-		; found. (It then goes inf-loop)
-		(if (equal? bad-pair start-cost-pair)
-			'()
-			(*pick-em smaller-list (list start-cost-pair) nected-list))
-	)
+	(if (eq? '() starting-graph)
+		'()
+		(*pick-em smaller-list starting-graph nected-list))
 )
 
 ; ---------------------------------------------------------------------
