@@ -8,26 +8,25 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below analyze a sequence of atoms, assigning to them a
-; spanning-tree (MST) parse, showing the dependencies between the atoms
-; in the sequence. The result of this parse is then used to create
-; disjuncts, summarizing how the atoms in the sequence are allowed to
-; connect.
+; The functions below accept a sequence of atoms, and create a maximum
+; spanning tree (MST) graph, such that the edges of the tree maximize a
+; scoring function.
 ;
 ; Input is sequence of atoms, together with a scoring function for
-; ordered pairs of atoms. In the typical usage, the scoring function
+; ordered pairs of atoms. In a prototypical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
-; so the MST parse is the tree-parse that maximizes the mutual
-; information between pairs of atoms.
+; so the MST graph is the planar tree that connects the atoms, and
+; maximizes the mutual information between pairs of atoms.
 ;
 ; The algorithm implemented is a basic maximum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with
-; with every atom in the sequence being connected to every other atom.
-; The edge-lengths are given by the score between atoms.
+; It can start with any existing graph, and add edges, until the desired
+; number of edges has been added, or until it is impossible to add more
+; edges, and still have a tree.  Edges are added only if they have a
+; score that isn't minus-infinity.
 ;
-; The spanning tree is then computed. Finally, disjuncts are created
-; from the resulting parse, by looking at how each atom is attached to
-; the other atoms.
+; In the prototypical usage, the starting graph is empty, so that the
+; result is a planar spanning tree. If the starting graph is not added,
+; then planar trees are appended to it.
 ;
 ; ---------------------------------------------------------------------
 ;

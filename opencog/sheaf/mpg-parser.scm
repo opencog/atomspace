@@ -8,23 +8,23 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below analyze a sequence of atoms, assigning to them a
-; planar-graphe (MPG) parse, showing the dependencies between the atoms
-; in the sequence. The result of this parse is then used to create
-; disjuncts, summarizing how the atoms in the sequence are allowed to
-; connect.
+; The functions below accept a sequence of atoms, and create a
+; planar graph (MPG), such that the edges of the graph maximize a
+; scoring function.
 ;
 ; Input is sequence of atoms, together with a scoring function for
-; ordered pairs of atoms. In the typical usage, the scoring function
+; ordered pairs of atoms. In a prototypical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
-; so the MPG parse is a planar graph (i.e. with loops) that is maximally
-; connected in such a way that the mutual information between pairs of
-; atoms. is maximized.
+; so the MPG graph is a planar graph (i.e. with loops) that is maximally
+; connected, in such a way that the mutual information between pairs of
+; atoms is maximized.
 ;
-; The algorithm implemented is built on top of a maximum spanning tree
-; MST algorithm. Starting with the MST parse, it adds additional edges,
-; those with the highest MI, until a desired number of loops is created.
-; (Setting the max-loops to zero just yeilds the MST parse).
+; The function can start with any existing graph, and add edges, until
+; the desired number of edges have been added, or it's impossible to add
+; more edges. In the prototypical usage, the starting graph is the
+; maximum spanning tree (MST) graph. Thus, the MST graph uses up the
+; most favored edges, and the MPG algo adds in the less-favored edges,
+; preserving planarity.
 ;
 ; ---------------------------------------------------------------------
 ;
