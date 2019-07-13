@@ -61,7 +61,8 @@
   first, until either NUM-LOOPS edges have been added, or it is not
   possible to add any more edges.  There are two reasons for not being
   able to add more edges: (1) there is no room or (2) no such edges are
-  recorded in the AtomSpace.
+  recorded in the AtomSpace. To iterate until maximum, pass -1 for
+  NUM-LOOPS.
 "
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
