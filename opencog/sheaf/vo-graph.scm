@@ -113,6 +113,23 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (atom-list->numa-list ATOM-LIST)
+"
+  atom-list->numa-list ATOM-LIST -- Return an ordinal-numbered list.
+
+  Given a list of atoms, create a numbered list of atoms. The numbering
+  establishes an order for the list, and provides a unique ID, needed
+  both of which are needed for the graph algos.  If the same Atom
+  atom appears twice in a sequence, the ordinal distinguishes these
+  multiple occurrences.
+"
+	(define cnt 0)
+	(map
+		(lambda (ato) (set! cnt (+ cnt 1)) (cons cnt ato))
+		ATOM-LIST)
+)
+
+
 (define-public (sort-numalist NUMA-LIST)
 "
   sort-numalist NUMA-LIST -- Sort a list of numas into ascending order.

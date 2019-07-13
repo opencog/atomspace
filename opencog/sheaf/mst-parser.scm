@@ -133,21 +133,6 @@
 	; Define a losing numa-pair
 	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
 
-	; Given a list of atoms, create a numbered list of atoms.
-	; The numbering provides a unique ID, needed for the graph algos.
-	; i.e. if the same atom appears twice in a sequence, we need to
-	; distinguish these multiple occurrences.  The id does this.
-	(define (atom-list->numa-list ATOMS)
-		(define cnt 0)
-		(map
-			(lambda (ato)
-				(set! cnt (+ cnt 1))
-				(cons cnt ato)
-			)
-			ATOMS
-		)
-	)
-
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
 	; Given a left-numa, and a list of numas to the right of it, pick
