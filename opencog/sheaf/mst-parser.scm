@@ -12,7 +12,7 @@
 ; spanning tree (MST) graph, such that the edges of the tree maximize a
 ; scoring function.
 ;
-; Input is sequence of atoms, together with a scoring function for
+; Input is a sequence of atoms, together with a scoring function for
 ; ordered pairs of atoms. In a prototypical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
 ; so the MST graph is the planar tree that connects the atoms, and
@@ -71,10 +71,10 @@
 
   Given an existing (possibly empty) GRAPH, extend it by adding up
   to NUM-EDGES new edges, adding them one at a time, such that each
-  added edge having the highest score possible, and does not interesect
+  added edge having the highest score possible, and does not intersect
   any of the existing edges. If NUM-EDGES is set to -1, then as many
   edges as possible are added, until a planar spanning tree is created,
-  or until it is impossbile to add a new edge (because the edge-score
+  or until it is impossible to add a new edge (because the edge-score
   is minus-infinity).
 
   The NUMA-LIST should be a scheme-list of ordinally-numbered atoms.

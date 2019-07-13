@@ -12,7 +12,7 @@
 ; planar graph (MPG), such that the edges of the graph maximize a
 ; scoring function.
 ;
-; Input is sequence of atoms, together with a scoring function for
+; Input is a sequence of atoms, together with a scoring function for
 ; ordered pairs of atoms. In a prototypical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
 ; so the MPG graph is a planar graph (i.e. with loops) that is maximally
