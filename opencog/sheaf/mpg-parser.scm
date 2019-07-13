@@ -82,14 +82,14 @@
 	; A wedge" is a weighted edge, having the form
 	;    ((left-numa . right-num) . weight).
 
-	; The the list of nodes in it.
-	(define node-list (sort-numalist (numas-in-wedge-list GRAPH)))
+	; The the list of nodes that might get added to the graph.
+	(define node-list (atom-list->numa-list ATOM-LIST))
 
 	; Define a losing score.
 	(define min-acceptable-mi -1e15)
 
-	; Given an Left-NUMA, and list NALI of right-numa's, return a
-	; wedge-list connecting NUMA to any of the NALI's, such that
+	; Given a Left-NUMA, and a list NALI of right-numa's, return
+	; a wedge-list connecting NUMA to any of the NALI's, such that
 	; none of the wedges intersect an edge in the wedge-list WELI.
 	(define (inter-links NUMA NALI WELI)
 		(filter-map
