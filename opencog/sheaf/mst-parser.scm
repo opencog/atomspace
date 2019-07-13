@@ -66,7 +66,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (graph-add-mst GRAPH ATOM-LIST SCORE-FN NUM-EDGES)
+(define-public (graph-add-mst GRAPH NUMA-LIST SCORE-FN NUM-EDGES)
 "
   Projective, Undirected Maximum Spanning Tree parser.
 
@@ -78,8 +78,9 @@
   or until it is impossbile to add a new edge (because the edge-score
   is minus-infinity).
 
-  The ATOM-LIST should be a scheme-list of atoms, all presumably of
-  a uniform atom type.
+  The NUMA-LIST should be a scheme-list of ordinally-numbered atoms.
+  This should be a list of scheme pairs `(Num . Atom)` where `Num` is
+  is an ordinal number, and `Atom` is some Atom.
 
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
@@ -389,21 +390,18 @@
 		)
 	)
 
-	; Number the atoms in sequence-order.
-	(define numa-list (atom-list->numa-list ATOM-LIST))
-
 	; If no starting graph specified, then find a pair of atoms
 	; connected with the largest weight in the sequence.
 	(define starting-graph
 		(if (eq? '() GRAPH)
-			(starting-graph numa-list)
+			(starting-graph NUMA-LIST)
 			GRAPH))
 
 	; Create a list of numas that are already in the graph.
 	(define nected-list (numas-in-wedge-list starting-graph))
 
 	; Create a list of numas that are not yet in the graph.
-	(define discon-list (set-sub numa-list nected-list))
+	(define discon-list (set-sub NUMA-LIST nected-list))
 
 	; If there's no graph, and we can't figure out where to start,
 	; then we are done.
@@ -472,8 +470,11 @@
   Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
   relationships in dependency trees”, ArXiv 1304.4086
 "
+	; Number the atoms in sequence-order.
+	(define numa-list (atom-list->numa-list ATOM-LIST))
+
 	; This is just a wrapper
-	(graph-add-mst '() ATOM-LIST SCORE-FN -1)
+	(graph-add-mst '() numa-list SCORE-FN -1)
 )
 
 ; ---------------------------------------------------------------------
