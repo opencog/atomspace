@@ -156,19 +156,13 @@
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
   for that pair. This numeric score will be maximized during the parse.
-  The most basic choice is to use the mutual information between the
-  pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-  right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference between the
-  ordinal numbers).
 
   The NUM-LOOPS should be an integer, indicating the number of extra
   edges to add to the MST tree. The highest-scoring edges are added
   first, until either NUM-LOOPS edges have been added, or it is not
-  possible to add any more edges.  There are two reasons for not being
-  able to add more edges: (1) there is no room or (2) no such edges are
-  recorded in the AtomSpace. To iterate until maximum, pass -1 for
-  NUM-LOOPS.
+  possible to add any more edges.
+
+  See `graph-add-mpg` for additional details.
 "
 	; Start with the MST parse
 	(define mst-tree (mst-parse-atom-seq ATOM-LIST SCORE-FN))
