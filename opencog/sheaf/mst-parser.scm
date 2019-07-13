@@ -107,7 +107,7 @@
 	(define min-acceptable-mi -1e15)
 
 	; Define a losing numa-pair
-	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
+	(define bad-pair (cons (cons (cons 0 #f) (cons 0 #f)) bad-mi))
 
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
