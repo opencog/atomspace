@@ -126,7 +126,7 @@
 				(add-link NED (cdr CANDS) RSLT)
 				(add-link (- NED 1) (cdr CANDS) (cons (car CANDS) RSLT)))))
 
-	(add-link NUM-LOOPS candidates mst-tree)
+	(add-link NUM-LOOPS sorted-cands mst-tree)
 )
 
 ; ---------------------------------------------------------------------
