@@ -69,23 +69,38 @@
 
 	; Tail-recursive joiner-upper
 	(define (*join-em-up result to-at prev verli grali disli)
-		(if (or (null? disli) (null? grali) (null? verli)) result
-			(let* ((vxit (car verli))
-					(grit (car grali))
-					(dsit (car disli))
-					(bigg (if (null? to-at) result
-							(cons (make-wedge to-at vxit) result)))
+(format #t "duuude result=~A\n" result)
+(format #t "duuude to-at=~A\n" to-at)
+(format #t "duuude prev=~A\n" prev)
+(format #t "duuude verli=~A\n" verli)
+(format #t "duuude grali=~A\n" grali)
+(format #t "duuude disli=~A\n" disli)
+		(cond
+			((or (null? disli) (null? verli)) result)
+			((null? grali)
+				(*join-em-up
+					(if (null? to-at) result
+						(cons (make-wedge to-at (car verli)) result))
+					(car verli) '() (cdr verli) grali (cdr disli)))
+
+			(else
+				(let* ((vxit (car verli))
+						(grit (car grali))
+						(dsit (car disli))
+						(bigg (if (null? to-at) result
+								(cons (make-wedge to-at vxit) result)))
+					)
+					(cond
+						((equal? vxit grit)
+							(*join-em-up bigg '() vxit (cdr verli) (cdr grali) disli))
+						((equal? vxit dsit)
+							(*join-em-up
+								(if (null? prev) bigg
+									(cons (make-wedge prev vxit) bigg))
+								vxit '() (cdr verli) grali (cdr disli)))
+						(else (throw 'invalid-vertex 'graph-add-linear
+							(format #f "Unexpected vertex ~A" vxit))))
 				)
-				(cond
-					((equal? vxit grit)
-						(*join-em-up bigg '() vxit (cdr verli) (cdr grali) disli))
-					((equal? vxit dsit)
-						(*join-em-up
-							(if (null? prev) bigg
-								(cons (make-wedge prev vxit) bigg))
-							vxit '() (cdr verli) grali (cdr disli)))
-					(else (throw 'invalid-vertex 'graph-add-linear
-						(format #f "Unexpected vertex ~A" vxit))))
 			)
 		)
 	)
@@ -99,6 +114,8 @@
 	; All of them, sorted.
 	(define alldem (sort-numalist NUMA-LIST))
 
+(format #t "duuude graver=~A\n" graver)
+(format #t "duuude discon=~A\n" discon)
 	(*join-em-up GRAPH '() '() alldem graver discon)
 )
 
