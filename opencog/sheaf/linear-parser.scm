@@ -141,9 +141,13 @@
 
 ; ---------------------------------------------------------------------
 
-(define (left-most-numa NUMA WELI)
+(define-public (left-most-numa NUMA WELI)
 "
-  Return the left-most NUMA that can be linked with the edges in WELI.
+  left-most-numa NUMA WELI - Return the left-most numa linked to NUMA
+
+  Return the left-most numa that can be linked to NUMA using the
+  edges in WELI. This walks the WELI graph, looking for the left-most
+  end of it.
 "
 	(define ord (numa-get-index NUMA))
 
@@ -169,9 +173,13 @@
 		NUMA)
 )
 
-(define (right-most-numa NUMA WELI)
+(define-public (right-most-numa NUMA WELI)
 "
-  Return the right-most NUMA that can be linked with the edges in WELI.
+  right-most-numa NUMA WELI - Return the right-most numa linked to NUMA
+
+  Return the right-most numa that can be linked to NUMA using the
+  edges in WELI. This walks the WELI graph, looking for the right-most
+  end of it.
 "
 	(define ord (numa-get-index NUMA))
 
