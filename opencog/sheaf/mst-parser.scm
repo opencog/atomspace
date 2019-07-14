@@ -208,20 +208,6 @@
 		(if (equal? bad-pair start-pair) '() (list start-pair))
 	)
 
-	; Set-subtraction.
-	; Given set-a and set-b, return set-a with all elts of set-b removed.
-	; It is assumed that equal? can be used to compare elements.  This
-	; should work fine for sets of ordinal-numbered atoms, and also for
-	; weighted edges.
-	(define (set-sub set rm-set)
-		(filter
-			(lambda (item)
-				(not (any (lambda (rjct) (equal? rjct item)) rm-set))
-			)
-			set
-		)
-	)
-
 	; Of multiple possibilities, pick the one with the highest weight
 	; The choice-list is assumed to be a list of weighted numa-pairs,
 	; each weighted edge of the form ((left-numa . right-num) . weight).
@@ -313,7 +299,7 @@
 			best
 			; Else, remove best from list, and try again.
 			(pick-no-cross-best
-				(set-sub candidates (list best)) graph-wedges)
+				(lset-difference equal? candidates (list best)) graph-wedges)
 		)
 	)
 
@@ -374,7 +360,7 @@
 					; (jd (format #t "fresh atom=~A\n" fresh-numa))
 
 					; Remove the freshly-connected numa from the numa-list.
-					(shorter-list (set-sub numa-list (list fresh-numa)))
+					(shorter-list (lset-difference equal? numa-list (list fresh-numa)))
 
 					; Add the freshly-connected numa to the connected-list
 					(more-nected (append nected-numas (list fresh-numa)))
@@ -392,7 +378,7 @@
 	; If no starting graph specified, then find a pair of atoms
 	; connected with the largest weight in the sequence.
 	(define starting-graph
-		(if (eq? '() GRAPH)
+		(if (null? GRAPH)
 			(starting-graph NUMA-LIST)
 			GRAPH))
 
@@ -400,11 +386,11 @@
 	(define nected-list (numas-in-wedge-list starting-graph))
 
 	; Create a list of numas that are not yet in the graph.
-	(define discon-list (set-sub NUMA-LIST nected-list))
+	(define discon-list (lset-difference equal? NUMA-LIST nected-list))
 
 	; If there's no graph, and we can't figure out where to start,
 	; then we are done.
-	(if (eq? '() starting-graph)
+	(if (null? starting-graph)
 		'()
 		(*pick-em smaller-list starting-graph nected-list NUM-EDGES))
 )

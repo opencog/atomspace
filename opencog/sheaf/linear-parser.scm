@@ -63,34 +63,24 @@
 "
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
-	; A wedge" is a weighted edge, having the form
+	; A "wedge" is a weighted edge, having the form
 	;    ((left-numa . right-num) . weight).
 
-	; Define a losing score.
-	(define min-acceptable-mi -1e15)
-
-	; Given a list NALI of numa's, return a wedge-list connecting them
-	; such that none of them intersect an edge in the wedge-list WELI.
-	(define (non-intersecting-links NALI WELI)
-		; Tail recursive helper
-		(define (tail-rec nali rslt)
-			(define rest (cdr nali))
-			(if (equal? '() rest) rslt
-				(tail-rec rest
-					(append rslt (inter-links (car nali) rest WELI)))))
-		(if (equal? '() NALI) '() (tail-rec NALI '()))
+	; Tail-recursive joiner-upper
+	(define (*join-em-up result grali disli)
+		(if (or (null? grali) (null? disli)) result
+			(let ((grit (car grali))
+					(dsit (car disli))
+				)
+			)
+		)
 	)
 
-	; A candidate list of links to add.
-	(define candidates (non-intersecting-links NUMA-LIST GRAPH))
+	; An ordered list of numa's in the graph.
+	(define graver (sort-numalist (numas-in-wedge-list GRAPH)))
 
-	; Candidates sorted by weight
-	(define sorted-cands
-		(sort candidates
-			(lambda (sa sb)
-				(< (wedge-get-score sb) (wedge-get-score sa)))))
-
-	(add-link NUM-EDGES sorted-cands GRAPH)
+	; An ordered list of num'a NOT in the graph.
+	(define discon (sort-numalist (lset-difference equal? NUMA-LIST graver)))
 )
 
 ; ---------------------------------------------------------------------

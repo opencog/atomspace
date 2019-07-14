@@ -80,7 +80,7 @@
 "
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
-	; A wedge" is a weighted edge, having the form
+	; A "wedge" is a weighted edge, having the form
 	;    ((left-numa . right-num) . weight).
 
 	; Define a losing score.
@@ -106,12 +106,12 @@
 	; such that none of them intersect an edge in the wedge-list WELI.
 	(define (non-intersecting-links NALI WELI)
 		; Tail recursive helper
-		(define (tail-rec nali rslt)
+		(define (*tail-rec nali rslt)
 			(define rest (cdr nali))
-			(if (equal? '() rest) rslt
-				(tail-rec rest
+			(if (null? rest) rslt
+				(*tail-rec rest
 					(append rslt (inter-links (car nali) rest WELI)))))
-		(if (equal? '() NALI) '() (tail-rec NALI '()))
+		(if (null? NALI) '() (*tail-rec NALI '()))
 	)
 
 	; A candidate list of links to add.
@@ -127,7 +127,7 @@
 	(define (add-link NED CANDS RSLT)
 		; If we've added the requested number, we're done.
 		; If there's nothing left to add, we're done.
-		(if (or (= 0 NED) (equal? '() CANDS)) RSLT
+		(if (or (= 0 NED) (null? CANDS)) RSLT
 			; If the candidate edge crosses, skip it and move on.
 			; else add it, and decrement the to-do count.
 			(if (wedge-cross-any? (car CANDS) RSLT)
