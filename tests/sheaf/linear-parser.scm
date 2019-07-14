@@ -4,6 +4,13 @@
 
 (opencog-test-runner)
 
+; ---------------------------------------------------------------
+; The ttests here are some simple tests of the two simplest
+; parsers -- the ones that fill in any gaps that might arise from
+; using the more complex parsers.  There are two:
+; * The bridger, which connects disconnected islands
+; * The linear parser, which builds linear sequences.
+
 ; Common setup used by all tests.
 (define wordli (list
 	"###LEFT-WALL###" "this" "is" "a" "kind" "of" "test" "it" "seems"))
@@ -131,5 +138,23 @@
 	(mkw 8 (Concept "it")	9 (Concept "seems") -inf.0)))
 
 (test-equal "Linear Bridged Island" brilin briexp)
+
+; ----------------
+; Empty Set
+
+(define emplin (sort-wedgelist (graph-add-linear '() nali)))
+
+; This is what we expect
+(define empexp (list
+	(mkw 1 (Concept "###LEFT-WALL###") 2 (Concept "this") -inf.0)
+	(mkw 2 (Concept "this") 3 (Concept "is")    -inf.0)
+	(mkw 3 (Concept "is")   7 (Concept "test")  -inf.0)
+	(mkw 4 (Concept "a")    5 (Concept "kind")  -inf.0)
+	(mkw 5 (Concept "kind") 6 (Concept "of")    -inf.0)
+	(mkw 6 (Concept "of")	7 (Concept "test")  -inf.0)
+	(mkw 7 (Concept "test") 8 (Concept "it")    -inf.0)
+	(mkw 8 (Concept "it")	9 (Concept "seems") -inf.0)))
+
+(test-equal "Linear Empty Set" emplin empexp)
 
 (test-end tlinear)
