@@ -159,7 +159,9 @@
 	(define sorted-numas (sort-numalist (numas-in-wedge-list GRAPH)))
 
 	; Find the right-most vertex connected to the left-most one.
-	(define right-end (right-most-numa (car sorted-numas) GRAPH))
+	(define right-end
+		(if (null? sorted-numas) (cons (-inf.0 #f))
+			(right-most-numa (car sorted-numas) GRAPH)))
 
 	; Its index.
 	(define right-idx (numa-get-index right-end))

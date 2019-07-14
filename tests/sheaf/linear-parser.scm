@@ -5,9 +5,9 @@
 (opencog-test-runner)
 
 ; ---------------------------------------------------------------
-; The ttests here are some simple tests of the two simplest
-; parsers -- the ones that fill in any gaps that might arise from
-; using the more complex parsers.  There are two:
+; The tests here are some simple tests of the two simplest parsers
+; -- the ones that fill in any gaps that might arise from using
+; the more complex parsers.  There are two:
 ; * The bridger, which connects disconnected islands
 ; * The linear parser, which builds linear sequences.
 
@@ -48,6 +48,11 @@
 	(mkw 7 (Concept "test") 8 (Concept "it")    7.8)))
 
 (test-equal "Island hopper" connected expected)
+
+; -----------------
+; Pathological test... must not fail.
+(define empty (graph-add-bridges '()))
+(test-equal "Empty Islands" empty '())
 
 (test-end tbridge)
 
