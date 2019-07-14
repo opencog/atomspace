@@ -68,30 +68,53 @@
 	(define (make-wedge VA VB) (cons (cons VA VB) -inf.0))
 
 	; Tail-recursive joiner-upper
+	; Its complicated to explain.
+	; Arguments:
+	; result -- the final result.
+	; to-at -- a disconnected vertex, to the left, that needs attaching
+	; prev -- a vertex to the left that is part of the graph
+	; verli -- vertex list to iterate over.
+	; grali -- list of vertexes in the graph
+	; disli -- list of vertexes not in the graph.
+	; It is assumed the last three are in left-right sorted order.
 	(define (*join-em-up result to-at prev verli grali disli)
 		(cond
+			; If we've got no more disconencted nodes, we are done.
 			((or (null? disli) (null? verli)) result)
+
+			; If there are no more graph nodes, then all that
+			; remains are disconnected nodes. Attach them.
 			((null? grali)
 				(*join-em-up
 					(if (null? prev) result
 						(cons (make-wedge prev (car verli)) result))
 					'() (car verli) (cdr verli) grali (cdr disli)))
 
+			; Well, there's more to do, obviously...
 			(else
 				(let* ((vxit (car verli))
 						(grit (car grali))
 						(dsit (car disli))
+						; If there's an unattached node to the left, attach it.
 						(bigg (if (null? to-at) result
 								(cons (make-wedge to-at vxit) result)))
 					)
 					(cond
+						; If this is a graph node, just ignore it, and recurse.
 						((equal? vxit grit)
 							(*join-em-up bigg '() vxit (cdr verli) (cdr grali) disli))
+
+						; If this is a disconnected node, and the previous
+						; node was a graph node, then attach to the previous
+						; node.
 						((equal? vxit dsit)
 							(*join-em-up
 								(if (null? prev) bigg
 									(cons (make-wedge prev vxit) bigg))
 								vxit '() (cdr verli) grali (cdr disli)))
+
+						; Either its a graph node, or its disconnected.
+						; Nothing else is possible...
 						(else (throw 'invalid-vertex 'graph-add-linear
 							(format #f "Unexpected vertex ~A" vxit))))
 	))))
