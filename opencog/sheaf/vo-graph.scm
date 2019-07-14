@@ -34,7 +34,7 @@
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
-; The MST parser returns a list of weighted edges, each edge consisting
+; A graph consists of a list of weighted edges, each edge consisting
 ; of a pair of ordered atoms.
 ; The functions below unpack each data structure.
 ;
@@ -44,29 +44,29 @@
 "
 	(cdr lnk))
 
-(define-public (wedge-get-left-overt lnk)
+(define-public (wedge-get-left-numa lnk)
 "
-  wedge-get-left-overt lnk -- Get the left numbered-atom (numa) in the
+  wedge-get-left-numa lnk -- Get the left numbered-atom (numa) in the
   link. The numa is a scheme pair of the form (number . atom)
 "
 	(car (car lnk)))
 
-(define-public (wedge-get-right-overt lnk)
+(define-public (wedge-get-right-numa lnk)
 "
-  wedge-get-right-overt lnk -- Get the right numbered-atom (numa) in the
+  wedge-get-right-numa lnk -- Get the right numbered-atom (numa) in the
   link. The numa is a scheme pair of the form (number . atom)
 "
 	(cdr (car lnk)))
 
-(define-public (overt-get-index numa)
+(define-public (numa-get-index numa)
 "
-  overt-get-index numa -- Get the index number out of the numa.
+  numa-get-index numa -- Get the index number out of the numa.
 "
 	(car numa))
 
-(define-public (overt-get-atom numa)
+(define-public (numa-get-atom numa)
 "
-  overt-get-atom numa -- Get the atom from the numa.
+  numa-get-atom numa -- Get the atom from the numa.
 "
 	(cdr numa))
 
@@ -74,25 +74,25 @@
 "
   wedge-get-left-atom lnk -- Get the left atom in the weighted link.
 "
-	(overt-get-atom (wedge-get-left-overt lnk)))
+	(numa-get-atom (wedge-get-left-numa lnk)))
 
 (define-public (wedge-get-right-atom lnk)
 "
   wedge-get-right-atom lnk -- Get the right atom in the weighted link.
 "
-	(overt-get-atom (wedge-get-right-overt lnk)))
+	(numa-get-atom (wedge-get-right-numa lnk)))
 
 (define-public (wedge-get-left-index lnk)
 "
   wedge-get-left-index lnk -- Get the index of the left atom in the link.
 "
-	(overt-get-index (wedge-get-left-overt lnk)))
+	(numa-get-index (wedge-get-left-numa lnk)))
 
 (define-public (wedge-get-right-index lnk)
 "
   wedge-get-right-index lnk -- Get the index of the right word in the link.
 "
-	(overt-get-index (wedge-get-right-overt lnk)))
+	(numa-get-index (wedge-get-right-numa lnk)))
 
 (define-public (numa-on-left-side? NUMA WEDGE)
 "
@@ -100,7 +100,7 @@
 
   Return #t if NUMA appears on the left side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-left-overt WEDGE)))
+	(equal? NUMA (wedge-get-left-numa WEDGE)))
 
 (define-public (numa-on-right-side? NUMA WEDGE)
 "
@@ -108,7 +108,7 @@
 
   Return #t if NUMA appears on the right side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-right-overt WEDGE)))
+	(equal? NUMA (wedge-get-right-numa WEDGE)))
 
 ; ---------------------------------------------------------------------
 
@@ -155,7 +155,7 @@
 "
 	(sort NUMA-LIST
 		(lambda (sa sb)
-			(< (overt-get-index sa) (overt-get-index sb)))))
+			(< (numa-get-index sa) (numa-get-index sb)))))
 
 (define-public (sort-wedgelist WEDGE-LIST)
 "
@@ -182,8 +182,8 @@
 	(delete-duplicates!
 	(fold
 		(lambda (mlnk lst)
-			(cons (wedge-get-left-overt mlnk)
-				(cons (wedge-get-right-overt mlnk) lst)))
+			(cons (wedge-get-left-numa mlnk)
+				(cons (wedge-get-right-numa mlnk) lst)))
 		'()
 		WELI))
 )
@@ -196,7 +196,7 @@
   create a list numas which holds only the numbered atoms
   linked to the right of NUMA.
 "
-	(map wedge-get-right-overt
+	(map wedge-get-right-numa
 		(filter
 			(lambda (wedge) (numa-on-left-side? NUMA wedge))
 			WELI)))
@@ -209,7 +209,7 @@
   create a list numas which holds only the numbered atoms
   linked to the left of NUMA.
 "
-	(map wedge-get-left-overt
+	(map wedge-get-left-numa
 		(filter
 			(lambda (wedge) (numa-on-right-side? NUMA wedge))
 			WELI)))

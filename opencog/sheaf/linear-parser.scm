@@ -141,6 +141,13 @@
 
 ; ---------------------------------------------------------------------
 
+(define (left-most-numa NUMA WELI)
+"
+  Return the left-most NUM that can be linked with the edges in WELI.
+"
+  
+)
+
 (define-public (graph-add-bridges GRAPH)
 "
   Sequential Island Bridger (SIB) parser.
