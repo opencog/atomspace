@@ -201,10 +201,27 @@
   This returns a new list of wedges, such that the resulting graph
   is simply connected.
 "
-	(define sorted-wedges (sort-wedgelist GRAPH))
-	(define right-end (right-most-numa
-		(wedge-get-right-numa (car sorted-wedges))))
+	(define (make-wedge VA VB) (cons (cons VA VB) -inf.0))
 
+	; Place vertexes in sorted order.
+	(define sorted-numas (sort-numalist (numas-in-wedge-list GRAPH)))
+
+	; Find the right-most vertex connected to the left-most one.
+	(define right-end (right-most-numa (car sorted-numas) GRAPH))
+
+	; Its index.
+	(define right-idx (numa-get-index right-end))
+
+	; Drop all vertexes to the left.
+	(define remainder (drop-while
+		(lambda (numa) (<= (numa-get-index numa) right-idx))
+		sorted-numas))
+
+	; If we dropped all of them we are done.
+	; Else, the first one is the start of a new island.
+	(if (null? remainder) GRAPH
+		(let ((gap (left-most-numa (car remainder) GRAPH)))
+			(graph-add-bridges (cons (make-wedge right-end gap) GRAPH))))
 )
 
 ; ---------------------------------------------------------------------
