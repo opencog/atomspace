@@ -88,4 +88,48 @@
 
 (test-equal "Linear Island" isllin islexp)
 
+; ----------------
+; Two distant island edges
+(define disli (list
+	(mkw 3 (Concept "is")   4 (Concept "a")    3.4)
+	(mkw 6 (Concept "of")   7 (Concept "test") 6.7)))
+
+(define dislin (sort-wedgelist (graph-add-linear disli nali)))
+
+; This is what we expect
+(define disexp (list
+	(mkw 1 (Concept "###LEFT-WALL###") 2 (Concept "this") -inf.0)
+	(mkw 2 (Concept "this") 3 (Concept "is")    -inf.0)
+	(mkw 3 (Concept "is")	4 (Concept "a")      3.4)
+	(mkw 4 (Concept "a")    5 (Concept "kind")  -inf.0)
+	(mkw 5 (Concept "kind") 6 (Concept "of")    -inf.0)
+	(mkw 6 (Concept "of")	7 (Concept "test")   6.7)
+	(mkw 7 (Concept "test") 8 (Concept "it")    -inf.0)
+	(mkw 8 (Concept "it")	9 (Concept "seems") -inf.0)))
+
+(test-equal "Linear Distant Island" dislin disexp)
+
+; ----------------
+; Two bridged islands
+(define brili (list
+	(mkw 3 (Concept "is")   4 (Concept "a")    3.4)
+	(mkw 3 (Concept "is")   7 (Concept "test") 3.7)
+	(mkw 6 (Concept "of")   7 (Concept "test") 6.7)))
+
+(define brilin (sort-wedgelist (graph-add-linear brili nali)))
+
+; This is what we expect
+(define briexp (list
+	(mkw 1 (Concept "###LEFT-WALL###") 2 (Concept "this") -inf.0)
+	(mkw 2 (Concept "this") 3 (Concept "is")    -inf.0)
+	(mkw 3 (Concept "is")	4 (Concept "a")      3.4)
+	(mkw 3 (Concept "is")   7 (Concept "test")   3.7)
+	(mkw 4 (Concept "a")    5 (Concept "kind")  -inf.0)
+	(mkw 5 (Concept "kind") 6 (Concept "of")    -inf.0)
+	(mkw 6 (Concept "of")	7 (Concept "test")   6.7)
+	(mkw 7 (Concept "test") 8 (Concept "it")    -inf.0)
+	(mkw 8 (Concept "it")	9 (Concept "seems") -inf.0)))
+
+(test-equal "Linear Bridged Island" brilin briexp)
+
 (test-end tlinear)
