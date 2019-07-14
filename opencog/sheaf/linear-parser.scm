@@ -30,7 +30,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (graph-add-linear GRAPH NUMA-LIST ATTACH-LEFT ATTACH-RIGHT)
+(define-public (graph-add-linear GRAPH NUMA-LIST)
 "
   Linear, Sequential Graph (LSG) parser.
 
@@ -38,12 +38,6 @@
   unconnected Atoms in the NUMA-LIST with new edges. Attachments are
   made in sequential order, thus preserving the order of the NUMA-LIST
   and preserving the planarity (if any) of the original graph.
-
-  Depending on the structure of teh graph, there may be ambiguity as
-  to whether attachments should be made to the left, or to the right.
-  This can be controlled by setting ATTACH-LEFT and ATTACH-RIGHT to
-  either #t or #f.  Setting both to #t might result in a final graph
-  with loops. Setting both to #f is invalid.
 
   The GRAPH should be an existing (possibly empty) list of 'wedges'
   connecting Atom pairs. Each 'wedge' is a weighted pair of numbered
@@ -59,6 +53,17 @@
 
   This returns a new graph, in the form of a wedge-list. The added
   edges will have a weight of minus-infinity.
+
+  If the graph has a bridge over a sequence of unconnected nodes,
+  then a loop will be created, as those unconnected nodes will be
+  attached to both the left and to the right.
+
+  If the graph has multiple components (islands), but no disconnected
+  nodes, then the returned result will remain disconnected. Use
+  `graph-add-bridges` to connect together islands. But if there is
+  a disconnected node between two islands, then that node will be
+  attached to both islands, thus connecting them.  Islands remain
+  unconnected only if nothing is between them.
 "
 	; Terminology:
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
@@ -128,7 +133,26 @@
 	; All of them, sorted.
 	(define alldem (sort-numalist NUMA-LIST))
 
+	; This attaches all of the disconnected nodes to some existing
+	; graph component. However, the graph may still have multiple
+	; disjoint components. To bad; we return that.
 	(*join-em-up GRAPH '() '() alldem graver discon)
 )
 
+; ---------------------------------------------------------------------
+
+(define-public (graph-add-bridges GRAPH)
+"
+  Sequential Island Bridger (SIB) parser.
+
+  Given an existing GRAPH which may contain disconnected components
+  or 'islands', this will add edges that connect neighboring islands.
+
+  The GRAPH should be an existing, non-empty list of 'wedges'.
+
+  This returns a new list of wedges, such that the resulting graph
+  is simply connected.
+"
+
+)
 ; ---------------------------------------------------------------------
