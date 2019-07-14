@@ -12,8 +12,7 @@
 ; vertex-ordered graph". A "vertex-ordered graph" is a graph where
 ; each vertex in the graph is labelled with an ordinal. This ordering
 ; can be imagined to give the vertexes a left-to-right ordering.
-; The graph is weighted if each of the edges is assigned a weight,
-; (equivalently, a "cost").
+; The graph is weighted because each of the edges is assigned a weight.
 ;
 ; The functions below simply provide an API to access the ordering and
 ; the weights.
@@ -35,7 +34,7 @@
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
-; The MST parser returns a list of weighted edges, each edge consisting
+; A graph consists of a list of weighted edges, each edge consisting
 ; of a pair of ordered atoms.
 ; The functions below unpack each data structure.
 ;
@@ -45,29 +44,29 @@
 "
 	(cdr lnk))
 
-(define-public (wedge-get-left-overt lnk)
+(define-public (wedge-get-left-numa lnk)
 "
-  wedge-get-left-overt lnk -- Get the left numbered-atom (numa) in the
+  wedge-get-left-numa lnk -- Get the left numbered-atom (numa) in the
   link. The numa is a scheme pair of the form (number . atom)
 "
 	(car (car lnk)))
 
-(define-public (wedge-get-right-overt lnk)
+(define-public (wedge-get-right-numa lnk)
 "
-  wedge-get-right-overt lnk -- Get the right numbered-atom (numa) in the
+  wedge-get-right-numa lnk -- Get the right numbered-atom (numa) in the
   link. The numa is a scheme pair of the form (number . atom)
 "
 	(cdr (car lnk)))
 
-(define-public (overt-get-index numa)
+(define-public (numa-get-index numa)
 "
-  overt-get-index numa -- Get the index number out of the numa.
+  numa-get-index numa -- Get the index number out of the numa.
 "
 	(car numa))
 
-(define-public (overt-get-atom numa)
+(define-public (numa-get-atom numa)
 "
-  overt-get-atom numa -- Get the atom from the numa.
+  numa-get-atom numa -- Get the atom from the numa.
 "
 	(cdr numa))
 
@@ -75,25 +74,25 @@
 "
   wedge-get-left-atom lnk -- Get the left atom in the weighted link.
 "
-	(overt-get-atom (wedge-get-left-overt lnk)))
+	(numa-get-atom (wedge-get-left-numa lnk)))
 
 (define-public (wedge-get-right-atom lnk)
 "
   wedge-get-right-atom lnk -- Get the right atom in the weighted link.
 "
-	(overt-get-atom (wedge-get-right-overt lnk)))
+	(numa-get-atom (wedge-get-right-numa lnk)))
 
 (define-public (wedge-get-left-index lnk)
 "
   wedge-get-left-index lnk -- Get the index of the left atom in the link.
 "
-	(overt-get-index (wedge-get-left-overt lnk)))
+	(numa-get-index (wedge-get-left-numa lnk)))
 
 (define-public (wedge-get-right-index lnk)
 "
   wedge-get-right-index lnk -- Get the index of the right word in the link.
 "
-	(overt-get-index (wedge-get-right-overt lnk)))
+	(numa-get-index (wedge-get-right-numa lnk)))
 
 (define-public (numa-on-left-side? NUMA WEDGE)
 "
@@ -101,7 +100,7 @@
 
   Return #t if NUMA appears on the left side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-left-overt WEDGE)))
+	(equal? NUMA (wedge-get-left-numa WEDGE)))
 
 (define-public (numa-on-right-side? NUMA WEDGE)
 "
@@ -109,9 +108,46 @@
 
   Return #t if NUMA appears on the right side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-right-overt WEDGE)))
+	(equal? NUMA (wedge-get-right-numa WEDGE)))
 
 ; ---------------------------------------------------------------------
+
+(define-public (print-wedglist WELI)
+"
+  print-wedgelist WEDGE-LIST -- print the WEDGE-LIST in readable form
+
+  Debug utility: print the WEDGE-LIST in an easy-to-read form.
+  WEDGE-LIST must be a list of wedges. Assumes the Atoms are Nodes.
+  XXX That should be fixed...
+"
+	(for-each
+		(lambda (LINK)
+			(format #t "~D-~D\t ~A <--> ~A\t Score=~6F\n"
+				(caaar LINK) (cadar LINK)
+				(cog-name (cdaar LINK)) (cog-name (cddar LINK))
+				(cdr LINK)
+			))
+		WELI)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (atom-list->numa-list ATOM-LIST)
+"
+  atom-list->numa-list ATOM-LIST -- Return an ordinal-numbered list.
+
+  Given a list of atoms, create a numbered list of atoms. The numbering
+  establishes an order for the list, and provides a unique ID, needed
+  both of which are needed for the graph algos.  If the same Atom
+  atom appears twice in a sequence, the ordinal distinguishes these
+  multiple occurrences.
+"
+	(define cnt 0)
+	(map
+		(lambda (ato) (set! cnt (+ cnt 1)) (cons cnt ato))
+		ATOM-LIST)
+)
+
 
 (define-public (sort-numalist NUMA-LIST)
 "
@@ -119,7 +155,7 @@
 "
 	(sort NUMA-LIST
 		(lambda (sa sb)
-			(< (overt-get-index sa) (overt-get-index sb)))))
+			(< (numa-get-index sa) (numa-get-index sb)))))
 
 (define-public (sort-wedgelist WEDGE-LIST)
 "
@@ -146,8 +182,8 @@
 	(delete-duplicates!
 	(fold
 		(lambda (mlnk lst)
-			(cons (wedge-get-left-overt mlnk)
-				(cons (wedge-get-right-overt mlnk) lst)))
+			(cons (wedge-get-left-numa mlnk)
+				(cons (wedge-get-right-numa mlnk) lst)))
 		'()
 		WELI))
 )
@@ -160,7 +196,7 @@
   create a list numas which holds only the numbered atoms
   linked to the right of NUMA.
 "
-	(map wedge-get-right-overt
+	(map wedge-get-right-numa
 		(filter
 			(lambda (wedge) (numa-on-left-side? NUMA wedge))
 			WELI)))
@@ -173,12 +209,78 @@
   create a list numas which holds only the numbered atoms
   linked to the left of NUMA.
 "
-	(map wedge-get-left-overt
+	(map wedge-get-left-numa
 		(filter
 			(lambda (wedge) (numa-on-right-side? NUMA wedge))
 			WELI)))
 
-;  ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+
+(define-public (left-most-numa NUMA WELI)
+"
+  left-most-numa NUMA WELI - Return the left-most numa linked to NUMA
+
+  Return the left-most numa that can be linked to NUMA using the
+  edges in WELI. This walks the WELI graph, looking for the left-most
+  end of it.
+"
+	(define ord (numa-get-index NUMA))
+
+	; Find something, anything to the left of NUMA...
+	(define more-left (find-tail
+		(lambda (wedge)
+			(or
+				(and (numa-on-right-side? NUMA wedge)
+					(< (wedge-get-left-index wedge) ord))
+				(and (numa-on-left-side? NUMA wedge)
+					(< (wedge-get-right-index wedge) ord))
+			))
+		WELI))
+
+	; If something found, try again, else we are done.
+	(if more-left
+		(let* ((medge (car more-left))
+				(luna (wedge-get-left-numa medge))
+				(runa (wedge-get-right-numa medge)))
+			(if (<= (numa-get-index luna) (numa-get-index runa))
+				(left-most-numa luna WELI)
+				(left-most-numa runa WELI)))
+		NUMA)
+)
+
+(define-public (right-most-numa NUMA WELI)
+"
+  right-most-numa NUMA WELI - Return the right-most numa linked to NUMA
+
+  Return the right-most numa that can be linked to NUMA using the
+  edges in WELI. This walks the WELI graph, looking for the right-most
+  end of it.
+"
+	(define ord (numa-get-index NUMA))
+
+	; Find something, anything to the left of NUMA...
+	(define more-right (find-tail
+		(lambda (wedge)
+			(or
+				(and (numa-on-right-side? NUMA wedge)
+					(< ord (wedge-get-left-index wedge)))
+				(and (numa-on-left-side? NUMA wedge)
+					(< ord (wedge-get-right-index wedge)))
+			))
+		WELI))
+
+	; If something found, try again, else we are done.
+	(if more-right
+		(let* ((medge (car more-right))
+				(luna (wedge-get-left-numa medge))
+				(runa (wedge-get-right-numa medge)))
+			(if (> (numa-get-index luna) (numa-get-index runa))
+				(right-most-numa luna WELI)
+				(right-most-numa runa WELI)))
+		NUMA)
+)
+
+; ---------------------------------------------------------------------
 
 (define-public (wedge-cross? wedge-a wedge-b)
 "

@@ -3,36 +3,34 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Copyright (c) 2014, 2017 Linas Vepstas
+; Copyright (c) 2014, 2017, 2019 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below analyze a sequence of atoms, assigning to them a
-; spanning-tree (MST) parse, showing the dependencies between the atoms
-; in the sequence. The result of this parse is then used to create
-; disjuncts, summarizing how the atoms in the sequence are allowed to
-; connect.
+; The functions below accept a sequence of atoms, and create a maximum
+; spanning tree (MST) graph, such that the edges of the tree maximize a
+; scoring function.
 ;
-; Input is sequence of atoms, together with a scoring function for
-; ordered pairs of atoms. In the typical usage, the scoring function
+; Input is a sequence of atoms, together with a scoring function for
+; ordered pairs of atoms. In a prototypical usage, the scoring function
 ; will return the mutual information between a pair of atoms, and
-; so the MST parse is the tree-parse that maximizes the mutual
-; information between pairs of atoms.
+; so the MST graph is the planar tree that connects the atoms, and
+; maximizes the mutual information between pairs of atoms.
 ;
 ; The algorithm implemented is a basic maximum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with
-; with every atom in the sequence being connected to every other atom.
-; The edge-lengths are given by the score between atoms.
+; It can start with any existing graph, and add edges, until the desired
+; number of edges has been added, or until it is impossible to add more
+; edges, and still have a tree.  Edges are added only if they have a
+; score that isn't minus-infinity.
 ;
-; The spanning tree is then computed. Finally, disjuncts are created
-; from the resulting parse, by looking at how each atom is attached to
-; the other atoms.
+; In the prototypical usage, the starting graph is empty, so that the
+; result is a planar spanning tree. If the starting graph is not added,
+; then planar trees are appended to it.
 ;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (opencog))
-(use-modules (opencog matrix))
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
 
@@ -66,87 +64,49 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+(define-public (graph-add-mst GRAPH NUMA-LIST SCORE-FN NUM-EDGES)
 "
   Projective, Undirected Maximum Spanning Tree parser.
 
-  Given a sequence of atoms, find an unlabeled, undirected, projective
-  dependency parse of the sequence, by finding a dependency tree that
-  maximizes the pair-wise scoring function. This returns a list of
-  atom-pairs, together with associated score.  The tree is projective,
-  in that no edges cross.
+  Given an existing (possibly empty) GRAPH, extend it by adding up
+  to NUM-EDGES new edges, adding them one at a time, such that each
+  added edge having the highest score possible, and does not intersect
+  any of the existing edges. If NUM-EDGES is set to -1, then as many
+  edges as possible are added, until a planar spanning tree is created,
+  or until it is impossible to add a new edge (because the edge-score
+  is minus-infinity).
 
-  The ATOM-LIST should be a scheme-list of atoms, all presumably of
-  a uniform atom type.
+  The NUMA-LIST should be a scheme-list of ordinally-numbered atoms.
+  This should be a list of scheme pairs `(Num . Atom)` where `Num` is
+  is an ordinal number, and `Atom` is some Atom.
 
   The SCORE-FN should be a function that, when give a left-right ordered
   pair of atoms, and the distance between them, returns a numeric score
   for that pair. This numeric score will be maximized during the parse.
-  The most basic choice is to use the mutual information between the
-  pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-  right-atom and the (numeric) distance between them (i.e. when the
-  atoms are ordered sequentially, this is the difference between the
-  ordinal numbers).
+  The SCORE-FN should take three arguments: left-atom, right-atom and
+  the (numeric) distance between them (i.e. when the atoms are ordered
+  sequentially, this is the difference between the ordinal numbers).
+  If no such edge exists or is impossible to score, then minus infinity
+  should be returned; such edges will not be considered. This function
+  is invoked as `(SCORE-FN Atom Atom Dist)`.
 
-  The M in MST often stands for 'minimum'; but in this code, the
-  score is maximized.
+  The NUM-EDGES should be an integer, indicating the number of extra
+  edges to add to the GRAPH. The highest-scoring edges are added
+  first, until either NUM-EDGES edges have been added, or it is not
+  possible to add any more edges.  There are two reasons for not being
+  able to add more edges: (1) the extension would no longer be a tree,
+  or (2) no such edges are recorded in the AtomSpace (they have a score
+  of minus-infinity). To add as many edges as possible, pass -1 for
+  NUM-EDGES.
 
-  There are many MST algorithms; the choice was made as follows:
-  Prim is very easy; but seems too simple to give good results.
-  Kruskal is good, but it seems hard to control a no-link-crossing
-  constraint with it. This implements a variant of Borůvka's algo,
-  which seems to be robust, and fast enough for the current needs.
-
-  It has been benchmarked (using the code in `bench-mst`) to run in
-  O(N^3) time, for a sequence of length N. From what I can tell, the
-  state-of-the-art projective algo is Eisner, which runs at O(N^3) time.
-  The code here is NOT Eisner! but seems to have comparable run-time.
-
-  The projective (no-edge-cross) constraint might not be required, see
-  R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
-  However, that would require changing the metric from mutual information
-  to something else, perhaps incorporating the dependency distance
-  (as defined by Ferrer-i-Cancho), or possibly the 'hubiness', or some
-  combination.  Since I really, really want to stick to entropy concepts,
-  the mean-dependency-distance metric needs to be re-phrased as some
-  sort of graph entropy. Hmmm...
-
-  Another idea is to apply the Dick Hudson Word Grammar landmark
-  transitivity idea, but exactly how this could work for unlabeled
-  trees has not been explored.
-
-  So, for now, a no-links-cross constraint is hand-coded into the algo.
-  Without it, it seems that the pair-MI scores alone give rather unruly
-  dependencies (unclear, needs exploration).  So, in the long-run, it
-  might be better to instead pick something that combines MI scores with
-  mean-dependency-distance or with hubiness. See, for example:
-  Haitao Liu (2008) “Dependency distance as a metric of language
-  comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
-  or also:
-  Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
-  relationships in dependency trees”, ArXiv 1304.4086
+  This returns a new graph, in the form of a wedge-list.
 "
 	; Define a losing score.
 	(define bad-mi -1e30)
 	(define min-acceptable-mi -1e15)
 
 	; Define a losing numa-pair
-	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
-
-	; Given a list of atoms, create a numbered list of atoms.
-	; The numbering provides a unique ID, needed for the graph algos.
-	; i.e. if the same atom appears twice in a sequence, we need to
-	; distinguish these multiple occurrences.  The id does this.
-	(define (atom-list->numa-list ATOMS)
-		(define cnt 0)
-		(map
-			(lambda (ato)
-				(set! cnt (+ cnt 1))
-				(cons cnt ato)
-			)
-			ATOMS
-		)
-	)
+	(define bad-pair (cons (cons (cons 0 #f) (cons 0 #f)) bad-mi))
 
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
@@ -214,7 +174,7 @@
 	)
 
 	; Given a list of numas, return a weighted numa-pair, in the form
-	; ((left-numa . right-num) . weight).
+	; ((left-numa . right-numa) . weight).
 	;
 	; The search is made over atom pairs scored by the SCORE-FN.
 	;
@@ -238,18 +198,13 @@
 		)
 	)
 
-	; Set-subtraction.
-	; Given set-a and set-b, return set-a with all elts of set-b removed.
-	; It is assumed that equal? can be used to compare elements.  This
-	; should work fine for sets of ordinal-numbered atoms, and also for
-	; weighted edges.
-	(define (set-sub set rm-set)
-		(filter
-			(lambda (item)
-				(not (any (lambda (rjct) (equal? rjct item)) rm-set))
-			)
-			set
-		)
+	; Create an initial graph, by finding the edge with the highest
+	; weight in the graph. If there are no such edges, return the
+	; empty list. This can happen if the zero function returns minus
+	; infinity for each potential edge.
+	(define (starting-edge numa-list)
+		(define start-pair (pick-best-cost-pair numa-list))
+		(if (equal? bad-pair start-pair) '() (list start-pair))
 	)
 
 	; Of multiple possibilities, pick the one with the highest weight
@@ -343,7 +298,7 @@
 			best
 			; Else, remove best from list, and try again.
 			(pick-no-cross-best
-				(set-sub candidates (list best)) graph-wedges)
+				(lset-difference equal? candidates (list best)) graph-wedges)
 		)
 	)
 
@@ -358,7 +313,8 @@
 		)
 	)
 
-	; Find the maximum spanning tree.
+	; Find the maximum spanning tree. Tail-recursive.
+	;
 	; numa-list is the list of unconnected numas, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
 	; nected-numas is a list numas that are part of the tree.
@@ -375,7 +331,7 @@
 	; The graph-links are assumed to be a set of weighted numa-pairs.
 	; That is, a pair of numas followed by a floating-point weight.
 	;
-	(define (*pick-em numa-list graph-links nected-numas)
+	(define (*pick-em numa-list graph-links nected-numas n-to-do)
 
 		; (format #t "----------------------- \n")
 		; (format #t "enter pick-em with numalist=~A\n" numa-list)
@@ -392,10 +348,9 @@
 		; There is no such "best link" i.e. we've never observed it
 		; and so have no weight for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
-		(if (> -1e10 (cdr best))
+		(if (or (= 0 n-to-do) (>= min-acceptable-mi (cdr best)))
 			graph-links
 			(let* (
-
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
 
@@ -404,7 +359,7 @@
 					; (jd (format #t "fresh atom=~A\n" fresh-numa))
 
 					; Remove the freshly-connected numa from the numa-list.
-					(shorter-list (set-sub numa-list (list fresh-numa)))
+					(shorter-list (lset-difference equal? numa-list (list fresh-numa)))
 
 					; Add the freshly-connected numa to the connected-list
 					(more-nected (append nected-numas (list fresh-numa)))
@@ -413,35 +368,97 @@
 				; If numa-list is null, then we are done. Otherwise, trawl.
 				(if (null? shorter-list)
 					bigger-graph
-					(*pick-em shorter-list bigger-graph more-nected)
+					(*pick-em shorter-list bigger-graph more-nected (- n-to-do 1))
 				)
 			)
 		)
 	)
 
-	(let* (
-			; Number the atoms in sequence-order.
-			(numa-list (atom-list->numa-list ATOM-LIST))
+	; If no starting graph specified, then find a pair of atoms
+	; connected with the largest weight in the sequence.
+	(define starting-graph
+		(if (null? GRAPH)
+			(starting-edge NUMA-LIST)
+			GRAPH))
 
-			; Find a pair of atoms connected with the largest weight
-			; in the sequence.
-			(start-cost-pair (pick-best-cost-pair numa-list))
+	; Create a list of numas that are already in the graph.
+	(define nected-list (numas-in-wedge-list starting-graph))
 
-			; Discard the weight.
-			(start-pair (car start-cost-pair))
+	; Create a list of numas that are not yet in the graph.
+	(define discon-list (lset-difference equal? NUMA-LIST nected-list))
 
-			; Add both of these atoms to the connected-list.
-			(nected-list (list (car start-pair) (cdr start-pair)))
+	; If there's no graph, and we can't figure out where to start,
+	; then we are done.
+	(if (null? starting-graph)
+		'()
+		(*pick-em smaller-list starting-graph nected-list NUM-EDGES))
+)
 
-			; Remove both of these atoms from the atom-list
-			(smaller-list (set-sub numa-list nected-list))
-		)
-		; smaller-list never gets smaller, if a start-pair is not
-		; found. (It then goes inf-loop)
-		(if (equal? bad-pair start-cost-pair)
-			'()
-			(*pick-em smaller-list (list start-cost-pair) nected-list))
-	)
+; ---------------------------------------------------------------------
+
+(define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+"
+  Projective, Undirected Maximum Spanning Tree parser.
+
+  Given a sequence of atoms, find an unlabeled, undirected, projective
+  dependency parse of the sequence, by finding a dependency tree that
+  maximizes the pair-wise scoring function. This returns a list of
+  atom-pairs, together with associated score.  The tree is projective,
+  in that no edges cross.
+
+  The ATOM-LIST should be a scheme-list of atoms, all presumably of
+  a uniform atom type.
+
+  The SCORE-FN should be a function that, when give a left-right ordered
+  pair of atoms, and the distance between them, returns a numeric score
+  for that pair. This numeric score will be maximized during the parse.
+  The most basic choice is to use the mutual information between the
+  pair of atoms.
+
+  -----
+  The M in MST often stands for 'minimum'; but in this code, the
+  score is maximized.
+
+  There are many MST algorithms; the choice was made as follows:
+  Prim is very easy; but seems too simple to give good results.
+  Kruskal is good, but it seems hard to control a no-link-crossing
+  constraint with it. This implements a variant of Borůvka's algo,
+  which seems to be robust, and fast enough for the current needs.
+
+  It has been benchmarked (using the code in `bench-mst`) to run in
+  O(N^3) time, for a sequence of length N. From what I can tell, the
+  state-of-the-art projective algo is Eisner, which runs at O(N^3) time.
+  The code here is NOT Eisner! but seems to have comparable run-time.
+
+  The projective (no-edge-cross) constraint might not be required, see
+  R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
+  However, that would require changing the metric from mutual information
+  to something else, perhaps incorporating the dependency distance
+  (as defined by Ferrer-i-Cancho), or possibly the 'hubiness', or some
+  combination.  Since I really, really want to stick to entropy concepts,
+  the mean-dependency-distance metric needs to be re-phrased as some
+  sort of graph entropy. Hmmm...
+
+  Another idea is to apply the Dick Hudson Word Grammar landmark
+  transitivity idea, but exactly how this could work for unlabeled
+  trees has not been explored.
+
+  So, for now, a no-links-cross constraint is hand-coded into the algo.
+  Without it, it seems that the pair-MI scores alone give rather unruly
+  dependencies (unclear, needs exploration).  So, in the long-run, it
+  might be better to instead pick something that combines MI scores with
+  mean-dependency-distance or with hubiness. See, for example:
+  Haitao Liu (2008) “Dependency distance as a metric of language
+  comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
+  or also:
+  Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
+  relationships in dependency trees”, ArXiv 1304.4086
+"
+	; Number the atoms in sequence-order.
+	(define numa-list (atom-list->numa-list ATOM-LIST))
+
+	; This is just a wrapper
+	(graph-add-mst '() numa-list SCORE-FN -1)
 )
 
 ; ---------------------------------------------------------------------

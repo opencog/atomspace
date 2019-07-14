@@ -169,20 +169,20 @@
 		(define left-cnc
 			(map (lambda (sw)
 					(Connector
-						(overt-get-atom sw)
+						(numa-get-atom sw)
 						(ConnectorDir "-")))
 			left-nus))
 
 		(define right-cnc
 			(map (lambda (sw)
 					(Connector
-						(overt-get-atom sw)
+						(numa-get-atom sw)
 						(ConnectorDir "+")))
 			right-nus))
 
 		; return the connector-set
 		(Section
-			(overt-get-atom NUMA)
+			(numa-get-atom NUMA)
 			(ConnectorSeq (append left-cnc right-cnc)))
 	)
 
