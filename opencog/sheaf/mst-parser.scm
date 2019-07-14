@@ -31,7 +31,6 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (opencog))
-(use-modules (opencog matrix))
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
 
@@ -203,7 +202,7 @@
 	; weight in the graph. If there are no such edges, return the
 	; empty list. This can happen if the zero function returns minus
 	; infinity for each potential edge.
-	(define (starting-graph numa-list)
+	(define (starting-edge numa-list)
 		(define start-pair (pick-best-cost-pair numa-list))
 		(if (equal? bad-pair start-pair) '() (list start-pair))
 	)
@@ -379,7 +378,7 @@
 	; connected with the largest weight in the sequence.
 	(define starting-graph
 		(if (null? GRAPH)
-			(starting-graph NUMA-LIST)
+			(starting-edge NUMA-LIST)
 			GRAPH))
 
 	; Create a list of numas that are already in the graph.

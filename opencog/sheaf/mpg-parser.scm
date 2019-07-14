@@ -29,7 +29,6 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (opencog))
-(use-modules (opencog matrix))
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
 
@@ -42,7 +41,7 @@
   Given an existing GRAPH, add up to NUM-EDGES additional edges, such
   that each added edge has the highest possible score, and no added
   edge intersects any existing edge.  The non-intersection constraint
-  keeps the graph planar or "projective". If NUM-EDGES is set to -1,
+  keeps the graph planar or projective. If NUM-EDGES is set to -1,
   then as many edges as possible are added, resulting in the maximal
   planar graph.
 

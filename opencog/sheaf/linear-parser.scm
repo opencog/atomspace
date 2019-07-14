@@ -26,7 +26,6 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (opencog))
-(use-modules (opencog matrix))
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
@@ -69,9 +68,9 @@
 	(define (make-wedge VA VB) (cons (cons VA VB) -inf.0))
 
 	; Tail-recursive joiner-upper
-	(define (*join-em-up result to-at verli grali disli)
+	(define (*join-em-up result to-at prev verli grali disli)
 		(if (or (null? disli) (null? grali) (null? verli?)) result
-			(let ((vxit (car verli))
+			(let* ((vxit (car verli))
 					(grit (car grali))
 					(dsit (car disli))
 					(bigg (if (null? to-at) result
@@ -79,9 +78,12 @@
 				)
 				(cond
 					((equal? vxit grit)
-						(*join-em-up bigg '() (cdr verli) (cdr grali) disli))
+						(*join-em-up bigg '() vxit (cdr verli) (cdr grali) disli))
 					((equal? vxit dsit)
-						(*join-em-up bigg vxit (cdr verli) grali (cdr disli)))
+						(*join-em-up
+							(if (null? prev) bigg
+								(cons (make-wedge prev vxit) bigg))
+							vxit '() (cdr verli) grali (cdr disli)))
 					(else (throw 'invalid-vertex 'graph-add-linear
 						(format #f "Unexpected vertex ~A" vxit))))
 			)
@@ -97,7 +99,7 @@
 	; All of them, sorted.
 	(define alldem (sort-numalist NUMA-LIST))
 
-	(*join-em-up graver '() alldem graver discon)
+	(*join-em-up graver '() '() alldem graver discon)
 )
 
 ; ---------------------------------------------------------------------

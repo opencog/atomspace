@@ -112,6 +112,26 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (print-wedglist WELI)
+"
+  print-wedgelist WEDGE-LIST -- print the WEDGE-LIST in readable form
+
+  Debug utility: print the WEDGE-LIST in an easy-to-read form.
+  WEDGE-LIST must be a list of wedges. Assumes the Atoms are Nodes.
+  XXX That should be fixed...
+"
+	(for-each
+		(lambda (LINK)
+			(format #t "~D-~D\t ~A <--> ~A\t Score=~6F\n"
+				(caaar LINK) (cadar LINK)
+				(cog-name (cdaar LINK)) (cog-name (cddar LINK))
+				(cdr LINK)
+			))
+		WELI)
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (atom-list->numa-list ATOM-LIST)
 "
   atom-list->numa-list ATOM-LIST -- Return an ordinal-numbered list.
