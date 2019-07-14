@@ -66,12 +66,24 @@
 	; A "wedge" is a weighted edge, having the form
 	;    ((left-numa . right-num) . weight).
 
+	(define (make-wedge VA VB) (cons (cons VA VB) -inf.0))
+
 	; Tail-recursive joiner-upper
-	(define (*join-em-up result grali disli)
-		(if (or (null? grali) (null? disli)) result
-			(let ((grit (car grali))
+	(define (*join-em-up result to-at verli grali disli)
+		(if (or (null? disli) (null? grali) (null? verli?)) result
+			(let ((vxit (car verli))
+					(grit (car grali))
 					(dsit (car disli))
+					(bigg (if (null? to-at) result
+							(cons (make-wedge to-at vxit) result)))
 				)
+				(cond
+					((equal? vxit grit)
+						(*join-em-up bigg '() (cdr verli) (cdr grali) disli))
+					((equal? vxit dsit)
+						(*join-em-up bigg vxit (cdr verli) grali (cdr disli)))
+					(else (throw 'invalid-vertex 'graph-add-linear
+						(format #f "Unexpected vertex ~A" vxit))))
 			)
 		)
 	)
@@ -81,6 +93,11 @@
 
 	; An ordered list of num'a NOT in the graph.
 	(define discon (sort-numalist (lset-difference equal? NUMA-LIST graver)))
+
+	; All of them, sorted.
+	(define alldem (sort-numalist NUMA-LIST))
+
+	(*join-em-up graver '() alldem graver discon)
 )
 
 ; ---------------------------------------------------------------------
