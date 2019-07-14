@@ -150,8 +150,12 @@
 	; Find something, anything to the left of NUMA...
 	(define more-left (find-tail
 		(lambda (wedge)
-			(or (< (numa-get-index (wedge-get-left-numa wedge)) ord)
-				(< (numa-get-index (wedge-get-right-numa wedge)) ord)))
+			(or
+				(and (numa-on-right-side? NUMA wedge)
+					(< (wedge-get-left-index wedge) ord))
+				(and (numa-on-left-side? NUMA wedge)
+					(< (wedge-get-right-index wedge) ord))
+			))
 		WELI))
 
 	; If something found, try again, else we are done.
@@ -174,8 +178,12 @@
 	; Find something, anything to the left of NUMA...
 	(define more-right (find-tail
 		(lambda (wedge)
-			(or (< ord (numa-get-index (wedge-get-left-numa wedge)))
-				(< ord (numa-get-index (wedge-get-right-numa wedge)))))
+			(or
+				(and (numa-on-right-side? NUMA wedge)
+					(< ord (wedge-get-left-index wedge)))
+				(and (numa-on-left-side? NUMA wedge)
+					(< ord (wedge-get-right-index wedge)))
+			))
 		WELI))
 
 	; If something found, try again, else we are done.
