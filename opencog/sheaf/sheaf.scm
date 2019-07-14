@@ -11,6 +11,7 @@
 ; in the earlier files.
 (load "sheaf/sections.scm")
 (load "sheaf/vo-graph.scm")
+(load "sheaf/linear-parser.scm")
 (load "sheaf/mst-parser.scm")
 (load "sheaf/mpg-parser.scm")
 (load "sheaf/make-section.scm")

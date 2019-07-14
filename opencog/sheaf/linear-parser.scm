@@ -69,7 +69,7 @@
 
 	; Tail-recursive joiner-upper
 	(define (*join-em-up result to-at prev verli grali disli)
-		(if (or (null? disli) (null? grali) (null? verli?)) result
+		(if (or (null? disli) (null? grali) (null? verli)) result
 			(let* ((vxit (car verli))
 					(grit (car grali))
 					(dsit (car disli))
@@ -99,7 +99,7 @@
 	; All of them, sorted.
 	(define alldem (sort-numalist NUMA-LIST))
 
-	(*join-em-up graver '() '() alldem graver discon)
+	(*join-em-up GRAPH '() '() alldem graver discon)
 )
 
 ; ---------------------------------------------------------------------
