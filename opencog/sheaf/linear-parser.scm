@@ -69,13 +69,6 @@
 
 	; Tail-recursive joiner-upper
 	(define (*join-em-up result to-at prev verli grali disli)
-(format #t "duuude result=\n") (print-wedglist result) (newline)
-(format #t "duuude to-at=~A\n" to-at)
-(format #t "duuude prev=~A\n" prev)
-(format #t "duuude verli=~A\n" verli)
-(format #t "duuude grali=~A\n" grali)
-(format #t "duuude disli=~A\n" disli)
-(format #t "=================================\n")
 		(cond
 			((or (null? disli) (null? verli)) result)
 			((null? grali)
@@ -95,18 +88,13 @@
 						((equal? vxit grit)
 							(*join-em-up bigg '() vxit (cdr verli) (cdr grali) disli))
 						((equal? vxit dsit)
-(begin (format #t "duude what the hey ~A\n" prev)
 							(*join-em-up
 								(if (null? prev) bigg
 									(cons (make-wedge prev vxit) bigg))
 								vxit '() (cdr verli) grali (cdr disli)))
-)
 						(else (throw 'invalid-vertex 'graph-add-linear
 							(format #f "Unexpected vertex ~A" vxit))))
-				)
-			)
-		)
-	)
+	))))
 
 	; An ordered list of numa's in the graph.
 	(define graver (sort-numalist (numas-in-wedge-list GRAPH)))
@@ -117,8 +105,6 @@
 	; All of them, sorted.
 	(define alldem (sort-numalist NUMA-LIST))
 
-(format #t "duuude graver=~A\n" graver)
-(format #t "duuude discon=~A\n" discon)
 	(*join-em-up GRAPH '() '() alldem graver discon)
 )
 
