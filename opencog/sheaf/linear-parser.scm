@@ -160,7 +160,7 @@
 
 	; Find the right-most vertex connected to the left-most one.
 	(define right-end
-		(if (null? sorted-numas) (cons (-inf.0 #f))
+		(if (null? sorted-numas) (cons -inf.0 #f)
 			(right-most-numa (car sorted-numas) GRAPH)))
 
 	; Its index.
