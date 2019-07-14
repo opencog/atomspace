@@ -143,9 +143,50 @@
 
 (define (left-most-numa NUMA WELI)
 "
-  Return the left-most NUM that can be linked with the edges in WELI.
+  Return the left-most NUMA that can be linked with the edges in WELI.
 "
-  
+	(define ord (numa-get-index NUMA))
+
+	; Find something, anything to the left of NUMA...
+	(define more-left (find-tail
+		(lambda (wedge)
+			(or (< (numa-get-index (wedge-get-left-numa wedge)) ord)
+				(< (numa-get-index (wedge-get-right-numa wedge)) ord)))
+		WELI))
+
+	; If something found, try again, else we are done.
+	(if more-left
+		(let* ((medge (car more-left))
+				(luna (wedge-get-left-numa medge))
+				(runa (wedge-get-right-numa medge)))
+			(if (<= (numa-get-index luna) (numa-get-index runa))
+				(left-most-numa luna WELI)
+				(left-most-numa runa WELI)))
+		NUMA)
+)
+
+(define (right-most-numa NUMA WELI)
+"
+  Return the right-most NUMA that can be linked with the edges in WELI.
+"
+	(define ord (numa-get-index NUMA))
+
+	; Find something, anything to the left of NUMA...
+	(define more-right (find-tail
+		(lambda (wedge)
+			(or (< ord (numa-get-index (wedge-get-left-numa wedge)))
+				(< ord (numa-get-index (wedge-get-right-numa wedge)))))
+		WELI))
+
+	; If something found, try again, else we are done.
+	(if more-right
+		(let* ((medge (car more-right))
+				(luna (wedge-get-left-numa medge))
+				(runa (wedge-get-right-numa medge)))
+			(if (> (numa-get-index luna) (numa-get-index runa))
+				(right-most-numa luna WELI)
+				(right-most-numa runa WELI)))
+		NUMA)
 )
 
 (define-public (graph-add-bridges GRAPH)
@@ -160,6 +201,10 @@
   This returns a new list of wedges, such that the resulting graph
   is simply connected.
 "
+	(define sorted-wedges (sort-wedgelist GRAPH))
+	(define right-end (right-most-numa
+		(wedge-get-right-numa (car sorted-wedges))))
 
 )
+
 ; ---------------------------------------------------------------------
