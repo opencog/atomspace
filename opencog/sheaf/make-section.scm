@@ -113,8 +113,7 @@
   The WEDGE-LIST is assumed to be a list of weighted edges. The weights
   are ignored.  The vertexes in the graph are assumed to just be the
   set of vertexes that appear at the ends of each edge; these are
-  extracted automatically, below.  XXX FIXME a better API could just
-  pass these in...
+  extracted automatically, below.
 
   The returned sections are a list of SectionLinks, one for each vertex.
   The SectionLink will list (in order) a list of ConnectorLink's, with
@@ -145,20 +144,9 @@
   mentions the (WordNode \"playing\").  This allows different
   ConnectorSeq's to be explicitly compared.
 "
-	; Discard links with bad MI values; anything less than
-	; -1e6 is bad. Heck, anything under minus ten is bad...
-	(define good-links (filter
-		(lambda (mlink) (< -1e6 (wedge-get-score mlink)))
-		WEDGE-LIST))
-
 	; Terminology: a "numa" is a NUMbered Atom, its a pair
-	; (cons integer Atom). Its the same thing as an "overt"
-	; "Ordered VERTex".
-	; A "link" is a weighted link: (cons (list lnuma rnuma) float)
-	; A "wedge" Weighted EDGE is the same thing as a link.
-
-	; Create a list of all of the numas in the wedge-list.
-	(define numa-list (numas-in-wedge-list good-links))
+	; (cons integer Atom).
+	; A "wedge" is a weighted edge: (cons (list lnuma rnuma) float)
 
 	; Given a numa, and a list of wedges, create a Section
 	(define (mk-pseudo NUMA WEDLI)
@@ -188,7 +176,7 @@
 
 	(map
 		(lambda (seq) (mk-pseudo seq WEDGE-LIST))
-		numa-list)
+		(numas-in-wedge-list WEDGE-LIST))
 )
 
 ;  ---------------------------------------------------------------------
