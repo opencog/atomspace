@@ -391,7 +391,7 @@
 	; then we are done.
 	(if (null? starting-graph)
 		'()
-		(*pick-em smaller-list starting-graph nected-list NUM-EDGES))
+		(*pick-em discon-list starting-graph nected-list NUM-EDGES))
 )
 
 ; ---------------------------------------------------------------------
