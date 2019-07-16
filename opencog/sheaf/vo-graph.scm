@@ -225,24 +225,31 @@
   end of it.
 "
 	(define (*more-left wedge vert graph)
+
+		; Follow the edge, if possible.
+		(define linked-vert
+			(cond
+				((numa-on-right-side? vert wedge)
+					(wedge-get-left-numa wedge))
+				((numa-on-left-side? vert wedge)
+					(wedge-get-right-numa wedge))
+				(else '())))
+
 		(cond
-			; Follow the edge
-			((numa-on-right-side? vert wedge)
-				(let ((linked-vert
-							(*more-left (car graph)
-								(wedge-get-left-numa wedge) (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						vert linked-vert)))
+			; If no edge, we are done.
+			((null? linked-vert) vert)
 
-			((numa-on-left-side? vert wedge)
-				(let ((linked-vert
-							(*more-left (car graph)
-								(wedge-get-right-numa wedge) (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						vert linked-vert)))
+			; If no more edges, just check the one we've got.
+			((null? graph)
+				(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						vert linked-vert))
 
-			; This edge does not contain this vertex.
-			(else vert)))
+			; Else recurse.
+			(else
+				(let ((farthest-vert
+						(*more-left (car graph) linked-vert (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index farthest-vert))
+						vert farthest-vert)))))
 
 	(if (null? WELI) NUMA
 		(*more-left (car WELI) NUMA (cdr WELI)))
@@ -257,24 +264,31 @@
   end of it.
 "
 	(define (*more-right wedge vert graph)
+
+		; Follow the edge, if possible.
+		(define linked-vert
+			(cond
+				((numa-on-right-side? vert wedge)
+					(wedge-get-left-numa wedge))
+				((numa-on-left-side? vert wedge)
+					(wedge-get-right-numa wedge))
+				(else '())))
+
 		(cond
-			; Follow the edge
-			((numa-on-right-side? vert wedge)
-				(let ((linked-vert
-							(*more-right (car graph)
-								(wedge-get-left-numa wedge) (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						linked-vert vert)))
+			; If no edge, we are done.
+			((null? linked-vert) vert)
 
-			((numa-on-left-side? vert wedge)
-				(let ((linked-vert
-							(*more-right (car graph)
-								(wedge-get-right-numa wedge) (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						linked-vert vert)))
+			; If no more edges, just check the one we've got.
+			((null? graph)
+				(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						linked-vert vert))
 
-			; This edge does not contain this vertex.
-			(else vert)))
+			; Else recurse.
+			(else
+				(let ((farthest-vert
+						(*more-right (car graph) linked-vert (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index farthest-vert))
+						farthest-vert vert)))))
 
 	(if (null? WELI) NUMA
 		(*more-right (car WELI) NUMA (cdr WELI)))
