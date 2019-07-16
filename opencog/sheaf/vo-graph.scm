@@ -100,7 +100,9 @@
 
   Return #t if NUMA appears on the left side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-left-numa WEDGE)))
+	(and (not (null? WEDGE))
+		(equal? NUMA (wedge-get-left-numa WEDGE)))
+)
 
 (define-public (numa-on-right-side? NUMA WEDGE)
 "
@@ -108,7 +110,9 @@
 
   Return #t if NUMA appears on the right side of the WEDGE.
 "
-	(equal? NUMA (wedge-get-right-numa WEDGE)))
+	(and (not (null? WEDGE))
+		(equal? NUMA (wedge-get-right-numa WEDGE)))
+)
 
 ; ---------------------------------------------------------------------
 
@@ -244,11 +248,11 @@
 					(wedge-get-left-numa wedge))
 				(else '())))
 
-		; If no linked vertex, or no more graph, we are done.
-		(if (or (null? linked-vert) (null? graph)) most-here
+		; If no linked vertex, we are done.
+		(if (null? linked-vert) most-here
 			; Else try the rest of the graph...
 			(let ((maybe-there
-					(*more-left (car graph) linked-vert (cdr graph))))
+					(*more-left '() linked-vert graph)))
 				(if (< (numa-get-index most-here) (numa-get-index maybe-there))
 					most-here maybe-there))))
 
@@ -285,11 +289,11 @@
 					(wedge-get-right-numa wedge))
 				(else '())))
 
-		; If no linked vertex, or no more graph, we are done.
-		(if (or (null? linked-vert) (null? graph)) most-here
+		; If no linked vertex, we are done.
+		(if (null? linked-vert) most-here
 			; Else try the rest of the graph...
 			(let ((maybe-there
-					(*more-right (car graph) linked-vert (cdr graph))))
+					(*more-right '() linked-vert graph)))
 				(if (< (numa-get-index most-here) (numa-get-index maybe-there))
 					maybe-there most-here))))
 
