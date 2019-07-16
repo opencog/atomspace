@@ -222,7 +222,7 @@ static bool try_to_load_modules(const char ** config_paths)
             PyObject* pyModulePath = PyUnicode_DecodeUTF8(
                   config_paths[i], strlen(config_paths[i]), "strict");
 #endif
-            PyList_Append(pySysPath, pyModulePath);
+            PyList_Insert(pySysPath, (Py_ssize_t) 0, pyModulePath);
             Py_DECREF(pyModulePath);
         }
     }
