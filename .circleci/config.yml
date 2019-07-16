@@ -24,7 +24,7 @@ jobs:
             - ccache-{{ checksum "/tmp/date" }}
             - ccache-
       - run:
-          name: Install cogutil
+          name: Install CogUtil
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
@@ -91,7 +91,7 @@ jobs:
       - attach_workspace:
           at: /ws/
       - run:
-          name: Install cogutil
+          name: Install CogUtil
           command: cd /ws/cogutil/build && make -j2 install && ldconfig
       - run:
           name: Install AtomSpace
@@ -124,6 +124,61 @@ jobs:
             - ure
             - ccache
 
+  miner:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/miner
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - restore_cache:
+          name: Restore GHC Cache
+          keys:
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+      - restore_cache:
+          name: Restore Haskell Deps Cache
+          keys:
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install URE
+          command: cd /ws/ure/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout Miner
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/miner .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j2 test ARGS=-j2
+      - run:
+          name: Install Miner
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - miner
+            - ccache
+
   opencog:
     docker:
       - image: opencog/opencog-deps
@@ -143,7 +198,7 @@ jobs:
           keys:
             - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
-          name: Install cogutil
+          name: Install CogUtil
           command: cd /ws/cogutil/build && make -j2 install && ldconfig
       - run:
           name: Install AtomSpace
@@ -176,6 +231,7 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
+            - opencog
             - ccache
 
   package: #Place holder
@@ -202,9 +258,11 @@ workflows:
       - ure:
           requires:
             - atomspace
+      - miner:
+          requires:
+            - ure
       - opencog:
           requires:
-            - atomspace
             - ure
       - package:
           requires:
