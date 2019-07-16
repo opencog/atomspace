@@ -80,10 +80,6 @@
 (define pl4 (left-most-numa n4 three-arcs))
 (define pr4 (right-most-numa n4 three-arcs))
 
-; what we expect
-(define lex n2)
-(define rex n4)
-
 (test-equal "three-arc l2" pl2 lex)
 (test-equal "three-arc r2" pr2 rex)
 
@@ -94,5 +90,61 @@
 (test-equal "three-arc r4" pr4 rex)
 
 (test-end tloop)
+
+; ---------------------------------------------------------------
+(define reved "reversed edge test")
+(test-begin reved)
+
+(define reverso (list
+	(mkw 3 (Concept "is") 2 (Concept "this") 3.2)
+	(mkw 1 (Concept "###LEFT-WALL###") 2 (Concept "this") 1.2)
+	(mkw 5 (Concept "test") 4 (Concept "a") 5.4)
+	(mkw 3 (Concept "is") 4 (Concept "a") 3.4)
+))
+
+; Debug print
+(print-wedglist reverso)
+
+(define w1 (cons 1 (Concept "###LEFT-WALL###")))
+(define w2 (cons 2 (Concept "This")))
+(define w3 (cons 3 (Concept "is")))
+(define w4 (cons 4 (Concept "a")))
+(define w5 (cons 5 (Concept "test")))
+
+(define wl1 (left-most-numa w1 reverso))
+(define wr1 (right-most-numa w1 reverso))
+
+(define wl2 (left-most-numa w2 reverso))
+(define wr2 (right-most-numa w2 reverso))
+
+(define wl3 (left-most-numa w3 reverso))
+(define wr3 (right-most-numa w3 reverso))
+
+(define wl4 (left-most-numa w4 reverso))
+(define wr4 (right-most-numa w4 reverso))
+
+(define wl5 (left-most-numa w5 reverso))
+(define wr5 (right-most-numa w5 reverso))
+
+; what we expect
+(define lwex w1)
+(define rwex w5)
+
+(test-equal "reversed-edge l1" wl1 lwex)
+(test-equal "reversed-edge r1" wr1 rwex)
+
+(test-equal "reversed-edge l2" wl2 lwex)
+(test-equal "reversed-edge r2" wr2 rwex)
+
+(test-equal "reversed-edge l3" wl3 lwex)
+(test-equal "reversed-edge r3" wr3 rwex)
+
+(test-equal "reversed-edge l4" wl4 lwex)
+(test-equal "reversed-edge r4" wr4 rwex)
+
+(test-equal "reversed-edge l5" wl5 lwex)
+(test-equal "reversed-edge r5" wr5 rwex)
+
+(test-end reved)
 
 ; ---------------------------------------------------------------
