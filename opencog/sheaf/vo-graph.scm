@@ -258,7 +258,7 @@
 
 
 	(if (null? WELI) NUMA
-		(*more-left (car WELI) NUMA (cdr WELI)))
+		(*more-left '() NUMA WELI))
 )
 
 (define-public (right-most-numa NUMA WELI)
@@ -269,36 +269,48 @@
   edges in WELI. This walks the WELI graph, looking for the right-most
   end of it.
 "
-	(define (*more-right wedge vert graph)
+	(define (*more-right vert graph best)
 
-		; Exhaust the graph, if possible.
-		(define most-here
-			(if (null? graph) vert
-				; Else try the rest of the graph...
-				(let ((more-here
-						(*more-right (car graph) vert (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index more-here))
-						more-here vert))))
+		; Make a list of all edges that start here.
+		(define starts
+			(filter (lambda (wedge) (or
+				(numa-on-left-side? vert wedge)
+				(numa-on-right-side? vert wedge))) graph))
 
-		; Follow the edge, if possible.
-		(define linked-vert
-			(cond
-				((numa-on-right-side? vert wedge)
-					(wedge-get-left-numa wedge))
-				((numa-on-left-side? vert wedge)
-					(wedge-get-right-numa wedge))
-				(else '())))
+		; Remove those edges from the graph
+		(define smaller-graph
+			(lset-difference equal? graph starts))
 
-		; If no linked vertex, we are done.
-		(if (null? linked-vert) most-here
-			; Else try the rest of the graph...
-			(let ((maybe-there
-					(*more-right '() linked-vert graph)))
-				(if (< (numa-get-index most-here) (numa-get-index maybe-there))
-					maybe-there most-here))))
+		; A tail-recursive helper function
+		(define (*right-loop edgeli most)
+			; If the edgelist is null, then most is the right-most
+			; that we've found.
+			(if (null? edgeli) most
+				; Otherwise, trace the current edge...
+				(let* ((edge (car edgeli))
+						; ... to it's other end.
+						(linked-vert
+							(if (numa-on-right-side? vert edge)
+								(wedge-get-left-numa edge)
+								(wedge-get-right-numa edge)))
 
-	(if (null? WELI) NUMA
-		(*more-right (car WELI) NUMA (cdr WELI)))
+						; Get the one that is further to the right.
+						(better
+							(if (< (numa-get-index most) (numa-get-index linked-vert))
+								linked-vert most))
+
+						;Recurse to the best one from here.
+						(best (*more-right linked-vert smaller-graph better)))
+
+					; And now try to beat that with the other edges.
+					(*right-loop (cdr edgeli) best)))
+		)
+
+		; Loop over the starting edges.
+		(*right-loop starts best)
+	)
+
+	(if (null? WELI) NUMA (*more-right NUMA WELI NUMA))
 )
 
 ; ---------------------------------------------------------------------
