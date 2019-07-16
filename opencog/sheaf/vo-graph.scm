@@ -224,28 +224,28 @@
   edges in WELI. This walks the WELI graph, looking for the left-most
   end of it.
 "
-	(define ord (numa-get-index NUMA))
+	(define (*more-left wedge vert graph)
+		(cond
+			; Follow the edge
+			((numa-on-right-side? vert wedge)
+				(let ((linked-vert
+							(*more-left (car graph)
+								(wedge-get-left-numa wedge) (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						vert linked-vert)))
 
-	; Find something, anything to the left of NUMA...
-	(define more-left (find-tail
-		(lambda (wedge)
-			(or
-				(and (numa-on-right-side? NUMA wedge)
-					(< (wedge-get-left-index wedge) ord))
-				(and (numa-on-left-side? NUMA wedge)
-					(< (wedge-get-right-index wedge) ord))
-			))
-		WELI))
+			((numa-on-left-side? vert wedge)
+				(let ((linked-vert
+							(*more-left (car graph)
+								(wedge-get-right-numa wedge) (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						vert linked-vert)))
 
-	; If something found, try again, else we are done.
-	(if more-left
-		(let* ((medge (car more-left))
-				(luna (wedge-get-left-numa medge))
-				(runa (wedge-get-right-numa medge)))
-			(if (<= (numa-get-index luna) (numa-get-index runa))
-				(left-most-numa luna WELI)
-				(left-most-numa runa WELI)))
-		NUMA)
+			; This edge does not contain this vertex.
+			(else vert)))
+
+	(if (null? WELI) NUMA
+		(*more-left (car WELI) NUMA (cdr WELI)))
 )
 
 (define-public (right-most-numa NUMA WELI)
@@ -256,28 +256,28 @@
   edges in WELI. This walks the WELI graph, looking for the right-most
   end of it.
 "
-	(define ord (numa-get-index NUMA))
+	(define (*more-right wedge vert graph)
+		(cond
+			; Follow the edge
+			((numa-on-right-side? vert wedge)
+				(let ((linked-vert
+							(*more-right (car graph)
+								(wedge-get-left-numa wedge) (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						linked-vert vert)))
 
-	; Find something, anything to the left of NUMA...
-	(define more-right (find-tail
-		(lambda (wedge)
-			(or
-				(and (numa-on-right-side? NUMA wedge)
-					(< ord (wedge-get-left-index wedge)))
-				(and (numa-on-left-side? NUMA wedge)
-					(< ord (wedge-get-right-index wedge)))
-			))
-		WELI))
+			((numa-on-left-side? vert wedge)
+				(let ((linked-vert
+							(*more-right (car graph)
+								(wedge-get-right-numa wedge) (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index linked-vert))
+						linked-vert vert)))
 
-	; If something found, try again, else we are done.
-	(if more-right
-		(let* ((medge (car more-right))
-				(luna (wedge-get-left-numa medge))
-				(runa (wedge-get-right-numa medge)))
-			(if (> (numa-get-index luna) (numa-get-index runa))
-				(right-most-numa luna WELI)
-				(right-most-numa runa WELI)))
-		NUMA)
+			; This edge does not contain this vertex.
+			(else vert)))
+
+	(if (null? WELI) NUMA
+		(*more-right (car WELI) NUMA (cdr WELI)))
 )
 
 ; ---------------------------------------------------------------------
