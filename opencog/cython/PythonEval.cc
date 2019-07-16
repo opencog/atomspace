@@ -102,7 +102,6 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 static const char* PROJECT_PYTHON_MODULE_PATHS[] =
 {
     PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
     PROJECT_SOURCE_DIR"/tests/cython",   // for testing
     NULL
 };
