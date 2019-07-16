@@ -208,6 +208,7 @@ static bool try_to_load_modules(const char ** config_paths)
 {
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
+    Py_ssize_t pos_idx = 0;
     // Add default OpenCog module directories to the Python interpreter's path.
     for (int i = 0; config_paths[i] != NULL; ++i)
     {
@@ -222,8 +223,9 @@ static bool try_to_load_modules(const char ** config_paths)
             PyObject* pyModulePath = PyUnicode_DecodeUTF8(
                   config_paths[i], strlen(config_paths[i]), "strict");
 #endif
-            PyList_Insert(pySysPath, (Py_ssize_t) 0, pyModulePath);
+            PyList_Insert(pySysPath, pos_idx, pyModulePath);
             Py_DECREF(pyModulePath);
+            pos_idx += 1;
         }
     }
 
