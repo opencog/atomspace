@@ -226,30 +226,32 @@
 "
 	(define (*more-left wedge vert graph)
 
+		; Exhaust the graph, if possible.
+		(define most-here
+			(if (null? graph) vert
+				; Else try the rest of the graph...
+				(let ((more-here
+						(*more-left (car graph) vert (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index more-here))
+						vert more-here))))
+
 		; Follow the edge, if possible.
 		(define linked-vert
 			(cond
-				((numa-on-right-side? vert wedge)
+				((numa-on-left-side? vert wedge)
 					(wedge-get-left-numa wedge))
 				((numa-on-left-side? vert wedge)
-					(wedge-get-right-numa wedge))
+					(wedge-get-left-numa wedge))
 				(else '())))
 
-		(cond
-			; If no edge, we are done.
-			((null? linked-vert) vert)
+		; If no linked vertex, or no more graph, we are done.
+		(if (or (null? linked-vert) (null? graph)) most-here
+			; Else try the rest of the graph...
+			(let ((maybe-there
+					(*more-left (car graph) linked-vert (cdr graph))))
+				(if (< (numa-get-index most-here) (numa-get-index maybe-there))
+					most-here maybe-there))))
 
-			; If no more edges, just check the one we've got.
-			((null? graph)
-				(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						vert linked-vert))
-
-			; Else recurse.
-			(else
-				(let ((farthest-vert
-						(*more-left (car graph) linked-vert (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index farthest-vert))
-						vert farthest-vert)))))
 
 	(if (null? WELI) NUMA
 		(*more-left (car WELI) NUMA (cdr WELI)))
@@ -265,6 +267,15 @@
 "
 	(define (*more-right wedge vert graph)
 
+		; Exhaust the graph, if possible.
+		(define most-here
+			(if (null? graph) vert
+				; Else try the rest of the graph...
+				(let ((more-here
+						(*more-right (car graph) vert (cdr graph))))
+					(if (< (numa-get-index vert) (numa-get-index more-here))
+						more-here vert))))
+
 		; Follow the edge, if possible.
 		(define linked-vert
 			(cond
@@ -274,21 +285,13 @@
 					(wedge-get-right-numa wedge))
 				(else '())))
 
-		(cond
-			; If no edge, we are done.
-			((null? linked-vert) vert)
-
-			; If no more edges, just check the one we've got.
-			((null? graph)
-				(if (< (numa-get-index vert) (numa-get-index linked-vert))
-						linked-vert vert))
-
-			; Else recurse.
-			(else
-				(let ((farthest-vert
-						(*more-right (car graph) linked-vert (cdr graph))))
-					(if (< (numa-get-index vert) (numa-get-index farthest-vert))
-						farthest-vert vert)))))
+		; If no linked vertex, or no more graph, we are done.
+		(if (or (null? linked-vert) (null? graph)) most-here
+			; Else try the rest of the graph...
+			(let ((maybe-there
+					(*more-right (car graph) linked-vert (cdr graph))))
+				(if (< (numa-get-index most-here) (numa-get-index maybe-there))
+					maybe-there most-here))))
 
 	(if (null? WELI) NUMA
 		(*more-right (car WELI) NUMA (cdr WELI)))
