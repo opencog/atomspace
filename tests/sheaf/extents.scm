@@ -34,14 +34,14 @@
 ; Debug print
 (print-wedglist two-arcs)
 
-(define l2 (left-most-numa n2 two-arcs)
-(define r2 (right-most-numa n2 two-arcs)
+(define l2 (left-most-numa n2 two-arcs))
+(define r2 (right-most-numa n2 two-arcs))
 
-(define l3 (left-most-numa n3 two-arcs)
-(define r3 (right-most-numa n3 two-arcs)
+(define l3 (left-most-numa n3 two-arcs))
+(define r3 (right-most-numa n3 two-arcs))
 
-(define l4 (left-most-numa n4 two-arcs)
-(define r4 (right-most-numa n4 two-arcs)
+(define l4 (left-most-numa n4 two-arcs))
+(define r4 (right-most-numa n4 two-arcs))
 
 ; what we expect
 (define lex n2)
@@ -68,34 +68,30 @@
 	(mkw 3 (Concept "Three") 2 (Concept "Part") 3.2)
 ))
 
-(define n2 (cons 2 (Concept "Part")))
-(define n3 (cons 3 (Concept "Three")))
-(define n4 (cons 4 (Concept ".")))
-
 ; Debug print
 (print-wedglist three-arcs)
 
-(define l2 (left-most-numa n2 three-arcs)
-(define r2 (right-most-numa n2 three-arcs)
+(define pl2 (left-most-numa n2 three-arcs))
+(define pr2 (right-most-numa n2 three-arcs))
 
-(define l3 (left-most-numa n3 three-arcs)
-(define r3 (right-most-numa n3 three-arcs)
+(define pl3 (left-most-numa n3 three-arcs))
+(define pr3 (right-most-numa n3 three-arcs))
 
-(define l4 (left-most-numa n4 three-arcs)
-(define r4 (right-most-numa n4 three-arcs)
+(define pl4 (left-most-numa n4 three-arcs))
+(define pr4 (right-most-numa n4 three-arcs))
 
 ; what we expect
 (define lex n2)
 (define rex n4)
 
-(test-equal "three-arc l2" l2 lex)
-(test-equal "three-arc r2" r2 rex)
+(test-equal "three-arc l2" pl2 lex)
+(test-equal "three-arc r2" pr2 rex)
 
-(test-equal "three-arc l3" l3 lex)
-(test-equal "three-arc r3" r3 rex)
+(test-equal "three-arc l3" pl3 lex)
+(test-equal "three-arc r3" pr3 rex)
 
-(test-equal "three-arc l4" l4 lex)
-(test-equal "three-arc r4" r4 rex)
+(test-equal "three-arc l4" pl4 lex)
+(test-equal "three-arc r4" pr4 rex)
 
 (test-end tloop)
 
