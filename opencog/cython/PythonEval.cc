@@ -291,8 +291,6 @@ void opencog::global_python_initialize()
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
 
-    // Should result in PYLIBNAME being "libpython3.5.so", etc.
-#define PYLIBNAME "libpython" TOSTRING(PY_MAJOR_VERSION) "." TOSTRING(PY_MINOR_VERSION) ".so"
     _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
     logger().info("[global_python_initialize] Start");
