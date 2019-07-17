@@ -1,5 +1,11 @@
 # persist/zmq
 
+Abandonware ... this code is no longer compatible with the current
+AtomSpace (it is missing support for Values, for example) and has
+other problems as well (see below). If you are interested, you can
+take over maintainership of  this.  However, it might also be easier
+to just start from scratch.
+
 ## Dependencies
 
 libzmq 3.x
