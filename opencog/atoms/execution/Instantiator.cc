@@ -310,18 +310,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		Handle hexpr(beta_reduce(expr, *_vmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
-		Handle pargs = ppp->get_arguments();
-		Handle gargs = walk_tree(pargs, silent);
-		if (gargs != pargs)
-		{
-			HandleSeq groset;
-			if (ppp->get_vardecl())
-				groset.emplace_back(ppp->get_vardecl());
-			groset.emplace_back(ppp->get_body());
-			groset.emplace_back(gargs);
-			ppp = createPutLink(groset);
-		}
-
 		// Step two: beta-reduce.
 		Handle red(HandleCast(ppp->execute(_as, silent)));
 

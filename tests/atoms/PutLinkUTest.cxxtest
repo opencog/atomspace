@@ -96,6 +96,7 @@ public:
 	void test_quoted_eval();
 	void test_quoted_lambda();
 	void test_arguments_execution();
+	void test_arguments_execution_with_lambda();
 };
 
 #define N _as.add_node
@@ -2106,6 +2107,58 @@ void PutLinkUTest::test_arguments_execution()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-execute-arguments.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-execute-arguments"),
+		result = HandleCast(inst.execute(put)),
+		expected = _eval.eval_h("expected-put-execute-arguments");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ *
+ * Test
+ *
+ * (Inheritance (Concept "B") (Concept "Parent"))
+ * (Inheritance (Concept "C") (Concept "Parent"))
+ *
+ *  (PutLink
+ *  (LambdaLink
+ *   (VariableNode "x")
+ *   (EvaluationLink
+ *    (PredicateNode "relation")
+ *    (ListLink
+ *    (VariableNode "x")
+ *     (VariableNode "A"))))
+ *  (GetLink
+ *   (Inheritance (Variable "$X") (Concept "Parent"))))
+ *
+ * which should return
+ *
+ *  (SetLink
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *   (ConceptNode "B")
+ *  (VariableNode "A")))
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *    (ConceptNode "C")
+ *    (VariableNode "A"))))
+*/
+void PutLinkUTest::test_arguments_execution_with_lambda()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-execute-arguments-with-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);

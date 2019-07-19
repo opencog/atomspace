@@ -3,11 +3,13 @@
 
 (define put-execute-arguments
  (PutLink
+  (LambdaLink
+   (VariableNode "x")
    (EvaluationLink
     (PredicateNode "relation")
     (ListLink
      (VariableNode "x")
-     (ConceptNode "A")))
+     (ConceptNode "A"))))
   (GetLink
    (Inheritance (Variable "$X") (Concept "Parent")))))
 
