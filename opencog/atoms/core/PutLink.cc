@@ -294,6 +294,12 @@ Handle PutLink::do_reduce(void) const
 	Handle bods(_body);
 	Variables vars(_varlist);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
+	Handle args(_arguments);
+
+	if (args->is_executable())
+	{
+		args = HandleCast(args->execute());
+	}
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
@@ -330,7 +336,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the arguments that we will plug into the body.
-	Type vtype = _arguments->get_type();
+	Type vtype = args->get_type();
 	size_t nvars = vars.varseq.size();
 
 	// FunctionLinks behave like pointless lambdas; that is, one can
@@ -348,7 +354,7 @@ Handle PutLink::do_reduce(void) const
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			const HandleSeq& rest = _arguments->getOutgoingSet();
+			const HandleSeq& rest = args->getOutgoingSet();
 			oset.insert(oset.end(), rest.begin(), rest.end());
 			return createLink(oset, btype);
 		}
@@ -356,13 +362,13 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			oset.emplace_back(_arguments);
+			oset.emplace_back(args);
 			return createLink(oset, btype);
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _arguments->getOutgoingSet())
+		for (const Handle& h : args->getOutgoingSet())
 		{
 			if (LIST_LINK == h->get_type())
 			{
@@ -386,12 +392,12 @@ Handle PutLink::do_reduce(void) const
 	{
 		if (SET_LINK != vtype)
 		{
-			return reddy(subs, {_arguments});
+			return reddy(subs, {args});
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _arguments->getOutgoingSet())
+		for (const Handle& h : args->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.emplace_back(h);
@@ -418,7 +424,7 @@ Handle PutLink::do_reduce(void) const
 		// But what if `h` is not itself executable, but one of it's
 		// deeper elements is? What then? Oy, this is a mess.
 		HandleSeq oset;
-		for (const Handle& h: _arguments->getOutgoingSet())
+		for (const Handle& h: args->getOutgoingSet())
 		{
 			if (PUT_LINK == h->get_type())
 				oset.push_back(HandleCast(h->execute()));
@@ -434,7 +440,7 @@ Handle PutLink::do_reduce(void) const
 	if (LAMBDA_LINK == vtype)
 	{
 		HandleSeq oset;
-		oset.emplace_back(_arguments);
+		oset.emplace_back(args);
 		return reddy(subs, oset);
 	}
 
@@ -450,7 +456,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	HandleSeq bset;
-	for (const Handle& h : _arguments->getOutgoingSet())
+	for (const Handle& h : args->getOutgoingSet())
 	{
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
