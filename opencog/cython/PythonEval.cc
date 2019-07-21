@@ -1567,8 +1567,14 @@ std::string PythonEval::poll_result()
     }
 
     std::string r = _result;
+
+    // Add the missing newline
+    if (0 < _result.size()) r += "\n";
+
+    // Report the error string too, but only the first time.
+    if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
+
     _result.clear();
-    if (_caught_error) r += _error_string;
     return r;
 }
 
