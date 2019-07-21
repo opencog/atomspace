@@ -227,6 +227,12 @@
   Return the left-most numa that can be linked to NUMA using the
   edges in WELI. This walks the WELI graph, looking for the left-most
   end of it.
+
+  XXX FIXME WARNING DANGER: As written, this runs in exponential time
+  as the size of the graph (the WELI), and thus can explode in
+  runtime, going from a fraction of a second for one graph, and many
+  minutes (or hours) for a graph that is 20% bigger!  This makes this
+  function unusable. You've been warned!
 "
 	(define (*more-left vert graph best)
 
@@ -279,6 +285,12 @@
   Return the right-most numa that can be linked to NUMA using the
   edges in WELI. This walks the WELI graph, looking for the right-most
   end of it.
+
+  XXX FIXME WARNING DANGER: As written, this runs in exponential time
+  as the size of the graph (the WELI), and thus can explode in
+  runtime, going from a fraction of a second for one graph, and many
+  minutes (or hours) for a graph that is 20% bigger!  This makes this
+  function unusable. You've been warned!
 "
 	(define (*more-right vert graph best)
 

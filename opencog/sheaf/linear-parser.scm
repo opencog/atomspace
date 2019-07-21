@@ -152,6 +152,12 @@
 
   This returns a new list of wedges, such that the resulting graph
   is simply connected.
+
+  XXX FIXME WARNING DANGER: As written, this runs in exponential time
+  as the size of the graph (the wedges), and thus can explode in
+  runtime, going from a fraction of a second for one graph, and many
+  minutes (or hours) for a graph that is 20% bigger!  This makes this
+  function unusable. You've been warned!
 "
 	(define (make-wedge VA VB) (cons (cons VA VB) -inf.0))
 
