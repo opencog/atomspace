@@ -674,9 +674,9 @@ std::string PythonEval::build_python_error_message(
 }
 
 // Check for errors in a script.
-void PythonEval::throw_on_error()
+bool PythonEval::check_for_error()
 {
-    if (not PyErr_Occurred()) return;
+    if (not PyErr_Occurred()) return false;
 
     _error_string = build_python_error_message(NO_FUNCTION_NAME);
     PyErr_Clear();
@@ -688,9 +688,7 @@ void PythonEval::throw_on_error()
     _eval_done = true;
     _caught_error = true;
 
-    // If there was an error, throw an exception so the user knows the
-    // script had a problem.
-    throw RuntimeException(TRACE_INFO, "%s", _error_string.c_str());
+    return true;
 }
 
 /**
@@ -720,7 +718,7 @@ std::string PythonEval::execute_string(const char* command)
             nullptr);
 
     // Check for error before collecting the result.
-    throw_on_error();
+    if (check_for_error()) return _error_string;
 
     std::string retval;
     if (pyResult)
@@ -1176,7 +1174,7 @@ std::string PythonEval::apply_script(const std::string& script)
         PyGILState_Release(gstate);
     } BOOST_SCOPE_EXIT_END
 
-    throw_on_error();
+    if (check_for_error()) return _error_string;
 
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
@@ -1184,7 +1182,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // was an error.
     std::string rc = execute_string(script.c_str());
 
-    throw_on_error();
+    if (check_for_error()) rc += _error_string;
     return rc;
 }
 
