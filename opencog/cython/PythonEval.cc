@@ -1542,6 +1542,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 
 wait_for_more:
     _caught_error = false;
+    _error_string = "";
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
@@ -1567,6 +1568,7 @@ std::string PythonEval::poll_result()
 
     std::string r = _result;
     _result.clear();
+    if (_caught_error) r += _error_string;
     return r;
 }
 
