@@ -678,7 +678,7 @@ void PythonEval::throw_on_error()
 {
     if (not PyErr_Occurred()) return;
 
-    std::string errorString = build_python_error_message(NO_FUNCTION_NAME);
+    _error_string = build_python_error_message(NO_FUNCTION_NAME);
     PyErr_Clear();
 
     // Clear the evaluator state; else future input is garbaged up.
@@ -690,7 +690,7 @@ void PythonEval::throw_on_error()
 
     // If there was an error, throw an exception so the user knows the
     // script had a problem.
-    throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+    throw RuntimeException(TRACE_INFO, "%s", _error_string.c_str());
 }
 
 /**

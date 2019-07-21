@@ -61,8 +61,8 @@ void SchemeEval::init(void)
 	_eval_thread = SCM_EOL;
 
 	// User error and crash management
-	_error_string = SCM_EOL;
-	_error_string = scm_gc_protect_object(_error_string);
+	_scm_error_string = SCM_EOL;
+	_scm_error_string = scm_gc_protect_object(_scm_error_string);
 
 	_captured_stack = SCM_BOOL_F;
 	_captured_stack = scm_gc_protect_object(_captured_stack);
@@ -192,7 +192,7 @@ void SchemeEval::finish(void)
 		scm_gc_unprotect_object(_pipe);
 	}
 
-	scm_gc_unprotect_object(_error_string);
+	scm_gc_unprotect_object(_scm_error_string);
 	scm_gc_unprotect_object(_captured_stack);
 
 	// Force garbage collection
@@ -218,8 +218,8 @@ void SchemeEval::set_captured_stack(SCM newstack)
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-	SCM olderror = _error_string;
-	_error_string = scm_gc_protect_object(newerror);
+	SCM olderror = _scm_error_string;
+	_scm_error_string = scm_gc_protect_object(newerror);
 	scm_gc_unprotect_object(olderror);
 }
 
@@ -720,30 +720,27 @@ std::string SchemeEval::do_poll_result()
 
 	if (_caught_error)
 	{
-		std::string rv = poll_port();
+		_error_string = poll_port();
 
-		char * str = scm_to_utf8_string(_error_string);
-		rv += str;
+		char * str = scm_to_utf8_string(_scm_error_string);
+		_error_string += str;
 		free(str);
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		rv += "\n";
-		return rv;
+		_error_string += "\n";
+		return _error_string;
 	}
-	else
-	{
-		// First, we get the contents of the output port,
-		// and pass that on.
-		std::string rv = poll_port();
 
-		// Next, we append the "interpreter" output
-		rv += prt(tmp_rc);
-		rv += "\n";
-		scm_remember_upto_here_1(tmp_rc);
-		return rv;
-	}
-	return "#<Error: Unreachable statement reached>";
+	// First, we get the contents of the output port,
+	// and pass that on.
+	std::string rv = poll_port();
+
+	// Next, we append the "interpreter" output
+	rv += prt(tmp_rc);
+	rv += "\n";
+	scm_remember_upto_here_1(tmp_rc);
+	return rv;
 }
 
 /* ============================================================== */
@@ -796,7 +793,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 	if (_caught_error)
 	{
-		char * str = scm_to_utf8_string(_error_string);
+		char * str = scm_to_utf8_string(_scm_error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
