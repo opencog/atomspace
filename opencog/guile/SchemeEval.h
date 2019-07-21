@@ -119,7 +119,7 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_apply_v(void *);
 
 		// Exception and error handling stuff
-		SCM _error_string;
+		SCM _scm_error_string;
 		std::string _error_msg;
 		SCM _captured_stack;
 		void set_error_string(SCM);
