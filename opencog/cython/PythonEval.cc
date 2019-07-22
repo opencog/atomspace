@@ -674,9 +674,9 @@ std::string PythonEval::build_python_error_message(
 }
 
 // Check for errors in a script.
-void PythonEval::throw_on_error()
+bool PythonEval::check_for_error()
 {
-    if (not PyErr_Occurred()) return;
+    if (not PyErr_Occurred()) return false;
 
     _error_string = build_python_error_message(NO_FUNCTION_NAME);
     PyErr_Clear();
@@ -688,9 +688,7 @@ void PythonEval::throw_on_error()
     _eval_done = true;
     _caught_error = true;
 
-    // If there was an error, throw an exception so the user knows the
-    // script had a problem.
-    throw RuntimeException(TRACE_INFO, "%s", _error_string.c_str());
+    return true;
 }
 
 /**
@@ -720,7 +718,7 @@ std::string PythonEval::execute_string(const char* command)
             nullptr);
 
     // Check for error before collecting the result.
-    throw_on_error();
+    if (check_for_error()) return _error_string;
 
     std::string retval;
     if (pyResult)
@@ -1176,7 +1174,7 @@ std::string PythonEval::apply_script(const std::string& script)
         PyGILState_Release(gstate);
     } BOOST_SCOPE_EXIT_END
 
-    throw_on_error();
+    if (check_for_error()) return _error_string;
 
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
@@ -1184,7 +1182,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // was an error.
     std::string rc = execute_string(script.c_str());
 
-    throw_on_error();
+    if (check_for_error()) rc += _error_string;
     return rc;
 }
 
@@ -1454,6 +1452,7 @@ void PythonEval::begin_eval()
     _caught_error = false;
     _pending_input = false;
     _result = "";
+    _capture_stdout = "";
 }
 
 void PythonEval::eval_expr(const std::string& partial_expr)
@@ -1488,6 +1487,12 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 //
 void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
+    int pipefd[2];
+    int rc = 0;
+    int stdout_backup = -1;
+    int nr = 0;
+    char buf[4097];
+
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
@@ -1530,7 +1535,37 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
+    // Capture whatever python prints to stdout
+    // What used to be stdout will now go to the pipe.
+    rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+    OC_ASSERT(0 == rc, "pipe creation failure");
+    stdout_backup = dup(fileno(stdout));
+    OC_ASSERT(0 < stdout_backup, "stdout dup failure");
+    rc = dup2(pipefd[1], fileno(stdout));
+    OC_ASSERT(0 < rc, "pipe splice failure");
+
     _result = apply_script(_input_line);
+
+    // Restore stdout
+    fflush(stdout);
+    rc = write(pipefd[1], "", 1); // null-terminated string!
+    OC_ASSERT(0 < rc, "pipe termination failure");
+    rc = close(pipefd[1]);
+    OC_ASSERT(0 == rc, "pipe close failure");
+    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+    OC_ASSERT(0 < rc, "restore stdout failure");
+
+    nr = read(pipefd[0], buf, sizeof(buf)-1);
+    while (0 < nr)
+    {
+       buf[nr] = 0;
+       if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
+
+       nr = read(pipefd[0], buf, sizeof(buf)-1);
+    }
+
+    // Cleanup.
+    close(pipefd[0]);
 
     _input_line = "";
     _paren_count = 0;
@@ -1544,6 +1579,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 
 wait_for_more:
     _caught_error = false;
+    _error_string = "";
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
@@ -1567,8 +1603,16 @@ std::string PythonEval::poll_result()
         _wait_done.wait(lck, evdone);
     }
 
-    std::string r = _result;
+    std::string r = _capture_stdout + _result;
+
+    // Add the missing newline
+    if (0 < _result.size()) r += "\n";
+
+    // Report the error string too, but only the first time.
+    if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
+
     _result.clear();
+    _capture_stdout.clear();
     return r;
 }
 

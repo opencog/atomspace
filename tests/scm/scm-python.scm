@@ -12,6 +12,6 @@
 (define rc (python-eval "print ('Hello world\\n', 2+2)"))
 
 ; Python print returns 'None'
-(test-assert "python-eval is borken" (string=? rc "None"))
+(test-assert "python-eval is borken" (string=? rc "Hello world\n 4\nNone\n"))
 
 (test-end t)
