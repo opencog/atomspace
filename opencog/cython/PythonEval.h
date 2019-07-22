@@ -82,12 +82,14 @@ class PythonEval : public GenericEval
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
-        std::string execute_string(const char* command);
         PyObject* find_object(const PyObject* pyModule,
                               const std::string& objectName);
         void module_for_function(const std::string& moduleFunction,
                                  PyObject*& pyModule, PyObject*& pyObject,
                                  std::string& functionName);
+
+        std::string execute_string(const char* command);
+        std::string eval_wrap_stdout(const std::string&);
 
         static PythonEval* singletonInstance;
 

@@ -1472,27 +1472,49 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     eval_expr_line(expr);
 }
 
-/// Like eval_expr(), except that it assumes that there is only
-/// one line per call, i.e. that partial expr has been split up
-/// into lines.
+/// Grab what is printed on stdout, so that others may see it.
 //
-// The python interpreter chokes if we send it lines, instead of
-// blocks. Thus, we have to save up whole blocks.  A block consists
-// of:
-//
-// 1) Something that starts unindented, and continues until the
-//    start of the next non-comment unindented line, or until
-//    end-of-file.
-// 2) Anything surrounded by parenthesis, regardless of indentation.
-//
+std::string PythonEval::eval_wrap_stdout(const std::string& expr)
+{
+    // Capture whatever python prints to stdout
+    // What used to be stdout will now go to the pipe.
+    int pipefd[2];
+    int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+    OC_ASSERT(0 == rc, "pipe creation failure");
+    int stdout_backup = dup(fileno(stdout));
+    OC_ASSERT(0 < stdout_backup, "stdout dup failure");
+    rc = dup2(pipefd[1], fileno(stdout));
+    OC_ASSERT(0 < rc, "pipe splice failure");
+
+    std::string res = apply_script(expr);
+
+    // Restore stdout
+    fflush(stdout);
+    rc = write(pipefd[1], "", 1); // null-terminated string!
+    OC_ASSERT(0 < rc, "pipe termination failure");
+    rc = close(pipefd[1]);
+    OC_ASSERT(0 == rc, "pipe close failure");
+    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+    OC_ASSERT(0 < rc, "restore stdout failure");
+
+    char buf[4097];
+    int nr = read(pipefd[0], buf, sizeof(buf)-1);
+    while (0 < nr)
+    {
+       buf[nr] = 0;
+       if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
+
+       nr = read(pipefd[0], buf, sizeof(buf)-1);
+    }
+
+    // Cleanup.
+    close(pipefd[0]);
+
+    return res;
+}
+
 void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
-    int pipefd[2];
-    int rc = 0;
-    int stdout_backup = -1;
-    int nr = 0;
-    char buf[4097];
-
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
@@ -1535,37 +1557,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
-    // Capture whatever python prints to stdout
-    // What used to be stdout will now go to the pipe.
-    rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-    OC_ASSERT(0 == rc, "pipe creation failure");
-    stdout_backup = dup(fileno(stdout));
-    OC_ASSERT(0 < stdout_backup, "stdout dup failure");
-    rc = dup2(pipefd[1], fileno(stdout));
-    OC_ASSERT(0 < rc, "pipe splice failure");
-
-    _result = apply_script(_input_line);
-
-    // Restore stdout
-    fflush(stdout);
-    rc = write(pipefd[1], "", 1); // null-terminated string!
-    OC_ASSERT(0 < rc, "pipe termination failure");
-    rc = close(pipefd[1]);
-    OC_ASSERT(0 == rc, "pipe close failure");
-    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-    OC_ASSERT(0 < rc, "restore stdout failure");
-
-    nr = read(pipefd[0], buf, sizeof(buf)-1);
-    while (0 < nr)
-    {
-       buf[nr] = 0;
-       if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
-
-       nr = read(pipefd[0], buf, sizeof(buf)-1);
-    }
-
-    // Cleanup.
-    close(pipefd[0]);
+    _result = eval_wrap_stdout(_input_line);
 
     _input_line = "";
     _paren_count = 0;
