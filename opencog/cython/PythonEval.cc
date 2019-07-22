@@ -692,11 +692,10 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     copy(boost::filesystem::directory_iterator(directory),
          boost::filesystem::directory_iterator(), back_inserter(files));
 
-    for (PathList::const_iterator it(files.begin());
-            it != files.end(); ++it)
+    for (auto filepath: files)
     {
-        if (it->extension() == boost::filesystem::path(".py"))
-            pyFiles.push_back(*it);
+        if (filepath.extension() == boost::filesystem::path(".py"))
+            pyFiles.push_back(filepath);
     }
 
     // Add the directory we are adding to Python's sys.path
@@ -715,9 +714,8 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     PyObject* pyFromList = PyList_New(0);
 
     // Import each of the ".py" files as a Python module.
-    for (PathList::const_iterator it(pyFiles.begin());
-            it != pyFiles.end(); ++it)
-        this->import_module(*it, pyFromList);
+    for (auto filepath: pyFiles)
+        import_module(filepath, pyFromList);
 
     // Cleanup the reference count for the from list.
     Py_DECREF(pyFromList);
@@ -1234,8 +1232,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // be passed to a Python C API function later that "steals" it.
     // PyObject_GetAttrString already returns new reference, so we
     // do this only for PyDict_GetItemString().
-    if(nullptr == pyObject) Py_INCREF(pyUserFunc);
-    if(pyObject) Py_DECREF(pyObject); // We don't need it anymore
+    if (nullptr == pyObject) Py_INCREF(pyUserFunc);
+    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc))
