@@ -5,7 +5,10 @@
 (define-module (opencog python))
 
 (use-modules (opencog as-config))
-(load-extension (string-append opencog-ext-path-python-scm "libPythonSCM") "opencog_python_init")
+(load-extension (string-append opencog-ext-path-python-scm "libPythonSCM")
+	"opencog_python_init")
+
+(export python-eval python-call-with-as)
 
 (set-procedure-property! python-eval 'documentation
 "
