@@ -90,7 +90,8 @@ class PythonEval : public GenericEval
                                      Handle varargs);
         std::string build_python_error_message(const std::string&);
 
-        std::string execute_string(const char* command);
+        std::string execute_string(const char*);
+        std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
 
         // Single-threded design.
@@ -172,11 +173,6 @@ class PythonEval : public GenericEval
             std::lock_guard<std::mutex> lock(_eval_mutex);
             begin_eval(); eval_expr(expr); return poll_result();
         }
-
-        /**
-         * Runs the Python code contained in 'script'.
-         */
-        std::string execute_script(const std::string& script);
 
         /**
          * Calls the Python function passed in `func`, passing it

@@ -485,6 +485,9 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
     return *singletonInstance;
 }
 
+// ============================================================
+// Python system initialization
+
 void PythonEval::initialize_python_objects_and_imports(void)
 {
     // Grab the GIL
@@ -603,147 +606,267 @@ void PythonEval::print_dictionary(PyObject* pyDict)
     Py_DECREF(pyKeys);
 }
 
-/**
- * Build the Python error message for the current error.
- */
-std::string PythonEval::build_python_error_message(
-                                     const std::string& function_name)
+void PythonEval::add_to_sys_path(std::string path)
 {
-    // Get the error from Python.
-    PyObject *pyErrorType, *pyError, *pyTraceback;
-    PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
+    PyObject* pyPathString = PyBytes_FromString(path.c_str());
+    PyList_Append(_pySysPath, pyPathString);
 
-    if (not pyError) return "No error!";
-
-    // Construct the error message string.
-    std::stringstream errorStringStream;
-    errorStringStream << "Python error";
-
-    if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << " in " << function_name;
-
-    PyObject* pyErrorString = PyObject_Str(pyError);
-#if PY_MAJOR_VERSION == 2
-    char* pythonErrorString = PyBytes_AsString(pyErrorString);
-#else
-    const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
-#endif
-    if (pythonErrorString) {
-        errorStringStream << ": " << pythonErrorString << ".";
-    } else {
-        errorStringStream << ": Undescribed Error.";
-    }
-
-    // Print the traceback, too, if it is provided.
-    if (pyTraceback)
-    {
-#if PY_MAJOR_VERSION == 2
-        PyObject* pyTBString = PyObject_Str(pyTraceback);
-        char* tb = PyBytes_AsString(pyTBString);
-        errorStringStream << "\nTraceback: " << tb;
-        Py_DECREF(pyTBString);
-#else
-        errorStringStream << "\nTraceback (most recent call last):\n";
-
-        PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
-
-        while (pyTracebackObject != NULL) {
-
-            int line_number = pyTracebackObject-> tb_lineno;
-            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
-            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
-
-            errorStringStream << "File \"" << filename <<"\", ";
-            errorStringStream << "line " << line_number <<", ";
-            errorStringStream << "in " << code_name <<"\n";
-
-            pyTracebackObject = pyTracebackObject -> tb_next;
-        }
-#endif
-    }
-
-    // Cleanup the references. NOTE: The traceback can be NULL even
-    // when the others aren't.
-    Py_DECREF(pyErrorType);
-    Py_DECREF(pyError);
-    Py_DECREF(pyErrorString);
-    if (pyTraceback)
-        Py_DECREF(pyTraceback);
-
-    return errorStringStream.str();
-}
-
-// Check for errors in a script.
-bool PythonEval::check_for_error()
-{
-    if (not PyErr_Occurred()) return false;
-
-    _error_string = build_python_error_message(NO_FUNCTION_NAME);
-    PyErr_Clear();
-
-    // Clear the evaluator state; else future input is garbaged up.
-    _input_line = "";
-    _paren_count = 0;
-    _pending_input = false;
-    _eval_done = true;
-    _caught_error = true;
-
-    return true;
-}
-
-/**
- * Execute the python string at the __main__ module context.
- *
- * This replaces a call to PyRun_SimpleString which clears errors so
- * that a subsequent call to Py_Error() returns false. This version
- * does everything that PyRun_SimpleString does except it does not
- * call PyErr_Print() and PyErr_Clear().
- */
-std::string PythonEval::execute_string(const char* command)
-{
-    // We use Py_file_input here, instead of Py_single_input, because
-    // Py_single_input spews errors on blank lines.  However, the
-    // flip-side is that simple expressions, such as 2+2, generate no
-    // output at all when Py_file_input is used; they do generate output
-    // when Py_single_input is used.
+    // We must decrement because, unlike PyList_SetItem, PyList_Append
+    // does not "steal" the reference we pass to it. So this:
     //
-    // In either case, the pyResult does not have any string
-    // repesentation; using PyObject_Str(pyResult) and then
-    // PyString_AsString to print it gives "None" in all situations.
-    // Because of this, I don't know how to write a valid command
-    // interpreter for the python shell ...
-    PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    PyObject* pyResult = PyRun_StringFlags(command,
-            Py_file_input, pyRootDictionary, pyRootDictionary,
-            nullptr);
+    // PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
+    //
+    // leaks memory. So we need to save the reference as above and
+    // decrement it, as below.
+    //
+    Py_DECREF(pyPathString);
+}
 
-    // Check for error before collecting the result.
-    if (check_for_error()) return _error_string;
+// ====================================================
+// Finding and loading python modules.
 
-    std::string retval;
-    if (pyResult)
+const int ABSOLUTE_IMPORTS_ONLY = 0;
+
+void PythonEval::import_module(const boost::filesystem::path &file,
+                               PyObject* pyFromList)
+{
+    // The pyFromList parameter corresponds to what would appear in
+    // an import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, this corresponds to an import of the
+    // entire module as is done in the simple import statement:
+    //
+    // import <module>
+
+    // Get the module name from the Python file name by removing the ".py"
+    std::string fileName = file.filename().c_str();
+    std::string moduleName = fileName.substr(0, fileName.length()-3);
+
+    logger().info("    importing Python module: " + moduleName);
+
+    // Import the entire module into the current Python environment.
+    PyObject* pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
+            _pyGlobal, _pyLocal, pyFromList,
+            ABSOLUTE_IMPORTS_ONLY);
+
+    if (nullptr == pyModule)
     {
-        PyObject* obrep = PyObject_Repr(pyResult);
-#if PY_MAJOR_VERSION < 3
-        retval = PyString_AsString(obrep);
-#else
-        PyObject* pyStr = nullptr;
-        if (not PyBytes_Check(obrep))
-        {
-            pyStr = PyUnicode_AsEncodedString(obrep, "UTF-8", "strict");
-            Py_DECREF(obrep);
-            obrep = pyStr;
-        }
-        retval = PyBytes_AS_STRING(obrep);
-#endif
-        Py_DECREF(obrep);
-        Py_DECREF(pyResult);
+        if (PyErr_Occurred()) PyErr_Print();
+        logger().warn() << "Couldn't import '" << moduleName << "' module";
+        return;
     }
 
-    PyObject *f = PySys_GetObject((char *) "stdout");
-    if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
+#ifdef SET_ATOMSPACE_IN_MODULE
+    // This seems like a really bad idea ... why would we do this?
+    PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
 
-    return retval;
+    // Add the ATOMSPACE object to this module
+    PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
+    PyDict_SetItemString(pyModuleDictionary, "ATOMSPACE",
+            pyAtomSpaceObject);
+
+    // This decrement is needed because PyDict_SetItemString does
+    // not "steal" the reference, unlike PyList_SetItem.
+    Py_DECREF(pyAtomSpaceObject);
+    if (nullptr == _atomspace)
+        logger().warn("Python module initialized with null atomspace!");
+#endif // SET_ATOMSPACE_IN_MODULE
+
+    // We need to increment the pyModule reference because
+    // PyModule_AddObject "steals" it and we're keeping a copy
+    // in our modules list.
+    Py_INCREF(pyModule);
+
+    // Add the module name to the root module.
+    PyModule_AddObject(_pyRootModule, moduleName.c_str(), pyModule);
+
+    // Add the module to our modules list. So don't decrement the
+    // Python reference in this function.
+    _modules[moduleName] = pyModule;
+}
+
+/**
+* Add all the .py files in the given directory as modules to __main__ and
+* keep the references in a dictionary (this->modules)
+*/
+void PythonEval::add_module_directory(const boost::filesystem::path &directory)
+{
+    vector<boost::filesystem::path> files;
+    vector<boost::filesystem::path> pyFiles;
+
+    // Loop over the files in the directory looking for Python files.
+    copy(boost::filesystem::directory_iterator(directory),
+         boost::filesystem::directory_iterator(), back_inserter(files));
+
+    for (vector<boost::filesystem::path>::const_iterator it(files.begin());
+            it != files.end(); ++it)
+    {
+        if (it->extension() == boost::filesystem::path(".py"))
+            pyFiles.push_back(*it);
+    }
+
+    // Add the directory we are adding to Python's sys.path
+    this->add_to_sys_path(directory.c_str());
+
+    // The pyFromList variable corresponds to what would appear in
+    // an import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, as below, this corresponds to an import
+    // of the entire module as is done in the simple import statement:
+    //
+    // import <module>
+    //
+    PyObject* pyFromList = PyList_New(0);
+
+    // Import each of the ".py" files as a Python module.
+    for (vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
+            it != pyFiles.end(); ++it)
+        this->import_module(*it, pyFromList);
+
+    // Cleanup the reference count for the from list.
+    Py_DECREF(pyFromList);
+}
+
+/**
+* Add the .py file in the given path as a module to __main__ and add the
+* reference to the dictionary (this->modules)
+*/
+void PythonEval::add_module_file(const boost::filesystem::path &file)
+{
+    // Add this file's parent path to sys.path so Python imports
+    // can find it.
+    this->add_to_sys_path(file.parent_path().c_str());
+
+    // The pyFromList variable corresponds to what would appear in
+    // an import statement after the import:
+    //
+    // from <module> import <from list>
+    //
+    // When this list is empty, as below, this corresponds to an import
+    // of the entire module as is done in the simple import statement:
+    //
+    // import <module>
+
+    // Import this file as a module.
+    PyObject* pyFromList = PyList_New(0);
+    this->import_module(file, pyFromList);
+    Py_DECREF(pyFromList);
+}
+
+/**
+ * Get a path and determine if it is a file or directory, then call the
+ * corresponding function specific to directories and files.
+ */
+void PythonEval::add_modules_from_path(std::string pathString)
+{
+    std::vector<std::string> dirs;
+    std::vector<std::string> files;
+    bool found = false;
+
+    auto loadmod_prep = [&dirs, &files, &found](const std::string& abspath,
+            const char** config_paths)
+    {
+        // If the resulting path is a directory or a regular file,
+        // then push to loading list.
+        struct stat finfo;
+        int stat_ret = stat(abspath.c_str(), &finfo);
+
+        if (stat_ret != 0)
+            return;
+
+        if (S_ISDIR(finfo.st_mode)) {
+            found = true;
+            dirs.push_back(abspath);
+            logger().info() << "Found python module in directory \'"
+                << abspath << "\'";
+        }
+
+        else if (S_ISREG(finfo.st_mode)) {
+            found = true;
+            files.push_back(abspath);
+            logger().info() << "Found python module in file \'"
+                << abspath << "\'";
+        }
+    };
+
+    const char** config_paths = get_module_paths();
+    std::vector<std::string> paths;
+    tokenize(pathString, std::back_inserter(paths), ",");
+    for (const auto& pathString : paths)
+    {
+        if ('/' == pathString[0]) {
+            loadmod_prep(pathString, NULL);
+            continue;
+        }
+
+        else if ('.' == pathString[0]) {
+            boost::filesystem::path base(getcwd(NULL, 0));
+            auto pypath = boost::filesystem::canonical(pathString, base);
+            loadmod_prep(pypath.string(), NULL);
+            continue;
+
+        } else {
+            for (int i = 0; config_paths[i] != NULL; ++i) {
+                std::string abspath = config_paths[i];
+                abspath += "/";
+                abspath += pathString;
+                loadmod_prep(abspath, config_paths);
+            }
+        }
+    }
+
+    if (not found)
+    {
+        Logger::Level btl = logger().get_backtrace_level();
+        logger().set_backtrace_level(Logger::Level::NONE);
+        logger().warn() << "Failed to load python module \'"
+            << pathString << "\', searched directories:";
+        for (int i = 0; config_paths[i] != NULL; ++i) {
+            logger().warn() << "Directory: " << config_paths[i];
+        }
+        logger().set_backtrace_level(btl);
+    }
+
+    // First, load directories, and then load files, to properly
+    // handle import dependencies.
+    dirs.insert(dirs.end(), files.begin(), files.end());
+    for (const auto& abspath : dirs)
+        add_modules_from_abspath(abspath);
+}
+
+void PythonEval::add_modules_from_abspath(std::string pathString)
+{
+    logger().info("Adding Python module (or directory): " + pathString);
+
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    struct stat finfo;
+    int stat_ret = stat(pathString.c_str(), &finfo);
+
+    if (stat_ret != 0)
+    {
+        logger().warn() << "Python module path \'" << pathString
+                        << "\' can't be found";
+    }
+    else
+    {
+        if (S_ISDIR(finfo.st_mode))
+            add_module_directory(pathString);
+        else if (S_ISREG(finfo.st_mode))
+            add_module_file(pathString);
+        else
+            logger().warn() << "Python module path \'" << pathString
+                            << "\' can't be found";
+    }
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 }
 
 /**
@@ -817,6 +940,10 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
     }
     if(pyObject && !bDecRef) Py_INCREF(pyObject); // for uniformity to DEC later in any case
 }
+
+// ===========================================================
+// Calling functions and applying functions to arguments
+// Most of these are part of the public API.
 
 /**
  * Call the user defined function with the arguments passed in the
@@ -1158,6 +1285,157 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyGILState_Release(gstate);
 }
 
+// ===================================================================
+// Error handling
+
+/**
+ * Build the Python error message for the current error.
+ */
+std::string PythonEval::build_python_error_message(
+                                     const std::string& function_name)
+{
+    // Get the error from Python.
+    PyObject *pyErrorType, *pyError, *pyTraceback;
+    PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
+
+    if (not pyError) return "No error!";
+
+    // Construct the error message string.
+    std::stringstream errorStringStream;
+    errorStringStream << "Python error";
+
+    if (function_name != NO_FUNCTION_NAME)
+        errorStringStream << " in " << function_name;
+
+    PyObject* pyErrorString = PyObject_Str(pyError);
+#if PY_MAJOR_VERSION == 2
+    char* pythonErrorString = PyBytes_AsString(pyErrorString);
+#else
+    const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+#endif
+    if (pythonErrorString) {
+        errorStringStream << ": " << pythonErrorString << ".";
+    } else {
+        errorStringStream << ": Undescribed Error.";
+    }
+
+    // Print the traceback, too, if it is provided.
+    if (pyTraceback)
+    {
+#if PY_MAJOR_VERSION == 2
+        PyObject* pyTBString = PyObject_Str(pyTraceback);
+        char* tb = PyBytes_AsString(pyTBString);
+        errorStringStream << "\nTraceback: " << tb;
+        Py_DECREF(pyTBString);
+#else
+        errorStringStream << "\nTraceback (most recent call last):\n";
+
+        PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
+
+        while (pyTracebackObject != NULL) {
+
+            int line_number = pyTracebackObject-> tb_lineno;
+            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
+            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
+
+            errorStringStream << "File \"" << filename <<"\", ";
+            errorStringStream << "line " << line_number <<", ";
+            errorStringStream << "in " << code_name <<"\n";
+
+            pyTracebackObject = pyTracebackObject -> tb_next;
+        }
+#endif
+    }
+
+    // Cleanup the references. NOTE: The traceback can be NULL even
+    // when the others aren't.
+    Py_DECREF(pyErrorType);
+    Py_DECREF(pyError);
+    Py_DECREF(pyErrorString);
+    if (pyTraceback)
+        Py_DECREF(pyTraceback);
+
+    return errorStringStream.str();
+}
+
+// Check for errors in a script.
+bool PythonEval::check_for_error()
+{
+    if (not PyErr_Occurred()) return false;
+
+    _error_string = build_python_error_message(NO_FUNCTION_NAME);
+    PyErr_Clear();
+
+    // Clear the evaluator state; else future input is garbaged up.
+    _input_line = "";
+    _paren_count = 0;
+    _pending_input = false;
+    _eval_done = true;
+    _caught_error = true;
+
+    return true;
+}
+
+// ===================================================================
+// Private Execution helper functions
+
+/**
+ * Execute the python string at the __main__ module context.
+ *
+ * This replaces a call to PyRun_SimpleString which clears errors so
+ * that a subsequent call to Py_Error() returns false. This version
+ * does everything that PyRun_SimpleString does except it does not
+ * call PyErr_Print() and PyErr_Clear().
+ */
+std::string PythonEval::execute_string(const char* command)
+{
+    // We use Py_file_input here, instead of Py_single_input, because
+    // Py_single_input spews errors on blank lines.  However, the
+    // flip-side is that simple expressions, such as 2+2, generate no
+    // output at all when Py_file_input is used; they do generate output
+    // when Py_single_input is used.
+    //
+    // In either case, the pyResult does not have any string
+    // repesentation; using PyObject_Str(pyResult) and then
+    // PyString_AsString to print it gives "None" in all situations.
+    // Because of this, I don't know how to write a valid command
+    // interpreter for the python shell ...
+    PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
+    PyObject* pyResult = PyRun_StringFlags(command,
+            Py_file_input, pyRootDictionary, pyRootDictionary,
+            nullptr);
+
+    // Check for error before collecting the result.
+    if (check_for_error()) return _error_string;
+
+    std::string retval;
+    if (pyResult)
+    {
+        PyObject* obrep = PyObject_Repr(pyResult);
+#if PY_MAJOR_VERSION < 3
+        retval = PyString_AsString(obrep);
+#else
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(obrep))
+        {
+            pyStr = PyUnicode_AsEncodedString(obrep, "UTF-8", "strict");
+            Py_DECREF(obrep);
+            obrep = pyStr;
+        }
+        retval = PyBytes_AS_STRING(obrep);
+#endif
+        Py_DECREF(obrep);
+        Py_DECREF(pyResult);
+    }
+
+    PyObject *f = PySys_GetObject((char *) "stdout");
+    if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
+
+    return retval;
+}
+
+
+/// Exactly the same as execute_string, but the GIL lock is taken.
 std::string PythonEval::execute_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -1186,293 +1464,9 @@ std::string PythonEval::execute_script(const std::string& script)
     return rc;
 }
 
-void PythonEval::add_to_sys_path(std::string path)
-{
-    PyObject* pyPathString = PyBytes_FromString(path.c_str());
-    PyList_Append(_pySysPath, pyPathString);
-
-    // We must decrement because, unlike PyList_SetItem, PyList_Append
-    // does not "steal" the reference we pass to it. So this:
-    //
-    // PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
-    //
-    // leaks memory. So we need to save the reference as above and
-    // decrement it, as below.
-    //
-    Py_DECREF(pyPathString);
-}
-
-const int ABSOLUTE_IMPORTS_ONLY = 0;
-
-void PythonEval::import_module(const boost::filesystem::path &file,
-                               PyObject* pyFromList)
-{
-    // The pyFromList parameter corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, this corresponds to an import of the
-    // entire module as is done in the simple import statement:
-    //
-    // import <module>
-
-    // Get the module name from the Python file name by removing the ".py"
-    std::string fileName = file.filename().c_str();
-    std::string moduleName = fileName.substr(0, fileName.length()-3);
-
-    logger().info("    importing Python module: " + moduleName);
-
-    // Import the entire module into the current Python environment.
-    PyObject* pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
-            _pyGlobal, _pyLocal, pyFromList,
-            ABSOLUTE_IMPORTS_ONLY);
-
-    if (nullptr == pyModule)
-    {
-        if (PyErr_Occurred()) PyErr_Print();
-        logger().warn() << "Couldn't import '" << moduleName << "' module";
-        return;
-    }
-
-#ifdef SET_ATOMSPACE_IN_MODULE
-    // This seems like a really bad idea ... why would we do this?
-    PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
-
-    // Add the ATOMSPACE object to this module
-    PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
-    PyDict_SetItemString(pyModuleDictionary, "ATOMSPACE",
-            pyAtomSpaceObject);
-
-    // This decrement is needed because PyDict_SetItemString does
-    // not "steal" the reference, unlike PyList_SetItem.
-    Py_DECREF(pyAtomSpaceObject);
-    if (nullptr == _atomspace)
-        logger().warn("Python module initialized with null atomspace!");
-#endif // SET_ATOMSPACE_IN_MODULE
-
-    // We need to increment the pyModule reference because
-    // PyModule_AddObject "steals" it and we're keeping a copy
-    // in our modules list.
-    Py_INCREF(pyModule);
-
-    // Add the module name to the root module.
-    PyModule_AddObject(_pyRootModule, moduleName.c_str(), pyModule);
-
-    // Add the module to our modules list. So don't decrement the
-    // Python reference in this function.
-    _modules[moduleName] = pyModule;
-}
-
-/**
-* Add all the .py files in the given directory as modules to __main__ and
-* keep the references in a dictionary (this->modules)
-*/
-void PythonEval::add_module_directory(const boost::filesystem::path &directory)
-{
-    vector<boost::filesystem::path> files;
-    vector<boost::filesystem::path> pyFiles;
-
-    // Loop over the files in the directory looking for Python files.
-    copy(boost::filesystem::directory_iterator(directory),
-         boost::filesystem::directory_iterator(), back_inserter(files));
-
-    for (vector<boost::filesystem::path>::const_iterator it(files.begin());
-            it != files.end(); ++it)
-    {
-        if (it->extension() == boost::filesystem::path(".py"))
-            pyFiles.push_back(*it);
-    }
-
-    // Add the directory we are adding to Python's sys.path
-    this->add_to_sys_path(directory.c_str());
-
-    // The pyFromList variable corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, as below, this corresponds to an import
-    // of the entire module as is done in the simple import statement:
-    //
-    // import <module>
-    //
-    PyObject* pyFromList = PyList_New(0);
-
-    // Import each of the ".py" files as a Python module.
-    for (vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
-            it != pyFiles.end(); ++it)
-        this->import_module(*it, pyFromList);
-
-    // Cleanup the reference count for the from list.
-    Py_DECREF(pyFromList);
-}
-
-/**
-* Add the .py file in the given path as a module to __main__ and add the
-* reference to the dictionary (this->modules)
-*/
-void PythonEval::add_module_file(const boost::filesystem::path &file)
-{
-    // Add this file's parent path to sys.path so Python imports
-    // can find it.
-    this->add_to_sys_path(file.parent_path().c_str());
-
-    // The pyFromList variable corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, as below, this corresponds to an import
-    // of the entire module as is done in the simple import statement:
-    //
-    // import <module>
-
-    // Import this file as a module.
-    PyObject* pyFromList = PyList_New(0);
-    this->import_module(file, pyFromList);
-    Py_DECREF(pyFromList);
-}
-
-/**
- * Get a path and determine if it is a file or directory, then call the
- * corresponding function specific to directories and files.
- */
-void PythonEval::add_modules_from_path(std::string pathString)
-{
-    std::vector<std::string> dirs;
-    std::vector<std::string> files;
-    bool found = false;
-
-    auto loadmod_prep = [&dirs, &files, &found](const std::string& abspath,
-            const char** config_paths)
-    {
-        // If the resulting path is a directory or a regular file,
-        // then push to loading list.
-        struct stat finfo;
-        int stat_ret = stat(abspath.c_str(), &finfo);
-        
-        if (stat_ret != 0)
-            return;
-
-        if (S_ISDIR(finfo.st_mode)) {
-            found = true;
-            dirs.push_back(abspath);
-            logger().info() << "Found python module in directory \'"
-                << abspath << "\'";
-        }
-
-        else if (S_ISREG(finfo.st_mode)) {
-            found = true;
-            files.push_back(abspath);
-            logger().info() << "Found python module in file \'"
-                << abspath << "\'";
-        }
-    };
-
-    const char** config_paths = get_module_paths();
-    std::vector<std::string> paths;
-    tokenize(pathString, std::back_inserter(paths), ",");
-    for (const auto& pathString : paths)
-    {
-        if ('/' == pathString[0]) {
-            loadmod_prep(pathString, NULL);
-            continue;
-        }
-
-        else if ('.' == pathString[0]) {
-            boost::filesystem::path base(getcwd(NULL, 0));
-            auto pypath = boost::filesystem::canonical(pathString, base);
-            loadmod_prep(pypath.string(), NULL);
-            continue;
-
-        } else {
-            for (int i = 0; config_paths[i] != NULL; ++i) {
-                std::string abspath = config_paths[i];
-                abspath += "/";
-                abspath += pathString;
-                loadmod_prep(abspath, config_paths);
-            }
-        }
-    }
-
-    if (not found)
-    {
-        Logger::Level btl = logger().get_backtrace_level();
-        logger().set_backtrace_level(Logger::Level::NONE);
-        logger().warn() << "Failed to load python module \'"
-            << pathString << "\', searched directories:";
-        for (int i = 0; config_paths[i] != NULL; ++i) {
-            logger().warn() << "Directory: " << config_paths[i];
-        }
-        logger().set_backtrace_level(btl);
-    }
-
-    // First, load directories, and then load files, to properly
-    // handle import dependencies.
-    dirs.insert(dirs.end(), files.begin(), files.end());
-    for (const auto& abspath : dirs)
-        add_modules_from_abspath(abspath);
-}
-
-void PythonEval::add_modules_from_abspath(std::string pathString)
-{
-    logger().info("Adding Python module (or directory): " + pathString);
-
-    // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    struct stat finfo;
-    int stat_ret = stat(pathString.c_str(), &finfo);
-    
-    if (stat_ret != 0)
-    {
-        logger().warn() << "Python module path \'" << pathString
-                        << "\' can't be found";
-    }
-    else
-    {
-        if (S_ISDIR(finfo.st_mode))
-            add_module_directory(pathString);
-        else if (S_ISREG(finfo.st_mode))
-            add_module_file(pathString);
-        else
-            logger().warn() << "Python module path \'" << pathString
-                            << "\' can't be found";
-    }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-}
-
-void PythonEval::begin_eval()
-{
-    _eval_done = false;
-    _caught_error = false;
-    _pending_input = false;
-    _result = "";
-    _capture_stdout = "";
-}
-
-void PythonEval::eval_expr(const std::string& partial_expr)
-{
-    // XXX FIXME this does a lot of wasteful string copying.
-    std::string expr = partial_expr;
-    size_t nl = expr.find_first_of("\n\r");
-    while (std::string::npos != nl)
-    {
-        if ('\r' == expr[nl]) nl++;
-        if ('\n' == expr[nl]) nl++;
-        std::string part = expr.substr(0, nl);
-        eval_expr_line(part);
-        expr = expr.substr(nl);
-        nl = expr.find_first_of("\n\r");
-    }
-    eval_expr_line(expr);
-}
-
-/// Grab what is printed on stdout, so that others may see it.
+/// Exactly the same as execute_script, but stdout is redirected.
+/// Grab what is printed on stdout, and save it, so that we can
+/// then return it to the user.
 //
 std::string PythonEval::exec_wrap_stdout(const std::string& expr)
 {
@@ -1582,6 +1576,35 @@ wait_for_more:
     _wait_done.notify_all();
 }
 
+// ===================================================================
+// Public Execution API
+
+void PythonEval::begin_eval()
+{
+    _eval_done = false;
+    _caught_error = false;
+    _pending_input = false;
+    _result = "";
+    _capture_stdout = "";
+}
+
+void PythonEval::eval_expr(const std::string& partial_expr)
+{
+    // XXX FIXME this does a lot of wasteful string copying.
+    std::string expr = partial_expr;
+    size_t nl = expr.find_first_of("\n\r");
+    while (std::string::npos != nl)
+    {
+        if ('\r' == expr[nl]) nl++;
+        if ('\n' == expr[nl]) nl++;
+        std::string part = expr.substr(0, nl);
+        eval_expr_line(part);
+        expr = expr.substr(nl);
+        nl = expr.find_first_of("\n\r");
+    }
+    eval_expr_line(expr);
+}
+
 std::string PythonEval::poll_result()
 {
     if (not _eval_done)
@@ -1620,3 +1643,5 @@ void PythonEval::interrupt(void)
 
     logger().warn("[PythonEval] interrupt not implemented!\n");
 }
+
+// =========== END OF FILE =========
