@@ -36,38 +36,21 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PythonEval.h"
 
+// This is an header in the build dreictory, auto-gened by cython
 #include "opencog/atomspace_api.h"
 
-using std::string;
-using std::vector;
-
 using namespace opencog;
-
-//#define DPRINTF printf
-#define DPRINTF(...)
 
 #ifdef __APPLE__
   #define secure_getenv getenv
 #endif
 
-PythonEval* PythonEval::singletonInstance = NULL;
-
 const int NO_SIGNAL_HANDLERS = 0;
 const char* NO_FUNCTION_NAME = "";
-const int SIMPLE_STRING_SUCCESS = 0;
-const int SIMPLE_STRING_FAILURE = -1;
-const int MISSING_FUNC_CODE = -1;
-
-// The Python functions can't take const flags.
-static bool already_initialized = false;
-static bool initialized_outside_opencog = false;
-static void *_dlso = nullptr;
-std::recursive_mutex PythonEval::_mtx;
 
 /*
  * @todo When can we remove the singleton instance? Answer: not sure.
@@ -93,6 +76,125 @@ std::recursive_mutex PythonEval::_mtx;
  *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
+PythonEval* PythonEval::singletonInstance = NULL;
+
+PythonEval::PythonEval(AtomSpace* atomspace)
+{
+    // Check that this is the first and only PythonEval object.
+    if (singletonInstance) {
+        throw RuntimeException(TRACE_INFO,
+            "Can't create more than one PythonEval singleton instance!");
+    }
+
+    // Remember our atomspace.
+    _atomspace = atomspace;
+    _paren_count = 0;
+
+    // Initialize Python objects and imports.
+    //
+    // Strange but true: one can use the atomspace, and put atoms
+    // in it .. using the type constructors and everything (e.g.
+    // the demos in the /examples/python directory) and never ever
+    // actually call global_python_initialize() ... it might never
+    // be called, if the python evaluator (i.e. this object) is
+    // never used or needed.  I thought this was unexpected, so I
+    // mention it here.
+    global_python_initialize();
+    this->initialize_python_objects_and_imports();
+}
+
+PythonEval::~PythonEval()
+{
+    logger().info("PythonEval::%s destructor", __FUNCTION__);
+
+    // Grab the GIL
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    // Decrement reference counts for instance Python object references.
+    Py_DECREF(_pyGlobal);
+    Py_DECREF(_pyLocal);
+
+    // NOTE: The following come from Python C api calls that return borrowed
+    // references. However, we have called Py_INCREF( x ) to promote them
+    // to full references so we can and must decrement them here.
+    Py_DECREF(_pySysPath);
+    Py_DECREF(_pyRootModule);
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
+}
+
+/**
+* Use a singleton instance to avoid initializing python interpreter twice.
+*/
+void PythonEval::create_singleton_instance(AtomSpace* atomspace)
+{
+    if (singletonInstance) return;
+
+    // Create the single instance of a PythonEval object.
+    singletonInstance = new PythonEval(atomspace);
+}
+
+void PythonEval::delete_singleton_instance()
+{
+    if (!singletonInstance) return;
+
+    // Delete the singleton PythonEval instance.
+    delete singletonInstance;
+    singletonInstance = NULL;
+}
+
+PythonEval& PythonEval::instance(AtomSpace* atomspace)
+{
+    // Make sure we have a singleton.
+    if (!singletonInstance)
+        create_singleton_instance(atomspace);
+
+    // Make sure the atom space is the same as the one in the singleton.
+    if (atomspace and singletonInstance->_atomspace != atomspace) {
+
+#define CHECK_SINGLETON
+#ifdef CHECK_SINGLETON
+        if (nullptr != singletonInstance->_atomspace)
+        {
+            // Someone is trying to initialize the Python interpreter on a
+            // different AtomSpace.  Because of the singleton design of the
+            // the CosgServer+AtomSpace, there is no easy way to support this...
+            // logger().error() will print a stack tace to tell use who
+            // is doing this.
+            logger().error("PythonEval: ",
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p uuid=%d "
+                "New ptr=%p uuid=%d\n",
+                singletonInstance->_atomspace,
+                singletonInstance->_atomspace->get_uuid(),
+                atomspace, atomspace?atomspace->get_uuid():0);
+
+            throw RuntimeException(TRACE_INFO,
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
+                singletonInstance->_atomspace, atomspace);
+        }
+#else
+        // We need to be able to call the python interpreter with
+        // different atomspaces; for example, we need to use temporary
+        // atomspaces when evaluating virtual links.  So, just set it
+        // here.  Hopefully the user will set it back, after using the
+        // temp atomspace.   Cleary, this is not thread-safe, and will
+        // bust with multiple threads. But the whole singleton-instance
+        // design is fundamentally flawed, so there is not much we can
+        // do about it until someone takes the time to fix this class
+        // to allow multiple instances.
+        //
+        singletonInstance->_atomspace = atomspace;
+#endif
+    }
+    return *singletonInstance;
+}
+
+// ====================================================
+// Initialization of search paths for python modules.
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
@@ -275,6 +377,13 @@ static bool try_to_load_modules(const char ** config_paths)
     return (NULL != py_atomspace);
 }
 
+// ============================================================
+// Python system initialization
+
+static bool already_initialized = false;
+static bool initialized_outside_opencog = false;
+static void *_dlso = nullptr;
+
 void opencog::global_python_initialize()
 {
     // Don't initialize twice
@@ -369,124 +478,6 @@ void opencog::global_python_finalize()
 
     logger().debug("[global_python_finalize] Finish");
 }
-
-PythonEval::PythonEval(AtomSpace* atomspace)
-{
-    // Check that this is the first and only PythonEval object.
-    if (singletonInstance) {
-        throw RuntimeException(TRACE_INFO,
-            "Can't create more than one PythonEval singleton instance!");
-    }
-
-    // Remember our atomspace.
-    _atomspace = atomspace;
-    _paren_count = 0;
-
-    // Initialize Python objects and imports.
-    //
-    // Strange but true: one can use the atomspace, and put atoms
-    // in it .. using the type constructors and everything (e.g.
-    // the demos in the /examples/python directory) and never ever
-    // actually call global_python_initialize() ... it might never
-    // be called, if the python evaluator (i.e. this object) is
-    // never used or needed.  I thought this was unexpected, so I
-    // mention it here.
-    global_python_initialize();
-    this->initialize_python_objects_and_imports();
-}
-
-PythonEval::~PythonEval()
-{
-    logger().info("PythonEval::%s destructor", __FUNCTION__);
-
-    // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    // Decrement reference counts for instance Python object references.
-    Py_DECREF(_pyGlobal);
-    Py_DECREF(_pyLocal);
-
-    // NOTE: The following come from Python C api calls that return borrowed
-    // references. However, we have called Py_INCREF( x ) to promote them
-    // to full references so we can and must decrement them here.
-    Py_DECREF(_pySysPath);
-    Py_DECREF(_pyRootModule);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-}
-
-/**
-* Use a singleton instance to avoid initializing python interpreter twice.
-*/
-void PythonEval::create_singleton_instance(AtomSpace* atomspace)
-{
-    if (singletonInstance) return;
-
-    // Create the single instance of a PythonEval object.
-    singletonInstance = new PythonEval(atomspace);
-}
-
-void PythonEval::delete_singleton_instance()
-{
-    if (!singletonInstance) return;
-
-    // Delete the singleton PythonEval instance.
-    delete singletonInstance;
-    singletonInstance = NULL;
-}
-
-PythonEval& PythonEval::instance(AtomSpace* atomspace)
-{
-    // Make sure we have a singleton.
-    if (!singletonInstance)
-        create_singleton_instance(atomspace);
-
-    // Make sure the atom space is the same as the one in the singleton.
-    if (atomspace and singletonInstance->_atomspace != atomspace) {
-
-#define CHECK_SINGLETON
-#ifdef CHECK_SINGLETON
-        if (nullptr != singletonInstance->_atomspace)
-        {
-            // Someone is trying to initialize the Python interpreter on a
-            // different AtomSpace.  Because of the singleton design of the
-            // the CosgServer+AtomSpace, there is no easy way to support this...
-            // logger().error() will print a stack tace to tell use who
-            // is doing this.
-            logger().error("PythonEval: ",
-                "Trying to re-initialize python interpreter with different\n"
-                "AtomSpace ptr! Current ptr=%p uuid=%d "
-                "New ptr=%p uuid=%d\n",
-                singletonInstance->_atomspace,
-                singletonInstance->_atomspace->get_uuid(),
-                atomspace, atomspace?atomspace->get_uuid():0);
-
-            throw RuntimeException(TRACE_INFO,
-                "Trying to re-initialize python interpreter with different\n"
-                "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
-                singletonInstance->_atomspace, atomspace);
-        }
-#else
-        // We need to be able to call the python interpreter with
-        // different atomspaces; for example, we need to use temporary
-        // atomspaces when evaluating virtual links.  So, just set it
-        // here.  Hopefully the user will set it back, after using the
-        // temp atomspace.   Cleary, this is not thread-safe, and will
-        // bust with multiple threads. But the whole singleton-instance
-        // design is fundamentally flawed, so there is not much we can
-        // do about it until someone takes the time to fix this class
-        // to allow multiple instances.
-        //
-        singletonInstance->_atomspace = atomspace;
-#endif
-    }
-    return *singletonInstance;
-}
-
-// ============================================================
-// Python system initialization
 
 void PythonEval::initialize_python_objects_and_imports(void)
 {
@@ -693,14 +684,15 @@ void PythonEval::import_module(const boost::filesystem::path &file,
 */
 void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 {
-    vector<boost::filesystem::path> files;
-    vector<boost::filesystem::path> pyFiles;
+    typedef std::vector<boost::filesystem::path> PathList;
+    PathList files;
+    PathList pyFiles;
 
     // Loop over the files in the directory looking for Python files.
     copy(boost::filesystem::directory_iterator(directory),
          boost::filesystem::directory_iterator(), back_inserter(files));
 
-    for (vector<boost::filesystem::path>::const_iterator it(files.begin());
+    for (PathList::const_iterator it(files.begin());
             it != files.end(); ++it)
     {
         if (it->extension() == boost::filesystem::path(".py"))
@@ -723,7 +715,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     PyObject* pyFromList = PyList_New(0);
 
     // Import each of the ".py" files as a Python module.
-    for (vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
+    for (PathList::const_iterator it(pyFiles.begin());
             it != pyFiles.end(); ++it)
         this->import_module(*it, pyFromList);
 
@@ -944,6 +936,8 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
 // ===========================================================
 // Calling functions and applying functions to arguments
 // Most of these are part of the public API.
+
+std::recursive_mutex PythonEval::_mtx;
 
 /**
  * Call the user defined function with the arguments passed in the
