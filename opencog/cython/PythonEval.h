@@ -76,9 +76,6 @@ class PythonEval : public GenericEval
         void add_modules_from_abspath(std::string path);
 
         // Python utility functions
-        PyObject* call_user_function(const std::string& func,
-                                     Handle varargs);
-        std::string build_python_error_message(const std::string&);
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
@@ -88,9 +85,15 @@ class PythonEval : public GenericEval
                                  PyObject*& pyModule, PyObject*& pyObject,
                                  std::string& functionName);
 
-        std::string execute_string(const char* command);
-        std::string eval_wrap_stdout(const std::string&);
+        // Call functions; execute scripts.
+        PyObject* call_user_function(const std::string& func,
+                                     Handle varargs);
+        std::string build_python_error_message(const std::string&);
 
+        std::string execute_string(const char* command);
+        std::string exec_wrap_stdout(const std::string&);
+
+        // Single-threded design.
         static PythonEval* singletonInstance;
 
         AtomSpace* _atomspace;
@@ -173,7 +176,7 @@ class PythonEval : public GenericEval
         /**
          * Runs the Python code contained in 'script'.
          */
-        std::string apply_script(const std::string& script);
+        std::string execute_script(const std::string& script);
 
         /**
          * Calls the Python function passed in `func`, passing it
@@ -193,14 +196,16 @@ class PythonEval : public GenericEval
          */
         void apply_as(const std::string& func, AtomSpace*);
 
+#if 0
         /**
-         *
+         * Debug utility
          */
         void print_root_dictionary()
         {
             printf("The root dictionary is:\n");
             this->print_dictionary(PyModule_GetDict(_pyRootModule));
         }
+#endif
 };
 
 /**

@@ -1158,7 +1158,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyGILState_Release(gstate);
 }
 
-std::string PythonEval::apply_script(const std::string& script)
+std::string PythonEval::execute_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -1474,7 +1474,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
 /// Grab what is printed on stdout, so that others may see it.
 //
-std::string PythonEval::eval_wrap_stdout(const std::string& expr)
+std::string PythonEval::exec_wrap_stdout(const std::string& expr)
 {
     // Capture whatever python prints to stdout
     // What used to be stdout will now go to the pipe.
@@ -1486,7 +1486,7 @@ std::string PythonEval::eval_wrap_stdout(const std::string& expr)
     rc = dup2(pipefd[1], fileno(stdout));
     OC_ASSERT(0 < rc, "pipe splice failure");
 
-    std::string res = apply_script(expr);
+    std::string res = execute_script(expr);
 
     // Restore stdout
     fflush(stdout);
@@ -1557,7 +1557,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
-    _result = eval_wrap_stdout(_input_line);
+    _result = exec_wrap_stdout(_input_line);
 
     _input_line = "";
     _paren_count = 0;
