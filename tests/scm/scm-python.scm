@@ -20,7 +20,9 @@
 ; then there's no "Hello world" (but if you run it by hand, there is.)
 (define expected-in-cxxtest "None\n")
 
-(test-assert "python-eval is borken"
+(format #t "python-eval returned this: >>~A<<\n" rc)
+
+(test-assert "Oh no! python-eval is borken!"
 	(or (string=? rc expected)
 		(string=? rc expected-in-cxxtest)))
 
