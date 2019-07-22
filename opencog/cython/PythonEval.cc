@@ -1452,6 +1452,7 @@ void PythonEval::begin_eval()
     _caught_error = false;
     _pending_input = false;
     _result = "";
+    _capture_stdout = "";
 }
 
 void PythonEval::eval_expr(const std::string& partial_expr)
@@ -1558,10 +1559,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     while (0 < nr)
     {
        buf[nr] = 0;
-       if (1 < nr or 0 != buf[0])
-       {
-          _result += buf;
-       }
+       if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
+
        nr = read(pipefd[0], buf, sizeof(buf)-1);
     }
 
@@ -1604,7 +1603,7 @@ std::string PythonEval::poll_result()
         _wait_done.wait(lck, evdone);
     }
 
-    std::string r = _result;
+    std::string r = _capture_stdout + _result;
 
     // Add the missing newline
     if (0 < _result.size()) r += "\n";
@@ -1613,6 +1612,7 @@ std::string PythonEval::poll_result()
     if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
 
     _result.clear();
+    _capture_stdout.clear();
     return r;
 }
 
