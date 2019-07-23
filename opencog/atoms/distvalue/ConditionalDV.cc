@@ -117,9 +117,6 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr c
 //Given a Distribution of the Condition calculate a Joint Probability distribution
 DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValuePtr base) const
 {
-	//std::cout << "conditional\n" << to_string() << std::endl;
-	//std::cout << "condition\n" << base->to_string() << std::endl;
-
 	size_t s1 = base->_value.max_size();
 	size_t d1 = base->_value.dims();
 	size_t s2 = _value.begin()->value.max_size();
@@ -128,7 +125,6 @@ DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValueP
 	DVecSeq ivsBASE = base->_value.get_posvec();
 
 	ConditionalDVPtr remaped = remap(ivsBASE);
-	//std::cout << "remaped\n" << remaped->to_string() << std::endl;
 
 	DVec lower = base->_value.lower_limits();
 	DVec upper = base->_value.upper_limits();

@@ -69,13 +69,11 @@ double CTHist<val_t>::epsilon = 0.001;
 template <typename val_t>
 void CTHist<val_t>::insertMerge(const CoverTreeNode<val_t> & x)
 {
-	//std::cout << "PSO: " << ::to_string(x.pos) << std::endl;
 	int level;
 	int parent = -1;
 	int nearest_idx = findNearestNeighbor_(x,_root_idx,_root_idx,
 										   _root_level,level,parent);
 	CoverTreeNode<val_t> & nearest = _nodes[nearest_idx];
-	//std::cout << "NEAREST: " << ::to_string(nearest.pos) << std::endl;
 	if (dist(nearest,x) <= epsilon)
 		nearest.value += x.value;
 	else

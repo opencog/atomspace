@@ -66,9 +66,6 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	keys.erase(std::unique(keys.begin(),keys.end()),keys.end());
 	DistributionalValuePtr dv2remap = dv2->remap(keys);
 
-	std::cout << keys << std::endl;
-	std::cout << dv2remap;
-
 	std::map<DVec,double> counts;
 
 	for (auto elem : dv1->value())
@@ -161,7 +158,6 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 
 	while (not is_within(m1,0.0,EPSILON) && not is_within(m2,0.0,EPSILON))
 	{
-		//std::cout << "m1: " << m1 << " m2: " << m2 << std::endl;
 		//We check which key represents a lower Truthness/Value
 		//This is a fuzzy conjunction so we want to take the min of that
 		if (n1->pos < n2->pos)
@@ -186,9 +182,6 @@ DVFormulas::conjunction(DistributionalValuePtr dv1,
 			n2 = &hist2[*it2];
 		}
 	}
-
-	//std::cout << "Conjuction:\n";
-	//std::cout << res << "\n";
 
 	return DistributionalValue::createDV(res);
 }

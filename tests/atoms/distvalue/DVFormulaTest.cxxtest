@@ -44,7 +44,6 @@ public:
 
 	void setUp()
 	{
-		std::cout << std::endl;
 		keys[0] = DVec{0.125};
 		keys[1] = DVec{0.375};
 		keys[2] = DVec{0.625};

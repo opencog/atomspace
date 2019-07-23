@@ -263,7 +263,6 @@ void CoverTree<val_t>::insert(int node_idx, int & p_id, int level)
 
 	if (dist(x,p) > covdist(level))
 	{
-		//std::cout << "Outside current covdist: " << x[0] << "\n";
 		while (dist(x,p) > 2*covdist(level))
 		{
 			if (p.children.size() != 0)

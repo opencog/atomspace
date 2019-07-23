@@ -33,7 +33,7 @@ private:
 public:
 	CTHistTest() {}
 
-	void setUp() {std::cout << std::endl;}
+	void setUp() {}
 
 	void tearDown() {}
 
