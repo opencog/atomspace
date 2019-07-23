@@ -327,6 +327,20 @@ val_t CoverTree<val_t>::get(const DVec & pos) const
 }
 
 template <typename val_t>
+val_t CoverTree<val_t>::get(const DVec & pos,val_t def) const
+{
+	CoverTreeNode<val_t> tmp = CoverTreeNode<val_t>(pos,val_t());
+	const CoverTreeNode<val_t> * nearest =
+		findNearestNeighbor_(tmp,_nodes[_root_idx],&_nodes[_root_idx]);
+	if (nearest->pos == pos)
+		return nearest->value;
+	else
+	{
+		return def;
+	}
+}
+
+template <typename val_t>
 DVecSeq CoverTree<val_t>::get_posvec() const
 {
 	DVecSeq res(_nodes.size());

@@ -100,51 +100,24 @@ public:
 
 	void tearDown() {}
 
-	void testTest()
+	void testJointToCDV()
 	{
-	}
-
-	void notestJointToCDV()
-	{
-		//CTHist<double> hist1 = CTHist<double>(3,1);
-		//hist1.insert(DVec{0.25},20);
-		//hist1.insert(DVec{0.75},20);
-
-		//DistributionalValuePtr dv1 = DistributionalValue::createDV(hist1);
-
-		//CTHist<double> hist2 = CTHist<double>(6,2);
-		//hist2.insert(DVec{0.25,0.25},10);
-		//hist2.insert(DVec{0.25,0.75},0);
-		//hist2.insert(DVec{0.5,0.25},5);
-		//hist2.insert(DVec{0.5,0.75},5);
-		//hist2.insert(DVec{0.75,0.25},0);
-		//hist2.insert(DVec{0.75,0.75},10);
-
-		//DistributionalValuePtr dv2 = DistributionalValue::createDV(hist2);
-
-		//ConditionalDVPtr res = DVFormulas::joint_to_cdv(dv2,dv1,1);
 		ConditionalDVPtr res = DVFormulas::joint_to_cdv(dvs[3],dvs[0],1);
 
-		std::cout << "Res: \n";
-		std::cout << res;
+		CTHist<double> hist2 = CTHist<double>(2,1);
+		hist2.insert(keys[7],7.5);
+		hist2.insert(keys[8],7.5);
 
-		//CTHist<double> hist2 = CTHist<double>(2,1);
-		//hist2.insert(keys[7],11.25);
-		//hist2.insert(keys[8],11.25);
+		CTHist<double> hist3 = CTHist<double>(2,1);
+		hist3.insert(keys[7],3.75);
+		hist3.insert(keys[8],3.75);
 
-		//CTHist<double> hist3 = CTHist<double>(2,1);
-		//hist3.insert(keys[7],5.625);
-		//hist3.insert(keys[8],5.625);
+		CDVrep cdvr = CDVrep(2,1);
+		cdvr.insert(keys[5],hist2);
+		cdvr.insert(keys[6],hist3);
 
-		//CDVrep cdvr = CDVrep(3,1);
-		//cdvr.insert(keys[5],hist2);
-		//cdvr.insert(keys[6],hist3);
-
-		//std::cout << "CDVR: \n";
-		//cdvr.print();
-
-		//ConditionalDVPtr cdv = ConditionalDV::createCDV(cdvr);
-		//TS_ASSERT_EQUALS(*cdv,*res);
+		ConditionalDVPtr cdv = ConditionalDV::createCDV(cdvr);
+		TS_ASSERT_EQUALS(*cdv,*res);
 	}
 
 	void testSumJoint()
@@ -158,32 +131,19 @@ public:
 		hist.insert(keys[6],20);
 
 		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
-		//std::cout << "Res: \n";
-		//res->value().print();
-		//std::cout << "DV: \n";
-		//dv->value().print();
 		TS_ASSERT_EQUALS(*dv,*res);
 	}
 
 	void testConjuction()
 	{
 		DistributionalValuePtr res = DVFormulas::conjunction(dvs[0],dvs[1]);
-		//std::cout << "DV0: \n";
-		//dvs[0]->value().print();
-		//std::cout << "DV1: \n";
-		//dvs[1]->value().print();
 
 		CTHist<double> hist = CTHist<double>(2,1);
 		hist.insert(keys[0],15);
 		hist.insert(keys[1],15);
 
 		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
-		//std::cout << "Res: \n";
-		//res->value().print();
-		//std::cout << "DV: \n";
-		//dv->value().print();
 		TS_ASSERT_EQUALS(*dv,*res);
-
 
 		CTHist<double> h1 = CTHist<double>(2,1);
 		h1.insert(DVec{0},1728.01);
@@ -207,10 +167,6 @@ public:
 		hist.insert(keys[6],20);
 
 		DistributionalValuePtr dv = DistributionalValue::createDV(hist);
-		//std::cout << "Res: \n";
-		//res->value().print();
-		//std::cout << "DV: \n";
-		//dv->value().print();
 		TS_ASSERT_EQUALS(*dv,*res)
 	}
 };

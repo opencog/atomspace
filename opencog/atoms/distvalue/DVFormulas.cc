@@ -37,7 +37,8 @@ using namespace opencog;
 //(A,B,C) + (B,C) => (B,C) -> A
 //idx is the position of consequent in the joint Distribution
 //(A,B,C) A is at idx 0
-//Result has the same total_count as dv2
+//This needs to be improved the final count should depend on both counts of
+//dv1 and dv2 somehow
 ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
                                           DistributionalValuePtr dv2,
                                           int idx)
@@ -65,6 +66,9 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 	keys.erase(std::unique(keys.begin(),keys.end()),keys.end());
 	DistributionalValuePtr dv2remap = dv2->remap(keys);
 
+	std::cout << keys << std::endl;
+	std::cout << dv2remap;
+
 	std::map<DVec,double> counts;
 
 	for (auto elem : dv1->value())
@@ -79,7 +83,7 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1,
 		if (dv2remap->get_mean(hs) != 0)
 		{
 			double count = dv1->get_mean_for(elem.value) /
-						   dv2remap->get_mean(hs);
+						   dv2remap->get_mean(hs);// *
 						   //dv2remap->total_count();
 
 			CTHist<double> val = CTHist<double>(dv2size,1);

@@ -161,6 +161,7 @@ public:
 	 * throws Expection if there is no Node at the given Postion
 	 */
 	val_t get(const DVec & pos) const;
+	val_t get(const DVec & pos,val_t def) const;
 
 	/*
 	 * Get a Vector of all positions

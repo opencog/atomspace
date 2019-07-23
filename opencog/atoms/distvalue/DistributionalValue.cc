@@ -173,17 +173,17 @@ std::map<DVec,double> DistributionalValue::bin_vars() const
 
 double DistributionalValue::get_mode(const DVec &val) const
 {
-	return get_mode_for(_value.get(val));
+	return get_mode_for(_value.get(val,1));
 }
 
 double DistributionalValue::get_mean(const DVec &val) const
 {
-	return get_mean_for(_value.get(val));
+	return get_mean_for(_value.get(val,0));
 }
 
 double DistributionalValue::get_var(const DVec &val) const
 {
-	return get_var_for(_value.get(val));
+	return get_var_for(_value.get(val,0));
 }
 
 double DistributionalValue::get_count(const DVec &val) const
