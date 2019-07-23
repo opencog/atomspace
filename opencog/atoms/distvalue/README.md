@@ -36,7 +36,7 @@ ConditionalDV
 -------------
 
 Similary to a DistributionalValue but containing a second order CTHist were each node containsa CTHist<double>.
-Which allows a better TV trepresentation for InheritanceLinks and other similar links.
+Which allows a better TV representation for InheritanceLinks and other similar links.
 
 DVFormulas
 ----------
