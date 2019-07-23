@@ -165,8 +165,9 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	// Base cases
 	if (content_eq(tree, atom)) return true;
 	if (not tree->is_link()) return false;
-	ScopeLinkPtr stree(ScopeLinkCast(tree));
-	if (nullptr != stree) {
+	if (nameserver().isA(tree->get_type(), SCOPE_LINK))
+	{
+		ScopeLinkPtr stree(ScopeLinkCast(tree));
 		const HandleSet& varset = stree->get_variables().varset;
 		if (varset.find(atom) != varset.cend())
 			return false;
@@ -185,7 +186,8 @@ bool is_constant_in_tree(const Handle& tree, const Handle& atom)
 	if (content_eq(tree, atom)) return true;
 	if (not tree->is_link()) return false;
 
-	if (if tree->is_executable()) return false;
+	// Halt recursion if the term is executable.
+	if (tree->is_executable()) return false;
 
 	// Recursive case
 	for (const Handle& h : tree->getOutgoingSet())
@@ -316,8 +318,9 @@ HandleSet get_free_variables(const Handle& h, Quotation quotation)
 	HandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
 	// If the link was a scope link then remove the scoped
 	// variables from the free variables found.
-	ScopeLinkPtr sh(ScopeLinkCast(h));
-	if (nullptr != sh) {
+	if (nameserver().isA(h->get_type(), SCOPE_LINK))
+	{
+		ScopeLinkPtr sh(ScopeLinkCast(h));
 		const HandleSet& varset = sh->get_variables().varset;
 		for (auto& v : varset)
 			results.erase(v);
