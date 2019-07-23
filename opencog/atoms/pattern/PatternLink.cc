@@ -685,14 +685,14 @@ bool PatternLink::add_dummies()
 		    IDENTICAL_LINK == tt)
 		{
 			const Handle& left = t->getOutgoingAtom(0);
-			if (any_unquoted_in_tree(left, _varlist.varset))
+			if (any_free_in_tree(left, _varlist.varset))
 			{
 				_pat.mandatory.emplace_back(left);
 				_fixed.emplace_back(left);
 			}
 
 			const Handle& right = t->getOutgoingAtom(1);
-			if (any_unquoted_in_tree(right, _varlist.varset))
+			if (any_free_in_tree(right, _varlist.varset))
 			{
 				_pat.mandatory.emplace_back(right);
 				_fixed.emplace_back(right);

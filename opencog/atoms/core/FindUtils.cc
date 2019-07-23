@@ -165,8 +165,9 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	// Base cases
 	if (content_eq(tree, atom)) return true;
 	if (not tree->is_link()) return false;
-	ScopeLinkPtr stree(ScopeLinkCast(tree));
-	if (nullptr != stree) {
+	if (nameserver().isA(tree->get_type(), SCOPE_LINK))
+	{
+		ScopeLinkPtr stree(ScopeLinkCast(tree));
 		const HandleSet& varset = stree->get_variables().varset;
 		if (varset.find(atom) != varset.cend())
 			return false;
@@ -179,6 +180,37 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
+bool is_constant_in_tree(const Handle& tree, const Handle& atom)
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->is_link()) return false;
+
+	// Halt recursion if the term is executable.
+	if (tree->is_executable()) return false;
+
+	// Recursive case
+	for (const Handle& h : tree->getOutgoingSet())
+		if (is_constant_in_tree(h, atom))
+			return true;
+	return false;
+}
+
+bool is_found_in_tree(const Handle& tree, const Handle& atom,
+                      bool (*reject)(const Handle&, const Handle&))
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->is_link()) return false;
+	if (reject(tree, atom)) return false;
+
+	// Recursive case
+	for (const Handle& h : tree->getOutgoingSet())
+		if (is_found_in_tree(h, atom, reject))
+			return true;
+	return false;
+}
+
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	return is_unquoted_in_tree(tree, atom) and is_unscoped_in_tree(tree, atom);
@@ -186,7 +218,26 @@ bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 
 bool is_free_in_tree(const Handle& tree, const Handle& atom)
 {
-	return is_unquoted_unscoped_in_tree(tree, atom);
+	// The atom may occur in two distinct places in a tree: in
+	// one place, it is scoped, and in another, its in an executable
+	// term. We have to reject both, and not one-at-a-time.
+	auto scoped_or_executable = [](const Handle& tr, const Handle& ato)
+	{
+		// Halt recursion if the term is executable.
+		if (tr->is_executable()) return true;
+
+		// Halt rescursion if scoped.
+		if (nameserver().isA(tr->get_type(), SCOPE_LINK))
+		{
+			ScopeLinkPtr stree(ScopeLinkCast(tr));
+			const HandleSet& varset = stree->get_variables().varset;
+			if (varset.find(ato) != varset.cend())
+				return true;
+		}
+		return false;
+	};
+	return is_unquoted_in_tree(tree, atom) and
+	       is_found_in_tree(tree, atom, scoped_or_executable);
 }
 
 bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
@@ -198,9 +249,12 @@ bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
 	return false;
 }
 
-bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom)
+bool is_free_in_any_tree(const HandleSeq& hs, const Handle& v)
 {
-	return is_unquoted_unscoped_in_any_tree(hs, atom);
+	for (const Handle& h : hs)
+		if (is_free_in_tree(h, v))
+			return true;
+	return false;
 }
 
 bool any_atom_in_tree(const Handle& tree, const HandleSet& atoms)
@@ -215,9 +269,7 @@ bool any_atom_in_tree(const Handle& tree, const HandleSet& atoms)
 bool any_unquoted_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
-	{
 		if (is_unquoted_in_tree(tree, n)) return true;
-	}
 	return false;
 }
 
@@ -228,11 +280,27 @@ bool any_unscoped_in_tree(const Handle& tree, const HandleSet& atoms)
 	return false;
 }
 
+bool any_constant_in_tree(const Handle& tree, const HandleSet& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_constant_in_tree(tree, n)) return true;
+	return false;
+}
+
 bool any_unquoted_unscoped_in_tree(const Handle& tree,
                                    const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unquoted_in_tree(tree, n) and is_unscoped_in_tree(tree, n))
+			return true;
+	return false;
+}
+
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSet& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_free_in_tree(tree, n))
 			return true;
 	return false;
 }
@@ -252,9 +320,7 @@ bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {
 	for (const Handle& tree: trees)
-	{
 		if (is_atom_in_tree(tree, atom)) return true;
-	}
 	return false;
 }
 
@@ -262,9 +328,7 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
                              const Handle& atom)
 {
 	for (const Handle& tree: trees)
-	{
 		if (is_unquoted_in_tree(tree, atom)) return true;
-	}
 	return false;
 }
 
@@ -301,8 +365,9 @@ HandleSet get_free_variables(const Handle& h, Quotation quotation)
 	HandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
 	// If the link was a scope link then remove the scoped
 	// variables from the free variables found.
-	ScopeLinkPtr sh(ScopeLinkCast(h));
-	if (nullptr != sh) {
+	if (nameserver().isA(h->get_type(), SCOPE_LINK))
+	{
+		ScopeLinkPtr sh(ScopeLinkCast(h));
 		const HandleSet& varset = sh->get_variables().varset;
 		for (auto& v : varset)
 			results.erase(v);
