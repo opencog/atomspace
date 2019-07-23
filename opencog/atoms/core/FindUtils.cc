@@ -203,7 +203,9 @@ bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 
 bool is_free_in_tree(const Handle& tree, const Handle& atom)
 {
-	return is_unquoted_unscoped_in_tree(tree, atom);
+	return is_unquoted_in_tree(tree, atom) and
+	       is_unscoped_in_tree(tree, atom) and
+	       is_constant_in_tree(tree, atom);
 }
 
 bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
@@ -215,9 +217,12 @@ bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
 	return false;
 }
 
-bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom)
+bool is_free_in_any_tree(const HandleSeq& hs, const Handle& v)
 {
-	return is_unquoted_unscoped_in_any_tree(hs, atom);
+	for (const Handle& h : hs)
+		if (is_free_in_tree(h, v))
+			return true;
+	return false;
 }
 
 bool any_atom_in_tree(const Handle& tree, const HandleSet& atoms)
@@ -232,9 +237,7 @@ bool any_atom_in_tree(const Handle& tree, const HandleSet& atoms)
 bool any_unquoted_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
-	{
 		if (is_unquoted_in_tree(tree, n)) return true;
-	}
 	return false;
 }
 
@@ -242,6 +245,13 @@ bool any_unscoped_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unscoped_in_tree(tree, n)) return true;
+	return false;
+}
+
+bool any_constant_in_tree(const Handle& tree, const HandleSet& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_constant_in_tree(tree, n)) return true;
 	return false;
 }
 

@@ -208,7 +208,7 @@ bool is_constant_in_tree(const Handle& tree, const Handle& atom);
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
- * Shorter name for is_unquoted_unscoped_in_tree
+ * True if is_unquoted, is_unscoped and is_constant_in_tree
 */
 bool is_free_in_tree(const Handle& tree, const Handle& atom);
 
@@ -220,7 +220,8 @@ bool is_unquoted_unscoped_in_any_tree(const HandleSeq& trees,
                                       const Handle& atom);
 
 /**
- * Shorter name for is_unquoted_unscoped_in_any_tree
+ * Return true if the atom (variable) occurs unquoted and
+ * unscoped and constant somewhere in any of the trees.
 */
 bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom);
 
@@ -246,6 +247,13 @@ bool any_unquoted_in_tree(const Handle& tree,
  * somewhere in the tree.
  */
 bool any_unscoped_in_tree(const Handle& tree,
+                          const HandleSet& atoms);
+
+/**
+ * Return true if any of the atoms (variables) occur
+ * somewhere in the tree, outside of an executable term.
+ */
+bool any_constant_in_tree(const Handle& tree,
                           const HandleSet& atoms);
 
 /**
