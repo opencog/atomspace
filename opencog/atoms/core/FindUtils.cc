@@ -224,7 +224,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 	auto unsco_and_const = [](const Handle& tr, const Handle& ato)
 	{
 		// Halt recursion if the term is executable.
-		if (tr->is_executable()) return false;
+		if (tr->is_executable()) return true;
 
 		// Halt rescursion if scoped.
 		if (nameserver().isA(tr->get_type(), SCOPE_LINK))
@@ -232,9 +232,9 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 			ScopeLinkPtr stree(ScopeLinkCast(tr));
 			const HandleSet& varset = stree->get_variables().varset;
 			if (varset.find(ato) != varset.cend())
-				return false;
+				return true;
 		}
-		return true;
+		return false;
 	};
 	return is_unquoted_in_tree(tree, atom) and
 	       is_found_in_tree(tree, atom, unsco_and_const);
