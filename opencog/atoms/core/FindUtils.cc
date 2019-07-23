@@ -196,6 +196,21 @@ bool is_constant_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
+bool is_found_in_tree(const Handle& tree, const Handle& atom,
+                      bool (*reject)(const Handle&, const Handle&))
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->is_link()) return false;
+	if (reject(tree, atom)) return false;
+
+	// Recursive case
+	for (const Handle& h : tree->getOutgoingSet())
+		if (is_found_in_tree(h, atom, reject))
+			return true;
+	return false;
+}
+
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	return is_unquoted_in_tree(tree, atom) and is_unscoped_in_tree(tree, atom);
@@ -203,9 +218,26 @@ bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 
 bool is_free_in_tree(const Handle& tree, const Handle& atom)
 {
+	// The atom may occur in two distinct places in a tree: in
+	// one place, it is scoped, and in another, its in an executable
+	// term. We have to reject both, and not one-at-a-time.
+	auto unsco_and_const = [](const Handle& tr, const Handle& ato)
+	{
+		// Halt recursion if the term is executable.
+		if (tr->is_executable()) return false;
+
+		// Halt rescursion if scoped.
+		if (nameserver().isA(tr->get_type(), SCOPE_LINK))
+		{
+			ScopeLinkPtr stree(ScopeLinkCast(tr));
+			const HandleSet& varset = stree->get_variables().varset;
+			if (varset.find(ato) != varset.cend())
+				return false;
+		}
+		return true;
+	};
 	return is_unquoted_in_tree(tree, atom) and
-	       is_unscoped_in_tree(tree, atom) and
-	       is_constant_in_tree(tree, atom);
+	       is_found_in_tree(tree, atom, unsco_and_const);
 }
 
 bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
@@ -267,13 +299,8 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
 bool any_free_in_tree(const Handle& tree,
                       const HandleSet& atoms)
 {
-	// XXX FIXME: this is subtley broken: the place where it occurs
-	// unquoted might be inside an executable term; the place where
-	// it occurs outside an executable term might be quoted...
 	for (const Handle& n: atoms)
-		if (is_unquoted_in_tree(tree, n) and
-		    is_unscoped_in_tree(tree, n) and
-		    is_constant_in_tree(tree,n))
+		if (is_free_in_tree(tree, n))
 			return true;
 	return false;
 }

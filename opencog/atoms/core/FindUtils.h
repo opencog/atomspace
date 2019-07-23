@@ -127,6 +127,16 @@ private:
 bool is_atom_in_tree(const Handle& tree, const Handle& atom);
 
 /**
+ * Return true if the indicated atom occurs somewhere in the tree
+ * (viz, the tree recursively spanned by the outgoing set of the handle)
+ * The search of some is terminated if the predicate `reject` returns
+ * true. (That is, rejected subtrees are not searched, so that the
+ * rejected subtree is a search-failure).
+ */
+bool is_found_in_tree(const Handle& tree, const Handle& atom,
+           bool (*reject)(const Handle& tree, const Handle& atom));
+
+/**
  * Return true if the indicated atom occurs quoted somewhere in the
  * tree.  That is, it returns true only if the atom is inside a
  * QuoteLink.
