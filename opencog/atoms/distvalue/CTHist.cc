@@ -64,6 +64,9 @@ void CTHist<val_t>::insert(const CoverTreeNode<val_t> & x)
 }
 
 template <typename val_t>
+double CTHist<val_t>::epsilon = 0.001;
+
+template <typename val_t>
 void CTHist<val_t>::insertMerge(const CoverTreeNode<val_t> & x)
 {
 	//std::cout << "PSO: " << ::to_string(x.pos) << std::endl;
@@ -73,7 +76,7 @@ void CTHist<val_t>::insertMerge(const CoverTreeNode<val_t> & x)
 										   _root_level,level,parent);
 	CoverTreeNode<val_t> & nearest = _nodes[nearest_idx];
 	//std::cout << "NEAREST: " << ::to_string(nearest.pos) << std::endl;
-	if (nearest.pos == x.pos)
+	if (dist(nearest,x) <= epsilon)
 		nearest.value += x.value;
 	else
 	{

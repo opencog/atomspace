@@ -59,6 +59,8 @@ class CTHist : public CoverTree<val_t> ,
 	using CoverTree<val_t>::insert;
 	using CoverTree<val_t>::insert_rec;
 
+	//Epsilon for Merging
+	static double epsilon;
 	//Maximum Number of Elements of CTHist
 	size_t _max_size;
 	//We store the highest and lowest value for each dimension we have ever seen
