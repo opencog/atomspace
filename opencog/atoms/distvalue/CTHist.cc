@@ -85,10 +85,13 @@ void CTHist<val_t>::insertMerge(const CoverTreeNode<val_t> & x)
 		std::vector<int> desc = std::vector<int>();
 		descendants(nearest,desc);
 
+		//If we aren't the root and we moved outside the coverdistance
 		if (parent != -1 && dist(nearest,_nodes[parent]) > covdist(level+1))
 		{
+			//Remove our node from the parent
 			_nodes[parent].children.erase(find(_nodes[parent].children.begin(),_nodes[parent].children.end(),nearest_idx));
 
+			//Add all descendants to the parent
 			for (int c_idx : desc)
 			{
 				_nodes[c_idx].children.clear();
@@ -96,10 +99,13 @@ void CTHist<val_t>::insertMerge(const CoverTreeNode<val_t> & x)
 			}
 			_nodes[nearest_idx].children.clear();
 
+			//Readd our node
 			insert(nearest_idx,_root_idx,_root_level);
 		}
 		else
 		{
+			//Check if the children are inside the coverdistance
+			//and if not move them
 			rec_move(nearest,nearest,parent,level);
 		}
 	}
@@ -115,8 +121,10 @@ void CTHist<val_t>::rec_move(CoverTreeNode<val_t> & n,
 	for (auto c_idx_it = x.children.begin(); c_idx_it != x.children.end(); )
 	{
 		int c_idx = *c_idx_it;
+		//Child is outside the covdist we need to move it
 		if (dist(n,_nodes[c_idx]) > covdist(level))
 		{
+			//If n is the root node the child will become the new root
 			if (n == _nodes[_root_idx])
 			{
 				_nodes[c_idx].children.push_back(_root_idx);
@@ -125,7 +133,8 @@ void CTHist<val_t>::rec_move(CoverTreeNode<val_t> & n,
 				_root_level++;
 			}
 			else
-			{
+			{   //If we have a parent reinsert the child and it's descendants
+				//on it
 				std::vector<int> c_desc = std::vector<int>();
 				descendants(_nodes[c_idx],c_desc);
 				for (int cd_idx : c_desc)
