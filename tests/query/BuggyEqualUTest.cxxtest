@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -61,6 +62,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 
 		void test_bugeq(void);
 		void test_bugalt(void);
+		void test_arithmetic(void);
 };
 
 void BuggyEqual::setUp(void)
@@ -86,6 +88,7 @@ void BuggyEqual::test_bugeq(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
 /*
  * NotLink causing weird trouble.
  */
@@ -98,6 +101,30 @@ void BuggyEqual::test_bugalt(void)
 	Handle alt = eval->eval_h("(cog-execute! pln-alt)");
 	printf("Alt results:\n%s\n", alt->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(alt));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Failed arithmetic search
+ */
+void BuggyEqual::test_arithmetic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/buggy-equal-arithmetic.scm\")");
+
+	Handle sixset = eval->eval_h("(cog-execute! arithmetic-search)");
+	printf("Arithmetic results:\n%s\n", sixset->to_short_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions", 1, getarity(sixset));
+
+	Handle six = sixset->getOutgoingAtom(0);
+	TSM_ASSERT_EQUALS("Expected number node!", NUMBER_NODE, six->get_type());
+
+	NumberNodePtr nn(NumberNodeCast(six));
+	double dsix = nn->get_value();
+	TS_ASSERT_LESS_THAN_EQUALS(5.99999, dsix);
+	TS_ASSERT_LESS_THAN_EQUALS(dsix, 6.00001);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
