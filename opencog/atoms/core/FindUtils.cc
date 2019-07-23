@@ -221,7 +221,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 	// The atom may occur in two distinct places in a tree: in
 	// one place, it is scoped, and in another, its in an executable
 	// term. We have to reject both, and not one-at-a-time.
-	auto unsco_and_const = [](const Handle& tr, const Handle& ato)
+	auto scoped_or_executable = [](const Handle& tr, const Handle& ato)
 	{
 		// Halt recursion if the term is executable.
 		if (tr->is_executable()) return true;
@@ -237,7 +237,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 		return false;
 	};
 	return is_unquoted_in_tree(tree, atom) and
-	       is_found_in_tree(tree, atom, unsco_and_const);
+	       is_found_in_tree(tree, atom, scoped_or_executable);
 }
 
 bool is_unquoted_unscoped_in_any_tree(const HandleSeq& hs,
