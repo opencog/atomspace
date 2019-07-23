@@ -264,6 +264,20 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
 	return false;
 }
 
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSet& atoms)
+{
+	// XXX FIXME: this is subtley broken: the place where it occurs
+	// unquoted might be inside an executable term; the place where
+	// it occurs outside an executable term might be quoted...
+	for (const Handle& n: atoms)
+		if (is_unquoted_in_tree(tree, n) and
+		    is_unscoped_in_tree(tree, n) and
+		    is_constant_in_tree(tree,n))
+			return true;
+	return false;
+}
+
 unsigned int num_unquoted_in_tree(const Handle& tree,
                                   const HandleSet& atoms)
 {
@@ -279,9 +293,7 @@ bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {
 	for (const Handle& tree: trees)
-	{
 		if (is_atom_in_tree(tree, atom)) return true;
-	}
 	return false;
 }
 
@@ -289,9 +301,7 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
                              const Handle& atom)
 {
 	for (const Handle& tree: trees)
-	{
 		if (is_unquoted_in_tree(tree, atom)) return true;
-	}
 	return false;
 }
 

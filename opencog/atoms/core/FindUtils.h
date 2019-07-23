@@ -264,6 +264,13 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
                                    const HandleSet& atoms);
 
 /**
+ * Return true if any of the atoms (variables) occur unquoted and
+ * unscoped and outside of an executable term, somewhere in the tree.
+ */
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSet& atoms);
+
+/**
  * Return how many of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  * But ONLY if they are not quoted!  This is intended to be used to
