@@ -196,6 +196,12 @@ int max_quotation_level(const Handle& tree,
 bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
+ * Return true if the atom (variable) occurs in a non-executable
+ * term somewhere in the tree.
+ */
+bool is_constant_in_tree(const Handle& tree, const Handle& atom);
+
+/**
  * Return true if the atom (variable) occurs both unquoted and
  * unscoped somewhere in the tree.
 */

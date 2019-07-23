@@ -179,6 +179,21 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
+bool is_constant_in_tree(const Handle& tree, const Handle& atom)
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->is_link()) return false;
+
+	if (if tree->is_executable()) return false;
+
+	// Recursive case
+	for (const Handle& h : tree->getOutgoingSet())
+		if (is_constant_in_tree(h, atom))
+			return true;
+	return false;
+}
+
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	return is_unquoted_in_tree(tree, atom) and is_unscoped_in_tree(tree, atom);
