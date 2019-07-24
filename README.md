@@ -1,7 +1,7 @@
 OpenCog AtomSpace
 =================
 
-[![CircleCI](https://circleci.com/gh/opencog/atomspace.svg?style=svg)](https://circleci.com/gh/opencog/atomspace)
+[![CircleCI](https://circleci.com/gh/singnet/atomspace/tree/master.svg?style=svg)](https://circleci.com/gh/singnet/atomspace/tree/master)
 
 The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
 database, an associated query engine and graph-re-writing system,
