@@ -196,19 +196,27 @@ bool is_constant_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
-bool is_found_in_tree(const Handle& tree, const Handle& atom,
-                      bool (*reject)(const Handle&, const Handle&))
+static bool found_helper(const Handle& tree,
+                         const Handle& subtree,
+                         const Handle& atom,
+           bool (*reject)(const Handle&, const Handle&, const Handle&))
 {
 	// Base cases
-	if (content_eq(tree, atom)) return true;
-	if (not tree->is_link()) return false;
-	if (reject(tree, atom)) return false;
+	if (content_eq(subtree, atom)) return true;
+	if (not subtree->is_link()) return false;
+	if (reject(tree, subtree, atom)) return false;
 
 	// Recursive case
-	for (const Handle& h : tree->getOutgoingSet())
-		if (is_found_in_tree(h, atom, reject))
+	for (const Handle& h : subtree->getOutgoingSet())
+		if (found_helper(tree, h, atom, reject))
 			return true;
 	return false;
+}
+
+bool is_found_in_tree(const Handle& tree, const Handle& atom,
+           bool (*reject)(const Handle&, const Handle&, const Handle&))
+{
+	return found_helper(tree, tree, atom, reject);
 }
 
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
@@ -221,15 +229,19 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 	// The atom may occur in two distinct places in a tree: in
 	// one place, it is scoped, and in another, its in an executable
 	// term. We have to reject both, and not one-at-a-time.
-	auto scoped_or_executable = [](const Handle& tr, const Handle& ato)
+	auto scoped_or_executable =
+	 [](const Handle& tree, const Handle& subtr, const Handle& ato)
 	{
+		// Plow through any quotes.
+		if (is_quoted_in_tree(tree, subtr)) return false;
+
 		// Halt recursion if the term is executable.
-		if (tr->is_executable()) return true;
+		if (subtr->is_executable()) return true;
 
 		// Halt rescursion if scoped.
-		if (nameserver().isA(tr->get_type(), SCOPE_LINK))
+		if (nameserver().isA(subtr->get_type(), SCOPE_LINK))
 		{
-			ScopeLinkPtr stree(ScopeLinkCast(tr));
+			ScopeLinkPtr stree(ScopeLinkCast(subtr));
 			const HandleSet& varset = stree->get_variables().varset;
 			if (varset.find(ato) != varset.cend())
 				return true;
