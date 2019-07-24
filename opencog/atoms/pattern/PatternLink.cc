@@ -355,6 +355,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		for (const Handle& ah: h->getOutgoingSet())
 		{
 			_pat.always.emplace_back(ah);
+			_pat.unquoted_clauses.emplace_back(ah);
 		}
 		return true;
 	}
