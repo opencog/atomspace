@@ -581,23 +581,14 @@ bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
 	// No grounding was found, reject it.
 	if (not grnd) _forall_state = false;
 
-	// If we failed once, we will always fail.
+	// If we failed once, we will always fail thenceforth.
 	return _forall_state;
 }
 
-void DefaultPatternMatchCB::push(void)
+void DefaultPatternMatchCB::search_group_done(void)
 {
-	_stack_depth++;
-}
-
-void DefaultPatternMatchCB::pop(void)
-{
-	_stack_depth--;
-
 	// Reset the for-all state at the very start of a new search.
-	// If might be more elegant if iniate_search told us when
-	// it was starting again, but whatever. This works for now.
-	if (0 == _stack_depth) _forall_state = true;
+	_forall_state = true;
 }
 
 /* ======================================================== */

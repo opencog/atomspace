@@ -2071,6 +2071,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
+	if (0 == _clause_stack_depth) _pmc.search_group_done();
 
 	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
 }

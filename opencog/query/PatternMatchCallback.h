@@ -340,6 +340,16 @@ class PatternMatchCallback
 		virtual bool initiate_search(PatternMatchEngine *) = 0;
 
 		/**
+		 * Called when a particular connected search set has been
+		 * completed. Currently, this is called whenever the stack
+		 * has been popped to zero, before starting a new search.
+		 * This is used by AlwaysLink to confirm the validity of
+		 * the search (i.e. that properties hold for all of the
+		 * groundings discovered in the search set.)
+		 */
+		virtual void search_group_done(void) {}
+
+		/**
 		 * Called when the search has completed. In principle, this is not
 		 * really needed, since the above callback "knows" when the search
 		 * is completed: its completed when the above returns. In practice,
