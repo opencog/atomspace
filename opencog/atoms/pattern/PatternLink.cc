@@ -62,8 +62,7 @@ void PatternLink::common_init(void)
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
-	unbundle_virtual(_varlist.varset, _pat.unquoted_clauses,
-	                 _fixed, _virtual, _pat.black);
+	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
 	add_dummies();
@@ -229,8 +228,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
-	unbundle_virtual(_varlist.varset, _pat.mandatory,
-	                 _fixed, _virtual, _pat.black);
+	unbundle_virtual(_pat.mandatory);
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
@@ -571,11 +569,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// those variables are grounded by different disconnected graph
 /// components; the combinatoric explosion has to be handled...
 ///
-void PatternLink::unbundle_virtual(const HandleSet& vars,
-                                   const HandleSeq& clauses,
-                                   HandleSeq& fixed_clauses,
-                                   HandleSeq& virtual_clauses,
-                                   HandleSet& black_clauses)
+void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -608,7 +602,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
 			// TODO: shouldn't there be unscoped as well?
-			if (2 <= num_unquoted_in_tree(sh, vars))
+			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
 			{
 				is_virtual = true;
 				is_black = true;
@@ -631,19 +625,19 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot. Virtuals are not black.
-			if (2 <= num_unquoted_in_tree(sh, vars))
+			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
 		if (is_virtual)
-			virtual_clauses.emplace_back(clause);
+			_virtual.emplace_back(clause);
 		else
-			fixed_clauses.emplace_back(clause);
+			_fixed.emplace_back(clause);
 
 		if (is_black)
-			black_clauses.insert(clause);
+			_pat.black.insert(clause);
 	}
 }
 
@@ -915,7 +909,7 @@ void PatternLink::debug_log(void) const
 
 	if (0 < _pat.optionals.size())
 	{
-		logger().fine("Predicate includes the following optional clauses:");
+		logger().fine("Pattern has optional clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.optionals)
 		{
@@ -934,7 +928,7 @@ void PatternLink::debug_log(void) const
 
 	if (0 < _pat.always.size())
 	{
-		logger().fine("Predicate includes the following for-all clauses:");
+		logger().fine("Pattern has for-all clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.always)
 		{
