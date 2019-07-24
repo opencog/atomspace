@@ -354,10 +354,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	if (not reverse and ALWAYS_LINK == typ)
 	    // or (reverse and NEVER_LINK == typ))
 	{
-		for (const Handle& inv: h->getOutgoingSet())
+		for (const Handle& ah: h->getOutgoingSet())
 		{
-			_pat.always.emplace_back(inv);
-			_pat.quoted_clauses.emplace_back(inv);
+			_pat.always.emplace_back(ah);
 		}
 		return true;
 	}
@@ -761,8 +760,6 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 	for (const Handle& h : _pat.mandatory)
 		make_map_recursive(h, h);
 	for (const Handle& h : _pat.optionals)
-		make_map_recursive(h, h);
-	for (const Handle& h : _pat.always)
 		make_map_recursive(h, h);
 
 	// Save some minor amount of space by erasing those atoms that

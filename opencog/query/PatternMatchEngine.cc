@@ -1784,7 +1784,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// If there are no optional clauses, we are done.
-	if (_pat->optionals.empty())
+	if (_pat->optionals.empty() and _pat->always.empty())
 	{
 		// There are no more ungrounded clauses to consider. We are done.
 		next_clause = Handle::UNDEFINED;
@@ -1801,6 +1801,24 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		{
 			if (get_next_thinnest_clause(true, true, true)) return;
 		}
+	}
+
+	// Now loop over all for-all clauses.
+	// I think that all variables will be grounded at this point, right?
+	for (const Handle& root : _pat->always)
+	{
+		if (issued.end() != issued.find(root)) continue;
+		issued.insert(root);
+		next_clause = root;
+		for (const Handle &v : _varlist->varset)
+		{
+			if (is_free_in_tree(root, v))
+			{
+				next_joint = v;
+				return;
+			}
+		}
+		throw RuntimeException(TRACE_INFO, "BUG! Somethings wrong!!");
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
