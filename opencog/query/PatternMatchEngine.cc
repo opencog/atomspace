@@ -1790,23 +1790,17 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	// If there are no optional clauses, we are done.
-	if (_pat->optionals.empty() and _pat->always.empty())
-	{
-		// There are no more ungrounded clauses to consider. We are done.
-		next_clause = Handle::UNDEFINED;
-		next_joint = Handle::UNDEFINED;
-		return;
-	}
-
 	// Try again, this time, considering the optional clauses.
-	if (get_next_thinnest_clause(false, false, true)) return;
-	if (not _pat->evaluatable_holders.empty())
+	if (not _pat->optionals.empty())
 	{
-		if (get_next_thinnest_clause(true, false, true)) return;
-		if (not _pat->black.empty())
+		if (get_next_thinnest_clause(false, false, true)) return;
+		if (not _pat->evaluatable_holders.empty())
 		{
-			if (get_next_thinnest_clause(true, true, true)) return;
+			if (get_next_thinnest_clause(true, false, true)) return;
+			if (not _pat->black.empty())
+			{
+				if (get_next_thinnest_clause(true, true, true)) return;
+			}
 		}
 	}
 
@@ -1822,6 +1816,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 			if (is_free_in_tree(root, v))
 			{
 				next_joint = v;
+printf("duuude now doing the forall!\n");
 				return;
 			}
 		}
@@ -2212,6 +2207,13 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		{
 			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
+		}
+
+		// Report the failure to the callback.
+		if (is_always(clause))
+		{
+			Handle empty;
+			_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
