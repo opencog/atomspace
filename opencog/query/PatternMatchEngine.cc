@@ -1816,7 +1816,6 @@ void PatternMatchEngine::get_next_untried_clause(void)
 			if (is_free_in_tree(root, v))
 			{
 				next_joint = v;
-printf("duuude now doing the forall!\n");
 				return;
 			}
 		}
@@ -2209,7 +2208,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 			found = explore_term_branches(term, grnd, clause);
 		}
 
-		// Report the failure to the callback.
+		// AlwaysLink clauses must always be satisfied. Report the
+		// failure to satisfy to the callback.
 		if (is_always(clause))
 		{
 			Handle empty;
