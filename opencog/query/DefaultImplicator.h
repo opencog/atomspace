@@ -32,6 +32,10 @@
 
 namespace opencog {
 
+// Flirting with diamond-pattern inheritance. We need to do this
+// because we want different helper classes (aka "mixin classes")
+// to handle different parts of the grounding process, and virtual
+// bases classes just minimizes the total boilerplate code needed.
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,
@@ -48,6 +52,15 @@ class DefaultImplicator:
 	{
 		InitiateSearchCB::set_pattern(vars, pat);
 		DefaultPatternMatchCB::set_pattern(vars, pat);
+	}
+
+	virtual bool grounding(const HandleMap &var_soln,
+	                       const HandleMap &term_soln)
+	{
+		// The AlwaysLink has rejected the entire grounding.
+		if (not DefaultPatternMatchCB::_forall_state) return false;
+
+		return Implicator::grounding(var_soln, term_soln);
 	}
 };
 
