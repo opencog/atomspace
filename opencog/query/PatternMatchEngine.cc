@@ -2234,7 +2234,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
 	{
-		return clause_accept(clause, clause);
+		return clause_accept(clause, grnd);
 	}
 	else if (is_always(clause))
 	{
