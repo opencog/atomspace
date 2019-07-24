@@ -43,7 +43,7 @@
 	(Bind
 		(VariableList
 			(TypedVariable (Variable "basket") (Type 'ConceptNode))
-			(TypedVariable (Variable "ball") (Type 'ConceptNode))
+			(TypedVariable (Variable "ball")   (Type 'ConceptNode))
 		)
 		(And
 			; Look at every basket ...
@@ -55,7 +55,7 @@
 			; Always means that *every* ball in the basket MUST
 			; be red! Any single failure to satisfy this invalidates
 			; the entire search.
-			(Always (Evaluation (Predicate "is red")  (Variable "ball")))
+			(Always (Evaluation (Predicate "is red") (Variable "ball")))
 		)
 
 		; Report the basket which has only red balls in it.
