@@ -133,8 +133,11 @@ bool is_atom_in_tree(const Handle& tree, const Handle& atom);
  * true. (That is, rejected subtrees are not searched, so that the
  * rejected subtree is a search-failure).
  */
-bool is_found_in_tree(const Handle& tree, const Handle& atom,
-           bool (*reject)(const Handle& tree, const Handle& atom));
+bool is_found_in_tree(const Handle& tree,
+                      const Handle& atom,
+                      bool (*reject)(const Handle& tree,
+                                     const Handle& subtree,
+                                     const Handle& atom));
 
 /**
  * Return true if the indicated atom occurs quoted somewhere in the

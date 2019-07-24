@@ -32,7 +32,7 @@ class FindUtilsUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace as;
 	Handle X, Y, P, free_evaluation, scoped_implication, quotation,
-	    quoted_lambda;
+		quoted_lambda, quoted_put;
 
 public:
 	FindUtilsUTest()
@@ -65,24 +65,30 @@ void FindUtilsUTest::setUp(void)
 
 	scoped_implication =
 		al(IMPLICATION_LINK,
-		   P,
-		   al(LAMBDA_LINK, X, free_evaluation));
+			P,
+			al(LAMBDA_LINK, X, free_evaluation));
 
 	quotation =
 		al(QUOTE_LINK,
-		   al(AND_LINK,
-		      al(UNQUOTE_LINK, X),
-		      al(QUOTE_LINK,
-		         al(OR_LINK,
-		            X,
-		            al(UNQUOTE_LINK, Y)))));
+			al(AND_LINK,
+				al(UNQUOTE_LINK, X),
+				al(QUOTE_LINK,
+					al(OR_LINK,
+						X,
+						al(UNQUOTE_LINK, Y)))));
 
 	quoted_lambda =
 		al(QUOTE_LINK,
-		   al(LAMBDA_LINK,
-		      al(UNQUOTE_LINK, X),
-		         al(UNQUOTE_LINK,
-		         al(AND_LINK, X, Y))));
+			al(LAMBDA_LINK,
+				al(UNQUOTE_LINK, X),
+					al(UNQUOTE_LINK,
+					al(AND_LINK, X, Y))));
+
+	quoted_put =
+		al(QUOTE_LINK,
+			al(PUT_LINK,
+				al(LAMBDA_LINK, X, X),
+				al(UNQUOTE_LINK, Y)));
 
 #undef al
 #undef an
@@ -125,6 +131,7 @@ void FindUtilsUTest::test_is_closed()
 void FindUtilsUTest::test_is_free_in_tree()
 {
 	TS_ASSERT(is_free_in_tree(quoted_lambda, X));
+	TS_ASSERT(is_free_in_tree(quoted_put, Y));
 }
 
 void FindUtilsUTest::test_get_free_variables()
