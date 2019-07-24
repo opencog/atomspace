@@ -90,8 +90,13 @@ void AlwaysUTest::test_basic(void)
 	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
 	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
 
-	// XXX FIXME (Always (Equals ...)) has not been implemented yet!
-	// TS_ASSERT_EQUALS(2, getarity(red_n_yell));
+	TS_ASSERT_EQUALS(2, getarity(red_n_yell));
+
+	Handle both =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "yellows basket"));
+	TS_ASSERT_EQUALS(red_n_yell, both);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

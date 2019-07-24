@@ -1,9 +1,7 @@
 ;
-; always.scm
+; always-more.scm
 ;
-; Basic unit test for AlwaysLink
-; This is nearly identical to anoterh file in the examples directory.
-; Invented after discussions at opencog/atomspace#2203
+; More complex variant unit test for AlwaysLink
 ;
 
 (use-modules (opencog) (opencog exec))
@@ -51,8 +49,6 @@
 		; Report the basket which has only red balls in it.
 		(Variable "basket"))
 )
-
-;;; (cog-execute! baskets-with-red-balls-only)
 
 (define baskets-with-same-color
 (Bind
