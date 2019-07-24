@@ -56,6 +56,8 @@ class Implicator :
 {
 	protected:
 		AtomSpace* _as;
+		std::vector<HandleMap> _grounding_cache;
+
 		ValueSet _result_set;
 		void insert_result(const ValuePtr&);
 
@@ -67,6 +69,7 @@ class Implicator :
 
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln);
+		virtual bool search_group_done(bool);
 
 		virtual const ValueSet& get_result_set() const
 		{ return _result_set; }

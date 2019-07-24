@@ -2074,7 +2074,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_clause_stack_depth --;
 	if (0 == _clause_stack_depth)
 	{
-		if (_forall_state) _pmc.search_group_done();
+		_pmc.search_group_done(_forall_state);
 		_forall_state = true;
 	}
 

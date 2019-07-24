@@ -43,21 +43,38 @@ bool Implicator::grounding(const HandleMap &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
-logger().info("duuude implcaitor grounding !!!!!!!!!!!!!!!!\n");
-	// Do not accept new solution if maximum number has been already reached
-	if (_result_set.size() >= max_results)
-		return true;
+	// Do not accept more solutions if maximum number has been
+	// already reached.
+	if (_result_set.size() >= max_results) return true;
 
-	// Ignore the case where the URE creates ill-formed links (due to
-	// rules producing nothing). Ideally this should be treated as a
-	// user error, that is, the user should design rule pre-conditions
-	// to prevent them from producing nothing.  In practice it is
-	// difficult to insure, so meanwhile this try-catch is used.
-	// See issue #950 and pull req #962. XXX FIXME later.
-	try {
-		ValuePtr v(inst.instantiate(implicand, var_soln, true));
-		insert_result(v);
-	} catch (const SilentException& ex) {}
+	_grounding_cache.emplace_back(var_soln);
+	return false;
+}
+
+bool Implicator::search_group_done(bool good_set)
+{
+	if (not good_set)
+	{
+		// The results were no good. Throw them away.
+		_grounding_cache.clear();
+		return false;
+	}
+
+	for (auto var_soln : _grounding_cache)
+	{
+		// Ignore the case where the URE creates ill-formed links
+		// (due to rules producing nothing). Ideally this should
+		// be treated as a user error, that is, the user should
+		// design rule pre-conditions to prevent them from producing
+		// nothing.  In practice it is difficult to insure, so
+		// meanwhile this try-catch is used.
+		// See issue #950 and pull req #962. XXX FIXME later.
+		try {
+			ValuePtr v(inst.instantiate(implicand, var_soln, true));
+			insert_result(v);
+		} catch (const SilentException& ex) {}
+	}
+	_grounding_cache.clear();
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);

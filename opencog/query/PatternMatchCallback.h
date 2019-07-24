@@ -346,8 +346,15 @@ class PatternMatchCallback
 		 * This is used by AlwaysLink to confirm the validity of
 		 * the search (i.e. that properties hold for all of the
 		 * groundings discovered in the search set.)
+		 *
+		 * The argument is the accumulated-AND of all results
+		 * returned by the always_clause_match() callback. That
+		 * is, the argument is true if and only if the prior
+		 * always_clause_match() callback never returned false.
+		 *
+		 * Return true to terminate further searching.
 		 */
-		virtual void search_group_done(void) {}
+		virtual bool search_group_done(bool) { return false; }
 
 		/**
 		 * Called when the search has completed. In principle, this is not
@@ -355,7 +362,7 @@ class PatternMatchCallback
 		 * is completed: its completed when the above returns. In practice,
 		 * the implementation is much simpler if we have a distinct
 		 * callback to handle this situation.  The argument, is the return
-		 * value from initiaitate_search().
+		 * value from initiatate_search().
 		 */
 		virtual bool search_finished(bool done) { return done; }
 
