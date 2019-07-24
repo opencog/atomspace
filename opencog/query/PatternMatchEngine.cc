@@ -2233,7 +2233,15 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
-		return clause_accept(clause, grnd);
+	{
+		return clause_accept(clause, clause);
+	}
+	else if (is_always(clause))
+	{
+		// We need to record failures for the AlwaysLink
+		Handle empty;
+		_pmc.always_clause_match(clause, empty, var_grounding);
+	}
 
 	return false;
 }
