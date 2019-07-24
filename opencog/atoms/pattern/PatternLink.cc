@@ -377,14 +377,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
-	// For just right now, unpack PresentLink, although this might not
-	// be correct in the long-run. (???)
-	//
-	// For SequentialAndLinks, which are expected to be evaluated
-	// in-order, we need to fish out any PresentLinks, and add them
-	// to the list of clauses to be grounded.  Of course, the
-	// SequentialAndLink itself also has to be evaluated, so we add it
-	// too.
+
+	// Start by fishing out the PresentLink's, and adding them to the
+	// list of clauses to be grounded.
 	_pat.body = hbody;
 	if (record_literal(hbody))
 	{
@@ -412,10 +407,19 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
-		// XXX FIXME, Just like in trace_connectives, assume we are
-		// working with the DefaultPatternMatchCB, which uses these.
+		// Just like in trace_connectives, assume we are working with
+		// the DefaultPatternMatchCB, which uses these. Some other
+		// yet-to-be-specified callback may want to use a different
+		// set of connectives...
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+
+		// BUG - XXX FIXME. This extracts PresentLink's from the
+		// Sequentials. This is not really correct, because the
+		// evaluation of the sequential might terminate *before*
+		// the PresentLink is reached. Whereas the current design
+		// of the clause-walking will run the PresentLink before
+		// running the sequential. So that's a bug.
 		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.unquoted_clauses.emplace_back(hbody);
