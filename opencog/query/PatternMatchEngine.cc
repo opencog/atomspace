@@ -1623,7 +1623,6 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	else
 	if (is_always(clause_root))
 	{
-		clause_accepted = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
 		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
 	}
