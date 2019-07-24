@@ -256,6 +256,27 @@ class PatternMatchCallback
 		                                   const HandleMap& term_gnds) = 0;
 
 		/**
+		 * Called when the search for a top-level for-all clause
+		 * has been completed. The clause may or may not have been
+		 * grounded as a result of the search. If it has been grounded,
+		 * then grnd will be non-null.
+		 *
+		 * Return false to terminate further searches from this point
+		 * on; the result of termination will be backtracking to search
+		 * for other possible groundings of the required clauses.
+		 * Return true to examine the next for-all clause (if any).
+		 *
+		 * Note that all required clauses will have been grounded,
+		 * and all optional clauses will have been examined before
+		 * the for-all clauses are tested. This guarantees that the
+		 * groundings for all variables are "final", and this is a
+		 * last-chance test.
+		 */
+		virtual bool always_clause_match(const Handle& pattrn,
+		                                 const Handle& grnd,
+		                                 const HandleMap& term_gnds) = 0;
+
+		/**
 		 * Called when a complete grounding for all clauses is found.
 		 * Should return false to search for more solutions; or return
 		 * true to terminate search.  (Just as in all the other callbacks,

@@ -63,6 +63,10 @@ private:
 		const HandleSeq& o(_pat->optionals);
 		return o.end() != std::find(o.begin(), o.end(), h); }
 
+	bool is_always(const Handle& h) {
+		const HandleSeq& o(_pat->always);
+		return o.end() != std::find(o.begin(), o.end(), h); }
+
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
 

@@ -350,6 +350,17 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
+	// Pull clauses out of an AlwaysLink
+	if (not reverse and ALWAYS_LINK == typ)
+	    // or (reverse and NEVER_LINK == typ))
+	{
+		for (const Handle& ah: h->getOutgoingSet())
+		{
+			_pat.always.emplace_back(ah);
+		}
+		return true;
+	}
+
 	return false;
 }
 
@@ -814,6 +825,11 @@ void PatternLink::make_term_trees()
 		PatternTermPtr root_term(std::make_shared<PatternTerm>());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
+	for (const Handle& clause : _pat.always)
+	{
+		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		make_term_tree_recursive(clause, clause, root_term);
+	}
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
@@ -911,6 +927,25 @@ void PatternLink::debug_log(void) const
 	}
 	else
 		logger().fine("No optional clauses");
+
+	if (0 < _pat.always.size())
+	{
+		logger().fine("Predicate includes the following for-all clauses:");
+		cl = 0;
+		for (const Handle& h : _pat.always)
+		{
+			std::stringstream ss;
+			ss << "Always clause " << cl << ":";
+			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
+				ss << " (evaluatable)";
+			ss << std::endl;
+			ss << h->to_short_string();
+			logger().fine() << ss.str();
+			cl++;
+		}
+	}
+	else
+		logger().fine("No always clauses");
 
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)

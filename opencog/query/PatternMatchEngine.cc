@@ -1621,6 +1621,13 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
+	if (is_always(clause_root))
+	{
+		clause_accepted = true;
+		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
+		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
+	}
+	else
 	{
 		match = _pmc.clause_match(clause_root, hg, var_grounding);
 		DO_LOG({logger().fine("clause match callback match=%d", match);})
@@ -1783,24 +1790,36 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	// If there are no optional clauses, we are done.
-	if (_pat->optionals.empty())
+	// Try again, this time, considering the optional clauses.
+	if (not _pat->optionals.empty())
 	{
-		// There are no more ungrounded clauses to consider. We are done.
-		next_clause = Handle::UNDEFINED;
-		next_joint = Handle::UNDEFINED;
-		return;
+		if (get_next_thinnest_clause(false, false, true)) return;
+		if (not _pat->evaluatable_holders.empty())
+		{
+			if (get_next_thinnest_clause(true, false, true)) return;
+			if (not _pat->black.empty())
+			{
+				if (get_next_thinnest_clause(true, true, true)) return;
+			}
+		}
 	}
 
-	// Try again, this time, considering the optional clauses.
-	if (get_next_thinnest_clause(false, false, true)) return;
-	if (not _pat->evaluatable_holders.empty())
+	// Now loop over all for-all clauses.
+	// I think that all variables will be grounded at this point, right?
+	for (const Handle& root : _pat->always)
 	{
-		if (get_next_thinnest_clause(true, false, true)) return;
-		if (not _pat->black.empty())
+		if (issued.end() != issued.find(root)) continue;
+		issued.insert(root);
+		next_clause = root;
+		for (const Handle &v : _varlist->varset)
 		{
-			if (get_next_thinnest_clause(true, true, true)) return;
+			if (is_free_in_tree(root, v))
+			{
+				next_joint = v;
+				return;
+			}
 		}
+		throw RuntimeException(TRACE_INFO, "BUG! Somethings wrong!!");
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
@@ -2187,6 +2206,14 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		{
 			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
+		}
+
+		// AlwaysLink clauses must always be satisfied. Report the
+		// failure to satisfy to the callback.
+		if (is_always(clause))
+		{
+			Handle empty;
+			_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
