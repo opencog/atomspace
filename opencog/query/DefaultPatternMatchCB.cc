@@ -565,6 +565,23 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
+/* There must always be a grounding! Always! If there ever
+ * wasn't one, then we fail forever-more.
+ */
+bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
+                                                const Handle& grnd,
+                                                const HandleMap& term_gnds)
+{
+printf("duuude always ! state=%d grnd=%d\n", _forall_state,
+grnd!=nullptr);
+	// No grounding at all was found, reject it.
+	if (not grnd) _forall_state = false;
+
+	return _forall_state;
+}
+
+/* ======================================================== */
+
 IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 {
 	return h->getIncomingSet(_as);

@@ -86,6 +86,12 @@ class PMCGroundings : public PatternMatchCallback
 		{
 			return _cb.optional_clause_match(pattrn, grnd, term_gnds);
 		}
+		bool always_clause_match(const Handle& pattrn,
+		                           const Handle& grnd,
+		                           const HandleMap& term_gnds)
+		{
+			return _cb.always_clause_match(pattrn, grnd, term_gnds);
+		}
 		IncomingSet get_incoming_set(const Handle& h) {
 			return _cb.get_incoming_set(h);
 		}

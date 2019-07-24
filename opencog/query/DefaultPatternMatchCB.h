@@ -69,12 +69,16 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool clause_match(const Handle&, const Handle&,
 		                          const HandleMap&);
-		/**
-		 * Typically called for AbsentLink
-		 */
+
+		/** Called for AbsentLink */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
 		                                   const HandleMap&);
+
+		/** Called for AlawaysLink */
+		virtual bool always_clause_match(const Handle& pattrn,
+		                                 const Handle& grnd,
+		                                 const HandleMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&);
 
@@ -132,6 +136,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 
 		bool _optionals_present = false;
+		bool _forall_state = true;
 		AtomSpace* _as;
 };
 
