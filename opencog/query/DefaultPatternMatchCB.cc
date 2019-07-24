@@ -578,17 +578,7 @@ bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
                                                 const HandleMap& term_gnds)
 {
-	// No grounding was found, reject it.
-	if (not grnd) _forall_state = false;
-
-	// If we failed once, we will always fail thenceforth.
-	return _forall_state;
-}
-
-void DefaultPatternMatchCB::search_group_done(void)
-{
-	// Reset the for-all state at the very start of a new search.
-	_forall_state = true;
+	return grnd != nullptr;
 }
 
 /* ======================================================== */

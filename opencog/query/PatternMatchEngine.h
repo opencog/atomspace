@@ -198,6 +198,7 @@ private:
 	void clause_stacks_pop(void);
 	void clause_stacks_clear(void);
 	unsigned int _clause_stack_depth;
+	bool _forall_state = true;
 
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.

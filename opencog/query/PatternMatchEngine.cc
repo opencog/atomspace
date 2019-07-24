@@ -1624,6 +1624,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (is_always(clause_root))
 	{
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
+		_forall_state = _forall_state and match;
 		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
 	}
 	else
@@ -2071,7 +2072,11 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
-	if (0 == _clause_stack_depth) _pmc.search_group_done();
+	if (0 == _clause_stack_depth)
+	{
+		if (_forall_state) _pmc.search_group_done();
+		_forall_state = true;
+	}
 
 	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
 }
@@ -2213,7 +2218,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		if (is_always(clause))
 		{
 			Handle empty;
-			_pmc.always_clause_match(clause, empty, var_grounding);
+			_forall_state = _forall_state and
+				_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
@@ -2241,7 +2247,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	{
 		// We need to record failures for the AlwaysLink
 		Handle empty;
-		_pmc.always_clause_match(clause, empty, var_grounding);
+		_forall_state = _forall_state and
+			_pmc.always_clause_match(clause, empty, var_grounding);
 	}
 
 	return false;

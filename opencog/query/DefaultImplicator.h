@@ -53,15 +53,6 @@ class DefaultImplicator:
 		InitiateSearchCB::set_pattern(vars, pat);
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
-
-	virtual bool grounding(const HandleMap &var_soln,
-	                       const HandleMap &term_soln)
-	{
-		// The AlwaysLink has rejected the entire grounding.
-		if (not DefaultPatternMatchCB::_forall_state) return false;
-
-		return Implicator::grounding(var_soln, term_soln);
-	}
 };
 
 }; // namespace opencog
