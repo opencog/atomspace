@@ -88,7 +88,7 @@ void AlwaysUTest::test_basic(void)
 
 	// ----------------
 	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
-	printf("Expecting red and yellow, got %s", red_n_yell>to_string().c_str());
+	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
 
 	// XXX FIXME (Always (Equals ...)) has not been implemented yet!
 	// TS_ASSERT_EQUALS(2, getarity(red_n_yell));
