@@ -95,8 +95,9 @@ public:
 	void test_quoted_exec();
 	void test_quoted_eval();
 	void test_quoted_lambda();
-	void test_arguments_execution();
-	void test_arguments_execution_with_lambda();
+	void test_get();
+	void test_get_lambda();
+	void test_get_multi();
 };
 
 #define N _as.add_node
@@ -2102,17 +2103,17 @@ void PutLinkUTest::test_quoted_lambda()
  *    (ConceptNode "C")
  *    (VariableNode "A"))))
 */
-void PutLinkUTest::test_arguments_execution()
+void PutLinkUTest::test_get()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-execute-arguments.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-execute-arguments"),
+	Handle put = _eval.eval_h("put-get"),
 		result = HandleCast(inst.execute(put)),
-		expected = _eval.eval_h("expected-put-execute-arguments");
+		expected = _eval.eval_h("expected-put-get");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -2154,17 +2155,45 @@ void PutLinkUTest::test_arguments_execution()
  *    (ConceptNode "C")
  *    (VariableNode "A"))))
 */
-void PutLinkUTest::test_arguments_execution_with_lambda()
+void PutLinkUTest::test_get_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-execute-arguments-with-lambda.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-execute-arguments"),
+	Handle put = _eval.eval_h("put-get-lambda"),
 		result = HandleCast(inst.execute(put)),
-		expected = _eval.eval_h("expected-put-execute-arguments");
+		expected = _eval.eval_h("expected-put-get-lambda");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Like above, but with mutiple arguments
+ */
+void PutLinkUTest::test_get_multi()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-multi.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Handle result = _eval.eval_h("(cog-execute! put-get-multi)");
+
+	Handle expected =
+		L(EVALUATION_LINK,
+			N(PREDICATE_NODE, "relatives"),
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "Jim"),
+				N(CONCEPT_NODE, "Jane"),
+				N(CONCEPT_NODE, "mom and pop")));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
