@@ -629,10 +629,10 @@ take_next_step:
 
 
 /// Detect if the PatternTermPtr is a clause, so that we know
-/// when to stop. This takes into consideration quoting or
-/// unquoting operations. WTF!? How can quoting possibly make any
-/// difference at all with regards to smething being a clause!?
-/// XXX FIXME, this seems fu'ed to me.
+/// that it is time to stop moving upwards. When quotations are
+/// being used, we  may have already moved past the top of the
+/// clause!! ... which seems strange to me, but that is how
+/// quotations work.
 bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
                                           const Handle& clause)
 {
@@ -1626,6 +1626,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	else
 	if (is_always(clause_root))
 	{
+		_did_check_forall = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
 		_forall_state = _forall_state and match;
 		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
@@ -2252,6 +2253,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
 
+		_did_check_forall = false;
 		bool found = explore_term_branches(term, grnd, clause);
 
 		// If no solution was found, and there are globs, then there may
@@ -2261,6 +2263,14 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		{
 			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
+		}
+
+		if (not _did_check_forall and is_always(clause))
+		{
+			// We need to record failures for the AlwaysLink
+			Handle empty;
+			_forall_state = _forall_state and
+				_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
