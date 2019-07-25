@@ -600,10 +600,9 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			_pat.evaluatable_terms.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
+			// unquoted, unscoped variables in them. Otherwise, they
 			// can be evaluated on the spot.
-			// TODO: shouldn't there be unscoped as well?
-			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
+			if (2 <= num_unquoted_unscoped_in_tree(sh, _varlist.varset))
 			{
 				is_virtual = true;
 				is_black = true;
@@ -625,7 +624,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			add_to_map(_pat.in_evaluatable, sh, sh);
 
 			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
+			// unquoted, unscoped variables in them. Otherwise, they
 			// can be evaluated on the spot. Virtuals are not black.
 			//
 			// Actually, they are virtual only if the variables
@@ -640,13 +639,13 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			// already done for virtual links. But right now, supporting
 			// this seems like a boon-doggle. The pattern matcher is
 			// not a magician.
-			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
+			if (2 <= num_unquoted_unscoped_in_tree(sh, _varlist.varset))
 			{
 				size_t nsub = 0;
 				size_t nsolv = 0;
 				for (const Handle& sub: sh->getOutgoingSet())
 				{
-					size_t nv = num_unquoted_in_tree(sub, _varlist.varset);
+					size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
 					if (0 < nv) nsub++;
 					if (0 < nv and sub->is_executable()) nsolv++;
 					if (0 < nv and VARIABLE_NODE == sub->get_type()) nsolv++;
