@@ -274,8 +274,20 @@ static inline Handle expand(const Handle& arg)
  * to place into the reduction.  This does make the PutLink
  * resemble function application; however, here, the application
  * is not infinite-recursive; it is only one level deep.  There
- * is just enough execution performed to get the neeed arguents,
+ * is just enough execution performed to get the neeed arguments,
  * and no more.
+ *
+ * What this actually does is fairly complex and sophisticated.
+ * First, when LambdaLinks are involved, and the arguments are
+ * variables, it performs alpha conversion instead of beta reduction.
+ * (as that's kind-of "the same thing", for variables).
+ *
+ * When multiple arguments are presented as a  set, then the put
+ * is applied to each member of the set; the result is a set.
+ *
+ * When the set is a singleton, that singleton is unwrapped, and
+ * the set is discarded. This is done in order to play nice with
+ * GetLink, which always returns SetLinks, sometimes uneccesarily.
  *
  * Users who need a more complete apply-like environment should
  * look to the EvaluationLink, the ExecutionOutputLink, or the
