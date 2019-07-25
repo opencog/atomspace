@@ -198,8 +198,15 @@ private:
 	void clause_stacks_pop(void);
 	void clause_stacks_clear(void);
 	unsigned int _clause_stack_depth;
-	bool _forall_state = true;
 
+	// -------------------------------------------
+	// Methods that run when all clauses have been grounded.
+
+	// Report a fully grounded pattern to the callback.
+	bool report_grounding(const HandleMap &var_soln,
+	                      const HandleMap &term_soln);
+
+	bool _forall_state = true;
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
