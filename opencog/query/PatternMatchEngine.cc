@@ -2073,15 +2073,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 
 	_clause_stack_depth --;
 	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
-
-	if (0 == _clause_stack_depth)
-	{
-		DO_LOG({logger().fine("Search-group DONE!! forall-state=%d",
-		                      _forall_state);})
-		// _pmc.search_group_done(_forall_state);
-		_forall_state = true;
-		DO_LOG({logger().fine("==================================");})
-	}
 }
 
 /**
@@ -2130,10 +2121,51 @@ void PatternMatchEngine::solution_drop(void)
 
 /* ======================================================== */
 
+/// Pass the grounding that was found out to the callback.
+/// ... unless there is an Always clasue, in which case we
+/// save them up until we've looked at all of them.
 bool PatternMatchEngine::report_grounding(const HandleMap &var_soln,
                                           const HandleMap &term_soln)
 {
-	return _pmc.grounding(var_soln, term_soln);
+	// If there is no for-all clause (no AlwaysLink clause)
+	// then report groundings as they are found.
+	if (_pat->always.size() == 0)
+		return _pmc.grounding(var_soln, term_soln);
+
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
+
+	// Don't even bother caching, if we know we are losing.
+	if (not _forall_state) return false;
+
+	_var_ground_cache.push_back(var_soln);
+	_term_ground_cache.push_back(term_soln);
+
+	// Keep going.
+	return false;
+}
+
+bool PatternMatchEngine::report_forall(void)
+{
+	// Nothing to do.
+	if (_pat->always.size() == 0) return false;
+
+	// If its OK to report, then report them now.
+	bool halt = false;
+	if (_forall_state)
+	{
+		size_t nitems = _var_ground_cache.size();
+		OC_ASSERT(_term_ground_cache.size() == nitems);
+		for (size_t i=0; i<nitems; i++)
+		{
+			halt = halt and _pmc.grounding(_var_ground_cache[i],
+			                               _term_ground_cache[i]);
+		}
+	}
+	_forall_state = true;
+	_var_ground_cache.clear();
+	_term_ground_cache.clear();
+	return halt;
 }
 
 /* ======================================================== */
@@ -2168,7 +2200,9 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                               const Handle& grnd)
 {
 	clause_stacks_clear();
-	return explore_redex(term, grnd, do_clause);
+	bool halt = explore_redex(term, grnd, do_clause);
+	bool stop = report_forall();
+	return halt or stop;
 }
 
 /**

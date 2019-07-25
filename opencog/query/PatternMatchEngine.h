@@ -202,11 +202,16 @@ private:
 	// -------------------------------------------
 	// Methods that run when all clauses have been grounded.
 
+	typedef HandleMap GrndMap;
+	std::vector<GrndMap> _var_ground_cache;
+	std::vector<GrndMap> _term_ground_cache;
+	bool _forall_state = true;
+
 	// Report a fully grounded pattern to the callback.
 	bool report_grounding(const HandleMap &var_soln,
 	                      const HandleMap &term_soln);
+	bool report_forall(void);
 
-	bool _forall_state = true;
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
