@@ -43,7 +43,6 @@ bool Implicator::grounding(const HandleMap &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
-logger().info("duuuuuude implicator!aaaaaaaaaaaaaa !!");
 	// Ignore the case where the URE creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
 	// be treated as a user error, that is, the user should
@@ -54,7 +53,6 @@ logger().info("duuuuuude implicator!aaaaaaaaaaaaaa !!");
 	try {
 		ValuePtr v(inst.instantiate(implicand, var_soln, true));
 		insert_result(v);
-if(v) logger().info("duuuuuude implicator!aaaval = %s", v->to_string().c_str());
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
