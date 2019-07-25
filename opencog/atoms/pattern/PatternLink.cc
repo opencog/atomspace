@@ -569,7 +569,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 			"This optimization problem currently not supported!");
 	}
 
-	return 1 < nsub;
+	return true;
 }
 
 /// Sort out the list of clauses into four classes:
