@@ -104,6 +104,7 @@ protected:
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
+	bool is_virtual(const Handle&);
 	void unbundle_virtual(const HandleSeq& clauses);
 
 	bool add_dummies();

@@ -525,6 +525,53 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
 }
 
+/// is_virtual -- check to see if a clause is virtual.
+///
+/// A clause is virtual if it has two or more unquoted, unscoped
+/// variables in it. Otherwise, it can be evaluated on the spot.
+///
+/// At this time, the pattern matcher does not support mathematical
+/// optimzation within virtual clauses.
+/// See https://en.wikipedia.org/wiki/Mathematical_optimization
+///
+/// So, virtual clauses are already one step towards full support
+/// for optimization, as they do enable certain kinds of brute-force
+/// search across disconnected components. So, there is partial
+/// support, for simple kinds of optimization problems. It would
+/// take more work and refactoring to support more.  Thus, for now,
+/// just throw an error when the more complex optimzation problems
+/// are encountered.
+///
+/// To add support, we would have to split executable clauses into
+/// component graphs, the same way we currently split VirtualLinks.
+///
+bool PatternLink::is_virtual(const Handle& clause)
+{
+	size_t nfree = num_unquoted_unscoped_in_tree(clause, _varlist.varset);
+	if (2 > nfree) return false;
+
+	size_t nsub = 0;
+	size_t nsolv = 0;
+	size_t nvar = 0;
+	for (const Handle& sub: clause->getOutgoingSet())
+	{
+		size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
+		if (0 < nv)
+		{
+			nsub++;
+			if (sub->is_executable()) nsolv++;
+			if (VARIABLE_NODE == sub->get_type()) nvar++;
+		}
+	}
+	if (2 <= nsolv or (1 == nsolv and 0 < nvar))
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"This optimization problem currently not supported!");
+	}
+
+	return true;
+}
+
 /// Sort out the list of clauses into four classes:
 /// virtual, evaluatable, executable and concrete.
 ///
@@ -574,7 +621,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
-		bool is_virtual = false;
+		bool is_virtu = false;
 		bool is_black = false;
 
 #ifdef BROKEN_DOESNT_WORK
@@ -599,13 +646,9 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		{
 			_pat.evaluatable_terms.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
-			// TODO: shouldn't there be unscoped as well?
-			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
+			if (is_virtual(sh))
 			{
-				is_virtual = true;
+				is_virtu = true;
 				is_black = true;
 			}
 		}
@@ -623,16 +666,13 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			_pat.evaluatable_terms.insert(sh);
 			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot. Virtuals are not black.
-			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
-				is_virtual = true;
+
+			if (is_virtual(sh)) is_virtu = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
-		if (is_virtual)
+		if (is_virtu)
 			_virtual.emplace_back(clause);
 		else
 			_fixed.emplace_back(clause);

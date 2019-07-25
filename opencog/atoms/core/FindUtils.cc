@@ -317,13 +317,13 @@ bool any_free_in_tree(const Handle& tree,
 	return false;
 }
 
-unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const HandleSet& atoms)
+unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
+                                           const HandleSet& atoms)
 {
 	unsigned int count = 0;
 	for (const Handle& n: atoms)
 	{
-		if (is_unquoted_in_tree(tree, n)) count++;
+		if (is_unquoted_unscoped_in_tree(tree, n)) count++;
 	}
 	return count;
 }

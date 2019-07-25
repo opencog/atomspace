@@ -289,12 +289,12 @@ bool any_free_in_tree(const Handle& tree,
 /**
  * Return how many of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
- * But ONLY if they are not quoted!  This is intended to be used to
- * search for variables; but when a variable is quoted, it is no
- * longer a variable.
+ * But ONLY if they are not quoted or bound! This is intended to
+ * be used to search for variables; but when a variable is quoted
+ * or bound, it is no longer a free variable.
  */
-unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const HandleSet& atoms);
+unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
+                                           const HandleSet& atoms);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees.
