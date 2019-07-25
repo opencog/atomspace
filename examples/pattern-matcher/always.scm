@@ -22,6 +22,7 @@
 
 ; Three baskets holding balls
 (Inheritance (Concept "reds basket")        (Concept "basket"))
+(Inheritance (Concept "another red basket") (Concept "basket"))
 (Inheritance (Concept "reds&greens basket") (Concept "basket"))
 (Inheritance (Concept "yellows basket")     (Concept "basket"))
 
