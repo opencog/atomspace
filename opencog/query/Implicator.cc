@@ -47,6 +47,8 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	// already reached.
 	if (_result_set.size() >= max_results) return true;
 
+	if (var_soln.size() == 0) _empty_ground = true;
+
 	_grounding_cache.emplace_back(var_soln);
 	return false;
 }
@@ -57,6 +59,7 @@ bool Implicator::search_group_done(bool good_set)
 	{
 		// The results were no good. Throw them away.
 		_grounding_cache.clear();
+		_empty_ground = false;
 		return false;
 	}
 
@@ -74,7 +77,18 @@ bool Implicator::search_group_done(bool good_set)
 			insert_result(v);
 		} catch (const SilentException& ex) {}
 	}
+
+	if (_empty_ground)
+	{
+		HandleMap empty;
+		try {
+			ValuePtr v(inst.instantiate(implicand, empty, true));
+			insert_result(v);
+		} catch (const SilentException& ex) {}
+	}
+
 	_grounding_cache.clear();
+	_empty_ground = false;
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);

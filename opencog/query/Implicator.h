@@ -57,6 +57,7 @@ class Implicator :
 	protected:
 		AtomSpace* _as;
 		std::vector<HandleMap> _grounding_cache;
+		bool _empty_ground = false;
 
 		ValueSet _result_set;
 		void insert_result(const ValuePtr&);
