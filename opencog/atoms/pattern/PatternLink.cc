@@ -623,11 +623,25 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			_pat.evaluatable_terms.insert(sh);
 			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
+
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot. Virtuals are not black.
+			// Actually, they are virtual only if the variables
+			// appear in different terms in the virtual, e.g.
+			// (GreaterThan x y) but are not virtual if they appear
+			// on just one side, e.g. (GreaterThan (x+y) 42)
 			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
-				is_virtual = true;
+			{
+				size_t nsub = 0;
+				for (const Handle& sub: sh->getOutgoingSet())
+				{
+					if (0 < num_unquoted_in_tree(sub, _varlist.varset))
+						nsub++;
+				}
+				if (2 <= nsub)
+					is_virtual = true;
+			}
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
