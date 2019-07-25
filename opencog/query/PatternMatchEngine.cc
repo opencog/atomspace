@@ -628,10 +628,13 @@ take_next_step:
 }
 
 
-/// Compare a PatternTermPtr with a clause taking in consideration
-/// quoting or unquoting operations.
-bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
-                                        const Handle& clause)
+/// Detect if the PatternTermPtr is a clause, so that we know
+/// when to stop. This takes into consideration quoting or
+/// unquoting operations. WTF!? How can quoting possibly make any
+/// difference at all with regards to smething being a clause!?
+/// XXX FIXME, this seems fu'ed to me.
+bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
+                                          const Handle& clause)
 {
 	return ptm->getHandle() == clause
 		or (Quotation::is_quotation_type(clause->get_type())
@@ -1486,7 +1489,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	const Handle& hp = ptm->getHandle();
-	if (clause_compare(ptm, clause_root))
+	if (term_is_a_clause(ptm, clause_root))
 		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
@@ -2158,8 +2161,9 @@ bool PatternMatchEngine::report_forall(void)
 		OC_ASSERT(_term_ground_cache.size() == nitems);
 		for (size_t i=0; i<nitems; i++)
 		{
-			halt = halt and _pmc.grounding(_var_ground_cache[i],
-			                               _term_ground_cache[i]);
+			halt = _pmc.grounding(_var_ground_cache[i],
+			                      _term_ground_cache[i]);
+			if (halt) break;
 		}
 	}
 	_forall_state = true;
@@ -2257,16 +2261,6 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		{
 			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
-		}
-
-		// AlwaysLink clauses must always be satisfied. Report the
-		// failure to satisfy to the callback.
-		if (is_always(clause))
-		{
-			Handle maybe;
-			if (found) maybe = grnd;
-			_forall_state = _forall_state and
-				_pmc.always_clause_match(clause, maybe, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.

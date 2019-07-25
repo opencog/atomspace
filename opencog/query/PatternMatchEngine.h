@@ -232,8 +232,9 @@ private:
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
-	bool clause_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
+
+	bool term_is_a_clause(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.

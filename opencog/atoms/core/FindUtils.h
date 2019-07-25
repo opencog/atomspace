@@ -140,6 +140,9 @@ bool is_found_in_tree(const Handle& tree, const Handle& atom,
  * Return true if the indicated atom occurs quoted somewhere in the
  * tree.  That is, it returns true only if the atom is inside a
  * QuoteLink.
+ *
+ * XXX FIXME: what if it appears quoted in one place, and unquoted
+ * in another? then what?
  */
 bool is_quoted_in_tree(const Handle& tree, const Handle& atom);
 
