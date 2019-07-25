@@ -2072,13 +2072,16 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
+	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
+
 	if (0 == _clause_stack_depth)
 	{
-		_pmc.search_group_done(_forall_state);
+		DO_LOG({logger().fine("Search-group DONE!! forall-state=%d",
+		                      _forall_state);})
+		// _pmc.search_group_done(_forall_state);
 		_forall_state = true;
+		DO_LOG({logger().fine("==================================");})
 	}
-
-	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
 }
 
 /**
@@ -2091,7 +2094,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
-#if 0
+#if 1
 	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
@@ -2217,9 +2220,10 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		// failure to satisfy to the callback.
 		if (is_always(clause))
 		{
-			Handle empty;
+			Handle maybe;
+			if (found) maybe = grnd;
 			_forall_state = _forall_state and
-				_pmc.always_clause_match(clause, empty, var_grounding);
+				_pmc.always_clause_match(clause, maybe, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
