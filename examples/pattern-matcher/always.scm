@@ -8,13 +8,17 @@
 ; satisfy some predicate or term? Such searches can be implemented
 ; with the AlwaysLink.
 ;
-; In this example, there are three baskets holding balls. Some
+; In this example, there are four baskets holding balls. Some
 ; hold balls of several different colors, some hold only balls
 ; that are all of the same color. The example sets up these baskets,
 ; and then issues a query to find the basket that holds only red
-; balls, and no others.
+; balls, and no others. A fancier query finds those baskets that
+; have balls all of the same color (whatever color that might be).
 ;
 (use-modules (opencog) (opencog exec))
+
+; ---------------------------------------------------------
+; Populate the atomspace with baskets holding balls.
 
 ; Three baskets holding balls
 (Inheritance (Concept "reds basket")        (Concept "basket"))
@@ -25,20 +29,33 @@
 (Member (Concept "red ball")      (Concept "reds basket"))
 (Member (Concept "red ball too")  (Concept "reds basket"))
 (Member (Concept "red ball also") (Concept "reds basket"))
+
+(Member (Concept "a red ball")    (Concept "another red basket"))
+(Member (Concept "b red ball")    (Concept "another red basket"))
+(Member (Concept "red ball also") (Concept "another red basket"))
+
 (Member (Concept "red ball")      (Concept "reds&greens basket"))
 (Member (Concept "red ball too")  (Concept "reds&greens basket"))
 (Member (Concept "green ball")    (Concept "reds&greens basket"))
+
 (Member (Concept "yellow ball")   (Concept "yellows basket"))
+(Member (Concept "ochre ball")    (Concept "yellows basket"))
 
 ; Predicate that tests the colors of the balls
 (Evaluation (Predicate "is red") (Concept "red ball"))
 (Evaluation (Predicate "is red") (Concept "red ball too"))
 (Evaluation (Predicate "is red") (Concept "red ball also"))
+(Evaluation (Predicate "is red") (Concept "a red ball"))
+(Evaluation (Predicate "is red") (Concept "b red ball"))
 
 (Evaluation (Predicate "is green")  (Concept "green ball"))
-(Evaluation (Predicate "is yellow") (Concept "yellow ball"))
 
-; The search that we will perform.
+(Evaluation (Predicate "is yellow") (Concept "yellow ball"))
+(Evaluation (Predicate "is yellow") (Concept "ochre ball"))
+
+; ---------------------------------------------------------
+; The query below will search for those baskets that have
+; only red balls in them.
 (define get-baskets-with-only-red-balls
 	(Bind
 		(VariableList
@@ -62,4 +79,44 @@
 		(Variable "basket"))
 )
 
+; Now run the query above ... it should find two baskets, the
+; "reds basket" and "another red basket".
 (cog-execute! get-baskets-with-only-red-balls)
+
+; ---------------------------------------------------------
+; Now lets generalize. Look for those baskets which all have
+; the same color, no matter what that might be. This time, the
+; color comparison is done pair-wise. Every possible pair of
+; balls in the basket are compared, and if they always match,
+; then the basket is reported.
+
+(define baskets-with-same-color
+	(Bind
+		(VariableList
+			(TypedVariable (Variable "basket")      (Type 'ConceptNode))
+			(TypedVariable (Variable "some ball")   (Type 'ConceptNode))
+			(TypedVariable (Variable "other ball")  (Type 'ConceptNode))
+			(TypedVariable (Variable "some color")  (Type 'PredicateNode))
+			(TypedVariable (Variable "other color") (Type 'PredicateNode))
+		)
+		(And
+			; We are only interested in baskets.
+			(Inheritance (Variable "basket")       (Concept "basket"))
+
+			; Pick out two balls from the same basket.
+			(Member (Variable "some ball")         (Variable "basket"))
+			(Member (Variable "other ball")        (Variable "basket"))
+			(Evaluation (Variable "some color")    (Variable "some ball"))
+			(Evaluation (Variable "other color")   (Variable "other ball"))
+
+			; Are those two balls of the same color?
+			(Always (Equal (Variable "some color") (Variable "other color")))
+		)
+		(Variable "basket"))
+)
+
+; Now run the query above ... it should find three baskets, the
+; two red ones, and also the yellow one.
+(cog-execute! baskets-with-same-color)
+
+; ---------------------------------------------------------

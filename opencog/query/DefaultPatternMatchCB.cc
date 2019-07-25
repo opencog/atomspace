@@ -578,6 +578,7 @@ bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
                                                 const HandleMap& term_gnds)
 {
+logger().info("duuude always clause CB is good=%d", grnd != nullptr);
 	return grnd != nullptr;
 }
 
