@@ -269,12 +269,17 @@ static inline Handle expand(const Handle& arg)
  * Perform the actual beta reduction --
  *
  * Substitute arguments for the variables in the pattern tree.
- * This is a lot like applying the function fun to the argument list
- * args, except that no actual evaluation is performed; only
- * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it yourself.  If you want
- * evaluation or execution to happen during or after sustitution, use
- * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
+ * This is not a pure beta-reduction, because it does execute
+ * any executable arguments, so as to obtain the correct forms
+ * to place into the reduction.  This does make the PutLink
+ * resemble function application; however, here, the application
+ * is not infinite-recursive; it is only one level deep.  There
+ * is just enough execution performed to get the neeed arguents,
+ * and no more.
+ *
+ * Users who need a more complete apply-like environment should
+ * look to the EvaluationLink, the ExecutionOutputLink, or the
+ * Instantiator.
  *
  * So, for example, if the PutLink looks like this:
  *
@@ -296,12 +301,11 @@ static inline Handle expand(const Handle& arg)
  *
  * Type checking is performed during substitution; if the arguments fail
  * to have the desired types, no substitution is performed.  In this case,
- * an undefined handle is returned. For set substitutions, this acts as
- * a filter, removing (filtering out) the mismatched types.
+ * an undefined handle is returned (?? XXX really? or is it a throw?).
+ * For set substitutions, this acts as a filter, removing (filtering out)
+ * the mismatched types.
  *
- * Again, only a substitution is performed, there is no execution or
- * evaluation.  Note also that the resulting tree is NOT placed into
- * any atomspace!
+ * Note that the resulting tree is NOT placed into any atomspace!
  */
 Handle PutLink::do_reduce(void) const
 {
@@ -311,9 +315,7 @@ Handle PutLink::do_reduce(void) const
 	Handle args(_arguments);
 
 	if (args->is_executable())
-	{
 		args = HandleCast(args->execute());
-	}
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
@@ -369,10 +371,7 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			for (const Handle& arg : args->getOutgoingSet())
-				if (arg->is_executable())
-					oset.emplace_back(HandleCast(arg->execute()));
-				else
-					oset.emplace_back(arg);
+				oset.emplace_back(expand(arg));
 			return createLink(oset, btype);
 		}
 
@@ -391,19 +390,13 @@ Handle PutLink::do_reduce(void) const
 			{
 				HandleSeq oset(bods->getOutgoingSet());
 				for (const Handle& arg : h->getOutgoingSet())
-					if (arg->is_executable())
-						oset.emplace_back(HandleCast(arg->execute()));
-					else
-						oset.emplace_back(arg);
+					oset.emplace_back(expand(arg));
 				bset.emplace_back(createLink(oset, btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				if (h->is_executable())
-					oset.emplace_back(HandleCast(h->execute()));
-				else
-					oset.emplace_back(h);
+				oset.emplace_back(expand(h));
 				bset.emplace_back(createLink(oset, btype));
 			}
 		}
