@@ -342,11 +342,11 @@ Handle PutLink::do_reduce(void) const
 	// FunctionLinks behave like pointless lambdas; that is, one can
 	// create valid beta-redexes with them. We handle that here.
 	//
-	// XXX At this time, we don't know the number of arguments any
-	// given FunctionLink might take.  Atomese does have the mechanisms
+	// At this time, we don't know the number of arguments any given
+	// FunctionLink might take.  Atomese does have the mechanisms
 	// to declare these, including arbitrary-arity functions, its
-	// just that its currently not declared anywhere for any of the
-	// FunctionLinks.  So we just punt.  Example usage:
+	// just that it is currently not declared anywhere for any of the
+	// FunctionLinks.  So we just guess as best we can.  Example usage:
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
 	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
 	if (0 == nvars and nameserver().isA(btype, FUNCTION_LINK))
@@ -354,8 +354,11 @@ Handle PutLink::do_reduce(void) const
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			const HandleSeq& rest = args->getOutgoingSet();
-			oset.insert(oset.end(), rest.begin(), rest.end());
+			for (const Handle& arg : args->getOutgoingSet())
+				if (arg->is_executable())
+					oset.emplace_back(HandleCast(arg->execute()));
+				else
+					oset.emplace_back(arg);
 			return createLink(oset, btype);
 		}
 
@@ -373,14 +376,20 @@ Handle PutLink::do_reduce(void) const
 			if (LIST_LINK == h->get_type())
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				const HandleSeq& rest = h->getOutgoingSet();
-				oset.insert(oset.end(), rest.begin(), rest.end());
+				for (const Handle& arg : h->getOutgoingSet())
+					if (arg->is_executable())
+						oset.emplace_back(HandleCast(arg->execute()));
+					else
+						oset.emplace_back(arg);
 				bset.emplace_back(createLink(oset, btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				oset.emplace_back(h);
+				if (h->is_executable())
+					oset.emplace_back(HandleCast(h->execute()));
+				else
+					oset.emplace_back(h);
 				bset.emplace_back(createLink(oset, btype));
 			}
 		}
