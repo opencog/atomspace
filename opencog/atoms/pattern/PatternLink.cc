@@ -627,17 +627,34 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot. Virtuals are not black.
+			//
 			// Actually, they are virtual only if the variables
 			// appear in different terms in the virtual, e.g.
 			// (GreaterThan x y) but are not virtual if they appear
 			// on just one side, e.g. (GreaterThan (x+y) 42)
+			//
+			// Note also: mathematical optimzation is not supported.
+			// See https://en.wikipedia.org/wiki/Mathematical_optimization
+			// If we really wanted to, we could kind-of support some
+			// of this, by doing exactly the same brute-force search
+			// already done for virtual links. But right now, supporting
+			// this seems like a boon-doggle. The pattern matcher is
+			// not a magician.
 			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
 			{
 				size_t nsub = 0;
+				size_t nsolv = 0;
 				for (const Handle& sub: sh->getOutgoingSet())
 				{
-					if (0 < num_unquoted_in_tree(sub, _varlist.varset))
-						nsub++;
+					size_t nv = num_unquoted_in_tree(sub, _varlist.varset);
+					if (0 < nv) nsub++;
+					if (0 < nv and sub->is_executable()) nsolv++;
+					if (0 < nv and VARIABLE_NODE == sub->get_type()) nsolv++;
+				}
+				if (2 <= nsolv)
+				{
+					throw InvalidParamException(TRACE_INFO,
+						"This optimization problem currently not supported!");
 				}
 				if (2 <= nsub)
 					is_virtual = true;
