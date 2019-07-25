@@ -11,4 +11,4 @@
 		(VariableList
 			(TypedVariableLink (VariableNode "$A") (TypeNode "NumberNode"))
 			(TypedVariableLink (VariableNode "$B") (TypeNode "NumberNode")))
-		(PlusLink (VariableNode "$A") (VariableNode "$B"))))
+		(Present (PlusLink (VariableNode "$A") (VariableNode "$B")))))
