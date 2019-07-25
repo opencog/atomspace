@@ -552,14 +552,18 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 	size_t nsub = 0;
 	size_t nsolv = 0;
+	size_t nvar = 0;
 	for (const Handle& sub: clause->getOutgoingSet())
 	{
 		size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
-		if (0 < nv) nsub++;
-		if (0 < nv and sub->is_executable()) nsolv++;
-		if (0 < nv and VARIABLE_NODE == sub->get_type()) nsolv++;
+		if (0 < nv)
+		{
+			nsub++;
+			if (sub->is_executable()) nsolv++;
+			if (VARIABLE_NODE == sub->get_type()) nvar++;
+		}
 	}
-	if (2 <= nsolv)
+	if (2 <= nsolv or (1 == nsolv and 0 < nvar))
 	{
 		throw InvalidParamException(TRACE_INFO,
 			"This optimization problem currently not supported!");
