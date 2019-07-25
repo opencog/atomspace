@@ -1,19 +1,17 @@
 (Inheritance (Concept "B") (Concept "Parent"))
 (Inheritance (Concept "C") (Concept "Parent"))
 
-(define put-execute-arguments
+(define put-get
  (PutLink
-  (LambdaLink
-   (VariableNode "x")
    (EvaluationLink
     (PredicateNode "relation")
     (ListLink
      (VariableNode "x")
-     (ConceptNode "A"))))
+     (ConceptNode "A")))
   (GetLink
    (Inheritance (Variable "$X") (Concept "Parent")))))
 
-(define expected-put-execute-arguments
+(define expected-put-get
  (SetLink
   (EvaluationLink
    (PredicateNode "relation")
