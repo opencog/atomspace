@@ -525,6 +525,49 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
 }
 
+/// is_virtual -- check to see if a clause is virtual.
+///
+/// A clause is virtual if it has two or more unquoted, unscoped
+/// variables in it. Otherwise, it can be evaluated on the spot.
+///
+/// At this time, the pattern matcher does not support mathematical
+/// optimzation within virtual clauses.
+/// See https://en.wikipedia.org/wiki/Mathematical_optimization
+///
+/// So, virtual clauses are already one step towards full support
+/// for optimization, as they do enable certain kinds of brute-force
+/// search across disconnected components. So, there is partial
+/// support, for simple kinds of optimization problems. It would
+/// take more work and refactoring to support more.  Thus, for now,
+/// just throw an error when the more complex optimzation problems
+/// are encountered.
+///
+/// To add support, we would have to split executable clauses into
+/// component graphs, the same way we currently split VirtualLinks.
+///
+bool PatternLink::is_virtual(const Handle& clause)
+{
+	size_t nfree = num_unquoted_unscoped_in_tree(clause, _varlist.varset);
+	if (2 > nfree) return false;
+
+	size_t nsub = 0;
+	size_t nsolv = 0;
+	for (const Handle& sub: clause->getOutgoingSet())
+	{
+		size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
+		if (0 < nv) nsub++;
+		if (0 < nv and sub->is_executable()) nsolv++;
+		if (0 < nv and VARIABLE_NODE == sub->get_type()) nsolv++;
+	}
+	if (2 <= nsolv)
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"This optimization problem currently not supported!");
+	}
+
+	return 1 < nsub;
+}
+
 /// Sort out the list of clauses into four classes:
 /// virtual, evaluatable, executable and concrete.
 ///
@@ -574,7 +617,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
-		bool is_virtual = false;
+		bool is_virtu = false;
 		bool is_black = false;
 
 #ifdef BROKEN_DOESNT_WORK
@@ -599,12 +642,9 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		{
 			_pat.evaluatable_terms.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, unscoped variables in them. Otherwise, they
-			// can be evaluated on the spot.
-			if (2 <= num_unquoted_unscoped_in_tree(sh, _varlist.varset))
+			if (is_virtual(sh))
 			{
-				is_virtual = true;
+				is_virtu = true;
 				is_black = true;
 			}
 		}
@@ -623,46 +663,12 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
 
-			// But they're virtual only if they have two or more
-			// unquoted, unscoped variables in them. Otherwise, they
-			// can be evaluated on the spot. Virtuals are not black.
-			//
-			// Actually, they are virtual only if the variables
-			// appear in different terms in the virtual, e.g.
-			// (GreaterThan x y) but are not virtual if they appear
-			// on just one side, e.g. (GreaterThan (x+y) 42)
-			//
-			// Note also: mathematical optimzation is not supported.
-			// See https://en.wikipedia.org/wiki/Mathematical_optimization
-			// If we really wanted to, we could kind-of support some
-			// of this, by doing exactly the same brute-force search
-			// already done for virtual links. But right now, supporting
-			// this seems like a boon-doggle. The pattern matcher is
-			// not a magician.
-			if (2 <= num_unquoted_unscoped_in_tree(sh, _varlist.varset))
-			{
-				size_t nsub = 0;
-				size_t nsolv = 0;
-				for (const Handle& sub: sh->getOutgoingSet())
-				{
-					size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
-					if (0 < nv) nsub++;
-					if (0 < nv and sub->is_executable()) nsolv++;
-					if (0 < nv and VARIABLE_NODE == sub->get_type()) nsolv++;
-				}
-				if (2 <= nsolv)
-				{
-					throw InvalidParamException(TRACE_INFO,
-						"This optimization problem currently not supported!");
-				}
-				if (2 <= nsub)
-					is_virtual = true;
-			}
+			if (is_virtual(sh)) is_virtu = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
-		if (is_virtual)
+		if (is_virtu)
 			_virtual.emplace_back(clause);
 		else
 			_fixed.emplace_back(clause);
