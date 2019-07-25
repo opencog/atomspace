@@ -38,19 +38,25 @@ class GroundedObjectNodeGilTest(unittest.TestCase):
         del self.atomspace
 
     def test_call_grounded_object_call(self):
-        point = Point(2, 3)
+        x = 2
+        y = 3
+        point = Point(x, y)
 
         GroundedObjectNode("point", point, unwrap_args=True)
-        GroundedObjectNode("x", 3)
-        GroundedObjectNode("y", 4)
 
-        for _ in range(3):
-            self.call_apply_link_async_in_schema(5)
+        move_x = 3
+        move_y = 4
+        GroundedObjectNode("x", move_x)
+        GroundedObjectNode("y", move_y)
+
+        iterations = 3
+        async_calls = 5
+        for _ in range(iterations):
+            self.call_apply_link_async_in_schema(async_calls)
             time.sleep(0.1)
 
-        N = 3 * 5
-        self.assertEqual(2 + 3 * N, point.x)
-        self.assertEqual(3 + 4 * N, point.y)
+        self.assertEqual(x + move_x * iterations * async_calls, point.x)
+        self.assertEqual(y + move_y * iterations * async_calls, point.y)
 
     def call_apply_link_async_in_schema(self, times):
         scheme_eval(self.atomspace,
