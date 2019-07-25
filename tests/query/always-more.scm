@@ -82,7 +82,7 @@
 
 ; Now run the query above ... it should find two baskets, the
 ; "reds basket" and "another red basket".
-(cog-execute! get-baskets-with-only-red-balls)
+; (cog-execute! get-baskets-with-only-red-balls)
 
 ; ---------------------------------------------------------
 ; Now lets generalize. Look for those baskets which all have
@@ -118,6 +118,6 @@
 
 ; Now run the query above ... it should find three baskets, the
 ; two red ones, and also the yellow one.
-(cog-execute! baskets-with-same-color)
+; (cog-execute! baskets-with-same-color)
 
 ; ---------------------------------------------------------

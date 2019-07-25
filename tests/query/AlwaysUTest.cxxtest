@@ -57,6 +57,7 @@ public:
 	void tearDown(void);
 
 	void test_basic(void);
+	void test_more(void);
 };
 
 void AlwaysUTest::tearDown(void)
@@ -90,8 +91,50 @@ void AlwaysUTest::test_basic(void)
 	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
 	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
 
-	// XXX FIXME (Always (Equals ...)) has not been implemented yet!
-	// TS_ASSERT_EQUALS(2, getarity(red_n_yell));
+	TS_ASSERT_EQUALS(2, getarity(red_n_yell));
+
+	Handle both =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "yellows basket"));
+	TS_ASSERT_EQUALS(red_n_yell, both);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Fancier AlwaysLink unit test. Much like the above, but with
+ * more baskets.  This is testing the demo in the examples directory.
+ */
+void AlwaysUTest::test_more(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/always-more.scm\")");
+
+	Handle red_set = eval->eval_h("(cog-execute! baskets-with-red-balls-only)");
+	printf("Expecting two red baskets, got %s", red_set->to_string().c_str());
+
+	TS_ASSERT_EQUALS(2, getarity(red_set));
+
+	Handle both =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "another red basket"));
+	TS_ASSERT_EQUALS(both, red_set);
+
+	// ----------------
+	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
+	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
+
+	TS_ASSERT_EQUALS(3, getarity(red_n_yell));
+
+	Handle three =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "another red basket"),
+			as->add_node(CONCEPT_NODE, "yellows basket"));
+	TS_ASSERT_EQUALS(red_n_yell, three);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

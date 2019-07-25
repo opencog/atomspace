@@ -80,9 +80,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                                 const Handle& grnd,
 		                                 const HandleMap&);
 
-		virtual void push(void);
-		virtual void pop(void);
-
 		virtual IncomingSet get_incoming_set(const Handle&);
 
 		/**
@@ -139,8 +136,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 
 		bool _optionals_present = false;
-		bool _forall_state = true;
-		size_t _stack_depth = 0;
 		AtomSpace* _as;
 };
 

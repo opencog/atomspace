@@ -628,10 +628,13 @@ take_next_step:
 }
 
 
-/// Compare a PatternTermPtr with a clause taking in consideration
-/// quoting or unquoting operations.
-bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
-                                        const Handle& clause)
+/// Detect if the PatternTermPtr is a clause, so that we know
+/// that it is time to stop moving upwards. When quotations are
+/// being used, we  may have already moved past the top of the
+/// clause!! ... which seems strange to me, but that is how
+/// quotations work.
+bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
+                                          const Handle& clause)
 {
 	return ptm->getHandle() == clause
 		or (Quotation::is_quotation_type(clause->get_type())
@@ -1486,7 +1489,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	const Handle& hp = ptm->getHandle();
-	if (clause_compare(ptm, clause_root))
+	if (term_is_a_clause(ptm, clause_root))
 		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
@@ -1623,8 +1626,9 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	else
 	if (is_always(clause_root))
 	{
-		clause_accepted = true;
+		_did_check_forall = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
+		_forall_state = _forall_state and match;
 		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
 	}
 	else
@@ -1659,7 +1663,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	if (nullptr == curr_root)
 	{
-		found = _pmc.grounding(var_grounding, clause_grounding);
+		found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
 	}
@@ -1721,7 +1725,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			{
 				DO_LOG({logger().fine("==================== FINITO BANDITO!");
 				log_solution(var_grounding, clause_grounding);})
-				found = _pmc.grounding(var_grounding, clause_grounding);
+				found = report_grounding(var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -2072,7 +2076,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
-
 	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
 }
 
@@ -2087,6 +2090,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
 #if 0
+	// Currently, only GlobUTest fails when this is uncommented.
 	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
@@ -2121,6 +2125,56 @@ void PatternMatchEngine::solution_drop(void)
 
 /* ======================================================== */
 
+/// Pass the grounding that was found out to the callback.
+/// ... unless there is an Always clasue, in which case we
+/// save them up until we've looked at all of them.
+bool PatternMatchEngine::report_grounding(const HandleMap &var_soln,
+                                          const HandleMap &term_soln)
+{
+	// If there is no for-all clause (no AlwaysLink clause)
+	// then report groundings as they are found.
+	if (_pat->always.size() == 0)
+		return _pmc.grounding(var_soln, term_soln);
+
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
+
+	// Don't even bother caching, if we know we are losing.
+	if (not _forall_state) return false;
+
+	_var_ground_cache.push_back(var_soln);
+	_term_ground_cache.push_back(term_soln);
+
+	// Keep going.
+	return false;
+}
+
+bool PatternMatchEngine::report_forall(void)
+{
+	// Nothing to do.
+	if (_pat->always.size() == 0) return false;
+
+	// If its OK to report, then report them now.
+	bool halt = false;
+	if (_forall_state)
+	{
+		size_t nitems = _var_ground_cache.size();
+		OC_ASSERT(_term_ground_cache.size() == nitems);
+		for (size_t i=0; i<nitems; i++)
+		{
+			halt = _pmc.grounding(_var_ground_cache[i],
+			                      _term_ground_cache[i]);
+			if (halt) break;
+		}
+	}
+	_forall_state = true;
+	_var_ground_cache.clear();
+	_term_ground_cache.clear();
+	return halt;
+}
+
+/* ======================================================== */
+
 /**
  * explore_neighborhood - explore the local (connected) neighborhood
  * of the starter clause, looking for a match.  The idea here is that
@@ -2151,7 +2205,9 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                               const Handle& grnd)
 {
 	clause_stacks_clear();
-	return explore_redex(term, grnd, do_clause);
+	bool halt = explore_redex(term, grnd, do_clause);
+	bool stop = report_forall();
+	return halt or stop;
 }
 
 /**
@@ -2197,6 +2253,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
 
+		_did_check_forall = false;
 		bool found = explore_term_branches(term, grnd, clause);
 
 		// If no solution was found, and there are globs, then there may
@@ -2208,12 +2265,12 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 			found = explore_term_branches(term, grnd, clause);
 		}
 
-		// AlwaysLink clauses must always be satisfied. Report the
-		// failure to satisfy to the callback.
-		if (is_always(clause))
+		if (not _did_check_forall and is_always(clause))
 		{
+			// We need to record failures for the AlwaysLink
 			Handle empty;
-			_pmc.always_clause_match(clause, empty, var_grounding);
+			_forall_state = _forall_state and
+				_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
@@ -2234,7 +2291,16 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
+	{
 		return clause_accept(clause, grnd);
+	}
+	else if (is_always(clause))
+	{
+		// We need to record failures for the AlwaysLink
+		Handle empty;
+		_forall_state = _forall_state and
+			_pmc.always_clause_match(clause, empty, var_grounding);
+	}
 
 	return false;
 }
@@ -2298,7 +2364,7 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 		}
 	}
 	if (found)
-		_pmc.grounding(HandleMap(), HandleMap());
+		report_grounding(HandleMap(), HandleMap());
 
 	return found;
 }

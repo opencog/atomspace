@@ -345,7 +345,7 @@ class PatternMatchCallback
 		 * is completed: its completed when the above returns. In practice,
 		 * the implementation is much simpler if we have a distinct
 		 * callback to handle this situation.  The argument, is the return
-		 * value from initiaitate_search().
+		 * value from initiatate_search().
 		 */
 		virtual bool search_finished(bool done) { return done; }
 

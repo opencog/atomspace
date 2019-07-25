@@ -47,14 +47,10 @@ class PatternMatchEngine
 
 private:
 	// -------------------------------------------
-	// The current set of clauses (redex context) being grounded.
-	// A single redex consists of a collection of clauses, all of
-	// which must be grounded.
-	bool explore_redex(const Handle&, const Handle&, const Handle&);
+	// The pattern holds a collection of clauses that are to be
+	// grounded. The variables are what are being directly grounded.
 
-	// These have to be pointers, not references; they get pushed
-	// onto a stack when a new redex context is started. This is
-	// how redex recursion will (eventually) be implemented.
+	// These are pointers; maybe they could be (should be?) references.
 	const Variables* _varlist;
 	const Pattern* _pat;
 
@@ -72,6 +68,8 @@ private:
 
 	bool is_black(const Handle& h) {
 		return (_pat->black.count(h) != 0); }
+
+	bool term_is_a_clause(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
@@ -200,6 +198,20 @@ private:
 	unsigned int _clause_stack_depth;
 
 	// -------------------------------------------
+	// Methods that run when all clauses have been grounded.
+
+	typedef HandleMap GrndMap;
+	std::vector<GrndMap> _var_ground_cache;
+	std::vector<GrndMap> _term_ground_cache;
+	bool _forall_state = true;
+	bool _did_check_forall;
+
+	// Report a fully grounded pattern to the callback.
+	bool report_grounding(const HandleMap &var_soln,
+	                      const HandleMap &term_soln);
+	bool report_forall(void);
+
+	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
 
@@ -219,13 +231,13 @@ private:
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
-	bool clause_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
+	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,

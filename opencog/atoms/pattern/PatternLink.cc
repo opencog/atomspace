@@ -62,8 +62,7 @@ void PatternLink::common_init(void)
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
-	unbundle_virtual(_varlist.varset, _pat.unquoted_clauses,
-	                 _fixed, _virtual, _pat.black);
+	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
 	add_dummies();
@@ -229,8 +228,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
-	unbundle_virtual(_varlist.varset, _pat.mandatory,
-	                 _fixed, _virtual, _pat.black);
+	unbundle_virtual(_pat.mandatory);
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
@@ -357,6 +355,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		for (const Handle& ah: h->getOutgoingSet())
 		{
 			_pat.always.emplace_back(ah);
+			_pat.unquoted_clauses.emplace_back(ah);
 		}
 		return true;
 	}
@@ -377,14 +376,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
-	// For just right now, unpack PresentLink, although this might not
-	// be correct in the long-run. (???)
-	//
-	// For SequentialAndLinks, which are expected to be evaluated
-	// in-order, we need to fish out any PresentLinks, and add them
-	// to the list of clauses to be grounded.  Of course, the
-	// SequentialAndLink itself also has to be evaluated, so we add it
-	// too.
+
+	// Start by fishing out the PresentLink's, and adding them to the
+	// list of clauses to be grounded.
 	_pat.body = hbody;
 	if (record_literal(hbody))
 	{
@@ -412,10 +406,19 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
-		// XXX FIXME, Just like in trace_connectives, assume we are
-		// working with the DefaultPatternMatchCB, which uses these.
+		// Just like in trace_connectives, assume we are working with
+		// the DefaultPatternMatchCB, which uses these. Some other
+		// yet-to-be-specified callback may want to use a different
+		// set of connectives...
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+
+		// BUG - XXX FIXME. This extracts PresentLink's from the
+		// Sequentials. This is not really correct, because the
+		// evaluation of the sequential might terminate *before*
+		// the PresentLink is reached. Whereas the current design
+		// of the clause-walking will run the PresentLink before
+		// running the sequential. So that's a bug.
 		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.unquoted_clauses.emplace_back(hbody);
@@ -567,11 +570,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// those variables are grounded by different disconnected graph
 /// components; the combinatoric explosion has to be handled...
 ///
-void PatternLink::unbundle_virtual(const HandleSet& vars,
-                                   const HandleSeq& clauses,
-                                   HandleSeq& fixed_clauses,
-                                   HandleSeq& virtual_clauses,
-                                   HandleSet& black_clauses)
+void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -604,7 +603,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
 			// TODO: shouldn't there be unscoped as well?
-			if (2 <= num_unquoted_in_tree(sh, vars))
+			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
 			{
 				is_virtual = true;
 				is_black = true;
@@ -627,19 +626,19 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot. Virtuals are not black.
-			if (2 <= num_unquoted_in_tree(sh, vars))
+			if (2 <= num_unquoted_in_tree(sh, _varlist.varset))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
 		if (is_virtual)
-			virtual_clauses.emplace_back(clause);
+			_virtual.emplace_back(clause);
 		else
-			fixed_clauses.emplace_back(clause);
+			_fixed.emplace_back(clause);
 
 		if (is_black)
-			black_clauses.insert(clause);
+			_pat.black.insert(clause);
 	}
 }
 
@@ -911,7 +910,7 @@ void PatternLink::debug_log(void) const
 
 	if (0 < _pat.optionals.size())
 	{
-		logger().fine("Predicate includes the following optional clauses:");
+		logger().fine("Pattern has optional clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.optionals)
 		{
@@ -930,7 +929,7 @@ void PatternLink::debug_log(void) const
 
 	if (0 < _pat.always.size())
 	{
-		logger().fine("Predicate includes the following for-all clauses:");
+		logger().fine("Pattern has for-all clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.always)
 		{

@@ -182,7 +182,7 @@ CHOICE_LINK <- ORDERED_LINK
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
 // terms are AND'ed together.  Since it does not make sense to ask if
 // the same atom is present more than once, or what order it was in, it
-// is an unordered link, and  duplicates are eliminated.
+// is an unordered link, and duplicates are eliminated.
 //
 PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 
