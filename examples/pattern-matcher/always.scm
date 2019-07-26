@@ -18,7 +18,7 @@
 (use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------
-; Populate the atomspace with baskets holding balls.
+; Populate the AtomSpace with baskets holding balls.
 
 ; Three baskets holding balls
 (Inheritance (Concept "reds basket")        (Concept "basket"))
@@ -120,4 +120,46 @@
 ; two red ones, and also the yellow one.
 (cog-execute! baskets-with-same-color)
 
+; ---------------------------------------------------------
+; One can achieve some of the same effect by cascading multiple
+; queries. In the below, a nested inner query performs a search
+; for baskets with balls that are not red, and then rejects such
+; baskets.
+
+(define not-baskets-with-not-red
+	; Return those things that ....
+	(Get (Variable "basket")
+		(And
+			; ... things that are baskets ...
+			(Inheritance (Variable "basket") (Concept "basket"))
+			; ... but are not ...
+			(NotLink
+				; SatisfactionLink returns true/false: true when
+				; the clauses can be satisfied, else, false.
+				; In this case, "true" means there exists a ball that ...
+				(SatisfactionLink (Variable "ball")
+					(And
+						; ... a ball that is in a basket, and ...
+						(Member (Variable "ball") (Variable "basket"))
+						; ... the ball is not red. That is, the clause
+						; below cannot be found in the AtomSpace.
+						(Absent
+							(Evaluation (Predicate "is red") (Variable "ball")))
+						; So, the SatisfactionLink evaluates to "true" if
+						; if the basket contains some ball (any ball) that
+						; is not red.
+					))))
+		; ... NotLink: true, if the basket didn't have any balls
+		; that were not red. That is, only baskets with red balls
+		; are found.
+	))
+
+; Run the above query.
+(cog-execute! not-baskets-with-not-red)
+
+; This query is less efficient than using the AlwaysLink, mostly
+; because it consists of two nested queries, and the inner query
+; needs to be setup before it can be run. The setup and the distinct
+; search it performs will in general use up more CPU time than the
+; single query leveraging the AlwaysLink.
 ; ---------------------------------------------------------
