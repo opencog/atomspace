@@ -194,10 +194,10 @@ std::string oc_to_string(TruthValuePtr tv, const std::string& indent)
 std::string oc_to_string(const TruthValueSeq& tvs, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << tvs.size() << std::endl;
+	ss << indent << "size = " << tvs.size();
 	size_t i = 0;
 	for (const TruthValuePtr& tv : tvs) {
-		ss << indent << "tv[" << i << "]: " << oc_to_string(tv);
+		ss << std::endl << indent << "tv[" << i << "]: " << oc_to_string(tv);
 		i++;
 	}
 	return ss.str();
