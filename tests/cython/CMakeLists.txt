@@ -73,11 +73,14 @@ IF (HAVE_NOSETESTS)
 	IF (HAVE_ATOMSPACE)
 		ADD_TEST(CythonAtomSpace ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/atomspace/)
-		SET_TESTS_PROPERTIES(CythonAtomSpace
-			PROPERTIES
-			DEPENDS atomspace_cython
-			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+		SET_PROPERTY(TEST CythonAtomSpace
+			APPEND PROPERTY ENVIRONMENT "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+				"PYTHONDONTWRITEBYTECODE=1"
+				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython"
+				"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}")
+		SET_PROPERTY(TEST CythonAtomSpace
+					PROPERTY DEPENDS atomspace_cython scheme_wrapper)
+
 
 		# All of the subsequent cython unit tests  depend on having
 		# guile working. So test guile first, and then the others.

@@ -38,6 +38,9 @@ static void load_cython_proxies()
 	if (!Py_IsInitialized())
 		throw RuntimeException(TRACE_INFO, "Python is expected to be "
 				"initialized when using Python specific part of API");
+	// InitThreads to not crash on Python 3.6.8
+	// when called from different thread
+	PyEval_InitThreads();
 	import_opencog__atomspace();
 }
 
