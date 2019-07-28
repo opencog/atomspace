@@ -14,11 +14,11 @@
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
 ; -- clear -- extract all atoms in the atomspace.
+; -- cog-report-counts -- Return an association list of counts.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 ; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
-; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
@@ -172,17 +172,43 @@
 	(cog-atomspace-clear)
 )
 
+; -----------------------------------------------------------------------
+(define-public (cog-report-counts)
+"
+  cog-report-counts -- Return an association list of counts
+
+  Return an association list holding a report of the number of atoms
+  of each type currently in the atomspace. Counts are included only
+  for types with non-zero atom counts.
+
+  See also:
+     cog-count-atoms -- which counts atoms of a given type.
+     count-all -- report a single grand-total count.
+"
+	(let ((tlist (cog-get-types)))
+		(define (rpt type)
+			(let ((cnt (cog-count-atoms type)))
+				(if (not (= 0 cnt))
+					(cons type cnt)
+					#f
+				)
+			)
+		)
+		(filter-map rpt tlist)
+	)
+)
+
 ; --------------------------------------------------------------------
 (define-public (count-all)
 "
   count-all -- Return the total number of atoms in the atomspace, it does not
   count those in the backing store.
+
+  See also:
+     cog-count-atoms -- which counts atoms of a given type.
+     cog-report-counts -- which reports counts by type.
 "
-	(define cnt 0)
-	(define (ink a) (set! cnt (+ cnt 1)) #f)
-	(define (cnt-type x) (cog-map-type ink x))
-	(map cnt-type (cog-get-types))
-	cnt
+	(fold (lambda (typ cnt) (+ cnt (cog-count-atoms typ))) 0 (cog-get-types))
 )
 
 ; -----------------------------------------------------------------------
@@ -269,28 +295,6 @@
   (define (cons-roots x) (set! roots (cons x roots)))
   (traverse-roots cons-roots)
   roots
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-report-counts)
-"
-  cog-report-counts -- Return an association list of counts
-
-  Return an association list holding a report of the number of atoms
-  of each type currently in the atomspace. Counts are included only
-  for types with non-zero atom counts.
-"
-	(let ((tlist (cog-get-types)))
-		(define (rpt type)
-			(let ((cnt (cog-count-atoms type)))
-				(if (not (= 0 cnt))
-					(cons type cnt)
-					#f
-				)
-			)
-		)
-		(filter-map rpt tlist)
-	)
 )
 
 ; -----------------------------------------------------------------------
