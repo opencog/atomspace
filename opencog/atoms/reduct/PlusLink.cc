@@ -90,10 +90,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	// have to behave consistently with adding a non-zero number.
 	// Adding a number to a stream samples one value out of that stream.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
-		sample_stream(vj, vjtype);
+		return sample_stream(vj, vjtype);
 
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		sample_stream(vi, vitype);
+		return sample_stream(vi, vitype);
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
