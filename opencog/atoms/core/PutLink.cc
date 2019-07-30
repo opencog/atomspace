@@ -217,6 +217,10 @@ void PutLink::static_typecheck_arguments(void)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink, SetLink or GetLink!");
 
+	if (0 == sz)
+		throw InvalidParamException(TRACE_INFO,
+			"PutLink: cannot put the empty set!");
+
 	if (1 < sz)
 	{
 		for (const Handle& h : valley->getOutgoingSet())
