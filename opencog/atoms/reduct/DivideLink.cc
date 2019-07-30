@@ -83,7 +83,7 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 
 	// If vj is one, just drop it
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return vi;
+		return sample_stream(vi, vitype);
 
 	// Collapse (3 / (5 * x)) and (3 / (x * 5))
 	if (NUMBER_NODE == vitype and TIMES_LINK == vjtype)
