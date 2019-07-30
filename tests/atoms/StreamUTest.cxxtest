@@ -135,10 +135,18 @@ void StreamUTest::test_times()
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
-	// scalar times vector --------------------------------------------
-	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
+	// unit scalar times vector --------------------------------------
+	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "1"), valof);
 
 	double sum = loop(times);
+	printf("Expect 0.45 < %g < 0.55\n", sum);
+	TS_ASSERT_LESS_THAN(0.455, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.55);
+
+	// scalar times vector --------------------------------------------
+	times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
+
+	sum = loop(times);
 	printf("Expect 1.45 < %g < 1.55\n", sum);
 	TS_ASSERT_LESS_THAN(1.455, sum);
 	TS_ASSERT_LESS_THAN(sum, 1.55);
@@ -171,10 +179,18 @@ void StreamUTest::test_plus()
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
-	// scalar plus vector --------------------------------------------
-	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
+	// zero scalar plus vector --------------------------------------
+	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "0"), valof);
 
 	double sum = loop(plus);
+	printf("Expect 0.49 < %g < 0.51\n", sum);
+	TS_ASSERT_LESS_THAN(0.49, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.51);
+
+	// scalar plus vector --------------------------------------------
+	plus = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
+
+	sum = loop(plus);
 	printf("Expect 3.49 < %g < 3.51\n", sum);
 	TS_ASSERT_LESS_THAN(3.49, sum);
 	TS_ASSERT_LESS_THAN(sum, 3.51);
@@ -261,7 +277,15 @@ void StreamUTest::test_minus()
 	TS_ASSERT_LESS_THAN(-6.7, sum);
 	TS_ASSERT_LESS_THAN(sum, -6.3);
 
-	// vector minus vector ----------------------------------------------
+	// x-0 --------------------------------------------
+	minus = al(MINUS_LINK, valof, an(NUMBER_NODE, "0"));
+
+	sum = loop(minus);
+	printf("Expect 0.45 < %g < 0.55\n", sum);
+	TS_ASSERT_LESS_THAN(0.45, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.55);
+
+	// vector minus vector ------------------------------------
 	minus = al(MINUS_LINK, valof, valof);
 
 	sum = loop(minus);
@@ -287,6 +311,14 @@ void StreamUTest::test_divide()
 	printf("Expect 0.122 < %g < 0.128\n", sum);
 	TS_ASSERT_LESS_THAN(0.122, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.128);
+
+	// x/1 --------------------------------------------
+	divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "1"));
+
+	sum = loop(divide);
+	printf("Expect 0.45 < %g < 0.55\n", sum);
+	TS_ASSERT_LESS_THAN(0.45, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.55);
 
 	// 3/(x+1) --------------------------------------------
 
