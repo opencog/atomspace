@@ -1,4 +1,4 @@
-from cpython cimport PyLong_FromLongLong
+from cpython cimport PyLong_FromSize_t
 
 # Atom wrapper object
 cdef class Atom(Value):
@@ -155,4 +155,4 @@ cdef class Atom(Value):
         if atom_ptr == NULL:
             raise RuntimeError("hash called on null pointer")
         cdef ContentHash h = deref(atom_ptr).get_hash()
-        return PyLong_FromLongLong(h)
+        return PyLong_FromSize_t(h)
