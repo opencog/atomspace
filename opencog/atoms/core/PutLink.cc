@@ -259,9 +259,18 @@ static inline Handle expand(const Handle& arg)
 	if (arg->is_executable())
 		result = HandleCast(arg->execute());
 
-	if (SET_LINK == result->get_type() and 1 == result->get_arity())
-		result = result->getOutgoingAtom(0);
+	if (SET_LINK == result->get_type())
+	{
+		Arity n = result->get_arity();
+		if (1 == n)
+			result = result->getOutgoingAtom(0);
 
+		if (0 == n)
+		{
+			// if (_silent) throw TypeCheckException();
+			throw RuntimeException(TRACE_INFO, "Cannot put the empty set!");
+		}
+	}
 	return result;
 }
 
