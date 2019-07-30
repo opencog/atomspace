@@ -119,9 +119,9 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	// If either one is the unit, then just drop it.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
-		return vj;
+		return sample_stream(vj, vjtype);
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return vi;
+		return sample_stream(vi, vitype);
 
    if (nameserver().isA(vjtype, NUMBER_NODE))
    {
