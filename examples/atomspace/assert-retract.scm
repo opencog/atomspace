@@ -239,7 +239,7 @@
 
 (Define
 	(DefinedSchema "colored things")
-	(Lambda (Inheritance (Concept "color") (Variable "$yyy"))))
+	(Lambda (Inheritance (Variable "$yyy") (Concept "color"))))
 
 (cog-execute!
 	(PutLink
@@ -249,8 +249,8 @@
 ; This will cause the following to be created:
 ;
 ; (InheritanceLink
-;    (ConceptNode "color")
-;    (ConceptNode "green"))
+;    (ConceptNode "green")
+;    (ConceptNode "color"))
 
 ; The above example introduces several other new things, the most
 ; important being the LambdaLink. The LambdaLink is a lot like the
