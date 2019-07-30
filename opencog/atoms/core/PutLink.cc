@@ -217,6 +217,10 @@ void PutLink::static_typecheck_arguments(void)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink, SetLink or GetLink!");
 
+	if (0 == sz)
+		throw InvalidParamException(TRACE_INFO,
+			"PutLink: cannot put the empty set!");
+
 	if (1 < sz)
 	{
 		for (const Handle& h : valley->getOutgoingSet())
@@ -253,14 +257,23 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 
 // If arg is executable, then run it, and unwrap the set link, too.
 // We unwrap the SetLinks cause that is what GetLinks return.
-static inline Handle expand(const Handle& arg)
+static inline Handle expand(const Handle& arg, bool silent)
 {
 	Handle result(arg);
 	if (arg->is_executable())
-	{
 		result = HandleCast(arg->execute());
-		if (1 == result->get_arity() and SET_LINK == result->get_type())
+
+	if (SET_LINK == result->get_type())
+	{
+		Arity n = result->get_arity();
+		if (1 == n)
 			result = result->getOutgoingAtom(0);
+
+		if (0 == n)
+		{
+			if (silent) throw SilentException();
+			throw RuntimeException(TRACE_INFO, "Cannot put the empty set!");
+		}
 	}
 	return result;
 }
@@ -383,7 +396,7 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			for (const Handle& arg : args->getOutgoingSet())
-				oset.emplace_back(expand(arg));
+				oset.emplace_back(expand(arg, _silent));
 			return createLink(oset, btype);
 		}
 
@@ -402,13 +415,13 @@ Handle PutLink::do_reduce(void) const
 			{
 				HandleSeq oset(bods->getOutgoingSet());
 				for (const Handle& arg : h->getOutgoingSet())
-					oset.emplace_back(expand(arg));
+					oset.emplace_back(expand(arg, _silent));
 				bset.emplace_back(createLink(oset, btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				oset.emplace_back(expand(h));
+				oset.emplace_back(expand(h, _silent));
 				bset.emplace_back(createLink(oset, btype));
 			}
 		}
@@ -446,7 +459,7 @@ Handle PutLink::do_reduce(void) const
 	{
 		HandleSeq oset;
 		for (const Handle& h: args->getOutgoingSet())
-			oset.push_back(expand(h));
+			oset.push_back(expand(h, _silent));
 		return reddy(subs, oset);
 	}
 
