@@ -257,11 +257,11 @@ static inline Handle expand(const Handle& arg)
 {
 	Handle result(arg);
 	if (arg->is_executable())
-	{
 		result = HandleCast(arg->execute());
-		if (1 == result->get_arity() and SET_LINK == result->get_type())
-			result = result->getOutgoingAtom(0);
-	}
+
+	if (SET_LINK == result->get_type() and 1 == result->get_arity())
+		result = result->getOutgoingAtom(0);
+
 	return result;
 }
 
