@@ -86,10 +86,24 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	}
 
 	// If adding zero, just drop the zero.
+	// Unless the other side is a StreamValue, in which case, we
+	// have to behave consistently with adding a non-zero number.
+	// Adding a number to a stream samples one value out of that stream.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
+	{
+		if (nameserver().isA(vjtype, STREAM_VALUE))
+			// return plus(0.0, FloatValueCast(vj));
+			return createFloatValue(FloatValueCast(vj)->value());
 		return vj;
+	}
+
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
+	{
+		if (nameserver().isA(vitype, STREAM_VALUE))
+			// return plus(0.0, FloatValueCast(vi));
+			return createFloatValue(FloatValueCast(vi)->value());
 		return vi;
+	}
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
@@ -225,10 +239,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	}
 
 	Handle hi(HandleCast(vi));
-	if (nullptr == hi) hi= HandleCast(fi);
+	if (nullptr == hi) hi = HandleCast(fi);
 
 	Handle hj(HandleCast(vj));
-	if (nullptr == hj) hj= HandleCast(fj);
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
