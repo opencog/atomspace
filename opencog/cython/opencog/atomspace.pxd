@@ -102,6 +102,9 @@ cdef class TruthValue(Value):
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
 
+# ContentHash
+
+ctypedef size_t ContentHash;
 
 # Atom
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
@@ -123,6 +126,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         # Conditionally-valid methods. Not defined for all atoms.
         string get_name()
         vector[cHandle] getOutgoingSet()
+        ContentHash get_hash()
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
 

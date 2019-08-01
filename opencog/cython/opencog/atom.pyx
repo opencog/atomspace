@@ -1,3 +1,5 @@
+from cpython cimport PyLong_FromLongLong
+
 # Atom wrapper object
 cdef class Atom(Value):
 
@@ -148,8 +150,5 @@ cdef class Atom(Value):
         else:
             return -1
 
-    def __hash__(a1):
-        # Use the address of the atom in memory as the hash.
-        # This should be globally unique, because the atomspace
-        # does not allow more than one, ever.
-        return hash(PyLong_FromVoidPtr(a1.handle.atom_ptr()))
+    def __hash__(self):
+        return PyLong_FromLongLong(self.get_c_handle().get().get_hash())
