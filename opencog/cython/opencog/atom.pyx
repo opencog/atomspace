@@ -151,8 +151,4 @@ cdef class Atom(Value):
             return -1
 
     def __hash__(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        if atom_ptr == NULL:
-            raise RuntimeError("hash called on null pointer")
-        cdef ContentHash h = deref(atom_ptr).get_hash()
-        return PyLong_FromLongLong(h)
+        return PyLong_FromLongLong(self.get_c_handle().get().get_hash())
