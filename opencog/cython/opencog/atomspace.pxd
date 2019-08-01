@@ -128,6 +128,10 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         vector[cHandle] getOutgoingSet()
         ContentHash get_hash()
 
+        bool operator=(cAtom&)
+        bool operator<(cAtom&)
+
+
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
 
 # Handle

@@ -124,31 +124,15 @@ cdef class Atom(Value):
     def handle_ptr(self):
         return PyLong_FromVoidPtr(self.handle)
 
-    def __richcmp__(a1_, a2_, int op):
-        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
-            return NotImplemented
-        cdef Atom a1 = a1_
-        cdef Atom a2 = a2_
+    def __lt__(self, other):
+        cdef cAtom* p = self.get_c_handle().get()
+        cdef cAtom* o = ((<Atom>other).get_c_handle()).get()
+        return deref(p) < deref(o)
 
-        is_equal = (a1.atomspace == a2.atomspace and
-                     deref(a1.handle) == deref(a2.handle))
-        if op == 2: # ==
-            return is_equal
-        elif op == 3: # !=
-            return not is_equal
-
-    # Necessary to prevent weirdness with RPyC
-    def __cmp__(a1_, a2_):
-        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
-            return NotImplemented
-        cdef Atom a1 = a1_
-        cdef Atom a2 = a2_
-        is_equal = (a1.atomspace == a2.atomspace and
-                     deref(a1.handle) == deref(a2.handle))
-        if is_equal:
-            return 0
-        else:
-            return -1
+    def __eq__(self, other):
+        cdef cAtom* p = self.get_c_handle().get()
+        cdef cAtom* o = (<Atom>other).get_c_handle().get()
+        return deref(p) == deref(o)
 
     def __hash__(self):
         return PyLong_FromLongLong(self.get_c_handle().get().get_hash())

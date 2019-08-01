@@ -8,7 +8,8 @@ from opencog.atomspace cimport create_python_value_from_c_value
 from opencog.atomspace import is_a, types
 
 def execute_atom(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("execute_atom atom is: None")
+    if atom is None:
+        raise ValueError("execute_atom atom is: None")
     cdef cValuePtr c_value_ptr = c_execute_atom(atomspace.atomspace,
                                            deref(atom.handle))
     return create_python_value_from_c_value(c_value_ptr, atomspace)
