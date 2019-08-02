@@ -80,7 +80,7 @@ def scheme_eval_h(AtomSpace a, str pys):
     cdef string expr
     expr = pys.encode('UTF-8')
     ret = eval_scheme_h(a.atomspace, expr)
-    return Atom.createAtom(ret, a)
+    return Atom.createAtom(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cAtomSpace* eval_scheme_as(const string& s) except +

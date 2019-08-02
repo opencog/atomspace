@@ -128,8 +128,10 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         vector[cHandle] getOutgoingSet()
         ContentHash get_hash()
 
-        bool operator=(cAtom&)
+        bool operator==(cAtom&)
         bool operator<(cAtom&)
+
+        cAtomSpace* getAtomSpace()
 
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
@@ -167,7 +169,7 @@ cdef class Atom(Value):
     # compatible with one from the parent class. It is the reason why we cannot
     # have Atom.create and Value.create at same time.
     @staticmethod
-    cdef Atom createAtom(cHandle& handle, AtomSpace a)
+    cdef Atom createAtom(cHandle& handle)
 
 
 # AtomSpace
@@ -207,7 +209,7 @@ cdef class AtomSpace:
     cdef object parent_atomspace
 
 
-cdef create_python_value_from_c_value(cValuePtr& value, AtomSpace atomspace)
+cdef create_python_value_from_c_value(cValuePtr& value)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":

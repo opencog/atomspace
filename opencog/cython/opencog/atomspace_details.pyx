@@ -11,14 +11,14 @@ cdef api string get_path_as_string() with gil:
     import sys
     return str(sys.path).encode('UTF-8')
 
-cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
+cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
     cdef cHandle handle
     result = []
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        value = create_python_value_from_c_value(<cValuePtr&>handle, atomspace)
+        value = create_python_value_from_c_value(<cValuePtr&>handle)
         result.append(value)
         inc(handle_iter)
     return result
@@ -97,7 +97,7 @@ cdef class AtomSpace:
         cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom.createAtom(result, self);
+        atom = Atom.createAtom(result);
         if tv :
             atom.tv = tv
         return atom
@@ -118,7 +118,7 @@ cdef class AtomSpace:
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom.createAtom(result, self);
+        atom = Atom.createAtom(result);
         if tv :
             atom.tv = tv
         return atom
@@ -209,7 +209,7 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
-        return convert_handle_seq_to_python_list(handle_vector,self)
+        return convert_handle_seq_to_python_list(handle_vector)
 
     @classmethod
     def include_incoming(cls, atoms):
@@ -241,8 +241,8 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(const cHandle& h, object atomspace):
-    cdef Atom atom = Atom.createAtom(h, atomspace)
+cdef api object py_atom(const cHandle& h):
+    cdef Atom atom = Atom.createAtom(h)
     return atom
 
 def create_child_atomspace(object atomspace):
