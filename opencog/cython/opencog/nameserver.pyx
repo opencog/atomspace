@@ -76,10 +76,7 @@ cdef create_python_value_from_c_value(cValuePtr& value):
     clazz = getattr(thismodule, type_name, None)
     cdef cValue *c_ptr = value.get()
     if clazz is not None:
-        if c_ptr.is_atom():
-            return clazz(ptr_holder = ptr_holder)
-        else:
-            return clazz(ptr_holder = ptr_holder)
+        return clazz(ptr_holder = ptr_holder)
 
     if c_ptr.is_atom():
         return Atom(ptr_holder = ptr_holder)

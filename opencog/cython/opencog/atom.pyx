@@ -119,12 +119,13 @@ cdef class Atom(Value):
         return PyLong_FromVoidPtr(self.handle)
 
     def __richcmp__(self, other, int op):
+        assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
         if op == Py_LT:
             return self.__lt(other)
         if op == Py_EQ:
             return self.__eq(other)
         if op == Py_GT:
-            return not self.__lt(other)
+            return other < self
         if op == Py_LE:
             return self.__lt(other) or self.__eq(other)
         if op == Py_NE:
