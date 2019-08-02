@@ -125,9 +125,9 @@ cdef class Atom(Value):
         if op == Py_EQ:
             return self.__eq(other)
         if op == Py_GT:
-            return other < self
+            return other.__lt(self)
         if op == Py_LE:
-            return self.__lt(other) or self.__eq(other)
+            return not other.__lt(self)
         if op == Py_NE:
             return not self.__eq(other)
         if op == Py_GE:
