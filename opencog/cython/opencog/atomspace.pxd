@@ -160,7 +160,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
 
 cdef class Atom(Value):
     cdef cHandle* handle
-    cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
@@ -170,7 +169,6 @@ cdef class Atom(Value):
     # have Atom.create and Value.create at same time.
     @staticmethod
     cdef Atom createAtom(cHandle& handle)
-
 
 # AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
