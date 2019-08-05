@@ -1,13 +1,14 @@
 from cpython cimport PyLong_FromLongLong
+from cpython.object cimport Py_LT, Py_EQ, Py_GT, Py_LE, Py_NE, Py_GE
 
 # Atom wrapper object
 cdef class Atom(Value):
 
     @staticmethod
-    cdef Atom createAtom(const cHandle& handle, AtomSpace a):
-        return Atom(PtrHolder.create(<shared_ptr[void]&>handle), a)
+    cdef Atom createAtom(const cHandle& handle):
+        return Atom(PtrHolder.create(<shared_ptr[void]&>handle))
 
-    def __init__(self, ptr_holder, atomspace):
+    def __init__(self, ptr_holder):
         super(Atom, self).__init__(ptr_holder)
         self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
         # cache the results after first retrieval of
@@ -15,22 +16,15 @@ cdef class Atom(Value):
         self._atom_type = None
         self._name = None
         self._outgoing = None
-        self.atomspace = atomspace
 
     cdef cHandle get_c_handle(Atom self):
         """Return C++ shared_ptr from PtrHolder instance"""
         return <cHandle&>(self.ptr_holder.shared_ptr)
 
-    def __nonzero__(self):
-        """ Allows boolean comparison, return false is handle is
-        UNDEFINED or doesn't exist in AtomSpace """
-        if self.handle:
-            return self.atomspace.is_valid(self)
-        return False
-
     property atomspace:
         def __get__(self):
-            return self.atomspace
+            cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
+            return AtomSpace_factory(a)
 
     property name:
         def __get__(self):
@@ -75,14 +69,14 @@ cdef class Atom(Value):
             deref((<Atom>key).handle))
         if value.get() == NULL:
             return None
-        return create_python_value_from_c_value(value, self.atomspace)
+        return create_python_value_from_c_value(value)
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             return None
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
-        return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+        return convert_handle_seq_to_python_list(handle_vector)
 
     property out:
         def __get__(self):
@@ -107,7 +101,7 @@ cdef class Atom(Value):
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
             atom_ptr.getIncomingSet(back_inserter(handle_vector))
-            return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+            return convert_handle_seq_to_python_list(handle_vector)
 
     def incoming_by_type(self, Type type):
         cdef vector[cHandle] handle_vector
@@ -115,7 +109,7 @@ cdef class Atom(Value):
         if atom_ptr == NULL:   # avoid null-pointer deref
             return None
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
-        return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+        return convert_handle_seq_to_python_list(handle_vector)
 
     def truth_value(self, mean, count):
         self.tv = createTruthValue(mean, count)
@@ -124,31 +118,34 @@ cdef class Atom(Value):
     def handle_ptr(self):
         return PyLong_FromVoidPtr(self.handle)
 
-    def __richcmp__(a1_, a2_, int op):
-        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
-            return NotImplemented
-        cdef Atom a1 = a1_
-        cdef Atom a2 = a2_
+    def __richcmp__(self, other, int op):
+        assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
+        if op == Py_LT:
+            return self.__lt(other)
+        if op == Py_EQ:
+            return self.__eq(other)
+        if op == Py_GT:
+            return other.__lt(self)
+        if op == Py_LE:
+            return not other.__lt(self)
+        if op == Py_NE:
+            return not self.__eq(other)
+        if op == Py_GE:
+            return not self.__lt(other)
+        raise RuntimeError("unexpected comparison kind: {0}".format(op))
 
-        is_equal = (a1.atomspace == a2.atomspace and
-                     deref(a1.handle) == deref(a2.handle))
-        if op == 2: # ==
-            return is_equal
-        elif op == 3: # !=
-            return not is_equal
+    def __lt(self, other):
+        assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
+        cdef cAtom* p = self.get_c_handle().get()
+        cdef cAtom* o = ((<Atom>other).get_c_handle()).get()
+        return deref(p) < deref(o)
 
-    # Necessary to prevent weirdness with RPyC
-    def __cmp__(a1_, a2_):
-        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
-            return NotImplemented
-        cdef Atom a1 = a1_
-        cdef Atom a2 = a2_
-        is_equal = (a1.atomspace == a2.atomspace and
-                     deref(a1.handle) == deref(a2.handle))
-        if is_equal:
-            return 0
-        else:
-            return -1
+    def __eq(self, other):
+        if not isinstance(other, Atom):
+            return False
+        cdef cAtom* p = self.get_c_handle().get()
+        cdef cAtom* o = (<Atom>other).get_c_handle().get()
+        return deref(p) == deref(o)
 
     def __hash__(self):
         return PyLong_FromLongLong(self.get_c_handle().get().get_hash())
