@@ -79,6 +79,26 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 	return new_vars;
 }
 
+/**
+ * Wrap every glob node with a ListLink
+ *
+ * Since GlobNodes can be matched/substituted with one or more
+ * arguments, The arguments are expected to be wrapped with
+ * ListLink.
+ * In case of alpha conversion, Alpha converted GlobNodes in a
+ * program needs to be wrapped before passed to substitute the Glob.
+ */
+inline HandleSeq wrap_glob_with_list(const HandleSeq& vars)
+{
+	HandleSeq new_vars;
+	for (const Handle& var : vars) {
+		if (GLOB_NODE == var->get_type())
+			new_vars.push_back(createLink(HandleSeq{var}, LIST_LINK));
+		else new_vars.push_back(var);
+	}
+	return new_vars;
+}
+
 Handle RewriteLink::alpha_convert() const
 {
 	HandleSeq vars = append_rand_str(_variables.varseq);
@@ -87,10 +107,11 @@ Handle RewriteLink::alpha_convert() const
 
 Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 {
+	const auto wrapped = wrap_glob_with_list(vars);
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
+		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped, _silent));
 
 	// Create the alpha converted scope link
 	return createLink(hs, get_type());
