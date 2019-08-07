@@ -147,7 +147,9 @@ void PatternLink::init(void)
 	// not set.
 	if (nullptr == _body) return;
 
-	if (2 < _outgoing.size() or
+	// TODO: Update size check conditions
+	if (3 < _outgoing.size() or
+	   (1 == _outgoing.size() and _outgoing[0] != _body) or
 	   (2 == _outgoing.size() and _outgoing[1] != _body))
 	{
 		throw InvalidParamException(TRACE_INFO,

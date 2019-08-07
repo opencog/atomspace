@@ -101,6 +101,21 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	if (UNQUOTE_LINK == decls)
 		return;
 
+	// oset:
+	//   variables
+	//   body
+	//   target
+	if (oset.size() == 3)
+	{
+		_vardecl = oset[0];
+		_body = oset[1];
+		_target = oset[2];
+
+		// Initialize _varlist with the scoped variables
+		init_scoped_variables(_vardecl);
+		return;
+	}
+
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations. There are two cases that can
 	// apply here: either the body is a lambda, in which case, we copy
