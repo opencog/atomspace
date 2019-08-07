@@ -68,7 +68,6 @@ ValuePtr ParallelGetLink::execute(AtomSpace* as, bool silent)
 {
 
 	HandleSet handle_set = do_execute(as, silent);
-	Handle satset(createUnorderedLink(handle_set, SET_LINK));
 
 	for (auto h: handle_set)
 	{
