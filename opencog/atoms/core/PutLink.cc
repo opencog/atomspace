@@ -25,6 +25,7 @@
 #include "DefineLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
@@ -431,24 +432,36 @@ Handle PutLink::do_reduce(void) const
 	// If there is only one variable in the PutLink body...
 	if (1 == nvars)
 	{
-		if (SET_LINK != vtype)
+
+		if (SET_LINK == vtype)
 		{
-			return reddy(subs, {args});
+			// If the arguments are given in a set, then iterate over the set...
+			HandleSeq bset;
+			for (const Handle& h : args->getOutgoingSet())
+			{
+				HandleSeq oset;
+				oset.emplace_back(h);
+				try
+				{
+					bset.emplace_back(reddy(subs, oset));
+				}
+				catch (const TypeCheckException& ex) {}
+			}
+			return createLink(bset, SET_LINK);
 		}
 
-		// If the arguments are given in a set, then iterate over the set...
-		HandleSeq bset;
-		for (const Handle& h : args->getOutgoingSet())
+		if (SET_NODE == vtype)
 		{
-			HandleSeq oset;
-			oset.emplace_back(h);
-			try
+			AtomSpace* as = getAtomSpace();
+			for (const LinkPtr& lp : args->getIncomingSetByType(MEMBER_LINK))
 			{
-				bset.emplace_back(reddy(subs, oset));
+				Handle h = lp->getOutgoingAtom(0);
+				if (as) as->add_atom(reddy(subs, {h}));
 			}
-			catch (const TypeCheckException& ex) {}
+			return args;
 		}
-		return createLink(bset, SET_LINK);
+
+		return reddy(subs, {args});
 	}
 
 	// If we are here, then there are multiple variables in the body.
