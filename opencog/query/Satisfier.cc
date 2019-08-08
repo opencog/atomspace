@@ -164,7 +164,9 @@ bool ParallelSatisfier::grounding(const HandleMap &var_soln,
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			_satisfying_set.emplace(var_soln.at(_varseq[0]));
+			Handle h = var_soln.at(_varseq[0]);
+			_control_value-> get_control()-> produce(h);
+			_satisfying_set.emplace(h);
 		}
 		catch (...)
 		{
@@ -193,6 +195,7 @@ bool ParallelSatisfier::grounding(const HandleMap &var_soln,
 
 bool ParallelSatisfier::search_finished(bool done)
 {
+	_control_value-> get_control()-> finished();
 	return done;
 }
 

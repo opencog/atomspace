@@ -58,7 +58,7 @@ HandleSet ParallelGetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
-	ParallelSatisfier sater(as);
+	ParallelSatisfier sater(as, _target);
 	this->satisfy(sater);
 
 	return sater._satisfying_set;

@@ -32,6 +32,8 @@
 #include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
+#include <opencog/atoms/value/ProducerConsumerValue.h>
+
 namespace opencog {
 
 /**
@@ -125,10 +127,22 @@ class ParallelSatisfier :
 	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
+
+	protected:
+		Handle _set_node;
+		ProducerConsumerValuePtr _control_value;
+
+
 	public:
-		ParallelSatisfier(AtomSpace* as) :
+		ParallelSatisfier(AtomSpace* as, Handle set_node) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as),
-			max_results(SIZE_MAX) {}
+			_set_node(set_node),
+			_control_value(createProducerConsumerValue(set_node->get_name())),
+			max_results(SIZE_MAX)
+			{
+				_set_node->setValue(ProducerConsumerValue::CONTROL_KEY,
+					CastToValue(_control_value));
+			}
 
 		HandleSeq _varseq;
 		HandleSet _satisfying_set;
