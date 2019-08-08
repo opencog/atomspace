@@ -121,6 +121,38 @@ class SatisfyingSet :
 		                       const HandleMap &term_soln);
 };
 
+class ParallelSatisfier :
+	public virtual InitiateSearchCB,
+	public virtual DefaultPatternMatchCB
+{
+	public:
+		ParallelSatisfier(AtomSpace* as) :
+			InitiateSearchCB(as), DefaultPatternMatchCB(as),
+			max_results(SIZE_MAX) {}
+
+		HandleSeq _varseq;
+		HandleSet _satisfying_set;
+		size_t max_results;
+
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat)
+		{
+			_varseq = vars.varseq;
+			InitiateSearchCB::set_pattern(vars, pat);
+			DefaultPatternMatchCB::set_pattern(vars, pat);
+		}
+
+		// Return true if a satisfactory grounding has been
+		// found. Note that in case where you want all possible
+		// groundings, this will usually return false, so the
+		// patternMatchEngine can keep looking for ever more
+		// groundings.
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln);
+
+		virtual bool search_finished(bool);
+};
+
 }; // namespace opencog
 
 #endif // _OPENCOG_SATISFIER_H

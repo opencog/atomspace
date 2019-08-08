@@ -325,6 +325,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// in a direct fashion.
 	if (_num_comps <= 1)
 	{
+
 		PatternMatchEngine pme(pmcb);
 
 		debug_log();

@@ -141,10 +141,59 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
+
 	_satisfying_set.emplace(createLink(vargnds, LIST_LINK));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);
+}
+
+// ===========================================================
+
+bool ParallelSatisfier::grounding(const HandleMap &var_soln,
+                              const HandleMap &term_soln)
+{
+	// PatternMatchEngine::log_solution(var_soln, term_soln);
+
+	// Do not accept new solution if maximum number has been already reached
+	if (_satisfying_set.size() >= max_results)
+		return true;
+
+	if (1 == _varseq.size())
+	{
+		// std::map::at() can throw. Rethrow for easier deubugging.
+		try
+		{
+			_satisfying_set.emplace(var_soln.at(_varseq[0]));
+		}
+		catch (...)
+		{
+			throw AssertionException(TRACE_INFO,
+				"Internal error: ungrounded variable %s\n",
+				_varseq[0]->to_string().c_str());
+		}
+
+		// If we found as many as we want, then stop looking for more.
+		return (_satisfying_set.size() >= max_results);
+	}
+
+	// If more than one variable, encapsulate in sequential order,
+	// in a ListLink.
+	HandleSeq vargnds;
+	for (const Handle& hv : _varseq)
+	{
+		vargnds.push_back(var_soln.at(hv));
+	}
+
+	_satisfying_set.emplace(createLink(vargnds, LIST_LINK));
+
+	// If we found as many as we want, then stop looking for more.
+	return (_satisfying_set.size() >= max_results);
+}
+
+bool ParallelSatisfier::search_finished(bool done)
+{
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */
