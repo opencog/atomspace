@@ -1,4 +1,5 @@
 from libcpp cimport bool
+from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
@@ -22,6 +23,9 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
         result.append(value)
         inc(handle_iter)
     return result
+
+cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
+    return [create_python_value_from_c_value(<cValuePtr&> h) for h in handles]
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)

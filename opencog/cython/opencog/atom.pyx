@@ -1,5 +1,6 @@
 from cpython cimport PyLong_FromLongLong
 from cpython.object cimport Py_LT, Py_EQ, Py_GT, Py_LE, Py_NE, Py_GE
+from libcpp.set cimport set as cpp_set
 
 # Atom wrapper object
 cdef class Atom(Value):
@@ -70,6 +71,10 @@ cdef class Atom(Value):
         if value.get() == NULL:
             return None
         return create_python_value_from_c_value(value)
+
+    def get_keys(self):
+        cdef cpp_set[cHandle] keys = self.get_c_handle().get().getKeys()
+        return convert_handle_set_to_python_list(keys)
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()

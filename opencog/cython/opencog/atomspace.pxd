@@ -1,7 +1,7 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
-from libcpp.list cimport list as cpplist
 from libcpp.memory cimport shared_ptr
+from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
@@ -120,6 +120,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         void setTruthValue(tv_ptr tvp)
         void setValue(const cHandle& key, const cValuePtr& value)
         cValuePtr getValue(const cHandle& key) const
+        cpp_set[cHandle] getKeys()
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
 

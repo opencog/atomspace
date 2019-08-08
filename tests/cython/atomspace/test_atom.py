@@ -26,6 +26,15 @@ class AtomTest(TestCase):
         atom.set_value(key, value)
         self.assertEqual(value.__class__, atom.get_value(key).__class__)
 
+    def test_get_keys(self):
+        atom = ConceptNode('foo')
+        key = PredicateNode('bar')
+        value = FloatValue([1.0, 2.0, 3.0])
+        atom.set_value(key, value)
+        result = atom.get_keys()
+        self.assertEqual(1, len(result))
+        self.assertEqual(key, result[0])
+
     def test_get_out(self):
         atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
 
