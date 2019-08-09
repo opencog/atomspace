@@ -141,9 +141,6 @@ protected:
      * directly.  Only derived classes (Node, Link) can call this.
      *
      * @param The type of the atom.
-     * @param Outgoing set of the atom, that is, the set of atoms this
-     * atom references. It must be an empty vector if the atom is a node.
-     * @param The truthValue of the atom.
      */
     Atom(Type t)
       : Value(t),

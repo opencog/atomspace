@@ -1,8 +1,8 @@
 ;
 ; bin-count.scm
 ;
-; Assorted ad-hoc collection of bin-counting tools. This is used to
-; create estimates of distributions.
+; Assorted ad-hoc collection of bin-counting (histogramming) tools.
+; This is used to create estimates of distributions.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -11,7 +11,7 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; Bin-counting utilities.
+; Bin-counting (histogramming) utilities.
 ;
 ; This must be the 20th time I've implemented bin-counts in my life...
 ;
@@ -19,6 +19,7 @@
          LOWER UPPER)
 "
   bin-count ITEMS NBINS item->value item->count LOWER UPPER
+
   Create a distribution by sorting items into bins, and then
   returning an array showing the number of items in each bin.
 

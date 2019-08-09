@@ -213,9 +213,6 @@ important subdirectories:
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.
 
-<dt>ure        <dd>Apply arbitrary collections of rules to the atomspace.
-                   Provides forward and backward chainers.
-
 <dt>matrix     <dd>Present a view of a subset of the atomspace as a
                    (sparse) matrix, *e.g.* a covariance/correlation
                    matrix, allowing statistical matrix analysis

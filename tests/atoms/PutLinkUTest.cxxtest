@@ -95,6 +95,10 @@ public:
 	void test_quoted_exec();
 	void test_quoted_eval();
 	void test_quoted_lambda();
+	void test_get();
+	void test_get_lambda();
+	void test_get_multi();
+	void test_multi_set();
 };
 
 #define N _as.add_node
@@ -2059,6 +2063,169 @@ void PutLinkUTest::test_quoted_lambda()
 	Handle put = _eval.eval_h("put-quoted-conjuction-lambda"),
 		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("put-quoted-conjuction-lambda-result");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ *
+ * Test
+ *
+ * (Inheritance (Concept "B") (Concept "Parent"))
+ * (Inheritance (Concept "C") (Concept "Parent"))
+ *
+ *  (PutLink
+ *  (LambdaLink
+ *   (VariableNode "x")
+ *   (EvaluationLink
+ *    (PredicateNode "relation")
+ *    (ListLink
+ *    (VariableNode "x")
+ *     (VariableNode "A"))))
+ *  (GetLink
+ *   (Inheritance (Variable "$X") (Concept "Parent"))))
+ *
+ * which should return
+ *
+ *  (SetLink
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *   (ConceptNode "B")
+ *  (VariableNode "A")))
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *    (ConceptNode "C")
+ *    (VariableNode "A"))))
+*/
+void PutLinkUTest::test_get()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-get"),
+		result = HandleCast(inst.execute(put)),
+		expected = _eval.eval_h("expected-put-get");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ *
+ * Test
+ *
+ * (Inheritance (Concept "B") (Concept "Parent"))
+ * (Inheritance (Concept "C") (Concept "Parent"))
+ *
+ *  (PutLink
+ *  (LambdaLink
+ *   (VariableNode "x")
+ *   (EvaluationLink
+ *    (PredicateNode "relation")
+ *    (ListLink
+ *    (VariableNode "x")
+ *     (VariableNode "A"))))
+ *  (GetLink
+ *   (Inheritance (Variable "$X") (Concept "Parent"))))
+ *
+ * which should return
+ *
+ *  (SetLink
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *   (ConceptNode "B")
+ *  (VariableNode "A")))
+ *  (EvaluationLink
+ *   (PredicateNode "relation")
+ *   (ListLink
+ *    (ConceptNode "C")
+ *    (VariableNode "A"))))
+*/
+void PutLinkUTest::test_get_lambda()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-lambda.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-get-lambda"),
+		result = HandleCast(inst.execute(put)),
+		expected = _eval.eval_h("expected-put-get-lambda");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Like above, but with mutiple arguments
+ */
+void PutLinkUTest::test_get_multi()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-multi.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Handle result = _eval.eval_h("(cog-execute! put-get-multi)");
+
+	Handle expected =
+		L(EVALUATION_LINK,
+			N(PREDICATE_NODE, "relatives"),
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "Jim"),
+				N(CONCEPT_NODE, "Jane"),
+				N(CONCEPT_NODE, "mom and pop")));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	TS_ASSERT_THROWS_ANYTHING(
+		_eval.eval_h("(cog-execute! put-get-multi-empty)"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Like above, but with pre-existing sets
+ */
+void PutLinkUTest::test_multi_set()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-multi-set.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Handle result = _eval.eval_h("(cog-execute! put-multi-set)");
+
+	Handle expected =
+		L(EVALUATION_LINK,
+			N(PREDICATE_NODE, "relatives"),
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "Jim"),
+				N(CONCEPT_NODE, "Jane"),
+				N(CONCEPT_NODE, "mom and pop")));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);

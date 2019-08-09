@@ -54,6 +54,7 @@
 	(Lambda
 		(VariableList (Variable "$atom") (Variable "$property"))
 		(Get
+			(Variable "$n")
 			(State (List (Variable "$atom") (Variable "$property"))
 				(Variable "$n"))
 			)))

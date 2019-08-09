@@ -25,8 +25,6 @@ SET(CYTHON_FLAGS "-2" "-f")
 
 ###################### logger ##########################################
 CYTHON_ADD_MODULE_PYX(logger)
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp"
-	"../../util/Logger.h")
 
 ADD_LIBRARY(logger_cython
 	logger.cpp
@@ -55,7 +53,6 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"PythonGroundedObject.h"
 )
 
-# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
@@ -101,8 +98,6 @@ CYTHON_ADD_MODULE_PYX(type_constructors
 	"atomspace.pxd" opencog_atom_types
 )
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
-
 ADD_LIBRARY(type_constructors
 	type_constructors.cpp
 )
@@ -123,8 +118,6 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 CYTHON_ADD_MODULE_PYX(utilities
 	"atomspace.pxd" opencog_atom_types
 )
-
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
 
 ADD_LIBRARY(utilities_cython
 	Utilities.cc
@@ -148,8 +141,6 @@ CYTHON_ADD_MODULE_PYX(bindlink
 	"atomspace.pxd"
 	opencog_atom_types
 )
-
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
 ADD_LIBRARY(bindlink_cython
 	BindlinkStub.cc
@@ -184,8 +175,6 @@ IF (HAVE_GUILE)
 		opencog_atom_types
 	)
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
-
 	ADD_LIBRARY(scheme_wrapper
 		load-file
 		PyScheme
@@ -207,38 +196,6 @@ IF (HAVE_GUILE)
 		scheme_wrapper
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
-
-##################### URE #####################
-
-CYTHON_ADD_MODULE_PYX(ure
-	"ure.pyx" "forwardchainer.pyx" "backwardchainer.pyx"
-	opencog_atom_types
-	"../../ure/forwardchainer/ForwardChainer.h"
-	"../../ure/backwardchainer/BackwardChainer.h"
-	ure
-)
-
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "ure.cpp")
-
-# opencog.ure Python bindings
-ADD_LIBRARY(ure_cython
-	ure.cpp
-)
-
-TARGET_LINK_LIBRARIES(ure_cython
-	atomspace_cython
-	type_constructors
-	ure
-	${PYTHON_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(ure_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME ure)
-
-INSTALL (TARGETS
-	ure_cython
-	DESTINATION "${PYTHON_DEST}")
 
 ##################################################
 # Tell python where to find modules.

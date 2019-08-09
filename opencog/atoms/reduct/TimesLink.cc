@@ -119,9 +119,9 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	// If either one is the unit, then just drop it.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
-		return vj;
+		return sample_stream(vj, vjtype);
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return vi;
+		return sample_stream(vi, vitype);
 
    if (nameserver().isA(vjtype, NUMBER_NODE))
    {
@@ -169,10 +169,10 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 	}
 
 	Handle hi(HandleCast(vi));
-	if (nullptr == hi) hi= HandleCast(fi);
+	if (nullptr == hi) hi = HandleCast(fi);
 
 	Handle hj(HandleCast(vj));
-	if (nullptr == hj) hj= HandleCast(fj);
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.

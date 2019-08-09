@@ -32,6 +32,10 @@
 
 namespace opencog {
 
+// Flirting with diamond-pattern inheritance. We need to do this
+// because we want different helper classes (aka "mixin classes")
+// to handle different parts of the grounding process, and virtual
+// bases classes just minimizes the total boilerplate code needed.
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,

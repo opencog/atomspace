@@ -102,7 +102,6 @@ cdef class TruthValue(Value):
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
 
-
 cdef extern from  "opencog/atoms/truthvalue/TensorTruthValue.h" namespace "opencog":
     ctypedef shared_ptr[const cTensorTruthValue] ttv_ptr "opencog::TensorTruthValuePtr"
     cdef cppclass cTensorTruthValue "opencog::TensorTruthValue"(cTruthValue):
@@ -118,7 +117,9 @@ cdef extern from  "opencog/atoms/truthvalue/TensorTruthValue.h" namespace "openc
 
     cdef ttv_ptr createTensorTruthValue(...)
 
+# ContentHash
 
+ctypedef size_t ContentHash;
 
 # Atom
 cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
@@ -140,6 +141,13 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         # Conditionally-valid methods. Not defined for all atoms.
         string get_name()
         vector[cHandle] getOutgoingSet()
+        ContentHash get_hash()
+
+        bool operator==(cAtom&)
+        bool operator<(cAtom&)
+
+        cAtomSpace* getAtomSpace()
+
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
 
@@ -167,7 +175,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
 
 cdef class Atom(Value):
     cdef cHandle* handle
-    cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
@@ -176,8 +183,7 @@ cdef class Atom(Value):
     # compatible with one from the parent class. It is the reason why we cannot
     # have Atom.create and Value.create at same time.
     @staticmethod
-    cdef Atom createAtom(cHandle& handle, AtomSpace a)
-
+    cdef Atom createAtom(cHandle& handle)
 
 # AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
@@ -218,7 +224,7 @@ cdef class AtomSpace:
     cdef object parent_atomspace
 
 
-cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspace)
+cdef create_python_value_from_c_value(const cValuePtr& value)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
@@ -240,6 +246,7 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
 
+
 cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
      cdef cAtom * atom_ptr = <cAtom*>h.get()
      if atom_ptr == NULL:  # avoid null-pointer deref
@@ -257,8 +264,3 @@ cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
          return False
      raise RuntimeError("Argument is not link and not node")
 
-# TODO: find proper way to work with dependencies includes into atomspace.pxd
-# means that we need to add these files at each library which depends on
-# atomspace.pxd, see CMakeLists.txt
-include "ptrvalue.pxd"
-include "grounded_object_node.pxd"

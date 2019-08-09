@@ -67,7 +67,7 @@ def get_refreshed_types():
     types = type('atom_types', (), generate_type_module())
     return types
 
-cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspace):
+cdef create_python_value_from_c_value(const cValuePtr& value):
     type = value.get().get_type()
     type_name = get_type_name(type)
     ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
@@ -76,13 +76,10 @@ cdef create_python_value_from_c_value(const cValuePtr& value, AtomSpace atomspac
     clazz = getattr(thismodule, type_name, None)
     cdef cValue *c_ptr = value.get()
     if clazz is not None:
-        if c_ptr.is_atom():
-            return clazz(ptr_holder = ptr_holder, atomspace = atomspace)
-        else:
-            return clazz(ptr_holder = ptr_holder)
+        return clazz(ptr_holder = ptr_holder)
 
-    if c_ptr.is_atom() and atomspace is not None:
-        return Atom(ptr_holder = ptr_holder, atomspace = atomspace)
+    if c_ptr.is_atom():
+        return Atom(ptr_holder = ptr_holder)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
 

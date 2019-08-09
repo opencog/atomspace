@@ -217,6 +217,10 @@ void PutLink::static_typecheck_arguments(void)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink, SetLink or GetLink!");
 
+	if (0 == sz)
+		throw InvalidParamException(TRACE_INFO,
+			"PutLink: cannot put the empty set!");
+
 	if (1 < sz)
 	{
 		for (const Handle& h : valley->getOutgoingSet())
@@ -251,16 +255,56 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 	return subs->beta_reduce(oset);
 }
 
+// If arg is executable, then run it, and unwrap the set link, too.
+// We unwrap the SetLinks cause that is what GetLinks return.
+static inline Handle expand(const Handle& arg, bool silent)
+{
+	Handle result(arg);
+	if (arg->is_executable())
+		result = HandleCast(arg->execute());
+
+	if (SET_LINK == result->get_type())
+	{
+		Arity n = result->get_arity();
+		if (1 == n)
+			result = result->getOutgoingAtom(0);
+
+		if (0 == n)
+		{
+			if (silent) throw SilentException();
+			throw RuntimeException(TRACE_INFO, "Cannot put the empty set!");
+		}
+	}
+	return result;
+}
+
 /**
  * Perform the actual beta reduction --
  *
  * Substitute arguments for the variables in the pattern tree.
- * This is a lot like applying the function fun to the argument list
- * args, except that no actual evaluation is performed; only
- * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it yourself.  If you want
- * evaluation or execution to happen during or after sustitution, use
- * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
+ * This is not a pure beta-reduction, because it does execute
+ * any executable arguments, so as to obtain the correct forms
+ * to place into the reduction.  This does make the PutLink
+ * resemble function application; however, here, the application
+ * is not infinite-recursive; it is only one level deep.  There
+ * is just enough execution performed to get the neeed arguments,
+ * and no more.
+ *
+ * What this actually does is fairly complex and sophisticated.
+ * First, when LambdaLinks are involved, and the arguments are
+ * variables, it performs alpha conversion instead of beta reduction.
+ * (as that's kind-of "the same thing", for variables).
+ *
+ * When multiple arguments are presented as a  set, then the put
+ * is applied to each member of the set; the result is a set.
+ *
+ * When the set is a singleton, that singleton is unwrapped, and
+ * the set is discarded. This is done in order to play nice with
+ * GetLink, which always returns SetLinks, sometimes uneccesarily.
+ *
+ * Users who need a more complete apply-like environment should
+ * look to the EvaluationLink, the ExecutionOutputLink, or the
+ * Instantiator.
  *
  * So, for example, if the PutLink looks like this:
  *
@@ -282,18 +326,21 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
  *
  * Type checking is performed during substitution; if the arguments fail
  * to have the desired types, no substitution is performed.  In this case,
- * an undefined handle is returned. For set substitutions, this acts as
- * a filter, removing (filtering out) the mismatched types.
+ * an undefined handle is returned (?? XXX really? or is it a throw?).
+ * For set substitutions, this acts as a filter, removing (filtering out)
+ * the mismatched types.
  *
- * Again, only a substitution is performed, there is no execution or
- * evaluation.  Note also that the resulting tree is NOT placed into
- * any atomspace!
+ * Note that the resulting tree is NOT placed into any atomspace!
  */
 Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
 	Variables vars(_varlist);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
+	Handle args(_arguments);
+
+	if (args->is_executable())
+		args = HandleCast(args->execute());
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
@@ -330,17 +377,17 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the arguments that we will plug into the body.
-	Type vtype = _arguments->get_type();
+	Type vtype = args->get_type();
 	size_t nvars = vars.varseq.size();
 
 	// FunctionLinks behave like pointless lambdas; that is, one can
 	// create valid beta-redexes with them. We handle that here.
 	//
-	// XXX At this time, we don't know the number of arguments any
-	// given FunctionLink might take.  Atomese does have the mechanisms
+	// At this time, we don't know the number of arguments any given
+	// FunctionLink might take.  Atomese does have the mechanisms
 	// to declare these, including arbitrary-arity functions, its
-	// just that its currently not declared anywhere for any of the
-	// FunctionLinks.  So we just punt.  Example usage:
+	// just that it is currently not declared anywhere for any of the
+	// FunctionLinks.  So we just guess as best we can.  Example usage:
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
 	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
 	if (0 == nvars and nameserver().isA(btype, FUNCTION_LINK))
@@ -348,33 +395,33 @@ Handle PutLink::do_reduce(void) const
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			const HandleSeq& rest = _arguments->getOutgoingSet();
-			oset.insert(oset.end(), rest.begin(), rest.end());
+			for (const Handle& arg : args->getOutgoingSet())
+				oset.emplace_back(expand(arg, _silent));
 			return createLink(oset, btype);
 		}
 
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			oset.emplace_back(_arguments);
+			oset.emplace_back(args);
 			return createLink(oset, btype);
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _arguments->getOutgoingSet())
+		for (const Handle& h : args->getOutgoingSet())
 		{
 			if (LIST_LINK == h->get_type())
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				const HandleSeq& rest = h->getOutgoingSet();
-				oset.insert(oset.end(), rest.begin(), rest.end());
+				for (const Handle& arg : h->getOutgoingSet())
+					oset.emplace_back(expand(arg, _silent));
 				bset.emplace_back(createLink(oset, btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
-				oset.emplace_back(h);
+				oset.emplace_back(expand(h, _silent));
 				bset.emplace_back(createLink(oset, btype));
 			}
 		}
@@ -386,12 +433,12 @@ Handle PutLink::do_reduce(void) const
 	{
 		if (SET_LINK != vtype)
 		{
-			return reddy(subs, {_arguments});
+			return reddy(subs, {args});
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _arguments->getOutgoingSet())
+		for (const Handle& h : args->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.emplace_back(h);
@@ -410,21 +457,9 @@ Handle PutLink::do_reduce(void) const
 	// arguments to plug in.
 	if (LIST_LINK == vtype)
 	{
-		// One of the unit tests requires that, for nested PutLinks,
-		// we must first reduce the deeper one, before we reduct this
-		// one. And I guess that makes sense, right?  But perhaps,
-		// instead of doing `if (PUT_LINK == h->get_type())` below, we
-		// should instead do `if (h->is_executable())` intead?
-		// But what if `h` is not itself executable, but one of it's
-		// deeper elements is? What then? Oy, this is a mess.
 		HandleSeq oset;
-		for (const Handle& h: _arguments->getOutgoingSet())
-		{
-			if (PUT_LINK == h->get_type())
-				oset.push_back(HandleCast(h->execute()));
-			else
-				oset.push_back(h);
-		}
+		for (const Handle& h: args->getOutgoingSet())
+			oset.push_back(expand(h, _silent));
 		return reddy(subs, oset);
 	}
 
@@ -434,7 +469,7 @@ Handle PutLink::do_reduce(void) const
 	if (LAMBDA_LINK == vtype)
 	{
 		HandleSeq oset;
-		oset.emplace_back(_arguments);
+		oset.emplace_back(args);
 		return reddy(subs, oset);
 	}
 
@@ -450,7 +485,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	HandleSeq bset;
-	for (const Handle& h : _arguments->getOutgoingSet())
+	for (const Handle& h : args->getOutgoingSet())
 	{
 		const HandleSeq& oset = h->getOutgoingSet();
 		try

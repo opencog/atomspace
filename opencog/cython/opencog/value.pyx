@@ -41,7 +41,7 @@ cdef class Value:
             return get_type_name(self.type)
 
     def is_atom(self):
-        return is_a(self.type, types.Node)
+        return is_a(self.type, types.Atom)
 
     def is_node(self):
         return is_a(self.type, types.Node)

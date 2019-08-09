@@ -23,10 +23,10 @@
 ;        ConnectorSeq
 ;            Connector
 ;                Atom "B"
-;                Label "A-to-B label"
+;                Label "go-to-B label"
 ;            Connector
 ;                Atom "C"
-;                Label "A-to-C label"
+;                Label "go-to-C label"
 ;
 ; which indicates that A is connected to B and to C; viz, that there are
 ; edges (AB) and (AC).  Note that the ConnectorSeq is independent of the
@@ -35,11 +35,16 @@
 ; the same ConnectorSeq as A. Thus, the ConnectorSeq simplifies the
 ; discovery of subgraph isomorphisms.
 ;
-; The ConnecorSeq is an ordered link; it is presumed that, in the
-; general case, that the order of the connectors matter.
+; In order to handle the general case, the ConnectorSeq is an ordered
+; link; it is presumed that, in the general case, that the order of the
+; connectors matter. (Whether the order matters, or not, depends on the
+; type of graph being considered. For example, for graphs that represent
+; temporal sequences, the order matters.)
 ;
 ; In the above example, the edges carry (optional) edge labels
-; indicating the type of the connector.
+; indicating the type of the connector. For example, the edge labels are
+; handy for indicating temporal order, e.g. whether Atom B came before
+; A or after A.
 ;
 ; In everything that follows, it is assumed that all of the vertexes of
 ; the graph are sequentially ordered, i.e. can be laid out in sequence
@@ -79,7 +84,7 @@
 ; the two endpoints. A single connector is then just a direction (to
 ; the left, to the right) plus the vertex atom at the far end.
 ;
-; The section (aka connector set) is then a sequence of conectors; the
+; The section (aka connector set) is then a sequence of connectors; the
 ; number of connectors in the section exactly equal to the degree of
 ; the vertex in the MST parse: the connector set "describes" the parse
 ; tree, locally.
@@ -107,14 +112,13 @@
 
   The WEDGE-LIST is assumed to be a list of weighted edges. The weights
   are ignored.  The vertexes in the graph are assumed to just be the
-  set of vertexes aht appear at the ends of each edge; these are
-  extracted automatically, below.  XXX FIXME a better API could just
-  pass these in...
+  set of vertexes that appear at the ends of each edge; these are
+  extracted automatically, below.
 
   The returned sections are a list of SectionLinks, one for each vertex.
   The SectionLink will list (in order) a list of ConnectorLink's, with
   each connector implicitly specifying an edge, by specifying the atom
-  at the far end of the edge.  The connectors are lablled with direction
+  at the far end of the edge.  The connectors are labeled with direction
   marks, '+' and '-', indicating whether the far end is to the right or
   the left of the given vertex.
 
@@ -140,78 +144,39 @@
   mentions the (WordNode \"playing\").  This allows different
   ConnectorSeq's to be explicitly compared.
 "
-	; Discard links with bad MI values; anything less than
-	; -1e6 is bad. Heck, anything under minus ten is bad...
-	(define good-links (filter
-		(lambda (mlink) (< -1e6 (wedge-get-score mlink)))
-		WEDGE-LIST))
+	; Terminology: a "numa" is a NUMbered Atom, its a pair
+	; (cons integer Atom).
+	; A "wedge" is a weighted edge: (cons (list lnuma rnuma) float)
 
-	; Create a list of all of the atoms in the sequence.
-	(define seq-list (delete-duplicates!
-		(fold
-			(lambda (mlnk lst)
-				(cons (wedge-get-left-overt mlnk)
-					(cons (wedge-get-right-overt mlnk) lst)))
-			'()
-			good-links)))
-
-	; Return #t if word appears on the left side of mst-lnk
-	(define (is-on-left-side? wrd mlnk)
-		(equal? wrd (wedge-get-left-atom mlnk)))
-	(define (is-on-right-side? wrd mlnk)
-		(equal? wrd (wedge-get-right-atom mlnk)))
-
-	; Given a word, and the mst-parse linkset, create a shorter
-	; seq-list which holds only the words linked to the right.
-	(define (mk-right-seqlist seq mparse)
-		(define wrd (overt-get-atom seq))
-		(map wedge-get-right-overt
-			(filter
-				(lambda (mlnk) (is-on-left-side? wrd mlnk))
-				mparse)))
-
-	(define (mk-left-seqlist seq mparse)
-		(define wrd (overt-get-atom seq))
-		(map wedge-get-left-overt
-			(filter
-				(lambda (mlnk) (is-on-right-side? wrd mlnk))
-				mparse)))
-
-	; Sort a seq-list into ascending order
-	(define (sort-seqlist seq-list)
-		(sort seq-list
-			(lambda (sa sb)
-				(< (overt-get-index sa) (overt-get-index sb)))))
-
-	; Given an atom, the the links, create a section
-	(define (mk-pseudo seq mlist)
-		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
-		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
+	; Given a numa, and a list of wedges, create a Section
+	(define (mk-pseudo NUMA WEDLI)
+		(define left-nus (sort-numalist (left-linked-numas NUMA WEDLI)))
+		(define right-nus (sort-numalist (right-linked-numas NUMA WEDLI)))
 
 		; Create a list of left-connectors
 		(define left-cnc
 			(map (lambda (sw)
 					(Connector
-						(overt-get-atom sw)
+						(numa-get-atom sw)
 						(ConnectorDir "-")))
-			lefts))
+			left-nus))
 
 		(define right-cnc
 			(map (lambda (sw)
 					(Connector
-						(overt-get-atom sw)
+						(numa-get-atom sw)
 						(ConnectorDir "+")))
-			rights))
+			right-nus))
 
 		; return the connector-set
 		(Section
-			(overt-get-atom seq)
+			(numa-get-atom NUMA)
 			(ConnectorSeq (append left-cnc right-cnc)))
 	)
 
 	(map
 		(lambda (seq) (mk-pseudo seq WEDGE-LIST))
-		seq-list)
+		(numas-in-wedge-list WEDGE-LIST))
 )
 
 ;  ---------------------------------------------------------------------

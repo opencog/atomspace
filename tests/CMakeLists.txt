@@ -1,11 +1,6 @@
 ENABLE_TESTING()
 INCLUDE(AddCxxtest)
 
-IF (WIN32)
-	ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
-	                -D_CRT_SECURE_NO_WARNINGS)
-ENDIF (WIN32)
-
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                 -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
@@ -23,7 +18,6 @@ IF (CXXTEST_FOUND)
 
 	ADD_SUBDIRECTORY (atomspace)
 	ADD_SUBDIRECTORY (atoms)
-	ADD_SUBDIRECTORY (unify)
 	ADD_SUBDIRECTORY (atomspaceutils)
 
 	# Persistence is for saving/restoring atomspace to disk.
@@ -37,8 +31,7 @@ IF (CXXTEST_FOUND)
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
 
-	# Reasoning depends on query, above.
-	ADD_SUBDIRECTORY (ure)
+	ADD_SUBDIRECTORY (sheaf)
 
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
 		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")

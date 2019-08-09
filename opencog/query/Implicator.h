@@ -56,6 +56,7 @@ class Implicator :
 {
 	protected:
 		AtomSpace* _as;
+
 		ValueSet _result_set;
 		void insert_result(const ValuePtr&);
 

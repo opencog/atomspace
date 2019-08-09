@@ -103,7 +103,7 @@
 			(Concept "B"))))
 
 
-; The PedicateFormulaLink behaves just like any other algebraic
+; The PredicateFormulaLink behaves just like any other algebraic
 ; expression with VariableNodes in it. When executed, it might
 ; reduce a bit, but that is all.
 (cog-execute!

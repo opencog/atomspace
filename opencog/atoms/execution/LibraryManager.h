@@ -34,13 +34,14 @@ private:
 public:
 	static void* getFunc(std::string libName,std::string funcName);
 	static void setLocalFunc(std::string libName, std::string funcName, void* func);
+
 	/**
 	 * Given a grounded schema name like "py: foo", extract
 	 * 1. the language, like "py"
 	 * 2. the library, like "" if there is none
 	 * 3. the function, like "foo"
 	 */
-	static void lang_lib_fun(const std::string& schema,
+	static void parse_schema(const std::string& schema,
 	                         std::string& lang,
 	                         std::string& lib,
 	                         std::string& fun);

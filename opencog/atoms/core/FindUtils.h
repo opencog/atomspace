@@ -127,9 +127,25 @@ private:
 bool is_atom_in_tree(const Handle& tree, const Handle& atom);
 
 /**
+ * Return true if the indicated atom occurs somewhere in the tree
+ * (viz, the tree recursively spanned by the outgoing set of the handle)
+ * The search of some is terminated if the predicate `reject` returns
+ * true. (That is, rejected subtrees are not searched, so that the
+ * rejected subtree is a search-failure).
+ */
+bool is_found_in_tree(const Handle& tree,
+                      const Handle& atom,
+                      bool (*reject)(const Handle& tree,
+                                     const Handle& subtree,
+                                     const Handle& atom));
+
+/**
  * Return true if the indicated atom occurs quoted somewhere in the
  * tree.  That is, it returns true only if the atom is inside a
  * QuoteLink.
+ *
+ * XXX FIXME: what if it appears quoted in one place, and unquoted
+ * in another? then what?
  */
 bool is_quoted_in_tree(const Handle& tree, const Handle& atom);
 
@@ -196,13 +212,19 @@ int max_quotation_level(const Handle& tree,
 bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
+ * Return true if the atom (variable) occurs in a non-executable
+ * term somewhere in the tree.
+ */
+bool is_constant_in_tree(const Handle& tree, const Handle& atom);
+
+/**
  * Return true if the atom (variable) occurs both unquoted and
  * unscoped somewhere in the tree.
 */
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
- * Shorter name for is_unquoted_unscoped_in_tree
+ * True if is_unquoted, is_unscoped and is_constant_in_tree
 */
 bool is_free_in_tree(const Handle& tree, const Handle& atom);
 
@@ -214,7 +236,8 @@ bool is_unquoted_unscoped_in_any_tree(const HandleSeq& trees,
                                       const Handle& atom);
 
 /**
- * Shorter name for is_unquoted_unscoped_in_any_tree
+ * Return true if the atom (variable) occurs unquoted and
+ * unscoped and constant somewhere in any of the trees.
 */
 bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom);
 
@@ -243,6 +266,13 @@ bool any_unscoped_in_tree(const Handle& tree,
                           const HandleSet& atoms);
 
 /**
+ * Return true if any of the atoms (variables) occur
+ * somewhere in the tree, outside of an executable term.
+ */
+bool any_constant_in_tree(const Handle& tree,
+                          const HandleSet& atoms);
+
+/**
  * Return true if any of the atoms (variables) occur unquoted and
  * unscoped somewhere in the tree.
  */
@@ -250,14 +280,21 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
                                    const HandleSet& atoms);
 
 /**
+ * Return true if any of the atoms (variables) occur unquoted and
+ * unscoped and outside of an executable term, somewhere in the tree.
+ */
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSet& atoms);
+
+/**
  * Return how many of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
- * But ONLY if they are not quoted!  This is intended to be used to
- * search for variables; but when a variable is quoted, it is no
- * longer a variable.
+ * But ONLY if they are not quoted or bound! This is intended to
+ * be used to search for variables; but when a variable is quoted
+ * or bound, it is no longer a free variable.
  */
-unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const HandleSet& atoms);
+unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
+                                           const HandleSet& atoms);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees.
