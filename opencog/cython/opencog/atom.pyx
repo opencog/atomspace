@@ -73,6 +73,11 @@ cdef class Atom(Value):
         return create_python_value_from_c_value(value)
 
     def get_keys(self):
+        """
+        Returns the keys of values associated with this atom.
+
+        :returns: A list of atoms.
+        """
         cdef cpp_set[cHandle] keys = self.get_c_handle().get().getKeys()
         return convert_handle_set_to_python_list(keys)
 
