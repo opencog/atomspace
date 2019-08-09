@@ -4,7 +4,7 @@ from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
-def createGroundedObjectNode(name, obj, atomspace, unwrap_args):
+def createGroundedObjectNode(name, obj, unwrap_args):
     cdef shared_ptr[cGroundedObject] o_ptr
     cdef shared_ptr[cGroundedObjectNode] node_ptr
     cdef string node_name = <bytes>(name.encode())
@@ -14,8 +14,7 @@ def createGroundedObjectNode(name, obj, atomspace, unwrap_args):
     else:
         node_ptr.reset(new cGroundedObjectNode(node_name))
 
-    return GroundedObjectNode(PtrHolder.create(<shared_ptr[void]&>node_ptr),
-                              atomspace)
+    return GroundedObjectNode(PtrHolder.create(<shared_ptr[void]&>node_ptr))
 
 cdef cGroundedObjectNodePtr create_grounded_object_node_from_python_object(object obj, bool unwrap_args):
     cdef shared_ptr[cGroundedObject] o_ptr
@@ -27,8 +26,8 @@ cdef cGroundedObjectNodePtr create_grounded_object_node_from_python_object(objec
 
 cdef class GroundedObjectNode(Atom):
 
-    def __init__(self, ptr_holder, atomspace):
-        super(GroundedObjectNode, self).__init__(ptr_holder, atomspace)
+    def __init__(self, ptr_holder):
+        super(GroundedObjectNode, self).__init__(ptr_holder)
 
     cdef cGroundedObjectNode* get_c_grounded_object_node_ptr(self):
         return <cGroundedObjectNode*>(self.get_c_value_ptr().get())
@@ -54,7 +53,7 @@ cdef api cValuePtr call_python_method(bool unwrap_args, void* obj,
     if unwrap_args:
         return call_unwrapped_args(method, args)
     else:
-        return call_wrapped_args(method, atomspace, args)
+        return call_wrapped_args(method, args)
 
 cdef cValuePtr call_unwrapped_args(object method, const cValuePtr& _args):
     args = convert_vector_of_grounded_objects_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
@@ -78,10 +77,8 @@ cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
         inc(handle_iter)
     return result
 
-cdef cValuePtr call_wrapped_args(object method, cAtomSpace* atomspace,
-                                 const cValuePtr& _args):
-    args = convert_handle_seq_to_python_list(
-        (<cAtom*>_args.get()).getOutgoingSet(), AtomSpace_factory(atomspace))
+cdef cValuePtr call_wrapped_args(object method, const cValuePtr& _args):
+    args = convert_handle_seq_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
     cdef Value result = method(*args)
     return result.get_c_value_ptr()
 
