@@ -1,3 +1,6 @@
+from cpython cimport PyLong_FromLongLong
+from cpython.object cimport Py_LT, Py_EQ, Py_GT, Py_LE, Py_NE, Py_GE
+
 # Atom wrapper object
 cdef class Atom(Value):
 
