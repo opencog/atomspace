@@ -35,8 +35,8 @@ class AtomTest(TestCase):
         atom.tv = tv
         keys = atom.get_keys()
         self.assertEqual(1, len(keys))
-        # Since the name of the key, check only the value it referes to
-        # is the same.
+        # Since the type or name of the TruthValue key may change, check that
+        # the value it referes to is the same.
         self.assertEqual(tv, atom.get_value(keys[0]))
 
         key = PredicateNode('bar')
