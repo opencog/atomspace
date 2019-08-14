@@ -140,7 +140,7 @@ class ParallelSatisfier :
 			_queue_value(createQueueValue(set_node->get_name())),
 			max_results(SIZE_MAX)
 			{
-				_set_node->setValue(QueueValue::CONTROL_KEY,
+				_set_node->setValue(QueueValue::QUEUE_VALUE_KEY,
 					CastToValue(_queue_value));
 			}
 

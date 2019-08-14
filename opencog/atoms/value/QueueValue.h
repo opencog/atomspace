@@ -109,7 +109,7 @@ protected:
 
 public:
 
-	static const Handle CONTROL_KEY;
+	static const Handle QUEUE_VALUE_KEY;
 
 	QueueValue(const std::string& name)
 		: Value(QUEUE_VALUE),

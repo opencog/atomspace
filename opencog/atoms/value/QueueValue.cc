@@ -25,7 +25,7 @@
 
 using namespace opencog;
 
-const Handle QueueValue::CONTROL_KEY = createNode(CONCEPT_NODE, "PRODUCER_CONSUMER_KEY");
+const Handle QueueValue::QUEUE_VALUE_KEY = createNode(CONCEPT_NODE, "QUEUE_VALUE_KEY");
 
 bool QueueValue::operator==(const Value& other) const
 {
