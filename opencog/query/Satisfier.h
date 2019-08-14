@@ -32,7 +32,7 @@
 #include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
-#include <opencog/atoms/value/ProducerConsumerValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 
 namespace opencog {
 
@@ -130,18 +130,18 @@ class ParallelSatisfier :
 
 	protected:
 		Handle _set_node;
-		ProducerConsumerValuePtr _control_value;
+		QueueValuePtr _queue_value;
 
 
 	public:
 		ParallelSatisfier(AtomSpace* as, Handle set_node) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as),
 			_set_node(set_node),
-			_control_value(createProducerConsumerValue(set_node->get_name())),
+			_queue_value(createQueueValue(set_node->get_name())),
 			max_results(SIZE_MAX)
 			{
-				_set_node->setValue(ProducerConsumerValue::CONTROL_KEY,
-					CastToValue(_control_value));
+				_set_node->setValue(QueueValue::CONTROL_KEY,
+					CastToValue(_queue_value));
 			}
 
 		HandleSeq _varseq;

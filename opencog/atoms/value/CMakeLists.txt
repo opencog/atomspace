@@ -7,7 +7,7 @@ ADD_LIBRARY (value
 	RandomStream.cc
 	StreamValue.cc
 	StringValue.cc
-	ProducerConsumerValue.cc
+	QueueValue.cc
 	ValueFactory.cc
 )
 
@@ -30,7 +30,7 @@ INSTALL (FILES
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
-	ProducerConsumerValue.h
+	QueueValue.h
 	ValueFactory.h
 	DESTINATION "include/opencog/atoms/value"
 )

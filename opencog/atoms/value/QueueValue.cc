@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/ProducerConsumerValue.cc
+ * opencog/atoms/value/QueueValue.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -20,22 +20,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/ProducerConsumerValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-const Handle ProducerConsumerValue::CONTROL_KEY = createNode(CONCEPT_NODE, "PRODUCER_CONSUMER_KEY");
+const Handle QueueValue::CONTROL_KEY = createNode(CONCEPT_NODE, "PRODUCER_CONSUMER_KEY");
 
-bool ProducerConsumerValue::operator==(const Value& other) const
+bool QueueValue::operator==(const Value& other) const
 {
-	if (PRODUCER_CONSUMER_VALUE != other.get_type()) return false;
+	if (QUEUE_VALUE != other.get_type()) return false;
 
-	const ProducerConsumerValue* cv = (const ProducerConsumerValue*) &other;
+	const QueueValue* cv = (const QueueValue*) &other;
 	return _name == cv->_name;
 }
 
-std::string ProducerConsumerValue::to_string(const std::string& indent) const
+std::string QueueValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += std::string(" \"") + _name + "\")";
@@ -43,29 +43,5 @@ std::string ProducerConsumerValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(PRODUCER_CONSUMER_VALUE,
-                     createProducerConsumerValue, std::string)
-
-
-// ==============================================================
-
-void ProducerConsumerControl::produce(const Handle& h)
-{
-	_queue.push(h);
-}
-
-void ProducerConsumerControl::subscribe(Consumer consume)
-{
-	_consume = consume;
-}
-
-void ProducerConsumerControl::finished()
-{
-	if (!_consume) return;
-
-	while (!_queue.empty())
-	{
-		_consume(_queue.front());
-		_queue.pop();
-	}
-}
+DEFINE_VALUE_FACTORY(QUEUE_VALUE,
+                     createQueueValue, std::string)

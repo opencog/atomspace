@@ -165,7 +165,7 @@ bool ParallelSatisfier::grounding(const HandleMap &var_soln,
 		try
 		{
 			Handle h = var_soln.at(_varseq[0]);
-			_control_value-> get_control()-> produce(h);
+			_queue_value-> get_queue() -> push(h);
 			_satisfying_set.emplace(h);
 		}
 		catch (...)
@@ -195,7 +195,7 @@ bool ParallelSatisfier::grounding(const HandleMap &var_soln,
 
 bool ParallelSatisfier::search_finished(bool done)
 {
-	_control_value-> get_control()-> finished();
+	_queue_value -> get_queue()-> close();
 	return done;
 }
 
