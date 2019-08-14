@@ -14,9 +14,19 @@
 (define expected-parallel-get
  (SetNode "S"))
 
-(define expected-members
- (Get
-  (Member
+(define parallel-put
+ (Put
+  (Variable "$BALL")
+  (Inheritance
    (Variable "$BALL")
-   (Variable "$SET"))))
+   (Concept "selected-balls"))
+  (SetNode "S")))
 
+(define expected-parallel-put
+ (SetLink
+  (InheritanceLink
+   (ConceptNode "ball-1")
+   (ConceptNode "selected-balls"))
+  (InheritanceLink
+   (ConceptNode "ball-3")
+   (ConceptNode "selected-balls"))))

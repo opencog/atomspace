@@ -57,6 +57,7 @@ public:
 	void tearDown() {}
 
 	void test_get();
+	void test_get_put();
 };
 
 #define N _as.add_node
@@ -94,8 +95,8 @@ void ParallelGetLinkUTest::test_get()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("parallel-get");
-	Handle result = HandleCast(inst.execute(put));
+	Handle get = _eval.eval_h("parallel-get");
+	Handle result = HandleCast(inst.execute(get));
 	Handle expected = _eval.eval_h("expected-parallel-get");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -123,3 +124,59 @@ void ParallelGetLinkUTest::test_get()
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
+
+/**
+ *
+ * Test
+ *
+ * (Inheritance (Concept "ball-1") (Concept "green"))
+ * (Inheritance (Concept "ball-2") (Concept "red"))
+ * (Inheritance (Concept "ball-3") (Concept "green"))
+ * (Inheritance (Concept "ball-4") (Concept "red"))
+ *
+ *  (ParallelGet
+ *   (Inheritance
+ *   (Variable "$BALL")
+ *   (Concept "green")))
+ *
+ *   (Put
+ *    (Variable "$BALL")
+ *    (Inheritance
+ *      (Variable "$BALL")
+ *      (Concept "selected-balls"))
+ *    (SetNode "S"))
+ *
+ * The putLink should return
+ *
+ *  (SetLink
+ *   (InheritanceLink
+ *    (ConceptNode "ball-1")
+ *    (ConceptNode "selected-balls"))
+ *   (InheritanceLink
+ *    (ConceptNode "ball-3")
+ *    (ConceptNode "selected-balls")))
+*/
+ void ParallelGetLinkUTest::test_get_put()
+ {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/parallel-get.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle get = _eval.eval_h("parallel-get");
+	Handle put = _eval.eval_h("parallel-put");
+	inst.execute(get);
+	Handle result = HandleCast(inst.execute(put));
+	Handle expected = _eval.eval_h("expected-parallel-put");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	printf("result: %s\n", result->to_short_string().c_str());
+	printf("expected: %s\n", expected->to_short_string().c_str());
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+ }

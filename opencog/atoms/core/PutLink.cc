@@ -257,6 +257,16 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 	return subs->beta_reduce(oset);
 }
 
+static inline void reddy(HandleSeq& bset, PrenexLinkPtr& subs, const HandleSeq& oset)
+{
+	try
+	{
+		bset.emplace_back(reddy(subs, oset));
+	}
+	catch (const TypeCheckException& ex) {}
+
+}
+
 // If arg is executable, then run it, and unwrap the set link, too.
 // We unwrap the SetLinks cause that is what GetLinks return.
 static inline Handle expand(const Handle& arg, bool silent)
@@ -440,13 +450,7 @@ Handle PutLink::do_reduce(void) const
 			HandleSeq bset;
 			for (const Handle& h : args->getOutgoingSet())
 			{
-				HandleSeq oset;
-				oset.emplace_back(h);
-				try
-				{
-					bset.emplace_back(reddy(subs, oset));
-				}
-				catch (const TypeCheckException& ex) {}
+				reddy(bset, subs, {h});
 			}
 			return createLink(bset, SET_LINK);
 		}
@@ -459,12 +463,14 @@ Handle PutLink::do_reduce(void) const
 			ValuePtr value = args->getValue(QueueValue::QUEUE_VALUE_KEY);
 			if (as && value)
 			{
-				HandleClosableQueuePtr queue = QueueValueCast(value)->get_queue();
 				Handle h;
+				HandleSeq bset;
+				HandleClosableQueuePtr queue = QueueValueCast(value)->get_queue();
 				while (queue->pop(h))
 				{
-					as->add_atom(reddy(subs, {h}));
+					reddy(bset, subs, {h});
 				}
+				return createLink(bset, SET_LINK);
 			}
 		}
 
