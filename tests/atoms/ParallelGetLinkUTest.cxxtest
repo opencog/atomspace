@@ -1,0 +1,125 @@
+/*
+ * tests/atoms/ParallelGetLinkUTest.cxxtest
+ *
+ * Copyright (C) 2015,2017 Linas Vepstas
+ * Copyright (C) 2016 Nil Geiswieller
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/exceptions.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+// Test the ParallelGetLink.
+//
+class ParallelGetLinkUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	ParallelGetLinkUTest() : _eval(&_as)
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::INFO);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true); // interleave with printf correctly
+
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_get();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+/**
+ *
+ * Test
+ *
+ * (Inheritance (Concept "ball-1") (Concept "green"))
+ * (Inheritance (Concept "ball-2") (Concept "red"))
+ * (Inheritance (Concept "ball-3") (Concept "green"))
+ * (Inheritance (Concept "ball-4") (Concept "red"))
+ *
+ *  (ParallelGet
+ *   (Inheritance
+ *   (Variable "$BALL")
+ *   (Concept "green")))
+ *
+ * which should return (SetNode "S")
+ * and produce MemberLinks in atomspace
+ *
+ * (Member
+ *   (Concept "ball-1")
+ *   (SetNode "S"))
+ * (Member
+ *   (Concept "ball-3")
+ *   (SetNode "S"))
+*/
+void ParallelGetLinkUTest::test_get()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/parallel-get.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("parallel-get");
+	Handle result = HandleCast(inst.execute(put));
+	Handle expected = _eval.eval_h("expected-parallel-get");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	HandleSeq hs;
+	_as.get_handles_by_type(hs, MEMBER_LINK, false);
+
+	Handle set_node = N(SET_NODE, "S");
+	Handle link_1 = L(MEMBER_LINK, N(CONCEPT_NODE, "ball-1"), set_node);
+	Handle link_2 = L(MEMBER_LINK, N(CONCEPT_NODE, "ball-3"), set_node);
+
+	int found_count = 0;
+	for (auto& h : hs)
+	{
+		if (link_1 == h || link_2 == h)
+		{
+			found_count++;
+		}
+	}
+
+	TS_ASSERT_EQUALS(found_count, 2);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

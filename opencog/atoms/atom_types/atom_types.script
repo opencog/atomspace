@@ -23,7 +23,7 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
-QUEUE_VALUE <- VALUE  // control value for producer/consumer task
+QUEUE_VALUE <- VALUE  // queue value to pass results from one link to another
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
