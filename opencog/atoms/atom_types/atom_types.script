@@ -23,7 +23,7 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
-QUEUE_VALUE <- VALUE  // queue value to pass results from one link to another
+QUEUE_VALUE <- VALUE  // queue value to pass results from one atom to another
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
@@ -387,9 +387,9 @@ SATISFYING_LINK <- PATTERN_LINK
 // QueryLink is identical to BindLink, except it returns a LinkValue
 // holding the result, instead of a SetLink. (Less atomspace pollution).
 GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
-PARALLEL_GET_LINK <- SATISFYING_LINK  // Finds all groundings, returns them
 QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
 BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
+PARALLEL_GET_LINK <- SATISFYING_LINK  // Finds all groundings, puts them to queue
 
 // Adjoint to the GetLink. This is "adjoint" in the sense that the roles
 // of the pattern and the grounding are reversed: given a grounding, the
