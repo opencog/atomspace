@@ -67,23 +67,24 @@ HandleSet ParallelGetLink::do_execute(AtomSpace* as, bool silent)
 ValuePtr ParallelGetLink::execute(AtomSpace* as, bool silent)
 {
 
-	HandleSet handle_set = do_execute(as, silent);
 
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+
+	HandleSet handle_set = do_execute(as, silent);
 	for (auto h: handle_set)
 	{
+
 		HandleSeq handle_seq;
 		handle_seq.push_back(h);
 		handle_seq.push_back(_target);
 		Handle member_link = createLink(handle_seq, MEMBER_LINK);
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-		// Shoot. XXX FIXME. Most of the unit tests require that the atom
-		// that we return is in the atomspace. But it would be nice if we
-		// could defer this indefinitely, until its really needed.
 		if (as) member_link = as->add_atom(member_link);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
 	}
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
 
 	return _target;
 }

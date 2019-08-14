@@ -26,6 +26,7 @@
 #include "LambdaLink.h"
 #include "PutLink.h"
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/QueueValue.h>
 
 using namespace opencog;
 
@@ -452,13 +453,19 @@ Handle PutLink::do_reduce(void) const
 
 		if (SET_NODE == vtype)
 		{
+			// If the argument is SetNode, then process atoms from queue
+			// stored in SetNode value
 			AtomSpace* as = getAtomSpace();
-			for (const LinkPtr& lp : args->getIncomingSetByType(MEMBER_LINK))
+			ValuePtr value = args->getValue(QueueValue::QUEUE_VALUE_KEY);
+			if (as && value)
 			{
-				Handle h = lp->getOutgoingAtom(0);
-				if (as) as->add_atom(reddy(subs, {h}));
+				HandleClosableQueuePtr queue = QueueValueCast(value)->get_queue();
+				Handle h;
+				while (queue->pop(h))
+				{
+					as->add_atom(reddy(subs, {h}));
+				}
 			}
-			return args;
 		}
 
 		return reddy(subs, {args});
