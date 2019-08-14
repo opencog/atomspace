@@ -107,8 +107,9 @@ pattern matcher implements a form of "intuitionistic logic", or
 "constructivist logic" under the covers. Perhaps not a surprise: these
 are the logics of theorem-proving, in general.)
 
-* `presence.scm`     -- Testing for the presence of an Atom.
-* `absent.scm`       -- Using the AbsentLink.
+* `presence.scm`     -- Testing for presence of an Atom ("there-exists").
+* `absent.scm`       -- Using the AbsentLink ("there-does-not-exist").
+* `always.scm`       -- Testing if a clause always holds ("for-all").
 * `value-of.scm`     -- Looking for high or low TruthValues.
 * `query.scm`        -- Running queries in parallel.
 

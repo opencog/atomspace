@@ -36,5 +36,5 @@ def TruthValue(strength=1.0, confidence=1.0):
     return createTruthValue(strength, confidence)
 
 def GroundedObjectNode(name, obj = None, unwrap_args = False):
-    return atomspace.add_atom(createGroundedObjectNode(name, obj, atomspace, unwrap_args))
+    return atomspace.add_atom(createGroundedObjectNode(name, obj, unwrap_args))
 

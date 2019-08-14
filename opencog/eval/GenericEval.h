@@ -40,6 +40,7 @@ class GenericEval
 {
 	protected:
 		std::string _input_line;
+		std::string _error_string;
 		bool _pending_input;
 		bool _caught_error;
 
@@ -65,6 +66,7 @@ class GenericEval
 		virtual void clear_pending()
 		{
 			_input_line = "";
+			_error_string = "";
 			_pending_input = false;
 			_caught_error = false;
 		}
@@ -75,6 +77,14 @@ class GenericEval
 		virtual bool eval_error(void)
 		{
 			return _caught_error;
+		}
+
+		/**
+		 * Return the error string, if any.
+		 */
+		virtual std::string get_error_string(void)
+		{
+			return _error_string;
 		}
 
 		/**

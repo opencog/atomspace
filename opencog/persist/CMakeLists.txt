@@ -9,6 +9,8 @@ ENDIF (GUILE_FOUND)
 
 ADD_SUBDIRECTORY (sql)
 
-IF (HAVE_ZMQ)
-	ADD_SUBDIRECTORY (zmq)
-ENDIF (HAVE_ZMQ)
+# ZMQ is unmaintained, and is not compatible with the AtomSpace any
+# longer.  Disable the build.
+# IF (HAVE_ZMQ)
+# 	ADD_SUBDIRECTORY (zmq)
+# ENDIF (HAVE_ZMQ)

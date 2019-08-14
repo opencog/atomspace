@@ -84,7 +84,7 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 
 	// If vj is zero, just drop it.
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		return vi;
+		return sample_stream(vi, vitype);
 
 	// Collapse (3 - (5 + x)) and (3 - (x + 5))
 	if (NUMBER_NODE == vitype and PLUS_LINK == vjtype)

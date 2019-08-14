@@ -1,0 +1,140 @@
+/*
+ * tests/query/AlwaysUTest.cxxtest
+ *
+ * Copyright (C) 2019 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include "imply.h"
+
+using namespace opencog;
+
+class AlwaysUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	AlwaysUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	~AlwaysUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_basic(void);
+	void test_more(void);
+};
+
+void AlwaysUTest::tearDown(void)
+{
+}
+
+void AlwaysUTest::setUp(void)
+{
+}
+
+#define getarity(hand) hand->get_arity()
+
+/*
+ * Basic AlwaysLink unit test. The simplest test possible.
+ */
+void AlwaysUTest::test_basic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/always.scm\")");
+
+	Handle red_set = eval->eval_h("(cog-execute! baskets-with-red-balls-only)");
+	printf("Expecting red basket, got %s", red_set->to_string().c_str());
+
+	TS_ASSERT_EQUALS(1, getarity(red_set));
+
+	Handle redbask = as->add_node(CONCEPT_NODE, "reds basket");
+	TS_ASSERT_EQUALS(redbask, red_set->getOutgoingAtom(0));
+
+	// ----------------
+	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
+	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
+
+	TS_ASSERT_EQUALS(2, getarity(red_n_yell));
+
+	Handle both =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "yellows basket"));
+	TS_ASSERT_EQUALS(red_n_yell, both);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Fancier AlwaysLink unit test. Much like the above, but with
+ * more baskets.  This is testing the demo in the examples directory.
+ */
+void AlwaysUTest::test_more(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/always-more.scm\")");
+
+	Handle red_set = eval->eval_h("(cog-execute! baskets-with-red-balls-only)");
+	printf("Expecting two red baskets, got %s", red_set->to_string().c_str());
+
+	TS_ASSERT_EQUALS(2, getarity(red_set));
+
+	Handle both =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "another red basket"));
+	TS_ASSERT_EQUALS(both, red_set);
+
+	// ----------------
+	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
+	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
+
+	TS_ASSERT_EQUALS(3, getarity(red_n_yell));
+
+	Handle three =
+		as->add_link(SET_LINK,
+			as->add_node(CONCEPT_NODE, "reds basket"),
+			as->add_node(CONCEPT_NODE, "another red basket"),
+			as->add_node(CONCEPT_NODE, "yellows basket"));
+	TS_ASSERT_EQUALS(red_n_yell, three);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

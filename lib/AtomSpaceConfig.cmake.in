@@ -31,10 +31,8 @@ set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_lambda_LIBRARY lambda)
 set(ATOMSPACE_persist_LIBRARY persist)
-set(ATOMSPACE_ure_LIBRARY ure)
 set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
-set(ATOMSPACE_unify_LIBRARY unify)
 set(ATOMSPACE_value_LIBRARY value)
 
 set(ATOMSPACE_LIBRARIES
@@ -49,10 +47,8 @@ set(ATOMSPACE_LIBRARIES
 	persist
 	query-engine
 	execution
-	ure
 	smob
 	atomspace
-	unify
 )
 
 # Python is optional

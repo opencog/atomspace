@@ -76,19 +76,25 @@ class PythonEval : public GenericEval
         void add_modules_from_abspath(std::string path);
 
         // Python utility functions
-        PyObject* call_user_function(const std::string& func,
-                                     Handle varargs);
-        std::string build_python_error_message(const std::string&);
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
-        std::string execute_string(const char* command);
         PyObject* find_object(const PyObject* pyModule,
                               const std::string& objectName);
         void module_for_function(const std::string& moduleFunction,
                                  PyObject*& pyModule, PyObject*& pyObject,
                                  std::string& functionName);
 
+        // Call functions; execute scripts.
+        PyObject* call_user_function(const std::string& func,
+                                     Handle varargs);
+        std::string build_python_error_message(const std::string&);
+
+        std::string execute_string(const char*);
+        std::string execute_script(const std::string&);
+        std::string exec_wrap_stdout(const std::string&);
+
+        // Single-threded design.
         static PythonEval* singletonInstance;
 
         AtomSpace* _atomspace;
@@ -131,9 +137,10 @@ class PythonEval : public GenericEval
         std::map <std::string, PyObject*> _modules;
 
         std::string _result;
+        std::string _capture_stdout;
         int _paren_count;
         void eval_expr_line(const std::string&);
-        void throw_on_error();
+        bool check_for_error();
 
     public:
         PythonEval(AtomSpace*);
@@ -168,11 +175,6 @@ class PythonEval : public GenericEval
         }
 
         /**
-         * Runs the Python code contained in 'script'.
-         */
-        std::string apply_script(const std::string& script);
-
-        /**
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
@@ -190,14 +192,16 @@ class PythonEval : public GenericEval
          */
         void apply_as(const std::string& func, AtomSpace*);
 
+#if 0
         /**
-         *
+         * Debug utility
          */
         void print_root_dictionary()
         {
             printf("The root dictionary is:\n");
             this->print_dictionary(PyModule_GetDict(_pyRootModule));
         }
+#endif
 };
 
 /**

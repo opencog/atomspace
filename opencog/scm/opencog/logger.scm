@@ -15,7 +15,6 @@
 (export
 	cog-logger?
 	cog-default-logger
-	cog-ure-logger
 	cog-logger-get-filename-of-logger
 	cog-logger-get-level-of-logger
 	cog-logger-get-component-of-logger
@@ -64,12 +63,6 @@
 "
  cog-default-logger
     Return the default logger.
-")
-
-(set-procedure-property! cog-ure-logger 'documentation
-"
- cog-ure-logger
-    Return the ure logger.
 ")
 
 (set-procedure-property! cog-logger-get-filename-of-logger 'documentation

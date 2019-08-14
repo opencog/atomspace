@@ -93,6 +93,10 @@ struct Pattern
 	/// grounded, they might be rejected (depending on the callback).
 	HandleSeq optionals;    // Optional clauses
 
+	/// The always (for-all) clauses have to always be the same way.
+	/// Any grounding failure at all invalidates all other groundings.
+	HandleSeq always;       // ForAll clauses
+
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
 	/// that they will be slow.  So, we leave these for last, so that the

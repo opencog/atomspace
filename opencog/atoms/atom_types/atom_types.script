@@ -185,7 +185,7 @@ CHOICE_LINK <- ORDERED_LINK
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
 // terms are AND'ed together.  Since it does not make sense to ask if
 // the same atom is present more than once, or what order it was in, it
-// is an unordered link, and  duplicates are eliminated.
+// is an unordered link, and duplicates are eliminated.
 //
 PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 
@@ -200,6 +200,17 @@ PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 // in the outgoing set, thus they are removed.  The mechanics of the
 // PresentLink is used to accomplish this.
 ABSENT_LINK <- PRESENT_LINK
+
+// The other adjoint.
+// Exists == left adjoint to the pullback functor of a relation.
+//           where PresentLink is `Exists` for the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation.
+//           We invent AlwaysLink, since `ForAll` is already taken
+//           up by PLN.
+// This is used in the pattern matcher, to implement an "always the
+// case" condition during matching. It's a kind-of `ForAll`, just like
+// Present is a kind-of `ThereExists`.
+ALWAYS_LINK <- PRESENT_LINK
 
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
@@ -712,9 +723,18 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 // Should these inherit from ReWriteLink or PrenexLink instead ???
 // I think PLN uses these; otherwise they are not yet properly defined.
 //
+// Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
+// is scoped!)
+//
 // Exists == left adjoint to the pullback functor of a relation.
+//           Note that PRESENT_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
 // ForAll == right adjoint to the pullback functor of a relation.
-// XXX Currently not implemented (viz don't work with virtual links).
+//           Note that ALWAYS_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
+//
+// XXX These are currently not implemented (viz they don't actually
+// work as virtual links).
 FORALL_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
 

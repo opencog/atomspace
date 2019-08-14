@@ -403,17 +403,6 @@ during the build, will be more precise as to which parts will not be built.
 * Needed for "remembering" between shutdowns (and for distributed AtomSpace)
 * https://postgres.org | `apt-get install postgresql postgresql-client libpq-dev`
 
-###### ZeroMQ (version 3.2.4 or higher)
-* Asynchronous messaging library.
-* Optional, almost completely unused, mostly due to poor performance.
-* https://zeromq.org/intro:get-the-software | `apt-get install libzmq3-dev`
-
-###### Google Protocol Buffers
-* Google's data interchange format (used by ZeroMQ).
-* Optional, needed only for ZMQ, above.
-* https://developers.google.com/protocol-buffers | `apt-get install libprotobuf-dev`
-
-
 ### Building AtomSpace
 
 Be sure to install the pre-requisites first!

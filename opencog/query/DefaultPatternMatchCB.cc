@@ -565,6 +565,24 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
+/* This implements AlwaysLink (the non-scoped vesion of ForAllLink
+ * used by the pattern matcher.) The AlwaysLink must always be
+ * satsifed, every time it is called, from the begining of the
+ * search to the end.  The AlwaysLinks is satsified whenever
+ * ptrn==grnd, and otherwise, if fails. That is, if ptrn==nullptr
+ * then there is some grounding of (all of) the other clauses of
+ * the pattern, with AlwaysLink failing to be satisfied. Reject
+ * this case, now and forever. (viz, this is stateful.)
+ */
+bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
+                                                const Handle& grnd,
+                                                const HandleMap& term_gnds)
+{
+	return grnd != nullptr;
+}
+
+/* ======================================================== */
+
 IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 {
 	return h->getIncomingSet(_as);

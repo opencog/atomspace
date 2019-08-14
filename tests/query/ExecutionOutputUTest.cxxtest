@@ -70,6 +70,7 @@ public:
 	void test_exec_variable(void);
 	void test_recursion(void);
 	void test_lambda(void);
+	void test_lambda_get(void);
 	void test_implication_scope(void);
 	void test_variable_schema(void);
 };
@@ -462,6 +463,26 @@ void ExecutionOutputUTest::test_lambda(void)
 	                      al(EVALUATION_LINK,
 	                         an(PREDICATE_NODE, "P"),
 	                         an(CONCEPT_NODE, "A"))));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(expect, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// This tests one of the demo examples that users are told to run.
+void ExecutionOutputUTest::test_lambda_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec-lambda-get.scm\")");
+	Handle exo = eval.eval_h("exo");
+
+	Instantiator inst(&as);
+	Handle result = HandleCast(inst.execute(exo));
+	Handle expect = al(SET_LINK, an(NUMBER_NODE, "0.6"));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);

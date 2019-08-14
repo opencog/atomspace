@@ -64,35 +64,6 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
 	SET(BUILD_SHARED_LIBS ON)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 
-# ----------------------------------------------------
-# Do the windows build.
-
-IF (WIN32)
-	ADD_DEFINITIONS(-DWIN32)
-	IF (CYGWIN)
-		ADD_DEFINITIONS(-DCYGWIN)
-	#   SET(WIN32 1)
-	ENDIF (CYGWIN)
-
-	# It is "not unix" when the code is compiled under windows but not
-	# under cygwin
-	IF (NOT UNIX)
-		ADD_DEFINITIONS(-DWIN32_NOT_UNIX)
-		FIND_PACKAGE(PThreads REQUIRED)
-		FIND_PACKAGE(STLPort REQUIRED)
-		INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include/win32" ${PTHREADS_INCLUDE_DIR} ${STLPORT_INCLUDE_DIR})
-		LINK_LIBRARIES(${PTHREADS_LIBRARY} ${STLPORT_LIBRARIES})
-		ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
-	ELSE (NOT UNIX)
-		LINK_LIBRARIES(pthread)
-		IF (CYGWIN)
-			SET(CMAKE_SHARED_LINKER_FLAGS "-Wl")
-		ELSE (CYGWIN)
-			SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
-		ENDIF (CYGWIN)
-	ENDIF (NOT UNIX)
-ENDIF (WIN32)
-
 # ===============================================================
 # Check for existance of various required, optional packages.
 # Listed in alphabetical order, more or less.
@@ -195,38 +166,40 @@ ENDIF (HAVE_SECURE_GETENV)
 
 
 # ----------------------------------------------------------
-# Google Protobuf library
-# The protocol buffer compiler is needed for ZMQ-based persistence.
-FIND_PACKAGE(Protobuf)
-IF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-	SET(HAVE_PROTOBUF 1)
-	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-
-ELSE (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	# If we are here, then we are missing either the libraries, or the
-	# compiler. React appropriately.
-	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-
-ENDIF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
-
+## Google Protobuf library
+## The protocol buffer compiler is needed for ZMQ-based persistence.
+# The ZMQ code is unmaintained and does not work. Give up until a
+# maintainer is found.
+#FIND_PACKAGE(Protobuf)
+#IF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+#	SET(HAVE_PROTOBUF 1)
+#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+#
+#ELSE (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	# If we are here, then we are missing either the libraries, or the
+#	# compiler. React appropriately.
+#	IF (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
+#
+#ENDIF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+#
 # ----------------------------------------------------------
 # Python and Cython
 #
@@ -474,9 +447,9 @@ IF(HAVE_COGUTIL)
 ENDIF(HAVE_COGUTIL)
 
 # Both protobuf and also zmq are needed to build ZMQ API.
-IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-	SET(HAVE_ZMQ 1)
-ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+# IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+# 	SET(HAVE_ZMQ 1)
+# ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
@@ -536,19 +509,17 @@ ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
-IF (NOT WIN32)
-	ADD_CUSTOM_TARGET (examples
-		# using CMAKE_BUILD_TOOL results in teh cryptic error message
-		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
-		# This is because make doesn't know how to pass jobserver args to
-		# the submake.  So, instead, just use $(MAKE) (with round parens)
-		# -- that will do the right thing.
-		# COMMAND ${CMAKE_BUILD_TOOL}
-		COMMAND $(MAKE)
-		WORKING_DIRECTORY examples
-		COMMENT "Building examples"
-	)
-ENDIF (NOT WIN32)
+ADD_CUSTOM_TARGET (examples
+	# using CMAKE_BUILD_TOOL results in teh cryptic error message
+	# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+	# This is because make doesn't know how to pass jobserver args to
+	# the submake.  So, instead, just use $(MAKE) (with round parens)
+	# -- that will do the right thing.
+	# COMMAND ${CMAKE_BUILD_TOOL}
+	COMMAND $(MAKE)
+	WORKING_DIRECTORY examples
+	COMMENT "Building examples"
+)
 
 ADD_CUSTOM_TARGET(cscope
 	COMMAND find opencog examples tests -name '*.cc' -o -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
@@ -627,6 +598,6 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
 SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
-SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
+# SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

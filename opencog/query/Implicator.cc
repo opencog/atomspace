@@ -43,15 +43,12 @@ bool Implicator::grounding(const HandleMap &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
-	// Do not accept new solution if maximum number has been already reached
-	if (_result_set.size() >= max_results)
-		return true;
-
-	// Ignore the case where the URE creates ill-formed links (due to
-	// rules producing nothing). Ideally this should be treated as a
-	// user error, that is, the user should design rule pre-conditions
-	// to prevent them from producing nothing.  In practice it is
-	// difficult to insure, so meanwhile this try-catch is used.
+	// Ignore the case where the URE creates ill-formed links
+	// (due to rules producing nothing). Ideally this should
+	// be treated as a user error, that is, the user should
+	// design rule pre-conditions to prevent them from producing
+	// nothing.  In practice it is difficult to insure, so
+	// meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
 	try {
 		ValuePtr v(inst.instantiate(implicand, var_soln, true));
