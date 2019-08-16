@@ -177,6 +177,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cAtomSpace()
         cAtomSpace(cAtomSpace * parent)
 
+        cHandle add_atom(cHandle handle) except +
+
         cHandle add_node(Type t, string s) except +
         cHandle add_node(Type t, string s, tv_ptr tvn) except +
 
@@ -188,7 +190,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
         cHandle set_truthvalue(cHandle h, tv_ptr tvn)
-
+        bool is_in_atomspace(cHandle & h) except +
         bint is_valid_handle(cHandle h)
         int get_size()
 
@@ -229,22 +231,3 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
-
-
-cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
-     cdef cAtom * atom_ptr = <cAtom*>h.get()
-     if atom_ptr == NULL:  # avoid null-pointer deref
-         return False
-     cdef Type t
-     t = deref(atom_ptr).get_type()
-     if deref(atom_ptr).is_node():
-         if deref(atomspace).get_handle(t, deref(atom_ptr).get_name()):
-             return True
-         return False
-     cdef vector[cHandle] handle_vector = deref(atom_ptr).getOutgoingSet()
-     if deref(atom_ptr).is_link():
-         if deref(atomspace).get_handle(t, handle_vector):
-             return True
-         return False
-     raise RuntimeError("Argument is not link and not node")
-

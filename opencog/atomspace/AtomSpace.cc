@@ -495,6 +495,22 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     return Handle::UNDEFINED;
 }
 
+bool AtomSpace::is_in_atomspace(Handle const & h){
+     Type t = h->get_type();
+     if (h->is_node()){
+         if (this->get_handle(t, h->get_name()))
+             return true;
+         return false;
+     }
+     std::vector<Handle> handle_vector = h->getOutgoingSet();
+     if (h->is_link()){
+         if (this->get_handle(t, handle_vector))
+             return true;
+         return false;
+     }
+     throw std::runtime_error("Argument is not link and not node");
+}
+
 std::string AtomSpace::to_string() const
 {
 	std::stringstream ss;
