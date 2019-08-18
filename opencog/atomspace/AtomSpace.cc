@@ -99,8 +99,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     if (space_first.get_size() != space_second.get_size())
     {
         if (emit_diagnostics)
-            std::cout << "compare_atomspaces - size " << 
-                    space_first.get_size() << " != size " << 
+            std::cout << "compare_atomspaces - size " <<
+                    space_first.get_size() << " != size " <<
                     space_second.get_size() << std::endl;
         return false;
     }
@@ -109,8 +109,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     if (space_first.get_num_nodes() != space_second.get_num_nodes())
     {
         if (emit_diagnostics)
-            std::cout << "compare_atomspaces - node count " << 
-                    space_first.get_num_nodes() << " != node count " << 
+            std::cout << "compare_atomspaces - node count " <<
+                    space_first.get_num_nodes() << " != node count " <<
                     space_second.get_num_nodes() << std::endl;
         return false;
     }
@@ -119,8 +119,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     if (space_first.get_num_links() != space_second.get_num_links())
     {
         if (emit_diagnostics)
-            std::cout << "compare_atomspaces - link count " << 
-                    space_first.get_num_links() << " != link count " << 
+            std::cout << "compare_atomspaces - link count " <<
+                    space_first.get_num_links() << " != link count " <<
                     space_second.get_num_links() << std::endl;
         return false;
     }
@@ -169,12 +169,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             if (emit_diagnostics)
             {
                 if (atom_first)
-                    std::cout << "compare_atomspaces - first atom " << 
+                    std::cout << "compare_atomspaces - first atom " <<
                             atom_first->to_string() << " != NULL " <<
                             std::endl;
                 if (atom_second)
                     std::cout << "compare_atomspaces - first atom " <<
-                            "NULL != second atom " << 
+                            "NULL != second atom " <<
                             atom_second->to_string() << std::endl;
             }
             return false;
@@ -185,7 +185,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (*((AtomPtr) atom_first) != *((AtomPtr) atom_second))
         {
             if (emit_diagnostics)
-                std::cout << "compare_atomspaces - first atom " << 
+                std::cout << "compare_atomspaces - first atom " <<
                         atom_first->to_string() << " != second atom " <<
                         atom_second->to_string() << std::endl;
             return false;
@@ -199,7 +199,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             if (*truth_first != *truth_second)
             {
                 if (emit_diagnostics)
-                    std::cout << "compare_atomspaces - first truth " << 
+                    std::cout << "compare_atomspaces - first truth " <<
                             atom_first->to_string() << " != second truth " <<
                             atom_second->to_string() << std::endl;
                 return false;
@@ -217,7 +217,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (!atom->isChecked())
         {
             if (emit_diagnostics)
-                std::cout << "compare_atomspaces - unchecked space atom " << 
+                std::cout << "compare_atomspaces - unchecked space atom " <<
                         atom->to_string() << std::endl;
             all_checked = false;
         }
@@ -231,7 +231,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
 
 bool AtomSpace::operator==(const AtomSpace& other) const
 {
-    return compare_atomspaces(*this, other, CHECK_TRUTH_VALUES, 
+    return compare_atomspaces(*this, other, CHECK_TRUTH_VALUES,
             DONT_EMIT_DIAGNOSTICS);
 }
 
@@ -493,22 +493,6 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     throw opencog::RuntimeException(TRACE_INFO,
          "TruthValue not changed; AtomSpace is readonly");
     return Handle::UNDEFINED;
-}
-
-bool AtomSpace::is_in_atomspace(Handle const & h){
-     Type t = h->get_type();
-     if (h->is_node()){
-         if (this->get_handle(t, h->get_name()))
-             return true;
-         return false;
-     }
-     std::vector<Handle> handle_vector = h->getOutgoingSet();
-     if (h->is_link()){
-         if (this->get_handle(t, handle_vector))
-             return true;
-         return false;
-     }
-     throw std::runtime_error("Argument is not link and not node");
 }
 
 std::string AtomSpace::to_string() const

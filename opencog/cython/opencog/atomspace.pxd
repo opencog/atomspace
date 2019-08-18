@@ -190,7 +190,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
         cHandle set_truthvalue(cHandle h, tv_ptr tvn)
-        bool is_in_atomspace(cHandle & h) except +
+        cHandle get_atom(cHandle & h)
         bint is_valid_handle(cHandle h)
         int get_size()
 

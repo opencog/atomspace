@@ -186,7 +186,9 @@ cdef class AtomSpace:
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
-        return self.atomspace.is_in_atomspace(deref((<Atom>(atom)).handle))
+        cdef cHandle result
+        result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
+        return result != result.UNDEFINED
 
     # Maybe this should be called __repr__ ???
     def __str__(self):
