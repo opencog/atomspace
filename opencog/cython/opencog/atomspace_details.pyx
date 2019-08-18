@@ -89,6 +89,12 @@ cdef class AtomSpace:
             atom = self.add_link(t, out, tv)
         return atom
 
+    def add_atom(self, Atom atom):
+        cdef cHandle result = self.atomspace.add_atom(atom.get_c_handle())
+        if result == result.UNDEFINED:
+            return None
+        return create_python_value_from_c_value(<cValuePtr&>result)
+
     def add_node(self, Type t, atom_name, TruthValue tv=None):
         """ Add Node to AtomSpace
         @todo support [0.5,0.5] format for TruthValue.
@@ -180,7 +186,9 @@ cdef class AtomSpace:
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
-        return is_in_atomspace(self.atomspace, deref((<Atom>(atom)).handle))
+        cdef cHandle result
+        result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
+        return result != result.UNDEFINED
 
     # Maybe this should be called __repr__ ???
     def __str__(self):

@@ -407,7 +407,6 @@ public:
     Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
 	    return get_handle(t, HandleSeq({ha, hb}));
     }
-
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
