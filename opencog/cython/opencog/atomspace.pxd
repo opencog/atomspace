@@ -1,7 +1,7 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
-from libcpp.list cimport list as cpplist
 from libcpp.memory cimport shared_ptr
+from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
@@ -135,6 +135,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         void setTruthValue(tv_ptr tvp)
         void setValue(const cHandle& key, const cValuePtr& value)
         cValuePtr getValue(const cHandle& key) const
+        cpp_set[cHandle] getKeys()
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
@@ -204,7 +205,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
         cHandle set_truthvalue(cHandle h, tv_ptr tvn)
-
+        cHandle get_atom(cHandle & h)
         bint is_valid_handle(cHandle h)
         int get_size()
 
@@ -245,7 +246,6 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
-
 
 cdef inline bool is_in_atomspace(cAtomSpace * atomspace, cHandle h):
      cdef cAtom * atom_ptr = <cAtom*>h.get()

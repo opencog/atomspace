@@ -29,4 +29,4 @@ BC = a.add_link(inh_type, [B, C], TV)
 AC = a.add_link(inh_type, [A, C])
 
 
-print "The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom)
+print("The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom))
