@@ -1,4 +1,5 @@
 from libcpp cimport bool
+from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
@@ -22,6 +23,9 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
         result.append(value)
         inc(handle_iter)
     return result
+
+cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
+    return [create_python_value_from_c_value(<cValuePtr&> h) for h in handles]
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
@@ -182,7 +186,9 @@ cdef class AtomSpace:
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
-        return is_in_atomspace(self.atomspace, deref((<Atom>(atom)).handle))
+        cdef cHandle result
+        result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
+        return result != result.UNDEFINED
 
     # Maybe this should be called __repr__ ???
     def __str__(self):

@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, Atom
+from opencog.atomspace import AtomSpace, Atom, TruthValue
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
@@ -24,7 +24,27 @@ class AtomTest(TestCase):
         key = PredicateNode('bar')
         value = FloatValue([1.0, 2.0, 3.0])
         atom.set_value(key, value)
-        self.assertEqual(value.__class__, atom.get_value(key).__class__)
+        self.assertEqual(value, atom.get_value(key))
+
+    def test_get_keys(self):
+        atom = ConceptNode('foo')
+        keys = atom.get_keys()
+        self.assertEqual(0, len(keys))
+
+        tv = TruthValue(0.7, 0.7)
+        atom.tv = tv
+        keys = atom.get_keys()
+        self.assertEqual(1, len(keys))
+        # Since the type or name of the TruthValue key may change, check that
+        # the value it referes to is the same.
+        self.assertEqual(tv, atom.get_value(keys[0]))
+
+        key = PredicateNode('bar')
+        value = FloatValue([1.0, 2.0, 3.0])
+        atom.set_value(key, value)
+        keys = atom.get_keys()
+        self.assertEqual(2, len(keys))
+        self.assertIn(key, keys)
 
     def test_get_out(self):
         atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
