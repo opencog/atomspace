@@ -90,6 +90,7 @@ bool check_numeric(const Handle& bool_atom)
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
 		if (VARIABLE_NODE == t) continue;
+		if (GLOB_NODE == t) continue;
 		if (NUMBER_NODE == t) continue;
 
 		// TODO - look up the schema, and make sure its numeric, also.
