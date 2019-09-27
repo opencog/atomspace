@@ -334,7 +334,7 @@ public:
     //! iteration stopsm and true is returned. Otherwise the
     //! callback is called on all incomings and false is returned.
     template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
     {
         // We make a copy of the set, so that we don't call the
         // callback with locks held.
