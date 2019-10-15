@@ -2,26 +2,11 @@
  * opencog/atoms/execution/EvaluationLink.h
  *
  * Copyright (C) 2013,2014,2015 Linas Vepstas
- * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#ifndef _OPENCOG_EVALUTATION_LINK_H
-#define _OPENCOG_EVALUTATION_LINK_H
+#ifndef _OPENCOG_EVALUATION_LINK_H
+#define _OPENCOG_EVALUATION_LINK_H
 
 #include <opencog/atoms/core/FreeLink.h>
 
@@ -41,7 +26,7 @@ public:
 	EvaluationLink(const Link& l);
 
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
-	    return do_evaluate(as, get_handle());
+		return do_evaluate(as, get_handle());
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
@@ -65,4 +50,4 @@ static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
 /** @}*/
 }
 
-#endif // _OPENCOG_EVALUTATION_LINK_H
+#endif // _OPENCOG_EVALUATION_LINK_H
