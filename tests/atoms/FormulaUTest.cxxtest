@@ -9,6 +9,7 @@
 #include <math.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <cxxtest/TestSuite.h>
@@ -44,6 +45,7 @@ public:
 	void test_lambda();
 	void test_naked_predicate();
 	void test_defined_predicate();
+	void test_defined_true();
 };
 
 #define MAXERR 1.0e-12
@@ -349,6 +351,27 @@ void FormulaUTest::test_defined_predicate()
 		printf("Executing %s\n", cmd.c_str());
 		TS_ASSERT_THROWS_ANYTHING(_eval.eval_v(cmd));
 		TS_ASSERT_EQUALS(true, _eval.eval_error());
+	}
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FormulaUTest::test_defined_true()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	for (double acc=0.0; acc < 10.5; acc += 1.0)
+	{
+		Handle hsum = _eval.eval_h("(get-sum)");
+		TS_ASSERT_EQUALS(hsum->get_type(), NUMBER_NODE);
+		NumberNodePtr sum = NumberNodeCast(hsum);
+		TS_ASSERT_LESS_THAN(fabs(sum->get_value() - acc), MAXERR);
+
+		ValuePtr vp = _eval.eval_v("(cog-execute! (DefinedPredicate \"inc\"))");
+		TruthValuePtr tvp = TruthValueCast(vp);
+		printf("TV for True=%s\n", tvp->to_string().c_str());
+		TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
+		TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
 	}
 
 	logger().info("END TEST: %s", __FUNCTION__);
