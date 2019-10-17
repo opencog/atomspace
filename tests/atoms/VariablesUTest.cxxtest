@@ -36,11 +36,15 @@ class VariablesUTest : public CxxTest::TestSuite
 {
 private:
 	Handle X, Y, NT, PNT, CNT;
-	
+
 	AtomSpace _as;
-	
+
 public:
-	VariablesUTest() {
+	VariablesUTest()
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
 		NT = an(TYPE_NODE, "Node");
@@ -48,7 +52,10 @@ public:
 		CNT = an(TYPE_NODE, "ConceptNode");
 	}
 
-	void test_extend() {
+	void test_extend()
+	{
+		logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 		Handle
 			vardecl1 = al(VARIABLE_LIST,
 			              al(TYPED_VARIABLE_LINK, X, NT),
@@ -68,8 +75,8 @@ public:
 
 		Handle result = _as.add_atom(v1.get_vardecl());
 
-		std::cout << "expected = " << expected;
-		std::cout << "result = " << result;
+		logger().debug() << "expected = " << oc_to_string(expected);
+		logger().debug() << "result = " << oc_to_string(result);
 
 		TS_ASSERT_EQUALS(expected, result);
 	}
