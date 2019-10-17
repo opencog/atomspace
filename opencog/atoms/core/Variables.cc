@@ -104,9 +104,13 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
 	: varseq(variables), varset(variables)
 {
-	unsigned i = 0;
-	for (const Handle& var : variables)
-		index.insert({var, i++});
+	init_index();
+}
+
+void FreeVariables::init_index()
+{
+	for (unsigned i = 0; i < varseq.size(); i++)
+		index[varseq[i]] = i;
 }
 
 bool FreeVariables::is_identical(const FreeVariables& other) const
@@ -130,11 +134,7 @@ void FreeVariables::find_variables(const HandleSeq& oset)
 {
 	VarScraper vsc;
 	vsc.find_vars(varseq, varset, oset);
-
-	// Build the index from variable name, to its ordinal number.
-	size_t sz = varseq.size();
-	for (size_t i=0; i<sz; i++)
-		index.insert(std::pair<Handle, unsigned int>(varseq[i], i));
+	init_index();
 }
 
 void FreeVariables::find_variables(const Handle& h)

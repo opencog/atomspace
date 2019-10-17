@@ -68,6 +68,10 @@ struct FreeVariables
 	FreeVariables() {}
 	FreeVariables(const std::initializer_list<Handle>& variables);
 
+	// Construct index. FreeVariables::varseq must be previously
+	// defined.
+	void init_index();
+
 	/// Return true if the variables in this, and other, are the same
 	/// variables (have exactly the same variable names.)
 	bool is_identical(const FreeVariables& other) const;
