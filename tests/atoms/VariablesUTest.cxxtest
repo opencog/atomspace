@@ -80,4 +80,30 @@ public:
 
 		TS_ASSERT_EQUALS(expected, result);
 	}
+
+	void test_find_variables()
+	{
+		logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+		// Make sure the variable declarations of body1 and body2 are
+		// the reverses of each other, that is if one is [X, Y], then
+		// the other is [Y, X].
+		Handle body1 = al(INHERITANCE_LINK, al(AND_LINK, X, Y), Y);
+		Handle body2 = al(INHERITANCE_LINK, al(AND_LINK, Y, X), X);
+
+		Variables vars1;
+		Variables vars2;
+		vars1.find_variables(body1);
+		vars2.find_variables(body2);
+		HandleSeq varseq1 = vars1.varseq;
+		HandleSeq varseq2 = vars2.varseq;
+
+		// Reverse varseq2 to test it if it equal to varseq1
+		std::reverse(varseq2.begin(), varseq2.end());
+
+		logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+		logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+		TS_ASSERT_EQUALS(varseq1, varseq2);
+	}
 };
