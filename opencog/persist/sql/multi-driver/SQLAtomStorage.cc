@@ -208,9 +208,9 @@ void SQLAtomStorage::get_server_version(void)
 /// other thread. If that thread has an exception, e.g. due to some
 /// SQL error, and the exception is uncaught, then the process will
 /// die. So we have to catch that exception.  Once caught, what do
-/// we do with it? Well, we culd ignore it, but then the user would
+/// we do with it? Well, we could ignore it, but then the user would
 /// not know that the SQL backend was damaged. So, instead, we throw
-/// it at the first user, any user that is doing soem other SQL stuff.
+/// it at the first user, any user that is doing some other SQL stuff.
 void SQLAtomStorage::rethrow(void)
 {
 	if (_async_write_queue_exception)
