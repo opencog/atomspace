@@ -28,7 +28,6 @@
 #include <atomic>
 #include <mutex>
 #include <set>
-#include <thread>
 #include <vector>
 
 // #include <opencog/util/async_method_caller.h>

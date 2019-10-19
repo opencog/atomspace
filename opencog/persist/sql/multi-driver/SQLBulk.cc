@@ -26,7 +26,6 @@
 
 #include <chrono>
 #include <memory>
-#include <thread>
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/oc_omp.h>
