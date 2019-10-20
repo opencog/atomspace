@@ -228,6 +228,14 @@ public:
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
+    ///
+    /// At this time, we use a 64-bit non-cryptographic hash: it is
+    /// just enough to disambiguate most Atoms, but is small enough
+    /// that it does not use up a lot of RAM (as AtomSpace algos are
+    /// RAM-limited, in practice.)
+    ///
+    /// If a crypto hash was ever needed, the IPLD hash format would
+    /// be recommended.  See https://ipld.io/ for details.
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
