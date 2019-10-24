@@ -309,7 +309,7 @@ public:
     //! are returned. Otherwise, the entire incoming set is returned.
     //!
     //! This call is thread-safe again simultaneous deletion of atoms.
-    //! That is, this call returns the incoming set as it was att the
+    //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
     IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
