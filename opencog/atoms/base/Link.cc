@@ -55,23 +55,23 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
+/// Return a universally-unique string for each distinct link.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Link::to_short_string(const std::string& indent) const
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << nameserver().getTypeName(_type);
-
-    if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->to_string();
-    answer << "\n";
+    answer << " ";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
         answer << h->to_short_string(more_indent);
 
-    answer << indent << ")\n";
+    answer << indent << ")";
 
     return answer.str();
 }

@@ -42,19 +42,15 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
+/// Return a universally-unique string for each distinct node.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::string answer = indent;
-    answer += "(" + nameserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += ")\n";
-
-    return answer;
+    std::stringstream nstrm;
+    nstrm << indent << "(" <<  nameserver().getTypeName(_type)
+        << " \"" << _name << "\")";
+    return nstrm.str();
 }
 
 std::string Node::to_string(const std::string& indent) const
