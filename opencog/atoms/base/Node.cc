@@ -44,17 +44,11 @@ void Node::init(const std::string& cname)
 
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::string answer = indent;
-    answer += "(" + nameserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += ")\n";
-
-    return answer;
+    // We want this to run fairly fast.
+    std::stringstream nstrm;
+    nstrm << indent << "(" <<  nameserver().getTypeName(_type)
+        << " \"" << _name << "\")\n";
+    return nstrm.str();
 }
 
 std::string Node::to_string(const std::string& indent) const
