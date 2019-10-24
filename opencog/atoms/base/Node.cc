@@ -42,12 +42,14 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
+/// Return a universally-unique string for each distinct node.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    // We want this to run fairly fast.
     std::stringstream nstrm;
     nstrm << indent << "(" <<  nameserver().getTypeName(_type)
-        << " \"" << _name << "\")\n";
+        << " \"" << _name << "\")";
     return nstrm.str();
 }
 
