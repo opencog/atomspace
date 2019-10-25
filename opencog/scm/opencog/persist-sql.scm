@@ -9,8 +9,8 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
-(export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
-	sql-store sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
+(export sql-clear-cache sql-clear-stats sql-close sql-open
+	sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
 
 (set-procedure-property! sql-clear-cache 'documentation
 "
@@ -79,15 +79,6 @@
     queues. If the flag is set, then the writers will 'stall', i.e.
     avoid doing any actual stores until the writeback queues have
     at least the low-watermark pending writes in them.
-")
-
-(set-procedure-property! sql-store 'documentation
-"
- sql-store - Store all atoms in the atomspace to the database.
-    This will dump the ENTIRE contents of the atomspace to the databse.
-    Depending on the size of the database, this can potentially take a
-    lot of time.  During normal operation, a bulk-save is rarely
-    required, as individual atoms can always be stored, one at a time.
 ")
 
 (set-procedure-property! sql-stats 'documentation
