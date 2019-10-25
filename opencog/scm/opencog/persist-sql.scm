@@ -4,13 +4,13 @@
 
 (define-module (opencog persist-sql))
 
-
 (use-modules (opencog))
+(use-modules (opencog persist))
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
-(export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
-	sql-store sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
+(export sql-clear-cache sql-clear-stats sql-close sql-open
+	sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
 
 (set-procedure-property! sql-clear-cache 'documentation
 "
@@ -35,15 +35,6 @@
     Close open connections to the currently-open backend, afterflushing
     any pending writes in the write queues. After the close, atoms can
     no longer be stored to or fetched from the database.
-")
-
-(set-procedure-property! sql-load 'documentation
-"
- sql-load - load all atoms in the database.
-    This will cause ALL of the atoms in the open database to be loaded
-    into the atomspace. This can be a very time-consuming operation.
-    In normal operation, it is rarely necessary to load all atoms;
-    atoms can always be fetched and stored one at a time, on demand.
 ")
 
 (set-procedure-property! sql-open 'documentation
@@ -90,15 +81,6 @@
     at least the low-watermark pending writes in them.
 ")
 
-(set-procedure-property! sql-store 'documentation
-"
- sql-store - Store all atoms in the atomspace to the database.
-    This will dump the ENTIRE contents of the atomspace to the databse.
-    Depending on the size of the database, this can potentially take a
-    lot of time.  During normal operation, a bulk-save is rarely
-    required, as individual atoms can always be stored, one at a time.
-")
-
 (set-procedure-property! sql-stats 'documentation
 "
  sql-stats - report performance statistics.
@@ -106,3 +88,19 @@
     to the stdout of the server. These statistics can be quite arcane
     and are useful primarily to the developers of the database backend.
 ")
+
+(define-public (sql-load)
+"
+ sql-load - load all atoms in the database.
+    Deprecated; use `load-atomspace` instead.
+"
+	(load-atomspace)
+)
+
+(define-public (sql-store)
+"
+ sql-store - store all atoms in the database.
+    Deprecated; use `store-atomspace` instead.
+"
+	(store-atomspace)
+)

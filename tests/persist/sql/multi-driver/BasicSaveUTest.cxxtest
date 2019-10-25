@@ -463,7 +463,7 @@ void BasicSaveUTest::do_test_table()
     add_to_table(idx++, table1, "DD-dd-wow ");
     add_to_table(idx++, table1, "EE-ee-wow ");
 
-    store->store(*table1);
+    store->storeAtomSpace(*table1);
     // table1->print();
     delete store;
     delete table1;
@@ -474,7 +474,7 @@ void BasicSaveUTest::do_test_table()
 
     AtomTable *table2 = new AtomTable();
 
-    store->load(*table2);
+    store->loadAtomSpace(*table2);
     // table2->print();
 
     idx = 0;

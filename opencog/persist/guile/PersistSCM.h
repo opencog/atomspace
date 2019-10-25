@@ -45,6 +45,8 @@ private:
 	void fetch_valuations(Handle, bool);
 	Handle store_atom(Handle);
 	void load_type(Type);
+	void load_atomspace(void);
+	void store_atomspace(void);
 	void barrier(void);
 
 public:

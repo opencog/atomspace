@@ -63,8 +63,6 @@ void SQLPersistSCM::init(void)
 {
     define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
     define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
-    define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
-    define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
     define_scheme_primitive("sql-stats", &SQLPersistSCM::do_stats, this, "persist-sql");
     define_scheme_primitive("sql-clear-cache", &SQLPersistSCM::do_clear_cache, this, "persist-sql");
     define_scheme_primitive("sql-clear-stats", &SQLPersistSCM::do_clear_stats, this, "persist-sql");
@@ -128,25 +126,6 @@ void SQLPersistSCM::do_close(void)
     // Only then actually call the dtor.
     backing->unregisterWith(_as);
     delete backing;
-}
-
-void SQLPersistSCM::do_load(void)
-{
-    if (nullptr == _backing)
-        throw RuntimeException(TRACE_INFO,
-            "sql-load: Error: Database not open");
-
-    _backing->loadAtomSpace(_as);
-}
-
-
-void SQLPersistSCM::do_store(void)
-{
-    if (nullptr == _backing)
-        throw RuntimeException(TRACE_INFO,
-            "sql-store: Error: Database not open");
-
-    _backing->storeAtomSpace(_as);
 }
 
 void SQLPersistSCM::do_stats(void)

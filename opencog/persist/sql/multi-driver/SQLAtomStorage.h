@@ -264,10 +264,8 @@ class SQLAtomStorage : public BackingStore
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
-		void loadAtomSpace(AtomSpace*);
-		void storeAtomSpace(AtomSpace*);
-		void load(AtomTable &); // Load entire contents of DB
-		void store(const AtomTable &); // Store entire contents of AtomTable
+		void loadAtomSpace(AtomTable &); // Load entire contents of DB
+		void storeAtomSpace(const AtomTable &); // Store entire contents of AtomTable
 
 		// Debugging and performance monitoring
 		void print_stats(void);

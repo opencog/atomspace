@@ -75,9 +75,9 @@ class BackingStore
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
-		 * Put all atoms having a value for the key into the atomtable.
-		 * If the bool flag is set, then all values on the atom are
-		 * fetched.
+		 * Get all atoms which have a value set for the given key.
+		 * If the bool flag is set, then all values on those atom are
+		 * fetched; otherwise, only that particular key is updated.
 		 */
 		virtual void getValuations(AtomTable&, const Handle&, bool) = 0;
 
@@ -106,6 +106,16 @@ class BackingStore
 		 * in the atomspace.)
 		 */
 		virtual void loadType(AtomTable&, Type) = 0;
+
+		/**
+		 * Load *all* atoms.
+		 */
+		virtual void loadAtomSpace(AtomTable&) = 0;
+
+		/**
+		 * Store *all* atoms.
+		 */
+		virtual void storeAtomSpace(const AtomTable&) = 0;
 
 		/**
 		 * Read-write synchronization barrier.
