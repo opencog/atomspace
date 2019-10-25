@@ -728,35 +728,47 @@ public:
      */
     void testTVUpdate()
     {
+        logger().info("Begin testTVUpdate");
+
         Handle h1 = createNode(CONCEPT_NODE, "dog1");
         h1->setTruthValue(SimpleTruthValue::createTV(0.001, 0.00001));
         Handle ash1 = atomSpace->add_atom(h1);
-
         TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001, 0.00001);
         TruthValuePtr htv = ash1->getTruthValue();
-        TS_ASSERT(htv->get_mean() - tv1->get_mean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(htv->get_count() - tv1->get_count() < FLOAT_ACCEPTABLE_ERROR);
+        logger().debug("ash1 = %s", ash1->to_string().c_str());
+        logger().debug("htv = %s", htv->to_string().c_str());
+        logger().debug("tv1 = %s", tv1->to_string().c_str());
+
+        TS_ASSERT(fabs(htv->get_mean() - tv1->get_mean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(htv->get_count() - tv1->get_count()) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h2 = createNode(CONCEPT_NODE, "dog1");
         h2->setTruthValue(SimpleTruthValue::createTV(0.02, 0.002));
         Handle ash2 = atomSpace->add_atom(h2);
         TruthValuePtr tv2 = SimpleTruthValue::createTV(0.02, 0.002);
+        logger().debug("ash2 = %s", ash2->to_string().c_str());
 
         TS_ASSERT(ash1 == ash2);
         htv = ash1->getTruthValue();
-        TS_ASSERT(htv->get_mean() - tv2->get_mean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(htv->get_count() - tv2->get_count() < FLOAT_ACCEPTABLE_ERROR);
+        logger().debug("htv = %s", htv->to_string().c_str());
+        logger().debug("tv2 = %s", tv2->to_string().c_str());
+        TS_ASSERT(fabs(htv->get_mean() - tv2->get_mean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(htv->get_count() - tv2->get_count()) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h3 = createNode(CONCEPT_NODE, "dog1");
         h3->setTruthValue(SimpleTruthValue::createTV(0.3, 0.03));
         Handle ash3 = atomSpace->add_atom(h3);
         TruthValuePtr tv3 = SimpleTruthValue::createTV(0.3, 0.03);
+        logger().debug("ash3 = %s", ash3->to_string().c_str());
 
         TS_ASSERT(ash1 == ash3);
         htv = ash1->getTruthValue();
-        TS_ASSERT(htv->get_mean() - tv3->get_mean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(htv->get_count() - tv3->get_count() < FLOAT_ACCEPTABLE_ERROR);
+        logger().debug("htv = %s", htv->to_string().c_str());
+        logger().debug("tv3 = %s", tv3->to_string().c_str());
+        TS_ASSERT(fabs(htv->get_mean() - tv3->get_mean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(htv->get_count() - tv3->get_count()) < FLOAT_ACCEPTABLE_ERROR);
 
+        logger().info("End testTVUpdate");
     }
 
     void testGetHandle_bugfix1()
