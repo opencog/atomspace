@@ -4,8 +4,8 @@
 
 (define-module (opencog persist-sql))
 
-
 (use-modules (opencog))
+(use-modules (opencog persist))
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
