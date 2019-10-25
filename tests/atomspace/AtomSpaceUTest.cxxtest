@@ -722,6 +722,43 @@ public:
 
     }
 
+    /**
+     * Truth values should get copied over, when a new version of
+     * the same atom is added.
+     */
+    void testTVUpdate()
+    {
+        Handle h1 = createNode(CONCEPT_NODE, "dog1");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001, 0.00001));
+        Handle ash1 = atomSpace->add_atom(h1);
+
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001, 0.00001);
+        TruthValuePtr htv = ash1->getTruthValue();
+        TS_ASSERT(htv->get_mean() - tv1->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(htv->get_count() - tv1->get_count() < FLOAT_ACCEPTABLE_ERROR);
+
+        Handle h2 = createNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.02, 0.002));
+        Handle ash2 = atomSpace->add_atom(h2);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.02, 0.002);
+
+        TS_ASSERT(ash1 == ash2);
+        htv = ash1->getTruthValue();
+        TS_ASSERT(htv->get_mean() - tv2->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(htv->get_count() - tv2->get_count() < FLOAT_ACCEPTABLE_ERROR);
+
+        Handle h3 = createNode(CONCEPT_NODE, "dog1");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.3, 0.03));
+        Handle ash3 = atomSpace->add_atom(h3);
+        TruthValuePtr tv3 = SimpleTruthValue::createTV(0.3, 0.03);
+
+        TS_ASSERT(ash1 == ash3);
+        htv = ash1->getTruthValue();
+        TS_ASSERT(htv->get_mean() - tv3->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(htv->get_count() - tv3->get_count() < FLOAT_ACCEPTABLE_ERROR);
+
+    }
+
     void testGetHandle_bugfix1()
     {
         HandleSeq emptyOutgoing;
