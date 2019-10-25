@@ -421,7 +421,7 @@ void PersistUTest::do_test_atomspace(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    _pm->do_store();
+    _as->store_atomspace();
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
