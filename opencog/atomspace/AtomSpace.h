@@ -33,6 +33,8 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
 
+class BasicSaveUTest;
+
 namespace opencog
 {
 const bool EMIT_DIAGNOSTICS = true;
@@ -60,6 +62,7 @@ class AtomSpace
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
+    friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
 
     /**
      * Drop copy constructor and equals operator to
