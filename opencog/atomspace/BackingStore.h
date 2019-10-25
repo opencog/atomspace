@@ -108,6 +108,16 @@ class BackingStore
 		virtual void loadType(AtomTable&, Type) = 0;
 
 		/**
+		 * Load *all* atoms.
+		 */
+		virtual void loadAtomSpace(AtomTable&) = 0;
+
+		/**
+		 * Store *all* atoms.
+		 */
+		virtual void storeAtomSpace(const AtomTable&) = 0;
+
+		/**
 		 * Read-write synchronization barrier.
 		 * All writes will be completed before this routine returns.
 		 * This allows the backend to implement asynchronous writes,

@@ -142,7 +142,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 	return rp.intval;
 }
 
-void SQLAtomStorage::load(AtomTable &table)
+void SQLAtomStorage::loadAtomSpace(AtomTable &table)
 {
 	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
@@ -261,7 +261,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 }
 
 /// Store all of the atoms in the atom table.
-void SQLAtomStorage::store(const AtomTable &table)
+void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
 {
 	rethrow();
 
@@ -306,16 +306,6 @@ void SQLAtomStorage::store(const AtomTable &table)
 	double rate = ((double) _store_count) / secs;
 	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
 		(unsigned long) _store_count, (int) secs, (int) rate);
-}
-
-void SQLAtomStorage::storeAtomSpace(AtomSpace* atomspace)
-{
-	store(atomspace->get_atomtable());
-}
-
-void SQLAtomStorage::loadAtomSpace(AtomSpace* atomspace)
-{
-	load(atomspace->get_atomtable());
 }
 
 /* ============================= END OF FILE ================= */

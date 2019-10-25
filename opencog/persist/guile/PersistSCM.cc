@@ -49,6 +49,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::store_atom, this, "persist");
 	define_scheme_primitive("load-atoms-of-type",
 	             &PersistSCM::load_type, this, "persist");
+	define_scheme_primitive("load-atomspace",
+	             &PersistSCM::load_atomspace, this, "persist");
+	define_scheme_primitive("store-atomspace",
+	             &PersistSCM::store_atomspace, this, "persist");
 	define_scheme_primitive("barrier",
 	             &PersistSCM::barrier, this, "persist");
 }
@@ -98,6 +102,18 @@ void PersistSCM::load_type(Type t)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
 	as->fetch_all_atoms_of_type(t);
+}
+
+void PersistSCM::load_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atomspace");
+	as->load_atomspace();
+}
+
+void PersistSCM::store_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atomspace");
+	as->store_atomspace();
 }
 
 void PersistSCM::barrier(void)

@@ -37,15 +37,6 @@
     no longer be stored to or fetched from the database.
 ")
 
-(set-procedure-property! sql-load 'documentation
-"
- sql-load - load all atoms in the database.
-    This will cause ALL of the atoms in the open database to be loaded
-    into the atomspace. This can be a very time-consuming operation.
-    In normal operation, it is rarely necessary to load all atoms;
-    atoms can always be fetched and stored one at a time, on demand.
-")
-
 (set-procedure-property! sql-open 'documentation
 "
  sql-open URL - Open a connection to a database
@@ -106,3 +97,19 @@
     to the stdout of the server. These statistics can be quite arcane
     and are useful primarily to the developers of the database backend.
 ")
+
+(define-public (sql-load)
+"
+ sql-load - load all atoms in the database.
+    Deprecated; use `load-atomspace` instead.
+"
+	(load-atomspace)
+)
+
+(define-public (sql-store)
+"
+ sql-store - store all atoms in the database.
+    Deprecated; use `store-atomspace` instead.
+"
+	(store-atomspace)
+)

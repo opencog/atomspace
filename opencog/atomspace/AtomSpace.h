@@ -263,6 +263,24 @@ public:
     }
 
     /**
+     * Use the backing store to load entire AtomSpace.
+     */
+    void load_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->loadAtomSpace(_atom_table);
+    }
+
+    /**
+     * Use the backing store to store entire AtomSpace.
+     */
+    void store_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->storeAtomSpace(_atom_table);
+    }
+
+    /**
      * Use the backing store to load the entire incoming set of the
      * atom.
      * If the flag is true, then the load is done recursively.
