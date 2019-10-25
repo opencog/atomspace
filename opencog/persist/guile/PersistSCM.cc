@@ -81,6 +81,13 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
+// XXX FIXME -- it appear that this was never exposed in scheme,
+// and so there are no users anywhere for this, which means that
+// there are no users for `as->fetch_valuations()` either, which
+// means it can be removed.  It's not hard to implement in SQL,
+// but does pose an implementation difficulty for IPFS. Since this
+// appears to be unused, then it really should be eliminate.
+// ... someday. In a later pull req, I guess.
 void PersistSCM::fetch_valuations(Handle key, bool get_all_values)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-valuations");
