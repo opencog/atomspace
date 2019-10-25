@@ -75,9 +75,9 @@ class BackingStore
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
-		 * Put all atoms having a value for the key into the atomtable.
-		 * If the bool flag is set, then all values on the atom are
-		 * fetched.
+		 * Get all atoms which have a value set for the given key.
+		 * If the bool flag is set, then all values on those atom are
+		 * fetched; otherwise, only that particular key is updated.
 		 */
 		virtual void getValuations(AtomTable&, const Handle&, bool) = 0;
 
