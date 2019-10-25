@@ -284,13 +284,20 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     if (not force) {
         Handle hcheck(getHandle(orig));
-        if (hcheck) return hcheck;
+        if (hcheck) {
+            // Oh we have it already. Update the values, as needed.
+            hcheck->copyValues(orig);
+            return hcheck;
+        }
     } else {
 
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
         Handle hcheck(lookupHandle(orig));
-        if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
+        if (hcheck and hcheck->getAtomSpace() == _as) {
+            hcheck->copyValues(orig);
+            return hcheck;
+        }
     }
 
     atom->copyValues(orig);
