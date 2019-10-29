@@ -462,7 +462,7 @@ void MultiPersistUTest::test_atomspace(void)
 
     TSM_ASSERT("Persist Module not loaded", _pm);
 
-    printf("Start creating %d theads\n", n_threads);
+    printf("Start creating %d threads\n", n_threads);
 
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
