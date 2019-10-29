@@ -191,6 +191,14 @@
    ...
 }
 
+{
+   <2.2-gc>
+   Memcheck:Cond
+   ...
+   fun:GC_promote_black_lists
+   ...
+}
+
 # ------------------------------------------
 # libuistring stuff
 

@@ -5,7 +5,11 @@
 # Note that the ordering of include statements may influence whether
 # things work or not
 
-include "classserver.pyx"
+include "nameserver.pyx"
 include "truth_value.pyx"
 include "atomspace_details.pyx"
 include "atom.pyx"
+include "value.pyx"
+include "float_value.pyx"
+include "string_value.pyx"
+include "link_value.pyx"

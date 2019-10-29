@@ -1,0 +1,154 @@
+/*
+ * tests/atoms/GroundedSchemaLocalUTest.cxxtest
+ *
+ * Copyright (C) 2018 Alexey Potapov
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/LibraryManager.h>
+#include <opencog/atoms/core/NumberNode.h>
+
+using namespace opencog;
+
+#define N as->add_node
+#define L as->add_link
+
+class GroundedSchemaLocalUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+
+public:
+	GroundedSchemaLocalUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+		as = new AtomSpace();
+	}
+
+	~GroundedSchemaLocalUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_local_schema();
+	void test_local_schema_no_sep();
+	void test_local_predicate();
+};
+
+void GroundedSchemaLocalUTest::tearDown()
+{
+	as->clear();
+}
+
+void GroundedSchemaLocalUTest::setUp()
+{
+	as->clear();
+}
+
+Handle* safe_car(AtomSpace* as, Handle* params)
+{
+	// it is necessary to allocate memory for Handle
+	return new Handle((*params)->get_type() != LIST_LINK ?
+	                  *params :
+	                  (*params)->getOutgoingAtom(0));
+}
+
+void GroundedSchemaLocalUTest::test_local_schema()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalSchema("safe_car", safe_car);
+
+	Handle eol =
+		L(EXECUTION_OUTPUT_LINK,
+		  N(GROUNDED_SCHEMA_NODE, "lib:\\safe_car"),
+		  L(LIST_LINK,
+		    N(CONCEPT_NODE, "Arg1"),
+		    N(CONCEPT_NODE, "Arg2"),
+		    N(CONCEPT_NODE, "Arg3"))
+		    );
+	Handle result = HandleCast(eol->execute(as));
+	logger().debug() << "Result is this:\n" << result->to_string();
+	Handle expected = N(CONCEPT_NODE, "Arg1");
+
+	TS_ASSERT_EQUALS(expected, result);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_local_schema but no need to preprend `\` to safe_car
+void GroundedSchemaLocalUTest::test_local_schema_no_sep()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalSchema("safe_car", safe_car);
+
+	Handle eol =
+		L(EXECUTION_OUTPUT_LINK,
+		  N(GROUNDED_SCHEMA_NODE, "lib:safe_car"),
+		  N(CONCEPT_NODE, "Arg"));
+	Handle result = HandleCast(eol->execute(as));
+	logger().debug() << "Result is this:\n" << result->to_string();
+	Handle expected = N(CONCEPT_NODE, "Arg");
+
+	TS_ASSERT_EQUALS(expected, result);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+TruthValuePtr* is_square(AtomSpace* as, Handle* params)
+{
+	const HandleSeq& args = (*params)->getOutgoingSet();
+	int val1 = NumberNodeCast(args[0])->get_value();
+	int val2 = NumberNodeCast(args[1])->get_value();
+	// it is necessary to allocate memory for TruthValuePtr*
+	return new TruthValuePtr(val1 == val2 * val2 ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV());
+}
+
+void GroundedSchemaLocalUTest::test_local_predicate()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalPredicate("is_square", is_square);
+
+	Handle gpn = N(GROUNDED_PREDICATE_NODE, "lib:\\is_square");
+	Handle args1 = L(LIST_LINK, N(NUMBER_NODE, "9"), N(NUMBER_NODE, "3"));
+	Handle args2 = L(LIST_LINK, N(NUMBER_NODE, "8"), N(NUMBER_NODE, "3"));
+
+	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
+	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
+
+	TruthValuePtr result1 = evl1->evaluate(as);
+	TruthValuePtr result2 = evl2->evaluate(as);
+ 	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
+	TruthValuePtr expected1 = TruthValue::TRUE_TV();
+	TruthValuePtr expected2 = TruthValue::FALSE_TV();
+
+	TS_ASSERT(*expected1 == *result1);
+	TS_ASSERT(*expected2 == *result2);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

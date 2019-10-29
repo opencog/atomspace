@@ -38,7 +38,7 @@
 ;      (normy 'right-length (list (Word "the") (Word "a")))
 ;
 ; which will take the disjunct-vectors for the two words "the" and "a",
-; treating each disjunct as a basis element, take thier difference, and
+; treating each disjunct as a basis element, take their difference, and
 ; return the length (the root-mean-square of the difference of the
 ; counts).
 ;
@@ -85,7 +85,7 @@
 ; ---------------------------------------------------------------------
 ;
 (define*-public (add-tuple-math LLOBJ FUNC #:optional
-	(GET-CNT 'pair-count))
+	(GET-CNT 'get-count))
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
   of rows or columns, and then call FUNC on that tuple, in the place of
@@ -119,9 +119,9 @@
   then the returned triple would be [(), (x,z), (x,w)].  At least one
   of the entries in the tuple is non-nil.
 
-  The 'item-pair method just distributes over the tuples. In the
-  above example, 'item-pair [(x,y), (x,z), (x,w)] will return the
-  triple ['item-pair (x,y), 'item-pair (x,z), 'item-pair (x,w)]
+  The 'get-pair method just distributes over the tuples. In the
+  above example, 'get-pair [(x,y), (x,z), (x,w)] will return the
+  triple ['get-pair (x,y), 'get-pair (x,z), 'get-pair (x,w)]
 
   The 'pair-count method will apply FUNC to the tuple. In the above
   example, the 'pair-count method will return a number, specifically,
@@ -151,15 +151,11 @@
 			; inserted repeatedly.
 			(define atom-set (make-atom-set))
 
-			; Add the left-side of the pair to the set.
-			(define (add-left-to-set LIST)
-				(for-each
-					(lambda (star-pair) (atom-set (gar star-pair)))
-					LIST))
-
-			; loop over everything in the tuple.
+			; Loop over everything in the tuple.
 			(for-each
-				(lambda (item) (add-left-to-set (star-obj 'left-stars item)))
+				(lambda (item)
+					(for-each (lambda (dual) (atom-set dual))
+						(star-obj 'left-duals item)))
 				TUPLE)
 
 			; Return the union of all left-stars in the tuple.
@@ -167,35 +163,32 @@
 
 		(define (get-right-union TUPLE)
 			(define atom-set (make-atom-set))
-			(define (add-right-to-set LIST)
-				(for-each
-					(lambda (star-pair) (atom-set (gdr star-pair)))
-					LIST))
 			(for-each
-				(lambda (item) (add-right-to-set (star-obj 'right-stars item)))
+				(lambda (item)
+					(for-each (lambda (dual) (atom-set dual))
+						(star-obj 'right-duals item)))
 				TUPLE)
+
 			(atom-set #f))
 
 		; ---------------
 		; Given a TUPLE of items of 'right-type, this returns
-		; a tuple of low-level pairs of LEFTY and each righty
-		; in the TUPLE.  If such a pair does not exist, the
-		; returned tuple will contain an empty list at that locus.
-		(define (get-left-lopr-tuple LEFTY TUPLE)
-			(define prty (LLOBJ 'pair-type))
+		; a tuple of pairs of LEFTY and each righty in the TUPLE.
+		; If such a pair does not exist, the returned tuple will
+		; contain an empty list at that locus.
+		(define (get-left-tuple LEFTY TUPLE)
 			(map
-				(lambda (rght) (cog-link prty LEFTY rght))
+				(lambda (rght) (LLOBJ 'get-pair LEFTY rght))
 				TUPLE))
 
-		(define (get-right-lopr-tuple RIGHTY TUPLE)
-			(define prty (LLOBJ 'pair-type))
+		(define (get-right-tuple RIGHTY TUPLE)
 			(map
-				(lambda (left) (cog-link prty left RIGHTY))
+				(lambda (left) (LLOBJ 'get-pair left RIGHTY))
 				TUPLE))
 
 		; ---------------
 		; Expects TUPLE to be a scheme list of items of 'right-type.
-		; Returns a list of tuples of the left-stars appropriae for
+		; Returns a list of tuples of the left-stars appropriate for
 		; that TUPLE.  The left-star tuples are "aligned", so that
 		; that within one tuple, all pairs have exactly the same
 		; left side.  If such a pair does not exist, the empty list
@@ -224,22 +217,17 @@
 
 		(define (left-star-union TUPLE)
 			(map
-				(lambda (lefty) (get-left-lopr-tuple lefty TUPLE))
+				(lambda (lefty) (get-left-tuple lefty TUPLE))
 				(get-left-union TUPLE)))
 
 		; Same as above, but for the right
 		(define (right-star-union TUPLE)
 			(map
-				(lambda (righty) (get-right-lopr-tuple righty TUPLE))
+				(lambda (righty) (get-right-tuple righty TUPLE))
 				(get-right-union TUPLE)))
 
 		; ---------------
-		; Given a TUPLE of low-level pairs, return a tuple of high-level
-		; pairs.
-		(define (get-pair TUPLE)
-			(map (lambda (lopr) (LLOBJ 'item-pair lopr)) TUPLE))
-
-		; Given a TUPLE of high-level pairs, return a single number.
+		; Given a TUPLE of pairs, return a single number.
 		; The FUNC is applied to reduce the counts on each pair
 		; in the tuple down to just one number.
 		(define (get-func-count TUPLE)
@@ -254,8 +242,7 @@
 			(case meth
 				((left-stars)  left-star-union)
 				((right-stars) right-star-union)
-				((item-pair)   get-pair)
-				((pair-count)  get-func-count)
+				((get-count)   get-func-count)
 				(else          (LLOBJ 'provides meth))))
 
 		; ---------------
@@ -265,8 +252,7 @@
 			(case message
 				((left-stars)      (apply left-star-union args))
 				((right-stars)     (apply right-star-union args))
-				((item-pair)       (apply get-pair args))
-				((pair-count)      (apply get-func-count args))
+				((get-count)       (apply get-func-count args))
 				((provides)        (apply provides args))
 				(else              (apply LLOBJ (cons message args))))
 			)))

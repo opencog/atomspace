@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/persist/sql/SQLBackingStore.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 namespace opencog
@@ -47,8 +46,7 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    SQLBackingStore *_backing;
-    SQLAtomStorage *_store;
+    SQLAtomStorage *_backing;
     AtomSpace *_as;
 
 public:
@@ -57,8 +55,6 @@ public:
 
     void do_open(const std::string&);
     void do_close(void);
-    void do_load(void);
-    void do_store(void);
 
     void do_stats(void);
     void do_clear_cache(void);

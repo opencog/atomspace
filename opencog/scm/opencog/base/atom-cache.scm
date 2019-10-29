@@ -31,11 +31,11 @@
   make-afunc-cache AFUNC -- Return a caching version of AFUNC.
 
   Here, AFUNC is a function that takes a single atom as an argument,
-  and returns some object associated with that atom.
+  and returns some scheme object associated with that atom.
 
   This returns a function that returns the same values that AFUNC would
   return, for the same argument; but if a cached value is available,
-  then return just that, instead of calling AFUNC a second time.  This
+  then that is returned, instead of calling AFUNC a second time.  This
   is useful whenever AFUNC is cpu-intensive, taking a long time to
   compute.  In order for the cache to be valid, the value of AFUNC must
   not depend on side-effects, because it will be called at most once.
@@ -58,6 +58,45 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (make-aset-predicate ATOM-LIST)
+"
+  make-aset-predicate ATOM-LIST - create a fast Atom-set predicate.
+
+  This returns a function - a predicate - that will return #t whenever
+  an atom is in the ATOM-LIST. That is, it maintains a set of atoms,
+  and returns #t whenever the argument is in that set; else returning #f.
+  The goal of this predicate is to run much, much faster than any search
+  of the ATOM-LIST. Under the covers, this maintains a hash-table of the
+  list for fast lookup.
+
+  Example usage:
+     (define atoms (list (Concept \"A\") (Concept \"B\") (Concept \"C\")))
+     (define is-abc? (make-aset-predicate atoms))
+     (is-abc? (Concept \"C\"))
+     => #t
+     (is-abc? (Concept \"D\"))
+     => #f
+"
+   ; Define the local hash table we will use.
+   (define cache (make-hash-table))
+
+   ; Guile needs help computing the hash of an atom.
+   (define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+   (define (atom-assoc ATOM ALIST)
+      (find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
+	; Insert each atom into the hash table.
+	(for-each
+		(lambda (ITEM) (hashx-set! atom-hash atom-assoc cache ITEM #t))
+		ATOM-LIST)
+
+	; Return #t if the atom is in the hash table.
+   (lambda (ITEM)
+      (hashx-ref atom-hash atom-assoc cache ITEM))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (make-atom-set)
 "
   make-atom-set - Return a function that can hold set of atoms.
@@ -69,6 +108,10 @@
   Calling the returned function with an atom in the argument places the
   atom into the set. Calling it with #f as the argument returns the
   entire set as a list.
+
+  When inserting an atom, this returns #t if the given atom was already
+  in the set, otherwise it returns #f. Thus, it can be used to avoid
+  repeated computations on some given atom.
 
   Example Usage:
      (define atom-set (make-atom-set))
@@ -87,20 +130,30 @@
 
 	(lambda (ITEM)
 		(if ITEM
-			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			; If already in the set, return #t
+			(if (hashx-ref atom-hash atom-assoc cache ITEM #f)
+				#t
+				; Else if not in set, add to set, and return #f
+				(begin
+					(hashx-set! atom-hash atom-assoc cache ITEM #t)
+					#f))
+			; If not item, then return entire set.
 			(let ((ats '()))
 				(hash-for-each-handle
 					(lambda (PR) (set! ats (cons (car PR) ats)))
 					cache)
-				ats))))
+				ats)))
+)
 
 ; ---------------------------------------------------------------------
 
 (define-public (delete-dup-atoms ATOM-LIST)
 "
-  delete-dup-atoms - Return ATOM-LIST, with duplicate atoms deleted.
+  delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This will usually be faster than calling delete-duplicates! whenever
+  This does the same thing as `delete-duplicates`, but is faster.
+
+  This will usually be faster than calling `delete-duplicates` whenever
   the ATOM-LIST is large (probably when its longer than 10 atoms long??)
 "
 
@@ -113,22 +166,74 @@
 
 (define-public (remove-duplicate-atoms ATOM-LIST)
 "
-  remove-duplicate-atoms - Return ATOM-LIST, with duplicate atoms deleted.
+  remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-dup-atoms` but might be faster(?)
+  This does the same thing as `delete-dup-atoms` but is slower(?)
 
-  This will usually be faster than calling delete-duplicates! whenever
+  This will usually be faster than calling `delete-duplicates` whenever
   the ATOM-LIST is large (probably when its longer than 10 atoms long??)
 "
 
 	; Sort first, and then filter.
-	(define sorted-atoms (sort! ATOM-LIST cog-atom-less?))
+	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
 	(if (null? sorted-atoms) '()
 		(fold
 			(lambda (ATM LST)
 				(if (equal? ATM (car LST)) LST (cons ATM LST)))
 			(list (car sorted-atoms))
 			(cdr sorted-atoms)))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (keep-duplicate-atoms ATOM-LIST)
+"
+  keep-duplicate-atoms ATOM-LIST - Keep only duplicate atoms from list.
+
+  This removes all atoms in ATOM-LIST that appear only once in the list.
+  The multiplicity of the remaining atoms is reduced by one, and so
+  repeated calls to this function allows progressively higher
+  multiplicities to be removed. For example, two calls to this function
+  will cause all atoms that appear once or twice to be removed.
+"
+	; Sort first, and then filter.
+	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
+	(define head #f)
+
+	(if (null? sorted-atoms) '()
+		(begin
+			(set! head (car sorted-atoms))
+			(fold
+				(lambda (ATM LST)
+					(if (equal? ATM head)
+						(cons ATM LST)
+						(begin (set! head ATM) LST)))
+				'()
+				(cdr sorted-atoms))))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (atoms-subtract LIST-A LIST-B)
+"
+  atoms-subtract LIST-A LIST-B
+
+  Return a list of all atoms in LIST-A that are not in LIST-B.
+
+  This does the same thing as `lset-difference` but will usually be
+  much much faster, if either list is more than ten atoms long.
+"
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
+	(for-each (lambda (ITEM)
+		(hashx-set! atom-hash atom-assoc cache ITEM #f))
+		LIST-B)
+	(remove (lambda (ATOM)
+		(hashx-get-handle atom-hash atom-assoc cache ATOM))
+		LIST-A)
 )
 
 ; ---------------------------------------------------------------------

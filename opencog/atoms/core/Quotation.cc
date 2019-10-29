@@ -101,9 +101,5 @@ std::string oc_to_string(const Quotation& quotation, const std::string& indent)
 {
 	return quotation.to_string(indent);
 }
-std::string oc_to_string(const Quotation& quotation)
-{
-	return oc_to_string(quotation, "");
-}
-	
+
 } // namespace opencog

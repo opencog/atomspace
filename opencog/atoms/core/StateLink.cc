@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include "StateLink.h"
 
 using namespace opencog;
@@ -71,6 +72,49 @@ Handle StateLink::get_state(const Handle& alias)
 Handle StateLink::get_link(const Handle& alias)
 {
 	return get_unique(alias, STATE_LINK, true);
+}
+
+void StateLink::install()
+{
+	// If the handlset is closed (no free variables), then
+	// only one copy of the atom can exist in the atomspace.
+	if (not is_closed())
+	{
+		Link::install();
+		return;
+	}
+
+	// Find all existing copies of this particular StateLink
+	// (There should be only one).
+	// Perform an atomic swap, replacing the old with the new.
+	bool swapped = false;
+	const Handle& alias = get_alias();
+	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
+	for (const LinkPtr& defl : defs)
+	{
+		if (defl->getOutgoingAtom(0) != alias) continue;
+		if (defl.get() == this) continue;
+
+		StateLinkPtr old_state(StateLinkCast(defl));
+		if (not old_state->is_closed()) continue;
+
+		// Make sure we are visible in the atomspace, before the swap.
+		AtomSpace *as = old_state->getAtomSpace();
+		setAtomSpace(as);
+
+		// Atomic update of the incoming set.
+		const LinkPtr& new_state = LinkCast(get_handle());
+		alias->swap_atom(old_state, new_state);
+
+		// Install the other atom as well.
+		_outgoing[1]->insert_atom(new_state);
+
+		// Remove the old StateLink too. It must be no more.
+		as->remove_atom(defl->get_handle(), true);
+		swapped = true;
+	}
+
+	if (not swapped) Link::install();
 }
 
 DEFINE_LINK_FACTORY(StateLink, STATE_LINK);

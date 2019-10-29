@@ -89,7 +89,7 @@ public:
 		: Node(n.get_type(), double_to_string(std::stod(n.get_name()))),
 		  value(std::stod(n.get_name()))
 	{
-		OC_ASSERT(classserver().isA(_type, NUMBER_NODE),
+		OC_ASSERT(nameserver().isA(_type, NUMBER_NODE),
 			"Bad NumberNode constructor!");
 	}
 
@@ -107,6 +107,8 @@ typedef std::shared_ptr<NumberNode> NumberNodePtr;
 static inline NumberNodePtr NumberNodeCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<NumberNode>(h); }
 static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
+	{ return std::dynamic_pointer_cast<NumberNode>(a); }
+static inline NumberNodePtr NumberNodeCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
 #define createNumberNode std::make_shared<NumberNode>

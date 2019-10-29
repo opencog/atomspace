@@ -30,11 +30,12 @@
 
 #include <cstdio>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -86,6 +87,7 @@ class FetchUTest :  public CxxTest::TestSuite
 
 		void atomCompare(AtomPtr, AtomPtr, std::string);
 		void test_stuff(void);
+		void test_readonly(void);
 };
 
 FetchUTest::FetchUTest(void)
@@ -224,7 +226,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval(sql_open);
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
 	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
-	eval->eval("(sql-store)");
+	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
 	delete _as;
@@ -245,13 +247,15 @@ void FetchUTest::test_stuff(void)
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
 	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
 
 	// Update A.
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
 
 	// Saving everything should not crash.  It should, however,
 	// change the TV on (Concept "BBB") back to DEFAULT_TV.
-	eval->eval("(sql-store)");
+	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
 	delete _as;
@@ -264,6 +268,8 @@ void FetchUTest::test_stuff(void)
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	etv = SimpleTruthValue::createTV(0.3, 0.33);
 	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
 
 	// BBB should have been clobbered.
 	eval->eval(R"((fetch-atom (Concept "BBB")))");
@@ -271,6 +277,76 @@ void FetchUTest::test_stuff(void)
 	TS_ASSERT((*tv) == (*dtv));
 	printf("Expecting %s\n", dtv->to_string().c_str());
 	printf("Got %s\n", tv->to_string().c_str());
+
+	eval->eval("(sql-close)");
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void FetchUTest::test_readonly(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// First, initialize the database
+	eval->eval("(use-modules (opencog persist) (opencog persist-sql))");
+	eval->eval(sql_open);
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
+	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
+	eval->eval(R"((List (Concept "AAA") (Concept "BBB")))");
+	eval->eval("(store-atomspace)");
+	eval->eval("(sql-close)");
+
+	delete _as;
+	_as = new AtomSpace();
+	_as->set_read_only();
+	eval = SchemeEval::get_evaluator(_as);
+	eval->eval(sql_open);
+
+	// Despite the AtomSpace being readonly, we should still be
+	// able to load atoms from the database.
+	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
+	std::string prt = eval->eval("(cog-prt-atomspace)");
+	printf("Atomspace contents:\n%s\n", prt.c_str());
+	Handle a = eval->eval_h(R"((Concept "AAA"))");
+	TS_ASSERT(nullptr != a);
+
+	TruthValuePtr tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
+	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
+
+	// No one is messing with the flag, eh?
+	TS_ASSERT(true == _as->get_read_only());
+	Handle c = _as->add_node(CONCEPT_NODE, "foobar");
+	TS_ASSERT(c == nullptr);
+
+	// Try to change TV on A -- should fail; should get old value.
+	// We should get an assert, for good measure.
+	// The assert is turned into an evaluator error.
+	TS_ASSERT(false == eval->eval_error());
+	eval->clear_pending();
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
+	TS_ASSERT(eval->eval_error());
+	eval->clear_pending();
+	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	TS_ASSERT((*tv) == (*etv));
+
+	// Should be possible to extract, even though its read-only
+	TS_ASSERT(2 == _as->get_size());
+	eval->eval(R"((cog-extract (Concept "AAA")))");
+	eval->eval(R"((cog-extract (Concept "BBB")))");
+	TS_ASSERT(0 == _as->get_size());
+
+	// And re-load them again.
+	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
+	TS_ASSERT(2 == _as->get_size());
+
+	TS_ASSERT(true == _as->get_read_only());
+	Handle d = _as->add_node(CONCEPT_NODE, "barfoo");
+	TS_ASSERT(d == nullptr);
+	TS_ASSERT(2 == _as->get_size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

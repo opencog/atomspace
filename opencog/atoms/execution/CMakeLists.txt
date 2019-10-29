@@ -7,35 +7,32 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
+	DLScheme.cc
 	Force.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
 	MapLink.cc
-	ExecSCM.cc
+	LibraryManager.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
-	query
-	atomspace
 	atombase
+	atomcore
 	clearbox
-	${Boost_SYSTEM_LIBRARY}
 )
-
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(execution smob)
-ENDIF (HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution PythonEval)
 	TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
-INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS execution
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	Force.h
@@ -45,9 +42,20 @@ INSTALL (FILES
 	DESTINATION "include/opencog/atoms/execution"
 )
 
+IF (HAVE_GUILE)
+	ADD_LIBRARY (exec ExecSCM.cc)
+	TARGET_LINK_LIBRARIES(exec execution smob)
+	ADD_GUILE_EXTENSION(SCM_CONFIG exec "opencog-ext-path-exec")
+	
+	INSTALL (TARGETS exec
+		EXPORT AtomSpaceTargets
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (HAVE_GUILE)
+
 # This does not belong, but cannot be fixed until the Python bindings
 # are fixed, first.
 INSTALL (FILES
 	MapLink.h
-	DESTINATION "include/opencog/atoms/core"
+	LibraryManager.h
+	DESTINATION "include/opencog/atoms/execution"
 )

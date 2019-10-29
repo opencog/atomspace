@@ -4,10 +4,8 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
-	AtomSpaceInit.cc
 	AtomTable.cc
 	BackingStore.cc
-	FixedIntegerIndex.cc
 	TypeIndex.cc
 )
 
@@ -15,15 +13,23 @@ ADD_LIBRARY (atomspace
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
-#	${NO_AS_NEEDED}
-	attentionbank
+	# We want to list every possible library that defines some
+	# atom type, so that the library ctors will run, and add those
+	# atom types to the classserver. If this is not done, then the
+	# classserver will fail to run atom factories, viz, will fail
+	# to run the ctors for C++-backed atom types, resulting in
+	# screwball failures.
+	${NO_AS_NEEDED}
+	clearbox
+	lambda
+	execution
 	atomcore
+	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
-	${Boost_THREAD_LIBRARY}
 )
 
-INSTALL (TARGETS atomspace
+INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -31,7 +37,6 @@ INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
 	BackingStore.h
-	FixedIntegerIndex.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

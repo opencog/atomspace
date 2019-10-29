@@ -30,7 +30,8 @@
 
 #include <boost/operators.hpp>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/util/empty_string.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/Variables.h>
@@ -116,8 +117,8 @@ bool ohs_content_eq(const HandleSet& lhs, const HandleSet& rhs);
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Context& c, const std::string& indent);
-std::string oc_to_string(const Context& c);
+std::string oc_to_string(const Context& c,
+                         const std::string& indent=empty_string);
 	
 /** @}*/
 } // namespace opencog

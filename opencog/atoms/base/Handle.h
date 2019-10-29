@@ -38,8 +38,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/util/Counter.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/atom_types/types.h>
 
 // Comment this out if you want to enforce more determinism in the
 // AtomSpace. For instance atoms are indexed according to content
@@ -122,6 +123,10 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return get() != h.get();
     }
+
+    /**
+     * Defer to Atom::operator< thus is content based.
+     */
     bool operator< (const Handle& h) const noexcept;
 
     /**
@@ -176,17 +181,26 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! RAM and has faster iteration.
 typedef std::set<Handle> HandleSet;
 
+//! a set of sets of handles.
+typedef std::set<HandleSet> HandleSetSet;
+
+//! a sequence of sets of handles.
+typedef std::vector<HandleSet> HandleSetSeq;
+
 //! a hash table. Usually has faster insertion.
 typedef std::unordered_set<Handle> UnorderedHandleSet;
-
-//! an ordered map from Handle to Handle set
-typedef std::map<Handle, HandleSet> HandleMultimap;
 
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
 
+//! an ordered map from Handle to Handle set
+typedef std::map<Handle, HandleSet> HandleMultimap;
+
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
+
+//! a sequence of sequences of ordered handle maps
+typedef std::vector<HandleMapSeq> HandleMapSeqSeq;
 
 //! a set of ordered handle maps
 typedef std::set<HandleMap> HandleMapSet;
@@ -209,6 +223,9 @@ bool content_eq(const opencog::HandleSeq& lhs,
 bool content_eq(const opencog::HandleSet& lhs,
                 const opencog::HandleSet& rhs);
 
+bool content_eq(const opencog::HandleSetSeq& lhs,
+                const opencog::HandleSetSeq& rhs);
+
 struct content_based_atom_ptr_less
 {
     bool operator()(const Atom* al, const Atom* ar) const
@@ -226,6 +243,7 @@ struct content_based_handle_less
     }
 };
 
+//! Content based HandleSet less than operator
 struct handle_seq_less
 {
     bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
@@ -241,6 +259,7 @@ struct handle_seq_less
     }
 };
 
+//! Content based HandleSet pointer less than operator
 struct handle_seq_ptr_less
 {
     bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
@@ -268,44 +287,76 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-// The reason indent is not an optional argument with default is
-// because gdb doesn't support that, see
-// http://stackoverflow.com/questions/16734783 for more explanation.
 #define OC_TO_STRING_INDENT "  "
-std::string oc_to_string(const Handle& h, const std::string& indent);
-std::string oc_to_string(const Handle& h);
-std::string oc_to_string(const HandlePair& hp, const std::string& indent);
-std::string oc_to_string(const HandlePair& hp);
-std::string oc_to_string(const HandleSeq& hs, const std::string& indent);
-std::string oc_to_string(const HandleSeq& hs);
-std::string oc_to_string(const HandleSeqSeq& hss, const std::string& indent);
-std::string oc_to_string(const HandleSeqSeq& hss);
-std::string oc_to_string(const HandleSet& ohs, const std::string& indent);
-std::string oc_to_string(const HandleSet& ohs);
-std::string oc_to_string(const UnorderedHandleSet& uhs, const std::string& indent);
-std::string oc_to_string(const UnorderedHandleSet& uhs);
-std::string oc_to_string(const HandleMap& hm, const std::string& indent);
-std::string oc_to_string(const HandleMap& hm);
-std::string oc_to_string(const HandleMultimap& hmm, const std::string& indent);
-std::string oc_to_string(const HandleMultimap& hmm);
-std::string oc_to_string(const HandleMapSeq& hms, const std::string& indent);
-std::string oc_to_string(const HandleMapSeq& hms);
-std::string oc_to_string(const HandleMapSet& hms, const std::string& indent);
-std::string oc_to_string(const HandleMapSet& hms);
-std::string oc_to_string(const HandlePairSeq& hps, const std::string& indent);
-std::string oc_to_string(const HandlePairSeq& hps);
-std::string oc_to_string(const HandleCounter& hc, const std::string& indent);
-std::string oc_to_string(const HandleCounter& hc);
-std::string oc_to_string(const HandleUCounter& huc, const std::string& indent);
-std::string oc_to_string(const HandleUCounter& huc);
-std::string oc_to_string(Type type, const std::string& indent);
-std::string oc_to_string(Type type);
-std::string oc_to_string(const AtomPtr& aptr, const std::string& indent);
-std::string oc_to_string(const AtomPtr& aptr);
+std::string oc_to_string(const Handle& h,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandlePair& hp,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSeq& hs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSeqSeq& hss,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSet& ohs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSetSet& ohss,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSetSeq& ohss,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const UnorderedHandleSet& uhs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMap& hm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMap::value_type& hmv,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMultimap& hmm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMapSeq& hms,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMapSeqSeq& hmss,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMapSet& hms,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandlePairSeq& hps,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleCounter& hc,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleUCounter& huc,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(Type type,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const TypeSet& types,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const AtomPtr& aptr,
+                         const std::string& indent=empty_string);
+
+/**
+ * Cast Handle to the specific Atom subclass. This function is defined only
+ * for T which are subclasses of Atom.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Atom, T>::value, std::shared_ptr<T> >::type
+CastFromHandle(const Handle& handle)
+{
+	return std::dynamic_pointer_cast<T>(handle);
+}
+
+/**
+ * Cast AtomPtr to the specific Atom subclass. This function is defined only
+ * for T which are subclasses of Atom.
+ */
+template<typename T>
+static inline
+typename std::enable_if< std::is_base_of<Atom, T>::value, std::shared_ptr<T> >::type
+CastFromAtomPtr(const AtomPtr& atom)
+{
+	return std::dynamic_pointer_cast<T>(atom);
+}
 
 } // namespace opencog
 
 namespace std {
+ostream& operator<<(ostream&, const opencog::HandleMap&);
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);

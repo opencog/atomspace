@@ -1,0 +1,765 @@
+//
+// Script for automatic "atom type" generation. For more information,
+// consult the `README.md` file in this directory.
+//
+// Please note: some of the types below are used only via the scheme
+// bindings. Thus, just because you can comment some of these out, and
+// the code still compiles, that does not mean that these types are
+// unused!  Be sure to grep for the CamelCase names, to see if they
+// show up elsewhere!
+//
+// Some of them are used by Python PLN code (which also uses the
+// CamelCase names).
+// ===========================================================
+
+// Special type designating that no atom type has been assigned.
+NOTYPE
+
+// --------------------------------------------------------------
+// Values are collections of data that can be associated with atoms.
+// Think of them as decorations that can be hung on an atom.
+VALUE
+FLOAT_VALUE <- VALUE    // vector of floats, actually.
+STRING_VALUE <- VALUE   // vector of strings
+LINK_VALUE <- VALUE     // vector of values ("link" holding values)
+VALUATION <- VALUE      // (atom,key,value) triple
+
+// ===========================================================
+// TruthValues are the subobject classifiers for Atomese; they are used
+// to generalize the notion of a subset (in exactly the same way that
+// a subobject classifier does so in an arbitrary topos.) In some cases,
+// these will be probabilities; in other cases, these are probabilities
+// with additional evidence associated to them. In yet other cases,
+// these resemble the truth values of "fuzzy logic", and so on.
+//
+// Many atoms and operations on atoms explicitly require truth values
+// -- for example, PredicateNodes and EvaluationLinks -- and so these
+// are vital and centrally important for getting things to work.
+//
+TRUTH_VALUE                <- FLOAT_VALUE
+SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
+COUNT_TRUTH_VALUE          <- TRUTH_VALUE
+INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
+FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
+PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
+EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
+
+// ===========================================================
+// A base class for time-varying (floating-point) values.
+// XXX TODO we need other base classes for other kinds of varying values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
+// ===========================================================
+// Base of the atom hierarchy. Atoms are globally unique and persistent
+// and are immutable (unchangeable).
+//
+// NOTE: ATOM will not have a corresponding python constructor, to
+// avoid conflict with the python Atom object.
+ATOM <- VALUE
+NODE <- ATOM
+LINK <- ATOM
+
+CONCEPT_NODE <- NODE
+NUMBER_NODE <- NODE
+
+// Basic Links
+ORDERED_LINK <- LINK
+UNORDERED_LINK <- LINK
+
+// A PredicateNode is the primary subobject classifier of Atomese.
+// When a PredicateNode is evaluated in some setting, the result is
+// always a TruthValue.  They must return a TV when evaluated.
+PREDICATE_NODE <- NODE
+
+// ===========================================================
+// Type-safety links.  These are used to enforce type safety
+// at Atom creation time. The mechanism that employs these fails
+// to handle "deep types", so this is kind-of inadequate for
+// strong type checking. In fact, doing it this way is kind of
+// a cheesy hack - really, there should be some ArrowLink
+// associated to each atom type, and that should determine the
+// behavior of the atom. But, for now, we do it the hacky way.
+// Basically, it works, and it handles most of the basic cases
+// in a fairly straightforward fashion.
+//
+// By doing type-checking at atom-creation time, this is a kind-of
+// static type-checking, and thus suffers from the typical issues
+// of static type-checking.
+//
+// Also -- polymorphic outputs are broken.  For example, ValueOfLink
+// can return both numbers, and not-numbers...
+
+
+// Evaluatable link. Any link type which might be evaluated, resulting
+// in a truth-value, should inherit from this type.  This is a
+// mixin-type, it does nothing by itself, but is used to identify
+// link types that are evaluatable - that is, they return truth values
+// when they are evaluated.
+EVALUATABLE_LINK <- LINK
+
+// Crisp binary true/false output. Link types that, when evaluated,
+// naturally yield a true/false value.
+CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
+
+// Numeric-output link. Generates either NumberNodes or FloatValues
+// upon execution.
+NUMERIC_OUTPUT_LINK <- LINK
+
+// Boolean-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be EvaluatableLinks.
+BOOLEAN_LINK <- LINK
+
+// Numeric-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be NumberNodes, or things
+// that can evaluate to NumberNodes: viz NumericOutputLinks, or
+// numeric values (derived from FloatValue).
+NUMERIC_LINK <- LINK
+
+// Type-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be types.
+TYPE_LINK <- LINK
+
+// Type-output link. Generates Types upon execution.
+TYPE_OUTPUT_LINK <- LINK
+
+// ===========================================================
+// Basic boolean algebra and set-theory-inspired links.
+
+SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+LIST_LINK <- ORDERED_LINK
+MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+
+// ContextLink: Universe of discourse. This behaves like set subtraction
+// in that the set of things outside of the context have no bearing on
+// the probability.
+CONTEXT_LINK <- ORDERED_LINK
+
+// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
+// These use probabilistic formulas to compute truth values.
+// UNION_LINK <- OR_LINK
+// INTERSECTION_LINK <- AND_LINK
+
+// Binary-valued (0/1, T/F) Boolean algebra operations and logical
+// constants. These are used by the pattern matcher to compute
+// crisp-logic boolean algebra combinations of predicates (that is,
+// to implement classical predicate logic.)
+//
+// The ordered links SequentialAndLink, SequentialOrLink allow
+// behavior-tree Sequence and Fallback to be implemented: they guarantee
+// sequential execution until the first failure or the first success.
+//
+TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
+FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
+AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+
+// The 'intuitionist logic' version of OR_LINK is 'multiple choice'
+// The ChoiceLink states that a choice must be made.  Like a restaurant
+// menu, it lists a menu of things: you can pick one (and only one).
+// Thus, ChoiceLink is an exclusive choice: you can only choose one of
+// the alternatives. The alternatives are just that: alternatives.
+// They are not true/false valued; they're simply options on a menu.
+// Pick one.  It is an ordered link, in the sense that the first choice
+// might be preferable.
+//
+// The ChoiceLink is NOT semantically equivalent to the OrLink. The
+// OrLink of two sets is a set union. The ChoiceLink of two sets is
+// "pick one of these two sets but not both". (So its more like
+// "disjoint union".)
+//
+// This is important for the pattern matcher; you use it to say
+// "match this graph or this graph or this graph".
+//
+CHOICE_LINK <- ORDERED_LINK
+
+// Rounding out the above, we have PresentLink, which is the converse
+// of AbsentLink, and is dual to ChoiceLink, since it requires that all
+// terms are AND'ed together.  Since it does not make sense to ask if
+// the same atom is present more than once, or what order it was in, it
+// is an unordered link, and duplicates are eliminated.
+//
+PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
+
+// The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
+// In 'intuitionist logic', the opposite of "true" is not "false",
+// the opposite is "don't know".  ABSENT_LINK is the effective
+// don't-know link.  Currently, it is used during pattern matching
+// to find clauses that may or may not be present: clauses that are
+// optionally present.
+//
+// Just like the PresentLink, it does not make sense to have duplicates
+// in the outgoing set, thus they are removed.  The mechanics of the
+// PresentLink is used to accomplish this.
+ABSENT_LINK <- PRESENT_LINK
+
+// The other adjoint.
+// Exists == left adjoint to the pullback functor of a relation.
+//           where PresentLink is `Exists` for the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation.
+//           We invent AlwaysLink, since `ForAll` is already taken
+//           up by PLN.
+// This is used in the pattern matcher, to implement an "always the
+// case" condition during matching. It's a kind-of `ForAll`, just like
+// Present is a kind-of `ThereExists`.
+ALWAYS_LINK <- PRESENT_LINK
+
+// Performance scripting links.
+// ParallelLink launches multiple threads, but does not wait for any of
+// them to return.  JoinLink launches multiple threads, and waits for
+// all of them to return, and then returns the And of their truth
+// values.
+PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+JOIN_LINK <- PARALLEL_LINK
+
+// ====================================================================
+// Predicate-logic/lambda-calc/model-theory style links and nodes.
+// These embody some of the common and recurring themes from predicate
+// logic, model theory, term rewriting and lambda calculus. There is
+// no strict correspondence, however, as there is no formal unification
+// of these theories -- its just a leveraging of common themes.
+//
+// These are used to implement the pattern matcher, and everything built
+// from the pattern matcher, including the query system and the rule
+// engine. In that sense, their definitions are "strict", else the
+// pattern matcher will fail.
+
+// A Variable.  Use Lambda's to hide these. Use types to type them.
+VARIABLE_NODE <- NODE
+
+// A list of variables or variable declarations.
+VARIABLE_LIST <- LIST_LINK
+
+// A non-greedy globbing variable; matches one or more atoms in a
+// sequence.  XXX TODO - this could be changed to a link, so that
+// it resembles a FUZZY_LINK more closely?  FuzzyLink implements
+// the same idea, but in a more general fashion...
+// Variadic, the globbed values are meant to be of all same type.
+GLOB_NODE <- VARIABLE_NODE
+
+// Everything under a QuoteLink is interpreted literally. Variable
+// substitution (beta-reduction) is not performed into quoted variables.
+QUOTE_LINK <- ORDERED_LINK
+
+// The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
+// quoting.  Defined to work kind-of like in lisp/scheme. (XXX TODO,
+// we currently do not check to make sure that each Unquote has a Quote
+// above it. We should ...)
+UNQUOTE_LINK <- ORDERED_LINK
+
+// Like QuoteLink but only affects the direct child, not its
+// descendants. It has the same effect as wrapping the child with a
+// QuoteLink and each atom of the its outgoing set with an UnquoteLink.
+LOCAL_QUOTE_LINK <- ORDERED_LINK
+
+// Everything under a DontExecLink is not executed. This is typically
+// used during pattern matching, to halt infinite recursion, when the
+// matched pattern is itself executable. Vaguely like QuoteLink, but
+// instead of blocking beta-reduction, it blocks execution.
+DONT_EXEC_LINK <- ORDERED_LINK
+
+// A FreeLink is any kind of link that might have free variables in it.
+// The FreeLink exists for one purpose: to make visible/explicit all of
+// free variables in the link. The primary user is the pattern matcher.
+// That is, envision the FreeLink as being at the top of a tree, and
+// somewhere in that tree, there might be VariableNodes.  The C++ class
+// for this link records the names of those variables, in order of
+// traversal.  The goal here is to simply know these variables, so that,
+// at the time of evaluation or execution, they are easily located.
+//
+// The variables are necessarily free: they do NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to ScopeLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+//
+FREE_LINK <- ORDERED_LINK
+
+// This is an interesting one. It is a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, using the terminology of predicate logic;
+// See Wikipedia for a formal definition).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+// Implementation Note: The DeleteLink cannot inherit from FunctionLink
+// because that would cause all variables to be bound, i.e. to become
+// a closed sentence; thus it inherits from FreeLink.
+//
+DELETE_LINK <- FREE_LINK
+
+// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
+// fixed first atom of the link.  Useful for defining state.  Additional
+// "open" links may exist; "open" links are defined as links that
+// contain free variables (see Wikipedia definition of "open term",
+// "closed term").  Kind of like DeleteLink, but allows one instead of
+// zero closed terms.
+UNIQUE_LINK <- FREE_LINK
+
+// Inserting a StateLink into the AtomSpace causes the previous
+// state to be removed from the AtomSpace.
+STATE_LINK <- UNIQUE_LINK
+
+// Uniquely naming things, tagging things. Attempting to insert a
+// second definition into the AtomSpace will throw an exception.
+DEFINE_LINK <- UNIQUE_LINK
+
+// The ScopeLink is used to identify an open term, i.e. a link
+// containing VariableNodes within it, and binding those variables.
+// In the process, it can also force type restrictions on them.
+// The ScopeLink does not have to bind all variables that occur in it's
+// body; those that are not bound remain free.
+//
+// The ScopeLink differs from the FreeLink in that the FreeLink
+// necessarily lists ALL the (free) variables within it; the ScopeLink
+// tracks only the bound variables (and not the free ones). The
+// FreeLink cannot have type restrictions on the variables; the
+// ScopeLink can (and usually does).
+SCOPE_LINK <- ORDERED_LINK
+
+// The RewriteLink is a ScopeLink with extra methods that perform
+// alpha conversion and beta reduction on the ScopeLink. It is a base
+// class for many kinds of atom types, most of which CANNOT be treated
+// as if they were lambdas!  So user beware: although RewriteLink feels
+// like LambdaLink ... it isn't.  Not everything is a Lambda.
+REWRITE_LINK <- SCOPE_LINK
+
+// The PrenexLink is a RewriteLink that maintains prenex normal form.
+// It serves as a base class for the various pattern-matching links,
+// since pattern matching only makes sense when the patterns are written
+// in prenex normal form.  It also serves as the base class for Lambda,
+// since function composition in Atomese only seems to make sense if
+// the result is in prenex form. (I can't figure out what it means to
+// have a Lambda that is not in prenex form. Or a Pattern that is not
+// in prenex form.)
+PRENEX_LINK <- REWRITE_LINK
+
+// The LambdaLink is supposed to roughly model the traditional concept
+// of a lambda from lambda calculus (or functional programming). It
+// is meant to behave just like a lambda-abstraction, and supports the
+// standard operations of beta-reduction and alpha-conversion (modulo
+// that the AtomSpace enforces alpha-equivalence).  Non-prenex lambdas
+// in Atomese don't seem to "make any sense", at least to me, so
+// lambda's are forced to be prenex. This is a departure from classical
+// lambda calculus.
+LAMBDA_LINK <- PRENEX_LINK
+
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed. PutLinks are the same thing as
+// beta-redexes.
+PUT_LINK <- PRENEX_LINK
+
+// Pattern definition, pattern grounding/satisfaction.
+// The PatternLink implements the base class holding a pattern that
+// the pattern matcher will traverse.  Its primary role in life is to
+// enable a C++ class that unpacks all the arguments and types, etc.
+// into assorted C++ structures. It does not have any semantics in and
+// of itself, it just holds machinery and a cache of the pre-compiled
+// pattern.
+PATTERN_LINK <- PRENEX_LINK
+
+// We subdivide patterns into two types: one type returns a TV when it
+// is evaluated.  The other type returns a set of atoms when it is
+// executed.  The distinction is made for the benefit of the C++ code,
+// so that it can dispatch appropriately, based on the base type.
+
+// Finds all groundings, returns generic Value
+SATISFYING_LINK <- PATTERN_LINK
+
+// The GetLink is almost exactly the same thing as a SatsifyingSetLink,
+// except that GetLink is imperative, while SatisfyingSetLink is
+// declarative.  Likewise, BindLink is exactly the same thing as an
+// ImplicationLink, except that its imperative, not declarative.
+// Both return SetLinks holding the results.
+// QueryLink is identical to BindLink, except it returns a LinkValue
+// holding the result, instead of a SetLink. (Less atomspace pollution).
+GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
+QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
+BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
+
+// Adjoint to the GetLink. This is "adjoint" in the sense that the roles
+// of the pattern and the grounding are reversed: given a grounding, the
+// collection of patterns that are grounded by it can be searched-for.
+DUAL_LINK <- SATISFYING_LINK
+
+// ==============================================================
+// Basic Knowledge-Representation types.
+//
+// EvaluationLinks record the result of evaluating a predicate.
+// That is, given some elements, they indicate whether the predicate is
+// true or false (or has some other truth value) on those elements.
+EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
+
+EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// ==============================================================
+// Types and type constructors. Variables and other atoms can be
+// given types.  The below describe the types.
+
+// A TypeNode holds simple, "atomic" type declarations, such as those
+// defined in this file. It cannot hold compound types (deep types),
+// because compound types are Atoms, and this is a Node, not a Link,
+// and so it cannot hold any atoms. Use DefinedTypeNode for compound
+// types.
+//
+// It inherits from PredicateNode because it is a kind of predicate:
+// It can evaluate to true, if something is of the indicated type,
+// else it would evaluate to false.
+//
+TYPE_NODE <- PREDICATE_NODE
+
+// Non-strict versions of above. See the wiki.
+TYPE_INH_NODE <- TYPE_NODE
+TYPE_CO_INH_NODE <- TYPE_NODE
+
+// User-defined type.  This is meant to be used with DefineLink
+// to give a name to a type definition; for example, a type definition
+// specified with SignatureLink or ArrowLink.
+DEFINED_TYPE_NODE <- TYPE_NODE
+
+// Used for type polymorphism.
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
+
+// Type constructor. Forces a boolean-and of all of the type definitions
+// (signatures) that it contains.  Mostly useful only when used with
+// the IntervalLink, so specify the length of a list or the size of a
+// set.  This, in turn, is mostly useful only for regex matching using
+// the GlobNode.
+TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
+
+// Function-type constructor.  Corresponds to right-arrow of functional
+// programming languages, viz. arity-2, first arg is input, 2nd
+// arg is output.
+ARROW_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
+
+// Type constructor.
+// The SignatureLink implements "deep types", a way for specifying
+// the type of an entire graph, and not just some node or link.
+// The type specification is "precise", in contrast to the fuzzy
+// type specification, below.
+SIGNATURE_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
+
+// The FuzzyLink is a kind of type specification that can be imprecise.
+// It is used to specify a pattern that is then matched only
+// approximately by the pattern matcher, to find "similar" graphs.
+// See also GlobNode, which performs a more narrow kind of matching.
+// (viz. bunch-in-a-row globbing)
+FUZZY_LINK <- SIGNATURE_LINK
+
+// A type binder: it binds a type to a VariableNode. Always arity-2,
+// the first position must be a VariableNode, the second must be a type.
+// Note that this is always scoped, i.e. used in lambdas and places
+// where variables are not free. Thus, unlike TypedAtomLink, this is
+// never globally unique.
+//
+// It inherits from Evaluatable, because it typically obtains a value
+// of "true", if the indicated variable is of the given type, else
+// it evaluates to "false".  The predicate specifying the concrete
+// test is the signature (SignatureLink, etc) that is tested.
+TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// A type binder for non-variable atoms. It binds a type to an atom
+// at a "global" level.  Always arity-2, the first position cannot be
+// any atom except for a VariableNode, the second must be a type.
+//  A given atom can only ever have just one type, thus, this is unique.
+TYPED_ATOM_LINK <- UNIQUE_LINK
+
+// An arity-2 link, used for specifying numeric intervals, that is,
+// the lower and upper bounds of some range. Currently used for
+// specifying GlobNode counts.
+INTERVAL_LINK <- ORDERED_LINK
+
+// ====================================================================
+// Synchronization primitive, used to mark stages of a processing
+// pipeline; used as a fence or guard barrier, make sure that earlier
+// stages have completed processing before later ones start.
+// Basically, hypergraphs may be attached to the anchor, with a
+// ListLink, to indicate that they are either done, or awaiting
+// processing.
+ANCHOR_NODE <- NODE
+
+// ====================================================================
+// Relations. A "relation" is a subset of a Cartesian product, or more
+// generally, something that can have a subobject classifier. Examples
+// include "relations" from model theory, and "relations" from
+// "relational algebra" (e.g. SQL).
+//
+// Relations always have an associated subobject classifier. For naive
+// set theory, this is the indicator function, having values of
+// true/false, indicating set membership. For Atomese, the subject
+// classifier is explicitly always a TRUTH_VALUE.
+
+// A VirtualLink is equivalent to an EvaluationLink, with a
+// GroundedPredicateNode in it, except that the GPN is "built in".
+// So, for example, GreaterThanLink is equivalent to an EvaluationLink
+// with a GroundedPredicateNode "c++:greater_than". The built-in
+// evaluation links have better performance, since they don't need
+// to make a call to external scheme or python code to get evaluated.
+//
+// The VirtualLink designation is needed by the pattern matcher,
+// in order to be able to find and treat these terms correctly.
+//
+// VirtualLinks only need to be used for those GPN's that take 2 or
+// more arguments. If they take only one, then there is no reason
+// for them to be declared as virtual (at least, as far as the pattern
+// matcher is concerned, which, right now, is the only user of this
+// link type.)
+//
+// XXX Or would it be better to merely have it derive from EvaluatableLink ???
+VIRTUAL_LINK <- EVALUATION_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
+
+// IdenticalLink tests for syntactic equality.  It does NOT execute its
+// arguments; it true only if both sides are the same atom.
+// EqualLink tests for semantic equality: the two sides are equal, if,
+// after execution, they evaluate to the same atom.
+IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// AlphaEqualLink tests to see if both sides are the same, up to an
+// alpha-renaming of any variables that they may have.
+ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// If the pattern has a grounding (any grounding at all), then
+// return true, else return false. This is a crisp binary true/false.
+SATISFACTION_LINK <- PATTERN_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
+
+// --------------------------------------------------------------
+// Functions that do NOT bind variables.
+
+// A FunctionLink is a link that can be executed, with the result of
+// execution being some atom.  FunctionLink does NOT derive from
+// LambdaLink, which may seem counter-intuitive; here's why, so
+// listen up.  All of the explicitly-named functions (e.g. PlusLink)
+// do not need to explicitly name their arguments, and it would even
+// be confusing if they did so.  Instead, the convention is that every
+// element in the outgoing set of the FunctionLink IS an argument of
+// the function; that's all, end-of-story.
+//
+// All variables that appear underneath the FunctionLink are necessarily
+// free variables; they are neither scoped, nor bound.
+//
+// The FunctionLink is meant to be a base type for links that define
+// functions.  It is NOT meant to be used as a base type for
+// user-defined structures; users should use the LambdaLink for that.
+FUNCTION_LINK <- FREE_LINK
+
+// The ExecutionOutputLink is a specific kind of function: it must have
+// a GroundedSchemeNode as its first argument.  The other kinds of
+// FunctionLinks do not have this restriction: indeed, the actual
+// function they perform is implicit in the link type.
+EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+
+// Return the indicated value on the indicated atom.
+// XXX FIXME - Not all ValueOfLinks are actually numeric; but there
+// is no way to tell, in advance. They may or may not be... when they
+// aren't, the evaluator will throw a silent exception, which is
+// caught, so its mostly harmless if the returned value isn't actually
+// numeric.  We need this try..catch because sometimes there just isn't
+// a value -- i.e. ValueOfLink can return a null pointer.
+VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
+STRENGTH_OF_LINK <- VALUE_OF_LINK
+CONFIDENCE_OF_LINK <- VALUE_OF_LINK
+
+ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
+STI_OF_LINK <- VALUE_OF_LINK
+LTI_OF_LINK <- VALUE_OF_LINK
+
+// The opposite of the above: given something that evaluates to a
+// FloatValue, return a TruthValue.  Kind-of-like
+// GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
+// This is not really needed, but will make the transition process
+// smoother.
+PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+
+// Basic arithmetic operators
+FOLD_LINK <- FUNCTION_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
+PLUS_LINK <- ARITHMETIC_LINK
+MINUS_LINK <- PLUS_LINK
+TIMES_LINK <- ARITHMETIC_LINK
+DIVIDE_LINK <- TIMES_LINK
+
+RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return arity of the wrapped link.
+ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return (with uniform distribution) one of the links it wraps.
+// XXX Broken polymorphism: the choice link can sometimes generate
+// numbers, and sometimes not. It depends ... so static type checking
+// is fairly broken, here, as currently implemented.
+RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return the current time.
+TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Conditional based on crisp boolean value from TV.
+COND_LINK <- FUNCTION_LINK
+
+// Sleep link pauses execution for the indicated number of seconds.
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// MapLink could be named UnPutLink ... it undoes a beta-reduction,
+// by extracting values for a given set of variables.  In many ways,
+// it resembles a GetLink, except that it searches only its argument
+// list, instead of the entire AtomSpace.  It is more-or-less analogous
+// to the standard functional-programming concept of "map".
+MAP_LINK <- FUNCTION_LINK
+
+// ====================================================================
+// Grammatical inference on time series
+//
+// The generic structure encoded here would be:
+//
+//     Section
+//         LexicalAtom "something"
+//         ConnectorSeq
+//             Connector
+//                 LexicalAtom "it's"
+//                 ConnectorDir "-"
+//             Connector
+//                 LexicalAtom "curious"
+//                 ConnectorDir "+"
+//
+CONNECTOR <- LINK              // Link-grammar connector
+CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
+LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
+CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
+SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+// ==============================================================
+// Procedure and schema nodes.
+//
+// These form the foundation for a different way of looking at
+// values and predicates: they generalize the notion of "predicate"
+// so that any value or atom can be the result of evaluation
+// (which is now renamed "execution", to make a distinction).
+//
+// Procedures are generic terms; when they are executed, they can
+// return any value, including Atoms, and not just TruthValues.
+PROCEDURE_NODE <- NODE
+
+// Grounded procedures/predicates/schemas are "jets", which replace
+// inefficient code with efficient implementations in an ad-hoc kind of
+// way. They accelerate code that would otherwise be impractical to
+// express or execute in Atomese. See for example
+// http://lambda-the-ultimate.org/node/5482 for discussion of jets.
+GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
+
+// SchemaNodes are similar to PredicateNodes, except they must
+// necessarily return an Atom when executed.
+SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE
+GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
+
+// Special cases of PredicateNodes.
+// DefinedPredicateNodes are used to make human-written Atomese easier
+// to read by humans. They have no other fundamental usefulness...
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
+GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
+
+// ====================================================================
+//
+// Link to represent the magnitude or the multitude of something,
+// such as 10kg, 10s, $10, etc. (??)
+QUANTITY_LINK <- ORDERED_LINK
+
+// ==============================================================
+// Assorted PLN link types. Most of these should probably be moved
+// so that they live with PLN, and not here. Why? Because the
+// AtomSpace does not actually need or use these. XXX FIXME.
+
+// Assorted PLN link types.  These are specific to the theory of PLN
+// and the rules it defines for knowledge representation and reasoning.
+// See the book on PLN by Goertzel etal. to understand what these are
+// all about.
+//
+// The concepts of extension and intension are needed, whenever one
+// has more truth values than simply true and false. These correspond
+// to the sigma and pi types of the Borel hierarchy of set theory.
+// More precisely, they are the left and right adjunctions to the
+// pullback functor of sets over an object -- that is, the pullback
+// functor on the slice category, where the slice is given by a
+// PredicateNode.
+//
+// Some of these have "scope" versions, but I don't understand what
+// these are or why they are needed. That might be a bug(?)
+
+// SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
+// Therefore the later has been removed.
+INHERITANCE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+SUBSET_LINK <- INHERITANCE_LINK
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
+
+SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+
+// Logical quantifiers (adjoints to pullbacks of relations)
+// These are ill-defined, at the moment: do they return truth
+// values, or sets of atoms? Do they express a predicate, or a subset?
+// Should these inherit from ReWriteLink or PrenexLink instead ???
+// I think PLN uses these; otherwise they are not yet properly defined.
+//
+// Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
+// is scoped!)
+//
+// Exists == left adjoint to the pullback functor of a relation.
+//           Note that PRESENT_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation.
+//           Note that ALWAYS_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
+//
+// XXX These are currently not implemented (viz they don't actually
+// work as virtual links).
+FORALL_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
+
+// Concept constructor
+SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
+
+// Convert predicate into concept
+SATISFYING_SET_LINK <- LINK,EVALUATABLE_LINK
+
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
+INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+
+EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+
+INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+
+// Generic association
+ASSOCIATIVE_LINK <- ORDERED_LINK
+
+// Mystery link used by PLN
+ATTRACTION_LINK <- ORDERED_LINK
+
+// Mystery link. What does this do ??? Can we get rid of it?
+EXECUTION_LINK <- ORDERED_LINK

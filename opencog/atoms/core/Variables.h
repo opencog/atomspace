@@ -28,6 +28,7 @@
 
 #include <boost/operators.hpp>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Quotation.h>
 
@@ -42,7 +43,7 @@ namespace opencog
 /// goal of this structure is to make it easier and faster to work with
 /// VariableNodes in C++; specifically, to find thier locations within
 /// a hypergraph, and to perform beta-substitution (to substitute a
-/// value for the variable).  This class implements the data that is
+/// argument for the variable).  This class implements the data that is
 /// used by FreeLink to work with free variables.
 ///
 struct FreeVariables
@@ -72,9 +73,7 @@ struct FreeVariables
 	bool is_identical(const FreeVariables& other) const;
 
 	/// Return true if variable `var` is in this variableset.
-	bool is_in_varset(const Handle& v) const {
-		return varset.end() != varset.find(v);
-	}
+	bool is_in_varset(const Handle& v) const;
 
 	/// Return true if all variables within the given range is in
 	/// varset.
@@ -108,10 +107,10 @@ struct FreeVariables
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
-	/// Convert a variable->value mapping into a sequence of "values"
-	/// that are in the same order as the free variables in this
-	/// class.  If the mapping does not mention a variable, then
-	/// that variable itself is used as the value.  This sequence
+	/// Convert a variable->argument mapping into a sequence of
+	/// "arguments" that are in the same order as the free variables
+	/// in this class.  If the mapping does not mention a variable,
+	/// then that variable itself is used as the argument.  This sequence
 	/// can be used with the substitute_nocheck() function below.
 	HandleSeq make_sequence(const HandleMap&) const;
 
@@ -119,7 +118,7 @@ struct FreeVariables
 	void erase(const Handle&);
 
 	// Given the tree `tree` containing variables in it, create and
-	// return a new tree with the indicated values `vals` substituted
+	// return a new tree with the indicated arguments `args` substituted
 	// for the variables.  "nocheck" == no type checking is done.
 	// This performs an almost pure, syntactic beta-reduction; its
 	// almost-pure because it does honour the semantics of QuoteLink.
@@ -127,7 +126,7 @@ struct FreeVariables
 	                          const HandleSeq&,
 	                          bool silent=false) const;
 
-	// Like the above, but takes a mapping from variables to values.
+	// Like the above, but takes a mapping from variables to arguments.
 	Handle substitute_nocheck(const Handle&,
 	                          const HandleMap&,
 	                          bool silent=false) const;
@@ -142,15 +141,18 @@ struct FreeVariables
 	/// Return true, if there are no free variables.
 	bool empty() const;
 
+	/// Useful for debugging
+	std::string to_string(const std::string& indent=empty_string) const;
+
 protected:
 	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
 	                         const IndexMap&,
 	                         Quotation quotation=Quotation()) const;
 };
 
-typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
-typedef std::map<Handle, const HandleSet> VariableDeepTypeMap;
-typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
+typedef std::map<Handle, TypeSet> VariableTypeMap;
+typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
+typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -214,7 +216,11 @@ struct Variables : public FreeVariables,
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
-	bool is_type(const Handle& h) const;
+	bool is_type(const Handle&) const;
+
+	// Return true if we are holding a single variable, and it can
+	// be the indicated type.
+	bool is_type(Type) const;
 
 	// Return true if we are holding the variable `var`, and `val`
 	// satisfies the type restrictions that apply to `var`.
@@ -234,13 +240,13 @@ struct Variables : public FreeVariables,
 	bool is_upper_bound(const Handle& glob, size_t n) const;
 
 	// Given the tree `tree` containing variables in it, create and
-	// return a new tree with the indicated values `vals` substituted
-	// for the variables. The vals must pass the typecheck, else an
+	// return a new tree with the indicated arguments `args` substituted
+	// for the variables. The `args` must pass the typecheck, else an
 	// exception is thrown. If "silent" is true, then the exception
 	// will not be logged; this allows this method to be used for
 	// filtering, where type mis-checks are expected and normal.
 	Handle substitute(const Handle& tree,
-	                  const HandleSeq& vals,
+	                  const HandleSeq& args,
 	                  bool silent=false) const;
 
 	// Like the above, but using a partial map.
@@ -269,7 +275,7 @@ struct Variables : public FreeVariables,
 	Handle get_vardecl() const;
 
 	// Useful for debugging
-	std::string to_string(const std::string& indent="") const;
+	std::string to_string(const std::string& indent=empty_string) const;
 };
 
 // Debugging helpers see
@@ -277,8 +283,12 @@ struct Variables : public FreeVariables,
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Variables& var, const std::string& indent);
-std::string oc_to_string(const Variables& var);
+std::string oc_to_string(const FreeVariables::IndexMap& imap,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const FreeVariables& var,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Variables& var,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 }

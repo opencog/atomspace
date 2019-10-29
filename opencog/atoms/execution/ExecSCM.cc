@@ -22,15 +22,17 @@
 using namespace opencog;
 
 /**
- * cog-execute! executes an ExecutionOutputLink
+ * cog-execute! executes any/all FunctionLinks
  */
-static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
+static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
-	Handle rh(inst.execute(h));
-	if (NULL != rh)
-		rh = atomspace->add_atom(rh);
-	return rh;
+	ValuePtr pap(inst.execute(h));
+	if (pap and pap->is_atom())
+	{
+		pap = atomspace->add_atom(HandleCast(pap));
+	}
+	return pap;
 }
 
 /**
@@ -46,8 +48,9 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 // XXX HACK ALERT This needs to be static, in order for python to
 // work correctly.  The problem is that python keeps creating and
 // destroying this class, but it expects things to stick around.
+// XXX FIXME: can we fix cython to not do this, already?
 // Oh well. I guess that's OK, since the definition is meant to be
-// for the lifetime of the server, anyway.
+// for the lifetime of the process, anyway.
 std::vector<FunctionWrap*>* ExecSCM::_binders = nullptr;
 
 ExecSCM::ExecSCM(void) :

@@ -59,13 +59,13 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-power-iter-pca LLOBJ #:optional
-	; Default is to use the pair-count method
-	(get-value 'pair-count))
+	; Default is to use the get-count method
+	(get-value 'get-count))
 "
   make-power-iter-pca LLOBJ - Implement a power-iteration form of PCA.
 
   Optionally, the name of a method can be supplied, from which the matrix
-  values will be fetched.  If not supplied, it defaults to 'pair-count.
+  values will be fetched.  If not supplied, it defaults to 'get-count.
   You can get fancier if you wish.  Using the MI could be interesting,
   for example: this would result in a MaxEnt style computation, instead
   of a PCA-style computation.
@@ -101,6 +101,10 @@
 			(make-afunc-cache (unit-fvec ELT-LIST)))
 
 		; --------------------
+		(define (get-pair-count LEFT RIGHT)
+			(define pare (llobj 'get-pair LEFT RIGHT))
+			(if (null? pare) 0 (llobj get-value pare)))
+
 		; Multiply matrix on the left by FVEC.  That is, return the
 		; function
 		;     result(y) = sum_x p(x,y) FVEC(x)
@@ -108,34 +112,22 @@
 		; function with an arguement to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
-
-			; We are going to cache it, because we know we will hit it hard.
-			(define fvec (make-afunc-cache LEFT-FVEC))
 			(lambda (ITEM)
 				(fold
-					(lambda (PAIR sum)
-						(define vecval (fvec (gar PAIR)))
-						; Avoid fetching the pair value if its
-						; multiply-by-zero
-						(if (eqv? 0 vecval)
-							sum
-							(+ sum (* (llobj get-value PAIR) vecval))))
+					(lambda (dual sum)
+						(+ sum (* (get-pair-count dual ITEM) (LEFT-FVEC dual))))
 					0
-					(star-obj 'left-stars ITEM))))
+					(star-obj 'left-duals ITEM))))
 
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
 		(define (right-mult RIGHT-FVEC)
-			(define fvec (make-afunc-cache RIGHT-FVEC))
 			(lambda (ITEM)
 				(fold
-					(lambda (PAIR sum)
-						(define vecval (fvec (gdr PAIR)))
-						(if (eqv? 0 vecval)
-							sum
-							(+ sum (* (llobj get-value PAIR) vecval))))
+					(lambda (dual sum)
+						(+ sum (* (get-pair-count ITEM dual) (RIGHT-FVEC dual))))
 					0
-					(star-obj 'right-stars ITEM))))
+					(star-obj 'right-duals ITEM))))
 
 		; --------------------
 		; Compute the normalization of the vector; that is, compute
@@ -257,12 +249,12 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-cosine-matrix LLOBJ #:optional
-	; Default is to use the pair-count method
-	(GET-CNT 'pair-count))
+	; Default is to use the get-count method
+	(GET-CNT 'get-count))
 "
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
-  Given an LLOBJ whose 'pair-count returns values N(x,y), one can define
+  Given an LLOBJ whose 'get-count returns values N(x,y), one can define
   another matrix such that the rows or columns are normalized to be unit
   vectors.  That is, one can define the left-unit
 
@@ -278,7 +270,7 @@
   We call it the 'left similarity' to emphasize that the summation is
   taking place over the left index.
 
-  The LLOBJ object needs to provide the 'pair-count method.
+  The LLOBJ object needs to provide the 'get-count method.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))
@@ -291,15 +283,18 @@
 		(define get-right-length (make-afunc-cache do-get-right-length))
 
 		; --------------------
+		; XXX FIXME rewrite this to eliminate the use of 'right-element
+		; The problem is that not all objects can support 'right-element
+		; This is remedeied by using 'right-duals instead of 'right-stars
 		(define (do-left-unit PAIR)
 			(define cnt (LLOBJ GET-CNT PAIR))
-			(define len (get-left-length (gdr PAIR)))
+			(define len (get-left-length (LLOBJ 'right-element PAIR)))
 			(/ cnt len)
 		)
 
 		(define (do-right-unit PAIR)
 			(define cnt (LLOBJ GET-CNT PAIR))
-			(define len (get-right-length (gar PAIR)))
+			(define len (get-right-length (LLOBJ 'left-element PAIR)))
 			(/ cnt len)
 		)
 

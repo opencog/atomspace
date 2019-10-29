@@ -29,6 +29,7 @@
 
 #include <opencog/util/Logger.h>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Quotation.h>
@@ -88,6 +89,7 @@ class PatternTerm
 {
 protected:
 	Handle _handle;
+	Handle _quote;
 	PatternTermPtr _parent;
 	PatternTermWSeq _outgoing;
 
@@ -108,7 +110,9 @@ public:
 
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 
-	Handle getHandle();
+	const Handle& getHandle() const;
+
+	const Handle& getQuote() const;
 
 	PatternTermPtr getParent();
 
@@ -126,19 +130,18 @@ public:
 
 	void addBoundVariable();
 
-	// Work around gdb's incapability to build a string on the fly,
-	// see http://stackoverflow.com/questions/16734783 for more
-	// explanation.
+	// Work around gdb's inability to build a string on the fly;
+	// See http://stackoverflow.com/questions/16734783 for explanation.
 	std::string to_string() const;
-	std::string to_string(std::string indent) const;
+	std::string to_string(const std::string& indent) const;
 };
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string(const PatternTerm& pt, const std::string& indent);
-std::string oc_to_string(const PatternTerm& pt);
-std::string oc_to_string(const PatternTermPtr& pt, const std::string& indent);
-std::string oc_to_string(const PatternTermPtr& pt_ptr);
+std::string oc_to_string(const PatternTerm& pt,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PatternTermPtr& pt,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 

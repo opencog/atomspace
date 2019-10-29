@@ -12,3 +12,13 @@ c_func = exportFunction someFunc
 
 someFunc :: Atom -> AtomSpace Atom
 someFunc a = pure a
+
+
+foreign export ccall "somePredicate"
+    c_pred :: Ptr AtomSpaceRef -> Handle -> IO (TruthValueP)
+
+c_pred = exportPredicate somePredicate
+
+somePredicate :: Atom -> TruthVal
+somePredicate (Link t xs tv) = tv
+somePredicate (Node t xs tv) = tv

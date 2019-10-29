@@ -10,11 +10,23 @@
 ; The object here assumes that a pair-counting batch job has completed.
 ; That is, it assumes that there are cached values available for the
 ; individual pair frequencies, the wild-card frequencies, and the
-; inddividual pair MI values.
+; individual pair MI values.
 ;
 ; It uses these cached stats for frequencies and MI to compute left
 ; and right subtotals (row and column subtotals), which are then cached.
 ; The cached values become available via the standard frequency API.
+;
+; XXX FIXME: This should be re-written to avoid the frequency API, and
+; make use only of the counts during computation. There are two reasons
+; for this:
+; 1) It takes time to compute the frequencies, and it takes storage to
+;    store them. This is a waste for large datasets; and poses problems
+;    when the datasets are extremely large.
+; 2) The count api can be filtered in a straight-forward way, with the
+;    filtering API. But these filtered counts are not used below, and
+;    there's no way to use that, without recomputing the frequencies.
+;    So .. see point 1) above: frequencies are screwy when filtering.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -48,7 +60,7 @@
   'cache-left-mi        -- compute and cache the column mi
   'cache-right-mi       -- compute and cache the row mi
 
-  The cahced values are accessible via the standard frequency API.
+  The cached values are accessible via the standard frequency API.
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
@@ -130,29 +142,50 @@
 			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
 		; ---------------
-		; Do all four loops.
-		(define (cache-all)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+		(define start-time (current-time))
+		(define (elapsed-secs)
+			(define diff (- (current-time) start-time))
+			(set! start-time (current-time))
+			diff)
 
-			(for-each cache-left-entropy (star-obj 'right-basis))
+		; Loop over all columns.
+		(define (cache-all-left-entropy)
+			(elapsed-secs)
+			(maybe-par-for-each cache-left-entropy (star-obj 'right-basis))
 			(format #t "Finished left entropy subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
-			(for-each cache-right-entropy (star-obj 'left-basis))
+		; Loop over all rows.
+		(define (cache-all-right-entropy)
+			(elapsed-secs)
+			(maybe-par-for-each cache-right-entropy (star-obj 'left-basis))
 			(format #t "Finished right entropy subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
-			(for-each cache-left-mi (star-obj 'right-basis))
+		; Loop over all columns.
+		(define (cache-all-left-mi)
+			(elapsed-secs)
+			(maybe-par-for-each cache-left-mi (star-obj 'right-basis))
 			(format #t "Finished left MI subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
-			(for-each cache-right-mi (star-obj 'left-basis))
+		; Loop over all rows.
+		(define (cache-all-right-mi)
+			(elapsed-secs)
+			(maybe-par-for-each cache-right-mi (star-obj 'left-basis))
 			(format #t "Finished right MI subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
+
+		; Do all four loops.
+		(define (cache-all)
+			(cache-all-left-entropy)
+			(cache-all-right-entropy)
+			(cache-all-left-mi)
+			(cache-all-right-mi)
 		)
 
 		; Methods on this class.
@@ -162,6 +195,12 @@
 				((cache-right-entropy)  (apply cache-right-entropy args))
 				((cache-left-mi)        (apply cache-left-mi args))
 				((cache-right-mi)       (apply cache-right-mi args))
+
+				((cache-all-left-entropy)  (cache-all-left-entropy))
+				((cache-all-right-entropy) (cache-all-right-entropy))
+				((cache-all-left-mi)       (cache-all-left-mi))
+				((cache-all-right-mi)      (cache-all-right-mi))
+
 				((cache-all-subtotals)  (cache-all))
 				(else (apply llobj      (cons message args))))
 		))
@@ -179,7 +218,7 @@
 
   The object must have valid partial sums for the entropy and MI on it,
   viz, the ones computed by add-subtotal-mi-compute, above. These are
-  acessed via the standard frequency-object API. These must have been
+  accessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 
   These methods loop over all rows and columns to compute the total sums.
@@ -238,9 +277,14 @@
 		; It returns a single numerical value, for the entire set.
 		(define (compute-right-entropy)
 			(right-sum
-				(lambda (x) (*
-						(frqobj 'right-wild-freq x)
-						(frqobj 'right-wild-logli x)))))
+				(lambda (x)
+					;; For cross-connectors, the observed count of a
+					;; word inside a connector might be zero, and so
+					;; log probability might be infinite. Avoid that.
+					(define lli (frqobj 'right-wild-logli x))
+					(if (finite? lli)
+						(* (frqobj 'right-wild-freq x) lli)
+						0.0))))
 
 		(define (cache-entropy)
 			(rptobj 'set-entropy

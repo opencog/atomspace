@@ -1,8 +1,8 @@
 ;
 ; bin-count.scm
 ;
-; Assorted ad-hoc collection of bin-counting tools. This is used to
-; create estimates of distributions.
+; Assorted ad-hoc collection of bin-counting (histogramming) tools.
+; This is used to create estimates of distributions.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -11,7 +11,7 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; Bin-counting utilities.
+; Bin-counting (histogramming) utilities.
 ;
 ; This must be the 20th time I've implemented bin-counts in my life...
 ;
@@ -19,12 +19,13 @@
          LOWER UPPER)
 "
   bin-count ITEMS NBINS item->value item->count LOWER UPPER
+
   Create a distribution by sorting items into bins, and then
   returning an array showing the number of items in each bin.
 
   The interval between UPPER and LOWER will be split into NBINS, each of
   equal size, thus having a width of (UPPER-LOWER)/NBINS. The list of
-  ITEMS will be sorted into these bins accoring to item->value.  Each
+  ITEMS will be sorted into these bins according to item->value.  Each
   time an item is sorted, the bin count is incremented by item->count.
 
   A list of two arrays are returned: the first array holds the
@@ -43,10 +44,10 @@
        count or strength for that item. It should return 1 for simple
        binning, i.e. if each item should be counted exactly once.
 
-  LOWER is the left boundry of the left-most bin; all values less than
+  LOWER is the left boundary of the left-most bin; all values less than
       this will go into the left-most bin.
 
-  UPPER is the right boundry of the right-most bin; all values greater
+  UPPER is the right boundary of the right-most bin; all values greater
       than this will go into the right-most bin.
 "
 	(define bin-width (/ (- UPPER LOWER) NBINS))
@@ -116,7 +117,7 @@
   The optional arguments MIN and MAX specify the left and right
   boundaries of the bins; if a value is less than MIN, it will be put
   in the left-most bin, and values greater than MAX will go into the
-  right-most bin. If MIN and MAx are not secified, then the smallest
+  right-most bin. If MIN and MAX are not specified, then the smallest
   and largest values will be used as the endpoints.
 "
 	; The item is the score; so this is a no-op.
@@ -137,7 +138,7 @@
 "
   bin-count-simple SCORED-ITEMS NBINS #:optional MIN MAX
 
-  A very simple API for bin-counting. The SCORED-ITEMD is assumed to be
+  A very simple API for bin-counting. The SCORED-ITEM is assumed to be
   a list of lists to bin-count. It is assumed that the first cell in
   each sublist holds a numeric value; this value will be used to create
   the distribution.  This is created by sorting these values into NBINS,
@@ -146,7 +147,7 @@
   The optional arguments MIN and MAX specify the left and right
   boundaries of the bins; if a value is less than MIN, it will be put
   in the left-most bin, and values greater than MAX will go into the
-  right-most bin. If MIN and MAx are not secified, then the smallest
+  right-most bin. If MIN and MAX are not specified, then the smallest
   and largest values will be used as the endpoints.
 "
 	; Get the item score

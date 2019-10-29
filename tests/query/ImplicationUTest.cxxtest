@@ -22,10 +22,9 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
-
 #include "imply.h"
+
 #include "test-types.h"
 
 using namespace opencog;
@@ -227,11 +226,11 @@ void ImplicationUTest::setUp(void)
 
 	// Create data on which the above pattern should match
 	const char * str = 
-	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
+	"(InheritanceLink (stv 1.0 1.0)\n"
 	"   (WordSenseNode \"#Ingestion\")\n"
 	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n"
-	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
+	"(InheritanceLink (stv 1.0 1.0)\n"
 	"   (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
 	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n";

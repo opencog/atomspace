@@ -4,10 +4,11 @@
 
 (define-module (opencog python))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-python-scm "libPythonSCM")
+	"opencog_python_init")
 
-(load-extension "libPythonSCM" "opencog_python_init")
+(export python-eval python-call-with-as)
 
 (set-procedure-property! python-eval 'documentation
 "

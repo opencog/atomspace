@@ -40,13 +40,11 @@ namespace opencog
 /// prenex form, even when being rewritten. PatternLinks must have
 /// all available declarations out in front, in order to work.
 ///
-class PrenexLink;
-typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;
 class PrenexLink : public RewriteLink
 {
 protected:
 	void init(void);
-	Handle reassemble(const HandleMap&, const HandleSeq&) const;
+	Handle reassemble(Type, const HandleMap&, const HandleSeq&) const;
 
 public:
 	PrenexLink(const HandleSeq&, Type=PRENEX_LINK);
@@ -59,6 +57,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
+typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;
 static inline PrenexLinkPtr PrenexLinkCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<PrenexLink>(h); }
 static inline PrenexLinkPtr PrenexLinkCast(const AtomPtr& a)

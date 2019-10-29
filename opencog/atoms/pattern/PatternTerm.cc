@@ -26,13 +26,17 @@
 
 namespace opencog {
 
+const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
+
 PatternTerm::PatternTerm()
-	: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
+	: _handle(Handle::UNDEFINED),
+	  _quote(Handle::UNDEFINED),
+	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
-	: _handle(h), _parent(parent),
+	: _handle(h), _quote(Handle::UNDEFINED), _parent(parent),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false)
@@ -46,6 +50,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink/LocalQuoteLink has "
 			                            "unexpected arity!");
+		// Save the quotes, useful for mapping patterns to grounds
+		_quote = _handle;
 		_handle = h->getOutgoingAtom(0);
 	}
 
@@ -58,9 +64,14 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 	_outgoing.push_back(ptm);
 }
 
-Handle PatternTerm::getHandle()
+const Handle& PatternTerm::getHandle() const
 {
 	return _handle;
+}
+
+const Handle& PatternTerm::getQuote() const
+{
+	return _quote;
 }
 
 PatternTermPtr PatternTerm::getParent()
@@ -132,7 +143,7 @@ void PatternTerm::addBoundVariable()
 
 std::string PatternTerm::to_string() const { return to_string(":"); }
 
-std::string PatternTerm::to_string(std::string indent) const
+std::string PatternTerm::to_string(const std::string& indent) const
 {
 	if (not _handle) return "-";
 	std::string str = _parent->to_string();
@@ -144,17 +155,10 @@ std::string oc_to_string(const PatternTerm& pt, const std::string& indent)
 {
 	return pt.to_string(indent);
 }
-std::string oc_to_string(const PatternTerm& pt)
-{
-	return oc_to_string(pt, "");
-}
+
 std::string oc_to_string(const PatternTermPtr& pt_ptr, const std::string& indent)
 {
 	return pt_ptr->to_string();
-}
-std::string oc_to_string(const PatternTermPtr& pt_ptr)
-{
-	return oc_to_string(pt_ptr, "");
 }
 
 } // ~namespace opencog

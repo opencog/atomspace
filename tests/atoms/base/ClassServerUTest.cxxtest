@@ -1,0 +1,220 @@
+/*
+ * tests/atoms/base/ClassServerUTest.cxxtest
+ *
+ * Copyright (C) 2019 OpenGog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+ #include <opencog/atoms/base/Handle.h>
+ #include <opencog/atoms/base/ClassServer.h>
+
+using namespace opencog;
+using namespace std;
+
+class ClassServerUTest :  public CxxTest::TestSuite
+{
+private:
+
+	NameServer *name_server;
+	ClassServer *class_server;
+
+	Type NODE;
+	Type NODE_A;
+	Type NODE_B;
+	Type NODE_C;
+	Type NODE_D;
+
+	static Handle factory_a(const Handle& h)
+	{
+		return Handle::UNDEFINED;
+	}
+
+	static Handle factory_b(const Handle& h)
+	{
+		return Handle::UNDEFINED;
+	}
+
+	static Handle factory_c(const Handle& h)
+	{
+		return Handle::UNDEFINED;
+	}
+
+	static bool validator_a(const Handle& h)
+	{
+		return false;
+	}
+
+	static bool validator_b(const Handle& h)
+	{
+		return false;
+	}
+
+	static bool validator_c(const Handle& h)
+	{
+		return false;
+	}
+
+public:
+
+	void setUp()
+	{
+		name_server = new NameServer();
+		class_server = new ClassServer(*name_server);
+
+		/*
+		 * Test type hierarchy:
+		 *
+		 * NODE <- NODE_A <- NODE_B <- NODE_C
+		 *           ^
+		 *           |
+		 *         NODE_D
+		 */
+
+		name_server->beginTypeDecls("test_types");
+		NODE = name_server->declType(NODE, "Node");
+		NODE_A = name_server->declType(NODE, "NodeA");
+		NODE_B = name_server->declType(NODE_A, "NodeB");
+		NODE_C = name_server->declType(NODE_B, "NodeC");
+		NODE_D = name_server->declType(NODE_A, "NodeD");
+		name_server->endTypeDecls();
+	}
+
+	void tearDown()
+	{
+		delete class_server;
+		delete name_server;
+	}
+
+	void test_set_factory()
+	{
+		class_server->addFactory(NODE_B, factory_b);
+
+		TS_ASSERT_EQUALS(factory_b, class_server->getFactory(NODE_B));
+	}
+
+	void test_set_factory_to_descendants()
+	{
+		class_server->addFactory(NODE_A, factory_a);
+
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_B));
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_C));
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_D));
+	}
+
+	void test_parent_factory_is_not_replaced()
+	{
+		class_server->addFactory(NODE_B, factory_b);
+
+		TS_ASSERT(!class_server->getFactory(NODE_A));
+	}
+
+	void test_replace_descendants_factory()
+	{
+		class_server->addFactory(NODE_A, factory_a);
+
+		class_server->addFactory(NODE_B, factory_b);
+
+		TS_ASSERT_EQUALS(factory_b, class_server->getFactory(NODE_C));
+	}
+
+	void test_factory_from_other_hierarchy_is_not_replaced()
+	{
+		class_server->addFactory(NODE_A, factory_a);
+
+		class_server->addFactory(NODE_B, factory_b);
+
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_D));
+	}
+
+	void test_not_parent_factory_is_not_replaced()
+	{
+		class_server->addFactory(NODE_C, factory_c);
+
+		class_server->addFactory(NODE_B, factory_b);
+
+		TS_ASSERT_EQUALS(factory_c, class_server->getFactory(NODE_C));
+	}
+
+	void test_add_validator()
+	{
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(validator_b, class_server->getValidator(NODE_B));
+	}
+
+	void test_replace_descendants_validators()
+	{
+		class_server->addValidator(NODE_A, validator_a);
+
+		TS_ASSERT_EQUALS(validator_a, class_server->getValidator(NODE_A));
+		TS_ASSERT_EQUALS(validator_a, class_server->getValidator(NODE_B));
+		TS_ASSERT_EQUALS(validator_a, class_server->getValidator(NODE_C));
+	}
+
+	void test_parent_validator_is_not_replaced()
+	{
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT(!class_server->getValidator(NODE_A));
+	}
+
+	void test_replace_descendants_validator()
+	{
+		class_server->addValidator(NODE_A, validator_a);
+
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(validator_b, class_server->getValidator(NODE_C));
+	}
+
+	void test_validator_from_other_hierarchy_is_not_replaced()
+	{
+		class_server->addValidator(NODE_A, validator_a);
+
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(validator_a, class_server->getValidator(NODE_D));
+	}
+
+	void test_explicitly_set_validator_is_not_replaced()
+	{
+		class_server->addValidator(NODE_C, validator_c);
+
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(validator_c, class_server->getValidator(NODE_C));
+	}
+
+	void test_explicitly_set_factory_is_not_replaced_by_validating_factory()
+	{
+		class_server->addFactory(NODE_B, factory_b);
+
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(factory_b, class_server->getFactory(NODE_B));
+	}
+
+	void test_implicitly_set_factory_is_not_replaced_by_validating_factory()
+	{
+		class_server->addFactory(NODE_A, factory_a);
+
+		class_server->addValidator(NODE_B, validator_b);
+
+		TS_ASSERT_EQUALS(factory_a, class_server->getFactory(NODE_B));
+	}
+};

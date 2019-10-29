@@ -30,9 +30,9 @@ using namespace opencog;
 ArityLink::ArityLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (not classserver().isA(t, ARITY_LINK))
+	if (not nameserver().isA(t, ARITY_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ArityLink, got %s", tname.c_str());
 	}
@@ -43,9 +43,9 @@ ArityLink::ArityLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, ARITY_LINK))
+	if (not nameserver().isA(tscope, ARITY_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ArityLink, got %s", tname.c_str());
 	}
@@ -53,20 +53,27 @@ ArityLink::ArityLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle ArityLink::execute() const
+/// Return the Arity, as a NumberNode.  Contrast this with
+/// ArityValueOf, which returns a FloatValue, instead.
+ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = 0;
-	for (Handle h : _outgoing)
+	for (const Handle& h : _outgoing)
 	{
-		FunctionLinkPtr flp(FunctionLinkCast(h));
-		if (nullptr != flp)
+		if (h->is_executable())
 		{
-			h = flp->execute();
+			ValuePtr pap(h->execute(as, silent));
+			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
+
+			// XXX TODO sum up length of values. (!?)
 		}
-		if (h->is_link()) ary += h->get_arity();
+		else
+		{
+			if (h->is_link()) ary += h->get_arity();
+		}
 	}
 
-	return Handle(createNumberNode(ary));
+	return ValuePtr(createNumberNode(ary));
 }
 
 DEFINE_LINK_FACTORY(ArityLink, ARITY_LINK)

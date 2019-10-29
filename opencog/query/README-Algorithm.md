@@ -300,18 +300,3 @@ Complications are introduced due to the following features:
    black-box links can have a side-effect (e.g. they can send a
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
-
- * Executable terms.  These are terms that contain a
-   GroundedSchemaNode (GSN).  These must be executed. The atom that
-   results from their execution is then treated as an "ordinary"
-   term, and is grounded as per usual (unless it also contains GSN's,
-   in which case the process repeats).  The use of GSN's means that
-   patterns themselves can be recursive. Support for GSN's means that
-   patterns are essentially the equivalent of ProLog programs, or
-   "answer-set" programs; the pattern matcher is then a
-   satisfiability solver. Since the pattern matcher can handle
-   truth values that are more general than true/false, it should more
-   accurately be called a satisfiability-modulo-theories (SMT) solver.
-
-   At this time, support for GSN's is only partly implemented, and
-   badly.

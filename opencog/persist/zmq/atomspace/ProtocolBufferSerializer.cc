@@ -27,11 +27,10 @@
 #include "opencog/atoms/base/Atom.h"
 #include "opencog/atoms/base/Link.h"
 #include "opencog/atoms/base/Node.h"
-#include "opencog/truthvalue/AttentionValue.h"
-#include "opencog/truthvalue/TruthValue.h"
-#include "opencog/truthvalue/CountTruthValue.h"
-#include "opencog/truthvalue/IndefiniteTruthValue.h"
-#include "opencog/truthvalue/SimpleTruthValue.h"
+#include "opencog/atoms/truthvalue/TruthValue.h"
+#include "opencog/atoms/truthvalue/CountTruthValue.h"
+#include "opencog/atoms/truthvalue/IndefiniteTruthValue.h"
+#include "opencog/atoms/truthvalue/SimpleTruthValue.h"
 #include "opencog/atomspaceutils/TLB.h"
 
 using namespace opencog;
@@ -50,8 +49,6 @@ ProtocolBufferSerializer::~ProtocolBufferSerializer()
 void ProtocolBufferSerializer::deserializeAtom(
         const ZMQAtomMessage& atomMessage, Atom& atom)
 {
-    //deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
-
     // XXX FIXME This is truly a bad and illegal design -- screwing
     // around with the Atom internals is just plain the wrong thing to
     // do.  Please use the Atom ctors correctly!
@@ -81,8 +78,6 @@ void ProtocolBufferSerializer::deserializeAtom(
 //void ProtocolBufferSerializer::serializeAtom(
 //        Atom& atom, ZMQAtomMessage* atomMessage)
 //{
-//    //serializeAttentionValueHolder(atom, atomMessage->mutable_attentionvalueholder());
-//
 //    atomMessage->set_handle(atom.get_handle().value());
 //
 //    HandleEntry* next=atom.incoming;
@@ -132,36 +127,6 @@ AtomPtr ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
 //        else
 //            throw RuntimeException(TRACE_INFO, "Invalid atomtype");
 //    }
-//}
-
-//void ProtocolBufferSerializer::deserializeAttentionValue(
-//        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-//        AttentionValue& av)
-//{
-//    av.m_STI=attentionValueHolderMessage.sti();
-//    av.m_LTI=attentionValueHolderMessage.lti();
-//    av.m_VLTI=attentionValueHolderMessage.vlti();
-//}
-//
-//void ProtocolBufferSerializer::serializeAttentionValue(
-//        AttentionValue& av, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-//{
-//    attentionValueHolderMessage->set_sti(av.m_STI);
-//    attentionValueHolderMessage->set_lti(av.m_LTI);
-//    attentionValueHolderMessage->set_vlti(av.m_VLTI);
-//}
-//
-//void ProtocolBufferSerializer::deserializeAttentionValueHolder(
-//        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-//        AttentionValueHolder& avh )
-//{
-//    deserializeAttentionValue(attentionValueHolderMessage, avh.attentionValue);
-//}
-//
-//void ProtocolBufferSerializer::serializeAttentionValueHolder(
-//        AttentionValueHolder& avh, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-//{
-//    serializeAttentionValue(avh.attentionValue, attentionValueHolderMessage);
 //}
 
 CountTruthValuePtr ProtocolBufferSerializer::deserializeCountTruthValue(

@@ -22,11 +22,10 @@
 #include <string>
 
 #include <opencog/util/random.h>
-#include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "LambdaLink.h"
 #include "RewriteLink.h"
@@ -36,9 +35,9 @@ using namespace opencog;
 void RewriteLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, REWRITE_LINK))
+	if (not nameserver().isA(t, REWRITE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a RewriteLink, got %s", tname.c_str());
 	}
@@ -185,6 +184,8 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 	{
 		vm.insert({vars.varseq[i], vals[i]});
 	}
+
+	// Call the possibly-overloaded map-based reduction function.
 	return beta_reduce(vm);
 }
 
@@ -333,11 +334,17 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	// Base case
 	if (h->is_node())
 	{
-		// Make sure quotation is removed around GroundedPredicateNode
-		// as it otherwise changes the pattern matcher semantics as it
-		// will consider those as virtual.
-		if (t == GROUNDED_PREDICATE_NODE)
-			needless_quotation = false;
+		// TODO: the following has no unit test!!! Yet it introduces a
+		// bug covered by RewriteLinkUTest::test_consume_quotations_4(),
+		// thus this code is disable till a unit test it created for it
+		// and we understand what it fixes and how it fixes.
+		//
+		// // Make sure quotation is not removed around
+		// // GroundedPredicateNode as it otherwise changes the pattern
+		// // matcher semantics as it will consider those as virtual.
+		// if (t == GROUNDED_PREDICATE_NODE)
+		// 	needless_quotation = false;
+
 		return h;
 	}
 
@@ -349,30 +356,33 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 
 	if (quotation_cp.consumable(t))
 	{
+		Handle child = h->getOutgoingAtom(0);
+
+		// A consumable quotation over a closed term not containing
+		// any quotation or special executable links is clearly
+		// useless, regardless of whether it has been determined
+		// needless or not.
+		if (is_closed(child) and
+		    not contains_atomtype(child, PUT_LINK) and
+		    not contains_atomtype(child, QUOTE_LINK) and
+		    not contains_atomtype(child, UNQUOTE_LINK) and
+		    not contains_atomtype(child, LOCAL_QUOTE_LINK))
+		{
+			return consume_quotations(variables, child,
+			                          quotation, needless_quotation,
+			                          clause_root);
+		}
+
 		if (t == UNQUOTE_LINK)
 		{
-			Handle uqh = h->getOutgoingAtom(0);
-
-			// A consumable Unquote over a closed term not containing
-			// any quotes is clearly useless, regardless of whether it
-			// has been determined needless.
-			if (is_closed(uqh) and
-			    not contains_atomtype(uqh, QUOTE_LINK) and
-			    not contains_atomtype(uqh, LOCAL_QUOTE_LINK))
-			{
-				return consume_quotations(variables, uqh,
-				                          quotation, needless_quotation,
-				                          clause_root);
-			}
-
 			// A succession of (Unquote (Quote ..)) is an involution
 			// and thus can be remove.
 			//
 			// TODO: generalize with when Unquote and Quote are apart
-			if (uqh->get_type() == QUOTE_LINK)
+			if (child->get_type() == QUOTE_LINK)
 			{
-				quotation.update(uqh->get_type());
-				return consume_quotations(variables, uqh->getOutgoingAtom(0),
+				quotation.update(child->get_type());
+				return consume_quotations(variables, child->getOutgoingAtom(0),
 				                          quotation, needless_quotation,
 				                          clause_root);
 			}
@@ -382,38 +392,39 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 			// needless_quotation to true before the recursion.
 			if (needless_quotation)
 			{
-				return consume_quotations(variables, uqh,
+				return consume_quotations(variables, child,
 				                          quotation, needless_quotation,
 				                          clause_root);
 			}
 			else
 			{
 				needless_quotation = true;
-				Handle ch = consume_quotations_mere_rec(variables, h,
-				                                        quotation, needless_quotation,
-				                                        clause_root);
+				Handle con_h = consume_quotations_mere_rec(variables, h,
+				                                           quotation,
+				                                           needless_quotation,
+				                                           clause_root);
 				needless_quotation = false;
-				return ch;
+				return con_h;
 			}
 		}
 
 		if (t == QUOTE_LINK or t == LOCAL_QUOTE_LINK)
 		{
-			Handle qh = h->getOutgoingAtom(0);
-			Handle con_qh = consume_quotations(variables, qh,
-			                                   quotation, needless_quotation,
-			                                   clause_root);
+			Handle con_child = consume_quotations(variables, child,
+			                                      quotation,
+			                                      needless_quotation,
+			                                      clause_root);
 
 			// Only consume if the quotation turned out to be needless
 			if (needless_quotation)
-				return con_qh;
+				return con_child;
 
 			// Otherwise keep the quotation, and reset
 			// needless_quotation to true for the remaining tree
 			needless_quotation = true;
-			Handle new_con_qh = createLink(t, con_qh);
-			new_con_qh->copyValues(con_qh);
-			return new_con_qh;
+			Handle new_con_child = createLink(t, con_child);
+			new_con_child->copyValues(con_child);
+			return new_con_child;
 		}
 	}
 
@@ -421,7 +432,11 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	// quotations as they may otherwise change the semantics
 	bool need_quotation = (quotation_cp.is_quoted() and
 	                       (t == PUT_LINK or
-	                        (t == AND_LINK and clause_root) or
+	                        nameserver().isA(t, FUNCTION_LINK) or
+	                        nameserver().isA(t, EVALUATION_LINK) or
+	                        (is_logical_connector(t) and
+	                         quotation_cp.is_locally_quoted() and
+	                         clause_root) or
 	                        is_scope_bound_to_ancestor(variables, h)));
 
 	// Propagate the need for quotation down
@@ -429,14 +444,14 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 		needless_quotation = false;
 
 	// Remember that the children are potentially clause root
-	clause_root = classserver().isA(t, SCOPE_LINK);
+	clause_root = nameserver().isA(t, SCOPE_LINK);
 
 	// Mere recursive call
 	Handle ch = consume_quotations_mere_rec(variables, h,
 	                                        quotation, needless_quotation,
 	                                        clause_root);
 
-	// Propagate the need for quotation up (because in case it is
+	// Propagate the need for quotation up, because in case it is
 	// local, we did not propagate it down.
 	if (need_quotation and quotation_cp.is_locally_quoted())
 		needless_quotation = false;
@@ -474,7 +489,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 bool RewriteLink::is_scope_bound_to_ancestor(const Variables& variables,
                                              const Handle& h)
 {
-	return classserver().isA(h->get_type(), SCOPE_LINK) and
+	return nameserver().isA(h->get_type(), SCOPE_LINK) and
 		is_bound_to_ancestor(variables, h);
 }
 
@@ -493,6 +508,16 @@ bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
 		}
 	}
 	return false;
+}
+
+bool RewriteLink::is_logical_connector(const Handle& h)
+{
+	return is_logical_connector(h->get_type());
+}
+
+bool RewriteLink::is_logical_connector(Type t)
+{
+	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
 /* ================================================================= */

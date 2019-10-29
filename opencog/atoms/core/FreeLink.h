@@ -38,8 +38,6 @@ namespace opencog
  * sequential order in _varseq. An index is placed in _index. That is,
  * given a variable, its ordinal number is placed in _index.
  */
-class FreeLink;
-typedef std::shared_ptr<FreeLink> FreeLinkPtr;
 class FreeLink : public Link
 {
 protected:
@@ -59,6 +57,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
+typedef std::shared_ptr<FreeLink> FreeLinkPtr;
 static inline FreeLinkPtr FreeLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FreeLink>(h); }
 static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)

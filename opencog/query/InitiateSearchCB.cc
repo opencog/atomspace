@@ -27,11 +27,11 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
+#include "Substitutor.h"
 
 using namespace opencog;
 
@@ -45,16 +45,12 @@ using namespace opencog;
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
-	_classserver(classserver())
+	_nameserver(nameserver())
 {
-#ifdef CACHED_IMPLICATOR
-	InitiateSearchCB::clear();
-	InitiateSearchCB::ready(as);
-#else
-	_variables = NULL;
-	_pattern = NULL;
-	_dynamic = NULL;
-	_pl = NULL;
+	_variables = nullptr;
+	_pattern = nullptr;
+	_dynamic = nullptr;
+	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -63,31 +59,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_choices.clear();
  	_search_fail = false;
 	_as = as;
-#endif
 }
-
-#ifdef CACHED_IMPLICATOR
-void InitiateSearchCB::ready(AtomSpace* as)
-{
-	_as = as;
-}
-
-void InitiateSearchCB::clear()
-{
-	_variables = NULL;
-	_pattern = NULL;
-	_dynamic = NULL;
-	_pl = NULL;
-
-	_root = Handle::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
-
-	_curr_clause = 0;
-	_choices.clear();
- 	_search_fail = false;
-	_as = NULL;
-}
-#endif
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
@@ -154,7 +126,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done.
 	Type t = h->get_type();
-	if (_classserver.isNode(t))
+	if (_nameserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 		{
@@ -176,7 +148,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->get_type();
-	if (_classserver.isNode(t))
+	if (_nameserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 		{
@@ -195,7 +167,6 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
 	size_t deepest = depth;
-	startrm = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
@@ -203,7 +174,12 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	{
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
-		Handle sbr(h);
+
+		// The start-term is a term that contains the starting atom...
+		// but it cannot be a ChoiceLink; it must be above or below
+		// any choice link.
+		Handle sbr(startrm);
+		if (CHOICE_LINK != t) sbr = h;
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
 		if (Quotation::is_quotation_type(hunt->get_type()))
@@ -306,9 +282,9 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  */
 bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
-	// If there are no non constant clauses, abort, will use
-	// no_search instead.
-	if (_pattern->clauses.empty()) {
+	// If there are no non-constant clauses, abort; will use
+	// no_search() instead.
+	if (_pattern->mandatory.empty() and _pattern->optionals.empty()) {
 		_search_fail = true;
 		return false;
 	}
@@ -318,18 +294,18 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// start searching with an optional clause. But if there ARE
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
-	bool try_all = true;
+	bool try_optionals = true;
 	for (const Handle& m : _pattern->mandatory)
 	{
 		if (0 == _pattern->evaluatable_holders.count(m))
 		{
-			try_all = false;
+			try_optionals = false;
 			break;
 		}
 	}
 
 	const HandleSeq& clauses =
-		try_all ?  _pattern->cnf_clauses :  _pattern->mandatory;
+		try_optionals ?  _pattern->optionals :  _pattern->mandatory;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -596,11 +572,10 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
 		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-		size_t prev = count;
+		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
 		{
-			prev = count;
 			_root = cl;
 		}
 	}
@@ -645,7 +620,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Initiate a search by looping over all atoms of the allowed
- * variable types (as set with the set_type_testrictions() method).
+ * variable types (as set with the set_type_restrictions() method).
  * This assumes that the varset contains the variables to be searched
  * over, and that the type restrictions are set up appropriately.
  *
@@ -653,7 +628,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
  * variables, then you probably don't want to use this method, either;
- * you should create somethnig more clever.
+ * you should create something more clever.
  */
 bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 {
@@ -672,7 +647,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
-	std::set<Type> ptypes;
+	TypeSet ptypes;
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 	_root = Handle::UNDEFINED;
@@ -693,7 +668,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		auto tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
-		const std::set<Type>& typeset = tit->second;
+		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
 		              << typeset.size();})
 
@@ -750,7 +725,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		if (not _variables->_deep_typemap.empty())
 		{
-			logger().warn("Warning: Full deep-type support not implemented!");
+			logger().warn("Full deep-type support not implemented!");
 		}
 		else
 		{
@@ -759,7 +734,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			throw SyntaxException(TRACE_INFO,
 				"Error: There were no type restrictions! That's infinite-recursive!");
 #else
-			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
+			logger().warn("No type restrictions! Your code has a bug in it!");
 			for (const Handle& var: _variables->varset)
 				logger().warn("Offending variable=%s\n", var->to_string().c_str());
 			for (const Handle& cl : clauses)
@@ -803,7 +778,14 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		// Fail-safe, in case they are all evaluatable.
 		if (nullptr == _root)
-			_root = _starter_term = clauses[0];
+		{
+			_root = clauses[0];
+			auto some_var = _variables->varset.begin();
+			if (some_var == _variables->varset.end())
+				throw FatalErrorException(TRACE_INFO,
+					"Internal Error: There were no variables!");
+			_starter_term = *some_var;
+		}
 	}
 
 	HandleSeq handle_set;
@@ -887,7 +869,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			// Extract the variables in the definition.
 			// Either they are given in a LambdaLink, or, if absent,
 			// we just hunt down and bind all of them.
-			if (_classserver.isA(LAMBDA_LINK, defn->get_type()))
+			if (_nameserver.isA(LAMBDA_LINK, defn->get_type()))
 			{
 				LambdaLinkPtr lam = LambdaLinkCast(defn);
 				vset.extend(lam->get_variables());
@@ -925,6 +907,54 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	set_pattern(*_variables, *_pattern);
 	DO_LOG({logger().fine("JIT expanded!");
 	_pl->debug_log();})
+}
+
+std::string InitiateSearchCB::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	if (_variables)
+		ss << indent << "_variables:" << std::endl
+		   << _variables->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_pattern)
+		ss << indent << "_pattern:" << std::endl
+		   << _pattern->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_dynamic)
+		ss << indent << "_dynamic:" << std::endl
+		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
+	if (_pl)
+		ss << indent << "_pl:" << std::endl
+		   << _pl->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_root)
+		ss << indent << "_root:" << std::endl
+		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
+	if (_starter_term)
+		ss << indent << "_starter_term:" << std::endl
+		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;
+	ss << indent << "_curr_clause = " << _curr_clause << std::endl;
+	if (not _choices.empty()) {
+		std::string indent_p = indent  + oc_to_string_indent;
+		std::string indent_pp = indent_p  + oc_to_string_indent;
+		std::string indent_ppp = indent_pp  + oc_to_string_indent;
+		ss << indent << "_choices:" << std::endl;
+		ss << indent_p << "size = " << _choices.size() << std::endl;
+		unsigned i = 0;
+		for (const Choice& ch : _choices) {
+			ss << indent_p << "choice[" << i << "]:" << std::endl
+			   << indent_pp << "clause = " << ch.clause << std::endl;
+			ss << indent_pp << "best_start:" << std::endl
+			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
+			ss << indent_pp << "start_term:" << std::endl
+			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+		}
+	}
+	ss << indent << "_search_fail = " << _search_fail;
+
+	return ss.str();
+}
+
+std::string oc_to_string(const InitiateSearchCB& iscb, const std::string& indent)
+{
+	return iscb.to_string(indent);
 }
 
 /* ===================== END OF FILE ===================== */

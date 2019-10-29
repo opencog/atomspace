@@ -4,8 +4,7 @@
 
 (define-module (opencog dist-gearman))
 
-; This is also loaded by (opencog exec) We need it here,
-; else we get undefined symbols in libquery.
-;(load-extension "libexecution" "opencog_exec_init")
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-dist-gearman "libdist-gearman") "opencog_dist_init")
 
-(load-extension "libdist-gearman" "opencog_dist_init")
+(export start-work-handler dist-eval exit-all-workers)

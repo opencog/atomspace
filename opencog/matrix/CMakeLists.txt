@@ -9,9 +9,12 @@ ADD_GUILE_MODULE (FILES
 	fold-api.scm
 	loop-api.scm
 	object-api.scm
+	report-api.scm
 	similarity-api.scm
 	support.scm
-	report-api.scm
+	symmetric-mi.scm
 	thresh-pca.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/matrix"
+	transpose.scm
+	trans-batch.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/matrix"
 )

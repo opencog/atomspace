@@ -21,13 +21,10 @@
 
 #include <string>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
-#include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "PrenexLink.h"
 
@@ -36,9 +33,9 @@ using namespace opencog;
 void PrenexLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, PRENEX_LINK))
+	if (not nameserver().isA(t, PRENEX_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a PrenexLink, got %s", tname.c_str());
 	}
@@ -66,22 +63,40 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-Handle PrenexLink::reassemble(const HandleMap& vm,
+/// Re-assemble into prenex form.
+///
+/// If the result of beta reduction is an expression with bound
+/// variables in it, then those bound variables should be moved
+/// to the outermost link, viz, be put into prenex form. All of
+/// the analysis of the term has alrady happened; here, we just
+/// need to assemble the final prenex form.
+//
+Handle PrenexLink::reassemble(Type prenex,
+                              const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
 	// Now get the vardecl and body
 	Handle vdecl = gen_vardecl(final_varlist);
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
-	// Reassemble if necessary
-	if (not final_varlist.empty())
-		return Handle(createLink(get_type(), vdecl, newbod));
+	// Reassemble if necessary. That is, if there are variables to
+	// declare, place them outermost, in prenex form. We only
+	// re-assemble into prenex form if the desired link type actually
+	// is a prenex link type. If it's not, then it should not get
+	// prenexed.  Check for PutLink to avoid infinite recursion.
+	if (PUT_LINK != prenex and not final_varlist.empty() and
+	    nameserver().isA(prenex, PRENEX_LINK))
+	{
+		return Handle(createLink(prenex, vdecl, newbod));
+	}
 
+	// Otherwise, we are done with the beta-reduction.
 	return newbod;
 }
 
 /* ================================================================= */
 
+// Collect up variables.
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
                       HandleSeq& final_varlist,
@@ -120,9 +135,9 @@ static Handle collect(const Variables& vtool,
 
 Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 {
-	// Test for a special case: eta reduction on the supplied
-	// function.  We can recognize this if we don't get fewer
-	// arguments than we expected.
+	// Test for a special case: function composition followed by
+	// eta conversion on the supplied function.  We can recognize
+	// this if we get fewer arguments than expected.
 	const Variables& vtool = get_variables();
 	size_t seqsize = seq.size();
 	if (seqsize == vtool.size())
@@ -131,10 +146,42 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		return RewriteLink::beta_reduce(seq);
 	}
 
-	// If its an eta, there must be just one argument, and it must
-	// must be a ScopeLink.
+	// If we are here, we are expecting an eta conversion.
+	// Here is what an eta conversion looks like (see test_eta in
+	// PutLinkUTest):
+	//
+	// (define func-with-three-args
+	//    (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// The above is a function that expects three arguments: x,y,z.
+	// Lets compose it with a function that takes one argument, but
+	// returns three results (function composition):
+	//
+	// (define func-returns-three-results
+	//    (Lambda (Variable "$w")
+	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
+	//
+	// Composing these two should return a function that takes one
+	// argument, namely $w.
+	//
+	//    (Put func-with-three-args func-returns-three-results)
+	//
+	// We expect as a result:
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is NOT compatible with beta-reduction in classical
+	// lambda calculus, which would leave $w free. We really want to
+	// eta-convert this, and keep $w bound, so that it looks like
+	// ordinary function composition. Atomese is not lambda calculus!
+
+	// ------- Lets begin.
+	// For a valid eta conversion, there must be just one argument,
+	// and it must must be a ScopeLink.
 	if (1 != seqsize or
-	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
+	    not nameserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
 		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
@@ -176,7 +223,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(get_type(), vm, final_varlist);
 }
 
 /* ================================================================= */
@@ -185,13 +232,14 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 {
 	HandleMap vm = vmap;
 
-	// If any of the mapped values are ScopeLinks, we need to discover
+	// If any of the mapped arguments are ScopeLinks, we need to discover
 	// and collect up the variables that they bind. We also need to
 	// make sure that they are "fresh", i.e. don't have naming
 	// collisions.
 	HandleSeq final_varlist;
 	HandleSet used_vars;
 	HandleMap issued;
+	Type prenex = get_type();
 
 	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
@@ -208,12 +256,12 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			continue;
 		}
 
-		Type valuetype = pare->second->get_type();
+		Type argtype = pare->second->get_type();
 
 		// If we are here, then var will be beta-reduced.
-		// But if the value is another variable, then alpha-convert,
-		// instead.
-		if (VARIABLE_NODE == valuetype)
+		// But if the argument is another variable, then
+		// alpha-convert, instead.
+		if (VARIABLE_NODE == argtype)
 		{
 			Handle alt = collect(vtool, var, pare->second,
 			                     final_varlist, used_vars, issued);
@@ -223,10 +271,13 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		}
 
 		// If we are here, then var will be beta-reduced.
-		// Is the value a ScopeLink? If so, handle it.
-		if (classserver().isA(valuetype, SCOPE_LINK))
+		// Is the argument a PrenexLink? If so, we need to disassmeble
+		// it, yank out the variables, and then reassemble it
+		// again, so that the variables are declared in the
+		// outer-most scope.
+		if (nameserver().isA(argtype, PRENEX_LINK))
 		{
-			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
+			PrenexLinkPtr sc = PrenexLinkCast(pare->second);
 			const Variables& bound = sc->get_variables();
 			Handle body = sc->get_body();
 
@@ -236,7 +287,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			if (nullptr == body)
 			{
 				throw SyntaxException(TRACE_INFO,
-				                      "PrenexLink given a malformed value=%s",
+				                      "PrenexLink given a malformed argument=%s",
 				                      sc->to_string().c_str());
 			}
 
@@ -255,13 +306,19 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 				}
 			}
 			vm[pare->first] = body;
+
+			// Last one wins.  XXX This is actually ambiguous, if there
+			// were multiple variables, and they weren's all LambdaLinks,
+			// for example. In that case, things are borked, and there's
+			// a bug here.  For now, we punt.
+			prenex = argtype;
 		}
 	}
 
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(prenex, vm, final_varlist);
 }
 
 /* ================================================================= */

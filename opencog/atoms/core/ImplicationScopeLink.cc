@@ -40,9 +40,9 @@ ImplicationScopeLink::ImplicationScopeLink(const Link &l)
 	: ScopeLink(l)
 {
 	Type t = l.get_type();
-	if (not classserver().isA(t, IMPLICATION_SCOPE_LINK))
+	if (not nameserver().isA(t, IMPLICATION_SCOPE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a ImplicationScopeLink, got %s", tname.c_str());
 	}

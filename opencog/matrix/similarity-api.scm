@@ -20,11 +20,11 @@
 ; recomputation, but also allows them to be persisted in the database.
 ;
 ; The second tool provided is a batch-compute function, that will
-; compute all NxN similarity values. This is extremely CPU-itensive,
+; compute all NxN similarity values. This is extremely CPU-intensive,
 ; and even moderate-sized matrixes can take days or weeks to compute.
 ;
 ; By default, the similarity measure is assumed to be the cosine
-; similarity; the ctor for the API allows other similairty measures
+; similarity; the ctor for the API allows other similarity measures
 ; to be specified.
 ;
 ; It is assumed that similarity scores are symmetric, so that exchanging
@@ -43,16 +43,17 @@
 ;
 ; are both exactly the same atom. The actual similarity values are
 ; stored as Values on these atoms.  The specific key used to store
-; the value depennds on the arguments the API is given; by default,
+; the value depends on the arguments the API is given; by default,
 ; the (Predicate "*-Cosine Sim Key-*") is used; if the underlying
 ; matrix is filtered, then a filter-name-dependent key is used.
-; Thus, the same API can be sed with both fitlered and non-filtered
+; Thus, the same API can be used with both filtered and non-filtered
 ; versions of the dataset.
 ;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
+(use-modules (ice-9 threads)) ; for threads
 (use-modules (opencog) (opencog persist))
 
 ; ---------------------------------------------------------------------
@@ -72,8 +73,8 @@
   stored in a database.
 
   The 'set-pair-similarity method is used to set a value.
-  The 'pair-simiarity method is used to fetch it.
-  
+  The 'pair-similarity method is used to fetch it.
+
   This creates a new NON-sparse matrix that can be understood as a
   kind-of matrix product of LLOBJ with it's transpose.
 
@@ -181,38 +182,43 @@
 	(let* ((wldobj (add-pair-stars LLOBJ))
 			(simobj (add-similarity-api wldobj MTM? ID))
 			(pair-sim-type (simobj 'pair-type))
-			(goodcnt 0)
+			(compcnt 0)  ; number computed
+			(savecnt 0)  ; number saved
 		)
 
-		; Fetch or compute the similarity value.
-		; If the sim value is stored already, return that,
-		; else compute it. If the computed value is greater than
-		; CUTOFF, then save it.
+		; Find or compute the similarity value. If the sim value
+		; is cached in the atomspace already, return that, else
+		; compute it. If the computed value is greater than CUTOFF,
+		; then cache it in the atomspace.
 		(define (compute-sim A B)
 			(define mpr (cog-link pair-sim-type A B))
 			(define prs (simobj 'pair-similarity mpr))
 			(if (not (null? prs))
 				(cog-value-ref prs 0)
 				(let ((simv (SIM-FUN A B)))
-					(if (<= CUTOFF simv)
+					(set! compcnt (+ compcnt 1))
+					; If we already have a similarity link for this object,
+					; go ahead and use it. Otherwise, save the similarity
+					; value only if it is greater than the cutoff.
+					(if (or (not (null? mpr)) (<= CUTOFF simv))
 						(begin
-							(set! goodcnt (+ goodcnt 1))
+							(set! savecnt (+ savecnt 1))
 							(simobj 'set-pair-similarity
 								(cog-new-link pair-sim-type A B)
 									(FloatValue simv))))
 					simv)))
 
-		; Compute and store the similarity between the ITEM, and the
+		; Compute and cache the similarity between the ITEM, and the
 		; other items in the ITEM-LIST.  Do NOT actually cache the
 		; similarity value, if it is less than CUTOFF.  This is used
 		; to avoid having N-squared pairs cluttering the atomspace.
 		;
+		; Return the number of similarity values that were above the
+		; cutoff.
 		(define (batch-simlist ITEM ITEM-LIST)
-			(set! goodcnt 0)
 			(for-each
 				(lambda (item) (compute-sim ITEM item))
 				ITEM-LIST)
-			goodcnt
 		)
 
 		; Loop over the entire list of items, and compute similarity
@@ -221,32 +227,37 @@
 		(define (batch-sim-pairs ITEM-LIST)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1)))
-			(define done 0)
-			(define prs 0)
-			(define prevf 0)
+			(define tot (* 0.5 len (- len 1))) ; number of pairs todo
+			(define done 0)      ; items done
+			(define prevcomp 0)  ; pairs computed
 			(define start (current-time))
-			(define prevt start)
+			(define prevelap 0.0) ; previous elapsed time.
 
 			(define (do-one-and-rpt ITM-LST)
-				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
+				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(frt (- tot togo))
-							(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
-							)
-						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
-							done len
-							(* 100.0 (/ prs frt))
-							elapsed
-							(* 100.0 (/ frt tot))
-							rate
+							(nprdone (- tot togo))  ; number of pairs done
+							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 						)
-						(set! prevt (- elapsed 1.0e-6))
-						(set! prevf frt)
+
+						; Frac is the percentage fraction that had
+						; similarities greater than the cutoff.
+						; Rate is the rate of computing pairs, whether
+						; or not they are actually saved.
+						(format #t
+							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
+							done len
+							(* 100.0 (/ savecnt nprdone))
+							elapsed
+							(* 100.0 (/ nprdone tot))
+							rate
+							(/ 1.0 rate)
+						)
+						(set! prevelap (- elapsed 1.0e-6))
+						(set! prevcomp compcnt)
 				)))
 
 			; tail-recursive list-walker.
@@ -256,41 +267,48 @@
 						(do-one-and-rpt ITM-LST)
 						(make-pairs (cdr ITM-LST)))))
 
+			; Reset the states, before restarting
+			(set! compcnt 0)
+			(set! savecnt 0)
 			(make-pairs ITEM-LIST)
 		)
 
 		; Loop over the entire list of items, and compute similarity
 		; scores for them.  Hacked parallel version.
+		; XXX FIXME -- due to guile locking flakiness, setting NTHREADS
+		; to any vaue bigger than 3 results in a net slow-down, and even
+		; for NTHREADS=3, it can be pretty bad suckage, as the system
+		; starts thrashing due to some kind of live-lock like thing.
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
 			(define tot (* 0.5 len (- len 1)))
 			(define done 0)
-			(define prs 0)
-			(define prevf 0)
+			(define prevcomp 0)  ; pairs computed
 			(define start (current-time))
-			(define prevt start)
+			(define prevelap 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
 				; These sets are not thread-safe but I don't care.
-				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
+				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(frt (- tot togo))
-							(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+							(nprdone (- tot togo))
+							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 							)
 						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
 							done len
-							(* 100.0 (/ (* NTHREADS prs) frt))
+							(* 100.0 (/ (* NTHREADS savecnt) nprdone))
 							elapsed
-							(* 100.0 (/ frt tot))
+							(* 100.0 (/ nprdone tot))
 							rate
+							(/ 1.0 rate)
 						)
-						(set! prevt (- elapsed 1.0e-6))
-						(set! prevf frt)
+						(set! prevelap (- elapsed 1.0e-6))
+						(set! prevcomp compcnt)
 					)))
 
 			; tail-recursive list-walker.
@@ -308,34 +326,52 @@
 						(call-with-new-thread (lambda () (make-pairs ITM-LST)))
 						(launch (cdr ITM-LST) (- CNT 1)))))
 
+			; Reset the states, before restarting
+			(set! compcnt 0)
+			(set! savecnt 0)
 			(launch ITEM-LIST NTHREADS)
 
 			(format #t "Started ~d threads\n" NTHREADS)
 		)
 
-		; Loop over basis elements
-		(define (batch)
-			(batch-sim-pairs
-				(if MTM?
+		; Get the entire basis, and sort it according to frequency.
+		; The returned list has the most frequent basis elements
+		; first in the list.
+		(define (get-sorted-basis)
+			(define basis (if MTM?
 					(wldobj 'right-basis)
-					(wldobj 'left-basis))))
-
-
-		; Loop over basis elements
-		(define (para-batch NTHREADS)
-			(para-batch-sim-pairs
+					(wldobj 'left-basis)))
+			(define supp-obj (add-support-api wldobj))
+			(define (nobs ITEM)
 				(if MTM?
-					(wldobj 'right-basis)
-					(wldobj 'left-basis))
-				NTHREADS))
+					(supp-obj 'left-count ITEM)
+					(supp-obj 'right-count ITEM)))
+
+			; Rank so that the commonest items are first in the list.
+			(sort basis
+				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
+		)
+
+		; Loop over the top-N most frequent basis elements
+		(define (batch TOP-N)
+			(define top-items (take (get-sorted-basis) TOP-N))
+			(batch-sim-pairs top-items))
+
+		; Loop over the top-N most frequent basis elements
+		; XXX Due to guile flakiness, this works very poorly for
+		; NTHREADS greater than 3, and even then it's prone to
+		; terrible slowdowns.
+		(define (para-batch TOP-N NTHREADS)
+			(define top-items (take (get-sorted-basis) TOP-N))
+			(para-batch-sim-pairs top-items NTHREADS))
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 
 				((compute-similarity)  (apply compute-sim args))
-				((batch-compute)       (batch))
-				((paralel-batch)       (apply para-batch args))
+				((batch-compute)       (apply batch args))
+				((parallel-batch)      (apply para-batch args))
 
 				(else                  (apply LLOBJ (cons message args)))
 		)))

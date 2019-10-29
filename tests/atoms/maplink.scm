@@ -478,6 +478,39 @@
 )
 )
 
-(define local-quote-map-result
+;; The order of A and B depends on the canonical, though arbitrary,
+;; order used to store outgoings in unordered links, consider both.
+(define local-quote-map-result-1
   (ListLink
     (ConceptNode "A") (ConceptNode "B")))
+(define local-quote-map-result-2
+  (ListLink
+    (ConceptNode "B") (ConceptNode "A")))
+
+(define quote-arg-map
+(MapLink
+  (LambdaLink
+    (VariableList
+      (VariableNode "$X")
+      (VariableNode "$Y")
+    )
+    (MemberLink
+      (VariableNode "$X")
+      (VariableNode "$Y")
+    )
+  )
+  (QuoteLink
+    (MemberLink
+      (DefinedSchemaNode "specialization-rule")
+      (ConceptNode "pm-rbs")
+    )
+  )
+)
+)
+
+(define quote-arg-map-result
+(ListLink
+  (DefinedSchemaNode "specialization-rule")
+  (ConceptNode "pm-rbs")
+)
+)

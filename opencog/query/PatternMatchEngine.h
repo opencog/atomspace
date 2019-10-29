@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -41,34 +41,35 @@ class PatternMatchEngine
 	// -------------------------------------------
 	// Callback to whom the results are reported.
 	PatternMatchCallback &_pmc;
-	ClassServer& _classserver;
+	NameServer& _nameserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
 
 private:
 	// -------------------------------------------
-	// The current set of clauses (redex context) being grounded.
-	// A single redex consists of a collection of clauses, all of
-	// which must be grounded.
-	bool explore_redex(const Handle&, const Handle&, const Handle&);
+	// The pattern holds a collection of clauses that are to be
+	// grounded. The variables are what are being directly grounded.
 
-	// These have to be pointers, not references; they get pushed
-	// onto a stack when a new redex context is started. This is
-	// how redex recursion will (eventually) be implemented.
+	// These are pointers; maybe they could be (should be?) references.
 	const Variables* _varlist;
 	const Pattern* _pat;
 
 	bool is_optional(const Handle& h) {
-		return (_pat->optionals.count(h) != 0); }
+		// return (_pat->optionals.count(h) != 0); }
+		const HandleSeq& o(_pat->optionals);
+		return o.end() != std::find(o.begin(), o.end(), h); }
+
+	bool is_always(const Handle& h) {
+		const HandleSeq& o(_pat->always);
+		return o.end() != std::find(o.begin(), o.end(), h); }
 
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
 
-	bool is_executable(const Handle& h) {
-		return (_pat->executable_terms.count(h) != 0); }
-
 	bool is_black(const Handle& h) {
 		return (_pat->black.count(h) != 0); }
+
+	bool term_is_a_clause(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
@@ -92,6 +93,16 @@ private:
 	HandleMap var_grounding;
 	// Map of clauses to their current groundings
 	HandleMap clause_grounding;
+
+	// Insert association between pattern ptm and its grounding hg into
+	// var_grounding.
+	//
+	// Takes quotation into account, that is only insert unquoted
+	// pattern, and if it is quoted, attempt to restore the unquoted
+	// pattern (as the quote is hidden inside the PatternTerm). This is
+	// especially useful for recording subclause patterns, which turn
+	// out to be useful during instantiation.
+	void record_grounding(const PatternTermPtr& ptm, const Handle& hg);
 
 	void clear_current_state(void);  // clear the stuff above
 
@@ -149,6 +160,7 @@ private:
 	bool do_next_clause(void);
 	bool clause_accepted;
 	void get_next_untried_clause(void);
+	Handle get_glob_embedding(const Handle&);
 	bool get_next_thinnest_clause(bool, bool, bool);
 	unsigned int thickness(const Handle&, const HandleSet&);
 	Handle next_clause;
@@ -170,7 +182,7 @@ private:
 	// Stacks containing partial groundings.
 	typedef HandleMap SolnMap;
 	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> term_solutn_stack;
+	std::stack<SolnMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
@@ -186,16 +198,28 @@ private:
 	unsigned int _clause_stack_depth;
 
 	// -------------------------------------------
+	// Methods that run when all clauses have been grounded.
+
+	typedef HandleMap GrndMap;
+	std::vector<GrndMap> _var_ground_cache;
+	std::vector<GrndMap> _term_ground_cache;
+	bool _forall_state = true;
+	bool _did_check_forall;
+
+	// Report a fully grounded pattern to the callback.
+	bool report_grounding(const HandleMap &var_soln,
+	                      const HandleMap &term_soln);
+	bool report_forall(void);
+
+	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
 
 	typedef enum {
-		CALL_QUOTE,
 		CALL_ORDER,
 		CALL_GLOB,
 		CALL_UNORDER,
 		CALL_CHOICE,
-		CALL_COMP,
 		CALL_SOLN
 	} Caller;   // temporary scaffolding !???
 
@@ -207,16 +231,20 @@ private:
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
-	bool clause_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
+	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
 	bool explore_link_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
@@ -242,6 +270,8 @@ public:
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
 	// Handy-dandy utilities
+	static void print_solution(const HandleMap &vars,
+	                           const HandleMap &clauses);
 	static void log_solution(const HandleMap &vars,
 	                         const HandleMap &clauses);
 

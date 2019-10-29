@@ -22,8 +22,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 using namespace opencog;
 
@@ -42,8 +42,8 @@ public:
         as = new AtomSpace();
         eval = new SchemeEval(as);
         eval->eval("(use-modules (opencog exec))");
-        eval->eval("(add-to-load-path \"..\")");
-        eval->eval("(add-to-load-path \"../../..\")");
+        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
     }
 
     ~GreaterComputeUTest()

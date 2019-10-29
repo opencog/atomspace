@@ -3,27 +3,33 @@
 
 ADD_LIBRARY (persist-sql
 	llapi
+	SQLAtomDelete
+	SQLAtomLoad
+	SQLAtomStore
 	SQLAtomStorage
+	SQLBulk
+	SQLSpaces
+	SQLTypeMap
+	SQLValues
+	SQLUUID
 	SQLPersistSCM
 )
 
 ADD_DEPENDENCIES(persist-sql opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(persist-sql
-	sql-support
 	atomspaceutils
 	atomspace
 )
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(persist-sql smob)
+	ADD_GUILE_EXTENSION(SCM_CONFIG persist-sql "opencog-ext-path-persist-sql")
 ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
 	INCLUDE_DIRECTORIES(${ODBC_INCLUDE_DIRS})
-	ADD_LIBRARY (persist-odbc
-		odbcxx
-	)
+	ADD_LIBRARY (persist-odbc odbcxx)
 	TARGET_LINK_LIBRARIES(persist-odbc ${ODBC_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-odbc)
 
@@ -38,7 +44,7 @@ IF (PGSQL_FOUND)
 	TARGET_LINK_LIBRARIES(persist-pg ${PGSQL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-pg)
 
-	INSTALL (TARGETS persist-pg
+	INSTALL (TARGETS persist-pg EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (PGSQL_FOUND)
@@ -48,7 +54,6 @@ ADD_EXECUTABLE(sniff
 )
 
 TARGET_LINK_LIBRARIES(sniff
-	sql-support
 	persist-sql
 )
 IF (ODBC_FOUND)
@@ -61,13 +66,6 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(sniff smob)
 ENDIF (HAVE_GUILE)
 
-INSTALL (TARGETS persist-sql
+INSTALL (TARGETS persist-sql EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	llapi.h
-	SQLAtomStorage.h
-	SQLPersistSCM.h
-	DESTINATION "include/opencog/persist/sql/multi-driver"
 )

@@ -31,15 +31,14 @@
 #include <string>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/atom_types/types.h>
 #include "opencog/persist/zmq/atomspace/ZMQMessages.pb.h"
 
 using namespace std;
@@ -52,18 +51,6 @@ namespace opencog {
 class ProtocolBufferSerializer {
     static void deserializeAtom(const ZMQAtomMessage& atomMessage, Atom& atom);
 //    static void serializeAtom(Atom& atom, ZMQAtomMessage* atomMessage);
-
-//    static void deserializeAttentionValue(
-//            const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-//            AttentionValue& av);
-//    static void serializeAttentionValue(
-//            AttentionValue& av, ZMQAttentionValueHolderMessage* attentionValueHolderMessage);
-//    static void deserializeAttentionValueHolder(
-//            const ZMQAttentionValueHolderMessage& attentionValueHolderMessage,
-//            AttentionValueHolder& attentionValueHolder);
-//    static void serializeAttentionValueHolder(
-//            AttentionValueHolder& attentionValueHolder,
-//            ZMQAttentionValueHolderMessage *attentionValueHolderMessage);
 
     static NodePtr deserializeNode(const ZMQAtomMessage& atomMessage);
     static LinkPtr deserializeLink(const ZMQAtomMessage& atomMessage);

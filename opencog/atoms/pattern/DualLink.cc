@@ -21,8 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/query/Recognizer.h>
 
 #include "DualLink.h"
 
@@ -31,9 +32,9 @@ using namespace opencog;
 void DualLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, DUAL_LINK))
+	if (not nameserver().isA(t, DUAL_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a DualLink, got %s", tname.c_str());
 	}
@@ -53,8 +54,6 @@ void DualLink::init(void)
 	// ScopeLink::extract_variables(_outgoing);
 	_body = _outgoing[0];
 
-	_pat.clauses.emplace_back(_body);
-	_pat.cnf_clauses.emplace_back(_body);
 	_pat.mandatory.emplace_back(_body);
 	_fixed.emplace_back(_body);
 
@@ -73,6 +72,14 @@ DualLink::DualLink(const Link &l)
 	: PatternLink(l)
 {
 	init();
+}
+
+ValuePtr DualLink::execute(AtomSpace* as, bool silent)
+{
+	if (nullptr == as) as = _atom_space;
+	Recognizer reco(as);
+	satisfy(reco);
+	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }
 
 DEFINE_LINK_FACTORY(DualLink, DUAL_LINK)

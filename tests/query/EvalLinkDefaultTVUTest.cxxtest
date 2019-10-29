@@ -1,0 +1,83 @@
+/*
+ * tests/query/EvalLinkDefaultTVUTest.cxxtest
+ *
+ * Copyright (C) 2018 SingularityNet Foundation
+ * All Rights Reserved
+ *
+ * Authors: Anatoly Belikov
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include "imply.h"
+
+using namespace opencog;
+
+
+/*
+ * Test that it is possible to modify truth value
+ * of virtual EvaluationLink from with the grounded predicate.
+ * Also test that pattern matcher does not override the value set in
+ * the grounded predicate with the value returned.
+ * This behavior is necessary if one wants to process EvaluationLinks with
+ * truth values < 0.5 in URE since pattern matcher would dismiss such evaluation link.
+ * See the discurssion at https://github.com/opencog/atomspace/issues/1868
+ */
+
+class EvalLinkDefaultTVUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace * as;
+	SchemeEval * eval;
+public:
+	EvalLinkDefaultTVUTest(){
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+		this->as = new AtomSpace();
+		this->eval = new SchemeEval(as);
+		this->eval->eval("(use-modules (opencog exec))");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	~EvalLinkDefaultTVUTest(){
+		delete this->eval;
+		delete this->as;
+
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void test_query_evallink(){
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		this->eval->eval("(load-from-path \"tests/query/eval-default-tv.scm\")");	
+		Handle query = eval->eval_h("query");
+		Handle answers = bindlink(as, query); 
+		Handle answer = answers->getOutgoingAtom(0);
+		int num_results = answers->getOutgoingSet().size();
+		TS_ASSERT_EQUALS(num_results, 1);
+		TruthValuePtr stv = answer->getTruthValue();
+		float strengh = stv->get_mean();
+		float confidence = stv->get_confidence();
+		float expected_strength = 1;
+		float expected_confidence = 0;
+		TS_ASSERT_EQUALS(strengh, expected_strength);
+		TS_ASSERT_EQUALS(confidence, expected_confidence);
+	}
+};

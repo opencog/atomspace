@@ -35,6 +35,29 @@
 namespace opencog
 {
 
+class uuid_pool
+{
+public:
+    virtual ~uuid_pool() {}
+
+    virtual UUID get_uuid(void) = 0;
+};
+
+/// Default local (non-shared) uuid_pool.
+class local_uuid_pool : public uuid_pool
+{
+private:
+    // Thread-safe atomic
+    std::atomic<UUID> _brk_uuid;
+public:
+    local_uuid_pool(void) : _brk_uuid(1) {}
+
+    UUID get_uuid(void)
+    {
+        return _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+    };
+};
+
 class AtomTable;
 
 /**
@@ -47,20 +70,12 @@ class AtomTable;
  *
  * Atomspaces are also issued UUID's. This allows atomspaces to be
  * uniquely identified as well.
- *
- * Reserving UUID's is kind of like mallocing them, except that
- * (currently) there is no way to free them.  Use reserve_range()
- * and reserve_extent() to malloc them.
- *
- * Everything in this class is private, mostly because we don't want
- * anyone to mess with it, except our closest friends.
  */
 class TLB
 {
 private:
-
-    // Thread-safe atomic
-    std::atomic<UUID> _brk_uuid;
+    local_uuid_pool _local_pool;
+    uuid_pool* _uuid_pool;
 
     std::mutex _mtx;
     std::unordered_map<UUID, Handle> _uuid_map;
@@ -68,7 +83,7 @@ private:
                       std::hash<opencog::Handle>,
                       std::equal_to<opencog::Handle> > _handle_map;
 
-    // Its a vector, not a set, because its priority ranked.
+    // Its a vector, not a set, because it's priority ranked.
     std::vector<const AtomTable*> _resolver;
     Handle do_res(const Handle&);
 
@@ -76,7 +91,7 @@ public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
 
-    TLB();
+    TLB(uuid_pool* = nullptr);
     void set_resolver(const AtomTable*);
     void clear_resolver(const AtomTable*);
 
@@ -107,45 +122,6 @@ public:
     }
     void removeAtom(const Handle&);
     void removeAtom(UUID);
-
-    /// Get the next UN-issued uuid.  The max issued UUID
-    /// is one less than this.
-    UUID getMaxUUID(void) { return _brk_uuid; }
-
-    /// Reserve a range of UUID's.  The range is inclusive; both `lo`
-    /// and `hi` are reserved.  The range must NOT intersect with the
-    /// currently issued UUID's.
-    inline void reserve_range(UUID lo, UUID hi)
-    {
-        if (hi <= lo)
-            throw InvalidParamException(TRACE_INFO,
-                "Bad argument order.");
-        UUID extent = hi - lo + 1;
-
-        UUID oldlo = _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-
-        if (lo < oldlo)
-            throw InvalidParamException(TRACE_INFO,
-                "Bad range reserve.");
-    }
-
-    /// Reserve an extent of UUID's. The lowest reserved ID is returned.
-    /// That is, after this call, no one else will be issued UUID's in
-    /// the range of [retval, retval+extent-1].
-    inline UUID reserve_extent(UUID extent)
-    {
-        return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
-
-    /// Make sure that all UUID's up to at least 'hi' have been
-    /// reserved.  No error checks are made; its OK if 'hi' has
-    /// already been issued.
-    inline void reserve_upto(UUID hi)
-    {
-        if (hi < _brk_uuid) return;
-        UUID extent = hi - _brk_uuid + 1;
-        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
 };
 
 } // namespace opencog

@@ -4,7 +4,7 @@
 
 (define-module (opencog exec))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-exec "libexec") "opencog_exec_init")
 
-(load-extension "libexecution" "opencog_exec_init")
+(export cog-evaluate! cog-execute!)

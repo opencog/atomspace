@@ -11,14 +11,13 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/ProtoAtom.h>
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -45,18 +44,18 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	// In the current C++ code, handles can also be pointers to
-	// protoAtoms.  Howerver, in the guile wrapper, we expect all
+	// values.  Howerver, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
-	// if you just want ProtoAtoms.
+	// if you just want Values.
 	if (not (h->is_link() or h->is_node()))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
 }
 
-ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 {
-	ProtoAtomPtr pv(scm_to_protom(satom));
+	ValuePtr pv(scm_to_protom(satom));
 	if (nullptr == pv)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
 
@@ -76,15 +75,19 @@ SCM SchemeSmob::ss_name (SCM satom)
 	return str;
 }
 
-SCM SchemeSmob::ss_type (SCM satom)
+/**
+ * Return the number of the NumberNode
+ */
+SCM SchemeSmob::ss_number (SCM satom)
 {
-	Handle h = verify_handle(satom, "cog-type");
-	Type t = h->get_type();
-	const std::string &tname = classserver().getTypeName(t);
-	SCM str = scm_from_utf8_string(tname.c_str());
-	SCM sym = scm_string_to_symbol(str);
+	Handle h = verify_handle(satom, "cog-number");
 
-	return sym;
+	NumberNodePtr nn(NumberNodeCast(h));
+	// Faster than saying if (not nameserver().isA(h->get_type(), NUMBER_NODE))
+	if (nullptr == nn)
+		scm_wrong_type_arg_msg("cog-number", 0, satom, "NumberNode");
+	SCM num = scm_from_double(nn->get_value());
+	return num;
 }
 
 SCM SchemeSmob::ss_arity (SCM satom)
@@ -104,26 +107,70 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	return tv_to_scm(h->getTruthValue());
+	return protom_to_scm(ValueCast(h->getTruthValue()));
+}
+
+/**
+ * Return the truth value mean on the atom.
+ * This is meant to be the fastest possible way of accessing the mean.
+ */
+SCM SchemeSmob::ss_get_mean(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-mean");
+	return scm_from_double(h->getTruthValue()->get_mean());
+}
+
+/**
+ * Return the truth value confidence on the atom.
+ * This is meant to be the fastest possible way of accessing the confidence.
+ */
+SCM SchemeSmob::ss_get_confidence(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-confidence");
+	return scm_from_double(h->getTruthValue()->get_confidence());
+}
+
+/**
+ * Return the truth value count on the atom.
+ * This is meant to be the fastest possible way of accessing the count.
+ */
+SCM SchemeSmob::ss_get_count(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-count");
+	return scm_from_double(h->getTruthValue()->get_count());
 }
 
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
-
-	h->setTruthValue(tv);
 	scm_remember_upto_here_1(stv);
-	return satom;
+
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	try
+	{
+		Handle newh = as->set_truthvalue(h, tv);
+
+		if (h == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-tv!", satom);
+	}
 }
 
 // Increment the count, keeping mean and confidence as-is.
 // Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 {
+	static std::mutex count_mtx;
+
 	Handle h = verify_handle(satom, "cog-inc-count!");
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
+	// Lock so that count updates are atomic!
+	std::lock_guard<std::mutex> lck(count_mtx);
 	TruthValuePtr tv = h->getTruthValue();
 	if (COUNT_TRUTH_VALUE == tv->get_type())
 	{
@@ -132,45 +179,45 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	tv = CountTruthValue::createTV(
 		tv->get_mean(), tv->get_confidence(), cnt);
 
-	h->setTruthValue(tv);
+	AtomSpace* as = ss_get_env_as("cog-inc-count!");
+	as->set_truthvalue(h, tv);
 	return satom;
 }
 
 /* ============================================================== */
-/* Attention-Value stuff */
-// XXX FIXME all this should move to attentionbank/AttentionBankSCM.cc
-
-SCM SchemeSmob::ss_av (SCM satom)
+// Increment the count of some generic FloatValue.
+// Just like ss_inc_count but generic.
+// key == key for value
+// cnt == how much to increment
+// ref == list-ref, which location to increment.
+SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 {
-	Handle h = verify_handle(satom, "cog-av");
-	return av_to_scm(get_av(h));
-}
+	static std::mutex incr_mtx;
 
-SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
-{
-	Handle h = verify_handle(satom, "cog-set-av!");
-	AttentionValuePtr av = verify_av(sav, "cog-set-av!", 2);
-	AtomSpace* atomspace = ss_get_env_as("cog-set-av!");
+	Handle h = verify_handle(satom, "cog-inc-value!");
+	Handle key = verify_handle(skey, "cog-inc-value!", 2);
+	double cnt = verify_real(scnt, "cog-inc-value!", 3);
+	int ref = verify_int(sref, "cog-inc-value!", 4);
 
-	attentionbank(atomspace).change_av(h, av);
-	return satom;
-}
+	std::vector<double> new_value;
 
-SCM SchemeSmob::ss_inc_vlti (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-inc-vlti!");
-	AtomSpace* atomspace = ss_get_env_as("cog-inc-vlti!");
+	// Lock so that count updates are atomic!
+	std::lock_guard<std::mutex> lck(incr_mtx);
 
-	attentionbank(atomspace).inc_vlti(h);
-	return satom;
-}
+	ValuePtr v = h->getValue(key);
+	if (nullptr != v and FLOAT_VALUE == v->get_type())
+	{
+		FloatValuePtr fv(FloatValueCast(v));
+		new_value = fv->value();
+		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
+	}
+	else
+	{
+		new_value.resize(ref+1, 0.0);
+	}
+	new_value[ref] += cnt;
 
-SCM SchemeSmob::ss_dec_vlti (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-dec-vlti!");
-	AtomSpace* atomspace = ss_get_env_as("cog-dec-vlti!");
-
-	attentionbank(atomspace).dec_vlti(h);
+	h->setValue(key, createFloatValue(new_value));
 	return satom;
 }
 
@@ -204,7 +251,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-by-type");
-	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
+	Type t = verify_type(stype, "cog-outgoing-by-type", 2);
 
 	if (not h->is_link()) return SCM_EOL;
 
@@ -265,7 +312,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
-	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
+	Type t = verify_type(stype, "cog-incoming-by-type", 2);
 
 	HandleSeq iset;
 	h->getIncomingSetByType(std::back_inserter(iset), t);
@@ -280,6 +327,31 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 }
 
 /* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of an atom.
+ */
+SCM SchemeSmob::ss_incoming_size (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size");
+	size_t sz = h->getIncomingSetSize();
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
+/**
+ * Return the length (size) of the incoming set of type stype
+ * of the atom.
+ */
+SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
+	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
+
+	size_t sz = h->getIncomingSetSizeByType(t);
+	return scm_from_size_t(sz);
+}
+
+/* ============================================================== */
 
 /**
  * Apply proceedure proc to all atoms of type stype
@@ -288,19 +360,17 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
  */
 SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 {
-	Type t = verify_atom_type (stype, "cog-map-type");
+	Type t = verify_type (stype, "cog-map-type");
 	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
-	std::list<Handle> handle_set;
-	atomspace->get_handles_by_type(back_inserter(handle_set), t, false);
+	HandleSet hset;
+	atomspace->get_handleset_by_type(hset, t);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.
 	// Break out of the loop if proc returns anything other than #f
-	std::list<Handle>::iterator i;
-	for (i = handle_set.begin(); i != handle_set.end(); ++i) {
-		Handle h = *i;
+	for (const Handle& h : hset) {
 
 		// In case h got removed from the atomspace between
 		// get_handles_by_type call and now. This may happen either
@@ -325,13 +395,16 @@ SCM SchemeSmob::ss_get_types (void)
 {
 	SCM list = SCM_EOL;
 
-	Type t = classserver().getNumberOfClasses();
+	Type t = nameserver().getNumberOfClasses();
 	while (1) {
 		t--;
-		const std::string &tname = classserver().getTypeName(t);
-		SCM str = scm_from_utf8_string(tname.c_str());
-		SCM sym = scm_string_to_symbol(str);
-		list = scm_cons(sym, list);
+		if (nameserver().isDefined(t))
+		{
+			const std::string &tname = nameserver().getTypeName(t);
+			SCM str = scm_from_utf8_string(tname.c_str());
+			SCM sym = scm_string_to_symbol(str);
+			list = scm_cons(sym, list);
+		}
 		if (0 == t) break;
 	}
 
@@ -345,13 +418,13 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 {
 	SCM list = SCM_EOL;
 
-	Type t = verify_atom_type(stype, "cog-get-subtypes");
+	Type t = verify_type(stype, "cog-get-subtypes");
 	std::vector<Type> subl;
-	unsigned int ns = classserver().getChildren(t, std::back_inserter(subl));
+	unsigned int ns = nameserver().getChildren(t, std::back_inserter(subl));
 
 	for (unsigned int i=0; i<ns; i++) {
 		t = subl[i];
-		const std::string &tname = classserver().getTypeName(t);
+		const std::string &tname = nameserver().getTypeName(t);
 		SCM str = scm_from_utf8_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);
@@ -375,119 +448,11 @@ SCM SchemeSmob::ss_get_type (SCM stype)
 		scm_wrong_type_arg_msg("cog-type->int", 0, stype, "opencog atom type");
 
 	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
+	Type t = nameserver().getType(ct);
 	if (NOTYPE == t and strcmp(ct, "Notype"))
 		scm_wrong_type_arg_msg("cog-type->int", 0, stype, "opencog atom type");
 
 	return scm_from_ushort(t);
-}
-
-/**
- * Return true if stype is an atom type
- */
-SCM SchemeSmob::ss_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (classserver().isValue(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-
-	return SCM_BOOL_T;
-}
-
-/**
- * Return true if stype is a value type
- */
-SCM SchemeSmob::ss_value_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (classserver().isValue(t) and not classserver().isAtom(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (classserver().isValue(t) and not classserver().isAtom(t))
-		return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Return true if stype is a node type
- */
-SCM SchemeSmob::ss_node_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (classserver().isNode(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (classserver().isNode(t)) return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Return true if stype is a link type
- */
-SCM SchemeSmob::ss_link_type_p (SCM stype)
-{
-	if (scm_is_integer(stype)) {
-		Type t = scm_to_ushort(stype);
-		if (classserver().isLink(t))
-			return SCM_BOOL_T;
-		return SCM_BOOL_F;
-	}
-
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
-
-	if (scm_is_false(scm_string_p(stype)))
-		return SCM_BOOL_F;
-
-	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
-
-	if (NOTYPE == t) return SCM_BOOL_F;
-	if (classserver().isLink(t)) return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
 }
 
 /**
@@ -502,7 +467,7 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 		return SCM_BOOL_F;
 
 	const char * ct = scm_i_string_chars(stype);
-	Type parent = classserver().getType(ct);
+	Type parent = nameserver().getType(ct);
 
 	if (NOTYPE == parent) return SCM_BOOL_F;
 
@@ -514,13 +479,24 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 		return SCM_BOOL_F;
 
 	const char * cht = scm_i_string_chars(schild);
-	Type child = classserver().getType(cht);
+	Type child = nameserver().getType(cht);
 
 	if (NOTYPE == child) return SCM_BOOL_F;
 
-	if (classserver().isA(child, parent)) return SCM_BOOL_T;
+	if (nameserver().isA(child, parent)) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
+}
+
+/**
+ * Return a count of the number of atoms of the indicated type
+ */
+SCM SchemeSmob::ss_count (SCM stype)
+{
+	Type t = verify_type(stype, "cog-count-atoms");
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	size_t cnt = as->get_num_atoms_of_type(t);
+	return scm_from_size_t(cnt);
 }
 
 SCM SchemeSmob::ss_get_free_variables(SCM satom)

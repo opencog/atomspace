@@ -23,8 +23,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 #include "test-types.h"
 
@@ -72,8 +72,8 @@ void BuggyStackUTest::setUp(void)
 {
 	as = new AtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/buggy-stack.scm\")");
 

@@ -10,26 +10,24 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
 	smob
 	atomspace
+	dist-gearman
 )
 
 # Make sure that the Gearman job server is running.
 # See the README file for details.
 FIND_PROGRAM(GEARMAN_JOB_SERVER gearmand)
 IF (GEARMAN_JOB_SERVER)
-	EXECUTE_PROCESS(COMMAND "ps" "-C" "gearmand"
-		OUTPUT_VARIABLE OUT
-		ERROR_VARIABLE ERR
-		RESULT_VARIABLE RC)
+	ADD_CONFIGURABLE_CXXTEST(GearmanUTest)
 
-	IF (RC)
-		MESSAGE(WARNING "gearman-job-server is not running; will not run the GearmanUTest")
-	ELSE (RC)
-		SET(GEARMAN_RUNNING 1)
-		MESSAGE(STATUS "gearman-job-server found")
-	ENDIF (RC)
+	ADD_DEPENDENCIES(tests GearmanUTest)
+
+	ADD_TEST(NAME GearmanUTest
+		COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/run_gearman_test.sh
+			${CMAKE_CURRENT_BINARY_DIR}
+	)
+	SET_TESTS_PROPERTIES(GearmanUTest
+		PROPERTIES
+		ENVIRONMENT "GUILE_LOAD_PATH=${GUILE_LOAD_PATH}"
+	)
 
 ENDIF (GEARMAN_JOB_SERVER)
-
-IF (GEARMAN_RUNNING)
-	ADD_CXXTEST(GearmanUTest)
-ENDIF (GEARMAN_RUNNING)

@@ -1,5 +1,5 @@
 #
-# Master Opencog CMake file.
+# Master AtomSpace CMake file.
 #
 # General organization:
 # -- check for different compilers, OS'es
@@ -8,40 +8,38 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-include(lib/Summary.cmake)
-
-# Need to have cmake-2.8.8 in order to be able to check the compiler
-# version.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+# cogutils already requires 2.8.12.2, so may as well ask for that.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
-	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
-
 
 IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 	CMAKE_POLICY(SET CMP0037 OLD)
+	CMAKE_POLICY(SET CMP0042 NEW)
 ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+IF (CMAKE_VERSION VERSION_GREATER 3.9.0)
+	CMAKE_POLICY(SET CMP0068 NEW)
+ENDIF (CMAKE_VERSION VERSION_GREATER 3.9.0)
 
 PROJECT(atomspace)
 
-# To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
-# Remove when CMake >= 2.8.4 is required to build the project
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
-# uncomment to be in Release mode [default]
+# ----------------------------------------------------------
+# User-modifiable options. Feel free to change these!
+#
+# Uncomment to be in Release mode [default].
 # SET(CMAKE_BUILD_TYPE Release)
 
-# uncomment to build in debug mode
+# Uncomment to build in debug mode.
 # SET(CMAKE_BUILD_TYPE Debug)
 
-# uncomment to be in coverage testing mode
+# Uncomment to be in coverage testing mode.
 # SET(CMAKE_BUILD_TYPE Coverage)
 
-# uncomment to build in profile mode
+# Uncomment to build in profile mode.
 # SET(CMAKE_BUILD_TYPE Profile)
 
-# uncomment to build in release mode with debug information
+# Uncomment to build in release mode with debug information.
 # SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # default build type
@@ -51,82 +49,11 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
-
-# add the 'lib' dir to cmake's module search path
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
-
-IF (CMAKE_COMPILER_IS_GNUCXX)
-	# gcc before version 4.8 does not support the c++11 definition
-	# of thread_local.
-	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
-		MESSAGE(FATAL_ERROR "GCC version must be at least 4.8.0!")
-	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
-
-	IF (APPLE)
-		CMAKE_POLICY(SET CMP0042 NEW)  # Something about MACOSX_RPATH
-
-		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
-		SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-		SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
-		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-		# Vital to do this otherwise unresolved symbols everywhere:
-		SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-
-		# The Apple linker does not support the --no-as-needed flag.
-		SET(NO_AS_NEEDED "")
-
-	ELSE (APPLE)
-		SET(CMAKE_C_FLAGS "-Wall -fPIC")
-		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
-		SET(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3 -fstack-protector")
-		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-		# -flto is good for performance, but wow is it slow to link...
-		# XXX disable for now ... its just to painful, in daily life.
-		# ... except that the buildbot needs this, to pass unit tests.
-		# Current failure is in libatomcore, which depends on atomutils
-		# (ldd -r libatomcore.so shows unresolved symbols.)
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
-
-		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
-		LINK_LIBRARIES(pthread)
-
-		# Workaround for circular dependencies problem. This causes
-		# LINK_LIBRARIES to appear twice in the linker line; the
-		# second appearance has the effect of resolving any circular
-		# dependencies left over from the first specification.
-		# See pull request #642 for more discussion.
-		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
-	ENDIF (APPLE)
-
-	# 1) -Wno-variadic-macros is to avoid warnings regarding using
-	# variadic in macro OC_ASSERT (the warning warns that this is only
-	# available from C99, lol!)
-	#
-	# 2) -fopenmp for multithreading support
-	#
-	# 3) -std=gnu++11 for C++11 and GNU extensions support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++11")
-
-	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
-	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
-	SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-
-	# Options for generating gcov code coverage output
-	SET(CMAKE_C_FLAGS_COVERAGE "-O0 -g -fprofile-arcs -ftest-coverage -fno-inline")
-	SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_C_FLAGS_COVERAGE} -fno-default-inline")
-	# Might be needed for some combinations of ln and gcc
-	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		LINK_LIBRARIES(gcov)
-	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # The default case for non-profile builds is to use shared libraries. So don't
 # use explicit SHARED in the ADD_LIBRARY calls in CMakeLists.txt instances or
@@ -137,83 +64,59 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
 	SET(BUILD_SHARED_LIBS ON)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 
-
-# Do the windows build
-IF (WIN32)
-	ADD_DEFINITIONS(-DWIN32)
-	IF (CYGWIN)
-		ADD_DEFINITIONS(-DCYGWIN)
-	#   SET(WIN32 1)
-	ENDIF (CYGWIN)
-
-	# It is "not unix" when the code is compiled under windows but not
-	# under cygwin
-	IF (NOT UNIX)
-		ADD_DEFINITIONS(-DWIN32_NOT_UNIX)
-		FIND_PACKAGE(PThreads REQUIRED)
-		FIND_PACKAGE(STLPort REQUIRED)
-		INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include/win32" ${PTHREADS_INCLUDE_DIR} ${STLPORT_INCLUDE_DIR})
-		LINK_LIBRARIES(${PTHREADS_LIBRARY} ${STLPORT_LIBRARIES})
-		ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
-	ELSE (NOT UNIX)
-		LINK_LIBRARIES(pthread)
-		IF (CYGWIN)
-			SET(CMAKE_SHARED_LINKER_FLAGS "-Wl")
-		ELSE (CYGWIN)
-			SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
-		ENDIF (CYGWIN)
-	ENDIF (NOT UNIX)
-ENDIF (WIN32)
-
-# ===================================================================
+# ===============================================================
 # Check for existance of various required, optional packages.
+# Listed in alphabetical order, more or less.
+# CogUtil must come first, because it supplies various FindXXX macros.
 
+# Add the 'lib' dir to cmake's module search path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+
+# Cogutil
+FIND_PACKAGE(CogUtil CONFIG)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+	SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
+ENDIF (COGUTIL_FOUND)
+
+# add the 'cmake' directory from cogutil to search path
+list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
+include(OpenCogGccOptions)
+include(Summary)
+
+# ----------------------------------------------------------
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
+SET(MIN_BOOST 1.46)
 
 # Required boost packages
-# hypertable requires boost iostreams
-# boost-1.49 no longer has a libboost_iostreams
-# 1.46 is minimum for required filesystem support
-# program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS date_time filesystem serialization system thread)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
-
-	# Boost.Signals2 requires this in signal_type.hpp
-	SET(BOOST_PARAMETER_MAX_ARITY 7)
-	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
 
-# Opencog won't compile with Boost 1.51, some kind of conflict with
+# Atomspace won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
 IF(105100 EQUAL ${Boost_VERSION})
-	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
+	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with AtomSpace.  Please use a different version.")
 ENDIF(105100 EQUAL ${Boost_VERSION})
-MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
-# Optional boost packages; can build without these.
-# FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
-# FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Arghhh. Except cmake is treating above as required, not optional. #$%**&
 IF(Boost_FOUND_SAVE)
 	SET(Boost_FOUND 1)
 ENDIF(Boost_FOUND_SAVE)
 
-# Cogutil
-FIND_PACKAGE(CogUtil)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
+# ----------------------------------------------------------
+# Needed for unit tests.
 
 FIND_PACKAGE(Cxxtest)
 IF (CXXTEST_FOUND)
@@ -221,6 +124,9 @@ IF (CXXTEST_FOUND)
 ELSE (CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
 ENDIF (CXXTEST_FOUND)
+
+# ----------------------------------------------------------
+# Optional, unused distributed processing framework.
 
 FIND_PACKAGE(LibGearman)
 ADD_DEFINITIONS(-DHAVE_GEARMAN)
@@ -233,90 +139,82 @@ ELSE (GEARMAN_FOUND)
 ENDIF(GEARMAN_FOUND)
 MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
 
+# ----------------------------------------------------------
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 
-# Gnu Guile scheme interpreter
-# Version 2.0.9 is needed for mrs io ports, compilation, etc.
-FIND_PACKAGE(Guile 2.0.9)
+# Gnu Guile scheme interpreter. Mandatory
+# Version 2.2.2 is needed for mrs io ports, compilation, atomics, nlp
+FIND_PACKAGE(Guile 2.2.2)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)
 	INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
 ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
-	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
+	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
-# Hypertable library, for atomspace persistence
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-	SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
 
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
+# ----------------------------------------------------------
+# secure_getenv
+INCLUDE(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h" HAVE_SECURE_GETENV)
+IF (HAVE_SECURE_GETENV)
+	ADD_DEFINITIONS(-DHAVE_SECURE_GETENV)
+ENDIF (HAVE_SECURE_GETENV)
 
-ELSE (HYPERTABLE_FOUND)
-	# The FindHypertable.cmake file already prints a message.
-	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
-	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
 
-ENDIF (HYPERTABLE_FOUND)
-
-# At this time, there is no reason to build with memcached for
-# FIND_PACKAGE(LibMemCached)
-
-# Google Protobuf library
-# The protocol buffer compiler is needed for ZMQ-based persistence.
-FIND_PACKAGE(Protobuf)
-IF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-	SET(HAVE_PROTOBUF 1)
-	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-
-ELSE (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	# If we are here, then we are missing either the libraries, or the
-	# compiler. React appropriately.
-	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-
-ENDIF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
-
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------
+## Google Protobuf library
+## The protocol buffer compiler is needed for ZMQ-based persistence.
+# The ZMQ code is unmaintained and does not work. Give up until a
+# maintainer is found.
+#FIND_PACKAGE(Protobuf)
+#IF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+#	SET(HAVE_PROTOBUF 1)
+#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+#
+#ELSE (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	# If we are here, then we are missing either the libraries, or the
+#	# compiler. React appropriately.
+#	IF (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
+#
+#ENDIF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+#
+# ----------------------------------------------------------
 # Python and Cython
 #
-# NOTE: Python interpreter is needed for runing python unit tests, and for
-# running the FindCython module.
+# NOTE: Python interpreter is needed for runing python unit tests,
+# and for running the FindCython module.
 #
 # Search for Python3 first, and use that, if found. Else use Python2.
+# To use Python2 only from the build directory run the following
+# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
 
 FIND_PACKAGE(Python3Interp)
-IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
+IF (3.4.0 VERSION_LESS "${PYTHON3_VERSION_STRING}")
 	SET (HAVE_PY_INTERP 1)
-	SET (PYTHON_VER python3.5)
+	SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
 ENDIF()
 
@@ -324,7 +222,7 @@ IF (NOT HAVE_PY_INTERP)
 	FIND_PACKAGE(PythonInterp)
 	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
 		SET (HAVE_PY_INTERP 1)
-		SET (PYTHON_VER python2.7)
+		SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
 	ENDIF()
 ENDIF()
@@ -340,22 +238,35 @@ ELSE()
 	MESSAGE(STATUS "Python libraries NOT found.")
 ENDIF()
 
-
 # Cython is used to generate python bindings.
 IF(HAVE_PY_INTERP)
-	FIND_PACKAGE(Cython 0.19.0)
+	FIND_PACKAGE(Cython 0.23.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
-		# Find python destination dir for python bindings because it may
-		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
 
-		# Hack together some reasonable install location.
-		SET(PYTHON_DEST
-			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		# Find python destination dir for python bindings
+		# because it may differ on each operating system.
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/get_python_lib.py" "${CMAKE_INSTALL_PREFIX}"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
+
+		# Replace new line at end
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+
+		# thunk
+		SET(PYTHON_ROOT "${PYTHON_DEST}")
+		SET(PYTHON_DEST "${PYTHON_DEST}/opencog")
+
 		MESSAGE(STATUS
-			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+			"Python install dir: ${PYTHON_DEST}" )
 
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
@@ -364,10 +275,13 @@ IF(HAVE_PY_INTERP)
 	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	IF (PYTHON3INTERP_FOUND)
+	IF (PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
 	ELSE ()
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
+	ENDIF ()
+	IF (NOT NOSETESTS_EXECUTABLE)
+		MESSAGE(STATUS "nosetests not found: needed for python tests")
 	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
@@ -375,14 +289,17 @@ IF(HAVE_PY_INTERP)
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 ENDIF(HAVE_PY_INTERP)
 
-# -----------------------------------------------------------------------------
-
+# ----------------------------------------------------------
 # Glasgow Haskell compiler
+
 FIND_PACKAGE(Stack)
 IF (STACK_FOUND)
 	ADD_DEFINITIONS(-DHAVE_STACK)
 	SET(HAVE_STACK 1)
 ENDIF (STACK_FOUND)
+
+# ----------------------------------------------------------
+# Optional/deprecated ODBC.
 
 FIND_PACKAGE(UnixODBC QUIET)
 IF (UnixODBC_FOUND)
@@ -399,20 +316,24 @@ ELSE (UnixODBC_FOUND)
 ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
-FIND_PACKAGE(PGSQL REQUIRED)
+# ----------------------------------------------------------
+# Mandatory Postgres
+
+FIND_PACKAGE(PGSQL 9.5 REQUIRED)
 IF (PGSQL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
 	ADD_DEFINITIONS(-DHAVE_PGSQL_STORAGE)
 	SET(HAVE_PGSQL_STORAGE 1)
 	SET(PGSQL_FOUND 1)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was found.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
 ELSE (PGSQL_FOUND)
 	SET(PGSQL_FOUND 0)
-	SET(PGSQL_DIR_MESSAGE "PGSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
+	SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
 ENDIF (PGSQL_FOUND)
 MESSAGE(STATUS "${PGSQL_DIR_MESSAGE}")
 
+# ----------------------------------------------------------
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -427,6 +348,9 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
+# ----------------------------------------------------------
+# Optional and almost obsolete...
+# Remove after the REST interfaces get fixed.
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
 IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
@@ -438,46 +362,42 @@ ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
-# ==========================================================
-# Decide what to build, based on the packages found.
+# ===============================================================
+# Get atomspace version
 
-IF(HAVE_COGUTIL)
-	SET(HAVE_ATOMSPACE 1)
-ENDIF(HAVE_COGUTIL)
-
-# Both protobuf and also zmq are needed to build ZMQ API.
-IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-	SET(HAVE_ZMQ 1)
-ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-
-# At this time, there is no reason to build with memcached for
-# any "normal" use, so just stub it out.
-# IF (LIBMEMCACHED_FOUND)
-#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-# ENDIF (LIBMEMCACHED_FOUND)
+# NOTE: This is the official semantic-version, as it is derived from
+# a version-control independent means of declaring versioning.
+#
+# TODO: Once CMAKE_MINIMUM_REQUIRED >= 3.0.2 check use of policy
+# CMP0048.
+#
+FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
+STRING(REGEX MATCH
+	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
+        _ "${_ATOMSPACE_H_CONTENTS}")
+SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # ===================================================================
-# global includes
+# Global includes
 
-# set confdir and datadir
-IF (NOT DEFINED CONFDIR)
-	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
-ENDIF (NOT DEFINED CONFDIR)
-IF (NOT DEFINED DATADIR)
-	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
-ENDIF (NOT DEFINED DATADIR)
-ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
-ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
+# -------------------------------------------------
+# Include configuration.
 
-# (re?)define MAN_INSTALL_DIR
-SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
+# Set default include paths.
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	${Boost_INCLUDE_DIRS} ${COGUTIL_INCLUDE_DIR})
 
-# include custom opencog cmake macros
-INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogFunctions.cmake")
+# Macros that define how atom types get declared.
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
 
-# small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
-# default lib path on 64 bit archs
+# -------------------------------------------------
+# Library configuration
+
+# Small hack to handle unixes that use "/usr/lib64" instead of
+# "/usr/lib" as the default lib path on 64 bit archs.
+#
 IF (NOT DEFINED LIB_DIR_SUFFIX)
 	EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs OUTPUT_VARIABLE PRINT_SEARCH_DIRS_OUTPUT)
 	STRING(REGEX MATCH "\r?\nlibraries:.*\r?\n" COMPILER_LIB_SEARCH_DIRS ${PRINT_SEARCH_DIRS_OUTPUT})
@@ -489,11 +409,8 @@ IF (NOT DEFINED LIB_DIR_SUFFIX)
 	ENDIF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
 ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
-# set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	${Boost_INCLUDE_DIRS} ${COGUTIL_INCLUDE_DIR})
-
-# rpath handling
+# RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
+# Note: RPATH only supported under Linux!
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH
@@ -502,15 +419,49 @@ SET(CMAKE_INSTALL_RPATH
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-ADD_SUBDIRECTORY(lib)
+# -------------------------------------------------
+# Install configuration
+
+# Only list install files that have actually changed.
+SET(CMAKE_INSTALL_MESSAGE "LAZY")
+
+# Set confdir and datadir.
+IF (NOT DEFINED CONFDIR)
+	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
+ENDIF (NOT DEFINED CONFDIR)
+
+IF (NOT DEFINED DATADIR)
+	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
+ENDIF (NOT DEFINED DATADIR)
+
+ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
+ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
+
+# (re?)define MAN_INSTALL_DIR
+SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
+
+# ==========================================================
+# Decide what to build, based on the packages found.
+
+IF(HAVE_COGUTIL)
+	SET(HAVE_ATOMSPACE 1)
+ENDIF(HAVE_COGUTIL)
+
+# Both protobuf and also zmq are needed to build ZMQ API.
+# IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+# 	SET(HAVE_ZMQ 1)
+# ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+
+ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
+ADD_SUBDIRECTORY(lib)
 
 IF (CXXTEST_FOUND)
 	ADD_CUSTOM_TARGET(tests)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(covtest
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -518,14 +469,19 @@ IF (CXXTEST_FOUND)
 			# -
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			# This script combines the coverage analysis of each test,
-			# then creates html in tests/lcov
-			# Note: this should now be run separately...
-			#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
 			COMMENT "Running tests with coverage..."
 		)
+		ADD_CUSTOM_TARGET(test
+			DEPENDS covtest
+			WORKING_DIRECTORY ./
+			# This script combines the coverage analysis of each test,
+			# then creates html in tests/lcov
+			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
+			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+			COMMENT "Generating lcov report..."
+		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# If this is a build with coverage enabled then test normally
+		# Coverage is disabled; test normally
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
@@ -535,20 +491,17 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
-		DEPENDS PythonEvalUTest
-				PythonUtilitiesUTest
-				bindlink_cython atomspace_cython
-				scheme_wrapper logger_cython utilities_cython
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
+	ADD_CUSTOM_TARGET(test_guile
+		WORKING_DIRECTORY tests/scm
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Guile and Python-bridge tests..."
+	)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
-		#      ../reasoning/RuleEngine/RuleUTest
-		#      ../reasoning/RuleEngine/ForwardChainerUTest
-		#      ../nlp/sureal/SuRealUTest
-		#      ../nlp/microplanning/MicroplanningUTest
 		WORKING_DIRECTORY tests/query
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running pattern matcher tests..."
@@ -557,19 +510,17 @@ ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
-IF (NOT WIN32)
-	ADD_CUSTOM_TARGET (examples
-		# using CMAKE_BUILD_TOOL results in teh cryptic error message
-		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
-		# This is because make doesn't know how to pass jobserver args to
-		# the submake.  So, instead, just use $(MAKE) (with round parens)
-		# -- that will do the right thing.
-		# COMMAND ${CMAKE_BUILD_TOOL}
-		COMMAND $(MAKE)
-		WORKING_DIRECTORY examples
-		COMMENT "Building examples"
-	)
-ENDIF (NOT WIN32)
+ADD_CUSTOM_TARGET (examples
+	# using CMAKE_BUILD_TOOL results in teh cryptic error message
+	# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+	# This is because make doesn't know how to pass jobserver args to
+	# the submake.  So, instead, just use $(MAKE) (with round parens)
+	# -- that will do the right thing.
+	# COMMAND ${CMAKE_BUILD_TOOL}
+	COMMAND $(MAKE)
+	WORKING_DIRECTORY examples
+	COMMENT "Building examples"
+)
 
 ADD_CUSTOM_TARGET(cscope
 	COMMAND find opencog examples tests -name '*.cc' -o -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
@@ -578,111 +529,76 @@ ADD_CUSTOM_TARGET(cscope
 	COMMENT "Generating CScope database"
 )
 
+# ===============================================================
+# Packaging
+## Architecture the package is for.
+## TODO: Will give error on non debian distros, fix it.
+EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
+	OUTPUT_VARIABLE PACKAGE_ARCHITECTURE
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
+# If 'sudo make install' is run before 'make package', then install_manifest.txt
+# will be owned by root. Creating the file during configuration stage ensures
+# that is owned by the builder thus avoiding 'Permission denied' error when
 # packaging
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
-SET(CPACK_PACKAGE_NAME "atomspace")
-SET(CPACK_PACKAGE_VENDOR "opencog.org")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MAJOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MINOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MICRO_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_MATCH_1})
-SET(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-SET(CPACK_BINARY_STGZ "OFF")
-SET(CPACK_BINARY_TBZ2 "OFF")
-SET(CPACK_BINARY_TGZ "OFF")
-SET(CPACK_BINARY_TZ "OFF")
-SET(CPACK_SOURCE_STGZ "OFF")
-SET(CPACK_SOURCE_TBZ2 "ON")
-SET(CPACK_SOURCE_TGZ "OFF")
-SET(CPACK_SOURCE_TZ "OFF")
+FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
+
+## Cpack configuration
+SET(CPACK_GENERATOR "DEB")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
-SET(CPACK_GENERATOR "TBZ2;DEB")
-SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
-SET(CPACK_SOURCE_IGNORE_FILES
-	"~$"
-	".a$"
-	".so$"
-	".log$"
-	".tar.z$"
-	".tar.gz$"
-	".tar.bz2$"
-	"/Makefile$"
-	"/CMakeFiles/"
-	"/CMakeCache.txt$"
-	"/DartTestfile.txt$"
-	"/cmake_install.cmake$"
-	"/Testfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"UTest$"
-	"UTest.cpp$"
-	"/_CPack_Packages/"
-	"/CPackConfig.cmake$"
-	"/CPackSourceConfig.cmake$"
-	"/sniff$"
-	"/install_manifest.txt$"
-	"${CPACK_PACKAGE_FILE_NAME}"
-	"^${PROJECT_SOURCE_DIR}/debian/"
-	"^${PROJECT_SOURCE_DIR}/.*spec$"
-	"^${PROJECT_SOURCE_DIR}/vendor/"
-	"^${PROJECT_SOURCE_DIR}/.bzr/"
-	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
-	"^${PROJECT_SOURCE_DIR}/.git/"
-)
-
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
+SET(CPACK_PACKAGE_NAME "atomspace-dev")
+SET(CPACK_PACKAGE_VENDOR "opencog.org")
+SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_FILE_NAME
+	"${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}")
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
+
+## Debian specific configurations
+SET(DEPENDENCY_LIST
+	"guile-2.2-dev (>= 2.2.2)"
+	"python-dev (>= 2.7.5)"
+	"libzmq3-dev (>= 4.0.4)"
+	"libboost-date-time-dev (>= ${MIN_BOOST})"
+	"libboost-filesystem-dev (>= ${MIN_BOOST})"
+	"libboost-program-options-dev (>= ${MIN_BOOST})"
+	"libboost-regex-dev (>= ${MIN_BOOST})"
+	"libboost-serialization-dev (>= ${MIN_BOOST})"
+	"libboost-thread-dev (>= ${MIN_BOOST})"
+	"libboost-system-dev (>= ${MIN_BOOST})"
+	"libboost-random-dev (>= ${MIN_BOOST})"
+	"libstdc++6 (>= 4.7)"
+	"libgearman-dev (>=1.0.6)"
+	"libpq-dev (>=9.3.24)"
+	"libcogutil-dev (>= 2.0.2)"
 )
 
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-IF (WIN32)
-	# Its "not unix" is cygwin is being used.
-	IF (NOT UNIX)
-		# There is a bug in NSI that does not handle full unix paths
-		# properly. Make sure there is at least one set of four (4)
-		# backslashes.
-		SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
-		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The OpenCog Atomspace")
-		SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
-		SET(CPACK_NSIS_MODIFY_PATH ON)
-	ELSE(NOT UNIX)
-		SET(CPACK_SOURCE_STRIP_FILES "")
-	ENDIF(NOT UNIX)
-ENDIF(WIN32)
-
+STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${MAIN_DEPENDENCIES}")
+SET(CPACK_DEBIAN_PACKAGE_SECTION "libdevel")
+SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
-# documentation
+# ===================================================================
+# Documentation.
 FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
-# Show a summary of what we got
-SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
+# ===================================================================
+# Show a summary of what we found, what we will do.
+
+SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
-SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
 SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
-SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
+# SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

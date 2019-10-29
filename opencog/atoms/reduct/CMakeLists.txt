@@ -15,12 +15,14 @@ ADD_LIBRARY (clearbox
 ADD_DEPENDENCIES(clearbox opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(clearbox
-	atombase
+	atom_types
 	atomcore
+	atombase
+	value
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS clearbox
+INSTALL (TARGETS clearbox EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

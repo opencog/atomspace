@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Potgres driver --
+ * Postgres driver --
  *
  * Threading:
  * ----------
@@ -39,9 +39,6 @@
 
 #include "ll-pg-cxx.h"
 
-#define PERR(...) \
-	throw opencog::RuntimeException(TRACE_INFO, __VA_ARGS__);
-
 /* =========================================================== */
 
 LLPGConnection::LLPGConnection(const char * uri)
@@ -54,7 +51,8 @@ LLPGConnection::LLPGConnection(const char * uri)
 	{
 		std::string msg = PQerrorMessage(_pgconn);
 		PQfinish(_pgconn);
-		PERR("Cannot connect to database: %s", msg.c_str());
+		throw opencog::RuntimeException(TRACE_INFO,
+			"Cannot connect to database: %s", msg.c_str());
 	}
 
 	is_connected = true;
@@ -93,7 +91,7 @@ LLPGRecordSet * LLPGConnection::get_record_set(void)
 /* =========================================================== */
 
 LLRecordSet *
-LLPGConnection::exec(const char * buff)
+LLPGConnection::exec(const char * buff, bool trial_run)
 {
 	if (!is_connected) return NULL;
 
@@ -106,11 +104,31 @@ LLPGConnection::exec(const char * buff)
 	    rest != PGRES_EMPTY_QUERY and
 	    rest != PGRES_TUPLES_OK)
 	{
-		opencog::logger().warn("PQresult message: %s",
-		               PQresultErrorMessage(rs->_result));
-		opencog::logger().warn("PQ query was: %s", buff);
+		// Don't log trial-run failures. Just throw.
+		if (trial_run and PGRES_FATAL_ERROR == rest)
+		{
+			rs->release();
+			throw opencog::SilentException();
+		}
+
+		std::string msg;
+		if (PQstatus(_pgconn) != CONNECTION_OK)
+		{
+			msg = "No connection to the database!";
+		}
+		else
+		{
+			msg = "PQresult message: ";
+			msg += PQresultErrorMessage(rs->_result);
+			msg += "\nPQ query was: ";
+			msg += buff;
+		}
 		rs->release();
-		PERR("Failed to execute!");
+
+		opencog::logger().warn("%s", msg.c_str());
+
+		throw opencog::RuntimeException(TRACE_INFO,
+			"Failed to execute SQL command!\n%s", msg.c_str());
 	}
 
 	/* Use numbr of columns to indicate that the query hasn't

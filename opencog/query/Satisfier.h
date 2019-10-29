@@ -26,7 +26,7 @@
 
 #include <vector>
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/InitiateSearchCB.h>

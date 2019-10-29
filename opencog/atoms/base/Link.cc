@@ -26,7 +26,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
@@ -41,10 +41,10 @@ using namespace opencog;
 
 void Link::init(const HandleSeq& outgoingVector)
 {
-    if (not classserver().isA(_type, LINK)) {
+    if (not nameserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
             "Link ctor: Atom type is not a Link: '%d' %s.",
-            _type, classserver().getTypeName(_type).c_str());
+            _type, nameserver().getTypeName(_type).c_str());
     }
 
     _outgoing = outgoingVector;
@@ -55,23 +55,23 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
+/// Return a universally-unique string for each distinct link.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Link::to_short_string(const std::string& indent) const
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
-    answer << indent << "(" << classserver().getTypeName(_type);
-
-    if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->to_string();
-    answer << "\n";
+    answer << indent << "(" << nameserver().getTypeName(_type);
+    answer << " ";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
         answer << h->to_short_string(more_indent);
 
-    answer << indent << ")\n";
+    answer << indent << ")";
 
     return answer.str();
 }
@@ -81,7 +81,7 @@ std::string Link::to_string(const std::string& indent) const
     std::string answer = indent;
     std::string more_indent = indent + "  ";
 
-    answer += "(" + classserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
@@ -167,7 +167,14 @@ ContentHash Link::compute_hash() const
 	ContentHash hsh = ((1UL<<44) - 377) * get_type();
 	for (const Handle& h: _outgoing)
 	{
-		hsh += (hsh <<5) + h->get_hash(); // recursive!
+		hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
+
+		// Bit-mixing copied from murmur64. Yes, this is needed.
+		hsh ^= hsh >> 33;
+		hsh *= 0xff51afd7ed558ccdL;
+		hsh ^= hsh >> 33;
+		hsh *= 0xc4ceb9fe1a85ec53L;
+		hsh ^= hsh >> 33;
 	}
 
 	// Links will always have the MSB set.
@@ -177,4 +184,22 @@ ContentHash Link::compute_hash() const
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	_content_hash = hsh;
 	return _content_hash;
+}
+
+/// Place `this` into the incoming set of each outgoing atom.
+///
+void Link::install()
+{
+	LinkPtr llc(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->insert_atom(llc);
+}
+
+void Link::remove()
+{
+	LinkPtr lll(LinkCast(get_handle()));
+	size_t arity = get_arity();
+	for (size_t i = 0; i < arity; i++)
+		_outgoing[i]->remove_atom(lll);
 }

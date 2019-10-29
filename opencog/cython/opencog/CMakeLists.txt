@@ -7,40 +7,24 @@
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
+MESSAGE(STATUS "Setting python RPATH to ${PYTHON_DEST}")
+SET(CMAKE_SHARED_LINKER_FLAGS
+	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${PYTHON_DEST}")
+SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-f")
-
-# Cythonizes one .pyx file into a .cpp file
-# Additional arguments are dependencies
-MACRO(CYTHON_ADD_MODULE_PYX name)
-	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx ${name}.pxd)
-	ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx)
-	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-	# Allow the user to specify dependencies as optional arguments
-	SET(DEPENDS ${DEPENDS} ${ARGN})
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${name}.cpp
-		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR} -o ${name}.cpp
-				--cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
-		DEPENDS ${DEPENDS}
-		COMMENT "Cythonizing ${name}.pyx")
-ENDMACRO(CYTHON_ADD_MODULE_PYX)
+SET(CYTHON_FLAGS "-2" "-f")
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 ###################### logger ##########################################
 CYTHON_ADD_MODULE_PYX(logger)
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp"
-	"../../util/Logger.h")
 
 ADD_LIBRARY(logger_cython
 	logger.cpp
@@ -56,22 +40,28 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 	OUTPUT_NAME logger)
 
 ###################### atomspace ####################################
+
 CYTHON_ADD_MODULE_PYX(atomspace
-	"atom.pyx" "classserver.pyx" "truth_value.pyx"
-	"atomspace_details.pyx" opencog_atom_types
-	"../../truthvalue/TruthValue.h" "../../truthvalue/SimpleTruthValue.h"
-	"../../atoms/base/ClassServer.h" "../../atoms/base/Handle.h"
+	"atom.pyx" "nameserver.pyx" "truth_value.pyx"
+	"atomspace_details.pyx" "value.pyx" "float_value.pyx" "string_value.pyx"
+	"link_value.pyx" opencog_atom_types
+	"../../atoms/truthvalue/TruthValue.h" "../../atoms/truthvalue/SimpleTruthValue.h"
+	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
 )
 
-# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
-	Cast.cc
 	atomspace.cpp
 )
+
+# The atomspace_api.h must be generated before PythonEval is compiled, thus
+# this phony-target is created. Why not add_dependencies between PythonEval
+# and atomspace_cython? -> Because that results in a cyclic dependency.
+ADD_CUSTOM_TARGET(py_atomspace_header
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/atomspace.cpp)
 
 # XXX FIXME Cython should not static link the atom-types, but
 # but should instead dynamic-load them, as needed.
@@ -79,18 +69,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
-	attentionbank
 	atomspace
-	atomutils
-	clearbox
-	atomspaceutils
-	truthvalue
-	atomcore
-	atomspace
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -102,21 +82,21 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
-	Cast.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
 ############################## type constructors #####################
-CYTHON_ADD_MODULE_PYX(type_constructors
-	"atomspace.pxd" opencog_atom_types )
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
+CYTHON_ADD_MODULE_PYX(type_constructors
+	"atomspace.pxd" opencog_atom_types
+)
 
 ADD_LIBRARY(type_constructors
 	type_constructors.cpp
 )
 
 TARGET_LINK_LIBRARIES(type_constructors
+	${NO_AS_NEEDED}
 	atomspace
 	${PYTHON_LIBRARIES}
 )
@@ -127,10 +107,10 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 
 
 ############################## utilities #####################
-CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" opencog_atom_types )
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
+CYTHON_ADD_MODULE_PYX(utilities
+	"atomspace.pxd" opencog_atom_types
+)
 
 ADD_LIBRARY(utilities_cython
 	Utilities.cc
@@ -139,13 +119,9 @@ ADD_LIBRARY(utilities_cython
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
-	clearbox
 	atomspace
 	type_constructors
-	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
@@ -153,11 +129,11 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	OUTPUT_NAME utilities)
 
 ############################## bindlink #####################
-CYTHON_ADD_MODULE_PYX(bindlink
-	"atomspace.pxd" opencog_atom_types
-	"../../query/BindLinkAPI.h")
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
+CYTHON_ADD_MODULE_PYX(bindlink
+	"atomspace.pxd"
+	opencog_atom_types
+)
 
 ADD_LIBRARY(bindlink_cython
 	BindlinkStub.cc
@@ -166,11 +142,8 @@ ADD_LIBRARY(bindlink_cython
 
 TARGET_LINK_LIBRARIES(bindlink_cython
 	atomspace_cython
-	query
-	execution
+	atomspace
 	${PYTHON_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
@@ -187,25 +160,27 @@ INSTALL (TARGETS
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
-	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../load-file.h")
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
+	CYTHON_ADD_MODULE_PYX(scheme_wrapper
+		"load-file.h"
+		"PyScheme.h"
+		"atomspace.pxd"
+		opencog_atom_types
+	)
 
 	ADD_LIBRARY(scheme_wrapper
+		load-file
 		PyScheme
 		scheme_wrapper.cpp
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		atomspace_cython
-		query
-		execution
+		atomspace
 		smob
 		${PYTHON_LIBRARIES}
 	)
-	
+
 	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)
@@ -215,6 +190,8 @@ IF (HAVE_GUILE)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
+##################################################
+# Tell python where to find modules.
 
 INSTALL (FILES
 	__init__.py

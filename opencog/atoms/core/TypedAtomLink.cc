@@ -32,7 +32,7 @@ void TypedAtomLink::init()
 	// Must have atom and type specification.
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting atom and type specification, got size %s",
+			"Expecting atom and type specification; got %s",
 			to_string().c_str());
 
 	// Perform some additional checks in the UniqueLink init method
@@ -46,14 +46,14 @@ void TypedAtomLink::init()
 			"You are not allowed to globally type a variable");
 
 	Type dtype = _outgoing[1]->get_type();
-	if (not classserver().isA(dtype, TYPE_NODE) and
+	if (not nameserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
 	    SIGNATURE_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting type defintion, got %s",
-				classserver().getTypeName(dtype).c_str());
+				nameserver().getTypeName(dtype).c_str());
 
 }
 

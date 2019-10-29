@@ -35,9 +35,9 @@ SleepLink::SleepLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, SLEEP_LINK))
+	if (not nameserver().isA(t, SLEEP_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SleepLink, got %s", tname.c_str());
 	}
@@ -47,7 +47,7 @@ SleepLink::SleepLink(const HandleSeq& oset, Type t)
 			"SleepLink expects only one argument");
 
 	Type tf = oset[0]->get_type();
-	if (NUMBER_NODE != tf and classserver().isA(tf, FUNCTION_LINK))
+	if (NUMBER_NODE != tf and nameserver().isA(tf, FUNCTION_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a NumberNode or something that returns a NumberNode");
 }
@@ -57,9 +57,9 @@ SleepLink::SleepLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, SLEEP_LINK))
+	if (not nameserver().isA(tscope, SLEEP_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SleepLink, got %s", tname.c_str());
 	}
@@ -67,21 +67,38 @@ SleepLink::SleepLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle SleepLink::execute() const
+/// Return number of seconds left to sleep.
+/// Normally, this is zero, unless the sleep was interrupted.
+ValuePtr SleepLink::execute(AtomSpace*as, bool silent)
 {
-	Handle time(_outgoing[0]);
-	FunctionLinkPtr flp(FunctionLinkCast(time));
-	if (flp)
-		time = flp->execute();
+	// Try to come up with a number, either from executing, or directly
+	Handle time(_outgoing.at(0));
+	double length = 0.0;
+	if (time->is_executable())
+	{
+		ValuePtr vp = time->execute(as, silent);
+		if (vp->is_atom())
+		{
+			time = HandleCast(vp);
+		}
+		else if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+		{
+			time = nullptr;
+			length = FloatValueCast(vp)->value().at(0);
+		}
+	}
 
-	NumberNodePtr nsle = NumberNodeCast(time);
-	if (nullptr == nsle)
-		throw RuntimeException(TRACE_INFO,
-			"Expecting an NumberNode, got %s",
-				(nullptr == time) ? "<invalid handle>" :
-					classserver().getTypeName(time->get_type()).c_str());
+	if (time)
+	{
+		NumberNodePtr nsle = NumberNodeCast(time);
+		if (nullptr == nsle)
+			throw RuntimeException(TRACE_INFO,
+				"Expecting a number, got %s",
+					(nullptr == _outgoing.at(0)) ? "<invalid handle>" :
+						_outgoing.at(0)->to_string().c_str());
 
-	double length = nsle->get_value();
+		length = nsle->get_value();
+	}
 	unsigned int secs = floor(length);
 	useconds_t usec = 1000000 * (length - secs);
 	
@@ -89,7 +106,7 @@ Handle SleepLink::execute() const
 	if (0 == secs)
 		usleep (usec);
 
-	return Handle(createNumberNode(secs));
+	return ValuePtr(createNumberNode(secs));
 }
 
 DEFINE_LINK_FACTORY(SleepLink, SLEEP_LINK)

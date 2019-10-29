@@ -9,18 +9,16 @@
 ; which is useful for working with EvaluationLink's.
 ;
 ; Utilities include:
-; -- abbreviations for working with truth values (stv, ctv, etc.)
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- for-each-except loop.
-; -- cog-atom-incr --  Increment count truth value on "atom" by "cnt".
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
 ; -- clear -- extract all atoms in the atomspace.
+; -- cog-report-counts -- Return an association list of counts.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-get-all-roots -- Return the list of all root atoms.
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
-; -- cog-count-atoms -- Count of the number of atoms of given type.
-; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
@@ -47,11 +45,11 @@
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
 ; -- cog-pop-atomspace -- Delete a temporary atomspace.
-; -- check-name? -- Check if a there is a node with the given name.
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
-; -- choose-var-name -- Generate a random name for a variable.
-; -- cog-new-flattened-link -- Create flattened link
+; -- choose-var-name -- Generate a random variable name.
+; -- random-node  -- Generate a random node of given type.
+; -- random-variable -- Generate a random variable.
 ; -- cog-cp -- Copy list of atoms from one atomspace to another
 ; -- cog-cp-all -- Copy all atoms from one atomspace to another
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
@@ -63,86 +61,6 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))  ; needed for par-map par-for-each
 
-; See below; the compiler step is not needed for guile-2.1
-(use-modules (system base compile)) ;; needed for compiler
-
-(define-public (av sti lti vlti) (cog-new-av sti lti vlti))
-
-(define-public (stv mean conf) (cog-new-stv mean conf))
-(define-public (itv lower upper conf) (cog-new-itv lower upper conf))
-(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
-(define-public (ptv mean conf count) (cog-new-ptv mean conf count))
-(define-public (ftv mean conf) (cog-new-ftv mean conf))
-(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
-
-; Fetch the mean, confidence and count of a TV.
-(define-public (tv-mean tv)
-"
-  Return the floating-point mean (strength) of a TruthValue.
-"
-	(assoc-ref (cog-tv->alist tv) 'mean))
-
-(define-public (tv-conf tv)
-"
-  Return the floating-point confidence of a TruthValue.
-"
-	(assoc-ref (cog-tv->alist tv) 'confidence))
-
-(define-public (tv-non-null-conf? tv)
-"
-  Return #t if the confidence of tv is non null positive, #f otherwise.
-"
-	(< 0 (tv-conf tv)))
-
-;
-; Simple truth values won't have a count. Its faster to just check
-; for #f than to call (cog-ctv? tv)
-(define-public (tv-count tv)
-"
-  Return the floating-point count of a CountTruthValue.
-"
-	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
-	(if (eq? cnt #f) 0 cnt)
-)
-
-(define-public (tv-positive-count tv)
-"
-  Return the floating-point positive count of a EvidenceCountTruthValue.
-"
-	(define pos-cnt (assoc-ref (cog-tv->alist tv) 'positive-count))
-	(if (eq? pos-cnt #f) 0 pos-cnt)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-set-sti! atom sti)
-"
-  Returns the atom after setting its sti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av sti (assoc-ref av-alist 'lti) (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-lti! atom lti)
-"
-  Returns the atom after setting its lti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) lti (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-vlti! atom vlti)
-"
-  Returns the atom after setting its vlti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) (assoc-ref av-alist 'lti) vlti))
-    )
-)
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
@@ -204,17 +122,6 @@
 	(loop lst)
 )
 
-; --------------------------------------------------------------
-;
-(define-public (cog-atom-incr atom cnt)
-"
-  cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
-
-  DEPRECATED! Use cog-inc-count! instead!
-"
-	(cog-inc-count! atom cnt)
-)
-
 ; --------------------------------------------------------------------
 (define-public (extract-hypergraph atom)
 "
@@ -259,90 +166,10 @@
 ; --------------------------------------------------------------------
 (define-public (clear)
 "
-  clear -- extract all atoms in the atomspace.  This only removes the
-  atoms from the atomspace, it does NOT remove it from the backingstore,
-  if attached!
+  clear -- extract all atoms in the atomspace. Deprecated; use
+      cog-atomspace-clear instead.
 "
-	(for-each
-		extract-type
-		(cog-get-types)
-	)
-)
-
-; --------------------------------------------------------------------
-(define-public (count-all)
-"
-  count-all -- Return the total number of atoms in the atomspace, it does not
-  count those in the backing store.
-"
-	(define cnt 0)
-	(define (ink a) (set! cnt (+ cnt 1)) #f)
-	(define (cnt-type x) (cog-map-type ink x))
-	(map cnt-type (cog-get-types))
-	cnt
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-get-atoms atom-type)
-"
-  cog-get-atoms -- Return a list of all atoms of type 'atom-type'
-
-  cog-get-atoms atom-type
-  Return a list of all atoms in the atomspace that are of type 'atom-type'
-
-  Example usage:
-  (display (cog-get-atoms 'ConceptNode))
-  will return and display all atoms of type 'ConceptNode
-"
-	(let ((lst '()))
-		(define (mklist atom)
-			(set! lst (cons atom lst))
-			#f
-		)
-		(cog-map-type mklist atom-type)
-		lst
-	)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-prt-atomspace)
-"
-  cog-prt-atomspace -- Prints all atoms in the atomspace
-
-  This will print all of the atoms in the atomspace: specifically, only
-  those atoms that have no incoming set, and thus are at the top of a
-  tree.  All other atoms (those which do have an incoming set) will
-  appear somewhere underneath these top-most atoms.
-"
-	(define (prt-atom h)
-		; Print only the top-level atoms.
-		(if (null? (cog-incoming-set h))
-			(display h))
-		#f)
-
-	(for-each (lambda (ty) (cog-map-type prt-atom ty)) (cog-get-types))
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-count-atoms atom-type)
-"
-  cog-count-atoms -- Count of the number of atoms of given type
-
-  cog-count-atoms atom-type
-  Return a count of the number of atoms of the given type 'atom-type'
-
-  Example usage:
-  (display (cog-count-atoms 'ConceptNode))
-  will display a count of all atoms of type 'ConceptNode
-"
-	(let ((cnt 0))
-		(define (inc atom)
-			(set! cnt (+ cnt 1))
-			#f
-		)
-		(cog-map-type inc atom-type)
-		cnt
-	)
+	(cog-atomspace-clear)
 )
 
 ; -----------------------------------------------------------------------
@@ -353,6 +180,10 @@
   Return an association list holding a report of the number of atoms
   of each type currently in the atomspace. Counts are included only
   for types with non-zero atom counts.
+
+  See also:
+     cog-count-atoms -- which counts atoms of a given type.
+     count-all -- report a single grand-total count.
 "
 	(let ((tlist (cog-get-types)))
 		(define (rpt type)
@@ -365,6 +196,105 @@
 		)
 		(filter-map rpt tlist)
 	)
+)
+
+; --------------------------------------------------------------------
+(define-public (count-all)
+"
+  count-all -- Return the total number of atoms in the atomspace, it does not
+  count those in the backing store.
+
+  See also:
+     cog-count-atoms -- which counts atoms of a given type.
+     cog-report-counts -- which reports counts by type.
+"
+	(fold (lambda (typ cnt) (+ cnt (cog-count-atoms typ))) 0 (cog-get-types))
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-get-atoms atom-type . subtypes)
+"
+
+  cog-get-atoms -- Return a list of all atoms of type 'atom-type', optionally
+                   if its subtypes as well.
+
+  Usage: (cog-get-atoms atom-type [subtypes])
+
+  Return a list of all atoms in the atomspace that are of type
+  'atom-type'. If the optional argument 'subtypes' is provided and set
+  to #t, then all atoms of subtypes of `atom-type` are returned as
+  well, otherwise only atoms of type `atom-type` are returned.
+
+  Examples:
+
+  (display (cog-get-atoms 'ConceptNode))
+  will return and display all atoms of type 'ConceptNode
+
+  (display (cog-get-atoms 'Atom #t))
+  will return and display all atoms, including outgoing duplicates.
+"
+	(let ((lst '()))
+		(define (mklist atom)
+			(set! lst (cons atom lst))
+			#f
+		)
+		(if (and (not (null? subtypes)) (eq? (car subtypes) #t))
+			(for-each (lambda (x) (cog-map-type mklist x)) (cog-get-all-subtypes atom-type))
+			(cog-map-type mklist atom-type))
+		lst
+	)
+)
+
+; -----------------------------------------------------------------------
+(define (traverse-roots func)
+"
+  traverse-roots -- Applies func to every root atom in the atomspace.
+
+  The root atoms are those, which have no incoming atoms, located
+  in the atomspace or its ancestors (i.e. visible from the atomspace).
+"
+	; A list of the atomspace and all parents
+	(define atomspace-and-parents
+		(unfold null? identity cog-atomspace-env (cog-atomspace)))
+
+	; Is the atom in any of the atomspaces?
+	(define (is-visible? atom)
+		(member (cog-as atom) atomspace-and-parents))
+
+	(define (apply-if-root h)
+		(if (not (any is-visible? (cog-incoming-set h)))
+			(func h))
+		#f)
+
+	(for-each (lambda (ty) (cog-map-type apply-if-root ty)) (cog-get-types))
+)
+; -----------------------------------------------------------------------
+(define-public (cog-prt-atomspace)
+"
+  cog-prt-atomspace -- Prints all atoms in the atomspace
+
+  This will print all of the atoms in the atomspace: specifically,
+  only those atoms that have no incoming set in the atomspace or its
+  ancestors, and thus are at the top of a tree.  All other atoms
+  (those which do have an incoming set) will appear somewhere
+  underneath these top-most atoms.
+"
+	(traverse-roots display)
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-get-all-roots)
+"
+  cog-get-all-roots -- Return the list of all root atoms.
+
+  cog-get-all-roots
+  Return the list of all root atoms, that is atoms with
+  no incoming set.
+"
+  (define roots '())
+  (define (cons-roots x) (set! roots (cons x roots)))
+  (traverse-roots cons-roots)
+  roots
 )
 
 ; -----------------------------------------------------------------------
@@ -542,7 +472,7 @@
   Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
   Starting at the atom 'anchor', chase its incoming links of
   'link-type', and call proceedure 'proc' on all of the atoms of
-  type 'node-type' in those links. For example, if 'anchor' is the
+  type 'endpoint-type' in those links. For example, if 'anchor' is the
   node 'GivenNode \"a\"', and the atomspace contains
 
      SomeLink
@@ -1035,7 +965,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public cog-atomspace-stack '())
+(define-public cog-atomspace-stack (make-fluid '()))
 (define-public (cog-push-atomspace)
 "
  cog-push-atomspace -- Create a temporary atomspace.
@@ -1045,7 +975,8 @@
     after popping, all of the atoms placed into it will also be
     deleted (unless they are refered to in some way).
 "
-	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
+	(fluid-set! cog-atomspace-stack
+		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))
 	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
 
 ; ---------------------------------------------------------------------
@@ -1055,39 +986,53 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(begin
-		(if (null-list? cog-atomspace-stack)
+	(let ((stk-top (fluid-ref cog-atomspace-stack)))
+		(if (null-list? stk-top)
 			(throw 'badpop "More pops than pushes!"))
-		(cog-set-atomspace! (car cog-atomspace-stack))
-		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
-		; Performing a gc here helps ensure that the removed atomspace
-		; is deleted, thus cleaning up incoming sets of many atoms.
-		; The pattern matcher will work correctly without this cleanup,
-		; but I think it helps. Do it twice; once is sometimes not enough.
-		(gc) (gc)))
 
+		; Guile gc should eventually garbage-collect this atomspace,
+		; which will clear it. But ... even when brute-forcing the
+		; gc to run (as done below), the atomspace seems to hang
+		; around anyway, undeleted. So we brute-force clear it now,
+		; so that at least the atoms do not chew up RAM.
+		(cog-atomspace-clear)
+		(cog-set-atomspace! (car stk-top))
+		(fluid-set! cog-atomspace-stack (cdr stk-top))
 
-; ---------------------------------------------------------------------
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (check-name? node-name node-type)
-"
- Return #t if there is a node of type node-type with a name "node-name".
-"
-	(not (null? (cog-node node-type node-name)))
-)
+		; Try to force garbage-collection of the atomspace.
+		(set-car! stk-top '())
+		(set-cdr! stk-top '())
+		(gc)
+	))
 
 ; ---------------------------------------------------------------------
 
+(define rand-state-fluid (make-fluid))
 (define-public (random-string str-length)
 "
- random-string -- Returns a random string of length 'str-length'.
+  random-string -- Returns a random string of length 'str-length'.
+
+  This is now thread-safe.  I think. Its missing a unit test,
+  and tends to not actually be random when hit hard from multiple
+  threads. Ick.  This and everything that touches this needs
+  review/redesign.
 "
 	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	(define str "")
+	(define alphlen (string-length alphanumeric))
+	(define str (format #f "~A-" (get-internal-real-time)))
+
+	; Attempt to make this thread-safe by giving each thread it's own
+	; random state.
+	(if (not (fluid-ref rand-state-fluid))
+		(fluid-set! rand-state-fluid
+			(seed->random-state (get-internal-real-time))))
+
+	; XXX FIXME -- this is a stunningly slow and sloppy random-string
+	; generator. But whatever.  I don't have the hours in the day to fix
+	; everything.
 	(while (> str-length 0)
-		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
+		(set! str (string-append str (string (string-ref alphanumeric
+			(random alphlen (fluid-ref rand-state-fluid))))))
 		(set! str-length (- str-length 1))
 	)
 	str
@@ -1095,115 +1040,110 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (random-node-name node-type random-length prepend-text)
+(define-public (random-node-name node-type random-length prefix)
 "
- Creates a possible name 'node-name' of length 'random-length' for a node
- of type 'node-type'. The 'node-name' is not used with any other node
- of type 'node-type'. Prepend 'prepend-text' to the front.
+  random-node-name TYPE LENGTH PREFIX - create a unique node.
+
+  Create a random string, consisting of `PREFIX` followed by
+  a random string of length `LENGTH`.  The string is checked, so
+  that no node of type `TYPE` exists in the atomspace at the time
+  of this call. Thus, the name is almost unique -- there still is
+  a tiny window in which a race can occur.
 "
+	(define (check-name? node-name node-type)
+	"
+	  Return #t if there is a node of type node-type with name
+      node-name in the current atomspace.
+	"
+		(not (null? (cog-node node-type node-name))))
+
 	(define node-name (random-string random-length))
-	(define prepend-length (string-length prepend-text))
-	(if (> prepend-length 0)
-		(set! node-name (string-append prepend-text node-name))
+	(define prefix-length (string-length prefix))
+	(if (> prefix-length 0)
+		(set! node-name (string-append prefix node-name))
 	)
 	(while (check-name? node-name node-type)
-		(if (> prepend-length 0)
-			(set! node-name (string-append prepend-text (random-string random-length)))
+		(if (> prefix-length 0)
+			(set! node-name (string-append prefix (random-string random-length)))
 			(set! node-name (random-string random-length))
 		)
 	)
 	node-name
 )
 
-; -----------------------------------------------------------------------
-
 (define-public (choose-var-name)
 "
- Creates name for VariableNodes after checking whether the name is being
- not used by other VariableNode.
+ DEPRECATED - use uniquely-named-variable instead.
 "
-    (random-node-name 'VariableNode 36 "$")
+    (random-node-name 'VariableNode 24 "$")
+)
+
+(define-public (uniquely-named-variable)
+"
+ uniquely-named-variable -- Creates a new uniquely-named VariableNode.
+"
+    (Variable (random-node-name 'VariableNode 24 "$"))
+)
+
+
+
+; -----------------------------------------------------------------------
+
+(define-public (random-node node-type random-length prefix)
+"
+  Creates a random node of type `node-type`, with name `prefix` followed by
+  a random string of length `random-length`. It Makes sure the resulting node
+  did not previously exist in the current atomspace.
+
+  For instance:
+
+  (random-node 'ConceptNode 8 \"texts-\")
+
+  returns
+
+  (ConceptNode \"texts-218951126396-as737yFW\")
+"
+	(cog-new-node node-type (random-node-name node-type random-length prefix)))
+
+; -----------------------------------------------------------------------
+
+(define-public (random-variable)
+"
+ Creates a new random VariableNode.
+"
+    (random-node 'VariableNode 36 "$")
 )
 
 ; -----------------------------------------------------------------------
 
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (cog-new-flattened-link link-type . args)
+(define-public (cog-cp AS LST)
 "
- Creates a new flattened link, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A B) C)
-
- will create the following
-
-    (AndLink A B C)
-
- This is not recursive. So, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
-
- will not produce
-
-   (AndLink A B C)
-
- but will produce instead
-
-   (AndLink A (AndLink B) C)
-
- Note that it will also remove duplicates, for instance
-
-   (cog-new-flattened-link 'AndLink (AndLink A B C) C)
-
- will create the following
-
-   (AndLink A B C)
-
- WARNING: TVs and other values attached to the atoms are ignored.
-   The TV's and values are not copied to the new link, nor are they
-   recomputed in any way.
-"
-  (define (flatten e r)
-    (append r (if (and (cog-link? e)
-                       (equal? (cog-type e) link-type))
-                  (cog-outgoing-set e)
-                  (list e))))
-  (let ((flat (delete-duplicates (fold flatten '() args))))
-    (apply cog-new-link link-type flat))
-)
-
-; -----------------------------------------------------------------------
-;
-; XXX FIXME. The two arguments to this function are backwards.
-; The AS should come first, then the list.
-; XXX FIXME why is #t being returned ???
-(define-public (cog-cp LST AS)
-"
-  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and
-  returns #t on success.
+  cog-cp AS LST - Copy the atoms in LST to the given atomspace AS and
+  returns the list of copied atoms.
 "
   (define initial-as (cog-atomspace))
 
-  (if (equal? AS initial-as)
-    (error "Destination atomspace is the same as the current atomspace\n"))
-
-  ; Switch to destination atomspace.
+  ;; Switch to destination atomspace.
   (cog-set-atomspace! AS)
 
-  ; The creation of a SetLink or any other link would result in the atoms
-  ; being inserted in the current atomspace.
-  (cog-delete (Set LST))
-  ; Switch back to initial atomspace.
-  (cog-set-atomspace! initial-as)
-  #t
+  (let* (;; The creation of a ListLink or any other link would result
+         ;; in the atoms being inserted in the current atomspace.
+         (LST-list (List LST))
+         (LST-cp (cog-outgoing-set LST-list)))
+    (cog-delete LST-list)
+    ;; Switch back to initial atomspace.
+    (cog-set-atomspace! initial-as)
+    ;; Return the copied list
+    LST-cp)
 )
 
 ; -----------------------------------------------------------------------
 (define-public (cog-cp-all AS)
 "
-  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns #t on success.
+  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS
+                  and returns the list of copied atoms on success.
 "
-  (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
+  (cog-cp AS (apply append (map cog-get-atoms (cog-get-types))))
 )
 
 (define-public (cog-get-all-subtypes atom-type)
@@ -1216,80 +1156,4 @@
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
-; -----------------------------------------------------------------------
-
-; A list of all the public (exported) utilities in this file
-(define cog-utilities (list
-'av
-'stv
-'itv
-'ctv
-'etv
-'tv-mean
-'tv-conf
-'tv-non-null-conf?
-'tv-count
-'cog-set-sti!
-'cog-set-lti!
-'cog-set-vlti!
-'gar
-'gdr
-'gadr
-'gddr
-'gaddr
-'gdddr
-'for-each-except
-'cog-atom-incr
-'extract-hypergraph
-'extract-type
-'clear
-'count-all
-'cog-get-atoms
-'cog-prt-atomspace
-'cog-count-atoms
-'cog-report-counts
-'cog-get-root
-'cog-get-all-nodes
-'cog-get-partner
-'cog-pred-get-partner
-'cog-filter
-'cog-chase-link
-'cog-chase-link-chk
-'cog-map-chase-link
-'cog-par-chase-link
-'cog-map-chase-links
-'cog-par-chase-links
-'cog-map-chase-links-chk
-'cog-par-chase-links-chk
-'cog-map-chase-link-dbg
-'cog-map-apply-link
-'cog-get-link
-'cog-get-pred
-'cog-get-reference
-'cog-get-trunk
-'filter-hypergraph
-'cartesian-prod
-'cartesian-prod-list-only
-'min-element-by-key
-'max-element-by-key
-'cog-atomspace-stack
-'cog-push-atomspace
-'cog-pop-atomspace
-'check-name?
-'random-string
-'random-node-name
-'choose-var-name
-'cog-new-flattened-link
-'cog-cp
-'cog-cp-all
-'cog-get-all-subtypes
-))
-
-; Compile 'em all.  This should improve performance a bit.
-; XXX FIXME This should be removed when guile-2.2 becomes popular
-; (maybe in 2017?) since 2.2 compiles everything by default.
-(for-each
-	(lambda (symb) (compile symb #:env (current-module)))
-	cog-utilities
-)
 ; ---------------------------------------------------------------------

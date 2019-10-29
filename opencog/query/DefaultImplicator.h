@@ -24,7 +24,6 @@
 #ifndef _OPENCOG_DEFAULT_IMPLICATOR_H
 #define _OPENCOG_DEFAULT_IMPLICATOR_H
 
-#include "AttentionalFocusCB.h"
 #include "DefaultPatternMatchCB.h"
 #include "Implicator.h"
 #include "InitiateSearchCB.h"
@@ -33,6 +32,10 @@
 
 namespace opencog {
 
+// Flirting with diamond-pattern inheritance. We need to do this
+// because we want different helper classes (aka "mixin classes")
+// to handle different parts of the grounding process, and virtual
+// bases classes just minimizes the total boilerplate code needed.
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,
@@ -44,22 +47,6 @@ class DefaultImplicator:
 			InitiateSearchCB(asp),
 			DefaultPatternMatchCB(asp) {}
 
-#ifdef CACHED_IMPLICATOR
-	virtual void ready(AtomSpace* asp)
-	{
-		Implicator::ready(asp);
-		InitiateSearchCB::ready(asp);
-		DefaultPatternMatchCB::ready(asp);
-	}
-
-	virtual void clear()
-	{
-		Implicator::clear();
-		InitiateSearchCB::clear();
-		DefaultPatternMatchCB::clear();
-	}
-#endif
-
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
 	{
@@ -67,41 +54,6 @@ class DefaultImplicator:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 };
-
-
-/**
- * Attentional Focus specific PatternMatchCallback implementation
- */
-class AFImplicator:
-	public virtual Implicator,
-	public virtual InitiateSearchCB,
-	public virtual AttentionalFocusCB
-{
-	public:
-		AFImplicator(AtomSpace* asp) :
-			Implicator(asp),
-			InitiateSearchCB(asp),
-			DefaultPatternMatchCB(asp),
-			AttentionalFocusCB(asp)
-		{}
-
-	virtual void set_pattern(const Variables& vars,
-	                         const Pattern& pat)
-	{
-		InitiateSearchCB::set_pattern(vars, pat);
-		DefaultPatternMatchCB::set_pattern(vars, pat);
-	}
-};
-
-#ifdef CACHED_IMPLICATOR
-class CachedDefaultImplicator {
-	static DefaultImplicator* _cached_implicator;
-	public:
-		CachedDefaultImplicator(AtomSpace*asp);
-		~CachedDefaultImplicator();
-		operator Implicator&() { return *_cached_implicator; }
-};
-#endif
 
 }; // namespace opencog
 

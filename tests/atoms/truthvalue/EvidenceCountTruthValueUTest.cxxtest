@@ -1,0 +1,86 @@
+/*
+ * tests/atomspace/SimpleTruthValueUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/atoms/truthvalue/EvidenceCountTruthValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+#define NUM_TVS 3
+#define TV1_POS_COUNT 10
+#define TV2_POS_COUNT 0
+#define TV3_POS_COUNT 100
+#define TV1_TOTAL_COUNT 20
+#define TV2_TOTAL_COUNT 40
+#define TV3_TOTAL_COUNT -1
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+
+class EvidenceCountTruthValueUTest : public CxxTest::TestSuite
+{
+private:
+
+    EvidenceCountTruthValue* ectvs[NUM_TVS];
+    float pos_counts[NUM_TVS];
+    float total_counts[NUM_TVS];
+
+public:
+    EvidenceCountTruthValueUTest() {
+        pos_counts[0] = TV1_POS_COUNT;
+        pos_counts[1] = TV2_POS_COUNT;
+        pos_counts[2] = TV3_POS_COUNT;
+        total_counts[0] = TV1_TOTAL_COUNT;
+        total_counts[1] = TV2_TOTAL_COUNT;
+        total_counts[2] = TV3_TOTAL_COUNT;
+    }
+
+    void setUp()
+	{
+		for (int i = 0; i < NUM_TVS; i++)
+			ectvs[i] =
+				new EvidenceCountTruthValue(pos_counts[i], total_counts[i]);
+	}
+
+    void tearDown()
+	{
+		for (int i = 0; i < NUM_TVS; i++)
+			delete ectvs[i];
+	}
+
+	void test_mean()
+	{
+		for (int i = 0; i < NUM_TVS; i++) {
+			if (ectvs[i]->is_count_valid()) {
+				TS_ASSERT_DELTA(ectvs[i]->get_mean(),
+				                pos_counts[i] / total_counts[i],
+				                FLOAT_ACCEPTABLE_ERROR);
+			} else {
+				TS_ASSERT(std::isnan(ectvs[i]->get_mean()));
+			}
+		}
+	}
+};

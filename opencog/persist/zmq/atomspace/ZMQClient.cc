@@ -32,14 +32,13 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/ProbabilisticTruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/atoms/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/persist/zmq/atomspace/ZMQClient.h>
 

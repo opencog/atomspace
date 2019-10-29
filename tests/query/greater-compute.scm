@@ -47,7 +47,7 @@
 
 ; Function that takes the square root of a numeric values
 (define (eff x)
-	(NumberNode (sqrt (string->number (cog-name x))))
+	(NumberNode (sqrt (cog-number x)))
 )
 
 ; Function that does some computation

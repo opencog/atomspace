@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_ATOMTABLE_H
 #define _OPENCOG_ATOMTABLE_H
 
+#include <atomic>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -34,9 +35,9 @@
 #include <opencog/util/RandGen.h>
 #include <opencog/util/sigslot.h>
 
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 
 #include <opencog/atomspace/TypeIndex.h>
 
@@ -71,7 +72,7 @@ class AtomTable
     friend class ::AtomSpaceUTest;
 
 private:
-    ClassServer& _classserver;
+    NameServer& _nameserver;
 
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
@@ -100,11 +101,11 @@ private:
 
     /**
      * signal connection used to find out about atom type additions in the
-     * ClassServer
+     * NameServer
      */
     int addedTypeConnection;
 
-    /** Handler of the 'type added' signal from ClassServer */
+    /** Handler of the 'type added' signal from NameServer */
     void typeAdded(Type);
 
     /** Provided signals */
@@ -121,21 +122,21 @@ private:
     /// operation. Viz, other computers on the network may have a copy
     /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
+    std::atomic_int _num_nested;
     UUID _uuid;
 
-    // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
+    // The AtomSpace that is holding us (if any).
     AtomSpace* _as;
     bool _transient;
 
     /**
-     * Override and declare copy constructor and equals operator as
-     * private.  This is to prevent large object copying by mistake.
+     * Drop copy constructor and equals operator to
+     * prevent large object copying by mistake.
      */
-    AtomTable& operator=(const AtomTable&);
-    AtomTable(const AtomTable&);
+    AtomTable& operator=(const AtomTable&) = delete;
+    AtomTable(const AtomTable&) = delete;
 
-    AtomPtr cast_factory(Type atom_type, AtomPtr atom);
-
+    void clear_all_atoms();
 public:
 
     /**
@@ -154,7 +155,6 @@ public:
     void ready_transient(AtomTable* parent, AtomSpace* holder);
     void clear_transient();
 
-    void clear_all_atoms();
     void clear();
 
     UUID get_uuid(void) const { return _uuid; }
@@ -201,12 +201,34 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, const std::string&) const;
-    Handle getNodeHandle(const AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(const AtomPtr&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(const Handle& h) const {
         AtomPtr a(h); return getHandle(a);
+    }
+    Handle lookupHandle(const AtomPtr&) const;
+
+    /**
+     * Returns the set of atoms of a given type (subclasses optionally).
+     *
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @return The set of atoms of a given type (subclasses optionally).
+     */
+    void
+    getHandleSetByType(HandleSet& hset,
+                       Type type,
+                       bool subclass=false,
+                       bool parent=true) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        auto tit = typeIndex.begin(type, subclass);
+        auto tend = typeIndex.end();
+        while (tit != tend) { hset.insert(*tit); tit++; }
+        // If an atom is already in the set, it will hide any duplicate
+        // atom in the parent.
+        if (parent and _environ)
+            _environ->getHandleSetByType(hset, type, subclass, parent);
     }
 
     /**
@@ -222,12 +244,19 @@ public:
                      bool subclass=false,
                      bool parent=true) const
     {
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
+           return std::copy(hset.begin(), hset.end(), result);
+        }
+
+        // No parent ... avoid the copy above.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
-                         typeIndex.end(),
-                         result);
+                         typeIndex.end(), result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -237,9 +266,21 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
+           std::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+           return;
+        }
+
+        // No parent ... avoid the copy above.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](const Handle& h)->void {
@@ -253,10 +294,28 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->foreachParallelByType(func, type, subclass);
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
 
+           // Parallelize, always, no matter what!
+           opencog::setting_omp(opencog::num_threads(), 1);
+
+           OMP_ALGO::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+
+           // Reset to default.
+           opencog::setting_omp(opencog::num_threads());
+           return;
+        }
+
+        // No parent ... avoid the copy above.
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
@@ -269,18 +328,6 @@ public:
         // Reset to default.
         opencog::setting_omp(opencog::num_threads());
     }
-
-    /* Exposes the type iterators so we can do more complicated
-     * looping without having to create a vector to hold the handles.
-     *
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @return The handle iterator for the given type.
-     */
-    TypeIndex::iterator beginType(Type type, bool subclass) const
-        { return typeIndex.begin(type, subclass); }
-    TypeIndex::iterator endType(void) const
-        { return typeIndex.end(); }
 
     /**
      * Adds an atom to the table. If the atom already is in the
@@ -300,10 +347,13 @@ public:
      * and also giving each index its own unique mutex, to avoid
      * collisions.  So the API is here, but more work is still needed.
      *
+     * The `force` flag forces the addtion of this atom into the
+     * atomtable, even if it is already in a parent atomspace.
+     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async);
+    Handle add(AtomPtr, bool async, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this

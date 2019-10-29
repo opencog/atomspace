@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/TimesLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include "DivideLink.h"
 #include "TimesLink.h"
 
 using namespace opencog;
+
+Handle TimesLink::one;
 
 TimesLink::TimesLink(const HandleSeq& oset, Type t)
     : ArithmeticLink(oset, t)
@@ -47,75 +50,133 @@ TimesLink::TimesLink(const Link& l)
 
 void TimesLink::init(void)
 {
+	if (nullptr == one) one = createNumberNode(1);
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, TIMES_LINK))
+	if (not nameserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
-	knil = Handle(createNumberNode(1));
+	knil = one;
 	_commutative = true;
 }
 
 // ============================================================
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ValuePtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
+ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
+                         const ValuePtr& fi, const ValuePtr& fj) const
 {
-	Type fitype = fi->get_type();
-	Type fjtype = fj->get_type();
+	// Try to yank out values, if possible.
+	ValuePtr vi(get_value(as, silent, fi));
+	Type vitype = vi->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
-	{
-		double prod = get_double(fi) * get_double(fj);
-		return Handle(createNumberNode(prod));
-	}
-
-	// If either one is the unit, then just drop it.
-	if (content_eq(fi, knil))
-		return fj;
-	if (content_eq(fj, knil))
-		return fi;
+	ValuePtr vj(get_value(as, silent, fj));
+	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
-	if (TIMES_LINK == fitype or TIMES_LINK == fjtype)
+	if (TIMES_LINK == vitype or TIMES_LINK == vjtype)
 	{
+		Handle hi(HandleCast(vi));
 		HandleSeq seq;
 		// flatten the left
-		if (TIMES_LINK == fitype)
+		if (TIMES_LINK == vitype)
 		{
-			for (const Handle& lhs: fi->getOutgoingSet())
+			for (const Handle& lhs: hi->getOutgoingSet())
 				seq.push_back(lhs);
 		}
 		else
 		{
-			seq.push_back(fi);
+			seq.push_back(hi);
 		}
 
 		// flatten the right
-		if (TIMES_LINK == fjtype)
+		if (TIMES_LINK == vjtype)
 		{
-			for (const Handle& rhs: fj->getOutgoingSet())
+			for (const Handle& rhs: HandleCast(vj)->getOutgoingSet())
 				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(fj);
+			seq.push_back(HandleCast(vj));
 		}
 		Handle foo(createLink(seq, TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
-		return ap->delta_reduce();
+		return ap->delta_reduce(as, silent);
 	}
+
+	// Are they both numbers?
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+	{
+		double prod = get_double(vi) * get_double(vj);
+		return createNumberNode(prod);
+	}
+
+	// If either one is the unit, then just drop it.
+	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
+		return sample_stream(vj, vjtype);
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
+		return sample_stream(vi, vitype);
+
+   if (nameserver().isA(vjtype, NUMBER_NODE))
+   {
+      std::swap(vi, vj);
+      std::swap(vitype, vjtype);
+   }
+	// Collapse (3 * (5 / x)) and (13 * (x / 6))
+	if (DIVIDE_LINK == vjtype and NUMBER_NODE == vitype)
+	{
+		Handle dividend(HandleCast(vj)->getOutgoingAtom(0));
+		Handle divisor(HandleCast(vj)->getOutgoingAtom(1));
+		if (NUMBER_NODE == dividend->get_type())
+		{
+			double prod = get_double(vi) * get_double(dividend);
+			Handle hprod(createNumberNode(prod));
+			return createDivideLink(hprod, divisor);
+		}
+		if (NUMBER_NODE == divisor->get_type())
+		{
+			double quot = get_double(vi) / get_double(divisor);
+			Handle hquot(createNumberNode(quot));
+			if (content_eq(hquot, one))
+				return dividend;
+			return createTimesLink(hquot, dividend);
+		}
+	}
+
+	// Swap order, make things easier below.
+	if (nameserver().isA(vitype, FLOAT_VALUE))
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Scalar times vector
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return times(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector times vector
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return times(FloatValueCast(vi), FloatValueCast(vj));
+	}
+
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi = HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
-	return Handle(createTimesLink(fi, fj)->reorder());
+	return createTimesLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(TimesLink, TIMES_LINK)

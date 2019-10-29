@@ -86,19 +86,19 @@ private:
 	 * of it, replacing the variables in its outgoing by their
 	 * respective groundings.
 	 *
+	 * See comments in the C++ code for a better explanation of
+	 * what this function actually does.
+	 *
 	 * See also the related function VariableList::substitute(),
 	 * which will simply perform a substitution, without performing
-	 * any execution. See also PutLink, which does substituion.
+	 * any execution. See also PutLink, which does substitution.
 	 * (actually, beta reduction).
-	 *
-	 * There are two ways to do this: via eager execution, and via
-	 * lazy execution. Lazy would be nicer, performance-wise, but this
-	 * is still buggy, and unit tests will fail. So do eager execution
-	 * by default.
 	 */
-	bool _eager;
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
+
+	/// Substitute, but do not execute ExecutionOutputLinks
+	Handle reduce_exout(const Handle& exout, bool silent=false);
 
 	/**
 	 * Return true iff the following atom type may not match to
@@ -134,17 +134,11 @@ public:
 		_halt = false;
 	}
 
-	// TODO: set consume_quotations to false when executing, set it to
-	// true when instantiating
-	Handle instantiate(const Handle& expr, const HandleMap &vars,
-	                   bool silent=false);
-	Handle execute(const Handle& expr, bool silent=false)
-	{
-		// If no actual instantiation is involved then do not consume
-		// quotations as it might change the semantics.
-		_consume_quotations = false;
-		return instantiate(expr, HandleMap(), silent);
-	}
+	ValuePtr instantiate(const Handle& expr,
+	                     const HandleMap& vars,
+	                     bool silent=false);
+
+	ValuePtr execute(const Handle& expr, bool silent=false);
 };
 
 } // namespace opencog

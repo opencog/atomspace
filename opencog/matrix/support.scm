@@ -2,9 +2,9 @@
 ; support.scm
 ;
 ; Define object-oriented class API's for computing the supporting set
-; the the lp-norms for the left and right side of pairs.
+; and the lp-norms of the rows and columns (vectors) in a matrix.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -20,11 +20,25 @@
 (define*-public (add-support-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
-  cached support, size and length subtotals on rows and columns.
+  add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
+  support, size and length subtotals on rows and columns. The values
+  are retrieved from the \"margins\", attached to the matrix wild-cards.
+  This class assumes the marginals were previously computed and
+  attached to the wildcards; this only grabs the precomputed values
+  from the atomspace.
 
-  Optional argument ID is #f to use the default value key;
-  otherwise a filtered key is used.
+  The margins (the pre-computed values) can be populated by saying
+  `((add-support-compute LLOBJ) 'cache-all)`
+  The `add-support-api` and `add-support-compute` API's are designed
+  to work together and complement one-another.
+
+  See the documentation on `add-support-compute` for an explanation
+  of what these marginals are.
+
+  Optional argument ID is #f to use the default value key; otherwise
+  a filtered key is used. That is, the marginals are fetched from a
+  default location; however, that location can be changed by specifying
+  it with the optional ID argument.
 "
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
@@ -38,14 +52,53 @@
 	(define (set-norms ATOM L0 L1 L2)
 		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
 
+	; -----------------
+	; Set the grand-total count. Use the CountTruthValue.
+	; Backwards-compatibility method. Remove this someday.
+	(define (set-wild-wild-count CNT)
+		(cog-set-tv! (LLOBJ 'wild-wild) (cog-new-ctv 0 0 CNT)))
+
+	; -----------------
+	(define left-total-key-name
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Left Total Key " ID)
+			"*-Left Total Key-*"))
+
+	(define left-total-key (PredicateNode left-total-key-name))
+
+	(define (set-left-totals L0 L1)
+		(set-wild-wild-count L1)
+		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1)))
+
+	(define right-total-key-name
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Right Total Key " ID)
+			"*-Right Total Key-*"))
+
+	(define right-total-key (PredicateNode right-total-key-name))
+
+	(define (set-right-totals L0 L1)
+		(set-wild-wild-count L1)
+		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1)))
+
+	; -----------------
+	; User might ask for something not in the matrix. In that
+	; case, cog-value-ref will throw 'wrong-type-arg. If this
+	; happens, just return zero.
 	(define (get-support ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 0))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 0))
+			(lambda (key . args) 0)))
 
 	(define (get-count ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 1))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 1))
+			(lambda (key . args) 0)))
 
 	(define (get-length ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 2))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
+			(lambda (key . args) 0)))
 
 	;--------
 	(define (get-left-support ITEM)
@@ -74,6 +127,28 @@
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
 	;--------
+	(define (get-total-support-left)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+
+	(define (get-total-count-left)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
+
+	(define (get-total-support-right)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
+
+	(define (get-total-count-right)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
+
+	;--------
+	; Backwards-compatibility method. Remove this someday.
+	; Note that various old datasets store wild-card counts here,
+	; and so this method is explicitly needed to access old data.
+	; The old data does not have the support-totals, above.
+	; Return the grand-total count. Use the CountTruthValue.
+	(define (get-wild-wild-count)
+		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
+
+	;--------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -83,42 +158,91 @@
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
 			((right-length)       (apply get-right-length args))
+
+			((total-support-left) (get-total-support-left))
+			((total-support-right)(get-total-support-right))
+			((total-count-left)   (get-total-count-left))
+			((total-count-right)  (get-total-count-right))
+
+			; The 'wild-wild-count method provides backwards-compat
+			; with the old `add-pair-count-api` object. Remove whenever.
+			((wild-wild-count)    (get-wild-wild-count))
+
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
+			((set-left-totals)    (apply set-left-totals args))
+			((set-right-totals)   (apply set-right-totals args))
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT 'pair-count))
+	 #:optional (GET-CNT 'get-count))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
-  the count (lp-norm for p=1), the Eucliden length (lp-norm for p=2)
-  and the general lp-norm.  These all work with the counts for the
-  pairs, and NOT the frequencies!  None of these use cached values,
-  instead, they compute these values on the fly.
+  the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
+  and the general lp-norm.  By default, these are computed from the
+  counts on the matrix; optionally, a different source of numbers can
+  be used.  This object does not make use of any pre-computed (marginal
+  or \"cached\") values; instead, all computations are done on the raw
+  matrix data.  The computed norms are not placed back into the
+  atomspace after being computed (unless the 'cache-all method is
+  invoked, in which case a bulk computation is done.)
+
+  The 'cache-all method computes norms for the ENTIRE matrix, and
+  places them in the margins, i.e. as values on the wild-cards of the
+  matrix.  This can take a lot of CPU-time. After the 'cache-all
+  method has been invoked, the `(add-support-api)` object can be
+  used to access these values.
+
+  In order for 'cache-all to work, the full matrix must available
+  in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
+  After computing the marginals, it is wise to store them back to
+  disk. This can be done with `((make-store LLOBJ) 'store-wildcards)`
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  The left-support-set consists of all pairs (x,y), for fixed y, for
+  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+
+  The 'left-support-set method return all pairs (x,y), for fixed y, for
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
-  The left-support is the number of non-zero entries in a column.
+  The 'left-support is the number of non-zero entries in a column.
+  That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The left-count is the wild-card sum_x N(x,y) for fixed y.
+  The 'left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
 
-  The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
+  The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
-  The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
+  The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
-  The total-support is sum_x sum_y 1
+  The 'total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
-  The total-count is N(*,*) = sum_x sum_y N(x,y)
-  That is, the total of all count entries in the matrix.
+  The 'total-count-left is N(*,*) = sum_x N(x,*)
+  That is, the total of all count entries in the matrix, with the
+  left-sum being done last. It uses the cached, previously-computed
+  right-marginal sums N(x,*) to perform the computation, and so this
+  computation will fail, if the marginals have not been stored.
+
+  The 'total-count-right is N(*,*) = sum_y N(*,y)
+  Same as above, but does the right-sum last. Should yeild the same
+  answer, as above, except for rounding errors. Using this method can
+  be more convenient, if the right-marginal sums are not available
+  (and v.v. if the other marginals are not available.)
+
+  The 'set-left-marginals ITEM requires an argument ITEM from the
+  right basis. It computes the marginals for that ITEM and caches
+  them.  This is useful when some algorithm has modified the matrix,
+  and the marginals for a specific column need to be recomputed.
+
+  The 'set-right-marginals ITEM requires an argument ITEM from the
+  left basis. It computes the marginals for that ITEM and caches them.
+  This is useful when some algorithm has modified the matrix, and the
+  marginals for a specific row need to be recomputed.
 
   Here, the LLOBJ is expected to be an object, with valid counts
   associated with each pair. LLOBJ is expected to have working,
@@ -131,22 +255,16 @@
   pass 'pair-freq as the second argument: Any method that takes a pair
   and returns a number is allowed.
 "
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(api-obj (add-support-api LLOBJ))
+	(let* ((star-obj (add-pair-stars LLOBJ))
+			(api-obj (add-support-api star-obj))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
 		; -------------
-		; Given a list of low-level pairs, return list of high-level
-		; pairs for which the count is non-zero. Internal use only.
+		; Filter and return only pairs with non-zero count.
+		; Internal use only.
 		(define (non-zero-filter LIST)
-			(filter-map
-				(lambda (lopr)
-					; 'item-pair returns the atom holding the count
-					(define hipr (LLOBJ 'item-pair lopr))
-					(define cnt (get-cnt lopr))
-					(if (< 0 cnt) hipr #f))
-				LIST))
+			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
 		; N(x,y) > 0.  Specifically, this returns the pairs which
@@ -163,10 +281,7 @@
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					; 'item-pair returns the atom holding the count
-					(+ sum
-						(if (< 0 (get-cnt lopr))
-							1 0)))
+					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
 				0
 				LIST))
 
@@ -207,7 +322,7 @@
 					LIST))
 			(sqrt tot))
 
-		; Returns the Eucliden length aka the l_2 norm (l_p norm for p=2)
+		; Returns the Euclidean length aka the l_2 norm (l_p norm for p=2)
 		(define (sum-left-length ITEM)
 			(sum-length (star-obj 'left-stars ITEM)))
 
@@ -236,57 +351,130 @@
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
-		; These are computed from the left; there is an equivalent
-		; computation from the right that should give exactly the same
-		; results. We could/should be not lazy and double-check these
-		; results in this way.
-		(define (compute-total-support)
+
+		; Compute the total number of times that all pairs have been
+		; observed. In formulas, return
+		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
+		;
+		; This method assumes that the right-partial wild-card counts
+		; have been previously computed and cached.  That is, it assumes
+		; that the 'right-wild-count returns a valid value. This value
+		; should be the same as what 'compute-right-count would return.
+		(define (compute-total-count-from-right)
 			(fold
-				(lambda (item sum) (+ sum (get-right-support-size item)))
+				;;; Use the cached value, equiavalent to this:
+				;;; (lambda (item sum) (+ sum (sum-right-count item)))
+				(lambda (item sum) (+ sum (api-obj 'right-count item)))
 				0
 				(star-obj 'left-basis)))
 
-		(define (compute-total-count)
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
+		; this should give exactly the same result as the above; however,
+		; the order in which the sums are performed is distinct, and
+		; thus large differences indicate a bug; small differences are
+		; due to rounding errors.
+		(define (compute-total-count-from-left)
 			(fold
-				(lambda (item sum) (+ sum (sum-right-count item)))
+				;;; (lambda (item sum) (+ sum (sum-left-count item)))
+				(lambda (item sum) (+ sum (api-obj 'left-count item)))
+				0
+				(star-obj 'right-basis)))
+
+		; Same as above, but for the support
+		(define (compute-total-support-from-right)
+			(fold
+				; (lambda (item sum) (+ sum (get-right-support-size item)))
+				(lambda (item sum) (+ sum (api-obj 'right-support item)))
 				0
 				(star-obj 'left-basis)))
+
+		(define (compute-total-support-from-left)
+			(fold
+				; (lambda (item sum) (+ sum (get-left-support-size item)))
+				(lambda (item sum) (+ sum (api-obj 'left-support item)))
+				0
+				(star-obj 'right-basis)))
 
 		; -------------
-		; Compute and cache all l_0, l_1 and l_2 norms, for later
-		; fast access.
+		; Compute all l_0, l_1 and l_2 norms, attach them to the
+		; wildcards, where the support-api can find them.
 
-		(define (cache-all)
+		; Perform three sums at once. The final sqrt taken later.
+		(define (sum-norms LIST)
+			(fold
+				(lambda (lopr sum)
+					(define cnt (get-cnt lopr))
+					(if (< 0 cnt) (list
+							(+ (first sum) 1)
+							(+ (second sum) cnt)
+							(+ (third sum) (* cnt cnt)))
+						sum))
+				(list 0 0 0)
+				LIST))
 
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+		(define (sum-left-norms ITEM)
+			(sum-norms (star-obj 'left-stars ITEM)))
 
-			(for-each
-				(lambda (ITEM)
-					(define l0 (get-left-support-size ITEM))
-					(define l1 (sum-left-count ITEM))
-					(define l2 (sum-left-length ITEM))
-					(api-obj 'set-left-norms ITEM l0 l1 l2))
-				(star-obj 'right-basis))
+		(define (sum-right-norms ITEM)
+			(sum-norms (star-obj 'right-stars ITEM)))
 
-			(format #t "Finished left support subtotals in ~A secs\n"
+		(define (set-left-marginals ITEM)
+			(define sums (sum-left-norms ITEM))
+			(define l0 (first sums))
+			(define l1 (second sums))
+			(define l2 (sqrt (third sums)))
+			(api-obj 'set-left-norms ITEM l0 l1 l2))
+
+		(define (set-right-marginals ITEM)
+			(define sums (sum-right-norms ITEM))
+			(define l0 (first sums))
+			(define l1 (second sums))
+			(define l2 (sqrt (third sums)))
+			(api-obj 'set-right-norms ITEM l0 l1 l2))
+
+		(define start-time 0)
+		(define (elapsed-secs)
+			(define diff (- (current-time) start-time))
+			(set! start-time (current-time))
+			diff)
+
+		(define (all-left-marginals)
+			; Loop over each item in the right-basis
+			(elapsed-secs)
+			(maybe-par-for-each set-left-marginals (star-obj 'right-basis))
+			(format #t "Finished left norm marginals in ~A secs\n"
 				(elapsed-secs))
 
-			(for-each
-				(lambda (ITEM)
-					(define l0 (get-right-support-size ITEM))
-					(define l1 (sum-right-count ITEM))
-					(define l2 (sum-right-length ITEM))
-					(api-obj 'set-right-norms ITEM l0 l1 l2))
-				(star-obj 'left-basis))
+			; Totals can only be computed, after above has been cached.
+			(api-obj 'set-left-totals
+				(compute-total-support-from-left)
+				(compute-total-count-from-left))
 
-			(format #t "Finished right support subtotals in ~A secs\n"
+			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
 		)
 
+		(define (all-right-marginals)
+			; Loop over each item in the left-basis
+			(elapsed-secs)
+			(maybe-par-for-each set-right-marginals (star-obj 'left-basis))
+			(format #t "Finished right norm marginals in ~A secs\n"
+				(elapsed-secs))
+
+			; Totals can only be computed, after above has been cached.
+			(api-obj 'set-right-totals
+				(compute-total-support-from-right)
+				(compute-total-count-from-right))
+
+			(format #t "Finished right totals in ~A secs\n"
+				(elapsed-secs))
+		)
+
+		; Do both at once
+		(define (cache-all)
+			(all-left-marginals)
+			(all-right-marginals))
 
 		; -------------
 		; Methods on this class.
@@ -303,10 +491,22 @@
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
-				((total-support)      (compute-total-support))
-				((total-count)        (compute-total-count))
+				((total-support-left)  (compute-total-support-from-left))
+				((total-support-right) (compute-total-support-from-right))
+				((total-count-left)    (compute-total-count-from-left))
+				((total-count-right)   (compute-total-count-from-right))
 
-				((cache-all)          (cache-all))
+				((set-left-marginals)  (apply set-left-marginals args))
+				((set-right-marginals) (apply set-right-marginals args))
+
+				((all-left-marginals)  (all-left-marginals))
+				((all-right-marginals) (all-right-marginals))
+				((cache-all)           (cache-all))
+
+; XXX hack alert. We need something more elegant!?
+; the language-learning clustering code uses this
+; to invalidate the star objects in use.
+				((clobber)            (star-obj 'clobber))
 				(else                 (apply LLOBJ (cons message args))))
 			)))
 

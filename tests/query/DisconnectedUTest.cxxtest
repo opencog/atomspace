@@ -24,8 +24,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 #include "test-types.h"
 
@@ -71,8 +71,8 @@ void DisconnectedUTest::setUp(void)
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 

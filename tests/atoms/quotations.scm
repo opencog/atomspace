@@ -129,3 +129,51 @@
   )
 )
 )
+
+(define quoted-grounded-predicate-argument
+  (EvaluationLink
+    (GroundedPredicateNode "scm: absolutely-true")
+    (EvaluationLink
+      (PredicateNode "minsup")
+      (ListLink
+        (QuoteLink
+          (LambdaLink
+            (UnquoteLink
+              (VariableNode "$X")
+            )
+            (Unquote
+              (VariableNode "$X")
+            )
+          )
+        )
+        (ConceptNode "texts")
+        (NumberNode "5.000000")
+      )
+    )
+  )
+)
+
+(define consumed-quoted-grounded-predicate-argument
+  (EvaluationLink
+    (GroundedPredicateNode "scm: absolutely-true")
+    (EvaluationLink
+      (PredicateNode "minsup")
+      (ListLink
+        (LambdaLink
+          (VariableNode "$X")
+          (VariableNode "$X")
+        )
+        (ConceptNode "texts")
+        (NumberNode "5.000000")
+      )
+    )
+  )
+)
+
+(define quoted-not-X
+  (LocalQuoteLink
+    (NotLink
+      (VariableNode "$X")
+    )
+  )
+)

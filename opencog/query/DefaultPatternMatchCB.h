@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -69,12 +69,16 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool clause_match(const Handle&, const Handle&,
 		                          const HandleMap&);
-		/**
-		 * Typically called for AbsentLink
-		 */
+
+		/** Called for AbsentLink */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
 		                                   const HandleMap&);
+
+		/** Called for AlawaysLink */
+		virtual bool always_clause_match(const Handle& pattrn,
+		                                 const Handle& grnd,
+		                                 const HandleMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&);
 
@@ -85,7 +89,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
-		virtual const std::set<Type>& get_connectives(void)
+		virtual const TypeSet& get_connectives(void)
 		{
 			return _connectives;
 		}
@@ -93,12 +97,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
-		ClassServer& _classserver;
+		NameServer& _nameserver;
 
-		const Variables* _vars = NULL;
-		const HandleSet* _dynamic = NULL;
+		const Variables* _vars = nullptr;
+		const HandleSet* _dynamic = nullptr;
 		bool _have_evaluatables = false;
-		const HandleSet* _globs = NULL;
+		const HandleSet* _globs = nullptr;
 
 		bool _have_variables;
 		Handle _pattern_body;
@@ -126,12 +130,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
 		static void release_transient_atomspace(AtomSpace* atomspace);
 
-#ifdef CACHED_IMPLICATOR
-		virtual void ready(AtomSpace*);
-		virtual void clear();
-#endif
 		// Crisp-logic evaluation of evaluatable terms
-		std::set<Type> _connectives;
+		TypeSet _connectives;
 		bool eval_term(const Handle& pat, const HandleMap& gnds);
 		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 

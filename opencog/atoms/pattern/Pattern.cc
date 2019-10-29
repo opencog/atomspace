@@ -26,12 +26,12 @@ namespace opencog {
 std::string Pattern::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	if (not clauses.empty())
-		ss << indent << "clauses:" << std::endl
-		   << oc_to_string(clauses, indent + OC_TO_STRING_INDENT);
-	if (not constants.empty())
-		ss << indent << "constants:" << std::endl
-		   << oc_to_string(constants, indent + OC_TO_STRING_INDENT);
+	if (not quoted_clauses.empty())
+		ss << indent << "quoted clauses:" << std::endl
+		   << oc_to_string(quoted_clauses, indent + OC_TO_STRING_INDENT);
+	if (not unquoted_clauses.empty())
+		ss << indent << "unquoted clauses:" << std::endl
+		   << oc_to_string(unquoted_clauses, indent + OC_TO_STRING_INDENT);
 	if (not mandatory.empty())
 		ss << indent << "mandatory:" << std::endl
 		   << oc_to_string(mandatory, indent + OC_TO_STRING_INDENT);
@@ -49,14 +49,6 @@ std::string Pattern::to_string(const std::string& indent) const
 		ss << indent << "evaluatable_holders:" << std::endl
 		   << oc_to_string(evaluatable_holders,
 		                   indent + OC_TO_STRING_INDENT);
-	if (not executable_terms.empty())
-		ss << indent << "executable_terms:" << std::endl
-		   << oc_to_string(executable_terms,
-		                   indent + OC_TO_STRING_INDENT);
-	if (not executable_holders.empty())
-		ss << indent << "executable_holders:" << std::endl
-		   << oc_to_string(executable_holders,
-		                   indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
@@ -65,10 +57,6 @@ std::string Pattern::to_string(const std::string& indent) const
 std::string oc_to_string(const Pattern& pattern, const std::string& indent)
 {
 	return pattern.to_string(indent);
-}
-std::string oc_to_string(const Pattern& pattern)
-{
-	return oc_to_string(pattern, "");
 }
 
 } // ~namespace opencog

@@ -1,3 +1,6 @@
+
+(use-modules (opencog) (opencog exec))
+
 (define soln (SetLink))
 
 (ListLink (ConceptNode "A") (ConceptNode "B"))

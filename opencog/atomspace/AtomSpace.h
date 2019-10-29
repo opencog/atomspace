@@ -28,10 +28,12 @@
 #include <list>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
+
+class BasicSaveUTest;
 
 namespace opencog
 {
@@ -54,19 +56,20 @@ const bool DONT_CHECK_TRUTH_VALUES = false;
 class AtomSpace
 {
     friend class Atom;               // Needs to call get_atomtable()
-    friend class AtomStorage;
     friend class BackingStore;
+    friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
+    friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
 
     /**
-     * Override and declare copy constructor and equals operator, to
-     * prevent the accidental copying of large objects.
+     * Drop copy constructor and equals operator to
+     * prevent accidental copying of large objects.
      */
-    AtomSpace& operator=(const AtomSpace&);
-    AtomSpace(const AtomSpace&);
+    AtomSpace& operator=(const AtomSpace&) = delete;
+    AtomSpace(const AtomSpace&) = delete;
 
     AtomTable _atom_table;
     /**
@@ -76,7 +79,7 @@ class AtomSpace
 
     AtomTable& get_atomtable(void) { return _atom_table; }
 
-    bool _transient;
+    bool _read_only;
 protected:
 
     /**
@@ -92,8 +95,15 @@ public:
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
+    // Transient atomspaces are lighter-weight, faster, but are missing
+    // some features. They are used during pattern matching, to hold
+    // temporary results.
     void ready_transient(AtomSpace* parent);
     void clear_transient();
+
+    void set_read_only(void);
+    void set_read_write(void);
+    bool get_read_only(void) { return _read_only; }
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
@@ -122,7 +132,8 @@ public:
         { return _atom_table.getNumAtomsOfType(type, subclass); }
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
-    //! Clear the atomspace, remove all atoms
+    //! Clear the atomspace, extract all atoms. Does NOT clear the
+    //! attached backingstore.
     void clear()
         { _atom_table.clear(); }
 
@@ -255,6 +266,24 @@ public:
     }
 
     /**
+     * Use the backing store to load entire AtomSpace.
+     */
+    void load_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->loadAtomSpace(_atom_table);
+    }
+
+    /**
+     * Use the backing store to store entire AtomSpace.
+     */
+    void store_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->storeAtomSpace(_atom_table);
+    }
+
+    /**
      * Use the backing store to load the entire incoming set of the
      * atom.
      * If the flag is true, then the load is done recursively.
@@ -338,6 +367,19 @@ public:
     bool remove_atom(Handle h, bool recursive=false);
 
     /**
+     * Set the Value on the atom, performing necessary permissions
+     * checking. If this atomspace is read-only, then the setting
+     * of values is prohibited.  If this atomspace has read-write
+     * permissions, but the atom is in a parent atomspace that is
+     * read-only, then the atom is copied into this atomspace, before
+     * the value is changed. (Copy-on-write (COW) semantics).
+     *
+     * If the atom is copied, then the copy is returned.
+     */
+    Handle set_value(const Handle&, const Handle& key, const ValuePtr& value);
+    Handle set_truthvalue(const Handle&, const TruthValuePtr&);
+
+    /**
      * Get a node from the AtomTable, if it's in there. If its not found
      * in the AtomTable, and there's a backing store, then the atom will
      * be fetched from the backingstore (and added to the AtomTable). If
@@ -387,7 +429,6 @@ public:
     Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
 	    return get_handle(t, HandleSeq({ha, hb}));
     }
-
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
@@ -397,72 +438,42 @@ public:
     }
 
     /**
-     * Gets all the atoms of any type and appends them to the HandleSeq.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         std::list<Handle> atoms;
-     *         atomSpace.get_all_atoms(atoms);
-     * @endcode
-     */
-    void get_all_atoms(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for ATOMs and subclasses.
-        get_handles_by_type(appendToHandles, ATOM, true);
-    }
-
-    /**
-     * Gets all the nodes of any type and appends them to the HandleSeq.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         std::list<Handle> nodes;
-     *         atomSpace.get_all_nodes(nodes);
-     * @endcode
-     */
-    void get_all_nodes(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for NODEs and subclasses.
-        get_handles_by_type(appendToHandles, NODE, true);
-    }
-
-    /**
-     * Gets all the links of any type and appends them to the HandleSeq.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         std::list<Handle> links;
-     *         atomSpace.get_all_links(links, LINK, true);
-     * @endcode
-     */
-    void get_all_links(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for LINKs and subclasses.
-        get_handles_by_type(appendToHandles, LINK, true);
-    }
-
-    /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
+     *
+     * @param hset the HandleSet into which to insert handles.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * Example of call to this method, which would return all ConceptNodes
+     * in the AtomSpace:
+     * @code
+     *         HandleSet atoms;
+     *         atomSpace.get_handlset_by_type(atoms, CONCEPT_NODE);
+     * @endcode
+     */
+    void get_handleset_by_type(HandleSet& hset,
+                               Type type,
+                               bool subclass=false) const
+    {
+        return _atom_table.getHandleSetByType(hset, type, subclass);
+    }
+
+    /**
+     * Gets a sequence of handles that matches with the given type
+     * (subclasses optionally).
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param appendToHandles the HandleSeq to which to append the handles.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
      *
-     * @note The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.
-     *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
      * @code
-     *         std::list<Handle> atoms;
-     *         atomSpace.getHandlesByType(atoms, CONCEPT_NODE);
+     *         HandleSeq atoms;
+     *         atomSpace.get_handle_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
     void get_handles_by_type(HandleSeq& appendToHandles,
@@ -485,8 +496,10 @@ public:
     }
 
     /**
-     * Gets a set of handles that matches with the given type
+     * Gets a container of handles that matches with the given type
      * (subclasses optionally).
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param result An output iterator.
      * @param type The desired type.
@@ -501,7 +514,7 @@ public:
      * in AtomSpace:
      * @code
      *         std::list<Handle> ret;
-     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     *         atomSpace.get_handles_by_type(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -510,36 +523,6 @@ public:
                         bool subclass=false) const
     {
         return _atom_table.getHandlesByType(result, type, subclass);
-    }
-
-    /* ----------------------------------------------------------- */
-    /* The foreach routines offer an alternative interface
-     * to the getHandleSet API.
-     */
-    /**
-     * Invoke the callback on each handle of the given type.
-     */
-    template<class T>
-    inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(const Handle&), T *data,
-                                       bool subclass=false)
-    {
-        // First we extract, then we loop. This is to avoid holding
-        // the lock for too long. (because we don't know how long
-        // the callback will take.)
-        std::list<Handle> handle_set;
-        // The intended signatue is
-        // getHandleSet(OutputIterator result, Type type, bool subclass)
-        get_handles_by_type(back_inserter(handle_set), atype, subclass);
-
-        // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i = handle_set.begin();
-        std::list<Handle>::iterator iend = handle_set.end();
-        for (; i != iend; ++i) {
-            bool rc = (data->*cb)(*i);
-            if (rc) return rc;
-        }
-        return false;
     }
 
     /**

@@ -20,10 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <boost/range/algorithm/find.hpp>
+#include <opencog/atoms/core/FindUtils.h>
 #include "PatternUtils.h"
 
 using namespace opencog;
@@ -31,25 +28,24 @@ using namespace opencog;
 namespace opencog {
 
 /**
- * Remove constant clauses from the list of clauses if they are in
- * the queried atomspace.
- *
- * Make sure that every clause contains at least one variable;
- * if not, remove the clause from the list of clauses.
+ * Remove constant clauses from the list of clauses. Every clause
+ * should contain at least one variable, or it should be evaluatable.
+ * If does not, or is not, remove the clause from the list of clauses.
  *
  * The core idea is that pattern matching against a constant expression
  * "doesn't make sense" -- the constant expression will always match to
  * itself and is thus "trivial".  In principle, the programmer should
  * never include constants in the list of clauses ... but, due to
  * programmer error, this can happen, and will lead to failures during
- * pattern matching. Thus, the routine below can be used to validate
- * the input.
+ * pattern matching. Thus, the routine below can be used to clean up
+ * the pattern-matcher input.
  *
  * Terms that contain GroundedSchema or GroundedPredicate nodes can
- * have side-effects, and are thus not really constants. They must be
- * evaluated during the pattern search. Terms that contain
- * DefinedPredicate or DefinedSchema nodes are simply not known until
- * runtime evaluation/execution.
+ * have side-effects, and are thus are not constants, even if they
+ * don't contain any variables. They must be kept around, and must be
+ * evaluated during the pattern search.  The definitions of
+ * DefinedPredicate or DefinedSchema nodes cannot be accessed until
+ * runtime evaluation/execution, so these too must be kept.
  *
  * The match for EvaluatableLink's is meant to solve the problem of
  * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
@@ -61,83 +57,65 @@ namespace opencog {
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const HandleSet &vars,
-                      Pattern &pat,
-                      HandleSeqSeq& components,
-                      HandleSeq& component_patterns,
-                      const AtomSpace &queried_as)
+bool remove_constants(const HandleSet& vars, Pattern& pat)
 {
 	bool modified = false;
 
 	// Caution: this loop modifies the clauses list!
 	HandleSeq::iterator i;
-	for (i = pat.clauses.begin(); i != pat.clauses.end();)
+	for (i = pat.mandatory.begin(); i != pat.mandatory.end();)
 	{
 		Handle clause(*i);
 
-		if (is_constant(vars, clause) && is_in_atomspace(clause, queried_as))
+		if (not is_constant(vars, clause))
 		{
-			pat.constants.emplace_back(clause);
-			i = pat.clauses.erase(i);
-
-			// remove the clause from components and component_patterns
-			auto j = boost::find(components, HandleSeq{clause});
-			if (j != components.end())
-			{
-				components.erase(j);
-				if (not component_patterns.empty())
-				{
-					auto cpj = std::next(component_patterns.begin(),
-					                     std::distance(components.begin(), j));
-					component_patterns.erase(cpj);
-				}
-			}
-
-			// remove the clause from _pattern_mandatory.
-			auto m = boost::find(pat.mandatory, clause);
-			if (m != pat.mandatory.end())
-				pat.mandatory.erase(m);
-
-			// remove the clause from _cnf_clauses.
-			auto c = boost::find(pat.cnf_clauses, clause);
-			if (c != pat.cnf_clauses.end())
-				pat.cnf_clauses.erase(c);
-
-			modified = true;
+			++i; continue;
 		}
-		else
-		{
-			++i;
-		}
+
+		i = pat.mandatory.erase(i);
+
+		// Remove the clause from quoted_clauses.
+		auto qc = std::find(pat.quoted_clauses.begin(),
+		                   pat.quoted_clauses.end(), clause);
+		if (qc != pat.quoted_clauses.end())
+			pat.quoted_clauses.erase(qc);
+
+		// Remove the clause from unquoted_clauses.
+		auto uc = std::find(pat.unquoted_clauses.begin(),
+		                   pat.unquoted_clauses.end(), clause);
+		if (uc != pat.unquoted_clauses.end())
+			pat.unquoted_clauses.erase(uc);
+
+		modified = true;
 	}
 
 	return modified;
 }
 
-bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
-{
-	return (bool)atomspace.get_atom(handle);
-}
-
 bool is_constant(const HandleSet& vars, const Handle& clause)
 {
-	return not (any_unquoted_unscoped_in_tree(clause, vars)
-	            or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-	            or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-	            or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-	            or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
-	            // TODO: should not the below be any VirtualLink?
-	            // Or contains any EvaluatableLink ??
-	            or contains_atomtype(clause, IDENTICAL_LINK)
-	            or contains_atomtype(clause, EQUAL_LINK)
-	            or contains_atomtype(clause, GREATER_THAN_LINK)
-	            // If it is an EvaluatableLink then is is not a
-	            // constant, unless it is a closed EvaluationLink over
-	            // a PredicateNode.
-	            or (classserver().isA(clause->get_type(), EVALUATABLE_LINK)
-	                and (0 != clause->get_arity()
-	                     or
-	                     clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+	Type ct = clause->get_type();
+	bool constant =
+		not (any_unquoted_unscoped_in_tree(clause, vars)
+		     or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		     or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
+		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
+		     // TODO: should not the below be any VirtualLink?
+		     // Or contains any EvaluatableLink ??
+		     or contains_atomtype(clause, IDENTICAL_LINK)
+		     or contains_atomtype(clause, EQUAL_LINK)
+		     or contains_atomtype(clause, GREATER_THAN_LINK)
+		     // If it is an EvaluatableLink then is is not a
+		     // constant, unless it is a closed EvaluationLink over
+		     // a PredicateNode.
+		     or (nameserver().isA(ct, EVALUATABLE_LINK)
+		         and (0 == clause->get_arity()
+		              or
+		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+
+	return constant;
 }
 
 /* ======================================================== */
@@ -179,7 +157,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& components,
-                              std::vector<HandleSet>& component_vars)
+                              HandleSetSeq& component_vars)
 {
 	HandleSeq todo(clauses);
 
@@ -241,6 +219,92 @@ void get_connected_components(const HandleSet& vars,
 		fv.search_set(ncl);
 		component_vars.emplace_back(fv.varset);
 	}
+}
+
+// Unfortunately for us, the list of clauses that we were given
+// includes the optionals. It might be nice if this was fixed
+// upstream, but that seems to be hard. XXX FIXME. So, here,
+// we brute-force remove them.
+static HandleSeq get_nonopts(const HandleSeq& clauses,
+                             const HandleSeq& opts)
+{
+	HandleSeq nonopts;
+	for (const Handle& h: clauses)
+	{
+		bool is_opt = false;
+		for (const Handle& opt: opts)
+		{
+			if (h == opt) { is_opt = true; break; }
+		}
+		if (not is_opt) nonopts.emplace_back(h);
+	}
+	return nonopts;
+}
+
+void get_bridged_components(const HandleSet& vars,
+                            const HandleSeq& clauses,
+                            const HandleSeq& opts,
+                            HandleSeqSeq& components,
+                            HandleSetSeq& component_vars)
+{
+	if (0 == opts.size())
+	{
+		get_connected_components(vars, clauses, components, component_vars);
+		return;
+	}
+
+	// Some optionals bridge across components; others simply
+	// connect to some of them. We need to figure out which is which.
+
+	HandleSeq nonopts(get_nonopts(clauses, opts));
+	if (0 == nonopts.size())
+	{
+		get_connected_components(vars, opts, components, component_vars);
+		return;
+	}
+
+	get_connected_components(vars, nonopts, components, component_vars);
+
+	// Now try to attach opts.
+	for (const Handle& opt: opts)
+	{
+		// Count how many components this opt might attach to.
+		size_t cnt = 0;
+		for (const HandleSet& vars: component_vars)
+		{
+			if (any_unquoted_in_tree(opt, vars)) cnt++;
+		}
+
+		// If its not attached to anything, create a new component.
+		if (0 == cnt)
+		{
+			components.push_back({opt});
+
+			FindAtoms fv(vars);
+			fv.search_set(opt);
+			component_vars.emplace_back(fv.varset);
+		}
+		else if (1 == cnt)
+		{
+			// Attach it to that one component.
+			get_connected_components(vars, {opt}, components, component_vars);
+		}
+
+		// else `(1 < cnt)` and its a bridge. Do nothing.
+	}
+
+	// The above loop has a very subtle bug, which I am going to
+	// ignore, because its hard to fix, and unlikely to get triggered.
+	// Yet, it could happen: so here goes. If one opt clause shares
+	// variables with another opt clause, yet each of these two
+	// share variables with two distinctly different components,
+	// then these two opts, together, bridge between the components.
+	// The user might want to reject such bridges, but allow each
+	// opt individually, as long as they don't bridge. As of today,
+	// specifying this kind of pattern would take some hard work,
+	// (I'm not sure its even possible with toeay's API) and so it
+	// seems very unlikely that any user would want this, and thus
+	// very unlikely that they'll hit this bug.
 }
 
 } // namespace opencog

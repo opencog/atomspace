@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TYPE_NODE_H
 #define _OPENCOG_TYPE_NODE_H
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 
 namespace opencog
@@ -39,20 +39,20 @@ namespace opencog
 class TypeNode : public Node
 {
 protected:
-	Type value;
+	Type _kind;
 
 public:
 	// Please do NOT use this constructor!
 	TypeNode(Type t, const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(t, s),
-		  value(classserver().getType(s))
+		  _kind(nameserver().getType(s))
 	{
 		// Perform strict checking only for TypeNode.  The
 		// DefinedTypeNode, which inherits from this class,
 		// allows user-defined types which the classerver
 		// currently does not know about.
-		if (TYPE_NODE == t and NOTYPE == value)
+		if (TYPE_NODE == t and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
 	}
@@ -61,37 +61,37 @@ public:
 	TypeNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(TYPE_NODE, s),
-		  value(classserver().getType(s))
+		  _kind(nameserver().getType(s))
 	{
-		if (NOTYPE == value)
+		if (NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
 	}
 
 	TypeNode(Type t)
-		: Node(TYPE_NODE, classserver().getTypeName(t)),
-		  value(t)
+		: Node(TYPE_NODE, nameserver().getTypeName(t)),
+		  _kind(t)
 	{}
 
 	TypeNode(Node &n)
 		: Node(n),
-		  value(classserver().getType(n.get_name()))
+		  _kind(nameserver().getType(n.get_name()))
 	{
-		OC_ASSERT(classserver().isA(n.get_type(), TYPE_NODE),
+		OC_ASSERT(nameserver().isA(n.get_type(), TYPE_NODE),
 			"Bad TypeNode constructor!");
 
-		if (DEFINED_TYPE_NODE != _type and NOTYPE == value)
+		if (DEFINED_TYPE_NODE != _type and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", n.get_name().c_str());
 
-		if (DEFINED_TYPE_NODE == _type and NOTYPE != value)
+		if (DEFINED_TYPE_NODE == _type and NOTYPE != _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Redefinition of a built-in typename: '%s'", n.get_name().c_str());
 	}
 
 	static void validate(const std::string& str)
 	{
-		Type t = classserver().getType(str);
+		Type t = nameserver().getType(str);
 		// XXX TODO ... Some types are defined. In this case,
 		// verify that the string occurs as a name inside
 		// some DefineLink... if it does, then it's valid.
@@ -101,7 +101,7 @@ public:
 				"Not a valid typename: '%s'", str.c_str());
 	}
 
-	Type get_value(void) { return value; }
+	Type get_kind(void) { return _kind; }
 
 	static Handle factory(const Handle&);
 };

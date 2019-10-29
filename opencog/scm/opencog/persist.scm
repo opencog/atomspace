@@ -5,13 +5,13 @@
 
 (define-module (opencog persist))
 
-(load-extension "libpersist" "opencog_persist_init")
+(use-modules (opencog))
+(use-modules (opencog as-config))
+(load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
 
 ; This avoids complaints, when the docs are set, below.
 (export fetch-atom fetch-incoming-set fetch-incoming-by-type
-store-atom load-atoms-of-type barrier)
-
-(use-modules (opencog))
+store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 
 ;; -----------------------------------------------------
 ;;
@@ -65,6 +65,24 @@ store-atom load-atoms-of-type barrier)
     does not mean that the data was actually written to disk. It merely
     means that the atomspace, as a client of the database, has given
     them to the database.
+")
+
+(set-procedure-property! load-atomspace 'documentation
+"
+ load-atomspace - load all atoms in the database.
+    This will cause ALL of the atoms in the open database to be loaded
+    into the atomspace. This can be a very time-consuming operation.
+    In normal operation, it is rarely necessary to load all atoms;
+    atoms can always be fetched and stored one at a time, on demand.
+")
+
+(set-procedure-property! store-atomspace 'documentation
+"
+ store-atomspace - Store all atoms in the atomspace to the database.
+    This will dump the ENTIRE contents of the atomspace to the databse.
+    Depending on the size of the database, this can potentially take a
+    lot of time.  During normal operation, a bulk-save is rarely
+    required, as individual atoms can always be stored, one at a time.
 ")
 
 ;

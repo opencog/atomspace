@@ -26,3 +26,26 @@
 		(VariableNode "$stuff")
 	)
 )
+
+; data to check Times matching
+(TimesLink
+	(NumberNode 3)
+	(NumberNode 5)
+	)
+
+; Pattern uses QuoteLink to match TimesLink without
+; making actual calculations
+(define get-times-link
+	(GetLink
+		(VariableList
+			(VariableNode "$a")
+			(VariableNode "$b")
+			)
+		(QuoteLink
+			(TimesLink
+				(UnquoteLink (VariableNode "$a"))
+				(UnquoteLink (VariableNode "$b"))
+				)
+			)
+		)
+	)

@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/FoldLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,8 @@
 
 #include <limits>
 
-#include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "FoldLink.h"
 
@@ -44,7 +44,7 @@ FoldLink::FoldLink(const Link& l)
 void FoldLink::init(void)
 {
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, FOLD_LINK))
+	if (not nameserver().isA(tscope, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 }
 
@@ -56,9 +56,12 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-Handle FoldLink::delta_reduce(void) const
+/// Actually, what is implemete here is not pure delta-reduction.
+/// If the arguments to Fold are executale, then they are executed
+/// first, and only then is the delta-reduction performed.
+ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
-	Handle expr = knil;
+	ValuePtr expr = knil;
 
 	// Loop over the outgoing set, kons'ing away.
 	// This is right to left.
@@ -67,23 +70,29 @@ Handle FoldLink::delta_reduce(void) const
 	{
 		Handle h(_outgoing[i]);
 
-		Type t = h->get_type();
-
 		// Special-case hack for atoms returned by the pattern matcher.
 		// ... The pattern matcher returns things wrapped in a SetLink.
 		// Unwrap them and use them.
-		if (SET_LINK == t and h->get_arity() == 1)
+		if (SET_LINK == h->get_type() and h->get_arity() == 1)
 		{
 			h = h->getOutgoingAtom(0);
-			t = h->get_type();
 		}
 
-		if (classserver().isA(t, FOLD_LINK))
+		// Well, we lied; this is not pure delta-reduction. If the
+		// arguments to fold are executable atoms, then execute them,
+		// and fold in the results.
+		//
+		// Performance ... maybe it is faster to call the nameserver
+		// instead?
+		// if (nameserver().isA(h->get_type(), FUNCTION_LINK))
+		if (h->is_executable())
 		{
-			FoldLinkPtr fff(FoldLinkCast(classserver().factory(h)));
-			h = fff->delta_reduce();
+			expr = kons(as, silent, h->execute(as, silent), expr);
 		}
-		expr = kons(h, expr);
+		else
+		{
+			expr = kons(as, silent, h, expr);
+		}
 	}
 
 	return expr;

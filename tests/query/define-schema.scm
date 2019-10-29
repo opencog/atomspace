@@ -2,7 +2,7 @@
 ; Demonstrate the used of DefinedSchemaNodes
 ;
 (define (get-timestamp)
-   (NumberNode (number->string (current-time))))
+   (NumberNode (current-time)))
 
 (DefineLink
    (DefinedSchemaNode "set timestamp")

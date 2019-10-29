@@ -1,9 +1,25 @@
 ;
-; sequence.scm
+; sequence.scm -- Behavior sequences
 ;
-; Demonstrate using the GroundedPredicateNode to provide a simple
+; Demonstrate using behavior trees to interact with external systems,
+; such as robots or game worlds.  Behavior trees (see Wikipedia:
+; https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
+; are commonly used in game worlds to control non-player characters
+; and to perform AI stimulus-response action sequences ("SRAI").
+;
+; The SatisfactionLink, combined with the SequentialAndLink, implements
+; the concept of a behavior tree "sequence node", and so writing
+; behavior trees in Atomese is straight-forward. (See also ParallelLink
+; and JoinLink for general scripting in multiple threads).
+;
+; Interacting with external systems in Atomese can be accomplished with
+; GroundedPredicateNode and with GroundedSchemaNode. This example
+; demonstrates how behavior scripting can be used to obtain input from
+; external systems.
+;
+; This example uses the GroundedPredicateNode to provide a simple
 ; behavior sequence: i.e. a set of steps that are conditionally played
-; out, depending on whether the predicate node returns true of false.
+; out, depending on whether the predicate returns true of false.
 ; There are no variables in this demo; thus, the sequence is not
 ; a graph search, but is rather a straight-forward if-else sequence
 ; evaluation.
@@ -12,42 +28,21 @@
 ; output, and no graph-rewriting occurs, thus a BindLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
-; The SatisfactionLink, combined with the SequentialAndLink, implement
-; the concept of a behavior tree "sequence node". See
-; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
 ;
-; The run this, you might need to do this:
-;
-; OCDIR=/home/yourname/where/you/put/opencog
-; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
-;
-; Add the following to your ~/.guile file:
-; (add-to-load-path "/home/yourname/opencog/build")
-; (add-to-load-path "/home/yourname/opencog/opencog/scm")
-; (add-to-load-path ".")
-;
-; Start guile:
-; guile
-;
-; and then load this file:
-; (load-from-path "sequence.scm")
-;
-; Then, scroll to the bottom, and try some of the commented-out
-; examples.
-;
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 
-(define green-light  (ConceptNode "green light"))
-(define red-light  (ConceptNode "red light"))
+(define green-light  (Concept "green light"))
+(define red-light  (Concept "red light"))
 
 ; Counts of how many times the green and red lights were seen.
 (define num-green 0)
 (define num-red 0)
 
-; Return SimpleTV of true if green light, false if red light, and
-; throw an exception if neither.  Increment counters so that we
+; Return SimpleTruthValue of true if green light, false if red light,
+; and throw an exception if neither.  Increment counters so that we
 ; can verify that this was invoked.
 (define (stop-go atom)
+	(format #t "Got called with this: ~A\n" (cog-name atom))
 	(cond
 		((equal? atom green-light) (begin (set! num-green (+ 1 num-green)) (stv 1 1)))
 		((equal? atom red-light) (begin (set! num-red (+ 1 num-red)) (stv 0 1)))
@@ -58,56 +53,40 @@
 ; Should throw an exception in all cases. Shouldn't do donuts on
 ; corn fields.
 (define off-road
-	(SatisfactionLink
+	(Satisfaction
 		(VariableList)  ; no variables
-		(SequentialAndLink
-			(EvaluationLink
+		(SequentialAnd
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink
-					(ConceptNode "corn field")
-				)
-			)
-		)
-	)
-)
+				(List (Concept "corn field"))))))
 
 ;; Should see two green lights, and one red light, after which
 ;; the matching should stop.  There should be no exceptions or
 ;; errors when evaluating this.
 (define traffic-lights
-	(SatisfactionLink
+	(Satisfaction
 		(VariableList)  ; no variables
-		(SequentialAndLink
-			(EvaluationLink
+		(SequentialAnd
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink green-light)
-			)
+				(List green-light))
 
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink green-light)
-			)
+				(List green-light))
 
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink red-light)
-			)
+				(List red-light))
 
-			(EvaluationLink
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink
-					(ConceptNode "traffic ticket")
-				)
-			)
-		)
-	)
-)
+				(List (Concept "traffic ticket"))))))
 
 (define (start-again)
 	(cog-evaluate! traffic-lights)
-	(simple-format #t "Went through ~A green lights and ~A  red lights\n"
-		num-green num-red)
-)
+	(format #t "Have seen ~A green lights and ~A  red lights\n"
+		num-green num-red))
 
 ;;; Try the below.  This should result in an exception being thrown.
 ;;;
@@ -125,39 +104,32 @@
 ;;; a SequentialOrLink that halts after the first TRUE value.
 ;;;
 (define hot-rodding
-	(SatisfactionLink
+	(Satisfaction
 		(VariableList)  ; no variables
-		(SequentialOrLink   ; <==== unlike before, this it OR
-			(EvaluationLink
+		(SequentialOr   ; <==== unlike before, this is OR
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink red-light)
-			)
-			(EvaluationLink
+				(List red-light))
+
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink red-light)
-			)
-			(EvaluationLink
+				(List red-light))
+
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink red-light)
-			)
-			(EvaluationLink
+				(List red-light))
+
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink green-light)
-			)
-			(EvaluationLink
+				(List green-light))
+
+			(Evaluation
 				(GroundedPredicateNode "scm: stop-go")
-				(ListLink
-					(ConceptNode ".... And they're off!")
-				)
-			)
-		)
-	)
-)
+				(List (Concept ".... And they're off!"))))))
 
 (define (drag-race)
 	(cog-evaluate! hot-rodding)
-	(simple-format #t "Waited on ~A red lights\n" num-red)
-)
+	(simple-format #t "Waited on ~A red lights\n" num-red))
 
 ;;; The below should result in the three red lights before it turns
 ;;; green.

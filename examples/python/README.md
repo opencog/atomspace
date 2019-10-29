@@ -4,7 +4,7 @@
   atomspace python install directory, after installing atomspace. Tun the
   following command from your shell,
   ```
-      export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
+      export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages/
   ```
 
 * From the python prompt, the following should list the opencog python modules

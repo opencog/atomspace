@@ -21,17 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ExecSCM.h>
 
 using namespace opencog;
 
@@ -226,8 +221,6 @@ void SCMExecutionOutputUTest::test_recursive(void)
 		"(define (make-queen x)"
 		"   (InheritanceLink x (ConceptNode \"queen\")))"
 		"(define (stv mean conf) (cog-new-stv mean conf))"
-		"(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))"
-		"(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))"
 	);
 	CHKEV(eval);
 
@@ -236,8 +229,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	eval->eval(
 		"(define (royal-incr atom cnt)"
 		"   (cog-set-tv! atom"
-		"       (stv (+ (tv-mean (cog-tv atom)) cnt)"
-		"           (tv-conf (cog-tv atom)))))"
+		"       (stv (+ (cog-mean atom) cnt)"
+		"           (cog-confidence atom))))"
 	);
 	CHKEV(eval);
 
@@ -247,7 +240,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// That is, 0.9/0.1 = 9.
 	eval->eval(
 		"(define (royalize x)"
-		"   (if (> (tv-mean (cog-tv x)) 0.9)"
+		"   (if (> (cog-mean x) 0.9)"
 		"      (make-king x)"
 		"      (royalize (royal-incr x 0.1))))"
 	);
@@ -262,7 +255,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// ExecutionOutputLink::do_execute() onto the stack.
 	eval->eval(
 		"(define (promote x)"
-		"   (if (> (tv-mean (cog-tv x)) 0.9)"
+		"   (if (> (cog-mean x) 0.9)"
 		"      (make-queen x)"
 		"      (exe-royalize (royal-incr x 0.01))))"
 	);
@@ -344,13 +337,9 @@ void SCMExecutionOutputUTest::test_nested(void)
 	// Define various generic utilities
 	eval->eval(
 		"(define (oc-plus x y)"
-		"   (NumberNode (number->string (+ "
-		"      (string->number (cog-name x)) "
-		"      (string->number (cog-name y))))))"
+		"   (NumberNode (+ (cog-number x) (cog-number y))))"
 		"(define (oc-times x y)"
-		"   (NumberNode (number->string (* "
-		"      (string->number (cog-name x)) "
-		"      (string->number (cog-name y))))))"
+		"   (NumberNode (* (cog-number x) (cog-number y))))"
 	);
 	CHKEV(eval);
 
@@ -362,9 +351,9 @@ void SCMExecutionOutputUTest::test_nested(void)
 		"         (ExecutionOutputLink "
 		"            (GroundedSchemaNode \"scm: oc-plus\")"
 		"            (ListLink "
-		"               (NumberNode \"1\")"
-		"               (NumberNode \"2\")))"
-		"         (NumberNode \"3\"))))"
+		"               (NumberNode 1)"
+		"               (NumberNode 2)))"
+		"         (NumberNode 3))))"
 	);
 	CHKEV(eval);
 

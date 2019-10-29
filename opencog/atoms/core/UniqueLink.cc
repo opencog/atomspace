@@ -62,9 +62,9 @@ void UniqueLink::init(bool allow_open)
 UniqueLink::UniqueLink(const HandleSeq& oset, Type type)
 	: FreeLink(oset, type)
 {
-	if (not classserver().isA(type, UNIQUE_LINK))
+	if (not nameserver().isA(type, UNIQUE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(type);
+		const std::string& tname = nameserver().getTypeName(type);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
@@ -85,9 +85,9 @@ UniqueLink::UniqueLink(const Link &l)
 {
 	// Type must be as expected
 	Type type = l.get_type();
-	if (not classserver().isA(type, UNIQUE_LINK))
+	if (not nameserver().isA(type, UNIQUE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(type);
+		const std::string& tname = nameserver().getTypeName(type);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}

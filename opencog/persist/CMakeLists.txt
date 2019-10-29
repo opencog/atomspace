@@ -1,10 +1,4 @@
 
-# The hypertable code never worked, and according to bug #567,
-# it doesn't compile either.
-# IF (HYPERTABLE_FOUND AND HAVE_EXPAT)
-#    ADD_SUBDIRECTORY (hypertable)
-# ENDIF (HYPERTABLE_FOUND AND HAVE_EXPAT)
-
 IF (HAVE_GEARMAN AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (gearman)
 ENDIF(HAVE_GEARMAN AND HAVE_GUILE)
@@ -15,6 +9,8 @@ ENDIF (GUILE_FOUND)
 
 ADD_SUBDIRECTORY (sql)
 
-IF (HAVE_ZMQ)
-	ADD_SUBDIRECTORY (zmq)
-ENDIF (HAVE_ZMQ)
+# ZMQ is unmaintained, and is not compatible with the AtomSpace any
+# longer.  Disable the build.
+# IF (HAVE_ZMQ)
+# 	ADD_SUBDIRECTORY (zmq)
+# ENDIF (HAVE_ZMQ)

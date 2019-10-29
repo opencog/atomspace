@@ -46,7 +46,7 @@ void Context::update(const Handle& h)
 	Type t = h->get_type();
 
 	// Update shadow
-	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
+	if (quotation.is_unquoted() and nameserver().isA(t, SCOPE_LINK)) {
 		const Variables& variables = ScopeLinkCast(h)->get_variables();
 
 		// Insert the new shadowing variables from the scope link
@@ -128,10 +128,7 @@ std::string oc_to_string(const Context::VariablesStack& scope_variables,
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Context::VariablesStack& scope_variables)
-{
-	return oc_to_string(scope_variables, "");
-}
+
 std::string oc_to_string(const Context& c, const std::string& indent)
 {
 	std::stringstream ss;
@@ -149,10 +146,6 @@ std::string oc_to_string(const Context& c, const std::string& indent)
 			ss << indent + OC_TO_STRING_INDENT << "ignored" << std::endl;
 	}
 	return ss.str();
-}
-std::string oc_to_string(const Context& c)
-{
-	return oc_to_string(c, "");
 }
 
 } // namespace opencog

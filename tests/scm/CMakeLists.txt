@@ -15,6 +15,7 @@ LINK_LIBRARIES(
 	smob
 	clearbox
 	execution
+	logger
 	${GUILE_LIBRARIES}
 )
 
@@ -24,3 +25,17 @@ ADD_CXXTEST(MultiAtomSpaceUTest)
 ADD_CXXTEST(MultiThreadUTest)
 ADD_CXXTEST(SCMUtilsUTest)
 ADD_CXXTEST(SCMExecutionOutputUTest)
+
+ADD_GUILE_TEST(SCMOpencogTestRunnerPass scm-opencog-test-runner-pass.scm)
+ADD_GUILE_TEST(SCMOpencogTestRunnerFail scm-opencog-test-runner-fail.scm)
+# The SCMOpencogTestRunnerFail fails purposely, as it is testing that the
+# scheme opencog-test-runner exits properly; thus requiring the flipping
+# of the test result by setting its properties.
+SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
+
+# Guile-python bridge requires python
+IF (HAVE_CYTHON)
+	ADD_GUILE_TEST(SCMPython scm-python.scm)
+	ADD_GUILE_TEST(SCMPythonSharedAtomspace scm-python-shared-atomspace.scm)
+	ADD_GUILE_TEST(SCMPythonArity scm-python-arity.scm)
+ENDIF (HAVE_CYTHON)

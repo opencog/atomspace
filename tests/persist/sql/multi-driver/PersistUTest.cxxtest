@@ -30,11 +30,11 @@
 
 #include <cstdio>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 #include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
@@ -388,6 +388,8 @@ void PersistUTest::do_test_atomspace(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+    kill_data();
+
     SQLPersistSCM* _pm = new SQLPersistSCM(_as);
     TSM_ASSERT("Persist Module not loaded", _pm);
 
@@ -400,8 +402,6 @@ void PersistUTest::do_test_atomspace(void)
         friendlyFailMessage();
         exit(1);
     };
-
-    kill_data();
 
     int idx = 0;
     add_to_space(idx++, _as, "AA-aa-wow ");
@@ -421,7 +421,7 @@ void PersistUTest::do_test_atomspace(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    _pm->do_store();
+    _as->store_atomspace();
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not

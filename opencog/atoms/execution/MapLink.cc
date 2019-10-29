@@ -20,8 +20,8 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
 
@@ -39,7 +39,7 @@ void MapLink::init(void)
 	// First argument must be a function of some kind.  All functions
 	// are specified using a ScopeLink, to bind the input-variables.
 	Type tscope = _outgoing[0]->get_type();
-	if (classserver().isA(tscope, SCOPE_LINK))
+	if (nameserver().isA(tscope, SCOPE_LINK))
 	{
 		_pattern = ScopeLinkCast(_outgoing[0]);
 	}
@@ -58,7 +58,7 @@ void MapLink::init(void)
 	// a re-write that should be performed.  Viz, ImplicationScopeLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	_is_impl = false;
-	if (classserver().isA(tscope, IMPLICATION_SCOPE_LINK))
+	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
 		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
@@ -111,9 +111,9 @@ MapLink::MapLink(Type t, const Handle& body)
 MapLink::MapLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (not classserver().isA(t, MAP_LINK))
+	if (not nameserver().isA(t, MAP_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a MapLink, got %s", tname.c_str());
 	}
@@ -128,9 +128,9 @@ MapLink::MapLink(const Link &l)
 {
 	// Type must be as expected
 	Type tmap = l.get_type();
-	if (not classserver().isA(tmap, MAP_LINK))
+	if (not nameserver().isA(tmap, MAP_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tmap);
+		const std::string& tname = nameserver().getTypeName(tmap);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a MapLink, got %s", tname.c_str());
 	}
@@ -322,8 +322,10 @@ bool MapLink::extract(const Handle& termpat,
 
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
+	// Execute the ground, including consuming its quotation as part of
+	// the MapLink semantics
 	Instantiator inst(scratch);
-	Handle term(inst.execute(cterm));
+	Handle term(HandleCast(inst.instantiate(cterm, HandleMap())));
 
 	// Extract values for variables.
 	HandleMap valmap;
@@ -354,7 +356,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
 		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-		return inst.execute(red);
+		return HandleCast(inst.execute(red));
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
@@ -371,7 +373,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	return Handle::UNDEFINED;
 }
 
-Handle MapLink::execute(AtomSpace* scratch) const
+ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 {
 	const Handle& valh = _outgoing[1];
 

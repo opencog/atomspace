@@ -12,6 +12,20 @@
 
 ; ------------------------------------------------------
 
+; Unit test makes the PresentLink true
+(define or-visible-put
+	(SatisfactionLink
+		;; SequentialOrLink - verify predicates in sequential order.
+		(SequentialOrLink
+			(PresentLink (EvaluationLink (PredicateNode "yes-visible")
+					(ListLink (VariableNode "$x"))))
+			;; If above fails then set state
+			(TrueLink (PutLink
+					(StateLink (AnchorNode "state") (VariableNode "$yy"))
+					(ConceptNode "ohhh noot visible")))
+		)))
+
+; Same as above, except unit test makes the PresentLink false
 (define or-put
 	(SatisfactionLink
 		;; SequentialOrLink - verify predicates in sequential order.
@@ -24,17 +38,6 @@
 					(ConceptNode "not-vis")))
 		)))
 
-(define or-visible-put
-	(SatisfactionLink
-		;; SequentialOrLink - verify predicates in sequential order.
-		(SequentialOrLink
-			(PresentLink (EvaluationLink (PredicateNode "yes-visible")
-					(ListLink (VariableNode "$x"))))
-			;; If above fails then set state
-			(TrueLink (PutLink
-					(StateLink (AnchorNode "state") (VariableNode "$yy"))
-					(ConceptNode "ohhh noot visible")))
-		)))
 
 (define trig 0)
 (define (incr-trig) (set! trig (+ trig 1)) (stv 1 1))

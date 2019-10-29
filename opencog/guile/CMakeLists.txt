@@ -1,3 +1,7 @@
+SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+
+ADD_SUBDIRECTORY (modules)
+
 INCLUDE_DIRECTORIES(
 	${GUILE_INCLUDE_DIR}
 )
@@ -8,22 +12,12 @@ ADD_LIBRARY (smob
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
-	SchemeSmobAF.cc
 	SchemeSmobAS.cc
-	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 	SchemeSmobValue.cc
 	SchemeSmobLogger.cc
-)
-
-ADD_LIBRARY (logger
-	LoggerSCM.cc
-)
-
-ADD_LIBRARY (randgen
-	RandGenSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(smob
@@ -34,45 +28,24 @@ TARGET_LINK_LIBRARIES(smob
 	# classserver will fail to run atom factories, viz, will fail
 	# to run the ctors for C++-backed atom types, resulting in
 	# screwball failures.
+	${NO_AS_NEEDED}
 	clearbox
 	lambda
-	# execution
+	execution
 	atomcore
 	atombase
 	truthvalue
-	attentionbank
 	atomspace
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 
-TARGET_LINK_LIBRARIES(logger
-	smob
-	${GUILE_LIBRARIES}
-	${COGUTIL_LIBRARY}
-    ruleengine # for cog-ure-logger
-)
+ADD_GUILE_EXTENSION(SCM_CONFIG smob "opencog-ext-path-smob")
 
-TARGET_LINK_LIBRARIES(randgen
-	smob
-	${GUILE_LIBRARIES}
-	${COGUTIL_LIBRARY}
+INSTALL (TARGETS smob
+	EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
-
-# XXX FIXME: We should also be installing `ln -s` links into one of
-# these eight locations:
-#    /usr/lib/guile/2.0/extensions
-#    /usr/local/lib/guile/2.0/extensions
-#    /usr/lib64/guile/2.0/extensions
-#    /usr/local/lib64/guile/2.0/extensions
-#    /usr/lib/guile/2.2/extensions
-#    /usr/local/lib/guile/2.2/extensions
-#    /usr/lib64/guile/2.2/extensions
-#    /usr/local/lib64/guile/2.2/extensions
-# ... but which one?  what a pain.
-INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-INSTALL (TARGETS logger DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-INSTALL (TARGETS randgen DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h

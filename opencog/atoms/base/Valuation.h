@@ -24,8 +24,8 @@
 #define _OPENCOG_VALUATION_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/ProtoAtom.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {
@@ -40,34 +40,34 @@ namespace opencog
  * Values with Atoms.
  */
 class Valuation
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	Handle _key;
 	Handle _atom;
-	ProtoAtomPtr _value;  // XXX TODO should this be  vector?
+	ValuePtr _value;  // XXX TODO should this be  vector?
 
 public:
-	Valuation(const Handle& k, const Handle& a, const ProtoAtomPtr& v)
-		: ProtoAtom(VALUATION), _key(k), _atom(a), _value(v) {}
+	Valuation(const Handle& k, const Handle& a, const ValuePtr& v)
+		: Value(VALUATION), _key(k), _atom(a), _value(v) {}
 
 	virtual ~Valuation() {}
 
 	const Handle& key() { return _key; }
 	const Handle& atom() { return _atom; }
-	ProtoAtomPtr& value() { return _value; }
+	ValuePtr& value() { return _value; }
 
-	void setValue(const ProtoAtomPtr&);
+	void setValue(const ValuePtr&);
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal, else false.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<Valuation> ValuationPtr;
-static inline ValuationPtr ValuationCast(const ProtoAtomPtr& a)
+static inline ValuationPtr ValuationCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<Valuation>(a); }
 
 #define createValuation std::make_shared<Valuation>

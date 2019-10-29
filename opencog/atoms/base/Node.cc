@@ -24,9 +24,8 @@
 #include <stdio.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atomspace/AtomTable.h>
 
 #include "Node.h"
 
@@ -34,34 +33,30 @@ using namespace opencog;
 
 void Node::init(const std::string& cname)
 {
-    if (not classserver().isA(_type, NODE))
+    if (not nameserver().isA(_type, NODE))
     {
         throw InvalidParamException(TRACE_INFO,
             "Node - Invalid node type '%d' %s.",
-            _type, classserver().getTypeName(_type).c_str());
+            _type, nameserver().getTypeName(_type).c_str());
     }
     _name = cname;
 }
 
+/// Return a universally-unique string for each distinct node.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
-
-    // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += ")\n";
-
-    return answer;
+    std::stringstream nstrm;
+    nstrm << indent << "(" <<  nameserver().getTypeName(_type)
+        << " \"" << _name << "\")";
+    return nstrm.str();
 }
 
 std::string Node::to_string(const std::string& indent) const
 {
     std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
 
     // Print the TV only if its not the default.

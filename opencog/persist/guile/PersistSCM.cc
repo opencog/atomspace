@@ -29,24 +29,12 @@
 using namespace opencog;
 
 PersistSCM::PersistSCM(void)
+	: ModuleWrap("opencog persist")
 {
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
-	scm_with_guile(init_in_guile, this);
-}
-
-void* PersistSCM::init_in_guile(void* self)
-{
-	scm_c_define_module("opencog persist", init_in_module, self);
-	scm_c_use_module("opencog persist");
-	return NULL;
-}
-
-void PersistSCM::init_in_module(void* data)
-{
-	PersistSCM* self = (PersistSCM*) data;
-	self->init();
+	module_init();
 }
 
 void PersistSCM::init(void)
@@ -61,6 +49,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::store_atom, this, "persist");
 	define_scheme_primitive("load-atoms-of-type",
 	             &PersistSCM::load_type, this, "persist");
+	define_scheme_primitive("load-atomspace",
+	             &PersistSCM::load_atomspace, this, "persist");
+	define_scheme_primitive("store-atomspace",
+	             &PersistSCM::store_atomspace, this, "persist");
 	define_scheme_primitive("barrier",
 	             &PersistSCM::barrier, this, "persist");
 }
@@ -89,6 +81,13 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
+// XXX FIXME -- it appear that this was never exposed in scheme,
+// and so there are no users anywhere for this, which means that
+// there are no users for `as->fetch_valuations()` either, which
+// means it can be removed.  It's not hard to implement in SQL,
+// but does pose an implementation difficulty for IPFS. Since this
+// appears to be unused, then it really should be eliminate.
+// ... someday. In a later pull req, I guess.
 void PersistSCM::fetch_valuations(Handle key, bool get_all_values)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-valuations");
@@ -110,6 +109,18 @@ void PersistSCM::load_type(Type t)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
 	as->fetch_all_atoms_of_type(t);
+}
+
+void PersistSCM::load_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atomspace");
+	as->load_atomspace();
+}
+
+void PersistSCM::store_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atomspace");
+	as->store_atomspace();
 }
 
 void PersistSCM::barrier(void)

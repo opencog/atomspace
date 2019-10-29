@@ -27,15 +27,11 @@
 #include <set>
 #include <sstream>
 
-#ifndef WIN32
-#include <unistd.h>
-#endif
-
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -78,6 +74,12 @@ equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
     return hl == hr;
 }
 
+// Overloading operator<< for Incoming Set
+ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
+{
+    return out << opencog::oc_to_string(iset);
+}
+
 } // namespace std
 
 namespace opencog {
@@ -92,7 +94,7 @@ Atom::~Atom()
         // destructor! Which they shouldn't do.)
         OC_ASSERT(0 == getIncomingSet().size(),
              "Atom deletion failure; incoming set not empty for %s h=%x",
-             classserver().getTypeName(_type).c_str(), get_hash());
+             nameserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
 }
@@ -123,7 +125,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    setValue (truth_key(), ProtoAtomCast(newTV));
+    setValue (truth_key(), ValueCast(newTV));
 
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
@@ -133,7 +135,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    ProtoAtomPtr pap(getValue(truth_key()));
+    ValuePtr pap(getValue(truth_key()));
     if (nullptr == pap) return TruthValue::DEFAULT_TV();
     return TruthValueCast(pap);
 }
@@ -141,7 +143,7 @@ TruthValuePtr Atom::getTruthValue() const
 // ==============================================================
 /// Setting values associated with this atom.
 /// If the value is a null pointer, then the key is removed.
-void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
+void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
 	std::lock_guard<std::mutex> lck(_mtx);
 	if (nullptr != value)
@@ -156,7 +158,7 @@ void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 	}
 }
 
-ProtoAtomPtr Atom::getValue(const Handle& key) const
+ValuePtr Atom::getValue(const Handle& key) const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -169,7 +171,7 @@ ProtoAtomPtr Atom::getValue(const Handle& key) const
     // the multi-threaded async atom store in the SQL peristance backend.
     // Furthermore, we must make a copy while holding the lock! Got that?
 
-    ProtoAtomPtr pap;
+    ValuePtr pap;
     std::lock_guard<std::mutex> lck(_mtx);
     auto pr = _values.find(key);
     if (_values.end() != pr) pap = pr->second;
@@ -191,8 +193,7 @@ void Atom::copyValues(const Handle& other)
     HandleSet okeys(other->getKeys());
     for (const Handle& k: okeys)
     {
-        ProtoAtomPtr p = other->getValue(k);
-        setValue(k, p);
+        setValue(k, other->getValue(k));
     }
 }
 
@@ -203,7 +204,7 @@ std::string Atom::valuesToString() const
     HandleSet keys(getKeys());
     for (const Handle& k: keys)
     {
-        ProtoAtomPtr p = getValue(k);
+        ValuePtr p = getValue(k);
         rv += "; key = " + k->to_string();
         rv += "; val = " + p->to_string() + "\n";
     }
@@ -324,7 +325,8 @@ void Atom::remove_atom(const LinkPtr& a)
 #endif /* INCOMING_SET_SIGNALS */
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
-    bucket->second.erase(a);
+    if (bucket != _incoming_set->_iset.end())
+        bucket->second.erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -357,13 +359,16 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 #endif /* INCOMING_SET_SIGNALS */
 }
 
+void Atom::install() {}
+void Atom::remove() {}
+
 size_t Atom::getIncomingSetSize() const
 {
     if (nullptr == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
-    for (const auto pr : _incoming_set->_iset)
+    for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
 }
@@ -382,7 +387,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (const auto bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
@@ -397,7 +402,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    for (const auto bucket : _incoming_set->_iset)
+    for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
         {
@@ -428,6 +433,23 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
         if (h) result.emplace_back(h);
     }
     return result;
+}
+
+size_t Atom::getIncomingSetSizeByType(Type type) const
+{
+    if (nullptr == _incoming_set) return 0;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return 0;
+
+    size_t cnt = 0;
+    for (const WinkPtr& w : bucket->second)
+    {
+        LinkPtr h(w.lock());
+        if (h) cnt++;
+    }
+    return cnt;
 }
 
 std::string Atom::id_to_string() const

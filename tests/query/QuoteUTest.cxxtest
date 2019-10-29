@@ -24,9 +24,10 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
+#include "imply.h"
+
 
 using namespace opencog;
 
@@ -45,8 +46,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
-        eval->eval("(add-to-load-path \"..\")");
-        eval->eval("(add-to-load-path \"../../..\")");
+        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
     }
 
     ~QuoteUTest()
@@ -64,7 +65,8 @@ public:
     void test_quoted_variable(void);
     void test_nest(void);
     void test_throw(void);
-    void test_gpn(void);
+    void test_gpn_bindy(void);
+    void test_gpn_get_times_link(void);
     void test_double_quote(void);
     void test_impossible(void);
     void test_numeric_greater(void);
@@ -183,7 +185,7 @@ void QuoteUTest::test_throw(void)
 /*
  * QuoteLink unit test.  Test proper search scope
  */
-void QuoteUTest::test_gpn(void)
+void QuoteUTest::test_gpn_bindy(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -197,6 +199,27 @@ void QuoteUTest::test_gpn(void)
     allstar = getlink(allstar, 0);
     TS_ASSERT_EQUALS(LIST_LINK, allstar->get_type());
     TS_ASSERT_EQUALS(2, getarity(allstar));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test matching quoted TimesLink
+ */
+void QuoteUTest::test_gpn_get_times_link(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/query/quote-gpn.scm\")");
+
+    Handle get_times_link = eval->eval_h("get-times-link");
+
+    Handle result = satisfying_set(as, get_times_link);
+    TS_ASSERT_EQUALS(1, getarity(result));
+
+    Handle times_link = getlink(result, 0);
+    TS_ASSERT_EQUALS(LIST_LINK, times_link->get_type());
+    TS_ASSERT_EQUALS(2, getarity(times_link));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -231,7 +254,7 @@ void QuoteUTest::test_impossible(void)
 
     Handle imp = eval->eval_h("imp");
 
-    TruthValuePtr tv = satisfaction_link(as, imp);
+    TruthValuePtr tv = imp->evaluate(as);
 
     // Mostly we expect the above to not throw or assert.
     // Getting back false tv (no groundings at all) is a bonus.

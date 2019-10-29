@@ -23,8 +23,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include "imply.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -46,8 +46,8 @@ public:
 		logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
 
-		eval.eval("(add-to-load-path \"..\")");
-		eval.eval("(add-to-load-path \"../../..\")");
+		eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	}
 
 	~DontExecUTest()
@@ -55,14 +55,13 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
-		int rc = CxxTest::TestTracker::tracker().suiteFailed();
-		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp();
 	void tearDown();
 
 	void test_DontExecLink_simple();
+	void test_DontExecLink_multi();
 	void test_DontExecLink_consumption();
 };
 
@@ -101,6 +100,26 @@ void DontExecUTest::test_DontExecLink_simple()
 	logger().debug() << "put expected = " << oc_to_string(band);
 
 	TS_ASSERT_EQUALS(put_band, band);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that DontExecLink are properly consumed, even when
+ * wrapped in a set.
+ */
+void DontExecUTest::test_DontExecLink_multi()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval.eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+
+	Handle got = eval.eval_h("(cog-execute! put-eval)");
+	Handle want = eval.eval_h("eval-expected");
+
+	TS_ASSERT_EQUALS(got, want);
+
+	logger().debug() << "put-multi result = " << oc_to_string(got);
+	logger().debug() << "put-multi expected = " << oc_to_string(want);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

@@ -1,6 +1,11 @@
 
 Query and Satisfaction
 ======================
+The atoms in this directory work with the pattern matcher to describe
+searches and queries of the AtomSpace. A general explanation of pattern
+matching can be found in the pattern-matching
+[README](opencog/query/README.md) file (as well as the wiki). Please
+review those resources first!
 
 The atoms in this directory memoize (cache) the patterns specified by
 the SatisfactionLink and the BindLink.  This helps avoid having to
@@ -11,17 +16,16 @@ The SatisfactionLink and BindLink implicitly assume (have to assume)
 that they will run with the DefaultPatternMatchCB, or variants thereof.
 However, the current implementation does allow them to actually run
 with other callbacks as well, so weird stuff may happen due to this
-implicit assumption. By contrast, the ConcreteLink tries not to make
-such assumptions, or, at least, to make fewer of them.
+implicit assumption.
 
 
 Basic Intro
 -----------
 What follows is a basic intro to satisfiability and grounding.
 
-The BindLink::imply() method is used to "evaluate" a BindLink.  The
-BindLink serves to declare the variables present in predicate and the
-implicand (the rewrite term).
+The `PatternLink::satisfy()` method is used to "evaluate" a BindLink.
+The BindLink serves to declare the variables present in predicate and
+the implicand (the rewrite term).
 
 Given a BindLink, this method will "evaluate" it, matching
 the predicate, and creating a grounded implicand, assuming the
@@ -48,7 +52,7 @@ predicate can be satisfied. Thus, for example, given the structure
             VariableNode "$var0"
             VariableNode "$var1"
 
-Then, if the atomspace also contains a parsed version of the English
+Then, if the AtomSpace also contains a parsed version of the English
 sentence "Pottery is made from clay", that is, if it contains the
 hypergraph
 
@@ -72,7 +76,7 @@ bindings are referred to as the 'groundings' or 'solutions' to the
 variables. So, e.g. $var0 is 'grounded' by "pottery".
 
 Next, a grounded copy of the implicand is then created; that is,
-the following hypergraph is created and added to the atomspace:
+the following hypergraph is created and added to the AtomSpace:
 
    EvaluationLink
       PredicateNode "make_from"
@@ -93,7 +97,7 @@ variable may lead to unexpected results.)
 
 Pattern-matching proceeds by finding groundings for these variables.
 When a pattern match is found, the variables can be understood as
-being grounded by some explicit terms in the atomspace. This
+being grounded by some explicit terms in the AtomSpace. This
 grounding is then used to create a grounded version of the
 (ungrounded) implicand. That is, the variables in the implicand are
 substituted by their grounding values.  This method then returns a
@@ -101,7 +105,7 @@ list of all of the grounded implicands that were created.
 
 The act of pattern-matching to the predicate of the implication has
 an implicit 'for-all' flavour to it: the pattern is matched to 'all'
-matches in the atomspace.  However, with a suitably defined
+matches in the AtomSpace.  However, with a suitably defined
 PatternMatchCallback, the search can be terminated at any time, and
 so this method can be used to implement a 'there-exists' predicate,
 or any quantifier whatsoever.
@@ -109,16 +113,3 @@ or any quantifier whatsoever.
 Note that this method can be used to create a simple forward-chainer:
 One need only to take a set of implication links, and call this
 method repeatedly on them, until one is exhausted.
-
-TO-DO List
-==========
-
-Type Restrictions
------------------
-It could make sense to store type restrictions with a new VariableNode
-class. This would offer a minor performance improvement: type
-restrictions would not have to be looked up in a map, as currently
-implemented.  On the other hand, this could be a major headache: every
-variable would have to be globally unique, as otherwise, the type
-restrictions would clash with one another.  This would also make
-type equations hard to enforce.  Hmm. So maybe this is a bad idea...

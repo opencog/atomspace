@@ -29,10 +29,10 @@ using namespace opencog;
 
 void DefineLink::init()
 {
-	if (not classserver().isA(get_type(), DEFINE_LINK))
+	if (not nameserver().isA(get_type(), DEFINE_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a DefineLink, got %s",
-				classserver().getTypeName(get_type()).c_str());
+				nameserver().getTypeName(get_type()).c_str());
 
 	// Must have name and body
 	if (2 != _outgoing.size())
@@ -51,7 +51,7 @@ void DefineLink::init()
 	    DEFINED_TYPE_NODE != dtype)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting Defined(Schema/Predicate/Type)Node, got %s",
-				classserver().getTypeName(dtype).c_str());
+				nameserver().getTypeName(dtype).c_str());
 }
 
 DefineLink::DefineLink(const HandleSeq& oset, Type t)

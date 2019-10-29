@@ -32,17 +32,16 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/base/FloatValue.h>
-#include <opencog/atoms/base/LinkValue.h>
-#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include <opencog/persist/sql/SQLBackingStore.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
@@ -120,7 +119,7 @@ class ValueSaveUTest :  public CxxTest::TestSuite
 
         void do_test_single_atom_save();
         void do_test_save_restore(bool);
-        void check_one(ProtoAtomPtr, bool);
+        void check_one(ValuePtr, bool);
         void do_test_load_by_type();
         void do_test_link_by_type();
         void do_test_incoming();
@@ -312,9 +311,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
@@ -327,7 +324,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.12345678901234567, 2.12345678901234567e35,
 		                     3.09876543210987654e200}));
 
@@ -336,7 +333,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
-	ProtoAtomPtr pvs = createStringValue(
+	ValuePtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	atom->setValue(key, pvs);
@@ -344,16 +341,16 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvs}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvs}));
 
 	atom->setValue(key, pvl);
 	as->store_atom(atom);
 	as->barrier();
 
 	// --------------------
-	ProtoAtomPtr pvl2 = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
+	ValuePtr pvl2 = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	atom->setValue(key, pvl2);
 	as->store_atom(atom);
@@ -363,7 +360,6 @@ void ValueSaveUTest::do_test_single_atom_save()
 	store->kill_data();
 
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -372,7 +368,7 @@ void ValueSaveUTest::do_test_single_atom_save()
  * Similar to above, but attempts to verify that the saved
  * values are correct.
  */
-void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
+void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 {
 	Handle bkey(createNode(PREDICATE_NODE, "some pred key"));
 	Handle batom(createNode(CONCEPT_NODE, "some node"));
@@ -383,9 +379,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 	TS_ASSERT(store->connected())
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->fetch_atom(bkey);
 	Handle atom = as->fetch_atom(batom);
@@ -400,7 +394,6 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 	printf ("Stored vals %s\n", atom->valuesToString().c_str());
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// ---------------------------------
@@ -409,9 +402,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// Storage uses a different code path if the key is not yet
 	// known when the values are fetched.  Test this code path.
@@ -420,13 +411,12 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 
 	printf("Got atom %s\n", atom->to_string().c_str());
 	printf("Got vals %s\n", atom->valuesToString().c_str());
-	ProtoAtomPtr fap = atom->getValue(key);
+	ValuePtr fap = atom->getValue(key);
 
 	printf("Expecting %s\n", pap->to_string().c_str());
 	TS_ASSERT(*pap == *fap);
 
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -439,9 +429,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
@@ -454,34 +442,33 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.6543210987654321, 2.67890123456789012e-35,
 		                     3.2109876543210987e-200}));
 
 	check_one(pvf, fkey);
 
 	// --------------------
-	ProtoAtomPtr pvs = createStringValue(
+	ValuePtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	check_one(pvs, fkey);
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvs}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvs}));
 
 	check_one(pvl, fkey);
 
 	// --------------------
-	ProtoAtomPtr pvl2 = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
+	ValuePtr pvl2 = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	check_one(pvl2, fkey);
 
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -499,9 +486,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "float node");
@@ -511,7 +496,7 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);
@@ -520,7 +505,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	af->setTruthValue(tf);
 
 	// --------------------
-	ProtoAtomPtr pvt = createStringValue(
+	ValuePtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 
@@ -528,16 +513,16 @@ void ValueSaveUTest::do_test_load_by_type()
 	at->setTruthValue(tt);
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvt}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 
 	TruthValuePtr tl(SimpleTruthValue::createTV(0.33, 300));
 	al->setTruthValue(tl);
 
 	// --------------------
-	ProtoAtomPtr pvv = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	ValuePtr pvv = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 
 	TruthValuePtr tv(SimpleTruthValue::createTV(0.44, 400));
@@ -552,7 +537,6 @@ void ValueSaveUTest::do_test_load_by_type()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -562,9 +546,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -591,10 +573,10 @@ void ValueSaveUTest::do_test_load_by_type()
 	TS_ASSERT(*gtl == *tl);
 	TS_ASSERT(*gtv == *tv);
 
-	ProtoAtomPtr gpf = gaf->getValue(gkey);
-	ProtoAtomPtr gpt = gat->getValue(gkey);
-	ProtoAtomPtr gpl = gal->getValue(gkey);
-	ProtoAtomPtr gpv = gav->getValue(gkey);
+	ValuePtr gpf = gaf->getValue(gkey);
+	ValuePtr gpt = gat->getValue(gkey);
+	ValuePtr gpl = gal->getValue(gkey);
+	ValuePtr gpv = gav->getValue(gkey);
 
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
@@ -604,7 +586,6 @@ void ValueSaveUTest::do_test_load_by_type()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -624,9 +605,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -646,7 +625,7 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);
@@ -659,7 +638,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	cf->setTruthValue(tf);
 
 	// --------------------
-	ProtoAtomPtr pvt = createStringValue(
+	ValuePtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 	bt->setValue(key, pvt);
@@ -671,8 +650,8 @@ void ValueSaveUTest::do_test_link_by_type()
 	ct->setTruthValue(tt);
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvt}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 	bl->setValue(key, pvl);
 	cl->setValue(key, pvl);
@@ -683,8 +662,8 @@ void ValueSaveUTest::do_test_link_by_type()
 	cl->setTruthValue(tl);
 
 	// --------------------
-	ProtoAtomPtr pvv = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	ValuePtr pvv = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 	bv->setValue(key, pvv);
 	cv->setValue(key, pvv);
@@ -705,7 +684,6 @@ void ValueSaveUTest::do_test_link_by_type()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -715,9 +693,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -781,10 +757,10 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	// --------------------
 
-	ProtoAtomPtr gpf;
-	ProtoAtomPtr gpt;
-	ProtoAtomPtr gpl;
-	ProtoAtomPtr gpv;
+	ValuePtr gpf;
+	ValuePtr gpt;
+	ValuePtr gpl;
+	ValuePtr gpv;
 
 	try { gpf = gaf->getValue(gkey); } catch(const RuntimeException&) {}
 	try { gpt = gat->getValue(gkey); } catch(const RuntimeException&) {}
@@ -819,7 +795,6 @@ void ValueSaveUTest::do_test_link_by_type()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -837,9 +812,7 @@ void ValueSaveUTest::do_test_incoming()
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -859,7 +832,7 @@ void ValueSaveUTest::do_test_incoming()
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e-37,
 		                     3.2109876543210987e250}));
 	af->setValue(key, pvf);
@@ -872,7 +845,7 @@ void ValueSaveUTest::do_test_incoming()
 	cf->setTruthValue(tf);
 
 	// --------------------
-	ProtoAtomPtr pvt = createStringValue(
+	ValuePtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 	bt->setValue(key, pvt);
@@ -884,8 +857,8 @@ void ValueSaveUTest::do_test_incoming()
 	ct->setTruthValue(tt);
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvt}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 	bl->setValue(key, pvl);
 	cl->setValue(key, pvl);
@@ -896,8 +869,8 @@ void ValueSaveUTest::do_test_incoming()
 	cl->setTruthValue(tl);
 
 	// --------------------
-	ProtoAtomPtr pvv = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	ValuePtr pvv = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 	bv->setValue(key, pvv);
 	cv->setValue(key, pvv);
@@ -918,7 +891,6 @@ void ValueSaveUTest::do_test_incoming()
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -928,9 +900,7 @@ void ValueSaveUTest::do_test_incoming()
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch incoming set. This is what we are testing.
@@ -997,10 +967,10 @@ void ValueSaveUTest::do_test_incoming()
 
 	// --------------------
 
-	ProtoAtomPtr gpf;
-	ProtoAtomPtr gpt;
-	ProtoAtomPtr gpl;
-	ProtoAtomPtr gpv;
+	ValuePtr gpf;
+	ValuePtr gpt;
+	ValuePtr gpl;
+	ValuePtr gpv;
 
 	try { gpf = gaf->getValue(gkey); } catch(const RuntimeException&) {}
 	try { gpt = gat->getValue(gkey); } catch(const RuntimeException&) {}
@@ -1035,7 +1005,6 @@ void ValueSaveUTest::do_test_incoming()
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 
@@ -1053,9 +1022,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	store->kill_data();
 
 	AtomSpace* as = new AtomSpace();
-	SQLBackingStore* backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "float node");
@@ -1065,7 +1032,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 
 	// --------------------
 	// Now set some values
-	ProtoAtomPtr pvf = createFloatValue(
+	ValuePtr pvf = createFloatValue(
 		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
 		                     3.2109876543210987e-250}));
 	af->setValue(key, pvf);
@@ -1074,7 +1041,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	af->setTruthValue(tf);
 
 	// --------------------
-	ProtoAtomPtr pvt = createStringValue(
+	ValuePtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
 
@@ -1082,16 +1049,16 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	at->setTruthValue(tt);
 
 	// --------------------
-	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvt}));
+	ValuePtr pvl = createLinkValue(
+		std::vector<ValuePtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 
 	TruthValuePtr tl(SimpleTruthValue::createTV(0.33, 300));
 	al->setTruthValue(tl);
 
 	// --------------------
-	ProtoAtomPtr pvv = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	ValuePtr pvv = createLinkValue(
+		std::vector<ValuePtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
 
 	TruthValuePtr tv(SimpleTruthValue::createTV(0.44, 400));
@@ -1106,7 +1073,6 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	as->barrier();
 
 	delete as;
-	delete backing;
 	delete store;
 
 	// --------------------
@@ -1116,9 +1082,7 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
-	backing = new SQLBackingStore();
-	backing->set_store(store);
-	backing->registerWith(as);
+	store->registerWith(as);
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -1161,10 +1125,10 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 		TS_ASSERT(gtv == TruthValue::DEFAULT_TV());
 	}
 
-	ProtoAtomPtr gpf = gaf->getValue(gkey);
-	ProtoAtomPtr gpt = gat->getValue(gkey);
-	ProtoAtomPtr gpl = gal->getValue(gkey);
-	ProtoAtomPtr gpv = gav->getValue(gkey);
+	ValuePtr gpf = gaf->getValue(gkey);
+	ValuePtr gpt = gat->getValue(gkey);
+	ValuePtr gpl = gal->getValue(gkey);
+	ValuePtr gpv = gav->getValue(gkey);
 
 	TS_ASSERT(gpf != nullptr);
 	TS_ASSERT(gpt != nullptr);
@@ -1179,7 +1143,6 @@ void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 	// --------------------
 	store->kill_data();
 	delete as;
-	delete backing;
 	delete store;
 }
 

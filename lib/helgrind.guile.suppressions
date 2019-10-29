@@ -1,0 +1,156 @@
+{
+   <GC_mark>
+   Helgrind:Race
+   fun:GC_mark_from
+   fun:GC_do_local_mark
+   fun:GC_mark_local
+   ...
+}
+{
+   <GC_associated_lock_not_held>
+   Helgrind:Misc
+   fun:pthread_cond_broadcast_WRK
+   fun:GC_notify_all_marker
+   ...
+}
+{
+   <GC_mark_thread>
+   Helgrind:Race
+   ...
+   fun:GC_mark_thread
+   fun:mythread_wrapper
+   fun:start_thread
+   fun:clone
+}
+{
+   <GC_start_mark_threads>
+   Helgrind:Race
+   fun:GC_start_mark_threads_inner
+   fun:GC_init
+   ...
+}
+{
+   <GC_stopped_mark>
+   Helgrind:Race
+   ...
+   fun:GC_stopped_mark
+   ...
+}
+{
+   <GC_reclaim>
+   Helgrind:Race
+   ...
+   fun:GC_reclaim_generic
+   fun:GC_reclaim_small_nonempty_block
+   ...
+}
+{
+   <GC_clear_stack>
+   Helgrind:Race
+   fun:GC_clear_stack
+   ...
+}
+{
+   <GC_clear_stack_inner>
+   Helgrind:Race
+   ...
+   fun:GC_clear_stack_inner
+   ...
+}
+{
+   <GC_suspend_handler>
+   Helgrind:Race
+   ...
+   fun:GC_suspend_handler
+   ...
+}
+{
+   <GC_generic_malloc>
+   Helgrind:Race
+   fun:GC_allocobj
+   fun:GC_generic_malloc_inner
+   ...
+}
+{
+   <GC_malloc_many>
+   Helgrind:Race
+   fun:GC_generic_malloc_many
+   ...
+}
+{
+   <GC_lock>
+   Helgrind:Race
+   fun:GC_lock
+   ...
+}
+{
+   <GC_noop>
+   Helgrind:Race
+   fun:GC_noop1
+   ...
+}
+{
+   <vm_regular_engine>
+   Helgrind:Race
+   fun:vm_regular_engine
+   fun:scm_call_n
+   ...
+}
+{
+   <scm_i_with_guile>
+   Helgrind:Race
+   fun:scm_i_with_guile
+   fun:scm_with_guile
+   ...
+}
+{
+   <scm_inline_cell>
+   Helgrind:Race
+   fun:scm_inline_cell
+   ...
+}
+{
+   <scm_weak>
+   Helgrind:Race
+   fun:scm_weak_table_refq
+   ...
+}
+{
+   <scm_cweak>
+   Helgrind:Race
+   fun:scm_c_weak_table_ref
+   ...
+}
+{
+   <scm_hash>
+   Helgrind:Race
+   fun:scm_ihashq
+   ...
+}
+{
+   <GC_init_threads>
+   Helgrind:Race
+   ...
+   fun:scm_i_init_thread_for_guile
+   ...
+}
+{
+   <oc_immortal_thread>
+   Helgrind:Race
+   fun:_ZL15immortal_threadv
+   ...
+}
+{
+   <oc_init>
+   Helgrind:Race
+   ...
+   fun:_ZN7opencog10SchemeEval4initEv
+   ...
+}
+{
+   <oc_init_once>
+   Helgrind:Race
+   fun:init_only_once
+   fun:_ZN7opencog10SchemeEvalC1EPNS_9AtomSpaceE
+   ...
+}

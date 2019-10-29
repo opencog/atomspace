@@ -1,0 +1,158 @@
+/*
+ * tests/atoms/HashUTest.cxxtest
+ *
+ * Copyright (C) 2018 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+// Test Atom::compute_hash(), in particular whether 2 different atoms
+// have different hashes. Atom hash collisions are impossible to
+// completely eliminate, but we can avoid obviously pathological ones.
+//
+class HashUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	HashUTest() : _eval(&_as)
+	{
+		logger().set_timestamp_flag(false);
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	// Test hash collisions of scope links
+	void test_scope_compute_hash_1();
+	void test_scope_compute_hash_2();
+	void test_scope_compute_hash_3();
+	void test_scope_compute_hash_4();
+	void test_scope_compute_hash_5();
+
+	// Test hash collisions of non-scope links
+	void test_sequential_compute_hash();
+	void test_times_plus_compute_hash();
+};
+
+void HashUTest::test_scope_compute_hash_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle bl1 = _eval.eval_h("bl-1"),
+		bl2 = _eval.eval_h("bl-2");
+
+	TS_ASSERT_DIFFERS(bl1.value(), bl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle gl1 = _eval.eval_h("gl-1"),
+		gl2 = _eval.eval_h("gl-2");
+
+	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_3(){
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h1 = _eval.eval_h("ll-1");
+	Handle h2 = _eval.eval_h("ll-2");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	h1 = _eval.eval_h("ll-3");
+	h2 = _eval.eval_h("ll-4");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	h1 = _eval.eval_h("ll-5");
+	h2 = _eval.eval_h("ll-6");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle bl3 = _eval.eval_h("bl-3"),
+		bl4 = _eval.eval_h("bl-4");
+
+	TS_ASSERT_DIFFERS(bl3.value(), bl4.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle bl5 = _eval.eval_h("bl-5"),
+		bl6 = _eval.eval_h("bl-6");
+
+	TS_ASSERT_DIFFERS(bl5.value(), bl6.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_sequential_compute_hash()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sal = _eval.eval_h("sal"),
+		sol = _eval.eval_h("sol");
+
+	TS_ASSERT_DIFFERS(sal.value(), sol.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_times_plus_compute_hash()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle tl = _eval.eval_h("tl"),
+		pl = _eval.eval_h("pl");
+
+	TS_ASSERT_DIFFERS(tl.value(), pl.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

@@ -119,3 +119,9 @@ Makefile
 ### Linux ###
 *~
 *.autosave
+
+# Vim #
+*.swp
+
+# Config for source dir testing
+opencog/scm/opencog/as-config.scm

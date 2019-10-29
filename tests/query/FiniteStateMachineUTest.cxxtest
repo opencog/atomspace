@@ -29,7 +29,7 @@ using namespace opencog;
 class FiniteStateMachineUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpace* as;
 	SchemeEval* eval;
 
 public:
@@ -41,8 +41,8 @@ public:
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec))");
-		eval->eval("(add-to-load-path \"..\")");
-		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	}
 
 	~FiniteStateMachineUTest()
@@ -52,15 +52,15 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp(void);
 	void tearDown(void);
 
 	Handle get_state(Handle);
-	void test_basic(void);
+	void do_test_basic(void);
+	void test_basic_rw(void);
+	void test_basic_overlay(void);
 };
 
 void FiniteStateMachineUTest::tearDown(void)
@@ -85,12 +85,8 @@ Handle FiniteStateMachineUTest::get_state(Handle set_link)
 /*
  * FiniteStateMachine most basic unit test.
  */
-void FiniteStateMachineUTest::test_basic(void)
+void FiniteStateMachineUTest::do_test_basic(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
-
 	// We expect the incoming set to have an arity of 3: once for the
 	// real, actual state, and once for each of the two VariableNodes.
 	Handle istate = eval->eval_h("(AnchorNode \"Current State\")");
@@ -127,7 +123,38 @@ void FiniteStateMachineUTest::test_basic(void)
 		TS_ASSERT_EQUALS(1, getarity(next));
 		TS_ASSERT_EQUALS(states[i%3], get_state(next));
 	}
+}
+
+void FiniteStateMachineUTest::test_basic_rw(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
+	do_test_basic();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void FiniteStateMachineUTest::test_basic_overlay(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
+
+	// Mark base-space as readonly; create a read-write overlay.
+	as->set_read_only();
+	AtomSpace* save = as;
+	as = new AtomSpace(as);
+	SchemeEval* seval = eval;
+	eval = new SchemeEval(as);
+
+	do_test_basic();
+
+	delete eval;
+	eval = seval;
+	delete as;
+	as = save;
+	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

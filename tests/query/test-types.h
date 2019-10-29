@@ -1,5 +1,5 @@
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 
 using namespace opencog;
 
@@ -27,3 +27,4 @@ Type WORD_INSTANCE_LINK;
 Type WORD_INSTANCE_NODE;
 Type WORD_NODE;
 Type WORD_SENSE_NODE;
+Type ANY_NODE;

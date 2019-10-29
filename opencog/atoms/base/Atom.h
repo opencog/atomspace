@@ -33,12 +33,11 @@
 #include <string>
 #include <unordered_set>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/ProtoAtom.h>
-#include <opencog/truthvalue/TruthValue.h>
-
-class AtomUTest;
+#include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -96,26 +95,27 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
- * represents nodes and links. In terms of inheritance, nodes and
- * links are specialization of atoms, that is, they inherit all
+ * represents nodes and links. In terms of C++ inheritance, nodes and
+ * links are specializations of atoms, that is, they inherit all
  * properties from atoms.
  */
 class Atom
-    : public ProtoAtom
+    : public Value
 {
-    friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
-    friend class DeleteLink;      // Needs to call getAtomTable()
+    friend class Link;            // Needs to call install_atom()
+    friend class StateLink;       // Needs to call swap_atom()
+    friend class SQLAtomStorage;  // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
+protected:
     //! Sets the AtomSpace in which this Atom is inserted.
-    void setAtomSpace(AtomSpace *);
+    virtual void setAtomSpace(AtomSpace *);
 
     //! Returns the AtomTable in which this Atom is inserted.
     AtomTable *getAtomTable() const;
 
-protected:
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
     mutable char _flags;
@@ -127,7 +127,7 @@ protected:
     AtomSpace *_atom_space;
 
     /// All of the values on the atom, including the TV.
-    mutable std::map<const Handle, ProtoAtomPtr> _values;
+    mutable std::map<const Handle, ValuePtr> _values;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -141,12 +141,9 @@ protected:
      * directly.  Only derived classes (Node, Link) can call this.
      *
      * @param The type of the atom.
-     * @param Outgoing set of the atom, that is, the set of atoms this
-     * atom references. It must be an empty vector if the atom is a node.
-     * @param The truthValue of the atom.
      */
     Atom(Type t)
-      : ProtoAtom(t),
+      : Value(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
@@ -176,7 +173,7 @@ protected:
         // incoming sets containing 10K atoms are not unusual, and can
         // be the source of bottlnecks.  Note that an atomspace can
         // contain a hundred-million atoms, so the solution has to be
-        // small. This rules out using using a vector to store the
+        // small. This rules out using a vector to store the
         // buckets (I tried).
         std::map<Type, WincomingSet> _iset;
 
@@ -198,6 +195,8 @@ protected:
     void insert_atom(const LinkPtr&);
     void remove_atom(const LinkPtr&);
     void swap_atom(const LinkPtr&, const LinkPtr&);
+    virtual void install();
+    virtual void remove();
 
     virtual ContentHash compute_hash() const = 0;
 
@@ -229,6 +228,14 @@ public:
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
+    ///
+    /// At this time, we use a 64-bit non-cryptographic hash: it is
+    /// just enough to disambiguate most Atoms, but is small enough
+    /// that it does not use up a lot of RAM (as AtomSpace algos are
+    /// RAM-limited, in practice.)
+    ///
+    /// If a crypto hash was ever needed, the IPLD hash format would
+    /// be recommended.  See https://ipld.io/ for details.
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
@@ -255,6 +262,18 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
+    virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO, "Not evaluatable!");
+    }
+    virtual bool is_evaluatable() const { return false; }
+
+    virtual ValuePtr execute(AtomSpace*, bool silent=false) {
+        throw RuntimeException(TRACE_INFO,
+            "Not executable! %s", to_string().c_str());
+    }
+    virtual ValuePtr execute(void) { return execute(_atom_space, false); }
+    virtual bool is_executable() const { return false; }
+
     /** Returns the handle of the atom. */
     inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
@@ -268,9 +287,9 @@ public:
     void setTruthValue(const TruthValuePtr&);
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, const ProtoAtomPtr& value);
+    void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
-    ProtoAtomPtr getValue(const Handle& key) const;
+    ValuePtr getValue(const Handle& key) const;
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
@@ -279,7 +298,7 @@ public:
     void copyValues(const Handle&);
 
     /// Print all of the key-value pairs.
-    virtual std::string valuesToString() const;
+    std::string valuesToString() const;
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
@@ -289,8 +308,8 @@ public:
     //! that belonged to that atomspace at the time this call was made
     //! are returned. Otherwise, the entire incoming set is returned.
     //!
-    //! This call is thread-safe again simultaneous deletion of atoms.
-    //! That is, this call returns the incoming set as it was att the
+    //! This call is thread-safe against simultaneous deletion of atoms.
+    //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
     IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
@@ -307,11 +326,11 @@ public:
     {
         if (nullptr == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        for (const auto bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle h(w.lock());
+                Handle h(std::static_pointer_cast<Atom>(w.lock()));
                 if (h) { *result = h; result ++; }
             }
         }
@@ -323,14 +342,14 @@ public:
     //! iteration stopsm and true is returned. Otherwise the
     //! callback is called on all incomings and false is returned.
     template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
     {
         // We make a copy of the set, so that we don't call the
         // callback with locks held.
         IncomingSet vh(getIncomingSet());
 
         for (const LinkPtr& lp : vh)
-            if ((data->*cb)(Handle(lp))) return true;
+            if ((data->*cb)(Handle(std::static_pointer_cast<Atom>(lp)))) return true;
         return false;
     }
 
@@ -353,7 +372,7 @@ public:
 
         for (const WinkPtr& w : bucket->second)
         {
-            Handle h(w.lock());
+            Handle h(std::static_pointer_cast<Atom>(w.lock()));
             if (h) { *result = h; result ++; }
         }
         return result;
@@ -361,6 +380,9 @@ public:
 
     /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type type) const;
+
+    /** Return the size of the incoming set, for the given type. */
+    size_t getIncomingSetSizeByType(Type type) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
@@ -391,7 +413,7 @@ public:
     bool operator!=(const Atom& other) const
     { return not operator==(other); }
 
-    virtual bool operator==(const ProtoAtom& other) const
+    virtual bool operator==(const Value& other) const
     {
         if (_type != other.get_type()) return false;
         return operator==(dynamic_cast<const Atom&>(other));
@@ -401,13 +423,13 @@ public:
     virtual bool operator<(const Atom&) const = 0;
 };
 
-static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)
+static inline AtomPtr AtomCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<Atom>(pa); }
 
 static inline AtomPtr AtomCast(const Handle& h)
     { return AtomPtr(h); }
 
-static inline Handle HandleCast(const ProtoAtomPtr& pa)
+static inline Handle HandleCast(const ValuePtr& pa)
     { return Handle(AtomCast(pa)); }
 
 // Debugging helpers see
@@ -415,10 +437,17 @@ static inline Handle HandleCast(const ProtoAtomPtr& pa)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const IncomingSet& iset, const std::string& indent);
-std::string oc_to_string(const IncomingSet& iset);
+std::string oc_to_string(const IncomingSet& iset,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 } // namespace opencog
+
+// Overloading operator<< for Incoming Set 
+namespace std {
+    
+ostream& operator<<(ostream&, const opencog::IncomingSet&);
+
+}
 
 #endif // _OPENCOG_ATOM_H

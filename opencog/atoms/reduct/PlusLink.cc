@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/PlusLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include "MinusLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
 using namespace opencog;
+
+Handle PlusLink::zero;
 
 PlusLink::PlusLink(const HandleSeq& oset, Type t)
     : ArithmeticLink(oset, t)
@@ -48,74 +51,114 @@ PlusLink::PlusLink(const Link& l)
 
 void PlusLink::init(void)
 {
+	if (nullptr == zero) zero = createNumberNode(0);
+
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, PLUS_LINK))
+	if (not nameserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knil = Handle(createNumberNode(0));
+	knil = zero;
 	_commutative = true;
 }
 
 // ============================================================
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ValuePtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
-Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
+ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
+                        const ValuePtr& fi, const ValuePtr& fj) const
 {
-	Type fitype = fi->get_type();
-	Type fjtype = fj->get_type();
+	// Try to yank out values, if possible.
+	ValuePtr vi(get_value(as, silent, fi));
+	Type vitype = vi->get_type();
+
+	ValuePtr vj(get_value(as, silent, fj));
+	Type vjtype = vj->get_type();
 
 	// Are they numbers?
-	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
 	{
-		double sum = get_double(fi) + get_double(fj);
-		return Handle(createNumberNode(sum));
+		double sum = get_double(vi) + get_double(vj);
+		return createNumberNode(sum);
 	}
 
-	// If either one is the unit, then just drop it.
-	if (content_eq(fi, knil))
-		return fj;
-	if (content_eq(fj, knil))
-		return fi;
+	// If adding zero, just drop the zero.
+	// Unless the other side is a StreamValue, in which case, we
+	// have to behave consistently with adding a non-zero number.
+	// Adding a number to a stream samples one value out of that stream.
+	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
+		return sample_stream(vj, vjtype);
+
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
+		return sample_stream(vi, vitype);
 
 	// Is either one a PlusLink? If so, then flatten.
-	if (PLUS_LINK == fitype or PLUS_LINK == fjtype)
+	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
 	{
 		HandleSeq seq;
 		// flatten the left
-		if (PLUS_LINK == fitype)
+		if (PLUS_LINK == vitype)
 		{
-			for (const Handle& lhs: fi->getOutgoingSet())
+			for (const Handle& lhs: HandleCast(vi)->getOutgoingSet())
 				seq.push_back(lhs);
 		}
 		else
 		{
-			seq.push_back(fi);
+			seq.push_back(HandleCast(vi));
 		}
 
 		// flatten the right
-		if (PLUS_LINK == fjtype)
+		if (PLUS_LINK == vjtype)
 		{
-			for (const Handle& rhs: fj->getOutgoingSet())
+			for (const Handle& rhs: HandleCast(vj)->getOutgoingSet())
 				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(fj);
+			seq.push_back(HandleCast(vj));
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
-		return ap->delta_reduce();
+		return ap->delta_reduce(as, silent);
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
-	if (content_eq(fi, fj))
+	Handle hvi(HandleCast(vi));
+	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
 		Handle two(createNumberNode("2"));
-		return Handle(createTimesLink(fi, two));
+		return createTimesLink(hvi, two) -> execute(as, silent);
+	}
+
+	// Swap order, to make the Minus handling below easier.
+	if (nameserver().isA(vitype, NUMBER_NODE))
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Collapse (3 + (5 - x)) and (13 + (x - 6))
+	if (MINUS_LINK == vitype and NUMBER_NODE == vjtype)
+	{
+		Handle minuend(HandleCast(vi)->getOutgoingAtom(0));
+		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
+		if (NUMBER_NODE == minuend->get_type())
+		{
+			double sum = get_double(vj) + get_double(minuend);
+			Handle hsum(createNumberNode(sum));
+			return createMinusLink(hsum, subtrahend);
+		}
+		if (NUMBER_NODE == subtrahend->get_type())
+		{
+			double diff = get_double(vj) - get_double(subtrahend);
+			Handle hdiff(createNumberNode(diff));
+			if (content_eq(hdiff, zero))
+				return minuend;
+			return createPlusLink(minuend, hdiff);
+		}
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -124,15 +167,15 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	if (fjtype == TIMES_LINK)
+	if (vjtype == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
 
-		Handle exx = fj->getOutgoingAtom(0);
+		Handle exx = HandleCast(vj)->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
-		if (fi == exx)
+		if (vi == exx)
 		{
 			Handle one(createNumberNode("1"));
 			rest.push_back(one);
@@ -140,10 +183,10 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		}
 
 		// Handle the (a+b) case described above.
-		else if (fitype == TIMES_LINK and
-		         fi->getOutgoingAtom(0) == exx)
+		else if (vitype == TIMES_LINK and
+		         hvi->getOutgoingAtom(0) == exx)
 		{
-			const HandleSeq& ilpo = fi->getOutgoingSet();
+			const HandleSeq& ilpo = hvi->getOutgoingSet();
 			size_t ilpsz = ilpo.size();
 			for (size_t k=1; k<ilpsz; k++)
 				rest.push_back(ilpo[k]);
@@ -152,7 +195,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 
 		if (do_add)
 		{
-			const HandleSeq& jlpo = fj->getOutgoingSet();
+			const HandleSeq& jlpo = HandleCast(vj)->getOutgoingSet();
 			size_t jlpsz = jlpo.size();
 			for (size_t k=1; k<jlpsz; k++)
 				rest.push_back(jlpo[k]);
@@ -160,17 +203,43 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 			// a_plus is now (a+1) or (a+b) as described above.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			Handle a_plus(ap->delta_reduce());
+			ValuePtr a_plus(ap->delta_reduce(as, silent));
 
-			return Handle(createTimesLink(exx, a_plus));
+			return createTimesLink(exx, HandleCast(a_plus));
 		}
 	}
+
+	// Swap order, make things easier below.
+	if (nameserver().isA(vitype, FLOAT_VALUE))
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Scalar times vector
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return plus(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector times vector
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return plus(FloatValueCast(vi), FloatValueCast(vj));
+	}
+
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi = HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
 	// For example, fi and fj might be two different VariableNodes.
-	return Handle(createPlusLink(fi, fj)->reorder());
+	return createPlusLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);
+
 // ============================================================

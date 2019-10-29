@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Force.h"
@@ -43,8 +43,8 @@ using namespace opencog;
 /// recursive.
 ///
 /// When executing, if the results are different, the new results
-/// are added to the atomspace. We need to do this, because scheme,
-/// and python expects to find their arguments in the atomspace.
+/// are added to the atomspace. We need to do this, because scheme
+/// and python expect to find their arguments in the atomspace.
 /// Users who do not want to pollute the atomspace should use a
 /// temporary (scratch) atomspace.
 ///
@@ -54,7 +54,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 
 	if (LIST_LINK != cargs->get_type())
 	{
-		Handle args(inst.execute(cargs, silent));
+		Handle args(HandleCast(inst.execute(cargs, silent)));
 		if (args != cargs)
 			args = as->add_atom(args);
 		return args;
@@ -65,7 +65,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 	bool changed = false;
 	for (const Handle& ho : cargs->getOutgoingSet())
 	{
-		Handle nh(inst.execute(ho, silent));
+		Handle nh(HandleCast(inst.execute(ho, silent)));
 		// nh might be NULL if ho was a DeleteLink
 		if (nullptr == nh)
 		{

@@ -19,7 +19,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-cosine-compute LLOBJ
-	#:optional (GET-CNT 'pair-count))
+	#:optional (GET-CNT 'get-count))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products, cosine angles and jaccard distances between two
@@ -34,6 +34,11 @@
   product is
       right-prod(x,u) = sum_y N(x,y) N(u,y)
   with x and u being two different row indexes.
+
+  The left-product is the same thing as an entry in the symmetric
+  matrix M^TM (with M==LLOBJ and ^T the transpose). That is,
+       left-product(y,z) = [M^TM](y,z)
+  Likewise, the right-product is an entry in the matrix MM^T.
 
   Cosines:
   --------
@@ -94,7 +99,7 @@
 
 		; -------------
 		; Return the vector product of column A and column B
-		; The prod-obj takes the product of pairs of atrix entries,
+		; The prod-obj takes the product of pairs of matrix entries,
 		; and the 'left-count method just adds them up.  Equivalently,
 		; we could just sum over the left-stars ourselves, but this
 		; would take three lines of code instead of one.

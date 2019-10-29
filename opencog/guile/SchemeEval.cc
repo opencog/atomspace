@@ -21,7 +21,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -61,8 +61,8 @@ void SchemeEval::init(void)
 	_eval_thread = SCM_EOL;
 
 	// User error and crash management
-	_error_string = SCM_EOL;
-	_error_string = scm_gc_protect_object(_error_string);
+	_scm_error_string = SCM_EOL;
+	_scm_error_string = scm_gc_protect_object(_scm_error_string);
 
 	_captured_stack = SCM_BOOL_F;
 	_captured_stack = scm_gc_protect_object(_captured_stack);
@@ -192,7 +192,7 @@ void SchemeEval::finish(void)
 		scm_gc_unprotect_object(_pipe);
 	}
 
-	scm_gc_unprotect_object(_error_string);
+	scm_gc_unprotect_object(_scm_error_string);
 	scm_gc_unprotect_object(_captured_stack);
 
 	// Force garbage collection
@@ -218,8 +218,8 @@ void SchemeEval::set_captured_stack(SCM newstack)
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-	SCM olderror = _error_string;
-	_error_string = scm_gc_protect_object(newerror);
+	SCM olderror = _scm_error_string;
+	_scm_error_string = scm_gc_protect_object(newerror);
 	scm_gc_unprotect_object(olderror);
 }
 
@@ -552,7 +552,8 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// Set global _atomspace variable in the execution environment.
+	// Set the execution environment atomspace (i.e. for this thread)
+	// to the evaluator _atomspace variable.
 	AtomSpace* saved_as = nullptr;
 	if (_atomspace)
 	{
@@ -719,30 +720,27 @@ std::string SchemeEval::do_poll_result()
 
 	if (_caught_error)
 	{
-		std::string rv = poll_port();
+		_error_string = poll_port();
 
-		char * str = scm_to_utf8_string(_error_string);
-		rv += str;
+		char * str = scm_to_utf8_string(_scm_error_string);
+		_error_string += str;
 		free(str);
 		set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		rv += "\n";
-		return rv;
+		_error_string += "\n";
+		return _error_string;
 	}
-	else
-	{
-		// First, we get the contents of the output port,
-		// and pass that on.
-		std::string rv = poll_port();
 
-		// Next, we append the "interpreter" output
-		rv += prt(tmp_rc);
-		rv += "\n";
-		scm_remember_upto_here_1(tmp_rc);
-		return rv;
-	}
-	return "#<Error: Unreachable statement reached>";
+	// First, we get the contents of the output port,
+	// and pass that on.
+	std::string rv = poll_port();
+
+	// Next, we append the "interpreter" output
+	rv += prt(tmp_rc);
+	rv += "\n";
+	scm_remember_upto_here_1(tmp_rc);
+	return rv;
 }
 
 /* ============================================================== */
@@ -763,7 +761,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
-	// Set global atomspace variable in the execution environment.
+	// Set per-thread atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
 	if (_atomspace)
 	{
@@ -795,7 +793,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 	if (_caught_error)
 	{
-		char * str = scm_to_utf8_string(_error_string);
+		char * str = scm_to_utf8_string(_scm_error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
@@ -895,7 +893,7 @@ void * SchemeEval::c_wrap_eval_v(void * p)
  * occurs, an exception is thrown, and the stack trace is logged to
  * the log file.
  */
-ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
+ValuePtr SchemeEval::eval_v(const std::string &expr)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -931,7 +929,7 @@ ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
 
 	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
-	ProtoAtomPtr rv;
+	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
 }
@@ -1031,15 +1029,15 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 /* ============================================================== */
 /**
  * apply_v -- apply named function func to arguments in ListLink.
- * Return an OpenCog ProtoAtomPtr (Handle, TruthValue or Value).
+ * Return an OpenCog ValuePtr (Handle, TruthValue or Value).
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The function is presumed to return pointer
- * to a ProtoAtom object. If the function does not return a ProtoAtom,
- * or if n error ocurred during evaluation, then a C++ exception is
- * thrown.
+ * to a ProtoAtom [now renamed Value] object. If the function does
+ * not return a ProtoAtom, or if n error ocurred during evaluation,
+ * then a C++ exception is thrown.
  */
-ProtoAtomPtr SchemeEval::apply_v(const std::string &func, Handle varargs)
+ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -1069,7 +1067,7 @@ ProtoAtomPtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 
 	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
-	ProtoAtomPtr rv;
+	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
 }
@@ -1116,12 +1114,6 @@ static void return_to_pool(SchemeEval* ev)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-/// This will throw an error if used recursively.  Viz, if the
-/// evaluator evaluates something that causes another evaluator
-/// to be needed for this thread (e.g. an ExecutionOutputLink),
-/// then this very same evaluator would be re-entered, corrupting
-/// its own internal state.  If that happened, the result would be
-/// a hard-to-find & fix bug. So instead, we throw.
 SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
 	static thread_local std::map<AtomSpace*,SchemeEval*> issued;
@@ -1156,13 +1148,6 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 	evaluator->_atomspace = as;
 	issued[as] = evaluator;
 	return evaluator;
-
-#if 0
-	if (evaluator->recursing())
-		throw RuntimeException(TRACE_INFO,
-			"Evaluator thread singleton used recursively!");
-#endif
-
 }
 
 /* ============================================================== */
@@ -1189,5 +1174,15 @@ void SchemeEval::init_scheme(void)
 	// XXX FIXME only a subset is needed.
 	SchemeEval sch;
 }
+
+extern "C" {
+// Thin wrapper for easy dlopen/dlsym dynamic loading
+opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
+{
+	return opencog::SchemeEval::get_evaluator(as);
+}
+
+};
+
 
 /* ===================== END OF FILE ============================ */

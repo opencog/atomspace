@@ -8,7 +8,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Each correlation matix has a size - the left and right dimensions, aka
+; Each correlation matrix has a size - the left and right dimensions, aka
 ; the number of rows and columns.  These are returned by 'left-dim and
 ; 'right-dim.
 ;
@@ -48,30 +48,36 @@
   'num-pairs        -- The number of non-zero entries
   'total-count      -- Total number of observations on all pairs
                        (Identical to the 'wild-wild-count on the
-                       count-api object)
+                       support-api object)
 
   'left-entropy     -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
   'right-entropy    -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
   'total-entropy    -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
   'total-mi         -- The sum MI = H_tot - H_left - H_right
 
-  'left-support     -- average l_0 norm of rows
-  'left-count       -- average l_1 norm of rows
-  'left-length      -- average l_2 norm of rows
+  The averages below are weighted-averages, so that, for example,
+  the 'left-support is the average, taken over all columns, of the
+  support of each column (i.e. is the average of all 'left-supports).
+  The weight is the probability of that column, i.e. is P(*,y) viz
+  it is the 'left-freq or 'left-count/total.
+
+  'left-support     -- average (over columns) l_0 norm of columns
+  'left-count       -- average l_1 norm of columns
+  'left-length      -- average l_2 norm of columns
   'left-rms-count   -- standard deviation of counts
 
-  'right-support    -- average l_0 norm of columns
-  'right-count      -- average l_1 norm of columns
-  'right-length     -- average l_2 norm of columns
+  'right-support    -- average l_0 norm of rows
+  'right-count      -- average l_1 norm of rows
+  'right-length     -- average l_2 norm of rows
   'right-rms-count -- standard deviation of counts
 
   If we imagine each pair as a directed edge, an arrow pointing from
-  left to right, then the left-support is the same as the average
-  out-degree of the left-vertexes. The right-support is the average
-  in-degree of the right-vertexes. Equivalently, the left-support is
-  the average number of non-zero entries in each row, and the
+  right to left, then the left-support is the same as the average
+  out-degree of the right-vertexes. The right-support is the average
+  in-degree of the left-vertexes. Equivalently, the left-support is
+  the average number of non-zero entries in each column, and the
   right-support is the average number of non-zero entries in each
-  column.
+  row.
 
   The left and right sizes are analogous, but are weighted by the
   number of observations on each vertex.
@@ -96,10 +102,10 @@
         P(x,*) = N(x,*) / N(*,*)
 
     Then we define these weighted averages:
-        left-support = sum_x P(x,*) |(x,*)|
-        left-count = sum_x P(x,*) N(x,*)
-        left-length = sqrt [ sum_x P(x,*) L(x,*) ]
-        left-rms-count = sqrt [ sum_x P(x,*)
+        right-support = sum_x P(x,*) |(x,*)|
+        right-count = sum_x P(x,*) N(x,*)
+        right-length = sqrt [ sum_x P(x,*) L(x,*) ]
+        right-rms-count = sqrt [ sum_x P(x,*)
                [ L^2(x,*) - (N(x,*))^2 / |(x*)|| ] ]
 
     Note that while computing the average length of a row/column,
@@ -109,7 +115,7 @@
     rms, the 'mean' must be taken, by dividing by the support. But
     after this is done, support is multiplied back in.  The point
     here is that count is not the average-count, and the length
-    is not divided by teh support either.  So the rms-count should
+    is not divided by the support either.  So the rms-count should
     avoid an accidental divide by the support; thus the slightly
     odd-looking formula above.
 
@@ -117,8 +123,7 @@
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
-	(let* ((cntobj (add-pair-count-api LLOBJ))
-			(totcnt (cntobj 'wild-wild-count))
+	(let* ((supobj (add-support-api LLOBJ))
 			(wild-atom (LLOBJ 'wild-wild))
 			(is-filtered? (and ID (LLOBJ 'filters?)))
 		)
@@ -222,7 +227,7 @@
 			(cog-value-ref (cog-value wild-atom r-norm-key) 3))
 
 		; ----------------------------------------------------
-		(define (get-total-count) totcnt)
+		(define (get-total-count) (supobj 'wild-wild-count))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -263,60 +268,85 @@
 (define-public (make-central-compute LLOBJ)
 "
   add-central-compute LLOBJ - Extend LLOBJ with methods to compute
-  misc graph-centrality statistics.
+  misc graph-centrality statistics. These are reported by the report
+  object (by the `add-report-api` object).
+
+  The stats include the weighted-average support, count and length of
+  rows and columns. The weighted-average is the frequency-weighted
+  average: So, for example, if a row is very long, but is very rarely
+  seen, then it will not contribute much to the average.
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
-			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
 		)
 
-		(define (get-left-fn-avg FN)
-			; The Right-METHOD gives the stat on a row that we want
+		; Take an average over all rows
+		(define (get-row-fn-avg FN)
+			; The FN function gives the stat on a row that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that row, which is P(x,*) i.e. right-freq
+			; i.e. the right-count divided by the total count.
 			; The sum is over all the rows.
-			(fold
+			(define weighted-avg (fold
 				(lambda (item sum)
 					(+ sum (*
 							(FN item)
-							(frq-obj 'right-wild-freq item))))
+							(len-obj 'right-count item))))
 				0.0
 				(wild-obj 'left-basis)))
 
-		(define (do-get-left-avg R-METHOD)
-			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
+			; TODO - some future day, use 'total-count-right
+			; For now, too many existing datasets don't store this value.
+			; (define total (len-obj 'total-count-right))
+			(define total (len-obj 'wild-wild-count))
 
-		(define (get-right-fn-avg FN)
-			; The Left-METHOD gives the stat on a column that we want
+			(/ weighted-avg total))
+
+		(define (do-get-row-avg R-METHOD)
+			(get-row-fn-avg (lambda (x) (len-obj R-METHOD x))))
+
+		; Take an average over all columns
+		(define (get-col-fn-avg FN)
+			; The FN function gives the stat on a column that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that column, which is P(*,y) i.e. left-freq
+			; i.e. the left-count divided by the total count.
 			; The sum is over all the columns.
-			(fold
+			(define weighted-avg (fold
 				(lambda (item sum)
 					(+ sum (*
 							(FN item)
-							(frq-obj 'left-wild-freq item))))
+							(len-obj 'left-count item))))
 				0.0
 				(wild-obj 'right-basis)))
 
-		(define (do-get-right-avg L-METHOD)
-			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
+			; TODO - some future day, use 'total-count-left
+			; For now, too many existing datasets don't store this value.
+			; (define total (len-obj 'total-count-left))
+			(define total (len-obj 'wild-wild-count))
+
+			(/ weighted-avg total))
+
+		(define (do-get-col-avg L-METHOD)
+			(get-col-fn-avg (lambda (x) (len-obj L-METHOD x))))
 
 		; ---------------------
-		(define (get-left-support) (do-get-left-avg 'right-support))
+		; Get the weighted-average support.
+		(define (get-right-support) (do-get-row-avg 'right-support))
 
-		(define (get-right-support) (do-get-right-avg 'left-support))
-
-		; ---------------------
-		(define (get-left-count) (do-get-left-avg 'right-count))
-
-		(define (get-right-count) (do-get-right-avg 'left-count))
+		(define (get-left-support) (do-get-col-avg 'left-support))
 
 		; ---------------------
-		(define (get-left-length) (do-get-left-avg 'right-length))
+		; Get the weighted-average count.
+		(define (get-right-count) (do-get-row-avg 'right-count))
 
-		(define (get-right-length) (do-get-right-avg 'left-length))
+		(define (get-left-count) (do-get-col-avg 'left-count))
+
+		; ---------------------
+		(define (get-right-length) (do-get-row-avg 'right-length))
+
+		(define (get-left-length) (do-get-col-avg 'left-length))
 
 		; ---------
 		; XXX FIXME. This is totally insane, but guile sometimes
@@ -333,9 +363,9 @@
 		; moment = sup * variance
 		; rms-count = sqrt (moment)
 		; multiple through by sup to get the implementation below.
-		(define (get-left-rms-count)
+		(define (get-right-rms-count)
 			(real-part
-			(get-left-fn-avg
+			(get-row-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'right-support x))
 					(define siz (len-obj 'right-count x))
@@ -344,9 +374,9 @@
 					(define sizsq (/ (* siz siz) sup))
 					(sqrt (- lensq sizsq))))))
 
-		(define (get-right-rms-count)
+		(define (get-left-rms-count)
 			(real-part
-			(get-right-fn-avg
+			(get-col-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'left-support x))
 					(define siz (len-obj 'left-count x))
@@ -359,12 +389,19 @@
 		; Compute and cache the values of the computation with the
 		; report-api can find them.
 
-		(define (cache-all)
+		(define (cache-left)
 			(define start-time (current-time))
 			(define (elapsed-secs)
 				(define diff (- (current-time) start-time))
 				(set! start-time (current-time))
 				diff)
+
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-left))
 
 			(rpt-obj 'set-left-norms
 				(get-left-support)
@@ -372,8 +409,23 @@
 				(get-left-length)
 				(get-left-rms-count))
 
-			(format #t "Finished left norm totals in ~A secs\n"
+			(format #t "Finished column (left) norm averages in ~A secs\n"
 				(elapsed-secs))
+		)
+
+		(define (cache-right)
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-right))
 
 			(rpt-obj 'set-right-norms
 				(get-right-support)
@@ -381,10 +433,11 @@
 				(get-right-length)
 				(get-right-rms-count))
 
-			(format #t "Finished right norm totals in ~A secs\n"
+			(format #t "Finished row (right) norm averages in ~A secs\n"
 				(elapsed-secs))
 		)
 
+		(define (cache-all) (cache-left) (cache-right))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -398,6 +451,8 @@
 				((right-length)      (get-right-length))
 				((left-rms-count)    (get-left-rms-count))
 				((right-rms-count)   (get-right-rms-count))
+				((cache-left)        (cache-left))
+				((cache-right)       (cache-right))
 				((cache-all)         (cache-all))
 
 				(else                (apply LLOBJ (cons message args)))
@@ -422,44 +477,97 @@
 (define (print-support-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
-	(define ls (rpt-obj 'left-support))
-	(define rs (rpt-obj 'right-support))
-	(define lc (rpt-obj 'left-count))
-	(define rc (rpt-obj 'right-count))
-	(define ll (rpt-obj 'left-length))
-	(define rl (rpt-obj 'right-length))
-	(define lv (rpt-obj 'left-rms-count))
-	(define rv (rpt-obj 'right-rms-count))
+	(define ls
+		(catch #t (lambda () (rpt-obj 'left-support))
+		(lambda (key . args) #f)))
+
+	(define rs
+		(catch #t (lambda () (rpt-obj 'right-support))
+		(lambda (key . args) #f)))
+
+	(define (prt tst val)
+		(if tst (format #f "~9,4g" (rpt-obj val)) "   n/a   "))
+
+	(define lc (prt ls 'left-count))
+	(define ll (prt ls 'left-length))
+	(define lv (prt ls 'left-rms-count))
+
+	(define rc (prt rs 'right-count))
+	(define rl (prt rs 'right-length))
+	(define rv (prt rs 'right-rms-count))
+
+	(define (avg tst val)
+		(if tst (format #f "~9,4g" (/ (rpt-obj val) tst)) "   n/a   "))
+
+	(define alc (avg ls 'left-count))
+	(define all (avg ls 'left-length))
+	(define alv (avg ls 'left-rms-count))
+
+	(define arc (avg rs 'right-count))
+	(define arl (avg rs 'right-length))
+	(define arv (avg rs 'right-rms-count))
+
+	(define lss (prt ls 'left-support))
+	(define rss (prt rs 'right-support))
+
+	; Print nothing, if neither rows nor columns available
+	(if (not (or ls rs))
+		(format PORT "No support statistics are present. Use make-central-compute to get them.\n")
+		(begin
 
 	(format PORT "\n")
 	(format PORT "                 Left         Right     Avg-left     Avg-right\n")
 	(format PORT "                 ----         -----     --------     ---------\n")
-	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"  ls  rs)
-	(format PORT "Count   (l_1)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		lc rc (/ lc ls) (/ rc rs))
-	(format PORT "Length  (l_2)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		ll rl (/ ll ls) (/ rl rs))
-	(format PORT "RMS Count      ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		lv rv (/ lv ls) (/ rv rs))
+	(format PORT "Support (l_0)  ~A    ~A\n"  lss  rss)
+	(format PORT "Count   (l_1)  ~A    ~A     ~A    ~A\n" lc rc alc arc)
+	(format PORT "Length  (l_2)  ~A    ~A     ~A    ~A\n" ll rl all arl)
+	(format PORT "RMS Count      ~A    ~A     ~A    ~A\n" lv rv alv arv)
+)))
+
+(define (print-transpose-summary-report LLOBJ PORT)
+
+	(define trans-obj (add-transpose-api LLOBJ))
+
+	(define mmt-support (trans-obj 'total-mmt-support))
+	(define mmt-count (trans-obj 'total-mmt-count))
+	(define mtm-support (trans-obj 'total-mtm-support))
+	(define mtm-count (trans-obj 'total-mtm-count))
+
+	; This is -log_2 (sum_d N(*,d) N(*,d)) / N(*,*) N(*,*)
+	; See diary for more info.
+	(define mmt-entropy 0)
+	(define mtm-entropy 0)
+	(if (< 0 mmt-support)
+		(set! mmt-entropy
+			(/ (- (log (/ mmt-count (* mmt-support mmt-support)))) (log 2))))
+
+	(if (< 0 mtm-support)
+		(set! mtm-entropy
+			(/ (- (log (/ mtm-count (* mtm-support mtm-support)))) (log 2))))
+
+	(format PORT "\n")
+	(if (< 0 mmt-support)
+		(format PORT "MM^T support=~6g count=~6g entropy=~6f\n"
+			mmt-support mmt-count mmt-entropy)
+		(format PORT "No MM^T data present\n"))
+
+	(if (< 0 mtm-support)
+		(format PORT "M^TM support=~6g count=~6g entropy=~6f\n"
+			mtm-support mtm-count mtm-entropy)
+		(format PORT "No M^TM data present\n"))
 )
 
-(define*-public (print-matrix-summary-report LLOBJ
-	#:optional (PORT #t))
-"
-  print-matrix-summary-report LLOBJ #:optional PORT
-  Print a summary report about the pair dataset LLOBJ to the
-  optionally-provided output PORT (e.g. a string or file port).
-"
+(define* (do-print-report LLOBJ PORT)
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define rpt-obj (add-report-api LLOBJ))
-	(define cnt-obj (add-pair-count-api LLOBJ))
+	(define sup-obj (add-support-api LLOBJ))
 
 	(define size (rpt-obj 'num-pairs))
 	(define nrows (rpt-obj 'left-dim))
 	(define ncols (rpt-obj 'right-dim))
 	(define tot (* nrows ncols))
-	(define obs (cnt-obj 'wild-wild-count))
+	(define obs (sup-obj 'wild-wild-count))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
@@ -473,7 +581,7 @@
 		size tot)
 	(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
 		(/ size tot) (log2 (/ tot size)))
-	(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
+	(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
 		obs (/ obs size))
 
 	(catch #t
@@ -483,11 +591,25 @@
 				"No MI statistics are present; run compute-mi to get them.\n")
 			#f))
 
+	(print-support-summary-report LLOBJ PORT)
+	(print-transpose-summary-report LLOBJ PORT)
+)
+
+(define*-public (print-matrix-summary-report LLOBJ
+	#:optional (PORT #t))
+"
+  print-matrix-summary-report LLOBJ #:optional PORT
+  Print a summary report about the pair dataset LLOBJ to the
+  optionally-provided output PORT (e.g. a string or file port).
+
+  See documentation for `add-report-api` for an explanation of
+  what is being printed.
+"
 	(catch #t
-		(lambda () (print-support-summary-report LLOBJ PORT))
+		(lambda () (do-print-report LLOBJ PORT))
 		(lambda (key . args)
 			(format PORT
-				"No support statistics are present. Run compute-mi to get them.\n")
+				"No cached matrix data available;\n  run ((make-central-compute LLOBJ) 'cache-all) to make one.\n")
 			#f))
 )
 

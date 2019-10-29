@@ -1,39 +1,35 @@
 
 SQL Backend Tests
 -----------------
-There are two subdirectories, here:
+There is one subdirectory, here:
 
 * `multi-driver`
-* `postgres`
-
-Everything in the `postgres` directory is broken. Don't go there.
 
 The tests in `multi-driver` test both the `odbc` and the `postgres`
-driver backends.  The `postgres` driver seems to be faster.
+driver backends.  The `postgres` driver is about 3x faster.
 
 
 HOWTO Run the SQL Tests
 -----------------------
 
-The tests in this directory are disabled, because they require some
-manual configuration in order to make it work. Most users don't bother
-with this configuration, so we disable it to avoid grief.
+The tests in this directory require manual configuration in order to
+make them run (and pass).
 
 To run these tests, perform the following steps:
 
-1) If you choose to change the default database name and username, then
-   edit tests/persist/sql/CMakeLists.txt and uncomment
-   SET(DB_IS_CONFIGURED 1)  It probbly easier to just use the default
-   database name and username; see below.
+1) If you choose to change the default test database name and username,
+   then edit tests/persist/sql/CMakeLists.txt and uncomment
+   `SET(DB_IS_CONFIGURED 1)`.  It probbly easier to just use the default
+   test database name and username; see below.
 
-2) Configure an SQL server, as described in opencog/persist/sql/README
-   Abreiviated instructions follow below; else skip to step 3.
+2) Configure an SQL server, as described in `opencog/persist/sql/README`
+   Abbreiviated instructions follow below; else skip to step 3.
 
-2a) Install the postgres server, the postgress client.
+2a) Install the postgres server and the postgress client.
 
 2b) You don't need to test ODBC, but if you are, then:
-    Install unixodbc and odbc-postgresql.
-    Edit /etc/odbcinst.ini and copy the example config into there.
+    Install `unixodbc` and `odbc-postgresql`.
+    Edit `/etc/odbcinst.ini` and copy the example config into there.
     Use the Unicode drivers, not the ANSI (ASCII) drivers. Opencog
     uses unicode.
 
@@ -41,18 +37,18 @@ To run these tests, perform the following steps:
 ```
     $ createdb opencog_test
 ```
-2d) If you get an error from the above, about missing createdb permissions,
+2d) If you get an error from the above, about missing `createdb` permissions,
     Try doing this:
 ```
     $ su - postgres; createuser <your-unix-username>
 ```
     Answer the question (yes, you want to be superuser) and exit.
-    Under rare circumstances, you may need to edit pg_hba.conf. Google
+    Under rare circumstances, you may need to edit `pg_hba.conf`. Google
     for additional help.
 
-2e) Create a database user named opencog_tester with password 'cheese'.
+2e) Create a database user named `opencog_tester` with password `cheese`.
     You can pick a different username and password, but it must be
-    consistent with the ~/.odbc.ini file. Do NOT use your login password!
+    consistent with the `~/.odbc.ini` file. Do NOT use your login password!
     Pick something else! Create the user at the shell prompt:
 ```
     $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d opencog_test
@@ -67,8 +63,8 @@ To run these tests, perform the following steps:
 ```
     $ cat opencog/persist/sql/odbc/atom.sql | psql opencog_test -U opencog_tester -W -h localhost
 ```
-2h) Verify that the tables were created. Login as before, then enter \d
-    at the postgres prompt.  You should see this:
+2h) Verify that the tables were created. Login as before, then enter
+    `\d` at the postgres prompt.  You should see this:
 ```
     opencog_test=> \d
                   List of relations
@@ -82,7 +78,7 @@ To run these tests, perform the following steps:
 ```
     If the above doesn't work, go back, and try again.
 
-2i) Verify that opencog_tester has write permissions to the tables. Do
+2i) Verify that `opencog_tester` has write permissions to the tables. Do
     this by entering the below.
 ```
     opencog_test=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');

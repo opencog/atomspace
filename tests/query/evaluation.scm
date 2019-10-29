@@ -4,9 +4,11 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 
-;;; Populate the atomspace with a cover of a directed bouquet of four circles
-;;; All nodes are equivalent to one, and there are directed arrows
-;;; in the node order...
+;;; Populate the atomspace with a cover of a directed bouquet
+;;; of four circles. A bouquet has just one vertex, and so all
+;;; nodes project down to just that one vertex in the base space.
+;;; There are directed arrows pointing, in the node order, from
+;;; one to the next, in the covering space.
 (AssociativeLink (ConceptNode "idea one") (ConceptNode "idea one"))
 
 (AssociativeLink (ConceptNode "idea one") (ConceptNode "idea two"))
@@ -82,11 +84,14 @@
 	)
 )
 
+;;;; -----------------------------------------------------------------
+;;; Boolean logic connectives!
+
 ;; reject node three only; of the five, four remain
 (define (four-arcs)
 	(wrapper
 		(list one->x x->one
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 		)
@@ -97,21 +102,18 @@
 (define (two-arcs)
 	(wrapper
 		(list one->x x->one
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
 			)
-			(AbsentLink
+			(NotLink
 				(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
 			)
 		)
 	)
 )
-
-;;;; -----------------------------------------------------------------
-;;; Boolean logic connectives!
 
 ;; reject node one only; of the five, four remain
 (define (four-not)

@@ -5,9 +5,11 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (atomcore
 	ArityLink.cc
 	Checkers.cc
+	CondLink.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
+	FindUtils.cc
 	FreeLink.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
@@ -24,10 +26,13 @@ ADD_LIBRARY (atomcore
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
+	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
+	TypeUtils.cc
 	UniqueLink.cc
 	UnorderedLink.cc
+	ValueOfLink.cc
 	Variables.cc
 	VariableList.cc
 )
@@ -36,20 +41,21 @@ ADD_LIBRARY (atomcore
 ADD_DEPENDENCIES(atomcore opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomcore
-	atomutils
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atomcore
+INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
 	ArityLink.h
+	CondLink.h
 	Context.h
 	DefineLink.h
 	DeleteLink.h
+	FindUtils.h
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
@@ -65,10 +71,13 @@ INSTALL (FILES
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
+	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
+	TypeUtils.h
 	UniqueLink.h
 	UnorderedLink.h
+	ValueOfLink.h
 	Variables.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"

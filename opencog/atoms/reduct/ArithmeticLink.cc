@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/ArithmeticLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,9 @@
 
 #include <limits>
 
-#include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
 
@@ -44,7 +45,7 @@ ArithmeticLink::ArithmeticLink(const Link& l)
 void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, ARITHMETIC_LINK))
+	if (not nameserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
 
 	_commutative = false;
@@ -83,15 +84,17 @@ void ArithmeticLink::init(void)
 /// ever-more rules to the rule engine to reduce ever-more interesting
 /// algebraic expressions.
 ///
-Handle ArithmeticLink::delta_reduce(void) const
+ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
 
-	Handle red(alp->FoldLink::delta_reduce());
+	ValuePtr red(alp->FoldLink::delta_reduce(as, silent));
 
-	alp = ArithmeticLinkCast(red);
-	if (NULL == alp) return red;
+	if (nullptr == red or not red->is_atom()) return red;
+
+	alp = ArithmeticLinkCast(HandleCast(red));
+	if (nullptr == alp) return red;
 	return alp->reorder();
 }
 
@@ -153,10 +156,43 @@ Handle ArithmeticLink::reorder(void) const
 }
 
 // ===========================================================
-/// execute() -- Execute the expression
-Handle ArithmeticLink::execute() const
+
+ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
 {
-	return delta_reduce();
+	if (DEFINED_SCHEMA_NODE == vptr->get_type())
+	{
+		vptr = DefineLink::get_definition(HandleCast(vptr));
+	}
+	while (vptr->is_atom())
+	{
+		Handle h(HandleCast(vptr));
+		if (not h->is_executable()) break;
+
+		ValuePtr red(h->execute(as, silent));
+
+		// It would probably be better to throw a silent exception, here?
+		if (nullptr == red) return vptr;
+		if (*red == *vptr) return vptr;
+		vptr = red;
+	}
+
+	// The FunctionLink might be a GetLink, which returns a SetLink
+	// of results. If the SetLink is wrapping only one value, then
+	// unwrap it and return that value.
+	if (SET_LINK == vptr->get_type())
+	{
+		Handle setl(HandleCast(vptr));
+		if (1 == setl->get_arity())
+			vptr = setl->getOutgoingAtom(0);
+	}
+	return vptr;
+}
+
+// ===========================================================
+/// execute() -- Execute the expression
+ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
+{
+	return delta_reduce(as, silent);
 }
 
 // ===========================================================

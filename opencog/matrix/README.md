@@ -10,6 +10,22 @@ and effects, or pair-wise relationships of any sort. A recurring
 problem is to obtain statistics for these pairs, and to manipulate
 them in various ways.
 
+A common theme in machine learning are "vectors of data": a vector
+of numbers can be associated to some object, and one is interested in
+classifying these vectors in some way; e.g. by using Principal Component
+Analysis (PCA), Singular Value Decomposition (SVD), K-means clustering,
+and so on. Vectors are buried in essentially all neural-net type
+algorithms.  But - this is key: a collection of vectors can be viewed
+as a matrix. Entries in the matrix are (row, column) pairs.
+
+The code in this directory exposes portions of the atomspace as pairs,
+or as a matrix, or as a collection of vectors, depending on how you want
+to think about it.  It implements the low-level code for this access,
+so that high-level algorithms can be implemented on top of it: so that
+they can grab that data, do things with it, and write it back.  It
+provides a "window" onto a portion of the atomspace, and everything
+seen through that "window" looks like vectors, like one big matrix.
+
 That is, the structure of interest are ordered pairs `(x,y)` of atoms
 (that is, where `x` and `y` are atoms), along with any values attached
 to such pairs. The primary value of interest is an observation count
@@ -43,9 +59,26 @@ that. Once you realize that your data can be seen as a kind of matrix,
 you can then apply a variety of generic matrix analysis tools to it.
 
 Another way to arrive at this idea is to view your data as a graph,
-and then realize that any graph can be described in terms of it's
-adjacency matrix. This directory provides tools to work with a graph
-from the point of view of its being an adjacency matrix.
+(of vertexes connected with edges) and then realize that any graph can
+be described in terms of it's adjacency matrix. This directory provides
+tools to work with a graph from the point of view of its being an
+adjacency matrix.
+
+Thus, generically, a "matrix" in the AtomSpace is simply a collection of
+Atoms, all of the same kind and general structure, with some
+identifiable sub-part, called "the rows", or the "left atoms", and some
+other identifiable sub-part, called "the columns", or the "right atoms".
+As long as one can easily identify all of the Atoms that belong to the
+collection, and one can identify two distinct sub-parts, one has
+everything one needs to identify pairs `(left, right)` aka
+`(row, column)` aka `(x,y)`.  To get a matrix, one needs one more thing:
+a Value, some Value, any Value, holding a floating-point number for each
+pair. This number is called `N(x,y)`. This number can represent any
+numeric data at all.  In the prototypical usage, this number is an
+observation count obtained by sensory data flowing in from the outside
+world. It dosn't have to be - the matrix toolset provided here is
+generic, intended to be useful for any AtomSpace data that meets the
+requirement of having a numeric value attached to a collection of pairs.
 
 The tools implemented here include:
 
@@ -67,36 +100,36 @@ method that returns the count, given the pair.
 
 FAQ
 ---
-Q: Why isn't this in C++?  Surely, numerical computations would be
+**Q:** Why isn't this in C++?  Surely, numerical computations would be
    a lot faster in C++, right?
 
-A: Yes, probably. But its a lot easier to write scheme code than
+**A:** Yes, probably. But its a lot easier to write scheme code than
    it is to write C++ code, and so prototyping in scheme just made
    more sense. It was just-plain simpler, faster, easier (for me).
    You are invited to take the lessons learned, and re-implement
    in C++.
 
-Q: What were the lessons learned?
+**Q:** What were the lessons learned?
 
-A: The number #1 most important lesson is that the filter object
+**A:** The number #1 most important lesson is that the filter object
    is the most important object: it controls what data you want
    to keep, and what data you want to discard, and it needs to
    run "underneath", as a foundation to everything else.
 
-Q: Really, C++ is sooo fast...
+**Q:** Really, C++ is sooo fast...
 
-A: Yes, but since the data is stored in values associated with
+**A:** Yes, but since the data is stored in values associated with
    atoms in the atomspace, adding numbers together is NOT the
    bottleneck. Accessing Atom Values *is* the bottleneck. Finding
    a good performance optimization for the atom values framework
    is a lot harder.
 
-Q: Why don't you just export all your data to SciPy or to Gnu R, or to
+**Q:** Why don't you just export all your data to SciPy or to Gnu R, or to
    Octave, or MatLab, for that matter, and just do your data analytics
    there?  That way, you don't need to re-implement all these basic
    statistical algorithms!
 
-A: That sounds nice, but frankly, it's too much work for me. Maybe you
+**A:** That sounds nice, but frankly, it's too much work for me. Maybe you
    can do this.  Seriously, its just a lot easier (for me) to create
    and use the code here, than to struggle mightily with those packages.
 
@@ -117,11 +150,11 @@ A: That sounds nice, but frankly, it's too much work for me. Maybe you
    the RAM needed to export all of these different cut and filtered
    datasets?  Maybe you can, its just not trivial.
 
-Q: But if I did want to do it for Gnu R, how could I do it?
+**Q:** But if I did want to do it for Gnu R, how could I do it?
 
-A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
+**A:** You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    Quote:
-   The Rcpp package provides C++ classes that greatly facilitate
+   *The Rcpp package provides C++ classes that greatly facilitate
    interfacing C or C++ code in R packages using the .Call() interface
    provided by R. Rcpp provides matching C++ classes for a large
    number of basic R data types. Hence, a package author can keep his
@@ -130,16 +163,16 @@ A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    structures can be accessed as easily at the C++ level, and used in
    the normal manner. The mapping of data types works in both
    directions. It is as straightforward to pass data from R to C++,
-   as it is it return data from C++ to R.
+   as it is it return data from C++ to R.*
 
-Q: Any other design issues?
+**Q:** Any other design issues?
 
-A: Yes. As currently structured, all of these classes assume that your
+**A:** Yes. As currently structured, all of these classes assume that your
    data is readily available in RAM. They will not work correctly, if
    your dataset is too big to fit into RAM.  At the time of this
    writing, a single atom takes about 1.5KBytes or so, so a dataset
    consisting of 100M atoms will require about 150GBytes of RAM, plus
-   a bit more for other processes (e.g. postgres). Since most computers
+   a bit more for other processes (e.g. Postgres). Since most computers
    max out at about 256 GBytes RAM, this limits datasets to 100M atoms.
    Some language datasets can be considerably larger than this.
    The largest Amazon EC2 instances are 256 GBytes.
@@ -191,7 +224,7 @@ Basic definitions
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
-The `add-pair-count-api` class provides an API to report the partial
+The `add-support-api` class provides an API to report the partial
 sums `N(x,*) = sum_y N(x,y)` and likewise `N(*,y)`.  If you think of
 `N(x,y)` as a matrix, these are the totals for the entries in each
 row or column of the matrix. Likewise, `N(*,*) = sum_x sum_y N(x,y)`.
@@ -231,10 +264,14 @@ methods:  `for-each-pair`, which simply calls the function for each
 pair, and a `map-pair` method which returns a list of the results of
 calling the function on each pair.
 
-The `make-compute-count` class provides methods to compute the partial
-sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
-they can be quickly retrieved. The location of the cached values are
-exactly where they can be found by the `add-pair-count-api`, above.
+The `add-support-compute` class provides methods to compute the
+partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
+compute how many non-zero entries there are in each row or column.
+It also provides methods for the "length" of a column: that is,
+`len(y) = sqrt(sum_x N^2 (x,y))` and more generally the l_p norm.
+Because these computations can take a considerable amount of time,
+the partial sums (the "marginals") are cached. The cached values can
+be accessed with the `add-support-api` object.
 
 The `make-compute-freq` class provides methods to compute and cache
 the frequencies `p(x,y)`, `p(*,y)` and `p(x,*)`.  These are cached
@@ -243,7 +280,7 @@ exactly where the `add-pair-freq-api` class, above, can find them.
 The `make-batch-mi` class provides methods to compute the fractional
 mutual information of all pairs, namely the value
 ```
-    MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
+    MI(x,y) = +log_2 P(x,y) / P(x,*) P(*,y)
 ```
 
 The `batch-all-pair-mi` class is a convenience class that wraps up all
@@ -254,21 +291,15 @@ e.g. tens of millions of atoms, this can take hours to run.  Thus, for
 this reason, the cached values are then saved to the currently-open
 database, so that these results become available later.
 
-Computing support and entropy
------------------------------
-The `add-support-compute` class provides methods to compute the
-partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
-compute how many non-zero entries there are in each row or column.
-It provides methods for the "length" of a column: that is,
-`len(y) = sqrt(sum_x N^2 (x,y))` and more generally the l_p norm.
-
+Computing entropy
+-----------------
 The `add-pair-mi-compute` class provides methods to compute the entropy
 and mutual information of rows and columns: for example, the column
 entropy (or `left-entropy`) `h_left(y) = -sum_x P(x,y) log_2 P(x,y)`
 It also returns the far more interesting 'fractional entropy', given
 by `H_left(y) = h_left(y) / P(*,y)`.  Along similar lines, there is
 also the mutual information `mi_left(y) = sum_x P(x,y) log_2 MI(x,y)`
-where `MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
+where `MI(x,y) = +log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
 MI.
 
 The `add-total-entropy-compute` class provides methods to compute the
@@ -348,7 +379,16 @@ tools in the (opencog network) module.
 TODO
 ----
 To-do list items.
- * The "api" objects need to be redesigned. They fetch stuff out of
-   the atomspace, which can only work if no filtering is applied. But
-   if there are pre-filters, then the returned values are necessarily
-   garbage. Yucko.  Can we fail-safe this for now?
+ * The "star" objects need to be redesigned. They fetch wild-card counts
+   etc. straight out of the atomspace, which can only work if no filtering
+   is applied. But if there are pre-filters, then the returned values are
+   necessarily garbage. Yucko.  Can we fail-safe this for now?
+
+ * Need to support columns/rows that can be one of several types
+   (e.g. can be WordNodes, or be WordClassNodes)
+
+ * Need to provide better support for complex structures (viz. cases
+   where left and right are not immediately underneath a common link).
+   Currently all pairs are necessarily of the form
+     (pair-type (left-type right-type))
+   and we need more complex variations than that.

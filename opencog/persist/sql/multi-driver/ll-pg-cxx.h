@@ -48,7 +48,7 @@ class LLPGConnection : public LLConnection
 		LLPGConnection(const char * uri);
 		~LLPGConnection();
 
-		LLRecordSet *exec(const char *);
+		LLRecordSet *exec(const char *, bool);
 };
 
 class LLPGRecordSet : public LLRecordSet

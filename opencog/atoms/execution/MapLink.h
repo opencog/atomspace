@@ -70,7 +70,7 @@ public:
 	// Align the pattern and the term side-by-side, and extract the
 	// values that match up with the variables.  If the term is not of
 	// the same type as the pattern, return the undefined handle.
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };

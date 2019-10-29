@@ -21,14 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atomutils/FindUtils.h>
-
-#include <opencog/util/algorithm.h>
 
 #include "DefaultPatternMatchCB.h"
 
@@ -59,7 +58,7 @@ std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
 
 AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 {
-	AtomSpace* transient_atomspace = NULL;
+	AtomSpace* transient_atomspace = nullptr;
 
 	// See if the cache has one...
 	if (s_transient_cache.size() > 0)
@@ -119,7 +118,7 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 /* ======================================================== */
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_classserver(classserver())
+	_nameserver(nameserver())
 {
 	_temp_aspace = grab_transient_atomspace(as);
 	_instor = new Instantiator(_temp_aspace);
@@ -141,40 +140,12 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	if (_temp_aspace)
 	{
 		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = NULL;
+		_temp_aspace = nullptr;
 	}
 
 	// Delete the instantiator.
 	delete _instor;
 }
-
-#ifdef CACHED_IMPLICATOR
-void DefaultPatternMatchCB::ready(AtomSpace* as)
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor->ready(_temp_aspace);
-
-	_as = as;
-}
-
-void DefaultPatternMatchCB::clear()
-{
-	_vars = NULL;
-	_dynamic = NULL;
-	_have_evaluatables = false;
-	_globs = NULL;
-
-	_have_variables = false;
-	_pattern_body = Handle::UNDEFINED;
-
-	release_transient_atomspace(_temp_aspace);
-	_temp_aspace = NULL;
-	_instor->clear();
-
-	_optionals_present = false;
-	_as = NULL;
-}
-#endif
 
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
@@ -281,7 +252,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 
 	// If the link is a ScopeLink, we need to deal with the
 	// alpha-conversion of the bound variables in the scope link.
-	if (_classserver.isA(pattype, SCOPE_LINK))
+	if (_nameserver.isA(pattype, SCOPE_LINK))
 	{
 		// Unless it is quoted.
 		if (ptm->isQuoted()) return true;
@@ -300,8 +271,11 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 		//     if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
 		// because that prevents searches for narrowly-typed grounds
 		// (as is done in the ForwardChainerUTest, see bug #934)
+		// Alternately, a single variable can match an entire
+		// VariableList (per bug #2070).
 		if (*_pat_bound_vars != *_gnd_bound_vars
-		    and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
+		      and not _pat_bound_vars->is_type(VARIABLE_LIST)
+		      and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
 		{
 			_pat_bound_vars = nullptr;
 			_gnd_bound_vars = nullptr;
@@ -318,7 +292,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
-	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	if (_pat_bound_vars and _nameserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
 		_gnd_bound_vars = nullptr;
@@ -358,7 +332,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
                                                const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
-	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	if (_pat_bound_vars and _nameserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
 		_gnd_bound_vars = nullptr;
@@ -441,7 +415,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// ScopeLink that happen to have exactly the same name as a bound
 	// variable in the pattern will hide/obscure the variable in the
 	// pattern. Or rather: here is where we hide it.  Tedious.
-	if (_classserver.isA(grnd->get_type(), SCOPE_LINK))
+	if (_nameserver.isA(grnd->get_type(), SCOPE_LINK))
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
@@ -544,17 +518,67 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  * AbsentLink: a match is possible only if the indicated clauses
  * are absent!
  *
- * We do "accept" self-groundings: as these are not actually
- * clauses that are present -- its merely the pattern finding itself.
+ * To recap:
+ *   If ground is found, return false;
+ *   If no ground is found, return true.
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
                                                   const HandleMap& term_gnds)
 {
-	if (nullptr == grnd) return true; // XXX can this ever happen?
-	if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
-		_optionals_present = true;
-	return false;
+	// If any grounding at all was found, reject it.
+	if (grnd)
+	{
+		if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
+			_optionals_present = true;
+		return false;
+	}
+
+	// No grounding was found directly, but that may be because
+	// this is a virtual-optional clause. That is, this clause
+	// might be bridging across two disconnected components;
+	// some of the component combinations may have a grounding,
+	// while others do not.  So we have to check.
+	Handle gopt;
+	try
+	{
+		gopt = HandleCast(_instor->instantiate(ptrn, term_gnds, true));
+	}
+	catch (const SilentException& ex)
+	{
+		// The instantiation above can throw an exception if the
+		// it is ill-formed. If so, assume the opt clause is absent.
+		_instor->reset_halt();
+		return true;
+	}
+
+	// If the result is a self-match, we don't mind.
+	// Its only bad if something else got built.
+	if (gopt == ptrn) return true;
+
+	// If the grounding we just built can be found in the atomspace,
+	// then we must reject it.
+	if (_as->get_atom(gopt)) return false;
+
+	return true;
+}
+
+/* ======================================================== */
+
+/* This implements AlwaysLink (the non-scoped vesion of ForAllLink
+ * used by the pattern matcher.) The AlwaysLink must always be
+ * satsifed, every time it is called, from the begining of the
+ * search to the end.  The AlwaysLinks is satsified whenever
+ * ptrn==grnd, and otherwise, if fails. That is, if ptrn==nullptr
+ * then there is some grounding of (all of) the other clauses of
+ * the pattern, with AlwaysLink failing to be satisfied. Reject
+ * this case, now and forever. (viz, this is stateful.)
+ */
+bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
+                                                const Handle& grnd,
+                                                const HandleMap& term_gnds)
+{
+	return grnd != nullptr;
 }
 
 /* ======================================================== */
@@ -579,7 +603,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Handle gvirt;
 	try
 	{
-		gvirt = _instor->instantiate(virt, gnds, true);
+		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
 	}
 	catch (const SilentException& ex)
 	{
@@ -643,7 +667,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Type vty = virt->get_type();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
-	    _classserver.isA(vty, FUNCTION_LINK))
+	    _nameserver.isA(vty, FUNCTION_LINK))
 	{
 		gvirt = _as->add_atom(gvirt);
 		tvp = gvirt->getTruthValue();
@@ -657,18 +681,18 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		}
 		catch (const SilentException& ex)
 		{
-			// The do_evaluate() above can throw if its given ungrounded
-			// expressions. It can be given ungrounded expressions if
-			// no grounding was found, and a final pass, run by the
-			// search_finished() callback, puts us here. So handle this
-			// case gracefully.
+			// The do_evaluate()/do_eval_scratch() above can throw if
+			// it is given ungrounded expressions. It can be given
+			// ungrounded expressions if no grounding was found, and
+			// a final pass, run by the search_finished() callback,
+			// puts us here. So handle this case gracefully.
 			return false;
 		}
 	}
 
 	// Avoid null-pointer dereference if user specified a bogus evaluation.
 	// i.e. an evaluation that failed to return a TV.
-	if (NULL == tvp)
+	if (nullptr == tvp)
 		throw InvalidParamException(TRACE_INFO,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->to_short_string().c_str());
@@ -676,7 +700,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
 	              << tvp->to_string() << std::endl;})
 
-	// XXX FIXME: we are making a crsip-logic go/no-go decision
+	// XXX FIXME: we are making a crisp-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
 	// wanted, here.
 	bool relation_holds = tvp->get_mean() > 0.5;
@@ -686,7 +710,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 /* ======================================================== */
 
 /**
- * This implements the evaluation of a classical boolean-logic
+ * This implements the evaluation of a classical binary-logic
  * "sentence": a well-formed formula with no free variables,
  * having a crisp true/false truth value.  Here, "top" holds
  * the sentence (with variables), 'gnds' holds the bindings of
@@ -696,7 +720,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                                           const HandleMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
-	              << top->to_short_string() << std::endl;})
+	              << top->to_short_string() << std::endl
+	              << "grounds=" << gnds << std::endl;})
 
 	if (top->get_type() == VARIABLE_NODE)
 	{
@@ -709,9 +734,6 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	            top->to_short_string().c_str());
 
 	const HandleSeq& oset = top->getOutgoingSet();
-	if (0 == oset.size())
-		throw InvalidParamException(TRACE_INFO,
-		   "Expecting logical connective to have at least one child!");
 
 	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
@@ -737,7 +759,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		return not eval_sentence(oset[0], gnds);
 	}
 	else if (EVALUATION_LINK == term_type or
-	         _classserver.isA(term_type, VIRTUAL_LINK))
+	         _nameserver.isA(term_type, VIRTUAL_LINK))
 	{
 		return eval_term(top, gnds);
 	}
@@ -798,8 +820,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	// If we are here, then what we have is some atom that is not
 	// normally "truth-valued". We can do one of three things:
 	// a) Throw an exception and complain.
-	// b) Invent a new link type: GetTruthValueLink, that 'returns'
-	//    the TV of the atom that it wraps.
+	// b) Tell user that they must use the TruthValueOfLink, which
+	//   'returns' the TV of the atom that it wraps.
 	// c) Do the above, without inventing a new link type.
 	// The below implements choice (c): i.e. it gets the TV of this
 	// atom, and checks to see if it is greater than 0.5 or not.

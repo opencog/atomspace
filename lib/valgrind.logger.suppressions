@@ -42,3 +42,14 @@
    fun:start_thread
    fun:clone
 }
+{
+   <log_notify_one>
+   Helgrind:Misc
+   ...
+   fun:_ZNSt18condition_variable10notify_oneEv
+   fun:push
+   fun:qmsg
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}

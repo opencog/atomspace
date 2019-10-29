@@ -22,9 +22,8 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
@@ -46,7 +45,6 @@ class PatternCrashUTest: public CxxTest::TestSuite
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 			_as = new AtomSpace();
-			attentionbank(_as);
 			_eval = new SchemeEval(_as);
 		}
 
@@ -124,8 +122,8 @@ void PatternCrashUTest::test_one_thing(void)
 	             (ConceptNode "Tweety")
 	             (ConceptNode "Yello")
 	             )
-	            (BindLink (av 0 0 0)
-	             (VariableList (av 0 0 0)
+	            (BindLink
+	             (VariableList
 	              (VariableNode "$A")
 	              (VariableNode "$B")
 	              )

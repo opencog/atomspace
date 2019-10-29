@@ -132,7 +132,7 @@
 ;; -----------------------------------------------------
 ;; This variant uses a hand-rolled scm compare function
 (define (richer a b)
-	(if (> (string->number (cog-name a)) (string->number (cog-name b)))
+	(if (> (cog-number a) (cog-number b))
 		(stv 1 1)  ;; true
 		(stv 0 1)  ;; false
 	)

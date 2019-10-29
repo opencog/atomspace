@@ -24,24 +24,24 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
 
-
 using namespace opencog;
+
 /* ======================================================== */
 /**
  * Pattern Match Engine Overview
  * -----------------------------
  * The explanation of how this code *actually* works has been
- * moved to README-Algorithm. That README provies the "big-picture"
+ * moved to README-Algorithm. That README provides the "big-picture"
  * explanation of the rather complex interwoven code below. Read it
- * first, and refert to it when examining the main methods below.
+ * first, and refer to it when examining the main methods below.
  */
 /* ======================================================== */
 
@@ -196,7 +196,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	// In practice, I was unable to come up with any test case
 	// where this mattered; any bogus groundings eventually get
 	// replaced by valid ones.  Thus, we save some unknown amount
-	// of cpu time by simply skipping the push & pop here.
+	// of CPU time by simply skipping the push & pop here.
 	//
 	depth ++;
 
@@ -249,7 +249,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	if (not match) return false;
 
 	// If we've found a grounding, record it.
-	if (hp != hg) var_grounding[hp] = hg;
+	record_grounding(ptm, hg);
 
 	return true;
 }
@@ -308,7 +308,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				solution_drop();
 
 				// If the grounding is accepted, record it.
-				if (hp != hg) var_grounding[hp] = hg;
+				record_grounding(ptm, hg);
 
 				_choice_state[GndChoice(ptm, hg)] = icurr;
 				return true;
@@ -355,10 +355,10 @@ static int facto (int n) { return (n==1)? 1 : n * facto(n-1); };
 /// Unordered link comparison
 ///
 /// Compare two unordered links, side by side. In some ways, this is
-/// similar to the ordered link compare: for a given, fixed permuation
+/// similar to the ordered link compare: for a given, fixed permutation
 /// of the unordered link, the compare is side by side.  However, if
-/// that compare fails, the next permuation must then be tried, until
-/// a match is found or all permuations are exhausted.  But there's a
+/// that compare fails, the next permutation must then be tried, until
+/// a match is found or all permutations are exhausted.  But there's a
 /// problem: if there are multiple, nested unordered links, or if they
 /// are peers (siblings) in the tree, then if one takes a step, the
 /// other must not. Coordinating this is difficult, and requires a long
@@ -392,8 +392,8 @@ truth tables.
 
 The topmost routine to call tree_compare must *always* set have_more=F
 and take_step=T before calling tree_compare.  This will cause
-tree_compare to advance to the next matching permuation, or to run until
-all permuations are exhausted, and no match was found.
+tree_compare to advance to the next matching permutation, or to run until
+all permutations are exhausted, and no match was found.
 
 
 Flag settings upon entry
@@ -403,14 +403,14 @@ Flag settings upon entry
 case step  more    Comments / Action to be Taken
 ---- ----  ----    -----------------------------
   A    T    T     Impossible, Who set have_more? Who set take_step?
-  B    T    F     Normal entry: we are first unordered link to be hit
-                  during downward travesal. Proceed using the truth
+  B    T    F     Normal entry: we are the first unordered link to be
+                  hit during downward traversal. Proceed using the truth
                   table below.
   C    F    T     We are not the first unorder. Someone ran before us.
-                  If we are in the very first permuation, (i.e. we are
+                  If we are in the very first permutation, (i.e. we are
                     entering for the first time) we must call downwards.
                     If this returns a mismatch, we must step until we
-                    find a match, or until we exhaust all permuatations.
+                    find a match, or until we exhaust all permutations.
                     See next table for what to return: we return cases
                     5, 7 or 8.
                   If we are not the first permutation, we could just
@@ -431,7 +431,7 @@ then its truthiness holds only for a grounding that no longer exists.
 Thus, for case C, it is safer to always check.
 
 However, by the above reasoning: if the grounding wasn't recorded
-(because the link is not in the recursion path) then the permuation
+(because the link is not in the recursion path) then the permutation
 should not be recorded either. It should start with a permutation from
 nothing.  XXX FIXME ... except we have no test case that illustrates
 this failure mode.  It would require a peer unordered link that takes
@@ -443,7 +443,7 @@ then report back, according to the truth table below.
 
      returned result flags
      take  have   got
-case step  more  match    Comments / Action to tbe Taken
+case step  more  match    Comments / Action to be Taken
 ---- ----  ----  ----     ------------------------------
  1     T    T      T    Impossible, error: who set have_more w/o
                           taking step??
@@ -454,7 +454,7 @@ case step  more  match    Comments / Action to tbe Taken
                         match we detected is the same match the last
                         time we were here. So we take a step, call
                         down again, and keep stepping until there is a
-                        match or until all permuations are exhausted.
+                        match or until all permutations are exhausted.
                           If match, we return: take_step=F,
                             have_more = result of std::next_perm
                             (we return case 5 or 7)
@@ -470,26 +470,26 @@ case step  more  match    Comments / Action to tbe Taken
  5     F    T      T    Someone below us took a step. Do nothing.
                         Return case 5 flags.
  6     F    T      F    Impossible; link that took the step should have
-                        stepped until match or exhastion.
+                        stepped until match or exhaustion.
  7     F    F      T    Unusual; its the last match for a lower unordered
                         link. We report the match. We do not take a
                         step; we do set the have_more flag to indicate
-                        that we ourselves still have more.  i.e We return
-                        case 5 flags.
- 8     F    F      F    Typical; a lower unord link ran to exhaustion,
+                        that we ourselves still have more.  i.e. we
+                        return case 5 flags.
+ 8     F    F      F    Typical; a lower unordered link ran to exhaustion,
                         and got nada.  So *we* take a step, and call
-                        downwards again. We keep  going till match or till
+                        downwards again. We keep going till match or till
                         exhaustion. If there's a match, we expect to see
                         the case 5 flags, so we halt and return.  If we
                         exhaust, we return case 8.
 
 The above assumes that the curr_perm() method always returns either
-the current permuation, or it returns a fresh permuation. If it returned
-a fresh permuation, this counts as "taking a step", so we need to know
+the current permutation, or it returns a fresh permutation. If it returned
+a fresh permutation, this counts as "taking a step", so we need to know
 this.
 
-Notice that these rules never pushed of popped the have-more stack.
-The have-more stack is only pushed/popped by other branchpoints, before
+Notice that these rules never pushed or popped the have-more stack.
+The have-more stack is only pushed/popped by other branch-points, before
 they call compare_tree.
 
 ******************************************************************/
@@ -501,12 +501,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool has_glob = (0 < _pat->globby_holders.count(hp));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
 	if (osg.size() != arity and not has_glob)
-		return _pmc.fuzzy_match(ptm->getHandle(), hg);
+		return _pmc.fuzzy_match(hp, hg);
 
 	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
@@ -540,7 +540,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		if (has_glob)
 		{
+			// Each glob comparison steps the glob state forwards.
+			// Each different permutation has to start with the
+			// same glob state as before. So save and restore state.
+			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
+			_glob_state = saved_glob_state;
 		}
 		else
 		{
@@ -587,7 +592,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				solution_drop();
 
 				// If the grounding is accepted, record it.
-				if (hp != hg) var_grounding[hp] = hg;
+				record_grounding(ptm, hg);
 
 				// Handle case 5&7 of description above.
 				have_more = true;
@@ -623,10 +628,13 @@ take_next_step:
 }
 
 
-/// Compare a PatternTermPtr with a clause taking in consideration
-/// quoting or unquoting operations.
-bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
-                                        const Handle& clause)
+/// Detect if the PatternTermPtr is a clause, so that we know
+/// that it is time to stop moving upwards. When quotations are
+/// being used, we  may have already moved past the top of the
+/// clause!! ... which seems strange to me, but that is how
+/// quotations work.
+bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
+                                          const Handle& clause)
 {
 	return ptm->getHandle() == clause
 		or (Quotation::is_quotation_type(clause->get_type())
@@ -696,7 +704,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	GlobGrd glob_grd;
 	GlobPosStack glob_pos_stack;
 
-	// Common things needed to be done when we backtrack.
+	// Common things that need to be done when backtracking.
 	bool backtracking = false;
 	bool cannot_backtrack_anymore = false;
 	auto backtrack = [&](bool is_glob)
@@ -729,8 +737,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 	};
 
-	// Common things needed to be done when we find a match
-	// for a glob.
+	// Common things that need to be done when a match
+	// is found for a glob.
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
@@ -789,9 +797,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			PatternTermPtr glob(osp[ip]);
 
 			// A glob may appear more than once in the pattern,
-			// so check if it's the case, and more importantly.
-			// if we have already grounded it previously, make
-			// sure the grounding satisfies the candidate here.
+			// so check if that's the case. If we have already
+			// grounded it previously, make sure the grounding
+			// here is consistent with the earlier grounding.
 			auto vg = var_grounding.find(ohp);
 			if (not backtracking and vg != var_grounding.end())
 			{
@@ -826,12 +834,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			}
 			else
 			{
+				// XXX why are we not doing any checks to see if the
+				// grounding meets the variable constraints?
 				glob_pos_stack.push({glob, {ip, jg}});
 				_glob_state[gp] = {glob_grd, glob_pos_stack};
 			}
 
 			// First of all, see if we have seen this glob in
-			// previous iterations.
+			// previous iterations.  Huh ??? Why???
 			size_t last_grd = SIZE_MAX;
 			auto gi = glob_grd.find(glob);
 			if (gi != glob_grd.end())
@@ -872,7 +882,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					continue;
 				}
 
-				// Just in case if the upper bound is zero...
+				// Just in case, if the upper bound is zero...
+				// XXX Huh ???
 				if (not _varlist->is_upper_bound(ohp, 1))
 				{
 					record_match(glob, glob_seq);
@@ -962,9 +973,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			// Or if we are reaching the end of osp but there
-			// are two or more atoms to be matched in osg,
-			// try again.
+			// Try again if we reached the end of osp, but there
+			// are two or more atoms to be matched in osg (because
+			// maybe we can match one atom with the final atom of the
+			// pattern, but we certainly cannot match two or more.)
 			if (ip+1 == osp_size and jg+1 < osg_size)
 			{
 				backtrack(false);
@@ -1034,14 +1046,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	auto gnd = var_grounding.find(hp);
 	if (gnd != var_grounding.end()) return (gnd->second == hg);
 
-	// If the pattern link is executable, then we should execute, and
-	// use the result of that execution. (This isn't implemented yet,
-	// because all variables in an executable link need to be grounded,
-	// before the execution can occur... thus, this needs to be handled
-	// a lot like a VirtualLink.)
-	if (is_executable(hp))
-		throw RuntimeException(TRACE_INFO, "Not implemented!!");
-
 	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
@@ -1077,6 +1081,15 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (hp->is_node() and hg->is_node())
 		return node_compare(hp, hg);
 
+	// CHOICE_LINK's are multiple-choice links. As long as we can
+	// can match one of the sub-expressions of the ChoiceLink, then
+	// the ChoiceLink as a whole can be considered to be grounded.
+	// Note, we must do this before the fuzzy_match below, because
+	// hg might be a node (i.e. we compare a choice of nodes to one
+	// node).
+	if (CHOICE_LINK == tp)
+		return choice_compare(ptm, hg);
+
 	// If they're not both links, then it is clearly a mismatch.
 	if (not (hp->is_link() and hg->is_link())) return _pmc.fuzzy_match(hp, hg);
 
@@ -1088,16 +1101,9 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
 
-	// CHOICE_LINK's are multiple-choice links. As long as we can
-	// can match one of the sub-expressions of the ChoiceLink, then
-	// the ChoiceLink as a whole can be considered to be grounded.
-	//
-	if (CHOICE_LINK == tp)
-		return choice_compare(ptm, hg);
-
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or _classserver.isA(tp, ORDERED_LINK))
+	if (2 > hp->get_arity() or _nameserver.isA(tp, ORDERED_LINK))
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1151,13 +1157,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause_root});
-	if (_pat->connected_terms_map.end() == pl)
-	{
-		// XXX ???? Isn't this a hard-error ???
-		DO_LOG({LAZY_LOG_FINE << "Pattern term not found for " << term->to_short_string()
-		              << ", clause=" << clause_root->to_short_string();})
-		return false;
-	}
+	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
@@ -1193,18 +1193,67 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 ///
 bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
+                                             const Handle& clause)
+{
+	// Check if the pattern has globs in it.
+	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+		return explore_upglob_branches(ptm, hg, clause);
+	return explore_upvar_branches(ptm, hg, clause);
+}
+
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// is specifying a VariableNode only. This is a straighforward
+/// loop over the incoming set, and nothing more.
+bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
                                              const Handle& clause_root)
 {
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->to_string()
-	              << " have " << sz << " branches";})
+	DO_LOG({LAZY_LOG_FINE << "Looking upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
 
-	// Check if the pattern has globs in it.
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		              << " for term=" << ptm->to_string()
+		              << " propose=" << iset[i]->to_string();})
+
+		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		if (found) break;
+	}
+
+	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+	return found;
+}
+
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// has a GlobNode in it. In this case, we need to loop over the
+/// inconoming, just as above, and also loop over differrent glob
+/// grounding possibilities.
+bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
+                                             const Handle& hg,
+                                             const Handle& clause_root)
+{
+	IncomingSet iset;
+	if (nullptr == hg->getAtomSpace())
+		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0));
+	else
+		iset = _pmc.get_incoming_set(hg);
+
+	size_t sz = iset.size();
+	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
+	              << ptm->getHandle()->to_string()
+	              << "It's grounding " << hg->to_string()
+	              << " has " << sz << " branches";})
+
 	size_t gstate_size = SIZE_MAX;
 
+	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
@@ -1217,24 +1266,28 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		// If there is no more possible ways to ground them, they
+		// If there are no more possible ways to ground them, they
 		// will be removed from glob_state. So simply by comparing the
 		// _glob_state size before and after seems to be an OK way to
 		// quickly check if we can move on to the next one or not.
-		if (has_glob) gstate_size = _glob_state.size();
+		std::map<GlobPair, GlobState> saved_glob_state;
+		saved_glob_state = _glob_state;
+		gstate_size = _glob_state.size();
 
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
+		while (not found and _glob_state.size() > gstate_size)
 		{
 			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		}
 
+		// Restore the saved state, for the next go-around.
+		_glob_state = saved_glob_state;
+
 		if (found) break;
 	}
-
 	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
 	return found;
 }
@@ -1280,7 +1333,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	// If its not an unordered link, then don't try to iterate over
 	// all permutations.
 	Type tp = hp->get_type();
-	if (not _classserver.isA(tp, UNORDERED_LINK))
+	if (not _nameserver.isA(tp, UNORDERED_LINK))
 		return explore_choice_branches(ptm, hg, clause_root);
 
 	do {
@@ -1373,8 +1426,8 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
-	              << " solved by " << hg.value() << ", move up";})
+	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
+	              << " solved by " << hg->to_string() << ", move up";})
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
@@ -1436,7 +1489,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	const Handle& hp = ptm->getHandle();
-	if (clause_compare(ptm, clause_root))
+	if (term_is_a_clause(ptm, clause_root))
 		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
@@ -1444,8 +1497,15 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string() << " of clause UUID = "
-	              << clause_root.value() << " has ground, move upwards";})
+#if 1
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
+	              << " of clause hash = " << clause_root.value()
+	              << " has ground, move upwards";})
+#endif
+
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->getHandle()->to_string()
+	              << " of clause = " << clause_root->to_string()
+	              << " has ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
@@ -1564,6 +1624,14 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
+	if (is_always(clause_root))
+	{
+		_did_check_forall = true;
+		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
+		_forall_state = _forall_state and match;
+		DO_LOG({logger().fine("for-all clause match callback match=%d", match);})
+	}
+	else
 	{
 		match = _pmc.clause_match(clause_root, hg, var_grounding);
 		DO_LOG({logger().fine("clause match callback match=%d", match);})
@@ -1595,16 +1663,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	if (nullptr == curr_root)
 	{
-		found = _pmc.grounding(var_grounding, clause_grounding);
+		found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
-
-		// Since the PM may move on and try to search for more solutions,
-		// clear the _glob_state here to prevent it from comparing the
-		// exact same term to the exact same candidate again.
-		// Otherwise, all possible ways to ground the globs in the term
-		// will be explored before moving to the next candidate.
-		_glob_state.clear();
 	}
 	else
 	{
@@ -1617,14 +1678,13 @@ bool PatternMatchEngine::do_next_clause(void)
 		logmsg("Joining variable is", joiner);
 		logmsg("Joining grounding is", var_grounding[joiner]); })
 
-		// Else, start solving the next unsolved clause. Note: this is
-		// a recursive call, and not a loop. Recursion is halted when
+		// Start solving the next unsolved clause. Note: this is a
+		// recursive call, and not a loop. Recursion is halted when
 		// the next unsolved clause has no grounding.
 		//
-		// We continue our search at the atom that "joins" (is shared
-		// in common) between the previous (solved) clause, and this
-		// clause. If the "join" was a variable, look up its grounding;
-		// else the join is a 'real' atom.
+		// We continue our search at the variable/glob that "joins"
+		// (is shared in common) between the previous (solved) clause,
+		// and this clause.
 
 		clause_accepted = false;
 		Handle hgnd(var_grounding[joiner]);
@@ -1647,7 +1707,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(joiner, undef, var_grounding);
+			bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 			DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
 			if (not match) {
 				clause_stacks_pop();
@@ -1665,7 +1725,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			{
 				DO_LOG({logger().fine("==================== FINITO BANDITO!");
 				log_solution(var_grounding, clause_grounding);})
-				found = _pmc.grounding(var_grounding, clause_grounding);
+				found = report_grounding(var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -1734,24 +1794,36 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	// If there are no optional clauses, we are done.
-	if (_pat->optionals.empty())
+	// Try again, this time, considering the optional clauses.
+	if (not _pat->optionals.empty())
 	{
-		// There are no more ungrounded clauses to consider. We are done.
-		next_clause = Handle::UNDEFINED;
-		next_joint = Handle::UNDEFINED;
-		return;
+		if (get_next_thinnest_clause(false, false, true)) return;
+		if (not _pat->evaluatable_holders.empty())
+		{
+			if (get_next_thinnest_clause(true, false, true)) return;
+			if (not _pat->black.empty())
+			{
+				if (get_next_thinnest_clause(true, true, true)) return;
+			}
+		}
 	}
 
-	// Try again, this time, considering the optional clauses.
-	if (get_next_thinnest_clause(false, false, true)) return;
-	if (not _pat->evaluatable_holders.empty())
+	// Now loop over all for-all clauses.
+	// I think that all variables will be grounded at this point, right?
+	for (const Handle& root : _pat->always)
 	{
-		if (get_next_thinnest_clause(true, false, true)) return;
-		if (not _pat->black.empty())
+		if (issued.end() != issued.find(root)) continue;
+		issued.insert(root);
+		next_clause = root;
+		for (const Handle &v : _varlist->varset)
 		{
-			if (get_next_thinnest_clause(true, true, true)) return;
+			if (is_free_in_tree(root, v))
+			{
+				next_joint = v;
+				return;
+			}
 		}
+		throw RuntimeException(TRACE_INFO, "BUG! Somethings wrong!!");
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
@@ -1795,6 +1867,56 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 	return count;
 }
 
+/// get_glob_embedding() -- given glob node, return term that it grounds.
+///
+/// If a GlobNode has a grounding, then there is always some
+/// corresponding term which contains that grounded GlobNode and is
+/// grounded. If that term appears in two (or more) clauses, then
+/// return it, so that it is used as the pivot point to the next
+/// ungrounded clause.  If there is no such term, then just  return the
+/// glob.
+Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
+{
+	// If the glob is in only one clause, there is no connectivity map.
+	if (0 == _pat->connectivity_map.count(glob)) return glob;
+
+	// Find some clause, any clause at all, containg the glob,
+	// that has not been grounded so far. We need to do this because
+	// the glob might appear in three clauses, with two of them
+	// grounded by a common term, and the third ungrounded
+	// with no common term.
+	auto clauses =  _pat->connectivity_map.equal_range(glob);
+	auto clpr = clauses.first;
+	for (; clpr != clauses.second; clpr++)
+	{
+		if (issued.end() == issued.find(clpr->second)) break;
+	}
+
+	// Glob is not in any ungrounded clauses.
+	if (clpr == clauses.second) return glob;
+
+	// Typically, the glob appears only once in the clause, so
+	// there is only one PatternTerm. The loop really isn't needed.
+	HandlePair glbt({glob, clpr->second});
+	const auto& ptms = _pat->connected_terms_map.find(glbt);
+	for (const PatternTermPtr& ptm : ptms->second)
+	{
+		// Here, ptm is the glob itself. It will almost surely
+		// be in some term. The test for nullptr will surely never
+		// trigger.
+		const PatternTermPtr& parent = ptm->getParent();
+		if (nullptr == parent) return glob;
+
+		// If this term appears in more than one clause, then it
+		// can be used as a pivot.
+		const Handle& embed = parent->getHandle();
+		if ((var_grounding.end() != var_grounding.find(embed)) and
+		    (1 < _pat->connectivity_map.count(embed)))
+			return embed;
+	}
+	return glob;
+}
+
 /// Same as above, but with three boolean flags:  if not set, then only
 /// those clauses satsifying the criterion are considered, else all
 /// clauses are considered.
@@ -1823,11 +1945,25 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 	for (const Handle &v : _varlist->varset)
 	{
-		auto gnd = var_grounding.find(v);
+		const auto& gnd = var_grounding.find(v);
 		if (gnd != var_grounding.end())
 		{
-			std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
-			thick_vars.insert(std::make_pair(incoming_set_size, v));
+			// We cannot use GlobNode's directly as joiners, because
+			// we don't know how they fit. Instead, we have to fish
+			// out a term that contains a grounded glob, and use
+			// that term as the joiner.
+			if (GLOB_NODE == v->get_type())
+			{
+				Handle embed = get_glob_embedding(v);
+				const Handle& tg = var_grounding[embed];
+				std::size_t incoming_set_size = tg->getIncomingSetSize();
+				thick_vars.insert(std::make_pair(incoming_set_size, embed));
+			}
+			else
+			{
+				std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
+				thick_vars.insert(std::make_pair(incoming_set_size, v));
+			}
 		}
 		else ungrounded_vars.insert(v);
 	}
@@ -1910,7 +2046,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	              _clause_stack_depth);})
 
 	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
@@ -1931,7 +2067,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_pmc.pop();
 
 	// The grounding stacks are handled differently.
-	POPSTK(term_solutn_stack, clause_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(issued_stack, issued);
 
@@ -1940,7 +2076,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
-
 	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
 }
 
@@ -1955,13 +2090,14 @@ void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
 #if 0
-	OC_ASSERT(0 == term_solutn_stack.size());
+	// Currently, only GlobUTest fails when this is uncommented.
+	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == perm_stack.size());
 #else
-	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
+	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
@@ -1972,19 +2108,69 @@ void PatternMatchEngine::clause_stacks_clear(void)
 void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
-	term_solutn_stack.push(clause_grounding);
+	_clause_solutn_stack.push(clause_grounding);
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(term_solutn_stack, clause_grounding);
+	POPSTK(_clause_solutn_stack, clause_grounding);
 }
 
 void PatternMatchEngine::solution_drop(void)
 {
 	var_solutn_stack.pop();
-	term_solutn_stack.pop();
+	_clause_solutn_stack.pop();
+}
+
+/* ======================================================== */
+
+/// Pass the grounding that was found out to the callback.
+/// ... unless there is an Always clasue, in which case we
+/// save them up until we've looked at all of them.
+bool PatternMatchEngine::report_grounding(const HandleMap &var_soln,
+                                          const HandleMap &term_soln)
+{
+	// If there is no for-all clause (no AlwaysLink clause)
+	// then report groundings as they are found.
+	if (_pat->always.size() == 0)
+		return _pmc.grounding(var_soln, term_soln);
+
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
+
+	// Don't even bother caching, if we know we are losing.
+	if (not _forall_state) return false;
+
+	_var_ground_cache.push_back(var_soln);
+	_term_ground_cache.push_back(term_soln);
+
+	// Keep going.
+	return false;
+}
+
+bool PatternMatchEngine::report_forall(void)
+{
+	// Nothing to do.
+	if (_pat->always.size() == 0) return false;
+
+	// If its OK to report, then report them now.
+	bool halt = false;
+	if (_forall_state)
+	{
+		size_t nitems = _var_ground_cache.size();
+		OC_ASSERT(_term_ground_cache.size() == nitems);
+		for (size_t i=0; i<nitems; i++)
+		{
+			halt = _pmc.grounding(_var_ground_cache[i],
+			                      _term_ground_cache[i]);
+			if (halt) break;
+		}
+	}
+	_forall_state = true;
+	_var_ground_cache.clear();
+	_term_ground_cache.clear();
+	return halt;
 }
 
 /* ======================================================== */
@@ -2001,12 +2187,12 @@ void PatternMatchEngine::solution_drop(void)
  * Inputs:
  * do_clause: must be one of the clauses previously specified in the
  *            clause list of the match() method.
- * starter:   must be a sub-clause of do_clause; that is, must be a link
- *            that appears in do_clause.
- * ah:        must be a (non-variable) node in the "starter" clause.
+ * term:      must be a sub-clause of do_clause; that is, must be a link
+ *            that appears in do_clause. Must contain `grnd` below.
+ * grnd:      must be a (non-variable) node in the `term` term.
  *            That is, this must be one of the outgoing atoms of the
- *            "starter" link, it must be a node, and it must not be
- *            a variable node.
+ *            `term` link; it must be a node, and it must not be
+ *            a variable node or glob node.
  *
  * Returns true if one (or more) matches are found
  *
@@ -2019,7 +2205,9 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                               const Handle& grnd)
 {
 	clause_stacks_clear();
-	return explore_redex(term, grnd, do_clause);
+	bool halt = explore_redex(term, grnd, do_clause);
+	bool stop = report_forall();
+	return halt or stop;
 }
 
 /**
@@ -2058,19 +2246,31 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	// evaluate to true or false.
 	if (not is_evaluatable(clause))
 	{
+		DO_LOG({logger().fine("Clause is matchable; start matching it");})
+
 		// Check if the pattern has globs in it, and record the glob_state.
 		// Do this *before* exploring the term.
 		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
 
-		DO_LOG({logger().fine("Clause is matchable; start matching it");})
+		_did_check_forall = false;
 		bool found = explore_term_branches(term, grnd, clause);
 
-		// If there may be another way to ground it differently to the same
-		// candidate, do it until exhausted.
+		// If no solution was found, and there are globs, then there may
+		// still be another way to ground the glob differently, to this
+		// same candidate caluse. So try that, and do it until exhausted.
 		while (not found and has_glob and _glob_state.size() > gstate_size)
 		{
+			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 			found = explore_term_branches(term, grnd, clause);
+		}
+
+		if (not _did_check_forall and is_always(clause))
+		{
+			// We need to record failures for the AlwaysLink
+			Handle empty;
+			_forall_state = _forall_state and
+				_pmc.always_clause_match(clause, empty, var_grounding);
 		}
 
 		// If found is false, then there's no solution here.
@@ -2080,12 +2280,49 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 	// If we are here, we have an evaluatable clause on our hands.
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
+
+	// Some people like to have a clause that is just one big
+	// giant variable, matching almost anything. Keep these folks
+	// happy, and record the suggested grounding. There's nowhere
+	// else to do this, so we do it here.
+	if (term->get_type() == VARIABLE_NODE)
+		var_grounding[term] = grnd;
+
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
+	{
 		return clause_accept(clause, grnd);
+	}
+	else if (is_always(clause))
+	{
+		// We need to record failures for the AlwaysLink
+		Handle empty;
+		_forall_state = _forall_state and
+			_pmc.always_clause_match(clause, empty, var_grounding);
+	}
 
 	return false;
+}
+
+void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
+                                          const Handle& hg)
+{
+	const Handle& hp = ptm->getHandle();
+
+	// If this is a closed pattern, not containing any variables,
+	// then there is no need to save it.
+	if (hp == hg)
+		return;
+
+	// Only record if the pattern is not quoted, otherwise the pattern
+	// is not completely self-contained.
+	if (not ptm->isQuoted())
+		var_grounding[hp] = hg;
+	// If quoted, try one last chance by checking if the quote is
+	// hidden in ptm.
+	else if (const Handle& quote = ptm->getQuote())
+		var_grounding[quote] = hg;
 }
 
 /**
@@ -2100,15 +2337,18 @@ void PatternMatchEngine::clear_current_state(void)
 
 	depth = 0;
 
-	// choice link state
+	// ChoiceLink state
 	_choice_state.clear();
 	_need_choice_push = false;
 	choose_next = true;
 
-	// unordered link state
+	// UnorderedLink state
 	have_more = false;
 	take_step = true;
 	_perm_state.clear();
+
+	// GlobNode state
+	_glob_state.clear();
 
 	issued.clear();
 }
@@ -2124,16 +2364,17 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 		}
 	}
 	if (found)
-		_pmc.grounding(HandleMap(), HandleMap());
+		report_grounding(HandleMap(), HandleMap());
 
 	return found;
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
-	_classserver(classserver()),
-	_varlist(NULL),
-	_pat(NULL)
+	_nameserver(nameserver()),
+	_varlist(nullptr),
+	_pat(nullptr),
+	clause_accepted(false)
 {
 	// current state
 	depth = 0;
@@ -2160,6 +2401,20 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 /* ======================================================== */
 
 #ifdef DEBUG
+void PatternMatchEngine::print_solution(
+	const HandleMap &vars,
+	const HandleMap &clauses)
+{
+	Logger::Level save = logger().get_level();
+	logger().set_level("fine");
+	logger().set_timestamp_flag(false);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_print_level_flag(false);
+	log_solution(vars, clauses);
+
+	logger().set_level(save);
+}
+
 void PatternMatchEngine::log_solution(
 	const HandleMap &vars,
 	const HandleMap &clauses)

@@ -256,6 +256,27 @@ class PatternMatchCallback
 		                                   const HandleMap& term_gnds) = 0;
 
 		/**
+		 * Called when the search for a top-level for-all clause
+		 * has been completed. The clause may or may not have been
+		 * grounded as a result of the search. If it has been grounded,
+		 * then grnd will be non-null.
+		 *
+		 * Return false to terminate further searches from this point
+		 * on; the result of termination will be backtracking to search
+		 * for other possible groundings of the required clauses.
+		 * Return true to examine the next for-all clause (if any).
+		 *
+		 * Note that all required clauses will have been grounded,
+		 * and all optional clauses will have been examined before
+		 * the for-all clauses are tested. This guarantees that the
+		 * groundings for all variables are "final", and this is a
+		 * last-chance test.
+		 */
+		virtual bool always_clause_match(const Handle& pattrn,
+		                                 const Handle& grnd,
+		                                 const HandleMap& term_gnds) = 0;
+
+		/**
 		 * Called when a complete grounding for all clauses is found.
 		 * Should return false to search for more solutions; or return
 		 * true to terminate search.  (Just as in all the other callbacks,
@@ -300,8 +321,8 @@ class PatternMatchCallback
 		 */
 		virtual void pop(void) {}
 
-		virtual const std::set<Type>& get_connectives(void)
-		{ static const std::set<Type> _empty; return _empty; }
+		virtual const TypeSet& get_connectives(void)
+		{ static const TypeSet _empty; return _empty; }
 
 		/**
 		 * Called to initiate the search. This callback is responsible
@@ -324,7 +345,7 @@ class PatternMatchCallback
 		 * is completed: its completed when the above returns. In practice,
 		 * the implementation is much simpler if we have a distinct
 		 * callback to handle this situation.  The argument, is the return
-		 * value from initiaitate_search().
+		 * value from initiatate_search().
 		 */
 		virtual bool search_finished(bool done) { return done; }
 

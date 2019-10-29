@@ -60,8 +60,8 @@ public:
 		Q = an(PREDICATE_NODE, "Q");
 		CT = an(TYPE_NODE, "ConceptNode");
 
-		_eval.eval("(add-to-load-path \"..\")");
-		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	}
 
 	void setUp() {}
@@ -77,6 +77,8 @@ public:
 	void test_consume_quotations_1();
 	void test_consume_quotations_2();
 	void test_consume_quotations_3();
+	void test_consume_quotations_4();
+	void test_consume_quotations_5();
 };
 
 #define NA _asa.add_node
@@ -308,6 +310,52 @@ void RewriteLinkUTest::test_consume_quotations_3()
 	// gpn is evaluatable
 	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
 		expected = _eval.eval_h("consumed-quoted-clauses");
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void RewriteLinkUTest::test_consume_quotations_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Test simple RewriteLink
+	Handle vardecl = al(VARIABLE_LIST),
+		quoted_clauses = _eval.eval_h("quoted-grounded-predicate-argument");
+
+	// Remove the UnquoteLink wrapping gpn as it is useless, and even
+	// harmful to the pattern matcher as it makes it believe that the
+	// gpn is evaluatable
+	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
+		expected = _eval.eval_h("consumed-quoted-grounded-predicate-argument");
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void RewriteLinkUTest::test_consume_quotations_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Test simple RewriteLink
+	Handle vardecl = al(VARIABLE_LIST),
+		quoted_clause = _eval.eval_h("quoted-not-X");
+
+	// LocalQuoteLink should not be removed because NotLink is
+	// interpreted as a logical connector by the pattern matcher in
+	// that context.
+	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clause, true),
+		expected = quoted_clause;
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);

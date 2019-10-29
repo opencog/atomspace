@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/ArithmeticLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,12 +43,23 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
+	ValuePtr get_value(AtomSpace*, bool, ValuePtr) const;
+
+	// Provide compatible behavior for kons(stream, knil)
+	// (e.g. adding zero to a stream value)
+	static inline ValuePtr sample_stream(ValuePtr& v, Type vt) {
+		if (nameserver().isA(vt, STREAM_VALUE))
+			return createFloatValue(FloatValueCast(v)->value());
+		return v;
+	}
+
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual Handle delta_reduce(void) const;
-	virtual Handle execute() const;
+	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
+	virtual ValuePtr execute(AtomSpace*, bool);
+	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;
