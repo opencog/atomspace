@@ -197,18 +197,27 @@ void Atom::copyValues(const Handle& other)
     }
 }
 
+/**
+ * Return all of the Values on this Atom, formatted as a scheme
+ * association-list. It  must have the SRFI-1 a-list format,
+ * as other code parses this, and expects it to be in this format.
+ * The format is `((key . value) (key2 . value2) ...)`
+ * It is expected that this method will execute relaitvely efficiently,
+ * as it is frequently used, e.g. in the DHT backend.
+ */
 std::string Atom::valuesToString() const
 {
-    std::string rv;
+    std::stringstream rv;
 
-    HandleSet keys(getKeys());
-    for (const Handle& k: keys)
+    rv << "(";
+    for (const Handle& k: getKeys())
     {
         ValuePtr p = getValue(k);
-        rv += "; key = " + k->to_string();
-        rv += "; val = " + p->to_string() + "\n";
+        rv << "(" << k->to_short_string()
+           << " . " << p->to_short_string() + ")";
     }
-    return rv;
+    rv << ")";
+    return rv.str();
 }
 
 // ==============================================================
