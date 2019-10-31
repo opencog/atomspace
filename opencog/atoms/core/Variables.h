@@ -91,25 +91,20 @@ struct FreeVariables
 		return are_in_varset(c.begin(), c.end());
 	}
 
-	/// Create an ordered set of the free variables in the given oset.
+	/// Create an ordered set of the free variables in the given body.
 	///
-	/// By "ordered set" it is meant: a list of variables, in traversal
-	/// order (from left to right, as they appear in the tree), with each
-	/// variable being named only once.  The varset is only used to make
-	/// sure that we don't name a variable more than once; that's all.
+	/// By "ordered set" it is meant: a list of variables in a
+	/// cannonical order that is compatible with alpha-equivalence. So
+	/// that if variables are renamed the order will not be altered in
+	/// a way that modifies the semantics of the scope.
 	///
-	/// Variables that are inside a QuoteLink are ignored ... unless they
-	/// are wrapped by UnquoteLink.  That is, QuoteLink behaves like a
-	/// quasi-quote in lisp/scheme.
-	///
-	/// Variables that are bound inside of some deeper link are ignored;
-	/// they are not free, and thus must not be collected up.  That is,
-	/// any bound variables appearing in a ScopeLink (such as GetLink,
-	/// BindLink, SatisfactionLink, etc.) will not be collected.  Any
-	/// *free* variables in these same links *will* be collected (since
-	/// they are free!)
-	void find_variables(const Handle&);
-	void find_variables(const HandleSeq&);
+	/// Quotations and scopes are supported (so quoted or scoped
+	/// variables are not considered).
+	void find_variables(const Handle& body);
+
+	/// Like above but for outgoing sets. The ordered flag indicates
+	/// whether the outgoing set is associated with an ordered link.
+	void find_variables(const HandleSeq& oset, bool ordered=true);
 
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables

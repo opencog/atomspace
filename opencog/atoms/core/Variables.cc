@@ -2,8 +2,10 @@
  * Variables.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ *               2019 SingularityNET Foundation
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Authors: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ *          Nil Geisweiller <ngeiswei@gmail.com> Oct 2019
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,13 +24,15 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/Context.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
@@ -38,65 +42,242 @@ namespace opencog {
 
 struct VarScraper
 {
-	Quotation _quotation;
-	HandleSet _bound_vars;
-	void find_vars(HandleSeq&, HandleSet&, const HandleSeq&);
+	/**
+	 * Mapping between variables and number of occurrences. This allows
+	 * to take into account the semantics of the variables, as to be
+	 * able to sort unordered links like
+	 *
+	 * (And
+	 *   (Inheritance (Variable "$X") (Variable "$Y"))
+	 *   (Inheritance (Variable "$Z") (Variable "$Z")))
+	 *
+	 * by their semantics (Z occurs twice, thus is sorted after X and
+	 * Y) as opposed to solely variable names, which is not robust to
+	 * alpha-conversion.
+	 */
+	HandleUCounter _fvc;
+
+	/**
+	 * Find variable declaration in such order that is consistent with
+	 * alpha-equivalence.
+	 */
+	void find_vars(HandleSeq& varseq, HandleSet& varset,
+	               const HandleSeq& outs, bool ordered);
+
+	/**
+	 * Return a mapping between free variables and the number of times
+	 * they occur in the given body.
+	 *
+	 * Such a mapping is then passed to the various ordering functions
+	 * so that semantics is considered prior to variable names.
+	 *
+	 * Note: context is passed by copy for implementation convenience.
+	 */
+	static HandleUCounter free_variables_counter(const Handle& h,
+	                                             Context ctx=Context());
+	static HandleUCounter free_variables_counter(const HandleSeq& hs,
+	                                             const Context& ctx=Context());
+
+	/**
+	 * Find all free variables in body and return them in a canonical
+	 * order, so that if the variables were renamed and rerun this
+	 * function we would obtain the same order, or an order that does
+	 * not affect the semantics.
+	 */
+	HandleSeq free_variables(const Handle& body, Context ctx=Context()) const;
+
+	/**
+	 * Like above but operates on the outgoing set of an ordered
+	 * (resp. unordered) link.
+	 */
+	HandleSeq free_variables_ordered(const HandleSeq& outs,
+	                                 const Context& ctx=Context()) const;
+	HandleSeq free_variables_unordered(const HandleSeq& outs,
+	                                   const Context& ctx=Context()) const;
+
+	/**
+	 * Return a sorted outgoing set according to a canonical order.
+	 *
+	 * Note: argument is passed by copy for implementation convenience.
+	 */
+	HandleSeq sorted(HandleSeq hs, const Context& ctx=Context()) const;
+
+	/**
+	 * Canonical order, so that variables get sorted according to their
+	 * semantics first, and only then their names. This allows to have
+	 * the order be consistent with alpha-equivalent.
+	 */
+	bool less_than(const Handle& lh, const Handle& rh, const Context& ctx) const;
+
+	/**
+	 * Like less_than but over ordered (resp. unordered) outgoings.
+	 */
+	bool less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
+	                       const Context& ctx) const;
+	bool less_than_unordered(const HandleSeq& lhs, const HandleSeq& rhs,
+	                         const Context& ctx) const;
+
+	/**
+	 * Return true iff h is a Variable or Glob node.
+	 */
+	static bool is_variable(const Handle& h);
+
+	/**
+	 * Return true iff is an ordered link or subtype thereof.
+	 */
+	static bool is_ordered(const Handle& h);
 };
 
-/* ================================================================= */
-//
-// The work-horse that does the actual heavy-lifting.
-// See the find_variables() method for the description of what
-// this does, and why.
-//
-// Note: the algo used here is nearly identical to that in
-// ScopeLink::term_hash() -- if you modify this, then modify that
-// one too.
 void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
-                           const HandleSeq& oset)
+                           const HandleSeq& hs, bool ordered)
 {
-	for (const Handle& h : oset)
+	_fvc = free_variables_counter(hs);
+	varseq = ordered ? free_variables_ordered(hs) : free_variables_unordered(hs);
+	varset = HandleSet(varseq.begin(), varseq.end());
+}
+
+HandleUCounter VarScraper::free_variables_counter(const Handle& h,
+                                                  Context ctx)
+{
+	// Base cases
+	if (ctx.is_free_variable(h))
+		return HandleUCounter{{h, 1}};
+	if (h->is_node())
+		return HandleUCounter{};
+
+	// Recursive case
+	OC_ASSERT(h->is_link());
+	ctx.update(h);
+	return free_variables_counter(h->getOutgoingSet(), ctx);
+}
+
+HandleUCounter VarScraper::free_variables_counter(const HandleSeq& hs,
+                                                  const Context& ctx)
+{
+	HandleUCounter fvc;
+	for (const Handle& h : hs)
+		fvc += free_variables_counter(h, ctx);
+	return fvc;
+}
+
+HandleSeq VarScraper::free_variables(const Handle& body, Context ctx) const
+{
+	// Base cases
+	if (ctx.is_free_variable(body))
+		return {body};
+	if (body->is_node())
+		return {};
+
+	// Recursive cases
+	OC_ASSERT(body->is_link());
+	ctx.update(body);
+	const HandleSeq& outs = body->getOutgoingSet();
+	return is_ordered(body)	? free_variables_ordered(outs, ctx)
+		: free_variables_unordered(outs, ctx);
+}
+
+HandleSeq VarScraper::free_variables_ordered(const HandleSeq& outs,
+                                             const Context& ctx) const
+{
+	HandleSeq res;
+	for (const Handle& out : outs)
 	{
-		Type t = h->get_type();
+		// Recursive call
+		HandleSeq fvs = free_variables(out, ctx);
 
-		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-		    _quotation.is_unquoted() and
-		    0 == varset.count(h) and
-		    0 == _bound_vars.count(h))
-		{
-			varseq.emplace_back(h);
-			varset.insert(h);
-		}
+		// Only retain variables that are not in res
+		HandleSeq fvs_n;
+		std::copy_if(fvs.begin(), fvs.end(), std::back_inserter(fvs_n),
+		             [&res](const Handle& var) {
+			             return std::find(res.begin(), res.end(), var) == res.end();
+		             });
 
-		if (not h->is_link()) continue;
-
-		bool issco = _quotation.is_unquoted()
-			and nameserver().isA(t, SCOPE_LINK);
-		HandleSet bsave;
-		if (issco)
-		{
-			// Save the current set of bound variables...
-			bsave = _bound_vars;
-
-			// The ScopeLink ctor did the bound-variable extraction.
-			ScopeLinkPtr sco(ScopeLinkCast(h));
-			const Variables& vees = sco->get_variables();
-			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
-		}
-
-		// Save quotation on the stack before updating it for the
-		// recursive call
-		Quotation save_quotation(_quotation);
-		_quotation.update(t);
-
-		find_vars(varseq, varset, h->getOutgoingSet());
-
-		if (issco)
-			_bound_vars = bsave;
-
-		// Restore current state from the stack
-		_quotation = save_quotation;
+		// Concatenate
+		res.insert(res.end(), fvs_n.begin(), fvs_n.end());
 	}
+	return res;
+}
+
+HandleSeq VarScraper::free_variables_unordered(const HandleSeq& outs,
+                                               const Context& ctx) const
+{
+	return free_variables_ordered(sorted(outs, ctx), ctx);
+}
+
+HandleSeq VarScraper::sorted(HandleSeq outs, const Context& ctx) const
+{
+	std::sort(outs.begin(), outs.end(), [&](const Handle& lh, const Handle& rh) {
+			return less_than(lh, rh, ctx); });
+	return outs;
+}
+
+bool VarScraper::less_than(const Handle& lh, const Handle& rh,
+                           const Context& ctx) const
+{
+	// Sort by atom type
+	Type lt = lh->get_type();
+	Type rt = rh->get_type();
+	if (lt != rt)
+		return lt < rt;
+
+	// Both atoms are links of the same type
+	if (lh->is_link())
+	{
+		// Sort by arity
+		Arity lty = lh->get_arity();
+		Arity rty = rh->get_arity();
+		if (lty != rty)
+			return lty < rty;
+
+		// Both atoms have same arity, sort by outgoings
+		const HandleSeq& lout = lh->getOutgoingSet();
+		const HandleSeq& rout = rh->getOutgoingSet();
+		return is_ordered(lh)? less_than_ordered(lout, rout, ctx)
+			: less_than_unordered(lout, rout, ctx);
+	}
+
+	// Both atoms are constant nodes of the same type, sort by regular
+	// atom order.
+	if (not is_variable(lh))
+		return lh < rh;
+
+	// Both atoms are variables. If they are have different counts,
+	// sort by counts, as that affects their semantics.
+	unsigned lc = _fvc.get(lh);
+	unsigned rc = _fvc.get(rh);
+	if (lc != rc)
+		return lc < rc;
+
+	// Both atoms are variables with same count, sort by regular atom
+	// order.
+	return lh < rh;
+}
+
+bool VarScraper::less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
+                                   const Context& ctx) const
+{
+	OC_ASSERT(lhs.size() == rhs.size());
+	for (std::size_t i = 0; lhs.size(); i++)
+		if (not content_eq(lhs[i], rhs[i]))
+			return less_than(lhs[i], rhs[i], ctx);
+	return false;
+}
+
+bool VarScraper::less_than_unordered(const HandleSeq& lhs, const HandleSeq& rhs,
+                                     const Context& ctx) const
+{
+	return less_than_ordered(sorted(lhs, ctx), sorted(rhs, ctx), ctx);
+}
+
+bool VarScraper::is_variable(const Handle& h)
+{
+	Type t = h->get_type();
+	return VARIABLE_NODE == t or GLOB_NODE == t;
+}
+
+bool VarScraper::is_ordered(const Handle& h)
+{
+	return nameserver().isA(h->get_type(), ORDERED_LINK);
 }
 
 /* ================================================================= */
@@ -130,10 +311,10 @@ bool FreeVariables::is_in_varset(const Handle& v) const
 	return varset.end() != varset.find(v);
 }
 
-void FreeVariables::find_variables(const HandleSeq& oset)
+void FreeVariables::find_variables(const HandleSeq& oset, bool ordered)
 {
 	VarScraper vsc;
-	vsc.find_vars(varseq, varset, oset);
+	vsc.find_vars(varseq, varset, oset, ordered);
 	init_index();
 }
 
