@@ -87,7 +87,6 @@ class SQLAtomStorage::Response
 		    fltval(0),
 		    strval(nullptr),
 		    lnkval(nullptr),
-		    get_all_values(false),
 		    intval(0)
 		{}
 
@@ -352,40 +351,6 @@ class SQLAtomStorage::Response
 
 			ValuePtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
-			return false;
-		}
-
-		// Valuations --------------------------------------------
-		// Get the values first, and then get the atom they are attached
-		// to. This is backwards from everything up above.
-		Handle katom;
-		bool get_all_values;
-		bool get_valuations_cb(void)
-		{
-			rs->foreach_column(&Response::get_value_column_cb, this);
-
-			// Do we know this atom yet? If not, go get it.
-			// Note: it is very likely we do NOT yet have this atom!
-			Handle h(store->_tlbuf.getAtom(uuid));
-			if (nullptr == h)
-			{
-				PseudoPtr pu(store->petAtom(uuid));
-				h = store->get_recursive_if_not_exists(pu);
-				h = table->add(h, false);
-				store->_tlbuf.addAtom(h, uuid);
-			}
-
-			// If user wanted all the values, then go get them.
-			if (get_all_values)
-			{
-				store->get_atom_values(h);
-				return false;
-			}
-
-			// Otherwise, just get this one and only value.
-			ValuePtr pap = store->doUnpackValue(*this);
-			h->setValue(katom, pap);
-
 			return false;
 		}
 
