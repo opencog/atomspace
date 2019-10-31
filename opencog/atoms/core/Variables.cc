@@ -259,7 +259,7 @@ bool VarScraper::less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
                                    const Context& ctx) const
 {
 	OC_ASSERT(lhs.size() == rhs.size());
-	for (std::size_t i = 0; lhs.size(); i++)
+	for (std::size_t i = 0; i < lhs.size(); i++)
 		if (not content_eq(lhs[i], rhs[i]))
 			return less_than(lhs[i], rhs[i], ctx);
 	return false;
