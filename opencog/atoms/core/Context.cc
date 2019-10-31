@@ -78,7 +78,8 @@ bool Context::consumable(Type t) const
 
 bool Context::is_free_variable(const Handle& h) const
 {
-	return (h->get_type() == VARIABLE_NODE)
+	Type t = h->get_type();
+	return (t == VARIABLE_NODE or t == GLOB_NODE)
 		and quotation.is_unquoted()
 		and not is_in(h, shadow);
 }
