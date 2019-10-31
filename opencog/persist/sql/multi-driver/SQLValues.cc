@@ -317,21 +317,6 @@ ValuePtr SQLAtomStorage::getValue(VUID vuid)
 	return doGetValue(buff);
 }
 
-/// Return a value, given by the key-atom pair.
-/// If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr SQLAtomStorage::getValuation(const Handle& key,
-                                      const Handle& atom)
-{
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		get_uuid(key),
-		get_uuid(atom));
-
-	return doGetValue(buff);
-}
-
 /// Return a value, given by indicated query buffer.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.

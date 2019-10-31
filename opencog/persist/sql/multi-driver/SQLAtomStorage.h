@@ -150,7 +150,6 @@ class SQLAtomStorage : public BackingStore
 		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
 		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
-		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		void deleteValuation(Response&, UUID, UUID);
 		void deleteAllValuations(Response&, UUID);
