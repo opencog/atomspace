@@ -150,7 +150,6 @@ class SQLAtomStorage : public BackingStore
 		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
 		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
-		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		void deleteValuation(Response&, UUID, UUID);
 		void deleteAllValuations(Response&, UUID);
@@ -256,7 +255,6 @@ class SQLAtomStorage : public BackingStore
 		Handle getLink(Type, const HandleSeq&);
 		void getIncomingSet(AtomTable&, const Handle&);
 		void getIncomingByType(AtomTable&, const Handle&, Type t);
-		void getValuations(AtomTable&, const Handle&, bool get_all);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);

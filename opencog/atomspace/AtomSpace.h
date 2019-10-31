@@ -302,18 +302,6 @@ public:
     Handle fetch_incoming_by_type(Handle, Type);
 
     /**
-     * Use the backing store to load all atoms that have a value
-     * set for the indicated key.  This is typically used to load
-     * up a slice of a dataset: viz, to avoid loading any other atoms.
-     *
-     * If the boolean flag is set to true, then all values on the
-     * atom are fetched; otherwise, only that one value is fetched.
-     * This can save a lot of RAM, if the atoms have a lot of misc.
-     * values attached to them.
-     */
-    void fetch_valuations(Handle, bool=false);
-
-    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
