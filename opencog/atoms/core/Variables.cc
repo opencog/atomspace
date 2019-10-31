@@ -83,6 +83,8 @@ struct VarScraper
 	 * order, so that if the variables were renamed and rerun this
 	 * function we would obtain the same order, or an order that does
 	 * not affect the semantics.
+	 *
+	 * Note: context is passed by copy for implementation convenience.
 	 */
 	HandleSeq free_variables(const Handle& body, Context ctx=Context()) const;
 
