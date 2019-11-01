@@ -149,6 +149,11 @@ protected:
         _atom_space(nullptr)
     {}
 
+    Atom& operator=(const Atom& other) // copy assignment operator
+        { return *this; }
+    Atom& operator=(Atom&& other) // move assignment operator
+        { return *this; }
+
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.
     // That is, we use weak pointers here, not strong ones.
