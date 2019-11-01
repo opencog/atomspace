@@ -78,13 +78,26 @@ public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
+    // Copy constructor
     explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
+
+    // Move constructor
+    explicit Handle(AtomPtr&& atom) : AtomPtr(atom) {}
+
     explicit Handle() {}
+
     ~Handle() {}
 
     ContentHash value(void) const;
 
+    // Copy assign operator
     inline Handle& operator=(const AtomPtr& a) {
+        this->AtomPtr::operator=(a);
+        return *this;
+    }
+
+    // Move assign operator
+    inline Handle& operator=(AtomPtr&& a) {
         this->AtomPtr::operator=(a);
         return *this;
     }
@@ -98,17 +111,18 @@ public:
         return get();
     }
 
-    // Allows expressions like "if(h)..." to work when h has a non-null pointer.
+    // Allows expressions like "if(h)..." to work
+    // when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
         if (get()) return true;
         return false;
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
-        return get() == 0x0;
+        return get() == nullptr;
     }
     inline bool operator!=(std::nullptr_t) const noexcept {
-        return get() != 0x0;
+        return get() != nullptr;
     }
     inline bool operator==(const Atom* ap) const noexcept {
         return get() == ap;
