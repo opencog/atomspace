@@ -1,0 +1,406 @@
+/*
+ * tests/atoms/VariablesUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class VariablesUTest : public CxxTest::TestSuite
+{
+private:
+	Handle A, B, W, X, Y, Z, NT, PNT, CNT;
+
+	AtomSpace _as;
+
+public:
+	VariablesUTest()
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_timestamp_flag(false);
+		logger().set_print_to_stdout_flag(true);
+
+		A = an(CONCEPT_NODE, "A");
+		B = an(CONCEPT_NODE, "B");
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		Z = an(VARIABLE_NODE, "$Z");
+		W = an(VARIABLE_NODE, "$W");
+		NT = an(TYPE_NODE, "Node");
+		PNT = an(TYPE_NODE, "PredicateNode");
+		CNT = an(TYPE_NODE, "ConceptNode");
+	}
+
+	void test_extend();
+	void test_find_variables_ordered_1();
+	void test_find_variables_ordered_2();
+	void test_find_variables_ordered_3();
+	void test_find_variables_ordered_4();
+	void test_find_variables_unordered_1();
+	void test_find_variables_unordered_2();
+	void test_find_variables_unordered_3();
+	void test_find_variables_unordered_4();
+	void test_find_variables_mixed_1();
+	void test_find_variables_mixed_2();
+	void test_find_variables_mixed_3();
+	void test_find_variables_mixed_4();
+	void test_find_variables_mixed_5();
+};
+
+void VariablesUTest::test_extend()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		vardecl1 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, NT),
+		              al(TYPED_VARIABLE_LINK, Y, CNT)),
+		vardecl2 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, PNT),
+		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+		expect = al(VARIABLE_LIST,
+		            al(TYPED_VARIABLE_LINK, X, PNT),
+		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_find_variables_ordered_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should be in infix order since all links are
+	// ordered, that is [X, Y].
+	Handle body = al(INHERITANCE_LINK, X, Y);
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_ordered_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should be in infix order since all links are
+	// ordered, that is [X, Y, Z, W].
+	Handle body = al(LIST_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Z, W));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y, Z, W};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_ordered_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should be in infix order since all links are
+	// ordered, that is [X, Y], as it eliminate redundant variables.
+	Handle body = al(LIST_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Y, X));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_ordered_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Simple ordered body with quoted and scoped variables (thus that
+	// should be ignored). Result should be [X, Y] as the first
+	// occurence of Y is quoted, and other variables like Z and W are
+	// scoped.
+	Handle body = al(LIST_LINK,
+	                 al(QUOTE_LINK, Y),
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(SCOPE_LINK, al(INHERITANCE_LINK, Z, W)));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_unordered_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should follow the atom hash order since the
+	// body structure imposes no asymmetry.
+	Handle body = al(AND_LINK, X, Y);
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect(vars.varset.begin(), vars.varset.end());
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_unordered_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl can be one of the possibilities
+	//
+	// 1. sorted({X, Y}) + sorted({Z, W})
+	// 2. sorted({Z, W}) + sorted({X, Y})
+	//
+	// X, Y and Z, W can be interleaved because it is would not be
+	// semantically equivalent.
+	Handle body = al(AND_LINK,
+	                 al(OR_LINK, X, Y),
+	                 al(OR_LINK, Z, W));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	HandleSet XY{X, Y}, ZW{Z, W};
+	HandleSeq expect1;
+	expect1.insert(expect1.end(), XY.begin(), XY.end());
+	expect1.insert(expect1.end(), ZW.begin(), ZW.end());
+	HandleSeq expect2;
+	expect2.insert(expect2.end(), ZW.begin(), ZW.end());
+	expect2.insert(expect2.end(), XY.begin(), XY.end());
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect1 = " << oc_to_string(expect1);
+	logger().debug() << "expect2 = " << oc_to_string(expect2);
+
+	TS_ASSERT(varseq == expect1 or varseq == expect2);
+}
+
+void VariablesUTest::test_find_variables_unordered_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should have Z come last because it occurs more
+	// often than X and Y.
+	Handle body = al(AND_LINK,
+	                 al(OR_LINK, X, Y),
+	                 al(OR_LINK, Z, Z));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	HandleSet XY = HandleSet{X, Y};
+	HandleSeq expect;
+	expect.insert(expect.end(), XY.begin(), XY.end());
+	expect.push_back(Z);
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_unordered_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should be sorted({X, Y}) + sorted({Z, W})
+	// because AndLink type is less than OrLink type.
+	Handle body = al(AND_LINK,
+	                 al(AND_LINK, X, Y),
+	                 al(OR_LINK, Z, W));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	HandleSet XY = HandleSet{X, Y};
+	HandleSet ZW = HandleSet{Z, W};
+	HandleSeq expect;
+	expect.insert(expect.end(), XY.begin(), XY.end());
+	expect.insert(expect.end(), ZW.begin(), ZW.end());
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_mixed_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should follow the atom hash order since the
+	// body structure imposes no asymmetry.
+	Handle body = al(AND_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Y, X));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+
+	TS_ASSERT_EQUALS(varseq, HandleSeq(vars.varset.begin(), vars.varset.end()));
+}
+
+void VariablesUTest::test_find_variables_mixed_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should place X before Y because the
+	// ExtensionalSimilarityLink type is ordered before
+	// IntensionalSimilarityLink type.
+	Handle body = al(AND_LINK,
+	                 al(SUBSET_LINK, X, Y),
+	                 al(INTENSIONAL_INHERITANCE_LINK, Y, X));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+}
+
+void VariablesUTest::test_find_variables_mixed_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the variable declarations of body1 and body2 are
+	// the reverses of each other, that is if one is [X, Y], then
+	// the other is [Y, X].
+	Handle body1 = al(INHERITANCE_LINK, al(AND_LINK, X, Y), Y);
+	Handle body2 = al(INHERITANCE_LINK, al(AND_LINK, Y, X), X);
+
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
+}
+
+void VariablesUTest::test_find_variables_mixed_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl should be
+	//
+	// 1. sorted({X, Y}) + sorted({Z, W})
+	//
+	// or
+	//
+	// 2. sorted({Z, W}) + sorted({X, Y})
+	//
+	// because there is no asymmetry in the AndLink
+	Handle body = al(AND_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Y, X),
+	                 al(INHERITANCE_LINK, Z, W),
+	                 al(INHERITANCE_LINK, W, Z));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	HandleSet XY{X, Y};
+	HandleSet ZW{Z, W};
+	HandleSeq expect1;
+	expect1.insert(expect1.end(), XY.begin(), XY.end());
+	expect1.insert(expect1.end(), ZW.begin(), ZW.end());
+	HandleSeq expect2;
+	expect2.insert(expect2.end(), ZW.begin(), ZW.end());
+	expect2.insert(expect2.end(), XY.begin(), XY.end());
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect1 = " << oc_to_string(expect1);
+	logger().debug() << "expect2 = " << oc_to_string(expect2);
+
+	TS_ASSERT(varseq == expect1 or varseq == expect2);
+}
+
+void VariablesUTest::test_find_variables_mixed_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Like test_find_variables_mixed_1 but incorporates non variable
+	// nodes to cover some, otherwise non covered, code.
+	Handle body = al(AND_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Y, X),
+	                 al(INHERITANCE_LINK, A, B));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+
+	TS_ASSERT_EQUALS(varseq, HandleSeq(vars.varset.begin(), vars.varset.end()));
+}

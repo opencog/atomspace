@@ -51,6 +51,7 @@ public:
 	void test_body();
 	void test_atomspace();
 	void test_bindlink();
+	void test_vardecl_free_scope();
 };
 
 #define NA _asa.add_node
@@ -304,6 +305,28 @@ void AlphaConvertUTest::test_bindlink()
 	// x and y should be NOT equal because their implicants are not
 	// alpha-equivalent.
 	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for alpha-equivalent scopes with no variable
+// declarations.
+void AlphaConvertUTest::test_vardecl_free_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	// Create Scopes with no variable declaration and X and Y swapped.
+	Handle hsco1 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(AND_LINK, X, Y), Y));
+	Handle hsco2 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(AND_LINK, Y, X), X));
+
+	ScopeLinkPtr sco1(ScopeLinkCast(hsco1));
+	TS_ASSERT(sco1 != nullptr);
+
+	// hsco1 and hsco2 should be equal as they are alpha-equivalent.
+	TS_ASSERT(sco1->is_equal(hsco2));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

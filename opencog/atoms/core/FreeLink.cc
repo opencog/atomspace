@@ -69,7 +69,8 @@ void FreeLink::unorder(void)
 
 void FreeLink::init(void)
 {
-	_vars.find_variables(_outgoing);
+	bool ordered = not nameserver().isA(get_type(), UNORDERED_LINK);
+	_vars.find_variables(_outgoing, ordered);
 }
 
 DEFINE_LINK_FACTORY(FreeLink, FREE_LINK);
