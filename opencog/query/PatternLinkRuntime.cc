@@ -329,8 +329,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 
 		debug_log();
 
-		pme.set_pattern(_varlist, _pat);
-		pmcb.set_pattern(_varlist, _pat);
+		pme.set_pattern(_variables, _pat);
+		pmcb.set_pattern(_variables, _pat);
 		bool found = pmcb.initiate_search(&pme);
 
 #ifdef DEBUG
@@ -423,7 +423,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 #endif
 	HandleMap empty_vg;
 	HandleMap empty_pg;
-	pmcb.set_pattern(_varlist, _pat);
+	pmcb.set_pattern(_variables, _pat);
 	return recursive_virtual(pmcb, _virtual, _pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);

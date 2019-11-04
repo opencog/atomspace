@@ -57,7 +57,7 @@ protected:
 	Handle _body;
 
 	/// Variables bound in the body.
-	Variables _varlist;
+	Variables _variables;
 
 protected:
 	void init(void);
@@ -75,7 +75,7 @@ public:
 	ScopeLink(const Link &l);
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 

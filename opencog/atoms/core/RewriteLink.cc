@@ -81,7 +81,7 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 
 Handle RewriteLink::alpha_convert() const
 {
-	HandleSeq vars = append_rand_str(_varlist.varseq);
+	HandleSeq vars = append_rand_str(_variables.varseq);
 	return alpha_convert(vars);
 }
 
@@ -90,7 +90,7 @@ Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
+		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
 
 	// Create the alpha converted scope link
 	return createLink(hs, get_type());
@@ -99,7 +99,7 @@ Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
 {
 	HandleSeq vars;
-	for (const Handle& var : _varlist.varseq) {
+	for (const Handle& var : _variables.varseq) {
 		auto it = vsmap.find(var);
 		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
 	}

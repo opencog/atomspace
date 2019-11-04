@@ -159,10 +159,10 @@ void PutLink::static_typecheck_arguments(void)
 		}
 	}
 
-	size_t sz = _varlist.varseq.size();
+	size_t sz = _variables.varseq.size();
 	if (1 == sz)
 	{
-		if (not _varlist.is_type(valley)
+		if (not _variables.is_type(valley)
 		    and SET_LINK != vtype
 		    and PUT_LINK != vtype
 		    and not (nameserver().isA(vtype, SATISFYING_LINK)))
@@ -174,7 +174,7 @@ void PutLink::static_typecheck_arguments(void)
 			{
 				LambdaLinkPtr lam(LambdaLinkCast(valley));
 				const Handle& body = lam->get_body();
-				if (_varlist.is_type(body))
+				if (_variables.is_type(body))
 					return; // everything is OK.
 			}
 
@@ -194,7 +194,7 @@ void PutLink::static_typecheck_arguments(void)
 	{
 		// is_type() verifies that the arity of the vars
 		// and the arguments matches up.
-		if (not _varlist.is_type(valley->getOutgoingSet()))
+		if (not _variables.is_type(valley->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
@@ -237,7 +237,7 @@ void PutLink::static_typecheck_arguments(void)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected argument list!");
 
-			if (not _varlist.is_type(h->getOutgoingSet()))
+			if (not _variables.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink bad argument list!");
 		}
@@ -247,7 +247,7 @@ void PutLink::static_typecheck_arguments(void)
 	// If the arity is one, the arguments must obey type constraint.
 	for (const Handle& h : valley->getOutgoingSet())
 	{
-		if (not _varlist.is_type(h))
+		if (not _variables.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
 					"PutLink bad type!");
 	}
@@ -341,7 +341,7 @@ static inline Handle expand(const Handle& arg, bool silent)
 Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
-	Variables vars(_varlist);
+	Variables vars(_variables);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 	Handle args(_arguments);
 

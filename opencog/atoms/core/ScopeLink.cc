@@ -117,12 +117,12 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		if (nameserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
-			_varlist = lam->get_variables();
+			_variables = lam->get_variables();
 			_body = lam->get_body();
 		}
 		else
 		{
-			_varlist.find_variables(oset[0]);
+			_variables.find_variables(oset[0]);
 		}
 		return;
 	}
@@ -137,13 +137,13 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	_vardecl = oset[0];
 	_body = oset[1];
 
-	// Initialize _varlist with the scoped variables
+	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
 }
 
 /* ================================================================= */
 ///
-/// Initialize _varlist given a handle of either VariableList or a
+/// Initialize _variables given a handle of either VariableList or a
 /// variable.
 ///
 void ScopeLink::init_scoped_variables(const Handle& hvar)
@@ -151,7 +151,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 	// Use the VariableList class as a tool to extract the variables
 	// for us.
 	VariableList vl(hvar);
-	_varlist = vl.get_variables();
+	_variables = vl.get_variables();
 }
 
 /* ================================================================= */
@@ -181,12 +181,12 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (n_scoped_terms != other_n_scoped_terms) return false;
 
 	// Variable declarations must match.
-	if (not _varlist.is_equal(scother->_varlist)) return false;
+	if (not _variables.is_equal(scother->_variables)) return false;
 
 	// If all of the variable names are identical in this and other,
 	// then no alpha conversion needs to be done; we can do a direct
 	// comparison.
-	if (_varlist.is_identical(scother->_varlist))
+	if (_variables.is_identical(scother->_variables))
 	{
 		// Compare them, they should match.
 		const HandleSeq& otho(other->getOutgoingSet());
@@ -206,8 +206,8 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	{
 		Handle h = getOutgoingAtom(i + vardecl_offset);
 		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
-		other_h = scother->_varlist.substitute_nocheck(other_h,
-		                                               _varlist.varseq, silent);
+		other_h = scother->_variables.substitute_nocheck(other_h,
+		                                                 _variables.varseq, silent);
 		// Compare them, they should match.
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
 	}
@@ -237,25 +237,25 @@ ContentHash ScopeLink::compute_hash() const
 {
 	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
 	fnv1a_hash(hsh, get_type());
-	fnv1a_hash(hsh, _varlist.varseq.size());
+	fnv1a_hash(hsh, _variables.varseq.size());
 
 	// It is not safe to mix here, since the sort order of the
 	// typemaps will depend on the variable names. So must be
 	// abelian. That is, we must use addition.
 	ContentHash vth = 0;
-	for (const auto& pr : _varlist._simple_typemap)
+	for (const auto& pr : _variables._simple_typemap)
 	{
 		for (Type t : pr.second) vth += t;
 	}
 	fnv1a_hash(hsh, vth);
 
-	for (const auto& pr : _varlist._deep_typemap)
+	for (const auto& pr : _variables._deep_typemap)
 	{
 		for (const Handle& th : pr.second) vth += th->get_hash();
 	}
 	fnv1a_hash(hsh, vth);
 
-	for(const auto& pr: _varlist._glob_intervalmap){
+	for(const auto& pr: _variables._glob_intervalmap){
 		vth += pr.first->get_hash();
 	}
 	fnv1a_hash(hsh, vth);
@@ -288,13 +288,13 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
 	    quotation.is_unquoted() and
-	    0 != _varlist.varset.count(h) and
+	    0 != _variables.varset.count(h) and
 	    0 == bound_vars.count(h))
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
 		ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
-		fnv1a_hash(hsh, (1 + _varlist.index.find(h)->second));
+		fnv1a_hash(hsh, (1 + _variables.index.find(h)->second));
 		return hsh;
 	}
 
