@@ -32,6 +32,8 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "ScopeLink.h"
 
@@ -105,7 +107,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	// there are no variable declarations. There are two cases that can
 	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
-	if (VARIABLE_LIST != decls and
+	if (VARIABLE_LIST != decls and VARIABLE_SET != decls and
 	    // A VariableNode could a be valid body, if it has no variable
 	    // declaration, that is if the Scope has only one argument.
 	    (VARIABLE_NODE != decls or oset.size() == 1) and
@@ -143,15 +145,14 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 /* ================================================================= */
 ///
-/// Initialize _variables given a handle of either VariableList or a
-/// variable.
+/// Initialize _variables given a handle representing a variable
+/// declaration.
 ///
-void ScopeLink::init_scoped_variables(const Handle& hvar)
+void ScopeLink::init_scoped_variables(const Handle& vardecl)
 {
-	// Use the VariableList class as a tool to extract the variables
-	// for us.
-	VariableList vl(hvar);
-	_variables = vl.get_variables();
+	_variables = Variables(vardecl);
+	if (vardecl->get_type() == VARIABLE_SET)
+		_variables.canonical_sort(_body);
 }
 
 /* ================================================================= */

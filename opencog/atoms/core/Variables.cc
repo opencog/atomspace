@@ -38,6 +38,7 @@
 
 #include "ScopeLink.h"
 #include "VariableList.h"
+#include "VariableSet.h"
 #include "Variables.h"
 
 namespace opencog {
@@ -315,6 +316,11 @@ bool FreeVariables::is_in_varset(const Handle& v) const
 	return varset.end() != varset.find(v);
 }
 
+void FreeVariables::find_variables(const Handle& body)
+{
+	find_variables(HandleSeq{body});
+}
+
 void FreeVariables::find_variables(const HandleSeq& oset, bool ordered)
 {
 	VarScraper vsc;
@@ -322,9 +328,16 @@ void FreeVariables::find_variables(const HandleSeq& oset, bool ordered)
 	init_index();
 }
 
-void FreeVariables::find_variables(const Handle& h)
+void FreeVariables::canonical_sort(const Handle& body)
 {
-	find_variables(HandleSeq{h});
+	VarScraper vsc;
+	// Grab free variables (and their counts)
+	vsc._fvc = vsc.free_variables_counter(body);
+
+	// Ignore free variables in body not in the FreeVariables object
+	HandleSet ignored_vars = set_symmetric_difference(vsc._fvc.keys(), varset);
+	Context ctx(Quotation(), ignored_vars, false);
+	varseq = vsc.free_variables(body, ctx);
 }
 
 HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
@@ -1323,8 +1336,19 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 
 Handle Variables::get_vardecl() const
 {
-	HandleSeq vars;
+	HandleSeq vardecls;
 	for (const Handle& var : varseq)
+		vardecls.emplace_back(get_type_decl(var, var));
+	if (vardecls.size() == 1)
+		return vardecls[0];
+
+	if (_ordered)
+		return Handle(createVariableList(vardecls));
+
+	std::sort(vardecls.begin(), vardecls.end());
+	return Handle(createVariableSet(vardecls));
+}
+
 void Variables::validate_vardecl(const HandleSeq& oset)
 {
 	for (const Handle& h: oset)

@@ -62,7 +62,7 @@ protected:
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
-	void init_scoped_variables(const Handle& hvar);
+	void init_scoped_variables(const Handle& vardecl);
 
 	bool skip_init(Type);
 	ContentHash term_hash(const Handle&, UnorderedHandleSet&,

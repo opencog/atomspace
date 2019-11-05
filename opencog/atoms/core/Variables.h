@@ -106,6 +106,15 @@ struct FreeVariables
 	/// whether the outgoing set is associated with an ordered link.
 	void find_variables(const HandleSeq& oset, bool ordered=true);
 
+	/// Sort the variables in a canonical order determined by their
+	/// positions in the given body.  In ordered link, the ordered is
+	/// determined by the outgoing set order (from left to right).  In
+	/// unordered links, the ordered is determined by some arbitrary,
+	/// though semantically consistent fix order.  The order only
+	/// depends on variable names as last resort, when no semantic
+	/// property can be used to break the symmetry.
+	void canonical_sort(const Handle& body);
+
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables
 	/// in this class.  If the mapping does not mention a variable,
@@ -277,12 +286,14 @@ struct Variables : public FreeVariables,
 	/// Return just the Variable itself, if its not typed.
 	Handle get_type_decl(const Handle&, const Handle&) const;
 
-	/// This is the inverse function of VariableList(vardecls).get_variable().
+	/// Inverse of Variables(vardecl).get_variable()
 	///
-	/// That is, convert everything in this object into a single
-	/// VariableList, suitable for direct use in a ScopeLink.
+	/// That is, convert Variables object into avariable declaration,
+	/// that is a VariableList, VariableSet, TypedVariableLink,
+	/// VariableNode or GlobNode, suitable for direct use in a
+	/// ScopeLink.
 	///
-	/// If empty then return the empty VariableList.
+	/// If empty then return the empty VariableList or VariableSet.
 	///
 	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;

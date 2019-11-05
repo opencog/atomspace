@@ -235,6 +235,12 @@ VARIABLE_NODE <- NODE
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
+// A set (thus unordered) of variables or variable declarations. This
+// is convenient when combined with a scope link where the order of
+// variables is irrelevant to the semantics of the scope, like a
+// BindLink.
+VARIABLE_SET <- SET_LINK
+
 // A non-greedy globbing variable; matches one or more atoms in a
 // sequence.  XXX TODO - this could be changed to a link, so that
 // it resembles a FUZZY_LINK more closely?  FuzzyLink implements
