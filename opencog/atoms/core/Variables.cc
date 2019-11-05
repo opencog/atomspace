@@ -543,6 +543,20 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 /* ================================================================= */
 
+Variables::Variables(const Handle& vardecl)
+	: _ordered(true)
+{
+	validate_vardecl(vardecl);
+	init_index();
+}
+
+Variables::Variables(const HandleSeq& vardecls, bool ordered)
+	: _ordered(ordered)
+{
+	validate_vardecl(vardecls);
+	init_index();
+}
+
 /* ================================================================= */
 /**
  * Extract the variable type(s) from a TypedVariableLink

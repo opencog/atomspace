@@ -170,6 +170,13 @@ struct Variables : public FreeVariables,
 	Variables(const std::initializer_list<Handle>& variables)
 		: FreeVariables(variables) {}
 
+	// CTor given a variable declaration
+	Variables(const Handle& vardecl);
+	Variables(const HandleSeq& vardecls, bool ordered=true);
+
+	/// Whether the order matters or not
+	bool _ordered;
+
 	/// Unbundled variables and type restrictions for them.
 
 	/// _simple_typemap is the (possibly empty) list of restrictions
