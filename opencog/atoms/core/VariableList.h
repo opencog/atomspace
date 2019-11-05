@@ -50,16 +50,9 @@ protected:
 	/// Unbundled variables and types for them.
 	Variables _varlist;
 
-	// See VariableList.cc for comments
-	void get_vartype(const Handle&);
-
-	// Validate the variable decls
-	void validate_vardecl(const Handle&);
-	void validate_vardecl(const HandleSeq&);
-
 	VariableList(Type, const HandleSeq&);
 
-	void build_index(void);
+	void throw_if_not_variable_list(Type t) const;
 public:
 	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
 	VariableList(const Handle& hvardecls);

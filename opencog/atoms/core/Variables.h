@@ -186,6 +186,13 @@ struct Variables : public FreeVariables,
 	/// GlobNodes in the pattern.
 	GlobIntervalMap _glob_intervalmap;
 
+	// See VariableList.cc for comments
+	void get_vartype(const Handle&);
+
+	// Validate the variable decls
+	void validate_vardecl(const Handle&);
+	void validate_vardecl(const HandleSeq&);
+
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
 	/// simple typed NOTYPE, then it returns false.
