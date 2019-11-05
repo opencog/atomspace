@@ -92,7 +92,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	{
 		_body = oset[0];
 		_implicand = oset[1];
-		_variables.find_variables(oset[0]);
+		_variables.find_variables(_body);
 		return;
 	}
 
@@ -103,7 +103,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	_implicand = oset[2];
 
 	// Initialize _variables with the scoped variables
-	init_scoped_variables(oset[0]);
+	init_scoped_variables(_vardecl);
 }
 
 /* ================================================================= */
