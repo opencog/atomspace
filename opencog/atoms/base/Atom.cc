@@ -199,7 +199,7 @@ void Atom::copyValues(const Handle& other)
 
 /**
  * Return all of the Values on this Atom, formatted as a scheme
- * association-list. It  must have the SRFI-1 a-list format,
+ * association-list. It must have the SRFI-1 a-list format,
  * as other code parses this, and expects it to be in this format.
  * The format is `((key . value) (key2 . value2) ...)`
  * It is expected that this method will execute relaitvely efficiently,
