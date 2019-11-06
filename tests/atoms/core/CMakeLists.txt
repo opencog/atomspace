@@ -10,6 +10,12 @@ IF(HAVE_GUILE)
 
 	ADD_CXXTEST(ScopeLinkUTest)
 	TARGET_LINK_LIBRARIES(ScopeLinkUTest smob atomspace)
+
+ 	ADD_CXXTEST(RewriteLinkUTest)
+	TARGET_LINK_LIBRARIES(RewriteLinkUTest smob atomspace)
+
+ 	ADD_CXXTEST(QuotationUTest)
+	TARGET_LINK_LIBRARIES(QuotationUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(CheckersUTest)

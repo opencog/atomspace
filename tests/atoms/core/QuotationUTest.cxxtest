@@ -104,7 +104,7 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
