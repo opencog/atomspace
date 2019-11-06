@@ -99,6 +99,7 @@ public:
 	void test_get_lambda();
 	void test_get_multi();
 	void test_multi_set();
+	void xtest_full_quotation();
 };
 
 #define N _as.add_node
@@ -2231,6 +2232,28 @@ void PutLinkUTest::test_multi_set()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test quoted put link, where vardecl, body and arguments are
+ * unquoted variables. Make just sure that it doesn't crash or throw
+ * exception.
+ */
+void PutLinkUTest::xtest_full_quotation()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle unquoted_vardecl = L(UNQUOTE_LINK, N(VARIABLE_NODE, "$vardecl"));
+	Handle unquoted_body = L(UNQUOTE_LINK, N(VARIABLE_NODE, "$body"));
+	Handle unquoted_args = L(UNQUOTE_LINK, N(VARIABLE_NODE, "$args"));
+
+	TS_ASSERT_THROWS_NOTHING(L(QUOTE_LINK,
+	                           L(PUT_LINK,
+	                             unquoted_vardecl,
+	                             unquoted_body,
+	                             unquoted_args)));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
