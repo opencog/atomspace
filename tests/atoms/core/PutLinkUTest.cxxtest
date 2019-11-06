@@ -1255,7 +1255,7 @@ void PutLinkUTest::test_nested_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1312,7 +1312,7 @@ void PutLinkUTest::test_nested_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Handle nested = _eval.eval_h("nested-put-2");
@@ -1351,7 +1351,7 @@ void PutLinkUTest::test_nested_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1383,7 +1383,7 @@ void PutLinkUTest::test_nested_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1441,7 +1441,7 @@ void PutLinkUTest::test_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1500,7 +1500,7 @@ void PutLinkUTest::test_and_compose_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1560,7 +1560,7 @@ void PutLinkUTest::test_and_compose_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1696,7 +1696,7 @@ void PutLinkUTest::test_tricky_put_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1729,7 +1729,7 @@ void PutLinkUTest::test_tricky_put_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1763,7 +1763,7 @@ void PutLinkUTest::test_tricky_put_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1804,7 +1804,7 @@ void PutLinkUTest::test_tricky_put_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1853,7 +1853,7 @@ void PutLinkUTest::test_tricky_put_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1877,7 +1877,7 @@ void PutLinkUTest::test_tricky_put_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1901,7 +1901,7 @@ void PutLinkUTest::test_tricky_put_7()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1948,7 +1948,7 @@ void PutLinkUTest::test_quoted_exec()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-quoted.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1995,7 +1995,7 @@ void PutLinkUTest::test_quoted_eval()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-quoted.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -2056,7 +2056,7 @@ void PutLinkUTest::test_quoted_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted-lambda.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-quoted-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -2108,7 +2108,7 @@ void PutLinkUTest::test_get()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-get.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -2160,7 +2160,7 @@ void PutLinkUTest::test_get_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-lambda.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-get-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -2183,7 +2183,7 @@ void PutLinkUTest::test_get_multi()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-get-multi.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-get-multi.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Handle result = _eval.eval_h("(cog-execute! put-get-multi)");
@@ -2214,7 +2214,7 @@ void PutLinkUTest::test_multi_set()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-multi-set.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-multi-set.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Handle result = _eval.eval_h("(cog-execute! put-multi-set)");

@@ -275,7 +275,7 @@ void RewriteLinkUTest::test_consume_quotations_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	// Test simple RewriteLink
@@ -298,7 +298,7 @@ void RewriteLinkUTest::test_consume_quotations_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	// Test simple RewriteLink
@@ -321,7 +321,7 @@ void RewriteLinkUTest::test_consume_quotations_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	// Test simple RewriteLink
@@ -344,7 +344,7 @@ void RewriteLinkUTest::test_consume_quotations_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	// Test simple RewriteLink
