@@ -99,7 +99,7 @@ public:
 	void test_get_lambda();
 	void test_get_multi();
 	void test_multi_set();
-	void xtest_full_quotation();
+	void test_full_quotation();
 };
 
 #define N _as.add_node
@@ -2241,7 +2241,7 @@ void PutLinkUTest::test_multi_set()
  * unquoted variables. Make just sure that it doesn't crash or throw
  * exception.
  */
-void PutLinkUTest::xtest_full_quotation()
+void PutLinkUTest::test_full_quotation()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

@@ -97,7 +97,13 @@ void PutLink::init(void)
 		_arguments = _outgoing[1];
 	}
 	else
+	{
+		// ScopeLink::extract_variables does not assign _vardecl and
+		// _body if variable declaration is unquoted. (Re)do it here.
+		_vardecl = _outgoing[0];
+		_body = _outgoing[1];
 		_arguments = _outgoing[2];
+	}
 
 	static_typecheck_arguments();
 }
