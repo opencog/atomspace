@@ -259,7 +259,7 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 	for (int w=0; w<NWORDS; w++)
 	{
 		hword[w] = space->add_node(CONCEPT_NODE, wrd + std::to_string(w));
-		TruthValuePtr tv(CountTruthValue::createTV(1, 0, ((int) NWORDS/w)));
+		TruthValuePtr tv(CountTruthValue::createTV(1, 0, ((int) NWORDS/(w+1))));
 		hword[w]->setTruthValue(tv);
 	}
 
