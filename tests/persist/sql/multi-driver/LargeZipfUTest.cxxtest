@@ -300,6 +300,13 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 	}
 	npairs = p;
 	logger().info("Created %d words and %d pairs", NWORDS, npairs);
+
+	for (int i=0; i<20; i++)
+	{
+		logger().info("Word %d has incoming size=%zu", i,
+		              hword[i]->getIncomingSetSize());
+	}
+
 	return p;
 }
 
