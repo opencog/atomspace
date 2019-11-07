@@ -2,6 +2,8 @@
  * tests/persist/sql/multi-driver/LargeZipfTest.cxxtest
  *
  * Emulate word-pair dataset with Zipfian incoming sets.
+ * This creates nodes with large incoming sets; database should
+ * not choke on these.
  *
  * If this test is failing for you, then be sure to read the README in
  * this directory, and also ../../opencong/persist/README, and then
@@ -297,6 +299,7 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 		}
 	}
 	npairs = p;
+	logger().info("Created %d words and %d pairs", NWORDS, npairs);
 	return p;
 }
 
