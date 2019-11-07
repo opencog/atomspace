@@ -39,10 +39,11 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		const char * username;
 		const char * passwd;
 
-#define NPAIRS 257000
-		Handle hpair[NPAIRS];
 #define NWORDS 35000
 		Handle hword[NWORDS];
+#define NPAIRS 257000
+		Handle hpair[NPAIRS];
+		int npairs; // actual number of pairs created.
 
 	public:
 
@@ -74,9 +75,9 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		}
 
 		int filler_up(AtomSpace *);
-		void fetch_space(int, AtomSpace *);
-		void check_space(int, AtomSpace *, std::string dbgmsg);
-		void check_empty(int, AtomSpace *);
+		void fetch_space(AtomSpace *);
+		void check_space(AtomSpace *, std::string dbgmsg);
+		void check_empty(AtomSpace *);
 		void atomCompare(AtomPtr, AtomPtr, std::string);
 
 		void do_test_atomspace(void);
@@ -201,99 +202,49 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 // ============================================================
 
-void LargeZipfTest::fetch_space(int idx, AtomSpace *space)
+void LargeZipfTest::fetch_space(AtomSpace *space)
 {
-	AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
-	Handle hb1(ab1->get_handle());
-	space->fetch_atom(hb1);
+	for (int w=0; w<NWORDS; w++)
+	{
+		Handle h = as->add_node(hword[w]->get_type(), hword[w]->get_name());
+		space->fetch_atom(h); // get the TV
+	}
 
-	AtomPtr ab2 = createNode(n2[idx]->get_type(), n2[idx]->get_name());
-	Handle hb2(ab2->get_handle());
-	space->fetch_atom(hb2);
-
-	AtomPtr ab3 = createNode(n3[idx]->get_type(), n3[idx]->get_name());
-	Handle hb3(ab3->get_handle());
-	space->fetch_atom(hb3);
-
-	AtomPtr ab4 = createNode(n4[idx]->get_type(), n4[idx]->get_name());
-	Handle hb4(ab4->get_handle());
-	space->fetch_atom(hb4);
-
-	HandleSeq hvec;
-	hvec.push_back(hb1);
-	hvec.push_back(hb2);
-	hvec.push_back(hb3);
-	hvec.push_back(hb4);
-
-	AtomPtr alb = createLink(hvec, hl[idx]->get_type());
-	Handle hlb(alb->get_handle());
-	space->fetch_atom(hlb);
-
-	HandleSeq hv2({hlb, hb2});
-	AtomPtr alb2 = createLink(hv2, hl2[idx]->get_type());
-	Handle hlb2(alb2->get_handle());
-	space->fetch_atom(hlb2);
-
-	HandleSeq hv3({hb1, hlb2, hb3});
-	AtomPtr alb3 = createLink(hv3, hl3[idx]->get_type());
-	Handle hlb3(alb3->get_handle());
-	space->fetch_atom(hlb3);
+	for (int p=0; p< npairs; p++)
+	{
+		Handle h = as->add_link(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
+		space->fetch_atom(h); // get the TV
+	}
 }
 
-void LargeZipfTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
+void LargeZipfTest::check_space(AtomSpace *space, std::string dbgmsg)
 {
-	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
-	atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
+	for (int w=0; w<NWORDS; w++)
+	{
+		Handle h = space->get_handle(hword[w]->get_type(), hword[w]->get_name());
+		atomCompare(hword[w], h, dbgmsg + "-word-" + std::to_string(w));
+	}
 
-	Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
-	atomCompare(h2[idx], hb2, dbgmsg + "-hb2");
-
-	Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
-	atomCompare(h3[idx], hb3, dbgmsg + "-hb3");
-
-	Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
-	atomCompare(h4[idx], hb4, dbgmsg + "-hb4");
-
-	HandleSeq hvec;
-	hvec.push_back(hb1);
-	hvec.push_back(hb2);
-	hvec.push_back(hb3);
-	hvec.push_back(hb4);
-
-	Handle hlb = space->get_handle(hl[idx]->get_type(), hvec);
-	atomCompare(hl[idx], hlb, dbgmsg + "-hlinkb");
-
-	HandleSeq hv2({hlb, hb2});
-	Handle hlb2 = space->get_handle(hl2[idx]->get_type(), hv2);
-	atomCompare(hl2[idx], hlb2, dbgmsg + "-hlinkb2");
-
-	HandleSeq hv3({hb1, hlb2, hb3});
-	Handle hlb3 = space->get_handle(hl3[idx]->get_type(), hv3);
-	atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
+	for (int p=0; p<npairs; p++)
+	{
+		Handle h = space->get_handle(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
+		atomCompare(hword[w], h, dbgmsg + "pair-" + std::to_string(p));
+	}
 }
 
-void LargeZipfTest::check_empty(int idx, AtomSpace *space)
+void LargeZipfTest::check_empty(AtomSpace *space)
 {
-	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
-	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
+	for (int w=0; w<NWORDS; w++)
+	{
+		Handle h = space->get_handle(hword[w]->get_type(), hword[w]->get_name());
+		TSM_ASSERT("Should not find this word", h == Handle::UNDEFINED);
+	}
 
-	Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
-	TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
-
-	Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
-	TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
-
-	Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
-	TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
-
-	HandleSeq hvec;
-	hvec.push_back(h1[idx]);
-	hvec.push_back(h2[idx]);
-	hvec.push_back(h3[idx]);
-	hvec.push_back(h4[idx]);
-
-	Handle hlb = space->get_handle(hl[idx]->get_type(), hvec);
-	TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
+	for (int p=0; p<npairs; p++)
+	{
+		Handle h = space->get_handle(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
+		TSM_ASSERT("Should not find this pair", h == Handle::UNDEFINED);
+	}
 }
 
 // ============================================================
@@ -323,6 +274,9 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 	while (p<NPAIRS;)
 	{
 		hpair[p] = as->add_link(LIST_LINK, hword[w1], hword[w2]);
+		TruthValuePtr tv(CountTruthValue::createTV(1, 0, wmax));
+		hpair[p]->setTruthValue(tv);
+
 		w2++;
 		p++;
 		if (wmax <= w2)
@@ -339,6 +293,7 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 			if (NWORDS <= w1) break;
 		}
 	}
+	npairs = p;
 	return p;
 }
 
@@ -380,12 +335,10 @@ void LargeZipfTest::do_test_atomspace(void)
 	};
 
 	/* Create a large number of atoms */
-	int idx = filler_up(_as);
+	filler_up(_as);
 
 	/* Verify that the atoms were added */
-	int i;
-	for (i=0; i<idx; i++)
-		check_space(i, _as, "verify-add");
+	check_space(_as, "verify-add");
 
 	/* Push all atoms out to the SQL DB */
 	_as->store_atomspace();
@@ -399,20 +352,16 @@ void LargeZipfTest::do_test_atomspace(void)
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
 	/* Verify that the atoms can still be fetched from storage. */
-	for (i=0; i<idx; i++) {
-		fetch_space(i, _as);
-		check_space(i, _as, "verify-fetch");
-	}
+	fetch_space(_as);
+	check_space(_as, "verify-fetch");
 
 	/* Do it again, for good luck.  */
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
 	/* Verify that the atoms can still be fetched from storage. */
-	for (i=0; i<idx; i++) {
-		fetch_space(i, _as);
-		check_space(i, _as, "ver-again");
-	}
+	fetch_space(_as);
+	check_space(_as, "ver-again");
 
 	/* Kill data for good */
 	_as->clear();
@@ -420,8 +369,7 @@ void LargeZipfTest::do_test_atomspace(void)
 	kill_data();
 
 	/* Verify that the atoms are no longer being found. */
-	for (i=0; i<idx; i++)
-		check_empty(i, _as);
+	check_empty(_as);
 
 	/* Orderly shutdown avoids warning in Postgres log file. */
 	_pm->do_close();
