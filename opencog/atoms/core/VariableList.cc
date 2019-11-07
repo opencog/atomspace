@@ -51,18 +51,18 @@ VariableList::VariableList(const Handle& vardecl)
 		// typed variable.
 		vardecl->get_type() == VARIABLE_LIST ?
 		vardecl->getOutgoingSet() : HandleSeq({vardecl}),
-		VARIABLE_LIST), _varlist(vardecl)
+		VARIABLE_LIST), _variables(vardecl)
 {
 }
 
 VariableList::VariableList(const HandleSeq& oset, Type t)
-	: Link(oset, t), _varlist(oset, true)
+	: Link(oset, t), _variables(oset, true)
 {
 	throw_if_not_variable_list(t);
 }
 
 VariableList::VariableList(const Link &l)
-	: Link(l), _varlist(l.get_handle())
+	: Link(l), _variables(l.get_handle())
 {
 	throw_if_not_variable_list(l.get_type());
 }
