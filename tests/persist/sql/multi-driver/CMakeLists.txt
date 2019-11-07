@@ -75,7 +75,7 @@ IF (DB_IS_CONFIGURED)
 
     ADD_CXXTEST(MultiPersistUTest)
     ADD_CXXTEST(MultiUserUTest)
-    ADD_CXXTEST(LargeUTest)
+    ADD_CXXTEST(LargeFlatUTest)
 
 ELSE (DB_IS_CONFIGURED)
     MESSAGE(WARNING "Postgres database not configured for unit tests! See the README!")
