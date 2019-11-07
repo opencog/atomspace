@@ -293,8 +293,8 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 			{
 				again = 0;
 				rpt *= 2;
-				wmax /= 2;
 			}
+			wmax = NWORDS / (double) (w1 + 1);
 			if (NWORDS <= w1) break;
 		}
 	}
