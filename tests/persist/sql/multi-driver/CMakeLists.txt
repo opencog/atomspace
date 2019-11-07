@@ -68,14 +68,14 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(ValueSaveUTest)
     ADD_CXXTEST(PersistUTest)
     ADD_CXXTEST(DeleteUTest)
-    ADD_CXXTEST(LargeUTest)
-    ADD_CXXTEST(MultiPersistUTest)
-    ADD_CXXTEST(MultiUserUTest)
-
     IF (HAVE_GUILE)
         ADD_CXXTEST(FetchUTest)
         TARGET_LINK_LIBRARIES(FetchUTest execution)
     ENDIF (HAVE_GUILE)
+
+    ADD_CXXTEST(MultiPersistUTest)
+    ADD_CXXTEST(MultiUserUTest)
+    ADD_CXXTEST(LargeUTest)
 
 ELSE (DB_IS_CONFIGURED)
     MESSAGE(WARNING "Postgres database not configured for unit tests! See the README!")
