@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/multi-driver/LargeFlatUTest.cxxtest
+ * tests/persist/sql/multi-driver/LargeZipfTest.cxxtest
  *
  * Test larger AtomSpace persistance.  Assumes PersistUTest is passing.
  *
@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-class LargeFlatUTest :  public CxxTest::TestSuite
+class LargeZipfTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *_as;
@@ -60,8 +60,8 @@ class LargeFlatUTest :  public CxxTest::TestSuite
 
 	public:
 
-		LargeFlatUTest(void);
-		~LargeFlatUTest()
+		LargeZipfTest(void);
+		~LargeZipfTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -74,7 +74,7 @@ class LargeFlatUTest :  public CxxTest::TestSuite
 
 		void friendlyFailMessage()
 		{
-			TS_FAIL("The LargeFlatUTest failed.\n"
+			TS_FAIL("The LargeZipfTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
@@ -99,7 +99,7 @@ class LargeFlatUTest :  public CxxTest::TestSuite
 		void test_pq_atomspace(void);
 };
 
-LargeFlatUTest:: LargeFlatUTest(void)
+LargeZipfTest:: LargeZipfTest(void)
 {
 	try
 	{
@@ -128,12 +128,12 @@ LargeFlatUTest:: LargeFlatUTest(void)
 /*
  * This is called once before each test, for each test (!!)
  */
-void LargeFlatUTest::setUp(void)
+void LargeZipfTest::setUp(void)
 {
 	_as = new AtomSpace();
 }
 
-void LargeFlatUTest::tearDown(void)
+void LargeZipfTest::tearDown(void)
 {
 	delete _as;
 
@@ -142,7 +142,7 @@ void LargeFlatUTest::tearDown(void)
 
 // ============================================================
 
-void LargeFlatUTest::kill_data(void)
+void LargeZipfTest::kill_data(void)
 {
 #if HAVE_ODBC_STORAGE
 	if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
@@ -168,7 +168,7 @@ void LargeFlatUTest::kill_data(void)
 
 // ============================================================
 
-void LargeFlatUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
+void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
 	// printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
 	TSM_ASSERT("No atom found", b != nullptr);
@@ -220,7 +220,7 @@ void LargeFlatUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 // ============================================================
 
-void LargeFlatUTest::add_to_space(int idx, AtomSpace *as, std::string id)
+void LargeZipfTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ...
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
@@ -263,7 +263,7 @@ void LargeFlatUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	l3[idx] = LinkCast(hl3[idx]);
 }
 
-void LargeFlatUTest::fetch_space(int idx, AtomSpace *space)
+void LargeZipfTest::fetch_space(int idx, AtomSpace *space)
 {
 	AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
 	Handle hb1(ab1->get_handle());
@@ -302,7 +302,7 @@ void LargeFlatUTest::fetch_space(int idx, AtomSpace *space)
 	space->fetch_atom(hlb3);
 }
 
-void LargeFlatUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
+void LargeZipfTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 {
 	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
 	atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
@@ -334,7 +334,7 @@ void LargeFlatUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 	atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
-void LargeFlatUTest::check_empty(int idx, AtomSpace *space)
+void LargeZipfTest::check_empty(int idx, AtomSpace *space)
 {
 	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
 	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
@@ -360,7 +360,7 @@ void LargeFlatUTest::check_empty(int idx, AtomSpace *space)
 
 // ============================================================
 
-int LargeFlatUTest::filler_up(AtomSpace *space)
+int LargeZipfTest::filler_up(AtomSpace *space)
 {
 	int idx = 0;
 	while (idx < (NCOPIES-20))
@@ -382,7 +382,7 @@ int LargeFlatUTest::filler_up(AtomSpace *space)
 
 // ============================================================
 
-void LargeFlatUTest::test_odbc_atomspace(void)
+void LargeZipfTest::test_odbc_atomspace(void)
 {
 #ifdef HAVE_ODBC_STORAGE
 	uri = mkuri("odbc", dbname, username, passwd);
@@ -390,7 +390,7 @@ void LargeFlatUTest::test_odbc_atomspace(void)
 #endif
 }
 
-void LargeFlatUTest::test_pq_atomspace(void)
+void LargeZipfTest::test_pq_atomspace(void)
 {
 #ifdef HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
@@ -398,7 +398,7 @@ void LargeFlatUTest::test_pq_atomspace(void)
 #endif
 }
 
-void LargeFlatUTest::do_test_atomspace(void)
+void LargeZipfTest::do_test_atomspace(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
