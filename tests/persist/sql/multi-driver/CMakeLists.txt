@@ -68,6 +68,7 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(ValueSaveUTest)
     ADD_CXXTEST(PersistUTest)
     ADD_CXXTEST(DeleteUTest)
+    ADD_CXXTEST(LargeUTest)
     ADD_CXXTEST(MultiPersistUTest)
     ADD_CXXTEST(MultiUserUTest)
 
