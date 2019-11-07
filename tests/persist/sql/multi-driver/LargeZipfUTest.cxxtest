@@ -19,7 +19,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 #include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
@@ -170,12 +170,12 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 	if (a->is_link())
 	{
-		TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
-		if (*la != *lb)
+		TSM_ASSERT_EQUALS("Arity mismatch", a->get_arity(), b->get_arity());
+		if (*a != *b)
 		{
-			printf("Mismatching la = %s\n", la->to_string().c_str());
-			printf("Mismatching lb = %s\n", lb->to_string().c_str());
-			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
+			printf("Mismatching la = %s\n", a->to_string().c_str());
+			printf("Mismatching lb = %s\n", b->to_string().c_str());
+			TSM_ASSERT_EQUALS("Link mis-match", a, b);
 		}
 	}
 
@@ -206,13 +206,14 @@ void LargeZipfTest::fetch_space(AtomSpace *space)
 {
 	for (int w=0; w<NWORDS; w++)
 	{
-		Handle h = as->add_node(hword[w]->get_type(), hword[w]->get_name());
+		Handle h = space->add_node(hword[w]->get_type(), hword[w]->get_name());
 		space->fetch_atom(h); // get the TV
 	}
 
-	for (int p=0; p< npairs; p++)
+	for (int p=0; p<npairs; p++)
 	{
-		Handle h = as->add_link(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
+		Handle h = space->add_link(hpair[p]->get_type(),
+		                           hpair[p]->getOutgoingSet());
 		space->fetch_atom(h); // get the TV
 	}
 }
@@ -227,8 +228,9 @@ void LargeZipfTest::check_space(AtomSpace *space, std::string dbgmsg)
 
 	for (int p=0; p<npairs; p++)
 	{
-		Handle h = space->get_handle(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
-		atomCompare(hword[w], h, dbgmsg + "pair-" + std::to_string(p));
+		Handle h = space->get_handle(hpair[p]->get_type(),
+		                             hpair[p]->getOutgoingSet());
+		atomCompare(hpair[p], h, dbgmsg + "pair-" + std::to_string(p));
 	}
 }
 
@@ -242,7 +244,8 @@ void LargeZipfTest::check_empty(AtomSpace *space)
 
 	for (int p=0; p<npairs; p++)
 	{
-		Handle h = space->get_handle(hpar[p]->get_outgoing_set(), hpair[p]->get_type());
+		Handle h = space->get_handle(hpair[p]->get_type(),
+		                             hpair[p]->getOutgoingSet());
 		TSM_ASSERT("Should not find this pair", h == Handle::UNDEFINED);
 	}
 }
@@ -252,10 +255,10 @@ void LargeZipfTest::check_empty(AtomSpace *space)
 int LargeZipfTest::filler_up(AtomSpace *space)
 {
 	// Emulate a word, with a spelling that is not long, not short ...
-	std::string wrd = "Word-ishy "
+	std::string wrd = "Word-ishy ";
 	for (int w=0; w<NWORDS; w++)
 	{
-		hword[w] = as->add_node(CONCEPT_NODE, wrd + std::to_string(w));
+		hword[w] = space->add_node(CONCEPT_NODE, wrd + std::to_string(w));
 		TruthValuePtr tv(CountTruthValue::createTV(1, 0, ((int) NWORDS/w)));
 		hword[w]->setTruthValue(tv);
 	}
@@ -271,9 +274,9 @@ int LargeZipfTest::filler_up(AtomSpace *space)
 	int rpt = 1;
 	int again = 0;
 	int p = 0;
-	while (p<NPAIRS;)
+	while (p<NPAIRS)
 	{
-		hpair[p] = as->add_link(LIST_LINK, hword[w1], hword[w2]);
+		hpair[p] = space->add_link(LIST_LINK, hword[w1], hword[w2]);
 		TruthValuePtr tv(CountTruthValue::createTV(1, 0, wmax));
 		hpair[p]->setTruthValue(tv);
 
