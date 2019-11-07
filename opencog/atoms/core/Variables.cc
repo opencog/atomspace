@@ -830,6 +830,10 @@ void Variables::get_vartype(const Handle& htypelink)
  */
 void Variables::validate_vardecl(const Handle& hdecls)
 {
+	// If no variable declaration then create the empty variables
+	if (not hdecls)
+		return;
+
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
 	Type tdecls = hdecls->get_type();
@@ -858,6 +862,13 @@ void Variables::validate_vardecl(const Handle& hdecls)
 		// variables! Make sure its as expected.
 		const HandleSeq& dset = hdecls->getOutgoingSet();
 		validate_vardecl(dset);
+	}
+	else if (UNQUOTE_LINK == tdecls)
+	{
+		// This indicates that the variable declaration is not in normal
+		// form (i.e. requires beta-reductions to be fully formed), thus
+		// variables inference is aborted for now.
+		return;
 	}
 	else
 	{
@@ -1362,20 +1373,6 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		else if (TYPED_VARIABLE_LINK == t)
 		{
 			get_vartype(h);
-		}
-
-		// Sigh. This UnquoteLink check is a bit of hackery. It can
-		// happen, during pattern-recognition, that we are *searching*
-		// for BindLink's/GetLink's, and need to construct a dummy
-		// variable to match a variable list.  This dummy will be
-		// unquoted first.  Its not unquoting an actual VariableList,
-		// though, its just unquoting a dummy, and so there's nothing
-		// there, its empty, there's nothing to do.  So just pass on
-		// the whole she-bang.  See the `recog.scm` example for a
-		// a real-world example of this happening.
-		else if (UNQUOTE_LINK == t)
-		{
-			return;
 		}
 		else
 		{
