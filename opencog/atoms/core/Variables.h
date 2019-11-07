@@ -64,7 +64,7 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
-	// CTor, convenient for  unit tests, so far
+	// CTor, mostly convenient for unit tests
 	FreeVariables() {}
 	FreeVariables(const std::initializer_list<Handle>& variables);
 
@@ -174,10 +174,11 @@ typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
-	// CTor, convenient for  unit tests, so far
-	Variables() {}
+	// CTor, mostly convenient for unit tests
+	Variables()
+		: _ordered(true) {}
 	Variables(const std::initializer_list<Handle>& variables)
-		: FreeVariables(variables) {}
+		: FreeVariables(variables), _ordered(true) {}
 
 	// CTor given a variable declaration
 	Variables(const Handle& vardecl);
