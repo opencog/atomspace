@@ -1,7 +1,7 @@
 /*
  * tests/persist/sql/multi-driver/LargeZipfTest.cxxtest
  *
- * Test larger AtomSpace persistance.  Assumes PersistUTest is passing.
+ * Emulate word-pair dataset with Zipfian incoming sets.
  *
  * If this test is failing for you, then be sure to read the README in
  * this directory, and also ../../opencong/persist/README, and then
@@ -39,24 +39,10 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		const char * username;
 		const char * passwd;
 
-// 75000 * 7 == half-a-million atoms (> 512K)
-// 37000 * 7 == 259K atoms (> 256K)
-// 19000 * 7 == 133K atoms (> 128K)
-#define NCOPIES 37000
-		NodePtr n1[NCOPIES];
-		NodePtr n2[NCOPIES];
-		NodePtr n3[NCOPIES];
-		NodePtr n4[NCOPIES];
-		LinkPtr l[NCOPIES];
-		LinkPtr l2[NCOPIES];
-		LinkPtr l3[NCOPIES];
-		Handle h1[NCOPIES];
-		Handle h2[NCOPIES];
-		Handle h3[NCOPIES];
-		Handle h4[NCOPIES];
-		Handle hl[NCOPIES];
-		Handle hl2[NCOPIES];
-		Handle hl3[NCOPIES];
+#define NPAIRS 257000
+		Handle hpair[NPAIRS];
+#define NWORDS 35000
+		Handle hword[NWORDS];
 
 	public:
 
@@ -88,7 +74,6 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		}
 
 		int filler_up(AtomSpace *);
-		void add_to_space(int, AtomSpace *, std::string id);
 		void fetch_space(int, AtomSpace *);
 		void check_space(int, AtomSpace *, std::string dbgmsg);
 		void check_empty(int, AtomSpace *);
@@ -177,16 +162,12 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 	TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
-	NodePtr na(NodeCast(a));
-	NodePtr nb(NodeCast(b));
-	if (na and nb)
+	if (a->is_node())
 	{
-		TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
+		TSM_ASSERT_EQUALS("Name mismatch", a->get_name(), b->get_name());
 	}
 
-	LinkPtr la(LinkCast(a));
-	LinkPtr lb(LinkCast(b));
-	if (la and lb)
+	if (a->is_link())
 	{
 		TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
 		if (*la != *lb)
@@ -219,49 +200,6 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 }
 
 // ============================================================
-
-void LargeZipfTest::add_to_space(int idx, AtomSpace *as, std::string id)
-{
-	// Create an atom ...
-	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
-	h1[idx] = as->add_node(SCHEMA_NODE, id + "fromNode");
-	h1[idx]->setTruthValue(stv);
-	n1[idx] = NodeCast(h1[idx]);
-
-	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
-	h2[idx] = as->add_node(SCHEMA_NODE, id + "toNode");
-	h2[idx]->setTruthValue(stv2);
-	n2[idx] = NodeCast(h2[idx]);
-
-	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
-	h3[idx] = as->add_node(SCHEMA_NODE, id + "third wheel");
-	h3[idx]->setTruthValue(stv3);
-	n3[idx] = NodeCast(h3[idx]);
-
-	// The NumberNode will go through the AtomTable clone factory
-	// and should thus elicit any errors in clone uuid handling.
-	char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
-	h4[idx] = as->add_node(NUMBER_NODE, buf);
-	TruthValuePtr stv4(SimpleTruthValue::createTV(0.44, 400+idx));
-	h4[idx]->setTruthValue(stv4);
-	n4[idx] = NodeCast(h4[idx]);
-
-	HandleSeq hvec;
-	hvec.push_back(h1[idx]);
-	hvec.push_back(h2[idx]);
-	hvec.push_back(h3[idx]);
-	hvec.push_back(h4[idx]);
-
-	// Note that SetLink is an unordered link.
-	hl[idx] = as->add_link(SET_LINK, hvec);
-	l[idx] = LinkCast(hl[idx]);
-
-	hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
-	l2[idx] = LinkCast(hl2[idx]);
-
-	hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
-	l3[idx] = LinkCast(hl3[idx]);
-}
 
 void LargeZipfTest::fetch_space(int idx, AtomSpace *space)
 {
@@ -362,22 +300,46 @@ void LargeZipfTest::check_empty(int idx, AtomSpace *space)
 
 int LargeZipfTest::filler_up(AtomSpace *space)
 {
-	int idx = 0;
-	while (idx < (NCOPIES-20))
+	// Emulate a word, with a spelling that is not long, not short ...
+	std::string wrd = "Word-ishy "
+	for (int w=0; w<NWORDS; w++)
 	{
-		std::string lbl = std::to_string(idx);
-		add_to_space(idx++, _as, "AA-aa-wow " + lbl);
-		add_to_space(idx++, _as, "BB-bb-wow " + lbl);
-		add_to_space(idx++, _as, "CC-cc-wow " + lbl);
-		add_to_space(idx++, _as, "DD-dd-wow " + lbl);
-		add_to_space(idx++, _as, "EE-ee-wow " + lbl);
-
-		/* Make sure UTF-8 works fine. */
-		add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон " + lbl);
-		add_to_space(idx++, _as, "はにがうりだそうであってるのかはち " + lbl);
-		add_to_space(idx++, _as, "係拉丁字母" + lbl);
+		hword[w] = as->add_node(CONCEPT_NODE, wrd + std::to_string(w));
+		TruthValuePtr tv(CountTruthValue::createTV(1, 0, ((int) NWORDS/w)));
+		hword[w]->setTruthValue(tv);
 	}
-	return idx;
+
+	// Emulate a zipfian distribution.
+	// Half of words linked once.  rpt = 1, wmax = NWORDS
+	// quarter of words linked twice.  rpt = 2, wmax = NWORDS/2
+	// eighth of words linked 4 times.  rpt = 4, wmax = NWORDS/4
+	// 1/16 of words linked 8 times. rpt = 8, wmax = NWORDS/8
+	int w1 = 0;
+	int w2 = 0;
+	int wmax = NWORDS;
+	int rpt = 1;
+	int again = 0;
+	int p = 0;
+	while (p<NPAIRS;)
+	{
+		hpair[p] = as->add_link(LIST_LINK, hword[w1], hword[w2]);
+		w2++;
+		p++;
+		if (wmax <= w2)
+		{
+			w2=0;
+			w1++;
+			again ++;
+			if (rpt <= again)
+			{
+				again = 0;
+				rpt *= 2;
+				wmax /= 2;
+			}
+			if (NWORDS <= w1) break;
+		}
+	}
+	return p;
 }
 
 // ============================================================
