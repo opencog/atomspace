@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/multi-driver/LargeUTest.cxxtest
+ * tests/persist/sql/multi-driver/LargeFlatUTest.cxxtest
  *
  * Test larger AtomSpace persistance.  Assumes PersistUTest is passing.
  *
@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-class LargeUTest :  public CxxTest::TestSuite
+class LargeFlatUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *_as;
@@ -60,8 +60,8 @@ class LargeUTest :  public CxxTest::TestSuite
 
 	public:
 
-		LargeUTest(void);
-		~LargeUTest()
+		LargeFlatUTest(void);
+		~LargeFlatUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -74,7 +74,7 @@ class LargeUTest :  public CxxTest::TestSuite
 
 		void friendlyFailMessage()
 		{
-			TS_FAIL("The LargeUTest failed.\n"
+			TS_FAIL("The LargeFlatUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
@@ -99,7 +99,7 @@ class LargeUTest :  public CxxTest::TestSuite
 		void test_pq_atomspace(void);
 };
 
-LargeUTest:: LargeUTest(void)
+LargeFlatUTest:: LargeFlatUTest(void)
 {
 	try
 	{
@@ -128,12 +128,12 @@ LargeUTest:: LargeUTest(void)
 /*
  * This is called once before each test, for each test (!!)
  */
-void LargeUTest::setUp(void)
+void LargeFlatUTest::setUp(void)
 {
 	_as = new AtomSpace();
 }
 
-void LargeUTest::tearDown(void)
+void LargeFlatUTest::tearDown(void)
 {
 	delete _as;
 
@@ -142,7 +142,7 @@ void LargeUTest::tearDown(void)
 
 // ============================================================
 
-void LargeUTest::kill_data(void)
+void LargeFlatUTest::kill_data(void)
 {
 #if HAVE_ODBC_STORAGE
 	if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
@@ -168,7 +168,7 @@ void LargeUTest::kill_data(void)
 
 // ============================================================
 
-void LargeUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
+void LargeFlatUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
 	// printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
 	TSM_ASSERT("No atom found", b != nullptr);
@@ -220,7 +220,7 @@ void LargeUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 // ============================================================
 
-void LargeUTest::add_to_space(int idx, AtomSpace *as, std::string id)
+void LargeFlatUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ...
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
@@ -263,7 +263,7 @@ void LargeUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	l3[idx] = LinkCast(hl3[idx]);
 }
 
-void LargeUTest::fetch_space(int idx, AtomSpace *space)
+void LargeFlatUTest::fetch_space(int idx, AtomSpace *space)
 {
 	AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
 	Handle hb1(ab1->get_handle());
@@ -302,7 +302,7 @@ void LargeUTest::fetch_space(int idx, AtomSpace *space)
 	space->fetch_atom(hlb3);
 }
 
-void LargeUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
+void LargeFlatUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 {
 	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
 	atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
@@ -334,7 +334,7 @@ void LargeUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 	atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
-void LargeUTest::check_empty(int idx, AtomSpace *space)
+void LargeFlatUTest::check_empty(int idx, AtomSpace *space)
 {
 	Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
 	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
@@ -360,7 +360,7 @@ void LargeUTest::check_empty(int idx, AtomSpace *space)
 
 // ============================================================
 
-int LargeUTest::filler_up(AtomSpace *space)
+int LargeFlatUTest::filler_up(AtomSpace *space)
 {
 	int idx = 0;
 	while (idx < (NCOPIES-20))
@@ -382,7 +382,7 @@ int LargeUTest::filler_up(AtomSpace *space)
 
 // ============================================================
 
-void LargeUTest::test_odbc_atomspace(void)
+void LargeFlatUTest::test_odbc_atomspace(void)
 {
 #ifdef HAVE_ODBC_STORAGE
 	uri = mkuri("odbc", dbname, username, passwd);
@@ -390,7 +390,7 @@ void LargeUTest::test_odbc_atomspace(void)
 #endif
 }
 
-void LargeUTest::test_pq_atomspace(void)
+void LargeFlatUTest::test_pq_atomspace(void)
 {
 #ifdef HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
@@ -398,7 +398,7 @@ void LargeUTest::test_pq_atomspace(void)
 #endif
 }
 
-void LargeUTest::do_test_atomspace(void)
+void LargeFlatUTest::do_test_atomspace(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
