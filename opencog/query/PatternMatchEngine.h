@@ -130,7 +130,7 @@ private:
 	typedef std::map<Unorder, Permutation> PermState; // alt: ChoiceState
 
 	PermState _perm_state;
-	Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
+	Permutation curr_perm(const PatternTermPtr&, const Handle&);
 	bool have_perm(const PatternTermPtr&, const Handle&);
 
 	// Iteration control for unordered links. Branchpoint advances

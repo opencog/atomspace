@@ -510,9 +510,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	           "Impossible situation! BUG!");
 
 	// _perm_state lets use resume where we last left off.
-	bool fresh = false;
-	Permutation mutation = curr_perm(ptm, hg, fresh);
-	if (fresh) _take_step = false; // took a step, clear the flag.
+	Permutation mutation = curr_perm(ptm, hg);
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -643,8 +641,7 @@ bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
 /// particular unordered link hp in the pattern.)
 PatternMatchEngine::Permutation
 PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
-                              const Handle& hg,
-                              bool& fresh)
+                              const Handle& hg)
 {
 	auto ps = _perm_state.find(Unorder(ptm, hg));
 	if (_perm_state.end() == ps)
@@ -653,7 +650,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
 		sort(perm.begin(), perm.end());
-		fresh = true;
+		_take_step = false;
 		return perm;
 	}
 	return ps->second;
