@@ -2258,10 +2258,29 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 		// If no solution was found, and there are globs, then there may
 		// still be another way to ground the glob differently, to this
-		// same candidate caluse. So try that, and do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
+		// same candidate clause. So try that, and do it until exhausted.
+		//
+		// If no solution was found, and there are unordered links, then
+		// there may be alternate permuations of the unordered link that
+		// might satisfy this clause. So try those, until exhausted.
+		//
+		// This should work even if there are mixtures of globs and
+		// unordered links, even if there are more than one of each,
+		// even if they're nested at various depths; the stacks should
+		// take care of the managing the flags.
+		while (not found and
+		       (_have_more or (has_glob and _glob_state.size() > gstate_size)))
 		{
-			DO_LOG({logger().fine("Globby clause not grounded; try again");})
+			if (_have_more)
+			{
+				_have_more = false;
+				_take_step = true;
+				DO_LOG({logger().fine("Permutable clause not grounded; try again");})
+			}
+			else
+			{
+				DO_LOG({logger().fine("Globby clause not grounded; try again");})
+			}
 			found = explore_term_branches(term, grnd, clause);
 		}
 
