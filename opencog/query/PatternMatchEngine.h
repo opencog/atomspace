@@ -108,6 +108,7 @@ private:
 
 	// -------------------------------------------
 	// ChoiceLink state management
+	// Very similar to permutation state management.
 	typedef std::pair<PatternTermPtr, Handle> GndChoice;
 	typedef std::map<GndChoice, size_t> ChoiceState;
 
@@ -123,9 +124,10 @@ private:
 
 	// -------------------------------------------
 	// Unordered Link suppoprt
-	typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
+	// Very similar to ChoiceLink state management.
+	typedef std::pair<PatternTermPtr, Handle> Unorder; // alt: GndChoice
 	typedef PatternTermSeq Permutation;
-	typedef std::map<Unorder, Permutation> PermState; // ChoiceState
+	typedef std::map<Unorder, Permutation> PermState; // alt: ChoiceState
 
 	PermState _perm_state;
 	Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
