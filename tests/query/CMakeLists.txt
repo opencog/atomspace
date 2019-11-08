@@ -30,7 +30,7 @@ ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(ConstantClausesUTest)
-
+ADD_CXXTEST(PermutationsUTest)
 
 # These are NOT in alphabetical order; they are in order of
 # simpler to more complex.  Later test cases assume features
