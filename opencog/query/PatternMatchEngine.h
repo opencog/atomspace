@@ -115,12 +115,12 @@ private:
 	ChoiceState _choice_state;
 	bool _need_choice_push;
 
-	size_t curr_choice(const PatternTermPtr&, const Handle&, bool&);
+	size_t curr_choice(const PatternTermPtr&, const Handle&);
 	bool have_choice(const PatternTermPtr&, const Handle&);
 
 	// Iteration control for choice links. Branchpoint advances
-	// whenever take_step is set to true.
-	bool choose_next;
+	// whenever _choose_next is set to true.
+	bool _choose_next;
 
 	// -------------------------------------------
 	// Unordered Link suppoprt

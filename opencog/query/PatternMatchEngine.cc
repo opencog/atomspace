@@ -271,21 +271,19 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 
 	// _choice_state lets use resume where we last left off.
 	size_t iend = osp.size();
-	bool fresh = false;
-	size_t icurr = curr_choice(ptm, hg, fresh);
-	if (fresh) choose_next = false; // took a step, clear the flag
+	size_t icurr = curr_choice(ptm, hg);
 
 	DO_LOG({LAZY_LOG_FINE << "tree_comp resume choice search at " << icurr
 	              << " of " << iend << " of term=" << ptm->to_string()
-	              << ", choose_next=" << choose_next;})
+	              << ", choose_next=" << _choose_next;})
 
 	// XXX This is almost surely wrong... if there are two
 	// nested choice links, then this will hog the steps,
 	// and the deeper choice will fail.
-	if (choose_next)
+	if (_choose_next)
 	{
 		icurr++;
-		choose_next = false; // we are taking a step, so clear the flag.
+		_choose_next = false; // we are taking a step, so clear the flag.
 	}
 
 	while (icurr<iend)
@@ -319,7 +317,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 			_pmc.post_link_mismatch(hp, hg);
 		}
 		solution_pop();
-		choose_next = false; // we are taking a step, so clear the flag.
+		_choose_next = false; // we are taking a step, so clear the flag.
 		icurr++;
 	}
 
@@ -331,13 +329,12 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 /// Return the current choice state for the given pattern & ground
 /// combination.
 size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
-                                       const Handle& hg,
-                                       bool& fresh)
+                                       const Handle& hg)
 {
 	auto cs = _choice_state.find(GndChoice(ptm, hg));
 	if (_choice_state.end() == cs)
 	{
-		fresh = true;
+		_choose_next = false;
 		return 0;
 	}
 	return cs->second;
@@ -1380,7 +1377,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		DO_LOG({logger().fine("Step to next choice");})
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
-		choose_next = true;
+		_choose_next = true;
 	} while (have_choice(ptm, hg));
 
 	DO_LOG({logger().fine("Exhausted all choice possibilities"
@@ -2337,7 +2334,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// ChoiceLink state
 	_choice_state.clear();
 	_need_choice_push = false;
-	choose_next = true;
+	_choose_next = true;
 
 	// UnorderedLink state
 	_have_more = false;
@@ -2381,7 +2378,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 
 	// choice link state
 	_need_choice_push = false;
-	choose_next = true;
+	_choose_next = true;
 
 	// unordered link state
 	_have_more = false;
