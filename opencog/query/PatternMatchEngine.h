@@ -133,10 +133,10 @@ private:
 
 	// Iteration control for unordered links. Branchpoint advances
 	// whenever take_step is set to true.
-	bool take_step;
-	bool have_more;
-	std::map<Unorder, int> perm_count;
-	std::stack<std::map<Unorder, int>> perm_count_stack;
+	bool _take_step;
+	bool _have_more;
+	std::map<Unorder, int> _perm_count;
+	std::stack<std::map<Unorder, int>> _perm_count_stack;
 
 	// --------------------------------------------
 	// Glob state management
