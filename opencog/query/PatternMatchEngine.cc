@@ -1155,8 +1155,23 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
-		if (explore_link_branches(ptm, hg, clause_root))
-			return true;
+		// Check if the pattern has globs in it, and record the glob_state.
+		// Do this *before* exploring the term.
+		bool has_glob = (0 < _pat->globby_holders.count(term));
+		size_t gstate_size = _glob_state.size();
+
+		bool found = explore_link_branches(ptm, hg, clause_root);
+		if (found) return true;
+
+		// If no solution was found, and there are globs, then there may
+		// still be another way to ground the glob differently, to this
+		// same candidate clause. So try that, and do it until exhausted.
+		while (not found and has_glob and _glob_state.size() > gstate_size)
+		{
+			DO_LOG({logger().fine("Globby clause not grounded; try again");})
+			found = explore_link_branches(ptm, hg, clause_root);
+			if (found) return true;
+		}
 	}
 	return false;
 }
@@ -2242,22 +2257,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	{
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
 
-		// Check if the pattern has globs in it, and record the glob_state.
-		// Do this *before* exploring the term.
-		bool has_glob = (0 < _pat->globby_holders.count(term));
-		size_t gstate_size = _glob_state.size();
-
 		_did_check_forall = false;
 		bool found = explore_term_branches(term, grnd, clause);
-
-		// If no solution was found, and there are globs, then there may
-		// still be another way to ground the glob differently, to this
-		// same candidate caluse. So try that, and do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
-		{
-			DO_LOG({logger().fine("Globby clause not grounded; try again");})
-			found = explore_term_branches(term, grnd, clause);
-		}
 
 		if (not _did_check_forall and is_always(clause))
 		{
