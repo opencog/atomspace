@@ -383,12 +383,12 @@ more possibilities to explore. Our behavior is thus controlled by this
 third bit, as well as what happened below us.
 
 The correct actions to take are best explored by truth tables: the
-settings of the take_step and have_more flags on entry, and what to
+settings of the _take_step and _have_more flags on entry, and what to
 do after running tree_compare downwards. These are handled by two
 truth tables.
 
-The topmost routine to call tree_compare must *always* set have_more=F
-and take_step=T before calling tree_compare.  This will cause
+The topmost routine to call tree_compare must *always* set _have_more=F
+and _take_step=T before calling tree_compare.  This will cause
 tree_compare to advance to the next matching permutation, or to run until
 all permutations are exhausted, and no match was found.
 
@@ -506,13 +506,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		return _pmc.fuzzy_match(hp, hg);
 
 	// Test for case A, described above.
-	OC_ASSERT (not (take_step and have_more),
+	OC_ASSERT (not (_take_step and _have_more),
 	           "Impossible situation! BUG!");
 
 	// _perm_state lets use resume where we last left off.
 	bool fresh = false;
 	Permutation mutation = curr_perm(ptm, hg, fresh);
-	if (fresh) take_step = false; // took a step, clear the flag.
+	if (fresh) _take_step = false; // took a step, clear the flag.
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -523,14 +523,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		num_perms = facto(mutation.size());
 		logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
-		              perm_count[Unorder(ptm, hg)], num_perms,
-		              ptm->to_string().c_str(), take_step, have_more);
+		              _perm_count[Unorder(ptm, hg)], num_perms,
+		              ptm->to_string().c_str(), _take_step, _have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
-		              << perm_count[Unorder(ptm, hg)] << " of " << num_perms
+		              << _perm_count[Unorder(ptm, hg)] << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
@@ -559,23 +559,23 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// Check for cases 1&2 of description above.
 		// The step-next may have been taken by someone else, in the
 		// tree_compare immediate above.
-		OC_ASSERT(not (take_step and have_more),
+		OC_ASSERT(not (_take_step and _have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
 		// Handle cases 3&4 of the description above. Seems wisest
 		// to do this before post_link_match() !??
-		if (take_step and not have_more)
+		if (_take_step and not _have_more)
 		{
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
 			goto take_next_step;
 		}
 
-		// If we are here, then take_step is false, because
+		// If we are here, then _take_step is false, because
 		// cases 1,2,3,4 already handled above.
 		// Well, actually, this can happen, if we are not careful
-		// to manage the have_more flag on a stack.
-//		OC_ASSERT(match or not have_more or 1==num_perms,
+		// to manage the _have_more flag on a stack.
+//		OC_ASSERT(match or not _have_more or 1==num_perms,
 //		          "Impossible: case 6 happened!");
 
 		if (match)
@@ -592,11 +592,11 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				record_grounding(ptm, hg);
 
 				// Handle case 5&7 of description above.
-				have_more = true;
+				_have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
-				              << perm_count[Unorder(ptm, hg)]
+				              << _perm_count[Unorder(ptm, hg)]
 				              << " for term=" << ptm->to_string()
-				              << " have_more=" << have_more;})
+				              << " have_more=" << _have_more;})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;
 			}
@@ -606,21 +606,21 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			_pmc.post_link_mismatch(hp, hg);
 		}
 		// If we are here, we are handling case 8.
-		DO_LOG({LAZY_LOG_FINE << "Above permuation " << perm_count[Unorder(ptm, hg)]
+		DO_LOG({LAZY_LOG_FINE << "Above permuation " << _perm_count[Unorder(ptm, hg)]
 		              << " failed term=" << ptm->to_string();})
 
 take_next_step:
-		take_step = false; // we are taking a step, so clear the flag.
-		have_more = false; // start with a clean slate...
+		_take_step = false; // we are taking a step, so clear the flag.
+		_have_more = false; // start with a clean slate...
 		solution_pop();
 		if (logger().is_fine_enabled())
-			perm_count[Unorder(ptm, hg)] ++;
+			_perm_count[Unorder(ptm, hg)] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permuations of term=" << ptm->to_string();})
 	_perm_state.erase(Unorder(ptm, hg));
-	have_more = false;
+	_have_more = false;
 	return false;
 }
 
@@ -673,14 +673,14 @@ void PatternMatchEngine::perm_push(void)
 {
 	perm_stack.push(_perm_state);
 	if (logger().is_fine_enabled())
-		perm_count_stack.push(perm_count);
+		_perm_count_stack.push(_perm_count);
 }
 
 void PatternMatchEngine::perm_pop(void)
 {
 	POPSTK(perm_stack, _perm_state);
 	if (logger().is_fine_enabled())
-		POPSTK(perm_count_stack, perm_count);
+		POPSTK(_perm_count_stack, _perm_count);
 }
 
 /* ======================================================== */
@@ -1341,8 +1341,8 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		DO_LOG({logger().fine("Step to next permuation");})
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
-		take_step = true;
-		have_more = false;
+		_take_step = true;
+		_have_more = false;
 	} while (have_perm(ptm, hg));
 
 	DO_LOG({logger().fine("No more unordered permutations");})
@@ -2340,8 +2340,8 @@ void PatternMatchEngine::clear_current_state(void)
 	_choose_next = true;
 
 	// UnorderedLink state
-	have_more = false;
-	take_step = true;
+	_have_more = false;
+	_take_step = true;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2384,8 +2384,8 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_choose_next = true;
 
 	// unordered link state
-	have_more = false;
-	take_step = true;
+	_have_more = false;
+	_take_step = true;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
