@@ -555,8 +555,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		}
 
 		// Check for cases 1&2 of description above.
-		// The step-next may have been taken by someone else, in the
-		// tree_compare immediate above.
+		// These flags might have been (mis-)set in the
+		// call to tree_compare() immediately above.
 		OC_ASSERT(not (_take_step and _have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
@@ -608,7 +608,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		              << " failed term=" << ptm->to_string();})
 
 take_next_step:
-		_take_step = false; // we are taking a step, so clear the flag.
+		_take_step = false; // we are taking the step, so clear the flag.
 		_have_more = false; // start with a clean slate...
 		solution_pop();
 		if (logger().is_fine_enabled())
