@@ -1268,22 +1268,10 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		// If there are no more possible ways to ground them, they
-		// will be removed from glob_state. So simply by comparing the
-		// _glob_state size before and after seems to be an OK way to
-		// quickly check if we can move on to the next one or not.
 		std::map<GlobPair, GlobState> saved_glob_state;
 		saved_glob_state = _glob_state;
-		gstate_size = _glob_state.size();
 
-		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
-
-		// If there may be another way to ground it differently to the same
-		// candidate, do it until exhausted.
-		while (not found and _glob_state.size() > gstate_size)
-		{
-			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
-		}
+		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
@@ -1306,6 +1294,11 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// If no solution is found, and there are globs, then there may
 	// be other ways to ground the glob differently.  So keep trying,
 	// until all possibilities are exhausted.
+	//
+	// Once there are no more possible ways to ground globby terms,
+	// they are removed from glob_state. So simply by comparing the
+	// _glob_state size before and after seems to be an OK way to
+	// quickly check if we can move on to the next one or not.
 	do
 	{
 		if (explore_link_branches(ptm, hg, clause_root))
