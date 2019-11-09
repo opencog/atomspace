@@ -597,6 +597,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				_have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
 				              << _perm_count[Unorder(ptm, hg)]
+				              << " of " << num_perms
 				              << " for term=" << ptm->to_string()
 				              << " have_more=" << _have_more;})
 				_perm_state[Unorder(ptm, hg)] = mutation;
@@ -607,9 +608,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			_pmc.post_link_mismatch(hp, hg);
 		}
+
 		// If we are here, we are handling case 8.
-		DO_LOG({LAZY_LOG_FINE << "Above permuation " << _perm_count[Unorder(ptm, hg)]
-		              << " failed term=" << ptm->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Bad permuation "
+		              << _perm_count[Unorder(ptm, hg)]
+		              << " of " << num_perms
+		              << " for term=" << ptm->to_string();})
 
 take_next_step:
 		_take_step = false; // we are taking the step, so clear the flag.
