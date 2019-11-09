@@ -610,7 +610,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		}
 
 		// If we are here, we are handling case 8.
-		DO_LOG({LAZY_LOG_FINE << "Bad permuation "
+		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
 		              << _perm_count[Unorder(ptm, hg)]
 		              << " of " << num_perms
 		              << " for term=" << ptm->to_string();})
@@ -624,7 +624,7 @@ take_next_step:
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
-	DO_LOG({LAZY_LOG_FINE << "Exhausted all permuations of term=" << ptm->to_string();})
+	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term=" << ptm->to_string();})
 	_perm_state.erase(Unorder(ptm, hg));
 	_have_more = false;
 	return false;
@@ -1328,7 +1328,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 /// unordered links. These links represent branch-points themselves.
 /// A ChoiceLink of arity N wraps N different possible branches to be
 /// explored. An unordered link of arity N wraps N-factorial different
-/// possible permuations, each of which must be explored. This method
+/// possible permutations, each of which must be explored. This method
 /// controls the exploration of these different branches. For each
 /// possible branch, it saves state, explores the branch, and pops the
 /// state. If the exploration yielded nothing, then the next branch is
@@ -1358,7 +1358,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		if (explore_choice_branches(ptm, hg, clause_root))
 			return true;
 
-		DO_LOG({logger().fine("Step to next permuation");})
+		DO_LOG({logger().fine("Step to next permutation");})
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		_take_step = true;
