@@ -1302,13 +1302,32 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// they are removed from glob_state. So simply by comparing the
 	// _glob_state size before and after seems to be an OK way to
 	// quickly check if we can move on to the next one or not.
+	//
+	// If no solution was found, and there are unordered links, then
+	// there may be alternate permuations of the unordered link that
+	// might satisfy this clause. So try those, until exhausted.
+	//
+	// This should work even if there are mixtures of globs and
+	// unordered links, even if there are more than one of each,
+	// even if they're nested at various depths; the stacks should
+	// take care of the managing the flags.
 	do
 	{
 		if (explore_link_branches(ptm, hg, clause_root))
 			return true;
-		DO_LOG({logger().fine("Globby clause not grounded; try again");})
+
+		if (_have_more)
+		{
+			_have_more = false;
+			_take_step = true;
+			DO_LOG({logger().fine("Permutable clause not grounded; try again");})
+		}
+		else
+		{
+			DO_LOG({logger().fine("Globby clause not grounded; try again");})
+		}
 	}
-	while (has_glob and _glob_state.size() > gstate_size);
+	while (_take_step or (has_glob and _glob_state.size() > gstate_size));
 
 	return false;
 }
