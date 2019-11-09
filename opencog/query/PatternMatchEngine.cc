@@ -1299,22 +1299,21 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	// Check if the pattern has globs in it, and record the glob_state.
-	// Do this *before* exploring the term.
+	// Do this *before* starting exploration.
 	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 	size_t gstate_size = _glob_state.size();
 
-	bool found = explore_link_branches(ptm, hg, clause_root);
-	if (found) return true;
-
-	// If no solution was found, and there are globs, then there may
-	// still be another way to ground the glob differently, to this
-	// same candidate clause. So try that, and do it until exhausted.
-	while (not found and has_glob and _glob_state.size() > gstate_size)
+	// If no solution is found, and there are globs, then there may
+	// be other ways to ground the glob differently.  So keep trying,
+	// until all possibilities are exhausted.
+	do
 	{
+		if (explore_link_branches(ptm, hg, clause_root))
+			return true;
 		DO_LOG({logger().fine("Globby clause not grounded; try again");})
-		found = explore_link_branches(ptm, hg, clause_root);
-		if (found) return true;
 	}
+	while (has_glob and _glob_state.size() > gstate_size);
+
 	return false;
 }
 
