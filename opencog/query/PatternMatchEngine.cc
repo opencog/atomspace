@@ -1253,8 +1253,6 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	              << "It's grounding " << hg->to_string()
 	              << " has " << sz << " branches";})
 
-	size_t gstate_size = SIZE_MAX;
-
 	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
