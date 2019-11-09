@@ -1163,23 +1163,8 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
-		// Check if the pattern has globs in it, and record the glob_state.
-		// Do this *before* exploring the term.
-		bool has_glob = (0 < _pat->globby_holders.count(term));
-		size_t gstate_size = _glob_state.size();
-
-		bool found = explore_link_branches(ptm, hg, clause_root);
-		if (found) return true;
-
-		// If no solution was found, and there are globs, then there may
-		// still be another way to ground the glob differently, to this
-		// same candidate clause. So try that, and do it until exhausted.
-		while (not found and has_glob and _glob_state.size() > gstate_size)
-		{
-			DO_LOG({logger().fine("Globby clause not grounded; try again");})
-			found = explore_link_branches(ptm, hg, clause_root);
-			if (found) return true;
-		}
+		if (explore_glob_branches(ptm, hg, clause_root))
+			return true;
 	}
 	return false;
 }
@@ -1268,8 +1253,6 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	              << "It's grounding " << hg->to_string()
 	              << " has " << sz << " branches";})
 
-	size_t gstate_size = SIZE_MAX;
-
 	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
@@ -1283,22 +1266,10 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		// If there are no more possible ways to ground them, they
-		// will be removed from glob_state. So simply by comparing the
-		// _glob_state size before and after seems to be an OK way to
-		// quickly check if we can move on to the next one or not.
 		std::map<GlobPair, GlobState> saved_glob_state;
 		saved_glob_state = _glob_state;
-		gstate_size = _glob_state.size();
 
-		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
-
-		// If there may be another way to ground it differently to the same
-		// candidate, do it until exhausted.
-		while (not found and _glob_state.size() > gstate_size)
-		{
-			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
-		}
+		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
@@ -1307,6 +1278,39 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	}
 	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
 	return found;
+}
+
+/// explore_glob_branches -- explore glob grounding alternatives
+///
+/// Please see the docs for `explore_link_branches` for the general
+/// idea. In this particular method, all possible alternatives for
+/// grounding glob nodes are explored.
+bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
+                                               const Handle& hg,
+                                               const Handle& clause_root)
+{
+	// Check if the pattern has globs in it, and record the glob_state.
+	// Do this *before* starting exploration.
+	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	size_t gstate_size = _glob_state.size();
+
+	// If no solution is found, and there are globs, then there may
+	// be other ways to ground the glob differently.  So keep trying,
+	// until all possibilities are exhausted.
+	//
+	// Once there are no more possible ways to ground globby terms,
+	// they are removed from glob_state. So simply by comparing the
+	// _glob_state size before and after seems to be an OK way to
+	// quickly check if we can move on to the next one or not.
+	do
+	{
+		if (explore_link_branches(ptm, hg, clause_root))
+			return true;
+		DO_LOG({logger().fine("Globby clause not grounded; try again");})
+	}
+	while (has_glob and _glob_state.size() > gstate_size);
+
+	return false;
 }
 
 /// explore_link_branches -- verify the suggested grounding.
