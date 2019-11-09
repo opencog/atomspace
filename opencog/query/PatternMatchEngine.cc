@@ -1282,6 +1282,11 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	return found;
 }
 
+/// explore_glob_branches -- explore glob grounding alternatives
+///
+/// Please see the docs for `explore_link_branches` for the general
+/// idea. In this particular method, all possible alternatives for
+/// grounding glob nodes are explored.
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
