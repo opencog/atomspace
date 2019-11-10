@@ -1396,25 +1396,28 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	const Handle& hp = ptm->getHandle();
+	// Look for a match, at least once.
+	if (explore_choice_branches(ptm, hg, clause_root))
+		return true;
 
-	// If its not an unordered link, then don't try to iterate over
-	// all permutations.
-	Type tp = hp->get_type();
-	if (not _nameserver.isA(tp, UNORDERED_LINK))
-		return explore_choice_branches(ptm, hg, clause_root);
+	// If its not an unordered link, then it will not have
+	// permuations, and so there is nothing more to do.
+	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
+		return false;
 
-	do {
-		// If the pattern was satisfied, then we are done for good.
-		if (explore_choice_branches(ptm, hg, clause_root))
-			return true;
-
+	while (have_perm(ptm, hg) and _latest_wrap != ptm)
+	{
 		DO_LOG({logger().fine("Step to next permutation");})
+
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		_take_step = true;
 		_have_more = false;
-	} while (have_perm(ptm, hg) and _latest_wrap != ptm);
+
+		// If the pattern was satisfied, then we are done for good.
+		if (explore_choice_branches(ptm, hg, clause_root))
+			return true;
+	}
 
 	DO_LOG({logger().fine("No more unordered permutations");})
 
