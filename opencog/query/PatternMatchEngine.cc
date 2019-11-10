@@ -1193,12 +1193,9 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
-		PatternTermPtr last_term;
-		if (_have_more)
-		{
-			last_term = _latest_term;
+		PatternTermPtr last_term = _latest_term;
+		if (last_term)
 			DO_LOG({LAZY_LOG_FINE << "Odometer term: " << last_term->to_string();})
-		}
 
 		while (_have_more)
 		{
