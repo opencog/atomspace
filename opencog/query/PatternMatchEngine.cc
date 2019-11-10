@@ -509,6 +509,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_take_step and _have_more),
 	           "Impossible situation! BUG!");
 
+	_latest_term = ptm;
+
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
 	bool do_wrap = _take_step;
@@ -629,17 +631,22 @@ take_next_step:
 	             << ptm->to_string()
 	             << " wrap=" << wrap << " dowrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
+	_perm_count.erase(Unorder(ptm, hg));
 	_have_more = false;
 
+	// Implement an "odomoter", for iterating on other unordered
+	// links that might occur in series with this one. That is,
+	// wrap around the permutation set for this link, while also
+	// advancing the next link by one (setting _take_step causes
+	// the next link to advance).
 	if (wrap and do_wrap)
 	{
-		_perm_count[Unorder(ptm, hg)] = 0;
 		bool match = unorder_compare(ptm, hg, false);
-		// if (match) _take_step = true;
-		_take_step = true;
+		if (not match) return false;
+		_latest_wrap = ptm;
 		_have_more = false;
-		_wrap = ptm;
-		return match;
+		_take_step = true;
+		return true;
 	}
 	return false;
 }
@@ -1186,8 +1193,8 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
-		PatternTermPtr last_wrap;
-		if (_have_more and _wrap) last_wrap = _wrap;
+		PatternTermPtr last_term;
+		if (_have_more) last_term = _latest_term;
 		while (_have_more)
 		{
 			_have_more = false;
@@ -1195,7 +1202,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 			if (explore_glob_branches(ptm, hg, clause_root))
 				return true;
-			if (_wrap and _wrap == last_wrap) return false;
+			if (_latest_wrap and _latest_wrap == last_term) return false;
 		}
 	}
 	return false;
@@ -1400,7 +1407,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		// On the next go-around, take a step.
 		_take_step = true;
 		_have_more = false;
-	} while (have_perm(ptm, hg) and _wrap != ptm);
+	} while (have_perm(ptm, hg) and _latest_wrap != ptm);
 
 	DO_LOG({logger().fine("No more unordered permutations");})
 
@@ -2385,7 +2392,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_have_more = false;
 	_take_step = true;
-	_wrap = nullptr;
+	_latest_term = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2430,7 +2437,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_have_more = false;
 	_take_step = true;
-	_wrap = nullptr;
+	_latest_term = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,

@@ -137,7 +137,8 @@ private:
 	// whenever take_step is set to true.
 	bool _take_step;
 	bool _have_more;
-	PatternTermPtr _wrap;
+	PatternTermPtr _latest_term;
+	PatternTermPtr _latest_wrap;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
 
