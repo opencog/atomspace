@@ -70,7 +70,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_un2(void);
 		void test_exhaust(void);
 		void test_embed(void);
-		void xtest_cube(void);
+		void test_cube(void);
 };
 
 /*
@@ -252,7 +252,7 @@ void UnorderedUTest::test_embed(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void UnorderedUTest::xtest_cube(void)
+void UnorderedUTest::test_cube(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
