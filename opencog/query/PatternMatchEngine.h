@@ -137,6 +137,7 @@ private:
 	// whenever take_step is set to true.
 	bool _take_step;
 	bool _have_more;
+	PatternTermPtr _wrap;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
 
@@ -232,7 +233,7 @@ private:
 	bool node_compare(const Handle&, const Handle&);
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
-	bool unorder_compare(const PatternTermPtr&, const Handle&);
+	bool unorder_compare(const PatternTermPtr&, const Handle&, bool);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------
