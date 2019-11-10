@@ -509,8 +509,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_take_step and _have_more),
 	           "Impossible situation! BUG!");
 
-	_latest_term = ptm;
-
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
 	bool do_wrap = _take_step;
@@ -592,6 +590,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			{
 				// Even the stack, *without* erasing the discovered grounding.
 				solution_drop();
+				_latest_term = ptm;
 
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
@@ -644,6 +643,7 @@ take_next_step:
 		bool match = unorder_compare(ptm, hg, false);
 		if (not match) return false;
 		_latest_wrap = ptm;
+		_latest_term = ptm;
 		_have_more = false;
 		_take_step = true;
 		return true;
@@ -2393,6 +2393,7 @@ void PatternMatchEngine::clear_current_state(void)
 	_have_more = false;
 	_take_step = true;
 	_latest_term = nullptr;
+	_latest_wrap = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2438,6 +2439,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_have_more = false;
 	_take_step = true;
 	_latest_term = nullptr;
+	_latest_wrap = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
