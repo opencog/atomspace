@@ -70,6 +70,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_un2(void);
 		void test_exhaust(void);
 		void xtest_embed(void);
+		void xtest_cube(void);
 };
 
 /*
@@ -251,3 +252,37 @@ void UnorderedUTest::xtest_embed(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void UnorderedUTest::xtest_cube(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-embed.scm\")");
+	Handle expected = eval->eval_h("expect-two-x-two");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", expected);
+
+	// Result should be a SetLink w/ four solutions
+	Handle result = eval->eval_h("(cog-execute! two-x-two)");
+
+	logger().debug("square result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------------------------------
+	// again, but cubed.
+	expected = eval->eval_h("expect-cube");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", expected);
+
+	// Result should be a SetLink w/ eight solutions
+	result = eval->eval_h("(cog-execute! cube)");
+
+	logger().debug("cube result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
