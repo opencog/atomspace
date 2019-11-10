@@ -1194,7 +1194,12 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
 		PatternTermPtr last_term;
-		if (_have_more) last_term = _latest_term;
+		if (_have_more)
+		{
+			last_term = _latest_term;
+			DO_LOG({LAZY_LOG_FINE << "Odometer term: " << last_term->to_string();})
+		}
+
 		while (_have_more)
 		{
 			_have_more = false;
@@ -1202,7 +1207,12 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 			if (explore_glob_branches(ptm, hg, clause_root))
 				return true;
-			if (_latest_wrap and _latest_wrap == last_term) return false;
+			if (_latest_wrap and _latest_wrap == last_term)
+			{
+				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
+				                      << last_term->to_string();})
+				return false;
+			}
 		}
 	}
 	return false;
