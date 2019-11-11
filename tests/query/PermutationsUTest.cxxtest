@@ -78,6 +78,8 @@ void PermutationsUTest::setUp(void)
 /**
  * Test bind link with a clause containing unordered links to make
  * sure that the results consider all permutations of outgoings.
+ * See also `unordered-embed.scm` for additional variations of this
+ * same bugfix.
  */
 void PermutationsUTest::test_bind(void)
 {
