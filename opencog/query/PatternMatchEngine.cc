@@ -140,11 +140,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// Compare an atom to itself. Amazingly, this is more complicated
-/// that what it might seem to be ...
-///
-/// If they're the same atom, then clearly they match.
-/// ... but only if atom is a constant (i.e. contains no bound variables)
+/// Compare an atom to itself.
 ///
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
@@ -158,6 +154,7 @@ bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 /* ======================================================== */
 
 /// Compare two nodes, one in the pattern, one proposed grounding.
+/// Return true if they match, else return false.
 bool PatternMatchEngine::node_compare(const Handle& hp,
                                       const Handle& hg)
 {
@@ -175,8 +172,9 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// If the two links are both ordered, its enough to compare
-/// them "side-by-side".
+/// If the two links are both ordered, its enough to compare them
+/// "side-by-side". Return true if they match, else return false.
+/// See `tree_compare` for a general explanation.
 bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
@@ -187,17 +185,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	size_t osp_size = osp.size();
 
 	// The recursion step: traverse down the tree.
-	// In principle, we could/should push the current groundings
-	// onto the stack before recursing, and then pop them off on
-	// return.  Failure to do so could leave some bogus groundings,
-	// sitting around, i.e. groundings that were found during
-	// recursion but then discarded due to a later mis-match.
-	//
-	// In practice, I was unable to come up with any test case
-	// where this mattered; any bogus groundings eventually get
-	// replaced by valid ones.  Thus, we save some unknown amount
-	// of CPU time by simply skipping the push & pop here.
-	//
 	depth ++;
 
 	// If the pattern contains no globs, then the pattern and ground
@@ -234,7 +221,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 
 	depth --;
-	DO_LOG({LAZY_LOG_FINE << "tree_comp down link match=" << match;})
+	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
 
 	const Handle &hp = ptm->getHandle();
 	if (not match)
@@ -1006,18 +993,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
  * Compare two incidence trees, side-by-side.  The incidence tree is
  * given by following the "outgoing set" of the links appearing in the
  * tree.  The incidence tree is the so-called "Levi graph" of the
- * hypergraph.  The first arg should be a handle to a clause in the
+ * hypergraph.  The first arg should be a handle to a term in the
  * pattern, while the second arg is a handle to a candidate grounding.
  * The pattern (template) clause is compared to the candidate grounding,
- * returning true if there is a mis-match.
+ * returning true if there is a match, else return false.
  *
  * The comparison is recursive, so this method calls itself on each
- * subtree (term) of the template clause, performing comparisons until a
+ * subtree (term) of the template term, performing comparisons until a
  * match is found (or not found).
- *
- * Return false if there's a mis-match. The goal here is to walk over
- * the entire tree, without mismatches.  Since a return value of false
- * stops the iteration, false is used to signal a mismatch.
  *
  * The pattern clause may contain quotes (QuoteLinks), which signify
  * that what follows must be treated as a literal (constant), rather
@@ -1031,10 +1014,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
  * quotes.  It is assumed that the QuoteLink has an arity of one, as
  * its quite unclear what an arity of more than one could ever mean.
  *
- * That method have side effects. The main one is to insert variable
- * groundings (and in fact sub-clauses grounding as well) in
- * var_grounding when encountering variables (and sub-clauses) in the
- * pattern.
+ * This method has side effects. The main one is to insert variable
+ * groundings and term groundings into `var_grounding` when grounded
+ * variables and grounded terms are discovered in the pattern. (A term
+ * is gounded when all variables in it are grounded). This is done
+ * progressively, so that earlier groundings will be recorded even if
+ * later ones fail. Thus, in order to use this method safely, the caller
+ * must make a temp copy of `var_grounding`, and restore the temp if
+ * there is no match.
  */
 bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       const Handle& hg,
@@ -1068,7 +1055,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if hp is a constant i.e. contains no bound variables)
 	//
 	// If the pattern contains atoms that are evaluatable i.e. GPN's
 	// then we must fall through, and let the tree comp mechanism
@@ -1468,11 +1454,8 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
 	              << " solved by " << hg->to_string() << ", move up";})
 
-	// XXX should not do perm_push every time... only selectively.
-	// But when? This is very confusing ...
-	perm_push();
+	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
-	perm_pop();
 
 	solution_pop();
 	return found;
@@ -1536,13 +1519,8 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-#if 1
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
-	              << " of clause hash = " << clause_root.value()
-	              << " has ground, move upwards";})
-#endif
-
-	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->getHandle()->to_string()
+	              << " " << ptm->getHandle()->to_string()
 	              << " of clause = " << clause_root->to_string()
 	              << " has ground, move upwards";})
 
@@ -2344,8 +2322,8 @@ void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
 	// is not completely self-contained.
 	if (not ptm->isQuoted())
 		var_grounding[hp] = hg;
-	// If quoted, try one last chance by checking if the quote is
-	// hidden in ptm.
+	// If it is quoted, maybe the quote is in the ptm. Unwrap it,
+	// and record that. (Huh ???)
 	else if (const Handle& quote = ptm->getQuote())
 		var_grounding[quote] = hg;
 }
