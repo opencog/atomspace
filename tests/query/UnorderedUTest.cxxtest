@@ -71,6 +71,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_exhaust(void);
 		void test_embed(void);
 		void test_cube(void);
+		void test_arcane(void);
 };
 
 /*
@@ -283,6 +284,25 @@ void UnorderedUTest::test_cube(void)
 	logger().debug("cube result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// A simple bug that triggers an in loop; however, very complicated
+// arcane inputs are needed to trigger the bug. See #2357 and #2360
+// for details.
+void UnorderedUTest::test_arcane(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-arcane.scm\")");
+
+	// Result should be a SetLink w/ one solutions
+	Handle result = eval->eval_h("(cog-execute! query)");
+
+	logger().debug("embedded result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

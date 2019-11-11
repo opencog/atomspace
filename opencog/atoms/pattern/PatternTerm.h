@@ -71,12 +71,10 @@ namespace opencog {
  * reference the roots of query clauses. Term tree roots have its
  * _parent attributes UNDEFINED.
  *
- * Term trees are build in the course of preprocessing stage before
- * pattern matcher starts searching for variable groundings. Each
- * clause is then recursively traversed from the root downwards,
- * through outgoing atoms. The _outgoing attribute stores a list of
- * the children created during this traversal. It corresponds
- * one-to-one to outgoing sets of the referenced atom.
+ * Term trees are built by the PatternLink constructor, which acts as
+ * a pre-processor or a "pattern compiler", analyzing the pattern and
+ * generating additional structures that allow the pattern matcher to
+ * run quickly and efficiently.
  */
 
 class PatternTerm;
@@ -90,6 +88,9 @@ class PatternTerm
 protected:
 	Handle _handle;
 	Handle _quote;
+	// TODO: it would probably be more efficient to swap which of these
+	// two is weak, since I think _outgoing is requested far more often
+	// than _parent, and having it run faster would be a performance win.
 	PatternTermPtr _parent;
 	PatternTermWSeq _outgoing;
 
