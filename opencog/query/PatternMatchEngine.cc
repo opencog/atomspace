@@ -172,8 +172,9 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// If the two links are both ordered, its enough to compare
-/// them "side-by-side".
+/// If the two links are both ordered, its enough to compare them
+/// "side-by-side". Return true if they match, else return false.
+/// See `tree_compare` for a general explanation.
 bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
@@ -184,17 +185,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	size_t osp_size = osp.size();
 
 	// The recursion step: traverse down the tree.
-	// In principle, we could/should push the current groundings
-	// onto the stack before recursing, and then pop them off on
-	// return.  Failure to do so could leave some bogus groundings,
-	// sitting around, i.e. groundings that were found during
-	// recursion but then discarded due to a later mis-match.
-	//
-	// In practice, I was unable to come up with any test case
-	// where this mattered; any bogus groundings eventually get
-	// replaced by valid ones.  Thus, we save some unknown amount
-	// of CPU time by simply skipping the push & pop here.
-	//
 	depth ++;
 
 	// If the pattern contains no globs, then the pattern and ground
@@ -231,7 +221,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 
 	depth --;
-	DO_LOG({LAZY_LOG_FINE << "tree_comp down link match=" << match;})
+	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
 
 	const Handle &hp = ptm->getHandle();
 	if (not match)
