@@ -640,7 +640,9 @@ take_next_step:
 	// the next link to advance).
 	if (wrap and do_wrap)
 	{
+perm_push();
 		bool match = unorder_compare(ptm, hg, false);
+perm_pop();
 		if (not match) return false;
 		_latest_wrap = ptm;
 		_latest_term = ptm;
@@ -1405,6 +1407,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
 		return false;
 
+logger().info("duuude enter explore  ptm=%s", ptm->to_string().c_str());
 	while (have_perm(ptm, hg) and _latest_wrap != ptm)
 	{
 		DO_LOG({logger().fine("Step to next permutation");})
@@ -1417,6 +1420,8 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		// If the pattern was satisfied, then we are done for good.
 		if (explore_choice_branches(ptm, hg, clause_root))
 			return true;
+logger().info("duuude aiieeee have=%d non-wrap=%d  ptm=%s",
+have_perm(ptm, hg), _latest_wrap != ptm, ptm->to_string().c_str());
 	}
 
 	DO_LOG({logger().fine("No more unordered permutations");})
