@@ -9,7 +9,7 @@
 
 ; Target graph to be found
 (ListLink
-	(OrderedLink (VariableList (VariableNode "$W"))
+	(LambdaLink (VariableList (VariableNode "$W"))
 		(PresentLink
 			(InheritanceLink (VariableNode "$W") (Concept "A"))
 			(InheritanceLink (Concept "A") (Concept "B"))))
@@ -24,20 +24,21 @@
 ; Query to run.
 ; The Quote...Unquote is needed to trigger the bug; removing
 ; the quotes hides the bug.  Note that in the original bug report,
-; the OrderedLink was a LambdaLink.
+; the OrderedLink was a LambdaLink. OK, I put it back to Lambda.
+; If testing w/o the quotes, users Ordered...
 (define query
 	(GetLink (PresentLink
 
 		; Matches the target graph
 		(ListLink (QuoteLink
-			(OrderedLink (UnquoteLink (VariableNode "$f-vardecl"))
+			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
 				(PresentLink (UnquoteLink (VariableNode "$cnj-bodies-1"))
 					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-0"))
 
 		; Also matches the target graph
 		(ListLink (QuoteLink
-			(OrderedLink (UnquoteLink (VariableNode "$f-vardecl"))
+			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
 				(PresentLink (UnquoteLink (VariableNode "$cnj-bodies-1"))
 					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-1")))))
