@@ -1436,11 +1436,8 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
 	              << " solved by " << hg->to_string() << ", move up";})
 
-	// XXX should not do perm_push every time... only selectively.
-	// But when? This is very confusing ...
-	perm_push();
+	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
-	perm_pop();
 
 	solution_pop();
 	return found;
