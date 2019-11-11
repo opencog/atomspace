@@ -93,14 +93,13 @@ void PermutationsUTest::test_bind(void)
 
 	Handle result = HandleCast(query->execute(&_as));
 	Handle expect = al(SET_LINK,
-	                   al(LIST_LINK, A, B, C),
-	                   al(LIST_LINK, A, C, B));
+	                   al(ORDERED_LINK, A, B, C),
+	                   al(ORDERED_LINK, A, C, B));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
 
-	// TODO: re-enable the test once it passes
-	// TS_ASSERT_EQUALS(result, expect);
+	TS_ASSERT_EQUALS(result, expect);
 	TS_ASSERT(true);
 }
 
