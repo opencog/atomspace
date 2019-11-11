@@ -1177,9 +1177,11 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 			_have_more = false;
 			_take_step = true;
 
+			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
 				return true;
 		}
+		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: " << ptm->to_string();})
 	}
 	return false;
 }
