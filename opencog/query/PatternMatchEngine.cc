@@ -498,7 +498,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
-	bool do_wrap = _take_step;
+	bool do_wrap = _perm_take_step;
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -577,7 +577,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			{
 				// Even the stack, *without* erasing the discovered grounding.
 				solution_drop();
-				_latest_term = ptm;
+				_perm_latest_term = ptm;
 
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
@@ -629,8 +629,8 @@ take_next_step:
 	{
 		bool match = unorder_compare(ptm, hg, false);
 		if (not match) return false;
-		_latest_wrap = ptm;
-		_latest_term = ptm;
+		_perm_latest_wrap = ptm;
+		_perm_latest_term = ptm;
 		_perm_have_more = false;
 		_perm_take_step = true;
 		return true;
@@ -1179,7 +1179,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
-		PatternTermPtr last_term = _latest_term;
+		PatternTermPtr last_term = _perm_latest_term;
 		if (last_term)
 			DO_LOG({LAZY_LOG_FINE << "Odometer term: " << last_term->to_string();})
 
@@ -1191,7 +1191,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
 				return true;
-			if (_latest_wrap and _latest_wrap == last_term)
+			if (_perm_latest_wrap and _perm_latest_wrap == last_term)
 			{
 				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
 				                      << last_term->to_string();})
@@ -1393,7 +1393,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
 		return false;
 
-	while (have_perm(ptm, hg) and _latest_wrap != ptm)
+	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm)
 	{
 		DO_LOG({logger().fine("Step to next permutation");})
 
@@ -2381,8 +2381,8 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_perm_have_more = false;
 	_perm_take_step = true;
-	_latest_term = nullptr;
-	_latest_wrap = nullptr;
+	_perm_latest_term = nullptr;
+	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2427,8 +2427,8 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_perm_have_more = false;
 	_perm_take_step = true;
-	_latest_term = nullptr;
-	_latest_wrap = nullptr;
+	_perm_latest_term = nullptr;
+	_perm_latest_wrap = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
