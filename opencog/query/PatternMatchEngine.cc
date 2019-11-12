@@ -1149,8 +1149,25 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
+		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		if (explore_glob_branches(ptm, hg, clause_root))
 			return true;
+
+		// If no solution was found, and there are unordered links, then
+		// there may be alternate permuations of the unordered link that
+		// might satisfy this clause. So try those, until exhausted.
+		// Note that these unordered links might be buried deeply;
+		// that is why we iterate over them here.
+		while (_have_more)
+		{
+			_have_more = false;
+			_take_step = true;
+
+			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
+			if (explore_glob_branches(ptm, hg, clause_root))
+				return true;
+		}
+		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: " << ptm->to_string();})
 	}
 	return false;
 }
@@ -1292,7 +1309,8 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	{
 		if (explore_link_branches(ptm, hg, clause_root))
 			return true;
-		DO_LOG({logger().fine("Globby clause not grounded; try again");})
+		if (has_glob)
+			DO_LOG({logger().fine("Globby clause not grounded; try again");})
 	}
 	while (has_glob and _glob_state.size() > gstate_size);
 
@@ -1379,7 +1397,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		// However, currently, no test case trips this up. so .. OK.
 		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_single_branch(ptm, hg, clause_root);
+		bool match = explore_glob_branches(ptm, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
