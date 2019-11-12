@@ -135,8 +135,8 @@ private:
 
 	// Iteration control for unordered links. Branchpoint advances
 	// whenever take_step is set to true.
-	bool _take_step;
-	bool _have_more;
+	bool _perm_take_step;
+	bool _perm_have_more;
 	PatternTermPtr _latest_term;
 	PatternTermPtr _latest_wrap;
 	std::map<Unorder, int> _perm_count;
