@@ -556,8 +556,13 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 /* ================================================================= */
 
-Variables::Variables(const Handle& vardecl)
-	: _ordered(true)
+Variables::Variables(bool ordered)
+	: _ordered(ordered)
+{
+}
+
+Variables::Variables(const Handle& vardecl, bool ordered)
+	: _ordered(ordered)
 {
 	validate_vardecl(vardecl);
 	init_index();

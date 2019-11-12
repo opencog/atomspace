@@ -174,17 +174,16 @@ typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
-	// CTor, mostly convenient for unit tests
-	Variables()
-		: _ordered(true) {}
-	Variables(const std::initializer_list<Handle>& variables)
-		: FreeVariables(variables), _ordered(true) {}
+	// CTors.
+	//
+	// Unordered by default as only VariableList can set such order.
+	Variables(bool ordered=false);
+	Variables(const Handle& vardecl, bool ordered=false);
+	Variables(const HandleSeq& vardecls, bool ordered=false);
 
-	// CTor given a variable declaration
-	Variables(const Handle& vardecl);
-	Variables(const HandleSeq& vardecls, bool ordered=true);
-
-	/// Whether the order matters or not
+	/// Whether the order matters or not. Typically if constructed with
+	/// VariableList then the order matters, if constructed with
+	/// VariableSet then the order does not matter.
 	bool _ordered;
 
 	/// Unbundled variables and type restrictions for them.
