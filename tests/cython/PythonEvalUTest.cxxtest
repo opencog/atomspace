@@ -132,29 +132,11 @@ public:
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys() DONE");
     }
 
-    void testGlobalPythonInitializationFinalization()
-    {
-        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
-
-        // Initialize and finalize Python.
-        global_python_initialize();
-        global_python_finalize();
-
-        // Initialize and finalize Python.
-        global_python_initialize();
-        global_python_finalize();
-
-        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization() DONE");
-    }
-
     void testPythonEvalSingletonCreationDeletion()
     {
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
         AtomSpace* atomSpace = NULL;
-
-        // Initialize Python.
-        global_python_initialize();
 
         // Tell the python evaluator to create its singleton instance.
         PythonEval::create_singleton_instance(NULL);
@@ -162,11 +144,20 @@ public:
         // Delete the singleton instance of the PythonEval.
         PythonEval::delete_singleton_instance();
 
-        // Cleanup Python.
-        global_python_finalize();
 
+        // Create an atomspace.
+        atomSpace = new AtomSpace();
 
-        // Now do it again with a non-NULL atomspace object.
+        // Tell the python evaluator to create its singleton instance
+        // with this atomspace.
+        PythonEval::create_singleton_instance(atomSpace);
+
+        // Delete the singleton instance of the PythonEval.
+        PythonEval::delete_singleton_instance();
+
+        // Delete the atomspace.
+        delete atomSpace;
+        atomSpace = NULL;
 
         // Initialize Python.
         global_python_initialize();
@@ -184,33 +175,6 @@ public:
         // Delete the atomspace.
         delete atomSpace;
         atomSpace = NULL;
-
-        // Cleanup Python.
-        global_python_finalize();
-
-
-        // Now do it again to make sure we cleaned up properly.
-
-
-        // Initialize Python.
-        global_python_initialize();
-
-        // Create an atomspace.
-        atomSpace = new AtomSpace();
-
-        // Tell the python evaluator to create its singleton instance
-        // with this atomspace.
-        PythonEval::create_singleton_instance(atomSpace);
-
-        // Delete the singleton instance of the PythonEval.
-        PythonEval::delete_singleton_instance();
-
-        // Delete the atomspace.
-        delete atomSpace;
-        atomSpace = NULL;
-
-        // Cleanup Python.
-        global_python_finalize();
 
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion() DONE");
     }
@@ -218,9 +182,6 @@ public:
     void testPythonEvalEvalExpr()
     {
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
-
-        // Initialize Python.
-        global_python_initialize();
 
         // Create an atomspace and singleton instance to use it.
         AtomSpace* atomSpace = new AtomSpace();
@@ -237,18 +198,11 @@ public:
         PythonEval::delete_singleton_instance();
         delete atomSpace;
         atomSpace = NULL;
-
-        // Cleanup Python.
-        global_python_finalize();
-
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
     }
 
     void testApplyAndApplyTV()
     {
-        // Initialize Python.
-        global_python_initialize();
-
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
@@ -304,16 +258,10 @@ public:
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-evaluate!", !error);
 #endif // HAVE_GUILE
-
-        // Cleanup Python.
-        global_python_finalize();
     }
 
     void testCodeBlockWithNewline()
     {
-        // Initialize Python.
-        global_python_initialize();
-
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
@@ -333,8 +281,28 @@ public:
         // Because results are ignored this cannot be tested as of now
         // TS_ASSERT_EQUALS(result, "3");
         TS_ASSERT(true);
+    }
 
-        // Cleanup Python.
+    void testGlobalPythonInitializationFinalization()
+    {
+        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
+
+        // Initialize and finalize Python.
+        global_python_initialize();
         global_python_finalize();
+	bool thrown = false;
+
+        // Initialize and finalize Python.
+	try{
+	    global_python_initialize(); }
+	catch (const std::runtime_error & e){
+	    if (std::string(e.what()) != "reinitialization is not supported by python")
+	        throw e;
+	    thrown = true;
+        }
+        TS_ASSERT(thrown);
+        global_python_finalize();
+
+        logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization() DONE");
     }
 };
