@@ -62,6 +62,8 @@ cdef class Atom(Value):
             atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
     def set_value(self, key, value):
+        if not isinstance(key, Value):
+            raise RuntimeError("key should be an instance of Value, got {0} instead".format(type(key)))
         self.get_c_handle().get().setValue(deref((<Atom>key).handle),
                                 (<Value>value).get_c_value_ptr())
 
