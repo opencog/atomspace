@@ -175,11 +175,9 @@ struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
 	// CTors.
-	//
-	// Unordered by default as only VariableList can set such order.
-	Variables(bool ordered=false);
-	Variables(const Handle& vardecl, bool ordered=false);
-	Variables(const HandleSeq& vardecls, bool ordered=false);
+	Variables(bool ordered=true);
+	Variables(const Handle& vardecl, bool ordered=true);
+	Variables(const HandleSeq& vardecls, bool ordered=true);
 
 	/// Whether the order matters or not. Typically if constructed with
 	/// VariableList then the order matters, if constructed with

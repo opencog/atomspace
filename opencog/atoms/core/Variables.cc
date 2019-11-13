@@ -295,6 +295,7 @@ FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
 
 void FreeVariables::init_index()
 {
+	index.clear();
 	for (unsigned i = 0; i < varseq.size(); i++)
 		index[varseq[i]] = i;
 }
@@ -338,6 +339,9 @@ void FreeVariables::canonical_sort(const Handle& body)
 	HandleSet ignored_vars = set_symmetric_difference(vsc._fvc.keys(), varset);
 	Context ctx(Quotation(), ignored_vars, false);
 	varseq = vsc.free_variables(body, ctx);
+
+	// Rebuild index to reflect the new order
+	init_index();
 }
 
 HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
@@ -851,20 +855,12 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	{
 		get_vartype(hdecls);
 	}
-	else if (VARIABLE_LIST == tdecls)
+	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
 	{
-		// The list of variable declarations should be .. a list of
-		// variables! Make sure its as expected.
-		const HandleSeq& dset = hdecls->getOutgoingSet();
-		validate_vardecl(dset);
-	}
-	else if (VARIABLE_SET == tdecls)
-	{
-		// The variable order does not matter
-		_ordered = false;
+		_ordered = VARIABLE_LIST == tdecls;
 
-		// The set of variable declarations should be .. a set of
-		// variables! Make sure its as expected.
+		// Extract the list of set of variables and make sure its as
+		// expected.
 		const HandleSeq& dset = hdecls->getOutgoingSet();
 		validate_vardecl(dset);
 	}
@@ -881,8 +877,6 @@ void Variables::validate_vardecl(const Handle& hdecls)
 			"Expected a VariableList holding variable declarations");
 	}
 }
-
-
 
 bool Variables::is_well_typed() const
 {
@@ -906,6 +900,8 @@ bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
 	if (other.varseq.size() != sz) return false;
+
+	if (other._ordered != _ordered) return false;
 
 	// Side-by-side comparison
 	for (size_t i = 0; i < sz; i++)
@@ -1396,6 +1392,9 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// FreeVariables
 	ss << FreeVariables::to_string(indent);
+
+	// Whether it is ordered
+	ss << indent << "_ordered = " << _ordered << std::endl;
 
 	// Simple typemap
 	std::string indent_p = indent + OC_TO_STRING_INDENT;

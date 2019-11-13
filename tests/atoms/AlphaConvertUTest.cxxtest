@@ -52,6 +52,7 @@ public:
 	void test_atomspace();
 	void test_bindlink();
 	void test_vardecl_free_scope();
+	void test_variable_set_scope();
 };
 
 #define NA _asa.add_node
@@ -327,6 +328,42 @@ void AlphaConvertUTest::test_vardecl_free_scope()
 
 	// hsco1 and hsco2 should be equal as they are alpha-equivalent.
 	TS_ASSERT(sco1->is_equal(hsco2));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for scopes with mixture of VariableList, VariableSet
+// and no variable declarations.
+void AlphaConvertUTest::test_variable_set_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	Handle sh1 = LA(SCOPE_LINK,
+	                LA(VARIABLE_SET, X, Y),
+	                LA(LIST_LINK, X, Y));
+	Handle sh2 = LA(SCOPE_LINK,
+	                LA(VARIABLE_LIST, X, Y),
+	                LA(LIST_LINK, X, Y));
+	Handle sh3 = LA(SCOPE_LINK,
+	                LA(VARIABLE_LIST, Y, X),
+	                LA(LIST_LINK, X, Y));
+	Handle sh4 = LA(SCOPE_LINK,
+	                LA(LIST_LINK, X, Y));
+
+	ScopeLinkPtr sc1 = ScopeLinkCast(sh1);
+	ScopeLinkPtr sc2 = ScopeLinkCast(sh2);
+	ScopeLinkPtr sc3 = ScopeLinkCast(sh3);
+	ScopeLinkPtr sc4 = ScopeLinkCast(sh4);
+
+	TS_ASSERT(not sc1->is_equal(sh2));
+	TS_ASSERT(not sc1->is_equal(sh3));
+	TS_ASSERT(sc1->is_equal(sh4));
+	TS_ASSERT(not sc2->is_equal(sh3));
+	TS_ASSERT(not sc2->is_equal(sh4));
+	TS_ASSERT(not sc3->is_equal(sh4));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

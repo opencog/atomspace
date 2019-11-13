@@ -261,6 +261,9 @@ ContentHash ScopeLink::compute_hash() const
 	}
 	fnv1a_hash(hsh, vth);
 
+	// As to not mix together VariableList and VariableSet
+	fnv1a_hash(hsh, _variables._ordered);
+
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;
 	UnorderedHandleSet hidden;
