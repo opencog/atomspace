@@ -102,9 +102,10 @@ struct FreeVariables
 	/// variables are not considered).
 	void find_variables(const Handle& body);
 
-	/// Like above but for outgoing sets. The ordered flag indicates
-	/// whether the outgoing set is associated with an ordered link.
-	void find_variables(const HandleSeq& oset, bool ordered=true);
+	/// Like above but for outgoing sets. The link_ordered flag
+	/// indicates whether the outgoing set is associated with an
+	/// ordered link.
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
 	/// Sort the variables in a canonical order determined by their
 	/// positions in the given body.  In ordered link, the ordered is
@@ -174,7 +175,8 @@ typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
-	// CTors.
+	// CTors. The ordered flag indicates whether we care about the
+	// order of the variables.
 	Variables(bool ordered=true);
 	Variables(const Handle& vardecl, bool ordered=true);
 	Variables(const HandleSeq& vardecls, bool ordered=true);
@@ -295,6 +297,13 @@ struct Variables : public FreeVariables,
 	///
 	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;
+
+	/// Like FreeVariables::find_variables but set _ordered to false,
+	/// on the ground that if such a method is called then no ordered
+	/// was provided by the creator of that scope, and thus order is
+	/// not relevant.
+	void find_variables(const Handle& body);
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;

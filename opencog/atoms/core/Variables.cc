@@ -65,7 +65,7 @@ struct VarScraper
 	 * alpha-equivalence.
 	 */
 	void find_vars(HandleSeq& varseq, HandleSet& varset,
-	               const HandleSeq& outs, bool ordered);
+	               const HandleSeq& outs, bool ordered_link);
 
 	/**
 	 * Return a mapping between free variables and the number of times
@@ -130,14 +130,15 @@ struct VarScraper
 	/**
 	 * Return true iff is an ordered link or subtype thereof.
 	 */
-	static bool is_ordered(const Handle& h);
+	static bool is_ordered_link(const Handle& h);
 };
 
 void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
-                           const HandleSeq& hs, bool ordered)
+                           const HandleSeq& hs, bool ordered_link)
 {
 	_fvc = free_variables_counter(hs);
-	varseq = ordered ? free_variables_ordered(hs) : free_variables_unordered(hs);
+	varseq = ordered_link ? free_variables_ordered(hs)
+		: free_variables_unordered(hs);
 	varset = HandleSet(varseq.begin(), varseq.end());
 }
 
@@ -177,7 +178,7 @@ HandleSeq VarScraper::free_variables(const Handle& body, Context ctx) const
 	OC_ASSERT(body->is_link());
 	ctx.update(body);
 	const HandleSeq& outs = body->getOutgoingSet();
-	return is_ordered(body)	? free_variables_ordered(outs, ctx)
+	return is_ordered_link(body) ? free_variables_ordered(outs, ctx)
 		: free_variables_unordered(outs, ctx);
 }
 
@@ -237,7 +238,7 @@ bool VarScraper::less_than(const Handle& lh, const Handle& rh,
 		// Both atoms have same arity, sort by outgoings
 		const HandleSeq& lout = lh->getOutgoingSet();
 		const HandleSeq& rout = rh->getOutgoingSet();
-		return is_ordered(lh)? less_than_ordered(lout, rout, ctx)
+		return is_ordered_link(lh)? less_than_ordered(lout, rout, ctx)
 			: less_than_unordered(lout, rout, ctx);
 	}
 
@@ -280,7 +281,7 @@ bool VarScraper::is_variable(const Handle& h)
 	return VARIABLE_NODE == t or GLOB_NODE == t;
 }
 
-bool VarScraper::is_ordered(const Handle& h)
+bool VarScraper::is_ordered_link(const Handle& h)
 {
 	return nameserver().isA(h->get_type(), ORDERED_LINK);
 }
@@ -322,10 +323,10 @@ void FreeVariables::find_variables(const Handle& body)
 	find_variables(HandleSeq{body});
 }
 
-void FreeVariables::find_variables(const HandleSeq& oset, bool ordered)
+void FreeVariables::find_variables(const HandleSeq& oset, bool ordered_link)
 {
 	VarScraper vsc;
-	vsc.find_vars(varseq, varset, oset, ordered);
+	vsc.find_vars(varseq, varset, oset, ordered_link);
 	init_index();
 }
 
@@ -1357,7 +1358,6 @@ Handle Variables::get_vardecl() const
 	if (_ordered)
 		return Handle(createVariableList(vardecls));
 
-	std::sort(vardecls.begin(), vardecls.end());
 	return Handle(createVariableSet(vardecls));
 }
 
@@ -1384,6 +1384,18 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 					to_string().c_str());
 		}
 	}
+}
+
+void Variables::find_variables(const Handle& body)
+{
+	FreeVariables::find_variables(body);
+	_ordered = false;
+}
+
+void Variables::find_variables(const HandleSeq& oset, bool ordered_link)
+{
+	FreeVariables::find_variables(oset, ordered_link);
+	_ordered = false;
 }
 
 std::string Variables::to_string(const std::string& indent) const
