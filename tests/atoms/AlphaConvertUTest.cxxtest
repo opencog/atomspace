@@ -88,7 +88,7 @@ void AlphaConvertUTest::test_untyped_variable()
 	_asb.clear();
 	Handle hscoz =
 	LB(SCOPE_LINK,
-		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(VARIABLE_SET, NB(VARIABLE_NODE, "$Z")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
 
 	// x and z should be equal
@@ -231,7 +231,7 @@ void AlphaConvertUTest::test_atomspace()
 
 	Handle hscoz =
 	LA(SCOPE_LINK,
-		LA(VARIABLE_LIST, NA(VARIABLE_NODE, "$Z")),
+		LA(VARIABLE_SET, NA(VARIABLE_NODE, "$Z")),
 		LA(AND_LINK, NA(VARIABLE_NODE, "$Z")));
 
 	// x and z should be equal

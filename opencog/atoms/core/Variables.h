@@ -176,10 +176,11 @@ struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
 	// CTors. The ordered flag indicates whether we care about the
-	// order of the variables.
-	Variables(bool ordered=true);
-	Variables(const Handle& vardecl, bool ordered=true);
-	Variables(const HandleSeq& vardecls, bool ordered=true);
+	// order of the variables. It is false by default and only enabled
+	// if VariableList is used.
+	Variables(bool ordered=false);
+	Variables(const Handle& vardecl, bool ordered=false);
+	Variables(const HandleSeq& vardecls, bool ordered=false);
 
 	/// Whether the order matters or not. Typically if constructed with
 	/// VariableList then the order matters, if constructed with

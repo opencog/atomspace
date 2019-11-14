@@ -845,8 +845,12 @@ void Variables::validate_vardecl(const Handle& hdecls)
 		return;
 
 	// Expecting the declaration list to be either a single
-	// variable, or a list of variable declarations
+	// variable, a list or a set of variable declarations.
 	Type tdecls = hdecls->get_type();
+
+	// Order matters only if it is a list of variables
+	_ordered = VARIABLE_LIST == tdecls;
+
 	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
 	{
 		varset.insert(hdecls);
@@ -858,8 +862,6 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	}
 	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
 	{
-		_ordered = VARIABLE_LIST == tdecls;
-
 		// Extract the list of set of variables and make sure its as
 		// expected.
 		const HandleSeq& dset = hdecls->getOutgoingSet();
