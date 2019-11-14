@@ -2,7 +2,7 @@
  * tests/atoms/PutLinkUTest.cxxtest
  *
  * Copyright (C) 2015,2017 Linas Vepstas
- * Copyright (C) 2016 Nil Geiswieller
+ * Copyright (C) 2016 Nil Geisweiller
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -538,9 +538,6 @@ void PutLinkUTest::test_compose()
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
-			L(VARIABLE_LIST,
-				N(VARIABLE_NODE, "$x"),
-				N(VARIABLE_NODE, "$y")),
 			L(EVALUATION_LINK,
 				N(PREDICATE_NODE, "P"),
 				L(INHERITANCE_LINK,
