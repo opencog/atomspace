@@ -47,8 +47,11 @@ class AtomTest(TestCase):
         self.assertIn(key, keys)
 
     def test_get_out(self):
-        atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
 
+        with self.assertRaises(TypeError):
+            atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
+
+        atom = ListLink(ConceptNode('a'), ConceptNode('b'))
         out = atom.out
 
         self.assertEqual(out, [ConceptNode('a'), ConceptNode('b')])
