@@ -28,6 +28,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 
 namespace opencog
 {
@@ -35,7 +36,7 @@ namespace opencog
  *  @{
  */
 
-class VariableSet : public Link
+class VariableSet : public UnorderedLink
 {
 protected:
 	/// Unbundled variables and types for them.
@@ -50,6 +51,8 @@ public:
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<VariableSet> VariableSetPtr;

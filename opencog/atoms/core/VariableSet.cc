@@ -24,6 +24,8 @@
 
 #include "VariableSet.h"
 
+#include <opencog/atoms/base/ClassServer.h>
+
 using namespace opencog;
 
 void VariableSet::throw_if_not_variable_set(Type t) const
@@ -37,13 +39,13 @@ void VariableSet::throw_if_not_variable_set(Type t) const
 }
 
 VariableSet::VariableSet(const HandleSeq& vardecls, Type t)
-	: Link(vardecls, t), _variables(vardecls, false)
+	: UnorderedLink(vardecls, t), _variables(vardecls, false)
 {
 	throw_if_not_variable_set(t);
 }
 
 VariableSet::VariableSet(const Handle& vardecl)
-	: Link(
+	: UnorderedLink(
 		not vardecl ?
 		// If vardecl is undefined then construct an empty variable set
 		HandleSeq({})
@@ -58,7 +60,7 @@ VariableSet::VariableSet(const Handle& vardecl)
 }
 
 VariableSet::VariableSet(const Link &l)
-	: Link(l), _variables(l.get_handle())
+	: UnorderedLink(l), _variables(l.get_handle())
 {
 	throw_if_not_variable_set(l.get_type());
 }
@@ -71,3 +73,5 @@ std::string opencog::oc_to_string(const VariableSetPtr& vsp,
 	else
 		return oc_to_string(vsp->get_handle(), indent);
 }
+
+DEFINE_LINK_FACTORY(VariableSet, VARIABLE_SET)
