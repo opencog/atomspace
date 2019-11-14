@@ -1256,16 +1256,16 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term = "
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
 	              << ptm->getHandle()->to_string()
-	              << "It's grounding " << hg->to_string()
+	              << "The grounded pivot point " << hg->to_string()
 	              << " has " << sz << " branches";})
 
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for term=" << ptm->to_string()
+		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
