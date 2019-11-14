@@ -137,6 +137,7 @@ private:
 	// whenever take_step is set to true.
 	bool _perm_take_step;
 	bool _perm_have_more;
+	bool _perm_reset;
 	PatternTermPtr _perm_latest_term;
 	PatternTermPtr _perm_latest_wrap;
 	std::map<Unorder, int> _perm_count;

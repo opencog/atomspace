@@ -496,6 +496,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
+	if (_perm_reset)
+	{
+		_perm_reset = false;
+		_perm_state.erase(Unorder(ptm, hg));
+		_perm_count.erase(Unorder(ptm, hg));
+	}
+
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
 	bool do_wrap = _perm_take_step;
@@ -541,6 +548,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				}
 			}
 		}
+		_perm_reset = false;
 
 		// Check for cases 1&2 of description above.
 		// These flags might have been (mis-)set in the
@@ -607,6 +615,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
+		_perm_reset = true;
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
@@ -2381,6 +2390,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_perm_have_more = false;
 	_perm_take_step = true;
+	_perm_reset = true;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
@@ -2427,6 +2437,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_perm_have_more = false;
 	_perm_take_step = true;
+	_perm_reset = true;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 }
