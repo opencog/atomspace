@@ -64,7 +64,7 @@ class AtomTest(TestCase):
 
     def test_invalid_key(self):
         string_node = ConceptNode("String")
-        error_str = "key should be an instance of Value, got {0} instead".format(str)
+        error_str = "key should be an instance of Atom, got {0} instead".format(str)
         with self.assertRaisesRegex(TypeError, error_str):
             string_node.set_value("bad key", StringValue("Hello, World!"))
 
