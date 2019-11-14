@@ -73,10 +73,10 @@ PrenexLink::PrenexLink(const Link &l)
 //
 Handle PrenexLink::reassemble(Type prenex,
                               const HandleMap& vm,
-                              const HandleSeq& final_varlist) const
+                              const Variables& final_variables) const
 {
 	// Now get the vardecl and body
-	Handle vdecl = gen_vardecl(final_varlist);
+	Handle vdecl = final_variables.get_vardecl();
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
 	// Reassemble if necessary. That is, if there are variables to
@@ -84,7 +84,7 @@ Handle PrenexLink::reassemble(Type prenex,
 	// re-assemble into prenex form if the desired link type actually
 	// is a prenex link type. If it's not, then it should not get
 	// prenexed.  Check for PutLink to avoid infinite recursion.
-	if (PUT_LINK != prenex and not final_varlist.empty() and
+	if (PUT_LINK != prenex and not final_variables.empty() and
 	    nameserver().isA(prenex, PRENEX_LINK))
 	{
 		return Handle(createLink(prenex, vdecl, newbod));
@@ -98,7 +98,8 @@ Handle PrenexLink::reassemble(Type prenex,
 
 // Collect up variables.
 static Handle collect(const Variables& vtool,
-                      const Handle& origvar, const Handle& newvar,
+                      const Handle& origvar,
+                      const Handle& newvar,
                       HandleSeq& final_varlist,
                       HandleSet& used_vars,
                       HandleMap& issued_vars)
@@ -220,10 +221,15 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		vm.insert({vtool.varseq[i], oset[i]});
 	}
 
+	// Whether the final_varlist should be ordered. If any variable
+	// declaration involved in the beta-reduction is ordered then it
+	// should be.
+	bool final_ordered = vtool._ordered or bound._ordered;
+
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(get_type(), vm, final_varlist);
+	return reassemble(get_type(), vm, Variables(final_varlist, final_ordered));
 }
 
 /* ================================================================= */
@@ -242,6 +248,12 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	Type prenex = get_type();
 
 	const Variables& vtool = get_variables();
+
+	// Whether the final_varlist should be ordered. If any variable
+	// declaration involved in the beta-reduction is ordered then it
+	// should be.
+	bool final_ordered = vtool._ordered;
+
 	for (const Handle& var : vtool.varseq)
 	{
 		// If we are not substituting for this variable, copy it
@@ -279,6 +291,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		{
 			PrenexLinkPtr sc = PrenexLinkCast(pare->second);
 			const Variables& bound = sc->get_variables();
+			final_ordered = final_ordered or bound._ordered;
 			Handle body = sc->get_body();
 
 			// The body might not exist, if there's an unmantched
@@ -318,7 +331,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(prenex, vm, final_varlist);
+	return reassemble(prenex, vm, Variables(final_varlist, final_ordered));
 }
 
 /* ================================================================= */
