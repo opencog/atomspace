@@ -514,16 +514,16 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	if (logger().is_fine_enabled())
 	{
 		num_perms = facto(mutation.size());
-		logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
+		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
-		              _perm_count[Unorder(ptm, hg)], num_perms,
+		              _perm_count[Unorder(ptm, hg)] + 1, num_perms,
 		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
-		              << _perm_count[Unorder(ptm, hg)] << " of " << num_perms
+		              << _perm_count[Unorder(ptm, hg)] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
@@ -593,7 +593,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				// Handle case 5&7 of description above.
 				_perm_have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
-				              << _perm_count[Unorder(ptm, hg)]
+				              << _perm_count[Unorder(ptm, hg)] + 1
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string()
 				              << " have_more=" << _perm_have_more;})
@@ -608,14 +608,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		// If we are here, we are handling case 8.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
-		              << _perm_count[Unorder(ptm, hg)]
+		              << _perm_count[Unorder(ptm, hg)] + 1
 		              << " of " << num_perms
 		              << " for term=" << ptm->to_string();})
 
 take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
-		_perm_reset = true;
+		_perm_reset = true;      // reset perms on lower links, too.
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
@@ -671,7 +671,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 	auto ps = _perm_state.find(Unorder(ptm, hg));
 	if (_perm_state.end() == ps)
 	{
-		DO_LOG({LAZY_LOG_FINE << "tree_comp fresh start unordered link term="
+		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
 		sort(perm.begin(), perm.end());
