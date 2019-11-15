@@ -647,7 +647,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
-		sort(perm.begin(), perm.end());  // XXX is this really needed?
+		// sort(perm.begin(), perm.end());  // XXX is this really needed?
 		_perm_take_step = false;
 		return perm;
 	}
