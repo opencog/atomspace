@@ -63,7 +63,7 @@
 			(Implication (Variable "$X") (Variable "$Y"))
 			(Implication (Variable "$Z") (Variable "$W")))))
 
-(define cube-expect
+(define expect-cube
 	(Set
 		(ImplicationLink
 			(ImplicationLink (PredicateNode "P") (PredicateNode "Q"))

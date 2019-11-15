@@ -32,14 +32,16 @@
 		; Matches the target graph
 		(ListLink (QuoteLink
 			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
-				(PresentLink (UnquoteLink (VariableNode "$cnj-bodies-1"))
+				(PresentLink
+					(UnquoteLink (VariableNode "$cnj-bodies-1"))
 					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-0"))
 
 		; Also matches the target graph
 		(ListLink (QuoteLink
 			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
-				(PresentLink (UnquoteLink (VariableNode "$cnj-bodies-1"))
+				(PresentLink
+					(UnquoteLink (VariableNode "$cnj-bodies-1"))
 					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-1")))))
 
