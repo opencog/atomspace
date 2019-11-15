@@ -316,7 +316,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return vardecl;
 	}
 
-	else if (VARIABLE_LIST == t)
+	else if (VARIABLE_LIST == t or VARIABLE_SET == t)
 	{
 		HandleSeq subvardecls;
 		HandleSet subvars;      // avoid duplicating variables
@@ -331,7 +331,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return Handle::UNDEFINED;
 		if (subvardecls.size() == 1)
 			return subvardecls[0];
-		return Handle(createVariableList(subvardecls));
+		return Handle(createLink(subvardecls, t));
 	}
 
 	// If we're here we have failed to recognize vardecl as a useful
