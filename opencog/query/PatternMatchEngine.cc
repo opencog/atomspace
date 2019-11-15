@@ -506,16 +506,16 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	if (logger().is_fine_enabled())
 	{
 		num_perms = facto(mutation.size());
-		logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
+		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
-		              _perm_count[Unorder(ptm, hg)], num_perms,
+		              _perm_count[Unorder(ptm, hg)] + 1, num_perms,
 		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
-		              << _perm_count[Unorder(ptm, hg)] << " of " << num_perms
+		              << _perm_count[Unorder(ptm, hg)] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
@@ -583,7 +583,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				// Handle case 5&7 of description above.
 				_perm_have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
-				              << _perm_count[Unorder(ptm, hg)]
+				              << _perm_count[Unorder(ptm, hg)] + 1
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string()
 				              << " have_more=" << _perm_have_more;})
@@ -598,7 +598,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		// If we are here, we are handling case 8.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
-		              << _perm_count[Unorder(ptm, hg)]
+		              << _perm_count[Unorder(ptm, hg)] + 1
 		              << " of " << num_perms
 		              << " for term=" << ptm->to_string();})
 
@@ -611,10 +611,12 @@ take_next_step:
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
-	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term=" << ptm->to_string();})
+	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
+	             << ptm->to_string();})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
+
 	return false;
 }
 
@@ -642,10 +644,10 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 	auto ps = _perm_state.find(Unorder(ptm, hg));
 	if (_perm_state.end() == ps)
 	{
-		DO_LOG({LAZY_LOG_FINE << "tree_comp fresh start unordered link term="
+		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
-		sort(perm.begin(), perm.end());
+		sort(perm.begin(), perm.end());  // XXX is this really needed?
 		_perm_take_step = false;
 		return perm;
 	}
@@ -1217,18 +1219,17 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term = "
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
 	              << ptm->getHandle()->to_string()
-	              << "It's grounding " << hg->to_string()
+	              << "The grounded pivot point " << hg->to_string()
 	              << " has " << sz << " branches";})
 
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for term=" << ptm->to_string()
+		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
-
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		if (found) break;
 	}
@@ -1439,21 +1440,23 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	DO_LOG({LAZY_LOG_FINE << "Checking pattern term=" << ptm->to_string()
+	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
 	              << " for soln by " << hg.value();})
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
-		              << " NOT solved by " << hg.value();})
+		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
+		              << ptm->to_string()
+		              << " its NOT solved by " << hg.value();})
 		solution_pop();
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
-	              << " solved by " << hg->to_string() << ", move up";})
+	DO_LOG({LAZY_LOG_FINE << "Solved term=" << ptm->getHandle()->to_string()
+	              << " it is solved by " << hg->to_string()
+	              << ", will move up.";})
 
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
