@@ -1285,6 +1285,9 @@ void Variables::extend(const Variables& vset)
 			catch(const std::out_of_range&) {}
 		}
 	}
+
+	// If either this or the other are ordered then the result is ordered
+	_ordered = _ordered or vset._ordered;
 }
 
 void Variables::erase(const Handle& var)
