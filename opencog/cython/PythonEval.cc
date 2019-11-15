@@ -382,12 +382,19 @@ static bool try_to_load_modules(const char ** config_paths)
 
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+static bool was_initialized_by_us = false;
 static void *_dlso = nullptr;
 
 void opencog::global_python_initialize()
 {
     // Don't initialize twice
     if (already_initialized) return;
+
+    // https://docs.python.org/3/c-api/init.html#c.Py_FinalizeEx
+    // Some extensions may not work properly if their initialization routine is called more than once; this can happen if an application calls Py_Initialize() and Py_FinalizeEx() more than once.
+    if (was_initialized_by_us)
+        throw std::runtime_error("reinitialization is not supported by python");
+
     already_initialized = true;
 
     // Calling "import rospy" exhibits bug
@@ -422,6 +429,7 @@ void opencog::global_python_initialize()
     {
         // We are doing the initialization.
         initialized_outside_opencog = false;
+        was_initialized_by_us = true;
 
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
@@ -463,6 +471,8 @@ void opencog::global_python_initialize()
 void opencog::global_python_finalize()
 {
     logger().debug("[global_python_finalize] Start");
+    if (!already_initialized)
+        return;
 
     // Cleanup Python.
     if (!initialized_outside_opencog)

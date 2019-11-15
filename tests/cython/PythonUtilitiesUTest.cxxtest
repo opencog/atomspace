@@ -50,9 +50,6 @@ public:
         // Create a atomspace.
         atomSpace = new AtomSpace();
 
-        // Initialize Python.
-        initialize_python(atomSpace);
-
         // Stop Python.
         finalize_python();
 
