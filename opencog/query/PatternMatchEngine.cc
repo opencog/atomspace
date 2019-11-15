@@ -674,7 +674,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
-		sort(perm.begin(), perm.end());
+		sort(perm.begin(), perm.end());  // XXX is this really needed?
 		_perm_take_step = false;
 		return perm;
 	}
@@ -1267,7 +1267,6 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
-
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		if (found) break;
 	}
@@ -1480,21 +1479,23 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	DO_LOG({LAZY_LOG_FINE << "Checking pattern term=" << ptm->to_string()
+	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
 	              << " for soln by " << hg.value();})
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
-		              << " NOT solved by " << hg.value();})
+		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
+		              << ptm->to_string()
+		              << " its NOT solved by " << hg.value();})
 		solution_pop();
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->getHandle()->to_string()
-	              << " solved by " << hg->to_string() << ", move up";})
+	DO_LOG({LAZY_LOG_FINE << "Solved term=" << ptm->getHandle()->to_string()
+	              << " it is solved by " << hg->to_string()
+	              << ", will move up.";})
 
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
