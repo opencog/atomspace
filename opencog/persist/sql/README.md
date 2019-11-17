@@ -390,65 +390,78 @@ lead to delays of tens of milliseconds to write handfuls of atoms, as
 that is the seek time (latency) for spinning disk media. Thus,
 synchronous commits should be disabled.
 
-Solid state disks are a lot faster; it's not clear if this would still
-be a bottleneck.
-
-Disabling synchronous commits may cause the latest database updates
-to be lost, if power goes out, or the system unexpectedly reboots.
-This kind of loss is usually not a problem for most opencog apps,
-... all of the current apps are gathering statistics from generated
-data, and so this kind of loss is almost surely inconsequential.
+The difference between `synchronous_commit=off` and `=on` can be as
+much as a factor of 100x for spinning disks, and a factor of 5x for
+SSD drives, based on measurements on actual AtomSpace workloads.
 
 Edit `postgresql.conf` (a typical location is
-`/etc/postgresql/9.5/main/postgresql.conf`) and make the changes below.
-The first two changes are recommended by
-http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+`/etc/postgresql/9.6/main/postgresql.conf`) and make the changes below.
+The first two changes are recommended by the
+[PostgreSQL wiki](http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 ```
-   shared_buffers = default was 32MB, change to 25% of installed RAM
-   work_mem = default was 1MB change to 32MB
-   effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
-   synchronous_commit = default on change to off
-   wal_buffers = default 64kB change to 2MB or even 32MB
-   checkpoint_segments = 64 (each one takes up 16MB disk space)
-	max_connections = 130 (each opencog instance needs 32)
-	max_worker_processes = 32 (one per CPU core)
-   ssl = off
+   shared_buffers = 24GB       # Change to 25% of installed RAM
+   work_mem = 32MB             # Default was 1MB, change to 32MB
+   effective_cache_size = 60GB # Change to 50%-75% of installed RAM
+   synchronous_commit = off    # Default was on, change to off
+	max_connections = 130       # Each AtomSpace instance needs 32
+	max_worker_processes = 32   # One per CPU core
+   ssl = off                   # There's no point to encyrption locally
 ```
 
-For SSD drives, the following can make a significant difference:
+Avoid the "checkpoints are occurring too frequently" warning message by
+setting:
+```
+   checkpoint_timeout = 1h
+   max_wal_size = 8GB
+   checkpoint_completion_target = 0.9
+```
+
+For SSD drives, the following can make a significant difference. There's
+some
+[benchmark charts at a blog](https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/).
+The changes to `seq_page_cost` and `random_page_cost` represent the
+relative ratios of SSD speed to CPU/RAM speed (where `1.0` is for a
+spinning disk.)
 ```
   seq_page_cost = 0.1
   random_page_cost = 0.1
   effective_io_concurrency = 100
 ```
 
-For spinning media, `synchronous_commit=off` is 120x faster than
-`synchronous_commit=local`(about 400 atoms/sec vs 3 atoms/sec)
-
-For write-mostly databases, such as in the language-learning project,
-you will get better results with `checkpoint_segments = 100`.
-
-If you have postgres 9.0 or newer, there are no checkpoint_segments.
-Instead, do this:
-```
-   checkpoint_timeout = 1h
-   max_wal_size = 8GB
-   checkpoint_completion_target = 0.9
-```
-This will avoid the "checkpoints are occurring too frequently"
-warning message.
-
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
-6.4 gigabytes (for example):
+16.4 gigabytes (for example). Edit: `sudo vi /etc/sysctl.conf` and add:
 ```
-   vi /etc/sysctl.conf
-   kernel.shmmax = 6440100100
+   kernel.shmmax = 16440100100
 ```
 save file contents, then:
 ```
-   sysctl -p /etc/sysctl.conf
+   sudo sysctl -p /etc/sysctl.conf
 ```
+Using 2MB-sized HugePages also helps. The proceedure here is a bit
+complicated. Add a hugepages user-group, and add postgres to it:
+```
+   sudo groupadd hugepages
+   sudo gpasswd -a postgres hugepages
+```
+Then you need to find out what the group id (gid) was:
+```
+   id postgres
+```
+Suppose that this shows group id 1234 for `hugepages`.  This needs to
+be added to `/etc/sysctl.conf` as well. So edit, and add:
+```
+   vm.nr_hugepages = 16384       # 32GB of hugepages, 25% of RAM.
+   vm.hugetlb_shm_group=1234
+```
+Don't forget to `sudo sysctl -p /etc/sysctl.conf` again.
+
+Finally, the ability to use thos pages. Add to `/etc/security/limits.conf`:
+```
+    @hugepages      soft    memlock         unlimited
+    @hugepages      hard    memlock         unlimited
+```
+
 
 Unsafe performance tweaks
 -------------------------
