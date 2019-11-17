@@ -394,9 +394,8 @@ The difference between `synchronous_commit=off` and `=on` can be as
 much as a factor of 100x for spinning disks, and a factor of 5x for
 SSD drives, based on measurements on actual AtomSpace workloads.
 
-Edit `postgresql.conf` (a typical location is
-`/etc/postgresql/9.6/main/postgresql.conf`) and make the changes below.
-The first two changes are recommended by the
+Edit `postgresql.conf` (usually `/etc/postgresql/9.6/main/postgresql.conf`)
+and make the changes below.  The first two changes are recommended by the
 [PostgreSQL wiki](http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 ```
    shared_buffers = 24GB       # Change to 25% of installed RAM
@@ -416,9 +415,8 @@ setting:
    checkpoint_completion_target = 0.9
 ```
 
-For SSD drives, the following can make a significant difference. There's
-some
-[benchmark charts at a blog](https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/).
+For SSD drives, the following can make a significant difference.
+This is shown in some [benchmark charts at a blog](https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/).
 The changes to `seq_page_cost` and `random_page_cost` represent the
 relative ratios of SSD speed to CPU/RAM speed (where `1.0` is for a
 spinning disk.)
@@ -438,6 +436,8 @@ save file contents, then:
 ```
    sudo sysctl -p /etc/sysctl.conf
 ```
+
+#### Tuning HugePages
 Using 2MB-sized HugePages also helps. The proceedure here is a bit
 complicated. Add a hugepages user-group, and add postgres to it:
 ```
@@ -460,19 +460,6 @@ Finally, the ability to use thos pages. Add to `/etc/security/limits.conf`:
 ```
     @hugepages      soft    memlock         unlimited
     @hugepages      hard    memlock         unlimited
-```
-
-
-Unsafe performance tweaks
--------------------------
-There is one very unsafe performance optimization: disabling fsync.
-It's not clear how much this helps; you'd have to measure. Disabling
-it is very dangerous: in case of a power loss, or a spontaneous reboot,
-before all data has been written to disk, this can result in database
-corruption.  Yes, this happens. THE BELOW IS NOT RECOMMENDED!
-
-```
-   fsync = default on  change to off
 ```
 
 Database Setup
