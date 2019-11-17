@@ -415,6 +415,13 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    ssl = off
 ```
 
+For SSD drives, the following should help:
+```
+  seq_page_cost = 0.1
+  random_page_cost = 0.15
+  effective_io_concurrency = 20
+```
+
 For spinning media, `synchronous_commit=off` is 120x faster than
 `synchronous_commit=local`(about 400 atoms/sec vs 3 atoms/sec)
 
@@ -424,9 +431,9 @@ you will get better results with `checkpoint_segments = 100`.
 If you have postgres 9.0 or newer, there are no checkpoint_segments.
 Instead, do this:
 ```
-checkpoint_timeout = 1h
-max_wal_size = 8GB
-checkpoint_completion_target = 0.9
+   checkpoint_timeout = 1h
+   max_wal_size = 8GB
+   checkpoint_completion_target = 0.9
 ```
 This will avoid the "checkpoints are occurring too frequently"
 warning message.
@@ -441,13 +448,6 @@ usage has been exceeded. This can be fixed by telling the kernel to use
 save file contents, then:
 ```
    sysctl -p /etc/sysctl.conf
-```
-
-For SSD drives, the following might help:
-```
-seq_page_cost = 0.1
-random_page_cost = 0.15
-effective_io_concurrency = 5
 ```
 
 Unsafe performance tweaks
