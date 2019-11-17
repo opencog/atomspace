@@ -415,11 +415,11 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    ssl = off
 ```
 
-For SSD drives, the following should help:
+For SSD drives, the following can make a significant difference:
 ```
   seq_page_cost = 0.1
-  random_page_cost = 0.15
-  effective_io_concurrency = 20
+  random_page_cost = 0.1
+  effective_io_concurrency = 100
 ```
 
 For spinning media, `synchronous_commit=off` is 120x faster than
