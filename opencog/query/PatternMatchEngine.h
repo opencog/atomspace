@@ -140,6 +140,7 @@ private:
 	bool _perm_reset;
 	PatternTermPtr _perm_latest_term;
 	PatternTermPtr _perm_latest_wrap;
+	PatternTermPtr _perm_pivot;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
 
