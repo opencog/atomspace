@@ -99,51 +99,87 @@ ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Vector (point-wise) multiplication
-ValuePtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+/// The shorter vector is assumed to be one-padded.
+std::vector<double> opencog::times(const std::vector<double>& fva,
+                                   const std::vector<double>& fvb)
 {
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
 
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = fva[i] * fvb[i];
-
-	return createFloatValue(prod);
+	std::vector<double> prod(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lenb; i++)
+			prod[i] = fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lena; i++)
+			prod[i] = fva[i];
+	}
+	return prod;
 }
 
 /// Vector (point-wise) addition
-ValuePtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+/// The shorter vector is assumed to be zero-padded.
+std::vector<double> opencog::plus(const std::vector<double>& fva,
+                                  const std::vector<double>& fvb)
 {
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
 
-	std::vector<double> sum(len);
-	for (size_t i=0; i<len; i++)
-		sum[i] = fva[i] + fvb[i];
-
-	return createFloatValue(sum);
+	std::vector<double> sum(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			sum[i] = fva[i] + fvb[i];
+		for (; i<lenb; i++)
+			sum[i] = fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			sum[i] = fva[i] + fvb[i];
+		for (; i<lena; i++)
+			sum[i] = fva[i];
+	}
+	return sum;
 }
 
 /// Vector (point-wise) division
-ValuePtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+/// The shorter vector is assumed to be one-padded.
+std::vector<double> opencog::divide(const std::vector<double>& fva,
+                                    const std::vector<double>& fvb)
 {
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
 
-	std::vector<double> ratio(len);
-	for (size_t i=0; i<len; i++)
-		ratio[i] = fva[i] / fvb[i];
-
-	return createFloatValue(ratio);
+	std::vector<double> ratio(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			ratio[i] = fva[i] / fvb[i];
+		for (; i<lenb; i++)
+			ratio[i] = 1.0 / fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			ratio[i] = fva[i] / fvb[i];
+		for (; i<lena; i++)
+			ratio[i] = fva[i];
+	}
+	return ratio;
 }
 
 // Adds factory when the library is loaded.

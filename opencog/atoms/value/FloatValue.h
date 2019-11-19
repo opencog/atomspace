@@ -84,11 +84,23 @@ ValuePtr times(double, const FloatValuePtr&);
 ValuePtr plus(double, const FloatValuePtr&);
 ValuePtr divide(double, const FloatValuePtr&);
 
-// Vector multiplication and addition
-ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
+std::vector<double> times(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> plus(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> divide(const std::vector<double>&, const std::vector<double>&);
 
+// Vector multiplication and addition
+inline
+ValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(times(fvpa->value(), fvpb->value()));
+}
+inline
+ValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(plus(fvpa->value(), fvpb->value()));
+}
+inline
+ValuePtr divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(divide(fvpa->value(), fvpb->value()));
+}
 
 /** @}*/
 } // namespace opencog
