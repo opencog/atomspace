@@ -46,7 +46,7 @@ std::vector<double> NumberNode::to_vector(const std::string& str)
 	size_t len = str.size();
 	while (true)
 	{
-		pos = str.find_first_of("0123456789.", pos);
+		pos = str.find_first_of("+-0123456789.", pos);
 		if (pos == std::string::npos) return vec;
 		size_t last;
 		vec.emplace_back(std::stod(str.substr(pos), &last));
