@@ -280,7 +280,10 @@ void StreamUTest::test_minus()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	// 3-x --------------------------------------------
-	Handle minus = al(MINUS_LINK, an(NUMBER_NODE, "3"), valof);
+	std::vector<double> vthree;
+	for (int i=0; i<LEN; i++) vthree.push_back(3.0);
+	Handle three(createNumberNode(vthree));
+	Handle minus = al(MINUS_LINK, three, valof);
 
 	double sum = loop(minus);
 	printf("Expect 2.45 < %g < 2.55\n", sum);
@@ -288,7 +291,10 @@ void StreamUTest::test_minus()
 	TS_ASSERT_LESS_THAN(sum, 2.55);
 
 	// x-7 --------------------------------------------
-	minus = al(MINUS_LINK, valof, an(NUMBER_NODE, "7"));
+	std::vector<double> vseven;
+	for (int i=0; i<LEN; i++) vseven.push_back(7.0);
+	Handle seven(createNumberNode(vseven));
+	minus = al(MINUS_LINK, valof, seven);
 
 	sum = loop(minus);
 	printf("Expect -6.7 < %g < -6.3\n", sum);

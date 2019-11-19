@@ -128,43 +128,77 @@ NumberNode::NumberNode(const ValuePtr& vp)
 }
 
 // ============================================================
-// Vector ops
-// There's a lot of cut-n-paste here, maybe it can be reduced.
-
-/// Scalar multiplication
-ValuePtr opencog::times(double scalar, const NumberNodePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = scalar * fv[i];
-
-	return createFloatValue(prod);
-}
 
 /// Scalar addition
-ValuePtr opencog::plus(double scalar, const NumberNodePtr& fvp)
+ValuePtr opencog::plus(double f, const ValuePtr& vj, bool silent)
 {
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> sum(len);
-	for (size_t i=0; i<len; i++)
-		sum[i] = scalar + fv[i];
+	Type vjtype = vj->get_type();
 
-	return createFloatValue(sum);
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return plus(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return plus(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Scalar subtraction
+ValuePtr opencog::minus(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return minus(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Scalar multiplication
+ValuePtr opencog::times(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return times(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return times(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
 }
 
 /// Scalar division
-ValuePtr opencog::divide(double scalar, const NumberNodePtr& fvp)
+ValuePtr opencog::divide(double f, const ValuePtr& vj, bool silent)
 {
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> ratio(len);
-	for (size_t i=0; i<len; i++)
-		ratio[i] = scalar / fv[i];
+	Type vjtype = vj->get_type();
 
-	return createFloatValue(ratio);
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return divide(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return divide(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
 }
 
 // ============================================================
@@ -188,6 +222,32 @@ ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
 		return plus(FloatValueCast(vi), FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Vector (point-wise) subtraction
+ValuePtr opencog::minus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
+{
+	Type vitype = vi->get_type();
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return minus(NumberNodeCast(vi), NumberNodeCast(vj));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(NumberNodeCast(vi), FloatValueCast(vj));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return minus(FloatValueCast(vi), NumberNodeCast(vj));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(FloatValueCast(vi), FloatValueCast(vj));
 
 	if (silent) throw SilentException();
 

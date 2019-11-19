@@ -328,7 +328,7 @@ void ValueOfUTest::test_minus()
 
 	ValuePtr result = FunctionLinkCast(minus)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 2.0, 1.0});
+	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, -1.0, -2.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -342,7 +342,7 @@ void ValueOfUTest::test_minus()
 
 	result = FunctionLinkCast(minus)->execute();
 
-	expect = createFloatValue(std::vector<double>{-7.0, -6.0, -5.0});
+	expect = createFloatValue(std::vector<double>{-7.0, 1.0, 2.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 

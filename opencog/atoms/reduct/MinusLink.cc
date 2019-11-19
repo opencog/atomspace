@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -60,11 +46,6 @@ void MinusLink::init(void)
 		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
@@ -75,16 +56,24 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-	{
-		double diff = get_double(vi) - get_double(vj);
-		return createNumberNode(diff);
-	}
-
 	// If vj is zero, just drop it.
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return sample_stream(vi, vitype);
+
+	// Are they numbers? If so, perform vector (pointwise) subtraction.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
+	{
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(minus(vi, vj, true));
+
+		return minus(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
+	}
 
 	// Collapse (3 - (5 + x)) and (3 - (x + 5))
 	if (NUMBER_NODE == vitype and PLUS_LINK == vjtype)
@@ -93,14 +82,12 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			double diff = get_double(vi) - get_double(augend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(minus(vi, augend)));
 			return createMinusLink(hdiff, addend);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			double diff = get_double(vi) - get_double(addend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(minus(vi, addend)));
 			return createMinusLink(hdiff, augend);
 		}
 	}
@@ -112,16 +99,14 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			double diff = get_double(augend) - get_double(vj);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(minus(augend, vj)));
 			if (content_eq(hdiff, zero))
 				return addend;
 			return createPlusLink(addend, hdiff);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			double diff = get_double(addend) - get_double(vj);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(minus(addend, vj)));
 			if (content_eq(hdiff, zero))
 				return augend;
 			return createPlusLink(augend, hdiff);
@@ -130,31 +115,23 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 
 	// ------------------------------------------------------------------
 	// Values
-	// Scalar minus vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	try
 	{
-		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
-		return plus(get_double(vi), mj);
-	}
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(minus(vi, vj, true));
 
-	// Vector minus scalar
-	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-	{
-		return plus(-get_double(vj), FloatValueCast(vi));
+		return minus(vi, vj, true);
 	}
-
-	// Vector times vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	catch (const SilentException& ex)
 	{
-		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
-		return plus(FloatValueCast(vi), mj);
+		// If we are here, they were not simple numbers.
 	}
 
 	Handle hi(HandleCast(vi));
-	if (nullptr == hi) hi= HandleCast(fi);
+	if (nullptr == hi) hi = HandleCast(fi);
 
 	Handle hj(HandleCast(vj));
-	if (nullptr == hj) hj= HandleCast(fj);
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
