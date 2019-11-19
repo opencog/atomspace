@@ -195,6 +195,32 @@ ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 		"Expecting NumberNode or FloatValue!");
 }
 
+/// Vector (point-wise) subtraction
+ValuePtr opencog::minus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
+{
+	Type vitype = vi->get_type();
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return minus(NumberNodeCast(vi), NumberNodeCast(vj));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(NumberNodeCast(vi), FloatValueCast(vj));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return minus(FloatValueCast(vi), NumberNodeCast(vj));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(FloatValueCast(vi), FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
 ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 {
 	Type vitype = vi->get_type();
