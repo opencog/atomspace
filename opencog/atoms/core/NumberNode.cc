@@ -128,46 +128,6 @@ NumberNode::NumberNode(const ValuePtr& vp)
 }
 
 // ============================================================
-// Vector ops
-// There's a lot of cut-n-paste here, maybe it can be reduced.
-
-/// Scalar multiplication
-ValuePtr opencog::times(double scalar, const NumberNodePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = scalar * fv[i];
-
-	return createFloatValue(prod);
-}
-
-/// Scalar addition
-ValuePtr opencog::plus(double scalar, const NumberNodePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> sum(len);
-	for (size_t i=0; i<len; i++)
-		sum[i] = scalar + fv[i];
-
-	return createFloatValue(sum);
-}
-
-/// Scalar division
-ValuePtr opencog::divide(double scalar, const NumberNodePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> ratio(len);
-	for (size_t i=0; i<len; i++)
-		ratio[i] = scalar / fv[i];
-
-	return createFloatValue(ratio);
-}
-
-// ============================================================
 
 /// Vector (point-wise) addition
 ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
