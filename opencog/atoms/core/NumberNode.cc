@@ -299,4 +299,76 @@ ValuePtr opencog::divide(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb)
 
 // ============================================================
 
+/// Vector (point-wise) addition
+ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj)
+{
+	Type vitype = vi->get_type();
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return createNumberNode(plus(NumberNodeCast(vi), NumberNodeCast(vj)));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(plus(NumberNodeCast(vi), FloatValueCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return createNumberNode(plus(FloatValueCast(vi), NumberNodeCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(plus(FloatValueCast(vi), FloatValueCast(vj)));
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj)
+{
+	Type vitype = vi->get_type();
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return createNumberNode(times(NumberNodeCast(vi), NumberNodeCast(vj)));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(times(NumberNodeCast(vi), FloatValueCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return createNumberNode(times(FloatValueCast(vi), NumberNodeCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(times(FloatValueCast(vi), FloatValueCast(vj)));
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+ValuePtr opencog::divide(const ValuePtr& vi, const ValuePtr& vj)
+{
+	Type vitype = vi->get_type();
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return createNumberNode(divide(NumberNodeCast(vi), NumberNodeCast(vj)));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(divide(NumberNodeCast(vi), FloatValueCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return createNumberNode(divide(FloatValueCast(vi), NumberNodeCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(divide(FloatValueCast(vi), FloatValueCast(vj)));
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+// ============================================================
+
 DEFINE_NODE_FACTORY(NumberNode, NUMBER_NODE)
