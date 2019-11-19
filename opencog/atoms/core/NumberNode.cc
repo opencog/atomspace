@@ -105,12 +105,22 @@ NumberNode::NumberNode(const FloatValuePtr& fv)
 NumberNode::NumberNode(const ValuePtr& vp)
 	: Node(NUMBER_NODE, "")
 {
-	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-		throw RuntimeException(TRACE_INFO,
-			"Bad NumberNode constructor, expecting FloatValue!");
-	FloatValuePtr fv = FloatValueCast(vp);
-	_value = fv->value();
-	_name = vector_to_plain(_value);
+	if (nameserver().isA(vp->get_type(), NUMBER_NODE))
+	{
+		NumberNodePtr fv = NumberNodeCast(vp);
+		_value = fv->value();
+		_name = vector_to_plain(_value);
+		return;
+	}
+	if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
+	{
+		FloatValuePtr fv = FloatValueCast(vp);
+		_value = fv->value();
+		_name = vector_to_plain(_value);
+		return;
+	}
+	throw RuntimeException(TRACE_INFO,
+		"Bad NumberNode constructor, expecting FloatValue!");
 }
 
 // ============================================================
