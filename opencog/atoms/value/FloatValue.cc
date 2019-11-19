@@ -96,7 +96,7 @@ std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
 }
 
 /// Scalar division
-std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
+std::vector<double> opencog::divide(double scalar, const std::vector<double>& fv)
 {
 	size_t len = fv.size();
 	std::vector<double> ratio(len);
@@ -136,30 +136,30 @@ std::vector<double> opencog::plus(const std::vector<double>& fva,
 
 /// Vector (point-wise) subtraction
 /// The shorter vector is assumed to be zero-padded.
-std::vector<double> opencog::plus(const std::vector<double>& fva,
+std::vector<double> opencog::minus(const std::vector<double>& fva,
                                   const std::vector<double>& fvb)
 {
 	size_t lena = fva.size();
 	size_t lenb = fvb.size();
 
-	std::vector<double> sum(std::max(lena, lenb));
+	std::vector<double> diff(std::max(lena, lenb));
 	if (lena < lenb)
 	{
 		size_t i=0;
 		for (; i<lena; i++)
-			sum[i] = fva[i] - fvb[i];
+			diff[i] = fva[i] - fvb[i];
 		for (; i<lenb; i++)
-			sum[i] = -fvb[i];
+			diff[i] = -fvb[i];
 	}
 	else
 	{
 		size_t i=0;
 		for (; i<lenb; i++)
-			sum[i] = fva[i] - fvb[i];
+			diff[i] = fva[i] - fvb[i];
 		for (; i<lena; i++)
-			sum[i] = fva[i];
+			diff[i] = fva[i];
 	}
-	return sum;
+	return diff;
 }
 
 /// Vector (point-wise) multiplication
