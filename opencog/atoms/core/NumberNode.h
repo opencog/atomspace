@@ -121,6 +121,11 @@ inline
 ValuePtr divide(double f, const NumberNodePtr& fvp) {
 	return createFloatValue(divide(f, fvp->value())); }
 
+ValuePtr plus(double, const ValuePtr&, bool silent=false);
+ValuePtr minus(double, const ValuePtr&, bool silent=false);
+ValuePtr times(double, const ValuePtr&, bool silent=false);
+ValuePtr divide(double, const ValuePtr&, bool silent=false);
+
 // Vector multiplication and addition
 inline
 ValuePtr plus(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {

@@ -129,6 +129,80 @@ NumberNode::NumberNode(const ValuePtr& vp)
 
 // ============================================================
 
+/// Scalar addition
+ValuePtr opencog::plus(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return plus(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return plus(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Scalar subtraction
+ValuePtr opencog::minus(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return minus(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return minus(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Scalar multiplication
+ValuePtr opencog::times(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return times(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return times(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+/// Scalar division
+ValuePtr opencog::divide(double f, const ValuePtr& vj, bool silent)
+{
+	Type vjtype = vj->get_type();
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vjtype)
+		return divide(f, NumberNodeCast(vj));
+
+	if (nameserver().isA(vjtype, FLOAT_VALUE))
+		return divide(f, FloatValueCast(vj));
+
+	if (silent) throw SilentException();
+
+	throw RuntimeException(TRACE_INFO,
+		"Expecting NumberNode or FloatValue!");
+}
+
+// ============================================================
+
 /// Vector (point-wise) addition
 ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 {
