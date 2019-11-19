@@ -86,7 +86,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	try
 	{
-		return createNumberNode(plus(vi, vj));
+		return createNumberNode(plus(vi, vj, true));
 	}
 	catch (const SilentException& ex)
 	{
