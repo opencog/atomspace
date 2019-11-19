@@ -362,11 +362,19 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	std::string name;
 	if (nameserver().isA(t, NUMBER_NODE)) {
+		std::vector<double> vec;
+		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
 		{
-			std::vector<double> vec;
-			vec.push_back(scm_to_double(sname));
-			SCM slist = kv_pairs;
+			slist = scm_cons(sname, kv_pairs);
+		}
+		else
+		if (scm_is_true(scm_list_p(sname)))
+		{
+			slist = sname;
+		}
+		if (not scm_is_null(slist))
+		{
 			while (scm_is_pair(slist))
 			{
 				SCM sval = SCM_CAR(slist);
