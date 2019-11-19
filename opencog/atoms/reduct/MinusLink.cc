@@ -46,11 +46,6 @@ void MinusLink::init(void)
 		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
@@ -71,9 +66,9 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 	try
 	{
 		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-			return createNumberNode(plus(vi, times(-1.0, vj), true));
+			return createNumberNode(minus(vi, vj, true));
 
-		return plus(vi, times(-1.0, vj), true);
+		return minus(vi, vj, true);
 	}
 	catch (const SilentException& ex)
 	{
@@ -87,12 +82,12 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			Handle hdiff(createNumberNode(plus(vi, times(-1.0, augend))));
+			Handle hdiff(createNumberNode(minus(vi, augend)));
 			return createMinusLink(hdiff, addend);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			Handle hdiff(createNumberNode(plus(vi, times(-1.0, addend))));
+			Handle hdiff(createNumberNode(minus(vi, addend)));
 			return createMinusLink(hdiff, augend);
 		}
 	}
@@ -104,14 +99,14 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 		Handle addend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == augend->get_type())
 		{
-			Handle hdiff(createNumberNode(plus(augend, times(-1.0, vj))));
+			Handle hdiff(createNumberNode(minus(augend, vj)));
 			if (content_eq(hdiff, zero))
 				return addend;
 			return createPlusLink(addend, hdiff);
 		}
 		if (NUMBER_NODE == addend->get_type())
 		{
-			Handle hdiff(createNumberNode(plus(addend, times(-1.0, vj))));
+			Handle hdiff(createNumberNode(minus(addend, vj)));
 			if (content_eq(hdiff, zero))
 				return augend;
 			return createPlusLink(augend, hdiff);
@@ -123,9 +118,9 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 	try
 	{
 		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-			return createNumberNode(plus(vi, times(-1.0, vj), true));
+			return createNumberNode(minus(vi, vj, true));
 
-		return plus(vi, times(-1.0, vj), true);
+		return minus(vi, vj, true);
 	}
 	catch (const SilentException& ex)
 	{

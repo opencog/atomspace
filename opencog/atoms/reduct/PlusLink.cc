@@ -142,7 +142,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
 			Handle hdiff(createNumberNode(
-				plus(vj, times(-1.0, NumberNodeCast(subtrahend)))));
+				minus(vj, subtrahend)));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
