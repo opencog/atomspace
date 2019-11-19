@@ -72,6 +72,7 @@ public:
 	NumberNode(const std::string&);
 	NumberNode(const std::vector<double>&);
 	NumberNode(const FloatValuePtr&);
+	NumberNode(const ValuePtr&);
 
 	NumberNode(double vvv)
 		: Node(NUMBER_NODE, double_to_string(vvv))

@@ -7,6 +7,8 @@
 
 #include <sstream>
 
+#include <opencog/util/exceptions.h>
+
 #include "NumberNode.h"
 
 using namespace opencog;
@@ -96,6 +98,17 @@ NumberNode::NumberNode(const std::vector<double>& vec)
 NumberNode::NumberNode(const FloatValuePtr& fv)
 	: Node(NUMBER_NODE, "")
 {
+	_value = fv->value();
+	_name = vector_to_plain(_value);
+}
+
+NumberNode::NumberNode(const ValuePtr& vp)
+	: Node(NUMBER_NODE, "")
+{
+	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+		throw RuntimeException(TRACE_INFO,
+			"Bad NumberNode constructor, expecting FloatValue!");
+	FloatValuePtr fv = FloatValueCast(vp);
 	_value = fv->value();
 	_name = vector_to_plain(_value);
 }
