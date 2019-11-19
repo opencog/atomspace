@@ -63,11 +63,6 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
@@ -78,13 +73,6 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-	{
-		double sum = get_double(vi) + get_double(vj);
-		return createNumberNode(sum);
-	}
-
 	// If adding zero, just drop the zero.
 	// Unless the other side is a StreamValue, in which case, we
 	// have to behave consistently with adding a non-zero number.
@@ -94,6 +82,21 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return sample_stream(vi, vitype);
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
+	{
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(plus(vi, vj, true));
+
+		return plus(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
+	}
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
@@ -147,14 +150,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == minuend->get_type())
 		{
-			double sum = get_double(vj) + get_double(minuend);
-			Handle hsum(createNumberNode(sum));
+			Handle hsum(createNumberNode(plus(vj, minuend)));
 			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
-			double diff = get_double(vj) - get_double(subtrahend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(
+				plus(vj, times(-1.0, NumberNodeCast(subtrahend)))));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
@@ -216,10 +218,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		std::swap(vitype, vjtype);
 	}
 
-	// Scalar times vector
+	// vector ops...
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
-		return plus(get_double(vi), FloatValueCast(vj));
+		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
 	// Vector times vector

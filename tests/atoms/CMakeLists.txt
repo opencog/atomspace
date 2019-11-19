@@ -9,6 +9,8 @@ ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
 
+ADD_SUBDIRECTORY (reduct)
+
 ADD_SUBDIRECTORY (pattern)
 
 IF(HAVE_GUILE)
@@ -22,8 +24,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ParallelUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(RandomUTest)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(ReductUTest)
-	TARGET_LINK_LIBRARIES(ReductUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(FormulaUTest)
 	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
