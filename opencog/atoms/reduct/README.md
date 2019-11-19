@@ -51,6 +51,15 @@ By "term reduction", I mean reducing expressions like x+x to 2x, or
 reducing x+0 to just x. More complex examples, too: 6(x/2) == 3x and
 so on.
 
+### TODO
+A short-term "easy" TODO is to finish vectorizing the code.  Right
+now, `PlusLink` correctly handles vectors, but the other arithmetic
+operators do not.  In particular, TimeLink should provide pointwise
+vector math. There should be a SumLink to sum vectors into scalars
+(accumulate). There should be a NumberOfLink that converts FloatValue
+into NumberNode... This stuff would make basic vector math just a little
+simpler...
+
 ## Examples
 I believe the following examples all work. See also the AtomSpace
 [examples](../../../examples/atomspace) directory for more examples.
