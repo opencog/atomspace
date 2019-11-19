@@ -35,20 +35,22 @@ std::string NumberNode::vector_to_plain(const std::vector<double>& vec)
 ///   scheme)  "#(0.1 0.2 0.3)"
 ///   json)    "[0.1, 0.2, 0.3]"
 /// Why multiple formats? I dunno.
+/// Currently, only "plain" is supported.
 std::vector<double> NumberNode::to_vector(const std::string& str)
 {
 	std::vector<double> vec;
 
-	// Handle zero-length vectors
-	auto start = str.find_first_of("0123456789.");
-	if (start == std::string::npos) return vec;
-
 	size_t pos = 0;
-	size_t end = str.size();
-	while(true)
+	size_t len = str.size();
+	while (true)
 	{
-		vec.emplace_back(std::stod(str, &pos));
-		if (pos == std::string::npos or end <= pos) break;
+		pos = str.find_first_of("0123456789.", pos);
+		if (pos == std::string::npos) return vec;
+		size_t last;
+		vec.emplace_back(std::stod(str.substr(pos), &last));
+		if (pos == std::string::npos) return vec;
+		pos += last;
+		if (len <= pos) return vec;
 	}
 	return vec;
 }
