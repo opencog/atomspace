@@ -84,8 +84,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		return sample_stream(vi, vitype);
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
 	try
 	{
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(plus(vi, vj, true));
+
 		return plus(vi, vj, true);
 	}
 	catch (const SilentException& ex)
