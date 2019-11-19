@@ -112,17 +112,35 @@ ValuePtr plus(double, const NumberNodePtr&);
 ValuePtr divide(double, const NumberNodePtr&);
 
 // Vector multiplication and addition
-ValuePtr times(const NumberNodePtr&, const NumberNodePtr&);
-ValuePtr plus(const NumberNodePtr&, const NumberNodePtr&);
-ValuePtr divide(const NumberNodePtr&, const NumberNodePtr&);
+inline
+ValuePtr times(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr plus(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr divide(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
 
-ValuePtr times(const FloatValuePtr&, const NumberNodePtr&);
-ValuePtr plus(const FloatValuePtr&, const NumberNodePtr&);
-ValuePtr divide(const FloatValuePtr&, const NumberNodePtr&);
+inline
+ValuePtr times(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr plus(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr divide(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
+	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
 
-ValuePtr times(const NumberNodePtr&, const FloatValuePtr&);
-ValuePtr plus(const NumberNodePtr&, const FloatValuePtr&);
-ValuePtr divide(const NumberNodePtr&, const FloatValuePtr&);
+inline
+ValuePtr times(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr plus(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+inline
+ValuePtr divide(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
 
 ValuePtr times(const ValuePtr&, const ValuePtr&, bool silent=false);
 ValuePtr plus(const ValuePtr&, const ValuePtr&, bool silent=false);
