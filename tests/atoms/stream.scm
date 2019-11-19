@@ -4,6 +4,7 @@
 ; Every time that it is accessed, it generates a different set
 ; of random floating-point values.
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog exec))
 
 ; First, define a key and an atom, and attach an ordinary value
@@ -17,7 +18,7 @@
 ; (cog-execute! vo)
 
 ; Numeric computations can be performed on that value...
-(define tym (Times (Plus vo (Number 6)) (Number 2)))
+(define tym (Times (Plus vo (Number 6 6 6)) (Number 2)))
 ; (cog-execute! tym)
 
 ; Now, do it again, with the RandomStream
@@ -29,5 +30,6 @@
 ; Every call, the stream generates 24 numbers between 0 and 1.
 ; Add 6 to get a number between 6 and 7.
 ; Then multiply by 2, to get a number between 12 and 14.
-(define tymb (Times (Number 2) (Plus (ValueOf b k) (Number 6)) ))
+(define sixes (make-list 24 6))
+(define tymb (Times (Number 2) (Plus (ValueOf b k) (Number sixes)) ))
 ; (cog-execute! tymb)
