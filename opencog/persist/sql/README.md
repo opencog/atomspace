@@ -50,7 +50,7 @@ Missing features/ToDo items
 Performance status
 ------------------
 In March 2014, 10.3M atoms were loaded in about 20 minutes wall-clock
-time, 10 minutes of opencog-server CPU time.  This works out to about
+time, 10 minutes of OpenCog-server CPU time.  This works out to about
 500K atoms/minute, or 9K atoms/second.  The resulting cogserver required
 about 10GBytes of RAM, which works out to about 1KByte/atom average.
 The loaded hypergraphs were all EvaluationLinks, viz:
@@ -137,7 +137,7 @@ The goal of this implementation is to:
    to more than 100 atomspace instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
-   all of opencog, starting with the atomspace.
+   all of OpenCog, starting with the atomspace.
 
 7) A non-design-goal is fully automatic save-restore of atoms.  The
    save and restore of atoms are performed under the explicit control
@@ -456,7 +456,7 @@ be added to `/etc/sysctl.conf` as well. So edit, and add:
 ```
 Don't forget to `sudo sysctl -p /etc/sysctl.conf` again.
 
-Finally, the ability to use thos pages. Add to `/etc/security/limits.conf`:
+Finally, the ability to use those pages. Add to `/etc/security/limits.conf`:
 ```
     @hugepages      soft    memlock         unlimited
     @hugepages      hard    memlock         unlimited
@@ -464,7 +464,7 @@ Finally, the ability to use thos pages. Add to `/etc/security/limits.conf`:
 
 Database Setup
 --------------
-A database to hold the opencog data needs to be created.  Multiple
+A database to hold the OpenCog data needs to be created.  Multiple
 databases can be created.  In this example, the database name will
 be "mycogdata".  Change this as desired.  The unit tests require a
 scratch database called "opencog_test".
@@ -516,7 +516,7 @@ authentication method. This command:
    $  psql mycogdata
 ```
 should place you at the postgres-client prompt; you are now ready to
-create the opencog tables.  If the above didn't work, then you will
+create the OpenCog tables.  If the above didn't work, then you will
 have to create an explicit database user login, as explained below;
 otherwise, creating a user is optional.
 
@@ -527,7 +527,7 @@ User setup
 wish; postgres automatically provides password-less `peer`
 authentication to your unix username. However, the unit-tests do require
 that a distinct user be created, called `opencog_tester`, although you
-can bypass this, too, by altering the opencog test configuration file.
+can bypass this, too, by altering the OpenCog test configuration file.
 
 The database user is NOT the same thing as a unix user: the login is for
 the database (only), not the OS. In general, you will want to pick a
@@ -738,6 +738,7 @@ Unit Test Status
 * As of 2015-04-23 both unit tests work and pass.
 * As of 2017-01-20 all four unit tests work and pass.
 * As of 2019-02-01 all six unit tests work and pass.
+* As of 2019-11-11 all nine unit tests work and pass.
 
 
 Using the System
@@ -923,25 +924,25 @@ Diary entries from June 2008
 
 Store performance
 -----------------
-This section reviews the performance for storage of data from opencog
+This section reviews the performance for storage of data from OpenCog
 to the SQL server (and thence to disk).  Performed in 2008, on a typical
 Intel desktop that was new in 2004. Viz. under two GhZ, and 4GB RAM.
 
 First run with a large data set (save of 1564K atoms to the database)
 was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
-kernel block i/o layer, and 12% each for the opencog and postgres times:
+kernel block i/o layer, and 12% each for the OpenCog and postgres times:
 ```
    112:00 [md4_raid1] or 4.3 millisecs per atom
-   17 minutes for postgres, and opencog, each. or 0.66 millisecs per atom
+   17 minutes for postgres, and OpenCog, each. or 0.66 millisecs per atom
    1937576 - 1088032 kB = 850MBytes disk use
 ```
 Experiment: is this due to the bad design for trying to figure whether
 "INSERT" or "UPDATE" should be used? A local client-side cache of the
 keys in the DB seems to change little:
 ```
-   CPU usage for postgres 11:04  and opencog 10:40 and 112:30 for md
+   CPU usage for postgres 11:04  and OpenCog 10:40 and 112:30 for md
 ```
-So this change drops postgres server and opencog CPU usage
+So this change drops postgres server and OpenCog CPU usage
 significantly, but the insane kernel CPU usage remains.
 
 The above disaster can be attributed to bad defaults for the postgres
@@ -1023,12 +1024,12 @@ Loading performance
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
 2:08 postgres = 82 microsecs/atom (12.2K atoms/sec)
-similar to for opencog, but then AtomTable needs to reconcile, which
+similar to for OpenCog, but then AtomTable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
 
 Conclude: database loading would be much faster if we loaded all of
 the atoms first, then all of the lowest-height links, etc.  This assumes
-that opencog is strictly hierarchically structured. (no "crazy loops")
+that OpenCog is strictly hierarchically structured. (no "crazy loops")
 
 After implementing height-structured restore, get following, loading
 from a "hot" postgres instance (had not been stopped since previous
