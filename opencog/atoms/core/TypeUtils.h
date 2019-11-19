@@ -35,7 +35,7 @@ namespace opencog
  *  @{
  */
 
-// TODO: most of what is here should be moved to Variables
+// TODO: some of what is here could be moved to Variables
 
 /**
  * Type checker.  Returns true if `value` is of type `type_spec`.
