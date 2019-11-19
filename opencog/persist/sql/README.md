@@ -402,8 +402,8 @@ and make the changes below.  The first two changes are recommended by the
    work_mem = 32MB             # Default was 1MB, change to 32MB
    effective_cache_size = 60GB # Change to 50%-75% of installed RAM
    synchronous_commit = off    # Default was on, change to off
-	max_connections = 130       # Each AtomSpace instance needs 32
-	max_worker_processes = 32   # One per CPU core
+   max_connections = 130       # Each AtomSpace instance needs 32
+   max_worker_processes = 32   # One per CPU core
    ssl = off                   # There's no point to encyrption locally
 ```
 
