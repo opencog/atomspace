@@ -41,7 +41,7 @@ class ScopeLinkUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	Handle X, Y, S, T, P, Q, CT;
+	Handle X, Y, Z, S, T, P, Q, CT;
 
 public:
 	ScopeLinkUTest() : _eval(&_as)
@@ -50,6 +50,7 @@ public:
 
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
+		Z = an(VARIABLE_NODE, "$Z");
 		S = an(VARIABLE_NODE, "$S");
 		T = an(VARIABLE_NODE, "$T");
 		P = an(PREDICATE_NODE, "P");
@@ -72,6 +73,9 @@ public:
 	void test_get_variables_1();
 	void test_get_variables_2();
 	void test_get_variables_3();
+	void test_get_variables_4();
+	void test_get_variables_5();
+	void test_get_variables_6();
 };
 
 void ScopeLinkUTest::test_content_less()
@@ -290,6 +294,95 @@ void ScopeLinkUTest::test_get_variables_3()
 	printf("Excepted %s\n", oc_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that default variables in scope link are sorted according
+	// to canonical order defined in VarScraper
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varseq;
+	Variables expvar;
+	expvar.find_variables(body);
+
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(expvar.varseq).c_str());
+
+	TS_ASSERT_EQUALS(got, expvar.varseq);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that variables in scope link provided with VariableSet are
+	// sorted according to canonical order defined in VarScraper. We
+	// provide a mixture of typed and untyped variables to make sure it
+	// covers these cases.
+	Handle vardecl = al(VARIABLE_SET,
+	                    al(TYPED_VARIABLE_LINK, X, CT),
+	                    Y,
+	                    al(TYPED_VARIABLE_LINK, Z, CT));
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	// Test that variables are in canonical order
+	const Variables& result = sc->get_variables();
+	Variables expect;
+	expect.find_variables(body);
+
+	printf("Got %s\n", oc_to_string(result.varseq).c_str());
+	printf("Excepted %s\n", oc_to_string(expect.varseq).c_str());
+
+	TS_ASSERT_EQUALS(result.varseq, expect.varseq);
+
+	// Test that the inferred variable declaration corresponds to the
+	// scope one
+	Handle re_vardecl = result.get_vardecl();
+	Handle sc_vardecl = sc->get_vardecl();
+
+	printf("Got vardecl %s\n", oc_to_string(re_vardecl).c_str());
+	printf("Excepted vardecl %s\n", oc_to_string(sc_vardecl).c_str());	
+
+	TS_ASSERT(content_eq(re_vardecl, sc_vardecl));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Like above but Z is not in the variable declaration thus treated
+	// as constant.
+	Handle vardecl = al(VARIABLE_SET,
+	                    al(TYPED_VARIABLE_LINK, X, CT),
+	                    al(TYPED_VARIABLE_LINK, Y, CT));
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	HandleSeq result = sc->get_variables().varseq;
+	HandleSeq expect{X, Y};
+
+	printf("Got %s\n", oc_to_string(result).c_str());
+	printf("Excepted %s\n", oc_to_string(expect).c_str());
+
+	// Test that variables are in canonical order
+	TS_ASSERT_EQUALS(result, expect);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

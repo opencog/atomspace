@@ -56,9 +56,9 @@ void PatternLink::common_init(void)
 	HandleSeq all_clauses(_pat.unquoted_clauses);
 	all_clauses.insert(all_clauses.end(),
 	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
-	validate_variables(_varlist.varset, all_clauses);
+	validate_variables(_variables.varset, all_clauses);
 
-	remove_constants(_varlist.varset, _pat);
+	remove_constants(_variables.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
@@ -94,12 +94,12 @@ void PatternLink::common_init(void)
 	}
 
 	// Split the non-virtual clauses into connected components
-	get_bridged_components(_varlist.varset, _fixed, _pat.optionals,
+	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
 	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
-	check_satisfiability(_varlist.varset, _component_vars);
+	check_satisfiability(_variables.varset, _component_vars);
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -127,8 +127,8 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
-		                           _varlist._glob_intervalmap, _components[i],
+		Handle h(createPatternLink(_component_vars[i], _variables._simple_typemap,
+		                           _variables._glob_intervalmap, _components[i],
 		                           _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -171,7 +171,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 {
 	_pat.redex_name = "jit PatternLink";
 
-	_varlist = vars;
+	_variables = vars;
 	_body = body;
 	unbundle_clauses(_body);
 	common_init();
@@ -196,17 +196,17 @@ PatternLink::PatternLink(const HandleSet& vars,
 	// called on us, not directly, at least.  If we need it, then the
 	// API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
-	_varlist.varset = vars;
-	_varlist.varseq.clear();
+	_variables.varset = vars;
+	_variables.varseq.clear();
 	for (const Handle& v : vars)
 	{
-		_varlist.varseq.emplace_back(v);
+		_variables.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_varlist._simple_typemap.insert(*it);
+			_variables._simple_typemap.insert(*it);
 		auto imit = intervalmap.find(v);
 		if (imit != intervalmap.end())
-			_varlist._glob_intervalmap.insert(*imit);
+			_variables._glob_intervalmap.insert(*imit);
 	}
 
 	// Next, the body... there's no _body for lambda. The compo is
@@ -253,7 +253,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
-	_varlist.varset = vars;
+	_variables.varset = vars;
 	_pat.unquoted_clauses = clauses;
 	_pat.mandatory = clauses;
 	common_init();
@@ -547,7 +547,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 ///
 bool PatternLink::is_virtual(const Handle& clause)
 {
-	size_t nfree = num_unquoted_unscoped_in_tree(clause, _varlist.varset);
+	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
 
 	size_t nsub = 0;
@@ -555,7 +555,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 	size_t nvar = 0;
 	for (const Handle& sub: clause->getOutgoingSet())
 	{
-		size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
+		size_t nv = num_unquoted_unscoped_in_tree(sub, _variables.varset);
 		if (0 < nv)
 		{
 			nsub++;
@@ -735,14 +735,14 @@ bool PatternLink::add_dummies()
 		    IDENTICAL_LINK == tt)
 		{
 			const Handle& left = t->getOutgoingAtom(0);
-			if (any_free_in_tree(left, _varlist.varset))
+			if (any_free_in_tree(left, _variables.varset))
 			{
 				_pat.mandatory.emplace_back(left);
 				_fixed.emplace_back(left);
 			}
 
 			const Handle& right = t->getOutgoingAtom(1);
-			if (any_free_in_tree(right, _varlist.varset))
+			if (any_free_in_tree(right, _variables.varset))
 			{
 				_pat.mandatory.emplace_back(right);
 				_fixed.emplace_back(right);
@@ -887,7 +887,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
 	    and not ptm->getQuotation().is_quoted()
-	    and _varlist.varset.end() != _varlist.varset.find(h))
+	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
 		return;
@@ -987,13 +987,13 @@ void PatternLink::debug_log(void) const
 		logger().fine("No always clauses");
 
 	// Print out the bound variables in the predicate.
-	for (const Handle& h : _varlist.varset)
+	for (const Handle& h : _variables.varset)
 	{
 		if (h->is_node())
 			logger().fine() << "Bound var: " << h->to_short_string();
 	}
 
-	if (_varlist.varset.empty())
+	if (_variables.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
 }
 
