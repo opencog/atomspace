@@ -63,11 +63,6 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
