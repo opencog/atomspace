@@ -57,7 +57,8 @@ public:
 		CNT = an(TYPE_NODE, "ConceptNode");
 	}
 
-	void test_extend();
+	void test_extend_1();
+	void test_extend_2();
 	void test_find_variables_ordered_1();
 	void test_find_variables_ordered_2();
 	void test_find_variables_ordered_3();
@@ -73,7 +74,34 @@ public:
 	void test_find_variables_mixed_5();
 };
 
-void VariablesUTest::test_extend()
+void VariablesUTest::test_extend_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		vardecl1 = X,
+		vardecl2 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, PNT),
+		              al(TYPED_VARIABLE_LINK, Y, CNT)),
+		expect = al(VARIABLE_LIST,
+		            al(TYPED_VARIABLE_LINK, X, PNT),
+		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

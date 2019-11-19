@@ -22,6 +22,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "MapLink.h"
 
@@ -48,7 +49,7 @@ void MapLink::init(void)
 		const Handle& body = _outgoing[0];
 		FreeVariables fv;
 		fv.find_variables(body);
-		Handle decl(createVariableList(fv.varseq));
+		Handle decl(createVariableSet(fv.varseq));
 		_pattern = createScopeLink(decl, body);
 	}
 	_mvars = &_pattern->get_variables();

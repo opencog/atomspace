@@ -154,7 +154,7 @@ public:
 	            const HandleSeq&);
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 	const Pattern& get_pattern(void) const { return _pat; }
 
 	const HandleSeqSeq& get_components(void) const { return _components; }
