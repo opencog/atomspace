@@ -78,13 +78,6 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-	{
-		double sum = get_double(vi) + get_double(vj);
-		return createNumberNode(sum);
-	}
-
 	// If adding zero, just drop the zero.
 	// Unless the other side is a StreamValue, in which case, we
 	// have to behave consistently with adding a non-zero number.
@@ -94,6 +87,20 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return sample_stream(vi, vitype);
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+		return createNumberNode(plus(NumberNodeCast(vi), NumberNodeCast(vj)));
+
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(plus(NumberNodeCast(vi), FloatValueCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+		return createNumberNode(plus(FloatValueCast(vi), NumberNodeCast(vj)));
+
+	if (nameserver().isA(vitype, FLOAT_VALUE) and
+		 nameserver().isA(vjtype, FLOAT_VALUE))
+		return createNumberNode(plus(FloatValueCast(vi), FloatValueCast(vj)));
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
