@@ -30,11 +30,9 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  *
- * Experimental NumberNode class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
- *
- * Perhaps this should be a vector of numbers???
+ * NumberNode implementation. This is a vector of floats; thus, just
+ * like a FloatValue, except that it's a Node. We don't want to actually
+ * do multiple inheritance here, as that tends to blow up C++.
  */
 
 class NumberNode : public Node
@@ -51,7 +49,7 @@ private:
 	// This was a painful discovery that ate the chatbot's lunch.
 	// So we perform a hack here.  The core issue is that the rest of the
 	// system is explcitly defined to be locale-independent, including
-	// the natural-langauge pipeline in guile/scheme. Thus, printing
+	// the natural-language pipeline in guile/scheme. Thus, printing
 	// the European comma as a decimal separator blows up the code.
 	static std::string double_to_string(double x)
 	{
@@ -63,42 +61,33 @@ private:
 	}
 
 protected:
-	double value;
+	std::vector<double> _value;
 
 public:
 	// Please to NOT use this constructor!
-	NumberNode(Type t, const std::string& s)
-		// Convert to number and back to string to avoid miscompares.
-		: Node(t, double_to_string(std::stod(s))),
-		  value(std::stod(s))
-	{}
+	NumberNode(Type, const std::string&);
 
 public:
-	NumberNode(const std::string& s)
-		// Convert to number and back to string to avoid miscompares.
-		: Node(NUMBER_NODE, double_to_string(std::stod(s))),
-		  value(std::stod(s))
-	{}
+	NumberNode(const std::string&);
 
 	NumberNode(double vvv)
-		: Node(NUMBER_NODE, double_to_string(vvv)),
-		  value(vvv)
-	{}
+		: Node(NUMBER_NODE, double_to_string(vvv))
+	{ _value.push_back(vvv); }
 
-	NumberNode(Node &n)
-		: Node(n.get_type(), double_to_string(std::stod(n.get_name()))),
-		  value(std::stod(n.get_name()))
-	{
-		OC_ASSERT(nameserver().isA(_type, NUMBER_NODE),
-			"Bad NumberNode constructor!");
-	}
+	// TODO Should be a move assignment...
+	NumberNode(Node &);
+
+	static std::vector<double> to_vector(const std::string&);
+	static std::string vector_to_json(const std::vector<double>&);
+	static std::string vector_to_plain(const std::vector<double>&);
 
 	static std::string validate(const std::string& str)
 	{
-		return double_to_string(std::stod(str));
+		return vector_to_plain(to_vector(str));
 	}
 
-	double get_value(void) { return value; }
+	std::vector<double> get_vector(void) { return _value; }
+	double get_value(void) { return _value[0]; }
 
 	static Handle factory(const Handle&);
 };
