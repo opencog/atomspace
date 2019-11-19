@@ -62,68 +62,48 @@ std::string FloatValue::to_string(const std::string& indent) const
 
 // ==============================================================
 
-/// Scalar multiplication
-ValuePtr opencog::times(double scalar, const FloatValuePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = scalar * fv[i];
-
-	return createFloatValue(prod);
-}
-
 /// Scalar addition
-ValuePtr opencog::plus(double scalar, const FloatValuePtr& fvp)
+std::vector<double> opencog::plus(double scalar, const std::vector<double>& fv)
 {
-	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
 	std::vector<double> sum(len);
 	for (size_t i=0; i<len; i++)
 		sum[i] = scalar + fv[i];
 
-	return createFloatValue(sum);
+	return sum;
+}
+
+/// Scalar subtraction
+std::vector<double> opencog::minus(double scalar, const std::vector<double>& fv)
+{
+	size_t len = fv.size();
+	std::vector<double> diff(len);
+	for (size_t i=0; i<len; i++)
+		diff[i] = scalar - fv[i];
+
+	return diff;
+}
+
+/// Scalar multiplication
+std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
+{
+	size_t len = fv.size();
+	std::vector<double> prod(len);
+	for (size_t i=0; i<len; i++)
+		prod[i] = scalar * fv[i];
+
+	return prod;
 }
 
 /// Scalar division
-ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
+std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
 {
-	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
 	std::vector<double> ratio(len);
 	for (size_t i=0; i<len; i++)
 		ratio[i] = scalar / fv[i];
 
-	return createFloatValue(ratio);
-}
-
-/// Vector (point-wise) multiplication
-/// The shorter vector is assumed to be one-padded.
-std::vector<double> opencog::times(const std::vector<double>& fva,
-                                   const std::vector<double>& fvb)
-{
-	size_t lena = fva.size();
-	size_t lenb = fvb.size();
-
-	std::vector<double> prod(std::max(lena, lenb));
-	if (lena < lenb)
-	{
-		size_t i=0;
-		for (; i<lena; i++)
-			prod[i] = fva[i] * fvb[i];
-		for (; i<lenb; i++)
-			prod[i] = fvb[i];
-	}
-	else
-	{
-		size_t i=0;
-		for (; i<lenb; i++)
-			prod[i] = fva[i] * fvb[i];
-		for (; i<lena; i++)
-			prod[i] = fva[i];
-	}
-	return prod;
+	return ratio;
 }
 
 /// Vector (point-wise) addition
@@ -152,6 +132,62 @@ std::vector<double> opencog::plus(const std::vector<double>& fva,
 			sum[i] = fva[i];
 	}
 	return sum;
+}
+
+/// Vector (point-wise) subtraction
+/// The shorter vector is assumed to be zero-padded.
+std::vector<double> opencog::plus(const std::vector<double>& fva,
+                                  const std::vector<double>& fvb)
+{
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
+
+	std::vector<double> sum(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			sum[i] = fva[i] - fvb[i];
+		for (; i<lenb; i++)
+			sum[i] = -fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			sum[i] = fva[i] - fvb[i];
+		for (; i<lena; i++)
+			sum[i] = fva[i];
+	}
+	return sum;
+}
+
+/// Vector (point-wise) multiplication
+/// The shorter vector is assumed to be one-padded.
+std::vector<double> opencog::times(const std::vector<double>& fva,
+                                   const std::vector<double>& fvb)
+{
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
+
+	std::vector<double> prod(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lenb; i++)
+			prod[i] = fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lena; i++)
+			prod[i] = fva[i];
+	}
+	return prod;
 }
 
 /// Vector (point-wise) division
