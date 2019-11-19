@@ -89,18 +89,14 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		return sample_stream(vi, vitype);
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-		return createNumberNode(plus(NumberNodeCast(vi), NumberNodeCast(vj)));
-
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(plus(NumberNodeCast(vi), FloatValueCast(vj)));
-
-	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return createNumberNode(plus(FloatValueCast(vi), NumberNodeCast(vj)));
-
-	if (nameserver().isA(vitype, FLOAT_VALUE) and
-		 nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(plus(FloatValueCast(vi), FloatValueCast(vj)));
+	try
+	{
+		return createNumberNode(plus(vi, vj));
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
+	}
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
@@ -154,14 +150,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == minuend->get_type())
 		{
-			double sum = get_double(vj) + get_double(minuend);
-			Handle hsum(createNumberNode(sum));
+			Handle hsum(createNumberNode(plus(vj, minuend)));
 			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
-			double diff = get_double(vj) - get_double(subtrahend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(
+				plus(vj, times(-1.0, NumberNodeCast(subtrahend)))));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
@@ -223,10 +218,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		std::swap(vitype, vjtype);
 	}
 
-	// Scalar times vector
+	// vector ops...
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
-		return plus(get_double(vi), FloatValueCast(vj));
+		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
 	// Vector times vector

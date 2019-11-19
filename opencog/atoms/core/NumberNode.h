@@ -124,9 +124,9 @@ ValuePtr times(const NumberNodePtr&, const FloatValuePtr&);
 ValuePtr plus(const NumberNodePtr&, const FloatValuePtr&);
 ValuePtr divide(const NumberNodePtr&, const FloatValuePtr&);
 
-ValuePtr times(const ValuePtr&, const ValuePtr&);
-ValuePtr plus(const ValuePtr&, const ValuePtr&);
-ValuePtr divide(const ValuePtr&, const ValuePtr&);
+ValuePtr times(const ValuePtr&, const ValuePtr&, bool silent=false);
+ValuePtr plus(const ValuePtr&, const ValuePtr&, bool silent=false);
+ValuePtr divide(const ValuePtr&, const ValuePtr&, bool silent=false);
 
 /** @}*/
 }

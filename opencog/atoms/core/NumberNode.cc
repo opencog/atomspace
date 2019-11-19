@@ -300,7 +300,7 @@ ValuePtr opencog::divide(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb)
 // ============================================================
 
 /// Vector (point-wise) addition
-ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj)
+ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 {
 	Type vitype = vi->get_type();
 	Type vjtype = vj->get_type();
@@ -319,11 +319,13 @@ ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj)
 		 nameserver().isA(vjtype, FLOAT_VALUE))
 		return createNumberNode(plus(FloatValueCast(vi), FloatValueCast(vj)));
 
+	if (silent) throw SilentException();
+
 	throw RuntimeException(TRACE_INFO,
 		"Expecting NumberNode or FloatValue!");
 }
 
-ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj)
+ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 {
 	Type vitype = vi->get_type();
 	Type vjtype = vj->get_type();
@@ -342,11 +344,13 @@ ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj)
 		 nameserver().isA(vjtype, FLOAT_VALUE))
 		return createNumberNode(times(FloatValueCast(vi), FloatValueCast(vj)));
 
+	if (silent) throw SilentException();
+
 	throw RuntimeException(TRACE_INFO,
 		"Expecting NumberNode or FloatValue!");
 }
 
-ValuePtr opencog::divide(const ValuePtr& vi, const ValuePtr& vj)
+ValuePtr opencog::divide(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 {
 	Type vitype = vi->get_type();
 	Type vjtype = vj->get_type();
@@ -364,6 +368,8 @@ ValuePtr opencog::divide(const ValuePtr& vi, const ValuePtr& vj)
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
 		return createNumberNode(divide(FloatValueCast(vi), FloatValueCast(vj)));
+
+	if (silent) throw SilentException();
 
 	throw RuntimeException(TRACE_INFO,
 		"Expecting NumberNode or FloatValue!");
