@@ -28,7 +28,10 @@ std::string NumberNode::vector_to_plain(const std::vector<double>& vec)
 {
 	std::stringstream ss;
 	for (double v: vec) ss << double_to_string(v) << " ";
-	return ss.str();
+
+	// Drop the trailing blank.
+	size_t len = ss.str().size();
+	return ss.str().substr(0, len-1);
 }
 
 /// Support multiple formats:
