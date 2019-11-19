@@ -24,6 +24,7 @@
 #define _OPENCOG_NUMBER_NODE_H
 
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 namespace opencog
 {
@@ -69,6 +70,8 @@ public:
 
 public:
 	NumberNode(const std::string&);
+	NumberNode(const std::vector<double>&);
+	NumberNode(const FloatValuePtr&);
 
 	NumberNode(double vvv)
 		: Node(NUMBER_NODE, double_to_string(vvv))
@@ -86,7 +89,7 @@ public:
 		return vector_to_plain(to_vector(str));
 	}
 
-	std::vector<double> get_vector(void) { return _value; }
+	std::vector<double> value(void) { return _value; }
 	double get_value(void) { return _value[0]; }
 
 	static Handle factory(const Handle&);
@@ -101,6 +104,24 @@ static inline NumberNodePtr NumberNodeCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
 #define createNumberNode std::make_shared<NumberNode>
+
+// Scalar multiplication and addition
+ValuePtr times(double, const NumberNodePtr&);
+ValuePtr plus(double, const NumberNodePtr&);
+ValuePtr divide(double, const NumberNodePtr&);
+
+// Vector multiplication and addition
+ValuePtr times(const NumberNodePtr&, const NumberNodePtr&);
+ValuePtr plus(const NumberNodePtr&, const NumberNodePtr&);
+ValuePtr divide(const NumberNodePtr&, const NumberNodePtr&);
+
+ValuePtr times(const FloatValuePtr&, const NumberNodePtr&);
+ValuePtr plus(const FloatValuePtr&, const NumberNodePtr&);
+ValuePtr divide(const FloatValuePtr&, const NumberNodePtr&);
+
+ValuePtr times(const NumberNodePtr&, const FloatValuePtr&);
+ValuePtr plus(const NumberNodePtr&, const FloatValuePtr&);
+ValuePtr divide(const NumberNodePtr&, const FloatValuePtr&);
 
 /** @}*/
 }
