@@ -9,6 +9,7 @@
 
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/value/FloatValue.h>
 #include "NumberNode.h"
 
 using namespace opencog;
@@ -176,17 +177,17 @@ ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-		return createNumberNode(plus(NumberNodeCast(vi), NumberNodeCast(vj)));
+		return plus(NumberNodeCast(vi), NumberNodeCast(vj));
 
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(plus(NumberNodeCast(vi), FloatValueCast(vj)));
+		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return createNumberNode(plus(FloatValueCast(vi), NumberNodeCast(vj)));
+		return plus(FloatValueCast(vi), NumberNodeCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(plus(FloatValueCast(vi), FloatValueCast(vj)));
+		return plus(FloatValueCast(vi), FloatValueCast(vj));
 
 	if (silent) throw SilentException();
 
@@ -201,17 +202,17 @@ ValuePtr opencog::times(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-		return createNumberNode(times(NumberNodeCast(vi), NumberNodeCast(vj)));
+		return times(NumberNodeCast(vi), NumberNodeCast(vj));
 
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(times(NumberNodeCast(vi), FloatValueCast(vj)));
+		return times(NumberNodeCast(vi), FloatValueCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return createNumberNode(times(FloatValueCast(vi), NumberNodeCast(vj)));
+		return times(FloatValueCast(vi), NumberNodeCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(times(FloatValueCast(vi), FloatValueCast(vj)));
+		return times(FloatValueCast(vi), FloatValueCast(vj));
 
 	if (silent) throw SilentException();
 
@@ -226,17 +227,17 @@ ValuePtr opencog::divide(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-		return createNumberNode(divide(NumberNodeCast(vi), NumberNodeCast(vj)));
+		return divide(NumberNodeCast(vi), NumberNodeCast(vj));
 
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(divide(NumberNodeCast(vi), FloatValueCast(vj)));
+		return divide(NumberNodeCast(vi), FloatValueCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return createNumberNode(divide(FloatValueCast(vi), NumberNodeCast(vj)));
+		return divide(FloatValueCast(vi), NumberNodeCast(vj));
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
-		return createNumberNode(divide(FloatValueCast(vi), FloatValueCast(vj)));
+		return divide(FloatValueCast(vi), FloatValueCast(vj));
 
 	if (silent) throw SilentException();
 
