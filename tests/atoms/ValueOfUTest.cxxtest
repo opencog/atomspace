@@ -377,7 +377,7 @@ void ValueOfUTest::test_divide()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	// x/4 --------------------------------------------
-	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4 4 4"));
 
 	ValuePtr result = FunctionLinkCast(divide)->execute();
 
@@ -392,12 +392,12 @@ void ValueOfUTest::test_divide()
 
 	// 3/(x+1) --------------------------------------------
 
-	divide = al(DIVIDE_LINK, an(NUMBER_NODE, "3"),
-		al(PLUS_LINK, valof, an(NUMBER_NODE, "1")));
+	divide = al(DIVIDE_LINK, an(NUMBER_NODE, "3 3 3"),
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "1 1 1")));
 
 	result = FunctionLinkCast(divide)->execute();
 
-	expect = createFloatValue(std::vector<double>{3.0, 3.0, 3.0/2.0});
+	expect = createFloatValue(std::vector<double>{3.0, 3.0/2.0, 3.0/3.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
