@@ -50,8 +50,9 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		UnorderedUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
-			logger().set_print_to_stdout_flag(true);
+			// logger().set_print_to_stdout_flag(true);
 			logger().set_timestamp_flag(false);
+			// logger().set_sync_flag(true);
 #include "test-types.cc"
 		}
 
@@ -60,6 +61,8 @@ class UnorderedUTest :  public CxxTest::TestSuite
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+			else
+				logger().flush();
 		}
 
 		void setUp(void);
