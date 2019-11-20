@@ -165,6 +165,7 @@ class GroundedObjectNodeTest(unittest.TestCase):
 
         name = gon.get_object().name
         self.assertEqual(refc, sys.getrefcount(obj))
+
     def test_pass_correctly_wrapped_args_to_python_grounded_predicate_node(self):
         obj = GroundedObjectNode("obj", TestObject("some obj"), unwrap_args = True)
         bindlink = BindLink(
@@ -183,6 +184,31 @@ class GroundedObjectNodeTest(unittest.TestCase):
         result = execute_atom(self.space, bindlink)
 
         self.assertEqual(result, SetLink(obj))
+
+    def test_call_grounded_object_no_arguments(self):
+        exec_link = ApplyLink(
+                        MethodOfLink(
+                            GroundedObjectNode("obj", TestObject("obj")),
+                            ConceptNode("no_return_value")
+                        ),
+                        ListLink()
+                    )
+
+        result = execute_atom(self.space,  exec_link)
+        self.assertEqual(result, None)
+
+    def test_call_grounded_object_no_arguments_unwrap_args(self):
+        exec_link = ApplyLink(
+                        MethodOfLink(
+                            GroundedObjectNode("obj", TestObject("obj"),
+                                unwrap_args=True),
+                            ConceptNode("no_return_value")
+                        ),
+                        ListLink()
+                    )
+
+        result = execute_atom(self.space,  exec_link)
+        self.assertEqual(result, None)
 
 def return_true(atom):
     return TruthValue(1.0, 1.0)
@@ -215,6 +241,9 @@ class TestObject:
 
     def truth(self):
         return (1.0, 1.0)
+
+    def no_return_value():
+        print("test")
 
 if __name__ == '__main__':
     unittest.main()

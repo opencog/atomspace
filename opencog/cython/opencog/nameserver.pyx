@@ -68,6 +68,9 @@ def get_refreshed_types():
     return types
 
 cdef create_python_value_from_c_value(const cValuePtr& value):
+    if value.get() == NULL:
+        return None
+
     type = value.get().get_type()
     type_name = get_type_name(type)
     ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
