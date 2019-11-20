@@ -164,6 +164,11 @@ std::vector<double> opencog::minus(const std::vector<double>& fva,
 
 /// Vector (point-wise) multiplication
 /// The shorter vector is assumed to be one-padded.
+/// Unless the shorter vector is a scalar, in which case we do scalar
+/// multiplication. This is the "right thing to do", because that
+/// is the general user intent.  We could detect this case in all
+/// the callers to this routine, or we could just handle it here.
+/// This may seem messy to you, but this is the easiest solution.
 std::vector<double> opencog::times(const std::vector<double>& fva,
                                    const std::vector<double>& fvb)
 {
@@ -171,6 +176,20 @@ std::vector<double> opencog::times(const std::vector<double>& fva,
 	size_t lenb = fvb.size();
 
 	std::vector<double> prod(std::max(lena, lenb));
+	if (1 == lena)
+	{
+		double f = fva[0];
+		for (size_t i=0; i<lenb; i++)
+			prod[i] = f * fvb[i];
+	}
+	else
+	if (1 == lenb)
+	{
+		double f = fvb[0];
+		for (size_t i=0; i<lena; i++)
+			prod[i] = f * fva[i];
+	}
+	else
 	if (lena < lenb)
 	{
 		size_t i=0;
