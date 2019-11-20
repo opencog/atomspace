@@ -255,6 +255,8 @@ void UnorderedUTest::test_embed(void)
 	Handle result = eval->eval_h("(cog-execute! embedded-set)");
 
 	logger().debug("embedded result is %s\n", SchemeSmob::to_string(result).c_str());
+	if (2 != getarity(result))
+		logger().info("Error: unexpected number of solutions\n");
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
 
