@@ -539,12 +539,12 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		if (GLOB_NODE == h->get_type())
 		{
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
-			if (glst->is_node())
-				return glst;
-
 			changed = true;
-			for (const Handle& gl : glst->getOutgoingSet())
-				oset.emplace_back(gl);
+			if (glst->get_type() == LIST_LINK)
+				for (const Handle &gl : glst->getOutgoingSet())
+					oset.emplace_back(gl);
+			else
+				oset.emplace_back(glst);
 		}
 		else
 		{
