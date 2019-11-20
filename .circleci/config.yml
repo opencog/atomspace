@@ -205,6 +205,24 @@ jobs:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
+          name: Install Cogserver
+          command: |
+              cd /ws
+              git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver cogserver
+              mkdir -p /ws/cogserver/build
+              cd /ws/cogserver/build
+              cmake ..
+              make -j2 && make install && ldconfig
+      - run:
+          name: Install AttentionBank
+          command: |
+              cd /ws
+              git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/attention attention
+              mkdir -p /ws/attention/build
+              cd /ws/attention/build
+              cmake ..
+              make -j2 && make install && ldconfig
+      - run:
           name: Checkout OpenCog
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
