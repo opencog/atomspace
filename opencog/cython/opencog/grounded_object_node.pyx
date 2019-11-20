@@ -80,5 +80,7 @@ cdef convert_vector_of_grounded_objects_to_python_list(vector[cHandle] handles):
 cdef cValuePtr call_wrapped_args(object method, const cValuePtr& _args):
     args = convert_handle_seq_to_python_list((<cAtom*>_args.get()).getOutgoingSet())
     cdef Value result = method(*args)
+    if result is None:
+        return cValuePtr(NULL);
     return result.get_c_value_ptr()
 
