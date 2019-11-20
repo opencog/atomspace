@@ -47,11 +47,6 @@ void TimesLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
@@ -141,23 +136,16 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		}
 	}
 
-	// Swap order, make things easier below.
-	if (nameserver().isA(vitype, FLOAT_VALUE))
+	try
 	{
-		std::swap(vi, vj);
-		std::swap(vitype, vjtype);
-	}
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(times(vi, vj, true));
 
-	// Scalar times vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-	{
-		return times(vi, vj);
+		return times(vi, vj, true);
 	}
-
-	// Vector times vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	catch (const SilentException& ex)
 	{
-		return times(vi, vj);
+		// If we are here, they were not simple numbers.
 	}
 
 	Handle hi(HandleCast(vi));
