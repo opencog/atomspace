@@ -85,7 +85,8 @@ PatternTermSeq PatternTerm::getOutgoingSet() const
 	for (PatternTermWPtr w : _outgoing)
 	{
 		PatternTermPtr s(w.lock());
-		if (s) oset.push_back(s);
+		OC_ASSERT(nullptr != s, "Unexpected corruption of PatternTerm oset!");
+		oset.push_back(s);
 	}
 
 	return oset;
@@ -121,9 +122,7 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 	// Checks for a valid position
 	if (pos < getArity()) {
 		PatternTermPtr s(_outgoing[pos].lock());
-		if (not s)
-			throw RuntimeException(TRACE_INFO,
-			                       "expired outgoing set index %d", pos);
+		OC_ASSERT(nullptr != s, "Unexpected missing PatternTerm oset entry!");
 		return s;
 	} else {
 		throw RuntimeException(TRACE_INFO,
