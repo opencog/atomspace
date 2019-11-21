@@ -64,7 +64,10 @@ void FreeLink::unorder(void)
 	// e.g. EqualLink and IdenticalLink are unordered,
 	// but don't inherit from the C++ UnorderedLink class.
 	// So we hack around and do it here.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+	// Use content_based_handle_less() to avoid variations due
+	// to address-space randomization.
+	std::sort(_outgoing.begin(), _outgoing.end(),
+		content_based_handle_less());
 }
 
 void FreeLink::init(void)

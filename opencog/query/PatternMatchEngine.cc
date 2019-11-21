@@ -608,7 +608,8 @@ take_next_step:
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
-	} while (std::next_permutation(mutation.begin(), mutation.end()));
+	} while (std::next_permutation(mutation.begin(), mutation.end(),
+	         std::less<PatternTermPtr>()));
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
@@ -647,7 +648,9 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
-		sort(perm.begin(), perm.end());
+		// Sort into explict std::less<PatternTermPtr>() order, as
+		// otherwise std::next_permutation() will miss some perms.
+		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
 		return perm;
 	}

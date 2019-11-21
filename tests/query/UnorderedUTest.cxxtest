@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/guile/SchemeEval.h>
@@ -50,16 +36,25 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		UnorderedUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
-			logger().set_print_to_stdout_flag(true);
+			// logger().set_level(Logger::FINE);
+			// logger().set_print_to_stdout_flag(true);
 			logger().set_timestamp_flag(false);
+			// logger().set_sync_flag(true);
 #include "test-types.cc"
 		}
 
 		~UnorderedUTest()
 		{
+			logger().info("Completed running UnorderedUTest");
+
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+			else
+			{
+				logger().info("UnorderedUTest failed!");
+				logger().flush();
+			}
 		}
 
 		void setUp(void);
@@ -247,6 +242,8 @@ void UnorderedUTest::test_embed(void)
 	Handle result = eval->eval_h("(cog-execute! embedded-set)");
 
 	logger().debug("embedded result is %s\n", SchemeSmob::to_string(result).c_str());
+	if (2 != getarity(result))
+		logger().info("Error: unexpected number of solutions\n");
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
 

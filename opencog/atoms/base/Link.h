@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_LINK_H
 #define _OPENCOG_LINK_H
 
+#include <functional>
 #include <string>
 
 #include <opencog/util/oc_assert.h>
@@ -252,5 +253,19 @@ Handle createLink( Args&&... args )
 
 /** @}*/
 } // namespace opencog
+
+// Overload std::less to perform a content-based compare of the
+// LinkPtr's. Otherwise, it seems to just use the address returned
+// by LinkPtr::get().
+namespace std {
+template<>
+struct less<opencog::LinkPtr>
+{
+    bool operator()(const opencog::LinkPtr& la, const opencog::LinkPtr& lb) const
+    {
+        return la->operator<(*lb);
+    }
+};
+}
 
 #endif // _OPENCOG_LINK_H
