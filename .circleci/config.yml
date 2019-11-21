@@ -120,8 +120,7 @@ jobs:
           root: /ws/
           paths:
             - ure
-            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
-            # - ccache
+            - ccache
 
   miner:
     docker:
@@ -387,9 +386,9 @@ workflows:
             - cogserver
       - opencog:
           requires:
-            - atomspace
+            # - atomspace
             - ure
-            - cogserver
+            # - cogserver
             - attention
       - package:
           requires:
