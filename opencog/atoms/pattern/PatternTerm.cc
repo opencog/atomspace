@@ -5,21 +5,7 @@
  * All Rights Reserved
  *
  * Created by Nil Geisweiller Oct 2016
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include "PatternTerm.h"
@@ -64,21 +50,6 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 	_outgoing.push_back(ptm);
 }
 
-const Handle& PatternTerm::getHandle() const
-{
-	return _handle;
-}
-
-const Handle& PatternTerm::getQuote() const
-{
-	return _quote;
-}
-
-PatternTermPtr PatternTerm::getParent()
-{
-	return _parent;
-}
-
 PatternTermSeq PatternTerm::getOutgoingSet() const
 {
 	PatternTermSeq oset;
@@ -90,31 +61,6 @@ PatternTermSeq PatternTerm::getOutgoingSet() const
 	}
 
 	return oset;
-}
-
-Arity PatternTerm::getArity() const
-{
-	return _outgoing.size();
-}
-
-Quotation& PatternTerm::getQuotation()
-{
-	return _quotation;
-}
-
-const Quotation& PatternTerm::getQuotation() const
-{
-	return _quotation;
-}
-
-bool PatternTerm::isQuoted() const
-{
-	return _quotation.is_quoted();
-}
-
-bool PatternTerm::hasAnyBoundVariable() const
-{
-	return _has_any_bound_var;
 }
 
 PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const

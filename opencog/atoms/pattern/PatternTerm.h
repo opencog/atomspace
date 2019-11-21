@@ -5,21 +5,7 @@
  * All Rights Reserved
  *
  * Created by Jacek Świergocki <jswiergo@gmail.com> July 2015
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #ifndef _OPENCOG_PATTERN_TERM_H
@@ -111,21 +97,21 @@ public:
 
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 
-	const Handle& getHandle() const;
+	const Handle& getHandle() const noexcept { return _handle; }
 
-	const Handle& getQuote() const;
+	const Handle& getQuote() const noexcept { return _quote; }
 
-	PatternTermPtr getParent();
+	PatternTermPtr getParent() const noexcept { return _parent; }
 
 	PatternTermSeq getOutgoingSet() const;
 
-	Arity getArity() const;
+	Arity getArity() const { return _outgoing.size(); }
 
-	Quotation& getQuotation();
-	const Quotation& getQuotation() const;
-	bool isQuoted() const;
+	Quotation& getQuotation() { return _quotation; };
+	const Quotation& getQuotation() const noexcept { return _quotation; }
+	bool isQuoted() const { return _quotation.is_quoted(); }
 
-	bool hasAnyBoundVariable() const;
+	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 
 	PatternTermPtr getOutgoingTerm(Arity pos) const;
 
