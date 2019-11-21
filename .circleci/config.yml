@@ -177,6 +177,119 @@ jobs:
             - miner
             - ccache
 
+  cogserver:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/cogserver
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - restore_cache:
+          name: Restore GHC Cache
+          keys:
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+      - restore_cache:
+          name: Restore Haskell Deps Cache
+          keys:
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make install && ldconfig
+      - run:
+          name: Checkout CogServer
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make
+      - run:
+          name: Build tests
+          command: cd build && make tests
+      - run:
+          name: Run tests
+          command: cd build && make test ARGS="$MAKEFLAGS"
+      - run:
+          name: Install CogServer
+          command: cd build && make install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - cogserver
+            - ccache
+
+  attention:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/attention
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make install && ldconfig
+      - restore_cache:
+          name: Restore GHC Cache
+          keys:
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
+      - restore_cache:
+          name: Restore Haskell Deps Cache
+          keys:
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make install && ldconfig
+      - run:
+          name: Install CogServer
+          command: cd /ws/cogserver/build && make install && ldconfig
+      - run:
+          name: Checkout Attention
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/attention .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make
+      - run:
+          name: Build tests
+          command: cd build && make tests
+      - run:
+          name: Run tests
+          command: cd build && make test ARGS="$MAKEFLAGS"
+      - run:
+          name: Install Attention
+          command: cd build && make install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - attention
+            - ccache
+
   opencog:
     docker:
       - image: opencog/opencog-deps
