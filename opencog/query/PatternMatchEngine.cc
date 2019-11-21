@@ -618,7 +618,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
-		_perm_reset = true;      // reset perms on lower links, too.
+		// _perm_reset = true;      // reset perms on lower links, too.
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
@@ -1131,7 +1131,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
-	return unorder_compare(ptm, hg, true);
+	return unorder_compare(ptm, hg, false);
 }
 
 /* ======================================================== */
@@ -1273,7 +1273,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
+		bool save_more = _perm_have_more;
+		_perm_reset = true;
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		_perm_have_more = save_more;
 		if (found) break;
 	}
 
@@ -1306,7 +1309,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for term=" << ptm->to_string()
+		              << " for glob term=" << ptm->to_string()
 		              << " propose=" << Handle(iset[i]).value();})
 
 		// Before exploring the link branches, record the current
