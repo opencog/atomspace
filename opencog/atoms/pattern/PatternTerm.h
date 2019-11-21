@@ -137,11 +137,13 @@ using namespace opencog;
 namespace std {
 
 /**
- * We need to overload standard comparison operator for PatternTerm pointers.
- * Now we do not care much about complexity of this comparison. The cases of
- * queries having repeated atoms that are deep should be very rare. So we just
- * traverse up towards root node. Typically we compare only the first level
- * handles on this path.
+ * Overload the standard comparison operator for PatternTerm pointers.
+ * This uses content-baed compare for individual atoms, and then moving
+ * up the term inclusion path, if the atoms are identical. Thus, this
+ * is almost the same as `std::less<Handle>` but not quite.
+ *
+ * This is performance-sensitive; it is used during pattern matching
+ * to walk over permutations of unordered links.
  */
 template<>
 struct less<PatternTermPtr>
