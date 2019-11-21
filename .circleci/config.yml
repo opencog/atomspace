@@ -318,6 +318,12 @@ jobs:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
+          name: Install CogServer
+          command: cd /ws/cogserver/build && make install && ldconfig
+      - run:
+          name: Install Attention
+          command: cd /ws/attention/build && make install && ldconfig
+      - run:
           name: Checkout OpenCog
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
@@ -366,15 +372,24 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
+      - cogserver:
+          requires:
+            - atomspace
       - ure:
           requires:
             - atomspace
       - miner:
           requires:
             - ure
+      - attention:
+          requires:
+            - cogserver
       - opencog:
           requires:
+            - atomspace
             - ure
+            - cogserver
+            - attention
       - package:
           requires:
             - opencog
