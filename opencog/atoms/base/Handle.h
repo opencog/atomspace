@@ -171,14 +171,6 @@ bool content_eq(const opencog::Handle& lh,
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
-struct handle_less
-{
-   bool operator()(const Handle& hl, const Handle& hr) const
-   {
-       return hl.operator<(hr);
-   }
-};
-
 //! a pair of Handles
 typedef std::pair<Handle, Handle> HandlePair;
 
