@@ -448,9 +448,24 @@ std::string oc_to_string(const IncomingSet& iset,
 /** @}*/
 } // namespace opencog
 
-// Overloading operator<< for Incoming Set 
 namespace std {
-    
+
+/// Overload std::less to perform a content-based compare of the
+/// AtomPtr's. Otherwise, it seems to just use the address returned
+/// by `AtomPtr::get()`. The core problem is that sometimes, were were
+/// expecting that `std::less<Handle>` was going to be used, and it
+/// wasn't, resulting in an address-space compare. This should halt
+/// that misbehavior. See issue #2371 for details.
+template<>
+struct less<opencog::AtomPtr>
+{
+    bool operator()(const opencog::AtomPtr& ata, const opencog::AtomPtr& atb) const
+    {
+        return ata->operator<(*atb);
+    }
+};
+
+// Overloading operator<< for Incoming Set
 ostream& operator<<(ostream&, const opencog::IncomingSet&);
 
 }

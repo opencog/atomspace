@@ -13,6 +13,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -359,17 +360,41 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	Type t = verify_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
+	std::string name;
 	if (nameserver().isA(t, NUMBER_NODE)) {
+		std::vector<double> vec;
+		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
-			sname = scm_number_to_string(sname, _radix_ten);
+		{
+			slist = scm_cons(sname, kv_pairs);
+		}
+		else
+		if (scm_is_true(scm_list_p(sname)))
+		{
+			slist = sname;
+		}
+		if (not scm_is_null(slist))
+		{
+			while (scm_is_pair(slist))
+			{
+				SCM sval = SCM_CAR(slist);
+				if (scm_is_number(sval))
+					vec.push_back(scm_to_double(sval));
+				slist = SCM_CDR(slist);
+			}
+			name = NumberNode::vector_to_plain(vec);
+		}
 	}
 	else
 	// Allow symbols as well as strings for atom types.
 	if (nameserver().isA(t, TYPE_NODE) and scm_is_symbol(sname)) {
 		sname = scm_symbol_to_string(sname);
 	}
-	std::string name(verify_string (sname, "cog-new-node", 2,
-		"string name for the node"));
+
+	// Haven't set the string yet...
+	if (0 == name.size())
+		name = verify_string (sname, "cog-new-node", 2,
+			"string name for the node");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");

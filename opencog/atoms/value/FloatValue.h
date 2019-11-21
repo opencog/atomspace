@@ -80,15 +80,51 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 }
 
 // Scalar multiplication and addition
-ValuePtr times(double, const FloatValuePtr&);
-ValuePtr plus(double, const FloatValuePtr&);
-ValuePtr divide(double, const FloatValuePtr&);
+std::vector<double> plus(double, const std::vector<double>&);
+std::vector<double> minus(double, const std::vector<double>&);
+std::vector<double> times(double, const std::vector<double>&);
+std::vector<double> divide(double, const std::vector<double>&);
+
+inline
+ValuePtr plus(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(plus(f, fvp->value()));
+}
+inline
+ValuePtr minus(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(minus(f, fvp->value()));
+}
+inline
+ValuePtr times(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(times(f, fvp->value()));
+}
+inline
+ValuePtr divide(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(divide(f, fvp->value()));
+}
+
+
+std::vector<double> plus(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> minus(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> times(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> divide(const std::vector<double>&, const std::vector<double>&);
 
 // Vector multiplication and addition
-ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
-
+inline
+ValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(plus(fvpa->value(), fvpb->value()));
+}
+inline
+ValuePtr minus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(minus(fvpa->value(), fvpb->value()));
+}
+inline
+ValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(times(fvpa->value(), fvpb->value()));
+}
+inline
+ValuePtr divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	return createFloatValue(divide(fvpa->value(), fvpb->value()));
+}
 
 /** @}*/
 } // namespace opencog

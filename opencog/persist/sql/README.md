@@ -50,7 +50,7 @@ Missing features/ToDo items
 Performance status
 ------------------
 In March 2014, 10.3M atoms were loaded in about 20 minutes wall-clock
-time, 10 minutes of opencog-server CPU time.  This works out to about
+time, 10 minutes of OpenCog-server CPU time.  This works out to about
 500K atoms/minute, or 9K atoms/second.  The resulting cogserver required
 about 10GBytes of RAM, which works out to about 1KByte/atom average.
 The loaded hypergraphs were all EvaluationLinks, viz:
@@ -137,7 +137,7 @@ The goal of this implementation is to:
    to more than 100 atomspace instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
-   all of opencog, starting with the atomspace.
+   all of OpenCog, starting with the atomspace.
 
 7) A non-design-goal is fully automatic save-restore of atoms.  The
    save and restore of atoms are performed under the explicit control
@@ -390,81 +390,81 @@ lead to delays of tens of milliseconds to write handfuls of atoms, as
 that is the seek time (latency) for spinning disk media. Thus,
 synchronous commits should be disabled.
 
-Solid state disks are a lot faster; it's not clear if this would still
-be a bottleneck.
+The difference between `synchronous_commit=off` and `=on` can be as
+much as a factor of 100x for spinning disks, and a factor of 5x for
+SSD drives, based on measurements on actual AtomSpace workloads.
 
-Disabling synchronous commits may cause the latest database updates
-to be lost, if power goes out, or the system unexpectedly reboots.
-This kind of loss is usually not a problem for most opencog apps,
-... all of the current apps are gathering statistics from generated
-data, and so this kind of loss is almost surely inconsequential.
-
-Edit `postgresql.conf` (a typical location is
-`/etc/postgresql/9.5/main/postgresql.conf`) and make the changes below.
-The first two changes are recommended by
-http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+Edit `postgresql.conf` (usually `/etc/postgresql/9.6/main/postgresql.conf`)
+and make the changes below.  The first two changes are recommended by the
+[PostgreSQL wiki](http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 ```
-   shared_buffers = default was 32MB, change to 25% of installed RAM
-   work_mem = default was 1MB change to 32MB
-   effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
-   synchronous_commit = default on change to off
-   wal_buffers = default 64kB change to 2MB or even 32MB
-   checkpoint_segments = 64 (each one takes up 16MB disk space)
-	max_connections = 130 (each opencog instance needs 32)
-	max_worker_processes = 32 (one per CPU core)
-   ssl = off
+   shared_buffers = 24GB       # Change to 25% of installed RAM
+   work_mem = 32MB             # Default was 1MB, change to 32MB
+   effective_cache_size = 60GB # Change to 50%-75% of installed RAM
+   synchronous_commit = off    # Default was on, change to off
+   max_connections = 130       # Each AtomSpace instance needs 32
+   max_worker_processes = 32   # One per CPU core
+   ssl = off                   # There's no point to encyrption locally
 ```
 
-For spinning media, `synchronous_commit=off` is 120x faster than
-`synchronous_commit=local`(about 400 atoms/sec vs 3 atoms/sec)
-
-For write-mostly databases, such as in the language-learning project,
-you will get better results with `checkpoint_segments = 100`.
-
-If you have postgres 9.0 or newer, there are no checkpoint_segments.
-Instead, do this:
+Avoid the "checkpoints are occurring too frequently" warning message by
+setting:
 ```
-checkpoint_timeout = 1h
-max_wal_size = 8GB
-checkpoint_completion_target = 0.9
+   checkpoint_timeout = 1h
+   max_wal_size = 8GB
+   checkpoint_completion_target = 0.9
 ```
-This will avoid the "checkpoints are occurring too frequently"
-warning message.
+
+For SSD drives, the following can make a significant difference.
+This is shown in some [benchmark charts at a blog](https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/).
+The changes to `seq_page_cost` and `random_page_cost` represent the
+relative ratios of SSD speed to CPU/RAM speed (where `1.0` is for a
+spinning disk.)
+```
+  seq_page_cost = 0.1
+  random_page_cost = 0.1
+  effective_io_concurrency = 100
+```
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
-6.4 gigabytes (for example):
+16.4 gigabytes (for example). Edit: `sudo vi /etc/sysctl.conf` and add:
 ```
-   vi /etc/sysctl.conf
-   kernel.shmmax = 6440100100
+   kernel.shmmax = 16440100100
 ```
 save file contents, then:
 ```
-   sysctl -p /etc/sysctl.conf
+   sudo sysctl -p /etc/sysctl.conf
 ```
 
-For SSD drives, the following might help:
+#### Tuning HugePages
+Using 2MB-sized HugePages also helps. The proceedure here is a bit
+complicated. Add a hugepages user-group, and add postgres to it:
 ```
-seq_page_cost = 0.1
-random_page_cost = 0.15
-effective_io_concurrency = 5
+   sudo groupadd hugepages
+   sudo gpasswd -a postgres hugepages
 ```
+Then you need to find out what the group id (gid) was:
+```
+   id postgres
+```
+Suppose that this shows group id 1234 for `hugepages`.  This needs to
+be added to `/etc/sysctl.conf` as well. So edit, and add:
+```
+   vm.nr_hugepages = 16384       # 32GB of hugepages, 25% of RAM.
+   vm.hugetlb_shm_group=1234
+```
+Don't forget to `sudo sysctl -p /etc/sysctl.conf` again.
 
-Unsafe performance tweaks
--------------------------
-There is one very unsafe performance optimization: disabling fsync.
-It's not clear how much this helps; you'd have to measure. Disabling
-it is very dangerous: in case of a power loss, or a spontaneous reboot,
-before all data has been written to disk, this can result in database
-corruption.  Yes, this happens. THE BELOW IS NOT RECOMMENDED!
-
+Finally, the ability to use those pages. Add to `/etc/security/limits.conf`:
 ```
-   fsync = default on  change to off
+    @hugepages      soft    memlock         unlimited
+    @hugepages      hard    memlock         unlimited
 ```
 
 Database Setup
 --------------
-A database to hold the opencog data needs to be created.  Multiple
+A database to hold the OpenCog data needs to be created.  Multiple
 databases can be created.  In this example, the database name will
 be "mycogdata".  Change this as desired.  The unit tests require a
 scratch database called "opencog_test".
@@ -516,7 +516,7 @@ authentication method. This command:
    $  psql mycogdata
 ```
 should place you at the postgres-client prompt; you are now ready to
-create the opencog tables.  If the above didn't work, then you will
+create the OpenCog tables.  If the above didn't work, then you will
 have to create an explicit database user login, as explained below;
 otherwise, creating a user is optional.
 
@@ -527,7 +527,7 @@ User setup
 wish; postgres automatically provides password-less `peer`
 authentication to your unix username. However, the unit-tests do require
 that a distinct user be created, called `opencog_tester`, although you
-can bypass this, too, by altering the opencog test configuration file.
+can bypass this, too, by altering the OpenCog test configuration file.
 
 The database user is NOT the same thing as a unix user: the login is for
 the database (only), not the OS. In general, you will want to pick a
@@ -738,6 +738,7 @@ Unit Test Status
 * As of 2015-04-23 both unit tests work and pass.
 * As of 2017-01-20 all four unit tests work and pass.
 * As of 2019-02-01 all six unit tests work and pass.
+* As of 2019-11-11 all nine unit tests work and pass.
 
 
 Using the System
@@ -923,25 +924,25 @@ Diary entries from June 2008
 
 Store performance
 -----------------
-This section reviews the performance for storage of data from opencog
+This section reviews the performance for storage of data from OpenCog
 to the SQL server (and thence to disk).  Performed in 2008, on a typical
 Intel desktop that was new in 2004. Viz. under two GhZ, and 4GB RAM.
 
 First run with a large data set (save of 1564K atoms to the database)
 was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
-kernel block i/o layer, and 12% each for the opencog and postgres times:
+kernel block i/o layer, and 12% each for the OpenCog and postgres times:
 ```
    112:00 [md4_raid1] or 4.3 millisecs per atom
-   17 minutes for postgres, and opencog, each. or 0.66 millisecs per atom
+   17 minutes for postgres, and OpenCog, each. or 0.66 millisecs per atom
    1937576 - 1088032 kB = 850MBytes disk use
 ```
 Experiment: is this due to the bad design for trying to figure whether
 "INSERT" or "UPDATE" should be used? A local client-side cache of the
 keys in the DB seems to change little:
 ```
-   CPU usage for postgres 11:04  and opencog 10:40 and 112:30 for md
+   CPU usage for postgres 11:04  and OpenCog 10:40 and 112:30 for md
 ```
-So this change drops postgres server and opencog CPU usage
+So this change drops postgres server and OpenCog CPU usage
 significantly, but the insane kernel CPU usage remains.
 
 The above disaster can be attributed to bad defaults for the postgres
@@ -1023,12 +1024,12 @@ Loading performance
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
 2:08 postgres = 82 microsecs/atom (12.2K atoms/sec)
-similar to for opencog, but then AtomTable needs to reconcile, which
+similar to for OpenCog, but then AtomTable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
 
 Conclude: database loading would be much faster if we loaded all of
 the atoms first, then all of the lowest-height links, etc.  This assumes
-that opencog is strictly hierarchically structured. (no "crazy loops")
+that OpenCog is strictly hierarchically structured. (no "crazy loops")
 
 After implementing height-structured restore, get following, loading
 from a "hot" postgres instance (had not been stopped since previous

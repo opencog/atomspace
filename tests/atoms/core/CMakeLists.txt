@@ -25,5 +25,7 @@ ADD_CXXTEST(CheckersUTest)
 
 ADD_CXXTEST(FindUtilsUTest)
 
+ADD_CXXTEST(TypeUtilsUTest)
+
 ADD_CXXTEST(VariablesUTest)
 TARGET_LINK_LIBRARIES(VariablesUTest atomspace)

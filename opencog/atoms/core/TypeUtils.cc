@@ -27,6 +27,7 @@
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "FindUtils.h"
 
@@ -315,7 +316,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return vardecl;
 	}
 
-	else if (VARIABLE_LIST == t)
+	else if (VARIABLE_LIST == t or VARIABLE_SET == t)
 	{
 		HandleSeq subvardecls;
 		HandleSet subvars;      // avoid duplicating variables
@@ -330,7 +331,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return Handle::UNDEFINED;
 		if (subvardecls.size() == 1)
 			return subvardecls[0];
-		return Handle(createVariableList(subvardecls));
+		return Handle(createLink(subvardecls, t));
 	}
 
 	// If we're here we have failed to recognize vardecl as a useful
@@ -392,34 +393,22 @@ TypeSet type_intersection(const TypeSet& lhs,
 	return res;
 }
 
-VariableListPtr gen_varlist(const Handle& h)
+VariableSetPtr gen_variable_set(const Handle& h)
 {
 	HandleSet vars = get_free_variables(h);
-	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+	return createVariableSet(HandleSeq(vars.begin(), vars.end()));
 }
 
 Handle gen_vardecl(const Handle& h)
 {
-	return Handle(gen_varlist(h));
-}
-
-VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
-{
-	if (not vardecl)
-		return gen_varlist(h);
-
-	Type vardecl_t = vardecl->get_type();
-	if (vardecl_t == VARIABLE_LIST)
-		return VariableListCast(vardecl);
-
-	OC_ASSERT(vardecl_t == VARIABLE_NODE
-	          or vardecl_t == TYPED_VARIABLE_LINK);
-	return createVariableList(vardecl);
+	return Handle(gen_variable_set(h));
 }
 
 Variables gen_variables(const Handle& h, const Handle& vardecl)
 {
-	return gen_varlist(h, vardecl)->get_variables();
+	if (vardecl)
+		return Variables(vardecl);
+	return gen_variable_set(h)->get_variables();
 }
 
 Handle gen_vardecl(const Handle& h, const Handle& vardecl)
@@ -429,13 +418,14 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 	return vardecl;
 }
 
-Handle gen_vardecl(const HandleSeq& varlist)
+Handle gen_vardecl(const HandleSeq& varlist, bool ordered)
 {
 	Handle vardecl;
 	if (1 == varlist.size())
 		return varlist[0];
 	else
-		return Handle(createVariableList(varlist));
+		return ordered ? Handle(createVariableList(varlist))
+			: Handle(createVariableSet(varlist));
 }
 
 } // ~namespace opencog

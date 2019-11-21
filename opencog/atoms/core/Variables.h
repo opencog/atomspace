@@ -64,7 +64,7 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
-	// CTor, convenient for  unit tests, so far
+	// CTor, mostly convenient for unit tests
 	FreeVariables() {}
 	FreeVariables(const std::initializer_list<Handle>& variables);
 
@@ -102,9 +102,19 @@ struct FreeVariables
 	/// variables are not considered).
 	void find_variables(const Handle& body);
 
-	/// Like above but for outgoing sets. The ordered flag indicates
-	/// whether the outgoing set is associated with an ordered link.
-	void find_variables(const HandleSeq& oset, bool ordered=true);
+	/// Like above but for outgoing sets. The link_ordered flag
+	/// indicates whether the outgoing set is associated with an
+	/// ordered link.
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
+
+	/// Sort the variables in a canonical order determined by their
+	/// positions in the given body.  In ordered link, the ordered is
+	/// determined by the outgoing set order (from left to right).  In
+	/// unordered links, the ordered is determined by some arbitrary,
+	/// though semantically consistent fix order.  The order only
+	/// depends on variable names as last resort, when no semantic
+	/// property can be used to break the symmetry.
+	void canonical_sort(const Handle& body);
 
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables
@@ -165,10 +175,17 @@ typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
-	// CTor, convenient for  unit tests, so far
-	Variables() {}
-	Variables(const std::initializer_list<Handle>& variables)
-		: FreeVariables(variables) {}
+	// CTors. The ordered flag indicates whether we care about the
+	// order of the variables. It is false by default and only enabled
+	// if VariableList is used.
+	Variables(bool ordered=false);
+	Variables(const Handle& vardecl, bool ordered=false);
+	Variables(const HandleSeq& vardecls, bool ordered=false);
+
+	/// Whether the order matters or not. Typically if constructed with
+	/// VariableList then the order matters, if constructed with
+	/// VariableSet then the order does not matter.
+	bool _ordered;
 
 	/// Unbundled variables and type restrictions for them.
 
@@ -185,6 +202,13 @@ struct Variables : public FreeVariables,
 	/// To restrict how many atoms should be matched for each of the
 	/// GlobNodes in the pattern.
 	GlobIntervalMap _glob_intervalmap;
+
+	// See VariableList.cc for comments
+	void get_vartype(const Handle&);
+
+	// Validate the variable decls
+	void validate_vardecl(const Handle&);
+	void validate_vardecl(const HandleSeq&);
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
@@ -253,7 +277,8 @@ struct Variables : public FreeVariables,
 	                  const HandleMap& map,
 	                  bool silent=false) const;
 
-	// Extend this variable set by adding in the given variable set.
+	// Extend this by adding in the given variables. If either this or
+	// the other are ordered, then the result is ordered
 	void extend(const Variables&);
 
 	// Erase the given variable, if exist
@@ -263,15 +288,24 @@ struct Variables : public FreeVariables,
 	/// Return just the Variable itself, if its not typed.
 	Handle get_type_decl(const Handle&, const Handle&) const;
 
-	/// This is the inverse function of VariableList(vardecls).get_variable().
+	/// Inverse of Variables(vardecl).get_variable()
 	///
-	/// That is, convert everything in this object into a single
-	/// VariableList, suitable for direct use in a ScopeLink.
+	/// That is, convert Variables object into avariable declaration,
+	/// that is a VariableList, VariableSet, TypedVariableLink,
+	/// VariableNode or GlobNode, suitable for direct use in a
+	/// ScopeLink.
 	///
-	/// If empty then return the empty VariableList.
+	/// If empty then return the empty VariableList or VariableSet.
 	///
 	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;
+
+	/// Like FreeVariables::find_variables but set _ordered to false,
+	/// on the ground that if such a method is called then no ordered
+	/// was provided by the creator of that scope, and thus order is
+	/// not relevant.
+	void find_variables(const Handle& body);
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;

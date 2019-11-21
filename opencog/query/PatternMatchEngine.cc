@@ -622,7 +622,8 @@ take_next_step:
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
-	} while (std::next_permutation(mutation.begin(), mutation.end()));
+	} while (std::next_permutation(mutation.begin(), mutation.end(),
+	         std::less<PatternTermPtr>()));
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
@@ -676,6 +677,10 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
+		Permutation perm = ptm->getOutgoingSet();
+		// Sort into explict std::less<PatternTermPtr>() order, as
+		// otherwise std::next_permutation() will miss some perms.
+		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
 		return ptm->getOutgoingSet();
 	}
@@ -871,7 +876,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			// If the lower bound of the interval is zero, the glob
 			// can be grounded to nothing.
-			if (_varlist->is_lower_bound(ohp, 0))
+			if (_variables->is_lower_bound(ohp, 0))
 			{
 				// Try again, find another glob that can be grounded
 				// in a different way. (we are probably resuming the
@@ -904,7 +909,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 				// Just in case, if the upper bound is zero...
 				// XXX Huh ???
-				if (not _varlist->is_upper_bound(ohp, 1))
+				if (not _variables->is_upper_bound(ohp, 1))
 				{
 					record_match(glob, glob_seq);
 					ip++;
@@ -937,7 +942,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					}
 
 					// Can't exceed the upper bound.
-					if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
+					if (not _variables->is_upper_bound(ohp, glob_seq.size()+1))
 					{
 						jg--;
 						break;
@@ -961,7 +966,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			// Try again if we can't ground enough atoms to satisfy
 			// the lower bound restriction.
-			if (not _varlist->is_lower_bound(ohp, glob_seq.size()))
+			if (not _variables->is_lower_bound(ohp, glob_seq.size()))
 			{
 				backtrack(true);
 				continue;
@@ -1077,7 +1082,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// of the bound variables. If so, then declare a match.
 	if (not ptm->isQuoted())
 	{
-		if (_varlist->varset.end() != _varlist->varset.find(hp))
+		if (_variables->varset.end() != _variables->varset.find(hp))
 			return variable_compare(hp, hg);
 
 		// Report other variables that might be found.
@@ -1879,7 +1884,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (issued.end() != issued.find(root)) continue;
 		issued.insert(root);
 		next_clause = root;
-		for (const Handle &v : _varlist->varset)
+		for (const Handle &v : _variables->varset)
 		{
 			if (is_free_in_tree(root, v))
 			{
@@ -2007,7 +2012,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// Grounded variables ordered by the size of their grounding incoming set
 	std::multimap<std::size_t, Handle> thick_vars;
 
-	for (const Handle &v : _varlist->varset)
+	for (const Handle &v : _variables->varset)
 	{
 		const auto& gnd = var_grounding.find(v);
 		if (gnd != var_grounding.end())
@@ -2425,7 +2430,7 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_nameserver(nameserver()),
-	_varlist(nullptr),
+	_variables(nullptr),
 	_pat(nullptr),
 	clause_accepted(false)
 {
@@ -2450,7 +2455,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 void PatternMatchEngine::set_pattern(const Variables& v,
                                      const Pattern& p)
 {
-	_varlist = &v;
+	_variables = &v;
 	_pat = &p;
 }
 

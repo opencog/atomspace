@@ -51,7 +51,7 @@ private:
 	// grounded. The variables are what are being directly grounded.
 
 	// These are pointers; maybe they could be (should be?) references.
-	const Variables* _varlist;
+	const Variables* _variables;
 	const Pattern* _pat;
 
 	bool is_optional(const Handle& h) {

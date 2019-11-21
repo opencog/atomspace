@@ -1,0 +1,107 @@
+/*
+ * tests/query/BindVariableSetUTest.cxxtest
+ *
+ * Copyright (C) 2019 SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class BindVariableSetUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+	Handle X, Y, Z, A, B, C;
+	
+public:
+	BindVariableSetUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+	}
+
+	~BindVariableSetUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_no_type(void);
+};
+
+void BindVariableSetUTest::tearDown(void)
+{
+	_as.clear();
+}
+
+void BindVariableSetUTest::setUp(void)
+{
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	Z = an(VARIABLE_NODE, "$Z");
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+	C = an(CONCEPT_NODE, "C");
+}
+
+/**
+ * Test simple bind link with variable declaration of variable set
+ * without type constraints.
+ */
+void BindVariableSetUTest::test_no_type(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// KB
+	Handle kb = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+	
+	// Query
+	// Handle vardecl = al(VARIABLE_SET, X, Y, Z);
+	Handle body = al(PRESENT_LINK, al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z)));
+	Handle rewrite = al(LIST_LINK, X, Y, Z);
+	Handle query = al(BIND_LINK, body, rewrite);
+
+	Handle result = HandleCast(query->execute(&_as));
+	Handle expect = al(SET_LINK,
+	                   al(LIST_LINK, A, B, C),
+	                   al(LIST_LINK, A, C, B));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+#undef al
+#undef an

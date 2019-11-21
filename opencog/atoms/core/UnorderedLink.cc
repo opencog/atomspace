@@ -37,8 +37,11 @@ UnorderedLink::UnorderedLink(const HandleSeq& oset, Type t)
 			"Expecting an UnorderedLink, got %s", tname.c_str());
 	}
 
-	// Place into arbitrary, but deterministic order.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+	// Place into arbitrary, but deterministic order. We use
+	// content (hash) based less, to avoid variations due to
+	// address-space randomization.
+	std::sort(_outgoing.begin(), _outgoing.end(),
+		content_based_handle_less());
 }
 
 UnorderedLink::UnorderedLink(const HandleSet& oset, Type t)
@@ -57,9 +60,10 @@ UnorderedLink::UnorderedLink(const HandleSet& oset, Type t)
 
 	// Place into arbitrary, but deterministic order.
 	// Actually, this should already be in sorted order, because
-	// HandleSet is already sorted by handle_less(). But it can't
-	// hurt to do it again, to avoid insanity.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+	// HandleSet is already sorted by content_based_handle_less().
+	// But it can't hurt to do it again, to avoid insanity.
+	std::sort(_outgoing.begin(), _outgoing.end(),
+		content_based_handle_less());
 }
 
 UnorderedLink::UnorderedLink(const Link& l)
@@ -77,7 +81,8 @@ UnorderedLink::UnorderedLink(const Link& l)
 	// Place into arbitrary, but deterministic order.
 	// We have to do this here,  because the input link l might not
 	// have ever gone through an UnorderedLink constructor before.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+	std::sort(_outgoing.begin(), _outgoing.end(),
+		content_based_handle_less());
 }
 
 // ---------------------------------------------------------------

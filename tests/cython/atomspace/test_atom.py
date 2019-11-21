@@ -47,8 +47,11 @@ class AtomTest(TestCase):
         self.assertIn(key, keys)
 
     def test_get_out(self):
-        atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
 
+        with self.assertRaises(TypeError):
+            atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
+
+        atom = ListLink(ConceptNode('a'), ConceptNode('b'))
         out = atom.out
 
         self.assertEqual(out, [ConceptNode('a'), ConceptNode('b')])
@@ -64,7 +67,7 @@ class AtomTest(TestCase):
 
     def test_invalid_key(self):
         string_node = ConceptNode("String")
-        error_str = "key should be an instance of Value, got {0} instead".format(str)
+        error_str = "key should be an instance of Atom, got {0} instead".format(str)
         with self.assertRaisesRegex(TypeError, error_str):
             string_node.set_value("bad key", StringValue("Hello, World!"))
 

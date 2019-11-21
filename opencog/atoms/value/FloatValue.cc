@@ -62,88 +62,195 @@ std::string FloatValue::to_string(const std::string& indent) const
 
 // ==============================================================
 
-/// Scalar multiplication
-ValuePtr opencog::times(double scalar, const FloatValuePtr& fvp)
-{
-	const std::vector<double>& fv = fvp->value();
-	size_t len = fv.size();
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = scalar * fv[i];
-
-	return createFloatValue(prod);
-}
-
 /// Scalar addition
-ValuePtr opencog::plus(double scalar, const FloatValuePtr& fvp)
+std::vector<double> opencog::plus(double scalar, const std::vector<double>& fv)
 {
-	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
 	std::vector<double> sum(len);
 	for (size_t i=0; i<len; i++)
 		sum[i] = scalar + fv[i];
 
-	return createFloatValue(sum);
+	return sum;
+}
+
+/// Scalar subtraction
+std::vector<double> opencog::minus(double scalar, const std::vector<double>& fv)
+{
+	size_t len = fv.size();
+	std::vector<double> diff(len);
+	for (size_t i=0; i<len; i++)
+		diff[i] = scalar - fv[i];
+
+	return diff;
+}
+
+/// Scalar multiplication
+std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
+{
+	size_t len = fv.size();
+	std::vector<double> prod(len);
+	for (size_t i=0; i<len; i++)
+		prod[i] = scalar * fv[i];
+
+	return prod;
 }
 
 /// Scalar division
-ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
+std::vector<double> opencog::divide(double scalar, const std::vector<double>& fv)
 {
-	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
 	std::vector<double> ratio(len);
 	for (size_t i=0; i<len; i++)
 		ratio[i] = scalar / fv[i];
 
-	return createFloatValue(ratio);
-}
-
-/// Vector (point-wise) multiplication
-ValuePtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
-{
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
-
-	std::vector<double> prod(len);
-	for (size_t i=0; i<len; i++)
-		prod[i] = fva[i] * fvb[i];
-
-	return createFloatValue(prod);
+	return ratio;
 }
 
 /// Vector (point-wise) addition
-ValuePtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+/// The shorter vector is assumed to be zero-padded.
+std::vector<double> opencog::plus(const std::vector<double>& fva,
+                                  const std::vector<double>& fvb)
 {
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
 
-	std::vector<double> sum(len);
-	for (size_t i=0; i<len; i++)
-		sum[i] = fva[i] + fvb[i];
+	std::vector<double> sum(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			sum[i] = fva[i] + fvb[i];
+		for (; i<lenb; i++)
+			sum[i] = fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			sum[i] = fva[i] + fvb[i];
+		for (; i<lena; i++)
+			sum[i] = fva[i];
+	}
+	return sum;
+}
 
-	return createFloatValue(sum);
+/// Vector (point-wise) subtraction
+/// The shorter vector is assumed to be zero-padded.
+std::vector<double> opencog::minus(const std::vector<double>& fva,
+                                  const std::vector<double>& fvb)
+{
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
+
+	std::vector<double> diff(std::max(lena, lenb));
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			diff[i] = fva[i] - fvb[i];
+		for (; i<lenb; i++)
+			diff[i] = -fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			diff[i] = fva[i] - fvb[i];
+		for (; i<lena; i++)
+			diff[i] = fva[i];
+	}
+	return diff;
+}
+
+/// Vector (point-wise) multiplication
+/// The shorter vector is assumed to be one-padded.
+/// Unless the shorter vector is a scalar, in which case we do scalar
+/// multiplication. This is the "right thing to do", because that
+/// is the general user intent.  We could detect this case in all
+/// the callers to this routine, or we could just handle it here.
+/// This may seem messy to you, but this is the easiest solution.
+std::vector<double> opencog::times(const std::vector<double>& fva,
+                                   const std::vector<double>& fvb)
+{
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
+
+	std::vector<double> prod(std::max(lena, lenb));
+	if (1 == lena)
+	{
+		double f = fva[0];
+		for (size_t i=0; i<lenb; i++)
+			prod[i] = f * fvb[i];
+	}
+	else
+	if (1 == lenb)
+	{
+		double f = fvb[0];
+		for (size_t i=0; i<lena; i++)
+			prod[i] = f * fva[i];
+	}
+	else
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lenb; i++)
+			prod[i] = fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			prod[i] = fva[i] * fvb[i];
+		for (; i<lena; i++)
+			prod[i] = fva[i];
+	}
+	return prod;
 }
 
 /// Vector (point-wise) division
-ValuePtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+/// The shorter vector is assumed to be one-padded.
+/// If the shorter vecotr has length one, assume its a scalar.
+/// See comments on times() above about scalars.
+std::vector<double> opencog::divide(const std::vector<double>& fva,
+                                    const std::vector<double>& fvb)
 {
-	const std::vector<double>& fva = fvpa->value();
-	const std::vector<double>& fvb = fvpb->value();
-	size_t len = fva.size();
-	if (len != fvb.size())
-		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+	size_t lena = fva.size();
+	size_t lenb = fvb.size();
 
-	std::vector<double> ratio(len);
-	for (size_t i=0; i<len; i++)
-		ratio[i] = fva[i] / fvb[i];
-
-	return createFloatValue(ratio);
+	std::vector<double> ratio(std::max(lena, lenb));
+	if (1 == lena)
+	{
+		double f = fva[0];
+		for (size_t i=0; i<lenb; i++)
+			ratio[i] = f / fvb[i];
+	}
+	else
+	if (1 == lenb)
+	{
+		double f = fvb[0];
+		for (size_t i=0; i<lena; i++)
+			ratio[i] = fva[i] / f;
+	}
+	else
+	if (lena < lenb)
+	{
+		size_t i=0;
+		for (; i<lena; i++)
+			ratio[i] = fva[i] / fvb[i];
+		for (; i<lenb; i++)
+			ratio[i] = 1.0 / fvb[i];
+	}
+	else
+	{
+		size_t i=0;
+		for (; i<lenb; i++)
+			ratio[i] = fva[i] / fvb[i];
+		for (; i<lena; i++)
+			ratio[i] = fva[i];
+	}
+	return ratio;
 }
 
 // Adds factory when the library is loaded.
