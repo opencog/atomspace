@@ -171,14 +171,6 @@ bool content_eq(const opencog::Handle& lh,
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
-struct handle_less
-{
-   bool operator()(const Handle& hl, const Handle& hr) const
-   {
-       return hl.operator<(hr);
-   }
-};
-
 //! a pair of Handles
 typedef std::pair<Handle, Handle> HandlePair;
 
@@ -375,22 +367,6 @@ ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 
-#ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
-// The below used to work, but broke in gcc-4.7.2. The reason it
-// broke is that it fails to typedef result_type and argument_type,
-// which ... somehow used to work automagically?? It doesn't any more.
-// I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.
-
-template<>
-inline std::size_t
-std::hash<opencog::Handle>::operator()(const opencog::Handle& h) const
-{
-    return hash_value(h);
-}
-
-#else
-
 // This works for me, per note immediately above.
 template<>
 struct hash<opencog::Handle>
@@ -445,8 +421,6 @@ struct equal_to<opencog::HandlePair>
                eq.operator()(lhp.second, rhp.second);
     }
 };
-
-#endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
 } // ~namespace std
 

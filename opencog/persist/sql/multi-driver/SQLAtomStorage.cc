@@ -169,7 +169,7 @@ SQLAtomStorage::~SQLAtomStorage()
 
 	while (not conn_pool.is_empty())
 	{
-		LLConnection* db_conn = conn_pool.pop();
+		LLConnection* db_conn = conn_pool.value_pop();
 		delete db_conn;
 	}
 
@@ -187,7 +187,7 @@ SQLAtomStorage::~SQLAtomStorage()
 bool SQLAtomStorage::connected(void)
 {
 	// This will leak a resource, if db_conn->connected() ever throws.
-	LLConnection* db_conn = conn_pool.pop();
+	LLConnection* db_conn = conn_pool.value_pop();
 	bool have_connection = db_conn->connected();
 	conn_pool.push(db_conn);
 	return have_connection;
