@@ -120,7 +120,8 @@ jobs:
           root: /ws/
           paths:
             - ure
-            - ccache
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
 
   miner:
     docker:
