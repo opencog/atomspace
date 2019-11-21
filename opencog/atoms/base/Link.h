@@ -254,9 +254,9 @@ Handle createLink( Args&&... args )
 /** @}*/
 } // namespace opencog
 
-// Overload std::less to perform a content-based compare of the
-// LinkPtr's. Otherwise, it seems to just use the address returned
-// by LinkPtr::get().
+/// Overload std::less to perform a content-based compare of the
+/// LinkPtr's. Otherwise, it seems to just use the address returned
+/// by LinkPtr::get().
 namespace std {
 template<>
 struct less<opencog::LinkPtr>
