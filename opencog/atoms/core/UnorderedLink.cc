@@ -81,7 +81,8 @@ UnorderedLink::UnorderedLink(const Link& l)
 	// Place into arbitrary, but deterministic order.
 	// We have to do this here,  because the input link l might not
 	// have ever gone through an UnorderedLink constructor before.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+	std::sort(_outgoing.begin(), _outgoing.end(),
+		content_based_handle_less());
 }
 
 // ---------------------------------------------------------------
