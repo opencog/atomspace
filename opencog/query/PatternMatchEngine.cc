@@ -633,12 +633,12 @@ take_next_step:
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
 
-	// Implement an "odomoter", for iterating on other unordered
+	// Implement an "odometer", for iterating on other unordered
 	// links that might occur in series with this one. That is,
 	// wrap around the permutation set for this link, while also
 	// advancing the next link by one (setting _take_step causes
 	// the next link to advance).
-	if (wrap and do_wrap)
+	if (_perm_have_odometer /* and wrap */ and do_wrap)
 	{
 		bool match = unorder_compare(ptm, hg, false);
 		if (not match) return false;
@@ -1131,7 +1131,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
-	return unorder_compare(ptm, hg, false);
+	return unorder_compare(ptm, hg, true);
 }
 
 /* ======================================================== */
@@ -1196,7 +1196,10 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// that is why we iterate over them here.
 		PatternTermPtr last_term = _perm_latest_term;
 		if (last_term)
+		{
+			_perm_have_odometer = true;
 			DO_LOG({LAZY_LOG_FINE << "Odometer term: " << last_term->to_string();})
+		}
 
 		while (_perm_have_more)
 		{
@@ -2404,6 +2407,7 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_have_more = false;
 	_perm_take_step = true;
 	_perm_reset = true;
+	_perm_have_odometer = false;
 	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
@@ -2452,6 +2456,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_have_more = false;
 	_perm_take_step = true;
 	_perm_reset = true;
+	_perm_have_odometer = false;
 	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
