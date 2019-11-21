@@ -496,7 +496,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
-	if (_perm_reset and ptm != _perm_freeze) // _perm_pivot)
+	// If we are coming up from below, through this particular
+	// ptm, we must not take any steps, or reset it.
+	if (_perm_reset and ptm != _perm_freeze)
 	{
 		_perm_reset = false;
 		_perm_state.erase(Unorder(ptm, hg));
@@ -555,8 +557,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
-		// If this is a pivot point, we MUST not advance!
-		if (_perm_take_step and ptm == _perm_pivot) return match;
 		_perm_reset = false;
 
 		// Handle cases 3&4 of the description above. That is, the
@@ -1509,12 +1509,9 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	              << " it is solved by " << hg->to_string()
 	              << ", will move up.";})
 
-	_perm_pivot = _perm_latest_term;
-
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
 
-	_perm_pivot = nullptr;
 	solution_pop();
 	return found;
 }
