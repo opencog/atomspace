@@ -98,3 +98,24 @@
 			(ImplicationLink (PredicateNode "S") (PredicateNode "R"))
 			(ImplicationLink (PredicateNode "U") (PredicateNode "T")))
 ))
+
+; ----------------------------------------------------
+; Like above, but sixteen permutations
+(List (Concept "C")
+	(Set (Predicate "P") (Predicate "Q"))
+	(Set (Predicate "R") (Predicate "S"))
+	(Set (Predicate "T") (Predicate "U"))
+	(Set (Predicate "V") (Predicate "W")))
+
+(define tesseract
+	(Bind
+		(Present (List (Variable "$C")
+			(Set (Variable "$A") (Variable "$B"))
+			(Set (Variable "$U") (Variable "$V"))
+			(Set (Variable "$X") (Variable "$Y"))
+			(Set (Variable "$Z") (Variable "$W"))))
+		(Implication
+			(Implication (Variable "$A") (Variable "$B"))
+			(Implication (Variable "$U") (Variable "$V"))
+			(Implication (Variable "$X") (Variable "$Y"))
+			(Implication (Variable "$Z") (Variable "$W")))))
