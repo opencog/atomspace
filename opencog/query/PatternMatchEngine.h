@@ -141,7 +141,6 @@ private:
 	bool _perm_have_odometer;
 	PatternTermPtr _perm_latest_term; // XXX
 	PatternTermPtr _perm_latest_wrap; // XXX
-	PatternTermPtr _perm_freeze;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
 

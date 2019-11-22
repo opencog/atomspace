@@ -498,7 +498,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	// If we are coming up from below, through this particular
 	// ptm, we must not take any steps, or reset it.
-	if (_perm_reset and ptm != _perm_freeze)
+	if (_perm_reset)
 	{
 		_perm_reset = false;
 		_perm_state.erase(Unorder(ptm, hg));
@@ -1283,11 +1283,8 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 		bool save_more = _perm_have_more;
-		PatternTermPtr save_frozen = _perm_freeze;
-		_perm_freeze = ptm;
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
-		_perm_freeze = save_frozen;
 		if (found) break;
 	}
 
@@ -2413,7 +2410,6 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
-	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
@@ -2462,7 +2458,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
-	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 }
