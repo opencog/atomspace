@@ -1195,11 +1195,11 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
-		PatternTermPtr last_term = _perm_latest_term;
-		if (last_term)
+		if (_perm_latest_term)
 		{
 			_perm_have_odometer = true;
-			DO_LOG({LAZY_LOG_FINE << "Odometer term: " << last_term->to_string();})
+			DO_LOG({LAZY_LOG_FINE << "Odometer term: "
+			                      << _perm_latest_term->to_string();})
 		}
 
 		while (_perm_have_more)
@@ -1207,20 +1207,22 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 			_perm_have_more = false;
 			_perm_take_step = true;
 
-			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
+			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
+			                      << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
 			{
 				_perm_have_odometer = false;
 				return true;
 			}
-			if (_perm_latest_wrap and _perm_latest_wrap == last_term)
+			if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
 			{
 				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
-				                      << last_term->to_string();})
+				                      << _perm_latest_term->to_string();})
 				return false;
 			}
 		}
-		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: " << ptm->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
+		                      << ptm->to_string();})
 	}
 	_perm_have_odometer = false;
 	return false;
