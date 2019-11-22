@@ -3,6 +3,8 @@
   #:re-export (test-begin test-assert test-end)
   #:export (opencog-test-runner))
 
+(use-modules (opencog))
+
 (define (opencog-test-runner)
 "
   opencog-test-runner
