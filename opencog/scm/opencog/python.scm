@@ -1,9 +1,9 @@
 ;
 ; Python wrapper.  Allows python snippets to be executed from scheme.
 ;
-
 (define-module (opencog python))
 
+(use-modules (opencog))
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-python-scm "libPythonSCM")
 	"opencog_python_init")

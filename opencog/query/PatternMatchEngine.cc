@@ -1129,7 +1129,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or _nameserver.isA(tp, ORDERED_LINK))
+	if (2 > hp->get_arity() or not _nameserver.isA(tp, UNORDERED_LINK))
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -2109,7 +2109,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
  * traversal data associated with the current clause, so that, later
  * on, traversal can be resumed where it was left off.
  *
- * This does NOT push and of the redex stacks because (with the current
+ * This does NOT push any of the redex stacks because (with the current
  * redex design), all redex substitutions should have terminatated by
  * now, and returned to the main clause. i.e. the redex stack is assumed
  * to be empty, at this point.  (Its possible this design may change in
@@ -2119,7 +2119,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 void PatternMatchEngine::clause_stacks_push(void)
 {
 	_clause_stack_depth++;
-	DO_LOG({logger().fine("--- That's it, now push to stack depth=%d",
+	DO_LOG({logger().fine("--- CLAUSE stack push to depth=%d",
 	              _clause_stack_depth);})
 
 	var_solutn_stack.push(var_grounding);
@@ -2153,7 +2153,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	perm_pop();
 
 	_clause_stack_depth --;
-	DO_LOG({logger().fine("pop to depth %d", _clause_stack_depth);})
+	DO_LOG({logger().fine("CLAUSE stack pop to depth %d", _clause_stack_depth);})
 }
 
 /**
