@@ -1097,7 +1097,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or _nameserver.isA(tp, ORDERED_LINK))
+	if (2 > hp->get_arity() or not _nameserver.isA(tp, UNORDERED_LINK))
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
