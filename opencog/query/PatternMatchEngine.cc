@@ -628,8 +628,7 @@ take_next_step:
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
-	             << ptm->to_string()
-	             << " dowrap=" << do_wrap;})
+	             << ptm->to_string() << " do_wrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
@@ -684,7 +683,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		// otherwise std::next_permutation() will miss some perms.
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
-		return ptm->getOutgoingSet();
+		return perm;
 	}
 	return ps->second;
 }
