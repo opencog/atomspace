@@ -68,8 +68,6 @@ public:
 /*
  * This function sets up .. whatever.
  */
-#define an as->add_node
-#define al as->add_link
 void MultiAtomSpace::setUp(void)
 {
 	main_as = new AtomSpace();
