@@ -6,7 +6,7 @@
 ; Expect 3!=6 solutions
 (define odo-dim-one
 	(Bind
-		(Present (List (Variable "$C")
+		(Present (List (Variable "$CPT")
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
 			(Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -20,7 +20,7 @@
 
 (define odo-dim-two
 	(Bind
-		(Present (List (Variable "$C")
+		(Present (List (Variable "$CPT")
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
@@ -36,7 +36,7 @@
 
 (define odo-dim-three
 	(Bind
-		(Present (List (Variable "$C")
+		(Present (List (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -55,7 +55,7 @@
 
 (define odo-dim-four
 	(Bind
-		(Present (List (Variable "$C")
+		(Present (List (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$D") (Variable "$E") (Variable "$F"))
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
