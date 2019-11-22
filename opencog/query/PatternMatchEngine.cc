@@ -496,8 +496,18 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
+	// If we are coming up from below, through this particular
+	// ptm, we must not take any steps, or reset it.
+	if (_perm_reset)
+	{
+		_perm_reset = false;
+		_perm_state.erase(Unorder(ptm, hg));
+		_perm_count.erase(Unorder(ptm, hg));
+	}
+
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
+	bool do_wrap = _perm_take_step;
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -547,6 +557,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
+		_perm_reset = false;
+
 		// Handle cases 3&4 of the description above. That is, the
 		// `tree_compare()` above did not take a step, so we will.
 		// The `tree_compare()` should have reported exactly the
@@ -576,6 +588,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			{
 				// Even the stack, *without* erasing the discovered grounding.
 				solution_drop();
+				_perm_latest_term = ptm;
 
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
@@ -588,6 +601,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " for term=" << ptm->to_string()
 				              << " have_more=" << _perm_have_more;})
 				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_reset = false;
 				return true;
 			}
 		}
@@ -605,6 +619,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
+		_perm_reset = true;      // reset perms on lower links, too.
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
@@ -613,11 +628,27 @@ take_next_step:
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
-	             << ptm->to_string();})
+	             << ptm->to_string() << " do_wrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
+	_perm_reset = false;
 
+	// Implement an "odometer", for iterating on other unordered
+	// links that might occur in series with this one. That is,
+	// wrap around the permutation set for this link, while also
+	// advancing the next link by one (setting _take_step causes
+	// the next link to advance).
+	if (_perm_have_odometer and do_wrap)
+	{
+		bool match = unorder_compare(ptm, hg);
+		if (not match) return false;
+		_perm_latest_wrap = ptm;
+		_perm_latest_term = ptm;
+		_perm_have_more = false;
+		_perm_take_step = true;
+		return true;
+	}
 	return false;
 }
 
@@ -1164,17 +1195,36 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
+		if (_perm_latest_term)
+		{
+			_perm_have_odometer = true;
+			DO_LOG({LAZY_LOG_FINE << "Odometer term: "
+			                      << _perm_latest_term->to_string();})
+		}
+
 		while (_perm_have_more)
 		{
 			_perm_have_more = false;
 			_perm_take_step = true;
 
-			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
+			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
+			                      << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
+			{
+				_perm_have_odometer = false;
 				return true;
+			}
+			if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
+			{
+				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
+				                      << _perm_latest_term->to_string();})
+				return false;
+			}
 		}
-		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: " << ptm->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
+		                      << ptm->to_string();})
 	}
+	_perm_have_odometer = false;
 	return false;
 }
 
@@ -1233,7 +1283,9 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
+		bool save_more = _perm_have_more;
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		_perm_have_more = save_more;
 		if (found) break;
 	}
 
@@ -1266,7 +1318,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for term=" << ptm->to_string()
+		              << " for glob term=" << ptm->to_string()
 		              << " propose=" << Handle(iset[i]).value();})
 
 		// Before exploring the link branches, record the current
@@ -1367,7 +1419,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
 		return false;
 
-	while (have_perm(ptm, hg))
+	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm)
 	{
 		DO_LOG({logger().fine("Step to next permutation");})
 
@@ -2357,6 +2409,10 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_perm_have_more = false;
 	_perm_take_step = true;
+	_perm_reset = false;
+	_perm_have_odometer = false;
+	_perm_latest_term = nullptr;
+	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2401,6 +2457,10 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_perm_have_more = false;
 	_perm_take_step = true;
+	_perm_reset = false;
+	_perm_have_odometer = false;
+	_perm_latest_term = nullptr;
+	_perm_latest_wrap = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
