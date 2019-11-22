@@ -101,7 +101,7 @@
 
 ; ----------------------------------------------------
 ; Like above, but sixteen permutations
-(List (Concept "C")
+(List (Concept "D")
 	(Set (Predicate "P") (Predicate "Q"))
 	(Set (Predicate "R") (Predicate "S"))
 	(Set (Predicate "T") (Predicate "U"))
