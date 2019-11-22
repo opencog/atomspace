@@ -236,7 +236,7 @@ private:
 	bool node_compare(const Handle&, const Handle&);
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
-	bool unorder_compare(const PatternTermPtr&, const Handle&, bool);
+	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------

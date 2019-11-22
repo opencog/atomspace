@@ -479,7 +479,7 @@ they call compare_tree.
 ******************************************************************/
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
-                                         const Handle& hg, bool wrap)
+                                         const Handle& hg)
 {
 	const Handle& hp = ptm->getHandle();
 	const HandleSeq& osg = hg->getOutgoingSet();
@@ -629,7 +629,7 @@ take_next_step:
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
 	             << ptm->to_string()
-	             << " wrap=" << wrap << " dowrap=" << do_wrap;})
+	             << " dowrap=" << do_wrap;})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
@@ -640,9 +640,9 @@ take_next_step:
 	// wrap around the permutation set for this link, while also
 	// advancing the next link by one (setting _take_step causes
 	// the next link to advance).
-	if (_perm_have_odometer /* and wrap */ and do_wrap)
+	if (_perm_have_odometer and do_wrap)
 	{
-		bool match = unorder_compare(ptm, hg, false);
+		bool match = unorder_compare(ptm, hg);
 		if (not match) return false;
 		_perm_latest_wrap = ptm;
 		_perm_latest_term = ptm;
@@ -1133,7 +1133,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
-	return unorder_compare(ptm, hg, true);
+	return unorder_compare(ptm, hg);
 }
 
 /* ======================================================== */
