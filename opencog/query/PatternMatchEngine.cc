@@ -601,6 +601,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " for term=" << ptm->to_string()
 				              << " have_more=" << _perm_have_more;})
 				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_reset = false;
 				return true;
 			}
 		}
@@ -632,6 +633,7 @@ take_next_step:
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
+	_perm_reset = false;
 
 	// Implement an "odometer", for iterating on other unordered
 	// links that might occur in series with this one. That is,
