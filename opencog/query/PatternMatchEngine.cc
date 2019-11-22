@@ -1208,7 +1208,10 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: " << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
+			{
+				_perm_have_odometer = false;
 				return true;
+			}
 			if (_perm_latest_wrap and _perm_latest_wrap == last_term)
 			{
 				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
@@ -1218,6 +1221,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		}
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: " << ptm->to_string();})
 	}
+	_perm_have_odometer = false;
 	return false;
 }
 
