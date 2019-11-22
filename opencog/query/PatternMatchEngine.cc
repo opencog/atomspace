@@ -1283,7 +1283,6 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 		bool save_more = _perm_have_more;
-		_perm_reset = true;
 		PatternTermPtr save_frozen = _perm_freeze;
 		_perm_freeze = ptm;
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
@@ -2412,7 +2411,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_perm_have_more = false;
 	_perm_take_step = true;
-	_perm_reset = true;
+	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
@@ -2461,7 +2460,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_perm_have_more = false;
 	_perm_take_step = true;
-	_perm_reset = true;
+	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_freeze = nullptr;
 	_perm_latest_term = nullptr;
