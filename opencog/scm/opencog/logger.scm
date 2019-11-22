@@ -7,7 +7,6 @@
 (define-module (opencog logger))
 
 (use-modules (opencog))
-
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-logger "liblogger") "opencog_logger_init")
 

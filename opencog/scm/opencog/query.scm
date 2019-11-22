@@ -4,6 +4,7 @@
 
 (define-module (opencog query))
 
+(use-modules (opencog))
 (use-modules (opencog exec))
 
 (define-public (cog-bind handle)
