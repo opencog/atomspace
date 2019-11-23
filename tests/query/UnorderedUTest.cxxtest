@@ -64,6 +64,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_un1(void);
 		void test_un2(void);
 		void test_jswiergo(void);
+		void xtest_big_jswiergo(void);
 		void test_exhaust(void);
 		void test_embed(void);
 		void test_cube(void);
@@ -193,6 +194,37 @@ void UnorderedUTest::test_jswiergo(void)
 	expected = eval->eval_h("expect-q2");
 
 	logger().debug("jsw second result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Currently failing. WTF.  used to work.
+void UnorderedUTest::xtest_big_jswiergo(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
+
+	Handle result, expected;
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! big-tree-q1)");
+	expected = eval->eval_h("big-expect1");
+
+	logger().debug("jsw big first result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! big-tree-q2)");
+	expected = eval->eval_h("big-expect2");
+
+	logger().debug("jsw big second result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
