@@ -4,6 +4,7 @@
 ;; used to access such auxiliary atomspace in some peculiar fashion,
 ;; and the created atom becomes invalid as a result.
 
+(use-modules (opencog))
 (use-modules (opencog logger))
 (cog-logger-set-timestamp! #f)
 (cog-logger-set-stdout! #t)
