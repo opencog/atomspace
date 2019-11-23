@@ -1,53 +1,53 @@
 ;
-; unordered-odometer.scm
+; unordered-layer.scm
 ;
-; Unordered terms, arranged in series, inside an ordered link.
-; Since they are in series, they force the "odometer" to run,
-; during search.
+; Unordered terms, arranged in series, inside an unordered link.
+; This resembles the simpler unordered-odometer.scm except that
+; here, they are layered.
 
 (use-modules (opencog) (opencog exec))
 
-(List (Concept "A")
+(Set (Concept "A")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R")))
 
 ; Expect 3!=6 solutions
-(define odo-dim-one
+(define layer-dim-one
 	(Bind
-		(Present (List (Variable "$CPT")
+		(Present (Set (Variable "$CPT")
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
 			(Variable "$X") (Variable "$Y") (Variable "$Z"))))
 
-; (cog-execute! odo-dim-one)
+; (cog-execute! layer-dim-one)
 
 ; ----------------------------------------------------
-; Like above, but 3! * 3! = 36 permutations
+; Like above, but 2!* (3! * 3!) = 72 permutations
 
-(List (Concept "B")
+(Set (Concept "B")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "S") (Predicate "T") (Predicate "U")))
 
-(define odo-dim-two
+(define layer-dim-two
 	(Bind
-		(Present (List (Variable "$CPT")
+		(Present (Set (Variable "$CPT")
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
 			(Variable "$U") (Variable "$V") (Variable "$W")
 			(Variable "$X") (Variable "$Y") (Variable "$Z"))))
 
-; (cog-execute! odo-dim-two)
+; (cog-execute! layer-dim-two)
 
 ; ----------------------------------------------------
-; Like above, but 6*6*6 = 216 permutations
-(List (Concept "C")
+; Like above, but 3! * (6*6*6) = 1296 permutations
+(Set (Concept "C")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "S") (Predicate "T") (Predicate "U"))
 	(Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
-(define odo-dim-three
+(define layer-dim-three
 	(Bind
-		(Present (List (Variable "$CPT")
+		(Present (Set (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -56,19 +56,19 @@
 			(Variable "$U") (Variable "$V") (Variable "$W")
 			(Variable "$X") (Variable "$Y") (Variable "$Z"))))
 
-; (cog-execute! odo-dim-three)
+; (cog-execute! layer-dim-three)
 
 ; ----------------------------------------------------
-; Like above, but 6*6*6*6 = 1296 permutations
-(List (Concept "D")
+; Like above, but 4! * (6*6*6*6) = 24 * 1296 = 31104 permutations
+(Set (Concept "D")
 	(Set (Predicate "L") (Predicate "M") (Predicate "N"))
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "S") (Predicate "T") (Predicate "U"))
 	(Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
-(define odo-dim-four
+(define layer-dim-four
 	(Bind
-		(Present (List (Variable "$CPT")
+		(Present (Set (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$D") (Variable "$E") (Variable "$F"))
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -79,6 +79,6 @@
 			(Variable "$U") (Variable "$V") (Variable "$W")
 			(Variable "$X") (Variable "$Y") (Variable "$Z"))))
 
-; (cog-execute! odo-dim-four)
+; (cog-execute! layer-dim-four)
 
 ; ----------------------------------------------------
