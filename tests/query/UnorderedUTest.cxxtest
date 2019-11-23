@@ -371,25 +371,25 @@ void UnorderedUTest::test_odo_couple(void)
 	Handle result;
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 6*2=12 solutions
+	// Result should be a SetLink w/ 2*2=4 solutions
 	result = eval->eval_h("(cog-execute! couple-dim-two)");
 
 	logger().debug("D=2 couple arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 6*2*2=24 solutions
+	// Result should be a SetLink w/ 2*1*2=4 solutions
 	result = eval->eval_h("(cog-execute! couple-dim-three)");
 
 	logger().debug("D=3 couple arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 24, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 6*2*2*2=48 solutions
+	// Result should be a SetLink w/ 2*1*1*2=4 solutions
 	result = eval->eval_h("(cog-execute! couple-dim-four)");
 
 	logger().debug("D=4 odo arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 48, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

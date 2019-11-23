@@ -1,7 +1,7 @@
 (use-modules (opencog) (opencog exec))
 
 ; ----------------------------------------------------
-; Coupled sets, expect 3! * 2! = 12 permutations
+; Coupled sets, expect 2! * 2! = 4 permutations
 
 (List (Concept "B")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
@@ -17,7 +17,7 @@
 			(Variable "$X") (Variable "$Y"))))
 
 ; ----------------------------------------------------
-; Like above, but 3! * 2! * 2! = 24 permutations
+; Like above, but 2! * 1! * 2! = 4 permutations
 (List (Concept "C")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
@@ -35,7 +35,7 @@
 			(Variable "$G"))))
 
 ; ----------------------------------------------------
-; Like above, but 6*2*2*2 = 48 permutations
+; Like above, but 2*1*1*2 = 4 permutations
 (List (Concept "D")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
