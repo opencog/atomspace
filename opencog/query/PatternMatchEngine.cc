@@ -633,6 +633,7 @@ take_next_step:
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
 	_perm_reset = false;
+	_perm_latest_term = ptm;
 
 	// Implement an "odometer", for iterating on other unordered
 	// links that might occur in series with this one. That is,
@@ -644,7 +645,6 @@ take_next_step:
 		bool match = unorder_compare(ptm, hg);
 		if (not match) return false;
 		_perm_latest_wrap = ptm;
-		_perm_latest_term = ptm;
 		_perm_have_more = false;
 		_perm_take_step = true;
 		return true;
