@@ -297,7 +297,7 @@ SCM SchemeSmob::ss_get_as (void)
 ///
 /// ... However, a common scenario seems to be that the new atomspace
 /// is a temp atomspace, created in the pattern matcher, the pattern
-/// minor or somewhere else, and it's parent is the old atomspace
+/// miner or somewhere else, and it's parent is the old atomspace
 /// (which we are tracking). That means that the old atomspace is still
 /// in use: its the parent of an untracked child. So we need to
 /// increment in this case as well, lest the use-count drop to zero.
