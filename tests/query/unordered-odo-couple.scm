@@ -1,3 +1,12 @@
+;
+; unordered-odo-couple.scm
+;
+; Multiple unordered links, arragned in series (so that the odometer
+; runs) but then constrained so that neighboring terms must be
+; identical.  This sharply limits the possible orderings.
+; See also unordered-odo-equal.scm for same test case, but with
+; equality constraints.
+;
 (use-modules (opencog) (opencog exec))
 
 ; ----------------------------------------------------

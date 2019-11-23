@@ -70,6 +70,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_odometer(void);
 		void xtest_odo_layer(void);
 		void xtest_odo_couple(void);
+		void xtest_odo_equal(void);
 };
 
 /*
@@ -370,7 +371,7 @@ void UnorderedUTest::xtest_odo_layer(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	SchemeEval* eval = new SchemeEval(as);
-	eval->eval("(load-from-path \"tests/query/unordered-layer.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-layer.scm\")");
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 3!=6 solutions
@@ -432,7 +433,42 @@ void UnorderedUTest::xtest_odo_couple(void)
 	// Result should be a SetLink w/ 2*1*1*2=4 solutions
 	result = eval->eval_h("(cog-execute! couple-dim-four)");
 
-	logger().debug("D=4 odo arity is %d\n", getarity(result));
+	logger().debug("D=4 couple arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Coupled odometers. Currently failing.
+void UnorderedUTest::xtest_odo_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-equal.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-two)");
+
+	logger().debug("D=2 equ arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-three)");
+
+	logger().debug("D=3 equ arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-four)");
+
+	logger().debug("D=4 equ arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
