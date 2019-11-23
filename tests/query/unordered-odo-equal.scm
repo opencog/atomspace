@@ -1,7 +1,7 @@
 ;
 ; unordered-odo-equal.scm
 ;
-; Multiple unordered links, arragned in series (so that the odometer
+; Multiple unordered links, arranged in series (so that the odometer
 ; runs) but then constrained so that neighboring terms must be
 ; identical.  This sharply limits the possible orderings.
 ; See also unordered-odo-couple.scm for same test case, but with
