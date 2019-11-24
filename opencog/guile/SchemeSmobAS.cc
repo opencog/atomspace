@@ -47,6 +47,8 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, as);
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
+	if (deleteable_as.end() != deleteable_as.find(as))
+		deleteable_as[as]++;
 	return smob;
 }
 
@@ -69,6 +71,7 @@ void SchemeSmob::release_as (AtomSpace *as)
 	auto has = deleteable_as.find(as);
 	if (deleteable_as.end() == has) return;
 
+	deleteable_as[as]--;
 	if (0 == deleteable_as[as])
 	{
 		AtomSpace* env = as->get_environ();
