@@ -525,10 +525,10 @@ void MultiAtomSpace::test_pm_scm(void)
 }
 
 /**
- * An atom is created in some auxiliary atomspace, then that atom is
- * used to access such auxiliary atomspace in some peculiar fashion
- * which leads guile's garbage collector to (wrong) delete the
- * auxiliary atomspace (till this bug gets fixed).
+ * An atom is created in an auxiliary atomspace, then that atom is
+ * used to access the auxiliary atomspace in a peculiar fashion
+ * which can lead to the auxiliary atomspace to be garbage collected.
+ * See bug opencog/atomspace#2382 for details.
  */
 void MultiAtomSpace::test_as_of_atom_scm(void)
 {
