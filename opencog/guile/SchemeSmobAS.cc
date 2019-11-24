@@ -15,6 +15,48 @@
 
 using namespace opencog;
 
+// Meta-theory.
+// Atomspaces are in general persistant, which means that, in general,
+// they should not be deleted just because guile doesn't have a pointer
+// to them. Unless they should be...
+//
+// There are two situations:
+// 1) Atomspaces that come from the outside world (e.g. from the
+//    cogserver, or were created in python, or are temp scratch
+//    atomspaces created by the pattern-matcher and the pattern-miner)
+//    and are given to us to use. We MUST NOT delete these atomspaces,
+//    when all guile references to them are gone.
+//
+// 2) Atomspaces are created by the user calling the scheme function
+//    `cog-new-atomspace`.  In this case, when all references are lost,
+//    then this atomspace can be safely deleted. If the user decides
+//    to hand off this atomspace to someone else (e.g. python), then
+//    the user should be careful to retain a guile reference to it!
+//
+// There are several complications:
+// A) In general, guile does NOT know that two different scheme SMOB's
+//    happen to point at the same AtomSpace. Thus, there are cases where
+//    guile delete's a SMOB that is unused, but it is pointing at an
+//    AtomSpace that is being used in some other SMOB. This is exhibited
+//    in `MultiAtomSpaceUTest::test_as_of_atom_scm()` or e.g. by
+//    saying `(load "as-of-atom.scm")` at the guile prompt. As a result,
+//    we have to maintain refernce counts independent of guile.
+//
+// B) In the top-level interaction environment, guile creates anonymous
+//    boxes or anonymous variables that hold SCM objects, and those
+//    boxes/variables are never GC'ed (because they are in the top-level
+//    environment).  As a result, it is possbile to create AtomSpaces
+//    which are never collected. This is easy to do: just say
+//    `(cog-new-atomspace)` at the guile prompt. At the end of this,
+//    you will not have any references to the AtomSpaces; they will have
+//    been lost. Well... almost lost.  One can still retreive them with
+//    `(use-modules (ice-9 history))` and then force GC with
+//    `(clear-value-history!) (gc)`.
+//
+// These complications are hit by `MultiAtomSpaceUTest`, by the
+// `CythonGuile` unit test, and by the pattern-miner.
+//
+// ------------------------------------------------------------------
 // Need a lock to protect the map, since multiple threads may be trying
 // to update this map.  The map contains a use-count for the number of
 // threads that are currently using this atomspace as the current
@@ -58,8 +100,10 @@ SCM SchemeSmob::make_as(AtomSpace *as)
  * The only place this is called from is the guile garbage collector!
  * Its called when guile thinks it has no pointers to the given
  * atomspace; thus, we should free it. In fact, we only decrement the
- * use count for it; XXX but under what circumstance would that not be
- * zero? If its racing with another thread ?? I'm confused.
+ * use count for it.  It can happen that the use-count is not zero
+ * because guile doesn't realize thatthere is another SCM still pointing
+ * at the same AtomSpace. Both MultiAtomSpaceUTest::test_as_of_atom_scm
+ * and also the `CythonGuile` unit tests trigger this case.
  *
  * Note that if the atomspace was given to us externally, e.g. by the
  * cogserver, then it will not even have a use-count (and thus, it's
