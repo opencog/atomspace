@@ -15,6 +15,51 @@
 
 using namespace opencog;
 
+// Meta-theory.
+// AtomSpaces are in general persistent, which means that, in general,
+// they should not be deleted just because guile doesn't have a pointer
+// to them. Unless they should be...
+//
+// There are two situations:
+// 1) AtomSpaces that come from the outside world (e.g. from the
+//    cogserver, or were created in python, or are temp scratch
+//    AtomSpaces created by the pattern-matcher and the pattern-miner)
+//    and are given to us to use. We MUST NOT delete these AtomSpaces,
+//    when all guile references to them are gone.
+//
+// 2) AtomSpaces are created by the user calling the scheme function
+//    `cog-new-atomspace`.  In this case, when all references are lost,
+//    then this atomspace can be safely deleted. If the user decides
+//    to hand off this atomspace to someone else (e.g. python), then
+//    the user should be careful to retain a guile reference to it!
+//
+// There are several complications:
+// A) In general, guile does NOT know that two different scheme SMOB's
+//    happen to point at the same AtomSpace. Thus, there are cases where
+//    guile deletes (GC's) a SMOB that is unused, but it is pointing at an
+//    AtomSpace that is being used in some other SMOB. This is exhibited
+//    in `MultiAtomSpaceUTest::test_as_of_atom_scm()` or e.g. by
+//    saying `(load "as-of-atom.scm")` at the guile prompt. As a result,
+//    we have to maintain reference counts independent of guile.
+//
+// B) In the top-level interaction environment, guile maintains a
+//    history of return values of all functions that the user typed
+//    in at the prompt. These might hold references to AtomSpaces that
+//    are never GC'ed, because they are sitting in the history buffer.
+//    Creating these is easy: just say `(cog-new-atomspace)` at the
+//    guile prompt. At the end of this, you will not have any
+//    references to the AtomSpaces; they will have been lost.
+//    Well... almost lost.  One can still retrieve them with
+//    `(use-modules (ice-9 history))` and then force GC with
+//    `(clear-value-history!) (gc)`. Similar remarks apply to
+//    `(cog-set-atomspace! new)` which returns the old AtomSpace as
+//    the return value, thus putting the old AtomSpace in the history
+//    buffer! Watch out!
+//
+// These complications are hit by `MultiAtomSpaceUTest`, by the
+// `CythonGuile` unit test, and by the pattern-miner.
+//
+// ------------------------------------------------------------------
 // Need a lock to protect the map, since multiple threads may be trying
 // to update this map.  The map contains a use-count for the number of
 // threads that are currently using this atomspace as the current
@@ -47,6 +92,8 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, as);
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
+	if (deleteable_as.end() != deleteable_as.find(as))
+		deleteable_as[as]++;
 	return smob;
 }
 
@@ -56,8 +103,10 @@ SCM SchemeSmob::make_as(AtomSpace *as)
  * The only place this is called from is the guile garbage collector!
  * Its called when guile thinks it has no pointers to the given
  * atomspace; thus, we should free it. In fact, we only decrement the
- * use count for it; XXX but under what circumstance would that not be
- * zero? If its racing with another thread ?? I'm confused.
+ * use count for it.  It can happen that the use-count is not zero
+ * because guile doesn't realize thatthere is another SCM still pointing
+ * at the same AtomSpace. Both MultiAtomSpaceUTest::test_as_of_atom_scm
+ * and also the `CythonGuile` unit tests trigger this case.
  *
  * Note that if the atomspace was given to us externally, e.g. by the
  * cogserver, then it will not even have a use-count (and thus, it's
@@ -69,6 +118,7 @@ void SchemeSmob::release_as (AtomSpace *as)
 	auto has = deleteable_as.find(as);
 	if (deleteable_as.end() == has) return;
 
+	deleteable_as[as]--;
 	if (0 == deleteable_as[as])
 	{
 		AtomSpace* env = as->get_environ();
@@ -297,7 +347,7 @@ SCM SchemeSmob::ss_get_as (void)
 ///
 /// ... However, a common scenario seems to be that the new atomspace
 /// is a temp atomspace, created in the pattern matcher, the pattern
-/// minor or somewhere else, and it's parent is the old atomspace
+/// miner or somewhere else, and it's parent is the old atomspace
 /// (which we are tracking). That means that the old atomspace is still
 /// in use: its the parent of an untracked child. So we need to
 /// increment in this case as well, lest the use-count drop to zero.
@@ -363,17 +413,8 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
  * thread, so that different threads can use different atomspaces,
  * all at the same time.
  */
-
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	// Do NOT do the following: it is tempting, but wrong.
-	// as_ref_count(ss_get_as(), nas);
-	// Why? Because this function is called from the evaluator, only,
-	// and it's likely that the use-count on "saved_as" will drop to
-	// zero, which would be undesirable. At any rate, the calls to
-	// this function always come in matched pairs, so its pointless
-	// to do more than the minimum amount of work.
-
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }
 
@@ -395,7 +436,7 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 /**
  * Search for an atomspace in a list of values.
  * Return the atomspace if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
+ * Throw errors if the list is not stictly just key-value pairs.
  */
 AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
 {
