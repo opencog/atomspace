@@ -496,6 +496,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
+	if (nullptr == _perm_first_term) _perm_first_term = ptm;
+
 	// If we are coming up from below, through this particular
 	// ptm, we must not take any steps, or reset it.
 	if (_perm_reset)
@@ -1151,7 +1153,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * Suppose that we start searching the clause from VariableNode "$x" that
  * occures twice in the pattern under UnorderedLink. While we traverse
  * the pattern recursively we need to keep current state of permutations
- * of UnorderedLink-s. We do not know which permutation will match. It may
+ * of UnorderedLinks. We do not know which permutation will match. It may
  * be different permutation for each occurence of UnorderedLink-s.
  * This is the reason why we use PatternTerm pointers instead of atom Handles
  * while traversing pattern tree. We need to keep permutation states for
@@ -1173,7 +1175,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * when the first match is found. XXX This may need to be refactored.
  * For now, we iterate over all pattern terms associated with a given
  * atom handle.
- *
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
@@ -1195,10 +1196,15 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		// might satisfy this clause. So try those, until exhausted.
 		// Note that these unordered links might be buried deeply;
 		// that is why we iterate over them here.
-		if (_perm_latest_term)
+		if (_perm_first_term)
 		{
 			_perm_have_odometer = true;
-			DO_LOG({LAZY_LOG_FINE << "Odometer term: "
+			DO_LOG({LAZY_LOG_FINE << "First odometer term: "
+			                      << _perm_first_term->to_string();})
+		}
+		if (_perm_latest_term != _perm_first_term)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
 			                      << _perm_latest_term->to_string();})
 		}
 
@@ -1211,7 +1217,6 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 			                      << ptm->to_string();})
 			if (explore_glob_branches(ptm, hg, clause_root))
 			{
-				_perm_have_odometer = false;
 				return true;
 			}
 			if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
@@ -2411,6 +2416,7 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
+	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
@@ -2459,6 +2465,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
+	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 }

@@ -25,8 +25,11 @@
 			(Variable "$U") (Variable "$V") (Variable "$W")
 			(Variable "$X") (Variable "$Y"))))
 
+; (cog-execute! couple-dim-two)
+
 ; ----------------------------------------------------
 ; Like above, but 2! * 1! * 2! = 4 permutations
+
 (List (Concept "C")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
@@ -43,8 +46,11 @@
 			(Variable "$D") (Variable "$E") (Variable "$F")
 			(Variable "$G"))))
 
+; (cog-execute! couple-dim-three)
+
 ; ----------------------------------------------------
 ; Like above, but 2*1*1*2 = 4 permutations
+
 (List (Concept "D")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
@@ -62,3 +68,7 @@
 			(Variable "$A") (Variable "$B") (Variable "$C")
 			(Variable "$D") (Variable "$E") (Variable "$F")
 			(Variable "$G") (Variable "$H") (Variable "$J"))))
+
+; (cog-execute! couple-dim-four)
+
+; ----------------------------------------------------
