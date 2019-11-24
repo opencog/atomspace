@@ -16,18 +16,18 @@
 using namespace opencog;
 
 // Meta-theory.
-// Atomspaces are in general persistant, which means that, in general,
+// AtomSpaces are in general persistent, which means that, in general,
 // they should not be deleted just because guile doesn't have a pointer
 // to them. Unless they should be...
 //
 // There are two situations:
-// 1) Atomspaces that come from the outside world (e.g. from the
+// 1) AtomSpaces that come from the outside world (e.g. from the
 //    cogserver, or were created in python, or are temp scratch
-//    atomspaces created by the pattern-matcher and the pattern-miner)
-//    and are given to us to use. We MUST NOT delete these atomspaces,
+//    AtomSpaces created by the pattern-matcher and the pattern-miner)
+//    and are given to us to use. We MUST NOT delete these AtomSpaces,
 //    when all guile references to them are gone.
 //
-// 2) Atomspaces are created by the user calling the scheme function
+// 2) AtomSpaces are created by the user calling the scheme function
 //    `cog-new-atomspace`.  In this case, when all references are lost,
 //    then this atomspace can be safely deleted. If the user decides
 //    to hand off this atomspace to someone else (e.g. python), then
@@ -36,22 +36,25 @@ using namespace opencog;
 // There are several complications:
 // A) In general, guile does NOT know that two different scheme SMOB's
 //    happen to point at the same AtomSpace. Thus, there are cases where
-//    guile delete's a SMOB that is unused, but it is pointing at an
+//    guile deletes (GC's) a SMOB that is unused, but it is pointing at an
 //    AtomSpace that is being used in some other SMOB. This is exhibited
 //    in `MultiAtomSpaceUTest::test_as_of_atom_scm()` or e.g. by
 //    saying `(load "as-of-atom.scm")` at the guile prompt. As a result,
-//    we have to maintain refernce counts independent of guile.
+//    we have to maintain reference counts independent of guile.
 //
-// B) In the top-level interaction environment, guile creates anonymous
-//    boxes or anonymous variables that hold SCM objects, and those
-//    boxes/variables are never GC'ed (because they are in the top-level
-//    environment).  As a result, it is possbile to create AtomSpaces
-//    which are never collected. This is easy to do: just say
-//    `(cog-new-atomspace)` at the guile prompt. At the end of this,
-//    you will not have any references to the AtomSpaces; they will have
-//    been lost. Well... almost lost.  One can still retreive them with
+// B) In the top-level interaction environment, guile maintains a
+//    history of return values of all functions that the user typed
+//    in at the prompt. These might hold references to AtomSpaces that
+//    are never GC'ed, because they are sitting in the history buffer.
+//    Creating these is easy: just say `(cog-new-atomspace)` at the
+//    guile prompt. At the end of this, you will not have any
+//    references to the AtomSpaces; they will have been lost.
+//    Well... almost lost.  One can still retrieve them with
 //    `(use-modules (ice-9 history))` and then force GC with
-//    `(clear-value-history!) (gc)`.
+//    `(clear-value-history!) (gc)`. Similar remarks apply to
+//    `(cog-set-atomspace! new)` which returns the old AtomSpace as
+//    the return value, thus putting the old AtomSpace in the history
+//    buffer! Watch out!
 //
 // These complications are hit by `MultiAtomSpaceUTest`, by the
 // `CythonGuile` unit test, and by the pattern-miner.
