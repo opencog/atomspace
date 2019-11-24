@@ -366,17 +366,8 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
  * thread, so that different threads can use different atomspaces,
  * all at the same time.
  */
-
 void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 {
-	// Do NOT do the following: it is tempting, but wrong.
-	// as_ref_count(ss_get_as(), nas);
-	// Why? Because this function is called from the evaluator, only,
-	// and it's likely that the use-count on "saved_as" will drop to
-	// zero, which would be undesirable. At any rate, the calls to
-	// this function always come in matched pairs, so its pointless
-	// to do more than the minimum amount of work.
-
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }
 
@@ -398,7 +389,7 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 /**
  * Search for an atomspace in a list of values.
  * Return the atomspace if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
+ * Throw errors if the list is not stictly just key-value pairs.
  */
 AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
 {
