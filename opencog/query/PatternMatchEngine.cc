@@ -1415,28 +1415,30 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	// Look for a match, at least once.
-	if (explore_dispatch(ptm, hg, clause_root))
-		return true;
-
 	// If its not an unordered link, then it will not have
 	// permuations, and so there is nothing more to do.
 	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
-		return false;
-
-	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm)
 	{
+		return explore_dispatch(ptm, hg, clause_root);
+	}
+
+	do
+	{
+		// If the pattern was satisfied, then we are done for good.
+		if (explore_dispatch(ptm, hg, clause_root))
+			return true;
+
 		DO_LOG({logger().fine("Step to next permutation");})
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		_perm_take_step = true;
 		_perm_have_more = false;
-
-		// If the pattern was satisfied, then we are done for good.
-		if (explore_dispatch(ptm, hg, clause_root))
-			return true;
 	}
+	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
+
+	_perm_take_step = false;
+	_perm_have_more = false;
 	DO_LOG({logger().fine("No more unordered permutations");})
 
 	return false;
