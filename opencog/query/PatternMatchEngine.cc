@@ -178,23 +178,29 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
-	PatternTermSeq osp = ptm->getOutgoingSet();
-	const HandleSeq &osg = hg->getOutgoingSet();
-
-	size_t osg_size = osg.size();
-	size_t osp_size = osp.size();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
 
 	// The recursion step: traverse down the tree.
 	depth ++;
 
 	// If the pattern contains no globs, then the pattern and ground
-	// must match exactly, term by term. If the pattern has globs,
-	// perform glob-matching (which can be thought of as a well-defined
-	// kind of fuzzy matching). If there are no globs, and the arity is
-	// mis-matched, then perform fuzzy matching.
+	// must match exactly, with atoms in the outgoing sets pairing up.
+	// If the pattern has globs, then more complex matching is needed;
+	// a glob can match one or more atoms in a row. If there are no
+	// globs, and the arity is mis-matched, then perform fuzzy matching.
+
 	bool match = true;
-	if (0 == _pat->globby_terms.count(ptm->getHandle()))
+	const Handle &hp = ptm->getHandle();
+	if (0 < _pat->globby_terms.count(hp))
 	{
+		match = glob_compare(osp, osg);
+	}
+	else
+	{
+		size_t osg_size = osg.size();
+		size_t osp_size = osp.size();
+
 		// If the arities are mis-matched, do a fuzzy compare instead.
 		if (osp_size != osg_size)
 		{
@@ -202,6 +208,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		}
 		else
 		{
+			// Side-by-side recursive compare.
 			for (size_t i=0; i<osp_size; i++)
 			{
 				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
@@ -212,18 +219,10 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			}
 		}
 	}
-	else
-	{
-		// If we are here, then the pattern contains globs. A glob can
-		// match one or more atoms in a row. Thus, we have a more
-		// complicated search ...
-		match = glob_compare(osp, osg);
-	}
 
 	depth --;
 	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
 
-	const Handle &hp = ptm->getHandle();
 	if (not match)
 	{
 		_pmc.post_link_mismatch(hp, hg);
@@ -244,7 +243,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 /* ======================================================== */
 
 /// Compare a ChoiceLink in the pattern to the proposed grounding.
-/// hp points at the ChoiceLink.
+/// The term `ptm` points at the ChoiceLink.
 ///
 /// CHOICE_LINK's are multiple-choice links. As long as we can
 /// can match one of the sub-expressions of the ChoiceLink, then
