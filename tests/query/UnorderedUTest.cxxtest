@@ -70,6 +70,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_cube(void);
 		void test_arcane(void);
 		void test_odometer(void);
+		void xtest_odo_below(void);
 		void xtest_odo_layer(void);
 		void xtest_odo_couple(void);
 		void xtest_odo_equ_pred(void);
@@ -420,6 +421,46 @@ void UnorderedUTest::test_odometer(void)
 	result = eval->eval_h("(cog-execute! odo-dim-four)");
 
 	logger().debug("D=4 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::xtest_odo_below(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! below-dim-one)");
+
+	logger().debug("D=1 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 6*6=36 solutions
+	result = eval->eval_h("(cog-execute! below-dim-two)");
+
+	logger().debug("D=2 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6=216 solutions
+	result = eval->eval_h("(cog-execute! below-dim-three)");
+
+	logger().debug("D=3 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! below-dim-four)");
+
+	logger().debug("D=4 below arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
