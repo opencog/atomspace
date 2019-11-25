@@ -1469,13 +1469,16 @@ bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
 	return explore_single_branch(ptm, hg, clause_root);
 }
 
-/// See explore_unordered_branches() for a general explanation. This method
-/// handles the ChoiceLink branch alternatives only.  It assumes
-/// that the caller had handled the unordered-link alternative branches.
+/// See explore_unordered_branches() for a general explanation.
+/// This method handles the ChoiceLink branch alternatives only.
+/// This method is never called, currently.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
+	throw RuntimeException(TRACE_INFO,
+		"This is not implemented or just wrong or something!!");
+
 	DO_LOG({logger().fine("Begin choice branchpoint iteration loop");})
 	do {
 		// XXX This `need_choice_push` thing is probably wrong; it probably
@@ -1483,7 +1486,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		// However, currently, no test case trips this up. so .. OK.
 		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_glob_branches(ptm, hg, clause_root);
+		bool match = explore_single_branch(ptm, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
