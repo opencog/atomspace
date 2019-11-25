@@ -1344,6 +1344,9 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
+		// It's not clear if the odometer can play nice with
+		// globby terms. Anyway, no unit test mixs these two.
+		// So, for now, we ignore it.
 		// if (explore_odometer(ptm, hg, clause_root))
 		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
@@ -1354,6 +1357,15 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+// explore_odometer - explore multiple unordered links at once.
+//
+// The core issue adressed here is that there may be lots of
+// UnorderedLinks below us, and we have to explore all of them.
+// So this tries to advance all of them.
+// XXX The design here is deeply flawed. Its just barely enough
+// to pass the current unit tests, but clearly fails on more
+// complex cases. See issue opencog/atomspace#2388
+// A redesign is needed.
 bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
