@@ -1355,9 +1355,13 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	// Check if the pattern has globs in it, and record the glob_state.
-	// Do this *before* starting exploration.
+	// Check if the pattern has globs in it,
 	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+
+	if (not has_glob)
+		return explore_dispatch(ptm, hg, clause_root);
+
+	// Record the glob_state *before* starting exploration.
 	size_t gstate_size = _glob_state.size();
 
 	// If no solution is found, and there are globs, then there may
@@ -1372,10 +1376,9 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	{
 		if (explore_dispatch(ptm, hg, clause_root))
 			return true;
-		if (has_glob)
-			DO_LOG({logger().fine("Globby clause not grounded; try again");})
+		DO_LOG({logger().fine("Globby clause not grounded; try again");})
 	}
-	while (has_glob and _glob_state.size() > gstate_size);
+	while (_glob_state.size() > gstate_size);
 
 	return false;
 }
