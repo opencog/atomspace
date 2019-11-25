@@ -1288,8 +1288,9 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
+
 		bool save_more = _perm_have_more;
-		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		found = explore_dispatch(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
 		if (found) break;
 	}
@@ -1369,7 +1370,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
-		if (explore_link_branches(ptm, hg, clause_root))
+		if (explore_dispatch(ptm, hg, clause_root))
 			return true;
 		if (has_glob)
 			DO_LOG({logger().fine("Globby clause not grounded; try again");})
@@ -1415,17 +1416,10 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	// If its not an unordered link, then it will not have
-	// permuations, and so there is nothing more to do.
-	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
-	{
-		return explore_dispatch(ptm, hg, clause_root);
-	}
-
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
-		if (explore_dispatch(ptm, hg, clause_root))
+		if (explore_single_branch(ptm, hg, clause_root))
 			return true;
 
 		DO_LOG({logger().fine("Step to next permutation");})
@@ -1449,12 +1443,20 @@ bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
                                           const Handle& clause_root)
 {
 	const Handle& hp = ptm->getHandle();
+	Type ptype = hp->get_type();
 
 	// Iterate over different possible choices.
-	if (CHOICE_LINK == hp->get_type())
+	if (CHOICE_LINK == ptype)
 	{
 		return explore_choice_branches(ptm, hg, clause_root);
 	}
+
+	// Unordered links have permutations to explore.
+	if (_nameserver.isA(ptype, UNORDERED_LINK))
+	{
+		return explore_link_branches(ptm, hg, clause_root);
+	}
+
 	return explore_single_branch(ptm, hg, clause_root);
 }
 
