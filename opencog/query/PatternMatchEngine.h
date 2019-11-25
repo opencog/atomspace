@@ -259,6 +259,8 @@ private:
 	                           const Handle&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
+	bool explore_odometer(const PatternTermPtr&, const Handle&,
+	                      const Handle&);
 	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
 	                                const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,

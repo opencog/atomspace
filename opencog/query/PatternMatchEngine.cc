@@ -1188,46 +1188,55 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
-		if (explore_var_branches(ptm, hg, clause_root))
+		if (explore_odometer(ptm, hg, clause_root))
 			return true;
-
-		// If no solution was found, and there are unordered links, then
-		// there may be alternate permuations of the unordered link that
-		// might satisfy this clause. So try those, until exhausted.
-		// Note that these unordered links might be buried deeply;
-		// that is why we iterate over them here.
-		if (_perm_first_term)
-		{
-			_perm_have_odometer = true;
-			DO_LOG({LAZY_LOG_FINE << "First odometer term: "
-			                      << _perm_first_term->to_string();})
-		}
-		if (_perm_latest_term != _perm_first_term)
-		{
-			DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
-			                      << _perm_latest_term->to_string();})
-		}
-
-		while (_perm_have_more)
-		{
-			_perm_have_more = false;
-			_perm_take_step = true;
-
-			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
-			                      << ptm->to_string();})
-			if (explore_var_branches(ptm, hg, clause_root))
-			{
-				return true;
-			}
-			if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
-			{
-				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
-				                      << _perm_latest_term->to_string();})
-				return false;
-			}
-		}
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string();})
+	}
+	return false;
+}
+
+bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
+                                          const Handle& hg,
+                                          const Handle& clause_root)
+{
+	if (explore_var_branches(ptm, hg, clause_root))
+		return true;
+
+	// If no solution was found, and there are unordered links, then
+	// there may be alternate permuations of the unordered link that
+	// might satisfy this clause. So try those, until exhausted.
+	// Note that these unordered links might be buried deeply;
+	// that is why we iterate over them here.
+	if (_perm_first_term)
+	{
+		_perm_have_odometer = true;
+		DO_LOG({LAZY_LOG_FINE << "First odometer term: "
+		                      << _perm_first_term->to_string();})
+	}
+	if (_perm_latest_term != _perm_first_term)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
+		                      << _perm_latest_term->to_string();})
+	}
+
+	while (_perm_have_more)
+	{
+		_perm_have_more = false;
+		_perm_take_step = true;
+
+		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
+		                      << ptm->to_string();})
+		if (explore_var_branches(ptm, hg, clause_root))
+		{
+			return true;
+		}
+		if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
+			                      << _perm_latest_term->to_string();})
+			return false;
+		}
 	}
 	_perm_have_odometer = false;
 	return false;
