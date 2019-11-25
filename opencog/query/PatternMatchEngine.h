@@ -255,8 +255,8 @@ private:
 	                         const Handle&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
-	bool explore_link_branches(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
+	                                const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
 	                             const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,

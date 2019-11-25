@@ -1249,7 +1249,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 /// one branch, we backtrack to here, and try another branch. When
 /// backtracking, all state must be popped and pushed again, to enter
 /// the new branch. We don't pushd & pop here, we push-n-pop in the
-/// explore_link_branches() method.
+/// explore_unordered_branches() method.
 ///
 /// This method is part of a recursive chain that only terminates
 /// when a grounding for *the entire pattern* was found (and the
@@ -1348,7 +1348,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 /// explore_glob_branches -- explore glob grounding alternatives
 ///
-/// Please see the docs for `explore_link_branches` for the general
+/// Please see the docs for `explore_unordered_branches` for the general
 /// idea. In this particular method, all possible alternatives for
 /// grounding glob nodes are explored.
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
@@ -1380,7 +1380,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
-/// explore_link_branches -- explore UnorderedLink alternatives.
+/// explore_unordered_branches -- explore UnorderedLink alternatives.
 ///
 /// Every UnorderedLink of arity N presents N-factorial different
 /// grounding possbilities, corresponding to different permutations
@@ -1395,7 +1395,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 /// nothing, then the next branch is explored, until exhaustion of the
 /// possibilities.  Upon exhaustion, it returns to the caller.
 ///
-bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
+bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
@@ -1460,13 +1460,13 @@ bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
 	// Unordered links have permutations to explore.
 	if (_nameserver.isA(ptype, UNORDERED_LINK))
 	{
-		return explore_link_branches(ptm, hg, clause_root);
+		return explore_unordered_branches(ptm, hg, clause_root);
 	}
 
 	return explore_single_branch(ptm, hg, clause_root);
 }
 
-/// See explore_link_branches() for a general explanation. This method
+/// See explore_unordered_branches() for a general explanation. This method
 /// handles the ChoiceLink branch alternatives only.  It assumes
 /// that the caller had handled the unordered-link alternative branches.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
