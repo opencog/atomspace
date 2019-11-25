@@ -1178,33 +1178,31 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
-                                               const Handle& clause_root)
+                                               const Handle& clause)
 {
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
-	auto pl = _pat->connected_terms_map.find({term, clause_root});
+	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
+
+	// Check if the pattern has globs in it.
+	bool has_glob = (0 < _pat->globby_holders.count(term));
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
-		if (explore_var_branches(ptm, hg, clause_root))
-			return true;
+		bool found;
+		if (has_glob)
+			found = explore_glob_branches(ptm, hg, clause);
+		else
+			found = explore_odometer(ptm, hg, clause);
+
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
-		                      << ptm->to_string();})
+		                      << ptm->to_string()
+		                      << " found=" << found; })
+		if (found) return true;
 	}
 	return false;
-}
-
-bool PatternMatchEngine::explore_var_branches(const PatternTermPtr& ptm,
-                                              const Handle& hg,
-                                              const Handle& clause)
-{
-	// Check if the pattern has globs in it.
-	if (0 < _pat->globby_holders.count(ptm->getHandle()))
-		return explore_glob_branches(ptm, hg, clause);
-
-	return explore_odometer(ptm, hg, clause);
 }
 
 /// explore_up_branches -- look for groundings for the given term.

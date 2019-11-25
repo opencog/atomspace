@@ -253,8 +253,6 @@ private:
 	                         const Handle&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
-	bool explore_var_branches(const PatternTermPtr&, const Handle&,
-	                          const Handle&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
