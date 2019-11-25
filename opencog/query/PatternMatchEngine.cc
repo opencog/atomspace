@@ -496,6 +496,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
+	if (nullptr == _perm_first_term) _perm_first_term = ptm;
+
 	// If we are coming up from below, through this particular
 	// ptm, we must not take any steps, or reset it.
 	if (_perm_reset)
@@ -1151,7 +1153,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * Suppose that we start searching the clause from VariableNode "$x" that
  * occures twice in the pattern under UnorderedLink. While we traverse
  * the pattern recursively we need to keep current state of permutations
- * of UnorderedLink-s. We do not know which permutation will match. It may
+ * of UnorderedLinks. We do not know which permutation will match. It may
  * be different permutation for each occurence of UnorderedLink-s.
  * This is the reason why we use PatternTerm pointers instead of atom Handles
  * while traversing pattern tree. We need to keep permutation states for
@@ -1173,58 +1175,33 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * when the first match is found. XXX This may need to be refactored.
  * For now, we iterate over all pattern terms associated with a given
  * atom handle.
- *
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
-                                               const Handle& clause_root)
+                                               const Handle& clause)
 {
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
-	auto pl = _pat->connected_terms_map.find({term, clause_root});
+	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
+
+	// Check if the pattern has globs in it.
+	bool has_glob = (0 < _pat->globby_holders.count(term));
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
-		if (explore_glob_branches(ptm, hg, clause_root))
-			return true;
+		bool found;
+		if (has_glob)
+			found = explore_glob_branches(ptm, hg, clause);
+		else
+			found = explore_odometer(ptm, hg, clause);
 
-		// If no solution was found, and there are unordered links, then
-		// there may be alternate permuations of the unordered link that
-		// might satisfy this clause. So try those, until exhausted.
-		// Note that these unordered links might be buried deeply;
-		// that is why we iterate over them here.
-		if (_perm_latest_term)
-		{
-			_perm_have_odometer = true;
-			DO_LOG({LAZY_LOG_FINE << "Odometer term: "
-			                      << _perm_latest_term->to_string();})
-		}
-
-		while (_perm_have_more)
-		{
-			_perm_have_more = false;
-			_perm_take_step = true;
-
-			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
-			                      << ptm->to_string();})
-			if (explore_glob_branches(ptm, hg, clause_root))
-			{
-				_perm_have_odometer = false;
-				return true;
-			}
-			if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
-			{
-				DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
-				                      << _perm_latest_term->to_string();})
-				return false;
-			}
-		}
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
-		                      << ptm->to_string();})
+		                      << ptm->to_string()
+		                      << " found=" << found; })
+		if (found) return true;
 	}
-	_perm_have_odometer = false;
 	return false;
 }
 
@@ -1244,7 +1221,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 /// one branch, we backtrack to here, and try another branch. When
 /// backtracking, all state must be popped and pushed again, to enter
 /// the new branch. We don't pushd & pop here, we push-n-pop in the
-/// explore_link_branches() method.
+/// explore_unordered_branches() method.
 ///
 /// This method is part of a recursive chain that only terminates
 /// when a grounding for *the entire pattern* was found (and the
@@ -1283,8 +1260,9 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
+
 		bool save_more = _perm_have_more;
-		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
 		if (found) break;
 	}
@@ -1342,16 +1320,18 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 /// explore_glob_branches -- explore glob grounding alternatives
 ///
-/// Please see the docs for `explore_link_branches` for the general
+/// Please see the docs for `explore_unordered_branches` for the general
 /// idea. In this particular method, all possible alternatives for
 /// grounding glob nodes are explored.
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	// Check if the pattern has globs in it, and record the glob_state.
-	// Do this *before* starting exploration.
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	// Check if the pattern has globs in it,
+	OC_ASSERT(0 < _pat->globby_holders.count(ptm->getHandle()),
+	          "Glob exploration went horribly wrong!");
+
+	// Record the glob_state *before* starting exploration.
 	size_t gstate_size = _glob_state.size();
 
 	// If no solution is found, and there are globs, then there may
@@ -1364,90 +1344,169 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
-		if (explore_link_branches(ptm, hg, clause_root))
+		// It's not clear if the odometer can play nice with
+		// globby terms. Anyway, no unit test mixs these two.
+		// So, for now, we ignore it.
+		// if (explore_odometer(ptm, hg, clause_root))
+		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
-		if (has_glob)
-			DO_LOG({logger().fine("Globby clause not grounded; try again");})
+		DO_LOG({logger().fine("Globby clause not grounded; try again");})
 	}
-	while (has_glob and _glob_state.size() > gstate_size);
+	while (_glob_state.size() > gstate_size);
 
 	return false;
 }
 
-/// explore_link_branches -- verify the suggested grounding.
+// explore_odometer - explore multiple unordered links at once.
+//
+// The core issue adressed here is that there may be lots of
+// UnorderedLinks below us, and we have to explore all of them.
+// So this tries to advance all of them.
+// XXX The design here is deeply flawed. Its just barely enough
+// to pass the current unit tests, but clearly fails on more
+// complex cases. See issue opencog/atomspace#2388
+// A redesign is needed.
+bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
+                                          const Handle& hg,
+                                          const Handle& clause_root)
+{
+	if (explore_type_branches(ptm, hg, clause_root))
+		return true;
+
+	// If no solution was found, and there are unordered links, then
+	// there may be alternate permuations of the unordered link that
+	// might satisfy this clause. So try those, until exhausted.
+	// Note that these unordered links might be buried deeply;
+	// that is why we iterate over them here.
+	if (_perm_first_term)
+	{
+		_perm_have_odometer = true;
+		DO_LOG({LAZY_LOG_FINE << "First odometer term: "
+		                      << _perm_first_term->to_string();})
+	}
+	if (_perm_latest_term != _perm_first_term)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
+		                      << _perm_latest_term->to_string();})
+	}
+
+	while (_perm_have_more)
+	{
+		_perm_have_more = false;
+		_perm_take_step = true;
+
+		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
+		                      << ptm->to_string();})
+		if (explore_type_branches(ptm, hg, clause_root))
+		{
+			return true;
+		}
+		if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
+			                      << _perm_latest_term->to_string();})
+			return false;
+		}
+	}
+	_perm_have_odometer = false;
+	return false;
+}
+
+/// explore_unordered_branches -- explore UnorderedLink alternatives.
 ///
-/// There are two ways to understand this method. In the "simple" case,
-/// where there are no unordered links, and no ChoiceLinks, this becomes
-/// a simple wrapper around tree_compare(), and it just returns true or
-/// false to indicate if the suggested grounding `hg` actually is a
-/// match for the current term being grounded. Before calling
-/// tree_compare(), it pushes all current state, and then pops it upon
-/// return. In other words, this encapsulates a single up-branch
-/// (incoming-set branch): grounding of that single branch succeeds or
-/// fails. Failure backtracks to the caller of this method; upon return,
-/// the current state has been restored; this routine leaves the current
-/// state as it found it. For the simple case, this method is mis-named:
-/// it should be called "explore_one_branch".
+/// Every UnorderedLink of arity N presents N-factorial different
+/// grounding possbilities, corresponding to different permutations
+/// of the UnorderedLink.  Each permutation must be explored. Thus,
+/// this can be thought of as a branching of exploration possibilities,
+/// each branch corresponding to a different permutation.  (If you
+/// know algebra, then think of the "free object" (e.g. theh "free
+/// group") where alternative branches are "free", unconstrained.)
 ///
-/// The non-simple case is a pattern that includes ChoiceLinks or
-/// unordered links. These links represent branch-points themselves.
-/// A ChoiceLink of arity N wraps N different possible branches to be
-/// explored. An unordered link of arity N wraps N-factorial different
-/// possible permutations, each of which must be explored. This method
-/// controls the exploration of these different branches. For each
-/// possible branch, it saves state, explores the branch, and pops the
-/// state. If the exploration yielded nothing, then the next branch is
-/// explored, until exhaustion of the possibilities.  Upon exhaustion,
-/// it returns to the caller.
+/// For each possible branch, the current state is saved, the branch
+/// is explored, then the state is popped. If the exploration yielded
+/// nothing, then the next branch is explored, until exhaustion of the
+/// possibilities.  Upon exhaustion, it returns to the caller.
 ///
-/// This method is part of a recursive chain that only terminates
-/// when a grounding for *the entire pattern* was found (and the
-/// grounding was accepted) or if all possibilities were exhaustively
-/// explored.  Thus, this returns true only if entire pattern was
-/// grounded.
-///
-bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
+bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	// Look for a match, at least once.
-	if (explore_choice_branches(ptm, hg, clause_root))
-		return true;
-
-	// If its not an unordered link, then it will not have
-	// permuations, and so there is nothing more to do.
-	if (not _nameserver.isA(ptm->getHandle()->get_type(), UNORDERED_LINK))
-		return false;
-
-	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm)
+	do
 	{
+		// If the pattern was satisfied, then we are done for good.
+		if (explore_single_branch(ptm, hg, clause_root))
+			return true;
+
 		DO_LOG({logger().fine("Step to next permutation");})
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		_perm_take_step = true;
 		_perm_have_more = false;
-
-		// If the pattern was satisfied, then we are done for good.
-		if (explore_choice_branches(ptm, hg, clause_root))
-			return true;
 	}
+	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
+
+	_perm_take_step = false;
+	_perm_have_more = false;
 	DO_LOG({logger().fine("No more unordered permutations");})
 
 	return false;
 }
 
-/// See explore_link_branches() for a general explanation. This method
-/// handles the ChoiceLink branch alternatives only.  It assumes
-/// that the caller had handled the unordered-link alternative branches.
+/// explore_type_branches -- perform exploration of alternatives.
+///
+/// This dispatches exploration of different grounding alternatives to
+/// one of the "specialist" functions that know how to ground specific
+/// link types.
+///
+/// In the simplest case, there are no alternatives, and this just
+/// dispatches to `explore_single_branch()` which is just a wrapper
+/// around `tree_compare()`. This just returns true or false to indicate
+/// if the suggested grounding `hg` actually is a match for the current
+/// term being grounded. Before calling `tree_compare()`, the
+/// `explore_single_branch()` method pushes all current state, and then
+/// pops it upon return. In other words, this encapsulates a single
+/// up-branch (incoming-set branch): grounding of that single branch
+/// succeeds or fails. Failure backtracks to the caller of this method;
+/// upon return, the current state has been restored; this routine
+/// leaves the current state as it found it.
+///
+/// The `explore_single_branch()` method is part of a recursive chain
+/// that only terminates  when a grounding for *the entire pattern* was
+/// found (and the grounding was accepted) or if all possibilities were
+/// exhaustivelyexplored.  Thus, this returns true only if entire
+/// pattern was grounded.
+bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
+                                          const Handle& hg,
+                                          const Handle& clause_root)
+{
+	const Handle& hp = ptm->getHandle();
+	Type ptype = hp->get_type();
+
+	// Iterate over different possible choices.
+	if (CHOICE_LINK == ptype)
+	{
+		return explore_choice_branches(ptm, hg, clause_root);
+	}
+
+	// Unordered links have permutations to explore.
+	if (_nameserver.isA(ptype, UNORDERED_LINK))
+	{
+		return explore_unordered_branches(ptm, hg, clause_root);
+	}
+
+	return explore_single_branch(ptm, hg, clause_root);
+}
+
+/// See explore_unordered_branches() for a general explanation.
+/// This method handles the ChoiceLink branch alternatives only.
+/// This method is never called, currently.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	const Handle& hp = ptm->getHandle();
-	// If its not a choice link, then don't try to iterate.
-	if (CHOICE_LINK != hp->get_type())
-		return explore_single_branch(ptm, hg, clause_root);
+	throw RuntimeException(TRACE_INFO,
+		"Maybe this works but its not tested!! Find out!");
 
 	DO_LOG({logger().fine("Begin choice branchpoint iteration loop");})
 	do {
@@ -1456,7 +1515,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		// However, currently, no test case trips this up. so .. OK.
 		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_glob_branches(ptm, hg, clause_root);
+		bool match = explore_single_branch(ptm, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
@@ -1727,93 +1786,94 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	return do_next_clause();
 }
 
-// This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to ground that.
+/// This is called when all previous clauses have been grounded; so
+/// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
 	get_next_untried_clause();
-	Handle joiner = next_joint;
-	Handle curr_root = next_clause;
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	bool found = false;
-	if (nullptr == curr_root)
+	if (nullptr == next_clause)
 	{
-		found = report_grounding(var_grounding, clause_grounding);
+		bool found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
+		clause_stacks_pop();
+		return found;
 	}
-	else
-	{
-		logmsg("Next clause is", curr_root);
-		DO_LOG({LAZY_LOG_FINE << "This clause is "
+
+	Handle joiner = next_joint;
+	Handle curr_root = next_clause;
+
+	logmsg("Next clause is", curr_root);
+	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (is_optional(curr_root)? "optional" : "required");})
-		DO_LOG({LAZY_LOG_FINE << "This clause is "
+	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (is_evaluatable(curr_root)?
 		                  "dynamically evaluatable" : "non-dynamic");
-		logmsg("Joining variable is", joiner);
-		logmsg("Joining grounding is", var_grounding[joiner]); })
+	logmsg("Joining variable is", joiner);
+	logmsg("Joining grounding is", var_grounding[joiner]); })
 
-		// Start solving the next unsolved clause. Note: this is a
-		// recursive call, and not a loop. Recursion is halted when
-		// the next unsolved clause has no grounding.
-		//
-		// We continue our search at the variable/glob that "joins"
-		// (is shared in common) between the previous (solved) clause,
-		// and this clause.
+	// Start solving the next unsolved clause. Note: this is a
+	// recursive call, and not a loop. Recursion is halted when
+	// the next unsolved clause has no grounding.
+	//
+	// We continue our search at the variable/glob that "joins"
+	// (is shared in common) between the previous (solved) clause,
+	// and this clause.
 
-		clause_accepted = false;
-		Handle hgnd(var_grounding[joiner]);
-		OC_ASSERT(nullptr != hgnd, "Error: joining handle has not been grounded yet!");
-		found = explore_clause(joiner, hgnd, curr_root);
+	clause_accepted = false;
+	Handle hgnd(var_grounding[joiner]);
+	OC_ASSERT(nullptr != hgnd,
+	         "Error: joining handle has not been grounded yet!");
+	bool found = explore_clause(joiner, hgnd, curr_root);
 
-		// If we are here, and found is false, then we've exhausted all
-		// of the search possibilities for the current clause. If this
-		// is an optional clause, and no solutions were reported for it,
-		// then report the failure of finding a solution now. If this was
-		// also the final optional clause, then in fact, we've got a
-		// grounding for the whole thing ... report that!
-		//
-		// Note that lack of a match halts recursion; thus, we can't
-		// depend on recursion to find additional unmatched optional
-		// clauses; thus we have to explicitly loop over all optional
-		// clauses that don't have matches.
-		while ((false == found) and
-		       (false == clause_accepted) and
-		       (is_optional(curr_root)))
+	// If we are here, and found is false, then we've exhausted all
+	// of the search possibilities for the current clause. If this
+	// is an optional clause, and no solutions were reported for it,
+	// then report the failure of finding a solution now. If this was
+	// also the final optional clause, then in fact, we've got a
+	// grounding for the whole thing ... report that!
+	//
+	// Note that lack of a match halts recursion; thus, we can't
+	// depend on recursion to find additional unmatched optional
+	// clauses; thus we have to explicitly loop over all optional
+	// clauses that don't have matches.
+	while ((false == found) and
+	       (false == clause_accepted) and
+	       (is_optional(curr_root)))
+	{
+		Handle undef(Handle::UNDEFINED);
+		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
+		DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
+		if (not match) {
+			clause_stacks_pop();
+			return false;
+		}
+
+		// XXX Maybe should push n pop here? No, maybe not ...
+		clause_grounding[curr_root] = Handle::UNDEFINED;
+		get_next_untried_clause();
+		joiner = next_joint;
+		curr_root = next_clause;
+
+		DO_LOG({logmsg("Next optional clause is", curr_root);})
+		if (nullptr == curr_root)
 		{
-			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
-			DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
-			if (not match) {
-				clause_stacks_pop();
-				return false;
-			}
-
-			// XXX Maybe should push n pop here? No, maybe not ...
-			clause_grounding[curr_root] = Handle::UNDEFINED;
-			get_next_untried_clause();
-			joiner = next_joint;
-			curr_root = next_clause;
-
-			DO_LOG({logmsg("Next optional clause is", curr_root);})
-			if (nullptr == curr_root)
-			{
-				DO_LOG({logger().fine("==================== FINITO BANDITO!");
-				log_solution(var_grounding, clause_grounding);})
-				found = report_grounding(var_grounding, clause_grounding);
-			}
-			else
-			{
-				// Now see if this optional clause has any solutions,
-				// or not. If it does, we'll recurse. If it does not,
-				// we'll loop around back to here again.
-				clause_accepted = false;
-				Handle hgnd = var_grounding[joiner];
-				found = explore_term_branches(joiner, hgnd, curr_root);
-			}
+			DO_LOG({logger().fine("==================== FINITO BANDITO!");
+			log_solution(var_grounding, clause_grounding);})
+			found = report_grounding(var_grounding, clause_grounding);
+		}
+		else
+		{
+			// Now see if this optional clause has any solutions,
+			// or not. If it does, we'll recurse. If it does not,
+			// we'll loop around back to here again.
+			clause_accepted = false;
+			Handle hgnd = var_grounding[joiner];
+			found = explore_term_branches(joiner, hgnd, curr_root);
 		}
 	}
 
@@ -2411,6 +2471,7 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
+	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
@@ -2459,6 +2520,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_take_step = true;
 	_perm_reset = false;
 	_perm_have_odometer = false;
+	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 }
