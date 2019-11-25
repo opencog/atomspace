@@ -1188,7 +1188,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
-		if (explore_glob_branches(ptm, hg, clause_root))
+		if (explore_var_branches(ptm, hg, clause_root))
 			return true;
 
 		// If no solution was found, and there are unordered links, then
@@ -1215,7 +1215,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 			DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
 			                      << ptm->to_string();})
-			if (explore_glob_branches(ptm, hg, clause_root))
+			if (explore_var_branches(ptm, hg, clause_root))
 			{
 				return true;
 			}
@@ -1267,6 +1267,17 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	return explore_upvar_branches(ptm, hg, clause);
 }
 
+bool PatternMatchEngine::explore_var_branches(const PatternTermPtr& ptm,
+                                              const Handle& hg,
+                                              const Handle& clause)
+{
+	// Check if the pattern has globs in it.
+	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+		return explore_glob_branches(ptm, hg, clause);
+
+	return explore_type_branches(ptm, hg, clause);
+}
+
 /// Same as explore_up_branches(), handles the case where `ptm`
 /// is specifying a VariableNode only. This is a straighforward
 /// loop over the incoming set, and nothing more.
@@ -1290,7 +1301,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " propose=" << iset[i]->to_string();})
 
 		bool save_more = _perm_have_more;
-		found = explore_dispatch(ptm, Handle(iset[i]), clause_root);
+		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
 		if (found) break;
 	}
@@ -1356,10 +1367,8 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	// Check if the pattern has globs in it,
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
-
-	if (not has_glob)
-		return explore_dispatch(ptm, hg, clause_root);
+	OC_ASSERT(0 < _pat->globby_holders.count(ptm->getHandle()),
+	          "Glob exploration went horribly wrong!");
 
 	// Record the glob_state *before* starting exploration.
 	size_t gstate_size = _glob_state.size();
@@ -1374,7 +1383,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
-		if (explore_dispatch(ptm, hg, clause_root))
+		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
 		DO_LOG({logger().fine("Globby clause not grounded; try again");})
 	}
@@ -1424,7 +1433,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
-/// explore_dispatch -- perform exploration of alternatives.
+/// explore_type_branches -- perform exploration of alternatives.
 ///
 /// This dispatches exploration of different grounding alternatives to
 /// one of the "specialist" functions that know how to ground specific
@@ -1447,7 +1456,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// found (and the grounding was accepted) or if all possibilities were
 /// exhaustivelyexplored.  Thus, this returns true only if entire
 /// pattern was grounded.
-bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
+bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
 {
@@ -1477,7 +1486,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& clause_root)
 {
 	throw RuntimeException(TRACE_INFO,
-		"This is not implemented or just wrong or something!!");
+		"Maybe this works but its not tested!! Find out!");
 
 	DO_LOG({logger().fine("Begin choice branchpoint iteration loop");})
 	do {

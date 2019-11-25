@@ -253,7 +253,11 @@ private:
 	                         const Handle&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
+	bool explore_var_branches(const PatternTermPtr&, const Handle&,
+	                          const Handle&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
+	                           const Handle&);
+	bool explore_type_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
 	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
 	                                const Handle&);
@@ -261,8 +265,6 @@ private:
 	                             const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
-	bool explore_dispatch(const PatternTermPtr&, const Handle&,
-	                      const Handle&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,
 	                const Handle&);
 	bool clause_accept(const Handle&, const Handle&);
