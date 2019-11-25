@@ -1380,37 +1380,20 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
-/// explore_link_branches -- verify the suggested grounding.
+/// explore_link_branches -- explore UnorderedLink alternatives.
 ///
-/// There are two ways to understand this method. In the "simple" case,
-/// where there are no unordered links, and no ChoiceLinks, this becomes
-/// a simple wrapper around tree_compare(), and it just returns true or
-/// false to indicate if the suggested grounding `hg` actually is a
-/// match for the current term being grounded. Before calling
-/// tree_compare(), it pushes all current state, and then pops it upon
-/// return. In other words, this encapsulates a single up-branch
-/// (incoming-set branch): grounding of that single branch succeeds or
-/// fails. Failure backtracks to the caller of this method; upon return,
-/// the current state has been restored; this routine leaves the current
-/// state as it found it. For the simple case, this method is mis-named:
-/// it should be called "explore_one_branch".
+/// Every UnorderedLink of arity N presents N-factorial different
+/// grounding possbilities, corresponding to different permutations
+/// of the UnorderedLink.  Each permutation must be explored. Thus,
+/// this can be thought of as a branching of exploration possibilities,
+/// each branch corresponding to a different permutation.  (If you
+/// know algebra, then think of the "free object" (e.g. theh "free
+/// group") where alternative branches are "free", unconstrained.)
 ///
-/// The non-simple case is a pattern that includes ChoiceLinks or
-/// unordered links. These links represent branch-points themselves.
-/// A ChoiceLink of arity N wraps N different possible branches to be
-/// explored. An unordered link of arity N wraps N-factorial different
-/// possible permutations, each of which must be explored. This method
-/// controls the exploration of these different branches. For each
-/// possible branch, it saves state, explores the branch, and pops the
-/// state. If the exploration yielded nothing, then the next branch is
-/// explored, until exhaustion of the possibilities.  Upon exhaustion,
-/// it returns to the caller.
-///
-/// This method is part of a recursive chain that only terminates
-/// when a grounding for *the entire pattern* was found (and the
-/// grounding was accepted) or if all possibilities were exhaustively
-/// explored.  Thus, this returns true only if entire pattern was
-/// grounded.
+/// For each possible branch, the current state is saved, the branch
+/// is explored, then the state is popped. If the exploration yielded
+/// nothing, then the next branch is explored, until exhaustion of the
+/// possibilities.  Upon exhaustion, it returns to the caller.
 ///
 bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
@@ -1438,6 +1421,29 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+/// explore_dispatch -- perform exploration of alternatives.
+///
+/// This dispatches exploration of different grounding alternatives to
+/// one of the "specialist" functions that know how to ground specific
+/// link types.
+///
+/// In the simplest case, there are no alternatives, and this just
+/// dispatches to `explore_single_branch()` which is just a wrapper
+/// around `tree_compare()`. This just returns true or false to indicate
+/// if the suggested grounding `hg` actually is a match for the current
+/// term being grounded. Before calling `tree_compare()`, the
+/// `explore_single_branch()` method pushes all current state, and then
+/// pops it upon return. In other words, this encapsulates a single
+/// up-branch (incoming-set branch): grounding of that single branch
+/// succeeds or fails. Failure backtracks to the caller of this method;
+/// upon return, the current state has been restored; this routine
+/// leaves the current state as it found it.
+///
+/// The `explore_single_branch()` method is part of a recursive chain
+/// that only terminates  when a grounding for *the entire pattern* was
+/// found (and the grounding was accepted) or if all possibilities were
+/// exhaustivelyexplored.  Thus, this returns true only if entire
+/// pattern was grounded.
 bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
