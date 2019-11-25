@@ -1233,6 +1233,17 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	return false;
 }
 
+bool PatternMatchEngine::explore_var_branches(const PatternTermPtr& ptm,
+                                              const Handle& hg,
+                                              const Handle& clause)
+{
+	// Check if the pattern has globs in it.
+	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+		return explore_glob_branches(ptm, hg, clause);
+
+	return explore_type_branches(ptm, hg, clause);
+}
+
 /// explore_up_branches -- look for groundings for the given term.
 ///
 /// The argument passed to this function is a term that needs to be
@@ -1265,17 +1276,6 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	if (0 < _pat->globby_holders.count(ptm->getHandle()))
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
-}
-
-bool PatternMatchEngine::explore_var_branches(const PatternTermPtr& ptm,
-                                              const Handle& hg,
-                                              const Handle& clause)
-{
-	// Check if the pattern has globs in it.
-	if (0 < _pat->globby_holders.count(ptm->getHandle()))
-		return explore_glob_branches(ptm, hg, clause);
-
-	return explore_type_branches(ptm, hg, clause);
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm`
@@ -1766,93 +1766,94 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	return do_next_clause();
 }
 
-// This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to ground that.
+/// This is called when all previous clauses have been grounded; so
+/// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
 	get_next_untried_clause();
-	Handle joiner = next_joint;
-	Handle curr_root = next_clause;
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	bool found = false;
-	if (nullptr == curr_root)
+	if (nullptr == next_clause)
 	{
-		found = report_grounding(var_grounding, clause_grounding);
+		bool found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
+		clause_stacks_pop();
+		return found;
 	}
-	else
-	{
-		logmsg("Next clause is", curr_root);
-		DO_LOG({LAZY_LOG_FINE << "This clause is "
+
+	Handle joiner = next_joint;
+	Handle curr_root = next_clause;
+
+	logmsg("Next clause is", curr_root);
+	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (is_optional(curr_root)? "optional" : "required");})
-		DO_LOG({LAZY_LOG_FINE << "This clause is "
+	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (is_evaluatable(curr_root)?
 		                  "dynamically evaluatable" : "non-dynamic");
-		logmsg("Joining variable is", joiner);
-		logmsg("Joining grounding is", var_grounding[joiner]); })
+	logmsg("Joining variable is", joiner);
+	logmsg("Joining grounding is", var_grounding[joiner]); })
 
-		// Start solving the next unsolved clause. Note: this is a
-		// recursive call, and not a loop. Recursion is halted when
-		// the next unsolved clause has no grounding.
-		//
-		// We continue our search at the variable/glob that "joins"
-		// (is shared in common) between the previous (solved) clause,
-		// and this clause.
+	// Start solving the next unsolved clause. Note: this is a
+	// recursive call, and not a loop. Recursion is halted when
+	// the next unsolved clause has no grounding.
+	//
+	// We continue our search at the variable/glob that "joins"
+	// (is shared in common) between the previous (solved) clause,
+	// and this clause.
 
-		clause_accepted = false;
-		Handle hgnd(var_grounding[joiner]);
-		OC_ASSERT(nullptr != hgnd, "Error: joining handle has not been grounded yet!");
-		found = explore_clause(joiner, hgnd, curr_root);
+	clause_accepted = false;
+	Handle hgnd(var_grounding[joiner]);
+	OC_ASSERT(nullptr != hgnd,
+	         "Error: joining handle has not been grounded yet!");
+	bool found = explore_clause(joiner, hgnd, curr_root);
 
-		// If we are here, and found is false, then we've exhausted all
-		// of the search possibilities for the current clause. If this
-		// is an optional clause, and no solutions were reported for it,
-		// then report the failure of finding a solution now. If this was
-		// also the final optional clause, then in fact, we've got a
-		// grounding for the whole thing ... report that!
-		//
-		// Note that lack of a match halts recursion; thus, we can't
-		// depend on recursion to find additional unmatched optional
-		// clauses; thus we have to explicitly loop over all optional
-		// clauses that don't have matches.
-		while ((false == found) and
-		       (false == clause_accepted) and
-		       (is_optional(curr_root)))
+	// If we are here, and found is false, then we've exhausted all
+	// of the search possibilities for the current clause. If this
+	// is an optional clause, and no solutions were reported for it,
+	// then report the failure of finding a solution now. If this was
+	// also the final optional clause, then in fact, we've got a
+	// grounding for the whole thing ... report that!
+	//
+	// Note that lack of a match halts recursion; thus, we can't
+	// depend on recursion to find additional unmatched optional
+	// clauses; thus we have to explicitly loop over all optional
+	// clauses that don't have matches.
+	while ((false == found) and
+	       (false == clause_accepted) and
+	       (is_optional(curr_root)))
+	{
+		Handle undef(Handle::UNDEFINED);
+		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
+		DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
+		if (not match) {
+			clause_stacks_pop();
+			return false;
+		}
+
+		// XXX Maybe should push n pop here? No, maybe not ...
+		clause_grounding[curr_root] = Handle::UNDEFINED;
+		get_next_untried_clause();
+		joiner = next_joint;
+		curr_root = next_clause;
+
+		DO_LOG({logmsg("Next optional clause is", curr_root);})
+		if (nullptr == curr_root)
 		{
-			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
-			DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
-			if (not match) {
-				clause_stacks_pop();
-				return false;
-			}
-
-			// XXX Maybe should push n pop here? No, maybe not ...
-			clause_grounding[curr_root] = Handle::UNDEFINED;
-			get_next_untried_clause();
-			joiner = next_joint;
-			curr_root = next_clause;
-
-			DO_LOG({logmsg("Next optional clause is", curr_root);})
-			if (nullptr == curr_root)
-			{
-				DO_LOG({logger().fine("==================== FINITO BANDITO!");
-				log_solution(var_grounding, clause_grounding);})
-				found = report_grounding(var_grounding, clause_grounding);
-			}
-			else
-			{
-				// Now see if this optional clause has any solutions,
-				// or not. If it does, we'll recurse. If it does not,
-				// we'll loop around back to here again.
-				clause_accepted = false;
-				Handle hgnd = var_grounding[joiner];
-				found = explore_term_branches(joiner, hgnd, curr_root);
-			}
+			DO_LOG({logger().fine("==================== FINITO BANDITO!");
+			log_solution(var_grounding, clause_grounding);})
+			found = report_grounding(var_grounding, clause_grounding);
+		}
+		else
+		{
+			// Now see if this optional clause has any solutions,
+			// or not. If it does, we'll recurse. If it does not,
+			// we'll loop around back to here again.
+			clause_accepted = false;
+			Handle hgnd = var_grounding[joiner];
+			found = explore_term_branches(joiner, hgnd, curr_root);
 		}
 	}
 
