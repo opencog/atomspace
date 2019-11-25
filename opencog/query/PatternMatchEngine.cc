@@ -1416,7 +1416,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	// Look for a match, at least once.
-	if (explore_choice_branches(ptm, hg, clause_root))
+	if (explore_dispatch(ptm, hg, clause_root))
 		return true;
 
 	// If its not an unordered link, then it will not have
@@ -1434,12 +1434,26 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		_perm_have_more = false;
 
 		// If the pattern was satisfied, then we are done for good.
-		if (explore_choice_branches(ptm, hg, clause_root))
+		if (explore_dispatch(ptm, hg, clause_root))
 			return true;
 	}
 	DO_LOG({logger().fine("No more unordered permutations");})
 
 	return false;
+}
+
+bool PatternMatchEngine::explore_dispatch(const PatternTermPtr& ptm,
+                                          const Handle& hg,
+                                          const Handle& clause_root)
+{
+	const Handle& hp = ptm->getHandle();
+
+	// Iterate over different possible choices.
+	if (CHOICE_LINK == hp->get_type())
+	{
+		return explore_choice_branches(ptm, hg, clause_root);
+	}
+	return explore_single_branch(ptm, hg, clause_root);
 }
 
 /// See explore_link_branches() for a general explanation. This method
@@ -1449,11 +1463,6 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	const Handle& hp = ptm->getHandle();
-	// If its not a choice link, then don't try to iterate.
-	if (CHOICE_LINK != hp->get_type())
-		return explore_single_branch(ptm, hg, clause_root);
-
 	DO_LOG({logger().fine("Begin choice branchpoint iteration loop");})
 	do {
 		// XXX This `need_choice_push` thing is probably wrong; it probably

@@ -243,8 +243,8 @@ private:
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
-	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_redex(const Handle&, const Handle&, const Handle&);
+	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
@@ -261,6 +261,8 @@ private:
 	                             const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
+	bool explore_dispatch(const PatternTermPtr&, const Handle&,
+	                      const Handle&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,
 	                const Handle&);
 	bool clause_accept(const Handle&, const Handle&);
