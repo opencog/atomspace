@@ -471,10 +471,6 @@ the current permutation, or it returns a fresh permutation. If it returned
 a fresh permutation, this counts as "taking a step", so we need to know
 this.
 
-Notice that these rules never pushed or popped the have-more stack.
-The have-more stack is only pushed/popped by other branch-points, before
-they call compare_tree.
-
 ******************************************************************/
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
@@ -595,13 +591,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				record_grounding(ptm, hg);
 
 				// Handle case 5&7 of description above.
-				_perm_have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
 				              << _perm_count[Unorder(ptm, hg)] + 1
 				              << " of " << num_perms
-				              << " for term=" << ptm->to_string()
-				              << " have_more=" << _perm_have_more;})
+				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_have_more = true;
 				_perm_reset = false;
 				return true;
 			}
@@ -1388,6 +1383,13 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
 		                      << _perm_latest_term->to_string();})
 	}
+
+#if 0
+// XXX FIXME, this makes SudokuUTest loop forever.
+	// If the perm state isn't empty, there must be more!
+	if (0 < _perm_state.size())
+		_perm_have_more = true;
+#endif
 
 	while (_perm_have_more)
 	{
