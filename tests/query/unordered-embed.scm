@@ -1,3 +1,9 @@
+;
+; unordered-embed.scm
+;
+; Test odometer concepts, for UnorderedLinks that are deeper down
+; in the search.
+
 (use-modules (opencog) (opencog exec))
 
 (List (Concept "A") (Set (Predicate "P") (Predicate "Q")))

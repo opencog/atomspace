@@ -249,14 +249,14 @@ void UnorderedUTest::test_exhaust(void)
 	// Result should be a ListLink w/ 60 solutions.
 	Handle result = bindlink(as, exhaust);
 
-	logger().debug("exhaustive result is %s\n", result->to_string().c_str());
+	// logger().debug("exhaustive result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 60, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 72 solutions
 	result = bindlink(as, exhaust2);
 
-	logger().debug("exhaust-2 result is %s\n", result->to_string().c_str());
+	// logger().debug("exhaust-2 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------
