@@ -130,7 +130,7 @@
 	)
 )
 
-; Twenty-seven solution constraints.  There ae nine row, nine column,
+; Twenty-seven solution constraints.  There are nine row, nine column,
 ; and nine box constraints: each row, column and box must form the 
 ; set of numerals.
 ;
