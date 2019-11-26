@@ -1,3 +1,9 @@
+;
+; unordered-embed.scm
+;
+; Test odometer concepts, for UnorderedLinks that are deeper down
+; in the search.
+
 (use-modules (opencog) (opencog exec))
 
 (List (Concept "A") (Set (Predicate "P") (Predicate "Q")))
@@ -6,6 +12,8 @@
 	(Bind
 		(Present (List (Variable "$C") (Set (Variable "$X") (Variable "$Y"))))
 		(Implication (Variable "$X") (Variable "$Y"))))
+
+; (cog-execute! embedded-set)
 
 ; The expected answer from above.
 (define expect-embedded-set
@@ -29,6 +37,8 @@
 			(Implication (Variable "$X") (Variable "$Y"))
 			(Implication (Variable "$Z") (Variable "$W")))))
 
+; (cog-execute! two-x-two)
+
 (define expect-two-x-two
 	(Set
 		(ImplicationLink
@@ -47,6 +57,7 @@
 
 ; ----------------------------------------------------
 ; Like above, but eight permutations
+
 (List (Concept "C")
 	(Set (Predicate "P") (Predicate "Q"))
 	(Set (Predicate "R") (Predicate "S"))
@@ -62,6 +73,8 @@
 			(Implication (Variable "$U") (Variable "$V"))
 			(Implication (Variable "$X") (Variable "$Y"))
 			(Implication (Variable "$Z") (Variable "$W")))))
+
+; (cog-arity (cog-execute! cube))
 
 (define expect-cube
 	(Set
@@ -101,6 +114,7 @@
 
 ; ----------------------------------------------------
 ; Like above, but sixteen permutations
+
 (List (Concept "D")
 	(Set (Predicate "P") (Predicate "Q"))
 	(Set (Predicate "R") (Predicate "S"))
@@ -119,3 +133,7 @@
 			(Implication (Variable "$U") (Variable "$V"))
 			(Implication (Variable "$X") (Variable "$Y"))
 			(Implication (Variable "$Z") (Variable "$W")))))
+
+; (cog-arity (cog-execute! tesseract))
+
+; ----------------------------------------------------
