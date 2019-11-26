@@ -2469,7 +2469,7 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// UnorderedLink state
 	_perm_have_more = false;
-	_perm_take_step = true;
+	_perm_take_step = false;
 	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_first_term = nullptr;
@@ -2518,7 +2518,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 
 	// unordered link state
 	_perm_have_more = false;
-	_perm_take_step = true;
+	_perm_take_step = false;
 	_perm_reset = false;
 	_perm_have_odometer = false;
 	_perm_first_term = nullptr;
