@@ -58,6 +58,8 @@ public:
 	void tearDown(void);
 
 	void test_arithmetic(void);
+	void test_arithmetic_inf(void);
+	void test_arithmetic_nan(void);
 	void test_setlink(void);
 	void test_minus(void);
 	void test_plus_minus(void);
@@ -213,6 +215,64 @@ void ReductUTest::test_arithmetic(void)
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test Plus inf.
+ */
+void ReductUTest::test_arithmetic_inf(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle inf = eval->eval_h(
+			"(cog-execute! (PlusLink (NumberNode 0) (NumberNode \"inf\")))"
+	);
+	printf("expecting res: %s\n", inf->to_short_string().c_str());
+
+	Handle einf = eval->eval_h("(NumberNode \"inf\")");
+	TS_ASSERT_EQUALS(inf, einf)
+
+	// ---------
+	Handle pninf4 = eval->eval_h(
+			"(cog-execute! "
+			"   (PlusLink"
+			"      (NumberNode \"inf 0 3.0\")"
+			"      (NumberNode \"inf -inf 1.0\")))"
+	);
+	printf("expecting res: %s\n", pninf4->to_short_string().c_str());
+
+	Handle epninf4 = eval->eval_h("(NumberNode \"inf -inf 4.0\")");
+	TS_ASSERT_EQUALS(pninf4, epninf4)
+}
+
+/*
+ * Test Plus nan.
+ */
+void ReductUTest::test_arithmetic_nan(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle nan = eval->eval_h(
+			"(cog-execute! (PlusLink (NumberNode 0) (NumberNode \"nan\")))"
+	);
+	printf("expecting nan: %s\n", nan->to_short_string().c_str());
+
+	Handle enan = eval->eval_h("(NumberNode \"nan\")");
+	TS_ASSERT_EQUALS(nan, enan)
+
+	// ---------
+	Handle nn4 = eval->eval_h(
+			"(cog-execute! "
+			"   (PlusLink"
+			"      (NumberNode \"nan nan 3.0\")"
+			"      (NumberNode \"inf -inf 1.0\")))"
+	);
+	printf("expecting nn4: %s\n", nn4->to_short_string().c_str());
+
+	Handle enn4 = eval->eval_h("(NumberNode \"nan nan 4.0\")");
+	TS_ASSERT_EQUALS(nn4, enn4)
 }
 
 // Test SetLink, which the pattern matcher gives to us.
