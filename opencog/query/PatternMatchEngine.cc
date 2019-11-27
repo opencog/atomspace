@@ -646,6 +646,7 @@ take_next_step:
 	{
 		POPSTK(_perm_stepper_stack, _perm_to_step);
 		_perm_have_more = true;
+		solution_pop();
 	}
 	_perm_reset = false;
 	_perm_latest_term = ptm;
@@ -703,6 +704,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		if (nullptr != _perm_to_step)
 			_perm_stepper_stack.push(_perm_to_step);
 		_perm_to_step = ptm;
+		solution_push();
 		return perm;
 	}
 	return ps->second;
