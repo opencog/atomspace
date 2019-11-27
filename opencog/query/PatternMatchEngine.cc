@@ -493,7 +493,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
-	bool do_wrap = _perm_take_step;
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -583,7 +582,6 @@ DO_LOG({LAZY_LOG_FINE << "duude take step ";})
 			{
 				// Even the stack, *without* erasing the discovered grounding.
 				solution_drop();
-				_perm_latest_term = ptm;
 
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
@@ -620,7 +618,7 @@ take_next_step:
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
-	             << ptm->to_string() << " do_wrap=" << do_wrap;})
+	             << ptm->to_string();})
 	_perm_state.erase(Unorder(ptm, hg));
 	_perm_count.erase(Unorder(ptm, hg));
 	_perm_have_more = false;
@@ -631,7 +629,6 @@ take_next_step:
 		_perm_have_more = true;
 		solution_pop();
 	}
-	_perm_latest_term = ptm;
 
 	return false;
 }
@@ -1366,16 +1363,6 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 	if (explore_type_branches(ptm, hg, clause_root))
 		return true;
 
-#if 0
-	// If no solution was found, and there are unordered links, then
-	// there may be alternate permuations of the unordered link that
-	// might satisfy this clause. So try those, until exhausted.
-	// Note that these unordered links might be buried deeply;
-	// that is why we iterate over them here.
-	DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
-		                      << _perm_latest_term->to_string();})
-#endif
-
 	while (_perm_have_more)
 	{
 		_perm_have_more = false;
@@ -1384,17 +1371,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
 		                      << ptm->to_string();})
 		if (explore_type_branches(ptm, hg, clause_root))
-		{
 			return true;
-		}
-#if 0
-		if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
-		{
-			DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
-			                      << _perm_latest_term->to_string();})
-			return false;
-		}
-#endif
 	}
 	return false;
 }
@@ -1431,7 +1408,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 		_perm_take_step = true;
 		_perm_have_more = false;
 	}
-	while (have_perm(ptm, hg) and _perm_latest_wrap != ptm);
+	while (have_perm(ptm, hg));
 
 	_perm_take_step = false;
 	_perm_have_more = false;
@@ -2459,8 +2436,6 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
-	_perm_latest_term = nullptr;
-	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2506,8 +2481,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
-	_perm_latest_term = nullptr;
-	_perm_latest_wrap = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
