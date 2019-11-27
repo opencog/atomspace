@@ -643,7 +643,10 @@ take_next_step:
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
 	if (0 < _perm_stepper_stack.size())
+	{
 		POPSTK(_perm_stepper_stack, _perm_to_step);
+		_perm_have_more = true;
+	}
 	_perm_reset = false;
 	_perm_latest_term = ptm;
 
