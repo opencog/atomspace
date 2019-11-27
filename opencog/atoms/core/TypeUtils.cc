@@ -300,7 +300,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 		return Handle::UNDEFINED;
 
 	Type t = vardecl->get_type();
-	if (VARIABLE_NODE == t)
+	if ((VARIABLE_NODE == t) || (GLOB_NODE == t))
 	{
 		if (is_free_in_any_tree(hs, vardecl))
 			return vardecl;
@@ -312,7 +312,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	{
 		Handle var = vardecl->getOutgoingAtom(0);
 		Type t = var->get_type();
-		if (t == VARIABLE_NODE and filter_vardecl(var, hs))
+		if (((t == VARIABLE_NODE) || (t == GLOB_NODE)) and filter_vardecl(var, hs))
 			return vardecl;
 	}
 

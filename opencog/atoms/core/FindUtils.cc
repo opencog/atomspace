@@ -366,7 +366,7 @@ HandleSet get_free_variables(const Handle& h, Quotation quotation)
 	Type t = h->get_type();
 
 	// Base cases
-	if (t == VARIABLE_NODE and quotation.is_unquoted())
+	if ((t == VARIABLE_NODE or t == GLOB_NODE) and quotation.is_unquoted())
 		return {h};
 	if (h->is_node())
 		return {};

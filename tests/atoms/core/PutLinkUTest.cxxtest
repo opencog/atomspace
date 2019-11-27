@@ -57,6 +57,9 @@ public:
 	void tearDown() {}
 
 	void test_define();
+	void test_define_glob();
+	void test_define_mixed_1();
+	void test_define_mixed_2();
 	void test_filtering();
 	void test_free_var_renaming();
 	void test_function();
@@ -135,6 +138,127 @@ void PutLinkUTest::test_define()
 	TS_ASSERT_EQUALS(putted, pat);
 
 	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void PutLinkUTest::test_define_glob()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle put =
+			L(PUT_LINK,
+				N(GLOB_NODE, "$g"),
+				L(AND_LINK,
+					N(GLOB_NODE, "$g")),
+				L(SET_LINK,
+					L(LIST_LINK,
+						N(PREDICATE_NODE, "P"),
+						N(PREDICATE_NODE, "Q")),
+					L(LIST_LINK,
+						N(PREDICATE_NODE, "R"),
+						N(PREDICATE_NODE, "K"))));
+
+	Instantiator inst(&_as);
+	Handle putted = HandleCast(inst.execute(put));
+
+	Handle expected =
+			L(SET_LINK,
+				L(AND_LINK,
+					N(PREDICATE_NODE, "P"),
+					N(PREDICATE_NODE, "Q")),
+				L(AND_LINK,
+					N(PREDICATE_NODE, "R"),
+					N(PREDICATE_NODE, "K")));
+
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+
+	TS_ASSERT(content_eq(expected, putted))
+}
+
+void PutLinkUTest::test_define_mixed_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle put =
+			L(PUT_LINK,
+				L(VARIABLE_LIST,
+					N(GLOB_NODE, "$g"),
+					N(VARIABLE_NODE, "$v")),
+				L(LIST_LINK,
+					N(GLOB_NODE, "$g"),
+					N(VARIABLE_NODE, "$v"),
+					N(PREDICATE_NODE, "J")),
+				L(SET_LINK,
+					L(LIST_LINK,
+						N(PREDICATE_NODE, "P"),
+						N(PREDICATE_NODE, "Q")),
+					L(LIST_LINK,
+						N(PREDICATE_NODE, "R"),
+						N(PREDICATE_NODE, "K"))));
+
+	Instantiator inst(&_as);
+	Handle putted = HandleCast(inst.execute(put));
+
+	Handle expected =
+			L(SET_LINK,
+				L(LIST_LINK,
+					N(PREDICATE_NODE, "P"),
+					N(PREDICATE_NODE, "Q"),
+					N(PREDICATE_NODE, "J")),
+				L(LIST_LINK,
+					N(PREDICATE_NODE, "R"),
+					N(PREDICATE_NODE, "K"),
+					N(PREDICATE_NODE, "J")));
+
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+
+	TS_ASSERT(content_eq(expected, putted))
+}
+
+void PutLinkUTest::test_define_mixed_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle put =
+			L(PUT_LINK,
+				L(VARIABLE_LIST,
+					N(GLOB_NODE, "$g"),
+					N(VARIABLE_NODE, "$v")),
+				L(AND_LINK,
+					N(GLOB_NODE, "$g"),
+					N(VARIABLE_NODE, "$v")),
+				L(SET_LINK,
+					L(LIST_LINK,
+						L(LIST_LINK,
+							N(PREDICATE_NODE, "P"),
+							N(PREDICATE_NODE, "Q")),
+						N(PREDICATE_NODE, "R")),
+					L(LIST_LINK,
+						L(INHERITANCE_LINK,
+							N(PREDICATE_NODE, "P"),
+							N(PREDICATE_NODE, "Q")),
+						N(PREDICATE_NODE, "R"))));
+
+	Instantiator inst(&_as);
+	Handle putted = HandleCast(inst.execute(put));
+
+	Handle expected =
+			L(SET_LINK,
+				L(AND_LINK,
+					N(PREDICATE_NODE, "P"),
+					N(PREDICATE_NODE, "Q"),
+					N(PREDICATE_NODE, "R")),
+				L(AND_LINK,
+					L(INHERITANCE_LINK,
+						N(PREDICATE_NODE, "P"),
+						N(PREDICATE_NODE, "Q")),
+					N(PREDICATE_NODE, "R")));
+
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+
+	TS_ASSERT(content_eq(expected, putted))
 }
 
 // Test to make sure that PutLink filters.

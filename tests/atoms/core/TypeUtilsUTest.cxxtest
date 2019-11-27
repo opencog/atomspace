@@ -34,7 +34,7 @@ class FindUtilsUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
-	Handle X, Y, P;
+	Handle X, Y, P, G1, G2;
 
 public:
 	FindUtilsUTest()
@@ -47,6 +47,7 @@ public:
 
 	void test_filter_vardecl_1();
 	void test_filter_vardecl_2();
+	void test_filter_vardecl_3();
 };
 
 void FindUtilsUTest::setUp(void)
@@ -54,6 +55,8 @@ void FindUtilsUTest::setUp(void)
 	X = an(VARIABLE_NODE, "$X");
 	Y = an(VARIABLE_NODE, "$Y");
 	P = an(PREDICATE_NODE, "P");
+	G1 = an(GLOB_NODE, "$G1");
+	G2 = an(GLOB_NODE, "$G2");
 }
 
 void FindUtilsUTest::test_filter_vardecl_1()
@@ -78,6 +81,19 @@ void FindUtilsUTest::test_filter_vardecl_2()
 
 	Handle result = filter_vardecl(vardecl, body);
 	Handle except = X;
+
+	TS_ASSERT_EQUALS(result, except);
+}
+
+void FindUtilsUTest::test_filter_vardecl_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_SET, G1, G2);
+	Handle body = al(IMPLICATION_LINK, G1, P);
+
+	Handle result = filter_vardecl(vardecl, body);
+	Handle except = G1;
 
 	TS_ASSERT_EQUALS(result, except);
 }
