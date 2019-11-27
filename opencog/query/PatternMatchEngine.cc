@@ -725,6 +725,9 @@ void PatternMatchEngine::perm_push(void)
 	perm_stack.push(_perm_state);
 	if (logger().is_fine_enabled())
 		_perm_count_stack.push(_perm_count);
+
+	if (nullptr != _perm_to_step)
+		_perm_stepper_stack.push(_perm_to_step);
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -732,6 +735,10 @@ void PatternMatchEngine::perm_pop(void)
 	POPSTK(perm_stack, _perm_state);
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
+
+	if (0 < _perm_stepper_stack.size())
+		POPSTK(_perm_stepper_stack, _perm_to_step);
+	// else _perm_to_step = nullptr; !?
 }
 
 /* ======================================================== */
@@ -2219,7 +2226,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	choice_stack.push(_choice_state);
 
 	perm_push();
-	_perm_stepper_stack.push(_perm_to_step);
 
 	_pmc.push();
 }
@@ -2242,7 +2248,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	POPSTK(choice_stack, _choice_state);
 
 	perm_pop();
-	POPSTK(_perm_stepper_stack, _perm_to_step);
 
 	_clause_stack_depth --;
 	DO_LOG({logger().fine("CLAUSE stack pop to depth %d", _clause_stack_depth);})
@@ -2265,12 +2270,14 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == perm_stack.size());
+	OC_ASSERT(0 == _perm_stepper_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!perm_stack.empty()) perm_stack.pop();
+	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
 #endif
 }
 

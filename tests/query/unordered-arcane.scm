@@ -25,7 +25,7 @@
 ; The Quote...Unquote is needed to trigger the bug; removing
 ; the quotes hides the bug.  Note that in the original bug report,
 ; the OrderedLink was a LambdaLink. OK, I put it back to Lambda.
-; If testing w/o the quotes, users Ordered...
+; If testing w/o the quotes, use Ordered...
 (define query
 	(GetLink (PresentLink
 
