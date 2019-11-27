@@ -1,11 +1,14 @@
 ;
+; unordered-arcane.scm
+;
 ; Test for infinite loop caused in #2357 fixed in #2360
-; The stuff in here is kind of crazy, but all if it is needed
-; to provoke the bug.
+; The stuff in here looks kind of crazy, but all of it is needed
+; to provoke the bug. Simplifying further makes the bug go away.
 
 (use-modules (opencog) (opencog exec) (opencog logger))
 ; (cog-logger-set-level! "fine")
 ; (cog-logger-set-stdout! #t)
+; (cog-logger-set-timestamp! #f)
 
 ; Target graph to be found
 (ListLink

@@ -1289,10 +1289,8 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " propose=" << iset[i]->to_string();})
 
 		bool save_more = _perm_have_more;
-		PatternTermPtr save_stepper = _perm_to_step;
 		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
 		_perm_have_more = save_more;
-		_perm_to_step = save_stepper;
 		if (found) break;
 	}
 
