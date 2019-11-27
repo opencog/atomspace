@@ -140,9 +140,6 @@ private:
 	PatternTermPtr _perm_to_step;
 	std::stack<PatternTermPtr> _perm_stepper_stack;
 
-	bool _perm_reset;
-	bool _perm_have_odometer;
-	PatternTermPtr _perm_first_term;
 	PatternTermPtr _perm_latest_term;
 	PatternTermPtr _perm_latest_wrap;
 	std::map<Unorder, int> _perm_count;

@@ -491,19 +491,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
-	if (nullptr == _perm_first_term) _perm_first_term = ptm;
-
-#if 0
-	// If we are coming up from below, through this particular
-	// ptm, we must not take any steps, or reset it.
-	if (_perm_reset)
-	{
-		_perm_reset = false;
-		_perm_state.erase(Unorder(ptm, hg));
-		_perm_count.erase(Unorder(ptm, hg));
-	}
-#endif
-
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
 	bool do_wrap = _perm_take_step;
@@ -555,8 +542,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// call to `tree_compare()` immediately above.
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
-
-		_perm_reset = false;
 
 		// Handle cases 3&4 of the description above. That is, the
 		// `tree_compare()` above did not take a step, so we will.
@@ -610,7 +595,6 @@ DO_LOG({LAZY_LOG_FINE << "duude take step ";})
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				_perm_have_more = true;
-				_perm_reset = false;
 				return true;
 			}
 		}
@@ -628,7 +612,6 @@ DO_LOG({LAZY_LOG_FINE << "duude take step ";})
 take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
-		_perm_reset = true;      // reset perms on lower links, too.
 		solution_pop();
 		if (logger().is_fine_enabled())
 			_perm_count[Unorder(ptm, hg)] ++;
@@ -648,25 +631,8 @@ take_next_step:
 		_perm_have_more = true;
 		solution_pop();
 	}
-	_perm_reset = false;
 	_perm_latest_term = ptm;
 
-#if 0
-	// Implement an "odometer", for iterating on other unordered
-	// links that might occur in series with this one. That is,
-	// wrap around the permutation set for this link, while also
-	// advancing the next link by one (setting _take_step causes
-	// the next link to advance).
-	if (_perm_have_odometer and do_wrap)
-	{
-		bool match = unorder_compare(ptm, hg);
-		if (not match) return false;
-		_perm_latest_wrap = ptm;
-		_perm_have_more = false;
-		_perm_take_step = true;
-		return true;
-	}
-#endif
 	return false;
 }
 
@@ -1400,28 +1366,14 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 	if (explore_type_branches(ptm, hg, clause_root))
 		return true;
 
+#if 0
 	// If no solution was found, and there are unordered links, then
 	// there may be alternate permuations of the unordered link that
 	// might satisfy this clause. So try those, until exhausted.
 	// Note that these unordered links might be buried deeply;
 	// that is why we iterate over them here.
-	if (_perm_first_term)
-	{
-		_perm_have_odometer = true;
-		DO_LOG({LAZY_LOG_FINE << "First odometer term: "
-		                      << _perm_first_term->to_string();})
-	}
-	if (_perm_latest_term != _perm_first_term)
-	{
-		DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
+	DO_LOG({LAZY_LOG_FINE << "Last odometer term: "
 		                      << _perm_latest_term->to_string();})
-	}
-
-#if 0
-// XXX FIXME, this makes SudokuUTest loop forever.
-	// If the perm state isn't empty, there must be more!
-	if (0 < _perm_state.size())
-		_perm_have_more = true;
 #endif
 
 	while (_perm_have_more)
@@ -1435,14 +1387,15 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		{
 			return true;
 		}
+#if 0
 		if (_perm_latest_wrap and _perm_latest_wrap == _perm_latest_term)
 		{
 			DO_LOG({LAZY_LOG_FINE << "Terminate Odometer: "
 			                      << _perm_latest_term->to_string();})
 			return false;
 		}
+#endif
 	}
-	_perm_have_odometer = false;
 	return false;
 }
 
@@ -2506,9 +2459,6 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
-	_perm_reset = false;
-	_perm_have_odometer = false;
-	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 	_perm_state.clear();
@@ -2556,9 +2506,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
-	_perm_reset = false;
-	_perm_have_odometer = false;
-	_perm_first_term = nullptr;
 	_perm_latest_term = nullptr;
 	_perm_latest_wrap = nullptr;
 }
