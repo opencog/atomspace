@@ -540,6 +540,9 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		{
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
 			changed = true;
+
+			// Also unwrap any ListLinks that were inserted by
+			// `wrap_glob_with_list()` in RewriteLink.cc
 			if (glst->get_type() == LIST_LINK)
 				for (const Handle &gl : glst->getOutgoingSet())
 					oset.emplace_back(gl);
