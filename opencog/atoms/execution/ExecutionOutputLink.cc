@@ -187,11 +187,11 @@ ValuePtr ExecutionOutputLink::do_execute(AtomSpace* as,
 	else if (lang == "py")
 	{
 #ifdef HAVE_CYTHON
-		// Get a reference to the python evaluator. 
+		// Get a reference to the python evaluator.
 		// Be sure to specify the atomspace in which the
 		// evaluation is to be performed.
 		PythonEval &applier = PythonEval::instance();
-		result = applier.apply(as, fun, args);
+		result = applier.apply(fun, args);
 #else
 		throw RuntimeException(TRACE_INFO,
 		                       "Cannot evaluate python GroundedSchemaNode!");
