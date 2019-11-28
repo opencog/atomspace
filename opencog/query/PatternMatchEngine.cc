@@ -1235,6 +1235,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 //
 // XXX ??? I think this is buggy in retrying unordered links,
 // because if/when it re-enters the unordered state is scrambled!?
+// This is what is breaking unordered-odo-distinct.scm I think...
 //
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& hg,

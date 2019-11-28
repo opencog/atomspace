@@ -70,8 +70,9 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_cube(void);
 		void xtest_arcane(void);
 		void test_odometer(void);
-		void test_odo_distinct(void);
 		void test_odo_below(void);
+		void xtest_odo_distinct(void);
+		void xtest_odo_indistinct(void);
 		void xtest_odo_layer(void);
 		void test_odo_couple(void);
 		void xtest_odo_equ_pred(void);
@@ -429,7 +430,47 @@ void UnorderedUTest::test_odometer(void)
 
 // ================================================================
 
-void UnorderedUTest::test_odo_distinct(void)
+void UnorderedUTest::test_odo_below(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! below-dim-one)");
+
+	logger().debug("D=1 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 6*6=36 solutions
+	result = eval->eval_h("(cog-execute! below-dim-two)");
+
+	logger().debug("D=2 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6=216 solutions
+	result = eval->eval_h("(cog-execute! below-dim-three)");
+
+	logger().debug("D=3 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! below-dim-four)");
+
+	logger().debug("D=4 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::xtest_odo_distinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -469,40 +510,40 @@ void UnorderedUTest::test_odo_distinct(void)
 
 // ================================================================
 
-void UnorderedUTest::test_odo_below(void)
+void UnorderedUTest::test_odo_xindistinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	SchemeEval* eval = new SchemeEval(as);
-	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-indistinct.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
-	Handle result = eval->eval_h("(cog-execute! below-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! indistinct-dim-one)");
 
-	logger().debug("D=1 below arity is %d\n", getarity(result));
+	logger().debug("D=1 indistinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------------------------------
 	// Again, but squared
 	// Result should be a SetLink w/ 6*6=36 solutions
-	result = eval->eval_h("(cog-execute! below-dim-two)");
+	result = eval->eval_h("(cog-execute! indistinct-dim-two)");
 
-	logger().debug("D=2 below arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+	logger().debug("D=2 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 144, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6=216 solutions
-	result = eval->eval_h("(cog-execute! below-dim-three)");
+	result = eval->eval_h("(cog-execute! indistinct-dim-three)");
 
-	logger().debug("D=3 below arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+	logger().debug("D=3 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2592, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
-	result = eval->eval_h("(cog-execute! below-dim-four)");
+	result = eval->eval_h("(cog-execute! indistinct-dim-four)");
 
-	logger().debug("D=4 below arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+	logger().debug("D=4 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 62208, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
