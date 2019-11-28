@@ -1,11 +1,14 @@
 ;
+; unordered-arcane.scm
+;
 ; Test for infinite loop caused in #2357 fixed in #2360
-; The stuff in here is kind of crazy, but all if it is needed
-; to provoke the bug.
+; The stuff in here looks kind of crazy, but all of it is needed
+; to provoke the bug. Simplifying further makes the bug go away.
 
 (use-modules (opencog) (opencog exec) (opencog logger))
 ; (cog-logger-set-level! "fine")
 ; (cog-logger-set-stdout! #t)
+; (cog-logger-set-timestamp! #f)
 
 ; Target graph to be found
 (ListLink
@@ -25,7 +28,7 @@
 ; The Quote...Unquote is needed to trigger the bug; removing
 ; the quotes hides the bug.  Note that in the original bug report,
 ; the OrderedLink was a LambdaLink. OK, I put it back to Lambda.
-; If testing w/o the quotes, users Ordered...
+; If testing w/o the quotes, use Ordered...
 (define query
 	(GetLink (PresentLink
 

@@ -137,13 +137,15 @@ private:
 	// whenever take_step is set to true.
 	bool _perm_take_step;
 	bool _perm_have_more;
-	bool _perm_reset;
-	bool _perm_have_odometer;
-	PatternTermPtr _perm_first_term;
-	PatternTermPtr _perm_latest_term;
-	PatternTermPtr _perm_latest_wrap;
+	PatternTermPtr _perm_to_step;
+	std::stack<PatternTermPtr> _perm_stepper_stack;
+
+	std::stack<PermState> _perm_stack;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
+
+	void perm_push(void);
+	void perm_pop(void);
 
 	// --------------------------------------------
 	// Glob state management
@@ -193,10 +195,6 @@ private:
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
-
-	std::stack<PermState> perm_stack;
-	void perm_push(void);
-	void perm_pop(void);
 
 	// push, pop and clear these states.
 	void clause_stacks_push(void);
