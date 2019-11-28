@@ -700,8 +700,9 @@ void PatternMatchEngine::perm_pop(void)
 		POPSTK(_perm_count_stack, _perm_count);
 
 	if (0 < _perm_stepper_stack.size())
-		POPSTK(_perm_stepper_stack, _perm_to_step);
-	// else _perm_to_step = nullptr; !?
+		POPSTK(_perm_stepper_stack, _perm_to_step)
+	else
+		_perm_to_step = nullptr;
 }
 
 /* ======================================================== */
@@ -1251,9 +1252,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
-		bool save_more = _perm_have_more;
-		found = explore_type_branches(ptm, Handle(iset[i]), clause_root);
-		_perm_have_more = save_more;
+		found = explore_odometer(ptm, Handle(iset[i]), clause_root);
 		if (found) break;
 	}
 
@@ -1352,10 +1351,6 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 // The core issue adressed here is that there may be lots of
 // UnorderedLinks below us, and we have to explore all of them.
 // So this tries to advance all of them.
-// XXX The design here is deeply flawed. Its just barely enough
-// to pass the current unit tests, but clearly fails on more
-// complex cases. See issue opencog/atomspace#2388
-// A redesign is needed.
 bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
