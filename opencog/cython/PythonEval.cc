@@ -1278,17 +1278,10 @@ bool PythonEval::check_for_error()
 {
     if (not PyErr_Occurred()) return false;
 
-    _error_string = build_python_error_message(NO_FUNCTION_NAME);
-    PyErr_Clear();
-
-    // Clear the evaluator state; else future input is garbaged up.
+    std::string error_string = build_python_error_message(NO_FUNCTION_NAME);
     _input_line = "";
-    _paren_count = 0;
-    _pending_input = false;
-    _eval_done = true;
-    _caught_error = true;
-
-    return true;
+    PyErr_Clear();
+    throw RuntimeException(TRACE_INFO, "%s", error_string.c_str());
 }
 
 // ===================================================================
@@ -1321,7 +1314,7 @@ std::string PythonEval::execute_string(const char* command)
             nullptr);
 
     // Check for error before collecting the result.
-    if (check_for_error()) return _error_string;
+    check_for_error();
 
     std::string retval;
     if (pyResult)
@@ -1367,7 +1360,7 @@ std::string PythonEval::execute_script(const std::string& script)
         PyGILState_Release(gstate);
     } BOOST_SCOPE_EXIT_END
 
-    if (check_for_error()) return _error_string;
+    check_for_error();
 
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
@@ -1395,30 +1388,31 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     rc = dup2(pipefd[1], fileno(stdout));
     OC_ASSERT(0 < rc, "pipe splice failure");
 
+    BOOST_SCOPE_EXIT(&pipefd, &rc, &stdout_backup, &_capture_stdout) {
+        // Restore stdout
+        fflush(stdout);
+        rc = write(pipefd[1], "", 1); // null-terminated string!
+        OC_ASSERT(0 < rc, "pipe termination failure");
+        rc = close(pipefd[1]);
+        OC_ASSERT(0 == rc, "pipe close failure");
+        rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+        OC_ASSERT(0 < rc, "restore stdout failure");
+
+        char buf[4097];
+        int nr = read(pipefd[0], buf, sizeof(buf)-1);
+        while (0 < nr)
+        {
+           buf[nr] = 0;
+           if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
+
+           nr = read(pipefd[0], buf, sizeof(buf)-1);
+        }
+
+        // Cleanup.
+        close(pipefd[0]);
+    } BOOST_SCOPE_EXIT_END
+
     std::string res = execute_script(expr);
-
-    // Restore stdout
-    fflush(stdout);
-    rc = write(pipefd[1], "", 1); // null-terminated string!
-    OC_ASSERT(0 < rc, "pipe termination failure");
-    rc = close(pipefd[1]);
-    OC_ASSERT(0 == rc, "pipe close failure");
-    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-    OC_ASSERT(0 < rc, "restore stdout failure");
-
-    char buf[4097];
-    int nr = read(pipefd[0], buf, sizeof(buf)-1);
-    while (0 < nr)
-    {
-       buf[nr] = 0;
-       if (1 < nr or 0 != buf[0]) _capture_stdout += buf;
-
-       nr = read(pipefd[0], buf, sizeof(buf)-1);
-    }
-
-    // Cleanup.
-    close(pipefd[0]);
-
     return res;
 }
 

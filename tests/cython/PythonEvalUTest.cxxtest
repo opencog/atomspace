@@ -184,9 +184,12 @@ public:
         PythonEval::create_singleton_instance();
         PythonEval* python = &PythonEval::instance();
 
+        TS_ASSERT_THROWS(std::string eval_res = python->eval(
+                    "from opencog.atomspace import vsfvkdfjnv\n"), RuntimeException);
+
         // Define python functions for use by scheme.
         std::string eval_res = python->eval(
-            "from opencog.atomspace import vsfvkdfjnv Atom, TruthValue\n"
+            "from opencog.atomspace import Atom, TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    ATOMSPACE = atom1.atomspace\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
