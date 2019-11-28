@@ -552,7 +552,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
-DO_LOG({LAZY_LOG_FINE << "duude take step ";})
 			goto take_next_step;
 		}
 
@@ -1363,7 +1362,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		_perm_have_more = false;
 		_perm_take_step = true;
 
-		DO_LOG({LAZY_LOG_FINE << "Continue exploring term: "
+		DO_LOG({LAZY_LOG_FINE << "STEP MORE unordered under term: "
 		                      << ptm->to_string();})
 		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
