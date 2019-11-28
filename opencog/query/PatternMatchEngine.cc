@@ -1229,12 +1229,16 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	return explore_upvar_branches(ptm, hg, clause);
 }
 
-/// Same as explore_up_branches(), handles the case where `ptm`
-/// is specifying a VariableNode only. This is a straighforward
-/// loop over the incoming set, and nothing more.
+/// Same as explore_up_branches(), handles the case where `ptm` has no
+/// GlobNodes in it. This is a straighforward loop over the incoming
+/// set, and nothing more.
+//
+// XXX ??? I think this is buggy in retrying unordered links,
+// because if/when it re-enters the unordered state is scrambled!?
+//
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
-                                             const Handle& hg,
-                                             const Handle& clause_root)
+                                                const Handle& hg,
+                                                const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
@@ -1244,6 +1248,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	              << "The grounded pivot point " << hg->to_string()
 	              << " has " << sz << " branches";})
 
+	_perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
@@ -1251,7 +1256,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
-		found = explore_odometer(ptm, Handle(iset[i]), clause_root);
+		found = explore_odometer(ptm, Handle(iset[i]), clause);
 		if (found) break;
 	}
 
@@ -1357,7 +1362,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 	if (explore_type_branches(ptm, hg, clause_root))
 		return true;
 
-	while (_perm_have_more)
+	while (_perm_have_more and _perm_to_step != _perm_breakout)
 	{
 		_perm_have_more = false;
 		_perm_take_step = true;
@@ -2430,6 +2435,7 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
+	_perm_breakout = nullptr;
 	_perm_state.clear();
 
 	// GlobNode state
@@ -2475,6 +2481,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_have_more = false;
 	_perm_take_step = false;
 	_perm_to_step = nullptr;
+	_perm_breakout = nullptr;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
