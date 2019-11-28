@@ -8,6 +8,7 @@ from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
 
 from test_functions import green_count, red_count
+import test_functions
 
 __author__ = 'Curtis Faith'
 

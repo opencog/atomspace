@@ -19,7 +19,7 @@ from opencog.type_constructors import atomspace
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b) :
-    global atomspace
+    atomspace = atom_a.atomspace
     TV = TruthValue(0.2, 0.69)
     atomspace.add_node(types.ConceptNode, 'Apple', TV)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])

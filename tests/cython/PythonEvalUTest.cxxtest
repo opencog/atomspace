@@ -136,45 +136,27 @@ public:
     {
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
-        AtomSpace* atomSpace = NULL;
 
         // Tell the python evaluator to create its singleton instance.
-        PythonEval::create_singleton_instance(NULL);
+        PythonEval::create_singleton_instance();
 
         // Delete the singleton instance of the PythonEval.
         PythonEval::delete_singleton_instance();
 
-
-        // Create an atomspace.
-        atomSpace = new AtomSpace();
-
-        // Tell the python evaluator to create its singleton instance
-        // with this atomspace.
-        PythonEval::create_singleton_instance(atomSpace);
+        PythonEval::create_singleton_instance();
 
         // Delete the singleton instance of the PythonEval.
         PythonEval::delete_singleton_instance();
 
-        // Delete the atomspace.
-        delete atomSpace;
-        atomSpace = NULL;
 
         // Initialize Python.
         global_python_initialize();
 
-        // Create an atomspace.
-        atomSpace = new AtomSpace();
-
-        // Tell the python evaluator to create its singleton instance
-        // with this atomspace.
-        PythonEval::create_singleton_instance(atomSpace);
+        // Repeat the process
+        PythonEval::create_singleton_instance();
 
         // Delete the singleton instance of the PythonEval.
         PythonEval::delete_singleton_instance();
-
-        // Delete the atomspace.
-        delete atomSpace;
-        atomSpace = NULL;
 
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion() DONE");
     }
@@ -182,35 +164,31 @@ public:
     void testPythonEvalEvalExpr()
     {
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
-
-        // Create an atomspace and singleton instance to use it.
-        AtomSpace* atomSpace = new AtomSpace();
-        PythonEval::create_singleton_instance(atomSpace);
+        PythonEval::create_singleton_instance();
         PythonEval* evaluator = &PythonEval::instance();
 
         // Check that our atom space global is visible and can add a node.
         evaluator->clear_pending();
         evaluator->eval_expr("from opencog.atomspace import *");
+        evaluator->eval_expr("ATOMSPACE = AtomSpace()");
         evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
         evaluator->eval_expr("print ('Total atoms = ', ATOMSPACE.size(), '\\n')");
 
-        // Delete the singleton instance and atomspace.
+        // Delete the singleton instance.
         PythonEval::delete_singleton_instance();
-        delete atomSpace;
-        atomSpace = NULL;
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
     }
 
     void testApplyAndApplyTV()
     {
-        AtomSpace *as = new AtomSpace();
-        PythonEval::create_singleton_instance(as);
+        PythonEval::create_singleton_instance();
         PythonEval* python = &PythonEval::instance();
 
         // Define python functions for use by scheme.
-        python->eval(
-            "from opencog.atomspace import types, Atom, TruthValue\n"
+        std::string eval_res = python->eval(
+            "from opencog.atomspace import vsfvkdfjnv Atom, TruthValue\n"
             "def add_link(atom1, atom2):\n"
+            "    ATOMSPACE = atom1.atomspace\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
             "    print ('add_link(',atom1,',',atom2,') = ', link)\n"
             "    return link\n\n"
@@ -219,8 +197,10 @@ public:
             "    print ('return_truth TruthValue(0.75, 100.0)')\n"
             "    return TruthValue(0.75, 100.0)\n\n"
             );
+        std::cout << "eval_res:" << std::endl << eval_res << std::endl;
 
 #ifdef HAVE_GUILE
+        AtomSpace * as = new AtomSpace();
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
@@ -256,14 +236,14 @@ public:
                 );
         error = scheme->eval_error();
         scheme->clear_pending();
+        delete as;
         TSM_ASSERT("Failed cog-evaluate!", !error);
 #endif // HAVE_GUILE
     }
 
     void testCodeBlockWithNewline()
     {
-        AtomSpace *as = new AtomSpace();
-        PythonEval::create_singleton_instance(as);
+        PythonEval::create_singleton_instance();
         PythonEval* python = &PythonEval::instance();
 
         // Define python functions with newline within the code block
