@@ -7,7 +7,7 @@
 (use-modules (opencog) (opencog exec))
 
 (define shared (Unordered (Concept "A")))
-(define tree (List shared (List shared (Concept "B"))))
+(List shared (List shared (Concept "B")))
 
 (define query1 (Unordered (Variable "$a")))
 (define query2 (Variable "$a"))
@@ -31,31 +31,20 @@
 ; -------------------------------------------------------------------
 ; Similar structure, but more complicated
 
-(define big-tree1
-	(List
-		(Unordered (Concept "X"))
-		(Unordered (Concept "A1") (Concept "B1"))
-		(List
-			(Unordered (Concept "X"))
-			(Unordered (Concept "B1") (Concept "A1")))))
+(List (Unordered (Concept "X"))
+	(Unordered (Concept "A1") (Concept "B1"))
+	(List (Unordered (Concept "X"))
+		(Unordered (Concept "B1") (Concept "A1"))))
 
+(List (Unordered (Concept "X"))
+	(Unordered (Concept "A2") (Concept "B2"))
+	(List (Unordered (Concept "X"))
+		(Unordered (Concept "B2") (Concept "A2"))))
 
-(define big-tree2
-	(List
-		(Unordered (Concept "X"))
-		(Unordered (Concept "A2") (Concept "B2"))
-		(List
-			(Unordered (Concept "X"))
-			(Unordered (Concept "B2") (Concept "A2")))))
-
-
-(define big-tree3
-	(List
-		(Unordered (Concept "X"))
-		(Unordered (Concept "A3") (Concept "B3"))
-		(List
-			(Unordered (Concept "X"))
-			(Unordered (Concept "B3") (Concept "A3")))))
+(List (Unordered (Concept "X"))
+	(Unordered (Concept "A3") (Concept "B3"))
+	(List (Unordered (Concept "X"))
+		(Unordered (Concept "B3") (Concept "A3"))))
 
 
 (define (big-tree-query input-query)

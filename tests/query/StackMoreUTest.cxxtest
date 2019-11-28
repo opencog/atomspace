@@ -41,6 +41,8 @@ class StackMoreUTest :  public CxxTest::TestSuite
 		StackMoreUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
+			// logger().set_level(Logger::FINE);
+			logger().set_timestamp_flag(false);
 			logger().set_print_to_stdout_flag(true);
 #include "test-types.cc"
 		}
