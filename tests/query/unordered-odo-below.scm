@@ -24,7 +24,7 @@
 ; (cog-execute! below-dim-one)
 
 ; ----------------------------------------------------
-; Like above, but 3! * 3! = 36 permutations
+; Like above, but 3! * (3! +3!) + same = 144 permutations
 
 (List (Concept "B")
 	(Set (Concept "B") (Predicate "P") (Predicate "Q") (Predicate "R"))
