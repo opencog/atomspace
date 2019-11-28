@@ -562,6 +562,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			        << _perm_count[Unorder(ptm, hg)] + 1
 			        << " of " << num_perms
 			        << " for term=" << ptm->to_string();})
+			// Balance the push above.
+			solution_drop();
 			return match;
 		}
 
@@ -626,6 +628,8 @@ take_next_step:
 	{
 		POPSTK(_perm_stepper_stack, _perm_to_step);
 		_perm_have_more = true;
+
+		// pop the matching push in curr_perm()
 		solution_pop();
 	}
 
@@ -666,6 +670,8 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		if (nullptr != _perm_to_step)
 			_perm_stepper_stack.push(_perm_to_step);
 		_perm_to_step = ptm;
+
+		// The matching pop is in Exhaust
 		solution_push();
 		return perm;
 	}
@@ -1360,6 +1366,13 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
 {
+	// We may be entring here via termp_up() and so have already
+	// looked at a specific unordered term. If so, then step.
+	if (_perm_have_more) {
+		_perm_have_more = false;
+		_perm_take_step = true;
+	}
+
 	if (explore_type_branches(ptm, hg, clause_root))
 		return true;
 
@@ -1368,7 +1381,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 		_perm_have_more = false;
 		_perm_take_step = true;
 
-		DO_LOG({LAZY_LOG_FINE << "STEP MORE unordered under term: "
+		DO_LOG({LAZY_LOG_FINE << "STEP MORE unordered beneath term: "
 		                      << ptm->to_string();})
 		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
