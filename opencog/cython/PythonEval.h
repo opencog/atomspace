@@ -97,17 +97,6 @@ class PythonEval : public GenericEval
         // Single-threded design.
         static PythonEval* singletonInstance;
 
-        AtomSpace* _atomspace;
-        // Resource Acquisition is Allocation, for the current AtomSpace.
-        // If anything throws an exception, then dtor runs and restores
-        // the old atomspace.
-        struct RAII {
-            RAII(PythonEval* pev, AtomSpace* as) : _pev(pev)
-               { _save_as = pev->_atomspace; pev->_atomspace = as; }
-            ~RAII() {_pev->_atomspace = _save_as; }
-            AtomSpace* _save_as;
-            PythonEval* _pev;
-        };
 
         // Single, global mutex for serializing access to the atomspace.
         // The singleton-instance design of this class forces us to
@@ -143,13 +132,13 @@ class PythonEval : public GenericEval
         bool check_for_error();
 
     public:
-        PythonEval(AtomSpace*);
+        PythonEval();
         ~PythonEval();
 
         /**
          * Create the singleton instance with the supplied atomspace.
          */
-        static void create_singleton_instance(AtomSpace*);
+        static void create_singleton_instance();
 
         /**
          * Delete the singleton instance.
@@ -159,7 +148,7 @@ class PythonEval : public GenericEval
         /**
          * Get a reference to the singleton instance.
          */
-        static PythonEval & instance(AtomSpace* atomspace = NULL);
+        static PythonEval & instance();
 
         // The async-output interface.
         virtual void begin_eval(void);
@@ -178,13 +167,13 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
-        Handle apply(AtomSpace*, const std::string& func, Handle varargs);
+        Handle apply(const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, returning a TruthValuePtr.
          */
-        TruthValuePtr apply_tv(AtomSpace*, const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in `func`, passing it
