@@ -139,8 +139,13 @@ private:
 	bool _perm_have_more;
 	PatternTermPtr _perm_to_step;
 	std::stack<PatternTermPtr> _perm_stepper_stack;
+
+	std::stack<PermState> _perm_stack;
 	std::map<Unorder, int> _perm_count;
 	std::stack<std::map<Unorder, int>> _perm_count_stack;
+
+	void perm_push(void);
+	void perm_pop(void);
 
 	// --------------------------------------------
 	// Glob state management
@@ -190,10 +195,6 @@ private:
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
-
-	std::stack<PermState> perm_stack;
-	void perm_push(void);
-	void perm_pop(void);
 
 	// push, pop and clear these states.
 	void clause_stacks_push(void);

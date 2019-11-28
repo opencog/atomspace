@@ -685,7 +685,7 @@ bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
 
 void PatternMatchEngine::perm_push(void)
 {
-	perm_stack.push(_perm_state);
+	_perm_stack.push(_perm_state);
 	if (logger().is_fine_enabled())
 		_perm_count_stack.push(_perm_count);
 
@@ -695,7 +695,7 @@ void PatternMatchEngine::perm_push(void)
 
 void PatternMatchEngine::perm_pop(void)
 {
-	POPSTK(perm_stack, _perm_state);
+	POPSTK(_perm_stack, _perm_state);
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
 
@@ -2197,14 +2197,14 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	OC_ASSERT(0 == var_solutn_stack.size());
 	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
-	OC_ASSERT(0 == perm_stack.size());
+	OC_ASSERT(0 == _perm_stack.size());
 	OC_ASSERT(0 == _perm_stepper_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
-	while (!perm_stack.empty()) perm_stack.pop();
+	while (!_perm_stack.empty()) _perm_stack.pop();
 	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
 #endif
 }
