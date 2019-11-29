@@ -64,7 +64,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_un1(void);
 		void test_un2(void);
 		void test_jswiergo(void);
-		void xtest_big_jswiergo(void);
+		void test_big_jswiergo(void);
 		void test_exhaust(void);
 		void test_embed(void);
 		void test_cube(void);
@@ -205,7 +205,7 @@ void UnorderedUTest::test_jswiergo(void)
 // ================================================================
 
 // More complicated variant of above.
-void UnorderedUTest::xtest_big_jswiergo(void)
+void UnorderedUTest::test_big_jswiergo(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
