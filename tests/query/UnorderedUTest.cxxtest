@@ -68,7 +68,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_exhaust(void);
 		void test_embed(void);
 		void test_cube(void);
-		void test_arcane(void);
+		void test_quote(void);
 		void test_odometer(void);
 		void test_odo_below(void);
 		void xtest_odo_distinct(void);
@@ -369,15 +369,14 @@ void UnorderedUTest::test_cube(void)
 }
 
 // ================================================================
-// A simple bug that triggers an inf loop; however, very complicated
-// arcane inputs are needed to trigger the bug. See #2357 and #2360
-// for details.
-void UnorderedUTest::test_arcane(void)
+// Infinite loop triggered by screwy handling of quoting during
+// grounding.  See #2357 and #2360 for details.
+void UnorderedUTest::test_quote(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	SchemeEval* eval = new SchemeEval(as);
-	eval->eval("(load-from-path \"tests/query/unordered-arcane.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
 
 	// Result should be a SetLink w/ one solutions
 	Handle result = eval->eval_h("(cog-execute! query)");
