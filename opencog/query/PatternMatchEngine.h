@@ -139,7 +139,10 @@ private:
 	bool _perm_have_more;
 	PatternTermPtr _perm_to_step;
 	PatternTermPtr _perm_breakout;
+	std::stack<bool> _perm_take_stack;
+	std::stack<bool> _perm_more_stack;
 	std::stack<PatternTermPtr> _perm_stepper_stack;
+	std::stack<PatternTermPtr> _perm_breakout_stack;
 
 	std::stack<PermState> _perm_stack;
 	std::map<Unorder, int> _perm_count;

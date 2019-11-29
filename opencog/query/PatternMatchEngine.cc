@@ -628,9 +628,6 @@ take_next_step:
 	{
 		POPSTK(_perm_stepper_stack, _perm_to_step);
 		_perm_have_more = true;
-
-		// pop the matching push in curr_perm()
-		solution_pop();
 	}
 
 	return false;
@@ -670,9 +667,6 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		if (nullptr != _perm_to_step)
 			_perm_stepper_stack.push(_perm_to_step);
 		_perm_to_step = ptm;
-
-		// The matching pop is in Exhaust
-		solution_push();
 		return perm;
 	}
 	return ps->second;
@@ -694,8 +688,15 @@ void PatternMatchEngine::perm_push(void)
 	if (logger().is_fine_enabled())
 		_perm_count_stack.push(_perm_count);
 
-	if (nullptr != _perm_to_step)
-		_perm_stepper_stack.push(_perm_to_step);
+	_perm_stepper_stack.push(_perm_to_step);
+	_perm_to_step = nullptr;
+
+	_perm_take_stack.push(_perm_take_step);
+	_perm_take_step = false;
+	_perm_more_stack.push(_perm_have_more);
+	_perm_have_more = false;
+	_perm_breakout_stack.push(_perm_breakout);
+	_perm_breakout = nullptr;
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -704,10 +705,15 @@ void PatternMatchEngine::perm_pop(void)
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
 
+	// Stepper gets unbalanced.. why?
 	if (0 < _perm_stepper_stack.size())
 		POPSTK(_perm_stepper_stack, _perm_to_step)
 	else
 		_perm_to_step = nullptr;
+
+	POPSTK(_perm_take_stack, _perm_take_step);
+	POPSTK(_perm_more_stack, _perm_have_more);
+	POPSTK(_perm_breakout_stack, _perm_breakout);
 }
 
 /* ======================================================== */
@@ -1238,11 +1244,6 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 /// Same as explore_up_branches(), handles the case where `ptm` has no
 /// GlobNodes in it. This is a straighforward loop over the incoming
 /// set, and nothing more.
-//
-// XXX ??? I think this is buggy in retrying unordered links,
-// because if/when it re-enters the unordered state is scrambled!?
-// This is what is breaking unordered-odo-distinct.scm I think...
-//
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& hg,
                                                 const Handle& clause)
@@ -1263,21 +1264,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
-// XXX Temporarily define BAD_FIX so that UnorderedUTest::test_arcane()
-// passes, so as to not disturb work on URE and PLN.  This needs to be
-// reverted later, after fixing the issue with grounding quoted things,
-// which is what test_arcane() is triggering.
-// The BAD_FIX does cause UnorderedUTest::test_big_jswiergo() to fail.
-#define BAD_FIX
-#ifdef BAD_FIX
-		bool save_more = _perm_have_more;
-		found = explore_type_branches(ptm, Handle(iset[i]), clause);
-		_perm_have_more = save_more;
-#else
 		found = explore_odometer(ptm, Handle(iset[i]), clause);
-#endif
 		if (found) break;
 	}
+	_perm_breakout = nullptr;
 
 	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
 	return found;
@@ -1378,20 +1368,16 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
                                           const Handle& clause_root)
 {
-	if (explore_type_branches(ptm, hg, clause_root))
+	bool found = explore_type_branches(ptm, hg, clause_root);
+	if (found)
 		return true;
 
-// XXX See comments above about BAD_FIX
-#ifdef BAD_FIX
-	while (_perm_have_more)
-#else
 	while (_perm_have_more and _perm_to_step != _perm_breakout)
-#endif
 	{
 		_perm_have_more = false;
 		_perm_take_step = true;
 
-		DO_LOG({LAZY_LOG_FINE << "STEP MORE unordered beneath term: "
+		DO_LOG({LAZY_LOG_FINE << "ODO STEP unordered beneath term: "
 		                      << ptm->to_string();})
 		if (explore_type_branches(ptm, hg, clause_root))
 			return true;
@@ -2428,14 +2414,16 @@ void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
 	if (hp == hg)
 		return;
 
-	// Only record if the pattern is not quoted, otherwise the pattern
-	// is not completely self-contained.
+	// Quoted patterns are tricky. If a pattern is quoted, AND the
+	// quote appears in the pattern term, then we record the quote.
+	// Otherwise, just record the raw grounding.
+	// Tested in UnorderedUTest::test_quote() and elsewhere.
 	if (not ptm->isQuoted())
 		var_grounding[hp] = hg;
-	// If it is quoted, maybe the quote is in the ptm. Unwrap it,
-	// and record that. (Huh ???)
 	else if (const Handle& quote = ptm->getQuote())
 		var_grounding[quote] = hg;
+	else
+		var_grounding[hp] = hg;
 }
 
 /**
