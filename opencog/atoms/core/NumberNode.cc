@@ -47,17 +47,14 @@ std::vector<double> NumberNode::to_vector(const std::string& str)
 	std::vector<double> vec;
 
 	size_t pos = 0;
-	size_t len = str.size();
-	while (true)
-	{
-		pos = str.find_first_of("+-0123456789.", pos);
-		if (pos == std::string::npos) return vec;
-		size_t last;
-		vec.emplace_back(std::stod(str.substr(pos), &last));
-		if (pos == std::string::npos) return vec;
-		pos += last;
-		if (len <= pos) return vec;
+	size_t in = 0;
+	// first condition in the loop will trim str.
+	while ((in = str.find_first_not_of(" \t\r\n", in)) != std::string::npos
+	       and (pos = str.find_first_of(' ', in)) != std::string::npos) {
+		vec.emplace_back(std::stod(str.substr(in, pos - in)));
+		in = pos + 1;
 	}
+	if (in != std::string::npos) vec.emplace_back(std::stod(str.substr(in)));
 	return vec;
 }
 
