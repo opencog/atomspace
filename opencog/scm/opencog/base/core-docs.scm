@@ -830,10 +830,11 @@
 
 (set-procedure-property! cog-count-atoms 'documentation
 "
-  cog-count-atoms -- Count of the number of atoms of given type
+  cog-count-atoms ATOM-TYPE [ATOMSPACE] -- Count of number of atoms
 
-  cog-count-atoms ATOM-TYPE
   Return a count of the number of atoms of the given type `ATOM-TYPE`.
+  If the optional argument `ATOMSPACE` is given, then a count is
+  returned for that atomspace; otherwise, the default atomspace is used.
 
   Example usage:
      (display (cog-count-atoms 'ConceptNode))

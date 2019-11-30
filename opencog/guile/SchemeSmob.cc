@@ -314,15 +314,15 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));
 	register_proc("cog-atomspace-rw!",     0, 1, 0, C(ss_as_mark_readwrite));
 
+	// Taking AtomSpace as optional argument
+	register_proc("cog-count-atoms",       1, 1, 0, C(ss_count));
+	register_proc("cog-map-type",          2, 1, 0, C(ss_map_type));
+
 	// Value types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
-	register_proc("cog-count-atoms",       1, 0, 0, C(ss_count));
-
-	// Iterators
-	register_proc("cog-map-type",          2, 1, 0, C(ss_map_type));
 
 	// Free variables
 	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));

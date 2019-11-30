@@ -493,12 +493,17 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 }
 
 /**
- * Return a count of the number of atoms of the indicated type
+ * Return a count of the number of atoms of the indicated type.
+ * The aspace argument is optional.
  */
-SCM SchemeSmob::ss_count (SCM stype)
+SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 {
 	Type t = verify_type(stype, "cog-count-atoms");
-	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-count-atoms");
+
 	size_t cnt = as->get_num_atoms_of_type(t);
 	return scm_from_size_t(cnt);
 }

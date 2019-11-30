@@ -135,7 +135,7 @@ private:
 	static SCM ss_get_type(SCM);
 	static SCM ss_get_subtypes(SCM);
 	static SCM ss_subtype_p(SCM, SCM);
-	static SCM ss_count(SCM);
+	static SCM ss_count(SCM, SCM);
 
 	// Truth values
 	static SCM ss_tv_get_mean(SCM);
