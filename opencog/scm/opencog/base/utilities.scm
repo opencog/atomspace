@@ -59,7 +59,8 @@
 ;
 
 (use-modules (srfi srfi-1))
-(use-modules (ice-9 threads))  ; needed for par-map par-for-each
+(use-modules (ice-9 optargs))  ; Needed for define*-public
+(use-modules (ice-9 threads))  ; Needed for par-map par-for-each
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
@@ -246,7 +247,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (traverse-roots func)
+(define* (traverse-roots func ATOMSPACE)
 "
   traverse-roots -- Applies func to every root atom in the atomspace.
 
@@ -255,7 +256,7 @@
 "
 	; A list of the atomspace and all parents
 	(define atomspace-and-parents
-		(unfold null? identity cog-atomspace-env (cog-atomspace)))
+		(unfold null? identity cog-atomspace-env ATOMSPACE))
 
 	; Is the atom in any of the atomspaces?
 	(define (is-visible? atom)
@@ -269,31 +270,35 @@
 	(for-each (lambda (ty) (cog-map-type apply-if-root ty)) (cog-get-types))
 )
 ; -----------------------------------------------------------------------
-(define-public (cog-prt-atomspace)
+(define*-public (cog-prt-atomspace #:optional (ATOMSPACE (cog-atomspace)))
 "
-  cog-prt-atomspace -- Prints all atoms in the atomspace
+  cog-prt-atomspace [ATOMSPACE] -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically,
-  only those atoms that have no incoming set in the atomspace or its
-  ancestors, and thus are at the top of a tree.  All other atoms
-  (those which do have an incoming set) will appear somewhere
-  underneath these top-most atoms.
+  This will print all of the atoms in the (optional argument) ATOMSPACE,
+  or in the default atomspace, if the optional argument is absent.
+  It prints only those atoms that have no incoming set (in the
+  atomspace, or its ancestors), and thus are at the top of a tree.
+  All other atoms (those which do have an incoming set) will appear
+  somewhere underneath these top-most atoms.
 "
-	(traverse-roots display)
+	(traverse-roots display ATOMSPACE)
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-all-roots)
+(define*-public (cog-get-all-roots #:optional (ATOMSPACE (cog-atomspace)))
 "
-  cog-get-all-roots -- Return the list of all root atoms.
+  cog-get-all-roots [ATOMSPACE] -- Return the list of all root atoms.
 
-  cog-get-all-roots
-  Return the list of all root atoms, that is atoms with
-  no incoming set.
+  Return the list of all root atoms in the (optional argument) ATOMSPACE,
+  or in the default atomspace, if the optional argument is absent.
+  It returns only those atoms that have no incoming set (in the
+  atomspace, or its ancestors), and thus are at the top of a tree.
+  All other atoms (those which do have an incoming set) will appear
+  somewhere underneath these top-most atoms.
 "
   (define roots '())
   (define (cons-roots x) (set! roots (cons x roots)))
-  (traverse-roots cons-roots)
+  (traverse-roots cons-roots ATOMSPACE)
   roots
 )
 
