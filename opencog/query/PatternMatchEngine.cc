@@ -515,6 +515,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 		bool match = true;
 
+		// Handle cases 3&4 of the description above.
+		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
+			goto take_next_step;
+
 		if (has_glob)
 		{
 			// Each glob comparison steps the glob state forwards.
@@ -541,19 +545,6 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// call to `tree_compare()` immediately above.
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
-
-		// Handle cases 3&4 of the description above. That is, the
-		// `tree_compare()` above did not take a step, so we will.
-		// The `tree_compare()` should have reported exactly the
-		// same results as last time (i.e. a match or eval) and so
-		// neither a `post_link_match()` nor a `post_link_mismatch()`
-		// should be reported.
-		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
-		{
-			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
-			          "Impossible: should have matched!");
-			goto take_next_step;
-		}
 
 		if (_perm_take_step and ptm != _perm_to_step)
 		{
