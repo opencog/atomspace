@@ -322,7 +322,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-count-atoms",       1, 0, 0, C(ss_count));
 
 	// Iterators
-	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
+	register_proc("cog-map-type",          2, 1, 0, C(ss_map_type));
 
 	// Free variables
 	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));

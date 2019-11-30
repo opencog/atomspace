@@ -357,11 +357,15 @@ SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
  * Apply proceedure proc to all atoms of type stype
  * If the proceedure returns something other than #f,
  * terminate the loop.
+ * The `aspace` argument is optional; use it if present, else not.
  */
-SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
+SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 {
 	Type t = verify_type (stype, "cog-map-type");
-	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
+
+	AtomSpace* atomspace = ss_to_atomspace(aspace);
+	if (nullptr == atomspace)
+		atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
 	HandleSet hset;

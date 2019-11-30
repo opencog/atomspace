@@ -130,7 +130,7 @@ private:
 	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
-	static SCM ss_map_type(SCM, SCM);
+	static SCM ss_map_type(SCM, SCM, SCM);
 	static SCM ss_get_types(void);
 	static SCM ss_get_type(SCM);
 	static SCM ss_get_subtypes(SCM);
