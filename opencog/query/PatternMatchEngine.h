@@ -137,6 +137,7 @@ private:
 	// whenever take_step is set to true.
 	bool _perm_take_step;
 	bool _perm_have_more;
+	bool _perm_go_around;
 	PatternTermPtr _perm_to_step;
 	PatternTermPtr _perm_breakout;
 	std::stack<bool> _perm_take_stack;

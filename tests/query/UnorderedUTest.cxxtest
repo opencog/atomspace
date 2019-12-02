@@ -71,13 +71,13 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_quote(void);
 		void test_odometer(void);
 		void test_odo_below(void);
-		void xtest_odo_distinct(void);
+		void test_odo_distinct(void);
 		void xtest_odo_indistinct(void);
-		void xtest_odo_layer(void);
+		void test_odo_layer(void);
 		void test_odo_couple(void);
 		void xtest_odo_equ_pred(void);
 		void test_odo_equal(void);
-		void xtest_odo_couplayer(void);
+		void test_odo_couplayer(void);
 };
 
 /*
@@ -469,7 +469,7 @@ void UnorderedUTest::test_odo_below(void)
 
 // ================================================================
 
-void UnorderedUTest::xtest_odo_distinct(void)
+void UnorderedUTest::test_odo_distinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -551,7 +551,7 @@ void UnorderedUTest::xtest_odo_indistinct(void)
 
 // Stacked odometers.
 // Currently fails
-void UnorderedUTest::xtest_odo_layer(void)
+void UnorderedUTest::test_odo_layer(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -697,7 +697,7 @@ void UnorderedUTest::test_odo_equal(void)
 // ================================================================
 
 // Coupled odometers. Currently failing.
-void UnorderedUTest::xtest_odo_couplayer(void)
+void UnorderedUTest::test_odo_couplayer(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -706,25 +706,25 @@ void UnorderedUTest::xtest_odo_couplayer(void)
 	Handle result;
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 2*2=4 solutions
+	// Result should be a SetLink w/ 2*(2*2)=8 solutions
 	result = eval->eval_h("(cog-execute! play-dim-two)");
 
 	logger().debug("D=2 play arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 2*1*2=4 solutions
+	// Result should be a SetLink w/ 2*(2*1*2)=8 solutions
 	result = eval->eval_h("(cog-execute! play-dim-three)");
 
 	logger().debug("D=3 play arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// --------------------------------------------
-	// Result should be a SetLink w/ 2*1*1*2=4 solutions
+	// Result should be a SetLink w/ 2*(2*1*1*2)=8 solutions
 	result = eval->eval_h("(cog-execute! play-dim-four)");
 
 	logger().debug("D=4 play arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

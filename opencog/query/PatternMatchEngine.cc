@@ -515,6 +515,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 		bool match = true;
 
+		// Handle cases 3&4 of the description above.
+		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
+			goto take_next_step;
+
 		if (has_glob)
 		{
 			// Each glob comparison steps the glob state forwards.
@@ -542,22 +546,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
-		// Handle cases 3&4 of the description above. That is, the
-		// `tree_compare()` above did not take a step, so we will.
-		// The `tree_compare()` should have reported exactly the
-		// same results as last time (i.e. a match or eval) and so
-		// neither a `post_link_match()` nor a `post_link_mismatch()`
-		// should be reported.
-		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
-		{
-			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
-			          "Impossible: should have matched!");
-			goto take_next_step;
-		}
-
 		if (_perm_take_step and ptm != _perm_to_step)
 		{
-			DO_LOG({LAZY_LOG_FINE << "DO NOT step; its NOT term="
+			DO_LOG({LAZY_LOG_FINE << "DO NOT step; stepper="
 			        << _perm_to_step->to_string() << " so just repeat "
 			        << _perm_count[Unorder(ptm, hg)] + 1
 			        << " of " << num_perms
@@ -594,12 +585,23 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				              << " for term=" << ptm->to_string();})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				_perm_have_more = true;
+				_perm_go_around = false;
 				return true;
 			}
 		}
 		else
 		{
 			_pmc.post_link_mismatch(hp, hg);
+		}
+
+		if (_perm_go_around)
+		{
+			_perm_go_around = false;
+			_perm_have_more = true;
+			_perm_state[Unorder(ptm, hg)] = mutation;
+			solution_pop();
+			DO_LOG({LAZY_LOG_FINE << "GO around ";})
+			return false;
 		}
 
 		// If we are here, we are handling case 8.
@@ -628,6 +630,7 @@ take_next_step:
 	{
 		POPSTK(_perm_stepper_stack, _perm_to_step);
 		_perm_have_more = true;
+		_perm_go_around = true;
 	}
 
 	return false;
@@ -697,6 +700,9 @@ void PatternMatchEngine::perm_push(void)
 	_perm_have_more = false;
 	_perm_breakout_stack.push(_perm_breakout);
 	_perm_breakout = nullptr;
+
+	// XXX should we be clearing ... or pushing this flag?
+	_perm_go_around = false;
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -714,6 +720,9 @@ void PatternMatchEngine::perm_pop(void)
 	POPSTK(_perm_take_stack, _perm_take_step);
 	POPSTK(_perm_more_stack, _perm_have_more);
 	POPSTK(_perm_breakout_stack, _perm_breakout);
+
+	// XXX should we be clearing ... or poping this flag?
+	_perm_go_around = false;
 }
 
 /* ======================================================== */
@@ -1264,7 +1273,11 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
+// XXX Surely push and pop are demanded, here???
+// perm_push();
+		_perm_go_around = false;
 		found = explore_odometer(ptm, Handle(iset[i]), clause);
+// perm_pop();
 		if (found) break;
 	}
 	_perm_breakout = nullptr;
@@ -1376,6 +1389,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 	{
 		_perm_have_more = false;
 		_perm_take_step = true;
+		_perm_go_around = false;
 
 		DO_LOG({LAZY_LOG_FINE << "ODO STEP unordered beneath term: "
 		                      << ptm->to_string();})
@@ -2446,6 +2460,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// UnorderedLink state
 	_perm_have_more = false;
 	_perm_take_step = false;
+	_perm_go_around = false;
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
 	_perm_state.clear();
@@ -2492,6 +2507,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	_perm_have_more = false;
 	_perm_take_step = false;
+	_perm_go_around = false;
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
 }

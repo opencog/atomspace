@@ -12,7 +12,10 @@
 (use-modules (opencog) (opencog exec))
 
 ; ----------------------------------------------------
-; Coupled sets, expect 2! * 2! = 4 permutations
+; Coupled sets, expect 2! * (2! * 2!) = 8 permutations
+;
+; $W should ALWAYS be "R" and the remaing permutations are
+; free order for PQ and ST, at the start or end.
 
 (Set (Concept "B")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
@@ -28,7 +31,12 @@
 			(Variable "$X") (Variable "$Y"))))
 
 ; ----------------------------------------------------
-; Like above, but 2! * 1! * 2! = 4 permutations
+; Like above, but 2! * (2! * 1! * 2!) = 8 permutations
+;
+; $D should ALWAYS be S and the middle three should always
+; be either TSR or RST.
+; The remaing permutations are free order for PQ and UV
+;
 (Set (Concept "C")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
@@ -46,7 +54,12 @@
 			(Variable "$G"))))
 
 ; ----------------------------------------------------
-; Like above, but 2*1*1*2 = 4 permutations
+; Like above, but 2*(2*1*1*2) = 8 permutations
+;
+; $E should ALWAYS be "T", and the
+; middle five should be either RSTUV or VUTSR
+; The remaing permutations are free order for PQ and WX
+;
 (Set (Concept "D")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Predicate "R") (Predicate "S") (Predicate "T"))
@@ -64,3 +77,5 @@
 			(Variable "$A") (Variable "$B") (Variable "$C")
 			(Variable "$D") (Variable "$E") (Variable "$F")
 			(Variable "$G") (Variable "$H") (Variable "$J"))))
+
+; ----------------------------------------------------
