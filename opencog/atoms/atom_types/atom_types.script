@@ -245,7 +245,7 @@ VARIABLE_SET <- SET_LINK
 // sequence.  XXX TODO - this could be changed to a link, so that
 // it resembles a FUZZY_LINK more closely?  FuzzyLink implements
 // the same idea, but in a more general fashion...
-// Variadic, the globbed values are meant to be of all same type.
+// https://wiki.opencog.org/w/GlobNode for more.
 GLOB_NODE <- VARIABLE_NODE
 
 // Everything under a QuoteLink is interpreted literally. Variable

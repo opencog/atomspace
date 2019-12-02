@@ -74,6 +74,10 @@ public:
 	void test_disconnected_const_eval(void);
 	void test_quote_equal(void);
 	void test_plus_pattern_get(void);
+
+	void test_glob_get(void);
+	void test_typed_glob_get(void);
+	void test_type_choice_glob_get(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -364,6 +368,77 @@ void GetLinkUTest::test_plus_pattern_get(void)
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic GlobNode with GetLink unit test.
+ */
+void GetLinkUTest::test_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-execute! basic-get)");
+	Handle hans =
+			eval->eval_h("(SetLink"
+			             "  (ListLink"
+			             "    (ConceptNode \"glib\")"
+			             "    (PredicateNode \"blab\")))");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Type restricted GlobNode with GetLink unit test.
+ */
+void GetLinkUTest::test_typed_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-execute! typed-get)");
+	Handle hans = eval->eval_h("(SetLink )");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Typed GlobNode with GetLink unit test.
+ */
+void GetLinkUTest::test_type_choice_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-execute! type-choice-get)");
+	Handle hans =
+			eval->eval_h("(SetLink"
+			             "  (ListLink"
+			             "    (ConceptNode \"glib\")"
+			             "    (PredicateNode \"blab\")))");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
