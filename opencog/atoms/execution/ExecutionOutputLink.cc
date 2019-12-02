@@ -188,8 +188,6 @@ ValuePtr ExecutionOutputLink::do_execute(AtomSpace* as,
 	{
 #ifdef HAVE_CYTHON
 		// Get a reference to the python evaluator.
-		// Be sure to specify the atomspace in which the
-		// evaluation is to be performed.
 		PythonEval &applier = PythonEval::instance();
 		result = applier.apply(fun, args);
 #else
