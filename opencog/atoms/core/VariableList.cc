@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <math.h>
-
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/TypeNode.h>
 
