@@ -94,7 +94,7 @@ SET(Boost_USE_MULTITHREADED ON)
 SET(MIN_BOOST 1.46)
 
 # Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS date_time filesystem serialization system thread)
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS filesystem system)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
