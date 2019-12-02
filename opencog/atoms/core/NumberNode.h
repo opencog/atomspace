@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #ifndef _OPENCOG_NUMBER_NODE_H
@@ -53,13 +39,10 @@ private:
 	// system is explcitly defined to be locale-independent, including
 	// the natural-language pipeline in guile/scheme. Thus, printing
 	// the European comma as a decimal separator blows up the code.
+	// Using boost::lexical_cast<> avoids this issue.
 	static std::string double_to_string(double x)
 	{
-		std::string vs = boost::lexical_cast<std::string>(x);
-		std::size_t found = vs.find(',');
-		if (std::string::npos != found)
-			vs[found] = '.';
-		return vs;
+		return boost::lexical_cast<std::string>(x);
 	}
 
 protected:
