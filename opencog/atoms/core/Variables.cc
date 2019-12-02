@@ -89,16 +89,16 @@ struct VarScraper
 	 *
 	 * Note: context is passed by copy for implementation convenience.
 	 */
-	HandleSeq free_variables(const Handle& body, Context ctx=Context()) const;
+	HandleSeq sorted_free_variables(const Handle& body, Context ctx=Context()) const;
 
 	/**
 	 * Like above but operates on the outgoing set of an ordered
 	 * (resp. unordered) link.
 	 */
-	HandleSeq free_variables_ordered(const HandleSeq& outs,
-	                                 const Context& ctx=Context()) const;
-	HandleSeq free_variables_unordered(const HandleSeq& outs,
-	                                   const Context& ctx=Context()) const;
+	HandleSeq sorted_free_variables_ordered_link(const HandleSeq& outs,
+	                                             const Context& ctx=Context()) const;
+	HandleSeq sorted_free_variables_unordered_link(const HandleSeq& outs,
+	                                               const Context& ctx=Context()) const;
 
 	/**
 	 * Return a sorted outgoing set according to a canonical order.
@@ -115,12 +115,13 @@ struct VarScraper
 	bool less_than(const Handle& lh, const Handle& rh, const Context& ctx) const;
 
 	/**
-	 * Like less_than but over ordered (resp. unordered) outgoings.
+	 * Like less_than but over the outgoings of an ordered
+	 * (resp. unordered) link.
 	 */
-	bool less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
-	                       const Context& ctx) const;
-	bool less_than_unordered(const HandleSeq& lhs, const HandleSeq& rhs,
-	                         const Context& ctx) const;
+	bool less_than_ordered_link(const HandleSeq& lhs, const HandleSeq& rhs,
+	                            const Context& ctx) const;
+	bool less_than_unordered_link(const HandleSeq& lhs, const HandleSeq& rhs,
+	                              const Context& ctx) const;
 
 	/**
 	 * Return true iff h is a Variable or Glob node.
@@ -137,8 +138,8 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
                            const HandleSeq& hs, bool ordered_link)
 {
 	_fvc = free_variables_counter(hs);
-	varseq = ordered_link ? free_variables_ordered(hs)
-		: free_variables_unordered(hs);
+	varseq = ordered_link ? sorted_free_variables_ordered_link(hs)
+		: sorted_free_variables_unordered_link(hs);
 	varset = HandleSet(varseq.begin(), varseq.end());
 }
 
@@ -166,7 +167,7 @@ HandleUCounter VarScraper::free_variables_counter(const HandleSeq& hs,
 	return fvc;
 }
 
-HandleSeq VarScraper::free_variables(const Handle& body, Context ctx) const
+HandleSeq VarScraper::sorted_free_variables(const Handle& body, Context ctx) const
 {
 	// Base cases
 	if (ctx.is_free_variable(body))
@@ -178,18 +179,18 @@ HandleSeq VarScraper::free_variables(const Handle& body, Context ctx) const
 	OC_ASSERT(body->is_link());
 	ctx.update(body);
 	const HandleSeq& outs = body->getOutgoingSet();
-	return is_ordered_link(body) ? free_variables_ordered(outs, ctx)
-		: free_variables_unordered(outs, ctx);
+	return is_ordered_link(body) ? sorted_free_variables_ordered_link(outs, ctx)
+		: sorted_free_variables_unordered_link(outs, ctx);
 }
 
-HandleSeq VarScraper::free_variables_ordered(const HandleSeq& outs,
-                                             const Context& ctx) const
+HandleSeq VarScraper::sorted_free_variables_ordered_link(const HandleSeq& outs,
+                                                         const Context& ctx) const
 {
 	HandleSeq res;
 	for (const Handle& out : outs)
 	{
 		// Recursive call
-		HandleSeq fvs = free_variables(out, ctx);
+		HandleSeq fvs = sorted_free_variables(out, ctx);
 
 		// Only retain variables that are not in res
 		HandleSeq fvs_n;
@@ -204,10 +205,10 @@ HandleSeq VarScraper::free_variables_ordered(const HandleSeq& outs,
 	return res;
 }
 
-HandleSeq VarScraper::free_variables_unordered(const HandleSeq& outs,
-                                               const Context& ctx) const
+HandleSeq VarScraper::sorted_free_variables_unordered_link(const HandleSeq& outs,
+                                                           const Context& ctx) const
 {
-	return free_variables_ordered(sorted(outs, ctx), ctx);
+	return sorted_free_variables_ordered_link(sorted(outs, ctx), ctx);
 }
 
 HandleSeq VarScraper::sorted(HandleSeq outs, const Context& ctx) const
@@ -238,8 +239,8 @@ bool VarScraper::less_than(const Handle& lh, const Handle& rh,
 		// Both atoms have same arity, sort by outgoings
 		const HandleSeq& lout = lh->getOutgoingSet();
 		const HandleSeq& rout = rh->getOutgoingSet();
-		return is_ordered_link(lh)? less_than_ordered(lout, rout, ctx)
-			: less_than_unordered(lout, rout, ctx);
+		return is_ordered_link(lh)? less_than_ordered_link(lout, rout, ctx)
+			: less_than_unordered_link(lout, rout, ctx);
 	}
 
 	// Both atoms are constant nodes of the same type, sort by regular
@@ -256,11 +257,13 @@ bool VarScraper::less_than(const Handle& lh, const Handle& rh,
 
 	// Both atoms are variables with same count, sort by regular atom
 	// order.
+	//
+	// TODO: Wrong! There should be no determined order at this point.
 	return lh < rh;
 }
 
-bool VarScraper::less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
-                                   const Context& ctx) const
+bool VarScraper::less_than_ordered_link(const HandleSeq& lhs, const HandleSeq& rhs,
+                                        const Context& ctx) const
 {
 	OC_ASSERT(lhs.size() == rhs.size());
 	for (std::size_t i = 0; i < lhs.size(); i++)
@@ -269,10 +272,10 @@ bool VarScraper::less_than_ordered(const HandleSeq& lhs, const HandleSeq& rhs,
 	return false;
 }
 
-bool VarScraper::less_than_unordered(const HandleSeq& lhs, const HandleSeq& rhs,
-                                     const Context& ctx) const
+bool VarScraper::less_than_unordered_link(const HandleSeq& lhs, const HandleSeq& rhs,
+                                          const Context& ctx) const
 {
-	return less_than_ordered(sorted(lhs, ctx), sorted(rhs, ctx), ctx);
+	return less_than_ordered_link(sorted(lhs, ctx), sorted(rhs, ctx), ctx);
 }
 
 bool VarScraper::is_variable(const Handle& h)
@@ -339,7 +342,7 @@ void FreeVariables::canonical_sort(const Handle& body)
 	// Ignore free variables in body not in the FreeVariables object
 	HandleSet ignored_vars = set_symmetric_difference(vsc._fvc.keys(), varset);
 	Context ctx(Quotation(), ignored_vars, false);
-	varseq = vsc.free_variables(body, ctx);
+	varseq = vsc.sorted_free_variables(body, ctx);
 
 	// Rebuild index to reflect the new order
 	init_index();
