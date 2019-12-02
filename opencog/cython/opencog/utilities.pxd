@@ -6,5 +6,5 @@ cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
     #   initialize_python(AtomSpace*);
     #   void finalize_python();
     #
-    cdef void c_initialize_python "opencog::initialize_python" (cAtomSpace*)
+    cdef void c_initialize_python "opencog::initialize_python" ()
     cdef void c_finalize_python "opencog::finalize_python" ()

@@ -33,28 +33,17 @@ public:
 
     void testOpencogInitializationFinalization() {
 
-        // Create an atomspace.
-        AtomSpace* atomSpace = new AtomSpace();
-
         // Initialize Python.
-        initialize_python(atomSpace);
+        initialize_python();
 
         // Stop Python.
         finalize_python();
-
-        // Delete the atom space.
-        delete atomSpace;
 
         // Do it again.
 
-        // Create a atomspace.
-        atomSpace = new AtomSpace();
-
         // Stop Python.
         finalize_python();
 
-        // Delete the atom space.
-        delete atomSpace;
    }
 
 

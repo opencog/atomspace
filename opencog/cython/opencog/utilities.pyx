@@ -15,7 +15,7 @@ def initialize_opencog(AtomSpace atomspace):
         return
     is_initialized = True
 
-    c_initialize_python(atomspace.atomspace)
+    c_initialize_python()
     set_type_ctor_atomspace(atomspace)
 
 def finalize_opencog():

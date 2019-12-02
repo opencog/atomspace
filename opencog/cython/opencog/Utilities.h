@@ -26,7 +26,7 @@
 
 namespace opencog {
 
-void initialize_python(AtomSpace*);
+void initialize_python();
 void finalize_python();
 
 } // namespace opencog

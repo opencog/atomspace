@@ -2,6 +2,8 @@ import unittest
 from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, Atom, TruthValue
+from opencog.bindlink import execute_atom
+
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
@@ -70,6 +72,36 @@ class AtomTest(TestCase):
         error_str = "key should be an instance of Atom, got {0} instead".format(str)
         with self.assertRaisesRegex(TypeError, error_str):
             string_node.set_value("bad key", StringValue("Hello, World!"))
+
+    def test_grounded_cond(self):
+        grounded_cond = CondLink(
+                    EvaluationLink (
+                        GroundedPredicateNode ("py:grounded_cond1"),
+                        ListLink ()),
+                    NumberNode('1'),
+                        EvaluationLink(
+                            GroundedPredicateNode("py:grounded_cond2"),
+                            ListLink()),
+                    NumberNode('2'))
+        result = execute_atom(self.space, grounded_cond)
+        baz = NumberNode("2")
+        print("got %s", result)
+        print("expected %s\n", baz)
+        self.assertTrue(result == baz)
+
+
+def grounded_cond1(*args):
+    print(args)
+    return TruthValue(0, 0)
+
+def grounded_cond2(*args):
+    print(args)
+    return TruthValue(1, 1)
+
+import __main__
+
+__main__.grounded_cond1 = grounded_cond1
+__main__.grounded_cond2 = grounded_cond2
 
 
 if __name__ == '__main__':
