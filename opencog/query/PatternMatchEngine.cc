@@ -692,17 +692,9 @@ void PatternMatchEngine::perm_push(void)
 		_perm_count_stack.push(_perm_count);
 
 	_perm_stepper_stack.push(_perm_to_step);
-	_perm_to_step = nullptr;
-
 	_perm_take_stack.push(_perm_take_step);
-	_perm_take_step = false;
 	_perm_more_stack.push(_perm_have_more);
-	_perm_have_more = false;
 	_perm_breakout_stack.push(_perm_breakout);
-	_perm_breakout = nullptr;
-
-	// XXX should we be clearing ... or pushing this flag?
-	_perm_go_around = false;
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -1273,11 +1265,13 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
-// XXX Surely push and pop are demanded, here???
-// perm_push();
+		// XXX TODO Perhaps this push can be avoided,
+		// if there are no unordered tems?
+		perm_push();
 		_perm_go_around = false;
 		found = explore_odometer(ptm, Handle(iset[i]), clause);
-// perm_pop();
+		perm_pop();
+
 		if (found) break;
 	}
 	_perm_breakout = nullptr;
@@ -2177,6 +2171,11 @@ void PatternMatchEngine::clause_stacks_push(void)
 	choice_stack.push(_choice_state);
 
 	perm_push();
+	_perm_to_step = nullptr;
+	_perm_take_step = false;
+	_perm_have_more = false;
+	_perm_breakout = nullptr;
+	_perm_go_around = false;
 
 	_pmc.push();
 }
