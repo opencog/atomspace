@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_NUMBER_NODE_H
 #define _OPENCOG_NUMBER_NODE_H
 
+#include <boost/lexical_cast.hpp>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/value/FloatValue.h>
 
@@ -54,7 +55,7 @@ private:
 	// the European comma as a decimal separator blows up the code.
 	static std::string double_to_string(double x)
 	{
-		std::string vs(std::to_string(x));
+		std::string vs = boost::lexical_cast<std::string>(x);
 		std::size_t found = vs.find(',');
 		if (std::string::npos != found)
 			vs[found] = '.';
