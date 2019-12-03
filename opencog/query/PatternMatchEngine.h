@@ -109,8 +109,7 @@ private:
 	// -------------------------------------------
 	// ChoiceLink state management
 	// Very similar to permutation state management.
-	typedef std::pair<PatternTermPtr, Handle> GndChoice;
-	typedef std::map<GndChoice, size_t> ChoiceState;
+	typedef std::map<PatternTermPtr, size_t> ChoiceState;
 
 	ChoiceState _choice_state;
 	bool _need_choice_push;

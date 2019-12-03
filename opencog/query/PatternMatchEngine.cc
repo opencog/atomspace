@@ -294,7 +294,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
 
-				_choice_state[GndChoice(ptm, hg)] = icurr;
+				_choice_state[ptm] = icurr;
 				return true;
 			}
 		}
@@ -308,7 +308,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	}
 
 	// If we are here, we've explored all the possibilities already
-	_choice_state.erase(GndChoice(ptm, hg));
+	_choice_state.erase(ptm);
 	return false;
 }
 
@@ -317,7 +317,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
                                        const Handle& hg)
 {
-	auto cs = _choice_state.find(GndChoice(ptm, hg));
+	auto cs = _choice_state.find(ptm);
 	if (_choice_state.end() == cs)
 	{
 		_choose_next = false;
@@ -329,7 +329,7 @@ size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
 bool PatternMatchEngine::have_choice(const PatternTermPtr& ptm,
                                      const Handle& hg)
 {
-	return 0 < _choice_state.count(GndChoice(ptm, hg));
+	return 0 < _choice_state.count(ptm);
 }
 
 /* ======================================================== */
