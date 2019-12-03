@@ -600,7 +600,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			_perm_have_more = true;
 			_perm_state[Unorder(ptm, hg)] = mutation;
 			solution_pop();
-			DO_LOG({LAZY_LOG_FINE << "GO around ";})
+			DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
 			return false;
 		}
 
@@ -2171,6 +2171,9 @@ void PatternMatchEngine::clause_stacks_push(void)
 	choice_stack.push(_choice_state);
 
 	perm_push();
+
+	// These should already be null/false; if not there's slop
+	// in the code. Clear, just to be sure.
 	_perm_to_step = nullptr;
 	_perm_take_step = false;
 	_perm_have_more = false;
