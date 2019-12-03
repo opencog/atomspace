@@ -76,10 +76,10 @@
 ; Like above, but 2*1*1*2 = 4 permutations
 
 (List (Concept "D")
-   (Set (Predicate "P") (Predicate "Q") (Predicate "R"))
-   (Set (Predicate "R") (Predicate "S") (Predicate "T"))
-   (Set (Predicate "T") (Predicate "U") (Predicate "V"))
-   (Set (Predicate "V") (Predicate "W") (Predicate "X")))
+   (Set (Concept "P") (Concept "Q") (Concept "R"))
+   (Set (Concept "R") (Concept "S") (Concept "T"))
+   (Set (Concept "T") (Concept "U") (Concept "V"))
+   (Set (Concept "V") (Concept "W") (Concept "X")))
 
 (define epr-dim-four
 	(Bind

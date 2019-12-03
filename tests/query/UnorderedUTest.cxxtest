@@ -75,7 +75,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void xtest_odo_indistinct(void);
 		void test_odo_layer(void);
 		void test_odo_couple(void);
-		void xtest_odo_equ_pred(void);
+		void test_odo_equ_pred(void);
 		void test_odo_equal(void);
 		void test_odo_couplayer(void);
 };
@@ -627,7 +627,7 @@ void UnorderedUTest::test_odo_couple(void)
 // ================================================================
 
 // Coupled odometers. Currently failing.
-void UnorderedUTest::xtest_odo_equ_pred(void)
+void UnorderedUTest::test_odo_equ_pred(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
