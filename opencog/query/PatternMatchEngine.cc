@@ -294,7 +294,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				// If the grounding is accepted, record it.
 				record_grounding(ptm, hg);
 
-				_choice_state[GndChoice(ptm, hg)] = icurr;
+				_choice_state[ptm] = icurr;
 				return true;
 			}
 		}
@@ -308,7 +308,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	}
 
 	// If we are here, we've explored all the possibilities already
-	_choice_state.erase(GndChoice(ptm, hg));
+	_choice_state.erase(ptm);
 	return false;
 }
 
@@ -317,7 +317,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
                                        const Handle& hg)
 {
-	auto cs = _choice_state.find(GndChoice(ptm, hg));
+	auto cs = _choice_state.find(ptm);
 	if (_choice_state.end() == cs)
 	{
 		_choose_next = false;
@@ -329,7 +329,7 @@ size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
 bool PatternMatchEngine::have_choice(const PatternTermPtr& ptm,
                                      const Handle& hg)
 {
-	return 0 < _choice_state.count(GndChoice(ptm, hg));
+	return 0 < _choice_state.count(ptm);
 }
 
 /* ======================================================== */
@@ -503,14 +503,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		num_perms = facto(mutation.size());
 		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
-		              _perm_count[Unorder(ptm, hg)] + 1, num_perms,
+		              _perm_count[ptm] + 1, num_perms,
 		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
-		              << _perm_count[Unorder(ptm, hg)] +1 << " of " << num_perms
+		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
@@ -524,7 +524,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			// Each glob comparison steps the glob state forwards.
 			// Each different permutation has to start with the
 			// same glob state as before. So save and restore state.
-			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
+			std::map<PatternTermSeq, GlobState> saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
 			_glob_state = saved_glob_state;
 		}
@@ -550,7 +550,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			DO_LOG({LAZY_LOG_FINE << "DO NOT step; stepper="
 			        << _perm_to_step->to_string() << " so just repeat "
-			        << _perm_count[Unorder(ptm, hg)] + 1
+			        << _perm_count[ptm] + 1
 			        << " of " << num_perms
 			        << " for term=" << ptm->to_string();})
 			// Balance the push above.
@@ -580,10 +580,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 				// Handle case 5&7 of description above.
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
-				              << _perm_count[Unorder(ptm, hg)] + 1
+				              << _perm_count[ptm] + 1
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string();})
-				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_state[ptm] = mutation;
 				_perm_have_more = true;
 				_perm_go_around = false;
 				return true;
@@ -598,15 +598,15 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			_perm_go_around = false;
 			_perm_have_more = true;
-			_perm_state[Unorder(ptm, hg)] = mutation;
+			_perm_state[ptm] = mutation;
 			solution_pop();
-			DO_LOG({LAZY_LOG_FINE << "GO around ";})
+			DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
 			return false;
 		}
 
 		// If we are here, we are handling case 8.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
-		              << _perm_count[Unorder(ptm, hg)] + 1
+		              << _perm_count[ptm] + 1
 		              << " of " << num_perms
 		              << " for term=" << ptm->to_string();})
 
@@ -615,15 +615,15 @@ take_next_step:
 		_perm_have_more = false; // start with a clean slate...
 		solution_pop();
 		if (logger().is_fine_enabled())
-			_perm_count[Unorder(ptm, hg)] ++;
+			_perm_count[ptm] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end(),
 	         std::less<PatternTermPtr>()));
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
 	             << ptm->to_string();})
-	_perm_state.erase(Unorder(ptm, hg));
-	_perm_count.erase(Unorder(ptm, hg));
+	_perm_state.erase(ptm);
+	_perm_count.erase(ptm);
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
 	if (0 < _perm_stepper_stack.size())
@@ -657,7 +657,7 @@ PatternMatchEngine::Permutation
 PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
                               const Handle& hg)
 {
-	auto ps = _perm_state.find(Unorder(ptm, hg));
+	auto ps = _perm_state.find(ptm);
 	if (_perm_state.end() == ps)
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
@@ -680,7 +680,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
                                    const Handle& hg)
 {
-	if (_perm_state.end() == _perm_state.find(Unorder(ptm, hg)))
+	if (_perm_state.end() == _perm_state.find(ptm))
 		return false;
 	return true;
 }
@@ -725,7 +725,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
-	GlobPair gp = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
@@ -752,7 +751,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			glob_grd.erase(glob_pos_stack.top().first);
 
 			glob_pos_stack.pop();
-			_glob_state[gp] = {glob_grd, glob_pos_stack};
+			_glob_state[osp] = {glob_grd, glob_pos_stack};
 		}
 
 		// See where the previous glob is and try again
@@ -776,7 +775,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		solution_push();
 
 		glob_grd[glob] = glob_seq.size();
-		_glob_state[gp] = {glob_grd, glob_pos_stack};
+		_glob_state[osp] = {glob_grd, glob_pos_stack};
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
@@ -790,7 +789,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto mismatch = [&]()
 	{
 		match = false;
-		_glob_state.erase(gp);
+		_glob_state.erase(osp);
 	};
 
 	// Resume the matching from a previous state.
@@ -798,7 +797,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	// turns out the groundings do not satisfy some other terms
 	// in the same pattern, so we try again and see if the globs
 	// in osp can be grounded differently.
-	auto r = _glob_state.find(gp);
+	auto r = _glob_state.find(osp);
 	if (r != _glob_state.end())
 	{
 		backtracking = true;
@@ -868,7 +867,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// XXX why are we not doing any checks to see if the
 				// grounding meets the variable constraints?
 				glob_pos_stack.push({glob, {ip, jg}});
-				_glob_state[gp] = {glob_grd, glob_pos_stack};
+				_glob_state[osp] = {glob_grd, glob_pos_stack};
 			}
 
 			// First of all, see if we have seen this glob in
@@ -1313,7 +1312,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		std::map<GlobPair, GlobState> saved_glob_state;
+		std::map<PatternTermSeq, GlobState> saved_glob_state;
 		saved_glob_state = _glob_state;
 
 		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);
@@ -2171,6 +2170,9 @@ void PatternMatchEngine::clause_stacks_push(void)
 	choice_stack.push(_choice_state);
 
 	perm_push();
+
+	// These should already be null/false; if not there's slop
+	// in the code. Clear, just to be sure.
 	_perm_to_step = nullptr;
 	_perm_take_step = false;
 	_perm_have_more = false;

@@ -109,8 +109,7 @@ private:
 	// -------------------------------------------
 	// ChoiceLink state management
 	// Very similar to permutation state management.
-	typedef std::pair<PatternTermPtr, Handle> GndChoice;
-	typedef std::map<GndChoice, size_t> ChoiceState;
+	typedef std::map<PatternTermPtr, size_t> ChoiceState;
 
 	ChoiceState _choice_state;
 	bool _need_choice_push;
@@ -125,9 +124,9 @@ private:
 	// -------------------------------------------
 	// Unordered Link suppoprt
 	// Very similar to ChoiceLink state management.
-	typedef std::pair<PatternTermPtr, Handle> Unorder; // alt: GndChoice
 	typedef PatternTermSeq Permutation;
-	typedef std::map<Unorder, Permutation> PermState; // alt: ChoiceState
+	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
+	typedef std::map<PatternTermPtr, int> PermCount;
 
 	PermState _perm_state;
 	Permutation curr_perm(const PatternTermPtr&, const Handle&);
@@ -146,17 +145,14 @@ private:
 	std::stack<PatternTermPtr> _perm_breakout_stack;
 
 	std::stack<PermState> _perm_stack;
-	std::map<Unorder, int> _perm_count;
-	std::stack<std::map<Unorder, int>> _perm_count_stack;
+	PermCount _perm_count;
+	std::stack<PermCount> _perm_count_stack;
 
 	void perm_push(void);
 	void perm_pop(void);
 
 	// --------------------------------------------
 	// Glob state management
-
-	// Record the glob-pattern and the candidate we are comparing
-	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
 
 	// Record where the globs are (branchpoints)
 	typedef std::pair<PatternTermPtr, std::pair<size_t, size_t>> GlobPos;
@@ -166,7 +162,7 @@ private:
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<GlobPair, GlobState> _glob_state;
+	std::map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
