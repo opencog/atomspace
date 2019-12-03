@@ -503,14 +503,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		num_perms = facto(mutation.size());
 		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
-		              _perm_count[Unorder(ptm, hg)] + 1, num_perms,
+		              _perm_count[ptm] + 1, num_perms,
 		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
-		              << _perm_count[Unorder(ptm, hg)] +1 << " of " << num_perms
+		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
@@ -550,7 +550,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			DO_LOG({LAZY_LOG_FINE << "DO NOT step; stepper="
 			        << _perm_to_step->to_string() << " so just repeat "
-			        << _perm_count[Unorder(ptm, hg)] + 1
+			        << _perm_count[ptm] + 1
 			        << " of " << num_perms
 			        << " for term=" << ptm->to_string();})
 			// Balance the push above.
@@ -580,10 +580,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 				// Handle case 5&7 of description above.
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
-				              << _perm_count[Unorder(ptm, hg)] + 1
+				              << _perm_count[ptm] + 1
 				              << " of " << num_perms
 				              << " for term=" << ptm->to_string();})
-				_perm_state[Unorder(ptm, hg)] = mutation;
+				_perm_state[ptm] = mutation;
 				_perm_have_more = true;
 				_perm_go_around = false;
 				return true;
@@ -598,7 +598,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			_perm_go_around = false;
 			_perm_have_more = true;
-			_perm_state[Unorder(ptm, hg)] = mutation;
+			_perm_state[ptm] = mutation;
 			solution_pop();
 			DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
 			return false;
@@ -606,7 +606,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		// If we are here, we are handling case 8.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
-		              << _perm_count[Unorder(ptm, hg)] + 1
+		              << _perm_count[ptm] + 1
 		              << " of " << num_perms
 		              << " for term=" << ptm->to_string();})
 
@@ -615,15 +615,15 @@ take_next_step:
 		_perm_have_more = false; // start with a clean slate...
 		solution_pop();
 		if (logger().is_fine_enabled())
-			_perm_count[Unorder(ptm, hg)] ++;
+			_perm_count[ptm] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end(),
 	         std::less<PatternTermPtr>()));
 
 	// If we are here, we've explored all the possibilities already
 	DO_LOG({LAZY_LOG_FINE << "Exhausted all permutations of term="
 	             << ptm->to_string();})
-	_perm_state.erase(Unorder(ptm, hg));
-	_perm_count.erase(Unorder(ptm, hg));
+	_perm_state.erase(ptm);
+	_perm_count.erase(ptm);
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
 	if (0 < _perm_stepper_stack.size())
@@ -657,7 +657,7 @@ PatternMatchEngine::Permutation
 PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
                               const Handle& hg)
 {
-	auto ps = _perm_state.find(Unorder(ptm, hg));
+	auto ps = _perm_state.find(ptm);
 	if (_perm_state.end() == ps)
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
@@ -680,7 +680,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
                                    const Handle& hg)
 {
-	if (_perm_state.end() == _perm_state.find(Unorder(ptm, hg)))
+	if (_perm_state.end() == _perm_state.find(ptm))
 		return false;
 	return true;
 }
