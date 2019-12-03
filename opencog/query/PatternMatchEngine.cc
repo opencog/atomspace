@@ -524,7 +524,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			// Each glob comparison steps the glob state forwards.
 			// Each different permutation has to start with the
 			// same glob state as before. So save and restore state.
-			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
+			std::map<PatternTermSeq, GlobState> saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
 			_glob_state = saved_glob_state;
 		}
@@ -725,7 +725,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
-	GlobPair gp = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
@@ -752,7 +751,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			glob_grd.erase(glob_pos_stack.top().first);
 
 			glob_pos_stack.pop();
-			_glob_state[gp] = {glob_grd, glob_pos_stack};
+			_glob_state[osp] = {glob_grd, glob_pos_stack};
 		}
 
 		// See where the previous glob is and try again
@@ -776,7 +775,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		solution_push();
 
 		glob_grd[glob] = glob_seq.size();
-		_glob_state[gp] = {glob_grd, glob_pos_stack};
+		_glob_state[osp] = {glob_grd, glob_pos_stack};
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
@@ -790,7 +789,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto mismatch = [&]()
 	{
 		match = false;
-		_glob_state.erase(gp);
+		_glob_state.erase(osp);
 	};
 
 	// Resume the matching from a previous state.
@@ -798,7 +797,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	// turns out the groundings do not satisfy some other terms
 	// in the same pattern, so we try again and see if the globs
 	// in osp can be grounded differently.
-	auto r = _glob_state.find(gp);
+	auto r = _glob_state.find(osp);
 	if (r != _glob_state.end())
 	{
 		backtracking = true;
@@ -868,7 +867,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// XXX why are we not doing any checks to see if the
 				// grounding meets the variable constraints?
 				glob_pos_stack.push({glob, {ip, jg}});
-				_glob_state[gp] = {glob_grd, glob_pos_stack};
+				_glob_state[osp] = {glob_grd, glob_pos_stack};
 			}
 
 			// First of all, see if we have seen this glob in
@@ -1313,7 +1312,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		std::map<GlobPair, GlobState> saved_glob_state;
+		std::map<PatternTermSeq, GlobState> saved_glob_state;
 		saved_glob_state = _glob_state;
 
 		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);

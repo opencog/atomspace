@@ -153,9 +153,6 @@ private:
 	// --------------------------------------------
 	// Glob state management
 
-	// Record the glob-pattern and the candidate we are comparing
-	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
-
 	// Record where the globs are (branchpoints)
 	typedef std::pair<PatternTermPtr, std::pair<size_t, size_t>> GlobPos;
 	typedef std::stack<GlobPos> GlobPosStack;
@@ -164,7 +161,7 @@ private:
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<GlobPair, GlobState> _glob_state;
+	std::map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
