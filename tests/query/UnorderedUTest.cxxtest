@@ -72,7 +72,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_odometer(void);
 		void test_odo_below(void);
 		void test_odo_distinct(void);
-		void xtest_odo_indistinct(void);
+		void test_odo_indistinct(void);
 		void test_odo_layer(void);
 		void test_odo_couple(void);
 		void test_odo_equ_pred(void);
@@ -509,7 +509,7 @@ void UnorderedUTest::test_odo_distinct(void)
 
 // ================================================================
 
-void UnorderedUTest::xtest_odo_indistinct(void)
+void UnorderedUTest::test_odo_indistinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -524,25 +524,25 @@ void UnorderedUTest::xtest_odo_indistinct(void)
 
 	// --------------------------------------------
 	// Again, but squared
-	// Result should be a SetLink w/ 6*6=36 solutions
+	// Result should be a SetLink w/ 2*6*6=72 solutions
 	result = eval->eval_h("(cog-execute! indistinct-dim-two)");
 
 	logger().debug("D=2 indistinct arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 144, getarity(result));
-
-	// --------------------------------------------
-	// Result should be a SetLink w/ 6*6*6=216 solutions
-	result = eval->eval_h("(cog-execute! indistinct-dim-three)");
-
-	logger().debug("D=3 indistinct arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2592, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! indistinct-dim-three)");
+
+	logger().debug("D=3 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6 *4! = 31104 solutions
 	result = eval->eval_h("(cog-execute! indistinct-dim-four)");
 
 	logger().debug("D=4 indistinct arity is %d\n", getarity(result));
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 62208, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 31104, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

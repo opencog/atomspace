@@ -22,7 +22,7 @@
 ; (cog-execute! indistinct-dim-one)
 
 ; ----------------------------------------------------
-; Like above, but 3! * (3! + 3!) x2  = 144 permutations
+; Like above, but (3! * 3!) x2  = 72 permutations
 
 (Set (Concept "B")
 	(Set (Concept "B") (Predicate "P") (Predicate "Q") (Predicate "R"))
@@ -40,7 +40,7 @@
 ; (cog-execute! indistinct-dim-two)
 
 ; ----------------------------------------------------
-; Like above, but 6*(144) x 3 = 2592 permutations
+; Like above, but (6*6*6) x 3! = 1296 permutations
 (Set (Concept "C")
 	(Set (Concept "C") (Predicate "P") (Predicate "Q") (Predicate "R"))
 	(Set (Concept "C") (Predicate "S") (Predicate "T") (Predicate "U"))
@@ -60,7 +60,7 @@
 ; (cog-execute! indistinct-dim-three)
 
 ; ----------------------------------------------------
-; Like above, but 6*(2592) x4 = 62208 permutations
+; Like above, but (6*6*6*6) x 4! = 31104 permutations
 (Set (Concept "D")
 	(Set (Concept "D") (Predicate "L") (Predicate "M") (Predicate "N"))
 	(Set (Concept "D") (Predicate "P") (Predicate "Q") (Predicate "R"))
