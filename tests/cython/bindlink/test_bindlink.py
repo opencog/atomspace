@@ -5,7 +5,6 @@ from opencog.atomspace import AtomSpace, TruthValue, Atom, types
 from opencog.bindlink import execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
 
 from test_functions import green_count, red_count
 import test_functions
@@ -27,8 +26,7 @@ class BindlinkTest(unittest.TestCase):
         self.atomspace.clear()
 
         # Initialize Python
-        initialize_opencog(self.atomspace)
-        set_type_ctor_atomspace(self.atomspace)
+        set_default_atomspace(self.atomspace)
 
         # Define several animals and something of a different type as well
         InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))
