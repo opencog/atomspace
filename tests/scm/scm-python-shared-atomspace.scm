@@ -17,7 +17,7 @@
 ; Define a python func returning a TV
 (python-eval "
 from opencog.atomspace import AtomSpace, TruthValue, types
-from opencog.utilities import get_type_ctor_atomspace
+from opencog.type_constructors import get_type_ctor_atomspace
 
 
 # Twiddle some atoms in the atomspace
