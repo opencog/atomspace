@@ -56,7 +56,7 @@ std::string FloatValue::to_string(const std::string& indent) const
 		snprintf(buf, 40, "%.17g", v);
 		rv += std::string(" ") + buf;
 	}
-	rv += ")\n";
+	rv += ")";
 	return rv;
 }
 

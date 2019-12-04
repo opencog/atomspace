@@ -69,7 +69,7 @@ std::string opencog::oc_to_string(const VariableSetPtr& vsp,
                                   const std::string& indent)
 {
 	if (vsp == nullptr)
-		return indent + "nullvariableset\n";
+		return indent + "nullvariableset";
 	else
 		return oc_to_string(vsp->get_handle(), indent);
 }

@@ -71,7 +71,7 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp,
                                   const std::string& indent)
 {
 	if (vlp == nullptr)
-		return indent + "nullvariablelist\n";
+		return indent + "nullvariablelist";
 	else
 		return oc_to_string(vlp->get_handle(), indent);
 }

@@ -913,13 +913,13 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 	// them out.
 	std::stringstream ss;
 	ss << "Pattern is not connected! Found "
-	   << components.size() << " components:\n";
+	   << components.size() << " components:";
 	int cnt = 1;
 	for (const auto& comp : components)
 	{
-		ss << "Connected component " << cnt
-		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->to_string();
+		ss << std::endl << "Connected component " << cnt
+		   << " consists of ----------------:";
+		for (Handle h : comp) ss << std::endl << h->to_string();
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
@@ -1017,7 +1017,7 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 	ss << indent << "_component_vars:" << std::endl
 	   << oc_to_string(_component_vars, indent_p) << std::endl;
 	ss << indent << "_component_patterns:" << std::endl
-	   << oc_to_string(_component_patterns, indent_p) << std::endl;
+	   << oc_to_string(_component_patterns, indent_p);
 	return ss.str();
 }
 

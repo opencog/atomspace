@@ -63,7 +63,7 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
             '    \(FloatValue 1\)\n'
             '    \(StringValue "foo"\)\n'
             '    \(ConceptNode "bar"\) ; \[\d+\]\[\d+\]\n'
-            '\)\n',
+            '\)',
             str(value)))
 
     def test_is_a(self):

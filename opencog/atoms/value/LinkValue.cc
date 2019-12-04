@@ -46,8 +46,8 @@ std::string LinkValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 	for (ValuePtr v :_value)
-		rv += std::string(" ") + v->to_string(indent + "   ");
-	rv += ")\n";
+		rv += std::string(" ") + v->to_string(indent + "   ") + "\n";
+	rv += ")";
 	return rv;
 }
 

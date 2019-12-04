@@ -497,7 +497,7 @@ ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
 	    if (h->getIncomingSetSize() == 0)
-		    out << h->to_string() << endl;
+		    out << h->to_string();
     return out;
 }
 

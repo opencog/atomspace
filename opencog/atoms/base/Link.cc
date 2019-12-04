@@ -91,9 +91,9 @@ std::string Link::to_string(const std::string& indent) const
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer += h->to_string(more_indent);
+        answer += h->to_string(more_indent) + "\n";
 
-    answer += indent + ") ; " + id_to_string() + "\n";
+    answer += indent + ") ; " + id_to_string();
 
     return answer;
 }

@@ -319,8 +319,8 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         AtomPtr a = it->second;
         if (atom != a) {
             LAZY_LOG_WARN << "Hash collision between:" << std::endl
-                          << atom->to_string() << "and:" << std::endl
-                          << a->to_string();
+                          << atom->to_string() << std::endl << "and:"
+                          << std::endl << a->to_string();
 #ifdef HALT_ON_COLLISON
             // This is an extreme yet convenient way to check whether
             // a collision has occured.

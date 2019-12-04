@@ -26,29 +26,58 @@ namespace opencog {
 std::string Pattern::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
+	bool first = true;
 	if (not quoted_clauses.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "quoted clauses:" << std::endl
 		   << oc_to_string(quoted_clauses, indent + OC_TO_STRING_INDENT);
+		 first = false;
+	}
 	if (not unquoted_clauses.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "unquoted clauses:" << std::endl
 		   << oc_to_string(unquoted_clauses, indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	if (not mandatory.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "mandatory:" << std::endl
 		   << oc_to_string(mandatory, indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	if (not optionals.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "optionals:" << std::endl
 		   << oc_to_string(optionals, indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	if (not black.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "black:" << std::endl
 		   << oc_to_string(black, indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	if (not evaluatable_terms.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "evaluatable_terms:" << std::endl
 		   << oc_to_string(evaluatable_terms,
 		                   indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	if (not evaluatable_holders.empty())
+	{
+		if (not first) ss << std::endl;
 		ss << indent << "evaluatable_holders:" << std::endl
 		   << oc_to_string(evaluatable_holders,
 		                   indent + OC_TO_STRING_INDENT);
+		first = false;
+	}
 	return ss.str();
 }
 
