@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/LinkUTest.cxxtest
+ * tests/atoms/base/LinkUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -102,5 +102,19 @@ public:
         TS_ASSERT(*l7 != *l4);
         TS_ASSERT(*l7 != *l5);
         TS_ASSERT(*l7 != *l6);
+    }
+
+    void test_to_short_string()
+    {
+        // Make sure Link::to_short_string() does not end with a
+        // newline as it is required by atomspace-dht
+        Handle A(createNode(CONCEPT_NODE, "A"));
+        Handle B(createNode(CONCEPT_NODE, "B"));
+        Handle AB(createLink(LIST_LINK, A, B));
+
+        std::string result = AB->to_short_string();
+        std::string expect = "(ListLink (ConceptNode \"A\") (ConceptNode \"B\"))";
+
+        TS_ASSERT_EQUALS(result, expect);
     }
 };

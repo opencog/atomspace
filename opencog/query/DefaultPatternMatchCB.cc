@@ -499,7 +499,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		_temp_aspace->clear();
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
-		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
+		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
 		              << std::endl << tvp->to_string() << std::endl;})
 
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
@@ -697,7 +697,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->to_short_string().c_str());
 
-	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
+	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
 	              << tvp->to_string() << std::endl;})
 
 	// XXX FIXME: we are making a crisp-logic go/no-go decision

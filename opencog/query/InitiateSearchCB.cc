@@ -593,9 +593,9 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	}
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	              << _root->to_string();})
+	                      << _root->to_string();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
-	              << _starter_term->to_string();})
+	                      << _starter_term->to_string();})
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->get_type();
@@ -609,8 +609,8 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	for (const Handle& h : handle_set)
 	{
 		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
-		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->to_string();})
+		                      << "Loop candidate (" << ++i << "/" << hsz << "):\n"
+		                      << h->to_string();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -670,7 +670,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
-		              << typeset.size();})
+		                      << typeset.size();})
 
 		// Calculate the total number of atoms of typeset
 		size_t num = 0;
@@ -678,7 +678,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
 		DO_LOG({LAZY_LOG_FINE << var->to_string() << "has "
-		              << num << " atoms in the atomspace";})
+		                      << num << " atoms in the atomspace";})
 
 		if (0 < num and num < count)
 		{
@@ -803,8 +803,8 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	for (const Handle& h : handle_set)
 	{
 		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
-		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->to_string();})
+		                      << "Loop candidate (" << ++i << "/" << hsz << "):\n"
+		                      << h->to_string();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}

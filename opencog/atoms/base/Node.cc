@@ -63,7 +63,7 @@ std::string Node::to_string(const std::string& indent) const
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->to_string();
 
-    answer += ") ; " + id_to_string() + "\n";
+    answer += ") ; " + id_to_string();
 
     return answer;
 }

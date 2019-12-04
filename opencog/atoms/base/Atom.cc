@@ -471,9 +471,9 @@ std::string Atom::id_to_string() const
 std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << iset.size() << std::endl;
+	ss << indent << "size = " << iset.size();
 	for (unsigned i = 0; i < iset.size(); i++)
-		ss << indent << "link[" << i << "]:" << std::endl
+		ss << std::endl << indent << "link[" << i << "]:" << std::endl
 		   << iset[i]->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }

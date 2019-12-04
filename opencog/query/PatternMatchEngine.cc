@@ -1252,17 +1252,17 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
-	              << ptm->getHandle()->to_string()
-	              << "The grounded pivot point " << hg->to_string()
-	              << " has " << sz << " branches";})
+	                      << ptm->getHandle()->to_string() << std::endl
+	                      << "The grounded pivot point " << hg->to_string()
+	                      << " has " << sz << " branches";})
 
 	_perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " at term=" << ptm->to_string()
-		              << " propose=" << iset[i]->to_string();})
+		                      << " at term=" << ptm->to_string()
+		                      << " propose=" << iset[i]->to_string();})
 
 		// XXX TODO Perhaps this push can be avoided,
 		// if there are no unordered tems?
@@ -1295,17 +1295,17 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
-	              << ptm->getHandle()->to_string()
-	              << "It's grounding " << hg->to_string()
-	              << " has " << sz << " branches";})
+	                      << ptm->getHandle()->to_string() << std::endl
+	                      << "It's grounding " << hg->to_string()
+	                      << " has " << sz << " branches";})
 
 	// Move up the solution graph, looking for a match.
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for glob term=" << ptm->to_string()
-		              << " propose=" << Handle(iset[i]).value();})
+		                      << " for glob term=" << ptm->to_string()
+		                      << " propose=" << Handle(iset[i]).value();})
 
 		// Before exploring the link branches, record the current
 		// _glob_state size.  The idea is, if the ptm & hg is a match,
