@@ -15,6 +15,7 @@ IF (HAVE_ATOMSPACE)
 	ADD_SUBDIRECTORY (eval)
 	ADD_SUBDIRECTORY (query)
 	ADD_SUBDIRECTORY (persist)
+	ADD_SUBDIRECTORY (executioncontext)
 ENDIF (HAVE_ATOMSPACE)
 
 # Extension language support
