@@ -84,7 +84,7 @@ void MapLinkUTest::test_singleton(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single)");
 
@@ -163,7 +163,7 @@ void MapLinkUTest::test_signature(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single-signature)");
 
@@ -180,7 +180,7 @@ void MapLinkUTest::test_double_set(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! double-num-set)");
 
@@ -210,7 +210,7 @@ void MapLinkUTest::test_implication(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! imply-map)");
 
@@ -236,7 +236,7 @@ void MapLinkUTest::test_glob(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! glob-simple)");
 
@@ -280,7 +280,7 @@ void MapLinkUTest::test_implication_nodecl(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! imply-map-nodecl)");
 
@@ -304,7 +304,7 @@ void MapLinkUTest::test_local_quote_map(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Instantiator inst(as);
     Handle local_quote_map = eval->eval_h("local-quote-map"),
@@ -325,7 +325,7 @@ void MapLinkUTest::test_quote_arg_map(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Instantiator inst(as);
     Handle quote_arg_map = eval->eval_h("quote-arg-map"),
