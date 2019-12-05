@@ -32,6 +32,7 @@ ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	atombase
+	executioncontext
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
