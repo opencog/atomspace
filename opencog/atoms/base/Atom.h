@@ -444,6 +444,8 @@ static inline Handle HandleCast(const ValuePtr& pa)
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(const IncomingSet& iset,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const Atom& atom,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 } // namespace opencog
