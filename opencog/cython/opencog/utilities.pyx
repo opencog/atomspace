@@ -72,10 +72,8 @@ def add_link(Type t, outgoing, TruthValue tv=None):
 
 
 def add_node(Type t, atom_name, TruthValue tv=None):
-    """ Add Node to AtomSpace
-    @todo support [0.5,0.5] format for TruthValue.
-    @todo support type name for type.
-    @returns the newly created Atom
+    """
+    Add Node to the atomspace from the current context
     """
     cdef string name = atom_name.encode('UTF-8')
     cdef cHandle result = c_add_node(t, name)

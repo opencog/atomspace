@@ -61,3 +61,16 @@ def stop_go(atom):
         assert(false)
 
     return TruthValue(0,0)
+
+
+def func_one(v):
+    thing = ConceptNode("barleycorn")
+    thang = ListLink(thing, v)
+    thang.tv = TruthValue(0.9, 1)
+    return thang.tv
+
+
+func_two_result = TruthValue (0,1) # false
+def func_two(v):
+    return func_two_result
+
