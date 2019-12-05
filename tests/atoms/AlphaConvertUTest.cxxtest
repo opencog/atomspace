@@ -51,6 +51,7 @@ public:
 	void test_body();
 	void test_atomspace();
 	void test_bindlink();
+	void test_bindlink_ordered();
 	void test_vardecl_free_scope();
 	void test_variable_set_scope();
 };
@@ -306,6 +307,45 @@ void AlphaConvertUTest::test_bindlink()
 	// x and y should be NOT equal because their implicants are not
 	// alpha-equivalent.
 	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for BindLink where the implicand is ordered
+void AlphaConvertUTest::test_bindlink_ordered()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	// Create BindLink
+	Handle hscox =
+	LA(BIND_LINK,
+	   LA(PRESENT_LINK, X, Y),
+	   LA(LIST_LINK, X, Y));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	_asb.clear();
+	Handle hscoy =
+	LB(BIND_LINK,
+	   LB(PRESENT_LINK, X, Y),
+	   LB(LIST_LINK, Y, X));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(BIND_LINK,
+	   LB(VARIABLE_SET, X, Y),
+	   LB(PRESENT_LINK, X, Y),
+	   LB(LIST_LINK, Y, X));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
