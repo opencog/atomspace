@@ -11,8 +11,9 @@ import warnings
 from opencog.atomspace import (createFloatValue, createLinkValue,
                                 createStringValue, createTruthValue)
 from opencog.atomspace import AtomSpace, types
+from utilities import add_node, add_link
+from utilities import get_default_atomspace, set_default_atomspace
 
-atomspace = None
 def set_type_ctor_atomspace(new_atomspace):
     warnings.warn('set_type_ctor_atomspace is deprecated, use set_default_atomspace instead',
             DeprecationWarning)
@@ -22,23 +23,6 @@ def get_type_ctor_atomspace():
     warnings.warn('get_type_ctor_atomspace is deprecated, use get_default_atomspace instead',
             DeprecationWarning)
     return get_default_atomspace()
-
-
-def set_default_atomspace(new_atomspace):
-    """
-    Set default atomspace for all threads
-    """
-    global atomspace
-    atomspace = new_atomspace
-
-
-def get_default_atomspace():
-    """
-    Get default atomspace
-    """
-    global atomspace
-    return atomspace
-
 
 include "opencog/atoms/atom_types/core_types.pyx"
 
@@ -53,3 +37,4 @@ def StringValue(arg):
 
 def TruthValue(strength=1.0, confidence=1.0):
     return createTruthValue(strength, confidence)
+
