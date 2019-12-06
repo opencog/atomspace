@@ -76,6 +76,31 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 	}
 }
 
+/**
+ * isAncestor - return true if `ptm` is a lineal ancestor of `this`.
+ * That is, return true if `ptm` appears as a parent somewhere in the
+ * chain of parents.
+ */
+bool PatternTerm::isAncestor(const PatternTermPtr& ptm) const
+{
+	if (PatternTerm::UNDEFINED == _parent) return false;
+	if (*_parent == *ptm) return true;
+	return _parent->isAncestor(ptm);
+}
+
+/**
+ * Equality operator.  Both the content must match, and the path
+ * taken to get to the content must match.
+ */
+bool PatternTerm::operator==(const PatternTerm& other)
+{
+	if (_handle != other._handle) return false;
+	if (_parent != other._parent) return false;
+	if (PatternTerm::UNDEFINED == _parent) return true;
+
+	return _parent->operator==(*other._parent);
+}
+
 void PatternTerm::addBoundVariable()
 {
 	if (!_has_any_bound_var)
