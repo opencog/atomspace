@@ -297,7 +297,7 @@ bool VarScraper::is_ordered_link(const Handle& h)
 
 bool VarScraper::is_ordered_type(Type t)
 {
-	return nameserver().isA(t, ORDERED_LINK);
+	return not nameserver().isA(t, UNORDERED_LINK);
 }
 
 /* ================================================================= */
