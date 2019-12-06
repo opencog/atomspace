@@ -48,6 +48,9 @@ namespace opencog
 // fact different in reality, due to the index of a unordered link
 // being always zero. We do that to be able to use std::operator<
 // rather than provide our own.
+//
+// Note: a notion of path is already implemented in PatternTerm, there
+// might be ways to unify the two.
 typedef std::pair<Type, Arity> TypeArityPair;
 typedef std::vector<TypeArityPair> Path;
 typedef std::multiset<Path> PathMultiset;

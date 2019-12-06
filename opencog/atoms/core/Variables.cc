@@ -284,7 +284,6 @@ bool VarScraper::less_than_unordered_outgoing(const HandleSeq& lhs,
 	return less_than_ordered_outgoing(sorted(lhs), sorted(rhs));
 }
 
-// TODO: maybe support context
 bool VarScraper::is_variable(const Handle& h)
 {
 	Type t = h->get_type();
@@ -298,7 +297,7 @@ bool VarScraper::is_ordered_link(const Handle& h)
 
 bool VarScraper::is_ordered_type(Type t)
 {
-	return nameserver().isA(t, ORDERED_LINK);
+	return not nameserver().isA(t, UNORDERED_LINK);
 }
 
 /* ================================================================= */
