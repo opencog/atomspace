@@ -478,4 +478,9 @@ std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 	return ss.str();
 }
 
+std::string oc_to_string(const Atom& atom, const std::string& indent)
+{
+	return atom.to_string(indent);
+}
+
 } // ~namespace opencog

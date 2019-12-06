@@ -30,6 +30,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/Quotation.h>
 
 namespace opencog
@@ -37,6 +38,20 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+// Struct to build paths between variables and root. A path is a
+// sequence of pairs (Type, Index), where Type is the type of a link
+// and index is the index of the outgoing of that link. If the type
+// unordered however, then index is zero, because in such case the
+// index has no meaning. The collection of paths is stored in a
+// multiset because some paths can be identically looking while in
+// fact different in reality, due to the index of a unordered link
+// being always zero. We do that to be able to use std::operator<
+// rather than provide our own.
+typedef std::pair<Type, Arity> TypeArityPair;
+typedef std::vector<TypeArityPair> Path;
+typedef std::multiset<Path> PathMultiset;
+typedef std::map<Handle, PathMultiset> HandlePathsMap;
 
 /// The FreeVariables struct defines a list of free, untyped variables
 /// "unbundled" from the hypergraph in which they normally occur. The
@@ -108,13 +123,15 @@ struct FreeVariables
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
 	/// Sort the variables in a canonical order determined by their
-	/// positions in the given body.  In ordered link, the ordered is
-	/// determined by the outgoing set order (from left to right).  In
-	/// unordered links, the ordered is determined by some arbitrary,
-	/// though semantically consistent fix order.  The order only
-	/// depends on variable names as last resort, when no semantic
-	/// property can be used to break the symmetry.
-	void canonical_sort(const Handle& body);
+	/// positions in the given outgoing set, which is assumed ordered,
+	/// as outgoing sets of scopes are always ordered so far.  In
+	/// ordered link, the ordered is determined by the outgoing set
+	/// order (from left to right).  In unordered links, the ordered is
+	/// determined by some arbitrary, though semantically consistent
+	/// fix order.  The order only depends on variable names as last
+	/// resort, when no semantic property can be used to break the
+	/// symmetry.
+	void canonical_sort(const HandleSeq& outgoings);
 
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables
@@ -316,6 +333,17 @@ struct Variables : public FreeVariables,
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
+struct VarScraper;
+std::string oc_to_string(const TypeArityPair& tap,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Path& path,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PathMultiset& paths,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandlePathsMap& hpsm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const VarScraper& vsc,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables& var,

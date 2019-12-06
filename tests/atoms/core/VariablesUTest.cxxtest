@@ -67,11 +67,17 @@ public:
 	void test_find_variables_unordered_2();
 	void test_find_variables_unordered_3();
 	void test_find_variables_unordered_4();
+	void test_find_variables_unordered_5();
 	void test_find_variables_mixed_1();
 	void test_find_variables_mixed_2();
 	void test_find_variables_mixed_3();
 	void test_find_variables_mixed_4();
 	void test_find_variables_mixed_5();
+	void test_find_variables_mixed_6();
+	void test_find_variables_mixed_7();
+	void test_find_variables_mixed_8();
+	void test_find_variables_mixed_9();
+	void test_find_variables_mixed_10();
 };
 
 void VariablesUTest::test_extend_1()
@@ -311,6 +317,34 @@ void VariablesUTest::test_find_variables_unordered_4()
 	TS_ASSERT_EQUALS(varseq, expect);
 }
 
+void VariablesUTest::test_find_variables_unordered_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl of body1 should be the reverse of inferred
+	// vardecl of body2.
+	Handle body1 = al(OR_LINK,
+	                  al(AND_LINK, X, A),
+	                  al(AND_LINK, Y, B));
+	Handle body2 = al(OR_LINK,
+	                  al(AND_LINK, Y, A),
+	                  al(AND_LINK, X, B));
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
+}
+
 void VariablesUTest::test_find_variables_mixed_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -367,11 +401,11 @@ void VariablesUTest::test_find_variables_mixed_3()
 	HandleSeq varseq1 = vars1.varseq;
 	HandleSeq varseq2 = vars2.varseq;
 
-	// Reverse varseq2 to test it if it equal to varseq1
-	std::reverse(varseq2.begin(), varseq2.end());
-
 	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
 	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
 
 	TS_ASSERT_EQUALS(varseq1, varseq2);
 }
@@ -431,4 +465,132 @@ void VariablesUTest::test_find_variables_mixed_5()
 	logger().debug() << "varseq = " << oc_to_string(varseq);
 
 	TS_ASSERT_EQUALS(varseq, HandleSeq(vars.varset.begin(), vars.varset.end()));
+}
+
+void VariablesUTest::test_find_variables_mixed_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the variable declarations of body1 and body2 are
+	// the reverses of each other, that is if one is [X, Y], then
+	// the other is [Y, X].
+	Handle body1 = al(LIST_LINK,
+	                  al(SET_LINK, X, Y),
+	                  al(LIST_LINK, X, Y));
+	Handle body2 = al(LIST_LINK,
+	                  al(SET_LINK, Y, X),
+	                  al(LIST_LINK, Y, X));
+
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
+}
+
+void VariablesUTest::test_find_variables_mixed_7()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the variable declarations of body1 and body2 are
+	// the reverses of each other, that is if one is [X, Y], then
+	// the other is [Y, X].
+	Handle body1 = al(SET_LINK,
+	                  al(SET_LINK, X, Y),
+	                  al(LIST_LINK, X, Y));
+	Handle body2 = al(SET_LINK,
+	                  al(SET_LINK, Y, X),
+	                  al(LIST_LINK, Y, X));
+
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
+}
+
+void VariablesUTest::test_find_variables_mixed_8()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// The order should be XYZ, because Z appears after X in the
+	// ordered link XZY, which makes XYZ before ordered before ZYX in
+	// the SetLink.
+	Handle XYZ = al(LIST_LINK, X, Y, Z);
+	Handle ZYX = al(LIST_LINK, Z, Y, X);
+	Handle XZY = al(LIST_LINK, X, Z, Y);
+	Handle body = al(LIST_LINK, al(SET_LINK, XYZ, ZYX), XZY);
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq result = vars.varseq;
+	HandleSeq expect{X, Y, Z};
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_find_variables_mixed_9()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// The vardecl order of body1 should be the reverse of the vardecl
+	// order of body2.
+	Handle body1 = al(LIST_LINK,
+	                 al(SET_LINK, X, Y),
+	                 al(SET_LINK, X, al(LIST_LINK, Y)));
+	Handle body2 = al(LIST_LINK,
+	                  al(SET_LINK, Y, X),
+	                  al(SET_LINK, Y, al(LIST_LINK, X)));
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
+}
+
+void VariablesUTest::test_find_variables_mixed_10()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// The vardecl should be empty because no variable are free.
+	Handle body = al(LAMBDA_LINK,
+	                 al(VARIABLE_LIST, X, Y),
+	                 al(LOCAL_QUOTE_LINK,
+	                    al(AND_LINK, X, Y)));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+
+	TS_ASSERT_EQUALS(varseq, HandleSeq());
 }
