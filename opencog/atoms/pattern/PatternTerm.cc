@@ -53,7 +53,7 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 PatternTermSeq PatternTerm::getOutgoingSet() const
 {
 	PatternTermSeq oset;
-	for (PatternTermWPtr w : _outgoing)
+	for (const PatternTermWPtr& w : _outgoing)
 	{
 		PatternTermPtr s(w.lock());
 		OC_ASSERT(nullptr != s, "Unexpected corruption of PatternTerm oset!");
