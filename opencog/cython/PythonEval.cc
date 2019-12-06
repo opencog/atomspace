@@ -37,7 +37,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/executioncontext/Context.h>
+#include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
 
 // This is an header in the build dreictory, auto-gened by cython

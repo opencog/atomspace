@@ -2,7 +2,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
-#include <opencog/executioncontext/Context.h>
+#include <opencog/cython/executioncontext/Context.h>
 #include <iostream>
 #include <stdexcept>
 

@@ -96,7 +96,7 @@ def set_default_atomspace(AtomSpace atomspace):
 
 def push_default_atomspace(AtomSpace new_atomspace):
     """
-    Set default atomspace for all threads
+    Set default atomspace for current threads
     """
     push_context_atomspace(new_atomspace.atomspace)
 

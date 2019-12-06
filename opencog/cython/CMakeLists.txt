@@ -13,6 +13,7 @@ SET(CMAKE_CXX_FLAGS
 	"${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wno-unused-function")
 
 ADD_SUBDIRECTORY (opencog)
+ADD_SUBDIRECTORY (executioncontext)
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}

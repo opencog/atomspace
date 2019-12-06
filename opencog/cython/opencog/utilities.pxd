@@ -13,7 +13,7 @@ cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
     # cHandle c_add_link "opencog::add_link" (Type t, vector[cHandle], tv_ptr tvn) except +
 
 
-cdef extern from "opencog/executioncontext/Context.h" namespace "opencog":
+cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog":
     cAtomSpace * get_context_atomspace();
     void push_context_atomspace(cAtomSpace * atomspace);
     cAtomSpace * pop_context_atomspace();
