@@ -77,15 +77,17 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 }
 
 /**
- * isAncestor - return true if `ptm` is a lineal ancestor of `this`.
+ * isDescendant - return true if `this` is a lineal descendant of `ptm`.
  * That is, return true if `ptm` appears as a parent somewhere in the
- * chain of parents.
+ * chain of parents of `this`.
+ *
+ * Mnemonic device: child->isDescendant(parent) == true
  */
-bool PatternTerm::isAncestor(const PatternTermPtr& ptm) const
+bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
 {
 	if (PatternTerm::UNDEFINED == _parent) return false;
 	if (*_parent == *ptm) return true;
-	return _parent->isAncestor(ptm);
+	return _parent->isDescendant(ptm);
 }
 
 /**

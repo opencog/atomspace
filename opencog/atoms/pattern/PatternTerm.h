@@ -98,7 +98,7 @@ public:
 	const Handle& getHandle() const noexcept { return _handle; }
 
 	PatternTermPtr getParent() const noexcept { return _parent; }
-	bool isAncestor(const PatternTermPtr&) const;
+	bool isDescendant(const PatternTermPtr&) const;
 
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 	PatternTermSeq getOutgoingSet() const;
