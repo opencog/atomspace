@@ -151,8 +151,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 void ScopeLink::init_scoped_variables(const Handle& vardecl)
 {
 	_variables = Variables(vardecl);
-	if (vardecl->get_type() == VARIABLE_SET)
-		_variables.canonical_sort(_body);
+	if (vardecl->get_type() == VARIABLE_SET) {
+		// Outgoing set without variable declaration
+		HandleSeq owv(std::next(_outgoing.begin()), _outgoing.end());
+		_variables.canonical_sort(owv);
+	}
 }
 
 /* ================================================================= */
