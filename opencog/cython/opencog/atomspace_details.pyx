@@ -27,6 +27,17 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
 cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
     return [create_python_value_from_c_value(<cValuePtr&> h) for h in handles]
 
+
+cdef vector[cHandle] atom_list_to_vector(list lst):
+    cdef vector[cHandle] handle_vector
+    for atom in lst:
+        if isinstance(atom, Atom):
+            handle_vector.push_back(deref((<Atom>(atom)).handle))
+        else:
+            raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
+    return handle_vector
+
+
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
@@ -121,12 +132,7 @@ cdef class AtomSpace:
         if self.atomspace == NULL:
             return None
         # create temporary cpp vector
-        cdef vector[cHandle] handle_vector
-        for atom in outgoing:
-            if isinstance(atom, Atom):
-                handle_vector.push_back(deref((<Atom>(atom)).handle))
-            else:
-                raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
+        cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
@@ -250,6 +256,17 @@ cdef class AtomSpace:
         """
         return list(set(atoms +
                 [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
+
+    def is_node_in_atomspace(self, Type t, s):
+        cdef string name = s.encode('UTF-8')
+        result = self.atomspace.get_handle(t, name)
+        return result != result.UNDEFINED
+
+    def is_link_in_atomspace(self, Type t, outgoing):
+        cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
+        result = self.atomspace.get_handle(t, handle_vector)
+        return result != result.UNDEFINED
+
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
