@@ -284,7 +284,6 @@ bool VarScraper::less_than_unordered_outgoing(const HandleSeq& lhs,
 	return less_than_ordered_outgoing(sorted(lhs), sorted(rhs));
 }
 
-// TODO: maybe support context
 bool VarScraper::is_variable(const Handle& h)
 {
 	Type t = h->get_type();
