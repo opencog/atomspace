@@ -180,12 +180,12 @@ class BindlinkTest(unittest.TestCase):
                    ListLink (VariableNode ("x")))))
         result = execute_atom(self.atomspace, get)
         self.assertFalse(result.out)
-        self.assertFalse('barleycorn' in str(self.atomspace.get_atoms_by_type(types.ConceptNode)))
-        test_functions.func_two_result = TruthValue(1,1)
+        self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
+        test_functions.func_one_result = TruthValue(1,1)
         result = execute_atom(self.atomspace, get)
         self.assertTrue(result.out)
         # still should not be in the current namespace
-        self.assertFalse('barleycorn' in str(self.atomspace.get_atoms_by_type(types.ConceptNode)))
+        self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
 
 if __name__ == "__main__":
     unittest.main()
