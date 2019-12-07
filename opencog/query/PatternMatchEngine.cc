@@ -362,22 +362,21 @@ tree-compare, moving downwards.  Thus, tree_compare must do a lot of
 heavy lifting.
 
 When comparing trees downwards, we have two situations we may be in:
-we may be asked to compare things exactly like last time, or we may be
-asked to try out the next permutation. We need to report back two bits
-of state: whether or not we found a match, and whether or not we have
-more possibilities to explore. Our behavior is thus controlled by this
-third bit, as well as what happened below us.
-
-The correct actions to take are best explored by truth tables: the
-settings of the _take_step and _have_more flags on entry, and what to
-do after running tree_compare downwards. These are handled by two
-truth tables.
+  1) we may be asked to compare things exactly like last time,
+     (take_step == false)
+  2) we may be asked to try out the next permutation.
+     (take_step == true)
+Our behavior is thus controlled by the `take_step` flag.
+We need to report back two bits of state: whether or not we found a match,
+and whether or not there are more permutation possibilities to explore
+(the `have_more` boolean flag).
 
 The topmost routine to call tree_compare must *always* set _have_more=F
 and _take_step=T before calling tree_compare.  This will cause
 tree_compare to advance to the next matching permutation, or to run until
 all permutations are exhausted, and no match was found.
 
+The above bits are explained in the truth table below.
 
 Flag settings upon entry
 ------------------------
@@ -663,7 +662,7 @@ take_next_step:
 				it ++;
 		}
 #if ODO_CLEANUP_NOT_NEEDED
-		// Like th above, cleanup the odometer state of any unordered
+		// Like the above, cleanup the odometer state of any unordered
 		// links that lie below us.
 		for (auto it =  _perm_odo_state.begin(); it != _perm_odo_state.end(); )
 		{
@@ -685,12 +684,16 @@ take_next_step:
 	_perm_count.erase(ptm);
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
+
 	if (0 < _perm_step_saver.size())
 	{
 		POPSTK(_perm_step_saver, _perm_to_step);
 		_perm_have_more = true;
 		_perm_go_around = true;
 	}
+
+	// Since we're done, let any unordered links above us know
+	// that we've wrapped around. And then reset them back.
 	_perm_podo[ptm] = true;
 	_perm_odo = _perm_podo;
 	_perm_podo = save_podo;
