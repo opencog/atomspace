@@ -491,8 +491,19 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
 
+	// Place the parent unordered link ("podo") where the child
+	// unordered link can find it. save the old parent on stack.
+	PermOdo save_podo = _perm_podo;
+	_perm_podo = _perm_odo;
+
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
+
+	// Likewise, pick up the odometer state where we last left off.
+	if (_perm_odo_state.find(ptm) != _perm_odo_state.end())
+		_perm_odo = _perm_odo_state.find(ptm)->second;
+	else
+		_perm_odo.clear();
 
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
@@ -555,6 +566,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			        << " for term=" << ptm->to_string();})
 			// Balance the push above.
 			solution_drop();
+			_perm_odo = _perm_podo;
+			_perm_podo = save_podo;
 			return match;
 		}
 
@@ -586,6 +599,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				_perm_state[ptm] = mutation;
 				_perm_have_more = true;
 				_perm_go_around = false;
+				_perm_odo_state[ptm] = _perm_odo;
+				_perm_odo = _perm_podo;
+				_perm_podo = save_podo;
 				return true;
 			}
 		}
@@ -596,12 +612,28 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		if (_perm_go_around)
 		{
-			_perm_go_around = false;
-			_perm_have_more = true;
-			_perm_state[ptm] = mutation;
-			solution_pop();
-			DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
-			return false;
+			bool not_done = false;
+			for (const auto& odo: _perm_odo)
+			{
+				if (odo.first == ptm) continue;
+				DO_LOG({LAZY_LOG_FINE << "Maybe go PERM odo "
+				                      << odo.first->to_string()
+				                      << " done=" << odo.second;})
+				if (not odo.second) { not_done = true; break; }
+			}
+
+			if (not_done)
+			{
+				DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
+				_perm_go_around = false;
+				_perm_have_more = true;
+				_perm_state[ptm] = mutation;
+				solution_pop();
+				_perm_odo_state[ptm] = _perm_odo;
+				_perm_odo = _perm_podo;
+				_perm_podo = save_podo;
+				return false;
+			}
 		}
 
 		// If we are here, we are handling case 8.
@@ -614,6 +646,33 @@ take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
 		solution_pop();
+		_perm_odo.clear();
+		_perm_odo_state[ptm] = _perm_odo;
+
+		// Clear out the permutation state of any unordered links
+		// that lie below us.  When we revisit these, we will want to
+		// start with a clean slate, every time.
+		for (auto it =  _perm_state.begin(); it != _perm_state.end(); )
+		{
+			if (it->first->isDescendant(ptm))
+			{
+				_perm_count.erase(it->first);
+				it = _perm_state.erase(it);
+			}
+			else
+				it ++;
+		}
+#if ODO_CLEANUP_NOT_NEEDED
+		// Like th above, cleanup the odometer state of any unordered
+		// links that lie below us.
+		for (auto it =  _perm_odo_state.begin(); it != _perm_odo_state.end(); )
+		{
+			if (it->first->isDescendant(ptm))
+				it = _perm_odo_state.erase(it);
+			else
+				it ++;
+		}
+#endif
 		if (logger().is_fine_enabled())
 			_perm_count[ptm] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end(),
@@ -632,6 +691,9 @@ take_next_step:
 		_perm_have_more = true;
 		_perm_go_around = true;
 	}
+	_perm_podo[ptm] = true;
+	_perm_odo = _perm_podo;
+	_perm_podo = save_podo;
 
 	return false;
 }
@@ -667,9 +729,21 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		// otherwise std::next_permutation() will miss some perms.
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
+
+		// This will become the permutation to step, next time we
+		// have to step. Meanwhile, save to old stepper, so that
+		// we can resume it when all perms of this one are exhausted.
 		if (nullptr != _perm_to_step)
 			_perm_step_saver.push(_perm_to_step);
 		_perm_to_step = ptm;
+
+		// If there are unordered links above us, we need to tell them
+		// about our existance, and let them know that we haven't been
+		// explored yet. We tell them by placing ourselves into thier
+		// odometer.
+		if (_perm_podo.find(ptm) == _perm_podo.end())
+			_perm_podo[ptm] = false;
+
 		return perm;
 	}
 	return ps->second;
@@ -695,6 +769,8 @@ void PatternMatchEngine::perm_push(void)
 	_perm_take_stack.push(_perm_take_step);
 	_perm_more_stack.push(_perm_have_more);
 	_perm_breakout_stack.push(_perm_breakout);
+
+	_perm_odo_stack.push(_perm_odo_state);
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -704,13 +780,14 @@ void PatternMatchEngine::perm_pop(void)
 		POPSTK(_perm_count_stack, _perm_count);
 
 	POPSTK(_perm_stepper_stack, _perm_to_step)
-
 	POPSTK(_perm_take_stack, _perm_take_step);
 	POPSTK(_perm_more_stack, _perm_have_more);
 	POPSTK(_perm_breakout_stack, _perm_breakout);
 
 	// XXX should we be clearing ... or poping this flag?
 	_perm_go_around = false;
+
+	POPSTK(_perm_odo_stack, _perm_odo_state);
 }
 
 /* ======================================================== */
@@ -1260,6 +1337,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		              << " at term=" << ptm->to_string()
 		              << " propose=" << iset[i]->to_string();})
 
+		_perm_odo.clear();
 		// XXX TODO Perhaps this push can be avoided,
 		// if there are no unordered tems?
 		perm_push();
@@ -2174,6 +2252,9 @@ void PatternMatchEngine::clause_stacks_push(void)
 	_perm_have_more = false;
 	_perm_breakout = nullptr;
 	_perm_go_around = false;
+	_perm_odo.clear();
+	_perm_podo.clear();
+	// _perm_odo_state.clear();
 
 	_pmc.push();
 }
@@ -2462,6 +2543,9 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
 	_perm_state.clear();
+	_perm_odo.clear();
+	_perm_podo.clear();
+	_perm_odo_state.clear();
 
 	// GlobNode state
 	_glob_state.clear();
@@ -2508,6 +2592,9 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_go_around = false;
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
+	_perm_odo.clear();
+	_perm_podo.clear();
+	_perm_odo_state.clear();
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
