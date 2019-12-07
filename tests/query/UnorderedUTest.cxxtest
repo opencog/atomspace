@@ -72,7 +72,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_odometer(void);
 		void test_odo_below(void);
 		void test_odo_distinct(void);
-		void xtest_odo_indistinct(void);
+		void test_odo_indistinct(void);
 		void test_odo_layer(void);
 		void test_odo_couple(void);
 		void test_odo_equ_pred(void);
@@ -509,7 +509,7 @@ void UnorderedUTest::test_odo_distinct(void)
 
 // ================================================================
 
-void UnorderedUTest::xtest_odo_indistinct(void)
+void UnorderedUTest::test_odo_indistinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

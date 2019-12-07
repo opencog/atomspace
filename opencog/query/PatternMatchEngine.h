@@ -127,6 +127,8 @@ private:
 	typedef PatternTermSeq Permutation;
 	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
 	typedef std::map<PatternTermPtr, int> PermCount;
+	typedef std::map<PatternTermPtr, bool> PermOdo;
+	typedef std::map<PatternTermPtr, PermOdo> PermOdoState;
 
 	PermState _perm_state;
 	Permutation curr_perm(const PatternTermPtr&, const Handle&);
@@ -139,12 +141,17 @@ private:
 	bool _perm_go_around;
 	PatternTermPtr _perm_to_step;
 	std::stack<PatternTermPtr> _perm_step_saver;
-
 	PatternTermPtr _perm_breakout;
+
+	PermOdo _perm_odo;
+	PermOdo _perm_podo;
+	PermOdoState _perm_odo_state;
+
 	std::stack<bool> _perm_take_stack;
 	std::stack<bool> _perm_more_stack;
 	std::stack<PatternTermPtr> _perm_stepper_stack;
 	std::stack<PatternTermPtr> _perm_breakout_stack;
+	std::stack<PermOdoState> _perm_odo_stack;
 
 	std::stack<PermState> _perm_stack;
 	PermCount _perm_count;

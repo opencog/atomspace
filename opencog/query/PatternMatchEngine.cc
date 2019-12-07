@@ -362,114 +362,60 @@ tree-compare, moving downwards.  Thus, tree_compare must do a lot of
 heavy lifting.
 
 When comparing trees downwards, we have two situations we may be in:
-we may be asked to compare things exactly like last time, or we may be
-asked to try out the next permutation. We need to report back two bits
-of state: whether or not we found a match, and whether or not we have
-more possibilities to explore. Our behavior is thus controlled by this
-third bit, as well as what happened below us.
-
-The correct actions to take are best explored by truth tables: the
-settings of the _take_step and _have_more flags on entry, and what to
-do after running tree_compare downwards. These are handled by two
-truth tables.
+  1) we may be asked to compare things exactly like last time,
+     (take_step == false)
+  2) we may be asked to try out the next permutation.
+     (take_step == true)
+Our behavior is thus controlled by the `take_step` flag.
+We need to report back two bits of state: whether or not we found a match,
+and whether or not there are more permutation possibilities to explore
+(the `have_more` boolean flag).
 
 The topmost routine to call tree_compare must *always* set _have_more=F
 and _take_step=T before calling tree_compare.  This will cause
 tree_compare to advance to the next matching permutation, or to run until
 all permutations are exhausted, and no match was found.
 
+Odometers
+---------
+Stepping through all possible permutations is "easy" for just one
+unordered link. If there are more than one, then several difficulties
+arise.  These are, roughly:
 
-Flag settings upon entry
-------------------------
+A) Two (or more) unordered links that are siblings to one another.
+   These can be visualized as being in left-right order; they are
+   strung together to form an "odometer". The odometer must spin as all
+   odometers do: all possible permutations of the right-most link must
+   be explored, before even one step of the left link can be taken.
+   Then, once the left link takes a step, all possible permutations
+   of the right-most link must be tried, again.  This is solved by
+   having a `perm_to_step` pointer: it indicates whose turn it is to
+   take one step.
 
-     take  have
-case step  more    Comments / Action to be Taken
----- ----  ----    -----------------------------
-  A    T    T     Impossible, Who set have_more? Who set take_step?
-  B    T    F     Normal entry: we are the first unordered link to be
-                  hit during downward traversal. Proceed using the truth
-                  table below.
-  C    F    T     We are not the first unorder. Someone ran before us.
-                  If we are in the very first permutation, (i.e. we are
-                    entering for the first time) we must call downwards.
-                    If this returns a mismatch, we must step until we
-                    find a match, or until we exhaust all permutations.
-                    See next table for what to return: we return cases
-                    5, 7 or 8.
-                  If we are not the first permutation, we could just
-                    return T, because that is what we did last time.
-                    i.e. we are told to not take a step, so we don't,
-                    and we know a-priori last time were were here, we
-                    must have returned a match.  Thus, we can return
-                    case 5 below.  We cannot return case 7 because we
-                    can't know what std::next_perm returns.
-                    (See however, footnote below).
-                  If we hold an evaluatable, we must call down.
-  D    F    F     Perform same as C above.
+B) Two (or more) unordered links are in a parent-chiled relationship.
+   This is similar to the odometer situation, in that all permutations
+   of the child must be explored before the parent can take a step.
+   It could be treated much as the above, with the understanding that
+   intervening ordered links mean that state needs to be held on stack.
 
-Footnote: case C: Well, the reasoning there is almost right, but not
-quite. If the unordered link contains a variable, and it is also not in
-the direct line of exploration (i.e. its grounding is NOT recorded)
-then its truthiness holds only for a grounding that no longer exists.
-Thus, for case C, it is safer to always check.
+C) Nested odometers: that is, combinations of case A) and case B).
+   This is where most of the complexity comes in: we have to track
+   both parent-child relationships, as well as sibling relationships.
+   Part of the problem is that we don't known, a priori, whether or
+   not there is more than on unordered link, or not, until we hit it.
+   If there is more than one, its not immediately obvious if it is a
+   sibiling or a descendant. (Perhaps some of this complexity could
+   be avoided during pattern compilation, i.e. when PatternLink gets
+   created: we could analyze the structure up front, and then make
+   use of it during traversal. This is not doen right now (2019).)
 
-However, by the above reasoning: if the grounding wasn't recorded
-(because the link is not in the recursion path) then the permutation
-should not be recorded either. It should start with a permutation from
-nothing.  XXX FIXME ... except we have no test case that illustrates
-this failure mode.  It would require a peer unordered link that takes
-a different order when the parent changes. Perhaps unordered links
-nested inside a ChoiceLink would trigger this?
+There's a final bit of complexity: we might be hitting unordered links
+for the first time, as we traverse up from below (e.g. by tracing from
+a joining variable in a different clause) or we might be traversing
+from above. The order in which steps are taken depend on this traversal
+stack: thus, its alwways the case that permutations of links higher in
+the stack are explored first, before those lower in the stack.
 
-If case B was encountered on entry, we call downwards ourselves, and
-then report back, according to the truth table below.
-
-     returned result flags
-     take  have   got
-case step  more  match    Comments / Action to be Taken
----- ----  ----  ----     ------------------------------
- 1     T    T      T    Impossible, error: who set have_more w/o
-                          taking step??
- 2     T    T      F    ditto
- 3     T    F      T    We have no unordered links below us; we are at
-                        the bottom.  If there had been unordered links,
-                        they would have cleared the take_step flag. The
-                        match we detected is the same match the last
-                        time we were here. So we take a step, call
-                        down again, and keep stepping until there is a
-                        match or until all permutations are exhausted.
-                          If match, we return: take_step=F,
-                            have_more = result of std::next_perm
-                            (we return case 5 or 7)
-                          If exhaust, we return take_step=F, have_more=F
-                            (we return case 8)
-
- 4     T    F      F    If we are not holding any evaluatable links,
-                        then this is impossible, as last time we were
-                        here, we returned T.  If we are holding
-                        evaluatable links, then one of them changed its
-                        mind. Oh well. Take a step, proceed as in case 3.
-
- 5     F    T      T    Someone below us took a step. Do nothing.
-                        Return case 5 flags.
- 6     F    T      F    Impossible; link that took the step should have
-                        stepped until match or exhaustion.
- 7     F    F      T    Unusual; its the last match for a lower unordered
-                        link. We report the match. We do not take a
-                        step; we do set the have_more flag to indicate
-                        that we ourselves still have more.  i.e. we
-                        return case 5 flags.
- 8     F    F      F    Typical; a lower unordered link ran to exhaustion,
-                        and got nada.  So *we* take a step, and call
-                        downwards again. We keep going till match or till
-                        exhaustion. If there's a match, we expect to see
-                        the case 5 flags, so we halt and return.  If we
-                        exhaust, we return case 8.
-
-The above assumes that the curr_perm() method always returns either
-the current permutation, or it returns a fresh permutation. If it returned
-a fresh permutation, this counts as "taking a step", so we need to know
-this.
 
 ******************************************************************/
 
@@ -487,14 +433,26 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	if (osg.size() != arity and not has_glob)
 		return _pmc.fuzzy_match(hp, hg);
 
-	// Test for case A, described above.
+	// Either we're going to take a step; or we aren't.
+	// If we're not taking a step, then there are unexplored
+	// permutations.
 	OC_ASSERT (not (_perm_take_step and _perm_have_more),
 	           "Impossible situation! BUG!");
+
+	// Place the parent unordered link ("podo") where the child
+	// unordered link can find it. save the old parent on stack.
+	PermOdo save_podo = _perm_podo;
+	_perm_podo = _perm_odo;
 
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = curr_perm(ptm, hg);
 
-	// Cases C and D fall through.
+	// Likewise, pick up the odometer state where we last left off.
+	if (_perm_odo_state.find(ptm) != _perm_odo_state.end())
+		_perm_odo = _perm_odo_state.find(ptm)->second;
+	else
+		_perm_odo.clear();
+
 	// If we are here, we've got possibilities to explore.
 #ifdef DEBUG
 	int num_perms = 0;
@@ -509,15 +467,19 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 #endif
 	do
 	{
+		bool match = true;
+		solution_push();
+
+		// If we've been told to take a step, then take it now.
+		if (_perm_take_step and ptm == _perm_to_step)
+			goto take_next_step;
+
+		// If we are not taking a step, then see if we've got a tree
+		// match. This is more or less just like the ordered-link
+		// comparison: pair up the outgoing sets.
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
 		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
-		solution_push();
-		bool match = true;
-
-		// Handle cases 3&4 of the description above.
-		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
-			goto take_next_step;
 
 		if (has_glob)
 		{
@@ -540,12 +502,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			}
 		}
 
-		// Check for cases 1&2 of description above.
-		// These flags might have been (mis-)set in the
-		// call to `tree_compare()` immediately above.
+		// These flags might have been (mis-)set by the callees...
+		// which would be very confusing.
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
+		// We are not the ones who are taking the step. Just report
+		// the tree-comparison results, as found.
 		if (_perm_take_step and ptm != _perm_to_step)
 		{
 			DO_LOG({LAZY_LOG_FINE << "DO NOT step; stepper="
@@ -555,15 +518,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			        << " for term=" << ptm->to_string();})
 			// Balance the push above.
 			solution_drop();
+			_perm_odo = _perm_podo;
+			_perm_podo = save_podo;
 			return match;
 		}
-
-		// If we are here, then _take_step is false, because
-		// cases 1,2,3,4 already handled above.
-		// Well, actually, this can happen, if we are not careful
-		// to manage the _have_more flag on a stack.
-//		OC_ASSERT(match or not _perm_have_more or 1==num_perms,
-//		          "Impossible: case 6 happened!");
 
 		if (match)
 		{
@@ -586,6 +544,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				_perm_state[ptm] = mutation;
 				_perm_have_more = true;
 				_perm_go_around = false;
+				_perm_odo_state[ptm] = _perm_odo;
+				_perm_odo = _perm_podo;
+				_perm_podo = save_podo;
 				return true;
 			}
 		}
@@ -594,17 +555,43 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			_pmc.post_link_mismatch(hp, hg);
 		}
 
+		// Odometer code. If there are multiple unordered links,
+		// then we might be the one that went all the way around
+		// first, and we exhausted all permutations. But then
+		// someone else took a step, so we have to go around back
+		// to the begining, and try all over again.
 		if (_perm_go_around)
 		{
-			_perm_go_around = false;
-			_perm_have_more = true;
-			_perm_state[ptm] = mutation;
-			solution_pop();
-			DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
-			return false;
+			// So first, take a look at *all* of the "wheels" in the
+			// odometer. If some of them have not yet gone all the
+			// way around, then there's more work to do.
+			bool not_done = false;
+			for (const auto& odo: _perm_odo)
+			{
+				if (odo.first == ptm) continue;
+				DO_LOG({LAZY_LOG_FINE << "Maybe go PERM odo "
+				                      << odo.first->to_string()
+				                      << " done=" << odo.second;})
+				if (not odo.second) { not_done = true; break; }
+			}
+
+			if (not_done)
+			{
+				// There are more unexplored permuations...
+				DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
+				_perm_go_around = false;
+				_perm_have_more = true;
+				_perm_state[ptm] = mutation;
+				solution_pop();
+				_perm_odo_state[ptm] = _perm_odo;
+				_perm_odo = _perm_podo;
+				_perm_podo = save_podo;
+				return false;
+			}
 		}
 
-		// If we are here, we are handling case 8.
+		// If we are here, then there was no match. Just print some
+		// debug info, and ... take a step.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
 		              << _perm_count[ptm] + 1
 		              << " of " << num_perms
@@ -614,6 +601,37 @@ take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
 		solution_pop();
+
+		// Clear out the permutation state of any unordered links
+		// that lie below us.  When we revisit these, we will want to
+		// start with a clean slate, every time.
+		for (auto it =  _perm_state.begin(); it != _perm_state.end(); )
+		{
+			if (it->first->isDescendant(ptm))
+			{
+				_perm_count.erase(it->first);
+				it = _perm_state.erase(it);
+			}
+			else
+				it ++;
+		}
+
+		// Clear the odometer that we maintain that records the state
+		// of the unordered links *below* us.
+		_perm_odo.clear();
+		_perm_odo_state[ptm] = _perm_odo;
+
+#if ODO_CLEANUP_NOT_NEEDED
+		// Like the above, cleanup the odometer state of any unordered
+		// links that lie below us.
+		for (auto it =  _perm_odo_state.begin(); it != _perm_odo_state.end(); )
+		{
+			if (it->first->isDescendant(ptm))
+				it = _perm_odo_state.erase(it);
+			else
+				it ++;
+		}
+#endif
 		if (logger().is_fine_enabled())
 			_perm_count[ptm] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end(),
@@ -626,12 +644,19 @@ take_next_step:
 	_perm_count.erase(ptm);
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
+
 	if (0 < _perm_step_saver.size())
 	{
 		POPSTK(_perm_step_saver, _perm_to_step);
 		_perm_have_more = true;
 		_perm_go_around = true;
 	}
+
+	// Since we're done, let any unordered links above us know
+	// that we've wrapped around. And then reset them back.
+	_perm_podo[ptm] = true;
+	_perm_odo = _perm_podo;
+	_perm_podo = save_podo;
 
 	return false;
 }
@@ -667,9 +692,21 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		// otherwise std::next_permutation() will miss some perms.
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
+
+		// This will become the permutation to step, next time we
+		// have to step. Meanwhile, save to old stepper, so that
+		// we can resume it when all perms of this one are exhausted.
 		if (nullptr != _perm_to_step)
 			_perm_step_saver.push(_perm_to_step);
 		_perm_to_step = ptm;
+
+		// If there are unordered links above us, we need to tell them
+		// about our existance, and let them know that we haven't been
+		// explored yet. We tell them by placing ourselves into thier
+		// odometer.
+		if (_perm_podo.find(ptm) == _perm_podo.end())
+			_perm_podo[ptm] = false;
+
 		return perm;
 	}
 	return ps->second;
@@ -695,6 +732,8 @@ void PatternMatchEngine::perm_push(void)
 	_perm_take_stack.push(_perm_take_step);
 	_perm_more_stack.push(_perm_have_more);
 	_perm_breakout_stack.push(_perm_breakout);
+
+	_perm_odo_stack.push(_perm_odo_state);
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -704,13 +743,14 @@ void PatternMatchEngine::perm_pop(void)
 		POPSTK(_perm_count_stack, _perm_count);
 
 	POPSTK(_perm_stepper_stack, _perm_to_step)
-
 	POPSTK(_perm_take_stack, _perm_take_step);
 	POPSTK(_perm_more_stack, _perm_have_more);
 	POPSTK(_perm_breakout_stack, _perm_breakout);
 
 	// XXX should we be clearing ... or poping this flag?
 	_perm_go_around = false;
+
+	POPSTK(_perm_odo_stack, _perm_odo_state);
 }
 
 /* ======================================================== */
@@ -1260,6 +1300,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		                      << " at term=" << ptm->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
+		_perm_odo.clear();
 		// XXX TODO Perhaps this push can be avoided,
 		// if there are no unordered tems?
 		perm_push();
@@ -2174,6 +2215,9 @@ void PatternMatchEngine::clause_stacks_push(void)
 	_perm_have_more = false;
 	_perm_breakout = nullptr;
 	_perm_go_around = false;
+	_perm_odo.clear();
+	_perm_podo.clear();
+	// _perm_odo_state.clear();
 
 	_pmc.push();
 }
@@ -2462,6 +2506,9 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
 	_perm_state.clear();
+	_perm_odo.clear();
+	_perm_podo.clear();
+	_perm_odo_state.clear();
 
 	// GlobNode state
 	_glob_state.clear();
@@ -2508,6 +2555,9 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_go_around = false;
 	_perm_to_step = nullptr;
 	_perm_breakout = nullptr;
+	_perm_odo.clear();
+	_perm_podo.clear();
+	_perm_odo_state.clear();
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
