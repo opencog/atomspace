@@ -471,9 +471,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 
 		// If we've been told to take a step, then take it now.
-		if (_perm_take_step and ptm == _perm_to_step and not _perm_have_more)
+		if (_perm_take_step and ptm == _perm_to_step)
 			goto take_next_step;
 
+		// If we are not taking a step, then see if we've got a tree
+		// match. This is more or less just like the ordered-link
+		// comparison: pair up the outgoing sets.
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
 		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
@@ -499,10 +502,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			}
 		}
 
-		// These flags might have been (mis-)set by the caller...
+		// These flags might have been (mis-)set by the callees...
+		// which would be very confusing.
 		OC_ASSERT(not (_perm_take_step and _perm_have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
+		// We are not the ones who are taking the step. Just report
+		// the tree-comparison results, as found.
 		if (_perm_take_step and ptm != _perm_to_step)
 		{
 			DO_LOG({LAZY_LOG_FINE << "DO NOT step; stepper="
@@ -549,8 +555,16 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			_pmc.post_link_mismatch(hp, hg);
 		}
 
+		// Odometer code. If there are multiple unordered links,
+		// then we might be the one that went all the way around
+		// first, and we exhausted all permutations. But then
+		// someone else took a step, so we have to go around back
+		// to the begining, and try all over again.
 		if (_perm_go_around)
 		{
+			// So first, take a look at *all* of the "wheels" in the
+			// odometer. If some of them have not yet gone all the
+			// way around, then there's more work to do.
 			bool not_done = false;
 			for (const auto& odo: _perm_odo)
 			{
@@ -563,6 +577,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 			if (not_done)
 			{
+				// There are more unexplored permuations...
 				DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
 				_perm_go_around = false;
 				_perm_have_more = true;
@@ -575,7 +590,8 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			}
 		}
 
-		// If we are here, we are handling case 8.
+		// If we are here, then there was no match. Just print some
+		// debug info, and ... take a step.
 		DO_LOG({LAZY_LOG_FINE << "Bad permutation "
 		              << _perm_count[ptm] + 1
 		              << " of " << num_perms
@@ -585,8 +601,6 @@ take_next_step:
 		_perm_take_step = false; // we are taking the step, so clear the flag.
 		_perm_have_more = false; // start with a clean slate...
 		solution_pop();
-		_perm_odo.clear();
-		_perm_odo_state[ptm] = _perm_odo;
 
 		// Clear out the permutation state of any unordered links
 		// that lie below us.  When we revisit these, we will want to
@@ -601,6 +615,12 @@ take_next_step:
 			else
 				it ++;
 		}
+
+		// Clear the odometer that we maintain that records the state
+		// of the unordered links *below* us.
+		_perm_odo.clear();
+		_perm_odo_state[ptm] = _perm_odo;
+
 #if ODO_CLEANUP_NOT_NEEDED
 		// Like the above, cleanup the odometer state of any unordered
 		// links that lie below us.

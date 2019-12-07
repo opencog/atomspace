@@ -141,8 +141,8 @@ private:
 	bool _perm_go_around;
 	PatternTermPtr _perm_to_step;
 	std::stack<PatternTermPtr> _perm_step_saver;
-
 	PatternTermPtr _perm_breakout;
+
 	PermOdo _perm_odo;
 	PermOdo _perm_podo;
 	PermOdoState _perm_odo_state;
