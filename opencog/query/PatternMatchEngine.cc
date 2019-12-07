@@ -626,9 +626,9 @@ take_next_step:
 	_perm_count.erase(ptm);
 	_perm_have_more = false;
 	_perm_to_step = nullptr;
-	if (0 < _perm_stepper_stack.size())
+	if (0 < _perm_step_saver.size())
 	{
-		POPSTK(_perm_stepper_stack, _perm_to_step);
+		POPSTK(_perm_step_saver, _perm_to_step);
 		_perm_have_more = true;
 		_perm_go_around = true;
 	}
@@ -668,7 +668,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
 		if (nullptr != _perm_to_step)
-			_perm_stepper_stack.push(_perm_to_step);
+			_perm_step_saver.push(_perm_to_step);
 		_perm_to_step = ptm;
 		return perm;
 	}
@@ -703,11 +703,7 @@ void PatternMatchEngine::perm_pop(void)
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
 
-	// Stepper gets unbalanced.. why?
-	if (0 < _perm_stepper_stack.size())
-		POPSTK(_perm_stepper_stack, _perm_to_step)
-	else
-		_perm_to_step = nullptr;
+	POPSTK(_perm_stepper_stack, _perm_to_step)
 
 	POPSTK(_perm_take_stack, _perm_take_step);
 	POPSTK(_perm_more_stack, _perm_have_more);
@@ -2230,6 +2226,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!_perm_stack.empty()) _perm_stack.pop();
 	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
+	while (!_perm_step_saver.empty()) _perm_step_saver.pop();
 #endif
 }
 

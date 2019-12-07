@@ -138,6 +138,8 @@ private:
 	bool _perm_have_more;
 	bool _perm_go_around;
 	PatternTermPtr _perm_to_step;
+	std::stack<PatternTermPtr> _perm_step_saver;
+
 	PatternTermPtr _perm_breakout;
 	std::stack<bool> _perm_take_stack;
 	std::stack<bool> _perm_more_stack;

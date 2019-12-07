@@ -53,7 +53,7 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 PatternTermSeq PatternTerm::getOutgoingSet() const
 {
 	PatternTermSeq oset;
-	for (PatternTermWPtr w : _outgoing)
+	for (const PatternTermWPtr& w : _outgoing)
 	{
 		PatternTermPtr s(w.lock());
 		OC_ASSERT(nullptr != s, "Unexpected corruption of PatternTerm oset!");
@@ -74,6 +74,33 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 		throw RuntimeException(TRACE_INFO,
 		                       "invalid outgoing set index %d", pos);
 	}
+}
+
+/**
+ * isDescendant - return true if `this` is a lineal descendant of `ptm`.
+ * That is, return true if `ptm` appears as a parent somewhere in the
+ * chain of parents of `this`.
+ *
+ * Mnemonic device: child->isDescendant(parent) == true
+ */
+bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
+{
+	if (PatternTerm::UNDEFINED == _parent) return false;
+	if (*_parent == *ptm) return true;
+	return _parent->isDescendant(ptm);
+}
+
+/**
+ * Equality operator.  Both the content must match, and the path
+ * taken to get to the content must match.
+ */
+bool PatternTerm::operator==(const PatternTerm& other)
+{
+	if (_handle != other._handle) return false;
+	if (_parent != other._parent) return false;
+	if (PatternTerm::UNDEFINED == _parent) return true;
+
+	return _parent->operator==(*other._parent);
 }
 
 void PatternTerm::addBoundVariable()

@@ -84,9 +84,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AlwaysUTest)
 	ADD_CXXTEST(ScopeUTest)
 	ADD_CXXTEST(NestedPutUTest)
-
-	# Disable for now, see #2388
-	# ADD_CXXTEST(SudokuUTest)
+	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)
 

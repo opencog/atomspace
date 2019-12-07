@@ -95,27 +95,26 @@ public:
 
 	PatternTerm(const PatternTermPtr& parent, const Handle& h);
 
-	void addOutgoingTerm(const PatternTermPtr& ptm);
-
 	const Handle& getHandle() const noexcept { return _handle; }
 
-	const Handle& getQuote() const noexcept { return _quote; }
-
 	PatternTermPtr getParent() const noexcept { return _parent; }
+	bool isDescendant(const PatternTermPtr&) const;
 
+	void addOutgoingTerm(const PatternTermPtr& ptm);
 	PatternTermSeq getOutgoingSet() const;
 
 	Arity getArity() const { return _outgoing.size(); }
+	PatternTermPtr getOutgoingTerm(Arity pos) const;
 
+	const Handle& getQuote() const noexcept { return _quote; }
 	Quotation& getQuotation() { return _quotation; };
 	const Quotation& getQuotation() const noexcept { return _quotation; }
 	bool isQuoted() const { return _quotation.is_quoted(); }
 
+	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 
-	PatternTermPtr getOutgoingTerm(Arity pos) const;
-
-	void addBoundVariable();
+	bool operator==(const PatternTerm&);
 
 	// Work around gdb's inability to build a string on the fly;
 	// See http://stackoverflow.com/questions/16734783 for explanation.
