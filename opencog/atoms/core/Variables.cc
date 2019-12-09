@@ -1272,23 +1272,22 @@ void Variables::extend(const Variables& vset)
 {
 	for (const Handle& h : vset.varseq)
 	{
-		try
+		auto index_it = index.find(h);
+		if (index_it != index.end())
 		{
-			index.at(h);
-
 			// Merge the two typemaps, if needed.
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				const TypeSet& tms = vset._simple_typemap.at(h);
+				const TypeSet& tms = typemap_it->second;
 				TypeSet mytypes =
 					type_intersection(_simple_typemap[h], tms);
 				_simple_typemap.erase(h);	 // is it safe to erase if
                                              // h not in already?
 				_simple_typemap.insert({h, mytypes});
 			}
-			catch(const std::out_of_range&) {}
 		}
-		catch(const std::out_of_range&)
+		else
 		{
 			// Found a new variable! Insert it.
 			index.insert({h, varseq.size()});
@@ -1296,12 +1295,11 @@ void Variables::extend(const Variables& vset)
 			varset.insert(h);
 
 			// Install the type constraints, as well.
-			// The at() might throw...
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
+				_simple_typemap.insert({h, typemap_it->second});
 			}
-			catch(const std::out_of_range&) {}
 		}
 	}
 
