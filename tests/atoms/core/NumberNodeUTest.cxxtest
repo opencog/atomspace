@@ -46,17 +46,26 @@ void FindUtilsUTest::test_number_equivalence()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle n1 = an(NUMBER_NODE, "42");
-	Handle n2 = an(NUMBER_NODE, "42.0");
-	Handle n3 = an(NUMBER_NODE, "42.00");
-	Handle n4 = an(NUMBER_NODE, "42.000");
-	Handle n5 = an(NUMBER_NODE, "42.0000000000042");
+	Handle n2 = an(NUMBER_NODE, "42.");
+	Handle n3 = an(NUMBER_NODE, "42.0");
+	Handle n4 = an(NUMBER_NODE, "42.00");
+	Handle n5 = an(NUMBER_NODE, "42.000");
+	Handle n6 = an(NUMBER_NODE, n1->get_name());
 	TS_ASSERT_EQUALS(n1, n2);
 	TS_ASSERT_EQUALS(n1, n3);
 	TS_ASSERT_EQUALS(n1, n4);
-	TS_ASSERT_DIFFERS(n1, n5);
+	TS_ASSERT_EQUALS(n1, n5);
+	TS_ASSERT_EQUALS(n1, n6);
+
+	Handle nn = an(NUMBER_NODE, "42.0000000000042");
+	TS_ASSERT_DIFFERS(n1, nn);
 
 	double ft = NumberNodeCast(n1)->get_value();
 	TS_ASSERT_LESS_THAN(ft-42.0, 1e-10);
+
+	Handle f1 = an(NUMBER_NODE, "31415.926");
+	Handle f2 = an(NUMBER_NODE, f1->get_name());
+	TS_ASSERT_EQUALS(f1, f2);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
