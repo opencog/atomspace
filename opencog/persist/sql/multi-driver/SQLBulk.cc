@@ -1,5 +1,5 @@
 /*
- * SQLBulk.cc
+ * opencog/persist/sql/multi-driver/SQLBulk.cc
  * Bulk save & restore of Atoms.
  *
  * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
