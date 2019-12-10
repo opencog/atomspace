@@ -67,6 +67,12 @@ void FindUtilsUTest::test_number_equivalence()
 	Handle f2 = an(NUMBER_NODE, f1->get_name());
 	TS_ASSERT_EQUALS(f1, f2);
 
+	ft = NumberNodeCast(f1)->get_value();
+	TS_ASSERT_LESS_THAN(ft-31415.926, 1e-10);
+
+	Handle f3 = an(NUMBER_NODE, std::to_string(ft));
+	TS_ASSERT_EQUALS(f1, f3);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
