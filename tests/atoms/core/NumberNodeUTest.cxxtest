@@ -1,0 +1,64 @@
+/*
+ * tests/atoms/core/NumberNode.cxxtest
+ *
+ * Copyright (C) 2019 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class FindUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+
+public:
+	FindUtilsUTest()
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	~FindUtilsUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void test_number_equivalence();
+};
+
+void FindUtilsUTest::test_number_equivalence()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle n1 = an(NUMBER_NODE, "42");
+	Handle n2 = an(NUMBER_NODE, "42.0");
+	Handle n3 = an(NUMBER_NODE, "42.00");
+	Handle n4 = an(NUMBER_NODE, "42.000");
+	Handle n5 = an(NUMBER_NODE, "42.0000000000042");
+	TS_ASSERT_EQUALS(n1, n2);
+	TS_ASSERT_EQUALS(n1, n3);
+	TS_ASSERT_EQUALS(n1, n4);
+	TS_ASSERT_DIFFERS(n1, n5);
+
+	double ft = NumberNodeCast(n1)->get_value();
+	TS_ASSERT_LESS_THAN(ft-42.0, 1e-10);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an
