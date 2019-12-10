@@ -66,6 +66,7 @@ FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/atom_types/atom_types.h>\n
 FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Handle.h>\n")
 FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Node.h>\n")
 FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Link.h>\n\n")
+FILE(APPEND "${CNAMES_FILE}" "namespace opencog {\n\n")
 FILE(APPEND "${CNAMES_FILE}" "#define NODE_CTOR(FUN,TYP) inline Handle FUN(std::string const& name) { return createNode(TYP, name); }\n\n")
 FILE(APPEND "${CNAMES_FILE}" "#define LINK_CTOR(FUN,TYP) inline Handle FUN(const Handle& a, const Handle& b) { return createLink(HandleSeq({a,b}), TYP); }\n\n")
 
@@ -259,5 +260,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
     ENDIF (MATCHED AND CMAKE_MATCH_1)
 ENDFOREACH (LINE)
 FILE(APPEND "${HEADER_FILE}" "} // namespace opencog\n")
+
 FILE(APPEND "${CNAMES_FILE}" "#undef NODE_CTOR\n")
 FILE(APPEND "${CNAMES_FILE}" "#undef LINK_CTOR\n")
+FILE(APPEND "${CNAMES_FILE}" "} // namespace opencog\n")
