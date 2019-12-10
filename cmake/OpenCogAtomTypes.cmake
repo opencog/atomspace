@@ -175,7 +175,9 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             NOT SHORT_NAME STREQUAL "" AND
             NOT SHORT_NAME STREQUAL "Atom" AND
             NOT SHORT_NAME STREQUAL "Notype" AND
-            NOT SHORT_NAME STREQUAL "Type")
+            NOT SHORT_NAME STREQUAL "Type" AND
+            NOT SHORT_NAME STREQUAL "TypeSet" AND
+            NOT SHORT_NAME STREQUAL "Arity")
             FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${SHORT_NAME}, ${TYPE})\n")
         ENDIF ()
         # Special case...
@@ -186,6 +188,14 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "Type")
             FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, TYPE_LINK)\n")
+        ENDIF ()
+        IF (ISLINK STREQUAL "LINK" AND
+            SHORT_NAME STREQUAL "TypeSet")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeSetLink, TYPE_SET_LINK)\n")
+        ENDIF ()
+        IF (ISLINK STREQUAL "LINK" AND
+            SHORT_NAME STREQUAL "Arity")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ARITY_LINK)\n")
         ENDIF ()
 
         # Print out the scheme definitions
