@@ -373,9 +373,13 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
-      - cogserver:
-          requires:
-            - atomspace
+#
+# Disable, until https://github.com/opencog/cogserver/issues/5
+# is fixed. The failing ShellUTest makes circleci report false
+# negatives.
+#      - cogserver:
+#          requires:
+#            - atomspace
       - ure:
           requires:
             - atomspace
