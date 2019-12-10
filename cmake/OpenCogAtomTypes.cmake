@@ -167,14 +167,25 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # Print out the C++ definitions
         IF (ISNODE STREQUAL "NODE" AND
-            NOT SHORT_NAME STREQUAL "")
+            NOT SHORT_NAME STREQUAL "" AND
+            NOT SHORT_NAME STREQUAL "Type")
             FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(${SHORT_NAME}, ${TYPE})\n")
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             NOT SHORT_NAME STREQUAL "" AND
             NOT SHORT_NAME STREQUAL "Atom" AND
-            NOT SHORT_NAME STREQUAL "Notype")
+            NOT SHORT_NAME STREQUAL "Notype" AND
+            NOT SHORT_NAME STREQUAL "Type")
             FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${SHORT_NAME}, ${TYPE})\n")
+        ENDIF ()
+        # Special case...
+        IF (ISNODE STREQUAL "NODE" AND
+            SHORT_NAME STREQUAL "Type")
+            FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(TypeNode, TYPE_NODE)\n")
+        ENDIF ()
+        IF (ISLINK STREQUAL "LINK" AND
+            SHORT_NAME STREQUAL "Type")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, TYPE_LINK)\n")
         ENDIF ()
 
         # Print out the scheme definitions
