@@ -224,13 +224,13 @@ jobs:
 #      - run:
 #          name: Run tests
 #          command: cd build && make test ARGS="$MAKEFLAGS"
+#      - run:
+#          name: Print test log
+#          command: cat build/tests/Testing/Temporary/LastTest.log
+#          when: always
       - run:
           name: Install CogServer
           command: cd build && make install && ldconfig
-      - run:
-          name: Print test log
-          command: cat build/tests/Testing/Temporary/LastTest.log
-          when: always
       - persist_to_workspace:
           root: /ws/
           paths:
