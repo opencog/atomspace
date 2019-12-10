@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport AtomSpace, Atom, TruthValue
 from opencog.atomspace import create_child_atomspace
+from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factory
 import warnings
 
@@ -65,7 +66,7 @@ def add_link(Type t, outgoing, TruthValue tv=None):
     cdef cHandle result
     result = c_add_link(t, handle_vector)
     if result == result.UNDEFINED: return None
-    atom = Atom.createAtom(result);
+    atom = create_python_value_from_c_value(<cValuePtr&>result)
     if tv is not None:
         atom.tv = tv
     return atom
@@ -79,7 +80,7 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     cdef cHandle result = c_add_node(t, name)
 
     if result == result.UNDEFINED: return None
-    atom = Atom.createAtom(result);
+    atom = create_python_value_from_c_value(<cValuePtr&>result)
     if tv is not None:
         atom.tv = tv
     return atom
