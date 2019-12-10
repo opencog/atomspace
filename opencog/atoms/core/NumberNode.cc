@@ -41,17 +41,20 @@ std::string NumberNode::vector_to_plain(const std::vector<double>& vec)
 ///   tsv)     "0.1\t0.2\t0.3"
 ///   scheme)  "#(0.1 0.2 0.3)"
 ///   json)    "[0.1, 0.2, 0.3]"
-/// Why multiple formats? I dunno.
-/// Currently, only "plain", "csv" and "tsv" is supported.
+/// Why multiple formats? I dunno. Seems like a reasonable thing to do.
 std::vector<double> NumberNode::to_vector(const std::string& str)
 {
 	std::vector<double> vec;
 
 	size_t pos = 0;
 	size_t in = 0;
-	// first condition in the loop will trim str.
+	if (0 == str.find("#(")) in = 2;      // is it a scheme vector?
+	else if (0 == str.find("[")) in = 1;  // is it a json vector?
+
+	// First condition in the loop will trim str.
 	while ((in = str.find_first_not_of(", \t\r\n", in)) != std::string::npos
-	       and (pos = str.find_first_of(", \t", in)) != std::string::npos) {
+	       and (pos = str.find_first_of(", \t", in)) != std::string::npos)
+	{
 		vec.emplace_back(std::stod(str.substr(in, pos - in)));
 		in = pos + 1;
 	}

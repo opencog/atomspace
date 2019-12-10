@@ -69,9 +69,13 @@ void FindUtilsUTest::test_number_vector()
 	Handle n2 = an(NUMBER_NODE, "1.1,2.2,3.3");
 	Handle n3 = an(NUMBER_NODE, "1.1, 2.2, 3.3");
 	Handle n4 = an(NUMBER_NODE, "1.1\t2.2\t3.3");
+	Handle n5 = an(NUMBER_NODE, "[1.1, 2.2, 3.3]");
+	Handle n6 = an(NUMBER_NODE, "#(1.1 2.2 3.3)");
 	TS_ASSERT_EQUALS(n1, n2);
 	TS_ASSERT_EQUALS(n1, n3);
 	TS_ASSERT_EQUALS(n1, n4);
+	TS_ASSERT_EQUALS(n1, n5);
+	TS_ASSERT_EQUALS(n1, n6);
 
 	std::vector<double> vec = NumberNodeCast(n1)->value();
 	TS_ASSERT_LESS_THAN(vec[0]-1.1, 1e-14);
