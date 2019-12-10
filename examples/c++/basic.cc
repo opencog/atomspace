@@ -10,17 +10,23 @@ using namespace opencog;
 
 int main()
 {
+	// Create a new AtomSpace.
 	AtomSpace* as = new AtomSpace();
 
-	as->add_atom(ConceptNode("foobar"));
+	// Create a ConceptNode Atom, place it in the AtomSpace.
+	as->add_atom(Concept("foobar"));
+
+	// Print the atomspace contents.
+	// Note that the unique Atom ID's (64-bit hashes) are printed.
 	printf("So far its this: %s\n", as->to_string().c_str());
 
+	// Create an EvaluationLink Atom, place it in the AtomSpace.
 	as->add_atom(
-		EvaluationLink(
-			PredicateNode("bling"),
-			ListLink(
-				ConceptNode("foo"),
-				ConceptNode("bar"))));
+		Evaluation(
+			Predicate("bling"),
+			List(
+				Concept("foo"),
+				Concept("bar"))));
 
 	printf("Now it is this: %s\n", as->to_string().c_str());
 }
