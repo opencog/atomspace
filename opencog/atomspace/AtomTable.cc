@@ -297,7 +297,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         }
         atom = createLink(closet, atom->get_type());
     }
-    else
+    else if (atom->getAtomTable())
         atom = createNode(*NodeCast(atom));
 
     atom->copyValues(orig);
