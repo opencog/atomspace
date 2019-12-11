@@ -18,19 +18,19 @@ using namespace opencog;
 #define al as.add_link
 #define an as.add_node
 
-class FindUtilsUTest :  public CxxTest::TestSuite
+class NumberNodeUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
 
 public:
-	FindUtilsUTest()
+	NumberNodeUTest()
 	{
 		logger().set_level(Logger::INFO);
 		logger().set_print_to_stdout_flag(true);
 	}
 
-	~FindUtilsUTest()
+	~NumberNodeUTest()
 	{
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -41,7 +41,7 @@ public:
 	void test_number_vector();
 };
 
-void FindUtilsUTest::test_number_equivalence()
+void NumberNodeUTest::test_number_equivalence()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -76,7 +76,7 @@ void FindUtilsUTest::test_number_equivalence()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void FindUtilsUTest::test_number_vector()
+void NumberNodeUTest::test_number_vector()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
