@@ -253,30 +253,10 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     if (not force and in_environ(atom))
         return atom->get_handle();
 
-    Handle orig(atom);
-
-    // Make a copy of the atom that the user gave us. Attempting
-    // to take over the memory management of whatever the user
-    // gives use is just asking for trouble. Its safer to keep our
-    // own private copy.
-    if (atom->is_link()) {
-        // Insert the outgoing set of this link.
-        HandleSeq closet;
-        // Reserving space improves emplace_back performance by 2x
-        closet.reserve(atom->get_arity());
-        for (const Handle& h : atom->getOutgoingSet()) {
-            // operator->() will be null if its a Value that is
-            // not an atom.
-            if (nullptr == h.operator->()) return Handle::UNDEFINED;
-            closet.emplace_back(add(h, async));
-        }
-        atom = createLink(closet, atom->get_type());
-    }
-    else
-        atom = createNode(*NodeCast(atom));
-
     // Force computation of hash external to the locked section.
     ContentHash hash = atom->get_hash();
+
+    Handle orig(atom);
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
@@ -299,6 +279,38 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
             return hcheck;
         }
     }
+
+    // Make a copy of the atom, if needed. Otherwise, use what we were
+    // given. Not making a copy saves a lot of time, especially by
+    // avoiding running the factories a second time. This is, however,
+    // potentially buggy, if the user is sneaky and hands us an Atom
+    // that should have gone through a factory, but did not.
+    if (atom->is_link()) {
+        bool need_copy = false;
+        if (atom->getAtomTable())
+            need_copy = true;
+        else
+            for (const Handle& h : atom->getOutgoingSet())
+                if (not in_environ(h)) { need_copy = true; break; }
+
+        if (need_copy) {
+            // Insert the outgoing set of this link.
+            HandleSeq closet;
+            // Reserving space improves emplace_back performance by 2x
+            closet.reserve(atom->get_arity());
+            for (const Handle& h : atom->getOutgoingSet()) {
+                // operator->() will be null if its a Value that is
+                // not an atom.
+                if (nullptr == h.operator->()) return Handle::UNDEFINED;
+                closet.emplace_back(add(h, async));
+            }
+            atom = createLink(closet, atom->get_type());
+        } else {
+            atom->unsetRemovalFlag();
+        }
+    }
+    else if (atom->getAtomTable())
+        atom = createNode(*NodeCast(atom));
 
     atom->copyValues(orig);
     atom->install();
