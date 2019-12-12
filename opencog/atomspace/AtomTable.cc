@@ -246,6 +246,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 
 Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 {
+// foo
     // Can be null, if its a Value
     if (nullptr == atom) return Handle::UNDEFINED;
 
