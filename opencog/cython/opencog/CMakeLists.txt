@@ -121,6 +121,7 @@ TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
 	atomspace
 	type_constructors
+	executioncontext
 	${PYTHON_LIBRARIES}
 )
 

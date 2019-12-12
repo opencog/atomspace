@@ -37,7 +37,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-
+#include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
 
 // This is an header in the build dreictory, auto-gened by cython
@@ -992,11 +992,14 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(const std::string& func, Handle varargs)
+Handle PythonEval::apply(AtomSpace * as, const std::string& func, Handle varargs)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
+    push_context_atomspace(as);
     // Get the atom object returned by this user function.
+    BOOST_SCOPE_EXIT(void) {
+        pop_context_atomspace();
+    } BOOST_SCOPE_EXIT_END
     PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
     // If we got a non-null atom were no errors.
@@ -1044,13 +1047,15 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  * Apply the user function to the arguments passed in varargs and
  * return the extracted truth value.
  */
-TruthValuePtr PythonEval::apply_tv(
+TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
                                    const std::string& func,
                                    Handle varargs)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-
+    push_context_atomspace(as);
+    BOOST_SCOPE_EXIT(void) {
+        pop_context_atomspace();
+    } BOOST_SCOPE_EXIT_END
     // Get the python truth value object returned by this user function.
     PyObject *pyTruthValue = call_user_function(func, varargs);
 

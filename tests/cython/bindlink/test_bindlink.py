@@ -166,5 +166,26 @@ class BindlinkTest(unittest.TestCase):
                         ConceptNode("deleteme")))
         self.assertEquals(result, None)
 
+
+    def test_tmp_atomspace(self):
+        ListLink(ConceptNode("foo"), ConceptNode("bar"))
+
+        get = GetLink(VariableNode("x"),
+                AndLink(
+                    PresentLink(ListLink (ConceptNode("foo"),
+                                          (VariableNode("x")))),
+                    EvaluationLink(GroundedPredicateNode("py: test_functions.func_one"),
+                        ListLink(VariableNode("x"))),
+                   EvaluationLink(GroundedPredicateNode( "py: test_functions.func_two"),
+                   ListLink (VariableNode ("x")))))
+        result = execute_atom(self.atomspace, get)
+        self.assertFalse(result.out)
+        self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
+        test_functions.func_one_result = TruthValue(1,1)
+        result = execute_atom(self.atomspace, get)
+        self.assertTrue(result.out)
+        # still should not be in the current namespace
+        self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
+
 if __name__ == "__main__":
     unittest.main()
