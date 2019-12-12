@@ -305,6 +305,8 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
                 closet.emplace_back(add(h, async));
             }
             atom = createLink(closet, atom->get_type());
+        } else {
+            atom->unsetRemovalFlag();
         }
     }
     else if (atom->getAtomTable())
