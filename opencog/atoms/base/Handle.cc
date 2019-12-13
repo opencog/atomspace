@@ -154,7 +154,7 @@ std::string oc_to_string(const HandlePair& hp, const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "first:" << std::endl
-	   << oc_to_string(hp.first, indent + OC_TO_STRING_INDENT);
+	   << oc_to_string(hp.first, indent + OC_TO_STRING_INDENT) << std::endl;
 	ss << indent << "second:" << std::endl
 	   << oc_to_string(hp.second, indent + OC_TO_STRING_INDENT);
 	return ss.str();
@@ -225,7 +225,7 @@ std::string oc_to_string(const HandleMap& hmap, const std::string& indent)
 	int i = 0;
 	for (const auto& p : hmap) {
 		ss << std::endl << indent << "key[" << i << "]:" << std::endl
-		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
 		   << indent << "value[" << i << "]:" << std::endl
 		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
 		i++;
@@ -250,10 +250,9 @@ std::string oc_to_string(const HandleMultimap& hmultimap, const std::string& ind
 	int i = 0;
 	for (const auto& p : hmultimap) {
 		ss << std::endl << indent << "key[" << i << "]:" << std::endl
-		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
-		   << indent << "value[" << i << "]:" << std::endl;
-		for (const auto& s : p.second)
-			ss << oc_to_string(s, indent + OC_TO_STRING_INDENT);
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "values[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
