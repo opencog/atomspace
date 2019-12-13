@@ -56,6 +56,8 @@ public:
 	UnorderedLink(const HandleSet&, Type=UNORDERED_LINK);
 	UnorderedLink(const Link &l);
 
+	virtual bool is_unordered_link() const { return true; }
+
 	static Handle factory(const Handle&);
 };
 
