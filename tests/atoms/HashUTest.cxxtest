@@ -69,8 +69,8 @@ public:
 	void test_sequential_compute_hash();
 	void test_times_plus_compute_hash();
 
-	// Test are unordered links like EqualLink have the same hash
-	// regardless of the order of their outgoing set
+	// Test that unordered links have the same hash regardless of the
+	// order of their outgoing set
 	void test_equallink();
 };
 
