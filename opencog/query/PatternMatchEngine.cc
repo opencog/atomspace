@@ -1168,7 +1168,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or not _nameserver.isA(tp, UNORDERED_LINK))
+	if (2 > hp->get_arity() or not hp->is_unordered_link())
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1494,8 +1494,8 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// exhaustivelyexplored.  Thus, this returns true only if entire
 /// pattern was grounded.
 bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
-                                          const Handle& hg,
-                                          const Handle& clause_root)
+                                               const Handle& hg,
+                                               const Handle& clause_root)
 {
 	const Handle& hp = ptm->getHandle();
 	Type ptype = hp->get_type();
@@ -1507,7 +1507,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	}
 
 	// Unordered links have permutations to explore.
-	if (_nameserver.isA(ptype, UNORDERED_LINK))
+	if (hp->is_unordered_link())
 	{
 		return explore_unordered_branches(ptm, hg, clause_root);
 	}

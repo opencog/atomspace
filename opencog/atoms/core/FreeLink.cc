@@ -57,7 +57,7 @@ FreeLink::FreeLink(const Link& l)
 
 void FreeLink::unorder(void)
 {
-	if (not nameserver().isA(get_type(), UNORDERED_LINK)) return;
+	if (not is_unordered_link()) return;
 
 	// Place into arbitrary, but deterministic order.
 	// We have to do this here,  because some links,
@@ -72,7 +72,7 @@ void FreeLink::unorder(void)
 
 void FreeLink::init(void)
 {
-	bool ordered = not nameserver().isA(get_type(), UNORDERED_LINK);
+	bool ordered = not is_unordered_link();
 	_vars.find_variables(_outgoing, ordered);
 }
 
