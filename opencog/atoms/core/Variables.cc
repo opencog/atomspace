@@ -1425,7 +1425,7 @@ std::string Variables::to_string(const std::string& indent) const
 	std::stringstream ss;
 
 	// FreeVariables
-	ss << FreeVariables::to_string(indent);
+	ss << FreeVariables::to_string(indent) << std::endl;
 
 	// Whether it is ordered
 	ss << indent << "_ordered = " << _ordered << std::endl;
@@ -1434,16 +1434,15 @@ std::string Variables::to_string(const std::string& indent) const
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
 	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
 	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent_p << "size = " << _simple_typemap.size();
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << indent_p << "variable[" << i << "]:" << std::endl
+		ss << std::endl << indent_p << "variable[" << i << "]:" << std::endl
 		   << oc_to_string(v.first, indent_pp)
 		   << indent_p << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << nameserver().getTypeName(t);
-		ss << std::endl;
 		i++;
 	}
 
@@ -1505,10 +1504,10 @@ std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << imap.size() << std::endl;
+	ss << indent << "size = " << imap.size();
 	for (const auto& el : imap) {
-		ss << indent << "index[" << el.second << "]: "
-		   << el.first->id_to_string() << std::endl;
+		ss << std::endl << indent << "index[" << el.second << "]: "
+		   << el.first->id_to_string();
 	}
 	return ss.str();
 }
