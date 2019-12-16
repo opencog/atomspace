@@ -167,13 +167,13 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
-        Handle apply(const std::string& func, Handle varargs);
+        Handle apply(AtomSpace * as, const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, returning a TruthValuePtr.
          */
-        TruthValuePtr apply_tv(const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(opencog::AtomSpace *as, const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in `func`, passing it

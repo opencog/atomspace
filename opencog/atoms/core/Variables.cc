@@ -125,11 +125,9 @@ struct VarScraper
 	static bool is_variable(const Handle& h);
 
 	/**
-	 * Return true iff is an ordered link (resp. type) or subtype
-	 * thereof.
+	 * Return true iff is an unordered link type or subtype.
 	 */
-	static bool is_ordered_link(const Handle& h);
-	static bool is_ordered_type(Type t);
+	static bool is_unordered(Type t);
 };
 
 HandleSeq VarScraper::operator()(const HandleSeq& hs, bool ordered_link)
@@ -163,7 +161,7 @@ HandlePathsMap VarScraper::variables_paths(Type itype, const HandleSeq& hs)
 		{
 			for (auto path : vpp.second)
 			{
-				path.emplace_back(TypeArityPair{itype, is_ordered_type(itype) ? i : 0});
+				path.emplace_back(TypeArityPair{itype, is_unordered(itype) ? 0 : i});
 				paths[vpp.first].insert(path);
 			}
 		}
@@ -184,7 +182,7 @@ HandleSeq VarScraper::sorted_free_variables(const Handle& body, Context ctx) con
 	OC_ASSERT(body->is_link());
 	ctx.update(body);
 	const HandleSeq& outs = body->getOutgoingSet();
-	return sorted_free_variables_outgoing(is_ordered_link(body), outs, ctx);
+	return sorted_free_variables_outgoing(not body->is_unordered_link(), outs, ctx);
 }
 
 HandleSeq VarScraper::sorted_free_variables_outgoing(bool ordered,
@@ -250,8 +248,8 @@ bool VarScraper::less_than(const Handle& lh, const Handle& rh) const
 		// Both atoms have same arity, sort by outgoings
 		const HandleSeq& lout = lh->getOutgoingSet();
 		const HandleSeq& rout = rh->getOutgoingSet();
-		return is_ordered_link(lh) ? less_than_ordered_outgoing(lout, rout)
-			: less_than_unordered_outgoing(lout, rout);
+		return lh->is_unordered_link() ? less_than_unordered_outgoing(lout, rout)
+			: less_than_ordered_outgoing(lout, rout);
 	}
 
 	// None are variables, sort by node content.
@@ -290,14 +288,9 @@ bool VarScraper::is_variable(const Handle& h)
 	return VARIABLE_NODE == t or GLOB_NODE == t;
 }
 
-bool VarScraper::is_ordered_link(const Handle& h)
+bool VarScraper::is_unordered(Type t)
 {
-	return is_ordered_type(h->get_type());
-}
-
-bool VarScraper::is_ordered_type(Type t)
-{
-	return not nameserver().isA(t, UNORDERED_LINK);
+	return nameserver().isA(t, UNORDERED_LINK);
 }
 
 /* ================================================================= */
@@ -1425,7 +1418,7 @@ std::string Variables::to_string(const std::string& indent) const
 	std::stringstream ss;
 
 	// FreeVariables
-	ss << FreeVariables::to_string(indent);
+	ss << FreeVariables::to_string(indent) << std::endl;
 
 	// Whether it is ordered
 	ss << indent << "_ordered = " << _ordered << std::endl;
@@ -1434,16 +1427,15 @@ std::string Variables::to_string(const std::string& indent) const
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
 	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
 	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent_p << "size = " << _simple_typemap.size();
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << indent_p << "variable[" << i << "]:" << std::endl
+		ss << std::endl << indent_p << "variable[" << i << "]:" << std::endl
 		   << oc_to_string(v.first, indent_pp)
 		   << indent_p << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << nameserver().getTypeName(t);
-		ss << std::endl;
 		i++;
 	}
 
@@ -1505,10 +1497,10 @@ std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << imap.size() << std::endl;
+	ss << indent << "size = " << imap.size();
 	for (const auto& el : imap) {
-		ss << indent << "index[" << el.second << "]: "
-		   << el.first->id_to_string() << std::endl;
+		ss << std::endl << indent << "index[" << el.second << "]: "
+		   << el.first->id_to_string();
 	}
 	return ss.str();
 }

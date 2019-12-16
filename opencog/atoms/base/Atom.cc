@@ -463,9 +463,12 @@ size_t Atom::getIncomingSetSizeByType(Type type) const
 
 std::string Atom::id_to_string() const
 {
-    return
-        std::string("[") + std::to_string(get_hash()) + "]" +
-        std::string("[") + (_atom_space? std::to_string(_atom_space->_atom_table.get_uuid()) : std::string("-1")) + "]";
+    std::stringstream ss;
+    ss << "[" << std::hex << get_hash() << "][";
+    if (_atom_space) ss << _atom_space->_atom_table.get_uuid();
+    else ss << "-1";
+    ss << "]";
+    return ss.str();
 }
 
 std::string oc_to_string(const IncomingSet& iset, const std::string& indent)

@@ -42,8 +42,6 @@ class FreeLink : public Link
 {
 protected:
 	FreeVariables _vars;
-
-	void unorder(void);
 	void init(void);
 
 public:

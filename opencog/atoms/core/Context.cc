@@ -121,10 +121,10 @@ std::string oc_to_string(const Context::VariablesStack& scope_variables,
                          const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << scope_variables.size() << std::endl;
+	ss << indent << "size = " << scope_variables.size();
 	int i = 0;
 	for (const Variables& variables : scope_variables) {
-		ss << indent << "variables[" << i++ << "]:" << std::endl
+		ss << std::endl << indent << "variables[" << i++ << "]:" << std::endl
 		   << variables.to_string(indent + OC_TO_STRING_INDENT);
 	}
 	return ss.str();
@@ -134,17 +134,16 @@ std::string oc_to_string(const Context& c, const std::string& indent)
 {
 	std::stringstream ss;
 	if (c == Context()) {
-		ss << indent << "none" << std::endl;
+		ss << indent << "none";
 	} else {
-		ss << indent << "quotation: " << oc_to_string(c.quotation)
+		ss << indent << "quotation: " << oc_to_string(c.quotation) << std::endl
 		   << indent << "shadow:" << std::endl
-		   << oc_to_string(c.shadow, indent + OC_TO_STRING_INDENT);
-		ss << indent << "scope_variables:" << std::endl;
+		   << oc_to_string(c.shadow, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "scope_variables:" << std::endl;
 		if (c.store_scope_variables)
-			ss << oc_to_string(c.scope_variables,
-			                   indent + OC_TO_STRING_INDENT);
+			ss << oc_to_string(c.scope_variables, indent + OC_TO_STRING_INDENT);
 		else
-			ss << indent + OC_TO_STRING_INDENT << "ignored" << std::endl;
+			ss << indent + OC_TO_STRING_INDENT << "ignored";
 	}
 	return ss.str();
 }

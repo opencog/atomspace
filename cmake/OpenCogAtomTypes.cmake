@@ -236,11 +236,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
             IF (ISNODE STREQUAL "NODE")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
-                FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return add_node(types.${TYPE_NAME}, node_name, tv)\n")
             ENDIF (ISNODE STREQUAL "NODE")
             IF (ISLINK STREQUAL "LINK")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
-                FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return add_link(types.${TYPE_NAME}, args)\n")
             ENDIF (ISLINK STREQUAL "LINK")
         ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
@@ -251,7 +251,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             NOT ISVALUE STREQUAL "VALUE" AND
             NOT ISSTREAM STREQUAL "STREAM")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
-            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
+            FILE(APPEND "${PYTHON_FILE}" "    return add_link(types.${TYPE_NAME}, args)\n")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
             NOT ISVALUE STREQUAL "VALUE" AND

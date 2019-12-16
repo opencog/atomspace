@@ -56,7 +56,6 @@ VariableSet::VariableSet(const Handle& vardecl)
 		vardecl->getOutgoingSet() : HandleSeq({vardecl}),
 		VARIABLE_SET), _variables(vardecl)
 {
-	throw_if_not_variable_set(vardecl->get_type());
 }
 
 VariableSet::VariableSet(const Link &l)

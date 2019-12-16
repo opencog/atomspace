@@ -335,7 +335,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	}
 
 	// hash_vec should be sorted only for unordered links
-	if (nameserver().isA(t, UNORDERED_LINK)) {
+	if (h->is_unordered_link()) {
 		std::sort(hash_vec.begin(), hash_vec.end());
 	}
 

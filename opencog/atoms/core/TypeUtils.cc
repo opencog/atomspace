@@ -108,7 +108,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	if (vlo.size() != sz) return false;
 
 	// Unordered links are harder to handle...
-	if (nameserver().isA(dpt, UNORDERED_LINK))
+	if (deep->is_unordered_link())
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
@@ -256,7 +256,7 @@ static bool type_match_rec(const Handle& left_,
 	if (not left->is_link() or not right->is_link()) return false;
 
 	// Unordered links are a pain in the butt.
-	if (nameserver().isA(ltype, UNORDERED_LINK))
+	if (left->is_unordered_link())
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 

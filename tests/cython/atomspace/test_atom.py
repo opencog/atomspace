@@ -7,7 +7,7 @@ from opencog.bindlink import execute_atom
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
 from time import sleep
 
@@ -15,11 +15,11 @@ class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        initialize_opencog(self.space)
+        push_default_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
-        del self.space
+        self.space = None
+        pop_default_atomspace()
 
     def test_get_value(self):
         atom = ConceptNode('foo')

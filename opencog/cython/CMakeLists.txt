@@ -13,6 +13,7 @@ SET(CMAKE_CXX_FLAGS
 	"${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wno-unused-function")
 
 ADD_SUBDIRECTORY (opencog)
+ADD_SUBDIRECTORY (executioncontext)
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -32,6 +33,7 @@ ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	atombase
+	executioncontext
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

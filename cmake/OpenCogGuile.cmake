@@ -205,18 +205,10 @@ ENDFUNCTION(ADD_GUILE_TEST)
 # module, e.g. "opencog as-config". This is passed to (define-module ...)
 # and is used for importing extension paths.
 #
-# TEST_ENV_VAR: An environment variable name. This env var will be
-# checked at run time, and if true, it will force the process to exit
-# if the config is loaded from the system path. This is to ensure that
-# when testing a local build, the system path is not inadvertently
-# taking precedence.
-#
 FUNCTION(DECLARE_GUILE_CONFIG_TARGET CONFIG_TARGET MODULE_NAME TEST_ENV_VAR)
     ADD_CUSTOM_TARGET(${CONFIG_TARGET} ALL)
     SET_TARGET_PROPERTIES(${CONFIG_TARGET}
         PROPERTIES MODULE_NAME "${MODULE_NAME}")
-    SET_TARGET_PROPERTIES(${CONFIG_TARGET}
-        PROPERTIES TEST_ENV_VAR "${TEST_ENV_VAR}")
 ENDFUNCTION(DECLARE_GUILE_CONFIG_TARGET)
 
 # ----------------------------------------------------------------------------
@@ -259,46 +251,21 @@ FUNCTION(WRITE_GUILE_CONFIG OUTPUT_FILE CONFIG_TARGET SCM_IN_BUILD_DIR)
     set(SCM_INSTALL_PATHS "")
     get_target_property(SYMBOL_PATH_LIST ${CONFIG_TARGET} EXT_LIBS)
     get_target_property(MODULE_NAME ${CONFIG_TARGET} MODULE_NAME)
-    get_target_property(TEST_ENV_VAR ${CONFIG_TARGET} TEST_ENV_VAR)
+
+    FILE(WRITE "${OUTPUT_FILE}" "(define-module (${MODULE_NAME}))\n")
     foreach(PATH_PAIR ${SYMBOL_PATH_LIST})
         string(REPLACE "|" ";" SYMBOL_AND_PATH ${PATH_PAIR})
         list(GET SYMBOL_AND_PATH 0 SYMBOL)
         list(GET SYMBOL_AND_PATH 1 LIBPATH)
 
-        set(SCM_PATHS "${SCM_PATHS}(define-public ${SYMBOL} \"${LIBPATH}/\")\n")
-        set(INSTALL_PATHS "${INSTALL_PATHS}        (set! ${SYMBOL} install-location)\n")
+        IF (SCM_IN_BUILD_DIR)
+            FILE(APPEND "${OUTPUT_FILE}"
+                "(define-public ${SYMBOL} \"${LIBPATH}/\")\n")
+        ELSE (SCM_IN_BUILD_DIR)
+            FILE(APPEND "${OUTPUT_FILE}"
+                "(define-public ${SYMBOL} \"${CMAKE_INSTALL_PREFIX}/lib/opencog/\")\n")
+
+        ENDIF (SCM_IN_BUILD_DIR)
     endforeach()
-
-    IF (SCM_IN_BUILD_DIR)
-        SET(SCM_IN_BUILD_DIR_BOOL "#t")
-    ELSE (SCM_IN_BUILD_DIR)
-        SET(SCM_IN_BUILD_DIR_BOOL "#f")
-    ENDIF (SCM_IN_BUILD_DIR)
-
-    # It would be nice to use CONFIGURE_FILE, but this cmake module
-    # will be used downstream, so we include the template inline.
-    SET(CONFIG_SRC "
-(define-module (${MODULE_NAME}))
-; CMAKE uses this tag generate different files for in-build
-(define in-build-dir ${SCM_IN_BUILD_DIR_BOOL})
-(define install-location \"${CMAKE_INSTALL_PREFIX}/lib/opencog/\")
-
-${SCM_PATHS}
-
-(if (not in-build-dir)
-    (begin
-        (let ( (is-testing (getenv \"${TEST_ENV_VAR}\")) )
-            (if (eq? is-testing \"1\")
-                (exit)
-            ))
-
-        ; When installed, all the modules have the same path
-${INSTALL_PATHS}
-
-    )
-)
-")
-
-    FILE(WRITE "${OUTPUT_FILE}" "${CONFIG_SRC}")
 
 ENDFUNCTION(WRITE_GUILE_CONFIG)

@@ -740,7 +740,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 
 		// Be sure to specify the atomspace in which to work!
 		PythonEval &applier = PythonEval::instance();
-		return applier.apply_tv(schema.substr(pos), args);
+		return applier.apply_tv(as, schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
 			"This binary does not have python support in it; "

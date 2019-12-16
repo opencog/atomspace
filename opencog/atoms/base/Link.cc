@@ -47,6 +47,12 @@ void Link::init(const HandleSeq& outgoingVector)
             _type, nameserver().getTypeName(_type).c_str());
     }
 
+    // Yes, people actually send us bad data.
+    for (const Handle& h: outgoingVector)
+        if (nullptr == h)
+            throw InvalidParamException(TRACE_INFO,
+                "Link ctor: invalid outgoing set!");
+
     _outgoing = outgoingVector;
 }
 
