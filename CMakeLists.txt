@@ -292,12 +292,12 @@ ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
 # Note: RPATH only supported under Linux!
+# The idea here is that during unit tests, we use the libraries in
+# the build directories, and NOT the system directories. But that
+# means that, during install, the paths have to be tweaked.
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH
-	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${PYTHON_DEST}")
-
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # -------------------------------------------------
