@@ -156,7 +156,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
-
 # ----------------------------------------------------------
 # secure_getenv
 INCLUDE(CheckSymbolExists)
@@ -167,40 +166,7 @@ ENDIF (HAVE_SECURE_GETENV)
 
 
 # ----------------------------------------------------------
-## Google Protobuf library
-## The protocol buffer compiler is needed for ZMQ-based persistence.
-# The ZMQ code is unmaintained and does not work. Give up until a
-# maintainer is found.
-#FIND_PACKAGE(Protobuf)
-#IF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-#	SET(HAVE_PROTOBUF 1)
-#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-#
-#ELSE (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	# If we are here, then we are missing either the libraries, or the
-#	# compiler. React appropriately.
-#	IF (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-#
-#ENDIF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
-#
+# Python stuff.
 
 include(OpenCogFindPython)
 
@@ -326,12 +292,12 @@ ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
 # Note: RPATH only supported under Linux!
+# The idea here is that during unit tests, we use the libraries in
+# the build directories, and NOT the system directories. But that
+# means that, during install, the paths have to be tweaked.
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH
-	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${PYTHON_DEST}")
-
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # -------------------------------------------------
@@ -477,14 +443,8 @@ SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
 	"python-dev (>= 2.7.5)"
 	"libzmq3-dev (>= 4.0.4)"
-	"libboost-date-time-dev (>= ${MIN_BOOST})"
 	"libboost-filesystem-dev (>= ${MIN_BOOST})"
-	"libboost-program-options-dev (>= ${MIN_BOOST})"
-	"libboost-regex-dev (>= ${MIN_BOOST})"
-	"libboost-serialization-dev (>= ${MIN_BOOST})"
-	"libboost-thread-dev (>= ${MIN_BOOST})"
 	"libboost-system-dev (>= ${MIN_BOOST})"
-	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
 	"libpq-dev (>=9.3.24)"
