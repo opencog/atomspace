@@ -39,8 +39,8 @@ namespace opencog
 {
 const bool EMIT_DIAGNOSTICS = true;
 const bool DONT_EMIT_DIAGNOSTICS = false;
-const bool CHECK_TRUTH_VALUES = true;
-const bool DONT_CHECK_TRUTH_VALUES = false;
+const bool CHECK_VALUES = true;
+const bool DONT_CHECK_VALUES = false;
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -117,7 +117,7 @@ public:
      */
     static bool compare_atomspaces(const AtomSpace& first,
                                    const AtomSpace& second,
-                                   bool check_truth_values=CHECK_TRUTH_VALUES,
+                                   bool check_values=CHECK_VALUES,
                                    bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
