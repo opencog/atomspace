@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/range/algorithm/find_if.hpp>
-
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -214,7 +214,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	for (const Handle& h : compo)
 	{
 		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
-		auto it = boost::find_if(opts, h_is_in);
+		auto it = std::find_if(opts.begin(), opts.end(), h_is_in);
 		if (it != opts.end())
 		{
 			_pat.optionals.emplace_back(*it);

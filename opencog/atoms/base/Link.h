@@ -27,7 +27,6 @@
 #include <functional>
 #include <string>
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 

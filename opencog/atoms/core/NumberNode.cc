@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/value/FloatValue.h>
 #include "NumberNode.h"

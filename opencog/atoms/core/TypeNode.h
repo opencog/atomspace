@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_TYPE_NODE_H
 #define _OPENCOG_TYPE_NODE_H
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 

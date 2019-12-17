@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <opencog/util/oc_assert.h>
 #include "PatternTerm.h"
 
 namespace opencog {
