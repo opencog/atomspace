@@ -34,9 +34,6 @@
 #include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>

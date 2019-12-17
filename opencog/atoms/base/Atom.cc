@@ -28,10 +28,11 @@
 #include <sstream>
 
 #include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 

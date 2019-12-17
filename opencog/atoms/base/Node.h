@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_NODE_H
 #define _OPENCOG_NODE_H
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 

@@ -27,6 +27,7 @@
  * Created by Linas Vepstas February 2008
  */
 
+#include <opencog/util/oc_assert.h>
 #include "FindUtils.h"
 
 namespace opencog {
