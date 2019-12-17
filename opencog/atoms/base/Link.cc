@@ -30,8 +30,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
-#include <boost/range/algorithm.hpp>
-
 #include "Link.h"
 
 //#define DPRINTF printf
