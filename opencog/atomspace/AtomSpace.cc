@@ -92,7 +92,7 @@ void AtomSpace::set_read_write(void)
 
 bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
                                    const AtomSpace& space_second,
-                                   bool check_truth_values,
+                                   bool check_values,
                                    bool emit_diagnostics)
 {
     // Compare sizes
@@ -191,18 +191,43 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             return false;
         }
 
-        // Check the truth values...
-        if (check_truth_values)
+        // Check the values...
+        // TODO: this should probably be moved to a method on class Atom.
+        if (check_values)
         {
-            TruthValuePtr truth_first = atom_first->getTruthValue();
-            TruthValuePtr truth_second = atom_second->getTruthValue();
-            if (*truth_first != *truth_second)
+            HandleSet keys_first = atom_first->getKeys();
+            HandleSet keys_second = atom_second->getKeys();
+            if (keys_first.size() != keys_second.size())
             {
                 if (emit_diagnostics)
-                    std::cout << "compare_atomspaces - first truth " <<
-                            atom_first->to_string() << " != second truth " <<
-                            atom_second->to_string() << std::endl;
+                    std::cout << "compare_atomspaces - first keys size "
+                              << keys_first.size() << " != second keys size "
+                              << keys_second.size() << " for "
+                              << atom_first->to_short_string() << std::endl;
                 return false;
+            }
+
+            if (keys_first != keys_second)
+            {
+                if (emit_diagnostics)
+                    std::cout << "compare_atomspaces - key set mistmatch for "
+                              << atom_first->to_short_string() << std::endl;
+                return false;
+            }
+
+            for (const Handle& key: keys_first)
+            {
+                ValuePtr value_first = atom_first->getValue(key);
+                ValuePtr value_second = atom_second->getValue(key);
+                if (*value_first != *value_second)
+                {
+                    if (emit_diagnostics)
+                        std::cout << "compare_atomspaces - first value "
+                            << value_first->to_string() << " != second value "
+                            << value_second->to_string() << " for "
+                            << atom_first->to_short_string() << std::endl;
+                    return false;
+                }
             }
         }
 
@@ -231,7 +256,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
 
 bool AtomSpace::operator==(const AtomSpace& other) const
 {
-    return compare_atomspaces(*this, other, CHECK_TRUTH_VALUES,
+    return compare_atomspaces(*this, other, CHECK_VALUES,
             DONT_EMIT_DIAGNOSTICS);
 }
 
