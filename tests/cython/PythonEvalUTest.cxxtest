@@ -266,6 +266,42 @@ public:
         TS_ASSERT(true);
     }
 
+    void testCodeBlockWithNewlineThreaded()
+    {
+        PythonEval::create_singleton_instance();
+        PythonEval* python = &PythonEval::instance();
+	std::vector<std::thread> threads;
+        std::string s = 
+                "tmp = 0\n"
+                "def fun(x):\n"
+                "    y = x + 1\n"
+                "\n"
+                "    global tmp\n"
+                "    tmp += x\n"
+                "    return y\n"
+                "\n"
+                "print(tmp)\n"
+                "fun(1)\n\n";
+        std::string s2 = "fun(1)\n\n";
+        python->eval(s);
+        for(int i=0; i<10; i++){
+            // Define python functions with newline within the code block
+            threads.emplace_back(&PythonEval::eval, python,
+                std::ref(s2)
+                );
+        }
+        for(std::thread & t: threads)
+            t.join();
+        std::string result = python->eval("print(fun(15))\n");
+        std::cout << "result = " << result << std::endl;
+        result = python->eval("print(tmp)\n");
+        std::cout << "result = " << result << std::endl;
+        // Because results are ignored this cannot be tested as of now
+        //TS_ASSERT_EQUALS(result, "26");
+        TS_ASSERT(true);
+    }
+
+
     void testGlobalPythonInitializationFinalization()
     {
         logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
