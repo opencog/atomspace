@@ -11,16 +11,6 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
 # CMakefiles to make sure that this directory is visited, first.
 ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 
-# For some obscure reason, CMake cannot figure out that these source
-# files depend on `atom_types.h`, and tries to compile them before
-# the `atom_types.h` file has been created. This becomes particularly
-# bad during parallel make, which races with the creation of
-# `atom_types.h`.
-SET_SOURCE_FILES_PROPERTIES(
-	atom_types_init.cc
-	NameServer.cc
-	DEPENDS opencog_atom_types)
-
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
@@ -28,6 +18,11 @@ ADD_LIBRARY (atom_types
 	atom_types_init.cc
 	NameServer.cc
 	)
+
+# Without this, parallel make will race and crap up the generated files.
+# Actually, that's not true ... even with this, compilation of other
+# units might start before the generation has finished.  Ugh.
+ADD_DEPENDENCIES(atom_types opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atom_types
 	${COGUTIL_LIBRARY}
