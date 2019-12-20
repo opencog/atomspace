@@ -6,18 +6,10 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	core_types.scm
 	core_types.pyx)
 
-ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h
-	atom_types.definitions atom_types.inheritance core_types.scm
-	core_types.pyx)
-
-# The goal of SET_SOURCE_FILE_PROPERTIES is to guarantee that the
-# creation of `atom_types.h` is finished BEFORE the compilation of
-# `NameServer.cc` starts. Similar concerns apply to the use of the
-# pyx file, as well as the two C files (definitions, inheritance).
-SET_SOURCE_FILES_PROPERTIES(atom_types.h PROPERTIES GENERATED TRUE)
-SET_SOURCE_FILES_PROPERTIES(atom_types.definitions PROPERTIES GENERATED TRUE)
-SET_SOURCE_FILES_PROPERTIES(atom_types.inheritance PROPERTIES GENERATED TRUE)
-SET_SOURCE_FILES_PROPERTIES(core_types.pyx PROPERTIES GENERATED TRUE)
+# The target `opencog_atom_types` is satisfied when `atom_types.h`
+# appears in the file system. This target is used in other
+# CMakefiles to make sure that this directory is visited, first.
+ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
