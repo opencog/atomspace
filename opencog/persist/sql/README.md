@@ -7,16 +7,16 @@ SQL Persist
 + Status update Jan 2017
 
 An implementation of atom persistence in SQL.  This allows not only
-saving and restoring of the atomspace, but it also allows multiple
-atomspaces to connect to the same SQL database at the same time, and
+saving and restoring of the AtomSpace, but it also allows multiple
+AtomSpaces to connect to the same SQL database at the same time, and
 so share a common set of data.  That is, it implements a basic form of
-a distributed atomspace.
+a distributed AtomSpace.
 
 Status
 ======
 It works and has been used with databases containing up to 100 million
 atoms (at about 1.5KByte/atom, this requires 150GBytes RAM). It has been
-accessed by atomspace processes (cogservers) that ran for months to
+accessed by AtomSpace processes (cogservers) that ran for months to
 perform computations, modifying more than 100's of millions of atoms,
 without crashes or other overt trouble.  It has scaled, trouble-free,
 without any slowdown, up to four cogservers.  No one has tried anything
@@ -36,7 +36,7 @@ Features
 --------
  * Save and restore of individual atoms and values.
  * Save and restore of atoms-by-type.
- * Save and restore of (recurisive) incoming sets (by-type).
+ * Save and restore of (recursive) incoming sets (by-type).
  * Bulk save-and-restore of entire AtomSpace contents.
 
 Missing features/ToDo items
@@ -81,11 +81,11 @@ the values are being updated).  Precisely, there were 6239904 stores
 in 6561 seconds, wall-clock time, for a rate of 951 Atoms/second.
 
 Store is performed by multiple parallel threads in the backend, each
-taking to a distinct instance of postgres; thus, it appears that
-postgres is the primary bottleneck. Certainly, postgres seems to be the
+taking to a distinct instance of Postgres; thus, it appears that
+Postgres is the primary bottleneck. Certainly, Postgres seems to be the
 primary consumer of CPU time, using a combined 2x more CPU than the
-atomspace. i.e. for every cpu-sec burned by the atomspace, the six
-different postgres instance burn up two cpu-secs.
+AtomSpace. i.e. for every cpu-sec burned by the AtomSpace, the six
+different Postgres instance burn up two cpu-secs.
 
 It is not at all obvious how to improve either load or store performance.
 
@@ -95,15 +95,15 @@ The goal of this implementation is to:
 
 1) Provide OpenCog with a working memory, so that the AtomSpace could
    be stopped and restarted without requiring a data dump.  That is,
-   checkpointing should be possible: if the atomspace crashes, data is
+   checkpointing should be possible: if the AtomSpace crashes, data is
    not lost.  By using a database, a file format does not need to be
    invented. By using a database, data integrity is assured.
    By using incremental access, only those atoms that are needed get
-   loaded into the atomspace; one does NOT have to do a bulk restore
+   loaded into the AtomSpace; one does NOT have to do a bulk restore
    if one doesn't want to.
 
 2) Provide an API for inter-server communications and atom exchange.
-   Multiple atomspaces can share data simply by sending atoms to,
+   Multiple AtomSpace can share data simply by sending atoms to,
    and retrieving atoms from the database.  Although this may not be
    the fastest way to send just single atoms, most algorithms do not
    need to send just single atoms: they just need to share some atoms,
@@ -120,7 +120,7 @@ The goal of this implementation is to:
 4) Provide a reference implementation for save and restore semantics.
    When saving or fetching outgoing sets, there are several choices
    of how to handle the associated values: these can also be saved
-   or fetched, clobbering the atomspace contents, or some more
+   or fetched, clobbering the AtomSpace contents, or some more
    fine-grained control can be provided.  The choices have both
    usability and performance implications. The choices are discussed
    in a separate section, below.
@@ -134,17 +134,17 @@ The goal of this implementation is to:
    and use correctly.
 
 6) A non-design-goal (at this time) is to build a system that can scale
-   to more than 100 atomspace instances.  The current design might be
+   to more than 100 AtomSpace instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
-   all of OpenCog, starting with the atomspace.
+   all of OpenCog, starting with the AtomSpace.
 
 7) A non-design-goal is fully automatic save-restore of atoms.  The
    save and restore of atoms are performed under the explicit control
    by user-written code, invoking the save/restore API. There is no
    automation. Control is in the user's hands.
 
-   The reason for this design point is that the atomspace is at too low
+   The reason for this design point is that the AtomSpace is at too low
    a level to be fully automatic.  It cannot guess what the user really
    wants to do.  If it did try to guess, it would probably guess wrong:
    saving atoms before the user is done with them, saving atoms that get
@@ -183,17 +183,17 @@ unique identifiers (UUID's), using the TLB mechanism.
 
  * Multi-user issuance and management of UUID's is weakly tested and
 seems to work. This allows a form of a "distributed atomspace" --
-multiple atomsapces can connect to the same database at the same time,
+multiple AtomSpaces can connect to the same database at the same time,
 and save and restore atoms, getting back the correct Values (such as
 TruthValues) on each atom, as expected.
 
  * This implementation automatically handles clashing atom types.  That
 is, if the data is written with one set of atom types, and then the
-atomspace process is stopped, the atomtypes are all changed (with some
+atomspace process is stopped, the atom types are all changed (with some
 added, some deleted), then during the load of the old data, the types
 will be automatically translated to use the new atom types. (The deleted
 atom types will not be removed from the database.  Restoring atoms with
-deleted atomtypes will cause an exception to be thrown.)
+deleted atom types will cause an exception to be thrown.)
 
  * Non-blocking atom store requests are implemented.  Eight asynchronous
 write-back threads are used, with hi/lo watermarks for queue management.
@@ -345,7 +345,7 @@ ODBC.
 After install, verify that `/etc/odbcinst.ini` contains the stanza
 below (or something similar).  If it is missing, then edit this file
 (as root) and add the stanza.  Notice that it uses the Unicode drivers,
-and NOT the ANSI (ASCII) drivers.  Opencog uses Unicode!
+and NOT the ANSI (ASCII) drivers.  OpenCog uses Unicode!
 
 ```
     sudo vi /etc/odbcinst.ini &
@@ -440,8 +440,8 @@ Save file contents, then:
 
 #### Tuning HugePages
 Using 2MB-sized HugePages can also offer a large performance boost,
-both for postgres, and for the atomspace, especially when working with a
-large atomspace.  The proceedure to set these up is a bit complicated.
+both for Postgres, and for the atomspace, especially when working with a
+large atomspace.  The procedure to set these up is a bit complicated.
 First, add a hugepages user-group, and add postgres to it:
 ```
    sudo groupadd hugepages
@@ -1149,7 +1149,7 @@ TODO
    next 330, etc. until they are all specified. This can be done with
    ZERO changes to the SQL table format.  Its really pretty easy to
    implement: just look at the length during save and restore, and
-   trigger disassemble/reassembly code when the lenght limits are hit.
+   trigger disassemble/reassembly code when the length limits are hit.
    Note also: the new link-type should be used in the SQL backend only,
    and thus, it would not be a real link-type, but a pseudo-type, a
    marker used only in the SQL tables.
