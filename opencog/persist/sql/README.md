@@ -399,12 +399,13 @@ and make the changes below.  The first two changes are recommended by the
 [PostgreSQL wiki](http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 ```
    shared_buffers = 24GB       # Change to 25% of installed RAM
+   huge_pages = try            # Always use huge_pages, if possible.
    work_mem = 32MB             # Default was 1MB, change to 32MB
-   effective_cache_size = 60GB # Change to 50%-75% of installed RAM
+   effective_cache_size = 60GB # Change to 25%-75% of installed RAM
    synchronous_commit = off    # Default was on, change to off
-   max_connections = 130       # Each AtomSpace instance needs 32
+   max_connections = 135       # Each AtomSpace instance needs 32
    max_worker_processes = 32   # One per CPU core
-   ssl = off                   # There's no point to encyrption locally
+   ssl = off                   # There's no point to encryption locally
 ```
 
 Avoid the "checkpoints are occurring too frequently" warning message by
@@ -428,18 +429,20 @@ spinning disk.)
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
-16.4 gigabytes (for example). Edit: `sudo vi /etc/sysctl.conf` and add:
+42.4 gigabytes (for example). Edit: `sudo vi /etc/sysctl.conf` and add:
 ```
-   kernel.shmmax = 16440100100
+   kernel.shmmax = 42440100100
 ```
-save file contents, then:
+Save file contents, then:
 ```
    sudo sysctl -p /etc/sysctl.conf
 ```
 
 #### Tuning HugePages
-Using 2MB-sized HugePages also helps. The proceedure here is a bit
-complicated. Add a hugepages user-group, and add postgres to it:
+Using 2MB-sized HugePages can also offer a large performance boost,
+both for postgres, and for the atomspace, especially when working with a
+large atomspace.  The proceedure to set these up is a bit complicated.
+First, add a hugepages user-group, and add postgres to it:
 ```
    sudo groupadd hugepages
    sudo gpasswd -a postgres hugepages
