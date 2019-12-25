@@ -7,6 +7,12 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 
+(display "\n")
+(display "====> Attention!\n")
+(display "====> Obsolete! You do not need this module any longer.\n")
+(display "====> Please use `(opencog exec)` and `cog-execute!` instead.\n")
+(display "\n")
+
 (define-public (cog-bind handle)
 "
    cog-bind - Obsolete!
