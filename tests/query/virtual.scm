@@ -52,15 +52,16 @@
 			(TypedVariable (Variable "y") (Type 'ConceptNode)))
 		(And
 			(Inheritance (Variable "x") (Concept "animal"))
+			(Inheritance (Variable "x") (Concept "mammal"))
 			(Inheritance (Variable "y") (Concept "animal"))
 			(Not (Equal (Variable "x") (Variable "y")))
 
-			; Satisfiable, because they are both animals.
+			; Satisfiable, because there are InheritanceLinks
+			; that both x and y inherit from (both are animals).
 			(Satisfaction (Variable "z")
 				(And
 					(Inheritance (Variable "x") (Variable "z"))
 					(Inheritance (Variable "y") (Variable "z"))
-					(Inheritance (Variable "x") (Concept "mammal"))
 				))
 		))
 )
