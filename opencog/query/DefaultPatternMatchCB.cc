@@ -597,13 +597,13 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// of some sort, so that the atoms can be communicated to scheme or
 	// python for the actual evaluation. We don't want to put the
 	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is probably
-	// not very efficient, but will do for now...
+	// grounding might be insane.  So we put it here. This is not
+	// very efficient, but will do for now...
 
-	Handle gvirt;
+	ValuePtr vp;
 	try
 	{
-		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
+		vp = _instor->instantiate(virt, gnds, true);
 	}
 	catch (const SilentException& ex)
 	{
@@ -622,6 +622,22 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_instor->reset_halt();
 		return false;
 	}
+
+	// Perhaps it already evaluated down to a truth-value.
+	if (not vp->is_atom())
+	{
+		TruthValuePtr tvp(TruthValueCast(vp));
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+		            "Expecting a TruthValue for an evaluatable link: %s\n",
+		            virt->to_short_string().c_str());
+
+		// Convert into a crisp boolean, per usual.
+		return tvp->get_mean() > 0.5;
+	}
+
+	// Its an atom... now we have to evaluate it.
+	Handle gvirt(HandleCast(vp));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})
