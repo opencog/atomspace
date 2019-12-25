@@ -603,7 +603,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		if (0 == vars.size())
 			return expr->execute(_as, silent);
 
-		// Instantiate.
+		// There are vars to be beta-reduced. Reduce them.
 		Handle grounded(walk_tree(expr, silent));
 		if (_as) grounded = _as->add_atom(grounded);
 		return grounded->execute(_as, silent);
@@ -628,6 +628,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
 	{
+		// XXX Don't we need to plug in the vars, first!?
+		// Maybe this is just not tested?
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 

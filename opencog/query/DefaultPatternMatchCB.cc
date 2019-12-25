@@ -589,6 +589,11 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 }
 
 /* ======================================================== */
+// FIXME: the code below is festooned with various FIXME's, stating
+// that, basically, the evaluation of terms in the presence of
+// grounding atoms is a bit messed up, and not fully correctly, cleanly
+// done. So this needs a clean re-implementation, with proper
+// beta-reduction with the groundings, followed by proper evaluation.
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
                                       const HandleMap& gnds)
@@ -603,6 +608,12 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	ValuePtr vp;
 	try
 	{
+		// XXX FIXME. This is kind-of/mostly wrong. What we *really*
+		// want to do is to plug the grounds into the virt expression,
+		// then evaluate the virt expression, and see if it is true.
+		// So, Instantiator::instantiate() does this, but then it
+		// does too much; it also executes. Which is more than what
+		// is wanted.
 		vp = _instor->instantiate(virt, gnds, true);
 	}
 	catch (const SilentException& ex)
