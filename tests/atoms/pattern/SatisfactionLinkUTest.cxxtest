@@ -23,6 +23,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/SatisfactionLink.h>
+#include <opencog/atoms/atom_types/atom_names.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -57,27 +58,24 @@ public:
  * Test to make sure the SatsifactionLink is executable.
  * Just a basic test, to make sure it compiles and runs.
  */
-void SatisfactionLinkUTest::test_full_quotation()
+void SatisfactionLinkUTest::test_execution()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle have_colors = _as.add_atom(
- 		SatisfactionLink(
-			VariableNode ("$color"),
-			InheritanceLink(
-				VariableNode ("$color"),
-				ConceptNode ("Color"))));
+		Satisfaction(
+			Variable ("$color"),
+			Inheritance(
+				Variable ("$color"),
+				Concept ("Color"))));
 
 	TS_ASSERT(have_colors->is_executable());
 	ValuePtr vp = have_colors->execute();
 	TS_ASSERT(vp == TruthValue::FALSE_TV());
 
-	_as.add_atom(
-		InheritanceLink(ConceptNode("red"), ConceptNode("Color")));
-	_as.add_atom(
-		InheritanceLink(ConceptNode("green"), ConceptNode("Color")));
-	_as.add_atom(
-		InheritanceLink(ConceptNode("blue"), ConceptNode("Color")));
+	_as.add_atom(Inheritance(Concept("red"), Concept("Color")));
+	_as.add_atom(Inheritance(Concept("green"), Concept("Color")));
+	_as.add_atom(Inheritance(Concept("blue"), Concept("Color")));
 
 	vp = have_colors->execute();
 	TS_ASSERT(vp == TruthValue::TRUE_TV());

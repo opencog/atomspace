@@ -1,7 +1,8 @@
 LINK_LIBRARIES(
+	execution
 	atomcore
 	atomspace
 )
 
 ADD_CXXTEST(BindLinkUTest)
-TARGET_LINK_LIBRARIES(BindLinkUTest execution atomspace)
+ADD_CXXTEST(SatisfactionLinkUTest)
