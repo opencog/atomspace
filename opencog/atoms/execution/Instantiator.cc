@@ -433,6 +433,25 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return Handle::UNDEFINED;
 	}
 
+	// Ideally, we should not evaluate any EvaluatableLinks.
+	// However, some of these may hold embedded executable links
+	// inside of them, which the current unit tests and code
+	// expect to be executed.  Thus, for right now, we only avoid
+	// evaluating VirtualLinks, as these all are capable of their
+	// own lazy-evaluation, and so, if evaluation is needed,
+	// it will be triggered by something else. We do, of course,
+	// substitute in for free variables, if any.
+	//
+	// Non-virtual evaluatables fall through and are handled
+	// below.
+	//
+	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
+	if (nameserver().isA(t, VIRTUAL_LINK))
+	{
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
+	}
+
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
@@ -452,23 +471,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// we have to perform it and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
+		// XXX I don't get it... don't we need to perform var
+		// substitution here? Is this just not tested?
 		return HandleCast(expr->execute(_as, silent));
-	}
-
-	// Ideally, we should not evaluate any EvaluatableLinks.
-	// However, some of these may hold embedded executable links
-	// inside of them, which the current unit tests and code
-	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of their
-	// own lazy-evaluation, and so, if evaluation is needed,
-	// it will be triggered by something else.
-	// Non-virtual evaluatables fall through and are handled
-	// below.
-	// if (nameserver().isA(t, EVALUATABLE_LINK))
-	if (nameserver().isA(t, VIRTUAL_LINK))
-	{
-		if (_vmap->empty()) return expr;
-		return beta_reduce(expr, *_vmap);
 	}
 
 	// Do not reduce PredicateFormulaLink. That is because it contains
@@ -595,7 +600,12 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return expr->execute(_as, silent);
+		if (0 == vars.size())
+			return expr->execute(_as, silent);
+
+		// Instantiate.
+		Handle grounded(walk_tree(expr, silent));
+		return grounded->execute(_as, silent);
 	}
 
 	// ExecutionOutputLinks
