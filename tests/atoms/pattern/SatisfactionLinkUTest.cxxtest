@@ -51,9 +51,6 @@ public:
 	void test_execution();
 };
 
-#define AN _as.add_node
-#define AL _as.add_link
-
 /**
  * Test to make sure the SatsifactionLink is executable.
  * Just a basic test, to make sure it compiles and runs.
