@@ -605,6 +605,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 		// Instantiate.
 		Handle grounded(walk_tree(expr, silent));
+		if (_as) grounded = _as->add_atom(grounded);
 		return grounded->execute(_as, silent);
 	}
 
