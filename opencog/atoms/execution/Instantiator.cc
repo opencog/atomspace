@@ -654,51 +654,6 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// something more efficient, here?
 	ValuePtr vp(instantiate(expr, HandleMap(), silent));
 
-#if NICE_IDEA_BUT_FAILS
-	// If the result of execution is an evaluatable link, viz, something
-	// that could return a truth value when evaluated, then do the
-	// evaluation now, on the spot, and return the truth value.
-	// There are several problems with this; the biggest is that
-	// about 1/4th of the unit tests fail (39 out of 138). So just
-	// collapsing the evaluatable/executable hierarchies into one
-	// is not possible, without clarifying a lot of the back-n-forth
-	// implicit casting, movement of data...
-	//
-	// That is, the current design of Atomese makes a large number
-	// of implicit decisions about when things should and should not
-	// be evaluated. Many of these decisions are buried in the link-types
-	// themselves. Most of these implicit behaviors seem "natural", but
-	// they also do not adhere to any grand plan ... its ad-hoc.
-	// Thus, we cannot just mash together evaluation and execution
-	// without reviewing all of these implicit and "natural" behaviors
-	// and maybe modifying them.  For example, maybe we need some
-	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
-	// to force evaluation/executation at certain points, instead of
-	// just making it all implicit. Or maybe there is some other,
-	// better design...
-
-	// Evaluate, if possible.
-	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
-	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
-
-	// Evaluate, crisp-binary-boolean tv links, if possible.
-	// This actually passes unit tests, but seems pointless, without
-	// some corresponding grand design that unifies things correctly.
-	if (vp)
-	{
-		Type t = vp->get_type();
-		if (EQUAL_LINK == t or
-		    IDENTICAL_LINK == t or
-		    GREATER_THAN_LINK == t)
-		{
-			Handle h(HandleCast(vp));
-			TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, h));
-			ValuePtr pap(ValueCast(tvp));
-			return pap;
-		}
-	}
-#endif
-
 	return vp;
 }
 
