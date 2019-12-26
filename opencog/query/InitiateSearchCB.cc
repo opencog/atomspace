@@ -257,10 +257,11 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 
 /* ======================================================== */
 /**
- * Given a set of clauses, find a neighborhood to search, and perform
- * the search. A `neighborhood` is defined as all of the atoms that
- * can be reached from a given (non-variable) atom, by following either
- * it's incoming or its outgoing set.
+ * Given a set of clauses, create a list of starting points for a
+ * search. This set of starting points is called a `neghborhood`;
+ * it is defined as all of the atoms that can be reached from a
+ * given (non-variable) atom, by following either it's incoming or
+ * its outgoing set.
  *
  * A neighborhood search is guaranteed to find all possible groundings
  * for the set of clauses. The reason for this is that, given a
@@ -269,10 +270,19 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * grounding must be contained in that neighborhood.  It is sufficient
  * to walk that graph until a suitable grounding is encountered.
  *
- * The return value is true if a grounding was found, else it returns
- * false. That is, this return value works just like all the other
- * satisfiability callbacks. Returns false, if no sutiable starting
- * points were found.
+ * The starting points or `neighborhood` is chosen so that the initial
+ * search space is as small as possible (thus, hopefully, resulting in
+ * a fast search.)
+ *
+ * Due to the ChoiceLink, there may be multiple such neighborhoods.
+ * Each neighborhood is placed into a `struct Choice`, and the search
+ * loop will look at the choices.
+ *
+ * This method returns true if suitable starting points were found,
+ * else it returns false. There are rare cases where this will fail
+ * to find starting points: if, for example, all clauses are evaluatable,
+ * or if all clauses consist only of VariableNodes or GlobNodes, so
+ * that there's nowhere to start the search.
  */
 bool InitiateSearchCB::setup_neighbor_search(void)
 {
@@ -339,6 +349,8 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 	return true;
 }
 
+/* ======================================================== */
+
 bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
                                    const std::string dbg_banner)
 {
@@ -369,6 +381,29 @@ bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
 
 	// If we are here, we have searched the entire neighborhood, and
 	// no satisfiable groundings were found.
+	return false;
+}
+
+/* ======================================================== */
+
+bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
+                                   const std::string dbg_banner)
+{
+	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
+	            << _search_set.size() << " atoms";})
+
+#ifdef DEBUG
+	size_t i = 0, hsz = _search_set.size();
+#endif
+	for (const Handle& h : _search_set)
+	{
+		DO_LOG({LAZY_LOG_FINE << dbg_banner
+		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+		             << h->to_string();})
+		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		if (found) return true;
+	}
+
 	return false;
 }
 
@@ -537,10 +572,15 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 
 /* ======================================================== */
 /**
- * Initiate a search by looping over all Links of the same type as one
- * of the links in the set of clauses.  This attempts to pick the link
- * type which has the smallest number of atoms of that type in the
+ * Set up a list of starting points to search by making a list of all
+ * Links of the same type as one of the links in the set of clauses.
+ * This attempts to minimize the search space by picking the link type
+ * which has the smallest number of atoms of that type in the
  * AtomSpace.
+ *
+ * The list of starting points is placed into `_search_set` and this
+ * method returns true. If it cannot find any starting points, this
+ * returns false.
  */
 bool InitiateSearchCB::setup_link_type_search()
 {
@@ -580,23 +620,26 @@ bool InitiateSearchCB::setup_link_type_search()
 	// Get type of the rarest link
 	Type ptype = _starter_term->get_type();
 
-	HandleSeq handle_set;
 	_as->get_handles_by_type(_search_set, ptype);
 	return true;
 }
 
 /* ======================================================== */
 /**
- * Initiate a search by looping over all atoms of the allowed
- * variable types (as set with the set_type_restrictions() method).
- * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictions are set up appropriately.
+ * Set up a list of search starting points consisting of all atoms of
+ * the allowed variable types (as set with the `set_type_restrictions()`
+ * method).  This assumes that the varset contains the variables to be
+ * searched over, and that the type restrictions are set up appropriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
  * variables, then you probably don't want to use this method, either;
  * you should create something more clever.
+ *
+ * The list of starting points is placed into `_search_set` and this
+ * method returns true. If it cannot find any starting points, this
+ * returns false.
  */
 bool InitiateSearchCB::setup_variable_search(void)
 {
@@ -760,27 +803,6 @@ bool InitiateSearchCB::setup_variable_search(void)
 			_as->get_handles_by_type(_search_set, ptype);
 
 	return true;
-}
-
-bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
-                                   const std::string dbg_banner)
-{
-	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
-	            << _search_set.size() << " atoms";})
-
-#ifdef DEBUG
-	size_t i = 0, hsz = _search_set.size();
-#endif
-	for (const Handle& h : _search_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << dbg_banner
-		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
-		             << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
-
-	return false;
 }
 
 /* ======================================================== */
