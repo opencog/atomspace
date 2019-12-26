@@ -495,11 +495,8 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
-	_search_fail = false;
 	if (setup_link_type_search())
-		found = search_loop(pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
-	if (found) return true;
-	if (not _search_fail) return false;
+		return search_loop(pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
@@ -508,10 +505,10 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
-	_search_fail = false;
 	if (setup_variable_search())
-		found = search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
-	return found;
+		return search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
+
+	return false;
 }
 
 /* ======================================================== */
@@ -584,10 +581,7 @@ bool InitiateSearchCB::setup_link_type_search()
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	if (nullptr == _root)
-	{
-		_search_fail = true;
 		return false;
-	}
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
 	                      << _root->to_string();})
@@ -740,13 +734,10 @@ bool InitiateSearchCB::setup_variable_search(void)
 #endif
 		}
 
+		// There are no clauses. This is kind-of weird, but it can happen
+		// if all clauses are optional.
 		if (0 == clauses.size())
-		{
-			// This is kind-of weird, but it can happen if all clauses
-			// are optional.
-			_search_fail = true;
 			return false;
-		}
 
 		// The pattern body might be of the form
 		// (And (Present (Variable "$x")) (Evaluation ...))
