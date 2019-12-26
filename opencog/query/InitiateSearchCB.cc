@@ -55,17 +55,14 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 
-	_curr_clause = 0;
+	_curr_clause = Handle::UNDEFINED;
 	_choices.clear();
- 	_search_fail = false;
 	_as = as;
 }
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
-	_search_fail = false;
-
 	_variables = &vars;
 	_pattern = &pat;
 	_dynamic = &pat.evaluatable_terms;
@@ -224,23 +221,21 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
                                        const HandleSet& evl,
                                        Handle& starter_term,
-                                       size_t& bestclause)
+                                       Handle& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
-	bestclause = 0;
+	bestclause = Handle::UNDEFINED;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
 	_choices.clear();
 
-	size_t nc = clauses.size();
-	for (size_t i=0; i < nc; i++)
+	for (const Handle& h: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (0 < evl.count(clauses[i])) continue;
+		if (0 < evl.count(h)) continue;
 
-		_curr_clause = i;
-		Handle h(clauses[i]);
+		_curr_clause = h;
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
 		Handle term(Handle::UNDEFINED);
@@ -251,7 +246,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		{
 			thinnest = width;
 			deepest = depth;
-			bestclause = i;
+			bestclause = h;
 			best_start = start;
 			starter_term = term;
 		}
@@ -276,18 +271,15 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  *
  * The return value is true if a grounding was found, else it returns
  * false. That is, this return value works just like all the other
- * satisfiability callbacks.  The flag '_search_fail' is set to true
- * if the search was not performed, due to a failure to find a sutiable
- * starting point.
+ * satisfiability callbacks. Returns false, if no sutiable starting
+ * points were found.
  */
-bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
+bool InitiateSearchCB::setup_neighbor_search(void)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
-	if (_pattern->mandatory.empty() and _pattern->optionals.empty()) {
-		_search_fail = true;
+	if (_pattern->mandatory.empty() and _pattern->optionals.empty())
 		return false;
-	}
 
 	// Sometimes, the number of mandatory clauses can be zero...
 	// or they might all be evaluatable.  In this case, its OK to
@@ -319,7 +311,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
 	// Note also: the user is allowed to specify patterns that have
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
-	size_t bestclause;
+	Handle bestclause;
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
@@ -329,12 +321,9 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
 	// Somewhat unusual, but it can happen.  For this, we need
 	// some other, alternative search strategy.
 	if (nullptr == best_start and 0 == _choices.size())
-	{
-		_search_fail = true;
 		return false;
-	}
 
-	// If only a single choice, fake it for the loop below.
+	// If only a single choice, fake it for the choice_loop.
 	if (0 == _choices.size())
 	{
 		Choice ch;
@@ -347,14 +336,18 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
 	{
 		// TODO -- weed out duplicates!
 	}
+	return true;
+}
 
+bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
+                                   const std::string dbg_banner)
+{
 	for (const Choice& ch : _choices)
 	{
-		bestclause = ch.clause;
-		best_start = ch.best_start;
+		_root = ch.clause;
 		_starter_term = ch.start_term;
+		Handle best_start = ch.best_start;
 
-		_root = clauses[bestclause];
 		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
 		DO_LOG({LAZY_LOG_FINE << "Start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
@@ -369,7 +362,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
 		for (const auto& lptr: iset)
 			_search_set.emplace_back(HandleCast(lptr));
 
-		bool found = search_loop(pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+		bool found = search_loop(pme, dbg_banner);
 		// Terminate search if satisfied.
 		if (found) return true;
 	}
@@ -473,10 +466,8 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	jit_analyze(pme);
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
-	_search_fail = false;
-	bool found = neighbor_search(pme);
-	if (found) return true;
-	if (not _search_fail) return false;
+	if (setup_neighbor_search())
+		return choice_loop(pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses hold no variables, and
@@ -920,7 +911,6 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
 		}
 	}
-	ss << indent << "_search_fail = " << _search_fail;
 
 	return ss.str();
 }

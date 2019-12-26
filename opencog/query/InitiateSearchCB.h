@@ -75,11 +75,11 @@ protected:
 
 	struct Choice
 	{
-		size_t clause;
+		Handle clause;
 		Handle best_start;
 		Handle start_term;
 	};
-	size_t _curr_clause;
+	Handle _curr_clause;
 	std::vector<Choice> _choices;
 
 	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
@@ -87,16 +87,16 @@ protected:
 	                                      size_t&);
 	virtual Handle find_thinnest(const HandleSeq&,
 	                             const HandleSet&,
-	                             Handle&, size_t&);
+	                             Handle&, Handle&);
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());
 
-	bool _search_fail;
-	bool neighbor_search(PatternMatchEngine *);
+	bool setup_neighbor_search(void);
 	bool setup_no_search(void);
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 
+	bool choice_loop(PatternMatchEngine *, const std::string);
 	bool search_loop(PatternMatchEngine *, const std::string);
 	AtomSpace *_as;
 };
