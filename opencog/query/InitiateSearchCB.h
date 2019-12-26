@@ -71,6 +71,7 @@ protected:
 
 	Handle _root;
 	Handle _starter_term;
+	HandleSeq _search_set;
 
 	struct Choice
 	{
@@ -90,11 +91,13 @@ protected:
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());
 
+	bool setup_variable_search(void);
+
 	bool _search_fail;
-	virtual bool neighbor_search(PatternMatchEngine *);
-	virtual bool link_type_search(PatternMatchEngine *);
-	virtual bool variable_search(PatternMatchEngine *);
-	virtual bool no_search(PatternMatchEngine *);
+	bool neighbor_search(PatternMatchEngine *);
+	bool link_type_search(PatternMatchEngine *);
+	bool variable_search(PatternMatchEngine *);
+	bool no_search(PatternMatchEngine *);
 
 	AtomSpace *_as;
 };

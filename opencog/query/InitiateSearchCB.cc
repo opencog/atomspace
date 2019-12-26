@@ -630,7 +630,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * variables, then you probably don't want to use this method, either;
  * you should create something more clever.
  */
-bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_variable_search(void)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -788,19 +788,26 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		}
 	}
 
-	HandleSeq handle_set;
 	if (ptypes.empty())
-		_as->get_handles_by_type(handle_set, ATOM, true);
+		_as->get_handles_by_type(_search_set, ATOM, true);
 	else
 		for (Type ptype : ptypes)
-			_as->get_handles_by_type(handle_set, ptype);
+			_as->get_handles_by_type(_search_set, ptype);
 
-	DO_LOG({LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";})
+	return true;
+}
+
+bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
+{
+	if (not setup_variable_search()) return false;
+
+	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
+	            << _search_set.size() << " atoms";})
 
 #ifdef DEBUG
-	size_t i = 0, hsz = handle_set.size();
+	size_t i = 0, hsz = _search_set.size();
 #endif
-	for (const Handle& h : handle_set)
+	for (const Handle& h : _search_set)
 	{
 		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
 		                      << "Loop candidate (" << ++i << "/" << hsz << "):\n"
