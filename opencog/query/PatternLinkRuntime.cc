@@ -380,7 +380,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 #endif
 
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
-		Pattern pat = clp->get_pattern();
+		const Pattern& pat(clp->get_pattern());
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
