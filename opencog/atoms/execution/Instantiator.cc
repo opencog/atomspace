@@ -183,7 +183,9 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 
 /// walk_tree() performs a kind-of eager-evaluation of function arguments.
 /// The code in here is a mashup of several different ideas that are not
-/// cleanly separated from each other. Roughly, it goes like so:
+/// cleanly separated from each other. (XXX FIXME, these need to be
+/// cleanly seprated; its impeding overall clean design/implementation.)
+/// Roughly, it goes like so:
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
@@ -433,6 +435,25 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return Handle::UNDEFINED;
 	}
 
+	// Ideally, we should not evaluate any EvaluatableLinks.
+	// However, some of these may hold embedded executable links
+	// inside of them, which the current unit tests and code
+	// expect to be executed.  Thus, for right now, we only avoid
+	// evaluating VirtualLinks, as these all are capable of their
+	// own lazy-evaluation, and so, if evaluation is needed,
+	// it will be triggered by something else. We do, of course,
+	// substitute in for free variables, if any.
+	//
+	// Non-virtual evaluatables fall through and are handled
+	// below.
+	//
+	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
+	if (nameserver().isA(t, VIRTUAL_LINK))
+	{
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
+	}
+
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
@@ -445,6 +466,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
+		// beta_reduce(expr, *_vmap);
 		return HandleCast(expr->execute(_as, silent));
 	}
 
@@ -452,23 +474,10 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// we have to perform it and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
+		// XXX I don't get it... don't we need to perform var
+		// substitution here? Is this just not tested?
+		// beta_reduce(expr, *_vmap);
 		return HandleCast(expr->execute(_as, silent));
-	}
-
-	// Ideally, we should not evaluate any EvaluatableLinks.
-	// However, some of these may hold embedded executable links
-	// inside of them, which the current unit tests and code
-	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of their
-	// own lazy-evaluation, and so, if evaluation is needed,
-	// it will be triggered by something else.
-	// Non-virtual evaluatables fall through and are handled
-	// below.
-	// if (nameserver().isA(t, EVALUATABLE_LINK))
-	if (nameserver().isA(t, VIRTUAL_LINK))
-	{
-		if (_vmap->empty()) return expr;
-		return beta_reduce(expr, *_vmap);
 	}
 
 	// Do not reduce PredicateFormulaLink. That is because it contains
@@ -595,7 +604,13 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// and return the satisfying set.
 	if (nameserver().isA(t, SATISFYING_LINK))
 	{
-		return expr->execute(_as, silent);
+		if (0 == vars.size())
+			return expr->execute(_as, silent);
+
+		// There are vars to be beta-reduced. Reduce them.
+		Handle grounded(walk_tree(expr, silent));
+		if (_as) grounded = _as->add_atom(grounded);
+		return grounded->execute(_as, silent);
 	}
 
 	// ExecutionOutputLinks
@@ -617,6 +632,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
 	{
+		// XXX Don't we need to plug in the vars, first!?
+		// Maybe this is just not tested?
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
@@ -643,51 +660,6 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// XXX FIXME, since the variable map is empty, maybe we can do
 	// something more efficient, here?
 	ValuePtr vp(instantiate(expr, HandleMap(), silent));
-
-#if NICE_IDEA_BUT_FAILS
-	// If the result of execution is an evaluatable link, viz, something
-	// that could return a truth value when evaluated, then do the
-	// evaluation now, on the spot, and return the truth value.
-	// There are several problems with this; the biggest is that
-	// about 1/4th of the unit tests fail (39 out of 138). So just
-	// collapsing the evaluatable/executable hierarchies into one
-	// is not possible, without clarifying a lot of the back-n-forth
-	// implicit casting, movement of data...
-	//
-	// That is, the current design of Atomese makes a large number
-	// of implicit decisions about when things should and should not
-	// be evaluated. Many of these decisions are buried in the link-types
-	// themselves. Most of these implicit behaviors seem "natural", but
-	// they also do not adhere to any grand plan ... its ad-hoc.
-	// Thus, we cannot just mash together evaluation and execution
-	// without reviewing all of these implicit and "natural" behaviors
-	// and maybe modifying them.  For example, maybe we need some
-	// new link types, like "EvaluateThisLink" and "ExecuteThisLink"
-	// to force evaluation/executation at certain points, instead of
-	// just making it all implicit. Or maybe there is some other,
-	// better design...
-
-	// Evaluate, if possible.
-	if (vp and nameserver().isA(vp->get_type(), EVALUATABLE_LINK))
-	if (vp and nameserver().isA(vp->get_type(), CRISP_OUTPUT_LINK))
-
-	// Evaluate, crisp-binary-boolean tv links, if possible.
-	// This actually passes unit tests, but seems pointless, without
-	// some corresponding grand design that unifies things correctly.
-	if (vp)
-	{
-		Type t = vp->get_type();
-		if (EQUAL_LINK == t or
-		    IDENTICAL_LINK == t or
-		    GREATER_THAN_LINK == t)
-		{
-			Handle h(HandleCast(vp));
-			TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, h));
-			ValuePtr pap(ValueCast(tvp));
-			return pap;
-		}
-	}
-#endif
 
 	return vp;
 }

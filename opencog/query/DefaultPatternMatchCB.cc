@@ -589,6 +589,11 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 }
 
 /* ======================================================== */
+// FIXME: the code below is festooned with various FIXME's, stating
+// that, basically, the evaluation of terms in the presence of
+// grounding atoms is a bit messed up, and not fully correctly, cleanly
+// done. So this needs a clean re-implementation, with proper
+// beta-reduction with the groundings, followed by proper evaluation.
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
                                       const HandleMap& gnds)
@@ -597,13 +602,19 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// of some sort, so that the atoms can be communicated to scheme or
 	// python for the actual evaluation. We don't want to put the
 	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is probably
-	// not very efficient, but will do for now...
+	// grounding might be insane.  So we put it here. This is not
+	// very efficient, but will do for now...
 
-	Handle gvirt;
+	ValuePtr vp;
 	try
 	{
-		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
+		// XXX FIXME. This is kind-of/mostly wrong. What we *really*
+		// want to do is to plug the grounds into the virt expression,
+		// then evaluate the virt expression, and see if it is true.
+		// So, Instantiator::instantiate() does this, but then it
+		// does too much; it also executes. Which is more than what
+		// is wanted.
+		vp = _instor->instantiate(virt, gnds, true);
 	}
 	catch (const SilentException& ex)
 	{
@@ -622,6 +633,22 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_instor->reset_halt();
 		return false;
 	}
+
+	// Perhaps it already evaluated down to a truth-value.
+	if (not vp->is_atom())
+	{
+		TruthValuePtr tvp(TruthValueCast(vp));
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+		            "Expecting a TruthValue for an evaluatable link: %s\n",
+		            virt->to_short_string().c_str());
+
+		// Convert into a crisp boolean, per usual.
+		return tvp->get_mean() > 0.5;
+	}
+
+	// Its an atom... now we have to evaluate it.
+	Handle gvirt(HandleCast(vp));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})

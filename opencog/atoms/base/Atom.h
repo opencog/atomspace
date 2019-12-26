@@ -279,7 +279,7 @@ public:
     virtual ValuePtr execute(void) { return execute(_atom_space, false); }
     virtual bool is_executable() const { return false; }
 
-    /** Returns the handle of the atom. */
+    /** Returns a handle holding "this". */
     inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
