@@ -183,7 +183,9 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 
 /// walk_tree() performs a kind-of eager-evaluation of function arguments.
 /// The code in here is a mashup of several different ideas that are not
-/// cleanly separated from each other. Roughly, it goes like so:
+/// cleanly separated from each other. (XXX FIXME, these need to be
+/// cleanly seprated; its impeding overall clean design/implementation.)
+/// Roughly, it goes like so:
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
@@ -464,6 +466,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
+		// beta_reduce(expr, *_vmap);
 		return HandleCast(expr->execute(_as, silent));
 	}
 
@@ -473,6 +476,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
+		// beta_reduce(expr, *_vmap);
 		return HandleCast(expr->execute(_as, silent));
 	}
 
