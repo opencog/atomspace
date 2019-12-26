@@ -34,6 +34,7 @@ INSTALL (TARGETS atom_types EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
+	${CMAKE_CURRENT_BINARY_DIR}/atom_names.h
 	atom_types.cc
 	NameServer.h
 	types.h
