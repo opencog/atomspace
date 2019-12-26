@@ -484,10 +484,8 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// we want to quickly rule out this case before moving to more
 	// complex searches, below.
 	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
-	_search_fail = false;
-	found = no_search(pme);
-	if (found) return true;
-	if (not _search_fail) return false;
+	if (setup_no_search())
+		return pme->explore_constant_evaluatables(_pattern->mandatory);
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -806,16 +804,9 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
  * inefficient to use the pattern matcher for this, so if you want it
  * to run fast, re-work the below to not use the PME.
  */
-bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_no_search(void)
 {
-	if (0 < _variables->varset.size())
-	{
-		_search_fail = true;
-		return false;
-	}
-
-	// Evaluate all evaluatable clauses
-	return pme->explore_constant_evaluatables(_pattern->mandatory);
+	return (0 == _variables->varset.size());
 }
 
 /* ======================================================== */

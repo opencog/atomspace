@@ -91,12 +91,11 @@ protected:
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());
 
+	bool _search_fail;
 	bool neighbor_search(PatternMatchEngine *);
+	bool setup_no_search(void);
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
-
-	bool _search_fail;
-	bool no_search(PatternMatchEngine *);
 
 	bool search_loop(PatternMatchEngine *, const std::string);
 	AtomSpace *_as;
