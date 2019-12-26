@@ -37,7 +37,7 @@ using namespace opencog;
 
 /* ======================================================== */
 
-bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
+bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 {
 	if (top->is_link())
 	{
@@ -47,11 +47,14 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		for (const Handle& h : top->getOutgoingSet())
 		{
 			_starter_term = top;
-			bool found = do_search(pme, h);
+			bool found = do_search(pmc, h);
 			if (found) return true;
 		}
 		return false;
 	}
+
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_vars, *_pattern);
 
 	IncomingSet iset = get_incoming_set(top);
 	size_t sz = iset.size();
@@ -62,7 +65,7 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
 		       top->to_short_string().c_str(),
 		       h->to_short_string().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		bool found = pme.explore_neighborhood(_root, _starter_term, h);
 
 		// Terminate search if satisfied.
 		if (found) return true;
@@ -73,16 +76,13 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 
 bool Recognizer::initiate_search(PatternMatchCallback& pmc)
 {
-	PatternMatchEngine pme(pmc);
-	pme.set_pattern(*_vars, *_pattern);
-
 	const HandleSeq& clauses = _pattern->mandatory;
 
 	_cnt = 0;
 	for (const Handle& h: clauses)
 	{
 		_root = h;
-		bool found = do_search(&pme, h);
+		bool found = do_search(pmc, h);
 		if (found) return true;
 	}
 	return false;

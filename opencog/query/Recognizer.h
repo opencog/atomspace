@@ -27,7 +27,6 @@
 #include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
-class PatternMatchEngine;
 
 /**
  * Pattern recognition is the dual of pattern matching.
@@ -57,7 +56,7 @@ class Recognizer :
 		Handle _root;
 		Handle _starter_term;
 		size_t _cnt;
-		bool do_search(PatternMatchEngine*, const Handle&);
+		bool do_search(PatternMatchCallback&, const Handle&);
 		bool loose_match(const Handle&, const Handle&);
 
 	public:
