@@ -91,6 +91,7 @@ protected:
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());
 
+	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 
 	bool _search_fail;

@@ -501,7 +501,8 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
 	_search_fail = false;
-	found = link_type_search(pme);
+	if (setup_link_type_search())
+		found = search_loop(pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -513,8 +514,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	_search_fail = false;
-	bool setup = setup_variable_search();
-	if (setup)
+	if (setup_variable_search())
 		found = search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 	return found;
 }
@@ -561,7 +561,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
  * type which has the smallest number of atoms of that type in the
  * AtomSpace.
  */
-bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_link_type_search()
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -603,20 +603,8 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	Type ptype = _starter_term->get_type();
 
 	HandleSeq handle_set;
-	_as->get_handles_by_type(handle_set, ptype);
-
-#ifdef DEBUG
-	size_t i = 0, hsz = handle_set.size();
-#endif
-	for (const Handle& h : handle_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
-		                      << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		                      << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
-	return false;
+	_as->get_handles_by_type(_search_set, ptype);
+	return true;
 }
 
 /* ======================================================== */
