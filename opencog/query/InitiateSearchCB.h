@@ -30,7 +30,6 @@
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -96,8 +95,8 @@ protected:
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 
-	bool choice_loop(PatternMatchEngine *, const std::string);
-	bool search_loop(PatternMatchEngine *, const std::string);
+	bool choice_loop(PatternMatchCallback&, const std::string);
+	bool search_loop(PatternMatchCallback&, const std::string);
 	AtomSpace *_as;
 };
 

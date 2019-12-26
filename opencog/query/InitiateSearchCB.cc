@@ -351,7 +351,7 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 
 /* ======================================================== */
 
-bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
+bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
@@ -374,7 +374,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
 		for (const auto& lptr: iset)
 			_search_set.emplace_back(HandleCast(lptr));
 
-		bool found = search_loop(pme, dbg_banner);
+		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
 		if (found) return true;
 	}
@@ -386,9 +386,12 @@ bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
 
 /* ======================================================== */
 
-bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
+bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_variables, *_pattern);
+
 	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
 	            << _search_set.size() << " atoms";})
 
@@ -400,7 +403,7 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		bool found = pme.explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
 
@@ -499,12 +502,10 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
 bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 {
 	jit_analyze();
-	PatternMatchEngine pme(pmc);
-	pme.set_pattern(*_variables, *_pattern);
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
-		return choice_loop(&pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses hold no variables, and
@@ -513,7 +514,11 @@ bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 	// complex searches, below.
 	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
 	if (setup_no_search())
+	{
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
 		return pme.explore_constant_evaluatables(_pattern->mandatory);
+	}
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -522,7 +527,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
 	if (setup_link_type_search())
-		return search_loop(&pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
+		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
@@ -532,7 +537,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	if (setup_variable_search())
-		return search_loop(&pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
+		return search_loop(pmc, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 
 	return false;
 }
