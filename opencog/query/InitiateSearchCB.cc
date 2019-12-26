@@ -513,7 +513,9 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	_search_fail = false;
-	found = variable_search(pme);
+	bool setup = setup_variable_search();
+	if (setup)
+		found = search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 	return found;
 }
 
@@ -797,10 +799,9 @@ bool InitiateSearchCB::setup_variable_search(void)
 	return true;
 }
 
-bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
+                                   const std::string dbg_banner)
 {
-	if (not setup_variable_search()) return false;
-
 	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
 	            << _search_set.size() << " atoms";})
 
@@ -809,9 +810,9 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 #endif
 	for (const Handle& h : _search_set)
 	{
-		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
-		                      << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		                      << h->to_string();})
+		DO_LOG({LAZY_LOG_FINE << dbg_banner
+		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+		             << h->to_string();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}

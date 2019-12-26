@@ -96,9 +96,9 @@ protected:
 	bool _search_fail;
 	bool neighbor_search(PatternMatchEngine *);
 	bool link_type_search(PatternMatchEngine *);
-	bool variable_search(PatternMatchEngine *);
 	bool no_search(PatternMatchEngine *);
 
+	bool search_loop(PatternMatchEngine *, const std::string);
 	AtomSpace *_as;
 };
 
