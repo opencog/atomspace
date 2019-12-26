@@ -21,6 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// #include <algorithm>
+// #include <execution>
+// #include <opencog/util/oc_omp.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -898,6 +902,58 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// Note also: parallelizing will require adding locks to some
 	// portions of the callback, e.g. the `grounding()` callback,
 	// so that two parallel reports don't clobber each other.
+// #define PM_PARALLEL 1
+#ifdef PM_PARALLEL
+	// Parallel loop. This requires C++17 to work.
+	// This does not pass unit tests, because a lock is needed in
+	// the `grounding()` callback. And maybe other locks too.
+
+	bool found = false;
+	std::for_each(
+		std::execution::par_unseq,
+		_search_set.begin(),
+		_search_set.end(),
+		[&](auto&& h)
+		{
+			PatternMatchEngine pme(pmc);
+			pme.set_pattern(*_variables, *_pattern);
+
+			found |= pme.explore_neighborhood(_root, _starter_term, h);
+		});
+
+	return found;
+
+#endif
+
+// #define OMP_PM_PARALLEL 1
+#ifdef OMP_PM_PARALLEL
+	// Parallel loop. This requies OpenMP to work.
+	// This does not pass unit tests, because a lock is needed in
+	// the `grounding()` callback. And maybe other locks too.
+
+	bool found = false;
+
+	size_t hsz = _search_set.size();
+	#pragma omp parallel for
+	for (size_t i=0; i< hsz; i++)
+	{
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+
+		Handle h(_search_set[i]);
+		DO_LOG({LAZY_LOG_FINE << dbg_banner
+		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+		             << h->to_string();})
+		found |= pme.explore_neighborhood(_root, _starter_term, h);
+	}
+	return found;
+#endif
+
+#define SEQUENTIAL_LOOP 1
+#ifdef SEQUENTIAL_LOOP
+	// Plain-old, olde-fashioned sequential search loop.
+	// This works.
+
 #ifdef DEBUG
 	size_t i = 0, hsz = _search_set.size();
 #endif
@@ -913,6 +969,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		bool found = pme.explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
+#endif
 
 	return false;
 }
