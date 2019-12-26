@@ -67,7 +67,7 @@ protected:
 	const HandleSet* _dynamic;
 
 	PatternLinkPtr _pl;
-	void jit_analyze(PatternMatchEngine *);
+	void jit_analyze(void);
 
 	Handle _root;
 	Handle _starter_term;

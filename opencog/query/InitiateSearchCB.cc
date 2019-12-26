@@ -440,55 +440,55 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
  *    but this has no effect on the thoroughness of the search.  The search
  *    will proceed by exploring the entire incoming-set for this node.
  *
- *    This is ideal, when the node_match() callback accepts a match only
+ *    This is ideal, when the `node_match()` callback accepts a match only
  *    when the pattern and suggested nodes are identical (i.e. are
- *    exactly the same atom).  If the node_match() callback is willing to
- *    accept a broader range of node matches, then other possible
+ *    exactly the same atom).  If the `node_match()` callback is willing
+ *    to accept a broader range of node matches, then other possible
  *    solutions might be missed. Just how to fix this depends sharpely
- *    on what node_match() is willing to accept as a match.
+ *    on what `node_match()` is willing to accept as a match.
  *
  *    Anyway, this seems like a very reasonable limitation: if you
- *    really want a lenient node_match(), then use variables instead.
- *    Don't overload node-match with something weird, and you should be
- *    OK.  Otherwise, you'll have to implement your own initiate_search()
- *    callback.
+ *    really want a lenient `node_match()`, then use variables instead.
+ *    Don't overload `node_match` with something weird, and you should
+ *    be OK.  Otherwise, you'll have to implement your own
+ *    `initiate_search()` callback.
  *
  * 2) If the clauses consist entirely of variables, i.e. if there is not
  *    even one single non-variable node in the pattern, then a search is
  *    driven by looking for all links that are of the same type as one
  *    of the links in one of the clauses.
  *
- *    If the link_match() callback is willing to accept a broader range
+ *    If the `link_match()` callback is willing to accept a broader range
  *    of types, then this search method may fail to find some possible
  *    patterns.
  *
- *    Lets start by noting that this situation is very rare: most
- *    patterns will not consist entirely if Links and VariableNodes.
+ *    Let's start by noting that this situation is very rare: most
+ *    patterns will not consist entirely of `Links` and `VariableNodes`.
  *    Almost surely, most reasonable people will have at least one
  *    non-variable node in the pattern. So the disucssion below almost
  *    surely does not apply.
  *
  *    But if you really want this, there are several possible remedies.
- *    One is to modify the link_type_search() callback to try each
+ *    One is to modify the `link_type_search()` callback to try each
  *    possible link type that is considered to be equivalent by
- *    link_match(). Another alternative is to just leave the
- *    link_match() callback alone, and use variables for links, instead.
+ *    `link_match()`. Another alternative is to just leave the
+ *    `link_match()` callback alone, and use variables for links, instead.
  *    This is probably the best strategy, because then the fairly
  *    standard reasoning can be used when thinking about the problem.
- *    Of course, you can always write your own initiate_search() callback.
+ *    Of course, you can always write your own `initiate_search()` callback.
  *
  * If the constraint 1) can be met, (which is always the case for
  * "standard, canonical" searches, then the pattern match should be
  * quite rapid.  Incoming sets tend to be small; in addition, the
- * implemnentation here picks the smallest, "tinnest" incoming set to
+ * implemnentation here picks the smallest, "thinnest" incoming set to
  * explore.
  *
- * The default implementation of node_match() and link_match() in this
+ * The default implementation of `node_match()` and `link_match()` in this
  * class does satisfy both 1) and 2), so this algo will work correctly,
  * if these two methods are not overloaded with more callbacks that are
  * lenient about matching.
  *
- * If you overload node_match(), and do so in a way that breaks
+ * If you overload `node_match()`, and do so in a way that breaks
  * assumption 1), then you will scratch your head, thinking
  * "why did my search fail to find this obvious solution?" The answer
  * will be for you to create a new search algo, in a new class, that
@@ -498,7 +498,8 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
-	jit_analyze(pme);
+	jit_analyze();
+	pme->set_pattern(*_variables, *_pattern);
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
@@ -828,7 +829,7 @@ bool InitiateSearchCB::setup_no_search(void)
  * earlier, because the definitions for them might not have been
  * present, or may have changed since the pattern was initially created.
  */
-void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
+void InitiateSearchCB::jit_analyze(void)
 {
 	// If there are no definitions, there is nothing to do.
 	if (0 == _pattern->defined_terms.size())
@@ -889,7 +890,6 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	_dynamic = &_pattern->evaluatable_terms;
 
-	pme->set_pattern(*_variables, *_pattern);
 	set_pattern(*_variables, *_pattern);
 	DO_LOG({logger().fine("JIT expanded!");
 	_pl->debug_log();})
