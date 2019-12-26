@@ -351,7 +351,7 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 
 /* ======================================================== */
 
-bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
+bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
@@ -374,7 +374,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
 		for (const auto& lptr: iset)
 			_search_set.emplace_back(HandleCast(lptr));
 
-		bool found = search_loop(pme, dbg_banner);
+		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
 		if (found) return true;
 	}
@@ -386,21 +386,40 @@ bool InitiateSearchCB::choice_loop(PatternMatchEngine* pme,
 
 /* ======================================================== */
 
-bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
+/// search_loop() -- perform the actual pattern search
+///
+/// This performs the actual search for matching graphs.
+/// This assumes that a list of search starting points have been
+/// set up in the `_search_set`, as well as an approprite root
+/// clause and starting term.
+bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
-	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
-	            << _search_set.size() << " atoms";})
-
 #ifdef DEBUG
 	size_t i = 0, hsz = _search_set.size();
 #endif
+
+	// TODO: This is kind-of the main entry point into the CPU-cycle
+	// sucking part of the pattern search.  It might be worth
+	// parallelizing at this point. That is, ***if*** the _search_set
+	// is large, or the pattern is large/complex, then it might be
+	// worth it to create N threads, and N copies of PatternMatchEngine
+	// and run one search per thread.  Maybe. CAUTION: this is not
+	// always the bottleneck, and so adding heavy-weight thread
+	// initialization here might hurt some users.  See the benchmark
+	// `nano-en.scm` in the benchmark get repo, for example.
+	// Note also: parallelizing will require adding locks to some
+	// portions of the callback, e.g. the `grounding()` callback,
+	// so that two parallel reports don't clobber each other.
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_variables, *_pattern);
+
 	for (const Handle& h : _search_set)
 	{
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		bool found = pme.explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
 
@@ -496,14 +515,13 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 {
 	jit_analyze();
-	pme->set_pattern(*_variables, *_pattern);
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
-		return choice_loop(pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses hold no variables, and
@@ -512,7 +530,11 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// complex searches, below.
 	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
 	if (setup_no_search())
-		return pme->explore_constant_evaluatables(_pattern->mandatory);
+	{
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+		return pme.explore_constant_evaluatables(_pattern->mandatory);
+	}
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -521,7 +543,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
 	if (setup_link_type_search())
-		return search_loop(pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
+		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
@@ -531,7 +553,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	if (setup_variable_search())
-		return search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
+		return search_loop(pmc, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 
 	return false;
 }

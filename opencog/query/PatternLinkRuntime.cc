@@ -28,8 +28,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 
-// #include "PatternMatchEngine.h"
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatchEngine.h>
 
 using namespace opencog;
 
@@ -103,9 +103,9 @@ class PMCGroundings : public PatternMatchCallback
 			_cb.set_pattern(vars, pat);
 		}
 
-		bool initiate_search(PatternMatchEngine* pme)
+		bool initiate_search(PatternMatchCallback& pmcb)
 		{
-			return _cb.initiate_search(pme);
+			return _cb.initiate_search(pmcb);
 		}
 
 		bool search_finished(bool done)
@@ -325,13 +325,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// in a direct fashion.
 	if (_num_comps <= 1)
 	{
-		PatternMatchEngine pme(pmcb);
-
 		debug_log();
 
-		pme.set_pattern(_variables, _pat);
 		pmcb.set_pattern(_variables, _pat);
-		bool found = pmcb.initiate_search(&pme);
+		bool found = pmcb.initiate_search(pmcb);
 
 #ifdef DEBUG
 		logger().fine("================= Done with Search =================");
@@ -380,7 +377,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 #endif
 
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
-		Pattern pat = clp->get_pattern();
+		const Pattern& pat(clp->get_pattern());
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
