@@ -30,7 +30,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 

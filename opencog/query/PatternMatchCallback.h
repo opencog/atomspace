@@ -33,7 +33,6 @@
 #include <opencog/atoms/pattern/PatternTerm.h> // for pattern context
 
 namespace opencog {
-class PatternMatchEngine;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -337,7 +336,7 @@ class PatternMatchCallback
 		 * values on all the other callbacks; it summarizes (passes
 		 * through) the return values of all the others.
 		 */
-		virtual bool initiate_search(PatternMatchEngine *) = 0;
+		virtual bool initiate_search(PatternMatchCallback&) = 0;
 
 		/**
 		 * Called when the search has completed. In principle, this is not

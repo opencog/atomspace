@@ -24,10 +24,10 @@
 #ifndef _OPENCOG_RECOGNIZER_H
 #define _OPENCOG_RECOGNIZER_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
+class PatternMatchEngine;
 
 /**
  * Pattern recognition is the dual of pattern matching.
@@ -76,7 +76,7 @@ class Recognizer :
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
-		virtual bool initiate_search(PatternMatchEngine*);
+		virtual bool initiate_search(PatternMatchCallback&);
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);

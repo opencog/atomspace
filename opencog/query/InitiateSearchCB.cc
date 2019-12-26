@@ -496,14 +496,15 @@ bool InitiateSearchCB::search_loop(PatternMatchEngine *pme,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 {
 	jit_analyze();
-	pme->set_pattern(*_variables, *_pattern);
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_variables, *_pattern);
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
-		return choice_loop(pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+		return choice_loop(&pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses hold no variables, and
@@ -512,7 +513,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// complex searches, below.
 	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
 	if (setup_no_search())
-		return pme->explore_constant_evaluatables(_pattern->mandatory);
+		return pme.explore_constant_evaluatables(_pattern->mandatory);
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -521,7 +522,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
 	if (setup_link_type_search())
-		return search_loop(pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
+		return search_loop(&pme, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
@@ -531,7 +532,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	if (setup_variable_search())
-		return search_loop(pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
+		return search_loop(&pme, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 
 	return false;
 }
