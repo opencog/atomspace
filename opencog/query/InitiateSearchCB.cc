@@ -386,18 +386,34 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 
 /* ======================================================== */
 
+/// search_loop() -- perform the actual pattern search
+///
+/// This performs the actual search for matching graphs.
+/// This assumes that a list of search starting points have been
+/// set up in the `_search_set`, as well as an approprite root
+/// clause and starting term.
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
-	PatternMatchEngine pme(pmc);
-	pme.set_pattern(*_variables, *_pattern);
-
-	DO_LOG({LAZY_LOG_FINE << "Search-set size: "
-	            << _search_set.size() << " atoms";})
-
 #ifdef DEBUG
 	size_t i = 0, hsz = _search_set.size();
 #endif
+
+	// TODO: This is kind-of the main entry point into the CPU-cycle
+	// sucking part of the pattern search.  It might be worth
+	// parallelizing at this point. That is, ***if*** the _search_set
+	// is large, or the pattern is large/complex, then it might be
+	// worth it to create N threads, and N copies of PatternMatchEngine
+	// and run one search per thread.  Maybe. CAUTION: this is not
+	// always the bottleneck, and so adding heavy-weight thread
+	// initialization here might hurt some users.  See the benchmark
+	// `nano-en.scm` in the benchmark get repo, for example.
+	// Note also: parallelizing will require adding locks to some
+	// portions of the callback, e.g. the `grounding()` callback,
+	// so that two parallel reports don't clobber each other.
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_variables, *_pattern);
+
 	for (const Handle& h : _search_set)
 	{
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
