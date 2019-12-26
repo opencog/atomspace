@@ -280,7 +280,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * if the search was not performed, due to a failure to find a sutiable
  * starting point.
  */
-bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::neighbor_search(PatternMatchEngine* pme)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
@@ -365,18 +365,13 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		// get_incoming_set(), so that, e.g. it gets sorted by attentional
 		// focus in the AttentionalFocusCB class...
 		IncomingSet iset = get_incoming_set(best_start);
-		size_t sz = iset.size();
-		for (size_t i = 0; i < sz; i++)
-		{
-			Handle h(iset[i]);
-			DO_LOG({LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
-			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
-			              << h->to_string();})
-			bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		_search_set.clear();
+		for (const auto& lptr: iset)
+			_search_set.emplace_back(HandleCast(lptr));
 
-			// Terminate search if satisfied.
-			if (found) return true;
-		}
+		bool found = search_loop(pme, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+		// Terminate search if satisfied.
+		if (found) return true;
 	}
 
 	// If we are here, we have searched the entire neighborhood, and
