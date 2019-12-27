@@ -9,7 +9,7 @@
 
 (display "\n")
 (display "====> Attention!\n")
-(display "====> Obsolete! You do not need this module any longer.\n")
+(display "====> Obsolete! You do not need the `(opencog query)` module.\n")
 (display "====> Please use `(opencog exec)` and `cog-execute!` instead.\n")
 (display "\n")
 
