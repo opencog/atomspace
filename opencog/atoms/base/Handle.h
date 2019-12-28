@@ -35,6 +35,7 @@
 #include <string>
 #include <sstream>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -199,6 +200,9 @@ typedef std::unordered_set<Handle> UnorderedHandleSet;
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
 
+//! a hash table. Usually has faster insertion.
+typedef std::unordered_map<Handle, Handle> UnorderedHandleMap;
+
 //! an ordered map from Handle to Handle set
 typedef std::map<Handle, HandleSet> HandleMultimap;
 
@@ -314,6 +318,8 @@ std::string oc_to_string(const HandleMap& hm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMap::value_type& hmv,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const UnorderedHandleMap& hm,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMultimap& hmm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
@@ -366,6 +372,7 @@ ostream& operator<<(ostream&, const opencog::HandleMap&);
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::UnorderedHandleMap&);
 
 // This works for me, per note immediately above.
 template<>
