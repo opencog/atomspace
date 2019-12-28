@@ -457,6 +457,10 @@ be added to `/etc/sysctl.conf` as well. So edit, and add:
    vm.nr_hugepages = 16384       # 32GB of hugepages, 25% of RAM.
    vm.hugetlb_shm_group=1234
 ```
+(You might even want to set hugepages to 80% of RAM, or whatever your
+typical working-set size is for your typical AtomSpace.  For server-class
+systems, you might also want to experiment with 1GB hugepages).
+
 Don't forget to `sudo sysctl -p /etc/sysctl.conf` again.
 
 Finally, the ability to use those pages. Add to `/etc/security/limits.conf`:
