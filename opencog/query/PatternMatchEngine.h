@@ -174,6 +174,7 @@ private:
 	// or as std::unordered_map (aka std::_Hashtable). I looked for a
 	// performance difference between these two, but could not find one,
 	// at least with the `guile -l nano-en.scm` benchmark.
+	// (As of Dec 2019, using gcc-8.3.0 and glibc-2.28)
 	std::map<PatternTermSeq, GlobState> _glob_state;
 	// std::unordered_map<PatternTermSeq, GlobState> _glob_state;
 
