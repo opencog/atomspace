@@ -27,7 +27,6 @@
 #include <map>
 #include <set>
 #include <stack>
-#include <unordered_map>
 #include <vector>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -171,10 +170,12 @@ private:
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	// Looking for performance differences between these two...
-	// ... but there does not seem to be any ...!?
-	// std::map<PatternTermSeq, GlobState> _glob_state;
-	std::unordered_map<PatternTermSeq, GlobState> _glob_state;
+	// GlobState can be defined as either std::map (aka std::_Rb_tree)
+	// or as std::unordered_map (aka std::_Hashtable). I looked for a
+	// performance difference between these two, but could not find one,
+	// at least with the `guile -l nano-en.scm` benchmark.
+	std::map<PatternTermSeq, GlobState> _glob_state;
+	// std::unordered_map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
