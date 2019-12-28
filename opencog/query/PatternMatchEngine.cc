@@ -486,7 +486,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 			// Each glob comparison steps the glob state forwards.
 			// Each different permutation has to start with the
 			// same glob state as before. So save and restore state.
-			std::map<PatternTermSeq, GlobState> saved_glob_state = _glob_state;
+			auto saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
 			_glob_state = saved_glob_state;
 		}
@@ -1349,8 +1349,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
-		std::map<PatternTermSeq, GlobState> saved_glob_state;
-		saved_glob_state = _glob_state;
+		auto saved_glob_state = _glob_state;
 
 		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);
 

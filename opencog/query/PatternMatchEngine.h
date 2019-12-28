@@ -171,7 +171,10 @@ private:
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<PatternTermSeq, GlobState> _glob_state;
+	// Looking for performance differences between these two...
+	// ... but there does not seem to be any ...!?
+	// std::map<PatternTermSeq, GlobState> _glob_state;
+	std::unordered_map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.

@@ -135,10 +135,11 @@ namespace std {
 
 /**
  * Overload the standard comparison operator for PatternTerm pointers.
- * This uses content-baed compare for individual atoms, and then moving
+ * This uses content-based compare for individual atoms, and then moving
  * up the term inclusion path, if the atoms are identical. Thus, this
  * is almost the same as `std::less<Handle>` but not quite.
  *
+ * This is needed for std::map<PatternTermPtr, ...> and similar.
  * This is performance-sensitive; it is used during pattern matching
  * to walk over permutations of unordered links.
  */
@@ -157,6 +158,56 @@ struct less<opencog::PatternTermPtr>
 		return lHandle < rHandle;
 	}
 
+};
+
+template<>
+struct hash<opencog::PatternTermPtr>
+{
+	std::size_t
+	operator()(const opencog::PatternTermPtr& ptm) const noexcept
+	{ return ptm->getHandle()->get_hash(); }
+};
+
+template<>
+struct equal_to<opencog::PatternTermPtr>
+{
+	bool
+	operator()(const opencog::PatternTermPtr& lptm,
+	           const opencog::PatternTermPtr& rptm) const noexcept
+	{ return lptm->operator==(*rptm); }
+};
+
+/** Needed for std::unordered_map<PatternTermSeq, ...> and similar. */
+template<>
+struct hash<opencog::PatternTermSeq>
+{
+	std::size_t
+	operator()(const opencog::PatternTermSeq& seq) const noexcept
+	{
+		std::size_t hash = 0;
+		for (const opencog::PatternTermPtr& ptm : seq)
+			hash += ptm->getHandle()->get_hash();
+		return hash;
+	}
+};
+
+template<>
+struct equal_to<opencog::PatternTermSeq>
+{
+	bool
+	operator()(const opencog::PatternTermSeq& lseq,
+	           const opencog::PatternTermSeq& rseq) const noexcept
+	{
+		size_t lsz = lseq.size();
+		if (lsz != rseq.size()) return false;
+		for (size_t i=0; i<lsz; i++)
+		{
+			const opencog::PatternTermPtr& lptm(lseq[i]);
+			const opencog::PatternTermPtr& rptm(rseq[i]);
+			if (not lptm->operator==(*rptm)) return false;
+		}
+		return true;
+	}
 };
 
 }; // namespace std;
