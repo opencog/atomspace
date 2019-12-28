@@ -2296,8 +2296,8 @@ void PatternMatchEngine::solution_drop(void)
 /// Pass the grounding that was found out to the callback.
 /// ... unless there is an Always clasue, in which case we
 /// save them up until we've looked at all of them.
-bool PatternMatchEngine::report_grounding(const HandleMap &var_soln,
-                                          const HandleMap &term_soln)
+bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
+                                          const GroundingMap &term_soln)
 {
 	// If there is no for-all clause (no AlwaysLink clause)
 	// then report groundings as they are found.
@@ -2520,13 +2520,13 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 	bool found = true;
 	for (const Handle& clause : clauses) {
 		if (is_in(clause, _pat->evaluatable_holders)) {
-			found = _pmc.evaluate_sentence(clause, HandleMap());
+			found = _pmc.evaluate_sentence(clause, GroundingMap());
 			if (not found)
 				break;
 		}
 	}
 	if (found)
-		report_grounding(HandleMap(), HandleMap());
+		report_grounding(GroundingMap(), GroundingMap());
 
 	return found;
 }
@@ -2570,8 +2570,8 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 
 #ifdef DEBUG
 void PatternMatchEngine::print_solution(
-	const HandleMap &vars,
-	const HandleMap &clauses)
+	const GroundingMap &vars,
+	const GroundingMap &clauses)
 {
 	Logger::Level save = logger().get_level();
 	logger().set_level("fine");
@@ -2584,8 +2584,8 @@ void PatternMatchEngine::print_solution(
 }
 
 void PatternMatchEngine::log_solution(
-	const HandleMap &vars,
-	const HandleMap &clauses)
+	const GroundingMap &vars,
+	const GroundingMap &clauses)
 {
 	if (!logger().is_fine_enabled())
 		return;
@@ -2623,7 +2623,7 @@ void PatternMatchEngine::log_solution(
 
 	// Print out the full binding to all of the clauses.
 	logger().fine() << "Groundings for " << clauses.size() << " clauses:";
-	HandleMap::const_iterator m;
+	GroundingMap::const_iterator m;
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
@@ -2652,8 +2652,8 @@ void PatternMatchEngine::log_term(const HandleSet &vars,
 }
 #else
 
-void PatternMatchEngine::log_solution(const HandleMap &vars,
-                                      const HandleMap &clauses) {}
+void PatternMatchEngine::log_solution(const GroundingMap &vars,
+                                      const GroundingMap &clauses) {}
 
 void PatternMatchEngine::log_term(const HandleSet &vars,
                                   const HandleSeq &clauses) {}

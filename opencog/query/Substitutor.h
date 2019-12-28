@@ -50,9 +50,9 @@ private:
 
 	// Placing vmap first allows the compiler to optimize the stack
 	// frame. That is, expr changes each time, but vmap does not.
-	static Handle walk_tree(const HandleMap &vmap, const Handle& expr)
+	static Handle walk_tree(const GroundingMap &vmap, const Handle& expr)
 	{
-		HandleMap::const_iterator it = vmap.find(expr);
+		GroundingMap::const_iterator it = vmap.find(expr);
 		if (vmap.end() != it )
 			return it->second;
 
@@ -85,7 +85,7 @@ public:
 	 * @return      a new atom with sub-atoms replaced
 	 */
 	static Handle substitute(const Handle& expr,
-	                         const HandleMap &vars)
+	                         const GroundingMap &vars)
 	{
 		// throw, not assert, because this is a user error ...
 		if (nullptr == expr)

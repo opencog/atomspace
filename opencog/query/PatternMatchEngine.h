@@ -90,9 +90,9 @@ private:
 	// Map of current groundings of variables to their grounds
 	// Also contains grounds of subclauses (not sure why, this seems
 	// to be needed)
-	HandleMap var_grounding;
+	GroundingMap var_grounding;
 	// Map of clauses to their current groundings
-	HandleMap clause_grounding;
+	GroundingMap clause_grounding;
 
 	// Insert association between pattern ptm and its grounding hg into
 	// var_grounding.
@@ -168,7 +168,7 @@ private:
 	typedef std::stack<GlobPos> GlobPosStack;
 
 	// Record how many atoms have been grounded to the globs
-	typedef std::unordered_map<PatternTermPtr, size_t> GlobGrd;
+	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
 	// Looking for performance differences between these two...
@@ -202,9 +202,8 @@ private:
 	void solution_drop(void);
 
 	// Stacks containing partial groundings.
-	typedef HandleMap SolnMap;
-	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> _clause_solutn_stack;
+	std::stack<GroundingMap> var_solutn_stack;
+	std::stack<GroundingMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
@@ -218,15 +217,14 @@ private:
 	// -------------------------------------------
 	// Methods that run when all clauses have been grounded.
 
-	typedef HandleMap GrndMap;
-	std::vector<GrndMap> _var_ground_cache;
-	std::vector<GrndMap> _term_ground_cache;
+	std::vector<GroundingMap> _var_ground_cache;
+	std::vector<GroundingMap> _term_ground_cache;
 	bool _forall_state = true;
 	bool _did_check_forall;
 
 	// Report a fully grounded pattern to the callback.
-	bool report_grounding(const HandleMap &var_soln,
-	                      const HandleMap &term_soln);
+	bool report_grounding(const GroundingMap &var_soln,
+	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
 	// -------------------------------------------
@@ -294,10 +292,10 @@ public:
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
 	// Handy-dandy utilities
-	static void print_solution(const HandleMap &vars,
-	                           const HandleMap &clauses);
-	static void log_solution(const HandleMap &vars,
-	                         const HandleMap &clauses);
+	static void print_solution(const GroundingMap &vars,
+	                           const GroundingMap &clauses);
+	static void log_solution(const GroundingMap &vars,
+	                         const GroundingMap &clauses);
 
 	static void log_term(const HandleSet &vars,
 	                     const HandleSeq &clauses);

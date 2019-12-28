@@ -161,7 +161,7 @@ MapLink::MapLink(const Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      HandleMap& valmap,
+                      GroundingMap& valmap,
                       Quotation quotation) const
 {
 	if (termpat == ground) return true;
@@ -326,10 +326,10 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// Execute the ground, including consuming its quotation as part of
 	// the MapLink semantics
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.instantiate(cterm, HandleMap())));
+	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
 
 	// Extract values for variables.
-	HandleMap valmap;
+	GroundingMap valmap;
 	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
 

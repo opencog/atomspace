@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const HandleMap &var_soln,
-                          const HandleMap &term_soln)
+bool Satisfier::grounding(const GroundingMap &var_soln,
+                          const GroundingMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
@@ -97,7 +97,7 @@ bool Satisfier::search_finished(bool done)
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
 		return done;
 
-	HandleMap empty;
+	GroundingMap empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
 		_result = TruthValue::TRUE_TV();
@@ -107,8 +107,8 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-bool SatisfyingSet::grounding(const HandleMap &var_soln,
-                              const HandleMap &term_soln)
+bool SatisfyingSet::grounding(const GroundingMap &var_soln,
+                              const GroundingMap &term_soln)
 {
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 

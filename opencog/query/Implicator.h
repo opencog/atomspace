@@ -66,8 +66,8 @@ class Implicator :
 		Handle implicand;
 		size_t max_results;
 
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 
 		virtual const ValueSet& get_result_set() const
 		{ return _result_set; }

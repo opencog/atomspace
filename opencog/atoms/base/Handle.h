@@ -224,6 +224,10 @@ typedef Counter<Handle, double> HandleCounter;
 //! a map from handle to unsigned
 typedef Counter<Handle, unsigned> HandleUCounter;
 
+typedef UnorderedHandleMap GroundingMap;
+typedef std::vector<GroundingMap> GroundingMapSeq;
+typedef std::vector<GroundingMapSeq> GroundingMapSeqSeq;
+
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
 

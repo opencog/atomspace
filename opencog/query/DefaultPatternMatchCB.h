@@ -67,17 +67,17 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual void post_link_mismatch(const Handle&, const Handle&);
 
 		virtual bool clause_match(const Handle&, const Handle&,
-		                          const HandleMap&);
+		                          const GroundingMap&);
 
 		/** Called for AbsentLink */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
-		                                   const HandleMap&);
+		                                   const GroundingMap&);
 
 		/** Called for AlawaysLink */
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
-		                                 const HandleMap&);
+		                                 const GroundingMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&);
 
@@ -85,7 +85,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
+		virtual bool evaluate_sentence(const Handle& pat, const GroundingMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
 		virtual const TypeSet& get_connectives(void)
@@ -107,7 +107,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
-		                    const HandleMap&, const HandleSet&,
+		                    const GroundingMap&, const HandleSet&,
 		                    Quotation quotation=Quotation());
 
 		// Variables that should be ignored, because they are bound
@@ -131,8 +131,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;
-		bool eval_term(const Handle& pat, const HandleMap& gnds);
-		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
+		bool eval_term(const Handle& pat, const GroundingMap& gnds);
+		bool eval_sentence(const Handle& pat, const GroundingMap& gnds);
 
 		bool _optionals_present = false;
 		AtomSpace* _as;

@@ -79,8 +79,8 @@ class Recognizer :
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 };
 
 } // namespace opencog
