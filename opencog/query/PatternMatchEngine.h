@@ -168,7 +168,7 @@ private:
 	typedef std::stack<GlobPos> GlobPosStack;
 
 	// Record how many atoms have been grounded to the globs
-	typedef std::map<PatternTermPtr, size_t> GlobGrd;
+	typedef std::unordered_map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
 	// Looking for performance differences between these two...
