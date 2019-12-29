@@ -149,7 +149,7 @@ public:
 
     virtual size_t size() const {
         size_t size = 1;
-        for (const Handle&h : _outgoing)
+        for (const Handle& h : _outgoing)
             size += h->size();
         return size;
     }
@@ -173,12 +173,7 @@ public:
      */
     virtual Handle getOutgoingAtom(Arity pos) const
     {
-        // Checks for a valid position
-        if (pos < _outgoing.size()) {
-            return Handle(AtomCast(_outgoing[pos]));
-        } else {
-            throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
-        }
+        return _outgoig.at(pos);
     }
 
     //! Invoke the callback on each atom in the outgoing set of
