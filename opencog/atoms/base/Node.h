@@ -69,15 +69,8 @@ public:
         init(s);
     }
 
-    /**
-     * Copy constructor, does not copy atomspace membership,
-     * or any of the values/truthvalues.
-     */
-    Node(const Node &n)
-        : Atom(n.get_type())
-    {
-        init(n._name);
-    }
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
 
     virtual bool is_node() const { return true; }
     virtual bool is_link() const { return false; }

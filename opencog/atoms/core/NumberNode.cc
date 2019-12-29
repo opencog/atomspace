@@ -84,16 +84,6 @@ NumberNode::NumberNode(const std::string& s)
 	_name = vector_to_plain(_value);
 }
 
-NumberNode::NumberNode(Node &n)
-	: Node(n)
-{
-	OC_ASSERT(nameserver().isA(_type, NUMBER_NODE),
-		"Bad NumberNode constructor!");
-
-	_value = to_vector(n.get_name());
-	_name = vector_to_plain(_value);
-}
-
 NumberNode::NumberNode(const std::vector<double>& vec)
 	: Node(NUMBER_NODE, "")
 {
