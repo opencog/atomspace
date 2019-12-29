@@ -51,6 +51,7 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&);
+    void init(const HandleSeq&&);
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -71,6 +72,12 @@ public:
      * @param Link truthvalue.
      */
     Link(const HandleSeq& oset, Type t=LINK)
+        : Atom(t)
+    {
+        init(oset);
+    }
+
+    Link(HandleSeq&& oset, Type t=LINK)
         : Atom(t)
     {
         init(oset);
@@ -173,7 +180,7 @@ public:
      */
     virtual Handle getOutgoingAtom(Arity pos) const
     {
-        return _outgoig.at(pos);
+        return _outgoing.at(pos);
     }
 
     //! Invoke the callback on each atom in the outgoing set of
