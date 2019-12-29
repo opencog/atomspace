@@ -49,7 +49,8 @@ protected:
 
 public:
 	RandomNumberLink(const HandleSeq&, Type=RANDOM_NUMBER_LINK);
-	RandomNumberLink(const Link &l);
+	RandomNumberLink(const RandomNumberLink&) = delete;
+	RandomNumberLink& operator=(const RandomNumberLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);

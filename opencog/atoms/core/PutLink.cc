@@ -34,12 +34,6 @@ PutLink::PutLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-PutLink::PutLink(const Link& l)
-    : PrenexLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 
 /// PutLink expects a very strict format: an arity-2 link, with

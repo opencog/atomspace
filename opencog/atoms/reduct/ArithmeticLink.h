@@ -55,7 +55,8 @@ protected:
 
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
-	ArithmeticLink(const Link& l);
+	ArithmeticLink(const ArithmeticLink&) = delete;
+	ArithmeticLink& operator=(const ArithmeticLink&) = delete;
 
 	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);

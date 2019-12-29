@@ -46,12 +46,6 @@ GetLink::GetLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-GetLink::GetLink(const Link &l)
-	: PatternLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 
 HandleSet GetLink::do_execute(AtomSpace* as, bool silent)

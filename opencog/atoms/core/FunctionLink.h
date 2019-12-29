@@ -70,7 +70,8 @@ public:
 	// Sadly, need to make this public, else the factory code fails.
 	FunctionLink(const HandleSeq& oset, Type = FUNCTION_LINK);
 
-	FunctionLink(const Link& l);
+	FunctionLink(const FunctionLink&) = delete;
+	FunctionLink& operator=(const FunctionLink&) = delete;
 	virtual ~FunctionLink() {}
 
 	virtual bool is_executable(void) const { return true; }

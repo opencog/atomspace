@@ -42,19 +42,6 @@ RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset, Type t)
 	}
 }
 
-RandomChoiceLink::RandomChoiceLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, RANDOM_CHOICE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an RandomChoiceLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 /// When executed, this will randomly select and return an atom

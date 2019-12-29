@@ -56,7 +56,8 @@ protected:
 public:
 	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
 	VariableList(const Handle& hvardecls);
-	VariableList(const Link&);
+	VariableList(const VariableList&) = delete;
+	VariableList& operator=(const VariableList&) = delete;
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }

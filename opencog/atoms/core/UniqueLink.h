@@ -53,9 +53,10 @@ public:
 	UniqueLink(const HandleSeq&, Type=UNIQUE_LINK);
 	UniqueLink(const Handle& alias, const Handle& body);
 
-	UniqueLink(const Link &l);
+	UniqueLink(const UniqueLink&) = delete;
+	UniqueLink& operator=(const UniqueLink&) = delete;
 
-	Handle get_alias(void) const { return _outgoing[0]; }
+	Handle get_alias(void) const { return _outgoing.at(0); }
 
 	static Handle factory(const Handle&);
 };

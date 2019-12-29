@@ -139,7 +139,8 @@ public:
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
-	PatternLink(const Link&);
+	PatternLink(const PatternLink&) = delete;
+	PatternLink& operator=(const PatternLink&) = delete;
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).

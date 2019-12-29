@@ -310,7 +310,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         }
     }
     else if (atom->getAtomTable())
-        atom = createNode(*NodeCast(atom));
+        atom = createNode(atom->get_type(), atom->get_name());
 
     atom->copyValues(orig);
     atom->install();

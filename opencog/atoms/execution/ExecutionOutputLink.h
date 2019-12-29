@@ -49,7 +49,8 @@ protected:
 public:
 	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
-	ExecutionOutputLink(const Link& l);
+	ExecutionOutputLink(const ExecutionOutputLink&) = delete;
+	ExecutionOutputLink& operator=(const ExecutionOutputLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false);

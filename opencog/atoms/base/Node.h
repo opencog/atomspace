@@ -45,6 +45,7 @@ protected:
     // properties
     std::string _name;
     void init(const std::string&);
+    void init(const std::string&&);
 
     virtual ContentHash compute_hash() const;
 
@@ -62,15 +63,14 @@ public:
         init(s);
     }
 
-    /**
-     * Copy constructor, does not copy atomspace membership,
-     * or any of the values/truthvalues.
-     */
-    Node(const Node &n)
-        : Atom(n.get_type())
+    Node(Type t, const std::string&& s)
+        : Atom(t)
     {
-        init(n._name);
+        init(s);
     }
+
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
 
     virtual bool is_node() const { return true; }
     virtual bool is_link() const { return false; }

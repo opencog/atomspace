@@ -66,25 +66,6 @@ UnorderedLink::UnorderedLink(const HandleSet& oset, Type t)
 		content_based_handle_less());
 }
 
-UnorderedLink::UnorderedLink(const Link& l)
-	: Link(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, UNORDERED_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an UnorderedLink, got %s", tname.c_str());
-	}
-
-	// Place into arbitrary, but deterministic order.
-	// We have to do this here,  because the input link l might not
-	// have ever gone through an UnorderedLink constructor before.
-	std::sort(_outgoing.begin(), _outgoing.end(),
-		content_based_handle_less());
-}
-
 // ---------------------------------------------------------------
 
 DEFINE_LINK_FACTORY(UnorderedLink, UNORDERED_LINK)

@@ -65,12 +65,6 @@ QueryLink::QueryLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-QueryLink::QueryLink(const Link &l)
-	: PatternLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 ///
 /// Find and unpack variable declarations, if any; otherwise, just

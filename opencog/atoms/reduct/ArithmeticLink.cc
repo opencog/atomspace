@@ -36,12 +36,6 @@ ArithmeticLink::ArithmeticLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-ArithmeticLink::ArithmeticLink(const Link& l)
-    : FoldLink(l)
-{
-	init();
-}
-
 void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();

@@ -74,21 +74,8 @@ public:
 		  _kind(t)
 	{}
 
-	TypeNode(Node &n)
-		: Node(n),
-		  _kind(nameserver().getType(n.get_name()))
-	{
-		OC_ASSERT(nameserver().isA(n.get_type(), TYPE_NODE),
-			"Bad TypeNode constructor!");
-
-		if (DEFINED_TYPE_NODE != _type and NOTYPE == _kind)
-			throw InvalidParamException(TRACE_INFO,
-				"Not a valid typename: '%s'", n.get_name().c_str());
-
-		if (DEFINED_TYPE_NODE == _type and NOTYPE != _kind)
-			throw InvalidParamException(TRACE_INFO,
-				"Redefinition of a built-in typename: '%s'", n.get_name().c_str());
-	}
+	TypeNode(TypeNode&) = delete;
+	TypeNode& operator=(const TypeNode&) = delete;
 
 	static void validate(const std::string& str)
 	{

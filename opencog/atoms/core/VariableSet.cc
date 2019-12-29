@@ -58,12 +58,6 @@ VariableSet::VariableSet(const Handle& vardecl)
 {
 }
 
-VariableSet::VariableSet(const Link &l)
-	: UnorderedLink(l), _variables(l.get_handle())
-{
-	throw_if_not_variable_set(l.get_type());
-}
-
 std::string opencog::oc_to_string(const VariableSetPtr& vsp,
                                   const std::string& indent)
 {

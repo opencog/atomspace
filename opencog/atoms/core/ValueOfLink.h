@@ -38,7 +38,8 @@ class ValueOfLink : public FunctionLink
 {
 public:
 	ValueOfLink(const HandleSeq&, Type=VALUE_OF_LINK);
-	ValueOfLink(const Link &l);
+	ValueOfLink(const ValueOfLink&) = delete;
+	ValueOfLink& operator=(const ValueOfLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);

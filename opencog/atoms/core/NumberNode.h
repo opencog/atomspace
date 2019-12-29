@@ -62,8 +62,8 @@ public:
 		: Node(NUMBER_NODE, double_to_string(vvv))
 	{ _value.push_back(vvv); }
 
-	// TODO Should be a move assignment...
-	NumberNode(Node &);
+	NumberNode(NumberNode&) = delete;
+	NumberNode& operator=(const NumberNode&) = delete;
 
 	static std::vector<double> to_vector(const std::string&);
 	static std::string vector_to_json(const std::vector<double>&);

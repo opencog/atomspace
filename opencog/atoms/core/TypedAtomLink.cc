@@ -69,12 +69,6 @@ TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(const Link &l)
-	: UniqueLink(l)
-{
-	init();
-}
-
 /**
  * Get the type description associated with the alias.
  * This will be the second atom of some TypedAtomLink, where

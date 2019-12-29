@@ -23,7 +23,8 @@ class EvaluationLink : public FreeLink
 public:
 	EvaluationLink(const HandleSeq&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
-	EvaluationLink(const Link& l);
+	EvaluationLink(const EvaluationLink&) = delete;
+	EvaluationLink& operator=(const EvaluationLink&) = delete;
 
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
 		return do_evaluate(as, get_handle());

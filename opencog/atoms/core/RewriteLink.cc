@@ -56,13 +56,6 @@ RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-RewriteLink::RewriteLink(const Link &l)
-	: ScopeLink(l), _silent(false)
-{
-	if (skip_init(l.get_type())) return;
-	init();
-}
-
 /* ================================================================= */
 
 inline Handle append_rand_str(const Handle& var)

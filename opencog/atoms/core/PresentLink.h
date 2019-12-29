@@ -61,7 +61,8 @@ class PresentLink : public UnorderedLink
 	void init(void);
 public:
 	PresentLink(const HandleSeq&, Type=PRESENT_LINK);
-	PresentLink(const Link &l);
+	PresentLink(const PresentLink &) = delete;
+	PresentLink& operator=(const PresentLink &) = delete;
 
 	static Handle factory(const Handle&);
 };

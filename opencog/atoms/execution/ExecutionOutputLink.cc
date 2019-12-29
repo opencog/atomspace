@@ -75,17 +75,6 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 	check_schema(schema);
 }
 
-ExecutionOutputLink::ExecutionOutputLink(const Link& l)
-	: FunctionLink(l)
-{
-	Type tscope = l.get_type();
-	if (EXECUTION_OUTPUT_LINK != tscope)
-		throw SyntaxException(TRACE_INFO,
-		                      "Expection an ExecutionOutputLink!");
-
-	check_schema(l.getOutgoingAtom(0));
-}
-
 /// execute -- execute the function defined in an ExecutionOutputLink
 ///
 /// Each ExecutionOutputLink should have the form:

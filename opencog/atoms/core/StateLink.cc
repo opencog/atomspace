@@ -48,12 +48,6 @@ StateLink::StateLink(const Handle& name, const Handle& defn)
 	init();
 }
 
-StateLink::StateLink(const Link &l)
-	: UniqueLink(l)
-{
-	init();
-}
-
 /**
  * Get the state associated with the alias.
  * This will be the second atom of some StateLink, where

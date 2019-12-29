@@ -48,7 +48,8 @@ public:
 	QueryLink(const HandleSeq&, Type=QUERY_LINK);
 	QueryLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	QueryLink(const Handle& body, const Handle& rewrite);
-	explicit QueryLink(const Link &l);
+	QueryLink(const QueryLink&) = delete;
+	QueryLink& operator=(const QueryLink&) = delete;
 
 	const Handle& get_implicand(void) { return _implicand; }
 

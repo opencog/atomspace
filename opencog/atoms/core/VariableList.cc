@@ -59,12 +59,6 @@ VariableList::VariableList(const HandleSeq& oset, Type t)
 	throw_if_not_variable_list(t);
 }
 
-VariableList::VariableList(const Link &l)
-	: Link(l), _variables(l.get_handle(), true)
-{
-	throw_if_not_variable_list(l.get_type());
-}
-
 /* ================================================================= */
 
 std::string opencog::oc_to_string(const VariableListPtr& vlp,

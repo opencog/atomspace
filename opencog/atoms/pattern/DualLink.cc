@@ -68,12 +68,6 @@ DualLink::DualLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-DualLink::DualLink(const Link &l)
-	: PatternLink(l)
-{
-	init();
-}
-
 ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
