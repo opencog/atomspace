@@ -45,6 +45,7 @@ protected:
     // properties
     std::string _name;
     void init(const std::string&);
+    void init(const std::string&&);
 
     virtual ContentHash compute_hash() const;
 
@@ -57,6 +58,12 @@ public:
      *                  the node.  Use empty string for unamed node.
      */
     Node(Type t, const std::string& s)
+        : Atom(t)
+    {
+        init(s);
+    }
+
+    Node(Type t, const std::string&& s)
         : Atom(t)
     {
         init(s);
