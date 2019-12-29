@@ -350,7 +350,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 /// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
-                                           const HandleMap& term_gnds,
+                                           const GroundingMap& term_gnds,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
@@ -466,7 +466,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd,
-                                         const HandleMap& term_gnds)
+                                         const GroundingMap& term_gnds)
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
@@ -524,7 +524,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
-                                                  const HandleMap& term_gnds)
+                                                  const GroundingMap& term_gnds)
 {
 	// If any grounding at all was found, reject it.
 	if (grnd)
@@ -576,7 +576,7 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
-                                                const HandleMap& term_gnds)
+                                                const GroundingMap& term_gnds)
 {
 	return grnd != nullptr;
 }
@@ -596,7 +596,7 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 // beta-reduction with the groundings, followed by proper evaluation.
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
-                                      const HandleMap& gnds)
+                                      const GroundingMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
@@ -744,7 +744,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * variables to values.
  */
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
-                                          const HandleMap& gnds)
+                                          const GroundingMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->to_short_string() << std::endl

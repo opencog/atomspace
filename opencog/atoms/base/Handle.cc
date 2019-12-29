@@ -233,6 +233,21 @@ std::string oc_to_string(const HandleMap& hmap, const std::string& indent)
 	return ss.str();
 }
 
+std::string oc_to_string(const UnorderedHandleMap& hmap, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hmap.size();
+	int i = 0;
+	for (const auto& p : hmap) {
+		ss << std::endl << indent << "key[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "value[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
+}
+
 std::string oc_to_string(const HandleMap::value_type& hmv, const std::string& indent)
 {
 	std::stringstream ss;
@@ -379,6 +394,10 @@ ostream& operator<<(ostream& out, const opencog::HandleSeq& hs)
 ostream& operator<<(ostream& out, const opencog::HandleSet& ohs)
 {
 	return out << oc_to_string(ohs);
+}
+ostream& operator<<(ostream& out, const opencog::UnorderedHandleMap& hm)
+{
+	return out << oc_to_string(hm);
 }
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& uhs)
 {

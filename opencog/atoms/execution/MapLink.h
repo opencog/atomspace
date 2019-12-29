@@ -57,7 +57,7 @@ protected:
 
 	MapLink(Type, const Handle&);
 
-	bool extract(const Handle&, const Handle&, HandleMap&,
+	bool extract(const Handle&, const Handle&, GroundingMap&,
 	             Quotation quotation=Quotation()) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*) const;

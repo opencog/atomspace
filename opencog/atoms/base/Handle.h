@@ -35,6 +35,7 @@
 #include <string>
 #include <sstream>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -199,6 +200,9 @@ typedef std::unordered_set<Handle> UnorderedHandleSet;
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
 
+//! a hash table. Usually has faster insertion.
+typedef std::unordered_map<Handle, Handle> UnorderedHandleMap;
+
 //! an ordered map from Handle to Handle set
 typedef std::map<Handle, HandleSet> HandleMultimap;
 
@@ -219,6 +223,18 @@ typedef Counter<Handle, double> HandleCounter;
 
 //! a map from handle to unsigned
 typedef Counter<Handle, unsigned> HandleUCounter;
+
+// A map of variables to thier groundings.  Everyone working with
+// groundings uses this type; changing the type here allows easy
+// comparisons of performance for these two mapping styles.
+// At this time (Dec 2019; gcc-8.3.0) there seems to be no difference
+// in performance in the pattern matcher as a result of using the
+// unordered aka std::_Hashtable variant vs the std::_Rb_tree variant.
+// (as measured with the `guile -l nano-en.scm` benchmark.)
+typedef HandleMap GroundingMap;
+// typedef UnorderedHandleMap GroundingMap;
+typedef std::vector<GroundingMap> GroundingMapSeq;
+typedef std::vector<GroundingMapSeq> GroundingMapSeqSeq;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
@@ -314,6 +330,8 @@ std::string oc_to_string(const HandleMap& hm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMap::value_type& hmv,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const UnorderedHandleMap& hm,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMultimap& hmm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
@@ -366,6 +384,7 @@ ostream& operator<<(ostream&, const opencog::HandleMap&);
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::UnorderedHandleMap&);
 
 // This works for me, per note immediately above.
 template<>

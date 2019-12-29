@@ -42,7 +42,7 @@ Instantiator::Instantiator(AtomSpace* as)
 /// member of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const HandleMap& vmap)
+static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 {
 	// Format conversion. FreeVariables::substitute_nocheck() performs
 	// beta-reduction correctly, so we just use that. But we have to
@@ -274,7 +274,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// If we are here, we found a free variable (or glob?). Look
 		// it up. Return a grounding if it has one, otherwise return
 		// the variable itself.
-		HandleMap::const_iterator it = _vmap->find(expr);
+		GroundingMap::const_iterator it = _vmap->find(expr);
 		if (_vmap->end() == it) return expr;
 
 		// Not so fast, pardner. VariableNodes can be grounded by
@@ -544,7 +544,7 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                   const HandleMap &vars,
+                                   const GroundingMap &vars,
                                    bool silent)
 {
 	// throw, not assert, because this is a user error ...
@@ -659,7 +659,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 
 	// XXX FIXME, since the variable map is empty, maybe we can do
 	// something more efficient, here?
-	ValuePtr vp(instantiate(expr, HandleMap(), silent));
+	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
 
 	return vp;
 }

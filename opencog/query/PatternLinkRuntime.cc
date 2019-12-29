@@ -70,25 +70,25 @@ class PMCGroundings : public PatternMatchCallback
 			return _cb.fuzzy_match(h1, h2);
 		}
 		bool evaluate_sentence(const Handle& link_h,
-		                       const HandleMap &gnds)
+		                       const GroundingMap &gnds)
 		{
 			return _cb.evaluate_sentence(link_h,gnds);
 		}
 		bool clause_match(const Handle& pattrn_link_h,
 		                  const Handle& grnd_link_h,
-		                  const HandleMap& term_gnds)
+		                  const GroundingMap& term_gnds)
 		{
 			return _cb.clause_match(pattrn_link_h, grnd_link_h, term_gnds);
 		}
 		bool optional_clause_match(const Handle& pattrn,
 		                           const Handle& grnd,
-		                           const HandleMap& term_gnds)
+		                           const GroundingMap& term_gnds)
 		{
 			return _cb.optional_clause_match(pattrn, grnd, term_gnds);
 		}
 		bool always_clause_match(const Handle& pattrn,
 		                           const Handle& grnd,
-		                           const HandleMap& term_gnds)
+		                           const GroundingMap& term_gnds)
 		{
 			return _cb.always_clause_match(pattrn, grnd, term_gnds);
 		}
@@ -115,16 +115,16 @@ class PMCGroundings : public PatternMatchCallback
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
-		bool grounding(const HandleMap &var_soln,
-		               const HandleMap &term_soln)
+		bool grounding(const GroundingMap &var_soln,
+		               const GroundingMap &term_soln)
 		{
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
-		HandleMapSeq _term_groundings;
-		HandleMapSeq _var_groundings;
+		GroundingMapSeq _term_groundings;
+		GroundingMapSeq _var_groundings;
 };
 
 /**
@@ -148,11 +148,11 @@ class PMCGroundings : public PatternMatchCallback
 static bool recursive_virtual(PatternMatchCallback& cb,
             const HandleSeq& virtuals,
             const HandleSeq& optionals,
-            const HandleMap& var_gnds,
-            const HandleMap& term_gnds,
+            const GroundingMap& var_gnds,
+            const GroundingMap& term_gnds,
             // copies, NOT references!
-            HandleMapSeqSeq comp_var_gnds,
-            HandleMapSeqSeq comp_term_gnds)
+            GroundingMapSeqSeq comp_var_gnds,
+            GroundingMapSeqSeq comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -226,9 +226,9 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 	// vg and vp will be the collection of all of the different possible
 	// groundings for one of the components (well, its for component m,
 	// in the above notation.) So the loop below tries every possibility.
-	HandleMapSeq vg = comp_var_gnds.back();
+	GroundingMapSeq vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
-	HandleMapSeq pg = comp_term_gnds.back();
+	GroundingMapSeq pg = comp_term_gnds.back();
 	comp_term_gnds.pop_back();
 
 	size_t ngnds = vg.size();
@@ -237,11 +237,11 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		// Given a set of groundings, tack on those for this component,
 		// and recurse, with one less component. We need to make a copy,
 		// of course.
-		HandleMap rvg(var_gnds);
-		HandleMap rpg(term_gnds);
+		GroundingMap rvg(var_gnds);
+		GroundingMap rpg(term_gnds);
 
-		const HandleMap& cand_vg(vg[i]);
-		const HandleMap& cand_pg(pg[i]);
+		const GroundingMap& cand_vg(vg[i]);
+		const GroundingMap& cand_pg(pg[i]);
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
@@ -366,8 +366,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 #endif
 
-	HandleMapSeqSeq comp_term_gnds;
-	HandleMapSeqSeq comp_var_gnds;
+	GroundingMapSeqSeq comp_term_gnds;
+	GroundingMapSeqSeq comp_var_gnds;
 
 	for (size_t i = 0; i < _num_comps; i++)
 	{
@@ -418,8 +418,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();
 #endif
-	HandleMap empty_vg;
-	HandleMap empty_pg;
+	GroundingMap empty_vg;
+	GroundingMap empty_pg;
 	pmcb.set_pattern(_variables, _pat);
 	return recursive_virtual(pmcb, _virtual, _pat.optionals,
 	                         empty_vg, empty_pg,
