@@ -338,11 +338,13 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(createLink(outgoing, t), async);
+        HandleSeq outset(outgoing);
+        rh = _atom_table.add(createLink(std::move(outset), t), async);
     }
     catch (const DeleteException& ex) {
         if (_backing_store) {
-           Handle h(createLink(outgoing, t));
+           HandleSeq outset(outgoing);
+           Handle h(createLink(std::move(outset), t));
            _backing_store->removeAtom(h, false);
         }
     }

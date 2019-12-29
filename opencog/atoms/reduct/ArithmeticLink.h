@@ -54,7 +54,8 @@ protected:
 	}
 
 public:
-	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
+	ArithmeticLink(const HandleSeq&&, Type=ARITHMETIC_LINK);
+
 	ArithmeticLink(const ArithmeticLink&) = delete;
 	ArithmeticLink& operator=(const ArithmeticLink&) = delete;
 

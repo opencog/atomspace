@@ -13,8 +13,8 @@
 
 using namespace opencog;
 
-DivideLink::DivideLink(const HandleSeq& oset, Type t)
-    : TimesLink(oset, t)
+DivideLink::DivideLink(const HandleSeq&& oset, Type t)
+    : TimesLink(std::move(oset), t)
 {
 	init();
 }

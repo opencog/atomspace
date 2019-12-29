@@ -62,7 +62,7 @@ class DefineLink : public UniqueLink
 protected:
 	void init();
 public:
-	DefineLink(const HandleSeq&, Type=DEFINE_LINK);
+	DefineLink(const HandleSeq&&, Type=DEFINE_LINK);
 
 	DefineLink(const Handle& alias, const Handle& body);
 

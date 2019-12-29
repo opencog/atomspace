@@ -184,7 +184,7 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
-    AtomPtr a(createLink(seq, t));
+    AtomPtr a(createLink(std::move(seq), t));
     return getHandle(a);
 }
 
@@ -304,7 +304,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
                 closet.emplace_back(add(h, async));
             }
-            atom = createLink(closet, atom->get_type());
+            atom = createLink(std::move(closet), atom->get_type());
         } else {
             atom->unsetRemovalFlag();
         }

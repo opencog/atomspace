@@ -31,8 +31,8 @@
 
 using namespace opencog;
 
-SleepLink::SleepLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+SleepLink::SleepLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, SLEEP_LINK))

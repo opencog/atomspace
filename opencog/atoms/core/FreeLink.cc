@@ -26,8 +26,8 @@
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq& oset, Type t)
-    : Link(oset, t)
+FreeLink::FreeLink(const HandleSeq&& oset, Type t)
+    : Link(std::move(oset), t)
 {
 	if (not nameserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");

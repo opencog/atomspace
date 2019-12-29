@@ -28,8 +28,8 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset, Type t)
-    : PrenexLink(oset, t)
+PutLink::PutLink(const HandleSeq&& oset, Type t)
+    : PrenexLink(std::move(oset), t)
 {
 	init();
 }
@@ -397,14 +397,14 @@ Handle PutLink::do_reduce(void) const
 			HandleSeq oset(bods->getOutgoingSet());
 			for (const Handle& arg : args->getOutgoingSet())
 				oset.emplace_back(expand(arg, _silent));
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			oset.emplace_back(args);
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
@@ -416,16 +416,16 @@ Handle PutLink::do_reduce(void) const
 				HandleSeq oset(bods->getOutgoingSet());
 				for (const Handle& arg : h->getOutgoingSet())
 					oset.emplace_back(expand(arg, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
 				oset.emplace_back(expand(h, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If there is only one variable in the PutLink body...
@@ -448,7 +448,7 @@ Handle PutLink::do_reduce(void) const
 			}
 			catch (const TypeCheckException& ex) {}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If we are here, then there are multiple variables in the body.
@@ -494,7 +494,7 @@ Handle PutLink::do_reduce(void) const
 		}
 		catch (const TypeCheckException& ex) {}
 	}
-	return createLink(bset, SET_LINK);
+	return createLink(std::move(bset), SET_LINK);
 }
 
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)

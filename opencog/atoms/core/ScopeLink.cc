@@ -45,7 +45,7 @@ void ScopeLink::init(void)
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
-	: Link(HandleSeq({vars, body}), SCOPE_LINK)
+	: Link({vars, body}, SCOPE_LINK)
 {
 	init();
 }
@@ -69,8 +69,8 @@ bool ScopeLink::skip_init(Type t)
 	return false;
 }
 
-ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	if (skip_init(t)) return;
 	init();

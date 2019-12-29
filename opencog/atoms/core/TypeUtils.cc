@@ -331,12 +331,12 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return Handle::UNDEFINED;
 		if (subvardecls.size() == 1)
 			return subvardecls[0];
-		return Handle(createLink(subvardecls, t));
+		return createLink(std::move(subvardecls), t);
 	}
 
 	// If we're here we have failed to recognize vardecl as a useful
 	// and well-formed variable declaration, so Handle::UNDEFINED is
-	// returned.
+	// returned. XXX FIXME -- surely this should be a throw, instead!!!
 	return Handle::UNDEFINED;
 }
 
@@ -418,14 +418,13 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 	return vardecl;
 }
 
-Handle gen_vardecl(const HandleSeq& varlist, bool ordered)
+Handle gen_vardecl(const HandleSeq&& varlist, bool ordered)
 {
-	Handle vardecl;
 	if (1 == varlist.size())
 		return varlist[0];
 	else
-		return ordered ? Handle(createVariableList(varlist))
-			: Handle(createVariableSet(varlist));
+		return ordered ? Handle(createVariableList(std::move(varlist)))
+			: Handle(createVariableSet(std::move(varlist)));
 }
 
 } // ~namespace opencog

@@ -48,13 +48,13 @@ protected:
 	void init();
 	virtual void install();
 public:
-	StateLink(const HandleSeq&, Type=STATE_LINK);
+	StateLink(const HandleSeq&&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
 
 	StateLink(const StateLink&) = delete;
 	StateLink& operator=(const StateLink&) = delete;
-	Handle get_alias(void) const { return _outgoing[0]; }
-	Handle get_state(void) const { return _outgoing[1]; }
+	Handle get_alias(void) const { return _outgoing.at(0); }
+	Handle get_state(void) const { return _outgoing.at(1); }
 
 	/**
 	 * Return false, if the state contains a variable.

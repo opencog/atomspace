@@ -71,13 +71,7 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq& oset, Type t=LINK)
-        : Atom(t)
-    {
-        init(oset);
-    }
-
-    Link(HandleSeq&& oset, Type t=LINK)
+    Link(const HandleSeq&& oset, Type t=LINK)
         : Atom(t)
     {
         init(oset);
@@ -240,8 +234,7 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
 template< class... Args >
 Handle createLink( Args&&... args )
 {
-	// Do we need to say (std::forward<Args>(args)...) instead ???
-	LinkPtr tmp(std::make_shared<Link>(args ...));
+	LinkPtr tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
 	return classserver().factory(tmp->get_handle());
 }
 

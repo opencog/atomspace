@@ -36,7 +36,8 @@ protected:
 	virtual HandleSet do_execute(AtomSpace*, bool silent);
 
 public:
-	GetLink(const HandleSeq&, Type=GET_LINK);
+	GetLink(const HandleSeq&&, Type=GET_LINK);
+
 	GetLink(const GetLink&) = delete;
 	GetLink operator=(const GetLink&) = delete;
 

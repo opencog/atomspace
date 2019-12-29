@@ -16,8 +16,8 @@ using namespace opencog;
 
 Handle TimesLink::one;
 
-TimesLink::TimesLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+TimesLink::TimesLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
@@ -80,7 +80,7 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, TIMES_LINK));
+		Handle foo(createLink(std::move(seq), TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
 		return ap->delta_reduce(as, silent);
 	}

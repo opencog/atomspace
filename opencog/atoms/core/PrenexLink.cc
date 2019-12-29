@@ -47,8 +47,8 @@ PrenexLink::PrenexLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-PrenexLink::PrenexLink(const HandleSeq& oset, Type t)
-	: RewriteLink(oset, t)
+PrenexLink::PrenexLink(const HandleSeq&& oset, Type t)
+	: RewriteLink(std::move(oset), t)
 {
 	if (skip_init(t)) return;
 	init();

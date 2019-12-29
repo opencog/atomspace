@@ -59,8 +59,8 @@ QueryLink::QueryLink(const Handle& body, const Handle& rewrite)
 	: QueryLink(HandleSeq{body, rewrite})
 {}
 
-QueryLink::QueryLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }

@@ -135,10 +135,11 @@ protected:
 	}
 
 public:
-	PatternLink(const HandleSeq&, Type=PATTERN_LINK);
+	PatternLink(const HandleSeq&&, Type=PATTERN_LINK);
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
+
 	PatternLink(const PatternLink&) = delete;
 	PatternLink& operator=(const PatternLink&) = delete;
 

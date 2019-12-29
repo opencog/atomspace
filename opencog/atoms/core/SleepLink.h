@@ -38,7 +38,7 @@ namespace opencog
 class SleepLink : public FunctionLink
 {
 public:
-	SleepLink(const HandleSeq&, Type=SLEEP_LINK);
+	SleepLink(const HandleSeq&&, Type=SLEEP_LINK);
 	SleepLink(const SleepLink &) = delete;
 	SleepLink& operator=(const SleepLink &) = delete;
 

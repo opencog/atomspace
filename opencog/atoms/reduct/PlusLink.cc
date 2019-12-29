@@ -17,8 +17,8 @@ using namespace opencog;
 
 Handle PlusLink::zero;
 
-PlusLink::PlusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+PlusLink::PlusLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
@@ -103,7 +103,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, PLUS_LINK));
+		Handle foo(createLink(std::move(seq), PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
 		return ap->delta_reduce(as, silent);
 	}
@@ -183,7 +183,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 				rest.push_back(jlpo[k]);
 
 			// a_plus is now (a+1) or (a+b) as described above.
-			Handle foo(createLink(rest, PLUS_LINK));
+			Handle foo(createLink(std::move(rest), PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			ValuePtr a_plus(ap->delta_reduce(as, silent));
 

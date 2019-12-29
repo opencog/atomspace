@@ -40,8 +40,8 @@ void GetLink::init(void)
 	}
 }
 
-GetLink::GetLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+GetLink::GetLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }

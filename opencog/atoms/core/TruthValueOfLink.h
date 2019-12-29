@@ -36,7 +36,8 @@ namespace opencog
 class TruthValueOfLink : public ValueOfLink
 {
 public:
-	TruthValueOfLink(const HandleSeq&, Type=TRUTH_VALUE_OF_LINK);
+	TruthValueOfLink(const HandleSeq&&, Type=TRUTH_VALUE_OF_LINK);
+
 	TruthValueOfLink(const TruthValueOfLink &) = delete;
 	TruthValueOfLink operator=(const TruthValueOfLink &) = delete;
 
@@ -62,7 +63,8 @@ static inline TruthValueOfLinkPtr TruthValueOfLinkCast(AtomPtr a)
 class StrengthOfLink : public ValueOfLink
 {
 public:
-	StrengthOfLink(const HandleSeq&, Type=STRENGTH_OF_LINK);
+	StrengthOfLink(const HandleSeq&&, Type=STRENGTH_OF_LINK);
+
 	StrengthOfLink(const StrengthOfLink&) = delete;
 	StrengthOfLink& operator=(const StrengthOfLink&) = delete;
 
@@ -88,7 +90,8 @@ static inline StrengthOfLinkPtr StrengthOfLinkCast(AtomPtr a)
 class ConfidenceOfLink : public ValueOfLink
 {
 public:
-	ConfidenceOfLink(const HandleSeq&, Type=CONFIDENCE_OF_LINK);
+	ConfidenceOfLink(const HandleSeq&&, Type=CONFIDENCE_OF_LINK);
+
 	ConfidenceOfLink(const ConfidenceOfLink&) = delete;
 	ConfidenceOfLink operator=(const ConfidenceOfLink&) = delete;
 

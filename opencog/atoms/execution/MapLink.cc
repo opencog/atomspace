@@ -49,8 +49,8 @@ void MapLink::init(void)
 		const Handle& body = _outgoing[0];
 		FreeVariables fv;
 		fv.find_variables(body);
-		Handle decl(createVariableSet(fv.varseq));
-		_pattern = createScopeLink(decl, body);
+		Handle decl(createVariableSet(std::move(fv.varseq)));
+		_pattern = createScopeLink(std::move(decl), body);
 	}
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
@@ -109,8 +109,8 @@ MapLink::MapLink(Type t, const Handle& body)
 	init();
 }
 
-MapLink::MapLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+MapLink::MapLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, MAP_LINK))
 	{
@@ -291,7 +291,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(glob_seq, LIST_LINK));
+			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else
@@ -351,7 +351,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return createLink(valseq, LIST_LINK);
+		return createLink(std::move(valseq), LIST_LINK);
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;
@@ -374,7 +374,7 @@ ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
-		return createLink(remap, argtype);
+		return createLink(std::move(remap), argtype);
 	}
 
 	// Its a singleton. Just remap that.

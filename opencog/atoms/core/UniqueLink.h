@@ -50,7 +50,7 @@ protected:
 	static Handle get_unique(const Handle&, Type, bool);
 
 public:
-	UniqueLink(const HandleSeq&, Type=UNIQUE_LINK);
+	UniqueLink(const HandleSeq&&, Type=UNIQUE_LINK);
 	UniqueLink(const Handle& alias, const Handle& body);
 
 	UniqueLink(const UniqueLink&) = delete;

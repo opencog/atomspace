@@ -14,8 +14,8 @@
 
 using namespace opencog;
 
-MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : PlusLink(oset, t)
+MinusLink::MinusLink(const HandleSeq&& oset, Type t)
+    : PlusLink(std::move(oset), t)
 {
 	init();
 }

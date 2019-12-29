@@ -47,7 +47,7 @@ namespace opencog
 class ArityLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&, Type = ARITY_LINK);
+	ArityLink(const HandleSeq&&, Type = ARITY_LINK);
 	ArityLink(const ArityLink&) = delete;
 	ArityLink& operator=(const ArityLink&) = delete;
 

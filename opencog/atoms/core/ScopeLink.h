@@ -70,7 +70,7 @@ protected:
 	virtual ContentHash compute_hash() const;
 
 public:
-	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
+	ScopeLink(const HandleSeq&&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
 	ScopeLink(const ScopeLink&) = delete;
 	ScopeLink& operator=(const ScopeLink&) = delete;

@@ -36,14 +36,14 @@ void StateLink::init()
 	FreeLink::init();
 }
 
-StateLink::StateLink(const HandleSeq& oset, Type t)
-	: UniqueLink(oset, t)
+StateLink::StateLink(const HandleSeq&& oset, Type t)
+	: UniqueLink(std::move(oset), t)
 {
 	init();
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
+	: UniqueLink({name, defn}, STATE_LINK)
 {
 	init();
 }

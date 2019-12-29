@@ -64,7 +64,7 @@ public:
                                sortedHandles[0],
                                sortedHandles[1] };
 
-        Atom* atom = new Link(outgoing, ORDERED_LINK);
+        Atom* atom = new Link(std::move(outgoing), ORDERED_LINK);
         Link *link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
 
@@ -74,7 +74,10 @@ public:
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[1]);
         delete atom;
         // Unordered lists sort their outgoing sets
-        atom = new UnorderedLink(outgoing);
+        outgoing = { sortedHandles[2],
+                     sortedHandles[0],
+                     sortedHandles[1] };
+        atom = new UnorderedLink(std::move(outgoing));
         link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
         TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[0]);

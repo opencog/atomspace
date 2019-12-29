@@ -27,8 +27,8 @@
 
 using namespace opencog;
 
-UnorderedLink::UnorderedLink(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+UnorderedLink::UnorderedLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	if (not nameserver().isA(t, UNORDERED_LINK))
 	{

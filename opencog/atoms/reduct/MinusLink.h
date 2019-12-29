@@ -28,7 +28,8 @@ protected:
 	ValuePtr kons(AtomSpace*, bool, const ValuePtr&, const ValuePtr&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b);
-	MinusLink(const HandleSeq&, Type=MINUS_LINK);
+	MinusLink(const HandleSeq&&, Type=MINUS_LINK);
+
 	MinusLink(const MinusLink&) = delete;
 	MinusLink& operator=(const MinusLink&) = delete;
 

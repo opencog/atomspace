@@ -274,8 +274,8 @@ PatternLink::PatternLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-PatternLink::PatternLink(const HandleSeq& hseq, Type t)
-	: PrenexLink(hseq, t)
+PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
+	: PrenexLink(std::move(hseq), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, PATTERN_LINK))

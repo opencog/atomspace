@@ -32,8 +32,8 @@ LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
 {
 }
 
-LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
-	: PrenexLink(oset, t)
+LambdaLink::LambdaLink(const HandleSeq&& oset, Type t)
+	: PrenexLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, LAMBDA_LINK))
 	{

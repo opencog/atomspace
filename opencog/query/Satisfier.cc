@@ -49,7 +49,7 @@ bool Satisfier::grounding(const GroundingMap &var_soln,
 		{
 			vargnds.push_back(var_soln.at(hv));
 		}
-		_ground = createLink(vargnds, LIST_LINK);
+		_ground = createLink(std::move(vargnds), LIST_LINK);
 	}
 
 	// No need to look for more groundings as _result isn't going to change
@@ -141,7 +141,7 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
-	_satisfying_set.emplace(createLink(vargnds, LIST_LINK));
+	_satisfying_set.emplace(createLink(std::move(vargnds), LIST_LINK));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);

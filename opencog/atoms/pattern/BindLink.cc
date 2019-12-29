@@ -54,8 +54,8 @@ BindLink::BindLink(const Handle& body, const Handle& rewrite)
 	: BindLink(HandleSeq{body, rewrite})
 {}
 
-BindLink::BindLink(const HandleSeq& hseq, Type t)
-	: QueryLink(hseq, t)
+BindLink::BindLink(const HandleSeq&& hseq, Type t)
+	: QueryLink(std::move(hseq), t)
 {
 	init();
 }
@@ -72,7 +72,7 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	ValueSet rslt(do_execute(as, silent));
 	HandleSeq hlist;
 	for (const ValuePtr& v: rslt) hlist.emplace_back(HandleCast(v));
-	Handle rewr(createUnorderedLink(hlist, SET_LINK));
+	Handle rewr(createUnorderedLink(std::move(hlist), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
