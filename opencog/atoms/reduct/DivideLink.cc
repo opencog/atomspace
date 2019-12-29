@@ -25,12 +25,6 @@ DivideLink::DivideLink(const Handle& a, const Handle& b)
 	init();
 }
 
-DivideLink::DivideLink(const Link& l)
-    : TimesLink(l)
-{
-	init();
-}
-
 void DivideLink::init(void)
 {
 	Type tscope = get_type();

@@ -40,6 +40,8 @@ protected:
 
 public:
 	CondLink(const HandleSeq&, Type=COND_LINK);
+	CondLink(const CondLink&) = delete;
+	CondLink& operator=(const CondLink&) = delete;
 
 	virtual ValuePtr execute(AtomSpace*, bool);
 

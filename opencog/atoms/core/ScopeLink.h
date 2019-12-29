@@ -72,7 +72,8 @@ protected:
 public:
 	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
-	ScopeLink(const Link &l);
+	ScopeLink(const ScopeLink&) = delete;
+	ScopeLink& operator=(const ScopeLink&) = delete;
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }

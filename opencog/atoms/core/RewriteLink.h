@@ -115,7 +115,8 @@ protected:
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
-	RewriteLink(const Link &l);
+	RewriteLink(const RewriteLink &) = delete;
+	RewriteLink& operator=(const RewriteLink &) = delete;
 
 	void make_silent(bool s) { _silent = s; }
 

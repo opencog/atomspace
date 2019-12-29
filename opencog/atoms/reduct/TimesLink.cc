@@ -28,12 +28,6 @@ TimesLink::TimesLink(const Handle& a, const Handle& b)
 	init();
 }
 
-TimesLink::TimesLink(const Link& l)
-    : ArithmeticLink(l)
-{
-	init();
-}
-
 void TimesLink::init(void)
 {
 	if (nullptr == one) one = createNumberNode(1);

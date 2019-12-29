@@ -37,19 +37,6 @@ TruthValueOfLink::TruthValueOfLink(const HandleSeq& oset, Type t)
 	}
 }
 
-TruthValueOfLink::TruthValueOfLink(const Link &l)
-	: ValueOfLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, TRUTH_VALUE_OF_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an TruthValueOfLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 /// When executed, this will return the TruthValue
@@ -85,19 +72,6 @@ StrengthOfLink::StrengthOfLink(const HandleSeq& oset, Type t)
 	if (not nameserver().isA(t, STRENGTH_OF_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an StrengthOfLink, got %s", tname.c_str());
-	}
-}
-
-StrengthOfLink::StrengthOfLink(const Link &l)
-	: ValueOfLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, STRENGTH_OF_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an StrengthOfLink, got %s", tname.c_str());
 	}
@@ -147,19 +121,6 @@ ConfidenceOfLink::ConfidenceOfLink(const HandleSeq& oset, Type t)
 	if (not nameserver().isA(t, CONFIDENCE_OF_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ConfidenceOfLink, got %s", tname.c_str());
-	}
-}
-
-ConfidenceOfLink::ConfidenceOfLink(const Link &l)
-	: ValueOfLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, CONFIDENCE_OF_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ConfidenceOfLink, got %s", tname.c_str());
 	}

@@ -32,7 +32,8 @@ protected:
 public:
 	TimesLink(const HandleSeq&, Type=TIMES_LINK);
 	TimesLink(const Handle& a, const Handle& b);
-	TimesLink(const Link&);
+	TimesLink(const TimesLink&) = delete;
+	TimesLink& operator=(const TimesLink&) = delete;
 
 	static Handle factory(const Handle&);
 };

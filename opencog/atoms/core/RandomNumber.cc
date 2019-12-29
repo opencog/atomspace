@@ -54,12 +54,6 @@ RandomNumberLink::RandomNumberLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-RandomNumberLink::RandomNumberLink(const Link &l)
-	: FunctionLink(l)
-{
-	init();
-}
-
 // ---------------------------------------------------------------
 
 static double get_dbl(AtomSpace* as, bool silent, const Handle& h)

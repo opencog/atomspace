@@ -76,13 +76,6 @@ ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-ScopeLink::ScopeLink(const Link &l)
-	: Link(l)
-{
-	if (skip_init(l.get_type())) return;
-	init();
-}
-
 /* ================================================================= */
 ///
 /// Find and unpack variable declarations, if any; otherwise, just

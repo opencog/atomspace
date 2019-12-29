@@ -74,15 +74,6 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 	}
 }
 
-EvaluationLink::EvaluationLink(const Link& l)
-    : FreeLink(l)
-{
-	Type tscope = l.get_type();
-	if (EVALUATION_LINK != tscope)
-		throw RuntimeException(TRACE_INFO,
-		    "Expecting an EvaluationLink");
-}
-
 /// We get exceptions in two differet ways: (a) due to user error,
 /// in which case we need to report the error to the user, and
 /// (b) occasionally expected errors, which might occur during normal

@@ -47,7 +47,8 @@ protected:
 public:
 	VariableSet(const HandleSeq& vardecls, Type=VARIABLE_SET);
 	VariableSet(const Handle& hvardecls);
-	VariableSet(const Link&);
+	VariableSet(const VariableSet&) = delete;
+	VariableSet& operator=(const VariableSet&) = delete;
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }

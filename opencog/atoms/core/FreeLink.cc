@@ -37,18 +37,6 @@ FreeLink::FreeLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-FreeLink::FreeLink(const Link& l)
-    : Link(l)
-{
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, FREE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
-
-	// Derived classes have thier own init routines.
-	if (FREE_LINK != tscope) return;
-	init();
-}
-
 /* ================================================================= */
 
 void FreeLink::init(void)

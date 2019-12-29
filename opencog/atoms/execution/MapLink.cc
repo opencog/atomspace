@@ -124,23 +124,6 @@ MapLink::MapLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-MapLink::MapLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tmap = l.get_type();
-	if (not nameserver().isA(tmap, MAP_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tmap);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a MapLink, got %s", tname.c_str());
-	}
-
-	// Derived types have a different initialization sequence.
-	if (MAP_LINK != tmap) return;
-	init();
-}
-
 // ===============================================================
 
 /// Recursive tree-compare-and-extract grounding values.

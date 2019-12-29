@@ -291,24 +291,6 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-PatternLink::PatternLink(const Link& l)
-	: PrenexLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, PATTERN_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a PatternLink, got %s", tname.c_str());
-	}
-
-	// QueryLink, BindLink use a different initialization sequence.
-	if (nameserver().isA(tscope, QUERY_LINK)) return;
-	if (DUAL_LINK == tscope) return;
-	init();
-}
-
 /* ================================================================= */
 
 /// Make a note of any clauses that must be present (or absent)

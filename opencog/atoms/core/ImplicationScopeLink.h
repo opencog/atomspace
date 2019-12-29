@@ -55,7 +55,8 @@ protected:
 	Handle _implicand;
 public:
 	ImplicationScopeLink(const HandleSeq&, Type = IMPLICATION_SCOPE_LINK);
-	ImplicationScopeLink(const Link &);
+	ImplicationScopeLink(const ImplicationScopeLink &) = delete;
+	ImplicationScopeLink& operator=(const ImplicationScopeLink &) = delete;
 
 	static Handle factory(const Handle&);
 };

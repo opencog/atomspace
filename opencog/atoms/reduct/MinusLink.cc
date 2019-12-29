@@ -26,12 +26,6 @@ MinusLink::MinusLink(const Handle& a, const Handle& b)
 	init();
 }
 
-MinusLink::MinusLink(const Link& l)
-    : PlusLink(l)
-{
-	init();
-}
-
 void MinusLink::init(void)
 {
 	Type tscope = get_type();

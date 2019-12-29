@@ -29,12 +29,6 @@ PlusLink::PlusLink(const Handle& a, const Handle& b)
 	init();
 }
 
-PlusLink::PlusLink(const Link& l)
-    : ArithmeticLink(l)
-{
-	init();
-}
-
 void PlusLink::init(void)
 {
 	if (nullptr == zero) zero = createNumberNode(0);

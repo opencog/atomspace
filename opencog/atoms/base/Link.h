@@ -132,15 +132,8 @@ public:
         init(oset);
     }
 
-    /**
-     * Copy constructor, does NOT copy atomspace membership,
-     * or any of the values or truth values.
-     */
-    Link(const Link &l)
-        : Atom(l.get_type())
-    {
-        init(l.getOutgoingSet());
-    }
+    Link(const Link&) = delete;
+    Link& operator=(const Link&) = delete;
 
     /**
      * Destructor for this class.

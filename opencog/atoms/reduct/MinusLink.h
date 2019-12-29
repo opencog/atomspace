@@ -29,7 +29,8 @@ protected:
 public:
 	MinusLink(const Handle& a, const Handle& b);
 	MinusLink(const HandleSeq&, Type=MINUS_LINK);
-	MinusLink(const Link&);
+	MinusLink(const MinusLink&) = delete;
+	MinusLink& operator=(const MinusLink&) = delete;
 
 	static Handle factory(const Handle&);
 };

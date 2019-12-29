@@ -83,7 +83,8 @@ protected:
 
 public:
 	PutLink(const HandleSeq& oset, Type=PUT_LINK);
-	PutLink(const Link& l);
+	PutLink(const PutLink&) = delete;
+	PutLink& operator=(const PutLink&) = delete;
 	virtual ~PutLink() {}
 
 	// PutLink arguments may be the second or the third outgoing-set elt.

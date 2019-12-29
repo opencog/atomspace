@@ -54,13 +54,6 @@ PrenexLink::PrenexLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-PrenexLink::PrenexLink(const Link &l)
-	: RewriteLink(l)
-{
-	if (skip_init(l.get_type())) return;
-	init();
-}
-
 /* ================================================================= */
 
 /// Re-assemble into prenex form.
