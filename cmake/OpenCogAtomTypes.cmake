@@ -68,7 +68,7 @@ FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Handle.h>\n")
 FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Node.h>\n")
 FILE(APPEND "${CNAMES_FILE}" "#include <opencog/atoms/base/Link.h>\n\n")
 FILE(APPEND "${CNAMES_FILE}" "namespace opencog {\n\n")
-FILE(APPEND "${CNAMES_FILE}" "#define NODE_CTOR(FUN,TYP) inline Handle FUN(std::string const& name) { return createNode(TYP, name); }\n\n")
+FILE(APPEND "${CNAMES_FILE}" "#define NODE_CTOR(FUN,TYP) inline Handle FUN(std::string const&& name) { return createNode(TYP, std::move(name)); }\n\n")
 FILE(APPEND "${CNAMES_FILE}" "#define LINK_CTOR(FUN,TYP) template<typename ...Atoms> inline Handle FUN(Atoms const&... atoms) { return createLink(TYP, atoms...); }\n\n")
 
 FILE(WRITE "${SCM_FILE}" "\n")

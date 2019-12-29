@@ -178,7 +178,7 @@ void AtomTable::clear()
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    AtomPtr a(createNode(t,n));
+    AtomPtr a(createNode(t, std::move(std::string(n))));
     return getHandle(a);
 }
 
@@ -310,7 +310,10 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         }
     }
     else if (atom->getAtomTable())
-        atom = createNode(atom->get_type(), atom->get_name());
+    {
+        std::string name(atom->get_name());
+        atom = createNode(atom->get_type(), std::move(name));
+    }
 
     atom->copyValues(orig);
     atom->install();

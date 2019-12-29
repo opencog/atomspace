@@ -321,7 +321,7 @@ Handle AtomSpace::add_node(Type t, const string& name,
     // in the atomspace, return it.
     if (_read_only) return _atom_table.getHandle(t, name);
 
-    return _atom_table.add(createNode(t, name), async);
+    return _atom_table.add(createNode(t, std::move(std::string(name))), async);
 }
 
 Handle AtomSpace::get_node(Type t, const string& name)

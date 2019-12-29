@@ -50,10 +50,10 @@ protected:
 
 public:
 	// Please to NOT use this constructor!
-	NumberNode(Type, const std::string&);
+	NumberNode(Type, const std::string&&);
 
 public:
-	NumberNode(const std::string&);
+	NumberNode(const std::string&&);
 	NumberNode(const std::vector<double>&);
 	NumberNode(const FloatValuePtr&);
 	NumberNode(const ValuePtr&);

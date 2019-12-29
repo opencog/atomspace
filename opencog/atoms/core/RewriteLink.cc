@@ -61,7 +61,7 @@ RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
 inline Handle append_rand_str(const Handle& var)
 {
 	std::string new_var_name = randstr(var->get_name() + "-");
-	return createNode(var->get_type(), new_var_name);
+	return createNode(var->get_type(), std::move(new_var_name));
 }
 
 inline HandleSeq append_rand_str(const HandleSeq& vars)

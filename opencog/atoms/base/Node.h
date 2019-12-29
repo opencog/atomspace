@@ -44,7 +44,6 @@ class Node : public Atom
 protected:
     // properties
     std::string _name;
-    void init(const std::string&);
     void init(const std::string&&);
 
     virtual ContentHash compute_hash() const;
@@ -57,16 +56,10 @@ public:
      * @param Node name A reference to a std::string with the name of
      *                  the node.  Use empty string for unamed node.
      */
-    Node(Type t, const std::string& s)
-        : Atom(t)
-    {
-        init(s);
-    }
-
     Node(Type t, const std::string&& s)
         : Atom(t)
     {
-        init(s);
+        init(std::move(s));
     }
 
     Node(const Node&) = delete;
@@ -127,8 +120,7 @@ static inline NodePtr NodeCast(const AtomPtr& a)
 template< class... Args >
 Handle createNode( Args&&... args )
 {
-   // Do we need to say (std::forward<Args>(args)...) instead ???
-   NodePtr tmp(std::make_shared<Node>(args ...));
+   NodePtr tmp(std::make_shared<Node>(std::forward<Args>(args) ...));
    return classserver().factory(tmp->get_handle());
 }
 
