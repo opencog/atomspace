@@ -65,7 +65,6 @@ class SQLAtomStorage : public BackingStore
 		// Utility for handling responses (on stack).
 		class Response;
 
-		void init(const char *);
 		std::string _uri;
 		int _server_version;
 		void get_server_version(void);
@@ -124,7 +123,6 @@ class SQLAtomStorage : public BackingStore
 		// --------------------------
 		// Table management
 		void rename_tables(void);
-		void create_tables(void);
 
 		// --------------------------
 		// Values
@@ -233,14 +231,16 @@ class SQLAtomStorage : public BackingStore
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(std::string uri);
+		SQLAtomStorage(void);
 		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
 		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
 		virtual ~SQLAtomStorage();
+		void open(std::string uri);
 		bool connected(void); // connection to DB is alive
 
-		void kill_data(void); // destroy DB contents
-		void clear_cache(void); // clear out the TLB.
+		void create_tables(void); // initialize the database
+		void kill_data(void);     // destroy DB contents
+		void clear_cache(void);   // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);
@@ -260,7 +260,7 @@ class SQLAtomStorage : public BackingStore
 
 		// Large-scale loads and saves
 		void loadAtomSpace(AtomTable &); // Load entire contents of DB
-		void storeAtomSpace(const AtomTable &); // Store entire contents of AtomTable
+		void storeAtomSpace(const AtomTable &); // Store all of AtomTable
 
 		// Debugging and performance monitoring
 		void print_stats(void);

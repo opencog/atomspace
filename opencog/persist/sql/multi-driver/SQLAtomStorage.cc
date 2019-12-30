@@ -47,9 +47,10 @@ using namespace opencog;
 /* ================================================================ */
 // Constructors
 
-void SQLAtomStorage::init(const char * uri)
+void SQLAtomStorage::open(std::string uris)
 {
-	_uri = uri;
+	_uri = uris;
+	const char * uri = uris.c_str();
 
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
 	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
@@ -149,15 +150,13 @@ void SQLAtomStorage::init(const char * uri)
 	table_id_cache.insert(1);
 }
 
-SQLAtomStorage::SQLAtomStorage(std::string uri) :
+SQLAtomStorage::SQLAtomStorage(void) :
 	_tlbuf(&_uuid_manager),
 	_uuid_manager("uuid_pool"),
 	_vuid_manager("vuid_pool"),
 	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
 	_async_write_queue_exception(nullptr)
 {
-	init(uri.c_str());
-
 	// Use a bigger buffer than the default. Assuming that the hardware
 	// can do 1K atom stores/sec or better, this gives a backlog of
 	// unwritten stuff less than a second long, which seems like an OK

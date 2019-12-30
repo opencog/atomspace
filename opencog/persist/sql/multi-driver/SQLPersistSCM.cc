@@ -80,7 +80,7 @@ void SQLPersistSCM::do_create(const std::string& uri)
 {
 // xxxx this is borken.
     // Use the postgres driver.
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    SQLAtomStorage *store = new SQLAtomStorage();
     if (!store)
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to open the database");
@@ -115,12 +115,14 @@ void SQLPersistSCM::do_open(const std::string& uri)
     if (_as->isAttachedToBackingStore())
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Atomspace connected to another storage backend!");
+
     // Use the postgres driver.
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    SQLAtomStorage *store = new SQLAtomStorage();
     if (!store)
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to open the database");
 
+    store->open(uri);
     if (!store->connected())
     {
         delete store;
