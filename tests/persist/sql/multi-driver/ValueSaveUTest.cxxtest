@@ -257,7 +257,8 @@ void ValueSaveUTest::test_pq_incoming(void)
  */
 void ValueSaveUTest::do_test_single_atom_save()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -328,7 +329,8 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// ------
 	// First, save the value
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	AtomSpace* as = new AtomSpace();
@@ -351,7 +353,8 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// ---------------------------------
 	// Now, fetch the value and compare.
-	store = new SQLAtomStorage(uri);
+	store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -375,7 +378,8 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 void ValueSaveUTest::do_test_save_restore(bool fkey)
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -432,7 +436,8 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 // as well.  This tests the fetching of nodes.
 void ValueSaveUTest::do_test_load_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -495,7 +500,8 @@ void ValueSaveUTest::do_test_load_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -551,7 +557,8 @@ void ValueSaveUTest::do_test_load_by_type()
 // be fetched.
 void ValueSaveUTest::do_test_link_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -642,7 +649,8 @@ void ValueSaveUTest::do_test_link_by_type()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
@@ -758,7 +766,8 @@ void ValueSaveUTest::do_test_link_by_type()
 // as well, but only on the incoming set!
 void ValueSaveUTest::do_test_incoming()
 {
-	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	SQLAtomStorage *store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
@@ -849,7 +858,8 @@ void ValueSaveUTest::do_test_incoming()
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage(uri);
+	store = new SQLAtomStorage();
+	store->open(uri);
 	TS_ASSERT(store->connected())
 
 	as = new AtomSpace();
