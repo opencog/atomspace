@@ -44,10 +44,63 @@
 
 using namespace opencog;
 
+// A large number of write-back queues do not seem to help
+// performance, because once the queues get above the high-water
+// mark, they *all* stall, waiting for the drain to complete.
+// Based on observations, postgres seems to have trouble servicing
+// more than 2 or 3 concurrent write requests on the same table,
+// and so anything above about 4 write-back quees seems to serve no
+// purpose. (Above statements for a 24-core CPU.)
+#define NUM_WB_QUEUES 6
+
 /* ================================================================ */
 // Constructors
 
-void SQLAtomStorage::open(std::string uris)
+SQLAtomStorage::SQLAtomStorage(void) :
+	_tlbuf(&_uuid_manager),
+	_uuid_manager("uuid_pool"),
+	_vuid_manager("vuid_pool"),
+	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
+	_async_write_queue_exception(nullptr)
+{
+	// Use a bigger buffer than the default. Assuming that the hardware
+	// can do 1K atom stores/sec or better, this gives a backlog of
+	// unwritten stuff less than a second long, which seems like an OK
+	// situation, to me.
+	_write_queue.set_watermarks(800, 150);
+
+	_initial_conn_pool_size = 0;
+
+	type_map_was_loaded = false;
+	for (int i=0; i< TYPEMAP_SZ; i++)
+		db_typename[i] = NULL;
+
+	max_height = 0;
+	bulk_load = false;
+	bulk_store = false;
+	clear_stats();
+}
+
+SQLAtomStorage::~SQLAtomStorage()
+{
+	flushStoreQueue();
+
+	while (not conn_pool.is_empty())
+	{
+		LLConnection* db_conn = conn_pool.value_pop();
+		delete db_conn;
+	}
+
+	for (int i=0; i<TYPEMAP_SZ; i++)
+	{
+		if (db_typename[i]) free(db_typename[i]);
+	}
+}
+
+/* ================================================================ */
+// Connections and opening
+
+void SQLAtomStorage::connect(std::string uris)
 {
 	_uri = uris;
 	const char * uri = uris.c_str();
@@ -55,11 +108,45 @@ void SQLAtomStorage::open(std::string uris)
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
 	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
 
-	// default to postgres, if no driver given.
+	// Default to postgres, if no driver given.
 	if (uri[0] == '/') use_libpq = true;
 
 	if (not use_libpq and not use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
+
+	if (0 == _initial_conn_pool_size)
+	{
+		_initial_conn_pool_size = 1;
+		LLConnection* db_conn = nullptr;
+#ifdef HAVE_PGSQL_STORAGE
+		if (use_libpq)
+			db_conn = new LLPGConnection(uri);
+#endif /* HAVE_PGSQL_STORAGE */
+
+#ifdef HAVE_ODBC_STORAGE
+		if (use_odbc)
+			db_conn = new ODBCConnection(uri);
+#endif /* HAVE_ODBC_STORAGE */
+
+		conn_pool.push(db_conn);
+	}
+
+	if (!connected()) return;
+
+	// Need the server version before init'ing the UUID pool.
+	get_server_version();
+}
+
+void SQLAtomStorage::open(std::string uri)
+{
+	connect(uri);
+	bool use_libpq = (0 == strncmp(uri.c_str(), "postgres", 8));
+#ifdef HAVE_ODBC_STORAGE
+	bool use_odbc = (0 == strncmp(uri.c_str(), "odbc", 4));
+#endif /* HAVE_ODBC_STORAGE */
+
+	// Default to postgres, if no driver given.
+	if (uri[0] == '/') use_libpq = true;
 
 	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
@@ -81,8 +168,8 @@ void SQLAtomStorage::open(std::string uris)
 	// otherwise, we'll deadlock. The problem is that during fetches,
 	// two connections get used per OMP_ALGO thread.
 	// 2) Postgres has efficiency problems scaling above 8 or 12
-	// connections, at least, as of postgres 9.5 (2016)
-	// actually, it seems not to be able to service more than 3 or 4
+	// connections, at least, as of postgres 9.5 (2016).
+	// Actually, it seems not to be able to service more than 3 or 4
 	// concurrent SELECT statements to the same table...
 	// So, ignore the number of cores, and set things to 12.
 	//
@@ -91,47 +178,24 @@ void SQLAtomStorage::open(std::string uris)
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
 // #define NUM_OMP_THREADS 8
 
-	// A large number of write-back queues do not seem to help
-	// performance, because once the queues get above the high-water
-	// mark, they *all* stall, waiting for the drain to complete.
-	// Based on observations, postgres seems to have trouble servicing
-	// more than 2 or 3 concurrent write requests on the same table,
-	// and so anything above about 4 write-back quees seems to serve no
-	// purpose. (Above statements for a 24-core CPU.)
-#define NUM_WB_QUEUES 6
-
-	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
+	_initial_conn_pool_size += NUM_OMP_THREADS + NUM_WB_QUEUES - 1;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		LLConnection* db_conn = nullptr;
 #ifdef HAVE_PGSQL_STORAGE
 		if (use_libpq)
-			db_conn = new LLPGConnection(uri);
+			db_conn = new LLPGConnection(uri.c_str());
 #endif /* HAVE_PGSQL_STORAGE */
 
 #ifdef HAVE_ODBC_STORAGE
 		if (use_odbc)
-			db_conn = new ODBCConnection(uri);
+			db_conn = new ODBCConnection(uri.c_str());
 #endif /* HAVE_ODBC_STORAGE */
 
 		conn_pool.push(db_conn);
 	}
-	type_map_was_loaded = false;
-
-	max_height = 0;
-	bulk_load = false;
-	bulk_store = false;
-	clear_stats();
-
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		db_typename[i] = NULL;
-	}
 
 	if (!connected()) return;
-
-	// Need the server version before init'ing the UUID pool.
-	get_server_version();
 
 	_uuid_manager.that = this;
 	_uuid_manager.reset_uuid_pool(getMaxObservedUUID());
@@ -148,36 +212,6 @@ void SQLAtomStorage::open(std::string uris)
 
 	// Special case for the pre-defined atomspaces.
 	table_id_cache.insert(1);
-}
-
-SQLAtomStorage::SQLAtomStorage(void) :
-	_tlbuf(&_uuid_manager),
-	_uuid_manager("uuid_pool"),
-	_vuid_manager("vuid_pool"),
-	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
-	_async_write_queue_exception(nullptr)
-{
-	// Use a bigger buffer than the default. Assuming that the hardware
-	// can do 1K atom stores/sec or better, this gives a backlog of
-	// unwritten stuff less than a second long, which seems like an OK
-	// situation, to me.
-	_write_queue.set_watermarks(800, 150);
-}
-
-SQLAtomStorage::~SQLAtomStorage()
-{
-	flushStoreQueue();
-
-	while (not conn_pool.is_empty())
-	{
-		LLConnection* db_conn = conn_pool.value_pop();
-		delete db_conn;
-	}
-
-	for (int i=0; i<TYPEMAP_SZ; i++)
-	{
-		if (db_typename[i]) free(db_typename[i]);
-	}
 }
 
 /**

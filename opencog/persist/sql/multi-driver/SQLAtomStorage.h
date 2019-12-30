@@ -236,6 +236,7 @@ class SQLAtomStorage : public BackingStore
 		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
 		virtual ~SQLAtomStorage();
 		void open(std::string uri);
+		void connect(std::string uri);
 		bool connected(void); // connection to DB is alive
 
 		void create_tables(void); // initialize the database
