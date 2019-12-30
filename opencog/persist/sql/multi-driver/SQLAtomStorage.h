@@ -239,9 +239,10 @@ class SQLAtomStorage : public BackingStore
 		void connect(std::string uri);
 		bool connected(void); // connection to DB is alive
 
-		void create_tables(void); // initialize the database
-		void kill_data(void);     // destroy DB contents
-		void clear_cache(void);   // clear out the TLB.
+		void create_database(std::string uri); // create the database
+		void create_tables(void);   // initialize the database
+		void kill_data(void);       // destroy DB contents
+		void clear_cache(void);     // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);

@@ -297,6 +297,28 @@ void SQLAtomStorage::rename_tables(void)
 	rp.exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 }
 
+void SQLAtomStorage::create_database(std::string uri)
+{
+	// Gack. Yuck. Ouch. Wrong. But whatever. Parse the URI
+	// and extract a database name from it. This completely
+	// ignores any usernames or passwords in the URI, and is
+	// likely to screw up if there is some hostname in there.
+	// Any way ... extract the database name.
+	if ('/' != uri[0] or strncmp(uri.c_str(), "postgres:///", 12))
+		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri.c_str());
+
+	size_t pos = uri.find_first_of("?@:&");
+	if (pos != uri.npos)
+		throw IOException(TRACE_INFO, "Unsupported URI '%s'\n", uri.c_str());
+
+	std::string dbname(uri);
+	if (0 == strncmp(uri.c_str(), "postgres:///", 12))
+		dbname = uri.substr(12);
+
+	Response rp(conn_pool);
+	rp.exec("CREATE DATABASE " + dbname + ";");
+}
+
 void SQLAtomStorage::create_tables(void)
 {
 	Response rp(conn_pool);
