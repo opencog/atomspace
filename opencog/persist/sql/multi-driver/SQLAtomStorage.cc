@@ -268,9 +268,9 @@ void SQLAtomStorage::create_tables(void)
 {
 	Response rp(conn_pool);
 
-	// See the file "atom.sql" for detailed documentation as to the
+	// See the file `atom.sql` for detailed documentation as to the
 	// structure of the SQL tables. The code below is kept in sync,
-	// manually, with the contents of atom.sql.
+	// manually, with the contents of `atom.sql`.
 	rp.exec("CREATE TABLE Spaces ("
 	              "space     BIGINT PRIMARY KEY,"
 	              "parent    BIGINT);");
@@ -287,6 +287,8 @@ void SQLAtomStorage::create_tables(void)
 	            "outgoing BIGINT[],"
 	            "UNIQUE (type, name),"
 	            "UNIQUE (type, outgoing));");
+
+	rp.exec("CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);");
 
 	rp.exec("CREATE TABLE Valuations ("
 	            "key BIGINT REFERENCES Atoms(uuid),"
@@ -309,6 +311,9 @@ void SQLAtomStorage::create_tables(void)
 	rp.exec("CREATE TABLE TypeCodes ("
 	            "type SMALLINT UNIQUE,"
 	            "typename TEXT UNIQUE);");
+
+	rp.exec("CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;");
+	rp.exec("CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;");
 
 	type_map_was_loaded = false;
 }
