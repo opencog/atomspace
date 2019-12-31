@@ -301,6 +301,9 @@ C-language bindings to the Postgres client library.
 
 Optional ODBC drivers
 ---------------------
+The use of the ODBC driver is discouraged; so, unless you really need it
+or really like it, you should skip this step.
+
 Optionally, download and install UnixODBC devel packages.  Do NOT use
 IODBC, it fails to support UTF-8!  It's also buggy when more than a few
 100K atoms need to be fetched.
@@ -328,6 +331,7 @@ simply won't work with MySQL, because of a lack of array support.
 Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
+(The above statements were accurate in 2012; things may have changed.)
 
 Be sure to install the Postgres server and the Postgres client.
 
@@ -528,13 +532,87 @@ have to create an explicit database user login, as explained below;
 otherwise, creating a user is optional.
 
 
+Does it work now?
+-----------------
+If the above steps were properly carried out, then the system is ready
+to be used. A simple "sniff test" can verify this.  At the shell prompt,
+start `guile`, and then try the following:
+```
+   $ guile
+   scheme> (use-modules (opencog))
+   scheme> (use-modules (opencog persist) (opencog persist-sql))
+   scheme> (sql-create "postgres:///foo")
+   scheme> (sql-open "postgres:///foo")
+   scheme> (Concept "this is a test" (stv 0.4 0.6))
+   scheme> (store-atom (Concept "this is a test"))
+   scheme> (sql-stats)
+   scheme> (sql-close)
+```
+
+The above should work without any errors. If not, double-check your
+configuration. You can verify that the truth value was stored by
+fetching the Atom; alll associated values will be fetched:
+
+```
+   $ guile
+   scheme> (use-modules (opencog))
+   scheme> (use-modules (opencog persist) (opencog persist-sql))
+   scheme> (sql-open "postgres:///foo")
+   scheme> (fetch-atom (Concept "this is a test"))
+   scheme> (sql-close)
+```
+
+Other useful scheme operations include bulk load/store, such as
+`store-atomspace`, `load-atomspace` and `load-atoms-of-type`.
+
+Even more handy are operations that fetch only a small portion
+of the atomspace: `fetch-incoming-set`, `fetch-incoming-by-type`,
+`load-referers` and `store-referers`.
+
+You can be reminded of these by saying
+```
+   scheme> ,a sql
+   scheme> ,a fetch
+```
+and get specific documentation on each:
+```
+   scheme> ,d sql-open
+```
+which will, for example, remind you of the supported URL formats:
+```
+   postgres:///DBNAME
+   postgres://USER@HOST/DBNAME
+   postgres://USER:PASSWORD@HOST/DBNAME
+   postgres:///DBNAME?user=USER
+   postgres:///DBNAME?user=USER&host=HOST
+   postgres:///DBNAME?user=USER&password=PASS
+```
+
+The `foo` database created above can be deleted at the shell prompt:
+```
+   $ dropdb foo
+```
+
+There is currently no way to drop databses from the scheme prompt;
+this is partly a safety feature (fewer accidents), and partly a
+minimization of complexity. If you need complex database management,
+then you need a database managemenet system. This guile module is
+not a replacement for a full DBMS, nor could it ever be.
+
+Skip ahead to the section [Using the System](#using-the-system)
+below for more info.
+
 User setup
 ----------
-(Optional)  You can continue without creating a database user, if you
-wish; postgres automatically provides password-less `peer`
-authentication to your unix username. However, the unit-tests do require
-that a distinct user be created, called `opencog_tester`, although you
-can bypass this, too, by altering the OpenCog test configuration file.
+(Optional)  The above is sufficient for most simple use-cases. The unit
+tests do require that a distinct user be created, called `opencog_tester`,
+although this can be bypassed by altering the database credentials in the
+OpenCog test configuration file, in `/lib/atomspace-test.conf`. This
+section provides a quick review of postgres user management.
+
+If no users are set up, then postgres automatically provides password-less
+`peer` authentication to your unix username. This is enough for
+single-user database access.  Shared dtabases require more work.
 
 The database user is NOT the same thing as a unix user: the login is for
 the database (only), not the OS. In general, you will want to pick a
@@ -548,20 +626,22 @@ See the [postgres
 documentation]((https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
 for details on the allowed URI format.
 
-In the following, a database user named `opencog_user` is created, and
+In the following, a database user named `opencog_tester` is created, and
 given the password `cheese`.  You can pick a different username and
 password.  If you are using ODBC (not recommended), then these two must
 be consistent with the `~/.odbc.ini` file. Do NOT use your unix password!
 Pick something else! Create the user at the shell prompt:
 
 ```
-   $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
+   $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d opencog_test
 ```
 
-Check that the above worked, by manually logging in:
+The above assumes you will be using a database called `opencog_test`, as
+configured in `/lib/atomspace-test.conf`.  Check that the above worked,
+by manually logging in:
 
 ```
-   $  psql mycogdata -U opencog_user -W -h localhost
+   $  psql opencog_test -U opencog_tester -W -h localhost
 ```
 
 If you can't login, something up above failed.
@@ -570,12 +650,12 @@ Next, see if you can login using unix-domain sockets, instead of
 TCP-IP sockets to `localhost`:
 
 ```
-   $  psql mycogdata -U opencog_user
+   $  psql opencog_test -U opencog_tester
 ```
 
 For most users, this will fail with the message
 ```
-psql: FATAL:  Peer authentication failed for user "opencog_user"
+psql: FATAL:  Peer authentication failed for user "opencog_tester"
 ```
 To fix this, you need to edit the file
 ```
@@ -593,23 +673,23 @@ Be sure to reload or restart the postgres server after the above change:
    service postgresql reload
 ```
 
-Table initialization
---------------------
+Manual table initialization
+---------------------------
 Next, you need to populate the database with OpenCog-specific tables.
 Navigate to the atomspace folder you cloned from GitHub:
 
 ```
-   $  cd ~/atomspace
+   $  cd ~/src/atomspace
 ```
 
 Create the database tables:
 
 ```
-   $ cat opencog/persist/sql/multi-driver/atom.sql | psql mycogdata
+   $ cat opencog/persist/sql/multi-driver/atom.sql | psql opencog_test
 ```
 
 If you are using a different user-id than your login, then you will
-Have to add the `-U opencog_user` flag to the `psql` command.  If you
+Have to add the `-U opencog_tester` flag to the `psql` command.  If you
 created a distinct user, and did not set up the `hba.conf` file as
 above, then you also need a `-h localhost` flag, to access the database
 using TCP/IP sockets on the local network.
@@ -617,20 +697,23 @@ using TCP/IP sockets on the local network.
 Verify that the tables were created. Login as before:
 
 ```
-   $  psql mycogdata
+   $  psql opencog_test
 ```
 
-Then enter `\d` at the postgres prompt.  You should see this:
+Then enter `\dt` at the postgres prompt.  You should see this:
 
 ```
-    mycogdata=> \d
+    opencog_test=> \dt
                   List of relations
-     Schema |   Name    | Type  |     Owner
-    --------+-----------+-------+----------------
-     public | atoms     | table | opencog_user
-     public | spaces    | table | opencog_user
-     public | typecodes | table | opencog_user
-    (3 rows)
+     Schema |    Name    | Type  |     Owner
+    --------+------------+-------+----------------
+     public | atoms      | table | opencog_tester
+     public | spaces     | table | opencog_tester
+     public | typecodes  | table | opencog_tester
+     public | valuations | table | opencog_tester
+     public | values     | table | opencog_tester
+
+    (5 rows)
 ```
 
 If the above doesn't work, go back, and try again.
@@ -732,9 +815,8 @@ Password    = cheese
    username and database names.  Stick to these.
 
 
-After the above steps, `BasicSaveUTest`, `PersistUTest`,
-`MultiPersistUTest`,`FetchUTest` and `ValueSaveUTest` should run and
-pass.
+After the above steps, all nine unit tests should run and pass, starting
+with `BasicSaveUTest`, `PersistUTest`, `MultiPersistUTest`, and so on.
 
 
 Unit Test Status
@@ -760,21 +842,24 @@ $ guile
 scheme@(guile-user)> (use-modules (opencog))
 scheme@(guile-user)> (use-modules (opencog persist) (opencog persist-sql))
 ```
-Open a database with `sql-open`:
+Create a database with `sql-create`:
 ```
-scheme@(guile-user)> (sql-open "postgres:///opencog_test?user=opencog_tester")
-Reserving UUID up to 3
+scheme@(guile-user)> (sql-create "postgres:///foo")
+```
+and then open it with `sql-open`:
+```
+scheme@(guile-user)> (sql-open "postgres:///foo")
 ```
 There are other, alternate forms for the URI. See the [postgres
 documentation](https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
 for details.
 ```
-> (sql-open "odbc://opencog_tester:cheese/opencog_test")
-> (sql-open "postgres://opencog_tester@localhost/opencog_test")
-> (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
-> (sql-open "postgres:///opencog_test?user=opencog_tester")
-> (sql-open "postgres:///opencog_test?user=opencog_tester&host=localhost")
-> (sql-open "postgres:///opencog_test?user=opencog_tester&password=cheese")
+> (sql-open "odbc://atomspace_user:cheese/foo")
+> (sql-open "postgres://atomspace_user@localhost/foo")
+> (sql-open "postgres://atomspace_user:cheese@localhost/foo")
+> (sql-open "postgres:///foo?user=atomspace_user")
+> (sql-open "postgres:///foo?user=atomspace_user&host=localhost")
+> (sql-open "postgres:///foo?user=atomspace_user&password=cheese")
 ```
 
 Save an atom with `store-atom`:
@@ -786,8 +871,18 @@ scheme@(guile-user)> (store-atom x)
 Other useful scheme functions: `fetch-atom` and `fetch-incoming-set`.
 A debugging print: `sql-stats`
 
-Bulk load and restore: `sql-load` `sql-store` `sql-close`
+Bulk load and restore: `sql-load` `sql-store` `sql-close`.
 
+View the list of supported functions with the `,apropos` guile shell
+command:
+```
+   scheme> ,a sql
+   scheme> ,a fetch
+```
+Specific documentation cane be viewed with the `,describe` command:
+```
+   scheme> ,d sql-open
+```
 
 Bulk Save and Restore
 ---------------------
