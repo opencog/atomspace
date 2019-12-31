@@ -588,13 +588,28 @@ which will, for example, remind you of the supported URL formats:
    postgres:///DBNAME?user=USER&password=PASS
 ```
 
+The `foo` database created above can be deleted at the shell prompt:
+```
+   $ dropdb foo
+```
+
+There is currently no way to drop databses from the scheme prompt;
+this is partly a safety feature (fewer accidents), and partly a
+minimization of complexity. If you need complex database management,
+then you need a database managemenet system. This guile module is
+not a replacement for a full DBMS, nor could it ever be.
+
 User setup
 ----------
-(Optional)  You can continue without creating a database user, if you
-wish; postgres automatically provides password-less `peer`
-authentication to your unix username. However, the unit-tests do require
-that a distinct user be created, called `opencog_tester`, although you
-can bypass this, too, by altering the OpenCog test configuration file.
+(Optional)  The above is sufficient for most simple use-cases. The unit
+tests do require that a distinct user be created, called `opencog_tester`,
+although this can be bypassed by altering the database credentials in the
+OpenCog test configuration file, in `/lib/atomspace-test.conf`. This
+section provides a quick review of postgres user management.
+
+If no users are set up, then postgres automatically provides password-less
+`peer` authentication to your unix username. This is enough for
+single-user database access.  Shared dtabases require more work.
 
 The database user is NOT the same thing as a unix user: the login is for
 the database (only), not the OS. In general, you will want to pick a
@@ -608,20 +623,22 @@ See the [postgres
 documentation]((https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
 for details on the allowed URI format.
 
-In the following, a database user named `opencog_user` is created, and
+In the following, a database user named `opencog_tester` is created, and
 given the password `cheese`.  You can pick a different username and
 password.  If you are using ODBC (not recommended), then these two must
 be consistent with the `~/.odbc.ini` file. Do NOT use your unix password!
 Pick something else! Create the user at the shell prompt:
 
 ```
-   $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
+   $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d opencog_test
 ```
 
-Check that the above worked, by manually logging in:
+The above assumes you will be using a database called `opencog_test`, as
+configured in `/lib/atomspace-test.conf`.  Check that the above worked,
+by manually logging in:
 
 ```
-   $  psql mycogdata -U opencog_user -W -h localhost
+   $  psql opencog_test -U opencog_tester -W -h localhost
 ```
 
 If you can't login, something up above failed.
@@ -630,12 +647,12 @@ Next, see if you can login using unix-domain sockets, instead of
 TCP-IP sockets to `localhost`:
 
 ```
-   $  psql mycogdata -U opencog_user
+   $  psql opencog_test -U opencog_tester
 ```
 
 For most users, this will fail with the message
 ```
-psql: FATAL:  Peer authentication failed for user "opencog_user"
+psql: FATAL:  Peer authentication failed for user "opencog_tester"
 ```
 To fix this, you need to edit the file
 ```
@@ -659,17 +676,17 @@ Next, you need to populate the database with OpenCog-specific tables.
 Navigate to the atomspace folder you cloned from GitHub:
 
 ```
-   $  cd ~/atomspace
+   $  cd ~/src/atomspace
 ```
 
 Create the database tables:
 
 ```
-   $ cat opencog/persist/sql/multi-driver/atom.sql | psql mycogdata
+   $ cat opencog/persist/sql/multi-driver/atom.sql | psql opencog_test
 ```
 
 If you are using a different user-id than your login, then you will
-Have to add the `-U opencog_user` flag to the `psql` command.  If you
+Have to add the `-U opencog_tester` flag to the `psql` command.  If you
 created a distinct user, and did not set up the `hba.conf` file as
 above, then you also need a `-h localhost` flag, to access the database
 using TCP/IP sockets on the local network.
@@ -677,20 +694,23 @@ using TCP/IP sockets on the local network.
 Verify that the tables were created. Login as before:
 
 ```
-   $  psql mycogdata
+   $  psql opencog_test
 ```
 
-Then enter `\d` at the postgres prompt.  You should see this:
+Then enter `\dt` at the postgres prompt.  You should see this:
 
 ```
-    mycogdata=> \d
+    opencog_test=> \dt
                   List of relations
-     Schema |   Name    | Type  |     Owner
-    --------+-----------+-------+----------------
-     public | atoms     | table | opencog_user
-     public | spaces    | table | opencog_user
-     public | typecodes | table | opencog_user
-    (3 rows)
+     Schema |    Name    | Type  |     Owner
+    --------+------------+-------+----------------
+     public | atoms      | table | opencog_tester
+     public | spaces     | table | opencog_tester
+     public | typecodes  | table | opencog_tester
+     public | valuations | table | opencog_tester
+     public | values     | table | opencog_tester
+
+    (5 rows)
 ```
 
 If the above doesn't work, go back, and try again.
@@ -792,9 +812,8 @@ Password    = cheese
    username and database names.  Stick to these.
 
 
-After the above steps, `BasicSaveUTest`, `PersistUTest`,
-`MultiPersistUTest`,`FetchUTest` and `ValueSaveUTest` should run and
-pass.
+After the above steps, all nine unit tests should run and pass, starting
+with `BasicSaveUTest`, `PersistUTest`, `MultiPersistUTest`, and so on.
 
 
 Unit Test Status
