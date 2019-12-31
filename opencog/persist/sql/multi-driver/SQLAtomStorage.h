@@ -61,11 +61,14 @@ class SQLAtomStorage : public BackingStore
 		// Pool of shared connections
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
+		void enlarge_conn_pool(int);
 
 		// Utility for handling responses (on stack).
 		class Response;
 
 		std::string _uri;
+		bool _use_libpq;
+		bool _use_odbc;
 		int _server_version;
 		void get_server_version(void);
 

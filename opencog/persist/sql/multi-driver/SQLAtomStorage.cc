@@ -70,6 +70,8 @@ SQLAtomStorage::SQLAtomStorage(void) :
 	_write_queue.set_watermarks(800, 150);
 
 	_initial_conn_pool_size = 0;
+	_use_libpq = false;
+	_use_odbc = false;
 
 	type_map_was_loaded = false;
 	for (int i=0; i< TYPEMAP_SZ; i++)
@@ -100,36 +102,46 @@ SQLAtomStorage::~SQLAtomStorage()
 /* ================================================================ */
 // Connections and opening
 
-void SQLAtomStorage::connect(std::string uris)
+void SQLAtomStorage::enlarge_conn_pool(int delta)
 {
-	_uri = uris;
-	const char * uri = uris.c_str();
+	if (0 >= delta) return;
 
-	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
-	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
-
-	// Default to postgres, if no driver given.
-	if (uri[0] == '/') use_libpq = true;
-
-	if (not use_libpq and not use_odbc)
-		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
-
-	if (0 == _initial_conn_pool_size)
+	const char * uri = _uri.c_str();
+	for (int i=0; i<delta; i++)
 	{
-		_initial_conn_pool_size = 1;
 		LLConnection* db_conn = nullptr;
 #ifdef HAVE_PGSQL_STORAGE
-		if (use_libpq)
+		if (_use_libpq)
 			db_conn = new LLPGConnection(uri);
 #endif /* HAVE_PGSQL_STORAGE */
 
 #ifdef HAVE_ODBC_STORAGE
-		if (use_odbc)
+		if (_use_odbc)
 			db_conn = new ODBCConnection(uri);
 #endif /* HAVE_ODBC_STORAGE */
 
 		conn_pool.push(db_conn);
 	}
+
+	_initial_conn_pool_size += delta;
+}
+
+void SQLAtomStorage::connect(std::string uris)
+{
+	_uri = uris;
+	const char * uri = uris.c_str();
+
+	_use_libpq = (0 == strncmp(uri, "postgres", 8));
+	_use_odbc = (0 == strncmp(uri, "odbc", 4));
+
+	// Default to postgres, if no driver given.
+	if (uri[0] == '/') _use_libpq = true;
+
+	if (not _use_libpq and not _use_odbc)
+		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
+
+	if (0 == _initial_conn_pool_size)
+		enlarge_conn_pool(NUM_WB_QUEUES + 1);
 
 	if (!connected()) return;
 
@@ -140,13 +152,6 @@ void SQLAtomStorage::connect(std::string uris)
 void SQLAtomStorage::open(std::string uri)
 {
 	connect(uri);
-	bool use_libpq = (0 == strncmp(uri.c_str(), "postgres", 8));
-#ifdef HAVE_ODBC_STORAGE
-	bool use_odbc = (0 == strncmp(uri.c_str(), "odbc", 4));
-#endif /* HAVE_ODBC_STORAGE */
-
-	// Default to postgres, if no driver given.
-	if (uri[0] == '/') use_libpq = true;
 
 	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
@@ -178,22 +183,7 @@ void SQLAtomStorage::open(std::string uri)
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
 // #define NUM_OMP_THREADS 8
 
-	_initial_conn_pool_size += NUM_OMP_THREADS + NUM_WB_QUEUES - 1;
-	for (int i=0; i<_initial_conn_pool_size; i++)
-	{
-		LLConnection* db_conn = nullptr;
-#ifdef HAVE_PGSQL_STORAGE
-		if (use_libpq)
-			db_conn = new LLPGConnection(uri.c_str());
-#endif /* HAVE_PGSQL_STORAGE */
-
-#ifdef HAVE_ODBC_STORAGE
-		if (use_odbc)
-			db_conn = new ODBCConnection(uri.c_str());
-#endif /* HAVE_ODBC_STORAGE */
-
-		conn_pool.push(db_conn);
-	}
+	enlarge_conn_pool(NUM_OMP_THREADS - 1);
 
 	if (!connected()) return;
 
