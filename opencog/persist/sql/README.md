@@ -599,6 +599,9 @@ minimization of complexity. If you need complex database management,
 then you need a database managemenet system. This guile module is
 not a replacement for a full DBMS, nor could it ever be.
 
+Skip ahead to the section [Using the System](#using-the-system)
+below for more info.
+
 User setup
 ----------
 (Optional)  The above is sufficient for most simple use-cases. The unit
@@ -839,21 +842,24 @@ $ guile
 scheme@(guile-user)> (use-modules (opencog))
 scheme@(guile-user)> (use-modules (opencog persist) (opencog persist-sql))
 ```
-Open a database with `sql-open`:
+Create a database with `sql-create`:
 ```
-scheme@(guile-user)> (sql-open "postgres:///opencog_test?user=opencog_tester")
-Reserving UUID up to 3
+scheme@(guile-user)> (sql-create "postgres:///foo")
+```
+and then open it with `sql-open`:
+```
+scheme@(guile-user)> (sql-open "postgres:///foo")
 ```
 There are other, alternate forms for the URI. See the [postgres
 documentation](https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
 for details.
 ```
-> (sql-open "odbc://opencog_tester:cheese/opencog_test")
-> (sql-open "postgres://opencog_tester@localhost/opencog_test")
-> (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
-> (sql-open "postgres:///opencog_test?user=opencog_tester")
-> (sql-open "postgres:///opencog_test?user=opencog_tester&host=localhost")
-> (sql-open "postgres:///opencog_test?user=opencog_tester&password=cheese")
+> (sql-open "odbc://atomspace_user:cheese/foo")
+> (sql-open "postgres://atomspace_user@localhost/foo")
+> (sql-open "postgres://atomspace_user:cheese@localhost/foo")
+> (sql-open "postgres:///foo?user=atomspace_user")
+> (sql-open "postgres:///foo?user=atomspace_user&host=localhost")
+> (sql-open "postgres:///foo?user=atomspace_user&password=cheese")
 ```
 
 Save an atom with `store-atom`:
@@ -865,8 +871,18 @@ scheme@(guile-user)> (store-atom x)
 Other useful scheme functions: `fetch-atom` and `fetch-incoming-set`.
 A debugging print: `sql-stats`
 
-Bulk load and restore: `sql-load` `sql-store` `sql-close`
+Bulk load and restore: `sql-load` `sql-store` `sql-close`.
 
+View the list of supported functions with the `,apropos` guile shell
+command:
+```
+   scheme> ,a sql
+   scheme> ,a fetch
+```
+Specific documentation cane be viewed with the `,describe` command:
+```
+   scheme> ,d sql-open
+```
 
 Bulk Save and Restore
 ---------------------
