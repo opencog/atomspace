@@ -9,7 +9,7 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
-(export sql-clear-cache sql-clear-stats sql-close sql-open
+(export sql-clear-cache sql-clear-stats sql-close sql-create sql-open
 	sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
 
 (set-procedure-property! sql-clear-cache 'documentation
