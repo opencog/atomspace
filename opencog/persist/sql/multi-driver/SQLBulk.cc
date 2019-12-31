@@ -292,13 +292,13 @@ void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
 	bulk_start = time(0);
 
 	// Try to knock out the nodes first, then the links.
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		NODE, true);
+	HandleSeq atoms;
+	table.getHandlesByType(atoms.begin(), NODE, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		LINK, true);
+	atoms.clear();
+	table.getHandlesByType(atoms.begin(), LINK, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();
 	bulk_store = false;
