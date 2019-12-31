@@ -280,6 +280,7 @@ public:
         }
 
         // No parent ... avoid the copy above.
+        // This can (will) deadlock if func touches the table.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
@@ -315,6 +316,7 @@ public:
         }
 
         // No parent ... avoid the copy above.
+        // This can (will) deadlock if func touches the table.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
