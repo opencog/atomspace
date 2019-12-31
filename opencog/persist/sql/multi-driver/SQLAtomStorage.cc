@@ -462,6 +462,12 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
+#ifndef OC_OMP
+	printf("Warning: backend compiled without parallel support!\n");
+#else
+	printf("Number of configured threads: %u\n", num_threads());
+#endif
+
 	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
 	time_t now = time(0);
 	// ctime returns string with newline at end of it.
