@@ -189,7 +189,8 @@ void SQLAtomStorage::open(std::string uri)
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
 // #define NUM_OMP_THREADS 8
 
-	enlarge_conn_pool(NUM_OMP_THREADS - 1);
+	// minus 2 because we had a +2 in connect();
+	enlarge_conn_pool(NUM_OMP_THREADS - 2);
 
 	if (!connected()) return;
 
@@ -322,7 +323,8 @@ void SQLAtomStorage::create_database(std::string uri)
 	// not, then libpq will deliver an error.
 	connect(server);
 	if (!connected())
-		throw IOException(TRACE_INFO, "Error: cannot connect to '%s'", server.c_str());
+		throw IOException(TRACE_INFO, "Error: cannot connect to '%s'",
+		                  server.c_str());
 
 	{
 		Response rp(conn_pool);

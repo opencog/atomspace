@@ -301,6 +301,9 @@ C-language bindings to the Postgres client library.
 
 Optional ODBC drivers
 ---------------------
+The use of the ODBC driver is discouraged; so, unless you really need it
+or really like it, you should skip this step.
+
 Optionally, download and install UnixODBC devel packages.  Do NOT use
 IODBC, it fails to support UTF-8!  It's also buggy when more than a few
 100K atoms need to be fetched.
@@ -328,6 +331,7 @@ simply won't work with MySQL, because of a lack of array support.
 Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
+(The above statements were accurate in 2012; things may have changed.)
 
 Be sure to install the Postgres server and the Postgres client.
 
@@ -528,6 +532,62 @@ have to create an explicit database user login, as explained below;
 otherwise, creating a user is optional.
 
 
+Does it work now?
+-----------------
+If the above steps were properly carried out, then the system is ready
+to be used. A simple "sniff test" can verify this.  At the shell prompt,
+start `guile`, and then try the following:
+```
+   $ guile
+   scheme> (use-modules (opencog))
+   scheme> (use-modules (opencog persist) (opencog persist-sql))
+   scheme> (sql-create "postgres:///foo")
+   scheme> (sql-open "postgres:///foo")
+   scheme> (Concept "this is a test" (stv 0.4 0.6))
+   scheme> (store-atom (Concept "this is a test"))
+   scheme> (sql-stats)
+   scheme> (sql-close)
+```
+
+The above should work without any errors. If not, double-check your
+configuration. You can verify that the truth value was stored by
+fetching the Atom; alll associated values will be fetched:
+
+```
+   $ guile
+   scheme> (use-modules (opencog))
+   scheme> (use-modules (opencog persist) (opencog persist-sql))
+   scheme> (sql-open "postgres:///foo")
+   scheme> (fetch-atom (Concept "this is a test"))
+   scheme> (sql-close)
+```
+
+Other useful scheme operations include bulk load/store, such as
+`store-atomspace`, `load-atomspace` and `load-atoms-of-type`.
+
+Even more handy are operations that fetch only a small portion
+of the atomspace: `fetch-incoming-set`, `fetch-incoming-by-type`,
+`load-referers` and `store-referers`.
+
+You can be reminded of these by saying
+```
+   scheme> ,a sql
+   scheme> ,a fetch
+```
+and get specific documentation on each:
+```
+   scheme> ,d sql-open
+```
+which will, for example, remind you of the supported URL formats:
+```
+   postgres:///DBNAME
+   postgres://USER@HOST/DBNAME
+   postgres://USER:PASSWORD@HOST/DBNAME
+   postgres:///DBNAME?user=USER
+   postgres:///DBNAME?user=USER&host=HOST
+   postgres:///DBNAME?user=USER&password=PASS
+```
+
 User setup
 ----------
 (Optional)  You can continue without creating a database user, if you
@@ -593,8 +653,8 @@ Be sure to reload or restart the postgres server after the above change:
    service postgresql reload
 ```
 
-Table initialization
---------------------
+Manual table initialization
+---------------------------
 Next, you need to populate the database with OpenCog-specific tables.
 Navigate to the atomspace folder you cloned from GitHub:
 
