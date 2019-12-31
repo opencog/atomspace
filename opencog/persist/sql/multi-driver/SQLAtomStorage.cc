@@ -297,31 +297,32 @@ void SQLAtomStorage::rename_tables(void)
 
 void SQLAtomStorage::create_database(std::string uri)
 {
-	// Gack. Yuck. Ouch. Wrong. But whatever. Parse the URI
-	// and extract a database name from it. This completely
-	// ignores any usernames or passwords in the URI, and is
-	// likely to screw up if there is some hostname in there.
-	// Any way ... extract the database name.
-	if (strncmp(uri.c_str(), "postgres:///", 12) and
-	    uri.npos != uri.find_first_of("/?@:&"))
+	// Parse the URI and make a valiant attempt to extract a
+	// database name from it. This ignores any usernames or
+	// passwords that might follow the database name.
+	// If ou want to get fancier, then fix this.
+	if (strncmp(uri.c_str(), "postgres://", 11) and
+	    uri.npos != uri.find_first_of("?&"))
 	{
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri.c_str());
 	}
 
+	std::string server(uri);
 	std::string dbname(uri);
-	if (0 == strncmp(uri.c_str(), "postgres:///", 12))
-		dbname = uri.substr(12);
 
-	size_t pos = dbname.find_first_of("?@:&");
-	if (pos != dbname.npos)
+	size_t pos = uri.find_last_of('/');
+	if (pos == uri.npos)
 		throw IOException(TRACE_INFO, "Unsupported URI '%s'\n", uri.c_str());
+
+	server = uri.substr(0, pos);
+	dbname = uri.substr(pos+1);
 
 	// We need a temporary, administrative connection, to create
 	// the database.  Let's assume the user has admin access; if
 	// not, then libpq will deliver an error.
-	connect("postgres:///");
+	connect(server);
 	if (!connected())
-		throw IOException(TRACE_INFO, "Error: no connection to db server!");
+		throw IOException(TRACE_INFO, "Error: cannot connect to '%s'", server.c_str());
 
 	{
 		Response rp(conn_pool);
