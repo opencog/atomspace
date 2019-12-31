@@ -293,11 +293,13 @@ void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
 
 	// Try to knock out the nodes first, then the links.
 	HandleSeq atoms;
-	table.getHandlesByType(atoms.begin(), NODE, true);
+	atoms.reserve(table.getNumNodes());
+	table.getHandlesByType(std::back_inserter(atoms), NODE, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	atoms.clear();
-	table.getHandlesByType(atoms.begin(), LINK, true);
+	atoms.reserve(table.getNumLinks());
+	table.getHandlesByType(std::back_inserter(atoms), LINK, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();
