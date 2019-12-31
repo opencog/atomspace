@@ -85,13 +85,7 @@ SQLAtomStorage::SQLAtomStorage(void) :
 
 SQLAtomStorage::~SQLAtomStorage()
 {
-	flushStoreQueue();
-
-	while (not conn_pool.is_empty())
-	{
-		LLConnection* db_conn = conn_pool.value_pop();
-		delete db_conn;
-	}
+	close_conn_pool();
 
 	for (int i=0; i<TYPEMAP_SZ; i++)
 	{
@@ -124,6 +118,18 @@ void SQLAtomStorage::enlarge_conn_pool(int delta)
 	}
 
 	_initial_conn_pool_size += delta;
+}
+
+void SQLAtomStorage::close_conn_pool()
+{
+	flushStoreQueue();
+
+	while (not conn_pool.is_empty())
+	{
+		LLConnection* db_conn = conn_pool.value_pop();
+		delete db_conn;
+	}
+	_initial_conn_pool_size = 0;
 }
 
 void SQLAtomStorage::connect(std::string uris)
@@ -291,9 +297,6 @@ void SQLAtomStorage::rename_tables(void)
 
 void SQLAtomStorage::create_database(std::string uri)
 {
-	if (!connected())
-		throw IOException(TRACE_INFO, "Error: no connection to db server!");
-
 	// Gack. Yuck. Ouch. Wrong. But whatever. Parse the URI
 	// and extract a database name from it. This completely
 	// ignores any usernames or passwords in the URI, and is
@@ -313,8 +316,22 @@ void SQLAtomStorage::create_database(std::string uri)
 	if (pos != dbname.npos)
 		throw IOException(TRACE_INFO, "Unsupported URI '%s'\n", uri.c_str());
 
-	Response rp(conn_pool);
-	rp.exec("CREATE DATABASE " + dbname + ";");
+	// We need a temporary, administrative connection, to create
+	// the database.  Let's assume the user has admin access; if
+	// not, then libpq will deliver an error.
+	connect("postgres:///");
+	if (!connected())
+		throw IOException(TRACE_INFO, "Error: no connection to db server!");
+
+	{
+		Response rp(conn_pool);
+		rp.exec("CREATE DATABASE " + dbname + ";");
+	}
+	close_conn_pool();
+
+	// Now reconnect, and create the tables.
+	connect(uri);
+	create_tables();
 }
 
 void SQLAtomStorage::create_tables(void)

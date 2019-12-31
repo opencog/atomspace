@@ -62,6 +62,7 @@ class SQLAtomStorage : public BackingStore
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
 		void enlarge_conn_pool(int);
+		void close_conn_pool(void);
 
 		// Utility for handling responses (on stack).
 		class Response;
@@ -126,6 +127,7 @@ class SQLAtomStorage : public BackingStore
 		// --------------------------
 		// Table management
 		void rename_tables(void);
+		void create_tables(void);
 
 		// --------------------------
 		// Values
@@ -243,7 +245,6 @@ class SQLAtomStorage : public BackingStore
 		bool connected(void); // connection to DB is alive
 
 		void create_database(std::string uri); // create the database
-		void create_tables(void);   // initialize the database
 		void kill_data(void);       // destroy DB contents
 		void clear_cache(void);     // clear out the TLB.
 
