@@ -37,15 +37,35 @@
     no longer be stored to or fetched from the database.
 ")
 
+(set-procedure-property! sql-create 'documentation
+"
+ sql-create URL - Create and initialize a new database,
+    Create the database encoded in the URL, and initialize it for
+    holding AtomSpace data. This assumes that the user has database
+    creation priviledges; otherwise an error will be thrown.
+
+    Currently, the ONLY supported URL formats are:
+       postgres:///DBNAME
+       postgres://USER@HOST/DBNAME
+       postgres://USER:PASSWORD@HOST/DBNAME
+
+  For example, to create the database \"foo\", just say:
+     (sql-create \"postgres:///foo\")
+  To then use it, you have to open it:
+     (sql-open \"postgres:///foo\")
+  To delete it, you must say \"dropdb foo\" at the shell (bash) prompt.
+")
+
 (set-procedure-property! sql-open 'documentation
 "
- sql-open URL - Open a connection to a database
+ sql-open URL - Open a connection to a database.
     Open a connection to the database encoded in the URL. All
     appropriate database credentials must be supplied in the URL,
     including the username and password, if required.
 
     The URL must be on one of these formats:
        odbc://USER:PASSWORD/DBNAME
+       postgres:///DBNAME
        postgres://USER@HOST/DBNAME
        postgres://USER:PASSWORD@HOST/DBNAME
        postgres:///DBNAME?user=USER
