@@ -27,6 +27,7 @@
 #include <chrono>
 #include <memory>
 
+#define OC_OMP 1  // hack alert -- force over-ride!
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/oc_omp.h>
 
