@@ -179,13 +179,13 @@ void AtomTable::clear()
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     AtomPtr a(createNode(t,n));
-    return getHandle(a);
+    return lookupHandle(a);
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
     AtomPtr a(createLink(seq, t));
-    return getHandle(a);
+    return lookupHandle(a);
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
