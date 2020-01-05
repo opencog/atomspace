@@ -371,9 +371,9 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
 
 		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by attentional
-		// focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start);
+		// get_incoming_set(), so that, e.g. it gets sorted by
+		// attentional focus in the AttentionalFocusCB class...
+		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
 		_search_set.clear();
 		for (const auto& lptr: iset)
 			_search_set.emplace_back(HandleCast(lptr));

@@ -79,7 +79,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                                 const Handle& grnd,
 		                                 const GroundingMap&);
 
-		virtual IncomingSet get_incoming_set(const Handle&);
+		virtual IncomingSet get_incoming_set(const Handle&, Type);
 
 		/**
 		 * Called when a virtual link is encountered. Returns false

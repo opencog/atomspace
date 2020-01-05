@@ -583,9 +583,9 @@ bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
-IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
+IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h, Type t)
 {
-	return h->getIncomingSet(_as);
+	return h->getIncomingSetByType(t, _as);
 }
 
 /* ======================================================== */
