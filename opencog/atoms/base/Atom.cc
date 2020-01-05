@@ -423,29 +423,38 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type) const
+IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 {
-    IncomingSet result;
+    static IncomingSet empty_set;
+    if (nullptr == _incoming_set) return empty_set;
 
-    // The code below is mostly a cut-n-paste from the header file.
-    // The only difference is that it works with LinkPtr instead of
-    // Handle.  The primary issue is that casting from Handle back
-    // to LinkPtr is slowwwwwww.  So we avoid that, here.
-    if (nullptr == _incoming_set) return result;
+    // Lock to prevent updates of the set of atoms.
     std::lock_guard<std::mutex> lck(_mtx);
 
     const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return result;
+    if (bucket == _incoming_set->_iset.cend()) return empty_set;
+
+    IncomingSet result;
+    if (as) {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const WinkPtr& w : bucket->second)
+        {
+            LinkPtr l(w.lock());
+            if (l and atab->in_environ(l))
+                result.emplace_back(l);
+        }
+        return result;
+    }
 
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr h(w.lock());
-        if (h) result.emplace_back(h);
+        LinkPtr l(w.lock());
+        if (l) result.emplace_back(l);
     }
     return result;
 }
 
-size_t Atom::getIncomingSetSizeByType(Type type) const
+size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck(_mtx);
@@ -454,10 +463,21 @@ size_t Atom::getIncomingSetSizeByType(Type type) const
     if (bucket == _incoming_set->_iset.cend()) return 0;
 
     size_t cnt = 0;
+
+    if (as) {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const WinkPtr& w : bucket->second)
+        {
+            LinkPtr l(w.lock());
+            if (l and atab->in_environ(l)) cnt++;
+        }
+        return cnt;
+    }
+
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr h(w.lock());
-        if (h) cnt++;
+        LinkPtr l(w.lock());
+        if (l) cnt++;
     }
     return cnt;
 }

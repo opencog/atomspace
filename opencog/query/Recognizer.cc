@@ -56,7 +56,8 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 	PatternMatchEngine pme(pmc);
 	pme.set_pattern(*_vars, *_pattern);
 
-	IncomingSet iset = get_incoming_set(top);
+	// IncomingSet iset = get_incoming_set(top);
+	IncomingSet iset = top->getIncomingSet(_as);
 	size_t sz = iset.size();
 	for (size_t i = 0; i < sz; i++)
 	{
