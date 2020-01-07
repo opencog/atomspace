@@ -69,8 +69,6 @@ class AtomTable
     friend class ::AtomSpaceUTest;
 
 private:
-    NameServer& _nameserver;
-
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
@@ -80,22 +78,6 @@ private:
     //! Index of atoms.
     TypeIndex typeIndex;
 
-    /**
-     * signal connection used to find out about atom type additions in the
-     * NameServer
-     */
-    int addedTypeConnection;
-
-    /** Handler of the 'type added' signal from NameServer */
-    void typeAdded(Type);
-
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomSignal _removeAtomSignal;
-
-    /** Signal emitted when the TV changes. */
-    TVCHSigl _TVChangedSignal;
-
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
     /// can reference those in the parent environment.
@@ -104,11 +86,24 @@ private:
     /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
     std::atomic_int _num_nested;
-    UUID _uuid;
 
     // The AtomSpace that is holding us (if any).
     AtomSpace* _as;
     bool _transient;
+
+    UUID _uuid;
+
+    /** Find out about atom type additions in the NameServer. */
+    NameServer& _nameserver;
+    int addedTypeConnection;
+    void typeAdded(Type);
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
 
     /**
      * Drop copy constructor and equals operator to
