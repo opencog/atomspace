@@ -75,11 +75,24 @@ class TypeIndex
 			auto bkt = range.first;
 			auto end = range.second;
 			for (; bkt != end; bkt++) {
-				if (h == bkt->second) {
+				if (*h == *bkt->second) {
 					s.erase(bkt);
 					break;
 				}
 			}
+		}
+
+		Handle findAtom(const Handle& h) const
+		{
+			const AtomSet& s(_idx.at(h->get_type()));
+			auto range = s.equal_range(h->get_hash());
+			auto bkt = range.first;
+			auto end = range.second;
+			for (; bkt != end; bkt++) {
+				if (*h == *bkt->second) /* content-compare */
+					return bkt->second;
+			}
+			return Handle::UNDEFINED;
 		}
 
 		size_t size(Type t)
@@ -98,7 +111,18 @@ class TypeIndex
 
 		void clear(void)
 		{
-			for (auto& s : _idx) s.clear();
+			for (auto& s : _idx)
+			{
+				for (auto& pr : s)
+				{
+					Handle& atom_to_clear = pr.second;
+					atom_to_clear->_atom_space = nullptr;
+
+					// We installed the incoming set; we remove it too.
+					atom_to_clear->remove();
+				}
+				s.clear();
+			}
 		}
 
 		// Return true if there exists some index containing duplicated

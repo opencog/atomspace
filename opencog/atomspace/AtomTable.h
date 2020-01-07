@@ -88,13 +88,8 @@ private:
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
 
-    // Index of all the atoms in the table, addressible by thier hash.
-    std::unordered_multimap<ContentHash, Handle> _atom_store;
-
-    //!@{
     //! Index of atoms.
     TypeIndex typeIndex;
-    //!@}
 
     /**
      * signal connection used to find out about atom type additions in the

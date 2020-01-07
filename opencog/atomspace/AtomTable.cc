@@ -145,22 +145,8 @@ void AtomTable::clear_all_atoms()
     for (Type type = ATOM; type < total_types; type++)
         _size_by_type[type] = 0;
 
-    // Clear the type-index
-    if (not _transient) typeIndex.clear();
-
     // Clear the atoms in the set.
-    for (auto& pr : _atom_store) {
-        Handle& atom_to_clear = pr.second;
-        atom_to_clear->_atom_space = nullptr;
-
-        // We installed the incoming set; we remove it too.
-        atom_to_clear->remove();
-    }
-
-    // Clear the atom store. This will delete all the atoms since
-    // this will be the last shared_ptr referecence, and set the
-    // size of the set to 0.
-    _atom_store.clear();
+    typeIndex.clear();
 }
 
 void AtomTable::clear()
@@ -188,17 +174,9 @@ Handle AtomTable::lookupHandle(const AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
-    ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    auto range = _atom_store.equal_range(ch);
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (*((AtomPtr) bkt->second) == *a) {
-            return bkt->second;
-        }
-    }
+    Handle h(typeIndex.findAtom(a->get_handle()));
+    if (h) return h;
 
     if (_environ)
         return _environ->lookupHandle(a);
@@ -316,27 +294,7 @@ Handle AtomTable::add(AtomPtr atom, bool force)
     _size_by_type[atom->_type] ++;
 
     Handle h(atom->get_handle());
-    _atom_store.insert({hash, h});
-
-#ifdef CHECK_ATOM_HASH_COLLISION
-    auto its = _atom_store.equal_range(atom->get_hash());
-    for (auto it = its.first; it != its.second; ++it) {
-        AtomPtr a = it->second;
-        if (atom != a) {
-            LAZY_LOG_WARN << "Hash collision between:" << std::endl
-                          << atom->to_string() << std::endl << "and:"
-                          << std::endl << a->to_string();
-#ifdef HALT_ON_COLLISON
-            // This is an extreme yet convenient way to check whether
-            // a collision has occured.
-            logger().flush();
-            abort();
-#endif
-        }
-    }
-#endif
-
-    typeIndex.insertAtom(atom->get_handle());
+    typeIndex.insertAtom(h);
 
     // Unlock, because the signal needs to run unlocked.
     lck.unlock();
@@ -358,11 +316,6 @@ size_t AtomTable::getSize() const
     // size. This sanity check might be able to avoid unpleasant
     // surprises.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    if (_size != _atom_store.size())
-        throw RuntimeException(TRACE_INFO,
-            "Internal Error: Inconsistent AtomTable hash size! %lu vs. %lu",
-            _size, _atom_store.size());
-
     if (_size != typeIndex.size())
         throw RuntimeException(TRACE_INFO,
             "Internal Error: Inconsistent AtomTable typeIndex size! %lu vs. %lu",
@@ -521,16 +474,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     if (atom->is_node()) _num_nodes--;
     if (atom->is_link()) _num_links--;
     _size_by_type[atom->_type] --;
-
-    auto range = _atom_store.equal_range(atom->get_hash());
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (handle == bkt->second) {
-            _atom_store.erase(bkt);
-            break;
-        }
-    }
 
     typeIndex.removeAtom(handle);
 
