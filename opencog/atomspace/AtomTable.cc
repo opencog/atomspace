@@ -227,8 +227,6 @@ Handle AtomTable::add(const Handle& orig, bool force)
     // Force computation of hash external to the locked section.
     orig->get_hash();
 
-    Handle atom(orig);
-
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
@@ -256,6 +254,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
     // avoiding running the factories a second time. This is, however,
     // potentially buggy, if the user is sneaky and hands us an Atom
     // that should have gone through a factory, but did not.
+    Handle atom(orig);
     if (atom->is_link()) {
         bool need_copy = false;
         if (atom->getAtomTable())
@@ -283,7 +282,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
     else if (atom->getAtomTable())
         atom = createNode(atom->get_type(), atom->get_name());
 
-    atom->copyValues(orig);
+    if (atom != orig) atom->copyValues(orig);
     atom->install();
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
