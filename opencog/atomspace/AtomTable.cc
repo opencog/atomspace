@@ -237,7 +237,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(AtomPtr atom, bool async, bool force)
+Handle AtomTable::add(AtomPtr atom, bool force)
 {
     // Can be null, if its a Value
     if (nullptr == atom) return Handle::UNDEFINED;
@@ -295,7 +295,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, async));
+                closet.emplace_back(add(h));
             }
             atom = createLink(closet, atom->get_type());
         } else {

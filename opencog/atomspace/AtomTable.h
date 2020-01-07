@@ -329,30 +329,15 @@ public:
     }
 
     /**
-     * Adds an atom to the table. If the atom already is in the
-     * atomtable, then the truth values and attention values of the
-     * two are merged (how, exactly? Is this done corrrectly!?)
+     * Adds an atom to the table.
      *
-     * If the async flag is set, then the atom addition is performed
-     * asynchronously; the atom might not be fully added by the time
-     * this method returns, although it will get added eventually.
-     * Async addition can improve the multi-threaded performance of
-     * lots of parallel adds.  The barrier() method can be used to
-     * force synchronization.
-     *
-     * XXX The async code path doesn't really do anything yet, since
-     * it also uses the big global lock, at the moment.  This needs
-     * fixing, mostly be creating a second mutex for the atom insertion,
-     * and also giving each index its own unique mutex, to avoid
-     * collisions.  So the API is here, but more work is still needed.
-     *
-     * The `force` flag forces the addtion of this atom into the
+     * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async, bool force=false);
+    Handle add(AtomPtr, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this

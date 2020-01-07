@@ -139,12 +139,11 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then new truth value is ignored, and the existing atom is
-     * returned.
+     * then that is returned.
      */
-    Handle add_atom(const Handle&, bool async=false);
-    Handle add_atom(AtomPtr a, bool async=false)
-        { return add_atom(a->get_handle(), async); }
+    Handle add_atom(const Handle&);
+    Handle add_atom(AtomPtr a)
+        { return add_atom(a->get_handle()); }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -153,7 +152,7 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name="", bool async=false);
+    Handle add_node(Type t, const std::string& name="");
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -163,7 +162,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing, bool async=false);
+    Handle add_link(Type t, const HandleSeq& outgoing);
 
     inline Handle add_link(Type t)
     {
