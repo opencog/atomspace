@@ -364,8 +364,7 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
           "AtomTable - transient should not index atoms!");
 
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    Atom* pat = atom.operator->();
-    typeIndex.insertAtom(pat);
+    typeIndex.insertAtom(atom->get_handle());
 
     // We can now unlock, since we are done. In particular, the signals
     // need to run unlocked, since they may result in more atom table
@@ -562,8 +561,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         }
     }
 
-    Atom* pat = atom.operator->();
-    typeIndex.removeAtom(pat);
+    typeIndex.removeAtom(handle);
 
     // Remove atom from other incoming sets.
     atom->remove();
