@@ -325,7 +325,7 @@ size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
         Type ntypes = nameserver().getNumberOfClasses();
         for (Type t = ATOM; t<ntypes; t++)
         {
-            if (t != type and _nameserver.isA(type, t))
+            if (t != type and _nameserver.isA(t, type))
                 result += typeIndex.size(t);
         }
     }
