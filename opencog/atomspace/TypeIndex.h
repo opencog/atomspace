@@ -95,9 +95,9 @@ class TypeIndex
 			return Handle::UNDEFINED;
 		}
 
-		size_t size(Type t)
+		size_t size(Type t) const
 		{
-			AtomSet& s(_idx.at(t));
+			const AtomSet& s(_idx.at(t));
 			return s.size();
 		}
 
