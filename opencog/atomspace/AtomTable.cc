@@ -69,14 +69,7 @@ using namespace opencog;
 static std::atomic<UUID> _id_pool(1);
 
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
-    _nameserver(nameserver()),
-    // Hmm. Right now async doesn't work anyway, so lets not create
-    // threads for it. It just makes using gdb that much harder.
-    // FIXME later. Actually, the async idea is not going to work as
-    // originally envisioned, anyway.  What we really need are
-    // consistent views of the atomtable.
-    // _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
-    _index_queue(this, &AtomTable::put_atom_into_index, 0)
+    _nameserver(nameserver())
 {
     _as = holder;
     _environ = parent;
@@ -343,42 +336,20 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     }
 #endif
 
-    if (not _transient and not async)
-        put_atom_into_index(atom);
-
-    // We can now unlock, since we are done.
-    lck.unlock();
-
-    // Update the indexes asynchronously
-    if (not _transient and async)
-        _index_queue.enqueue(atom);
-
-    DPRINTF("Atom added: %s\n", atom->to_string().c_str());
-    return h;
-}
-
-void AtomTable::put_atom_into_index(const AtomPtr& atom)
-{
-    if (_transient)
-        throw RuntimeException(TRACE_INFO,
-          "AtomTable - transient should not index atoms!");
-
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
     typeIndex.insertAtom(atom->get_handle());
 
-    // We can now unlock, since we are done. In particular, the signals
-    // need to run unlocked, since they may result in more atom table
-    // additions.
+    // Unlock, because the signal needs to run unlocked.
     lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal.emit(atom->get_handle());
+    _addAtomSignal.emit(h);
+
+    return h;
 }
 
 void AtomTable::barrier()
 {
-    _index_queue.flush_queue();
 }
 
 size_t AtomTable::getSize() const
