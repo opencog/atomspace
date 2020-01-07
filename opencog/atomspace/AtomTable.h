@@ -50,10 +50,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::set<AtomPtr> AtomPtrSet;
-
 typedef SigSlot<const Handle&> AtomSignal;
-typedef SigSlot<const AtomPtr&> AtomPtrSignal;
 typedef SigSlot<const Handle&,
                 const TruthValuePtr&,
                 const TruthValuePtr&> TVCHSigl;
@@ -72,48 +69,14 @@ class AtomTable
     friend class ::AtomSpaceUTest;
 
 private:
-    NameServer& _nameserver;
-
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
     mutable std::recursive_mutex _mtx;
 
-    // Cached count of the number of atoms in the table.
-    size_t _size;
-    size_t _num_nodes;
-    size_t _num_links;
-
-    // Cached count of the number of atoms of each type.
-    std::vector<size_t> _size_by_type;
-
-    // Index of all the atoms in the table, addressible by thier hash.
-    std::unordered_multimap<ContentHash, Handle> _atom_store;
-
-    //!@{
-    //! Index for quick retrieval of certain kinds of atoms.
+    //! Index of atoms.
     TypeIndex typeIndex;
-
-    async_caller<AtomTable, AtomPtr> _index_queue;
-    void put_atom_into_index(const AtomPtr&);
-    //!@}
-
-    /**
-     * signal connection used to find out about atom type additions in the
-     * NameServer
-     */
-    int addedTypeConnection;
-
-    /** Handler of the 'type added' signal from NameServer */
-    void typeAdded(Type);
-
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomPtrSignal _removeAtomSignal;
-
-    /** Signal emitted when the TV changes. */
-    TVCHSigl _TVChangedSignal;
 
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
@@ -123,11 +86,24 @@ private:
     /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
     std::atomic_int _num_nested;
-    UUID _uuid;
 
     // The AtomSpace that is holding us (if any).
     AtomSpace* _as;
     bool _transient;
+
+    UUID _uuid;
+
+    /** Find out about atom type additions in the NameServer. */
+    NameServer& _nameserver;
+    int addedTypeConnection;
+    void typeAdded(Type);
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
 
     /**
      * Drop copy constructor and equals operator to
@@ -171,7 +147,7 @@ public:
      * shared libraries. Yes, this is kind-of hacky, but its the
      * simplest fix for just right now.
      */
-    bool in_environ(const AtomPtr& atom) const
+    bool in_environ(const Handle& atom) const
     {
         if (nullptr == atom) return false;
         AtomTable* atab = atom->getAtomTable();
@@ -202,11 +178,8 @@ public:
      */
     Handle getHandle(Type, const std::string&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const AtomPtr&) const;
-    Handle getHandle(const Handle& h) const {
-        AtomPtr a(h); return getHandle(a);
-    }
-    Handle lookupHandle(const AtomPtr&) const;
+    Handle getHandle(const Handle&) const;
+    Handle lookupHandle(const Handle&) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -332,30 +305,15 @@ public:
     }
 
     /**
-     * Adds an atom to the table. If the atom already is in the
-     * atomtable, then the truth values and attention values of the
-     * two are merged (how, exactly? Is this done corrrectly!?)
+     * Adds an atom to the table.
      *
-     * If the async flag is set, then the atom addition is performed
-     * asynchronously; the atom might not be fully added by the time
-     * this method returns, although it will get added eventually.
-     * Async addition can improve the multi-threaded performance of
-     * lots of parallel adds.  The barrier() method can be used to
-     * force synchronization.
-     *
-     * XXX The async code path doesn't really do anything yet, since
-     * it also uses the big global lock, at the moment.  This needs
-     * fixing, mostly be creating a second mutex for the atom insertion,
-     * and also giving each index its own unique mutex, to avoid
-     * collisions.  So the API is here, but more work is still needed.
-     *
-     * The `force` flag forces the addtion of this atom into the
+     * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async, bool force=false);
+    Handle add(const Handle&, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
@@ -368,7 +326,7 @@ public:
      * Return true if the atom table holds this handle, else return false.
      */
     bool holds(const Handle& h) const {
-        return (NULL != h) and h->getAtomTable() == this;
+        return (nullptr != h) and h->getAtomTable() == this;
     }
 
     /**
@@ -386,7 +344,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    AtomPtrSet extract(Handle& handle, bool recursive=true);
+    HandleSet extract(Handle& handle, bool recursive=true);
 
     /**
      * Return a random atom in the AtomTable.
@@ -394,7 +352,7 @@ public:
     Handle getRandom(RandGen* rng) const;
 
     AtomSignal& atomAddedSignal() { return _addAtomSignal; }
-    AtomPtrSignal& atomRemovedSignal() { return _removeAtomSignal; }
+    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }

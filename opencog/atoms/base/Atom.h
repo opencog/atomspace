@@ -104,6 +104,7 @@ class Atom
 {
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
+    friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
     friend class SQLAtomStorage;  // Needs to call getAtomTable()

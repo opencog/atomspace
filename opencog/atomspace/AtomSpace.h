@@ -139,12 +139,11 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then new truth value is ignored, and the existing atom is
-     * returned.
+     * then that is returned.
      */
-    Handle add_atom(const Handle&, bool async=false);
-    Handle add_atom(AtomPtr a, bool async=false)
-        { return add_atom(a->get_handle(), async); }
+    Handle add_atom(const Handle&);
+    Handle add_atom(const AtomPtr& a)
+        { return add_atom(a->get_handle()); }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -153,7 +152,7 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name="", bool async=false);
+    Handle add_node(Type t, const std::string& name="");
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -163,7 +162,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing, bool async=false);
+    Handle add_link(Type t, const HandleSeq& outgoing);
 
     inline Handle add_link(Type t)
     {
@@ -318,8 +317,8 @@ public:
      * the AtomSpace is not connected to a backend, there is no
      * difference between remove and extract.
      *
-     * The atom itself remains valid as long as there are Handles or
-     * AtomPtr's that reference it; the RAM associated with the atom is
+     * The atom itself remains valid as long as there are Handles
+     * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -338,8 +337,8 @@ public:
 
     /**
      * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles or AtomPtr's
-     * that reference it; it is deleted only when the last reference
+     * The atom remains valid as long as there are Handles that
+     * reference it; it is deleted only when the last reference
      * goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -525,7 +524,7 @@ public:
     {
         return _atom_table.atomAddedSignal();
     }
-    AtomPtrSignal& atomRemovedSignal()
+    AtomSignal& atomRemovedSignal()
     {
         return _atom_table.atomRemovedSignal();
     }
