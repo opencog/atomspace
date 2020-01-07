@@ -152,8 +152,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
-/// such an atom is in the table, it is returned, else the return
-/// is the bad handle.
+/// such an atom is in the table, it is returned, else return nullptr.
 Handle AtomTable::lookupHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;

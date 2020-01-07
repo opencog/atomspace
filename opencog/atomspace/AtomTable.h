@@ -326,7 +326,7 @@ public:
      * Return true if the atom table holds this handle, else return false.
      */
     bool holds(const Handle& h) const {
-        return (NULL != h) and h->getAtomTable() == this;
+        return (nullptr != h) and h->getAtomTable() == this;
     }
 
     /**
