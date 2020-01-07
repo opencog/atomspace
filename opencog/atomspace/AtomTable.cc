@@ -77,10 +77,6 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
     _num_nested = 0;
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
     _size = 0;
-    _num_nodes = 0;
-    _num_links = 0;
-    size_t ntypes = _nameserver.getNumberOfClasses();
-    _size_by_type.resize(ntypes);
     _transient = transient;
 
     // Connect signal to find out about type additions
@@ -135,17 +131,7 @@ void AtomTable::clear_transient()
 
 void AtomTable::clear_all_atoms()
 {
-    // Reset the size to zero.
     _size = 0;
-    _num_nodes = 0;
-    _num_links = 0;
-
-    // Clear the by-type size cache.
-    Type total_types = _size_by_type.size();
-    for (Type type = ATOM; type < total_types; type++)
-        _size_by_type[type] = 0;
-
-    // Clear the atoms in the set.
     typeIndex.clear();
 }
 
@@ -288,10 +274,6 @@ Handle AtomTable::add(const Handle& orig, bool force)
     atom->setAtomSpace(_as);
 
     _size++;
-    if (atom->is_node()) _num_nodes++;
-    if (atom->is_link()) _num_links++;
-    _size_by_type[atom->_type] ++;
-
     typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
@@ -324,27 +306,27 @@ size_t AtomTable::getSize() const
 
 size_t AtomTable::getNumNodes() const
 {
-    return _num_nodes;
+    return getNumAtomsOfType(NODE, true);
 }
 
 size_t AtomTable::getNumLinks() const
 {
-    return _num_links;
+    return getNumAtomsOfType(LINK, true);
 }
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    size_t result = _size_by_type[type];
+    size_t result = typeIndex.size(type);
     if (subclass)
     {
         // Also count subclasses of this type, if need be.
-        Type ntypes = _size_by_type.size();
+        Type ntypes = nameserver().getNumberOfClasses();
         for (Type t = ATOM; t<ntypes; t++)
         {
             if (t != type and _nameserver.isA(type, t))
-                result += _size_by_type[t];
+                result += typeIndex.size(t);
         }
     }
 
@@ -467,10 +449,6 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     _size--;
-    if (handle->is_node()) _num_nodes--;
-    if (handle->is_link()) _num_links--;
-    _size_by_type[handle->_type] --;
-
     typeIndex.removeAtom(handle);
 
     // Remove handle from other incoming sets.
@@ -482,13 +460,9 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
     return result;
 }
 
-// This is the resize callback, when a new type is dynamically added.
+/// This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    //resize all Type-based indexes
-    size_t new_size = _nameserver.getNumberOfClasses();
-    _size_by_type.resize(new_size);
     typeIndex.resize();
 }
-

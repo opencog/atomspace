@@ -79,11 +79,6 @@ private:
 
     // Cached count of the number of atoms in the table.
     size_t _size;
-    size_t _num_nodes;
-    size_t _num_links;
-
-    // Cached count of the number of atoms of each type.
-    std::vector<size_t> _size_by_type;
 
     //! Index of atoms.
     TypeIndex typeIndex;
