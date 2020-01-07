@@ -215,19 +215,19 @@ static void prt_diag(Handle atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(Handle atom, bool force)
+Handle AtomTable::add(const Handle& orig, bool force)
 {
     // Can be null, if its a Value
-    if (nullptr == atom) return Handle::UNDEFINED;
+    if (nullptr == orig) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
-    if (not force and in_environ(atom))
-        return atom;
+    if (not force and in_environ(orig))
+        return orig;
 
     // Force computation of hash external to the locked section.
-    atom->get_hash();
+    orig->get_hash();
 
-    Handle orig(atom);
+    Handle atom(orig);
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
