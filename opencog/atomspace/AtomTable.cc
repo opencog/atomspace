@@ -157,25 +157,25 @@ void AtomTable::clear()
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    AtomPtr a(createNode(t,n));
+    Handle a(createNode(t,n));
     return lookupHandle(a);
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
-    AtomPtr a(createLink(seq, t));
+    Handle a(createLink(seq, t));
     return lookupHandle(a);
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::lookupHandle(const AtomPtr& a) const
+Handle AtomTable::lookupHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    Handle h(typeIndex.findAtom(a->get_handle()));
+    Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
     if (_environ)
@@ -186,18 +186,18 @@ Handle AtomTable::lookupHandle(const AtomPtr& a) const
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
 /// Otherwise, search for an equivalent atom that we might be holding.
-Handle AtomTable::getHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
     if (in_environ(a))
-        return a->get_handle();
+        return a;
 
     return lookupHandle(a);
 }
 
 #if 0
-static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
+static void prt_diag(Handle atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
     Logger::Level save = logger().getBackTraceLevel();
     logger().setBackTraceLevel(Logger::Level::NONE);
@@ -215,17 +215,17 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(AtomPtr atom, bool force)
+Handle AtomTable::add(Handle atom, bool force)
 {
     // Can be null, if its a Value
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
     if (not force and in_environ(atom))
-        return atom->get_handle();
+        return atom;
 
     // Force computation of hash external to the locked section.
-    ContentHash hash = atom->get_hash();
+    atom->get_hash();
 
     Handle orig(atom);
 
@@ -293,17 +293,16 @@ Handle AtomTable::add(AtomPtr atom, bool force)
     if (atom->is_link()) _num_links++;
     _size_by_type[atom->_type] ++;
 
-    Handle h(atom->get_handle());
-    typeIndex.insertAtom(h);
+    typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
     lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal.emit(h);
+    _addAtomSignal.emit(atom);
 
-    return h;
+    return atom;
 }
 
 void AtomTable::barrier()
@@ -375,23 +374,21 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
+HandleSet AtomTable::extract(Handle& handle, bool recursive)
 {
-    AtomPtrSet result;
+    HandleSet result;
 
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    AtomPtr atom(handle);
-    atom = getHandle(atom);
-    handle = atom;
+    handle = getHandle(handle);
 
-    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
+    if (nullptr == handle or handle->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    AtomTable* other = atom->getAtomTable();
+    AtomTable* other = handle->getAtomTable();
     if (other != this)
     {
         if (not in_environ(handle)) return result;
@@ -404,8 +401,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
-    if (atom->isMarkedForRemoval()) return result;
-    atom->markForRemoval();
+    if (handle->isMarkedForRemoval()) return result;
+    handle->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -435,7 +432,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             if (not his->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
                 if (other) {
-                    AtomPtrSet ex = other->extract(his, true);
+                    HandleSet ex = other->extract(his, true);
                     result.insert(ex.begin(), ex.end());
                 }
             }
@@ -466,23 +463,23 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // unlocking it once is not enough, because it can still be
     // recurisvely locked.
     // lck.unlock();
-    _removeAtomSignal.emit(atom);
+    _removeAtomSignal.emit(handle);
     // lck.lock();
 
     // Decrements the size of the table
     _size--;
-    if (atom->is_node()) _num_nodes--;
-    if (atom->is_link()) _num_links--;
-    _size_by_type[atom->_type] --;
+    if (handle->is_node()) _num_nodes--;
+    if (handle->is_link()) _num_links--;
+    _size_by_type[handle->_type] --;
 
     typeIndex.removeAtom(handle);
 
-    // Remove atom from other incoming sets.
-    atom->remove();
+    // Remove handle from other incoming sets.
+    handle->remove();
 
-    atom->setAtomSpace(nullptr);
+    handle->setAtomSpace(nullptr);
 
-    result.insert(atom);
+    result.insert(handle);
     return result;
 }
 

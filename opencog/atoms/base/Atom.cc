@@ -402,7 +402,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
             for (const WinkPtr& w : bucket.second)
             {
                 LinkPtr l(w.lock());
-                if (l and atab->in_environ(l))
+                if (l and atab->in_environ(l->get_handle()))
                     iset.emplace_back(l);
             }
         }
@@ -440,7 +440,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
         for (const WinkPtr& w : bucket->second)
         {
             LinkPtr l(w.lock());
-            if (l and atab->in_environ(l))
+            if (l and atab->in_environ(l->get_handle()))
                 result.emplace_back(l);
         }
         return result;
@@ -469,7 +469,7 @@ size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
         for (const WinkPtr& w : bucket->second)
         {
             LinkPtr l(w.lock());
-            if (l and atab->in_environ(l)) cnt++;
+            if (l and atab->in_environ(l->get_handle())) cnt++;
         }
         return cnt;
     }

@@ -142,7 +142,7 @@ public:
      * then that is returned.
      */
     Handle add_atom(const Handle&);
-    Handle add_atom(AtomPtr a)
+    Handle add_atom(const AtomPtr& a)
         { return add_atom(a->get_handle()); }
 
     /**
@@ -317,8 +317,8 @@ public:
      * the AtomSpace is not connected to a backend, there is no
      * difference between remove and extract.
      *
-     * The atom itself remains valid as long as there are Handles or
-     * AtomPtr's that reference it; the RAM associated with the atom is
+     * The atom itself remains valid as long as there are Handles
+     * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -337,8 +337,8 @@ public:
 
     /**
      * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles or AtomPtr's
-     * that reference it; it is deleted only when the last reference
+     * The atom remains valid as long as there are Handles that
+     * reference it; it is deleted only when the last reference
      * goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -524,7 +524,7 @@ public:
     {
         return _atom_table.atomAddedSignal();
     }
-    AtomPtrSignal& atomRemovedSignal()
+    AtomSignal& atomRemovedSignal()
     {
         return _atom_table.atomRemovedSignal();
     }

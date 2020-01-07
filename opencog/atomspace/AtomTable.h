@@ -50,10 +50,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::set<AtomPtr> AtomPtrSet;
-
 typedef SigSlot<const Handle&> AtomSignal;
-typedef SigSlot<const AtomPtr&> AtomPtrSignal;
 typedef SigSlot<const Handle&,
                 const TruthValuePtr&,
                 const TruthValuePtr&> TVCHSigl;
@@ -102,7 +99,7 @@ private:
 
     /** Provided signals */
     AtomSignal _addAtomSignal;
-    AtomPtrSignal _removeAtomSignal;
+    AtomSignal _removeAtomSignal;
 
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
@@ -163,7 +160,7 @@ public:
      * shared libraries. Yes, this is kind-of hacky, but its the
      * simplest fix for just right now.
      */
-    bool in_environ(const AtomPtr& atom) const
+    bool in_environ(const Handle& atom) const
     {
         if (nullptr == atom) return false;
         AtomTable* atab = atom->getAtomTable();
@@ -194,11 +191,8 @@ public:
      */
     Handle getHandle(Type, const std::string&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const AtomPtr&) const;
-    Handle getHandle(const Handle& h) const {
-        AtomPtr a(h); return getHandle(a);
-    }
-    Handle lookupHandle(const AtomPtr&) const;
+    Handle getHandle(const Handle&) const;
+    Handle lookupHandle(const Handle&) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -332,7 +326,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool force=false);
+    Handle add(Handle, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
@@ -363,7 +357,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    AtomPtrSet extract(Handle& handle, bool recursive=true);
+    HandleSet extract(Handle& handle, bool recursive=true);
 
     /**
      * Return a random atom in the AtomTable.
@@ -371,7 +365,7 @@ public:
     Handle getRandom(RandGen* rng) const;
 
     AtomSignal& atomAddedSignal() { return _addAtomSignal; }
-    AtomPtrSignal& atomRemovedSignal() { return _removeAtomSignal; }
+    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
