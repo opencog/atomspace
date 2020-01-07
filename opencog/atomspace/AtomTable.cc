@@ -76,7 +76,6 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
     if (_environ) _environ->_num_nested++;
     _num_nested = 0;
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
-    _size = 0;
     _transient = transient;
 
     // Connect signal to find out about type additions
@@ -131,7 +130,6 @@ void AtomTable::clear_transient()
 
 void AtomTable::clear_all_atoms()
 {
-    _size = 0;
     typeIndex.clear();
 }
 
@@ -273,7 +271,6 @@ Handle AtomTable::add(const Handle& orig, bool force)
     atom->keep_incoming_set();
     atom->setAtomSpace(_as);
 
-    _size++;
     typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
@@ -292,16 +289,7 @@ void AtomTable::barrier()
 
 size_t AtomTable::getSize() const
 {
-    // No one except the unit tests ever worries about the atom table
-    // size. This sanity check might be able to avoid unpleasant
-    // surprises.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    if (_size != typeIndex.size())
-        throw RuntimeException(TRACE_INFO,
-            "Internal Error: Inconsistent AtomTable typeIndex size! %lu vs. %lu",
-            _size, typeIndex.size());
-
-    return _size;
+    return getNumAtomsOfType(ATOM, true);
 }
 
 size_t AtomTable::getNumNodes() const
@@ -447,8 +435,6 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
     _removeAtomSignal.emit(handle);
     // lck.lock();
 
-    // Decrements the size of the table
-    _size--;
     typeIndex.removeAtom(handle);
 
     // Remove handle from other incoming sets.

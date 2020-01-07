@@ -77,9 +77,6 @@ private:
     // them during add/remove.
     mutable std::recursive_mutex _mtx;
 
-    // Cached count of the number of atoms in the table.
-    size_t _size;
-
     //! Index of atoms.
     TypeIndex typeIndex;
 
