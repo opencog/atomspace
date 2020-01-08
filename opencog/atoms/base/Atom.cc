@@ -61,7 +61,7 @@ namespace std {
 opencog::Type
 hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
 {
-    opencog::LinkPtr h(w.lock());
+    opencog::Handle h(w.lock());
     if (nullptr == h) return 0;
     return h->get_type();
 }
@@ -72,14 +72,16 @@ equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
 {
     opencog::Handle hl(lw.lock());
     opencog::Handle hr(rw.lock());
-    return hl == hr;
+    return hl == hr;  /* hang on, should this be content-compare??? */
 }
 
+#if 0
 // Overloading operator<< for Incoming Set
 ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
 {
     return out << opencog::oc_to_string(iset);
 }
+#endif
 
 } // namespace std
 
@@ -305,7 +307,7 @@ void Atom::drop_incoming_set()
 }
 
 /// Add an atom to the incoming set.
-void Atom::insert_atom(const LinkPtr& a)
+void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -326,7 +328,7 @@ void Atom::insert_atom(const LinkPtr& a)
 }
 
 /// Remove an atom from the incoming set.
-void Atom::remove_atom(const LinkPtr& a)
+void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -342,7 +344,7 @@ void Atom::remove_atom(const LinkPtr& a)
 /// Remove old, and add new, atomically, so that every user
 /// will see either one or the other, but not both/neither in
 /// the incoming set. This is used to manage the StateLink.
-void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
+void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -401,8 +403,8 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                LinkPtr l(w.lock());
-                if (l and atab->in_environ(l->get_handle()))
+                Handle l(w.lock());
+                if (l and atab->in_environ(l))
                     iset.emplace_back(l);
             }
         }
@@ -416,7 +418,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            LinkPtr l(w.lock());
+            Handle l(w.lock());
             if (l) iset.emplace_back(l);
         }
     }
@@ -439,8 +441,8 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
         const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
-            LinkPtr l(w.lock());
-            if (l and atab->in_environ(l->get_handle()))
+            Handle l(w.lock());
+            if (l and atab->in_environ(l))
                 result.emplace_back(l);
         }
         return result;
@@ -448,7 +450,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr l(w.lock());
+        Handle l(w.lock());
         if (l) result.emplace_back(l);
     }
     return result;
@@ -468,15 +470,15 @@ size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
         const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
-            LinkPtr l(w.lock());
-            if (l and atab->in_environ(l->get_handle())) cnt++;
+            Handle l(w.lock());
+            if (l and atab->in_environ(l)) cnt++;
         }
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr l(w.lock());
+        Handle l(w.lock());
         if (l) cnt++;
     }
     return cnt;
@@ -492,6 +494,7 @@ std::string Atom::id_to_string() const
     return ss.str();
 }
 
+#if 0
 std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 {
 	std::stringstream ss;
@@ -501,6 +504,7 @@ std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 		   << iset[i]->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
+#endif
 
 std::string oc_to_string(const Atom& atom, const std::string& indent)
 {
