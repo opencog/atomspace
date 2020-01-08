@@ -66,7 +66,7 @@ public:
     Node(Type t, const std::string&& s)
         : Atom(t)
     {
-        init(s);
+        init(std::move(s));
     }
 
     Node(const Node&) = delete;

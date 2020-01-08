@@ -77,59 +77,40 @@ public:
         init(oset);
     }
 
-    Link(HandleSeq&& oset, Type t=LINK)
+    Link(const HandleSeq&& oset, Type t=LINK)
         : Atom(t)
     {
-        init(oset);
+        init(std::move(oset));
     }
 
     Link(Type t)
         : Atom(t)
     {
-        HandleSeq oset;
-        init(oset);
+        init({});
     }
 
 	Link(Type t, const Handle& h)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(1);
-        oset[0] = h;
-        init(oset);
+        init({h});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(2);
-        oset[0] = ha;
-        oset[1] = hb;
-        init(oset);
+        init({ha, hb});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(3);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        init(oset);
+        init({ha, hb, hc});
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(4);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        oset[3] = hd;
-        init(oset);
+        init({ha, hb, hc, hd});
     }
 
     Link(const Link&) = delete;
