@@ -214,8 +214,8 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
 template< class... Args >
 Handle createLink( Args&&... args )
 {
-	LinkPtr tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
-	return classserver().factory(tmp->get_handle());
+	Handle tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
+	return classserver().factory(tmp);
 }
 
 /** @}*/

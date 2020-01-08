@@ -429,7 +429,7 @@ public:
 		ex.clear();
 
 		TS_ASSERT(as.get_size() == 1);
-		TS_ASSERT(ex.get_size() == 0);
+		TS_ASSERT(ex.get_size() == 1);
 
 		handle_set.clear();
 		ex.get_handles_by_type(handle_set, CONCEPT_NODE);

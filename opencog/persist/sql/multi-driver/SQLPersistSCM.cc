@@ -61,6 +61,7 @@ void SQLPersistSCM::init_in_module(void* data)
 
 void SQLPersistSCM::init(void)
 {
+    define_scheme_primitive("sql-create", &SQLPersistSCM::do_create, this, "persist-sql");
     define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
     define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
     define_scheme_primitive("sql-stats", &SQLPersistSCM::do_stats, this, "persist-sql");
@@ -73,6 +74,13 @@ void SQLPersistSCM::init(void)
 SQLPersistSCM::~SQLPersistSCM()
 {
     if (_backing) delete _backing;
+}
+
+void SQLPersistSCM::do_create(const std::string& uri)
+{
+    SQLAtomStorage* store = new SQLAtomStorage();
+    store->create_database(uri);
+    delete store;
 }
 
 void SQLPersistSCM::do_open(const std::string& uri)
@@ -93,12 +101,9 @@ void SQLPersistSCM::do_open(const std::string& uri)
     if (_as->isAttachedToBackingStore())
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Atomspace connected to another storage backend!");
-    // Use the postgres driver.
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
-    if (!store)
-        throw RuntimeException(TRACE_INFO,
-            "sql-open: Error: Unable to open the database");
 
+    SQLAtomStorage *store = new SQLAtomStorage();
+    store->open(uri);
     if (!store->connected())
     {
         delete store;

@@ -104,6 +104,7 @@ class Atom
 {
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
+    friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
     friend class SQLAtomStorage;  // Needs to call getAtomTable()
@@ -317,7 +318,7 @@ public:
     //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
+    IncomingSet getIncomingSet(AtomSpace* = nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -384,10 +385,10 @@ public:
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type type) const;
+    IncomingSet getIncomingSetByType(Type, AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type) const;
+    size_t getIncomingSetSizeByType(Type type, AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;

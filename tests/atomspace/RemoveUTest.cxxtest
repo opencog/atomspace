@@ -70,7 +70,7 @@ void RemoveUTest::testSimple()
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
 	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 3);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -82,7 +82,7 @@ void RemoveUTest::testSimple()
 	as2.remove_atom(hli);
 
 	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as2.get_size() == 2);
 
 	// Handle hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -149,7 +149,7 @@ void RemoveUTest::testRecursive()
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
 	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 1);
+	TS_ASSERT(as2.get_size() == 3);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -161,7 +161,7 @@ void RemoveUTest::testRecursive()
 	as1.remove_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -191,7 +191,7 @@ void RemoveUTest::testCross()
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 3);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -233,7 +233,7 @@ void RemoveUTest::testReCross()
 	Handle hli = as2.add_link(LIST_LINK, hna, hnb);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 3);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -245,7 +245,7 @@ void RemoveUTest::testReCross()
 	as2.remove_atom(hnb, true);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -276,7 +276,7 @@ void RemoveUTest::testRepeat()
 	Handle hlili = as2.add_link(LIST_LINK, hli, hli);
 
 	TS_ASSERT(as1.get_size() == 2);
-	TS_ASSERT(as2.get_size() == 2);
+	TS_ASSERT(as2.get_size() == 4);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -288,7 +288,7 @@ void RemoveUTest::testRepeat()
 	as1.remove_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -337,7 +337,7 @@ void RemoveUTest::testHeads()
 	Handle hohoy = as2.add_link(LIST_LINK, hna, hoho, ho, hoo, hohox, hwa);
 
 	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 7);
+	TS_ASSERT(as2.get_size() == 13);
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
@@ -349,7 +349,7 @@ void RemoveUTest::testHeads()
 	as1.remove_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
-	TS_ASSERT(as2.get_size() == 0);
+	TS_ASSERT(as2.get_size() == 1);
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
@@ -393,12 +393,12 @@ void RemoveUTest::testTails()
 	Handle hohoy = as2.add_link(LIST_LINK, hna, hoho, ho, hoo, hohox, hwa);
 
 	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 7);
+	TS_ASSERT(as2.get_size() == 13);
 
 	as2.remove_atom(hoo, true);
 
 	TS_ASSERT(as1.get_size() == 6);
-	TS_ASSERT(as2.get_size() == 3);
+	TS_ASSERT(as2.get_size() == 9);
 
 	as1.clear();
 	as2.clear();

@@ -254,7 +254,8 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    SQLAtomStorage *store = new SQLAtomStorage();
+    store->open(uri);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -307,13 +308,13 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
     TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 1.0/(100.0+idx)));
     n1[idx]->setTruthValue(stv);
-    n1[idx] = table->add(n1[idx], false);
+    n1[idx] = table->add(n1[idx]);
     a1[idx] = n1[idx];
 
     n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
     TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 1.0/(200.0+idx)));
     n2[idx]->setTruthValue(stv2);
-    n2[idx] = table->add(n2[idx], false);
+    n2[idx] = table->add(n2[idx]);
     a2[idx] = n2[idx];
 
     // ODBC fails when there is a question mark in the text.
@@ -324,7 +325,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv3(SimpleTruthValue::createTV(1.0e33/3.0, (1.0e-30)/(300.0+idx)));
     n3[idx]->setTruthValue(stv3);
-    n3[idx] = table->add(n3[idx], false);
+    n3[idx] = table->add(n3[idx]);
     a3[idx] = n3[idx];
 
     // The NumberNode will go through the AtomTable clone factory
@@ -335,7 +336,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv4(SimpleTruthValue::createTV((4.0e-200)/9.0, 1.0e40/(400.0+idx)));
     n4[idx]->setTruthValue(stv4);
-    n4[idx] = table->add(n4[idx], false);
+    n4[idx] = table->add(n4[idx]);
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
@@ -345,7 +346,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(a4[idx]->get_handle());
 
     l[idx] = createLink(hvec, SET_LINK);
-    l[idx] = table->add(l[idx], false);
+    l[idx] = table->add(l[idx]);
     al[idx] = l[idx];
 }
 
@@ -380,7 +381,8 @@ void BasicSaveUTest::do_test_single_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    astore = new SQLAtomStorage(uri);
+    astore = new SQLAtomStorage();
+    astore->open(uri);
     if (!astore->connected())
     {
         logger().info("setUp: cannot connect to database");
@@ -407,7 +409,8 @@ void BasicSaveUTest::do_test_fresh_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    SQLAtomStorage *store = new SQLAtomStorage();
+    store->open(uri);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -448,7 +451,8 @@ void BasicSaveUTest::do_test_table()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    SQLAtomStorage *store = new SQLAtomStorage();
+    store->open(uri);
     if (!store->connected())
     {
         logger().debug("test_table: cannot connect to db");
@@ -469,7 +473,8 @@ void BasicSaveUTest::do_test_table()
     delete table1;
 
     // Reopen connection, and load the atom table.
-    store = new SQLAtomStorage(uri);
+    store = new SQLAtomStorage();
+    store->open(uri);
     TSM_ASSERT("Not connected to database", store->connected());
 
     AtomTable *table2 = new AtomTable();

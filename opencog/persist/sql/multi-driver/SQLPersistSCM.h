@@ -53,6 +53,7 @@ public:
     SQLPersistSCM(AtomSpace*);
     ~SQLPersistSCM();
 
+    void do_create(const std::string&);
     void do_open(const std::string&);
     void do_close(void);
 

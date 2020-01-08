@@ -92,8 +92,8 @@ class PMCGroundings : public PatternMatchCallback
 		{
 			return _cb.always_clause_match(pattrn, grnd, term_gnds);
 		}
-		IncomingSet get_incoming_set(const Handle& h) {
-			return _cb.get_incoming_set(h);
+		IncomingSet get_incoming_set(const Handle& h, Type t) {
+			return _cb.get_incoming_set(h, t);
 		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }

@@ -1285,7 +1285,8 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
-	IncomingSet iset = _pmc.get_incoming_set(hg);
+	Type t = ptm->getHandle()->get_type();
+	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
 	                      << ptm->getHandle()->to_string() << std::endl
@@ -1321,14 +1322,15 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 /// inconoming, just as above, and also loop over differrent glob
 /// grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
-                                             const Handle& hg,
-                                             const Handle& clause_root)
+                                                 const Handle& hg,
+                                                 const Handle& clause_root)
 {
+	Type t = ptm->getHandle()->get_type();
 	IncomingSet iset;
 	if (nullptr == hg->getAtomSpace())
-		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0));
+		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0), t);
 	else
-		iset = _pmc.get_incoming_set(hg);
+		iset = _pmc.get_incoming_set(hg, t);
 
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "

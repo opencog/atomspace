@@ -44,21 +44,120 @@
 
 using namespace opencog;
 
+// A large number of write-back queues do not seem to help
+// performance, because once the queues get above the high-water
+// mark, they *all* stall, waiting for the drain to complete.
+// Based on observations, postgres seems to have trouble servicing
+// more than 2 or 3 concurrent write requests on the same table,
+// and so anything above about 4 write-back quees seems to serve no
+// purpose. (Above statements for a 24-core CPU.)
+#define NUM_WB_QUEUES 6
+
 /* ================================================================ */
 // Constructors
 
-void SQLAtomStorage::init(const char * uri)
+SQLAtomStorage::SQLAtomStorage(void) :
+	_tlbuf(&_uuid_manager),
+	_uuid_manager("uuid_pool"),
+	_vuid_manager("vuid_pool"),
+	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
+	_async_write_queue_exception(nullptr)
 {
-	_uri = uri;
+	// Use a bigger buffer than the default. Assuming that the hardware
+	// can do 1K atom stores/sec or better, this gives a backlog of
+	// unwritten stuff less than a second long, which seems like an OK
+	// situation, to me.
+	_write_queue.set_watermarks(800, 150);
 
-	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
-	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
+	_initial_conn_pool_size = 0;
+	_use_libpq = false;
+	_use_odbc = false;
 
-	// default to postgres, if no driver given.
-	if (uri[0] == '/') use_libpq = true;
+	type_map_was_loaded = false;
+	for (int i=0; i< TYPEMAP_SZ; i++)
+		db_typename[i] = NULL;
 
-	if (not use_libpq and not use_odbc)
+	max_height = 0;
+	bulk_load = false;
+	bulk_store = false;
+	clear_stats();
+}
+
+SQLAtomStorage::~SQLAtomStorage()
+{
+	close_conn_pool();
+
+	for (int i=0; i<TYPEMAP_SZ; i++)
+	{
+		if (db_typename[i]) free(db_typename[i]);
+	}
+}
+
+/* ================================================================ */
+// Connections and opening
+
+void SQLAtomStorage::enlarge_conn_pool(int delta)
+{
+	if (0 >= delta) return;
+
+	const char * uri = _uri.c_str();
+	for (int i=0; i<delta; i++)
+	{
+		LLConnection* db_conn = nullptr;
+#ifdef HAVE_PGSQL_STORAGE
+		if (_use_libpq)
+			db_conn = new LLPGConnection(uri);
+#endif /* HAVE_PGSQL_STORAGE */
+
+#ifdef HAVE_ODBC_STORAGE
+		if (_use_odbc)
+			db_conn = new ODBCConnection(uri);
+#endif /* HAVE_ODBC_STORAGE */
+
+		conn_pool.push(db_conn);
+	}
+
+	_initial_conn_pool_size += delta;
+}
+
+void SQLAtomStorage::close_conn_pool()
+{
+	flushStoreQueue();
+
+	while (not conn_pool.is_empty())
+	{
+		LLConnection* db_conn = conn_pool.value_pop();
+		delete db_conn;
+	}
+	_initial_conn_pool_size = 0;
+}
+
+void SQLAtomStorage::connect(std::string uris)
+{
+	_uri = uris;
+	const char * uri = uris.c_str();
+
+	_use_libpq = (0 == strncmp(uri, "postgres", 8));
+	_use_odbc = (0 == strncmp(uri, "odbc", 4));
+
+	// Default to postgres, if no driver given.
+	if (uri[0] == '/') _use_libpq = true;
+
+	if (not _use_libpq and not _use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
+
+	if (0 == _initial_conn_pool_size)
+		enlarge_conn_pool(NUM_WB_QUEUES + 2);
+
+	if (!connected()) return;
+
+	// Need the server version before init'ing the UUID pool.
+	get_server_version();
+}
+
+void SQLAtomStorage::open(std::string uri)
+{
+	connect(uri);
 
 	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
@@ -80,8 +179,8 @@ void SQLAtomStorage::init(const char * uri)
 	// otherwise, we'll deadlock. The problem is that during fetches,
 	// two connections get used per OMP_ALGO thread.
 	// 2) Postgres has efficiency problems scaling above 8 or 12
-	// connections, at least, as of postgres 9.5 (2016)
-	// actually, it seems not to be able to service more than 3 or 4
+	// connections, at least, as of postgres 9.5 (2016).
+	// Actually, it seems not to be able to service more than 3 or 4
 	// concurrent SELECT statements to the same table...
 	// So, ignore the number of cores, and set things to 12.
 	//
@@ -90,47 +189,10 @@ void SQLAtomStorage::init(const char * uri)
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
 // #define NUM_OMP_THREADS 8
 
-	// A large number of write-back queues do not seem to help
-	// performance, because once the queues get above the high-water
-	// mark, they *all* stall, waiting for the drain to complete.
-	// Based on observations, postgres seems to have trouble servicing
-	// more than 2 or 3 concurrent write requests on the same table,
-	// and so anything above about 4 write-back quees seems to serve no
-	// purpose. (Above statements for a 24-core CPU.)
-#define NUM_WB_QUEUES 6
-
-	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
-	for (int i=0; i<_initial_conn_pool_size; i++)
-	{
-		LLConnection* db_conn = nullptr;
-#ifdef HAVE_PGSQL_STORAGE
-		if (use_libpq)
-			db_conn = new LLPGConnection(uri);
-#endif /* HAVE_PGSQL_STORAGE */
-
-#ifdef HAVE_ODBC_STORAGE
-		if (use_odbc)
-			db_conn = new ODBCConnection(uri);
-#endif /* HAVE_ODBC_STORAGE */
-
-		conn_pool.push(db_conn);
-	}
-	type_map_was_loaded = false;
-
-	max_height = 0;
-	bulk_load = false;
-	bulk_store = false;
-	clear_stats();
-
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		db_typename[i] = NULL;
-	}
+	// minus 2 because we had a +2 in connect();
+	enlarge_conn_pool(NUM_OMP_THREADS - 2);
 
 	if (!connected()) return;
-
-	// Need the server version before init'ing the UUID pool.
-	get_server_version();
 
 	_uuid_manager.that = this;
 	_uuid_manager.reset_uuid_pool(getMaxObservedUUID());
@@ -149,38 +211,6 @@ void SQLAtomStorage::init(const char * uri)
 	table_id_cache.insert(1);
 }
 
-SQLAtomStorage::SQLAtomStorage(std::string uri) :
-	_tlbuf(&_uuid_manager),
-	_uuid_manager("uuid_pool"),
-	_vuid_manager("vuid_pool"),
-	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
-	_async_write_queue_exception(nullptr)
-{
-	init(uri.c_str());
-
-	// Use a bigger buffer than the default. Assuming that the hardware
-	// can do 1K atom stores/sec or better, this gives a backlog of
-	// unwritten stuff less than a second long, which seems like an OK
-	// situation, to me.
-	_write_queue.set_watermarks(800, 150);
-}
-
-SQLAtomStorage::~SQLAtomStorage()
-{
-	flushStoreQueue();
-
-	while (not conn_pool.is_empty())
-	{
-		LLConnection* db_conn = conn_pool.value_pop();
-		delete db_conn;
-	}
-
-	for (int i=0; i<TYPEMAP_SZ; i++)
-	{
-		if (db_typename[i]) free(db_typename[i]);
-	}
-}
-
 /**
  * connected -- return true if a successful connection to the
  * database exists; else return false.  Note that this may block,
@@ -188,6 +218,8 @@ SQLAtomStorage::~SQLAtomStorage()
  */
 bool SQLAtomStorage::connected(void)
 {
+	if (0 == _initial_conn_pool_size) return false;
+
 	// This will leak a resource, if db_conn->connected() ever throws.
 	LLConnection* db_conn = conn_pool.value_pop();
 	bool have_connection = db_conn->connected();
@@ -264,13 +296,54 @@ void SQLAtomStorage::rename_tables(void)
 	rp.exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 }
 
+void SQLAtomStorage::create_database(std::string uri)
+{
+	// Parse the URI and make a valiant attempt to extract a
+	// database name from it. This ignores any usernames or
+	// passwords that might follow the database name.
+	// If ou want to get fancier, then fix this.
+	if (strncmp(uri.c_str(), "postgres://", 11) and
+	    uri.npos != uri.find_first_of("?&"))
+	{
+		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri.c_str());
+	}
+
+	std::string server(uri);
+	std::string dbname(uri);
+
+	size_t pos = uri.find_last_of('/');
+	if (pos == uri.npos)
+		throw IOException(TRACE_INFO, "Unsupported URI '%s'\n", uri.c_str());
+
+	server = uri.substr(0, pos);
+	dbname = uri.substr(pos+1);
+
+	// We need a temporary, administrative connection, to create
+	// the database.  Let's assume the user has admin access; if
+	// not, then libpq will deliver an error.
+	connect(server);
+	if (!connected())
+		throw IOException(TRACE_INFO, "Error: cannot connect to '%s'",
+		                  server.c_str());
+
+	{
+		Response rp(conn_pool);
+		rp.exec("CREATE DATABASE " + dbname + ";");
+	}
+	close_conn_pool();
+
+	// Now reconnect, and create the tables.
+	connect(uri);
+	create_tables();
+}
+
 void SQLAtomStorage::create_tables(void)
 {
 	Response rp(conn_pool);
 
-	// See the file "atom.sql" for detailed documentation as to the
+	// See the file `atom.sql` for detailed documentation as to the
 	// structure of the SQL tables. The code below is kept in sync,
-	// manually, with the contents of atom.sql.
+	// manually, with the contents of `atom.sql`.
 	rp.exec("CREATE TABLE Spaces ("
 	              "space     BIGINT PRIMARY KEY,"
 	              "parent    BIGINT);");
@@ -287,6 +360,8 @@ void SQLAtomStorage::create_tables(void)
 	            "outgoing BIGINT[],"
 	            "UNIQUE (type, name),"
 	            "UNIQUE (type, outgoing));");
+
+	rp.exec("CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);");
 
 	rp.exec("CREATE TABLE Valuations ("
 	            "key BIGINT REFERENCES Atoms(uuid),"
@@ -309,6 +384,9 @@ void SQLAtomStorage::create_tables(void)
 	rp.exec("CREATE TABLE TypeCodes ("
 	            "type SMALLINT UNIQUE,"
 	            "typename TEXT UNIQUE);");
+
+	rp.exec("CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;");
+	rp.exec("CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;");
 
 	type_map_was_loaded = false;
 }

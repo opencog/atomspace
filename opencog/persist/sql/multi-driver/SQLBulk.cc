@@ -27,6 +27,7 @@
 #include <chrono>
 #include <memory>
 
+#define OC_OMP 1  // hack alert -- force over-ride!
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/oc_omp.h>
 
@@ -291,13 +292,15 @@ void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
 	bulk_start = time(0);
 
 	// Try to knock out the nodes first, then the links.
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		NODE, true);
+	HandleSeq atoms;
+	atoms.reserve(table.getNumNodes());
+	table.getHandlesByType(std::back_inserter(atoms), NODE, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		LINK, true);
+	atoms.clear();
+	atoms.reserve(table.getNumLinks());
+	table.getHandlesByType(std::back_inserter(atoms), LINK, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();
 	bulk_store = false;

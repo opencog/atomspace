@@ -300,9 +300,9 @@ class PatternMatchCallback
 		 * is smaller than the full incoming set (for example, by
 		 * returning only those atoms with a high av-sti).
 		 */
-		virtual IncomingSet get_incoming_set(const Handle& h)
+		virtual IncomingSet get_incoming_set(const Handle& h, Type t)
 		{
-			return h->getIncomingSet();
+			return h->getIncomingSetByType(t);
 		}
 
 		/**

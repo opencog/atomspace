@@ -229,20 +229,6 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# ----------------------------------------------------------
-# Optional and almost obsolete...
-# Remove after the REST interfaces get fixed.
-# ZeroMQ
-FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQLIB 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
-
 # ===============================================================
 # Get atomspace version
 
@@ -327,11 +313,6 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 IF(HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
 ENDIF(HAVE_COGUTIL)
-
-# Both protobuf and also zmq are needed to build ZMQ API.
-# IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-# 	SET(HAVE_ZMQ 1)
-# ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
@@ -474,6 +455,5 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
 SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
-# SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
