@@ -1,5 +1,5 @@
 /*
- * Variables.cc
+ * atoms/core/Variables.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *               2019 SingularityNET Foundation
@@ -471,8 +471,6 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// for as long as the bound variable is in scope. We hide it by
 		// removing it from the index.
 		ScopeLinkPtr sco(ScopeLinkCast(term));
-		if (nullptr == sco)
-			sco = createScopeLink(term->getOutgoingSet());
 
 		const Variables& vees = sco->get_variables();
 		bool alpha_hide = false;
@@ -533,7 +531,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				oset.emplace_back(substitute_scoped(h, args, silent,
 				                                    hidden_map, quotation));
 			}
-			return createLink(oset, term->get_type());
+			return createLink(std::move(oset), term->get_type());
 		}
 	}
 
@@ -568,7 +566,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	// Return the original atom, if it was not modified.
 	if (not changed) return term;
-	return createLink(oset, term->get_type());
+	return createLink(std::move(oset), term->get_type());
 }
 
 /* ================================================================= */
@@ -1340,7 +1338,7 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
 		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(types, TYPE_CHOICE);
+			: createLink(std::move(types), TYPE_CHOICE);
 		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
@@ -1371,9 +1369,9 @@ Handle Variables::get_vardecl() const
 		return vardecls[0];
 
 	if (_ordered)
-		return Handle(createVariableList(vardecls));
+		return Handle(createVariableList(std::move(vardecls)));
 
-	return Handle(createVariableSet(vardecls));
+	return Handle(createVariableSet(std::move(vardecls)));
 }
 
 void Variables::validate_vardecl(const HandleSeq& oset)
