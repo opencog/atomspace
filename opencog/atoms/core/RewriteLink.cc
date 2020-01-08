@@ -61,7 +61,7 @@ RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
 inline Handle append_rand_str(const Handle& var)
 {
 	std::string new_var_name = randstr(var->get_name() + "-");
-	return createNode(var->get_type(), new_var_name);
+	return createNode(var->get_type(), std::move(new_var_name));
 }
 
 inline HandleSeq append_rand_str(const HandleSeq& vars)
@@ -107,7 +107,7 @@ Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped, _silent));
 
 	// Create the alpha converted scope link
-	return createLink(hs, get_type());
+	return createLink(std::move(hs), get_type());
 }
 
 Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
@@ -145,13 +145,13 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 		// in it. So we must not call createLink(), below.
 		Type t = get_type();
 		if (PUT_LINK == t or LAMBDA_LINK == t)
-			return hs[0];
+			return hs.at(0);
 	}
 
 	// Create the substituted scope.  I suspect that this is a bad
 	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
 	// and cause issues thhrought the code ... but ... whatever.
-	return createLink(hs, get_type());
+	return createLink(std::move(hs), get_type());
 }
 
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
@@ -287,7 +287,7 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 	{
 		OC_ASSERT(false, "Not implemented");
 	}
-	return createLink(oset, t);
+	return createLink(std::move(oset), t);
 }
 
 Handle RewriteLink::consume_quotations() const
@@ -311,7 +311,7 @@ Handle RewriteLink::consume_quotations() const
 		nouts.insert(nouts.begin(), vardecl);
 
 	// Recreate the scope
-	return createLink(nouts, get_type());
+	return createLink(std::move(nouts), get_type());
 }
 
 Handle RewriteLink::consume_quotations(const Handle& vardecl,
