@@ -116,7 +116,7 @@ static Handle collect(const Variables& vtool,
 	do
 	{
 		std::string altname = randstr(newvar->get_name() + "-");
-		alt = createNode(VARIABLE_NODE, altname);
+		alt = createNode(VARIABLE_NODE, std::move(altname));
 	} while (used_vars.find(alt) != used_vars.end());
 
 	final_varlist.emplace_back(vtool.get_type_decl(origvar, alt));
