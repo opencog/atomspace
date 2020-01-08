@@ -141,7 +141,7 @@ void AtomTable::clear()
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    Handle a(createNode(t,n));
+    Handle a(createNode(t, n));
     return lookupHandle(a);
 }
 
@@ -257,7 +257,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
                 closet.emplace_back(add(h));
             }
-            atom = createLink(closet, atom->get_type());
+            atom = createLink(std::move(closet), atom->get_type());
         } else {
             atom->unsetRemovalFlag();
         }

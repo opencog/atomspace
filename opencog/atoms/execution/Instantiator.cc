@@ -359,7 +359,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 					unwrap.push_back(plo);
 				}
 			}
-			return createLink(unwrap, SET_LINK);
+			return createLink(std::move(unwrap), SET_LINK);
 		}
 
 		try {
@@ -415,7 +415,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			if (vardecl)
 				oset.insert(oset.begin(), vardecl);
 			// TODO: copy values
-			return createLink(oset, LAMBDA_LINK);
+			return createLink(std::move(oset), LAMBDA_LINK);
 		}
 		return expr;
 	}
@@ -511,7 +511,7 @@ mere_recursive_call:
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 	if (changed)
 	{
-		Handle subl(createLink(oset_results, t));
+		Handle subl(createLink(std::move(oset_results), t));
 		subl->copyValues(expr);
 		return subl;
 	}
@@ -593,7 +593,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 				if (hg) oset_results.push_back(hg);
 			}
 		}
-		Handle flp(createLink(oset_results, t));
+		Handle flp(createLink(std::move(oset_results), t));
 		ValuePtr pap(flp->execute(_as, silent));
 		if (_as and pap->is_atom())
 			return _as->add_atom(HandleCast(pap));

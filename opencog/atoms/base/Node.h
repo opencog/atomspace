@@ -66,7 +66,7 @@ public:
     Node(Type t, const std::string&& s)
         : Atom(t)
     {
-        init(s);
+        init(std::move(s));
     }
 
     Node(const Node&) = delete;
@@ -127,9 +127,8 @@ static inline NodePtr NodeCast(const AtomPtr& a)
 template< class... Args >
 Handle createNode( Args&&... args )
 {
-   // Do we need to say (std::forward<Args>(args)...) instead ???
-   NodePtr tmp(std::make_shared<Node>(args ...));
-   return classserver().factory(tmp->get_handle());
+   Handle tmp(std::make_shared<Node>(std::forward<Args>(args) ...));
+   return classserver().factory(tmp);
 }
 
 
