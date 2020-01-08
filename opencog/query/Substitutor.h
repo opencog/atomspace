@@ -71,7 +71,7 @@ private:
 		if (not changed) return expr;
 
 		// Create a duplicate link with the substitution.
-		Handle hret(createLink(oset_results, expr->get_type()));
+		Handle hret(createLink(std::move(oset_results), expr->get_type()));
 		hret->copyValues(expr);
 		return hret;
 	}
