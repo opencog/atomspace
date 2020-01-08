@@ -291,7 +291,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(glob_seq, LIST_LINK));
+			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else

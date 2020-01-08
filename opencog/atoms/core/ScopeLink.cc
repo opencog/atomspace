@@ -45,7 +45,7 @@ void ScopeLink::init(void)
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
-	: Link(HandleSeq({vars, body}), SCOPE_LINK)
+	: Link({vars, body}, SCOPE_LINK)
 {
 	init();
 }

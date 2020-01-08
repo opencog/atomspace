@@ -43,7 +43,7 @@ StateLink::StateLink(const HandleSeq& oset, Type t)
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
+	: UniqueLink({name, defn}, STATE_LINK)
 {
 	init();
 }
