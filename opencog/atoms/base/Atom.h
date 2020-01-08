@@ -41,9 +41,7 @@
 
 namespace opencog
 {
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
-typedef std::weak_ptr<Link> WinkPtr;
+typedef std::weak_ptr<Atom> WinkPtr;
 }
 
 namespace std
@@ -87,8 +85,8 @@ typedef std::size_t Arity;
 //! virtually all access will be either insert, or iterate, so we get
 //! O(1) performance. Note that sometimes incoming sets can be huge,
 //! millions of atoms.
-typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
-typedef SigSlot<AtomPtr, LinkPtr> AtomPairSignal;
+typedef HandleSeq IncomingSet;
+typedef SigSlot<Handle, Handle> AtomPairSignal;
 
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
@@ -198,9 +196,9 @@ protected:
     void drop_incoming_set();
 
     // Insert and remove links from the incoming set.
-    void insert_atom(const LinkPtr&);
-    void remove_atom(const LinkPtr&);
-    void swap_atom(const LinkPtr&, const LinkPtr&);
+    void insert_atom(const Handle&);
+    void remove_atom(const Handle&);
+    void swap_atom(const Handle&, const Handle&);
     virtual void install();
     virtual void remove();
 
@@ -354,8 +352,8 @@ public:
         // callback with locks held.
         IncomingSet vh(getIncomingSet());
 
-        for (const LinkPtr& lp : vh)
-            if ((data->*cb)(Handle(std::static_pointer_cast<Atom>(lp)))) return true;
+        for (const Handle& lp : vh)
+            if ((data->*cb)(lp)) return true;
         return false;
     }
 
@@ -443,8 +441,8 @@ static inline Handle HandleCast(const ValuePtr& pa)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const IncomingSet& iset,
-                         const std::string& indent=empty_string);
+// std::string oc_to_string(const IncomingSet& iset,
+//                          const std::string& indent=empty_string);
 std::string oc_to_string(const Atom& atom,
                          const std::string& indent=empty_string);
 

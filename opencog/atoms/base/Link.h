@@ -213,6 +213,7 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
+typedef std::shared_ptr<Link> LinkPtr;
 static inline LinkPtr LinkCast(const Handle& h)
     { return std::dynamic_pointer_cast<Link>(h); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
