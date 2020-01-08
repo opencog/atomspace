@@ -41,7 +41,7 @@ void UniqueLink::init(bool allow_open)
 
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
-	for (const LinkPtr& def : defs)
+	for (const Handle& def : defs)
 	{
 		if (def->getOutgoingAtom(0) == alias)
 		{
@@ -91,7 +91,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 
 	// Return the first (supposedly unique) definition that has no
 	// variables in it.
-	for (const LinkPtr& defl : defs)
+	for (const Handle& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) == alias)
 		{
@@ -100,7 +100,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 				UniqueLinkPtr ulp(UniqueLinkCast(defl));
 				if (0 < ulp->get_vars().varseq.size()) continue;
 			}
-			return defl->get_handle();
+			return defl;
 		}
 	}
 

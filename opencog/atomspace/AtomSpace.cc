@@ -411,8 +411,8 @@ Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
     if (not recursive) return h;
 
     IncomingSet vh(h->getIncomingSet());
-    for (const LinkPtr& lp : vh)
-        fetch_incoming_set(Handle(lp), true);
+    for (const Handle& lp : vh)
+        fetch_incoming_set(lp, true);
 
     return h;
 }
