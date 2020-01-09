@@ -41,10 +41,10 @@ namespace opencog {
  *  @{
  */
 
-/// The Pattern struct defines a search pattern in a way that makes it
-/// easier and faster to work with in C++.  It implements the data that
-/// is shared between the various pattern-specification atoms and the
-/// pattern matcher.
+/// The Pattern struct contains a low-level analysis of a search pattern,
+/// in a format that will make a subsequent search run faster.  It is
+/// effectively a "compiled" version of the pattern. Patterns only need
+/// to be compiled once; the searches can be performed repeatedly.
 ///
 struct Pattern
 {
