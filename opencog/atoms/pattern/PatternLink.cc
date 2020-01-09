@@ -65,6 +65,8 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
@@ -469,6 +471,42 @@ void PatternLink::locate_globs(const HandleSeq& clauses)
 			_pat.globby_holders.insert(h);
 		}
 	}
+}
+
+/* ================================================================= */
+/**
+ * Locate "cacheable" terms. These are terms whose groundings can be
+ * cached for later re-use. To qualify for being cacheable, the term
+ * must not be evaluatable (as that would result in a changing grounding)
+ * and the term must contain only one variable (there is no use-cases
+ * for two or more variables, at this time. Similarly no Globs either.)
+ *
+ * Caching is used to "prune" or "cut" terms during search; once thier
+ * grounding is known, no additional work is needed to re-ground them.
+ *
+ * This is kind-of the opposite of `is_virtual()` except its for terms,
+ * not clauses.
+ */
+void PatternLink::locate_cacheable(const Handle& term)
+{
+	if (not term->is_executable())
+	{
+		HandleSet freev(unquoted_unscoped_in_tree(term, _variables.varset));
+		if (1 == freev.size())
+		{
+			Handle var(*freev.begin());
+			_pat.cacheable_terms.insert({term, var});
+		}
+	}
+
+	// How about subterms?
+	locate_cacheable(term->getOutgoingSet());
+}
+
+void PatternLink::locate_cacheable(const HandleSeq& clauses)
+{
+	for (const Handle& sub: clauses)
+		locate_cacheable(sub);
 }
 
 /* ================================================================= */

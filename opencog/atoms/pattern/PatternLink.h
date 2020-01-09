@@ -107,6 +107,9 @@ protected:
 	bool is_virtual(const Handle&);
 	void unbundle_virtual(const HandleSeq& clauses);
 
+	void locate_cacheable(const HandleSeq& clauses);
+	void locate_cacheable(const Handle& term);
+
 	bool add_dummies();
 
 	void trace_connectives(const TypeSet&,
