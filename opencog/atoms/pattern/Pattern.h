@@ -120,6 +120,14 @@ struct Pattern
 	/// GlobNode, but uses a different algorithm.
 	HandleSet fuzzy_terms;
 
+	/// Terms that can be grounded in only one way; thus the result
+	/// of that grounding can be cached, for avoid rechecking.
+	/// These terms cannot be evaluatable (as that would invalidate
+	/// the results), and can only contain on variable (there is no
+	/// use case for two or more, right now.) The pair here is
+	/// (term, variable), the vairable making lookup faster.
+	std::unordered_map<Handle,Handle> cacheable_terms;
+
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because
 	/// a variable may appear in several different evaluatables.
