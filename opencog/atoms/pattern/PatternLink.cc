@@ -500,7 +500,8 @@ void PatternLink::locate_cacheable(const Handle& term)
 	}
 
 	// How about subterms?
-	locate_cacheable(term->getOutgoingSet());
+	if (term->is_link())
+		locate_cacheable(term->getOutgoingSet());
 }
 
 void PatternLink::locate_cacheable(const HandleSeq& clauses)
