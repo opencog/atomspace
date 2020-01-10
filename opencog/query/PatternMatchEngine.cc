@@ -1804,8 +1804,9 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 			(_pat->cacheable_clauses.find(clause_root) !=
 		    _pat->cacheable_clauses.end()))
 		{
-			Handle jgnd(var_grounding[next_joint]);
-			_gnd_cache.insert({{clause_root, jgnd}, hg});
+			auto jgnd(var_grounding.find(next_joint));
+			if (jgnd != var_grounding.end())
+				_gnd_cache.insert({{clause_root, jgnd->second}, hg});
 		}
 	}
 
