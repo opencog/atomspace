@@ -1192,12 +1192,12 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * occures twice in the pattern under UnorderedLink. While we traverse
  * the pattern recursively we need to keep current state of permutations
  * of UnorderedLinks. We do not know which permutation will match. It may
- * be different permutation for each occurence of UnorderedLink-s.
+ * be a different permutation for each occurence of UnorderedLink-s.
+ * Thus, we need to keep permutation states for each term pointer separately.
  * This is the reason why we use PatternTerm pointers instead of atom Handles
- * while traversing pattern tree. We need to keep permutation states for
- * each term pointer separately.
+ * while traversing the pattern tree.
  *
- * Next suppose our joining atom repeats in several sub-branches of a single
+ * Next, suppose our joining atom repeats in several sub-branches of a single
  * ChoiceLink. For example:
  *
  * ChoiceLink
@@ -2406,6 +2406,8 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  *
  * This method simply dispatches a given clause to be either pattern
  * matched, or to be evaluated.
+ *
+ * Returns true if there was a match, else returns false to reject it.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
