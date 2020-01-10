@@ -475,39 +475,36 @@ void PatternLink::locate_globs(const HandleSeq& clauses)
 
 /* ================================================================= */
 /**
- * Locate "cacheable" terms. These are terms whose groundings can be
- * cached for later re-use. To qualify for being cacheable, the term
- * must not be evaluatable (as that would result in a changing grounding)
- * and the term must contain only one variable (there is no use-cases
- * for two or more variables, at this time. Similarly no Globs either.)
+ * Locate cacheable clauses. These are clauses whose groundings can be
+ * cached for later re-use. To qualify for being cacheable, the clause
+ * must not contain any evaluatable terms (as that would result in a
+ * changing grounding), cannot contain any unordered or choice links
+ * (as these have multiple groundings) and the clause can only contain
+ * one variable (there is no use-cases for two or more variables, at
+ * this time. Similarly, no Globs either.)
  *
- * Caching is used to "prune" or "cut" terms during search; once thier
- * grounding is known, no additional work is needed to re-ground them.
+ * Caching is used to "prune" or "cut" clauses during search; once the
+ * joining variable is known, the "up" exploration can be skipped, and
+ * pruned clause re-attached with the known grounding.
  *
- * This is kind-of the opposite of `is_virtual()` except its for terms,
- * not clauses.
+ * This is kind-of the opposite of `is_virtual()`.
  */
-void PatternLink::locate_cacheable(const Handle& term)
-{
-	if (not term->is_executable())
-	{
-		HandleSet freev(unquoted_unscoped_in_tree(term, _variables.varset));
-		if (1 == freev.size())
-		{
-			Handle var(*freev.begin());
-			_pat.cacheable_terms.insert({term, var});
-		}
-	}
-
-	// How about subterms?
-	if (term->is_link())
-		locate_cacheable(term->getOutgoingSet());
-}
-
 void PatternLink::locate_cacheable(const HandleSeq& clauses)
 {
-	for (const Handle& sub: clauses)
-		locate_cacheable(sub);
+	for (const Handle& claw: clauses)
+	{
+		// Skip over anything unsuitable.
+		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
+		if (_pat.globby_holders.find(claw) != _pat.globby_holders.end()) continue;
+		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
+		if (_pat.black.find(claw) != _pat.black.end()) continue;
+
+		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
+		if (contains_atomtype(claw, CHOICE_LINK)) continue;
+
+		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+			_pat.cacheable_clauses.insert(claw);
+	}
 }
 
 /* ================================================================= */

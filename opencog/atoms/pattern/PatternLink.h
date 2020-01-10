@@ -108,7 +108,6 @@ protected:
 	void unbundle_virtual(const HandleSeq& clauses);
 
 	void locate_cacheable(const HandleSeq& clauses);
-	void locate_cacheable(const Handle& term);
 
 	bool add_dummies();
 
