@@ -1192,12 +1192,12 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * occures twice in the pattern under UnorderedLink. While we traverse
  * the pattern recursively we need to keep current state of permutations
  * of UnorderedLinks. We do not know which permutation will match. It may
- * be different permutation for each occurence of UnorderedLink-s.
+ * be a different permutation for each occurence of UnorderedLink-s.
+ * Thus, we need to keep permutation states for each term pointer separately.
  * This is the reason why we use PatternTerm pointers instead of atom Handles
- * while traversing pattern tree. We need to keep permutation states for
- * each term pointer separately.
+ * while traversing pattern tree.
  *
- * Next suppose our joining atom repeats in several sub-branches of a single
+ * Next, suppose our joining atom repeats in several sub-branches of a single
  * ChoiceLink. For example:
  *
  * ChoiceLink
@@ -1798,6 +1798,15 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		clause_grounding[clause_root] = hg;
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
+
+		// Cache the result, so that it can be reused.
+		if (next_joint and
+			(_pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end()))
+		{
+			Handle jgnd(var_grounding[next_joint]);
+			_gnd_cache.insert({{clause_root, jgnd}, hg});
+		}
 	}
 
 	// Now go and do more clauses.
@@ -2406,6 +2415,8 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  *
  * This method simply dispatches a given clause to be either pattern
  * matched, or to be evaluated.
+ *
+ * Returns true if there was a match, else returns false to reject it.
  */
 bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& grnd,
@@ -2462,8 +2473,8 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 }
 
 /**
- * Same as explore_clause, but looks at the cache of pre-grounded
- * clauses, first. Should save smoe CPU time.
+ * Same as explore_clause_direct, but looks at the cache of pre-grounded
+ * clauses, first. Should save some CPU time.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
@@ -2472,6 +2483,14 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	// If not cacheable, nothing to do.
 	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
 		return explore_clause_direct(term, grnd, clause);
+
+	// Do we have a cached value for this? If so, then use it.
+	auto cac = _gnd_cache.find({clause,grnd});
+	if (cac != _gnd_cache.end())
+	{
+		var_grounding[clause] = cac->second;
+		return do_next_clause();
+	}
 
 	return explore_clause_direct(term, grnd, clause);
 }
