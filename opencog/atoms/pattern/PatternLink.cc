@@ -497,7 +497,8 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
 		if (_pat.globby_holders.find(claw) != _pat.globby_holders.end()) continue;
 		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
-		if (_pat.black.find(claw) != _pat.black.end()) continue;
+		// black terms are evaluatble; no need to do it twice.
+		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
 		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
 		if (contains_atomtype(claw, CHOICE_LINK)) continue;
