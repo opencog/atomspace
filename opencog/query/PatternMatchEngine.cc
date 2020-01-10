@@ -2407,9 +2407,9 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  * This method simply dispatches a given clause to be either pattern
  * matched, or to be evaluated.
  */
-bool PatternMatchEngine::explore_clause(const Handle& term,
-                                        const Handle& grnd,
-                                        const Handle& clause)
+bool PatternMatchEngine::explore_clause_direct(const Handle& term,
+                                               const Handle& grnd,
+                                               const Handle& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
 	// Evaluatable clauses are not patterns; they are clauses that
@@ -2460,6 +2460,22 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 	return false;
 }
+
+/**
+ * Same as explore_clause, but looks at the cache of pre-grounded
+ * clauses, first. Should save smoe CPU time.
+ */
+bool PatternMatchEngine::explore_clause(const Handle& term,
+                                        const Handle& grnd,
+                                        const Handle& clause)
+{
+	// If not cacheable, nothing to do.
+	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
+		return explore_clause_direct(term, grnd, clause);
+
+	return explore_clause_direct(term, grnd, clause);
+}
+
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
                                           const Handle& hg)
