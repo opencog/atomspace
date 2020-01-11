@@ -1800,6 +1800,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		logmsg("ground:", hg);
 
 		// Cache the result, so that it can be reused.
+		// See commentary on `explore_clause()` for more info.
 		if (next_joint and
 			(_pat->cacheable_clauses.find(clause_root) !=
 		    _pat->cacheable_clauses.end()))
@@ -2475,7 +2476,43 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 
 /**
  * Same as explore_clause_direct, but looks at the cache of pre-grounded
- * clauses, first. Should save some CPU time.
+ * clauses, first. This saves some CPU time for certain patterns that
+ * have repeated re-explorations of clauses. An example pattern is given
+ * below. It's an example of some of the cpu-intensive searches in the
+ * genome/proteome/reactome annotation code. Its looking for pathways
+ * from start to endpoint. Because multiple paths exist, the endpoint
+ * gets searched repeatedly. The caching avoids the repeated search.
+ *
+ * To make this discussion less abstract and more real, here's an
+ * example, from the gene annotation code:
+
+(Evaluation (Predicate "foo") (List (Concept "a") (Concept "start-point")))
+(Evaluation (Predicate "foo") (List (Concept "b") (Concept "start-point")))
+(Evaluation (Predicate "foo") (List (Concept "c") (Concept "start-point")))
+
+(Evaluation (Predicate "bar") (List (Concept "w") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "x") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "y") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "z") (Concept "end-point")))
+
+; Multiple pathways connecting start and end-points.
+(Inheritance (Concept "a") (Concept "z"))
+(Inheritance (Concept "b") (Concept "z"))
+(Inheritance (Concept "b") (Concept "y"))
+(Inheritance (Concept "b") (Concept "x"))
+(Inheritance (Concept "c") (Concept "x"))
+(Inheritance (Concept "c") (Concept "w"))
+
+(define find-pathways (Get (And
+   (Evaluation (Predicate "foo") (List (Variable "$a") (Concept "start-point")))
+   (Evaluation (Predicate "bar") (List (Variable "$z") (Concept "end-point")))
+   (Inheritance (Variable "$a") (Variable "$z")))))
+
+; (cog-execute! find-pathways)
+
+ * In the above example, the start/end-points would be genes, and the
+ * paths would be reactome grid paths. The above pattern has two cache
+ * hits, one on "x" and one on the "z" end-point.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
@@ -2495,7 +2532,6 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 	return explore_clause_direct(term, grnd, clause);
 }
-
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
                                           const Handle& hg)
