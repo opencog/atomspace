@@ -2514,6 +2514,9 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
  * paths would be reactome grid paths. The above pattern has two cache
  * hits, one on "x" and one on the "z" end-point.
  *
+ * There's no unit test for this. Caching does hurt some workloads by
+ * as much as 5%. It helps the genome-annotation code by 25%.
+ *
  * TODO: The implementation here is minimal - very simple, very basic.
  * One could get much fancier. For example, the cache could be held in
  * the atomspace (thus making it effective across multiple searches,
