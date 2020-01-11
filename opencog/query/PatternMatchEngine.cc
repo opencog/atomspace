@@ -2513,6 +2513,19 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
  * In the above example, the start/end-points would be genes, and the
  * paths would be reactome grid paths. The above pattern has two cache
  * hits, one on "x" and one on the "z" end-point.
+ *
+ * TODO: The implementation here is minimal - very simple, very basic.
+ * One could get much fancier. For example, the cache could be held in
+ * the atomspace (thus making it effective across multiple searches,
+ * e.g. with different start points but with the same end-points.)
+ * In this case, maybe the cache should be held in a special Value
+ * attached to a clause.  Size and bloat issues occur with atomspace
+ * caching; these would need to be managed.
+ *
+ * A different fancy approach would be to spot more complex recurring
+ * sub-patterns, and cache those. This adds considerable complexity,
+ * and would become effective only for large, complex searches, of
+ * which I haven't seen any good examples of, yet.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
