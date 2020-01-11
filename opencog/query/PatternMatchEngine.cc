@@ -1195,7 +1195,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * be a different permutation for each occurence of UnorderedLink-s.
  * Thus, we need to keep permutation states for each term pointer separately.
  * This is the reason why we use PatternTerm pointers instead of atom Handles
- * while traversing pattern tree.
+ * while traversing the pattern tree.
  *
  * Next, suppose our joining atom repeats in several sub-branches of a single
  * ChoiceLink. For example:
