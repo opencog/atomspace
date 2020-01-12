@@ -1245,10 +1245,10 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 
 /// explore_up_branches -- look for groundings for the given term.
 ///
-/// The argument passed to this function is a term that needs to be
-/// grounded. One of this term's children has already been grounded:
-/// the term's child is in `hp`, and the corresponding grounding is
-/// in `hg`.  Thus, if the argument is going to be grounded, it will
+/// The argument passed to this function is a clause that needs to be
+/// grounded. One of this clause's subterms has already been grounded:
+/// the subterm is in `ptm`, and the corresponding grounding is
+/// in `hg`.  Thus, if the clause is going to be grounded, it will
 /// be grounded by some atom in the incoming set of `hg`. Viz, we are
 /// walking upwards in these trees, in lockstep.
 ///
