@@ -193,6 +193,9 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
+	// Cacheable grounded clauses
+	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
+
 	// -------------------------------------------
 	// Stack used to store current traversal state for a single
 	// clause. These are pushed when a clause is fully grounded,
@@ -256,6 +259,7 @@ private:
 	// See PatternMatchEngine.cc for descriptions
 	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
+	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,

@@ -329,6 +329,17 @@ unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
 	return count;
 }
 
+HandleSet unquoted_unscoped_in_tree(const Handle& tree,
+                                    const HandleSet& atoms)
+{
+	HandleSet rv;
+	for (const Handle& n: atoms)
+	{
+		if (is_unquoted_unscoped_in_tree(tree, n)) rv.insert(n);
+	}
+	return rv;
+}
+
 bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {

@@ -1798,6 +1798,17 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		clause_grounding[clause_root] = hg;
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
+
+		// Cache the result, so that it can be reused.
+		// See commentary on `explore_clause()` for more info.
+		if (next_joint and
+			(_pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end()))
+		{
+			auto jgnd(var_grounding.find(next_joint));
+			if (jgnd != var_grounding.end())
+				_gnd_cache.insert({{clause_root, jgnd->second}, hg});
+		}
 	}
 
 	// Now go and do more clauses.
@@ -2409,9 +2420,9 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  *
  * Returns true if there was a match, else returns false to reject it.
  */
-bool PatternMatchEngine::explore_clause(const Handle& term,
-                                        const Handle& grnd,
-                                        const Handle& clause)
+bool PatternMatchEngine::explore_clause_direct(const Handle& term,
+                                               const Handle& grnd,
+                                               const Handle& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
 	// Evaluatable clauses are not patterns; they are clauses that
@@ -2461,6 +2472,81 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	}
 
 	return false;
+}
+
+/**
+ * Same as explore_clause_direct, but looks at the cache of pre-grounded
+ * clauses, first. This saves some CPU time for certain patterns that
+ * have repeated re-explorations of clauses. An example pattern is given
+ * below. It's an example of some of the cpu-intensive searches in the
+ * genome/proteome/reactome annotation code. Its looking for pathways
+ * from start to endpoint. Because multiple paths exist, the endpoint
+ * gets searched repeatedly. The caching avoids the repeated search.
+ *
+ * To make this discussion less abstract and more real, here's an
+ * example, from the gene annotation code:
+
+(Evaluation (Predicate "foo") (List (Concept "a") (Concept "start-point")))
+(Evaluation (Predicate "foo") (List (Concept "b") (Concept "start-point")))
+(Evaluation (Predicate "foo") (List (Concept "c") (Concept "start-point")))
+
+(Evaluation (Predicate "bar") (List (Concept "w") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "x") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "y") (Concept "end-point")))
+(Evaluation (Predicate "bar") (List (Concept "z") (Concept "end-point")))
+
+; Multiple pathways connecting start and end-points.
+(Inheritance (Concept "a") (Concept "z"))
+(Inheritance (Concept "b") (Concept "z"))
+(Inheritance (Concept "b") (Concept "y"))
+(Inheritance (Concept "b") (Concept "x"))
+(Inheritance (Concept "c") (Concept "x"))
+(Inheritance (Concept "c") (Concept "w"))
+
+(define find-pathways (Get (And
+   (Evaluation (Predicate "foo") (List (Variable "$a") (Concept "start-point")))
+   (Evaluation (Predicate "bar") (List (Variable "$z") (Concept "end-point")))
+   (Inheritance (Variable "$a") (Variable "$z")))))
+
+; (cog-execute! find-pathways)
+
+ * In the above example, the start/end-points would be genes, and the
+ * paths would be reactome grid paths. The above pattern has two cache
+ * hits, one on "x" and one on the "z" end-point.
+ *
+ * There's no unit test for this. Caching does hurt some workloads by
+ * as much as 5%. It helps the genome-annotation code by 25%.
+ *
+ * TODO: The implementation here is minimal - very simple, very basic.
+ * One could get much fancier. For example, the cache could be held in
+ * the atomspace (thus making it effective across multiple searches,
+ * e.g. with different start points but with the same end-points.)
+ * In this case, maybe the cache should be held in a special Value
+ * attached to a clause.  Size and bloat issues occur with atomspace
+ * caching; these would need to be managed.
+ *
+ * A different fancy approach would be to spot more complex recurring
+ * sub-patterns, and cache those. This adds considerable complexity,
+ * and would become effective only for large, complex searches, of
+ * which I haven't seen any good examples of, yet.
+ */
+bool PatternMatchEngine::explore_clause(const Handle& term,
+                                        const Handle& grnd,
+                                        const Handle& clause)
+{
+	// If not cacheable, nothing to do.
+	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
+		return explore_clause_direct(term, grnd, clause);
+
+	// Do we have a cached value for this? If so, then use it.
+	auto cac = _gnd_cache.find({clause,grnd});
+	if (cac != _gnd_cache.end())
+	{
+		var_grounding[clause] = cac->second;
+		return do_next_clause();
+	}
+
+	return explore_clause_direct(term, grnd, clause);
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,

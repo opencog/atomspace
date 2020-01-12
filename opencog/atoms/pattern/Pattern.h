@@ -93,8 +93,8 @@ struct Pattern
 	/// grounded, they might be rejected (depending on the callback).
 	HandleSeq optionals;    // Optional clauses
 
-	/// The always (for-all) clauses have to always be the same way.
-	/// Any grounding failure at all invalidates all other groundings.
+	/// The always (for-all) clauses have to always be grounded the same
+	/// way. Any grounding failure at all invalidates all other groundings.
 	HandleSeq always;       // ForAll clauses
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
@@ -119,6 +119,16 @@ struct Pattern
 	/// Terms that may be grounded in an imprecise way. Similar to a
 	/// GlobNode, but uses a different algorithm.
 	HandleSet fuzzy_terms;
+
+	/// Clauses that can be grounded in only one way; thus the result
+	/// of that grounding can be cached, for avoid rechecking.
+	/// These clauses cannot contain evaluatable elements (as that would
+	/// invalidate the results), cannot contiain unordered or choice links
+	/// (as those can have multiple groundings) and can only contain one
+	/// variable (there is no use case for two or more, right now.)
+	/// The idea could be extended to cacheable sub-terms, but this is
+	/// more complex, and not implemented.
+	HandleSet cacheable_clauses;
 
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because

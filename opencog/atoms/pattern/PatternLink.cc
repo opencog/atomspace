@@ -65,6 +65,8 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
@@ -468,6 +470,41 @@ void PatternLink::locate_globs(const HandleSeq& clauses)
 		{
 			_pat.globby_holders.insert(h);
 		}
+	}
+}
+
+/* ================================================================= */
+/**
+ * Locate cacheable clauses. These are clauses whose groundings can be
+ * cached for later re-use. To qualify for being cacheable, the clause
+ * must not contain any evaluatable terms (as that would result in a
+ * changing grounding), cannot contain any unordered or choice links
+ * (as these have multiple groundings) and the clause can only contain
+ * one variable (there is no use-cases for two or more variables, at
+ * this time. Similarly, no Globs either.)
+ *
+ * Caching is used to "prune" or "cut" clauses during search; once the
+ * joining variable is known, the "up" exploration can be skipped, and
+ * pruned clause re-attached with the known grounding.
+ *
+ * This is kind-of the opposite of `is_virtual()`.
+ */
+void PatternLink::locate_cacheable(const HandleSeq& clauses)
+{
+	for (const Handle& claw: clauses)
+	{
+		// Skip over anything unsuitable.
+		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
+		if (_pat.globby_holders.find(claw) != _pat.globby_holders.end()) continue;
+		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
+		// black terms are evaluatble; no need to do it twice.
+		// if (_pat.black.find(claw) != _pat.black.end()) continue;
+
+		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
+		if (contains_atomtype(claw, CHOICE_LINK)) continue;
+
+		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+			_pat.cacheable_clauses.insert(claw);
 	}
 }
 
