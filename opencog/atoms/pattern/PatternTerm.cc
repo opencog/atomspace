@@ -19,7 +19,7 @@ PatternTerm::PatternTerm()
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
 	  _has_bound_var(false)
 {}
 
