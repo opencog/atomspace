@@ -1306,7 +1306,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		// if there are no unordered tems?
 		perm_push();
 		_perm_go_around = false;
-		found = explore_odometer(ptm, Handle(iset[i]), clause);
+		found = explore_odometer(ptm, iset[i], clause);
 		perm_pop();
 
 		if (found) break;
@@ -1344,7 +1344,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		                      << " for glob term=" << ptm->to_string()
-		                      << " propose=" << Handle(iset[i]).value();})
+		                      << " propose=" << iset[i].value();})
 
 		// Before exploring the link branches, record the current
 		// _glob_state size.  The idea is, if the ptm & hg is a match,
@@ -1353,7 +1353,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// different way (e.g. backtracking from another branchpoint).
 		auto saved_glob_state = _glob_state;
 
-		found = explore_glob_branches(ptm, Handle(iset[i]), clause_root);
+		found = explore_glob_branches(ptm, iset[i], clause_root);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
