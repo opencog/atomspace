@@ -131,6 +131,8 @@ public:
 	std::string to_string(const std::string& indent) const;
 };
 
+#define createPatternTerm std::make_shared<PatternTerm>
+
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const PatternTerm& pt,
