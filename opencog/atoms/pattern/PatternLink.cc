@@ -891,11 +891,13 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           Handle h,
+                                           const Handle& term,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(createPatternTerm(parent, h));
-	h = ptm->getHandle();
+	PatternTermPtr ptm(createPatternTerm(parent, term));
+
+	// `h` is usually the same as `term`, unless there's quotation.
+	Handle h(ptm->getHandle());
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
