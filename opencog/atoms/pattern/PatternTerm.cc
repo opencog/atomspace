@@ -20,13 +20,15 @@ PatternTerm::PatternTerm()
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false)
+	  _has_bound_var(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	: _handle(h), _quote(Handle::UNDEFINED), _parent(parent),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
+	  _has_bound_var(false)
 {
 	Type t = h->get_type();
 
@@ -104,14 +106,20 @@ bool PatternTerm::operator==(const PatternTerm& other)
 	return _parent->operator==(*other._parent);
 }
 
-void PatternTerm::addBoundVariable()
+void PatternTerm::addAnyBoundVar()
 {
 	if (!_has_any_bound_var)
 	{
 		_has_any_bound_var = true;
 		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addBoundVariable();
+			_parent->addAnyBoundVar();
 	}
+}
+
+void PatternTerm::addBoundVariable()
+{
+	_has_bound_var = true;
+	addAnyBoundVar();
 }
 
 std::string PatternTerm::to_string() const { return to_string(":"); }

@@ -74,6 +74,7 @@ class PatternTerm
 protected:
 	Handle _handle;
 	Handle _quote;
+
 	// TODO: it would probably be more efficient to swap which of these
 	// two is weak, since I think _outgoing is requested far more often
 	// than _parent, and having it run faster would be a performance win.
@@ -87,6 +88,13 @@ protected:
 	// contain any bound variables. This means that the term is constant
 	// and may be self-grounded.
 	bool _has_any_bound_var;
+
+	// True if none of the outgoing set are bound variables. Unlike the
+	// above, this is for the immediate outgoing set only, and not any
+	// deeper terms.
+	bool _has_bound_var;
+
+	void addAnyBoundVar();
 
 public:
 	static const PatternTermPtr UNDEFINED;
@@ -113,6 +121,7 @@ public:
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
+	bool hasBoundVariable() const noexcept { return _has_bound_var; }
 
 	bool operator==(const PatternTerm&);
 
