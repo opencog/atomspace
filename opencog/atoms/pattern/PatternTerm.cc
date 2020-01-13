@@ -20,7 +20,8 @@ PatternTerm::PatternTerm()
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false),
-	  _has_bound_var(false)
+	  _has_bound_var(false),
+	  _has_any_unordered_link(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -28,7 +29,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false),
-	  _has_bound_var(false)
+	  _has_bound_var(false),
+	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
 
@@ -108,7 +110,7 @@ bool PatternTerm::operator==(const PatternTerm& other)
 
 void PatternTerm::addAnyBoundVar()
 {
-	if (!_has_any_bound_var)
+	if (not _has_any_bound_var)
 	{
 		_has_any_bound_var = true;
 		if (_parent != PatternTerm::UNDEFINED)
@@ -131,6 +133,16 @@ void PatternTerm::addBoundVariable()
 
 	// Mark recursively, all the way to the root.
 	addAnyBoundVar();
+}
+
+void PatternTerm::addUnorderedLink()
+{
+	if (not _has_any_unordered_link)
+	{
+		_has_any_unordered_link = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addUnorderedLink();
+	}
 }
 
 std::string PatternTerm::to_string() const { return to_string(":"); }

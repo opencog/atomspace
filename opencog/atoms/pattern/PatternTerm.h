@@ -96,6 +96,12 @@ protected:
 	// variables, but this flag will not be set.
 	bool _has_bound_var;
 
+	// True if any pattern subtree rooted in this tree node contains
+	// an unordered link. Trees without any unordered links can be
+	// searched in a straight-forward manner; those with them need to
+	// have all possible permutations explored.
+	bool _has_any_unordered_link;
+
 	void addAnyBoundVar();
 
 public:
@@ -124,6 +130,9 @@ public:
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
+
+	void addUnorderedLink();
+	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
 
 	bool operator==(const PatternTerm&);
 
