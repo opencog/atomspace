@@ -23,6 +23,8 @@ PatternTerm::PatternTerm()
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
 	  _has_any_unordered_link(false)
 {}
 
@@ -34,6 +36,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
 	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
@@ -164,6 +168,29 @@ void PatternTerm::addGlobbyVar()
 		_parent->_has_globby_var = true;
 
 	addAnyGlobbyVar();
+}
+
+// ==============================================================
+// Just like above, but for evaluatables.
+
+void PatternTerm::addAnyEvaluatable()
+{
+	if (not _has_any_evaluatable)
+	{
+		_has_any_evaluatable = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyEvaluatable();
+	}
+}
+
+void PatternTerm::addEvaluatable()
+{
+	_has_evaluatable = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_evaluatable = true;
+
+	addAnyEvaluatable();
 }
 
 // ==============================================================

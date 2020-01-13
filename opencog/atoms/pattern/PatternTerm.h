@@ -105,6 +105,10 @@ protected:
 	// As above, but only one level deep.
 	bool _has_globby_var;
 
+	// As above, but for evaluatables.
+	bool _has_any_evaluatable;
+	bool _has_evaluatable;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
 	// searched in a straight-forward manner; those with them need to
@@ -113,6 +117,7 @@ protected:
 
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
+	void addAnyEvaluatable();
 
 public:
 	static const PatternTermPtr UNDEFINED;
@@ -144,6 +149,10 @@ public:
 	void addGlobbyVar();
 	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
 	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
+
+	void addEvaluatable();
+	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }
+	bool hasEvaluatable() const noexcept { return _has_evaluatable; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
