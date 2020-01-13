@@ -84,14 +84,16 @@ protected:
 	// Quotation level and local quotation
 	Quotation _quotation;
 
-	// True if the pattern subtree rooted in this tree node does not
-	// contain any bound variables. This means that the term is constant
-	// and may be self-grounded.
+	// True if any pattern subtree rooted in this tree node contains
+	// a variable bound to the search pattern. Trees without any bound
+	// search variables are constants, and are satisfied by themselves.
 	bool _has_any_bound_var;
 
-	// True if none of the outgoing set are bound variables. Unlike the
-	// above, this is for the immediate outgoing set only, and not any
-	// deeper terms.
+	// True if none of the outgoing set of this particular term are
+	// variables bound to the search pattern. Unlike the above flag,
+	// this flag is set for the immediate outgoing set only, and not
+	// any deeper terms.  That is, deeper terms may contain bound
+	// variables, but this flag will not be set.
 	bool _has_bound_var;
 
 	void addAnyBoundVar();
