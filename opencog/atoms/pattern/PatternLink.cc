@@ -477,7 +477,6 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 // XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
 // which means we need to have terms, here ...
 		// if (claw->hasAnyGlobbyVar()) continue;
-		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
 		// black terms are evaluatble; no need to do it twice.
 		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
