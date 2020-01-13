@@ -477,7 +477,7 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 // XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
 // which means we need to have terms, here ...
 		// if (claw->hasAnyGlobbyVar()) continue;
-		// black terms are evaluatble; no need to do it twice.
+		// black terms are evalutable; no need to do it twice.
 		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
 		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
