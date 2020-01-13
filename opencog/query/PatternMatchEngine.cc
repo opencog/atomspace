@@ -1229,8 +1229,10 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
 			found = explore_glob_branches(ptm, hg, clause);
-		else
+		else if(ptm->hasUnorderedLink())
 			found = explore_odometer(ptm, hg, clause);
+		else
+			found = explore_type_branches(ptm, hg, clause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1413,7 +1415,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	do
 	{
 		// It's not clear if the odometer can play nice with
-		// globby terms. Anyway, no unit test mixs these two.
+		// globby terms. Anyway, no unit test mixes these two.
 		// So, for now, we ignore it.
 		// if (explore_odometer(ptm, hg, clause_root))
 		if (explore_type_branches(ptm, hg, clause_root))
