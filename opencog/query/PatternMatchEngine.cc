@@ -1223,14 +1223,11 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
-	// Check if the pattern has globs in it.
-	bool has_glob = (0 < _pat->globby_holders.count(term));
-
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
-		if (has_glob)
+		if (ptm->hasAnyGlobbyVar())
 			found = explore_glob_branches(ptm, hg, clause);
 		else
 			found = explore_odometer(ptm, hg, clause);
