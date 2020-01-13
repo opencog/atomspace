@@ -914,6 +914,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		return;
 	}
 
+	// If the term is unordered, all parents must know about it.
+	if (nameserver().isA(t, UNORDERED_LINK))
+		ptm->addUnorderedLink();
+
 	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
