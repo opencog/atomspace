@@ -39,8 +39,6 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.unquoted_clauses);
-	locate_globs(_pat.unquoted_clauses);
-	locate_globs(_pat.quoted_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -227,7 +225,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 		}
 	}
 	locate_defines(compo);
-	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
@@ -454,25 +451,6 @@ void PatternLink::locate_defines(const HandleSeq& clauses)
 	}
 }
 
-void PatternLink::locate_globs(const HandleSeq& clauses)
-{
-	for (const Handle& clause: clauses)
-	{
-		FindAtoms fgn(GLOB_NODE, true);
-		fgn.search_set(clause);
-
-		for (const Handle& sh : fgn.least_holders)
-		{
-			_pat.globby_terms.insert(sh);
-		}
-
-		for (const Handle& h : fgn.holders)
-		{
-			_pat.globby_holders.insert(h);
-		}
-	}
-}
-
 /* ================================================================= */
 /**
  * Locate cacheable clauses. These are clauses whose groundings can be
@@ -495,7 +473,10 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 	{
 		// Skip over anything unsuitable.
 		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
-		if (_pat.globby_holders.find(claw) != _pat.globby_holders.end()) continue;
+
+// XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
+// which means we need to have terms, here ...
+		// if (claw->hasAnyGlobbyVar()) continue;
 		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
 		// black terms are evaluatble; no need to do it twice.
 		// if (_pat.black.find(claw) != _pat.black.end()) continue;

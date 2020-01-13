@@ -112,10 +112,6 @@ struct Pattern
 	/// or a DefineSchemaNode (DSN).
 	HandleSet defined_terms;    // The DPN/DSN itself.
 
-	/// Globby terms are terms that contain a GlobNode
-	HandleSet globby_terms;     // Smallest term that has a glob.
-	HandleSet globby_holders;   // holds something globby.
-
 	/// Terms that may be grounded in an imprecise way. Similar to a
 	/// GlobNode, but uses a different algorithm.
 	HandleSet fuzzy_terms;

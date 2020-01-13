@@ -100,7 +100,6 @@ protected:
 	                          bool reverse=false);
 
 	void locate_defines(const HandleSeq& clauses);
-	void locate_globs(const HandleSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
