@@ -623,21 +623,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		bool is_virtu = false;
 		bool is_black = false;
 
-#ifdef BROKEN_DOESNT_WORK
-// The below should have worked to set things up, but it doesn't,
-// and I'm too lazy to investigate, because an alternate hack is
-// working, at the moment.
-		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaluatable, so that we can evaluate
-		// it later.
-		if (VARIABLE_NODE == clause->get_type())
-		{
-			_pat.evaluatable_terms.insert(clause);
-			add_to_map(_pat.in_evaluatable, clause, clause);
-			is_black = true;
-		}
-#endif
-
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.stopset.insert(SCOPE_LINK);
 		fgpn.search_set(clause);
