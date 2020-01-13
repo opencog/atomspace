@@ -911,6 +911,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		if (GLOB_NODE == t) ptm->addGlobbyVar();
 		return;
 	}
 

@@ -192,7 +192,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 	bool match = true;
 	const Handle &hp = ptm->getHandle();
-	if (0 < _pat->globby_terms.count(hp))
+	if (ptm->hasGlobbyVar())
 	{
 		match = glob_compare(osp, osg);
 	}
@@ -426,7 +426,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_holders.count(hp));
+	bool has_glob = ptm->hasAnyGlobbyVar();
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
@@ -1273,7 +1273,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 {
 	// Check if the pattern has globs in it.
 	PatternTermPtr parent(ptm->getParent());
-	if (0 < _pat->globby_holders.count(parent->getHandle()))
+	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
 }
@@ -1399,7 +1399,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	// Check if the pattern has globs in it,
-	OC_ASSERT(0 < _pat->globby_holders.count(ptm->getHandle()),
+	OC_ASSERT(ptm->hasAnyGlobbyVar(),
 	          "Glob exploration went horribly wrong!");
 
 	// Record the glob_state *before* starting exploration.
