@@ -1293,6 +1293,20 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// and directly move upwards. Do this by assembling the single
 	// (unique) upward term, and then seeing if it's acceptable
 	// to the gaunlet of callbacks. If it is, we are done.
+	//
+	// The prototypical csearch being handled here is that of
+	//
+	//     EvaluationLink
+	//         PredicateNode "some const"
+	//         ListLink
+	//             VariableNode "$x"
+	//             ConceptNode "foo"
+	//
+	// If we arrive here, with `ptm` being teh ListLink, and the `hg`
+	// being the grounding of the ListLink, then we should be able to
+	// immediately jump to the EvaluationLink, withot any further ado.
+	// Specifically, there is no need to search the incoming set of `hg`
+	// just build up the EvaluationLink and offer it as the ground.
 	if (not parent->hasBoundVariable() and not ptm->hasUnorderedLink())
 	{
 		bool need_search = false;
@@ -1304,9 +1318,13 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 				oset.push_back(hg);
 			else
 			{
+				// OK, so I think the if-statement below is hiding a bug
+				// of some kind. It triggers on a suspiscious construction
+				// in ScopeLinkUTest. XXX FIXME this needs more investigation.
 				if (pp->hasAnyBoundVariable())
 				{
 					need_search = true;
+					break;
 				}
 				oset.push_back(pp->getHandle());
 			}
@@ -1316,7 +1334,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			Handle hup(hg->getAtomSpace()->get_link(t, oset));
 			if (hup)
 				return explore_type_branches(parent, hup, clause);
-			// return false;
+			return false;
 		}
 	}
 
