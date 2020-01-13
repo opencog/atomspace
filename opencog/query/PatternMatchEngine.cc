@@ -1295,17 +1295,39 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
+	// If there aren't any unordered links anywhere, just explore
+	// directly upwards.
+	if (not parent->hasUnorderedLink())
+	{
+		bool found = false;
+		for (size_t i = 0; i < sz; i++)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+			                      << " at term=" << parent->to_string()
+			                      << " propose=" << iset[i]->to_string();})
+
+			found = explore_type_branches(parent, iset[i], clause);
+			if (found) break;
+		}
+
+		DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+		return found;
+	}
+
+	// If we are here, then there's at least one (and maybe more)
+	// unordered links, somewhere at this level, next to us or to
+	// the side and below us. Explore all of the differrent possible
+	// permutations.
 	_perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		DO_LOG({LAZY_LOG_FINE << "Try upward permutable branch "
+		                      << i+1 << " of " << sz
 		                      << " at term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		_perm_odo.clear();
-		// XXX TODO Perhaps this push can be avoided,
-		// if there are no unordered terms?
 		perm_push();
 		_perm_go_around = false;
 		found = explore_odometer(parent, iset[i], clause);
