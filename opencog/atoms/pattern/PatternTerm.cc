@@ -21,6 +21,7 @@ PatternTerm::PatternTerm()
 	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _has_any_globby_var(false),
 	  _has_any_unordered_link(false)
 {}
 
@@ -30,6 +31,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _has_any_globby_var(false),
 	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
@@ -95,6 +97,7 @@ bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
 	return _parent->isDescendant(ptm);
 }
 
+// ==============================================================
 /**
  * Equality operator.  Both the content must match, and the path
  * taken to get to the content must match.
@@ -108,6 +111,9 @@ bool PatternTerm::operator==(const PatternTerm& other)
 	return _parent->operator==(*other._parent);
 }
 
+// ==============================================================
+
+// Mark recursively, all the way to the root.
 void PatternTerm::addAnyBoundVar()
 {
 	if (not _has_any_bound_var)
@@ -135,6 +141,31 @@ void PatternTerm::addBoundVariable()
 	addAnyBoundVar();
 }
 
+// ==============================================================
+// Just like above, but for globs.
+
+void PatternTerm::addAnyGlobbyVar()
+{
+	if (not _has_any_globby_var)
+	{
+		_has_any_globby_var = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyGlobbyVar();
+	}
+}
+
+void PatternTerm::addGlobbyVar()
+{
+	_has_globby_var = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_globby_var = true;
+
+	addAnyGlobbyVar();
+}
+
+// ==============================================================
+
 void PatternTerm::addUnorderedLink()
 {
 	if (not _has_any_unordered_link)
@@ -144,6 +175,8 @@ void PatternTerm::addUnorderedLink()
 			_parent->addUnorderedLink();
 	}
 }
+
+// ==============================================================
 
 std::string PatternTerm::to_string() const { return to_string(":"); }
 

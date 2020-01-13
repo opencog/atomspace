@@ -97,12 +97,22 @@ protected:
 	bool _has_bound_var;
 
 	// True if any pattern subtree rooted in this tree node contains
+	// an GlobNode. Trees without any GlobNodes can be searched in a
+	// straight-forward manner; those with them need to have all
+	// possible glob matches explored.
+	bool _has_any_globby_var;
+
+	// As above, but only one level deep.
+	bool _has_globby_var;
+
+	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
 	// searched in a straight-forward manner; those with them need to
 	// have all possible permutations explored.
 	bool _has_any_unordered_link;
 
 	void addAnyBoundVar();
+	void addAnyGlobbyVar();
 
 public:
 	static const PatternTermPtr UNDEFINED;
@@ -130,6 +140,10 @@ public:
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
+
+	void addGlobbyVar();
+	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
+	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
