@@ -22,6 +22,7 @@ PatternTerm::PatternTerm()
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
+	  _has_globby_var(false),
 	  _has_any_unordered_link(false)
 {}
 
@@ -32,6 +33,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
+	  _has_globby_var(false),
 	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
