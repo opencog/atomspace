@@ -1272,7 +1272,8 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& clause)
 {
 	// Check if the pattern has globs in it.
-	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+	PatternTermPtr parent(ptm->getParent());
+	if (0 < _pat->globby_holders.count(parent->getHandle()))
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
 }
@@ -1285,11 +1286,12 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
-	Type t = ptm->getHandle()->get_type();
+	PatternTermPtr parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
-	                      << ptm->getHandle()->to_string() << std::endl
+	                      << parent->getHandle()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
@@ -1298,15 +1300,15 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at term=" << ptm->to_string()
+		                      << " at term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		_perm_odo.clear();
 		// XXX TODO Perhaps this push can be avoided,
-		// if there are no unordered tems?
+		// if there are no unordered terms?
 		perm_push();
 		_perm_go_around = false;
-		found = explore_odometer(ptm, iset[i], clause);
+		found = explore_odometer(parent, iset[i], clause);
 		perm_pop();
 
 		if (found) break;
@@ -1325,7 +1327,8 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	Type t = ptm->getHandle()->get_type();
+	PatternTermPtr parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
 	IncomingSet iset;
 	if (nullptr == hg->getAtomSpace())
 		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0), t);
@@ -1334,7 +1337,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
-	                      << ptm->getHandle()->to_string() << std::endl
+	                      << parent->getHandle()->to_string() << std::endl
 	                      << "It's grounding " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
@@ -1343,17 +1346,17 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " for glob term=" << ptm->to_string()
+		                      << " for glob term=" << parent->to_string()
 		                      << " propose=" << iset[i].value();})
 
 		// Before exploring the link branches, record the current
-		// _glob_state size.  The idea is, if the ptm & hg is a match,
+		// _glob_state size.  The idea is, if the parent & iset[i] is a match,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
 		auto saved_glob_state = _glob_state;
 
-		found = explore_glob_branches(ptm, iset[i], clause_root);
+		found = explore_glob_branches(parent, iset[i], clause_root);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
@@ -1730,7 +1733,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	bool found = false;
 	if (CHOICE_LINK != hi->get_type())
 	{
-		if (explore_up_branches(parent, hg, clause_root)) found = true;
+		if (explore_up_branches(ptm, hg, clause_root)) found = true;
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
 	}
 	else
