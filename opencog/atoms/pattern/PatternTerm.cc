@@ -116,9 +116,20 @@ void PatternTerm::addAnyBoundVar()
 	}
 }
 
+/// Set two flags: one flag (the "any" flag) is set recursively from
+/// a variable, all the way up to the root, indicating that there's
+/// a variable on this path.  The other flag gets set only on the
+/// variable, and it's immediate parent (i.e. the holder of the
+/// variable).
 void PatternTerm::addBoundVariable()
 {
+	// Mark just this term (the variable itself)
+	// and mark the term that holds us.
 	_has_bound_var = true;
+	if (_parent != PatternTerm::UNDEFINED)
+			_parent->_has_bound_var = true;
+
+	// Mark recursively, all the way to the root.
 	addAnyBoundVar();
 }
 
