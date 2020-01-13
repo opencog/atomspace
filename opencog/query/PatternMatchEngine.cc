@@ -1297,7 +1297,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 
 	// If there aren't any unordered links anywhere, just explore
 	// directly upwards.
-	if (not parent->hasUnorderedLink())
+	if (not ptm->hasUnorderedLink())
 	{
 		bool found = false;
 		for (size_t i = 0; i < sz; i++)
