@@ -1287,6 +1287,43 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	PatternTermPtr parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
+
+	// If the pattern term doesn't have any other bound variables,
+	// aside from the one grounded by hg, then we can immediately
+	// and directly move upwards. Do this by assembling the single
+	// (unique) upward term, and then seeing if it's acceptable
+	// to the gaunlet of callbacks. If it is, we are done.
+	if (not parent->hasBoundVariable() and not ptm->hasUnorderedLink())
+	{
+		bool need_search = false;
+		HandleSeq oset;
+		oset.reserve(parent->getArity());
+		for (const PatternTermPtr& pp: parent->getOutgoingSet())
+		{
+			if (pp == ptm)
+				oset.push_back(hg);
+			else
+			{
+				if (pp->hasAnyBoundVariable())
+				{
+					need_search = true;
+				}
+				oset.push_back(pp->getHandle());
+			}
+		}
+		if (not need_search)
+		{
+			Handle hup(hg->getAtomSpace()->get_link(t, oset));
+			if (hup)
+				return explore_type_branches(parent, hup, clause);
+			// return false;
+		}
+	}
+
+	// If we are here, then somehow the upward-term is not unique, and
+	// we have to explore the incoming set of the ground to see which
+	// (if any) of the incoming set satsisfies the parent term.
+
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
