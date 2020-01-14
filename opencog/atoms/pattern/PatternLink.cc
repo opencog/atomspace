@@ -39,8 +39,6 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.unquoted_clauses);
-	locate_globs(_pat.unquoted_clauses);
-	locate_globs(_pat.quoted_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -227,7 +225,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 		}
 	}
 	locate_defines(compo);
-	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
@@ -454,25 +451,6 @@ void PatternLink::locate_defines(const HandleSeq& clauses)
 	}
 }
 
-void PatternLink::locate_globs(const HandleSeq& clauses)
-{
-	for (const Handle& clause: clauses)
-	{
-		FindAtoms fgn(GLOB_NODE, true);
-		fgn.search_set(clause);
-
-		for (const Handle& sh : fgn.least_holders)
-		{
-			_pat.globby_terms.insert(sh);
-		}
-
-		for (const Handle& h : fgn.holders)
-		{
-			_pat.globby_holders.insert(h);
-		}
-	}
-}
-
 /* ================================================================= */
 /**
  * Locate cacheable clauses. These are clauses whose groundings can be
@@ -495,9 +473,11 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 	{
 		// Skip over anything unsuitable.
 		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
-		if (_pat.globby_holders.find(claw) != _pat.globby_holders.end()) continue;
-		if (_pat.fuzzy_terms.find(claw) != _pat.fuzzy_terms.end()) continue;
-		// black terms are evaluatble; no need to do it twice.
+
+// XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
+// which means we need to have terms, here ...
+		// if (claw->hasAnyGlobbyVar()) continue;
+		// black terms are evalutable; no need to do it twice.
 		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
 		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
@@ -642,21 +622,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 	{
 		bool is_virtu = false;
 		bool is_black = false;
-
-#ifdef BROKEN_DOESNT_WORK
-// The below should have worked to set things up, but it doesn't,
-// and I'm too lazy to investigate, because an alternate hack is
-// working, at the moment.
-		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaluatable, so that we can evaluate
-		// it later.
-		if (VARIABLE_NODE == clause->get_type())
-		{
-			_pat.evaluatable_terms.insert(clause);
-			add_to_map(_pat.in_evaluatable, clause, clause);
-			is_black = true;
-		}
-#endif
 
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.stopset.insert(SCOPE_LINK);
@@ -875,27 +840,29 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.always)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           Handle h,
+                                           const Handle& term,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
-	h = ptm->getHandle();
+	PatternTermPtr ptm(createPatternTerm(parent, term));
+
+	// `h` is usually the same as `term`, unless there's quotation.
+	Handle h(ptm->getHandle());
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
@@ -909,8 +876,13 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		if (GLOB_NODE == t) ptm->addGlobbyVar();
 		return;
 	}
+
+	// If the term is unordered, all parents must know about it.
+	if (nameserver().isA(t, UNORDERED_LINK))
+		ptm->addUnorderedLink();
 
 	if (h->is_link())
 	{

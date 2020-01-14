@@ -192,7 +192,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 	bool match = true;
 	const Handle &hp = ptm->getHandle();
-	if (0 < _pat->globby_terms.count(hp))
+	if (ptm->hasGlobbyVar())
 	{
 		match = glob_compare(osp, osg);
 	}
@@ -426,7 +426,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_holders.count(hp));
+	bool has_glob = ptm->hasAnyGlobbyVar();
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
@@ -1223,17 +1223,16 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
-	// Check if the pattern has globs in it.
-	bool has_glob = (0 < _pat->globby_holders.count(term));
-
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
-		if (has_glob)
+		if (ptm->hasAnyGlobbyVar())
 			found = explore_glob_branches(ptm, hg, clause);
-		else
+		else if(ptm->hasUnorderedLink())
 			found = explore_odometer(ptm, hg, clause);
+		else
+			found = explore_type_branches(ptm, hg, clause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1272,7 +1271,8 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& clause)
 {
 	// Check if the pattern has globs in it.
-	if (0 < _pat->globby_holders.count(ptm->getHandle()))
+	PatternTermPtr parent(ptm->getParent());
+	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
 }
@@ -1285,28 +1285,116 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
-	Type t = ptm->getHandle()->get_type();
+	PatternTermPtr parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
+
+	// If the parent pattern term doesn't have any other bound
+	// variables, aside from `ptm` which is grounded by `hg`,
+	// then we can immediately and directly move upwards. Do this
+	// by assembling the single (unique) upward term, and then
+	// seeing if it's acceptable to the gauntlet of callbacks.
+	// If it is, we are done.
+	//
+	// The prototypical search being handled here is that of
+	//
+	//     EvaluationLink
+	//         PredicateNode "some const"
+	//         ListLink
+	//             VariableNode "$x"
+	//             ConceptNode "foo"
+	//
+	// If we arrive here, with `ptm` being the ListLink, and the `hg`
+	// being the grounding of the ListLink, then we should be able to
+	// immediately jump to the EvaluationLink, without any further ado.
+	// Specifically, there is no need to search the incoming set of `hg`
+	// just build up the EvaluationLink and offer it as the ground.
+	if (not ptm->hasUnorderedLink())
+	{
+		bool need_search = false;
+		HandleSeq oset;
+		oset.reserve(parent->getArity());
+		for (const PatternTermPtr& pp: parent->getOutgoingSet())
+		{
+			if (pp == ptm)
+				oset.push_back(hg);
+			else if (pp->hasAnyBoundVariable())
+			{
+				// If we are here, then `parent` has another
+				// variable, besides `ptm`. In some (rare?)
+				// cases, we might already know how it's grounded.
+				// Is it a waste of CPU time to check? I dunno.
+				auto gnd(var_grounding.find(pp->getHandle()));
+				if (gnd == var_grounding.end())
+				{
+					// Oh no! Abandon ship!
+					need_search = true;
+					break;
+				}
+				oset.push_back(gnd->second);
+			}
+			else
+				oset.push_back(pp->getHandle());
+		}
+		if (not need_search)
+		{
+			// Yuck. What we really want to do here is to find out
+			// if `Link(t, oset)` is in the incoming set of `hg`. But
+			// there isn't any direct way of doing this (at this time).
+			// So hack around this by asking the AtomSpace about it,
+			// instead.
+			Handle hup(hg->getAtomSpace()->get_link(t, oset));
+			if (nullptr == hup) return false;
+			return explore_type_branches(parent, hup, clause);
+		}
+	}
+
+	// If we are here, then somehow the upward-term is not unique, and
+	// we have to explore the incoming set of the ground to see which
+	// (if any) of the incoming set satsisfies the parent term.
+
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
-	                      << ptm->getHandle()->to_string() << std::endl
+	                      << parent->getHandle()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
+	// If there aren't any unordered links anywhere, just explore
+	// directly upwards.
+	if (not ptm->hasUnorderedLink())
+	{
+		bool found = false;
+		for (size_t i = 0; i < sz; i++)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+			                      << " at term=" << parent->to_string()
+			                      << " propose=" << iset[i]->to_string();})
+
+			found = explore_type_branches(parent, iset[i], clause);
+			if (found) break;
+		}
+
+		DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+		return found;
+	}
+
+	// If we are here, then there's at least one (and maybe more)
+	// unordered links, somewhere at this level, next to us or to
+	// the side and below us. Explore all of the differrent possible
+	// permutations.
 	_perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at term=" << ptm->to_string()
+		DO_LOG({LAZY_LOG_FINE << "Try upward permutable branch "
+		                      << i+1 << " of " << sz
+		                      << " at term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		_perm_odo.clear();
-		// XXX TODO Perhaps this push can be avoided,
-		// if there are no unordered tems?
 		perm_push();
 		_perm_go_around = false;
-		found = explore_odometer(ptm, iset[i], clause);
+		found = explore_odometer(parent, iset[i], clause);
 		perm_pop();
 
 		if (found) break;
@@ -1325,7 +1413,8 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	Type t = ptm->getHandle()->get_type();
+	PatternTermPtr parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
 	IncomingSet iset;
 	if (nullptr == hg->getAtomSpace())
 		iset = _pmc.get_incoming_set(hg->getOutgoingAtom(0), t);
@@ -1334,7 +1423,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking globby upward for term = "
-	                      << ptm->getHandle()->to_string() << std::endl
+	                      << parent->getHandle()->to_string() << std::endl
 	                      << "It's grounding " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
@@ -1343,17 +1432,17 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " for glob term=" << ptm->to_string()
+		                      << " for glob term=" << parent->to_string()
 		                      << " propose=" << iset[i].value();})
 
 		// Before exploring the link branches, record the current
-		// _glob_state size.  The idea is, if the ptm & hg is a match,
+		// _glob_state size.  The idea is, if the parent & iset[i] is a match,
 		// their state will be recorded in _glob_state, so that one can,
 		// if needed, resume and try to ground those globs again in a
 		// different way (e.g. backtracking from another branchpoint).
 		auto saved_glob_state = _glob_state;
 
-		found = explore_glob_branches(ptm, iset[i], clause_root);
+		found = explore_glob_branches(parent, iset[i], clause_root);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
@@ -1374,7 +1463,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	// Check if the pattern has globs in it,
-	OC_ASSERT(0 < _pat->globby_holders.count(ptm->getHandle()),
+	OC_ASSERT(ptm->hasAnyGlobbyVar(),
 	          "Glob exploration went horribly wrong!");
 
 	// Record the glob_state *before* starting exploration.
@@ -1391,7 +1480,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	do
 	{
 		// It's not clear if the odometer can play nice with
-		// globby terms. Anyway, no unit test mixs these two.
+		// globby terms. Anyway, no unit test mixes these two.
 		// So, for now, we ignore it.
 		// if (explore_odometer(ptm, hg, clause_root))
 		if (explore_type_branches(ptm, hg, clause_root))
@@ -1730,7 +1819,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	bool found = false;
 	if (CHOICE_LINK != hi->get_type())
 	{
-		if (explore_up_branches(parent, hg, clause_root)) found = true;
+		if (explore_up_branches(ptm, hg, clause_root)) found = true;
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
 	}
 	else
