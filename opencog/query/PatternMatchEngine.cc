@@ -1319,11 +1319,9 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 				oset.push_back(hg);
 			else
 			{
-				// OK, so I think the if-statement below is hiding a bug
-				// of some kind. It triggers on a suspiscious construction
-				// in ScopeLinkUTest. XXX FIXME this needs more investigation.
 				if (pp->hasAnyBoundVariable())
 				{
+					// Oh no! Abandon ship!
 					need_search = true;
 					break;
 				}
@@ -1332,6 +1330,11 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		}
 		if (not need_search)
 		{
+			// Yuck. What we really wnat to do here is to find out
+			// if `Link(t, oset)` is in the incoming set of `hg`. But
+			// there isn't any direct way of doing this (at this time).
+			// So hack around this by asking the AtomSpace about it,
+			// instead.
 			Handle hup(hg->getAtomSpace()->get_link(t, oset));
 			if (hup)
 				return explore_type_branches(parent, hup, clause);
