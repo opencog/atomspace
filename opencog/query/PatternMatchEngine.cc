@@ -1317,16 +1317,23 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		{
 			if (pp == ptm)
 				oset.push_back(hg);
-			else
+			else if (pp->hasAnyBoundVariable())
 			{
-				if (pp->hasAnyBoundVariable())
+				// If we are here, then `parent` has another
+				// variable, besides `ptm`. In some (rare?)
+				// cases, we might already know how it's grounded.
+				// Is it a waste of CPU time to check? I dunno.
+				auto gnd(var_grounding.find(pp->getHandle()));
+				if (gnd == var_grounding.end())
 				{
 					// Oh no! Abandon ship!
 					need_search = true;
 					break;
 				}
-				oset.push_back(pp->getHandle());
+				oset.push_back(gnd->second);
 			}
+			else
+				oset.push_back(pp->getHandle());
 		}
 		if (not need_search)
 		{
@@ -1336,9 +1343,8 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			// So hack around this by asking the AtomSpace about it,
 			// instead.
 			Handle hup(hg->getAtomSpace()->get_link(t, oset));
-			if (hup)
-				return explore_type_branches(parent, hup, clause);
-			return false;
+			if (nullptr == hup) return false;
+			return explore_type_branches(parent, hup, clause);
 		}
 	}
 
