@@ -28,7 +28,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else

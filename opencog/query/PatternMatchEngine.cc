@@ -50,7 +50,7 @@ using namespace opencog;
 // wouldn't be kept no matter what (it's not like it's gonna take up a
 // lot of resources).
 
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define DO_LOG(STUFF) STUFF
 #else
