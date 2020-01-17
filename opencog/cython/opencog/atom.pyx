@@ -2,9 +2,9 @@ from cpython cimport PyLong_FromLongLong
 from cpython.object cimport Py_LT, Py_EQ, Py_GT, Py_LE, Py_NE, Py_GE
 from libcpp.set cimport set as cpp_set
 
+from atomspace cimport nameserver
 # Atom wrapper object
 cdef class Atom(Value):
-
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
         return Atom(PtrHolder.create(<shared_ptr[void]&>handle))
@@ -39,6 +39,15 @@ cdef class Atom(Value):
                 else:
                     self._name = ""
             return self._name
+    property type:
+        def __get__(self):
+            cdef cAtom* atom_ptr
+            if self._atom_type is None:
+                atom_ptr = self.handle.atom_ptr()
+                if atom_ptr == NULL:   # avoid null-pointer deref
+                    return None
+                self._atom_type = nameserver().getTypeName(atom_ptr.get_type())
+            return self._atom_type
 
     property tv:
         def __get__(self):
