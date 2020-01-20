@@ -39,6 +39,7 @@ protected:
 
 	void do_randgen_set_seed(int);
 	int do_randgen_randint(int);
+	float do_randgen_randfloat();
 
 public:
 	RandGenSCM();
@@ -56,6 +57,12 @@ int RandGenSCM::do_randgen_randint(int n)
 {
 	return randGen().randint(n);
 }
+
+/// Pick a random float in [0,1]
+float RandGenSCM::do_randgen_randfloat()
+{
+	return randGen().randfloat();
+}
 	
 } /*end of namespace opencog*/
 
@@ -69,6 +76,8 @@ void RandGenSCM::init(void)
 		&RandGenSCM::do_randgen_set_seed, this, "randgen");
 	define_scheme_primitive("cog-randgen-randint",
 		&RandGenSCM::do_randgen_randint, this, "randgen");
+	define_scheme_primitive("cog-randgen-randfloat",
+		&RandGenSCM::do_randgen_randfloat, this, "randgen");
 }
 
 extern "C" {

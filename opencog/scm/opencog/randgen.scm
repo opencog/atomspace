@@ -14,11 +14,20 @@
 (set-procedure-property! cog-randgen-set-seed! 'documentation
 "
  cog-randgen-set-seed! SEED
+
     Set the random seed to SEED
 ")
 
 (set-procedure-property! cog-randgen-randint 'documentation
 "
  cog-randgen-randint N
+
     Return a random integer between 0 and N excluded.
+")
+
+(set-procedure-property! cog-randgen-randfloat 'documentation
+"
+ cog-randgen-float
+
+    Return a random float within [0, 1].
 ")
