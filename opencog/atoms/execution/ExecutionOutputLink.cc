@@ -104,6 +104,28 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	return vp;
 }
 
+///
+/// Somewhat like force_execute(), but assumes that each atoms
+/// knows how to behave itself correctly.
+static HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
+{
+	HandleSeq exargs;
+	for (const Handle& h: args)
+	{
+		if (h->is_executable())
+		{
+			ValuePtr vp = h->execute(as, silent);
+			if (not vp->is_atom())
+				exargs.push_back(h);
+			else
+				exargs.push_back(HandleCast(vp));
+		}
+		else
+			exargs.push_back(h);
+	}
+	return exargs;
+}
+
 ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 {
 	Handle sn(_outgoing[0]);
@@ -119,12 +141,15 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 
 	if (LAMBDA_LINK == sn->get_type())
 	{
+		// Unpack and beta-reduce the Lambda link.
+		// Execute the args before plugging them in.
 		LambdaLinkPtr flp(LambdaLinkCast(sn));
 		Handle body(flp->get_body());
 		Variables vars(flp->get_variables());
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
-		return vars.substitute_nocheck(body, oset);
+
+		return vars.substitute_nocheck(body, execute_args(as, oset, silent));
 	}
 
 	return get_handle();
