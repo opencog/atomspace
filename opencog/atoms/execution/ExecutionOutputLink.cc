@@ -104,9 +104,9 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	return vp;
 }
 
-///
-/// Somewhat like force_execute(), but assumes that each atoms
-/// knows how to behave itself correctly.
+/// execute_args -- execute a seq of arguments, return a seq of results.
+/// Somewhat like force_execute(), but assumes that each atom knows
+/// how to behave itself correctly.
 static HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
 {
 	HandleSeq exargs;
