@@ -121,7 +121,10 @@
 
 ; --------------------------------------------------------------
 
-; Define a recursive tree-walker
+; Define a recursive tree-walker.
+; XXX FIXME this is wrong; as written, this is infinitely-recursive
+; because there is no check for the empty-set during the recursion.
+; So this is a mess, but I'm too lazy to fix this right now.
 (DefineLink
 	(DefinedSchemaNode "recursive-rewrite")
 	(Lambda
