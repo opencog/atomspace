@@ -16,6 +16,8 @@
 (Inheritance    (Concept "B")    (Concept "F"))
 (Inheritance    (Concept "C")    (Concept "D"))
 
+; --------------------------------------------------------------
+
 ; The re-written DAG edges will look like this:
 (define into-form
 	(Evaluation (Predicate "yikes")
@@ -38,6 +40,8 @@
  		(DefinedSchemaNode "make-an-edge")
  		(List (Concept "X") (Concept "Y"))))
 
+; --------------------------------------------------------------
+
 ; The input DAG edges that we search for
 (define get-form
 	(Inheritance (Variable "$head") (Variable "$tail")))
@@ -58,6 +62,8 @@
 		(DefinedSchemaNode "get-the-tail")
 		(List (Concept "A"))))
 
+; --------------------------------------------------------------
+
 ; Can we chain them together? Yes we can.
 (DefineLink
 	(DefinedSchemaNode "rewrite-one")
@@ -73,10 +79,12 @@
 
 ; Does it work? Yes it does.
 ; (cog-execute! 
-; 	(ExecutionOutput
-; 		(DefinedSchemaNode "rewrite-one")
-; 		(List (Concept "A"))))
+(define rw-one
+	(ExecutionOutput
+		(DefinedSchemaNode "rewrite-one")
+		(List (Concept "A"))))
 
+; --------------------------------------------------------------
 
 ; Do nothing.
 (DefineLink
@@ -106,9 +114,12 @@
 
 ; Does it work?
 ; (cog-execute!
-; 	(ExecutionOutput
-; 		(DefinedSchema "test-rewrite")
-; 		(List (Concept "A") (Concept "null"))))
+(define nest
+	(ExecutionOutput
+		(DefinedSchema "test-rewrite")
+		(List (Concept "A") (Concept "null"))))
+
+; --------------------------------------------------------------
 
 ; Define a recursive tree-walker
 (DefineLink
