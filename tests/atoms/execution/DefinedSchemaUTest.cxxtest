@@ -60,6 +60,7 @@ public:
 	void test_get_tail(void);
 	void test_compose(void);
 	void test_nest(void);
+	void test_recursive(void);
 };
 
 void DefinedSchemaUTest::tearDown(void)
@@ -146,13 +147,39 @@ void DefinedSchemaUTest::test_nest(void)
 	"		(PredicateNode \"yikes\")"
 	"		(ListLink"
 	"			(ConceptNode \"A\")"
-	"			(ConceptNode \"null\")))"
+	"			(ConceptNode \"null\"))))"
 	);
 
 	printf("got %s\n", result->to_string().c_str());
 	printf("expected %s\n", edge->to_string().c_str());
 
 	TS_ASSERT(result == edge);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void DefinedSchemaUTest::test_recursive(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = eval->eval_h("(cog-execute! recursive)");
+
+#if 0
+	Handle edge = eval->eval_h(
+	"(ListLink"
+	"	(Set (ConceptNode \"B\"))"
+	"	(EvaluationLink"
+	"		(PredicateNode \"yikes\")"
+	"		(ListLink"
+	"			(ConceptNode \"A\")"
+	"			(ConceptNode \"null\"))))"
+	);
+
+	printf("got %s\n", result->to_string().c_str());
+	printf("expected %s\n", edge->to_string().c_str());
+
+	TS_ASSERT(result == edge);
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

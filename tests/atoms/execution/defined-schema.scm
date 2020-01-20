@@ -141,6 +141,9 @@
 						
 
 ; (cog-execute!
-; 	(ExecutionOutput
-; 		(DefinedSchema "recursive-rewrite")
-; 		(List (Concept "A") (Concept "null"))))
+(define recursive
+	(ExecutionOutput
+		(DefinedSchema "recursive-rewrite")
+		(List (Concept "A") (Concept "null"))))
+
+*unspecified*
