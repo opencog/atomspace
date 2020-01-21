@@ -167,7 +167,19 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
-		return vars.substitute_nocheck(body, execute_args(as, oset, silent));
+		// If one of the arguments is a SetLink, then apply the
+		// lambda expression to each of the mebers in the set.
+		// This is also how PutLink works. It's needed to handle
+		// the case where GetLink returns a set of multiple results;
+		// we want to emulate that set passing through the processing
+		// pipeline. (XXX Is there a better way of doing this?)
+		bool have_set = false;
+		HandleSeq xargs(execute_args(as, oset, silent, have_set));
+
+		if (not have_set)
+			return vars.substitute_nocheck(body, xargs);
+		else
+			return vars.substitute_nocheck(body, xargs);
 	}
 
 	return get_handle();
