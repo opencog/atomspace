@@ -107,28 +107,39 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 /// execute_args -- execute a seq of arguments, return a seq of results.
 ///
 /// Somewhat like force_execute(), but assumes that each atom knows
-/// how to behave itself correctly.
-static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
+/// how to behave itself correctly. Much like PutLink, this also tries
+/// to deal with multiple arguments that are sets (so that a SetLink
+/// has the semantics of "apply to all members of the set")
+static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args,
+                                     bool silent, bool& have_set)
 {
 	HandleSeq exargs;
 	for (const Handle& h: args)
 	{
-		if (h->is_executable())
+		if (not h->is_executable())
 		{
-			ValuePtr vp = h->execute(as, silent);
-			if (not vp->is_atom()) // Yuck!
-				exargs.push_back(h);
-			else
-			{
-				Handle hex(HandleCast(vp));
-				// Unwrap SetLink singletons.
-				if (SET_LINK == hex->get_type() and 1 == hex->get_arity())
-					hex = hex->getOutgoingAtom(0);
-				exargs.push_back(hex);
-			}
-		}
-		else
+			// XXX should be be unwrapping SetLinks here?
 			exargs.push_back(h);
+			continue;
+		}
+
+		// If we are here, the earguent is executable.
+		ValuePtr vp = h->execute(as, silent);
+		if (not vp->is_atom()) // Yuck!
+			exargs.push_back(h);
+		else
+		{
+			Handle hex(HandleCast(vp));
+			if (SET_LINK == hex->get_type())
+			{
+				have_set = true;
+
+				// Unwrap SetLink singletons.
+				if (1 == hex->get_arity())
+					hex = hex->getOutgoingAtom(0);
+			}
+			exargs.push_back(hex);
+		}
 	}
 	return exargs;
 }
