@@ -121,19 +121,18 @@
 
 ; --------------------------------------------------------------
 
-; Define a recursive tree-walker.
-; XXX FIXME this is wrong; as written, this is infinitely-recursive
-; because there is no check for the empty-set during the recursion.
-; So this is a mess, but I'm too lazy to fix this right now.
+; Define a recursive tree-walker. It not only recurses, it reverses,
+; tracing a path from each leaf, back up to the root. The return is
+; a set-link, each element a path from leaf to root.
 (DefineLink
-	(DefinedSchemaNode "recursive-rewrite")
+	(DefinedSchemaNode "reversive-rewrite")
 	(Lambda
 		(VariableList (Variable "$hd") (Variable "$out"))
 		(Cond
 			(Equal (Variable "$hd") (Set))
 			(Variable "$out")
 			(ExecutionOutput
-				(DefinedSchemaNode "recursive-rewrite")
+				(DefinedSchemaNode "reversive-rewrite")
 					(List
 						(ExecutionOutputLink
 							(DefinedSchema "get-the-tail")
@@ -147,9 +146,30 @@
 
 
 ; (cog-execute!
-(define recursive
+(define reversive
 	(ExecutionOutput
-		(DefinedSchema "recursive-rewrite")
-		(List (Concept "A") (Concept "null"))))
+		(DefinedSchema "reversive-rewrite")
+		(List (Concept "A") (Concept "root"))))
+
+; What the above generates, when executed.
+(define reversive-result
+	(SetLink
+		(EvaluationLink (PredicateNode "yikes") (ListLink
+			(ConceptNode "F")
+			(EvaluationLink (PredicateNode "yikes") (ListLink
+				(ConceptNode "B")
+				(EvaluationLink (PredicateNode "yikes") (ListLink
+					(ConceptNode "A")
+					(ConceptNode "root")))))))
+		(EvaluationLink (PredicateNode "yikes") (ListLink
+			(ConceptNode "D")
+			(EvaluationLink (PredicateNode "yikes") (ListLink
+				(ConceptNode "C")
+				(EvaluationLink (PredicateNode "yikes") (ListLink
+					(ConceptNode "B")
+					(EvaluationLink (PredicateNode "yikes") (ListLink
+						(ConceptNode "A")
+						(ConceptNode "root"))))))))))
+)
 
 *unspecified*
