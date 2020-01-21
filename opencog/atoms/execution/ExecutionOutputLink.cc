@@ -116,10 +116,16 @@ static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args, bool silent)
 		if (h->is_executable())
 		{
 			ValuePtr vp = h->execute(as, silent);
-			if (not vp->is_atom())
+			if (not vp->is_atom()) // Yuck!
 				exargs.push_back(h);
 			else
-				exargs.push_back(HandleCast(vp));
+			{
+				Handle hex(HandleCast(vp));
+				// Unwrap SetLink singletons.
+				if (SET_LINK == hex->get_type() and 1 == hex->get_arity())
+					hex = hex->getOutgoingAtom(0);
+				exargs.push_back(hex);
+			}
 		}
 		else
 			exargs.push_back(h);
