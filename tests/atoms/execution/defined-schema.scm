@@ -26,7 +26,7 @@
 ; A defined Lambda, in atomese.
 (DefineLink
 	(DefinedSchemaNode "make-an-edge")
-	(Lambda 
+	(Lambda
 		(VariableList (Variable "$h") (Variable "$t"))
 		(PutLink
 			(VariableList (Variable "$head") (Variable "$tail"))
@@ -34,7 +34,7 @@
 			(List (Variable "$h") (Variable "$t")))))
 
 ; Lets try it out. Does it work? Yes.
-; (cog-execute! 
+; (cog-execute!
 (define mk-edge
  	(ExecutionOutput
  		(DefinedSchemaNode "make-an-edge")
@@ -49,14 +49,14 @@
 ; Wrap it up in a function
 (DefineLink
 	(DefinedSchemaNode "get-the-tail")
-	(Lambda 
+	(Lambda
 		(Variable "$head")
 		(GetLink
 			(Variable "$tail")
 			get-form)))
 
 ; Does it work as expected? Yes.
-;(cog-execute! 
+;(cog-execute!
 (define get-tl
 	(ExecutionOutput
 		(DefinedSchemaNode "get-the-tail")
@@ -78,7 +78,7 @@
 					(List (Variable "$hd")))))))
 
 ; Does it work? Yes it does.
-; (cog-execute! 
+; (cog-execute!
 (define rw-one
 	(ExecutionOutput
 		(DefinedSchemaNode "rewrite-one")
@@ -110,7 +110,7 @@
 					(List
 						(Variable "$hd")
 						(Variable "$out")))))))
-						
+
 
 ; Does it work?
 ; (cog-execute!
@@ -131,17 +131,20 @@
 		(VariableList (Variable "$hd") (Variable "$out"))
 		(ExecutionOutput
 			(DefinedSchemaNode "recursive-rewrite")
-			(List
-				(ExecutionOutputLink
-					(DefinedSchema "get-the-tail")
-					(List
-						(Variable "$hd")))
-				(ExecutionOutput
-					(DefinedSchemaNode "make-an-edge")
-					(List
-						(Variable "$hd")
-						(Variable "$out")))))))
-						
+			(Cond
+				(Equal (Variable "$hd") (Set))
+				(Variable "$out")
+				(List
+					(ExecutionOutputLink
+						(DefinedSchema "get-the-tail")
+						(List
+							(Variable "$hd")))
+					(ExecutionOutput
+						(DefinedSchemaNode "make-an-edge")
+						(List
+							(Variable "$hd")
+							(Variable "$out"))))))))
+
 
 ; (cog-execute!
 (define recursive
