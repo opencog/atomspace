@@ -153,10 +153,11 @@ static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args,
 			Handle hex(HandleCast(vp));
 			if (SET_LINK == hex->get_type())
 			{
+				size_t sz = hex->get_arity();
 				// Unwrap SetLink singletons.
-				if (1 == hex->get_arity())
+				if (1 == sz)
 					hex = hex->getOutgoingAtom(0);
-				else
+				else if (1 < sz)
 					have_set = true;
 			}
 			exargs.push_back(hex);
