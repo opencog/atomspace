@@ -174,8 +174,26 @@
 
 ; --------------------------------------------------------------
 
+; Unwrap a SetLink, and turn it into a ListLink.
+(DefineLink
+	(DefinedSchemaNode "unwrap")
+	(Lambda
+		(VariableList (Variable "$set"))
+		(Bind (Glob "$elts")
+			(Equal (Variable "$set") (Set (Glob "$elts")))
+			(List (Glob "$elts")))))
+
+; (cog-execute!
+(define unwrap
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Set (Concept "X") (Concept "Y"))))
+
 ; Define a recursive tree-walker. Unlike the above, this does
 ; not reverse the order of the edges.
+; XXX FIXME, this does not quite work as one might naively expect,
+; because the search results are expanded combinatorially, instead
+; of being kept in branching-tree form.
 (DefineLink
 	(DefinedSchemaNode "recursive-rewrite")
 	(Lambda
