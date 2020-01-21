@@ -172,4 +172,40 @@
 						(ConceptNode "root"))))))))))
 )
 
+; --------------------------------------------------------------
+
+; Define a recursive tree-walker. Unlike the above, this does
+; not reverse the order of the edges.
+(DefineLink
+	(DefinedSchemaNode "recursive-rewrite")
+	(Lambda
+		(VariableList (Variable "$hd"))
+		(Cond
+			; If there's no tail, then return head.
+			(Equal (Set)
+				(ExecutionOutputLink
+					(DefinedSchema "get-the-tail")
+						(List
+							(Variable "$hd"))))
+			(Variable "$hd")
+
+			; Else make an edge connecting head and tail.
+			(ExecutionOutput
+				(DefinedSchemaNode "make-an-edge")
+				(List
+					(Variable "$hd")
+					(ExecutionOutput
+						(DefinedSchemaNode "recursive-rewrite")
+						(List
+							(ExecutionOutputLink
+								(DefinedSchema "get-the-tail")
+								(List
+									(Variable "$hd"))))))))))
+
+; (cog-execute!
+(define recursive
+	(ExecutionOutput
+		(DefinedSchema "recursive-rewrite")
+		(List (Concept "A") (Concept "root"))))
+
 *unspecified*
