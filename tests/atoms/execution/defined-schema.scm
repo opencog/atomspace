@@ -129,21 +129,21 @@
 	(DefinedSchemaNode "recursive-rewrite")
 	(Lambda
 		(VariableList (Variable "$hd") (Variable "$out"))
-		(ExecutionOutput
-			(DefinedSchemaNode "recursive-rewrite")
-			(Cond
-				(Equal (Variable "$hd") (Set))
-				(Variable "$out")
-				(List
-					(ExecutionOutputLink
-						(DefinedSchema "get-the-tail")
-						(List
-							(Variable "$hd")))
-					(ExecutionOutput
-						(DefinedSchemaNode "make-an-edge")
-						(List
-							(Variable "$hd")
-							(Variable "$out"))))))))
+		(Cond
+			(Equal (Variable "$hd") (Set))
+			(Variable "$out")
+			(ExecutionOutput
+				(DefinedSchemaNode "recursive-rewrite")
+					(List
+						(ExecutionOutputLink
+							(DefinedSchema "get-the-tail")
+							(List
+								(Variable "$hd")))
+						(ExecutionOutput
+							(DefinedSchemaNode "make-an-edge")
+							(List
+								(Variable "$hd")
+								(Variable "$out"))))))))
 
 
 ; (cog-execute!
