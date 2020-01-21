@@ -132,11 +132,11 @@ static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args,
 			Handle hex(HandleCast(vp));
 			if (SET_LINK == hex->get_type())
 			{
-				have_set = true;
-
 				// Unwrap SetLink singletons.
 				if (1 == hex->get_arity())
 					hex = hex->getOutgoingAtom(0);
+				else
+					have_set = true;
 			}
 			exargs.push_back(hex);
 		}
@@ -173,13 +173,43 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		// the case where GetLink returns a set of multiple results;
 		// we want to emulate that set passing through the processing
 		// pipeline. (XXX Is there a better way of doing this?)
+		// If there is more than one SettLink, then this won't work,
+		// and we need to make a Cartesian product of them, instead.
 		bool have_set = false;
 		HandleSeq xargs(execute_args(as, oset, silent, have_set));
 
 		if (not have_set)
 			return vars.substitute_nocheck(body, xargs);
-		else
-			return vars.substitute_nocheck(body, xargs);
+
+		// Ugh. First, find the SetLink.
+		size_t nargs = xargs.size();
+		size_t set_idx = 0;
+		for (size_t i=0; i<nargs; i++)
+		{
+			if (SET_LINK == xargs[i]->get_type())
+			{
+				set_idx = i;
+				break;
+			}
+		}
+
+		// Next, get the SetLink arity, and loop over it.
+		size_t num_elts = xargs[set_idx]->get_arity();
+		HandleSeq results;
+		for (size_t n=0; n<num_elts; n++)
+		{
+			HandleSeq yargs;
+			for (size_t i=0; i<nargs; i++)
+			{
+				if (i != set_idx)
+					yargs.push_back(xargs[i]);
+				else
+					yargs.push_back(xargs[set_idx]->getOutgoingAtom(n));
+			}
+			results.push_back(vars.substitute_nocheck(body, yargs));
+		}
+
+		return createLink(results, SET_LINK);
 	}
 
 	return get_handle();
