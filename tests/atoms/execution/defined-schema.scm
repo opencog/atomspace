@@ -117,7 +117,7 @@
 (define nest
 	(ExecutionOutput
 		(DefinedSchema "test-rewrite")
-		(List (Concept "A") (Concept "null"))))
+		(List (Concept "A") (Concept "root"))))
 
 ; --------------------------------------------------------------
 

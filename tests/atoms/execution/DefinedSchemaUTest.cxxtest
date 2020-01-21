@@ -147,7 +147,7 @@ void DefinedSchemaUTest::test_nest(void)
 	"		(PredicateNode \"yikes\")"
 	"		(ListLink"
 	"			(ConceptNode \"A\")"
-	"			(ConceptNode \"null\"))))"
+	"			(ConceptNode \"root\"))))"
 	);
 
 	printf("got %s\n", result->to_string().c_str());
