@@ -36,9 +36,9 @@
 ; Lets try it out. Does it work? Yes.
 ; (cog-execute!
 (define mk-edge
- 	(ExecutionOutput
- 		(DefinedSchemaNode "make-an-edge")
- 		(List (Concept "X") (Concept "Y"))))
+	(ExecutionOutput
+		(DefinedSchemaNode "make-an-edge")
+		(List (Concept "X") (Concept "Y"))))
 
 ; --------------------------------------------------------------
 
@@ -188,6 +188,27 @@
 	(ExecutionOutput
 		(DefinedSchema "unwrap")
 		(Set (Concept "X") (Concept "Y"))))
+
+; A defined Lambda, in atomese.
+(DefineLink
+	(DefinedSchemaNode "make-a-tree")
+	(Lambda
+		(VariableList (Variable "$h") (Variable "$set"))
+		(PutLink
+			(VariableList (Variable "$head") (Variable "$tail"))
+			into-form
+			(List (Variable "$h")
+				(ExecutionOutput
+					(DefinedSchema "unwrap")
+						(Variable "$set"))))))
+
+; Lets try it out. Does it work? No.
+; (cog-execute!
+(define mk-tree
+	(ExecutionOutput
+		(DefinedSchemaNode "make-a-tree")
+		(List (Concept "head") (Set (Concept "X") (Concept "Y") (Concept"Z")))))
+
 
 ; Define a recursive tree-walker. Unlike the above, this does
 ; not reverse the order of the edges.
