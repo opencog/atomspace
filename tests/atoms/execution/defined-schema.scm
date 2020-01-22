@@ -52,7 +52,7 @@
 	(Lambda
 		(Variable "$head")
 		(GetLink
-			(Variable "$tail")
+			(TypedVariable (Variable "$tail") (Type 'ConceptNode))
 			get-form)))
 
 ; Does it work as expected? Yes.
@@ -179,15 +179,31 @@
 	(DefinedSchemaNode "unwrap")
 	(Lambda
 		(VariableList (Variable "$set"))
-		(Bind (Glob "$elts")
-			(Equal (Variable "$set") (Set (Glob "$elts")))
-			(List (Glob "$elts")))))
+		(Cond
+			(Equal (Set) (Bind (Glob "$elts")
+				(Equal (Variable "$set") (Set (Glob "$elts")))
+				(List (Glob "$elts"))))
+			(Variable "$set")
+			(Bind (Glob "$elts")
+				(Equal (Variable "$set") (Set (Glob "$elts")))
+				(List (Glob "$elts"))))))
 
 ; (cog-execute!
-(define unwrap
+(define unwrap-set
 	(ExecutionOutput
 		(DefinedSchema "unwrap")
 		(Set (Concept "X") (Concept "Y"))))
+
+(define unwrap-singleton
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Concept "X")))
+
+(define unwrap-natural
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+				(Inheritance (Concept "B") (Variable "$x")))))
 
 ; A defined Lambda, in atomese.
 (DefineLink
@@ -202,12 +218,20 @@
 					(DefinedSchema "unwrap")
 						(Variable "$set"))))))
 
-; Lets try it out. Does it work? No.
+; Lets try it out. Does it work? Yes.
 ; (cog-execute!
 (define mk-tree
 	(ExecutionOutput
 		(DefinedSchemaNode "make-a-tree")
 		(List (Concept "head") (Set (Concept "X") (Concept "Y") (Concept"Z")))))
+
+; Lets try it out on a natural set. Does it work? No...
+(define mk-tree-indirect
+	(ExecutionOutput
+		(DefinedSchemaNode "make-a-tree")
+		(List (Concept "B")
+			(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+				(Inheritance (Concept "B") (Variable "$x"))))))
 
 
 ; Define a recursive tree-walker. Unlike the above, this does
