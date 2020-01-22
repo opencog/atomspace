@@ -61,6 +61,7 @@ public:
 	void test_compose(void);
 	void test_nest(void);
 	void test_reversive(void);
+	void test_recursive(void);
 };
 
 void DefinedSchemaUTest::tearDown(void)
@@ -175,6 +176,27 @@ void DefinedSchemaUTest::test_reversive(void)
 	printf("expected %s\n", leaves->to_string().c_str());
 
 	TS_ASSERT(result == leaves);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test the recursive operation of ExecutionOutputLinks, where the
+// DefinedSchema is used to define recursive execution.
+void DefinedSchemaUTest::test_recursive(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = eval->eval_h("(cog-execute! recursive)");
+
+	printf("got %s\n", result->to_string().c_str());
+
+#if 0
+	Handle leaves = eval->eval_h("recursive-result");
+
+	printf("expected %s\n", leaves->to_string().c_str());
+
+	TS_ASSERT(result == leaves);
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

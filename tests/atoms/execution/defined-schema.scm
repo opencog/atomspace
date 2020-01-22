@@ -245,6 +245,6 @@
 (define recursive
 	(ExecutionOutput
 		(DefinedSchema "recursive-rewrite")
-		(List (Concept "A") (Concept "root"))))
+		(List (Concept "A"))))
 
 *unspecified*
