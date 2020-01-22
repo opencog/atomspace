@@ -645,6 +645,8 @@ LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
 
+ANY_NODE <- NODE  // Wild-card node, very useful for counting.
+
 // ==============================================================
 // Procedure and schema nodes.
 //
