@@ -230,7 +230,7 @@
 
 			; Else make an edge connecting head and tail.
 			(ExecutionOutput
-				(DefinedSchemaNode "make-an-edge")
+				(DefinedSchemaNode "make-a-tree")
 				(List
 					(Variable "$hd")
 					(ExecutionOutput
