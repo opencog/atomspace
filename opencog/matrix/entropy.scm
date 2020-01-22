@@ -64,9 +64,10 @@
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
+	;     We don't want it to throw, in case some pair has zero counts.
 	(let* ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api star-obj)))
+			(frqobj (add-pair-freq-api star-obj #:nothrow #t)))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
