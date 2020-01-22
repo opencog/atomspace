@@ -36,9 +36,9 @@
 ; Lets try it out. Does it work? Yes.
 ; (cog-execute!
 (define mk-edge
- 	(ExecutionOutput
- 		(DefinedSchemaNode "make-an-edge")
- 		(List (Concept "X") (Concept "Y"))))
+	(ExecutionOutput
+		(DefinedSchemaNode "make-an-edge")
+		(List (Concept "X") (Concept "Y"))))
 
 ; --------------------------------------------------------------
 
@@ -52,7 +52,7 @@
 	(Lambda
 		(Variable "$head")
 		(GetLink
-			(Variable "$tail")
+			(TypedVariable (Variable "$tail") (Type 'ConceptNode))
 			get-form)))
 
 ; Does it work as expected? Yes.
@@ -117,7 +117,7 @@
 (define nest
 	(ExecutionOutput
 		(DefinedSchema "test-rewrite")
-		(List (Concept "A") (Concept "null"))))
+		(List (Concept "A") (Concept "root"))))
 
 ; --------------------------------------------------------------
 
@@ -171,5 +171,104 @@
 						(ConceptNode "A")
 						(ConceptNode "root"))))))))))
 )
+
+; --------------------------------------------------------------
+
+; Unwrap a SetLink, and turn it into a ListLink.
+(DefineLink
+	(DefinedSchemaNode "unwrap")
+	(Lambda
+		(VariableList (Variable "$set"))
+		(Cond
+			(Equal (Set) (Bind (Glob "$elts")
+				(Equal (Variable "$set") (Set (Glob "$elts")))
+				(List (Glob "$elts"))))
+			(Variable "$set")
+			(Bind (Glob "$elts")
+				(Equal (Variable "$set") (Set (Glob "$elts")))
+				(List (Glob "$elts"))))))
+
+; (cog-execute!
+(define unwrap-set
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Set (Concept "X") (Concept "Y"))))
+
+(define unwrap-singleton
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Concept "X")))
+
+(define unwrap-natural
+	(ExecutionOutput
+		(DefinedSchema "unwrap")
+		(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+				(Inheritance (Concept "B") (Variable "$x")))))
+
+; A defined Lambda, in atomese.
+(DefineLink
+	(DefinedSchemaNode "make-a-tree")
+	(Lambda
+		(VariableList (Variable "$h") (Variable "$set"))
+		(PutLink
+			(VariableList (Variable "$head") (Variable "$tail"))
+			into-form
+			(List (Variable "$h")
+				(ExecutionOutput
+					(DefinedSchema "unwrap")
+						(Variable "$set"))))))
+
+; Lets try it out. Does it work? Yes.
+; (cog-execute!
+(define mk-tree
+	(ExecutionOutput
+		(DefinedSchemaNode "make-a-tree")
+		(List (Concept "head") (Set (Concept "X") (Concept "Y") (Concept"Z")))))
+
+; Lets try it out on a natural set. Does it work? No...
+(define mk-tree-indirect
+	(ExecutionOutput
+		(DefinedSchemaNode "make-a-tree")
+		(List (Concept "B")
+			(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+				(Inheritance (Concept "B") (Variable "$x"))))))
+
+
+; Define a recursive tree-walker. Unlike the above, this does
+; not reverse the order of the edges.
+; XXX FIXME, this does not quite work as one might naively expect,
+; because the search results are expanded combinatorially, instead
+; of being kept in branching-tree form.
+(DefineLink
+	(DefinedSchemaNode "recursive-rewrite")
+	(Lambda
+		(VariableList (Variable "$hd"))
+		(Cond
+			; If there's no tail, then return head.
+			(Equal (Set)
+				(ExecutionOutputLink
+					(DefinedSchema "get-the-tail")
+						(List
+							(Variable "$hd"))))
+			(Variable "$hd")
+
+			; Else make an edge connecting head and tail.
+			(ExecutionOutput
+				(DefinedSchemaNode "make-a-tree")
+				(List
+					(Variable "$hd")
+					(ExecutionOutput
+						(DefinedSchemaNode "recursive-rewrite")
+						(List
+							(ExecutionOutputLink
+								(DefinedSchema "get-the-tail")
+								(List
+									(Variable "$hd"))))))))))
+
+; (cog-execute!
+(define recursive
+	(ExecutionOutput
+		(DefinedSchema "recursive-rewrite")
+		(List (Concept "A"))))
 
 *unspecified*
