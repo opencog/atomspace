@@ -115,6 +115,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	{
 		while (elt->is_executable())
 		{
+			elt = as->add_atom(elt);
 			vp = elt->execute(as, silent);
 			if (not vp->is_atom()) break;
 			elt = HandleCast(vp);
@@ -144,7 +145,7 @@ static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args,
 			continue;
 		}
 
-		// If we are here, the earguent is executable.
+		// If we are here, the argument is executable.
 		ValuePtr vp = h->execute(as, silent);
 		if (not vp->is_atom()) // Yuck!
 			exargs.push_back(h);
@@ -201,7 +202,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		HandleSeq xargs(execute_args(as, oset, silent, have_set));
 
 		if (not have_set)
-			return vars.substitute_nocheck(body, xargs);
+			return as->add_atom(vars.substitute_nocheck(body, xargs));
 
 		// Ugh. First, find the SetLink.
 		size_t nargs = xargs.size();
