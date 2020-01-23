@@ -65,12 +65,6 @@ QueryLink::QueryLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-QueryLink::QueryLink(const Link &l)
-	: PatternLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 ///
 /// Find and unpack variable declarations, if any; otherwise, just
@@ -92,7 +86,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	{
 		_body = oset[0];
 		_implicand = oset[1];
-		_varlist.find_variables(oset[0]);
+		_variables.find_variables(oset);
 		return;
 	}
 
@@ -102,8 +96,8 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	_body = oset[1];
 	_implicand = oset[2];
 
-	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
+	// Initialize _variables with the scoped variables
+	init_scoped_variables(_vardecl);
 }
 
 /* ================================================================= */

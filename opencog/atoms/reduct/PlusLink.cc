@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -43,12 +29,6 @@ PlusLink::PlusLink(const Handle& a, const Handle& b)
 	init();
 }
 
-PlusLink::PlusLink(const Link& l)
-    : ArithmeticLink(l)
-{
-	init();
-}
-
 void PlusLink::init(void)
 {
 	if (nullptr == zero) zero = createNumberNode(0);
@@ -63,11 +43,6 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
@@ -78,13 +53,6 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
-	{
-		double sum = get_double(vi) + get_double(vj);
-		return createNumberNode(sum);
-	}
-
 	// If adding zero, just drop the zero.
 	// Unless the other side is a StreamValue, in which case, we
 	// have to behave consistently with adding a non-zero number.
@@ -94,6 +62,21 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return sample_stream(vi, vitype);
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
+	{
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(plus(vi, vj, true));
+
+		return plus(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
+	}
 
 	// Is either one a PlusLink? If so, then flatten.
 	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
@@ -120,7 +103,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, PLUS_LINK));
+		Handle foo(createLink(std::move(seq), PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
 		return ap->delta_reduce(as, silent);
 	}
@@ -147,14 +130,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == minuend->get_type())
 		{
-			double sum = get_double(vj) + get_double(minuend);
-			Handle hsum(createNumberNode(sum));
+			Handle hsum(createNumberNode(plus(vj, minuend)));
 			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
-			double diff = get_double(vj) - get_double(subtrahend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(
+				minus(vj, subtrahend)));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
@@ -201,7 +183,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 				rest.push_back(jlpo[k]);
 
 			// a_plus is now (a+1) or (a+b) as described above.
-			Handle foo(createLink(rest, PLUS_LINK));
+			Handle foo(createLink(std::move(rest), PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			ValuePtr a_plus(ap->delta_reduce(as, silent));
 
@@ -216,10 +198,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		std::swap(vitype, vjtype);
 	}
 
-	// Scalar times vector
+	// vector ops...
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
-		return plus(get_double(vi), FloatValueCast(vj));
+		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
 	// Vector times vector

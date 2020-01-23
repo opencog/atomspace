@@ -38,8 +38,8 @@ using namespace opencog;
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool Implicator::grounding(const HandleMap &var_soln,
-                           const HandleMap &term_soln)
+bool Implicator::grounding(const GroundingMap &var_soln,
+                           const GroundingMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 

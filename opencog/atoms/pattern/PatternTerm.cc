@@ -5,23 +5,10 @@
  * All Rights Reserved
  *
  * Created by Nil Geisweiller Oct 2016
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <opencog/util/oc_assert.h>
 #include "PatternTerm.h"
 
 namespace opencog {
@@ -32,14 +19,26 @@ PatternTerm::PatternTerm()
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
+	  _has_bound_var(false),
+	  _has_any_globby_var(false),
+	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
+	  _has_any_unordered_link(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	: _handle(h), _quote(Handle::UNDEFINED), _parent(parent),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
+	  _has_bound_var(false),
+	  _has_any_globby_var(false),
+	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
+	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
 
@@ -64,56 +63,17 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 	_outgoing.push_back(ptm);
 }
 
-const Handle& PatternTerm::getHandle() const
-{
-	return _handle;
-}
-
-const Handle& PatternTerm::getQuote() const
-{
-	return _quote;
-}
-
-PatternTermPtr PatternTerm::getParent()
-{
-	return _parent;
-}
-
 PatternTermSeq PatternTerm::getOutgoingSet() const
 {
 	PatternTermSeq oset;
-	for (PatternTermWPtr w : _outgoing)
+	for (const PatternTermWPtr& w : _outgoing)
 	{
 		PatternTermPtr s(w.lock());
-		if (s) oset.push_back(s);
+		OC_ASSERT(nullptr != s, "Unexpected corruption of PatternTerm oset!");
+		oset.push_back(s);
 	}
 
 	return oset;
-}
-
-Arity PatternTerm::getArity() const
-{
-	return _outgoing.size();
-}
-
-Quotation& PatternTerm::getQuotation()
-{
-	return _quotation;
-}
-
-const Quotation& PatternTerm::getQuotation() const
-{
-	return _quotation;
-}
-
-bool PatternTerm::isQuoted() const
-{
-	return _quotation.is_quoted();
-}
-
-bool PatternTerm::hasAnyBoundVariable() const
-{
-	return _has_any_bound_var;
 }
 
 PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
@@ -121,9 +81,7 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 	// Checks for a valid position
 	if (pos < getArity()) {
 		PatternTermPtr s(_outgoing[pos].lock());
-		if (not s)
-			throw RuntimeException(TRACE_INFO,
-			                       "expired outgoing set index %d", pos);
+		OC_ASSERT(nullptr != s, "Unexpected missing PatternTerm oset entry!");
 		return s;
 	} else {
 		throw RuntimeException(TRACE_INFO,
@@ -131,15 +89,123 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 	}
 }
 
-void PatternTerm::addBoundVariable()
+/**
+ * isDescendant - return true if `this` is a lineal descendant of `ptm`.
+ * That is, return true if `ptm` appears as a parent somewhere in the
+ * chain of parents of `this`.
+ *
+ * Mnemonic device: child->isDescendant(parent) == true
+ */
+bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
 {
-	if (!_has_any_bound_var)
+	if (PatternTerm::UNDEFINED == _parent) return false;
+	if (*_parent == *ptm) return true;
+	return _parent->isDescendant(ptm);
+}
+
+// ==============================================================
+/**
+ * Equality operator.  Both the content must match, and the path
+ * taken to get to the content must match.
+ */
+bool PatternTerm::operator==(const PatternTerm& other)
+{
+	if (_handle != other._handle) return false;
+	if (_parent != other._parent) return false;
+	if (PatternTerm::UNDEFINED == _parent) return true;
+
+	return _parent->operator==(*other._parent);
+}
+
+// ==============================================================
+
+// Mark recursively, all the way to the root.
+void PatternTerm::addAnyBoundVar()
+{
+	if (not _has_any_bound_var)
 	{
 		_has_any_bound_var = true;
 		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addBoundVariable();
+			_parent->addAnyBoundVar();
 	}
 }
+
+/// Set two flags: one flag (the "any" flag) is set recursively from
+/// a variable, all the way up to the root, indicating that there's
+/// a variable on this path.  The other flag gets set only on the
+/// variable, and it's immediate parent (i.e. the holder of the
+/// variable).
+void PatternTerm::addBoundVariable()
+{
+	// Mark just this term (the variable itself)
+	// and mark the term that holds us.
+	_has_bound_var = true;
+	if (_parent != PatternTerm::UNDEFINED)
+			_parent->_has_bound_var = true;
+
+	// Mark recursively, all the way to the root.
+	addAnyBoundVar();
+}
+
+// ==============================================================
+// Just like above, but for globs.
+
+void PatternTerm::addAnyGlobbyVar()
+{
+	if (not _has_any_globby_var)
+	{
+		_has_any_globby_var = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyGlobbyVar();
+	}
+}
+
+void PatternTerm::addGlobbyVar()
+{
+	_has_globby_var = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_globby_var = true;
+
+	addAnyGlobbyVar();
+}
+
+// ==============================================================
+// Just like above, but for evaluatables.
+
+void PatternTerm::addAnyEvaluatable()
+{
+	if (not _has_any_evaluatable)
+	{
+		_has_any_evaluatable = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyEvaluatable();
+	}
+}
+
+void PatternTerm::addEvaluatable()
+{
+	_has_evaluatable = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_evaluatable = true;
+
+	addAnyEvaluatable();
+}
+
+// ==============================================================
+
+void PatternTerm::addUnorderedLink()
+{
+	if (not _has_any_unordered_link)
+	{
+		_has_any_unordered_link = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addUnorderedLink();
+	}
+}
+
+// ==============================================================
 
 std::string PatternTerm::to_string() const { return to_string(":"); }
 

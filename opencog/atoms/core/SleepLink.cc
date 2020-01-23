@@ -52,19 +52,6 @@ SleepLink::SleepLink(const HandleSeq& oset, Type t)
 			"Expecting a NumberNode or something that returns a NumberNode");
 }
 
-SleepLink::SleepLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, SLEEP_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an SleepLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 /// Return number of seconds left to sleep.

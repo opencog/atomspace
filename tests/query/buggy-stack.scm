@@ -1,7 +1,7 @@
+
+(use-modules (opencog) (opencog exec))
 ;
 ; Test data for a stack-handling bug found by Samir
-; The bug was stupid, and is unlikely to reappear, but
-; this still seems like a good test case to have around.
 
 (define (stv mean conf) (cog-new-stv mean conf))
 
@@ -53,92 +53,35 @@
 
 ; The implication to be run
 (define (impy)
-
-  (BindLink (stv 1 1)
+  (Bind
    (VariableList
-    (TypedVariableLink
-     (VariableNode "$agent")
-     (TypeChoice
-      (TypeNode "ConceptNode")
-      (TypeNode "WordInstanceNode")
-      )
-     )
-    (TypedVariableLink
-     (VariableNode "$framePredicateNode")
-     (TypeNode "PredicateNode")
-     )
-    (TypedVariableLink
-     (VariableNode "$frameAgentPredicateNode")
-     (TypeNode "PredicateNode")
-     )
-    (TypedVariableLink
-     (VariableNode "$frameDepictivePredicateNode")
-     (TypeNode "PredicateNode")
-     )
-    (TypedVariableLink
-     (VariableNode "$frameEntityPredicateNode")
-     (TypeNode "PredicateNode")
-     )
-    (TypedVariableLink
-     (VariableNode "$targetEntity")
-     (TypeNode "WordInstanceNode")
-     )
-    )
-   (AndLink
-    (InheritanceLink
-     (VariableNode "$framePredicateNode")
-     (WordSenseNode "#Manipulation")
-     )
-    (InheritanceLink
-     (VariableNode "$frameAgentPredicateNode")
-     (SemeNode "#Manipulation:Agent")
-     )
-    (InheritanceLink
-     (VariableNode "$frameDepictivePredicateNode")
-     (SemeNode "#Manipulation:Depictive")
-     )
-    (InheritanceLink
-     (VariableNode "$frameEntityPredicateNode")
-     (SemeNode "#Manipulation:Entity")
-     )
-    
-    
-    (FeatureLink
-     (VariableNode "$framePredicateNode")
-     (VariableNode "$frameEntityPredicateNode")
-     )            
-    (FeatureLink
-     (VariableNode "$framePredicateNode")
-     (VariableNode "$frameAgentPredicateNode")
-     )            
-    (FeatureLink
-     (VariableNode "$framePredicateNode")
-     (VariableNode "$frameDepictivePredicateNode")
-     )
-    
-    (EvaluationLink
-     (VariableNode "$frameAgentPredicateNode")
-     (VariableNode "$agent")
-     )
-    (EvaluationLink
-     (VariableNode "$frameDepictivePredicateNode")
-     (ConceptNode "#grab")
-     )     
-    (EvaluationLink
-     (VariableNode "$frameEntityPredicateNode")
-     (VariableNode "$targetEntity")
-     )
-    
-    )
-   
-   (EvaluationLink
-    (PredicateNode "grab")
-    (ListLink
-     (VariableNode "$targetEntity")
-     (VariableNode "$frameDepictivePredicateNode")
-     )
-    )
+    (TypedVariable
+      (Variable "$agent")
+      (TypeChoice (Type "ConceptNode") (Type "WordInstanceNode")))
+    (TypedVariable (Variable "$framePred") (Type "PredicateNode"))
+    (TypedVariable (Variable "$frameAgent") (Type "PredicateNode"))
+    (TypedVariable (Variable "$frameDepictive") (Type "PredicateNode"))
+    (TypedVariable (Variable "$frameEntity") (Type "PredicateNode"))
+    (TypedVariable (Variable "$targetEntity") (Type "WordInstanceNode"))
    )
+   (And
+    (Inheritance (Variable "$framePred") (WordSense "#Manipulation"))
+    (Inheritance (Variable "$frameAgent") (Seme "#Manipulation:Agent"))
+    (Inheritance (Variable "$frameDepictive") (Seme "#Manipulation:Depictive"))
+    (Inheritance (Variable "$frameEntity") (Seme "#Manipulation:Entity"))
+
+    (Feature (Variable "$framePred") (Variable "$frameEntity"))
+    (Feature (Variable "$framePred") (Variable "$frameAgent"))
+    (Feature (Variable "$framePred") (Variable "$frameDepictive"))
+
+    (Evaluation (Variable "$frameAgent") (Variable "$agent"))
+    (Evaluation (Variable "$frameDepictive") (Concept "#grab"))
+    (Evaluation (Variable "$frameEntity") (Variable "$targetEntity"))
+   )
+   (Evaluation
+    (Predicate "grab")
+    (List (Variable "$targetEntity") (Variable "$frameDepictive")))
+  )
 )
 
 ; Running the implication should return only one answer!

@@ -30,6 +30,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/Quotation.h>
 
 namespace opencog
@@ -37,6 +38,23 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+// Struct to build paths between variables and root. A path is a
+// sequence of pairs (Type, Index), where Type is the type of a link
+// and index is the index of the outgoing of that link. If the type
+// unordered however, then index is zero, because in such case the
+// index has no meaning. The collection of paths is stored in a
+// multiset because some paths can be identically looking while in
+// fact different in reality, due to the index of a unordered link
+// being always zero. We do that to be able to use std::operator<
+// rather than provide our own.
+//
+// Note: a notion of path is already implemented in PatternTerm, there
+// might be ways to unify the two.
+typedef std::pair<Type, Arity> TypeArityPair;
+typedef std::vector<TypeArityPair> Path;
+typedef std::multiset<Path> PathMultiset;
+typedef std::map<Handle, PathMultiset> HandlePathsMap;
 
 /// The FreeVariables struct defines a list of free, untyped variables
 /// "unbundled" from the hypergraph in which they normally occur. The
@@ -64,9 +82,13 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
-	// CTor, convenient for  unit tests, so far
+	// CTor, mostly convenient for unit tests
 	FreeVariables() {}
 	FreeVariables(const std::initializer_list<Handle>& variables);
+
+	// Construct index. FreeVariables::varseq must be previously
+	// defined.
+	void init_index();
 
 	/// Return true if the variables in this, and other, are the same
 	/// variables (have exactly the same variable names.)
@@ -87,25 +109,32 @@ struct FreeVariables
 		return are_in_varset(c.begin(), c.end());
 	}
 
-	/// Create an ordered set of the free variables in the given oset.
+	/// Create an ordered set of the free variables in the given body.
 	///
-	/// By "ordered set" it is meant: a list of variables, in traversal
-	/// order (from left to right, as they appear in the tree), with each
-	/// variable being named only once.  The varset is only used to make
-	/// sure that we don't name a variable more than once; that's all.
+	/// By "ordered set" it is meant: a list of variables in a
+	/// cannonical order that is compatible with alpha-equivalence. So
+	/// that if variables are renamed the order will not be altered in
+	/// a way that modifies the semantics of the scope.
 	///
-	/// Variables that are inside a QuoteLink are ignored ... unless they
-	/// are wrapped by UnquoteLink.  That is, QuoteLink behaves like a
-	/// quasi-quote in lisp/scheme.
-	///
-	/// Variables that are bound inside of some deeper link are ignored;
-	/// they are not free, and thus must not be collected up.  That is,
-	/// any bound variables appearing in a ScopeLink (such as GetLink,
-	/// BindLink, SatisfactionLink, etc.) will not be collected.  Any
-	/// *free* variables in these same links *will* be collected (since
-	/// they are free!)
-	void find_variables(const Handle&);
-	void find_variables(const HandleSeq&);
+	/// Quotations and scopes are supported (so quoted or scoped
+	/// variables are not considered).
+	void find_variables(const Handle& body);
+
+	/// Like above but for outgoing sets. The link_ordered flag
+	/// indicates whether the outgoing set is associated with an
+	/// ordered link.
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
+
+	/// Sort the variables in a canonical order determined by their
+	/// positions in the given outgoing set, which is assumed ordered,
+	/// as outgoing sets of scopes are always ordered so far.  In
+	/// ordered link, the ordered is determined by the outgoing set
+	/// order (from left to right).  In unordered links, the ordered is
+	/// determined by some arbitrary, though semantically consistent
+	/// fix order.  The order only depends on variable names as last
+	/// resort, when no semantic property can be used to break the
+	/// symmetry.
+	void canonical_sort(const HandleSeq& outgoings);
 
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables
@@ -166,10 +195,17 @@ typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
-	// CTor, convenient for  unit tests, so far
-	Variables() {}
-	Variables(const std::initializer_list<Handle>& variables)
-		: FreeVariables(variables) {}
+	// CTors. The ordered flag indicates whether we care about the
+	// order of the variables. It is false by default and only enabled
+	// if VariableList is used.
+	Variables(bool ordered=false);
+	Variables(const Handle& vardecl, bool ordered=false);
+	Variables(const HandleSeq& vardecls, bool ordered=false);
+
+	/// Whether the order matters or not. Typically if constructed with
+	/// VariableList then the order matters, if constructed with
+	/// VariableSet then the order does not matter.
+	bool _ordered;
 
 	/// Unbundled variables and type restrictions for them.
 
@@ -186,6 +222,13 @@ struct Variables : public FreeVariables,
 	/// To restrict how many atoms should be matched for each of the
 	/// GlobNodes in the pattern.
 	GlobIntervalMap _glob_intervalmap;
+
+	// See VariableList.cc for comments
+	void get_vartype(const Handle&);
+
+	// Validate the variable decls
+	void validate_vardecl(const Handle&);
+	void validate_vardecl(const HandleSeq&);
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
@@ -254,7 +297,8 @@ struct Variables : public FreeVariables,
 	                  const HandleMap& map,
 	                  bool silent=false) const;
 
-	// Extend this variable set by adding in the given variable set.
+	// Extend this by adding in the given variables. If either this or
+	// the other are ordered, then the result is ordered
 	void extend(const Variables&);
 
 	// Erase the given variable, if exist
@@ -264,15 +308,24 @@ struct Variables : public FreeVariables,
 	/// Return just the Variable itself, if its not typed.
 	Handle get_type_decl(const Handle&, const Handle&) const;
 
-	/// This is the inverse function of VariableList(vardecls).get_variable().
+	/// Inverse of Variables(vardecl).get_variable()
 	///
-	/// That is, convert everything in this object into a single
-	/// VariableList, suitable for direct use in a ScopeLink.
+	/// That is, convert Variables object into avariable declaration,
+	/// that is a VariableList, VariableSet, TypedVariableLink,
+	/// VariableNode or GlobNode, suitable for direct use in a
+	/// ScopeLink.
 	///
-	/// If empty then return the empty VariableList.
+	/// If empty then return the empty VariableList or VariableSet.
 	///
 	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;
+
+	/// Like FreeVariables::find_variables but set _ordered to false,
+	/// on the ground that if such a method is called then no ordered
+	/// was provided by the creator of that scope, and thus order is
+	/// not relevant.
+	void find_variables(const Handle& body);
+	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
@@ -283,6 +336,17 @@ struct Variables : public FreeVariables,
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
+struct VarScraper;
+std::string oc_to_string(const TypeArityPair& tap,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Path& path,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PathMultiset& paths,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandlePathsMap& hpsm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const VarScraper& vsc,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables& var,

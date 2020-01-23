@@ -48,47 +48,41 @@ class VariableList : public Link
 {
 protected:
 	/// Unbundled variables and types for them.
-	Variables _varlist;
-
-	// See VariableList.cc for comments
-	void get_vartype(const Handle&);
-
-	// Validate the variable decls
-	void validate_vardecl(const Handle&);
-	void validate_vardecl(const HandleSeq&);
+	Variables _variables;
 
 	VariableList(Type, const HandleSeq&);
 
-	void build_index(void);
+	void throw_if_not_variable_list(Type t) const;
 public:
 	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
 	VariableList(const Handle& hvardecls);
-	VariableList(const Link&);
+	VariableList(const VariableList&) = delete;
+	VariableList& operator=(const VariableList&) = delete;
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
-	bool is_type(const Handle& h) const { return _varlist.is_type(h); }
+	bool is_type(const Handle& h) const { return _variables.is_type(h); }
 
 	// Return true if we are holding the variable `var`, and `val`
 	// satisfies the type restrictions that apply to `var`.
 	bool is_type(const Handle& var, const Handle& val) const
-		{ return _varlist.is_type(var, val); }
+		{ return _variables.is_type(var, val); }
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
 	// restrictions (if any).
-	bool is_type(const HandleSeq& hseq) const { return _varlist.is_type(hseq); }
+	bool is_type(const HandleSeq& hseq) const { return _variables.is_type(hseq); }
 
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated arguments `args` substituted
 	// for the variables. The `args` must pass the typecheck, else an
 	// exception is thrown.
 	Handle substitute(const Handle& tree, const HandleSeq& args) const
-		{ return _varlist.substitute(tree, args); }
+		{ return _variables.substitute(tree, args); }
 
 	static Handle factory(const Handle&);
 };

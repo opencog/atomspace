@@ -55,7 +55,8 @@ class LambdaLink : public PrenexLink
 public:
 	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
-	LambdaLink(const Link &l);
+	LambdaLink(const LambdaLink &) = delete;
+	LambdaLink& operator=(const LambdaLink &) = delete;
 
 	static Handle factory(const Handle&);
 };

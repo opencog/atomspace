@@ -2,22 +2,7 @@
  * opencog/atoms/execution/EvaluationLink.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015 Linas Vepstas
- * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <thread>
@@ -87,15 +72,6 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have args in a ListLink!");
 	}
-}
-
-EvaluationLink::EvaluationLink(const Link& l)
-    : FreeLink(l)
-{
-	Type tscope = l.get_type();
-	if (EVALUATION_LINK != tscope)
-		throw RuntimeException(TRACE_INFO,
-		    "Expecting an EvaluationLink");
 }
 
 /// We get exceptions in two differet ways: (a) due to user error,
@@ -548,7 +524,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	    DEFINED_PREDICATE_NODE == t)
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-		                evelnk, scratch, silent));
+		                 evelnk, scratch, silent));
 		if (0.5 < tv->get_mean()) return true;
 		return false;
 	}
@@ -600,22 +576,25 @@ static TruthValuePtr eval_formula(AtomSpace* as,
 		{
 			flh = fvars.substitute_nocheck(flh, cargs);
 		}
-                
-                // Expecting a FunctionLink without variables.
-                ValuePtr v(flh->execute(as, silent));
-                Type vtype = v->get_type();
-                if (vtype == NUMBER_NODE) {
-                        nums.push_back(NumberNodeCast(v)->get_value());
-                        continue;
-                }
-                if (nameserver().isA(vtype, FLOAT_VALUE)) {
-                        FloatValuePtr fv(FloatValueCast(v));
-                        nums.push_back(fv->value()[0]);
-                        continue;
-                }
-                
-                // If it is neither NumberNode nor a FloatValue...
-                throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flh->execute(as, silent));
+		Type vtype = v->get_type();
+		if (vtype == NUMBER_NODE)
+		{
+			nums.push_back(NumberNodeCast(v)->get_value());
+			continue;
+		}
+
+		if (nameserver().isA(vtype, FLOAT_VALUE))
+		{
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value()[0]);
+			continue;
+		}
+
+		// If it is neither NumberNode nor a FloatValue...
+		throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 	}
 
 	// XXX FIXME; if we are given more than two floats, then
@@ -851,7 +830,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
-		                                sna.at(0), args, silent));
+		                                    sna.at(0), args, silent));
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
@@ -923,18 +902,22 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				throw SyntaxException(TRACE_INFO, "Expecting an executable Link");
 
 			ValuePtr v(h->execute(scratch, silent));
-                        Type vtype = v->get_type();
-                        if (NUMBER_NODE == vtype) {
-                                nums.push_back(NumberNodeCast(v)->get_value());
-                                continue;
-                        }
-                        if (nameserver().isA(vtype, FLOAT_VALUE)) {
-                                FloatValuePtr fv(FloatValueCast(v));
-                                nums.push_back(fv->value().at(0));
-                                continue;
-                        }
-			
-                        throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
+			Type vtype = v->get_type();
+
+			if (NUMBER_NODE == vtype)
+			{
+				nums.push_back(NumberNodeCast(v)->get_value());
+				continue;
+			}
+
+			if (nameserver().isA(vtype, FLOAT_VALUE))
+			{
+				FloatValuePtr fv(FloatValueCast(v));
+				nums.push_back(fv->value().at(0));
+				continue;
+			}
+
+			throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 		}
 		return createSimpleTruthValue(nums);
 	}
@@ -944,7 +927,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// then ... compute the truth value, on the fly!
 		Handle ofatom = evelnk->getOutgoingAtom(0);
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(as,
-		                    ofatom, scratch, silent));
+		                  ofatom, scratch, silent));
 
 		// Cache the computed truth value...
 		// XXX FIXME: is this a good idea, or not?

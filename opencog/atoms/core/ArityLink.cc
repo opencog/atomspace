@@ -38,19 +38,6 @@ ArityLink::ArityLink(const HandleSeq& oset, Type t)
 	}
 }
 
-ArityLink::ArityLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, ARITY_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ArityLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 /// Return the Arity, as a NumberNode.  Contrast this with

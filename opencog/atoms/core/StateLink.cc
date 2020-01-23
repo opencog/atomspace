@@ -43,13 +43,7 @@ StateLink::StateLink(const HandleSeq& oset, Type t)
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
-{
-	init();
-}
-
-StateLink::StateLink(const Link &l)
-	: UniqueLink(l)
+	: UniqueLink({name, defn}, STATE_LINK)
 {
 	init();
 }
@@ -90,7 +84,7 @@ void StateLink::install()
 	bool swapped = false;
 	const Handle& alias = get_alias();
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
-	for (const LinkPtr& defl : defs)
+	for (const Handle& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) != alias) continue;
 		if (defl.get() == this) continue;
@@ -103,14 +97,14 @@ void StateLink::install()
 		setAtomSpace(as);
 
 		// Atomic update of the incoming set.
-		const LinkPtr& new_state = LinkCast(get_handle());
-		alias->swap_atom(old_state, new_state);
+		const Handle& new_state(get_handle());
+		alias->swap_atom(defl, new_state);
 
 		// Install the other atom as well.
 		_outgoing[1]->insert_atom(new_state);
 
 		// Remove the old StateLink too. It must be no more.
-		as->remove_atom(defl->get_handle(), true);
+		as->remove_atom(defl, true);
 		swapped = true;
 	}
 

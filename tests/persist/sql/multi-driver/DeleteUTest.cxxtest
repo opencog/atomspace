@@ -169,7 +169,8 @@ void DeleteUTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
     if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-    SQLAtomStorage* astore = new SQLAtomStorage(uri);
+    SQLAtomStorage* astore = new SQLAtomStorage();
+    astore->open(uri);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -508,7 +509,7 @@ void DeleteUTest::do_test_remove(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    _pm->do_store();
+    _as->store_atomspace();
 
     printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx);
     TSM_ASSERT("Initial unexpected atomspace size",
@@ -618,7 +619,7 @@ void DeleteUTest::do_test_recurse(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    _pm->do_store();
+    _as->store_atomspace();
 
     /* Perform recursive extract of some nodes.
      * This should result in thier being removed from the atomspace,

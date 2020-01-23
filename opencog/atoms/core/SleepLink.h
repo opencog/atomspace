@@ -39,7 +39,8 @@ class SleepLink : public FunctionLink
 {
 public:
 	SleepLink(const HandleSeq&, Type=SLEEP_LINK);
-	SleepLink(const Link &l);
+	SleepLink(const SleepLink &) = delete;
+	SleepLink& operator=(const SleepLink &) = delete;
 
 	// Return number of seconds left to sleep.
 	virtual ValuePtr execute(AtomSpace*, bool);

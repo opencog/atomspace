@@ -72,8 +72,8 @@ class Satisfier :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
@@ -117,8 +117,8 @@ class SatisfyingSet :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 };
 
 }; // namespace opencog

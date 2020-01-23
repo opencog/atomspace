@@ -17,16 +17,18 @@
 ; Define a python func returning a TV
 (python-eval "
 from opencog.atomspace import AtomSpace, TruthValue, types
-from opencog.type_constructors import atomspace
+from opencog.type_constructors import get_type_ctor_atomspace
+
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b):
-    global atomspace
+    atomspace = get_type_ctor_atomspace()
     TV = TruthValue(0.2, 0.69)
     atomspace.add_node(types.ConceptNode, 'Apple', TV)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return TruthValue(0.42, 0.24)
 ")
+
 
 ; Call the python func defined above.
 (cog-evaluate!

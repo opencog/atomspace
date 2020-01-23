@@ -1,0 +1,120 @@
+/*
+ * tests/atoms/base/LinkUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <opencog/util/platform.h>
+
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+
+using namespace opencog;
+
+class LinkUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    LinkUTest() {
+    }
+
+    void setUp() {}
+
+    void tearDown() {}
+
+    void testEquals()
+    {
+        Handle n1(createNode(CONCEPT_NODE, "TEST"));
+        Handle n2(createNode(CONCEPT_NODE, "TEST"));
+        HandleSeq out1;
+        Handle l1(createLink(out1, LIST_LINK));
+        Handle l2(createLink(out1, LIST_LINK));
+        TS_ASSERT(l1->get_arity() == 0);
+        TS_ASSERT(l2->get_arity() == 0);
+
+        HandleSeq out2;
+        out2.push_back(n1);
+        Handle l3(createLink(out2, LIST_LINK));
+        Handle l4(createLink(out2, LIST_LINK));
+        Handle l5(createLink(out2, INHERITANCE_LINK));
+        Handle l6(createLink(out2, INHERITANCE_LINK));
+        TS_ASSERT(l3->get_arity() == 1);
+        TS_ASSERT(l4->get_arity() == 1);
+        TS_ASSERT(l5->get_arity() == 1);
+        TS_ASSERT(l6->get_arity() == 1);
+
+        HandleSeq out3;
+        out3.push_back(n1);
+        out3.push_back(n2);
+        Handle l7(createLink(out3, INHERITANCE_LINK));
+        Handle l8(createLink(out3, INHERITANCE_LINK));
+        TS_ASSERT(l7->get_arity() == 2);
+        TS_ASSERT(l8->get_arity() == 2);
+
+        TS_ASSERT(*l1 == *l2);
+        TS_ASSERT(*l3 == *l4);
+        TS_ASSERT(*l5 == *l6);
+        TS_ASSERT(*l7 == *l8);
+
+        TS_ASSERT(*l1 != *l3);
+        TS_ASSERT(*l1 != *l4);
+        TS_ASSERT(*l1 != *l5);
+        TS_ASSERT(*l1 != *l6);
+        TS_ASSERT(*l1 != *l7);
+        TS_ASSERT(*l1 != *l8);
+
+        TS_ASSERT(*l3 != *l1);
+        TS_ASSERT(*l3 != *l2);
+        TS_ASSERT(*l3 != *l5);
+        TS_ASSERT(*l3 != *l6);
+        TS_ASSERT(*l3 != *l7);
+        TS_ASSERT(*l3 != *l8);
+
+        TS_ASSERT(*l5 != *l1);
+        TS_ASSERT(*l5 != *l2);
+        TS_ASSERT(*l5 != *l3);
+        TS_ASSERT(*l5 != *l4);
+        TS_ASSERT(*l5 != *l7);
+        TS_ASSERT(*l5 != *l8);
+
+        TS_ASSERT(*l7 != *l1);
+        TS_ASSERT(*l7 != *l2);
+        TS_ASSERT(*l7 != *l3);
+        TS_ASSERT(*l7 != *l4);
+        TS_ASSERT(*l7 != *l5);
+        TS_ASSERT(*l7 != *l6);
+    }
+
+    void test_to_short_string()
+    {
+        // Make sure Link::to_short_string() does not end with a
+        // newline as it is required by atomspace-dht
+        Handle A(createNode(CONCEPT_NODE, "A"));
+        Handle B(createNode(CONCEPT_NODE, "B"));
+        Handle AB(createLink(LIST_LINK, A, B));
+
+        std::string result = AB->to_short_string();
+        std::string expect = "(ListLink (ConceptNode \"A\") (ConceptNode \"B\"))";
+
+        TS_ASSERT_EQUALS(result, expect);
+    }
+};

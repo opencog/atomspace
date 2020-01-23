@@ -50,7 +50,8 @@ protected:
 
 public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);
-	FoldLink(const Link& l);
+	FoldLink(const FoldLink&) = delete;
+	FoldLink& operator=(const FoldLink&) = delete;
 
 	// Should probably be renamed to execute() ...
    virtual ValuePtr delta_reduce(AtomSpace*, bool) const;

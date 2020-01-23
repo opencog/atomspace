@@ -30,8 +30,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
-#include <boost/range/algorithm.hpp>
-
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -47,7 +45,30 @@ void Link::init(const HandleSeq& outgoingVector)
             _type, nameserver().getTypeName(_type).c_str());
     }
 
+    // Yes, people actually send us bad data.
+    for (const Handle& h: outgoingVector)
+        if (nullptr == h)
+            throw InvalidParamException(TRACE_INFO,
+                "Link ctor: invalid outgoing set!");
+
     _outgoing = outgoingVector;
+}
+
+void Link::init(const HandleSeq&& outgoingVector)
+{
+    if (not nameserver().isA(_type, LINK)) {
+        throw InvalidParamException(TRACE_INFO,
+            "Link ctor: Atom type is not a Link: '%d' %s.",
+            _type, nameserver().getTypeName(_type).c_str());
+    }
+
+    // Yes, people actually send us bad data.
+    for (const Handle& h: outgoingVector)
+        if (nullptr == h)
+            throw InvalidParamException(TRACE_INFO,
+                "Link ctor: invalid outgoing set!");
+
+    _outgoing = std::move(outgoingVector);
 }
 
 Link::~Link()
@@ -55,6 +76,9 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
+/// Return a universally-unique string for each distinct link.
+/// It needs to be fast, to be human-readable, and without any
+/// trailing newlines.
 std::string Link::to_short_string(const std::string& indent) const
 {
     std::stringstream answer;
@@ -62,16 +86,12 @@ std::string Link::to_short_string(const std::string& indent) const
 
     answer << indent << "(" << nameserver().getTypeName(_type);
 
-    if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->to_string();
-    answer << "\n";
-
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
-        answer << h->to_short_string(more_indent);
+        answer << " " << h->to_short_string();
 
-    answer << indent << ")\n";
+    answer << indent << ")";
 
     return answer.str();
 }
@@ -91,9 +111,9 @@ std::string Link::to_string(const std::string& indent) const
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer += h->to_string(more_indent);
+        answer += h->to_string(more_indent) + "\n";
 
-    answer += indent + ") ; " + id_to_string() + "\n";
+    answer += indent + ") ; " + id_to_string();
 
     return answer;
 }
@@ -215,16 +235,14 @@ void Link::check_outgoing_type(int index, const Type& type)
 ///
 void Link::install()
 {
-	LinkPtr llc(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->insert_atom(llc);
+	Handle llc(get_handle());
+	for (Handle& h : _outgoing)
+		h->insert_atom(llc);
 }
 
 void Link::remove()
 {
-	LinkPtr lll(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->remove_atom(lll);
+	Handle lll(get_handle());
+	for (Handle& h : _outgoing)
+		h->remove_atom(lll);
 }

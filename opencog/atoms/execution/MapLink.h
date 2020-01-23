@@ -57,7 +57,7 @@ protected:
 
 	MapLink(Type, const Handle&);
 
-	bool extract(const Handle&, const Handle&, HandleMap&,
+	bool extract(const Handle&, const Handle&, GroundingMap&,
 	             Quotation quotation=Quotation()) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
@@ -65,7 +65,8 @@ protected:
 public:
 	MapLink(const HandleSeq&, Type=MAP_LINK);
 	MapLink(const Handle& pattern, const Handle& term);
-	MapLink(const Link &l);
+	MapLink(const MapLink&) = delete;
+	MapLink operator=(const MapLink&) = delete;
 
 	// Align the pattern and the term side-by-side, and extract the
 	// values that match up with the variables.  If the term is not of

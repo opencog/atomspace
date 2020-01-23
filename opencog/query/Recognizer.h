@@ -24,7 +24,6 @@
 #ifndef _OPENCOG_RECOGNIZER_H
 #define _OPENCOG_RECOGNIZER_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
@@ -57,7 +56,7 @@ class Recognizer :
 		Handle _root;
 		Handle _starter_term;
 		size_t _cnt;
-		bool do_search(PatternMatchEngine*, const Handle&);
+		bool do_search(PatternMatchCallback&, const Handle&);
 		bool loose_match(const Handle&, const Handle&);
 
 	public:
@@ -76,12 +75,12 @@ class Recognizer :
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
-		virtual bool initiate_search(PatternMatchEngine*);
+		virtual bool initiate_search(PatternMatchCallback&);
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 };
 
 } // namespace opencog

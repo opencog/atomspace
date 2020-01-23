@@ -9,6 +9,10 @@ ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
 
+ADD_SUBDIRECTORY (reduct)
+
+ADD_SUBDIRECTORY (pattern)
+
 ADD_SUBDIRECTORY (execution)
 
 IF(HAVE_GUILE)
@@ -16,22 +20,10 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest smob atomspace)
-	ADD_CXXTEST(MapLinkUTest)
-	TARGET_LINK_LIBRARIES(MapLinkUTest execution smob atomspace)
 	ADD_CXXTEST(ParallelUTest)
 	TARGET_LINK_LIBRARIES(ParallelUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(RandomUTest)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(ReductUTest)
-	TARGET_LINK_LIBRARIES(ReductUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(RewriteLinkUTest)
-	TARGET_LINK_LIBRARIES(RewriteLinkUTest smob atomspace)
-	ADD_CXXTEST(ScopeLinkUTest)
-	TARGET_LINK_LIBRARIES(ScopeLinkUTest smob atomspace)
-	ADD_CXXTEST(PutLinkUTest)
-	TARGET_LINK_LIBRARIES(PutLinkUTest execution smob atomspace)
-	ADD_CXXTEST(QuotationUTest)
-	TARGET_LINK_LIBRARIES(QuotationUTest execution smob atomspace)
 	ADD_CXXTEST(FormulaUTest)
 	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
@@ -56,9 +48,6 @@ TARGET_LINK_LIBRARIES(GroundedSchemaLocalUTest execution atomspace)
 
 ADD_CXXTEST(StateLinkUTest)
 TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
-
-ADD_CXXTEST(VariablesUTest)
-TARGET_LINK_LIBRARIES(VariablesUTest atomspace)
 
 ADD_CXXTEST(ExistsLinkUTest)
 TARGET_LINK_LIBRARIES(ExistsLinkUTest execution atomspace)

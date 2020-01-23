@@ -33,12 +33,14 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
 
+class BasicSaveUTest;
+
 namespace opencog
 {
 const bool EMIT_DIAGNOSTICS = true;
 const bool DONT_EMIT_DIAGNOSTICS = false;
-const bool CHECK_TRUTH_VALUES = true;
-const bool DONT_CHECK_TRUTH_VALUES = false;
+const bool CHECK_VALUES = true;
+const bool DONT_CHECK_VALUES = false;
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -55,10 +57,12 @@ class AtomSpace
 {
     friend class Atom;               // Needs to call get_atomtable()
     friend class BackingStore;
+    friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
+    friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
 
     /**
      * Drop copy constructor and equals operator to
@@ -113,7 +117,7 @@ public:
      */
     static bool compare_atomspaces(const AtomSpace& first,
                                    const AtomSpace& second,
-                                   bool check_truth_values=CHECK_TRUTH_VALUES,
+                                   bool check_values=CHECK_VALUES,
                                    bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
@@ -135,12 +139,11 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then new truth value is ignored, and the existing atom is
-     * returned.
+     * then that is returned.
      */
-    Handle add_atom(const Handle&, bool async=false);
-    Handle add_atom(AtomPtr a, bool async=false)
-        { return add_atom(a->get_handle(), async); }
+    Handle add_atom(const Handle&);
+    Handle add_atom(const AtomPtr& a)
+        { return add_atom(a->get_handle()); }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -149,7 +152,7 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name="", bool async=false);
+    Handle add_node(Type t, const std::string& name="");
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -159,7 +162,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing, bool async=false);
+    Handle add_link(Type t, const HandleSeq& outgoing);
 
     inline Handle add_link(Type t)
     {
@@ -262,6 +265,24 @@ public:
     }
 
     /**
+     * Use the backing store to load entire AtomSpace.
+     */
+    void load_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->loadAtomSpace(_atom_table);
+    }
+
+    /**
+     * Use the backing store to store entire AtomSpace.
+     */
+    void store_atomspace(void) {
+        if (nullptr == _backing_store)
+            throw RuntimeException(TRACE_INFO, "No backing store");
+        _backing_store->storeAtomSpace(_atom_table);
+    }
+
+    /**
      * Use the backing store to load the entire incoming set of the
      * atom.
      * If the flag is true, then the load is done recursively.
@@ -280,18 +301,6 @@ public:
     Handle fetch_incoming_by_type(Handle, Type);
 
     /**
-     * Use the backing store to load all atoms that have a value
-     * set for the indicated key.  This is typically used to load
-     * up a slice of a dataset: viz, to avoid loading any other atoms.
-     *
-     * If the boolean flag is set to true, then all values on the
-     * atom are fetched; otherwise, only that one value is fetched.
-     * This can save a lot of RAM, if the atoms have a lot of misc.
-     * values attached to them.
-     */
-    void fetch_valuations(Handle, bool=false);
-
-    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
@@ -308,8 +317,8 @@ public:
      * the AtomSpace is not connected to a backend, there is no
      * difference between remove and extract.
      *
-     * The atom itself remains valid as long as there are Handles or
-     * AtomPtr's that reference it; the RAM associated with the atom is
+     * The atom itself remains valid as long as there are Handles
+     * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -328,8 +337,8 @@ public:
 
     /**
      * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles or AtomPtr's
-     * that reference it; it is deleted only when the last reference
+     * The atom remains valid as long as there are Handles that
+     * reference it; it is deleted only when the last reference
      * goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -515,7 +524,7 @@ public:
     {
         return _atom_table.atomAddedSignal();
     }
-    AtomPtrSignal& atomRemovedSignal()
+    AtomSignal& atomRemovedSignal()
     {
         return _atom_table.atomRemovedSignal();
     }

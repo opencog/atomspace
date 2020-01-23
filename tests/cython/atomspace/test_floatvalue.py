@@ -44,7 +44,7 @@ class FloatValueTest(unittest.TestCase):
 
     def test_str(self):
         value = FloatValue(1.234)
-        self.assertEqual('(FloatValue 1.234)\n', str(value))
+        self.assertEqual('(FloatValue 1.234)', str(value))
 
     def test_is_a(self):
         value = FloatValue(1.234)

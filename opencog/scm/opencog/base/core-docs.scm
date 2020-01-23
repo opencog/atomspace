@@ -809,13 +809,16 @@
 
 (set-procedure-property! cog-map-type 'documentation
 "
- cog-map-type PROC TYPE
-    Call proceedure PROC for each atom in the atomspace that is of
+ cog-map-type PROC TYPE [ATOMSPACE]
+    Call proceedure PROC for each atom in the ATOMSPACE that is of
     type TYPE. If proc returns any value other than #f, then the
     iteration is terminated.  Note that this iterates only over the
     given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
     will never call proc, because no atoms in the atomspace can have
     the type Atom: they are all subtypes of Atom.
+
+    The ATOMSPACE argument is optional; if absent, the default
+    atomspace is used.
 
     Example:
        ; define a function that prints the atoms:
@@ -827,10 +830,11 @@
 
 (set-procedure-property! cog-count-atoms 'documentation
 "
-  cog-count-atoms -- Count of the number of atoms of given type
+  cog-count-atoms ATOM-TYPE [ATOMSPACE] -- Count of number of atoms
 
-  cog-count-atoms ATOM-TYPE
   Return a count of the number of atoms of the given type `ATOM-TYPE`.
+  If the optional argument `ATOMSPACE` is given, then a count is
+  returned for that atomspace; otherwise, the default atomspace is used.
 
   Example usage:
      (display (cog-count-atoms 'ConceptNode))

@@ -44,13 +44,6 @@ FunctionLink::FunctionLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-FunctionLink::FunctionLink(const Link& l)
-    : FreeLink(l)
-{
-	check_type(l.get_type());
-	init();
-}
-
 DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);
 
 /* ===================== END OF FILE ===================== */

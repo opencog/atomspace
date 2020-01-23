@@ -21,6 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// #include <algorithm>
+// #include <execution>
+// #include <opencog/util/oc_omp.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -35,7 +39,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define DO_LOG(STUFF) STUFF
 #else
@@ -55,17 +59,14 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 
-	_curr_clause = 0;
+	_curr_clause = Handle::UNDEFINED;
 	_choices.clear();
- 	_search_fail = false;
 	_as = as;
 }
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
-	_search_fail = false;
-
 	_variables = &vars;
 	_pattern = &pat;
 	_dynamic = &pat.evaluatable_terms;
@@ -224,23 +225,21 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
                                        const HandleSet& evl,
                                        Handle& starter_term,
-                                       size_t& bestclause)
+                                       Handle& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
-	bestclause = 0;
+	bestclause = Handle::UNDEFINED;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
 	_choices.clear();
 
-	size_t nc = clauses.size();
-	for (size_t i=0; i < nc; i++)
+	for (const Handle& h: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (0 < evl.count(clauses[i])) continue;
+		if (0 < evl.count(h)) continue;
 
-		_curr_clause = i;
-		Handle h(clauses[i]);
+		_curr_clause = h;
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
 		Handle term(Handle::UNDEFINED);
@@ -251,7 +250,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		{
 			thinnest = width;
 			deepest = depth;
-			bestclause = i;
+			bestclause = h;
 			best_start = start;
 			starter_term = term;
 		}
@@ -262,10 +261,11 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 
 /* ======================================================== */
 /**
- * Given a set of clauses, find a neighborhood to search, and perform
- * the search. A `neighborhood` is defined as all of the atoms that
- * can be reached from a given (non-variable) atom, by following either
- * it's incoming or its outgoing set.
+ * Given a set of clauses, create a list of starting points for a
+ * search. This set of starting points is called a `neghborhood`;
+ * it is defined as all of the atoms that can be reached from a
+ * given (non-variable) atom, by following either it's incoming or
+ * its outgoing set.
  *
  * A neighborhood search is guaranteed to find all possible groundings
  * for the set of clauses. The reason for this is that, given a
@@ -274,20 +274,26 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * grounding must be contained in that neighborhood.  It is sufficient
  * to walk that graph until a suitable grounding is encountered.
  *
- * The return value is true if a grounding was found, else it returns
- * false. That is, this return value works just like all the other
- * satisfiability callbacks.  The flag '_search_fail' is set to true
- * if the search was not performed, due to a failure to find a sutiable
- * starting point.
+ * The starting points or `neighborhood` is chosen so that the initial
+ * search space is as small as possible (thus, hopefully, resulting in
+ * a fast search.)
+ *
+ * Due to the ChoiceLink, there may be multiple such neighborhoods.
+ * Each neighborhood is placed into a `struct Choice`, and the search
+ * loop will look at the choices.
+ *
+ * This method returns true if suitable starting points were found,
+ * else it returns false. There are rare cases where this will fail
+ * to find starting points: if, for example, all clauses are evaluatable,
+ * or if all clauses consist only of VariableNodes or GlobNodes, so
+ * that there's nowhere to start the search.
  */
-bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_neighbor_search(void)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
-	if (_pattern->mandatory.empty() and _pattern->optionals.empty()) {
-		_search_fail = true;
+	if (_pattern->mandatory.empty() and _pattern->optionals.empty())
 		return false;
-	}
 
 	// Sometimes, the number of mandatory clauses can be zero...
 	// or they might all be evaluatable.  In this case, its OK to
@@ -319,7 +325,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Note also: the user is allowed to specify patterns that have
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
-	size_t bestclause;
+	Handle bestclause;
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
@@ -329,12 +335,9 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Somewhat unusual, but it can happen.  For this, we need
 	// some other, alternative search strategy.
 	if (nullptr == best_start and 0 == _choices.size())
-	{
-		_search_fail = true;
 		return false;
-	}
 
-	// If only a single choice, fake it for the loop below.
+	// If only a single choice, fake it for the choice_loop.
 	if (0 == _choices.size())
 	{
 		Choice ch;
@@ -347,14 +350,20 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	{
 		// TODO -- weed out duplicates!
 	}
+	return true;
+}
 
+/* ======================================================== */
+
+bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
+                                   const std::string dbg_banner)
+{
 	for (const Choice& ch : _choices)
 	{
-		bestclause = ch.clause;
-		best_start = ch.best_start;
+		_root = ch.clause;
 		_starter_term = ch.start_term;
+		Handle best_start = ch.best_start;
 
-		_root = clauses[bestclause];
 		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
 		DO_LOG({LAZY_LOG_FINE << "Start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
@@ -362,21 +371,16 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
 
 		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by attentional
-		// focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start);
-		size_t sz = iset.size();
-		for (size_t i = 0; i < sz; i++)
-		{
-			Handle h(iset[i]);
-			DO_LOG({LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
-			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
-			              << h->to_string();})
-			bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		// get_incoming_set(), so that, e.g. it gets sorted by
+		// attentional focus in the AttentionalFocusCB class...
+		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
+		_search_set.clear();
+		for (const auto& lptr: iset)
+			_search_set.emplace_back(HandleCast(lptr));
 
-			// Terminate search if satisfied.
-			if (found) return true;
-		}
+		bool found = search_loop(pmc, dbg_banner);
+		// Terminate search if satisfied.
+		if (found) return true;
 	}
 
 	// If we are here, we have searched the entire neighborhood, and
@@ -417,55 +421,55 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  *    but this has no effect on the thoroughness of the search.  The search
  *    will proceed by exploring the entire incoming-set for this node.
  *
- *    This is ideal, when the node_match() callback accepts a match only
+ *    This is ideal, when the `node_match()` callback accepts a match only
  *    when the pattern and suggested nodes are identical (i.e. are
- *    exactly the same atom).  If the node_match() callback is willing to
- *    accept a broader range of node matches, then other possible
+ *    exactly the same atom).  If the `node_match()` callback is willing
+ *    to accept a broader range of node matches, then other possible
  *    solutions might be missed. Just how to fix this depends sharpely
- *    on what node_match() is willing to accept as a match.
+ *    on what `node_match()` is willing to accept as a match.
  *
  *    Anyway, this seems like a very reasonable limitation: if you
- *    really want a lenient node_match(), then use variables instead.
- *    Don't overload node-match with something weird, and you should be
- *    OK.  Otherwise, you'll have to implement your own initiate_search()
- *    callback.
+ *    really want a lenient `node_match()`, then use variables instead.
+ *    Don't overload `node_match` with something weird, and you should
+ *    be OK.  Otherwise, you'll have to implement your own
+ *    `initiate_search()` callback.
  *
  * 2) If the clauses consist entirely of variables, i.e. if there is not
  *    even one single non-variable node in the pattern, then a search is
  *    driven by looking for all links that are of the same type as one
  *    of the links in one of the clauses.
  *
- *    If the link_match() callback is willing to accept a broader range
+ *    If the `link_match()` callback is willing to accept a broader range
  *    of types, then this search method may fail to find some possible
  *    patterns.
  *
- *    Lets start by noting that this situation is very rare: most
- *    patterns will not consist entirely if Links and VariableNodes.
+ *    Let's start by noting that this situation is very rare: most
+ *    patterns will not consist entirely of `Links` and `VariableNodes`.
  *    Almost surely, most reasonable people will have at least one
  *    non-variable node in the pattern. So the disucssion below almost
  *    surely does not apply.
  *
  *    But if you really want this, there are several possible remedies.
- *    One is to modify the link_type_search() callback to try each
+ *    One is to modify the `link_type_search()` callback to try each
  *    possible link type that is considered to be equivalent by
- *    link_match(). Another alternative is to just leave the
- *    link_match() callback alone, and use variables for links, instead.
+ *    `link_match()`. Another alternative is to just leave the
+ *    `link_match()` callback alone, and use variables for links, instead.
  *    This is probably the best strategy, because then the fairly
  *    standard reasoning can be used when thinking about the problem.
- *    Of course, you can always write your own initiate_search() callback.
+ *    Of course, you can always write your own `initiate_search()` callback.
  *
  * If the constraint 1) can be met, (which is always the case for
  * "standard, canonical" searches, then the pattern match should be
  * quite rapid.  Incoming sets tend to be small; in addition, the
- * implemnentation here picks the smallest, "tinnest" incoming set to
+ * implemnentation here picks the smallest, "thinnest" incoming set to
  * explore.
  *
- * The default implementation of node_match() and link_match() in this
+ * The default implementation of `node_match()` and `link_match()` in this
  * class does satisfy both 1) and 2), so this algo will work correctly,
  * if these two methods are not overloaded with more callbacks that are
  * lenient about matching.
  *
- * If you overload node_match(), and do so in a way that breaks
+ * If you overload `node_match()`, and do so in a way that breaks
  * assumption 1), then you will scratch your head, thinking
  * "why did my search fail to find this obvious solution?" The answer
  * will be for you to create a new search algo, in a new class, that
@@ -473,15 +477,13 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 {
-	jit_analyze(pme);
+	jit_analyze();
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
-	_search_fail = false;
-	bool found = neighbor_search(pme);
-	if (found) return true;
-	if (not _search_fail) return false;
+	if (setup_neighbor_search())
+		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses hold no variables, and
@@ -489,10 +491,12 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// we want to quickly rule out this case before moving to more
 	// complex searches, below.
 	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
-	_search_fail = false;
-	found = no_search(pme);
-	if (found) return true;
-	if (not _search_fail) return false;
+	if (setup_no_search())
+	{
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+		return pme.explore_constant_evaluatables(_pattern->mandatory);
+	}
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -500,10 +504,8 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
-	_search_fail = false;
-	found = link_type_search(pme);
-	if (found) return true;
-	if (not _search_fail) return false;
+	if (setup_link_type_search())
+		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
@@ -512,9 +514,10 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
-	_search_fail = false;
-	found = variable_search(pme);
-	return found;
+	if (setup_variable_search())
+		return search_loop(pmc, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
+
+	return false;
 }
 
 /* ======================================================== */
@@ -554,12 +557,17 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 
 /* ======================================================== */
 /**
- * Initiate a search by looping over all Links of the same type as one
- * of the links in the set of clauses.  This attempts to pick the link
- * type which has the smallest number of atoms of that type in the
+ * Set up a list of starting points to search by making a list of all
+ * Links of the same type as one of the links in the set of clauses.
+ * This attempts to minimize the search space by picking the link type
+ * which has the smallest number of atoms of that type in the
  * AtomSpace.
+ *
+ * The list of starting points is placed into `_search_set` and this
+ * method returns true. If it cannot find any starting points, this
+ * returns false.
  */
-bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_link_type_search()
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -587,50 +595,38 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	if (nullptr == _root)
-	{
-		_search_fail = true;
 		return false;
-	}
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	              << _root->to_string();})
+	                      << _root->to_string();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
-	              << _starter_term->to_string();})
+	                      << _starter_term->to_string();})
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->get_type();
 
-	HandleSeq handle_set;
-	_as->get_handles_by_type(handle_set, ptype);
-
-#ifdef DEBUG
-	size_t i = 0, hsz = handle_set.size();
-#endif
-	for (const Handle& h : handle_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
-		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
-	return false;
+	_as->get_handles_by_type(_search_set, ptype);
+	return true;
 }
 
 /* ======================================================== */
 /**
- * Initiate a search by looping over all atoms of the allowed
- * variable types (as set with the set_type_restrictions() method).
- * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictions are set up appropriately.
+ * Set up a list of search starting points consisting of all atoms of
+ * the allowed variable types (as set with the `set_type_restrictions()`
+ * method).  This assumes that the varset contains the variables to be
+ * searched over, and that the type restrictions are set up appropriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
  * variables, then you probably don't want to use this method, either;
  * you should create something more clever.
+ *
+ * The list of starting points is placed into `_search_set` and this
+ * method returns true. If it cannot find any starting points, this
+ * returns false.
  */
-bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_variable_search(void)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -670,7 +666,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
-		              << typeset.size();})
+		                      << typeset.size();})
 
 		// Calculate the total number of atoms of typeset
 		size_t num = 0;
@@ -678,7 +674,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
 		DO_LOG({LAZY_LOG_FINE << var->to_string() << "has "
-		              << num << " atoms in the atomspace";})
+		                      << num << " atoms in the atomspace";})
 
 		if (0 < num and num < count)
 		{
@@ -755,13 +751,10 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 #endif
 		}
 
+		// There are no clauses. This is kind-of weird, but it can happen
+		// if all clauses are optional.
 		if (0 == clauses.size())
-		{
-			// This is kind-of weird, but it can happen if all clauses
-			// are optional.
-			_search_fail = true;
 			return false;
-		}
 
 		// The pattern body might be of the form
 		// (And (Present (Variable "$x")) (Evaluation ...))
@@ -788,28 +781,13 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		}
 	}
 
-	HandleSeq handle_set;
 	if (ptypes.empty())
-		_as->get_handles_by_type(handle_set, ATOM, true);
+		_as->get_handles_by_type(_search_set, ATOM, true);
 	else
 		for (Type ptype : ptypes)
-			_as->get_handles_by_type(handle_set, ptype);
+			_as->get_handles_by_type(_search_set, ptype);
 
-	DO_LOG({LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";})
-
-#ifdef DEBUG
-	size_t i = 0, hsz = handle_set.size();
-#endif
-	for (const Handle& h : handle_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
-		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->to_string();})
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
-
-	return false;
+	return true;
 }
 
 /* ======================================================== */
@@ -824,16 +802,9 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
  * inefficient to use the pattern matcher for this, so if you want it
  * to run fast, re-work the below to not use the PME.
  */
-bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
+bool InitiateSearchCB::setup_no_search(void)
 {
-	if (0 < _variables->varset.size())
-	{
-		_search_fail = true;
-		return false;
-	}
-
-	// Evaluate all evaluatable clauses
-	return pme->explore_constant_evaluatables(_pattern->mandatory);
+	return (0 == _variables->varset.size());
 }
 
 /* ======================================================== */
@@ -842,7 +813,7 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
  * earlier, because the definitions for them might not have been
  * present, or may have changed since the pattern was initially created.
  */
-void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
+void InitiateSearchCB::jit_analyze(void)
 {
 	// If there are no definitions, there is nothing to do.
 	if (0 == _pattern->defined_terms.size())
@@ -860,7 +831,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	while (0 < _pattern->defined_terms.size())
 	{
 		Variables vset;
-		HandleMap defnmap;
+		GroundingMap defnmap;
 		for (const Handle& name : _pattern->defined_terms)
 		{
 			Handle defn = DefineLink::get_definition(name);
@@ -903,11 +874,107 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	_dynamic = &_pattern->evaluatable_terms;
 
-	pme->set_pattern(*_variables, *_pattern);
 	set_pattern(*_variables, *_pattern);
 	DO_LOG({logger().fine("JIT expanded!");
 	_pl->debug_log();})
 }
+
+/* ======================================================== */
+
+/// search_loop() -- perform the actual pattern search
+///
+/// This performs the actual search for matching graphs.
+/// This assumes that a list of search starting points have been
+/// set up in the `_search_set`, as well as an approprite root
+/// clause and starting term.
+bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
+                                   const std::string dbg_banner)
+{
+	// TODO: This is kind-of the main entry point into the CPU-cycle
+	// sucking part of the pattern search.  It might be worth
+	// parallelizing at this point. That is, ***if*** the _search_set
+	// is large, or the pattern is large/complex, then it might be
+	// worth it to create N threads, and N copies of PatternMatchEngine
+	// and run one search per thread.  Maybe. CAUTION: this is not
+	// always the bottleneck, and so adding heavy-weight thread
+	// initialization here might hurt some users.  See the benchmark
+	// `nano-en.scm` in the benchmark get repo, for example.
+	// Note also: parallelizing will require adding locks to some
+	// portions of the callback, e.g. the `grounding()` callback,
+	// so that two parallel reports don't clobber each other.
+// #define PM_PARALLEL 1
+#ifdef PM_PARALLEL
+	// Parallel loop. This requires C++17 to work.
+	// This does not pass unit tests, because a lock is needed in
+	// the `grounding()` callback. And maybe other locks too.
+
+	bool found = false;
+	std::for_each(
+		std::execution::par_unseq,
+		_search_set.begin(),
+		_search_set.end(),
+		[&](auto&& h)
+		{
+			PatternMatchEngine pme(pmc);
+			pme.set_pattern(*_variables, *_pattern);
+
+			found |= pme.explore_neighborhood(_root, _starter_term, h);
+		});
+
+	return found;
+
+#endif
+
+// #define OMP_PM_PARALLEL 1
+#ifdef OMP_PM_PARALLEL
+	// Parallel loop. This requies OpenMP to work.
+	// This does not pass unit tests, because a lock is needed in
+	// the `grounding()` callback. And maybe other locks too.
+
+	bool found = false;
+
+	size_t hsz = _search_set.size();
+	#pragma omp parallel for
+	for (size_t i=0; i< hsz; i++)
+	{
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+
+		Handle h(_search_set[i]);
+		DO_LOG({LAZY_LOG_FINE << dbg_banner
+		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+		             << h->to_string();})
+		found |= pme.explore_neighborhood(_root, _starter_term, h);
+	}
+	return found;
+#endif
+
+#define SEQUENTIAL_LOOP 1
+#ifdef SEQUENTIAL_LOOP
+	// Plain-old, olde-fashioned sequential search loop.
+	// This works.
+
+#ifdef DEBUG
+	size_t i = 0, hsz = _search_set.size();
+#endif
+
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_variables, *_pattern);
+
+	for (const Handle& h : _search_set)
+	{
+		DO_LOG({LAZY_LOG_FINE << dbg_banner
+		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+		             << h->to_string();})
+		bool found = pme.explore_neighborhood(_root, _starter_term, h);
+		if (found) return true;
+	}
+#endif
+
+	return false;
+}
+
+/* ======================================================== */
 
 std::string InitiateSearchCB::to_string(const std::string& indent) const
 {
@@ -947,7 +1014,6 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
 		}
 	}
-	ss << indent << "_search_fail = " << _search_fail;
 
 	return ss.str();
 }

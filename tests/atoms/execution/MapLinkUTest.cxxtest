@@ -1,0 +1,341 @@
+/*
+ * tests/atoms/MapLinkUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MapLinkUTest: public CxxTest::TestSuite
+{
+private:
+    AtomSpace *as;
+    SchemeEval* eval;
+
+public:
+    MapLinkUTest(void)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+        eval->eval("(use-modules (opencog exec))");
+    }
+
+    ~MapLinkUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_singleton(void);
+    void test_signature(void);
+    void test_double_set(void);
+    void test_implication(void);
+    void test_glob(void);
+    void test_implication_nodecl(void);
+    void test_local_quote_map(void);
+    void test_quote_arg_map(void);
+};
+
+void MapLinkUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void MapLinkUTest::setUp(void)
+{
+    as->clear();
+}
+
+/*
+ * MapLink unit test.
+ */
+void MapLinkUTest::test_singleton(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! single)");
+
+    Handle baz = eval->eval_h("(Concept \"baz\")");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", baz->to_string().c_str());
+
+    TS_ASSERT(result == baz);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-set)");
+
+    Handle set = eval->eval_h(
+		"(SetLink "
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", set->to_string().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    // Uses same expected result as above.
+    result = eval->eval_h("(cog-execute! single-set-noscope)");
+
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", set->to_string().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-set-filter)");
+
+    set = eval->eval_h(
+		"(SetLink "
+		"	(Concept \"ah one\") (Number 3))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", set->to_string().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    // Uses same expected result as above.
+    result = eval->eval_h("(cog-execute! single-set-filter-noscope)");
+
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", set->to_string().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-list)");
+
+    Handle list = eval->eval_h(
+		"(ListLink "
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", list->to_string().c_str());
+
+    TS_ASSERT(result == list);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-type)");
+
+    set = eval->eval_h(
+		"(SetLink "
+		"	(Concept \"ah one\") (Concept \"ah two\"))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", set->to_string().c_str());
+
+    TS_ASSERT(result == set);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_signature(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! single-signature)");
+
+    Handle sete = eval->eval_h("sig-expect");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_double_set(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! double-num-set)");
+
+    Handle sete = eval->eval_h(
+        "(SetLink (ListLink (Concept \"bar\") (Number 3)))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! double-con-set)");
+
+    sete = eval->eval_h(
+        "(SetLink "
+        "    (ListLink (Concept \"bar\") (Concept \"ah one\"))"
+        "    (ListLink (Concept \"bar\") (Concept \"ah two\")))");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_implication(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! imply-map)");
+
+    Handle sete = eval->eval_h("imply-expected");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-eval)");
+
+    sete = eval->eval_h("eval-expected");
+    printf("got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_glob(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! glob-simple)");
+
+    Handle sete = eval->eval_h("glob-simple-expected");
+    printf("simp got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-simple-tail)");
+
+    sete = eval->eval_h("glob-simple-tail-expected");
+    printf("tail got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-double)");
+
+    sete = eval->eval_h("glob-double-expected");
+    printf("double got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-glob)");
+
+    sete = eval->eval_h("glob-glob-expected");
+    printf("glob-glob got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_implication_nodecl(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! imply-map-nodecl)");
+
+    Handle sete = eval->eval_h("imply-expected");
+    printf("nodecl got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-glob-nodecl)");
+
+    sete = eval->eval_h("imply-glob-expected");
+    printf("imply-glob got %s", result->to_string().c_str());
+    printf("expected %s\n", sete->to_string().c_str());
+
+    TS_ASSERT(result == sete);
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_local_quote_map(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Instantiator inst(as);
+    Handle local_quote_map = eval->eval_h("local-quote-map"),
+        result = HandleCast(inst.execute(local_quote_map)),
+        expected1 = eval->eval_h("local-quote-map-result-1"),
+        expected2 = eval->eval_h("local-quote-map-result-2");
+
+    printf("result %s", result->to_string().c_str());
+    printf("expected1 %s\n", expected1->to_string().c_str());
+    printf("expected2 %s\n", expected2->to_string().c_str());
+
+    TS_ASSERT(result == expected1 or result == expected2);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_quote_arg_map(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
+
+    Instantiator inst(as);
+    Handle quote_arg_map = eval->eval_h("quote-arg-map"),
+        result = HandleCast(inst.execute(quote_arg_map)),
+        expected = eval->eval_h("quote-arg-map-result");
+
+    printf("result %s", result->to_string().c_str());
+    printf("expected %s\n", expected->to_string().c_str());
+
+    TS_ASSERT(result == expected);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}

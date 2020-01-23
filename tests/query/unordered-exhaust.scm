@@ -19,8 +19,7 @@
 	(SetLink
 		(ConceptNode "s")
 		(ConceptNode "t")
-		(ConceptNode "u")
-	)
+		(ConceptNode "u"))
 )
 
 ; Yet another set containing four objects.
@@ -31,8 +30,7 @@
 	(SetLink
 		(ConceptNode "a")
 		(ConceptNode "b")
-		(ConceptNode "c")
-	)
+		(ConceptNode "c"))
 )
 
 ;; This should match in 4! + (6+6+6) + (6+6+6) = 60 different ways,
@@ -42,20 +40,17 @@
 	(BindLink
 		;; variable decls
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a")
-				(TypeNode "ConceptNode"))
-		(VariableNode "$b")
-		(VariableNode "$c")
-		(VariableNode "$d")
-		)
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d"))
+
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
 				(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c")
-         		(VariableNode "$d")
-			)
+				(VariableNode "$b")
+				(VariableNode "$c")
+				(VariableNode "$d"))
 		)
 		; The result to report
 		(ListLink
@@ -81,9 +76,7 @@
 	(BindLink
 		;; variable decls
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a")
-				(TypeNode "ConceptNode"))
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
 			(VariableNode "$b")
 			(VariableNode "$c")
 			(VariableNode "$d")
@@ -92,29 +85,26 @@
 		)
 		(AndLink
 			(SetLink ; sets are inherently unordered
-      			(VariableNode "$a")
-       			(VariableNode "$b")
-       			(VariableNode "$c")
+				(VariableNode "$a")
+				(VariableNode "$b")
+				(VariableNode "$c")
 				(SetLink
-         			(VariableNode "$d")
-         			(VariableNode "$e")
-         			(VariableNode "$f")
-				)
-			)
-		)
+					(VariableNode "$d")
+					(VariableNode "$e")
+					(VariableNode "$f"))
+			))
 		; The result to report
 		(ListLink
-       		(VariableNode "$a")
-       		(VariableNode "$b")
-       		(VariableNode "$c")
-       		(VariableNode "$d")
-       		(VariableNode "$e")
-       		(VariableNode "$f")
-		)
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
+			(VariableNode "$e")
+			(VariableNode "$f"))
 	)
 )
 
-;; This should match in (3! * 3!) / 3 = 12 different ways, viz a 
+;; This should match in (3! * 3!) / 3 = 12 different ways, viz a
 ;; constrained combinatorial explosion.  That is, since $a $b $c
 ;; can have 3! assignments, and $c $d $e can have 3! assignments,
 ;; but the first and the second $c must be equal, thus the cosets
@@ -124,41 +114,37 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-3)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c")
-         (VariableNode "$d")
-         (VariableNode "$e")
-      )
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
+			(VariableNode "$e")
+		)
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
-     		(VariableNode "$a")
-     		(VariableNode "$b")
-     		(VariableNode "$c")
+				(VariableNode "$a")
+				(VariableNode "$b")
+				(VariableNode "$c")
 				(SetLink
-     			(VariableNode "$c")
-     			(VariableNode "$d")
-     			(VariableNode "$e")
-				)
-			)
-		)
+					(VariableNode "$c")
+					(VariableNode "$d")
+					(VariableNode "$e"))
+		))
 		; The result to report
 		(ListLink
-    		(VariableNode "$a")
-    		(VariableNode "$b")
-    		(VariableNode "$c")
-    		(VariableNode "$d")
-    		(VariableNode "$e")
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
+			(VariableNode "$e")
 		)
 	)
 )
 
-;; This should match in (3! * 3!) / 6 = 6 different ways, viz a 
+;; This should match in (3! * 3!) / 6 = 6 different ways, viz a
 ;; constrained combinatorial explosion.  That is, since $a $b $c
 ;; can have 3! assignments, and $b $c $d can have 3! assignments,
 ;; but the first and the second $b must be equal, thus the cosets
@@ -169,40 +155,36 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-4)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c")
-         (VariableNode "$d")
-      )
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
+		)
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
-     		(VariableNode "$a")
-     		(VariableNode "$b")
-     		(VariableNode "$c")
+				(VariableNode "$a")
+				(VariableNode "$b")
+				(VariableNode "$c")
 				(SetLink
-     			(VariableNode "$b")
-     			(VariableNode "$c")
-     			(VariableNode "$d")
-				)
-			)
-		)
+					(VariableNode "$b")
+					(VariableNode "$c")
+					(VariableNode "$d"))
+		))
 		; The result to report
 		(ListLink
-    		(VariableNode "$a")
-    		(VariableNode "$b")
-    		(VariableNode "$c")
-    		(VariableNode "$d")
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
 		)
 	)
 )
 
-;; This should match in (3! * 3!) / 6 = 6 different ways, viz a 
-;; constrained combinatorial explosion.  That is, since the first 
+;; This should match in (3! * 3!) / 6 = 6 different ways, viz a
+;; constrained combinatorial explosion.  That is, since the first
 ;; $a $b $c can have 3! assignments, and the other $a $b $c can have
 ;; 3! assignments, but the order of the first and second must be equal.
 ;; As above, there is a modulo-3 and a modulo-2 division, and also a
@@ -212,37 +194,33 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-5)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c")
-      )
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c")
+		)
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
-     		(VariableNode "$a")
-     		(VariableNode "$b")
-     		(VariableNode "$c")
+				(VariableNode "$a")
+				(VariableNode "$b")
+				(VariableNode "$c")
 				(SetLink
-     			(VariableNode "$a")
-     			(VariableNode "$b")
-     			(VariableNode "$c")
-				)
-			)
-		)
+					(VariableNode "$a")
+					(VariableNode "$b")
+					(VariableNode "$c"))
+		))
 		; The result to report
 		(ListLink
-    		(VariableNode "$a")
-    		(VariableNode "$b")
-    		(VariableNode "$c")
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c")
 		)
 	)
 )
 
-;; This should match in (3! * 3!) / 3 = 12 different ways, viz a 
+;; This should match in (3! * 3!) / 3 = 12 different ways, viz a
 ;; constrained combinatorial explosion.  That is, since $a $b $c
 ;; can have 3! assignments, and $c $d $e can have 3! assignments,
 ;; but the first and the second $c must be equal, thus the cosets
@@ -277,28 +255,25 @@
 )
 
 (define (exhaust-eq-12)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c1")
-         (VariableNode "$c2")
-         (VariableNode "$e")
-         (VariableNode "$f")
-      )
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c1")
+			(VariableNode "$c2")
+			(VariableNode "$e")
+			(VariableNode "$f")
+		)
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
-     		(VariableNode "$a")
-     		(VariableNode "$b")
-     		(VariableNode "$c1")
+				(VariableNode "$a")
+				(VariableNode "$b")
+				(VariableNode "$c1")
 				(SetLink
-     			(VariableNode "$c2")
-     			(VariableNode "$e")
-     			(VariableNode "$f")
-				)
+					(VariableNode "$c2")
+					(VariableNode "$e")
+					(VariableNode "$f"))
 			)
 
 			; External clause enforcing equality relation
@@ -312,39 +287,36 @@
 		)
 		; The result to report
 		(ListLink
-    		(VariableNode "$a")
-    		(VariableNode "$b")
-    		(VariableNode "$c1")
-    		(VariableNode "$c2")
-    		(VariableNode "$e")
-    		(VariableNode "$f")
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c1")
+			(VariableNode "$c2")
+			(VariableNode "$e")
+			(VariableNode "$f")
 		)
 	)
 )
 
 (define (exhaust-eq-6)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b1")
-         (VariableNode "$b2")
-         (VariableNode "$c1")
-         (VariableNode "$c2")
-         (VariableNode "$f")
-      )
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
+			(VariableNode "$b1")
+			(VariableNode "$b2")
+			(VariableNode "$c1")
+			(VariableNode "$c2")
+			(VariableNode "$f")
+		)
 		(AndLink
 			(SetLink ; sets are inherenetly unordered
-     		(VariableNode "$a")
-     		(VariableNode "$b1")
-     		(VariableNode "$c1")
+				(VariableNode "$a")
+				(VariableNode "$b1")
+				(VariableNode "$c1")
 				(SetLink
-     			(VariableNode "$c2")
-     			(VariableNode "$b2")
-     			(VariableNode "$f")
-				)
+					(VariableNode "$c2")
+					(VariableNode "$b2")
+					(VariableNode "$f"))
 			)
 
 			; External clause enforcing equality relation
@@ -365,12 +337,12 @@
 		)
 		; The result to report
 		(ListLink
-    		(VariableNode "$a")
-    		(VariableNode "$b1")
-    		(VariableNode "$b2")
-    		(VariableNode "$c1")
-    		(VariableNode "$c2")
-    		(VariableNode "$f")
+			(VariableNode "$a")
+			(VariableNode "$b1")
+			(VariableNode "$b2")
+			(VariableNode "$c1")
+			(VariableNode "$c2")
+			(VariableNode "$f")
 		)
 	)
 )

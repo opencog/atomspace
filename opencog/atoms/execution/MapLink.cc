@@ -22,6 +22,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "MapLink.h"
 
@@ -48,7 +49,7 @@ void MapLink::init(void)
 		const Handle& body = _outgoing[0];
 		FreeVariables fv;
 		fv.find_variables(body);
-		Handle decl(createVariableList(fv.varseq));
+		Handle decl(createVariableSet(fv.varseq));
 		_pattern = createScopeLink(decl, body);
 	}
 	_mvars = &_pattern->get_variables();
@@ -123,23 +124,6 @@ MapLink::MapLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-MapLink::MapLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tmap = l.get_type();
-	if (not nameserver().isA(tmap, MAP_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tmap);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a MapLink, got %s", tname.c_str());
-	}
-
-	// Derived types have a different initialization sequence.
-	if (MAP_LINK != tmap) return;
-	init();
-}
-
 // ===============================================================
 
 /// Recursive tree-compare-and-extract grounding values.
@@ -160,7 +144,7 @@ MapLink::MapLink(const Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      HandleMap& valmap,
+                      GroundingMap& valmap,
                       Quotation quotation) const
 {
 	if (termpat == ground) return true;
@@ -307,7 +291,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(glob_seq, LIST_LINK));
+			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else
@@ -325,10 +309,10 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// Execute the ground, including consuming its quotation as part of
 	// the MapLink semantics
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.instantiate(cterm, HandleMap())));
+	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
 
 	// Extract values for variables.
-	HandleMap valmap;
+	GroundingMap valmap;
 	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
 

@@ -41,9 +41,7 @@
 
 namespace opencog
 {
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
-typedef std::weak_ptr<Link> WinkPtr;
+typedef std::weak_ptr<Atom> WinkPtr;
 }
 
 namespace std
@@ -87,8 +85,8 @@ typedef std::size_t Arity;
 //! virtually all access will be either insert, or iterate, so we get
 //! O(1) performance. Note that sometimes incoming sets can be huge,
 //! millions of atoms.
-typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
-typedef SigSlot<AtomPtr, LinkPtr> AtomPairSignal;
+typedef HandleSeq IncomingSet;
+typedef SigSlot<Handle, Handle> AtomPairSignal;
 
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
@@ -104,6 +102,7 @@ class Atom
 {
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
+    friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
     friend class SQLAtomStorage;  // Needs to call getAtomTable()
@@ -149,6 +148,11 @@ protected:
         _atom_space(nullptr)
     {}
 
+    Atom& operator=(const Atom& other) // copy assignment operator
+        { return *this; }
+    Atom& operator=(Atom&& other) // move assignment operator
+        { return *this; }
+
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.
     // That is, we use weak pointers here, not strong ones.
@@ -192,9 +196,9 @@ protected:
     void drop_incoming_set();
 
     // Insert and remove links from the incoming set.
-    void insert_atom(const LinkPtr&);
-    void remove_atom(const LinkPtr&);
-    void swap_atom(const LinkPtr&, const LinkPtr&);
+    void insert_atom(const Handle&);
+    void remove_atom(const Handle&);
+    void swap_atom(const Handle&, const Handle&);
     virtual void install();
     virtual void remove();
 
@@ -228,6 +232,14 @@ public:
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
+    ///
+    /// At this time, we use a 64-bit non-cryptographic hash: it is
+    /// just enough to disambiguate most Atoms, but is small enough
+    /// that it does not use up a lot of RAM (as AtomSpace algos are
+    /// RAM-limited, in practice.)
+    ///
+    /// If a crypto hash was ever needed, the IPLD hash format would
+    /// be recommended.  See https://ipld.io/ for details.
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
@@ -266,7 +278,7 @@ public:
     virtual ValuePtr execute(void) { return execute(_atom_space, false); }
     virtual bool is_executable() const { return false; }
 
-    /** Returns the handle of the atom. */
+    /** Returns a handle holding "this". */
     inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
@@ -300,11 +312,11 @@ public:
     //! that belonged to that atomspace at the time this call was made
     //! are returned. Otherwise, the entire incoming set is returned.
     //!
-    //! This call is thread-safe again simultaneous deletion of atoms.
-    //! That is, this call returns the incoming set as it was att the
+    //! This call is thread-safe against simultaneous deletion of atoms.
+    //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
+    IncomingSet getIncomingSet(AtomSpace* = nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -340,8 +352,8 @@ public:
         // callback with locks held.
         IncomingSet vh(getIncomingSet());
 
-        for (const LinkPtr& lp : vh)
-            if ((data->*cb)(Handle(std::static_pointer_cast<Atom>(lp)))) return true;
+        for (const Handle& lp : vh)
+            if ((data->*cb)(lp)) return true;
         return false;
     }
 
@@ -371,10 +383,10 @@ public:
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type type) const;
+    IncomingSet getIncomingSetByType(Type, AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type) const;
+    size_t getIncomingSetSizeByType(Type type, AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
@@ -429,15 +441,32 @@ static inline Handle HandleCast(const ValuePtr& pa)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const IncomingSet& iset,
+// std::string oc_to_string(const IncomingSet& iset,
+//                          const std::string& indent=empty_string);
+std::string oc_to_string(const Atom& atom,
                          const std::string& indent=empty_string);
 
 /** @}*/
 } // namespace opencog
 
-// Overloading operator<< for Incoming Set 
 namespace std {
-    
+
+/// Overload std::less to perform a content-based compare of the
+/// AtomPtr's. Otherwise, it seems to just use the address returned
+/// by `AtomPtr::get()`. The core problem is that sometimes, were were
+/// expecting that `std::less<Handle>` was going to be used, and it
+/// wasn't, resulting in an address-space compare. This should halt
+/// that misbehavior. See issue #2371 for details.
+template<>
+struct less<opencog::AtomPtr>
+{
+    bool operator()(const opencog::AtomPtr& ata, const opencog::AtomPtr& atb) const
+    {
+        return ata->operator<(*atb);
+    }
+};
+
+// Overloading operator<< for Incoming Set
 ostream& operator<<(ostream&, const opencog::IncomingSet&);
 
 }

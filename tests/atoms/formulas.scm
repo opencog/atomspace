@@ -178,6 +178,7 @@
     (Number 1)
   )
 )
+
 (define naked-pred2
   (PredicateFormula
     (Times
@@ -187,6 +188,7 @@
     (Number 1)
   )
 )
+
 (define naked-pred3
   (PredicateFormula
     (Number 1)
@@ -196,8 +198,10 @@
     )
   )
 )
+
 (define apple-is-green (Concept "apple-is-green" (stv 1 0.5)))
 (define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
+
 (define naked-pred4
   (PredicateFormula
     (Number 1)
@@ -213,6 +217,7 @@
 (define (times x y)
   (cog-execute! (Times x y))
 )
+
 (define naked-pred5
   (PredicateFormula
     (Number 1)
@@ -229,6 +234,7 @@
     (Number 1)
   )
 )
+
 (define naked-pred-crash2
   (PredicateFormula
     (Number 1)
@@ -239,7 +245,7 @@
   )
 )
 
-; --------------------------------------------------
+; -------------------------------------------------
 ; Testing defined predicate formulas (issue #2218).
 
 (Define
@@ -249,6 +255,7 @@
     (Number 1)
   )
 )
+
 (Define
   (DefinedPredicate "defined-pred2")
   (PredicateFormula
@@ -259,6 +266,7 @@
     (Number 1)
   )
 )
+
 (Define
   (DefinedPredicate "defined-pred3")
   (PredicateFormula
@@ -269,6 +277,7 @@
     )
   )
 )
+
 (Define
   (DefinedPredicate "defined-pred4")
   (PredicateFormula
@@ -281,6 +290,7 @@
     )
   )
 )
+
 (Define
   (DefinedPredicate "defined-pred-crash1")
   (PredicateFormula
@@ -296,6 +306,7 @@
     )
   )
 )
+
 (Define
   (DefinedPredicate "defined-pred-crash2")
   (PredicateFormula
@@ -303,9 +314,30 @@
     (Concept "saboteur")
   )
 )
+
 (define (eval-nullary name)
   (Evaluation
     (DefinedPredicate name)
     (List)
   )
 )
+
+; -------------------------------------------------
+; Testing defined predicate execution (issue #2312).
+
+; Initialize count to zero
+(State (Anchor "sum") (Number 0))
+
+; Define increment "function"
+(Define
+	(DefinedPredicate "inc")
+	(True
+		(Put
+			(State (Anchor "sum") (Variable "$x"))
+			(Plus (Number 1) (Get (State (Anchor "sum") (Variable "$y")))))))
+
+; GetLink returns a SetLink. Unwrap it to get the NumberNode.
+(define (get-sum)
+	(cog-outgoing-atom (cog-execute!
+		(Get (State (Anchor "sum") (Variable "$x"))))
+		0))

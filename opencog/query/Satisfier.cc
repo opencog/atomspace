@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const HandleMap &var_soln,
-                          const HandleMap &term_soln)
+bool Satisfier::grounding(const GroundingMap &var_soln,
+                          const GroundingMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
@@ -49,7 +49,7 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 		{
 			vargnds.push_back(var_soln.at(hv));
 		}
-		_ground = createLink(vargnds, LIST_LINK);
+		_ground = createLink(std::move(vargnds), LIST_LINK);
 	}
 
 	// No need to look for more groundings as _result isn't going to change
@@ -97,7 +97,7 @@ bool Satisfier::search_finished(bool done)
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
 		return done;
 
-	HandleMap empty;
+	GroundingMap empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
 		_result = TruthValue::TRUE_TV();
@@ -107,8 +107,8 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-bool SatisfyingSet::grounding(const HandleMap &var_soln,
-                              const HandleMap &term_soln)
+bool SatisfyingSet::grounding(const GroundingMap &var_soln,
+                              const GroundingMap &term_soln)
 {
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
@@ -141,7 +141,7 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
-	_satisfying_set.emplace(createLink(vargnds, LIST_LINK));
+	_satisfying_set.emplace(createLink(std::move(vargnds), LIST_LINK));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);

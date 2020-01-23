@@ -1,5 +1,5 @@
 /*
- * SQLBulk.cc
+ * opencog/persist/sql/multi-driver/SQLBulk.cc
  * Bulk save & restore of Atoms.
  *
  * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
@@ -26,8 +26,8 @@
 
 #include <chrono>
 #include <memory>
-#include <thread>
 
+#define OC_OMP 1  // hack alert -- force over-ride!
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/oc_omp.h>
 
@@ -143,7 +143,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 	return rp.intval;
 }
 
-void SQLAtomStorage::load(AtomTable &table)
+void SQLAtomStorage::loadAtomSpace(AtomTable &table)
 {
 	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
@@ -262,7 +262,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 }
 
 /// Store all of the atoms in the atom table.
-void SQLAtomStorage::store(const AtomTable &table)
+void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
 {
 	rethrow();
 
@@ -292,13 +292,15 @@ void SQLAtomStorage::store(const AtomTable &table)
 	bulk_start = time(0);
 
 	// Try to knock out the nodes first, then the links.
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		NODE, true);
+	HandleSeq atoms;
+	atoms.reserve(table.getNumNodes());
+	table.getHandlesByType(std::back_inserter(atoms), NODE, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
-	table.foreachHandleByType(
-		[&](const Handle& h)->void { storeAtom(h); },
-		LINK, true);
+	atoms.clear();
+	atoms.reserve(table.getNumLinks());
+	table.getHandlesByType(std::back_inserter(atoms), LINK, true);
+	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();
 	bulk_store = false;
@@ -307,16 +309,6 @@ void SQLAtomStorage::store(const AtomTable &table)
 	double rate = ((double) _store_count) / secs;
 	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
 		(unsigned long) _store_count, (int) secs, (int) rate);
-}
-
-void SQLAtomStorage::storeAtomSpace(AtomSpace* atomspace)
-{
-	store(atomspace->get_atomtable());
-}
-
-void SQLAtomStorage::loadAtomSpace(AtomSpace* atomspace)
-{
-	load(atomspace->get_atomtable());
 }
 
 /* ============================= END OF FILE ================= */

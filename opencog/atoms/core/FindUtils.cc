@@ -27,6 +27,7 @@
  * Created by Linas Vepstas February 2008
  */
 
+#include <opencog/util/oc_assert.h>
 #include "FindUtils.h"
 
 namespace opencog {
@@ -328,6 +329,17 @@ unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
 	return count;
 }
 
+HandleSet unquoted_unscoped_in_tree(const Handle& tree,
+                                    const HandleSet& atoms)
+{
+	HandleSet rv;
+	for (const Handle& n: atoms)
+	{
+		if (is_unquoted_unscoped_in_tree(tree, n)) rv.insert(n);
+	}
+	return rv;
+}
+
 bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {
@@ -366,7 +378,7 @@ HandleSet get_free_variables(const Handle& h, Quotation quotation)
 	Type t = h->get_type();
 
 	// Base cases
-	if (t == VARIABLE_NODE and quotation.is_unquoted())
+	if ((t == VARIABLE_NODE or t == GLOB_NODE) and quotation.is_unquoted())
 		return {h};
 	if (h->is_node())
 		return {};

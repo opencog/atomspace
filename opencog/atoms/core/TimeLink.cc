@@ -44,19 +44,6 @@ TimeLink::TimeLink(const HandleSeq& oset, Type t)
 			"TimeLink does not expect any arguments");
 }
 
-TimeLink::TimeLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, TIME_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an TimeLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 ValuePtr TimeLink::execute(AtomSpace* as, bool silent)
