@@ -268,9 +268,13 @@
 		; It returns a single numerical value, for the entire set.
 		(define (compute-left-entropy)
 			(left-sum
-				(lambda (x) (*
-						(frqobj 'left-wild-freq x)
-						(frqobj 'left-wild-logli x)))))
+				(lambda (x)
+					;; In general pairs can have a zero count,
+					;; and so a minus-inf logarithm. avoid NaN
+					(define lli (frqobj 'left-wild-logli x))
+					(if (finite? lli)
+						(* (frqobj 'left-wild-freq x) lli)
+						0.0))))
 
 		; Compute the right-wildcard partial entropy for the set. This
 		; loops over all right-wildcards, and computes the sum
