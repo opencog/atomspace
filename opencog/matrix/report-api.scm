@@ -372,7 +372,8 @@
 					(define len (len-obj 'right-length x))
 					(define lensq (* len len))
 					(define sizsq (/ (* siz siz) sup))
-					(sqrt (- lensq sizsq))))))
+					(if (finite? sizsq)
+						(sqrt (- lensq sizsq)) 0.0)))))
 
 		(define (get-left-rms-count)
 			(real-part
@@ -383,7 +384,8 @@
 					(define len (len-obj 'left-length x))
 					(define lensq (* len len))
 					(define sizsq (/ (* siz siz) sup))
-					(sqrt (- lensq sizsq))))))
+					(if (finite? sizsq)
+						(sqrt (- lensq sizsq)) 0.0)))))
 
 		; ----------------------------------------------------
 		; Compute and cache the values of the computation with the

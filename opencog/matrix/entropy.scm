@@ -64,9 +64,10 @@
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
+	;     We don't want it to throw, in case some pair has zero counts.
 	(let* ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api star-obj)))
+			(frqobj (add-pair-freq-api star-obj #:nothrow #t)))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -115,14 +116,19 @@
 		;    MI_total = sum_y mi_left(y)
 		(define (compute-left-mi RIGHT-ITEM)
 			(fold
-				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
+				(lambda (PAIR sum)
+					; MI might be inf. if count is zero...
+					(define pmi (frqobj 'pair-mi PAIR))
+					(if (finite? pmi) (+ sum pmi) sum))
 				0
 				(star-obj 'left-stars RIGHT-ITEM)))
 
 		; As above, but flipped.
 		(define (compute-right-mi LEFT-ITEM)
 			(fold
-				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
+				(lambda (PAIR sum)
+					(define pmi (frqobj 'pair-mi PAIR))
+					(if (finite? pmi) (+ sum pmi) sum))
 				0
 				(star-obj 'right-stars LEFT-ITEM)))
 
@@ -267,9 +273,13 @@
 		; It returns a single numerical value, for the entire set.
 		(define (compute-left-entropy)
 			(left-sum
-				(lambda (x) (*
-						(frqobj 'left-wild-freq x)
-						(frqobj 'left-wild-logli x)))))
+				(lambda (x)
+					;; In general pairs can have a zero count,
+					;; and so a minus-inf logarithm. avoid NaN
+					(define lli (frqobj 'left-wild-logli x))
+					(if (finite? lli)
+						(* (frqobj 'left-wild-freq x) lli)
+						0.0))))
 
 		; Compute the right-wildcard partial entropy for the set. This
 		; loops over all right-wildcards, and computes the sum

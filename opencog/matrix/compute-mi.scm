@@ -279,12 +279,13 @@
 
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
+	;      Don't throw, in case of zero counts on a pair.
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-count, provided by add-support-api
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
 			(supobj (add-support-api LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ)))
+			(frqobj (add-pair-freq-api LLOBJ #:nothrow #t)))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the

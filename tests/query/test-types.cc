@@ -25,5 +25,4 @@ WORD_INSTANCE_LINK = nameserver().declType(LINK, "WordInstanceLink");
 WORD_INSTANCE_NODE = nameserver().declType(NODE, "WordInstanceNode");
 WORD_NODE = nameserver().declType(NODE, "WordNode");
 WORD_SENSE_NODE = nameserver().declType(NODE, "WordSenseNode");
-ANY_NODE = nameserver().declType(NODE, "AnyNode");
 nameserver().endTypeDecls();
