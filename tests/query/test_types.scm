@@ -80,8 +80,3 @@
 	(apply cog-new-node (append (list 'WordSenseNode) x)))
 (define (WordSense . x)
 	(apply cog-new-node (append (list 'WordSenseNode) x)))
-
-(define (AnyNode . x)
-	(apply cog-new-node (append (list 'AnyNode) x)))
-(define (Any . x)
-	(apply cog-new-node (append (list 'AnyNode) x)))
