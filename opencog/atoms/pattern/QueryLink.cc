@@ -70,15 +70,17 @@ QueryLink::QueryLink(const HandleSeq& hseq, Type t)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-/// On top of that initialize _body and _implicand with the
-/// clauses and the rewrite rule.
+/// On top of that, initialize _body and _implicand with the
+/// clauses and the rewrite rule(s). (Multiple implicands are
+/// allowed, this can save some CPU cycles when one search needs to
+/// create several rewrites.)
 ///
 void QueryLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
-	if (sz < 2 or 3 < sz)
+	if (sz < 2)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
+			"Expecting an outgoing set size of at least two, got %d", sz);
 
 	// If the outgoing set size is two, then there are no variable
 	// declarations; extract all free variables.
