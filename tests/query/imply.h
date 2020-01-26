@@ -28,7 +28,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 
 	// Now perform the search.
 	DefaultImplicator impl(as);
-	impl.implicand = himplicand;
+	impl.implicand.push_back(himplicand);
 
 	bl->satisfy(impl);
 

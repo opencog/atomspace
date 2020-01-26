@@ -85,7 +85,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	if (2 == sz)
 	{
 		_body = oset[0];
-		_implicand = oset[1];
+		_implicand.push_back(oset[1]);
 		_variables.find_variables(oset);
 		return;
 	}
@@ -94,7 +94,8 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	// a variable declaration.
 	_vardecl = oset[0];
 	_body = oset[1];
-	_implicand = oset[2];
+	for (size_t i=2; i < oset.size(); i++)
+		_implicand.push_back(oset[i]);
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
@@ -178,7 +179,8 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	    and not intu->optionals_present())
 	{
 		ValueSet result;
-		result.insert(impl.inst.execute(impl.implicand, true));
+		for (const Handle& himp: impl.implicand)
+			result.insert(impl.inst.execute(himp, true));
 		return result;
 	}
 
