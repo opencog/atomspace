@@ -247,7 +247,7 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	// Now perform the search.
 	DefaultImplicator simpl(&as);
-	simpl.implicand = situation->get_implicand();
+	simpl.implicand = situation->get_implicand_seq();
 	situation->satisfy(simpl);
 
 	// The result_list contains a list of the grounded expressions.
@@ -257,7 +257,7 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	// Now perform the search.
 	DefaultImplicator pimpl(&as);
-	pimpl.implicand = predicament->get_implicand();
+	pimpl.implicand = predicament->get_implicand_seq();
 	predicament->satisfy(pimpl);
 
 	// The result_list contains a list of the grounded expressions.
