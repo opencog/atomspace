@@ -134,7 +134,7 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 
 	DefaultImplicator impl(as);
-	impl.implicand = this->get_implicand();
+	impl.implicand = this->get_implicand_seq();
 
 	/*
 	 * The `do_conn_check` flag stands for "do connectivity check"; if the

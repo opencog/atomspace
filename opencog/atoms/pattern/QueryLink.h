@@ -51,7 +51,8 @@ public:
 	QueryLink(const QueryLink&) = delete;
 	QueryLink& operator=(const QueryLink&) = delete;
 
-	const HandleSeq& get_implicand(void) { return _implicand; }
+	const Handle& get_implicand(void) { return _implicand[0]; }
+	const HandleSeq& get_implicand_seq(void) { return _implicand; }
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
