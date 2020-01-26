@@ -63,7 +63,7 @@ class Implicator :
 	public:
 		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
 		Instantiator inst;
-		Handle implicand;
+		HandleSeq implicand;
 		size_t max_results;
 
 		virtual bool grounding(const GroundingMap &var_soln,

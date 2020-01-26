@@ -43,16 +43,21 @@ bool Implicator::grounding(const GroundingMap &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
-	// Ignore the case where the URE creates ill-formed links
+	// Catch and ignore SilentExceptions. This arises when
+	// running with the URE, which creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
 	// be treated as a user error, that is, the user should
 	// design rule pre-conditions to prevent them from producing
 	// nothing.  In practice it is difficult to insure, so
 	// meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
+	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
 	try {
-		ValuePtr v(inst.instantiate(implicand, var_soln, true));
-		insert_result(v);
+		for (const Handle& himp: implicand)
+		{
+			ValuePtr v(inst.instantiate(himp, var_soln, true));
+			insert_result(v);
+		}
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
