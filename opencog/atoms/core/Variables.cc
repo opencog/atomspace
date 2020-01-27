@@ -1175,16 +1175,7 @@ bool Variables::is_type(Type gtype) const
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default restriction is 1 or more,
-	// so return true as long as `n` is larger than 0.
-	if (_glob_intervalmap.end() == iit)
-		return (n > 0);
-
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n >= intervals.first);
 }
 
@@ -1194,19 +1185,9 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  * Returns true/false if the glob satisfies the upper bound
  * interval restriction.
  */
-bool Variables::is_upper_bound(const Handle& glob, size_t n) const
+bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default upper bound is
-	// "unbounded"; any number of matches are OK.
-	if (_glob_intervalmap.end() == iit)
-		return true;
-
-	// Negative upper bound means "unbounded" (infinity).
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n <= intervals.second or intervals.second < 0);
 }
 
