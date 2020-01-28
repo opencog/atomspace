@@ -181,7 +181,8 @@ protected:
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;
 typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
-typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
+typedef std::pair<double, double> GlobInterval;
+typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -327,6 +328,8 @@ struct Variables : public FreeVariables,
 	void find_variables(const Handle& body);
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
+	const GlobInterval& get_interval(const Handle&) const;
+
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -335,6 +338,18 @@ protected:
 			VariableDeepTypeMap::const_iterator,
 			VariableDeepTypeMap::const_iterator,
 			const Handle&) const;
+
+private:
+	inline const GlobInterval &default_interval(Type t) const
+	{
+		static const GlobInterval var_def_interval =
+				GlobInterval(1, 1);
+		static const GlobInterval glob_def_interval =
+				GlobInterval(1, std::numeric_limits<double>::infinity());
+		return t == GLOB_NODE ? glob_def_interval :
+		       var_def_interval;
+	}
+
 };
 
 // Debugging helpers see

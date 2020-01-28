@@ -1210,6 +1210,16 @@ bool Variables::is_upper_bound(const Handle& glob, size_t n) const
 	return (n <= intervals.second or intervals.second < 0);
 }
 
+const GlobInterval& Variables::get_interval(const Handle& var) const
+{
+	const auto interval = _glob_intervalmap.find(var);
+
+	if (interval == _glob_intervalmap.end())
+		return default_interval(var->get_type());
+
+	return interval->second;
+}
+
 /* ================================================================= */
 /**
  * Substitute the given arguments for the variables occuring in a tree.
