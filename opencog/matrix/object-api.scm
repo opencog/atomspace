@@ -725,7 +725,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
 
 	; Return the observational frequency on ATOM.
-	; If the ATOM does not exist (was not observed) return 0.
+	; If the ATOM does not exist (or was not observed) return 0.
 	(define (get-freq ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
