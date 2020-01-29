@@ -222,6 +222,24 @@
 		; ----------------------------------------------------
 		(define (get-total-count) (supobj 'wild-wild-count))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-concatenate
+"This is the `add-report-api` object applied to the \"~A\"\n"
+"object.  It provides matrix-wide summary values characterizing the\n"
+"matrix\n"
+"\n"
+"For more information, say `,d add-report-api` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(llobj 'id)))
+
+		(define (describe)
+			(display (procedure-property add-report-api 'documentation)))
+
 		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -278,6 +296,10 @@
 				((set-left-norms)      (apply set-left-norms args))
 				((set-right-norms)     (apply set-right-norms args))
 
+				((help)                (help))
+				((describe)            (describe))
+				((obj)                 "add-report-api")
+				((base)                LLOBJ)
 				(else                  (apply LLOBJ (cons message args)))
 			))
 	)
@@ -462,6 +484,24 @@
 
 		(define (cache-all) (cache-left) (cache-right))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-concatenate
+"This is the `make-central-compute` object applied to the \"~A\"\n"
+"object.  It provides matrix-wide summary values characterizing the\n"
+"matrix\n"
+"\n"
+"For more information, say `,d make-central-compute` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(llobj 'id)))
+
+		(define (describe)
+			(display (procedure-property make-central-compute 'documentation)))
+
 		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -477,6 +517,11 @@
 				((cache-left)        (cache-left))
 				((cache-right)       (cache-right))
 				((cache-all)         (cache-all))
+
+				((help)              (help))
+				((describe)          (describe))
+				((obj)               "make-central-compute")
+				((base)              LLOBJ)
 
 				(else                (apply LLOBJ (cons message args)))
 			))
