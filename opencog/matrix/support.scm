@@ -28,12 +28,10 @@
   of \"support\", \"count\" and \"length\"; in breif, these are just the
   l_0, l_1 and l_2 norms of the rows and columns.
 
-  This object is quite similar to the `add-report-api` object, having
-  many methods with the same name. The primary difference between these
-  two is that this object provides the **unweighted** support, count and
-  length subtotals, while `add-report-api` provides the weighted variants,
-  with the weighting being given by the frequency of the row/column
-  observations.
+  This object provides per-row/per-column values for support, count and
+  length.  The `add-report-api` has methods with similar, or the same
+  names, but it provides matrix-wide averages (i.e. averaged over all
+  rows and columns).
 
   This object fetches precomputed values, fetched from the \"margins\"
   of the matrix (i.e. attached to the matrix wild-cards.) These marginal
@@ -226,12 +224,9 @@
   invoked, in which case a bulk computation is done.) Cached values
   can be access with the `add-support-api` object.
 
-  This object is similar to, but differs from the `make-central-compute`
-  object, which provides many mehtods having the smae names. The main
-  difference between these two is that this object computes the
-  unweighted lp-norms, whereas the other one weights these norms by
-  the row/column frequencies. See below, and the documentation on
-  `make-central-compute` for precise defintions.
+  This object provides per-row/per-column values for these quantities.
+  The `make-central-compute` object has methods with similar or the
+  same names; they provide the matrix-wide averages.
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
