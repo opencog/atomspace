@@ -158,7 +158,7 @@
 
 	(define (help)
 		(format #t
-			(string-concatenate
+			(string-append
 "This is the `add-support-api` object applied to the \"~A\"\n"
 "object.  It provides methods to access the support, count and length\n"
 "subtotals on rows and columns. See the documentation for\n"
@@ -169,7 +169,7 @@
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-			(llobj 'id)))
+			(LLOBJ 'id)))
 
 	(define (describe)
 		(display (procedure-property add-support-api 'documentation)))
@@ -517,7 +517,7 @@
 
 		(define (help)
 			(format #t
-				(string-concatenate
+				(string-append
 "This is the `add-support-compute` object applied to the \"~A\"\n"
 "object.  It provides methods to compute the support, size and length\n"
 "subtotals on rows and columns. It is recommended that this object be\n"
@@ -528,7 +528,7 @@
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-				(llobj 'id)))
+				(LLOBJ 'id)))
 
 		(define (describe)
 			(display (procedure-property add-support-compute 'documentation)))

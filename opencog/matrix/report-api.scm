@@ -226,7 +226,7 @@
 
 		(define (help)
 			(format #t
-				(string-concatenate
+				(string-append
 "This is the `add-report-api` object applied to the \"~A\"\n"
 "object.  It provides matrix-wide summary values characterizing the\n"
 "matrix\n"
@@ -235,7 +235,7 @@
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-				(llobj 'id)))
+				(LLOBJ 'id)))
 
 		(define (describe)
 			(display (procedure-property add-report-api 'documentation)))
@@ -488,7 +488,7 @@
 
 		(define (help)
 			(format #t
-				(string-concatenate
+				(string-append
 "This is the `make-central-compute` object applied to the \"~A\"\n"
 "object.  It provides matrix-wide summary values characterizing the\n"
 "matrix\n"
@@ -497,7 +497,7 @@
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-				(llobj 'id)))
+				(LLOBJ 'id)))
 
 		(define (describe)
 			(display (procedure-property make-central-compute 'documentation)))

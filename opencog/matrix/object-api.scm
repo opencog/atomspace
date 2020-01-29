@@ -503,7 +503,7 @@
 
 		(define (help)
 			(format #t
-				(string-concatenate
+				(string-append
 "This is the `add-pair-stars` object applied to the \"~A\"\n"
 "object.  It provides row and column access methods (aka wildcard\n"
 "methods). This is a core utility, widely used to simplify iteration\n"
@@ -512,7 +512,7 @@
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-				(llobj 'id)))
+				(LLOBJ 'id)))
 
 		(define (describe)
 			(display (procedure-property add-pair-stars 'documentation)))
@@ -891,7 +891,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 
 	(define (help)
 		(format #t
-			(string-concatenate
+			(string-append
 "This is the `add-pair-pair-freq` object applied to the \"~A\"\n"
 "object.  It provides access to frequency, entropy and mutual information\n"
 "values attached to pairs (to matrix elements). It assumes that these have\n"
@@ -902,7 +902,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 "or just use the 'describe method on this object. You can also get at\n"
 "the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
-			(llobj 'id)))
+			(LLOBJ 'id)))
 
 	(define (describe)
 		(display (procedure-property add-pair-freq-api 'documentation)))
