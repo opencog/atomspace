@@ -349,6 +349,10 @@ std::string oc_to_string(const VarScraper& vsc,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const VariableTypeMap& vtm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const GlobIntervalMap& gim,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables& var,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Variables& var,

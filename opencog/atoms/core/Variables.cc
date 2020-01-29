@@ -1423,19 +1423,12 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// Simple typemap
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
-	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
-	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size();
-	unsigned i = 0;
-	for (const auto& v : _simple_typemap)
-	{
-		ss << std::endl << indent_p << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent_pp)
-		   << indent_p << "types[" << i << "]:";
-		for (auto& t : v.second)
-			ss << " " << nameserver().getTypeName(t);
-		i++;
-	}
+	ss << indent << "_simple_typemap:" << std::endl
+	   << oc_to_string(_simple_typemap, indent_p) << std::endl;
+
+	// Glob interval map
+	ss << indent << "_glob_intervalmap:" << std::endl
+	   << oc_to_string(_glob_intervalmap, indent_p);
 
 	return ss.str();
 }
@@ -1499,6 +1492,42 @@ std::string oc_to_string(const FreeVariables::IndexMap& imap,
 	for (const auto& el : imap) {
 		ss << std::endl << indent << "index[" << el.second << "]: "
 		   << el.first->id_to_string();
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const VariableTypeMap& vtm, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << vtm.size();
+	unsigned i = 0;
+	for (const auto& v : vtm)
+	{
+		ss << std::endl << indent << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "types[" << i << "]:";
+		for (auto& t : v.second)
+			ss << " " << nameserver().getTypeName(t);
+		i++;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const GlobIntervalMap& gim, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << gim.size();
+	unsigned i = 0;
+	for (const auto& v : gim)
+	{
+		ss << std::endl << indent << "glob[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "interval[" << i << "]: ";
+		double lo = v.second.first;
+		double up = v.second.second;
+		ss << ((0 <= lo and std::isfinite(lo)) ? "[" : "(") << lo << ", "
+		   << up << ((0 <= up and std::isfinite(up)) ? "]" : ")");
+		i++;
 	}
 	return ss.str();
 }
