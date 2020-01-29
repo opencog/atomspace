@@ -225,6 +225,33 @@
 		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
+			(define (oops)
+				(throw 'wrong-number-of-args 'add-report-api
+					(format #f "The '~A method does not expect any arguments!" message)))
+
+			; Error checking to avoid my own screw-ups.
+			(if (< 0 (length args))
+				(case message
+					((left-dim)            (oops))
+					((right-dim)           (oops))
+					((num-pairs)           (oops))
+
+					((left-entropy)        (oops))
+					((right-entropy)       (oops))
+					((total-entropy)       (oops))
+					((total-mi)            (oops))
+
+					((total-count)         (oops))
+					((left-support)        (oops))
+					((right-support)       (oops))
+					((left-count)          (oops))
+					((right-count)         (oops))
+					((left-length)         (oops))
+					((right-length)        (oops))
+					((left-rms-count)      (oops))
+					((right-rms-count)     (oops))
+				))
+
 			(case message
 				((left-dim)            (get-left-dim))
 				((right-dim)           (get-right-dim))
