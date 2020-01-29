@@ -504,13 +504,13 @@
 		(define (help)
 			(format #t
 				(string-concatenate
-"This is the `add-pair-stars` object applied to the \"~A\"
-"object.  It provides row and column access methods (aka wildcard"
-"methods). This is a core utility, widely used to simplify iteration"
-"over the rows and columns of the base object. For more information, say"
-"`,d add-pair-stars` or `,describe add-pair-stars` at the guile prompt,"
-"or just use the 'describe method on this object. You can also get at"
-"the base object with the 'base method: e.g. `((obj 'base) 'help)`."
+"This is the `add-pair-stars` object applied to the \"~A\"\n"
+"object.  It provides row and column access methods (aka wildcard\n"
+"methods). This is a core utility, widely used to simplify iteration\n"
+"over the rows and columns of the base object. For more information, say\n"
+"`,d add-pair-stars` or `,describe add-pair-stars` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
 				(llobj 'id)))
 
@@ -573,6 +573,7 @@
 					((provides)         (apply provides args))
 					((help)             (help))
 					((describe)         (describe))
+					((obj)              "add-pair-stars")
 					((base)             LLOBJ)
 					(else               (apply LLOBJ (cons message args))))
 			))))
@@ -886,6 +887,26 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (set-right-wild-mi ITEM MI FRMI)
 		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
 
+	;-------------------------------------------
+
+	(define (help)
+		(format #t
+			(string-concatenate
+"This is the `add-pair-pair-freq` object applied to the \"~A\"\n"
+"object.  It provides access to frequency, entropy and mutual information\n"
+"values attached to pairs (to matrix elements). It assumes that these have\n"
+"been previously computed; this object only fetches the values from well-\n"
+"known locations in the AtomSpace.\n"
+"\n"
+"For more information, say `,d add-pair-freq-api` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+			(llobj 'id)))
+
+	(define (describe)
+		(display (procedure-property add-pair-freq-api 'documentation)))
+
 	; ----------------------------------------------------
 	; Methods on this class.
 	(lambda (message . args)
@@ -921,6 +942,11 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 			((right-wild-mi)     (apply get-right-wild-mi args))
 			((right-wild-fmi)    (apply get-right-wild-fmi args))
 			((set-right-wild-mi) (apply set-right-wild-mi args))
+
+			((help)              (help))
+			((describe)          (describe))
+			((obj)               "add-pair-freq-api")
+			((base)              LLOBJ)
 
 			(else                (apply LLOBJ (cons message args)))))
 )
