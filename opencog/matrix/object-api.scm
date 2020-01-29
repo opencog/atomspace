@@ -196,17 +196,17 @@
 (define-public (add-pair-stars LLOBJ)
 "
   add-pair-stars LLOBJ - Extend LLOBJ with row and column access
-  methods (aka wildcard methods); specifically, to get all non-zero
-  elements in a given row or column.
+  methods (aka wildcard methods). This is a core utility, widely
+  used to simplify iteration over the rows and columns of LLOBJ.
 
   The supported methods are:
   'left-basis - Return all items (atoms) that can be used to index
-      a row in the matrix.  That is, given a matrix N(x,y), this
-      returns the set {x | (x,y) exists in the atomspace for some y}.
+      a row in the matrix.  That is, given a matrix `N(x,y)`, this
+      returns the set `{x | (x,y) exists in the atomspace for some y}`.
       All of the elements of this set will be atoms of type
-      (LLOBJ 'left-type).  A check is made to verify that (x,y) is
-      a valid pair, viz that it is an atom whose type is
-      (LLOBJ 'pair-type) and that y is of type (LLOBJ 'right-type).
+      `(LLOBJ 'left-type)`.  A check is made to verify that `(x,y)` is
+      a valid pair, viz. that it is an atom whose type is
+      `(LLOBJ 'pair-type)` and that `y` is of type `(LLOBJ 'right-type)`.
       This only verifies that such pairs exist in the atomspace; it
       does NOT verify that they have a nonzero count!
 
@@ -218,43 +218,40 @@
   'right-basis-size - Likewise.
 
   'left-duals COL - Return the set of rows for which the pair
-      (row, COL) exists in the atomspace.  That is, return the set
-          { x | (x,COL) exists in the atomspace }
-      The returned rows will all be of type (LLOBJ 'left-type).
-      The input COL atom must be of type (LLOBJ 'right-type).
+      `(row, COL)` exists in the atomspace.  That is, return the set
+          `{ x | (x,COL) exists in the atomspace }`
+      The returned rows will all be of type `(LLOBJ 'left-type)`.
+      The input COL atom must be of type `(LLOBJ 'right-type)`.
       This does NOT verify that these pairs have a non-zero count.
 
-  'right-duals ROW - Likewise, but returns the columns for (ROW, *).
+  'right-duals ROW - Likewise, but returns the columns for `(ROW, *)`.
 
-  'left-stars COL - Return the set of pairs (row, column) for
-      which the column is COL, and the pair exists in the atomspace.
+  'left-stars COL - Return the set of pairs `(row, column)` for
+      which the column is `COL`, and the pair exists in the atomspace.
       That is, return the set
          (*, COL) == { (x,COL) | (x,COL) exists in the atomspace }
-      The returned pairs will all be of type (LLOBJ 'pair-type),
-      and the x's will all be of type (LLOBJ 'left-type). The
-      input COL atom must be of type (LLOBJ 'right-type).  This does
+      The returned pairs will all be of type `(LLOBJ 'pair-type)`,
+      and the x's will all be of type `(LLOBJ 'left-type)`. The
+      input COL atom must be of type `(LLOBJ 'right-type)`.  This does
       NOT verify that these pairs have a non-zero count.
 
-  'right-stars ROW - Likewise, but returns the set (ROW, *).
+  'right-stars ROW - Likewise, but returns the set `(ROW, *)`.
 
   'get-all-elts - Return a list of all elements in the matrix.
       Caution: this may be very large, and thus take a long time to
       compute.  The result is not cached, so if you call this a second
       time, this list will be recomputed from scratch!
 
-  Note that for (define STARS (add-pair-stars LLOBJ))
+  Note that for `(define STARS (add-pair-stars LLOBJ))`
   the list returned by
-    (map (lambda (COL) (LLOBJ 'get-pair ROW COL)) (STARS 'right-duals ROW))
+    `(map (lambda (COL) (LLOBJ 'get-pair ROW COL)) (STARS 'right-duals ROW))`
   should be equal to the list
-    (STARS 'right-stars ROW)
+    `(STARS 'right-stars ROW)`
   and so this offers two different ways of iterating over the same
   list of pairs.
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'left-type, 'right-type and 'pair-type on it. It is assumed that
-  the pairs are arity-two links having the form
-     (pair-type (left-type right-type))
-  That is, the pair-type is the low-level pair type.
+  'left-type, 'right-type and 'pair-type on it.
 "
 	(let ((l-basis '())
 			(r-basis '())
@@ -504,6 +501,24 @@
 
 		;-------------------------------------------
 
+		(define (help)
+			(format #t
+				(string-concatenate
+"This is the `add-pair-stars` object applied to the \"~A\"
+"object.  It provides row and column access methods (aka wildcard"
+"methods). This is a core utility, widely used to simplify iteration"
+"over the rows and columns of the base object. For more information, say"
+"`,d add-pair-stars` or `,describe add-pair-stars` at the guile prompt,"
+"or just use the 'describe method on this object. You can also get at"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`."
+)
+				(llobj 'id)))
+
+		(define (describe)
+			(display (procedure-property add-pair-stars 'documentation)))
+
+		;-------------------------------------------
+
 		; Provide default methods, but only if the low-level object
 		; does not already provide them. In practice, this is used in
 		; two different ways: One is by the fold-api which overloads
@@ -556,6 +571,9 @@
 					((get-all-elts)     (f-get-all-elts))
 					((clobber)          (f-clobber))
 					((provides)         (apply provides args))
+					((help)             (help))
+					((describe)         (describe))
+					((base)             LLOBJ)
 					(else               (apply LLOBJ (cons message args))))
 			))))
 
