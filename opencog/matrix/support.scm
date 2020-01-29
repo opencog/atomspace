@@ -21,19 +21,27 @@
 	 #:optional (ID (LLOBJ 'id)))
 "
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
-  support, size and length subtotals on rows and columns. The values
-  are retrieved from the \"margins\", attached to the matrix wild-cards.
-  This class assumes the marginals were previously computed and
-  attached to the wildcards; this only grabs the precomputed values
-  from the atomspace.
+  support, count and length subtotals on rows and columns. It is assumed
+  that these have been previously computed, as described below.
 
-  The margins (the pre-computed values) can be populated by saying
-  `((add-support-compute LLOBJ) 'cache-all)`
+  See the documentation on `add-support-compute` for precise definitions
+  of \"support\", \"count\" and \"length\"; in breif, these are just the
+  l_0, l_1 and l_2 norms of the rows and columns.
+
+  This object is quite similar to the `add-report-api` object, having
+  many methods with the same name. The primary difference between these
+  two is that this object provides the **unweighted** support, count and
+  length subtotals, while `add-report-api` provides the weighted variants,
+  with the weighting being given by the frequency of the row/column
+  observations.
+
+  This object fetches precomputed values, fetched from the \"margins\"
+  of the matrix (i.e. attached to the matrix wild-cards.) These marginal
+  values must have been previously computed and attached to the wildcards.
+  This can be done by saying
+     `((add-support-compute LLOBJ) 'cache-all)`
   The `add-support-api` and `add-support-compute` API's are designed
   to work together and complement one-another.
-
-  See the documentation on `add-support-compute` for an explanation
-  of what these marginals are.
 
   Optional argument ID is #f to use the default value key; otherwise
   a filtered key is used. That is, the marginals are fetched from a
@@ -154,9 +162,10 @@
 		(format #t
 			(string-concatenate
 "This is the `add-support-api` object applied to the \"~A\"\n"
-"object.  It provides methods to access the support, size and length\n"
-"subtotals on rows and columns. It is assumed that these have been\n"
-"previously computed with the `add-support-compute` object.\n"
+"object.  It provides methods to access the support, count and length\n"
+"subtotals on rows and columns. See the documentation for\n"
+"`add-support-compute` for precise definitions of \"support\", \"count\"\n"
+"and \"length\".\n"
 "\n"
 "For more information, say `,d add-support-api` at the guile prompt,\n"
 "or just use the 'describe method on this object. You can also get at\n"
@@ -214,7 +223,15 @@
   or \"cached\") values; instead, all computations are done on the raw
   matrix data.  The computed norms are not placed back into the
   atomspace after being computed (unless the 'cache-all method is
-  invoked, in which case a bulk computation is done.)
+  invoked, in which case a bulk computation is done.) Cached values
+  can be access with the `add-support-api` object.
+
+  This object is similar to, but differs from the `make-central-compute`
+  object, which provides many mehtods having the smae names. The main
+  difference between these two is that this object computes the
+  unweighted lp-norms, whereas the other one weights these norms by
+  the row/column frequencies. See below, and the documentation on
+  `make-central-compute` for precise defintions.
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
