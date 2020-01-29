@@ -148,6 +148,25 @@
 	(define (get-wild-wild-count)
 		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
 
+	;-------------------------------------------
+
+	(define (help)
+		(format #t
+			(string-concatenate
+"This is the `add-support-api` object applied to the \"~A\"\n"
+"object.  It provides methods to access the support, size and length\n"
+"subtotals on rows and columns. It is assumed that these have been\n"
+"previously computed with the `add-support-compute` object.\n"
+"\n"
+"For more information, say `,d add-support-api` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+			(llobj 'id)))
+
+	(define (describe)
+		(display (procedure-property add-support-api 'documentation)))
+
 	;--------
 	; Methods on this class.
 	(lambda (message . args)
@@ -172,6 +191,12 @@
 			((set-right-norms)    (apply set-right-norms args))
 			((set-left-totals)    (apply set-left-totals args))
 			((set-right-totals)   (apply set-right-totals args))
+
+			((help)               (help))
+			((describe)           (describe))
+			((obj)                "add-support-api")
+			((base)               LLOBJ)
+
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
@@ -476,6 +501,26 @@
 			(all-left-marginals)
 			(all-right-marginals))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-concatenate
+"This is the `add-support-compute` object applied to the \"~A\"\n"
+"object.  It provides methods to compute the support, size and length\n"
+"subtotals on rows and columns. It is recommended that this object be\n"
+"used only to precompute and cache these values, which can then be more\n"
+"quickly accessed with the `add-support-api` object.\n"
+"\n"
+"For more information, say `,d add-support-compute` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(llobj 'id)))
+
+		(define (describe)
+			(display (procedure-property add-support-compute 'documentation)))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -507,6 +552,12 @@
 ; the language-learning clustering code uses this
 ; to invalidate the star objects in use.
 				((clobber)            (star-obj 'clobber))
+
+				((help)               (help))
+				((describe)           (describe))
+				((obj)                "add-support-compute")
+				((base)               LLOBJ)
+
 				(else                 (apply LLOBJ (cons message args))))
 			)))
 
