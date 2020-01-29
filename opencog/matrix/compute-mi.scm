@@ -344,7 +344,12 @@
 							(define pr-freq (frqobj 'pair-freq lipr))
 							(define pr-logli (frqobj 'pair-logli lipr))
 
-							(if (< 0 (supobj 'left-count right-item))
+							; It would be nicer to check the count here, not
+							; the freq, because the count is an integer. But,
+							; unfortunately, we don't know which count this
+							; might have come from. (Perhaps it should be
+							; cached, when the frequency is computed?)
+							(if (< 0 pr-freq)
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi)))

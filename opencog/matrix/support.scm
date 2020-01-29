@@ -21,19 +21,25 @@
 	 #:optional (ID (LLOBJ 'id)))
 "
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
-  support, size and length subtotals on rows and columns. The values
-  are retrieved from the \"margins\", attached to the matrix wild-cards.
-  This class assumes the marginals were previously computed and
-  attached to the wildcards; this only grabs the precomputed values
-  from the atomspace.
+  support, count and length subtotals on rows and columns. It is assumed
+  that these have been previously computed, as described below.
 
-  The margins (the pre-computed values) can be populated by saying
-  `((add-support-compute LLOBJ) 'cache-all)`
+  See the documentation on `add-support-compute` for precise definitions
+  of \"support\", \"count\" and \"length\"; in breif, these are just the
+  l_0, l_1 and l_2 norms of the rows and columns.
+
+  This object provides per-row/per-column values for support, count and
+  length.  The `add-report-api` has methods with similar, or the same
+  names, but it provides matrix-wide averages (i.e. averaged over all
+  rows and columns).
+
+  This object fetches precomputed values, fetched from the \"margins\"
+  of the matrix (i.e. attached to the matrix wild-cards.) These marginal
+  values must have been previously computed and attached to the wildcards.
+  This can be done by saying
+     `((add-support-compute LLOBJ) 'cache-all)`
   The `add-support-api` and `add-support-compute` API's are designed
   to work together and complement one-another.
-
-  See the documentation on `add-support-compute` for an explanation
-  of what these marginals are.
 
   Optional argument ID is #f to use the default value key; otherwise
   a filtered key is used. That is, the marginals are fetched from a
@@ -148,6 +154,26 @@
 	(define (get-wild-wild-count)
 		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
 
+	;-------------------------------------------
+
+	(define (help)
+		(format #t
+			(string-append
+"This is the `add-support-api` object applied to the \"~A\"\n"
+"object.  It provides methods to access the support, count and length\n"
+"subtotals on rows and columns. See the documentation for\n"
+"`add-support-compute` for precise definitions of \"support\", \"count\"\n"
+"and \"length\".\n"
+"\n"
+"For more information, say `,d add-support-api` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+			(LLOBJ 'id)))
+
+	(define (describe)
+		(display (procedure-property add-support-api 'documentation)))
+
 	;--------
 	; Methods on this class.
 	(lambda (message . args)
@@ -172,6 +198,12 @@
 			((set-right-norms)    (apply set-right-norms args))
 			((set-left-totals)    (apply set-left-totals args))
 			((set-right-totals)   (apply set-right-totals args))
+
+			((help)               (help))
+			((describe)           (describe))
+			((obj)                "add-support-api")
+			((base)               LLOBJ)
+
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
@@ -189,7 +221,12 @@
   or \"cached\") values; instead, all computations are done on the raw
   matrix data.  The computed norms are not placed back into the
   atomspace after being computed (unless the 'cache-all method is
-  invoked, in which case a bulk computation is done.)
+  invoked, in which case a bulk computation is done.) Cached values
+  can be access with the `add-support-api` object.
+
+  This object provides per-row/per-column values for these quantities.
+  The `make-central-compute` object has methods with similar or the
+  same names; they provide the matrix-wide averages.
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
@@ -476,6 +513,26 @@
 			(all-left-marginals)
 			(all-right-marginals))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-support-compute` object applied to the \"~A\"\n"
+"object.  It provides methods to compute the support, size and length\n"
+"subtotals on rows and columns. It is recommended that this object be\n"
+"used only to precompute and cache these values, which can then be more\n"
+"quickly accessed with the `add-support-api` object.\n"
+"\n"
+"For more information, say `,d add-support-compute` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(LLOBJ 'id)))
+
+		(define (describe)
+			(display (procedure-property add-support-compute 'documentation)))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -507,6 +564,12 @@
 ; the language-learning clustering code uses this
 ; to invalidate the star objects in use.
 				((clobber)            (star-obj 'clobber))
+
+				((help)               (help))
+				((describe)           (describe))
+				((obj)                "add-support-compute")
+				((base)               LLOBJ)
+
 				(else                 (apply LLOBJ (cons message args))))
 			)))
 

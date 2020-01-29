@@ -4,18 +4,6 @@
 ; Define API providing overview of the correlation matrix.
 ;
 ; Copyright (c) 2017 Linas Vepstas
-;
-; ---------------------------------------------------------------------
-; OVERVIEW
-; --------
-; Each correlation matrix has a size - the left and right dimensions, aka
-; the number of rows and columns.  These are returned by 'left-dim and
-; 'right-dim.
-;
-; Each matrix is sparse, and has only a small number of non-zero
-; entries. These are returned by 'num-pairs.
-;
-; And so on. See documentation below.
 
 ; ---------------------------------------------------------------------
 
@@ -35,9 +23,9 @@
   of non-zero entries in the matrix), the left, right and total
   entropies and the total mutual information.
 
-  Here, the LLOBJ is expected to be an object, with the 'wild-wild
-  method on it.  This is the atom on which these summaries will be
-  stored.
+  It is presumed that the entropies have been previously computed,
+  with the `make-compute-freq`, the `make-all-pair-mi` and the
+  `make-central-compute` objects.
 
   The optional ID argument should be #f or a string, used to construct
   the key under which the values are stored.
@@ -60,6 +48,11 @@
   support of each column (i.e. is the average of all 'left-supports).
   The weight is the probability of that column, i.e. is P(*,y) viz
   it is the 'left-freq or 'left-count/total.
+
+  Note that the `add-support-api` also provides methods with the same
+  names. This object provides matrix-wide averages of the support,
+  count and length, whereas that object provides per-row/per-column
+  values of each.
 
   'left-support     -- average (over columns) l_0 norm of columns
   'left-count       -- average l_1 norm of columns
@@ -229,9 +222,54 @@
 		; ----------------------------------------------------
 		(define (get-total-count) (supobj 'wild-wild-count))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-report-api` object applied to the \"~A\"\n"
+"object.  It provides matrix-wide summary values characterizing the\n"
+"matrix\n"
+"\n"
+"For more information, say `,d add-report-api` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(LLOBJ 'id)))
+
+		(define (describe)
+			(display (procedure-property add-report-api 'documentation)))
+
 		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
+			(define (oops)
+				(throw 'wrong-number-of-args 'add-report-api
+					(format #f "The '~A method does not expect any arguments!" message)))
+
+			; Error checking to avoid my own screw-ups.
+			(if (< 0 (length args))
+				(case message
+					((left-dim)            (oops))
+					((right-dim)           (oops))
+					((num-pairs)           (oops))
+
+					((left-entropy)        (oops))
+					((right-entropy)       (oops))
+					((total-entropy)       (oops))
+					((total-mi)            (oops))
+
+					((total-count)         (oops))
+					((left-support)        (oops))
+					((right-support)       (oops))
+					((left-count)          (oops))
+					((right-count)         (oops))
+					((left-length)         (oops))
+					((right-length)        (oops))
+					((left-rms-count)      (oops))
+					((right-rms-count)     (oops))
+				))
+
 			(case message
 				((left-dim)            (get-left-dim))
 				((right-dim)           (get-right-dim))
@@ -258,6 +296,10 @@
 				((set-left-norms)      (apply set-left-norms args))
 				((set-right-norms)     (apply set-right-norms args))
 
+				((help)                (help))
+				((describe)            (describe))
+				((obj)                 "add-report-api")
+				((base)                LLOBJ)
 				(else                  (apply LLOBJ (cons message args)))
 			))
 	)
@@ -274,7 +316,8 @@
   The stats include the weighted-average support, count and length of
   rows and columns. The weighted-average is the frequency-weighted
   average: So, for example, if a row is very long, but is very rarely
-  seen, then it will not contribute much to the average.
+  seen, then it will not contribute much to the average. See the
+  documentation on `add-report-api` for precise defintions.
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
@@ -441,6 +484,24 @@
 
 		(define (cache-all) (cache-left) (cache-right))
 
+		;-------------------------------------------
+
+		(define (help)
+			(format #t
+				(string-append
+"This is the `make-central-compute` object applied to the \"~A\"\n"
+"object.  It provides matrix-wide summary values characterizing the\n"
+"matrix\n"
+"\n"
+"For more information, say `,d make-central-compute` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+				(LLOBJ 'id)))
+
+		(define (describe)
+			(display (procedure-property make-central-compute 'documentation)))
+
 		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -456,6 +517,11 @@
 				((cache-left)        (cache-left))
 				((cache-right)       (cache-right))
 				((cache-all)         (cache-all))
+
+				((help)              (help))
+				((describe)          (describe))
+				((obj)               "make-central-compute")
+				((base)              LLOBJ)
 
 				(else                (apply LLOBJ (cons message args)))
 			))
