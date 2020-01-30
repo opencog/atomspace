@@ -709,7 +709,7 @@ void Variables::get_vartype(const Handle& htypelink)
 		Type vt = TypeNodeCast(vartype)->get_kind();
 		TypeSet ts;
 		TypeSet::iterator it = ts.begin();
-		nameserver().getChildren(vt, std::inserter(ts, it));
+		nameserver().getChildrenRecursive(vt, std::inserter(ts, it));
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CO_INH_NODE == t)
