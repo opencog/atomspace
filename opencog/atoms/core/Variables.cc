@@ -737,6 +737,17 @@ void Variables::get_vartype(const Handle& htypelink)
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt) typeset.insert(vt);
 			}
+			else if (TYPE_INH_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt)
+				{
+					TypeSet ts;
+					auto i_it = std::inserter(ts, ts.begin());
+					nameserver().getChildrenRecursive(vt, i_it);
+					typeset.insert(ts.begin(), ts.end());
+				}
+			}
 			else if (SIGNATURE_LINK == var_type)
 			{
 				const HandleSeq& sig = ht->getOutgoingSet();
