@@ -12,7 +12,9 @@
 // CamelCase names).
 // ===========================================================
 
-// Special type designating that no atom type has been assigned.
+// Special type designating that no atom type has been assigned. It is
+// equivalent to the bottom type in type theory, see
+// https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
 
 // --------------------------------------------------------------
