@@ -11,6 +11,9 @@ MESSAGE(STATUS "Setting python RPATH to ${PYTHON_DEST}")
 SET(CMAKE_SHARED_LINKER_FLAGS
 	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${PYTHON_DEST}")
 SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+SET(CMAKE_INSTALL_RPATH
+   "${CMAKE_INSTALL_PREFIX}/lib/opencog"
+   "${PYTHON_DEST}")
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -128,6 +131,7 @@ TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
 	atomspace
 	type_constructors
+	executioncontext
 	${PYTHON_LIBRARIES}
 )
 

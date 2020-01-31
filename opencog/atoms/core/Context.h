@@ -97,7 +97,8 @@ struct Context : public boost::totally_ordered<Context>
 
 	/**
 	 * Return true iff the given atom in that context is a free
-	 * variable, that is unquoted and unshadowed.
+	 * variable (VariableNode or GlobNode), that is unquoted and
+	 * unshadowed.
 	 */
 	bool is_free_variable(const Handle& h) const;
 

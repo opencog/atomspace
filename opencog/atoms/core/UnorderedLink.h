@@ -54,7 +54,10 @@ class UnorderedLink : public Link
 public:
 	UnorderedLink(const HandleSeq&, Type=UNORDERED_LINK);
 	UnorderedLink(const HandleSet&, Type=UNORDERED_LINK);
-	UnorderedLink(const Link &l);
+	UnorderedLink(const UnorderedLink&) = delete;
+	UnorderedLink& operator=(const UnorderedLink&) = delete;
+
+	virtual bool is_unordered_link() const { return true; }
 
 	static Handle factory(const Handle&);
 };

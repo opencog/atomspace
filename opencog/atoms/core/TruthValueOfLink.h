@@ -37,7 +37,8 @@ class TruthValueOfLink : public ValueOfLink
 {
 public:
 	TruthValueOfLink(const HandleSeq&, Type=TRUTH_VALUE_OF_LINK);
-	TruthValueOfLink(const Link &l);
+	TruthValueOfLink(const TruthValueOfLink &) = delete;
+	TruthValueOfLink operator=(const TruthValueOfLink &) = delete;
 
 	// Return a pointer to the extracted value.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -62,7 +63,8 @@ class StrengthOfLink : public ValueOfLink
 {
 public:
 	StrengthOfLink(const HandleSeq&, Type=STRENGTH_OF_LINK);
-	StrengthOfLink(const Link &l);
+	StrengthOfLink(const StrengthOfLink&) = delete;
+	StrengthOfLink& operator=(const StrengthOfLink&) = delete;
 
 	// Return a pointer to the extracted value.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -87,7 +89,8 @@ class ConfidenceOfLink : public ValueOfLink
 {
 public:
 	ConfidenceOfLink(const HandleSeq&, Type=CONFIDENCE_OF_LINK);
-	ConfidenceOfLink(const Link &l);
+	ConfidenceOfLink(const ConfidenceOfLink&) = delete;
+	ConfidenceOfLink operator=(const ConfidenceOfLink&) = delete;
 
 	// Return a pointer to the extracted value.
 	virtual ValuePtr execute(AtomSpace*, bool);

@@ -22,12 +22,16 @@
 
 #ifndef _OPENCOG_UTILITIES_H
 #define _OPENCOG_UTILITIES_H
+#include "opencog/atoms/base/Handle.h"
 
 
 namespace opencog {
 
-void initialize_python(AtomSpace*);
+void initialize_python();
 void finalize_python();
+Handle add_node(Type t, const std::string& name="");
+Handle add_link(Type t, const HandleSeq& outgoing);
+
 
 } // namespace opencog
 

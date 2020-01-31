@@ -24,9 +24,9 @@
 #ifndef _OPENCOG_LINK_H
 #define _OPENCOG_LINK_H
 
+#include <functional>
 #include <string>
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 
@@ -51,6 +51,7 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&);
+    void init(const HandleSeq&&);
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -76,64 +77,44 @@ public:
         init(oset);
     }
 
+    Link(const HandleSeq&& oset, Type t=LINK)
+        : Atom(t)
+    {
+        init(std::move(oset));
+    }
+
     Link(Type t)
         : Atom(t)
     {
-        HandleSeq oset;
-        init(oset);
+        init({});
     }
 
 	Link(Type t, const Handle& h)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(1);
-        oset[0] = h;
-        init(oset);
+        init({h});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(2);
-        oset[0] = ha;
-        oset[1] = hb;
-        init(oset);
+        init({ha, hb});
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(3);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        init(oset);
+        init({ha, hb, hc});
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
         : Atom(t)
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(4);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        oset[3] = hd;
-        init(oset);
+        init({ha, hb, hc, hd});
     }
 
-    /**
-     * Copy constructor, does NOT copy atomspace membership,
-     * or any of the values or truth values.
-     */
-    Link(const Link &l)
-        : Atom(l.get_type())
-    {
-        init(l.getOutgoingSet());
-    }
+    Link(const Link&) = delete;
+    Link& operator=(const Link&) = delete;
 
     /**
      * Destructor for this class.
@@ -149,7 +130,7 @@ public:
 
     virtual size_t size() const {
         size_t size = 1;
-        for (const Handle&h : _outgoing)
+        for (const Handle& h : _outgoing)
             size += h->size();
         return size;
     }
@@ -173,12 +154,7 @@ public:
      */
     virtual Handle getOutgoingAtom(Arity pos) const
     {
-        // Checks for a valid position
-        if (pos < _outgoing.size()) {
-            return Handle(AtomCast(_outgoing[pos]));
-        } else {
-            throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
-        }
+        return _outgoing.at(pos);
     }
 
     //! Invoke the callback on each atom in the outgoing set of
@@ -245,6 +221,7 @@ public:
     void check_outgoing_type(int index, const Type& type);
 };
 
+typedef std::shared_ptr<Link> LinkPtr;
 static inline LinkPtr LinkCast(const Handle& h)
     { return std::dynamic_pointer_cast<Link>(h); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
@@ -253,12 +230,25 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
 template< class... Args >
 Handle createLink( Args&&... args )
 {
-	// Do we need to say (std::forward<Args>(args)...) instead ???
-	LinkPtr tmp(std::make_shared<Link>(args ...));
-	return classserver().factory(tmp->get_handle());
+	Handle tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
+	return classserver().factory(tmp);
 }
 
 /** @}*/
 } // namespace opencog
+
+/// Overload std::less to perform a content-based compare of the
+/// LinkPtr's. Otherwise, it seems to just use the address returned
+/// by LinkPtr::get().
+namespace std {
+template<>
+struct less<opencog::LinkPtr>
+{
+    bool operator()(const opencog::LinkPtr& la, const opencog::LinkPtr& lb) const
+    {
+        return la->operator<(*lb);
+    }
+};
+}
 
 #endif // _OPENCOG_LINK_H

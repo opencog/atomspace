@@ -7,14 +7,14 @@
 (define get-mouse
 	(GetLink (Variable "x")
 		(And
-			(Inheritance (Variable "x") (Concept "animal"))
+			(Present (Inheritance (Variable "x") (Concept "animal")))
 
 			; This nested Satsifaction should be treated as
 			; an evaluatable clause by the pattern matcher,
 			; and should be evaluated on demand.
 			(Satisfaction (Variable "y")
 				(And
-					(Inheritance (Variable "x") (Variable "y"))
+					(Present (Inheritance (Variable "x") (Variable "y")))
 					(Equal (Variable "y") (Concept "mammal"))
 				))
 		))
@@ -26,12 +26,12 @@
 (define get-snail
 	(GetLink (Variable "x")
 		(And
-			(Inheritance (Variable "x") (Concept "animal"))
+			(Present (Inheritance (Variable "x") (Concept "animal")))
 
 			; Find some inheritance relation that is not already known.
 			(Satisfaction (Variable "y")
 				(And
-					(Inheritance (Variable "x") (Variable "y"))
+					(Present (Inheritance (Variable "x") (Variable "y")))
 					(Not (Equal (Variable "y") (Concept "animal")))
 					(Not (Equal (Variable "y") (Concept "mammal")))
 					(Not (Equal (Variable "y") (Concept "cephalopod")))
@@ -51,16 +51,19 @@
 			(TypedVariable (Variable "x") (Type 'ConceptNode))
 			(TypedVariable (Variable "y") (Type 'ConceptNode)))
 		(And
-			(Inheritance (Variable "x") (Concept "animal"))
-			(Inheritance (Variable "y") (Concept "animal"))
+			(Present (Inheritance (Variable "x") (Concept "animal")))
+			(Present (Inheritance (Variable "x") (Concept "mammal")))
+			(Present (Inheritance (Variable "y") (Concept "animal")))
 			(Not (Equal (Variable "x") (Variable "y")))
 
-			; Satisfiable, because they are both animals.
+			; Satisfiable, because there are InheritanceLinks
+			; that both x and y inherit from (both are animals).
 			(Satisfaction (Variable "z")
 				(And
-					(Inheritance (Variable "x") (Variable "z"))
-					(Inheritance (Variable "y") (Variable "z"))
-					(Inheritance (Variable "x") (Concept "mammal"))
+					(Present (Inheritance (Variable "x") (Variable "z")))
+					(Present (Inheritance (Variable "y") (Variable "z")))
 				))
 		))
 )
+
+*unspecified*

@@ -234,7 +234,8 @@ void MultiUserUTest::tearDown(void)
 
 void MultiUserUTest::kill_data(void)
 {
-    SQLAtomStorage* astore = new SQLAtomStorage(uri);
+    SQLAtomStorage* astore = new SQLAtomStorage();
+    astore->open(uri);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");

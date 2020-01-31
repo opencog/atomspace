@@ -45,7 +45,7 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
-	const HandleMap *_vmap;
+	const GroundingMap *_vmap;
 	bool _halt;
 
 	/**
@@ -135,7 +135,7 @@ public:
 	}
 
 	ValuePtr instantiate(const Handle& expr,
-	                     const HandleMap& vars,
+	                     const GroundingMap& vars,
 	                     bool silent=false);
 
 	ValuePtr execute(const Handle& expr, bool silent=false);

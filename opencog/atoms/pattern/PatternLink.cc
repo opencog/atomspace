@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/range/algorithm/find_if.hpp>
-
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -39,8 +39,6 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.unquoted_clauses);
-	locate_globs(_pat.unquoted_clauses);
-	locate_globs(_pat.quoted_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -56,15 +54,17 @@ void PatternLink::common_init(void)
 	HandleSeq all_clauses(_pat.unquoted_clauses);
 	all_clauses.insert(all_clauses.end(),
 	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
-	validate_variables(_varlist.varset, all_clauses);
+	validate_variables(_variables.varset, all_clauses);
 
-	remove_constants(_varlist.varset, _pat);
+	remove_constants(_variables.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
@@ -94,12 +94,12 @@ void PatternLink::common_init(void)
 	}
 
 	// Split the non-virtual clauses into connected components
-	get_bridged_components(_varlist.varset, _fixed, _pat.optionals,
+	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
 	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
-	check_satisfiability(_varlist.varset, _component_vars);
+	check_satisfiability(_variables.varset, _component_vars);
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -127,8 +127,8 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
-		                           _varlist._glob_intervalmap, _components[i],
+		Handle h(createPatternLink(_component_vars[i], _variables._simple_typemap,
+		                           _variables._glob_intervalmap, _components[i],
 		                           _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -171,7 +171,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 {
 	_pat.redex_name = "jit PatternLink";
 
-	_varlist = vars;
+	_variables = vars;
 	_body = body;
 	unbundle_clauses(_body);
 	common_init();
@@ -196,17 +196,17 @@ PatternLink::PatternLink(const HandleSet& vars,
 	// called on us, not directly, at least.  If we need it, then the
 	// API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
-	_varlist.varset = vars;
-	_varlist.varseq.clear();
+	_variables.varset = vars;
+	_variables.varseq.clear();
 	for (const Handle& v : vars)
 	{
-		_varlist.varseq.emplace_back(v);
+		_variables.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_varlist._simple_typemap.insert(*it);
+			_variables._simple_typemap.insert(*it);
 		auto imit = intervalmap.find(v);
 		if (imit != intervalmap.end())
-			_varlist._glob_intervalmap.insert(*imit);
+			_variables._glob_intervalmap.insert(*imit);
 	}
 
 	// Next, the body... there's no _body for lambda. The compo is
@@ -214,7 +214,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	for (const Handle& h : compo)
 	{
 		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
-		auto it = boost::find_if(opts, h_is_in);
+		auto it = std::find_if(opts.begin(), opts.end(), h_is_in);
 		if (it != opts.end())
 		{
 			_pat.optionals.emplace_back(*it);
@@ -225,7 +225,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 		}
 	}
 	locate_defines(compo);
-	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
@@ -253,7 +252,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
-	_varlist.varset = vars;
+	_variables.varset = vars;
 	_pat.unquoted_clauses = clauses;
 	_pat.mandatory = clauses;
 	common_init();
@@ -288,24 +287,6 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 	// QueryLink, BindLink use a different initialization sequence.
 	if (nameserver().isA(t, QUERY_LINK)) return;
 	if (DUAL_LINK == t) return;
-	init();
-}
-
-PatternLink::PatternLink(const Link& l)
-	: PrenexLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, PATTERN_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a PatternLink, got %s", tname.c_str());
-	}
-
-	// QueryLink, BindLink use a different initialization sequence.
-	if (nameserver().isA(tscope, QUERY_LINK)) return;
-	if (DUAL_LINK == tscope) return;
 	init();
 }
 
@@ -470,22 +451,40 @@ void PatternLink::locate_defines(const HandleSeq& clauses)
 	}
 }
 
-void PatternLink::locate_globs(const HandleSeq& clauses)
+/* ================================================================= */
+/**
+ * Locate cacheable clauses. These are clauses whose groundings can be
+ * cached for later re-use. To qualify for being cacheable, the clause
+ * must not contain any evaluatable terms (as that would result in a
+ * changing grounding), cannot contain any unordered or choice links
+ * (as these have multiple groundings) and the clause can only contain
+ * one variable (there is no use-cases for two or more variables, at
+ * this time. Similarly, no Globs either.)
+ *
+ * Caching is used to "prune" or "cut" clauses during search; once the
+ * joining variable is known, the "up" exploration can be skipped, and
+ * pruned clause re-attached with the known grounding.
+ *
+ * This is kind-of the opposite of `is_virtual()`.
+ */
+void PatternLink::locate_cacheable(const HandleSeq& clauses)
 {
-	for (const Handle& clause: clauses)
+	for (const Handle& claw: clauses)
 	{
-		FindAtoms fgn(GLOB_NODE, true);
-		fgn.search_set(clause);
+		// Skip over anything unsuitable.
+		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
 
-		for (const Handle& sh : fgn.least_holders)
-		{
-			_pat.globby_terms.insert(sh);
-		}
+// XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
+// which means we need to have terms, here ...
+		// if (claw->hasAnyGlobbyVar()) continue;
+		// black terms are evalutable; no need to do it twice.
+		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
-		for (const Handle& h : fgn.holders)
-		{
-			_pat.globby_holders.insert(h);
-		}
+		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
+		if (contains_atomtype(claw, CHOICE_LINK)) continue;
+
+		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+			_pat.cacheable_clauses.insert(claw);
 	}
 }
 
@@ -547,7 +546,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 ///
 bool PatternLink::is_virtual(const Handle& clause)
 {
-	size_t nfree = num_unquoted_unscoped_in_tree(clause, _varlist.varset);
+	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
 
 	size_t nsub = 0;
@@ -555,7 +554,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 	size_t nvar = 0;
 	for (const Handle& sub: clause->getOutgoingSet())
 	{
-		size_t nv = num_unquoted_unscoped_in_tree(sub, _varlist.varset);
+		size_t nv = num_unquoted_unscoped_in_tree(sub, _variables.varset);
 		if (0 < nv)
 		{
 			nsub++;
@@ -623,21 +622,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 	{
 		bool is_virtu = false;
 		bool is_black = false;
-
-#ifdef BROKEN_DOESNT_WORK
-// The below should have worked to set things up, but it doesn't,
-// and I'm too lazy to investigate, because an alternate hack is
-// working, at the moment.
-		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaluatable, so that we can evaluate
-		// it later.
-		if (VARIABLE_NODE == clause->get_type())
-		{
-			_pat.evaluatable_terms.insert(clause);
-			add_to_map(_pat.in_evaluatable, clause, clause);
-			is_black = true;
-		}
-#endif
 
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.stopset.insert(SCOPE_LINK);
@@ -735,14 +719,14 @@ bool PatternLink::add_dummies()
 		    IDENTICAL_LINK == tt)
 		{
 			const Handle& left = t->getOutgoingAtom(0);
-			if (any_free_in_tree(left, _varlist.varset))
+			if (any_free_in_tree(left, _variables.varset))
 			{
 				_pat.mandatory.emplace_back(left);
 				_fixed.emplace_back(left);
 			}
 
 			const Handle& right = t->getOutgoingAtom(1);
-			if (any_free_in_tree(right, _varlist.varset))
+			if (any_free_in_tree(right, _variables.varset))
 			{
 				_pat.mandatory.emplace_back(right);
 				_fixed.emplace_back(right);
@@ -856,27 +840,29 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.always)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           Handle h,
+                                           const Handle& term,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
-	h = ptm->getHandle();
+	PatternTermPtr ptm(createPatternTerm(parent, term));
+
+	// `h` is usually the same as `term`, unless there's quotation.
+	Handle h(ptm->getHandle());
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
@@ -887,11 +873,16 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
 	    and not ptm->getQuotation().is_quoted()
-	    and _varlist.varset.end() != _varlist.varset.find(h))
+	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		if (GLOB_NODE == t) ptm->addGlobbyVar();
 		return;
 	}
+
+	// If the term is unordered, all parents must know about it.
+	if (nameserver().isA(t, UNORDERED_LINK))
+		ptm->addUnorderedLink();
 
 	if (h->is_link())
 	{
@@ -913,13 +904,13 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 	// them out.
 	std::stringstream ss;
 	ss << "Pattern is not connected! Found "
-	   << components.size() << " components:\n";
+	   << components.size() << " components:";
 	int cnt = 1;
 	for (const auto& comp : components)
 	{
-		ss << "Connected component " << cnt
-		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->to_string();
+		ss << std::endl << "Connected component " << cnt
+		   << " consists of ----------------:";
+		for (Handle h : comp) ss << std::endl << h->to_string();
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
@@ -987,13 +978,13 @@ void PatternLink::debug_log(void) const
 		logger().fine("No always clauses");
 
 	// Print out the bound variables in the predicate.
-	for (const Handle& h : _varlist.varset)
+	for (const Handle& h : _variables.varset)
 	{
 		if (h->is_node())
 			logger().fine() << "Bound var: " << h->to_short_string();
 	}
 
-	if (_varlist.varset.empty())
+	if (_variables.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
 }
 
@@ -1017,7 +1008,7 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 	ss << indent << "_component_vars:" << std::endl
 	   << oc_to_string(_component_vars, indent_p) << std::endl;
 	ss << indent << "_component_patterns:" << std::endl
-	   << oc_to_string(_component_patterns, indent_p) << std::endl;
+	   << oc_to_string(_component_patterns, indent_p);
 	return ss.str();
 }
 

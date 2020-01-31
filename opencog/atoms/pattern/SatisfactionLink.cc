@@ -46,12 +46,6 @@ SatisfactionLink::SatisfactionLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-SatisfactionLink::SatisfactionLink(const Link &l)
-	: PatternLink(l)
-{
-	init();
-}
-
 TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;

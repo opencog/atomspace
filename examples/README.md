@@ -19,4 +19,5 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 * python        - Python usage examples.
 * haskell       - Haskell usage examples.
 
-* c++-guile     - Example of how to create a guile wrapper for C++ code.
+* c++           - Example CMakefile and demos for C++ code.
+* c++-guile     - Creating guile wrappers for C++ code.

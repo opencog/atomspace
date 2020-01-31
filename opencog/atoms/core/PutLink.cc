@@ -34,12 +34,6 @@ PutLink::PutLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-PutLink::PutLink(const Link& l)
-    : PrenexLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 
 /// PutLink expects a very strict format: an arity-2 link, with
@@ -97,7 +91,13 @@ void PutLink::init(void)
 		_arguments = _outgoing[1];
 	}
 	else
+	{
+		// ScopeLink::extract_variables does not assign _vardecl and
+		// _body if variable declaration is unquoted. (Re)do it here.
+		_vardecl = _outgoing[0];
+		_body = _outgoing[1];
 		_arguments = _outgoing[2];
+	}
 
 	static_typecheck_arguments();
 }
@@ -153,10 +153,10 @@ void PutLink::static_typecheck_arguments(void)
 		}
 	}
 
-	size_t sz = _varlist.varseq.size();
+	size_t sz = _variables.varseq.size();
 	if (1 == sz)
 	{
-		if (not _varlist.is_type(valley)
+		if (not _variables.is_type(valley)
 		    and SET_LINK != vtype
 		    and PUT_LINK != vtype
 		    and not (nameserver().isA(vtype, SATISFYING_LINK)))
@@ -168,7 +168,7 @@ void PutLink::static_typecheck_arguments(void)
 			{
 				LambdaLinkPtr lam(LambdaLinkCast(valley));
 				const Handle& body = lam->get_body();
-				if (_varlist.is_type(body))
+				if (_variables.is_type(body))
 					return; // everything is OK.
 			}
 
@@ -188,7 +188,7 @@ void PutLink::static_typecheck_arguments(void)
 	{
 		// is_type() verifies that the arity of the vars
 		// and the arguments matches up.
-		if (not _varlist.is_type(valley->getOutgoingSet()))
+		if (not _variables.is_type(valley->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
@@ -231,7 +231,7 @@ void PutLink::static_typecheck_arguments(void)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected argument list!");
 
-			if (not _varlist.is_type(h->getOutgoingSet()))
+			if (not _variables.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink bad argument list!");
 		}
@@ -241,7 +241,7 @@ void PutLink::static_typecheck_arguments(void)
 	// If the arity is one, the arguments must obey type constraint.
 	for (const Handle& h : valley->getOutgoingSet())
 	{
-		if (not _varlist.is_type(h))
+		if (not _variables.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
 					"PutLink bad type!");
 	}
@@ -335,7 +335,7 @@ static inline Handle expand(const Handle& arg, bool silent)
 Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
-	Variables vars(_varlist);
+	Variables vars(_variables);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 	Handle args(_arguments);
 
@@ -397,14 +397,14 @@ Handle PutLink::do_reduce(void) const
 			HandleSeq oset(bods->getOutgoingSet());
 			for (const Handle& arg : args->getOutgoingSet())
 				oset.emplace_back(expand(arg, _silent));
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			oset.emplace_back(args);
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
@@ -416,16 +416,16 @@ Handle PutLink::do_reduce(void) const
 				HandleSeq oset(bods->getOutgoingSet());
 				for (const Handle& arg : h->getOutgoingSet())
 					oset.emplace_back(expand(arg, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
 				oset.emplace_back(expand(h, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If there is only one variable in the PutLink body...
@@ -448,7 +448,7 @@ Handle PutLink::do_reduce(void) const
 			}
 			catch (const TypeCheckException& ex) {}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If we are here, then there are multiple variables in the body.
@@ -494,7 +494,7 @@ Handle PutLink::do_reduce(void) const
 		}
 		catch (const TypeCheckException& ex) {}
 	}
-	return createLink(bset, SET_LINK);
+	return createLink(std::move(bset), SET_LINK);
 }
 
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)

@@ -27,7 +27,6 @@
 #include <map>
 #include <set>
 #include <stack>
-#include <unordered_map>
 #include <vector>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -51,7 +50,7 @@ private:
 	// grounded. The variables are what are being directly grounded.
 
 	// These are pointers; maybe they could be (should be?) references.
-	const Variables* _varlist;
+	const Variables* _variables;
 	const Pattern* _pat;
 
 	bool is_optional(const Handle& h) {
@@ -90,9 +89,9 @@ private:
 	// Map of current groundings of variables to their grounds
 	// Also contains grounds of subclauses (not sure why, this seems
 	// to be needed)
-	HandleMap var_grounding;
+	GroundingMap var_grounding;
 	// Map of clauses to their current groundings
-	HandleMap clause_grounding;
+	GroundingMap clause_grounding;
 
 	// Insert association between pattern ptm and its grounding hg into
 	// var_grounding.
@@ -108,41 +107,60 @@ private:
 
 	// -------------------------------------------
 	// ChoiceLink state management
-	typedef std::pair<PatternTermPtr, Handle> GndChoice;
-	typedef std::map<GndChoice, size_t> ChoiceState;
+	// Very similar to permutation state management.
+	typedef std::map<PatternTermPtr, size_t> ChoiceState;
 
 	ChoiceState _choice_state;
 	bool _need_choice_push;
 
-	size_t curr_choice(const PatternTermPtr&, const Handle&, bool&);
+	size_t curr_choice(const PatternTermPtr&, const Handle&);
 	bool have_choice(const PatternTermPtr&, const Handle&);
 
 	// Iteration control for choice links. Branchpoint advances
-	// whenever take_step is set to true.
-	bool choose_next;
+	// whenever _choose_next is set to true.
+	bool _choose_next;
 
 	// -------------------------------------------
 	// Unordered Link suppoprt
-	typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
+	// Very similar to ChoiceLink state management.
 	typedef PatternTermSeq Permutation;
-	typedef std::map<Unorder, Permutation> PermState; // ChoiceState
+	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
+	typedef std::map<PatternTermPtr, int> PermCount;
+	typedef std::map<PatternTermPtr, bool> PermOdo;
+	typedef std::map<PatternTermPtr, PermOdo> PermOdoState;
 
 	PermState _perm_state;
-	Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
+	Permutation curr_perm(const PatternTermPtr&, const Handle&);
 	bool have_perm(const PatternTermPtr&, const Handle&);
 
 	// Iteration control for unordered links. Branchpoint advances
 	// whenever take_step is set to true.
-	bool take_step;
-	bool have_more;
-	std::map<Unorder, int> perm_count;
-	std::stack<std::map<Unorder, int>> perm_count_stack;
+	bool _perm_take_step;
+	bool _perm_have_more;
+	bool _perm_go_around;
+	PatternTermPtr _perm_to_step;
+	std::stack<PatternTermPtr> _perm_step_saver;
+	PatternTermPtr _perm_breakout;
+
+	PermOdo _perm_odo;
+	PermOdo _perm_podo;
+	PermOdoState _perm_odo_state;
+
+	std::stack<bool> _perm_take_stack;
+	std::stack<bool> _perm_more_stack;
+	std::stack<PatternTermPtr> _perm_stepper_stack;
+	std::stack<PatternTermPtr> _perm_breakout_stack;
+	std::stack<PermOdoState> _perm_odo_stack;
+
+	std::stack<PermState> _perm_stack;
+	PermCount _perm_count;
+	std::stack<PermCount> _perm_count_stack;
+
+	void perm_push(void);
+	void perm_pop(void);
 
 	// --------------------------------------------
 	// Glob state management
-
-	// Record the glob-pattern and the candidate we are comparing
-	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
 
 	// Record where the globs are (branchpoints)
 	typedef std::pair<PatternTermPtr, std::pair<size_t, size_t>> GlobPos;
@@ -152,7 +170,13 @@ private:
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<GlobPair, GlobState> _glob_state;
+	// GlobState can be defined as either std::map (aka std::_Rb_tree)
+	// or as std::unordered_map (aka std::_Hashtable). I looked for a
+	// performance difference between these two, but could not find one,
+	// at least with the `guile -l nano-en.scm` benchmark.
+	// (As of Dec 2019, using gcc-8.3.0 and glibc-2.28)
+	std::map<PatternTermSeq, GlobState> _glob_state;
+	// std::unordered_map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
@@ -169,6 +193,9 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
+	// Cacheable grounded clauses
+	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
+
 	// -------------------------------------------
 	// Stack used to store current traversal state for a single
 	// clause. These are pushed when a clause is fully grounded,
@@ -180,16 +207,11 @@ private:
 	void solution_drop(void);
 
 	// Stacks containing partial groundings.
-	typedef HandleMap SolnMap;
-	std::stack<SolnMap> var_solutn_stack;
-	std::stack<SolnMap> _clause_solutn_stack;
+	std::stack<GroundingMap> var_solutn_stack;
+	std::stack<GroundingMap> _clause_solutn_stack;
 
 	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
-
-	std::stack<PermState> perm_stack;
-	void perm_push(void);
-	void perm_pop(void);
 
 	// push, pop and clear these states.
 	void clause_stacks_push(void);
@@ -200,15 +222,14 @@ private:
 	// -------------------------------------------
 	// Methods that run when all clauses have been grounded.
 
-	typedef HandleMap GrndMap;
-	std::vector<GrndMap> _var_ground_cache;
-	std::vector<GrndMap> _term_ground_cache;
+	std::vector<GroundingMap> _var_ground_cache;
+	std::vector<GroundingMap> _term_ground_cache;
 	bool _forall_state = true;
 	bool _did_check_forall;
 
 	// Report a fully grounded pattern to the callback.
-	bool report_grounding(const HandleMap &var_soln,
-	                      const HandleMap &term_soln);
+	bool report_grounding(const GroundingMap &var_soln,
+	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
 	// -------------------------------------------
@@ -236,8 +257,9 @@ private:
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
-	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_redex(const Handle&, const Handle&, const Handle&);
+	bool explore_clause(const Handle&, const Handle&, const Handle&);
+	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
@@ -246,8 +268,14 @@ private:
 	                         const Handle&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                         const Handle&);
-	bool explore_link_branches(const PatternTermPtr&, const Handle&,
+	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
+	bool explore_type_branches(const PatternTermPtr&, const Handle&,
+	                           const Handle&);
+	bool explore_odometer(const PatternTermPtr&, const Handle&,
+	                      const Handle&);
+	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
+	                                const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
 	                             const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
@@ -270,10 +298,10 @@ public:
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
 	// Handy-dandy utilities
-	static void print_solution(const HandleMap &vars,
-	                           const HandleMap &clauses);
-	static void log_solution(const HandleMap &vars,
-	                         const HandleMap &clauses);
+	static void print_solution(const GroundingMap &vars,
+	                           const GroundingMap &clauses);
+	static void log_solution(const GroundingMap &vars,
+	                         const GroundingMap &clauses);
 
 	static void log_term(const HandleSet &vars,
 	                     const HandleSeq &clauses);

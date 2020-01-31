@@ -27,6 +27,7 @@
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "FindUtils.h"
 
@@ -107,7 +108,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	if (vlo.size() != sz) return false;
 
 	// Unordered links are harder to handle...
-	if (nameserver().isA(dpt, UNORDERED_LINK))
+	if (deep->is_unordered_link())
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
@@ -255,7 +256,7 @@ static bool type_match_rec(const Handle& left_,
 	if (not left->is_link() or not right->is_link()) return false;
 
 	// Unordered links are a pain in the butt.
-	if (nameserver().isA(ltype, UNORDERED_LINK))
+	if (left->is_unordered_link())
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
@@ -299,7 +300,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 		return Handle::UNDEFINED;
 
 	Type t = vardecl->get_type();
-	if (VARIABLE_NODE == t)
+	if ((VARIABLE_NODE == t) || (GLOB_NODE == t))
 	{
 		if (is_free_in_any_tree(hs, vardecl))
 			return vardecl;
@@ -311,11 +312,11 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	{
 		Handle var = vardecl->getOutgoingAtom(0);
 		Type t = var->get_type();
-		if (t == VARIABLE_NODE and filter_vardecl(var, hs))
+		if (((t == VARIABLE_NODE) || (t == GLOB_NODE)) and filter_vardecl(var, hs))
 			return vardecl;
 	}
 
-	else if (VARIABLE_LIST == t)
+	else if (VARIABLE_LIST == t or VARIABLE_SET == t)
 	{
 		HandleSeq subvardecls;
 		HandleSet subvars;      // avoid duplicating variables
@@ -330,12 +331,12 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			return Handle::UNDEFINED;
 		if (subvardecls.size() == 1)
 			return subvardecls[0];
-		return Handle(createVariableList(subvardecls));
+		return createLink(std::move(subvardecls), t);
 	}
 
 	// If we're here we have failed to recognize vardecl as a useful
 	// and well-formed variable declaration, so Handle::UNDEFINED is
-	// returned.
+	// returned. XXX FIXME -- surely this should be a throw, instead!!!
 	return Handle::UNDEFINED;
 }
 
@@ -392,34 +393,22 @@ TypeSet type_intersection(const TypeSet& lhs,
 	return res;
 }
 
-VariableListPtr gen_varlist(const Handle& h)
+VariableSetPtr gen_variable_set(const Handle& h)
 {
 	HandleSet vars = get_free_variables(h);
-	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+	return createVariableSet(HandleSeq(vars.begin(), vars.end()));
 }
 
 Handle gen_vardecl(const Handle& h)
 {
-	return Handle(gen_varlist(h));
-}
-
-VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
-{
-	if (not vardecl)
-		return gen_varlist(h);
-
-	Type vardecl_t = vardecl->get_type();
-	if (vardecl_t == VARIABLE_LIST)
-		return VariableListCast(vardecl);
-
-	OC_ASSERT(vardecl_t == VARIABLE_NODE
-	          or vardecl_t == TYPED_VARIABLE_LINK);
-	return createVariableList(vardecl);
+	return Handle(gen_variable_set(h));
 }
 
 Variables gen_variables(const Handle& h, const Handle& vardecl)
 {
-	return gen_varlist(h, vardecl)->get_variables();
+	if (vardecl)
+		return Variables(vardecl);
+	return gen_variable_set(h)->get_variables();
 }
 
 Handle gen_vardecl(const Handle& h, const Handle& vardecl)
@@ -429,13 +418,14 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 	return vardecl;
 }
 
-Handle gen_vardecl(const HandleSeq& varlist)
+Handle gen_vardecl(const HandleSeq& varlist, bool ordered)
 {
 	Handle vardecl;
 	if (1 == varlist.size())
 		return varlist[0];
 	else
-		return Handle(createVariableList(varlist));
+		return ordered ? Handle(createVariableList(varlist))
+			: Handle(createVariableSet(varlist));
 }
 
 } // ~namespace opencog

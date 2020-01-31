@@ -57,12 +57,12 @@ protected:
 	Handle _body;
 
 	/// Variables bound in the body.
-	Variables _varlist;
+	Variables _variables;
 
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
-	void init_scoped_variables(const Handle& hvar);
+	void init_scoped_variables(const Handle& vardecl);
 
 	bool skip_init(Type);
 	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
@@ -72,10 +72,11 @@ protected:
 public:
 	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
-	ScopeLink(const Link &l);
+	ScopeLink(const ScopeLink&) = delete;
+	ScopeLink& operator=(const ScopeLink&) = delete;
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 

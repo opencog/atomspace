@@ -37,12 +37,7 @@ namespace opencog
  *  @{
  */
 
-// This is very costly and only used to get deterministic behavior
-#ifdef REPRODUCIBLE_ATOMSPACE
-typedef std::set<Atom*, content_based_atom_ptr_less> AtomSet
-#else
-typedef std::unordered_set<Atom*> AtomSet;
-#endif
+typedef std::unordered_multimap<ContentHash, Handle> AtomSet;
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -68,20 +63,41 @@ class TypeIndex
 	public:
 		TypeIndex(void);
 		void resize(void);
-		void insertAtom(Atom* a)
+		void insertAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(a->get_type()));
-			s.insert(a);
+			AtomSet& s(_idx.at(h->get_type()));
+			s.insert({h->get_hash(), h});
 		}
-		void removeAtom(Atom* a)
+		void removeAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(a->get_type()));
-			s.erase(a);
+			AtomSet& s(_idx.at(h->get_type()));
+			auto range = s.equal_range(h->get_hash());
+			auto bkt = range.first;
+			auto end = range.second;
+			for (; bkt != end; bkt++) {
+				if (*h == *bkt->second) {
+					s.erase(bkt);
+					break;
+				}
+			}
 		}
 
-		size_t size(Type t)
+		Handle findAtom(const Handle& h) const
 		{
-			AtomSet& s(_idx.at(t));
+			const AtomSet& s(_idx.at(h->get_type()));
+			auto range = s.equal_range(h->get_hash());
+			auto bkt = range.first;
+			auto end = range.second;
+			for (; bkt != end; bkt++) {
+				if (*h == *bkt->second) /* content-compare */
+					return bkt->second;
+			}
+			return Handle::UNDEFINED;
+		}
+
+		size_t size(Type t) const
+		{
+			const AtomSet& s(_idx.at(t));
 			return s.size();
 		}
 
@@ -95,7 +111,18 @@ class TypeIndex
 
 		void clear(void)
 		{
-			for (auto& s : _idx) s.clear();
+			for (auto& s : _idx)
+			{
+				for (auto& pr : s)
+				{
+					Handle& atom_to_clear = pr.second;
+					atom_to_clear->_atom_space = nullptr;
+
+					// We installed the incoming set; we remove it too.
+					atom_to_clear->remove();
+				}
+				s.clear();
+			}
 		}
 
 		// Return true if there exists some index containing duplicated

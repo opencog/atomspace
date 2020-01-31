@@ -9,6 +9,8 @@
 
 (define (FeatureLink . x)
 	(apply cog-new-link (append (list 'FeatureLink) x)))
+(define (Feature . x)
+	(apply cog-new-link (append (list 'FeatureLink) x)))
 
 (define (HebbianLink . x)
 	(apply cog-new-link (append (list 'HebbianLink) x)))
@@ -57,6 +59,8 @@
 
 (define (SemeNode . x)
 	(apply cog-new-node (append (list 'SemeNode) x)))
+(define (Seme . x)
+	(apply cog-new-node (append (list 'SemeNode) x)))
 
 (define (SentenceNode . x)
 	(apply cog-new-node (append (list 'SentenceNode) x)))
@@ -74,8 +78,5 @@
 
 (define (WordSenseNode . x)
 	(apply cog-new-node (append (list 'WordSenseNode) x)))
-
-(define (AnyNode . x)
-	(apply cog-new-node (append (list 'AnyNode) x)))
-(define (Any . x)
-	(apply cog-new-node (append (list 'AnyNode) x)))
+(define (WordSense . x)
+	(apply cog-new-node (append (list 'WordSenseNode) x)))

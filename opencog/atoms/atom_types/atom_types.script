@@ -238,11 +238,17 @@ VARIABLE_NODE <- NODE
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
+// A set (thus unordered) of variables or variable declarations. This
+// is convenient when combined with a scope link where the order of
+// variables is irrelevant to the semantics of the scope, like a
+// BindLink.
+VARIABLE_SET <- SET_LINK
+
 // A non-greedy globbing variable; matches one or more atoms in a
 // sequence.  XXX TODO - this could be changed to a link, so that
 // it resembles a FUZZY_LINK more closely?  FuzzyLink implements
 // the same idea, but in a more general fashion...
-// Variadic, the globbed values are meant to be of all same type.
+// https://wiki.opencog.org/w/GlobNode for more.
 GLOB_NODE <- VARIABLE_NODE
 
 // Everything under a QuoteLink is interpreted literally. Variable
@@ -519,9 +525,7 @@ ANCHOR_NODE <- NODE
 // for them to be declared as virtual (at least, as far as the pattern
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
-//
-// XXX Or would it be better to merely have it derive from EvaluatableLink ???
-VIRTUAL_LINK <- EVALUATION_LINK
+VIRTUAL_LINK <- EVALUATABLE_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
@@ -537,7 +541,7 @@ ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
-SATISFACTION_LINK <- PATTERN_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
+SATISFACTION_LINK <- SATISFYING_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
@@ -648,6 +652,8 @@ CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+ANY_NODE <- NODE  // Wild-card node, very useful for counting.
 
 // ==============================================================
 // Procedure and schema nodes.

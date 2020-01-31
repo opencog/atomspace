@@ -94,7 +94,7 @@ SET(Boost_USE_MULTITHREADED ON)
 SET(MIN_BOOST 1.46)
 
 # Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS date_time filesystem serialization system thread)
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS filesystem system)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
@@ -156,7 +156,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(FATAL_ERROR "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
-
 # ----------------------------------------------------------
 # secure_getenv
 INCLUDE(CheckSymbolExists)
@@ -167,127 +166,9 @@ ENDIF (HAVE_SECURE_GETENV)
 
 
 # ----------------------------------------------------------
-## Google Protobuf library
-## The protocol buffer compiler is needed for ZMQ-based persistence.
-# The ZMQ code is unmaintained and does not work. Give up until a
-# maintainer is found.
-#FIND_PACKAGE(Protobuf)
-#IF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-#	SET(HAVE_PROTOBUF 1)
-#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-#
-#ELSE (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	# If we are here, then we are missing either the libraries, or the
-#	# compiler. React appropriately.
-#	IF (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-#
-#ENDIF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
-#
-# ----------------------------------------------------------
-# Python and Cython
-#
-# NOTE: Python interpreter is needed for runing python unit tests,
-# and for running the FindCython module.
-#
-# Search for Python3 first, and use that, if found. Else use Python2.
-# To use Python2 only from the build directory run the following
-# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
+# Python stuff.
 
-FIND_PACKAGE(Python3Interp)
-IF (3.4.0 VERSION_LESS "${PYTHON3_VERSION_STRING}")
-	SET (HAVE_PY_INTERP 1)
-	SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
-ENDIF()
-
-IF (NOT HAVE_PY_INTERP)
-	FIND_PACKAGE(PythonInterp)
-	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
-		SET (HAVE_PY_INTERP 1)
-		SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
-	ENDIF()
-ENDIF()
-
-FIND_PACKAGE(PythonLibs)
-IF (PYTHONLIBS_FOUND AND
-     ((PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
-     OR
-     (2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})))
-	SET (HAVE_PY_LIBS 1)
-	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
-ELSE()
-	MESSAGE(STATUS "Python libraries NOT found.")
-ENDIF()
-
-# Cython is used to generate python bindings.
-IF(HAVE_PY_INTERP)
-	FIND_PACKAGE(Cython 0.23.0)
-
-	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
-		ADD_DEFINITIONS(-DHAVE_CYTHON)
-		SET(HAVE_CYTHON 1)
-
-		# Find python destination dir for python bindings
-		# because it may differ on each operating system.
-		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/get_python_lib.py" "${CMAKE_INSTALL_PREFIX}"
-			OUTPUT_VARIABLE PYTHON_DEST
-		)
-
-		# Replace new line at end
-		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-		IF ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(FATAL_ERROR "Python destination dir not found")
-		ELSE ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-		ENDIF ("${PYTHON_DEST}" STREQUAL "")
-
-		# thunk
-		SET(PYTHON_ROOT "${PYTHON_DEST}")
-		SET(PYTHON_DEST "${PYTHON_DEST}/opencog")
-
-		MESSAGE(STATUS
-			"Python install dir: ${PYTHON_DEST}" )
-
-	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
-		IF(NOT CYTHON_FOUND)
-			MESSAGE(STATUS "Cython executable not found.")
-		ENDIF(NOT CYTHON_FOUND)
-	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
-
-	# Nosetests will find and automatically run python tests.
-	IF (PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
-	ELSE ()
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
-	ENDIF ()
-	IF (NOT NOSETESTS_EXECUTABLE)
-		MESSAGE(STATUS "nosetests not found: needed for python tests")
-	ENDIF ()
-	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
-		SET(HAVE_NOSETESTS 1)
-		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
-	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
-ENDIF(HAVE_PY_INTERP)
+include(OpenCogFindPython)
 
 # ----------------------------------------------------------
 # Glasgow Haskell compiler
@@ -348,20 +229,6 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# ----------------------------------------------------------
-# Optional and almost obsolete...
-# Remove after the REST interfaces get fixed.
-# ZeroMQ
-FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQLIB 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
-
 # ===============================================================
 # Get atomspace version
 
@@ -411,12 +278,12 @@ ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
 # Note: RPATH only supported under Linux!
+# The idea here is that during unit tests, we use the libraries in
+# the build directories, and NOT the system directories. But that
+# means that, during install, the paths have to be tweaked.
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH
-	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${PYTHON_DEST}")
-
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # -------------------------------------------------
@@ -446,11 +313,6 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 IF(HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
 ENDIF(HAVE_COGUTIL)
-
-# Both protobuf and also zmq are needed to build ZMQ API.
-# IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-# 	SET(HAVE_ZMQ 1)
-# ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
@@ -562,14 +424,8 @@ SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
 	"python-dev (>= 2.7.5)"
 	"libzmq3-dev (>= 4.0.4)"
-	"libboost-date-time-dev (>= ${MIN_BOOST})"
 	"libboost-filesystem-dev (>= ${MIN_BOOST})"
-	"libboost-program-options-dev (>= ${MIN_BOOST})"
-	"libboost-regex-dev (>= ${MIN_BOOST})"
-	"libboost-serialization-dev (>= ${MIN_BOOST})"
-	"libboost-thread-dev (>= ${MIN_BOOST})"
 	"libboost-system-dev (>= ${MIN_BOOST})"
-	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
 	"libpq-dev (>=9.3.24)"
@@ -599,6 +455,5 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
 SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
-# SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

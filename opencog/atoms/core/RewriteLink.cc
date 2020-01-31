@@ -56,19 +56,12 @@ RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-RewriteLink::RewriteLink(const Link &l)
-	: ScopeLink(l), _silent(false)
-{
-	if (skip_init(l.get_type())) return;
-	init();
-}
-
 /* ================================================================= */
 
 inline Handle append_rand_str(const Handle& var)
 {
 	std::string new_var_name = randstr(var->get_name() + "-");
-	return createNode(VARIABLE_NODE, new_var_name);
+	return createNode(var->get_type(), std::move(new_var_name));
 }
 
 inline HandleSeq append_rand_str(const HandleSeq& vars)
@@ -79,27 +72,48 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 	return new_vars;
 }
 
+/**
+ * Wrap every glob node with a ListLink
+ *
+ * Since GlobNodes can be matched/substituted with one or more
+ * arguments, The arguments are expected to be wrapped with
+ * ListLink.
+ * In case of alpha conversion, Alpha converted GlobNodes in a
+ * program needs to be wrapped before passed to substitute the Glob.
+ */
+inline HandleSeq wrap_glob_with_list(const HandleSeq& vars)
+{
+	HandleSeq new_vars;
+	for (const Handle& var : vars) {
+		if (GLOB_NODE == var->get_type())
+			new_vars.push_back(createLink(HandleSeq{var}, LIST_LINK));
+		else new_vars.push_back(var);
+	}
+	return new_vars;
+}
+
 Handle RewriteLink::alpha_convert() const
 {
-	HandleSeq vars = append_rand_str(_varlist.varseq);
+	HandleSeq vars = append_rand_str(_variables.varseq);
 	return alpha_convert(vars);
 }
 
 Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 {
+	const auto wrapped = wrap_glob_with_list(vars);
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
+		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped, _silent));
 
 	// Create the alpha converted scope link
-	return createLink(hs, get_type());
+	return createLink(std::move(hs), get_type());
 }
 
 Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
 {
 	HandleSeq vars;
-	for (const Handle& var : _varlist.varseq) {
+	for (const Handle& var : _variables.varseq) {
 		auto it = vsmap.find(var);
 		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
 	}
@@ -131,13 +145,13 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 		// in it. So we must not call createLink(), below.
 		Type t = get_type();
 		if (PUT_LINK == t or LAMBDA_LINK == t)
-			return hs[0];
+			return hs.at(0);
 	}
 
 	// Create the substituted scope.  I suspect that this is a bad
 	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
 	// and cause issues thhrought the code ... but ... whatever.
-	return createLink(hs, get_type());
+	return createLink(std::move(hs), get_type());
 }
 
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
@@ -273,7 +287,7 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 	{
 		OC_ASSERT(false, "Not implemented");
 	}
-	return createLink(oset, t);
+	return createLink(std::move(oset), t);
 }
 
 Handle RewriteLink::consume_quotations() const
@@ -297,7 +311,7 @@ Handle RewriteLink::consume_quotations() const
 		nouts.insert(nouts.begin(), vardecl);
 
 	// Recreate the scope
-	return createLink(nouts, get_type());
+	return createLink(std::move(nouts), get_type());
 }
 
 Handle RewriteLink::consume_quotations(const Handle& vardecl,

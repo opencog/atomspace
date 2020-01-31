@@ -49,6 +49,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::store_atom, this, "persist");
 	define_scheme_primitive("load-atoms-of-type",
 	             &PersistSCM::load_type, this, "persist");
+	define_scheme_primitive("load-atomspace",
+	             &PersistSCM::load_atomspace, this, "persist");
+	define_scheme_primitive("store-atomspace",
+	             &PersistSCM::store_atomspace, this, "persist");
 	define_scheme_primitive("barrier",
 	             &PersistSCM::barrier, this, "persist");
 }
@@ -77,12 +81,6 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
-void PersistSCM::fetch_valuations(Handle key, bool get_all_values)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-valuations");
-	as->fetch_valuations(key, get_all_values);
-}
-
 /**
  * Store the single atom to the backing store hanging off the
  * atom-space.
@@ -98,6 +96,18 @@ void PersistSCM::load_type(Type t)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
 	as->fetch_all_atoms_of_type(t);
+}
+
+void PersistSCM::load_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atomspace");
+	as->load_atomspace();
+}
+
+void PersistSCM::store_atomspace(void)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atomspace");
+	as->store_atomspace();
 }
 
 void PersistSCM::barrier(void)

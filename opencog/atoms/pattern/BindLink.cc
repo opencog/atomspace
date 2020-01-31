@@ -60,12 +60,6 @@ BindLink::BindLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-BindLink::BindLink(const Link &l)
-	: QueryLink(l)
-{
-	init();
-}
-
 /* ================================================================= */
 /* ================================================================= */
 

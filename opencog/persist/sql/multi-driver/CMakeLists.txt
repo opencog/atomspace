@@ -15,7 +15,7 @@ ADD_LIBRARY (persist-sql
 	SQLPersistSCM
 )
 
-ADD_DEPENDENCIES(persist-sql opencog_atom_types)
+ADD_DEPENDENCIES(persist-sql opencog_atom_types atomspace)
 
 TARGET_LINK_LIBRARIES(persist-sql
 	atomspaceutils

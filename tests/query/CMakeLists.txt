@@ -30,7 +30,10 @@ ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(ConstantClausesUTest)
+ADD_CXXTEST(PermutationsUTest)
 
+# Unit tests for queries using VariableSet as variable declaration
+ADD_CXXTEST(BindVariableSetUTest)
 
 # These are NOT in alphabetical order; they are in order of
 # simpler to more complex.  Later test cases assume features
@@ -81,7 +84,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AlwaysUTest)
 	ADD_CXXTEST(ScopeUTest)
 	ADD_CXXTEST(NestedPutUTest)
-
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)

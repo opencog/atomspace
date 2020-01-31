@@ -66,12 +66,6 @@ DefineLink::DefineLink(const Handle& name, const Handle& defn)
 	init();
 }
 
-DefineLink::DefineLink(const Link &l)
-	: UniqueLink(l)
-{
-	init();
-}
-
 /**
  * Get the definition associated with the alias.
  * This will be the second atom of some DefineLink, where

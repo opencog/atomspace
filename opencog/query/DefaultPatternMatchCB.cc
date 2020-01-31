@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define DO_LOG(STUFF) STUFF
 #else
@@ -155,7 +155,6 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();
 	_pattern_body = pat.body;
-	_globs = &pat.globby_terms;
 }
 
 /* ======================================================== */
@@ -247,7 +246,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat) and lpat->get_arity() != lsoln->get_arity())
+	if (not ptm->hasGlobbyVar() and lpat->get_arity() != lsoln->get_arity())
 		return false;
 
 	// If the link is a ScopeLink, we need to deal with the
@@ -350,7 +349,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 /// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
-                                           const HandleMap& term_gnds,
+                                           const GroundingMap& term_gnds,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
@@ -466,7 +465,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd,
-                                         const HandleMap& term_gnds)
+                                         const GroundingMap& term_gnds)
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
@@ -499,7 +498,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		_temp_aspace->clear();
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
-		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
+		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
 		              << std::endl << tvp->to_string() << std::endl;})
 
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
@@ -524,7 +523,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
-                                                  const HandleMap& term_gnds)
+                                                  const GroundingMap& term_gnds)
 {
 	// If any grounding at all was found, reject it.
 	if (grnd)
@@ -576,34 +575,45 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
-                                                const HandleMap& term_gnds)
+                                                const GroundingMap& term_gnds)
 {
 	return grnd != nullptr;
 }
 
 /* ======================================================== */
 
-IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
+IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h, Type t)
 {
-	return h->getIncomingSet(_as);
+	return h->getIncomingSetByType(t, _as);
 }
 
 /* ======================================================== */
+// FIXME: the code below is festooned with various FIXME's, stating
+// that, basically, the evaluation of terms in the presence of
+// grounding atoms is a bit messed up, and not fully correctly, cleanly
+// done. So this needs a clean re-implementation, with proper
+// beta-reduction with the groundings, followed by proper evaluation.
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
-                                      const HandleMap& gnds)
+                                      const GroundingMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
 	// python for the actual evaluation. We don't want to put the
 	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is probably
-	// not very efficient, but will do for now...
+	// grounding might be insane.  So we put it here. This is not
+	// very efficient, but will do for now...
 
-	Handle gvirt;
+	ValuePtr vp;
 	try
 	{
-		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
+		// XXX FIXME. This is kind-of/mostly wrong. What we *really*
+		// want to do is to plug the grounds into the virt expression,
+		// then evaluate the virt expression, and see if it is true.
+		// So, Instantiator::instantiate() does this, but then it
+		// does too much; it also executes. Which is more than what
+		// is wanted.
+		vp = _instor->instantiate(virt, gnds, true);
 	}
 	catch (const SilentException& ex)
 	{
@@ -622,6 +632,22 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_instor->reset_halt();
 		return false;
 	}
+
+	// Perhaps it already evaluated down to a truth-value.
+	if (not vp->is_atom())
+	{
+		TruthValuePtr tvp(TruthValueCast(vp));
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+		            "Expecting a TruthValue for an evaluatable link: %s\n",
+		            virt->to_short_string().c_str());
+
+		// Convert into a crisp boolean, per usual.
+		return tvp->get_mean() > 0.5;
+	}
+
+	// Its an atom... now we have to evaluate it.
+	Handle gvirt(HandleCast(vp));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})
@@ -697,7 +723,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->to_short_string().c_str());
 
-	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
+	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
 	              << tvp->to_string() << std::endl;})
 
 	// XXX FIXME: we are making a crisp-logic go/no-go decision
@@ -717,7 +743,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * variables to values.
  */
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
-                                          const HandleMap& gnds)
+                                          const GroundingMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->to_short_string() << std::endl

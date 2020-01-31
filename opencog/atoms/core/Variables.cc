@@ -1,9 +1,11 @@
 /*
- * Variables.cc
+ * atoms/core/Variables.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ *               2019 SingularityNET Foundation
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Authors: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ *          Nil Geisweiller <ngeiswei@gmail.com> Oct 2019
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,81 +24,273 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/Context.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
+#include "VariableSet.h"
 #include "Variables.h"
 
 namespace opencog {
 
+/// The VarScraper struct provides the functions to find and sort free
+/// variables in a scope link that does not contain variable
+/// declaration or contains an unordered one (using VariableSet). The
+/// sorting of free variables only depends on the semantics of the
+/// variables, that is their positions in the scope, taking into
+/// account the commutativity property of unordered links.
 struct VarScraper
 {
-	Quotation _quotation;
-	HandleSet _bound_vars;
-	void find_vars(HandleSeq&, HandleSet&, const HandleSeq&);
+	/**
+	 * Mapping variables to their paths, where a path is a list of
+	 * pairs of atom type and outgoing index, with the particularity
+	 * that when the type is a subtype of unordered link, the index is
+	 * zero, because it is semantically meaningless.
+	 */
+	HandlePathsMap _paths;
+
+	/**
+	 * Find variable declaration in such order that is consistent with
+	 * alpha-equivalence.
+	 */
+	HandleSeq operator()(const HandleSeq& outgoing, bool ordered_link);
+
+	/**
+	 * Return a mapping between variables (free and non free) and their
+	 * paths. The reason we need the path of non free variables is
+	 * because they are subject to semantic comparison just like the
+	 * rest.
+	 *
+	 * Note: context is passed by copy for implementation convenience.
+	 */
+	static HandlePathsMap variables_paths(const Handle& h);
+	static HandlePathsMap variables_paths(Type incoming_type,
+	                                      const HandleSeq& outgoing);
+
+	/**
+	 * Find all free variables in body and return them in a canonical
+	 * order, so that if the variables were renamed and rerun this
+	 * function we would obtain the same order, or an order that does
+	 * not affect the semantics.
+	 *
+	 * Note: context is passed by copy for implementation convenience.
+	 */
+	HandleSeq sorted_free_variables(const Handle& body, Context ctx=Context()) const;
+
+	/**
+	 * Like above but operates on the outgoing set of an ordered
+	 * (resp. unordered) link.
+	 */
+	HandleSeq sorted_free_variables_outgoing(
+		bool ordered, const HandleSeq& outgoing, const Context& ctx=Context()) const;
+	HandleSeq sorted_free_variables_ordered_outgoing(
+		const HandleSeq& outs, const Context& ctx=Context()) const;
+	HandleSeq sorted_free_variables_unordered_outgoing(
+		const HandleSeq& outs, const Context& ctx=Context()) const;
+
+	/**
+	 * Return a sorted outgoing set according to a canonical order.
+	 */
+	HandleSeq sorted(HandleSeq hs) const;
+
+	/**
+	 * Canonical order, so that variables get sorted according to their
+	 * semantics. This allows to have the order be consistent with
+	 * alpha-equivalent.
+	 */
+	bool less_than(const Handle& lh, const Handle& rh) const;
+
+	/**
+	 * Like less_than but over the outgoings of an ordered
+	 * (resp. unordered) link.
+	 */
+	bool less_than_ordered_outgoing(const HandleSeq& lhs,
+	                                const HandleSeq& rhs) const;
+	bool less_than_unordered_outgoing(const HandleSeq& lhs,
+	                                  const HandleSeq& rhs) const;
+
+	/**
+	 * Return true iff h is a Variable or Glob node.
+	 */
+	static bool is_variable(const Handle& h);
+
+	/**
+	 * Return true iff is an unordered link type or subtype.
+	 */
+	static bool is_unordered(Type t);
 };
 
-/* ================================================================= */
-//
-// The work-horse that does the actual heavy-lifting.
-// See the find_variables() method for the description of what
-// this does, and why.
-//
-// Note: the algo used here is nearly identical to that in
-// ScopeLink::term_hash() -- if you modify this, then modify that
-// one too.
-void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
-                           const HandleSeq& oset)
+HandleSeq VarScraper::operator()(const HandleSeq& hs, bool ordered_link)
 {
-	for (const Handle& h : oset)
+	_paths = variables_paths(ORDERED_LINK, hs);
+	HandleSeq result = sorted_free_variables_outgoing(ordered_link, hs);
+	_paths.clear();
+	return result;
+}
+
+HandlePathsMap VarScraper::variables_paths(const Handle& h)
+{
+	// Base cases
+	if (is_variable(h))
+		return HandlePathsMap{{h, {{}}}};
+	if (h->is_node())
+		return HandlePathsMap{};
+
+	// Recursive case
+	return variables_paths(h->get_type(), h->getOutgoingSet());
+}
+
+HandlePathsMap VarScraper::variables_paths(Type itype, const HandleSeq& hs)
+{
+	HandlePathsMap paths;
+	for (Arity i = 0; i < hs.size(); i++)
 	{
-		Type t = h->get_type();
-
-		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-		    _quotation.is_unquoted() and
-		    0 == varset.count(h) and
-		    0 == _bound_vars.count(h))
+		// Append (itype, i) to each path, i is zero if itype is
+		// unordered.
+		for (const auto& vpp : variables_paths(hs[i]))
 		{
-			varseq.emplace_back(h);
-			varset.insert(h);
+			for (auto path : vpp.second)
+			{
+				path.emplace_back(TypeArityPair{itype, is_unordered(itype) ? 0 : i});
+				paths[vpp.first].insert(path);
+			}
 		}
-
-		if (not h->is_link()) continue;
-
-		bool issco = _quotation.is_unquoted()
-			and nameserver().isA(t, SCOPE_LINK);
-		HandleSet bsave;
-		if (issco)
-		{
-			// Save the current set of bound variables...
-			bsave = _bound_vars;
-
-			// The ScopeLink ctor did the bound-variable extraction.
-			ScopeLinkPtr sco(ScopeLinkCast(h));
-			const Variables& vees = sco->get_variables();
-			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
-		}
-
-		// Save quotation on the stack before updating it for the
-		// recursive call
-		Quotation save_quotation(_quotation);
-		_quotation.update(t);
-
-		find_vars(varseq, varset, h->getOutgoingSet());
-
-		if (issco)
-			_bound_vars = bsave;
-
-		// Restore current state from the stack
-		_quotation = save_quotation;
 	}
+
+	return paths;
+}
+
+HandleSeq VarScraper::sorted_free_variables(const Handle& body, Context ctx) const
+{
+	// Base cases
+	if (ctx.is_free_variable(body))
+		return {body};
+	if (body->is_node())
+		return {};
+
+	// Recursive cases
+	OC_ASSERT(body->is_link());
+	ctx.update(body);
+	const HandleSeq& outs = body->getOutgoingSet();
+	return sorted_free_variables_outgoing(not body->is_unordered_link(), outs, ctx);
+}
+
+HandleSeq VarScraper::sorted_free_variables_outgoing(bool ordered,
+                                                     const HandleSeq& outgoing,
+                                                     const Context& ctx) const
+{
+	return ordered ? sorted_free_variables_ordered_outgoing(outgoing, ctx)
+		: sorted_free_variables_unordered_outgoing(outgoing, ctx);
+}
+
+HandleSeq VarScraper::sorted_free_variables_ordered_outgoing(
+	const HandleSeq& outgoing, const Context& ctx) const
+{
+	HandleSeq res;
+	for (const Handle& h : outgoing)
+	{
+		// Recursive call
+		HandleSeq fvs = sorted_free_variables(h, ctx);
+
+		// Only retain variables that are not in res
+		HandleSeq fvs_n;
+		std::copy_if(fvs.begin(), fvs.end(), std::back_inserter(fvs_n),
+		             [&res](const Handle& var) {
+			             return std::find(res.begin(), res.end(), var) == res.end();
+		             });
+
+		// Concatenate
+		res.insert(res.end(), fvs_n.begin(), fvs_n.end());
+	}
+	return res;
+}
+
+HandleSeq VarScraper::sorted_free_variables_unordered_outgoing(
+	const HandleSeq& outgoing, const Context& ctx) const
+{
+	return sorted_free_variables_ordered_outgoing(sorted(outgoing), ctx);
+}
+
+HandleSeq VarScraper::sorted(HandleSeq outs) const
+{
+	std::sort(outs.begin(), outs.end(), [&](const Handle& lh, const Handle& rh) {
+			return less_than(lh, rh); });
+	return outs;
+}
+
+bool VarScraper::less_than(const Handle& lh, const Handle& rh) const
+{
+	// Sort by atom type
+	Type lt = lh->get_type();
+	Type rt = rh->get_type();
+	if (lt != rt)
+		return lt < rt;
+
+	// Both atoms are links of the same type
+	if (lh->is_link())
+	{
+		// Sort by arity
+		Arity lty = lh->get_arity();
+		Arity rty = rh->get_arity();
+		if (lty != rty)
+			return lty < rty;
+
+		// Both atoms have same arity, sort by outgoings
+		const HandleSeq& lout = lh->getOutgoingSet();
+		const HandleSeq& rout = rh->getOutgoingSet();
+		return lh->is_unordered_link() ? less_than_unordered_outgoing(lout, rout)
+			: less_than_ordered_outgoing(lout, rout);
+	}
+
+	// None are variables, sort by node content.
+	if (not is_variable(lh))
+		return lh < rh;
+
+	const auto& lps = _paths.at(lh);
+	const auto& rps = _paths.at(rh);
+	if (lps != rps)
+		return lps < rps;
+
+	// Still a tie? These 2 variables are semantically equivalent. Sort
+	// by atom order then.
+	return lh < rh;
+}
+
+bool VarScraper::less_than_ordered_outgoing(const HandleSeq& lhs,
+                                            const HandleSeq& rhs) const
+{
+	OC_ASSERT(lhs.size() == rhs.size());
+	for (std::size_t i = 0; i < lhs.size(); i++)
+		if (not content_eq(lhs[i], rhs[i]))
+			return less_than(lhs[i], rhs[i]);
+	return false;
+}
+
+bool VarScraper::less_than_unordered_outgoing(const HandleSeq& lhs,
+                                              const HandleSeq& rhs) const
+{
+	return less_than_ordered_outgoing(sorted(lhs), sorted(rhs));
+}
+
+bool VarScraper::is_variable(const Handle& h)
+{
+	Type t = h->get_type();
+	return VARIABLE_NODE == t or GLOB_NODE == t;
+}
+
+bool VarScraper::is_unordered(Type t)
+{
+	return nameserver().isA(t, UNORDERED_LINK);
 }
 
 /* ================================================================= */
@@ -104,9 +298,14 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
 	: varseq(variables), varset(variables)
 {
-	unsigned i = 0;
-	for (const Handle& var : variables)
-		index.insert({var, i++});
+	init_index();
+}
+
+void FreeVariables::init_index()
+{
+	index.clear();
+	for (unsigned i = 0; i < varseq.size(); i++)
+		index[varseq[i]] = i;
 }
 
 bool FreeVariables::is_identical(const FreeVariables& other) const
@@ -126,20 +325,33 @@ bool FreeVariables::is_in_varset(const Handle& v) const
 	return varset.end() != varset.find(v);
 }
 
-void FreeVariables::find_variables(const HandleSeq& oset)
+void FreeVariables::find_variables(const Handle& body)
 {
-	VarScraper vsc;
-	vsc.find_vars(varseq, varset, oset);
-
-	// Build the index from variable name, to its ordinal number.
-	size_t sz = varseq.size();
-	for (size_t i=0; i<sz; i++)
-		index.insert(std::pair<Handle, unsigned int>(varseq[i], i));
+	find_variables(HandleSeq{body});
 }
 
-void FreeVariables::find_variables(const Handle& h)
+void FreeVariables::find_variables(const HandleSeq& oset, bool ordered_link)
 {
-	find_variables(HandleSeq{h});
+	varseq = VarScraper()(oset, ordered_link);
+	varset = HandleSet(varseq.begin(), varseq.end());
+	init_index();
+}
+
+void FreeVariables::canonical_sort(const HandleSeq& hs)
+{
+	// Get free variables
+	HandleSet fv = get_free_variables(hs);
+
+	// Ignore free variables in body not in the FreeVariables object
+	HandleSet ignored_vars = set_symmetric_difference(fv, varset);
+	Context ctx(Quotation(), ignored_vars, false);
+
+	VarScraper vsc;
+	vsc._paths = vsc.variables_paths(ORDERED_LINK, hs);
+	varseq = vsc.sorted_free_variables_ordered_outgoing(hs, ctx);
+
+	// Rebuild index to reflect the new order
+	init_index();
 }
 
 HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
@@ -208,7 +420,7 @@ std::string FreeVariables::to_string(const std::string& indent) const
 
 	// Varseq
 	ss << indent << "varseq:" << std::endl
-	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT);
+	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT) << std::endl;
 
 	// index
 	ss << indent << "index:" << std::endl
@@ -259,8 +471,6 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// for as long as the bound variable is in scope. We hide it by
 		// removing it from the index.
 		ScopeLinkPtr sco(ScopeLinkCast(term));
-		if (nullptr == sco)
-			sco = createScopeLink(term->getOutgoingSet());
 
 		const Variables& vees = sco->get_variables();
 		bool alpha_hide = false;
@@ -321,7 +531,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				oset.emplace_back(substitute_scoped(h, args, silent,
 				                                    hidden_map, quotation));
 			}
-			return createLink(oset, term->get_type());
+			return createLink(std::move(oset), term->get_type());
 		}
 	}
 
@@ -336,12 +546,15 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		if (GLOB_NODE == h->get_type())
 		{
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
-			if (glst->is_node())
-				return glst;
-
 			changed = true;
-			for (const Handle& gl : glst->getOutgoingSet())
-				oset.emplace_back(gl);
+
+			// Also unwrap any ListLinks that were inserted by
+			// `wrap_glob_with_list()` in RewriteLink.cc
+			if (glst->get_type() == LIST_LINK)
+				for (const Handle &gl : glst->getOutgoingSet())
+					oset.emplace_back(gl);
+			else
+				oset.emplace_back(glst);
 		}
 		else
 		{
@@ -353,10 +566,330 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	// Return the original atom, if it was not modified.
 	if (not changed) return term;
-	return createLink(oset, term->get_type());
+	return createLink(std::move(oset), term->get_type());
 }
 
 /* ================================================================= */
+
+Variables::Variables(bool ordered)
+	: _ordered(ordered)
+{
+}
+
+Variables::Variables(const Handle& vardecl, bool ordered)
+	: _ordered(ordered)
+{
+	validate_vardecl(vardecl);
+	init_index();
+}
+
+Variables::Variables(const HandleSeq& vardecls, bool ordered)
+	: _ordered(ordered)
+{
+	validate_vardecl(vardecls);
+	init_index();
+}
+
+/* ================================================================= */
+/**
+ * Extract the variable type(s) from a TypedVariableLink
+ *
+ * The call is expecting htypelink to point to one of the two
+ * following structures:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeNode  "ConceptNode"
+ *
+ * or
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          TypeNode  "NumberNode"
+ *          TypeNode  "WordNode"
+ *
+ * or possibly types that are SignatureLink's or FuyzzyLink's or
+ * polymorphic combinations thereof: e.g. the following is valid:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          SignatureLink
+ *              InheritanceLink
+ *                 PredicateNode "foobar"
+ *                 TypeNode  "ListLink"
+ *          FuzzyLink
+ *              InheritanceLink
+ *                 ConceptNode "animal"
+ *                 ConceptNode "tiger"
+ *
+ * In either case, the variable itself is appended to "vset",
+ * and the list of allowed types are associated with the variable
+ * via the map "typemap".
+ */
+void Variables::get_vartype(const Handle& htypelink)
+{
+	const HandleSeq& oset = htypelink->getOutgoingSet();
+	if (2 != oset.size())
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"TypedVariableLink has wrong size, got %lu", oset.size());
+	}
+
+	Handle varname(oset[0]);
+	Handle vartype(oset[1]);
+
+	Type nt = varname->get_type();
+	Type t = vartype->get_type();
+
+	// Specifying how many atoms can be matched to a GlobNode, if any
+	HandleSeq intervals;
+
+	// If its a defined type, unbundle it.
+	if (DEFINED_TYPE_NODE == t)
+	{
+		vartype = DefineLink::get_definition(vartype);
+		t = vartype->get_type();
+	}
+
+	// For GlobNode, we can specify either the interval or the type, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   IntervalLink
+	//     NumberNode  2
+	//     NumberNode  3
+	//
+	// or both under a TypeSetLink, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   TypeSetLink
+	//     IntervalLink
+	//       NumberNode  2
+	//       NumberNode  3
+	//     TypeNode "ConceptNode"
+	if (GLOB_NODE == nt and TYPE_SET_LINK == t)
+	{
+		for (const Handle& h : vartype->getOutgoingSet())
+		{
+			Type th = h->get_type();
+
+			if (INTERVAL_LINK == th)
+				intervals = h->getOutgoingSet();
+
+			else if (TYPE_NODE == th)
+			{
+				vartype = h;
+				t = th;
+			}
+
+			else throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in TypedSetLink\n"
+				"Expected IntervalLink and TypeNode, got %s",
+				h->to_string().c_str());
+		}
+	}
+
+	// The vartype is either a single type name, or a list of typenames.
+	if (TYPE_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		if (vt != ATOM)  // Atom type is same as untyped.
+		{
+			TypeSet ts = {vt};
+			_simple_typemap.insert({varname, ts});
+		}
+	}
+	else if (TYPE_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		TypeSet ts;
+		TypeSet::iterator it = ts.begin();
+		nameserver().getChildren(vt, std::inserter(ts, it));
+		_simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CO_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		TypeSet ts;
+		TypeSet::iterator it = ts.begin();
+		nameserver().getChildren(vt, std::inserter(ts, it));
+		_simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CHOICE == t)
+	{
+		TypeSet typeset;
+		HandleSet deepset;
+		HandleSet fuzzset;
+
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		size_t tss = tset.size();
+		for (size_t i=0; i<tss; i++)
+		{
+			Handle ht(tset[i]);
+			Type var_type = ht->get_type();
+			if (TYPE_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt) typeset.insert(vt);
+			}
+			else if (SIGNATURE_LINK == var_type)
+			{
+				const HandleSeq& sig = ht->getOutgoingSet();
+				if (1 != sig.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in SignatureLink\n"
+						"Expected arity==1, got %s", vartype->to_string().c_str());
+
+				deepset.insert(ht);
+			}
+			else if (FUZZY_LINK == var_type)
+			{
+				const HandleSeq& fuz = ht->getOutgoingSet();
+				if (1 != fuz.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in FuzzyLink\n"
+						"Expected arity==1, got %s", vartype->to_string().c_str());
+
+				fuzzset.insert(ht);
+			}
+			else
+			{
+				throw InvalidParamException(TRACE_INFO,
+					"VariableChoice has unexpected content:\n"
+					"Expected TypeNode, got %s",
+					    nameserver().getTypeName(ht->get_type()).c_str());
+			}
+		}
+
+		if (0 < typeset.size())
+			_simple_typemap.insert({varname, typeset});
+		if (0 < deepset.size())
+			_deep_typemap.insert({varname, deepset});
+		if (0 < fuzzset.size())
+			_fuzzy_typemap.insert({varname, fuzzset});
+	}
+	else if (SIGNATURE_LINK == t)
+	{
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in SignatureLink\n"
+				"Expected arity==1, got %s", vartype->to_string().c_str());
+
+		HandleSet ts;
+		ts.insert(vartype);
+		_deep_typemap.insert({varname, ts});
+	}
+	else if (FUZZY_LINK == t)
+	{
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in FuzzyLink\n"
+				"Expected arity==1, got %s", vartype->to_string().c_str());
+
+		HandleSet ts;
+		ts.insert(vartype);
+		_fuzzy_typemap.insert({varname, ts});
+	}
+	else if (VARIABLE_NODE == t)
+	{
+		// This occurs when the variable type is a variable to be
+		// matched by the pattern matcher. There's nothing to do
+		// except not throwing an exception.
+	}
+	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
+	{
+		intervals = vartype->getOutgoingSet();
+	}
+	else
+	{
+		throw SyntaxException(TRACE_INFO,
+			"Unexpected contents in TypedVariableLink\n"
+			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
+			nameserver().getTypeName(t).c_str());
+	}
+
+	if (0 < intervals.size())
+	{
+		_glob_intervalmap.insert({varname, std::make_pair(
+			std::round(NumberNodeCast(intervals[0])->get_value()),
+			std::round(NumberNodeCast(intervals[1])->get_value()))});
+	}
+
+	varset.insert(varname);
+	varseq.emplace_back(varname);
+}
+
+/* ================================================================= */
+/**
+ * Validate variable declarations for syntax correctness.
+ *
+ * This will check to make sure that a set of variable declarations are
+ * of a reasonable form. Thus, for example, a structure similar to the
+ * below is expected.
+ *
+ *       VariableList
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *          TypedVariableLink
+ *             VariableNode "$var2"
+ *             TypeNode  "ConceptNode"
+ *          TypedVariableLink
+ *             VariableNode "$var3"
+ *             TypeChoice
+ *                 TypeNode  "PredicateNode"
+ *                 TypeNode  "GroundedPredicateNode"
+ *
+ * As a side-effect, the variables and type restrictions are unpacked.
+ */
+void Variables::validate_vardecl(const Handle& hdecls)
+{
+	// If no variable declaration then create the empty variables
+	if (not hdecls)
+		return;
+
+	// Expecting the declaration list to be either a single
+	// variable, a list or a set of variable declarations.
+	Type tdecls = hdecls->get_type();
+
+	// Order matters only if it is a list of variables
+	_ordered = VARIABLE_LIST == tdecls;
+
+	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
+	{
+		varset.insert(hdecls);
+		varseq.emplace_back(hdecls);
+	}
+	else if (TYPED_VARIABLE_LINK == tdecls)
+	{
+		get_vartype(hdecls);
+	}
+	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
+	{
+		// Extract the list of set of variables and make sure its as
+		// expected.
+		const HandleSeq& dset = hdecls->getOutgoingSet();
+		validate_vardecl(dset);
+	}
+	else if (UNQUOTE_LINK == tdecls)
+	{
+		// This indicates that the variable declaration is not in normal
+		// form (i.e. requires beta-reductions to be fully formed), thus
+		// variables inference is aborted for now.
+		return;
+	}
+	else
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a VariableList holding variable declarations");
+	}
+}
 
 bool Variables::is_well_typed() const
 {
@@ -380,6 +913,8 @@ bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
 	if (other.varseq.size() != sz) return false;
+
+	if (other._ordered != _ordered) return false;
 
 	// Side-by-side comparison
 	for (size_t i = 0; i < sz; i++)
@@ -728,23 +1263,22 @@ void Variables::extend(const Variables& vset)
 {
 	for (const Handle& h : vset.varseq)
 	{
-		try
+		auto index_it = index.find(h);
+		if (index_it != index.end())
 		{
-			index.at(h);
-
 			// Merge the two typemaps, if needed.
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				const TypeSet& tms = vset._simple_typemap.at(h);
+				const TypeSet& tms = typemap_it->second;
 				TypeSet mytypes =
 					type_intersection(_simple_typemap[h], tms);
 				_simple_typemap.erase(h);	 // is it safe to erase if
                                              // h not in already?
 				_simple_typemap.insert({h, mytypes});
 			}
-			catch(const std::out_of_range&) {}
 		}
-		catch(const std::out_of_range&)
+		else
 		{
 			// Found a new variable! Insert it.
 			index.insert({h, varseq.size()});
@@ -752,14 +1286,16 @@ void Variables::extend(const Variables& vset)
 			varset.insert(h);
 
 			// Install the type constraints, as well.
-			// The at() might throw...
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
+				_simple_typemap.insert({h, typemap_it->second});
 			}
-			catch(const std::out_of_range&) {}
 		}
 	}
+
+	// If either this or the other are ordered then the result is ordered
+	_ordered = _ordered or vset._ordered;
 }
 
 void Variables::erase(const Handle& var)
@@ -802,7 +1338,7 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
 		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(types, TYPE_CHOICE);
+			: createLink(std::move(types), TYPE_CHOICE);
 		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
@@ -826,15 +1362,53 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 
 Handle Variables::get_vardecl() const
 {
-	HandleSeq vars;
+	HandleSeq vardecls;
 	for (const Handle& var : varseq)
-	{
-		vars.emplace_back(get_type_decl(var, var));
-	}
-	if (vars.size() == 1)
-		return vars[0];
+		vardecls.emplace_back(get_type_decl(var, var));
+	if (vardecls.size() == 1)
+		return vardecls[0];
 
-	return Handle(createVariableList(vars));
+	if (_ordered)
+		return Handle(createVariableList(std::move(vardecls)));
+
+	return Handle(createVariableSet(std::move(vardecls)));
+}
+
+void Variables::validate_vardecl(const HandleSeq& oset)
+{
+	for (const Handle& h: oset)
+	{
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+		{
+			varset.insert(h);
+			varseq.emplace_back(h);
+		}
+		else if (TYPED_VARIABLE_LINK == t)
+		{
+			get_vartype(h);
+		}
+		else
+		{
+			throw InvalidParamException(TRACE_INFO,
+				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"\nVariableList is %s",
+					nameserver().getTypeName(t).c_str(),
+					to_string().c_str());
+		}
+	}
+}
+
+void Variables::find_variables(const Handle& body)
+{
+	FreeVariables::find_variables(body);
+	_ordered = false;
+}
+
+void Variables::find_variables(const HandleSeq& oset, bool ordered_link)
+{
+	FreeVariables::find_variables(oset, ordered_link);
+	_ordered = false;
 }
 
 std::string Variables::to_string(const std::string& indent) const
@@ -842,25 +1416,78 @@ std::string Variables::to_string(const std::string& indent) const
 	std::stringstream ss;
 
 	// FreeVariables
-	ss << FreeVariables::to_string(indent);
+	ss << FreeVariables::to_string(indent) << std::endl;
+
+	// Whether it is ordered
+	ss << indent << "_ordered = " << _ordered << std::endl;
 
 	// Simple typemap
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
 	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
 	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent_p << "size = " << _simple_typemap.size();
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << indent_p << "variable[" << i << "]:" << std::endl
+		ss << std::endl << indent_p << "variable[" << i << "]:" << std::endl
 		   << oc_to_string(v.first, indent_pp)
 		   << indent_p << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << nameserver().getTypeName(t);
-		ss << std::endl;
 		i++;
 	}
 
+	return ss.str();
+}
+
+std::string oc_to_string(const TypeArityPair& tap, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent
+	   << "(" << oc_to_string(tap.first)
+	   << "," << tap.second << ")";
+	return ss.str();
+}
+
+std::string oc_to_string(const Path& path, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent;
+	for (const auto& tap : path)
+		ss << oc_to_string(tap);
+	return ss.str();
+}
+
+std::string oc_to_string(const PathMultiset& paths, const std::string& indent)
+{
+	std::stringstream ss;
+	size_t i = 0;
+	for (const auto& path : paths)
+	{
+		ss << indent << "path[" << i++ << "]: " << oc_to_string(path);
+		if (i < path.size())
+			ss << std::endl;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const HandlePathsMap& hpsm, const std::string& indent)
+{
+	std::stringstream ss;
+	for (const auto& hpsp : hpsm)
+	{
+		ss << indent << "paths[" << hpsp.first->to_short_string() << "]:"
+		   << std::endl
+		   << oc_to_string(hpsp.second, indent + OC_TO_STRING_INDENT);
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const VarScraper& vsc, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "_paths:" << std::endl
+	   << oc_to_string(vsc._paths, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
@@ -868,10 +1495,10 @@ std::string oc_to_string(const FreeVariables::IndexMap& imap,
                          const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << imap.size() << std::endl;
+	ss << indent << "size = " << imap.size();
 	for (const auto& el : imap) {
-		ss << indent << "index[" << el.second << "]: "
-		   << el.first->id_to_string() << std::endl;
+		ss << std::endl << indent << "index[" << el.second << "]: "
+		   << el.first->id_to_string();
 	}
 	return ss.str();
 }

@@ -48,7 +48,8 @@ class ArityLink : public FunctionLink
 {
 public:
 	ArityLink(const HandleSeq&, Type = ARITY_LINK);
-	ArityLink(const Link &l);
+	ArityLink(const ArityLink&) = delete;
+	ArityLink& operator=(const ArityLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);

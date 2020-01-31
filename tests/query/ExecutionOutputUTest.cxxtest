@@ -234,7 +234,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr situation(createBindLink(*LinkCast(situ)));
+	BindLinkPtr situation(createBindLink(situ->getOutgoingSet()));
 
 	Handle pred =
 	al(BIND_LINK,
@@ -244,7 +244,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr predicament(createBindLink(*LinkCast(pred)));
+	BindLinkPtr predicament(createBindLink(pred->getOutgoingSet()));
 
 	// Now perform the search.
 	DefaultImplicator simpl(&as);

@@ -38,19 +38,6 @@ ValueOfLink::ValueOfLink(const HandleSeq& oset, Type t)
 	}
 }
 
-ValueOfLink::ValueOfLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, VALUE_OF_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ValueOfLink, got %s", tname.c_str());
-	}
-}
-
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.

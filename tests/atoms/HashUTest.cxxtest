@@ -31,6 +31,9 @@
 
 using namespace opencog;
 
+#define an _as.add_node
+#define al _as.add_link
+
 // Test Atom::compute_hash(), in particular whether 2 different atoms
 // have different hashes. Atom hash collisions are impossible to
 // completely eliminate, but we can avoid obviously pathological ones.
@@ -65,6 +68,10 @@ public:
 	// Test hash collisions of non-scope links
 	void test_sequential_compute_hash();
 	void test_times_plus_compute_hash();
+
+	// Test that unordered links have the same hash regardless of the
+	// order of their outgoing set
+	void test_equallink();
 };
 
 void HashUTest::test_scope_compute_hash_1()
@@ -155,4 +162,17 @@ void HashUTest::test_times_plus_compute_hash()
 	TS_ASSERT_DIFFERS(tl.value(), pl.value());
 
 	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void
+HashUTest::test_equallink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = an(VARIABLE_NODE, "$X");
+	Handle Y = an(VARIABLE_NODE, "$Y");
+	Handle EqXY = al(EQUAL_LINK, X, Y);
+	Handle EqYX = al(EQUAL_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(EqXY.value(), EqYX.value());
 }

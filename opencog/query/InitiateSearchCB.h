@@ -30,7 +30,6 @@
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -54,7 +53,7 @@ public:
 	 * in order to drive a reasonably-fast search.
 	 */
 	virtual void set_pattern(const Variables&, const Pattern&);
-	virtual bool initiate_search(PatternMatchEngine *);
+	virtual bool initiate_search(PatternMatchCallback&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -67,18 +66,19 @@ protected:
 	const HandleSet* _dynamic;
 
 	PatternLinkPtr _pl;
-	void jit_analyze(PatternMatchEngine *);
+	void jit_analyze(void);
 
 	Handle _root;
 	Handle _starter_term;
+	HandleSeq _search_set;
 
 	struct Choice
 	{
-		size_t clause;
+		Handle clause;
 		Handle best_start;
 		Handle start_term;
 	};
-	size_t _curr_clause;
+	Handle _curr_clause;
 	std::vector<Choice> _choices;
 
 	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
@@ -86,16 +86,17 @@ protected:
 	                                      size_t&);
 	virtual Handle find_thinnest(const HandleSeq&,
 	                             const HandleSet&,
-	                             Handle&, size_t&);
+	                             Handle&, Handle&);
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());
 
-	bool _search_fail;
-	virtual bool neighbor_search(PatternMatchEngine *);
-	virtual bool link_type_search(PatternMatchEngine *);
-	virtual bool variable_search(PatternMatchEngine *);
-	virtual bool no_search(PatternMatchEngine *);
+	bool setup_neighbor_search(void);
+	bool setup_no_search(void);
+	bool setup_link_type_search(void);
+	bool setup_variable_search(void);
 
+	bool choice_loop(PatternMatchCallback&, const std::string);
+	bool search_loop(PatternMatchCallback&, const std::string);
 	AtomSpace *_as;
 };
 

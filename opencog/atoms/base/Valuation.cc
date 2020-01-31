@@ -41,7 +41,7 @@ std::string Valuation::to_string(const std::string& indent) const
 	std::string rv = indent + "(Valuation\n   " + indent;
 	rv += _key->to_string("") + "\n   " + indent;
 	rv += _atom->to_string("") + "\n   " + indent;
-	rv += _value->to_string("") + ")\n";
+	rv += _value->to_string("") + ")";
 	return rv;
 }
 

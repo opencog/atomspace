@@ -37,7 +37,8 @@ protected:
 
 public:
 	GetLink(const HandleSeq&, Type=GET_LINK);
-	explicit GetLink(const Link &l);
+	GetLink(const GetLink&) = delete;
+	GetLink operator=(const GetLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

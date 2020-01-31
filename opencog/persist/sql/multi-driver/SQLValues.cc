@@ -317,21 +317,6 @@ ValuePtr SQLAtomStorage::getValue(VUID vuid)
 	return doGetValue(buff);
 }
 
-/// Return a value, given by the key-atom pair.
-/// If the value type is a link, then the full recursive
-/// fetch is performed.
-ValuePtr SQLAtomStorage::getValuation(const Handle& key,
-                                      const Handle& atom)
-{
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		get_uuid(key),
-		get_uuid(atom));
-
-	return doGetValue(buff);
-}
-
 /// Return a value, given by indicated query buffer.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
@@ -489,32 +474,6 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	rp.table = nullptr;
 	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
 	rp.atom = nullptr;
-}
-
-/* ================================================================ */
-
-void SQLAtomStorage::getValuations(AtomTable& table,
-                                   const Handle& key, bool get_all_values)
-{
-	rethrow();
-
-	// If the uuid of the key is not known, the key does not exist
-	// in the database; therefore, there are no values. Just return.
-	UUID kuid = check_uuid(key);
-	if (TLB::INVALID_UUID == kuid) return;
-
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Valuations WHERE key=%lu;", kuid);
-
-	Response rp(conn_pool);
-	rp.store = this;
-	rp.table = &table;
-	rp.katom = key;
-	rp.get_all_values = get_all_values;
-	rp.exec(buff);
-	rp.rs->foreach_row(&Response::get_valuations_cb, &rp);
-	rp.katom = nullptr;
 }
 
 /* ============================= END OF FILE ================= */

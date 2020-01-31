@@ -51,7 +51,8 @@ public:
 	StateLink(const HandleSeq&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
 
-	StateLink(const Link&);
+	StateLink(const StateLink&) = delete;
+	StateLink& operator=(const StateLink&) = delete;
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_state(void) const { return _outgoing[1]; }
 

@@ -28,16 +28,12 @@
 #include <atomic>
 #include <mutex>
 #include <set>
-#include <thread>
 #include <vector>
 
 // #include <opencog/util/async_method_caller.h>
 #include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -65,12 +61,15 @@ class SQLAtomStorage : public BackingStore
 		// Pool of shared connections
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
+		void enlarge_conn_pool(int);
+		void close_conn_pool(void);
 
 		// Utility for handling responses (on stack).
 		class Response;
 
-		void init(const char *);
 		std::string _uri;
+		bool _use_libpq;
+		bool _use_odbc;
 		int _server_version;
 		void get_server_version(void);
 
@@ -151,7 +150,6 @@ class SQLAtomStorage : public BackingStore
 		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
 		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
-		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		void deleteValuation(Response&, UUID, UUID);
 		void deleteAllValuations(Response&, UUID);
@@ -238,14 +236,17 @@ class SQLAtomStorage : public BackingStore
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(std::string uri);
+		SQLAtomStorage(void);
 		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
 		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
 		virtual ~SQLAtomStorage();
+		void open(std::string uri);
+		void connect(std::string uri);
 		bool connected(void); // connection to DB is alive
 
-		void kill_data(void); // destroy DB contents
-		void clear_cache(void); // clear out the TLB.
+		void create_database(std::string uri); // create the database
+		void kill_data(void);       // destroy DB contents
+		void clear_cache(void);     // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);
@@ -257,7 +258,6 @@ class SQLAtomStorage : public BackingStore
 		Handle getLink(Type, const HandleSeq&);
 		void getIncomingSet(AtomTable&, const Handle&);
 		void getIncomingByType(AtomTable&, const Handle&, Type t);
-		void getValuations(AtomTable&, const Handle&, bool get_all);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);
@@ -265,10 +265,8 @@ class SQLAtomStorage : public BackingStore
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
-		void loadAtomSpace(AtomSpace*);
-		void storeAtomSpace(AtomSpace*);
-		void load(AtomTable &); // Load entire contents of DB
-		void store(const AtomTable &); // Store entire contents of AtomTable
+		void loadAtomSpace(AtomTable &); // Load entire contents of DB
+		void storeAtomSpace(const AtomTable &); // Store all of AtomTable
 
 		// Debugging and performance monitoring
 		void print_stats(void);

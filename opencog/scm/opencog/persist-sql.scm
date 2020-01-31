@@ -1,16 +1,16 @@
 ;
-; OpenCog SQL Persistance module
+; OpenCog SQL Persistence module
 ;
 
 (define-module (opencog persist-sql))
 
-
 (use-modules (opencog))
+(use-modules (opencog persist))
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist-sql "libpersist-sql") "opencog_persist_sql_init")
 
-(export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
-	sql-store sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
+(export sql-clear-cache sql-clear-stats sql-close sql-create sql-open
+	sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
 
 (set-procedure-property! sql-clear-cache 'documentation
 "
@@ -37,24 +37,35 @@
     no longer be stored to or fetched from the database.
 ")
 
-(set-procedure-property! sql-load 'documentation
+(set-procedure-property! sql-create 'documentation
 "
- sql-load - load all atoms in the database.
-    This will cause ALL of the atoms in the open database to be loaded
-    into the atomspace. This can be a very time-consuming operation.
-    In normal operation, it is rarely necessary to load all atoms;
-    atoms can always be fetched and stored one at a time, on demand.
+ sql-create URL - Create and initialize a new database,
+    Create the database encoded in the URL, and initialize it for
+    holding AtomSpace data. This assumes that the user has database
+    creation priviledges; otherwise an error will be thrown.
+
+    Currently, the ONLY supported URL formats are:
+       postgres:///DBNAME
+       postgres://USER@HOST/DBNAME
+       postgres://USER:PASSWORD@HOST/DBNAME
+
+  For example, to create the database \"foo\", just say:
+     (sql-create \"postgres:///foo\")
+  To then use it, you have to open it:
+     (sql-open \"postgres:///foo\")
+  To delete it, you must say \"dropdb foo\" at the shell (bash) prompt.
 ")
 
 (set-procedure-property! sql-open 'documentation
 "
- sql-open URL - Open a connection to a database
+ sql-open URL - Open a connection to a database.
     Open a connection to the database encoded in the URL. All
     appropriate database credentials must be supplied in the URL,
     including the username and password, if required.
 
     The URL must be on one of these formats:
        odbc://USER:PASSWORD/DBNAME
+       postgres:///DBNAME
        postgres://USER@HOST/DBNAME
        postgres://USER:PASSWORD@HOST/DBNAME
        postgres:///DBNAME?user=USER
@@ -90,15 +101,6 @@
     at least the low-watermark pending writes in them.
 ")
 
-(set-procedure-property! sql-store 'documentation
-"
- sql-store - Store all atoms in the atomspace to the database.
-    This will dump the ENTIRE contents of the atomspace to the databse.
-    Depending on the size of the database, this can potentially take a
-    lot of time.  During normal operation, a bulk-save is rarely
-    required, as individual atoms can always be stored, one at a time.
-")
-
 (set-procedure-property! sql-stats 'documentation
 "
  sql-stats - report performance statistics.
@@ -106,3 +108,19 @@
     to the stdout of the server. These statistics can be quite arcane
     and are useful primarily to the developers of the database backend.
 ")
+
+(define-public (sql-load)
+"
+ sql-load - load all atoms in the database.
+    Deprecated; use `load-atomspace` instead.
+"
+	(load-atomspace)
+)
+
+(define-public (sql-store)
+"
+ sql-store - store all atoms in the database.
+    Deprecated; use `store-atomspace` instead.
+"
+	(store-atomspace)
+)

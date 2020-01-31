@@ -35,10 +35,17 @@ protected:
 	void init(void);
 public:
 	SatisfactionLink(const HandleSeq&, Type=SATISFACTION_LINK);
-	SatisfactionLink(const Link &l);
+	SatisfactionLink(const SatisfactionLink&) = delete;
+	SatisfactionLink& operator=(const SatisfactionLink&) = delete;
 
 	virtual bool is_evaluatable() const { return true; }
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace* as, bool silent) {
+		return ValueCast(evaluate(as, silent)); }
+
+
 	static Handle factory(const Handle&);
 };
 

@@ -186,6 +186,9 @@ cdef class Atom(Value):
     @staticmethod
     cdef Atom createAtom(cHandle& handle)
 
+
+cdef vector[cHandle] atom_list_to_vector(list lst);
+
 # AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":

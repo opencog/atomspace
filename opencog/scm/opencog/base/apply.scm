@@ -22,6 +22,7 @@
 (define-public (substitute-var bindings body)
   (let ((body_type (cog-type body)))
     (cond ; recursive case
+          ((cog-subtype? 'VariableList body_type) (VariableList))
           ((cog-subtype? 'Link body_type)
            (apply cog-new-link
                   (cons body_type

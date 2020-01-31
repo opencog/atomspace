@@ -35,12 +35,6 @@ FoldLink::FoldLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-FoldLink::FoldLink(const Link& l)
-    : FunctionLink(l)
-{
-	init();
-}
-
 void FoldLink::init(void)
 {
 	Type tscope = get_type();

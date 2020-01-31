@@ -42,9 +42,10 @@ private:
 	Handle fetch_atom(Handle);
 	Handle fetch_incoming_set(Handle);
 	Handle fetch_incoming_by_type(Handle, Type);
-	void fetch_valuations(Handle, bool);
 	Handle store_atom(Handle);
 	void load_type(Type);
+	void load_atomspace(void);
+	void store_atomspace(void);
 	void barrier(void);
 
 public:

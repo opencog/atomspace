@@ -42,13 +42,12 @@ class FreeLink : public Link
 {
 protected:
 	FreeVariables _vars;
-
-	void unorder(void);
 	void init(void);
 
 public:
 	FreeLink(const HandleSeq& oset, Type=FREE_LINK);
-	FreeLink(const Link& l);
+	FreeLink(const FreeLink&) = delete;
+	FreeLink& operator=(const FreeLink&) = delete;
 	virtual ~FreeLink() {}
 
 	const FreeVariables& get_vars() const

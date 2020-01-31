@@ -100,12 +100,13 @@ protected:
 	                          bool reverse=false);
 
 	void locate_defines(const HandleSeq& clauses);
-	void locate_globs(const HandleSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
 	bool is_virtual(const Handle&);
 	void unbundle_virtual(const HandleSeq& clauses);
+
+	void locate_cacheable(const HandleSeq& clauses);
 
 	bool add_dummies();
 
@@ -120,7 +121,7 @@ protected:
 	                          const HandleSetSeq&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, Handle,
+	void make_term_tree_recursive(const Handle&, const Handle&,
 	                              PatternTermPtr&);
 
 	void init(void);
@@ -139,7 +140,8 @@ public:
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
-	PatternLink(const Link&);
+	PatternLink(const PatternLink&) = delete;
+	PatternLink& operator=(const PatternLink&) = delete;
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).
@@ -154,7 +156,7 @@ public:
 	            const HandleSeq&);
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 	const Pattern& get_pattern(void) const { return _pat; }
 
 	const HandleSeqSeq& get_components(void) const { return _components; }

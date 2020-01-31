@@ -36,20 +36,6 @@ ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq, Type t)
 	init();
 }
 
-ImplicationScopeLink::ImplicationScopeLink(const Link &l)
-	: ScopeLink(l)
-{
-	Type t = l.get_type();
-	if (not nameserver().isA(t, IMPLICATION_SCOPE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ImplicationScopeLink, got %s", tname.c_str());
-	}
-
-	init();
-}
-
 void ImplicationScopeLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = _outgoing.size();
