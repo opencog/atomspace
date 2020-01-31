@@ -1274,11 +1274,11 @@ void Variables::extend(const Variables& vset)
 			if (typemap_it != vset._simple_typemap.end())
 			{
 				const TypeSet& tms = typemap_it->second;
-				TypeSet mytypes =
-					type_intersection(_simple_typemap[h], tms);
-				_simple_typemap.erase(h);	 // is it safe to erase if
-                                             // h not in already?
-				_simple_typemap.insert({h, mytypes});
+				auto tti = _simple_typemap.find(h);
+				if(tti != _simple_typemap.end())
+					tti->second = set_intersection(tti->second, tms);
+				else
+					_simple_typemap.insert({h, tms});
 			}
 		}
 		else
