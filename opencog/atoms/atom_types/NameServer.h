@@ -160,6 +160,25 @@ public:
         return n_children;
     }
 
+    /**
+     * Given the type `type`, get all of the parents. This is
+     * recursive, that is, parents of the parents are returned.
+     * Stores the parent types on the OutputIterator 'result'.
+     * Returns the number of parent types.
+     */
+    template <typename OutputIterator>
+    unsigned long getParentsRecursive(Type type, OutputIterator result) const
+    {
+        unsigned long n_parents = 0;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (recursiveMap[i][type] and (type != i)) {
+                *(result++) = i;
+                n_parents++;
+            }
+        }
+        return n_parents;
+    }
+
     template <typename Function>
     void foreachRecursive(Function func, Type type) const
     {
