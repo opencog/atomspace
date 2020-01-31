@@ -1046,10 +1046,44 @@ bool Variables::is_type(const Handle& h) const
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	if (varset.end() == varset.find(var)) return false;
+
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
+	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
+
+	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
+
+	// If one is allowed in interval then there are two alternatives.
+	// one: val must satisfy type restriction.
+	// two: val must be list_link and its unique outgoing satisfies
+	//      type restriction.
+	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
+	    and is_type(tit, dit, fit, val))
+		return true;
+	else if (val->get_type() != LIST_LINK or
+	         not is_lower_bound(var, num_args) or
+	         not is_upper_bound(var, num_args))
+		// If the number of arguments is out of the allowed interval
+		// of the variable/glob or val is not List_link, return false.
+		return false;
+
+	// Every outgoing atom in list must satisfy type restriction of var.
+	for (size_t i = 0; i < num_args; i++)
+		if (!is_type(tit, dit, fit, val->getOutgoingSet()[i]))
+			return false;
+
+	return true;
+}
+
+bool Variables::is_type(VariableTypeMap::const_iterator tit,
+                        VariableDeepTypeMap::const_iterator dit,
+                        VariableDeepTypeMap::const_iterator fit,
+                        const Handle& val) const
+{
 	bool ret = true;
 
 	// Simple type restrictions?
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
 		const TypeSet &tchoice = tit->second;
@@ -1064,8 +1098,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Deep type restrictions?
-	VariableDeepTypeMap::const_iterator dit =
-		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
 		const HandleSet &sigset = dit->second;
@@ -1077,18 +1109,13 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Fuzzy deep type restrictions?
-	VariableDeepTypeMap::const_iterator fit =
-		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
 		// const HandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
+		                       "Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
-
-	// Maybe we don't know this variable?
-	if (varset.end() == varset.find(var)) return false;
 
 	// There appear to be no type restrictions...
 	return ret;

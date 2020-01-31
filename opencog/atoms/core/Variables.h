@@ -329,6 +329,12 @@ struct Variables : public FreeVariables,
 
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
+
+protected:
+	bool is_type(VariableTypeMap::const_iterator,
+			VariableDeepTypeMap::const_iterator,
+			VariableDeepTypeMap::const_iterator,
+			const Handle&) const;
 };
 
 // Debugging helpers see
