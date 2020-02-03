@@ -200,7 +200,7 @@ MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 # ----------------------------------------------------------
 # Mandatory Postgres
 
-FIND_PACKAGE(PGSQL 9.5 REQUIRED)
+FIND_PACKAGE(PGSQL 9.5)
 IF (PGSQL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
