@@ -26,6 +26,7 @@
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
+(load "matrix/eval-pair.scm")
 (load "matrix/object-api.scm")
 (load "matrix/dynamic.scm")
 (load "matrix/support.scm")

@@ -36,12 +36,6 @@
 ; information.
 ;
 ; ---------------------------------------------------------------------
-;
-(use-modules (srfi srfi-1))
-(use-modules (opencog))
-(use-modules (opencog matrix))
-
-; ---------------------------------------------------------------------
 
 (define-public (make-evaluation-pair-api PRED-NODE LEFT-TYPE RIGHT-TYPE
                ANY-LEFT ANY-RIGHT ID NAME)
