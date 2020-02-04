@@ -3,6 +3,7 @@
 ; Wraps up the assorted tools and scripts into one module.
 ;
 (define-module (opencog matrix))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------
 ; Common configuration
@@ -26,7 +27,7 @@
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
-(load "matrix/eval-pair.scm")
+(load "matrix/eval-pairs.scm")
 (load "matrix/object-api.scm")
 (load "matrix/dynamic.scm")
 (load "matrix/support.scm")
