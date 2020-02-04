@@ -53,16 +53,16 @@
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
 ; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
-(load-from-path "opencog/base/core-docs.scm")
+(include-from-path "opencog/base/core-docs.scm")
 
-(load-from-path "opencog/base/utilities.scm")
+(include-from-path "opencog/base/utilities.scm")
 
-(load-from-path "opencog/base/atom-cache.scm")
-(load-from-path "opencog/base/apply.scm")
-(load-from-path "opencog/base/tv.scm")
-(load-from-path "opencog/base/types.scm")
-(load-from-path "opencog/base/file-utils.scm")
-(load-from-path "opencog/base/debug-trace.scm")
+(include-from-path "opencog/base/atom-cache.scm")
+(include-from-path "opencog/base/apply.scm")
+(include-from-path "opencog/base/tv.scm")
+(include-from-path "opencog/base/types.scm")
+(include-from-path "opencog/base/file-utils.scm")
+(include-from-path "opencog/base/debug-trace.scm")
 
 ; Obsolete functions
 (define-public (cog-atom X) "obsolete function" '())
