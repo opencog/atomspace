@@ -1,7 +1,7 @@
 
 AtomSpace Source Code
 =====================
-The atomspace implementation is here. But first, a quick overview of the
+The AtomSpace implementation is here. But first, a quick overview of the
 basics.
 
 
@@ -163,7 +163,7 @@ What is the Matrix API?
 -----------------------
 Binary relations between things, for example "A is-a B", can be thought
 of as defining a (sparse) matrix between things of type A and type B,
-where A and B are individually the row and column lables in that matrix.
+where A and B are individually the row and column labels in that matrix.
 The value system allows arbitrary data to be stored at these matrix
 locations, such as counts, frequencies, probabilities, and so on. This
 in turn allows conditional probabilities, marginal probabilities and
@@ -172,7 +172,7 @@ computed and stored.
 
 This differs from traditional science packages, such as SciPy or Gnu R
 (or Octave, or MatLab ...) in that the AtomSpace enables extremely sparse
-matricies to be stored. For example, matricies of 200K by 200K entries
+matrices to be stored. For example, matrices of 200K by 200K entries
 are not uncommon in linguistics and genomics/proteomics.  Non-sparse
 representations would require 200K x 200K = 40 billion entries, the vast
 majority of which are zero. The AtomSpace allows for ultra-sparse,
