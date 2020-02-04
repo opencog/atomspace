@@ -91,11 +91,17 @@ The tools implemented here include:
  * Performing cuts, to remove unwanted rows, columns and individual entries.
 
 To use these tools, all you need to do is to specify a low-level
-object that describes the matrix. It needs to provide some very simple
-but important methods: the `'left-type` and `'right-type` methods,
-that return the atom type of the rows and the columns; a `'pair-type`
-method that returns the atom-type of the pair, and a `'pair-count`
-method that returns the count, given the pair.
+object that describes the matrix. If the matrix is in the form of an
+`EvaluationLink`, as shown above, then it is sufficient to use the
+`make-evaluation-pair-api` to describe the types of the left and right
+(row and column) atoms, and the `PredicateNode` identifying the pair;
+everything else is automated. If the matrix is not of the above form,
+then it is quite easy to write a small, custom matrix-access object
+that defines what the pairs are. See `object-api.scm` for details;
+in short, one provides some very simple methods: the `'left-type` and
+`'right-type` methods, that return the atom type of the rows and the
+columns; a `'pair-type` method that returns the atom-type of the pair,
+and a `'pair-count` method that returns the count, given the pair.
 
 
 FAQ
@@ -136,7 +142,7 @@ FAQ
    Also: realize that the end-goal of OpenCog is not to export data
    once, analyze it once, and be done. Rather, the goal is to constantly
    and continuously monitor external, real-world events, pull them into
-   the atomspace, crunch it incessantly, and update knowledge of the
+   the AtomSpace, crunch it incessantly, and update knowledge of the
    external world as a result. This rules out GUI tools for data
    processing (because there's no GUI in a server) and it rules out
    popsicle-stick architectures as being a bit hokey.
@@ -148,7 +154,8 @@ FAQ
    to work with different cuts and filters, where you discard much of
    the data, or average together different parts: can you really afford
    the RAM needed to export all of these different cut and filtered
-   datasets?  Maybe you can, its just not trivial.
+   datasets?  Maybe you can, its just not trivial. (In my datasets,
+   petabytes of RAM would be needed for non-sparse representations.)
 
 **Q:** But if I did want to do it for Gnu R, how could I do it?
 
@@ -214,9 +221,9 @@ count (or other numeric value).
 
 The methods that need to be implemented are described in
 `object-api.scm`. Working examples of the base classes can be found in
-http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/batch-word-pair.scm
+https://github.com/opencog/learn/tree/master/scm/batch-word-pair.scm
 and in
-http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/pseudo-csets.scm
+https://github.com/opencog/learn/tree/master/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------

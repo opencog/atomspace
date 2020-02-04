@@ -1,7 +1,7 @@
 
 AtomSpace Source Code
 =====================
-The atomspace implementation is here. But first, a quick overview of the
+The AtomSpace implementation is here. But first, a quick overview of the
 basics.
 
 
@@ -154,6 +154,39 @@ themselves are stored in the atomspace. This enables things like a
 graph. This allows the database to act as a rule engine, holding a large
 number of rules.
 
+Examples of "dual searches" include chatbots, which, given some input
+text, wish to locate possible replies by matching fragments of that
+input. The pattern matcher extends the idea of this kind of search to
+arbitrary graph structures.
+
+What is the Matrix API?
+-----------------------
+Binary relations between things, for example "A is-a B", can be thought
+of as defining a (sparse) matrix between things of type A and type B,
+where A and B are individually the row and column labels in that matrix.
+The value system allows arbitrary data to be stored at these matrix
+locations, such as counts, frequencies, probabilities, and so on. This
+in turn allows conditional probabilities, marginal probabilities and
+other statistical properties, or linear-algebra in general to be
+computed and stored.
+
+This differs from traditional science packages, such as SciPy or Gnu R
+(or Octave, or MatLab ...) in that the AtomSpace enables extremely sparse
+matrices to be stored. For example, matrices of 200K by 200K entries
+are not uncommon in linguistics and genomics/proteomics.  Non-sparse
+representations would require 200K x 200K = 40 billion entries, the vast
+majority of which are zero. The AtomSpace allows for ultra-sparse,
+ultra-high-dimension matrixes to be stored.
+
+This should also be contrasted to artificial neural nets and deep
+learning: in most common applications of neural nets, the dimensions
+of the "hidden layers" rarely exceed several thousand, precisely due
+to O(N^2) explosion of non-zero entries. In all of the standard
+approaches, the weight vectors in neural nets are NOT sparse. By
+contrast, the AtomSpace provides a framework for performing neural-net
+type research with ultra-high-dimension, ultra-sparse connectivity
+diagrams.
+
 
 What is the Unified Rule Engine?
 --------------------------------
@@ -169,6 +202,9 @@ There are four different ways of managing rules. Two are the traditional
 forward-chaining and backward-chaining algorithms, full analogous to
 those chainers commonly seen in many kinds of logic engines and theorem
 proving systems (most rule engines provide only a forward chainer).
+Its not in this repo; it's in the
+[opencog/ure](https://github.com/opencog/ure) repo, and is at release
+level, and fully supported.
 
 A third type of rule engine is based on the idea of parsing. It is
 neither a forward nor backward chainer, but combines a bit of both,

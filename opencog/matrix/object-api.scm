@@ -67,15 +67,20 @@
 ;
 ; ---------------------------------------------------------------------
 ;
-; Example low-level API class. It has only six methods; these
-; return atoms on which observation counts are stored as values.
+; Example low-level API class. It provides a handful of core methods;
+; these return atoms on which observation counts are stored as values.
 ; Higher-level objects use this object to fetch counts, store them
-; into the database, or to return various statistics.
+; into the database, or to compute and return various statistics.
 ;
-; The `add-pair-count-api` class, below, is a typical user of this
-; class; it provides getters and setters for the counts.
+; Most users will find it easiest to use the `make-evaluation-pair-api`
+; to provide the low-level API.  It is ideal, when counts are stored
+; in the form of `EvaluationLink PredicateNode "..." ListLink ...`.
 ;
-; See `make-any-link-api` for a working example.
+; The `add-pair-freq-api` class, below, is a typical user of this
+; class; it provides getters and setters for the frequencies.
+;
+; See `make-evaluation-pair-api` and `make-any-link-api` for working
+; examples.
 ;
 ; When called, this will create a new instance of the class
 ; i.e. will create a new object.
