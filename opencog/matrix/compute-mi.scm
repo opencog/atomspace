@@ -114,6 +114,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 atomic))
+(use-modules (ice-9 optargs))  ; Needed for define*-public
 (use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog persist))
@@ -516,9 +517,9 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-(define-public (batch-all-pair-mi OBJ)
+(define*-public (batch-all-pair-mi OBJ #:optional (DO-STORE #t))
 "
-  batch-all-pair-mi LLOBJ
+  batch-all-pair-mi LLOBJ [DO-STORE]
 
   Compute the mutual information between all pairs. Counts, frequencies
   and left, right partial sums are also performed; this is an all-in-one
@@ -549,6 +550,10 @@
   NOT use the atomspace would almost surely be faster.  We put up with
   the performance overhead here in order to get the flexibility that
   the atomspace provides.
+
+  By default, the results of the computation are stored in the currently
+  open database. If the optional argument DO-STORE is set to #f, then
+  the storage will not be performed.
 "
 	(define overall-start-time (current-time))
 	(define start-time (current-time))
@@ -582,6 +587,12 @@
 	; Define the object that can store the computed values
 	(define store-obj (make-store wild-obj))
 
+	; Optionally store individual atoms
+	(define maybe-store-atoms
+		(if DO-STORE
+			(lambda (atom-list) (for-each store-atom atom-list))
+			(lambda (atom-list) #f)))
+
 	(display "Start computing the basis\n")
 	(format #t "Support: found num left= ~A num right= ~A in ~A secs\n"
 			(length (wild-obj 'left-basis))
@@ -608,51 +619,53 @@
 	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
 
-	(display "Going to do individual pair frequencies\n")
+	(display "Going to do individual pair frequencies.\n")
 	(let ((pair-cnt (freq-obj 'cache-all-pair-freqs)))
 		(format #t "Done computing ~A pair frequencies in ~A secs\n"
 				pair-cnt (elapsed-secs)))
 
-	(display "Start computing log P(*,y)\n")
+	(display "Start computing log P(*,y).\n")
 	(freq-obj 'cache-all-left-freqs)
-	(format #t "Done computing ~A left-wild log frequencies in ~A secs\n"
+	(format #t "Done computing ~A left-wild log frequencies in ~A secs.\n"
 		(length (wild-obj 'right-basis)) (elapsed-secs))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
 	(freq-obj 'cache-all-right-freqs)
-	(format #t "Done computing ~A right-wild log frequencies in ~A secs\n"
+	(format #t "Done computing ~A right-wild log frequencies in ~A secs.\n"
 		(length (wild-obj 'left-basis)) (elapsed-secs))
 
-	(store-obj 'store-wildcards)
-	(display "Done computing and saving -log P(x,*) and P(*,y)\n")
+	(if DO-STORE (begin
+		(store-obj 'store-wildcards)
+		(display "Done saving -log P(x,*) and P(*,y)\n")))
 
 	; Now, the individual pair mi's
-	(display "Going to compute and store individual pair MI\n")
+	(if DO-STORE
+		(display "Going to compute and store individual pair MI.\n")
+		(display "Going to compute individual pair MI.\n"))
 	(elapsed-secs)
-	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
-				; Non-parallel version here; it's parallel in the
-				; outer loop, above.
-				(lambda (atom-list) (for-each store-atom atom-list)))))
+	(let ((num-prs (batch-mi-obj 'cache-pair-mi maybe-store-atoms)))
 
-		; This print triggers as soon as the let* above finishes.
+		; This print triggers as soon as the let above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
 	)
 
-	(display "Going to do column and row subtotals\n")
+	(display "Going to do column and row subtotals.\n")
 	(subtotal-obj 'cache-all-left-entropy)
 	(subtotal-obj 'cache-all-right-entropy)
 	(subtotal-obj 'cache-all-left-mi)
 	(subtotal-obj 'cache-all-right-mi)
 
-	(display "Going to compute the left, right and total entropy\n")
+	(display "Going to compute the left, right and total entropy.\n")
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
 
-	(display "Done computing totals; start saving wildcards\n")
-	(store-obj 'store-wildcards)
+	(if DO-STORE (begin
+		(display "Done computing totals; start saving wildcards.\n")
+		(store-obj 'store-wildcards))
+		(display "Done computing totals.\n"))
 
-	(format #t "Finished with MI computations; this took ~5f hours\n"
+	(format #t "Finished with MI computations; this took ~5f hours.\n"
 		(/ (- (current-time) overall-start-time) 3600.0))
 )
 
