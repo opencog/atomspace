@@ -19,7 +19,65 @@
 
 (load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
-(use-modules (system base compile))
+; List everything to be exported from the C++ code i.e. from libsmob,
+; as otherwise guile generates warnings about "possibly unbound variable"
+; when these are touched in the various scm files.
+(export
+cog-arity
+cog-as
+cog-atom?
+cog-atom-less?
+cog-atomspace?
+cog-atomspace-clear
+cog-atomspace-env
+cog-atomspace-uuid
+cog-confidence
+cog-count
+cog-count-atoms
+cog-delete
+cog-delete-recursive
+cog-extract
+cog-extract-recursive
+cog-get-subtypes
+cog-get-types
+cog-handle
+cog-inc-count!
+cog-incoming-by-type
+cog-incoming-set
+cog-incoming-size
+cog-incoming-size-by-type
+cog-inc-value!
+cog-keys
+cog-link
+cog-link?
+cog-map-type
+cog-mean
+cog-name
+cog-new-link
+cog-new-node
+cog-new-value
+cog-node
+cog-node?
+cog-number
+cog-outgoing-atom
+cog-outgoing-by-type
+cog-outgoing-set
+cog-set-tv!
+cog-set-value!
+cog-subtype?
+cog-tv
+cog-tv-confidence
+cog-tv-count
+cog-tv-mean
+cog-tv-merge
+cog-tv-merge-hi-conf
+cog-type
+cog-type->int
+cog-value
+cog-value?
+cog-value->list
+cog-value-ref
+)
 
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
