@@ -67,9 +67,8 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
 # ---------------------------------------------------------------------
 # When building, all files specifed are are copied to
-# '${CMAKE_BINARY_DIR}/opencog/scm' following the file tree structure
-# created when installing to /usr/local/share/opencog/scm.
-# XXX FIXME: the above install path is no longer used!! !?!?!?!?
+# '${CMAKE_BINARY_DIR}/opencog/scm' following the same file tree
+# as will be installed (to /usr/local/share/guile/site/3.0/opencog)
 #
 # It has three keyword arguments
 #
@@ -82,7 +81,7 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 #   only file to be installed.
 #
 # DEPENDS: The name of a target that generates a scheme file that is
-# to be installed. This is an optional argument only required for
+# to be installed. This is an optional argument required only for
 # generated files.
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the
@@ -113,8 +112,8 @@ FUNCTION(ADD_GUILE_MODULE)
             GET_FILENAME_COMPONENT(DIR_PATH ${FILE_PATH} DIRECTORY)
             GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
 
-            # Check if the file exists or is generated, and set FULL_DIR_PATH
-            # or target dependencies.
+            # Check if the file exists or is generated, and set
+            # FULL_DIR_PATH or target dependencies.
             IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/${FILE_NAME})
                 SET(FULL_DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/)
             ELSEIF(EXISTS /${DIR_PATH}/${FILE_NAME})
