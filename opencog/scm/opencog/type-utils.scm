@@ -25,7 +25,7 @@
   Type checker.  Returns true if `VALUE` is of type `TYPE-SPEC`.
   More precisely, returns true if `VALUE` will fit into the type
   specification given by `TYPE-SPEC`; that the value and the type
-  specification can be connected. This is usefule for beta-reduction,
+  specification can be connected. This is useful for beta-reduction,
   (to check that some argument is reducible) or for pattern matching
   (searching).
 
