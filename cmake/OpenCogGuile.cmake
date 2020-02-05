@@ -158,6 +158,22 @@ FUNCTION(ADD_GUILE_MODULE)
                 ${FILE_PATH}
                 DESTINATION ${FILE_INSTALL_PATH}
             )
+
+            # If any file in the module is newer than the module
+            # itself, then touch the module; this is needed to force
+            # recompilation of the module!
+            # XXX This "almost works" but somehow still does not do
+            # the right thing -- CMake always installs! ??? Huh???
+#            INSTALL(CODE "
+#              IF(EXISTS ${FILE_INSTALL_PATH}.scm AND
+#                 (${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}
+#                      IS_NEWER_THAN ${FILE_INSTALL_PATH}.scm))
+#                 MESSAGE(\"-- Touch: ${FILE_INSTALL_PATH}.scm\")
+#                 MESSAGE(\"-- Newer: ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}\")
+#                 FILE(TOUCH ${FILE_INSTALL_PATH}.scm)
+#              ENDIF()
+#            ")
+
         ENDFOREACH()
     ELSE()
         IF(NOT DEFINED SCM_FILES)
