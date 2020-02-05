@@ -19,6 +19,13 @@
 			(VariableNode "$B"))
 		(InheritanceLink (VariableNode "$A") (VariableNode "$B"))))
 
+;; an empty TypeChoice is a bottom type in a sense an
+;; empty disjunction is false.
+(define is-nothing
+	(GetLink
+		(TypedVariableLink (VariableNode "$H") (TypeChoice))
+		(InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
+
 ;; looks for queries.
 ;; This binds only the second variable, thus, the first variable
 ;; remains free. Running this should results in a grounding to is-human,

@@ -772,6 +772,9 @@ void Variables::get_vartype(const Handle& htypelink)
 			_deep_typemap.insert({varname, deepset});
 		if (0 < fuzzset.size())
 			_fuzzy_typemap.insert({varname, fuzzset});
+		if (tset.empty())
+			// An empty disjunction corresponds to a bottom type.
+			_simple_typemap.insert({varname, {NOTYPE}});
 	}
 	else if (SIGNATURE_LINK == t)
 	{
