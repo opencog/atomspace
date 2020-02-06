@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
@@ -351,46 +352,6 @@ bool is_well_typed(const TypeSet& ts)
 		if (not is_well_typed(t))
 			return false;
 	return true;
-}
-
-Type type_intersection(Type lhs, Type rhs)
-{
-	NameServer& ns = nameserver();
-	if (ns.isA(lhs, rhs))
-		return lhs;
-	if (ns.isA(rhs, lhs))
-		return rhs;
-	return NOTYPE;              // represent the bottom type
-}
-
-TypeSet type_intersection(Type lhs, const TypeSet& rhs)
-{
-	TypeSet res;
-	// Distribute the intersection over the union type rhs
-	for (Type rhst : rhs) {
-		Type ty = type_intersection(lhs, rhst);
-		if (ty != NOTYPE)
-			res.insert(ty);
-	}
-	return res;
-}
-
-TypeSet type_intersection(const TypeSet& lhs,
-                          const TypeSet& rhs)
-{
-	// Base cases
-	if (lhs.empty())
-		return rhs;
-	if (rhs.empty())
-		return lhs;
-
-	// Recursive cases
-	TypeSet res;
-	for (Type ty : lhs) {
-		TypeSet itr = type_intersection(ty, rhs);
-		res.insert(itr.begin(), itr.end());
-	}
-	return res;
 }
 
 VariableSetPtr gen_variable_set(const Handle& h)

@@ -35,7 +35,7 @@ using namespace opencog;
 class VariablesUTest : public CxxTest::TestSuite
 {
 private:
-	Handle A, B, W, X, Y, Z, NT, PNT, CNT;
+	Handle A, B, W, X, Y, Z, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
 
 	AtomSpace _as;
 
@@ -55,10 +55,16 @@ public:
 		NT = an(TYPE_NODE, "Node");
 		PNT = an(TYPE_NODE, "PredicateNode");
 		CNT = an(TYPE_NODE, "ConceptNode");
+		NTI = an(TYPE_INH_NODE, "Node");
+		DPTCI = an(TYPE_CO_INH_NODE, "DefinedPredicateNode");
+		LLT = an(TYPE_NODE, "ListLink");
+		LTI = an(TYPE_INH_NODE, "Link");
 	}
 
 	void test_extend_1();
 	void test_extend_2();
+	void test_extend_3();
+	void test_extend_4();
 	void test_find_variables_ordered_1();
 	void test_find_variables_ordered_2();
 	void test_find_variables_ordered_3();
@@ -119,8 +125,66 @@ void VariablesUTest::test_extend_2()
 		              al(TYPED_VARIABLE_LINK, X, PNT),
 		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
 		expect = al(VARIABLE_LIST,
-		            al(TYPED_VARIABLE_LINK, X, PNT),
+		            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE)),
 		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, NTI),
+			              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LLT, NTI)),
+			              al(TYPED_VARIABLE_LINK, Y, NT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LTI, CNT)),
+			              al(TYPED_VARIABLE_LINK, Y, DPTCI)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, CNT, LLT)),
+			            al(TYPED_VARIABLE_LINK, Y, NT));
 
 	VariableList vl1(vardecl1), vl2(vardecl2);
 
