@@ -1409,16 +1409,13 @@ bool Variables::operator<(const Variables& other) const
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
+	HandleSeq types;
 	// Simple type info
 	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
 	{
-		HandleSeq types;
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
-		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(std::move(types), TYPE_CHOICE);
-		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
 	auto dit = _deep_typemap.find(var);
@@ -1433,8 +1430,37 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		OC_ASSERT(false, "TODO: support fuzzy type info");
 	}
 
-	// TODO: _glob_intervalmap?
+	// Check if ill-typed a.k.a invalid type intersection.
+	if(types.empty() and sit != _simple_typemap.end())
+	{
+		const Handle ill_type = createLink(TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
+	}
 
+	const auto interval = get_interval(var);
+	if (interval != default_interval(var->get_type())) {
+		Handle il = createLink(INTERVAL_LINK,
+		                       Handle(createNumberNode(interval.first)),
+		                       Handle(createNumberNode(interval.second)));
+
+		if (types.empty())
+			return createLink(TYPED_VARIABLE_LINK, alt, il);
+
+		HandleSeq tcs;
+		for (Handle tn : types)
+			tcs.push_back(createLink(TYPE_SET_LINK, il, tn));
+		return tcs.size() == 1 ?
+		       createLink(TYPED_VARIABLE_LINK, alt, tcs[0]) :
+		       createLink(TYPED_VARIABLE_LINK, alt,
+		                  createLink(tcs, TYPE_CHOICE));
+	}
+	// No/Default interval found
+	if (!types.empty()) {
+		Handle types_h = types.size() == 1 ?
+		                 types[0] :
+		                 createLink(std::move(types), TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
+	}
 	// No type info
 	return alt;
 }
