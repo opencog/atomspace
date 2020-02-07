@@ -681,7 +681,9 @@ void Variables::get_vartype(const Handle& htypelink)
 			if (INTERVAL_LINK == th)
 				intervals = h->getOutgoingSet();
 
-			else if (TYPE_NODE == th)
+			else if (TYPE_NODE == th or
+			         TYPE_INH_NODE == th or
+			         TYPE_CO_INH_NODE == th)
 			{
 				vartype = h;
 				t = th;
