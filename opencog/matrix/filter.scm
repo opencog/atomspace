@@ -412,3 +412,27 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (add-zero-filter LLOBJ RENAME)
+"
+  add-zero-filter LLOBJ RENAME - discard zero rows and columns.
+
+  Given a matrix LLOBJ, this defines a new matrix that contains
+  only those rows and columns with non-zero counts. This is useful
+  when analyzing matrix-wide reports, where zero rows/columns can
+  throw off averages.
+"
+	(define (left-basis-p ATOM)
+		(any (lambda (PR) (< 0 (LLOBJ 'get-count PR)))
+			(LLOBJ 'right-stars ATOM)))
+
+	(define (right-basis-p ATOM)
+		(any (lambda (PR) (< 0 (LLOBJ 'get-count PR)))
+			(LLOBJ 'left-stars ATOM)))
+
+	(define (pair-p PAIR) (< 0 (LLOBJ 'get-count PAIR)))
+
+	(add-generic-filter LLOBJ left-basis-p right-basis-p pair-p
+		"zero-filter" RENAME)
+)
+; ---------------------------------------------------------------------
