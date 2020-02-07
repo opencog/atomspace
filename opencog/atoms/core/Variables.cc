@@ -1335,10 +1335,46 @@ void Variables::extend(const Variables& vset)
 				_simple_typemap.insert({h, typemap_it->second});
 			}
 		}
+		// extend _glob_interval_map
+		extend_interval(h, vset);
 	}
 
 	// If either this or the other are ordered then the result is ordered
 	_ordered = _ordered or vset._ordered;
+}
+
+inline double max(double ld, double rd)
+{
+	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return ld;
+	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return rd;
+	return std::max(ld, rd);
+}
+
+inline double min(double ld, double rd)
+{
+	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return rd;
+	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return ld;
+	return std::min(ld, rd);
+}
+
+inline GlobInterval interval_intersection(const GlobInterval &lhs,
+                                          const GlobInterval &rhs)
+{
+	const auto lb = max(lhs.first, rhs.first);
+	const auto ub = min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{NAN, NAN} : GlobInterval{lb, ub};
+}
+
+void Variables::extend_interval(const Handle &h, const Variables &vset)
+{
+	auto it = _glob_intervalmap.find(h);
+	auto is_in_gim = it != _glob_intervalmap.end();
+	const auto intersection = not is_in_gim ? vset.get_interval(h) :
+			interval_intersection(vset.get_interval(h), get_interval(h));
+	if (intersection != default_interval(h->get_type())) {
+		if (is_in_gim) it->second = intersection;
+		else _glob_intervalmap.insert({h, intersection});
+	}
 }
 
 void Variables::erase(const Handle& var)

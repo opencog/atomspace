@@ -339,6 +339,8 @@ protected:
 			VariableDeepTypeMap::const_iterator,
 			const Handle&) const;
 
+	void extend_interval(const Handle &h, const Variables &vset);
+
 private:
 	inline const GlobInterval &default_interval(Type t) const
 	{
