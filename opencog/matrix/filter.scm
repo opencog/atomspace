@@ -199,6 +199,21 @@
 			(string-append (LLOBJ 'id) " " ID-STR))
 
 		; ---------------
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-generic-filter` object applied to \"~A\" to\n"
+"create \"~A\", with filtering ~A. The filter object knocks\n"
+"out rows, columns and individual entries from the larger matrix\n"
+"object. It effectively creates a smaller matrix from a bigger one,\n"
+"by overloading the default access functions.\n"
+)
+				(LLOBJ 'id) ID-STR (if REANME "enabled" "disabled")))
+
+		(define (describe)
+			(display (procedure-property add-generic-filter 'documentation)))
+
+		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
@@ -233,6 +248,12 @@
 				((get-all-elts)     (get-all-elts))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
+
+				((help)             (help))
+				((describe)         (describe))
+				((obj)              "add-generic-filter")
+				((base)             LLOBJ)
+
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
