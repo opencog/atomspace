@@ -77,7 +77,7 @@ repos, including:
 * [Unsupervised natural language learning](https://github.com/opencog/learn)
   (learn repo)
 * [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
-  (agi-bio repo) and various [MOZI](https://github.com/mozi) repos.
+  (agi-bio repo) and various [MOZI.AI](https://github.com/mozi-ai) repos.
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
   (tinycog repo)
 * [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
