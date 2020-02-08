@@ -709,17 +709,13 @@ void Variables::get_vartype(const Handle& htypelink)
 	else if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getChildrenRecursive(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getChildrenRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getParentsRecursive(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getParentsRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
@@ -744,9 +740,7 @@ void Variables::get_vartype(const Handle& htypelink)
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt)
 				{
-					TypeSet ts;
-					auto i_it = std::inserter(ts, ts.begin());
-					nameserver().getChildrenRecursive(vt, i_it);
+					TypeSet ts = nameserver().getChildrenRecursive(vt);
 					typeset.insert(ts.begin(), ts.end());
 				}
 			}
@@ -755,9 +749,7 @@ void Variables::get_vartype(const Handle& htypelink)
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt)
 				{
-					TypeSet ts;
-					auto i_it = std::inserter(ts, ts.begin());
-					nameserver().getParentsRecursive(vt, i_it);
+					TypeSet ts = nameserver().getParentsRecursive(vt);
 					typeset.insert(ts.begin(), ts.end());
 				}
 			}
