@@ -1072,7 +1072,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 
 	// Every outgoing atom in list must satisfy type restriction of var.
 	for (size_t i = 0; i < num_args; i++)
-		if (!is_type(tit, dit, fit, val->getOutgoingSet()[i]))
+		if (!is_type(tit, dit, fit, val->getOutgoingAtom(i)))
 			return false;
 
 	return true;
