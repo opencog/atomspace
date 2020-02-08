@@ -170,8 +170,8 @@ public:
     unsigned long getParentsRecursive(Type type, OutputIterator result) const
     {
         unsigned long n_parents = 0;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[i][type] and (type != i)) {
+        for (Type i = 0; i < type; ++i) {
+            if (recursiveMap[i][type]) {
                 *(result++) = i;
                 n_parents++;
             }
