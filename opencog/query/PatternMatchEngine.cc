@@ -969,45 +969,32 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			}
 
 			// Try to match as many atoms as possible.
-			bool tc;
-			do
+			// Iterate from the maximum allowed number of match to the minimum.
+			// Till valid match is found.
+			auto interval = _variables->get_interval(glob->getHandle());
+			size_t up_bound =
+					interval.second == std::numeric_limits<double>::infinity()
+					? SIZE_MAX :
+					interval.second;
+			for (auto i = std::min({up_bound, osg_size - jg, last_grd - 1});
+			     i >= interval.first; i--)
 			{
-				tc = tree_compare(glob, osg[jg], CALL_GLOB);
+				HandleSeq osg_seq = HandleSeq(osg.begin() + jg,
+				                              osg.begin() + i + jg);
+				Handle wr_h = createLink(osg_seq, LIST_LINK);
+
+				auto tc = tree_compare(glob, wr_h, CALL_GLOB);
 				if (tc)
 				{
-					// Can't match more than it did last time.
-					if (glob_seq.size()+1 >= last_grd)
-					{
-						jg--;
-						break;
-					}
-
-					// Can't exceed the upper bound.
-					if (not _variables->is_upper_bound(ohp, glob_seq.size()+1))
-					{
-						jg--;
-						break;
-					}
-
-					glob_seq.push_back(osg[jg]);
-
-					// See if we can match the next one.
-					jg++;
+					glob_seq.insert(glob_seq.end(),
+					                osg_seq.begin(),
+					                osg_seq.end());
+					jg += i - 1;
+					break;
 				}
-				// Can't match more, e.g. a type mis-match
-				else jg--;
-			} while (tc and jg<osg_size);
-
-			// Try again if we can't ground the glob after all.
-			if (0 == glob_seq.size())
-			{
-				backtrack(true);
-				continue;
 			}
 
-			// Try again if we can't ground enough atoms to satisfy
-			// the lower bound restriction.
-			if (not _variables->is_lower_bound(ohp, glob_seq.size()))
+			if (0 == glob_seq.size())
 			{
 				backtrack(true);
 				continue;

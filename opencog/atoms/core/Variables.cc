@@ -681,7 +681,9 @@ void Variables::get_vartype(const Handle& htypelink)
 			if (INTERVAL_LINK == th)
 				intervals = h->getOutgoingSet();
 
-			else if (TYPE_NODE == th)
+			else if (TYPE_NODE == th or
+			         TYPE_INH_NODE == th or
+			         TYPE_CO_INH_NODE == th)
 			{
 				vartype = h;
 				t = th;
@@ -1046,10 +1048,44 @@ bool Variables::is_type(const Handle& h) const
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	if (varset.end() == varset.find(var)) return false;
+
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
+	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
+
+	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
+
+	// If one is allowed in interval then there are two alternatives.
+	// one: val must satisfy type restriction.
+	// two: val must be list_link and its unique outgoing satisfies
+	//      type restriction.
+	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
+	    and is_type(tit, dit, fit, val))
+		return true;
+	else if (val->get_type() != LIST_LINK or
+	         not is_lower_bound(var, num_args) or
+	         not is_upper_bound(var, num_args))
+		// If the number of arguments is out of the allowed interval
+		// of the variable/glob or val is not List_link, return false.
+		return false;
+
+	// Every outgoing atom in list must satisfy type restriction of var.
+	for (size_t i = 0; i < num_args; i++)
+		if (!is_type(tit, dit, fit, val->getOutgoingSet()[i]))
+			return false;
+
+	return true;
+}
+
+bool Variables::is_type(VariableTypeMap::const_iterator tit,
+                        VariableDeepTypeMap::const_iterator dit,
+                        VariableDeepTypeMap::const_iterator fit,
+                        const Handle& val) const
+{
 	bool ret = true;
 
 	// Simple type restrictions?
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
 		const TypeSet &tchoice = tit->second;
@@ -1064,8 +1100,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Deep type restrictions?
-	VariableDeepTypeMap::const_iterator dit =
-		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
 		const HandleSet &sigset = dit->second;
@@ -1077,18 +1111,13 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Fuzzy deep type restrictions?
-	VariableDeepTypeMap::const_iterator fit =
-		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
 		// const HandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
+		                       "Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
-
-	// Maybe we don't know this variable?
-	if (varset.end() == varset.find(var)) return false;
 
 	// There appear to be no type restrictions...
 	return ret;
@@ -1148,16 +1177,7 @@ bool Variables::is_type(Type gtype) const
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default restriction is 1 or more,
-	// so return true as long as `n` is larger than 0.
-	if (_glob_intervalmap.end() == iit)
-		return (n > 0);
-
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n >= intervals.first);
 }
 
@@ -1167,20 +1187,20 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  * Returns true/false if the glob satisfies the upper bound
  * interval restriction.
  */
-bool Variables::is_upper_bound(const Handle& glob, size_t n) const
+bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default upper bound is
-	// "unbounded"; any number of matches are OK.
-	if (_glob_intervalmap.end() == iit)
-		return true;
-
-	// Negative upper bound means "unbounded" (infinity).
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n <= intervals.second or intervals.second < 0);
+}
+
+const GlobInterval& Variables::get_interval(const Handle& var) const
+{
+	const auto interval = _glob_intervalmap.find(var);
+
+	if (interval == _glob_intervalmap.end())
+		return default_interval(var->get_type());
+
+	return interval->second;
 }
 
 /* ================================================================= */
@@ -1317,10 +1337,46 @@ void Variables::extend(const Variables& vset)
 				_simple_typemap.insert({h, typemap_it->second});
 			}
 		}
+		// extend _glob_interval_map
+		extend_interval(h, vset);
 	}
 
 	// If either this or the other are ordered then the result is ordered
 	_ordered = _ordered or vset._ordered;
+}
+
+inline double max(double ld, double rd)
+{
+	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return ld;
+	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return rd;
+	return std::max(ld, rd);
+}
+
+inline double min(double ld, double rd)
+{
+	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return rd;
+	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return ld;
+	return std::min(ld, rd);
+}
+
+inline GlobInterval interval_intersection(const GlobInterval &lhs,
+                                          const GlobInterval &rhs)
+{
+	const auto lb = max(lhs.first, rhs.first);
+	const auto ub = min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{NAN, NAN} : GlobInterval{lb, ub};
+}
+
+void Variables::extend_interval(const Handle &h, const Variables &vset)
+{
+	auto it = _glob_intervalmap.find(h);
+	auto is_in_gim = it != _glob_intervalmap.end();
+	const auto intersection = not is_in_gim ? vset.get_interval(h) :
+			interval_intersection(vset.get_interval(h), get_interval(h));
+	if (intersection != default_interval(h->get_type())) {
+		if (is_in_gim) it->second = intersection;
+		else _glob_intervalmap.insert({h, intersection});
+	}
 }
 
 void Variables::erase(const Handle& var)
@@ -1355,16 +1411,13 @@ bool Variables::operator<(const Variables& other) const
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
+	HandleSeq types;
 	// Simple type info
 	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
 	{
-		HandleSeq types;
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
-		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(std::move(types), TYPE_CHOICE);
-		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
 	auto dit = _deep_typemap.find(var);
@@ -1379,8 +1432,37 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		OC_ASSERT(false, "TODO: support fuzzy type info");
 	}
 
-	// TODO: _glob_intervalmap?
+	// Check if ill-typed a.k.a invalid type intersection.
+	if(types.empty() and sit != _simple_typemap.end())
+	{
+		const Handle ill_type = createLink(TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
+	}
 
+	const auto interval = get_interval(var);
+	if (interval != default_interval(var->get_type())) {
+		Handle il = createLink(INTERVAL_LINK,
+		                       Handle(createNumberNode(interval.first)),
+		                       Handle(createNumberNode(interval.second)));
+
+		if (types.empty())
+			return createLink(TYPED_VARIABLE_LINK, alt, il);
+
+		HandleSeq tcs;
+		for (Handle tn : types)
+			tcs.push_back(createLink(TYPE_SET_LINK, il, tn));
+		return tcs.size() == 1 ?
+		       createLink(TYPED_VARIABLE_LINK, alt, tcs[0]) :
+		       createLink(TYPED_VARIABLE_LINK, alt,
+		                  createLink(tcs, TYPE_CHOICE));
+	}
+	// No/Default interval found
+	if (!types.empty()) {
+		Handle types_h = types.size() == 1 ?
+		                 types[0] :
+		                 createLink(std::move(types), TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
+	}
 	// No type info
 	return alt;
 }
