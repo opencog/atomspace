@@ -159,6 +159,16 @@ public:
         }
         return n_children;
     }
+    TypeSet getChildrenRecursive(Type type) const
+    {
+        TypeSet ts;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (recursiveMap[type][i] and (type != i)) {
+                ts.insert(i);
+            }
+        }
+        return ts;
+    }
 
     /**
      * Given the type `type`, get all of the parents. This is
@@ -170,13 +180,23 @@ public:
     unsigned long getParentsRecursive(Type type, OutputIterator result) const
     {
         unsigned long n_parents = 0;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[i][type] and (type != i)) {
+        for (Type i = 0; i < type; ++i) {
+            if (recursiveMap[i][type]) {
                 *(result++) = i;
                 n_parents++;
             }
         }
         return n_parents;
+    }
+    TypeSet getParentsRecursive(Type type) const
+    {
+        TypeSet ts;
+        for (Type i = 0; i < type; ++i) {
+            if (recursiveMap[i][type]) {
+                ts.insert(i);
+            }
+        }
+        return ts;
     }
 
     template <typename Function>

@@ -709,17 +709,13 @@ void Variables::get_vartype(const Handle& htypelink)
 	else if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getChildrenRecursive(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getChildrenRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getParentsRecursive(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getParentsRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
@@ -744,9 +740,7 @@ void Variables::get_vartype(const Handle& htypelink)
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt)
 				{
-					TypeSet ts;
-					auto i_it = std::inserter(ts, ts.begin());
-					nameserver().getChildrenRecursive(vt, i_it);
+					TypeSet ts = nameserver().getChildrenRecursive(vt);
 					typeset.insert(ts.begin(), ts.end());
 				}
 			}
@@ -755,9 +749,7 @@ void Variables::get_vartype(const Handle& htypelink)
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt)
 				{
-					TypeSet ts;
-					auto i_it = std::inserter(ts, ts.begin());
-					nameserver().getParentsRecursive(vt, i_it);
+					TypeSet ts = nameserver().getParentsRecursive(vt);
 					typeset.insert(ts.begin(), ts.end());
 				}
 			}
@@ -796,9 +788,18 @@ void Variables::get_vartype(const Handle& htypelink)
 			_deep_typemap.insert({varname, deepset});
 		if (0 < fuzzset.size())
 			_fuzzy_typemap.insert({varname, fuzzset});
+
+		// An empty disjunction corresponds to a bottom type.
 		if (tset.empty())
-			// An empty disjunction corresponds to a bottom type.
 			_simple_typemap.insert({varname, {NOTYPE}});
+
+		// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
+		if (1 == tset.size() and TYPE_CO_INH_NODE == tset[0]->get_type())
+		{
+			Type vt = TypeNodeCast(tset[0])->get_kind();
+			if (ATOM == vt)
+				_simple_typemap.insert({varname, {NOTYPE}});
+		}
 	}
 	else if (SIGNATURE_LINK == t)
 	{
@@ -844,9 +845,12 @@ void Variables::get_vartype(const Handle& htypelink)
 
 	if (0 < intervals.size())
 	{
-		_glob_intervalmap.insert({varname, std::make_pair(
-			std::round(NumberNodeCast(intervals[0])->get_value()),
-			std::round(NumberNodeCast(intervals[1])->get_value()))});
+		long lb = std::lround(NumberNodeCast(intervals[0])->get_value());
+		long ub = std::lround(NumberNodeCast(intervals[1])->get_value());
+		if (lb < 0) lb = 0;
+		if (ub < 0) ub = SIZE_MAX;
+
+		_glob_intervalmap.insert({varname, std::make_pair(lb, ub)});
 	}
 
 	varset.insert(varname);
@@ -1072,7 +1076,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 
 	// Every outgoing atom in list must satisfy type restriction of var.
 	for (size_t i = 0; i < num_args; i++)
-		if (!is_type(tit, dit, fit, val->getOutgoingSet()[i]))
+		if (!is_type(tit, dit, fit, val->getOutgoingAtom(i)))
 			return false;
 
 	return true;
@@ -1345,26 +1349,12 @@ void Variables::extend(const Variables& vset)
 	_ordered = _ordered or vset._ordered;
 }
 
-inline double max(double ld, double rd)
-{
-	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return ld;
-	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return rd;
-	return std::max(ld, rd);
-}
-
-inline double min(double ld, double rd)
-{
-	if (ld < 0 and rd != std::numeric_limits<double>::infinity()) return rd;
-	if (rd < 0 and ld != std::numeric_limits<double>::infinity()) return ld;
-	return std::min(ld, rd);
-}
-
 inline GlobInterval interval_intersection(const GlobInterval &lhs,
                                           const GlobInterval &rhs)
 {
-	const auto lb = max(lhs.first, rhs.first);
-	const auto ub = min(lhs.second, rhs.second);
-	return lb > ub ? GlobInterval{NAN, NAN} : GlobInterval{lb, ub};
+	const auto lb = std::max(lhs.first, rhs.first);
+	const auto ub = std::min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
 }
 
 void Variables::extend_interval(const Handle &h, const Variables &vset)

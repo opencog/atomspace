@@ -181,7 +181,7 @@ protected:
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;
 typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
-typedef std::pair<double, double> GlobInterval;
+typedef std::pair<size_t, size_t> GlobInterval;
 typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
@@ -347,7 +347,7 @@ private:
 		static const GlobInterval var_def_interval =
 				GlobInterval(1, 1);
 		static const GlobInterval glob_def_interval =
-				GlobInterval(1, std::numeric_limits<double>::infinity());
+				GlobInterval(1, SIZE_MAX);
 		return t == GLOB_NODE ? glob_def_interval :
 		       var_def_interval;
 	}

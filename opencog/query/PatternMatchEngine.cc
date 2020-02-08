@@ -860,7 +860,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		if (GLOB_NODE == ptype)
 		{
 			HandleSeq glob_seq;
-			PatternTermPtr glob(osp[ip]);
+			const PatternTermPtr& glob(osp[ip]);
 
 			// A glob may appear more than once in the pattern,
 			// so check if that's the case. If we have already
@@ -971,12 +971,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// Try to match as many atoms as possible.
 			// Iterate from the maximum allowed number of match to the minimum.
 			// Till valid match is found.
-			auto interval = _variables->get_interval(glob->getHandle());
-			size_t up_bound =
-					interval.second == std::numeric_limits<double>::infinity()
-					? SIZE_MAX :
-					interval.second;
-			for (auto i = std::min({up_bound, osg_size - jg, last_grd - 1});
+			const GlobInterval& interval = _variables->get_interval(ohp);
+			for (auto i = std::min({interval.second, osg_size - jg, last_grd - 1});
 			     i >= interval.first; i--)
 			{
 				HandleSeq osg_seq = HandleSeq(osg.begin() + jg,
