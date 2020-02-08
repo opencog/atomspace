@@ -788,9 +788,18 @@ void Variables::get_vartype(const Handle& htypelink)
 			_deep_typemap.insert({varname, deepset});
 		if (0 < fuzzset.size())
 			_fuzzy_typemap.insert({varname, fuzzset});
+
+		// An empty disjunction corresponds to a bottom type.
 		if (tset.empty())
-			// An empty disjunction corresponds to a bottom type.
 			_simple_typemap.insert({varname, {NOTYPE}});
+
+		// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
+		if (1 == tset.size() and TYPE_CO_INH_NODE == tset[0]->get_type())
+		{
+			Type vt = TypeNodeCast(tset[0])->get_kind();
+			if (ATOM == vt)
+				_simple_typemap.insert({varname, {NOTYPE}});
+		}
 	}
 	else if (SIGNATURE_LINK == t)
 	{
