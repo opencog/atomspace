@@ -79,21 +79,35 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
 
+    IF (NOT MODULE_NAME)
+        SET(MODULE_NAME "opencog")
+        SET(MODULE_NAME "opencog" PARENT_SCOPE)
+    ENDIF()
     IF (${MODULE_DIR_PATH} STREQUAL "/")
         SET(MODULE_DIR_PATH ${DIR_PATH})
     ENDIF()
 
-    # Copy files into build directory mirroring the install path
-    # structure, and also set the install path.
+    # Set the install path.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
+        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
             PARENT_SCOPE
         )
     ELSE()
+        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
         )
     ENDIF()
+
+    # Copy files into the build directory, mirroring the install
+    # path structure.
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${FILE_BUILD_PATH})
+
+    ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${FULL_DIR_PATH}/${FILE_NAME}"
+             "${FILE_BUILD_PATH}/${FILE_NAME}")
 
 ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
@@ -178,10 +192,8 @@ FUNCTION(ADD_GUILE_MODULE)
 
             PROCESS_MODULE_STRUCTURE(${FILE_PATH})
 
-            INSTALL (FILES
-                ${FILE_PATH}
-                DESTINATION ${FILE_INSTALL_PATH}
-            )
+            INSTALL (FILES ${FILE_PATH}
+                     DESTINATION ${FILE_INSTALL_PATH})
         ENDFOREACH()
 
     ELSE()
