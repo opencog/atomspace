@@ -310,10 +310,6 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 # ==========================================================
 # Decide what to build, based on the packages found.
 
-IF(HAVE_COGUTIL)
-	SET(HAVE_ATOMSPACE 1)
-ENDIF(HAVE_COGUTIL)
-
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
 ADD_SUBDIRECTORY(lib)
@@ -446,7 +442,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
