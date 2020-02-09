@@ -74,37 +74,27 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     #              associated with the module are installed
     #              at and copied to, with the exception
     #              of the MODULE_FILE.
+    SET(MODULE_NAME ${CMAKE_MATCH_3})
     SET(MODULE_NAME ${CMAKE_MATCH_3} PARENT_SCOPE)
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
 
+    IF (${MODULE_DIR_PATH} STREQUAL "/")
+        SET(MODULE_DIR_PATH ${DIR_PATH})
+    ENDIF()
+
     # Copy files into build directory mirroring the install path
     # structure, and also set the install path.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
-        EXECUTE_PROCESS(
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-                 ${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}
-        )
-        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${FULL_DIR_PATH}/${FILE_NAME}"
-                 "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-        )
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
             PARENT_SCOPE
         )
     ELSE()
-        EXECUTE_PROCESS(
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-                   ${GUILE_BIN_DIR}/${MODULE_DIR_PATH}
-        )
-        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${FULL_DIR_PATH}/${FILE_NAME}"
-                   "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-        )
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
         )
     ENDIF()
+
 ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
 # ---------------------------------------------------------------------
