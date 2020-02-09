@@ -79,6 +79,10 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
 
+    IF (SCM_MODULE)
+        SET(MODULE_NAME SCM_MODULE)
+        SET(MODULE_NAME SCM_MODULE PARENT_SCOPE)
+    ENDIF()
     IF (NOT MODULE_NAME)
         SET(MODULE_NAME "opencog")
         SET(MODULE_NAME "opencog" PARENT_SCOPE)
@@ -143,13 +147,13 @@ FUNCTION(ADD_GUILE_MODULE)
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
-    SET(oneValueArgs MODULE_DESTINATION)
+    SET(oneValueArgs MODULE_DESTINATION MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
-    # NOTE:  The keyword arguments 'SCM_FILES' and
-    # 'SCM_MODULE_DESTINATION' are required.
+    # NOTE:  The keyword arguments 'FILES' and
+    # 'MODULE_DESTINATION' are required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
         # FILE_PATH is used for variable name because files in
         # sub-directories may be passed.
