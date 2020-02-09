@@ -32,37 +32,87 @@ ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
 
 # -------------------------------------------------------------------
-# This configures the install and binary paths for each file,
-# passed to it, based on the value of the variables MODULE_NAME,
-# MODULE_FILE_DIR_PATH and MODULE_DIR_PATH in the PARENT_SCOPE.
-FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME DIR_PATH)
-    # Copy files into build directory mirroring the install path
-    # structure, and also set the install path.
+#
+# This configures the install and binary paths for each file.
+# Variables set in the PARENTS_SCOPE context are MODULE_NAME and
+# FILE_INSTALL_PATH. All other variables are local to this function.
+FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
+    GET_PROPERTY(FILE_GENERATED SOURCE ${FILE_PATH}
+        PROPERTY GENERATED SET)
+    GET_FILENAME_COMPONENT(DIR_PATH ${FILE_PATH} DIRECTORY)
+    GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
+
+    # Check if the file exists or is generated, and set
+    # FULL_DIR_PATH or target dependencies.
+    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/${FILE_NAME})
+        SET(FULL_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/")
+    ELSEIF(EXISTS /${DIR_PATH}/${FILE_NAME})
+        SET(FULL_DIR_PATH "/${DIR_PATH}/")
+    ELSEIF(FILE_GENERATED AND (NOT SCM_DEPENDS))
+        MESSAGE(FATAL_ERROR "The target that generates ${FILE_PATH} "
+            "has not been added as a dependency using the keyword "
+            "argument 'DEPENDS'")
+    ELSEIF(FILE_GENERATED AND SCM_DEPENDS)
+        ADD_DEPENDENCIES(${TARGET_NAME} ${SCM_DEPENDS})
+        SET(FULL_DIR_PATH "/${DIR_PATH}/")
+    ELSE()
+        MESSAGE(FATAL_ERROR "${FILE_PATH} file does not exist in "
+            "${CMAKE_CURRENT_SOURCE_DIR} nor does it have "
+            "'GENERATED' property")
+    ENDIF()
+
+    # Specify module paths.
+    STRING(REGEX MATCH
+        "^(${PREFIX_DIR_PATH})([_a-z0-9/-]+)*/([_a-z0-9-]+)" ""
+        ${SCM_MODULE_DESTINATION})
+
+    # MODULE_NAME: it is equal to the MODULE_DESTINATION
+    #              directory name
+    # MODULE_FILE_DIR_PATH: the directory path where the
+    #              MODULE_FILE is installed.
+    # MODULE_DIR_PATH: the directory path where the files
+    #              associated with the module are installed
+    #              at and copied to, with the exception
+    #              of the MODULE_FILE.
+    SET(MODULE_NAME ${CMAKE_MATCH_3})
+    SET(MODULE_NAME ${CMAKE_MATCH_3} PARENT_SCOPE)
+    SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
+    SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
+
+    IF (SCM_MODULE)
+        SET(MODULE_NAME SCM_MODULE)
+        SET(MODULE_NAME SCM_MODULE PARENT_SCOPE)
+    ENDIF()
+    IF (NOT MODULE_NAME)
+        SET(MODULE_NAME "opencog")
+        SET(MODULE_NAME "opencog" PARENT_SCOPE)
+    ENDIF()
+    IF (${MODULE_DIR_PATH} STREQUAL "/")
+        SET(MODULE_DIR_PATH ${DIR_PATH})
+    ENDIF()
+
+    # Set the install path.
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
-        EXECUTE_PROCESS(
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-                 ${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}
-        )
-        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}"
-                 "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}/${FILE_NAME}"
-        )
+        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
             PARENT_SCOPE
         )
     ELSE()
-        EXECUTE_PROCESS(
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-                   ${GUILE_BIN_DIR}/${MODULE_DIR_PATH}
-        )
-        ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${DIR_PATH}/${FILE_NAME}"
-                   "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}/${FILE_NAME}"
-        )
+        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
         )
     ENDIF()
+
+    # Copy files into the build directory, mirroring the install
+    # path structure.
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${FILE_BUILD_PATH})
+
+    ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${FULL_DIR_PATH}/${FILE_NAME}"
+             "${FILE_BUILD_PATH}/${FILE_NAME}")
+
 ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
 # ---------------------------------------------------------------------
@@ -97,57 +147,19 @@ FUNCTION(ADD_GUILE_MODULE)
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options "")  # This is used only as a place-holder
-    SET(oneValueArgs MODULE_DESTINATION)
+    SET(oneValueArgs MODULE_DESTINATION MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
-    # NOTE:  The keyword arguments 'FILES' and 'MODULE_DESTINATION' are
-    # required.
+
+    # NOTE:  The keyword arguments 'FILES' and
+    # 'MODULE_DESTINATION' are required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
         # FILE_PATH is used for variable name because files in
         # sub-directories may be passed.
         FOREACH(FILE_PATH ${SCM_FILES})
-            GET_PROPERTY(FILE_GENERATED SOURCE ${FILE_PATH}
-                PROPERTY GENERATED SET)
-            GET_FILENAME_COMPONENT(DIR_PATH ${FILE_PATH} DIRECTORY)
-            GET_FILENAME_COMPONENT(FILE_NAME ${FILE_PATH} NAME)
 
-            # Check if the file exists or is generated, and set
-            # FULL_DIR_PATH or target dependencies.
-            IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/${FILE_NAME})
-                SET(FULL_DIR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${DIR_PATH}/)
-            ELSEIF(EXISTS /${DIR_PATH}/${FILE_NAME})
-                SET(FULL_DIR_PATH /${DIR_PATH}/)
-            ELSEIF(FILE_GENERATED AND (NOT SCM_DEPENDS))
-                MESSAGE(FATAL_ERROR "The target that generates ${FILE_PATH} "
-                    "has not been added as a dependency using the keyword "
-                    "argument 'DEPENDS'")
-            ELSEIF(FILE_GENERATED AND SCM_DEPENDS)
-                ADD_DEPENDENCIES(${TARGET_NAME} ${SCM_DEPENDS})
-                SET(FULL_DIR_PATH /${DIR_PATH}/)
-            ELSE()
-                MESSAGE(FATAL_ERROR "${FILE_PATH} file does not exist in "
-                    "${CMAKE_CURRENT_SOURCE_DIR} nor does it have "
-                    "'GENERATED' property")
-            ENDIF()
-
-            # Specify module paths.
-            STRING(REGEX MATCH
-                "^(${PREFIX_DIR_PATH})([_a-z0-9/-]+)*/([_a-z0-9-]+)" ""
-                ${SCM_MODULE_DESTINATION})
-
-            # MODULE_NAME: it is equal to the MODULE_DESTINATION
-            #              directory name
-            # MODULE_FILE_DIR_PATH: the directory path where the
-            #              MODULE_FILE is installed.
-            # MODULE_DIR_PATH: the directory path where the files
-            #              associated with the module are installed
-            #              at and copied to, with the exception
-            #              of the MODULE_FILE.
-            SET(MODULE_NAME ${CMAKE_MATCH_3})
-            SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
-            SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
-            PROCESS_MODULE_STRUCTURE(${FILE_NAME} ${FULL_DIR_PATH})
+            PROCESS_MODULE_STRUCTURE(${FILE_PATH})
 
             # If any file in the module is newer than the module
             # itself, then touch the module; this is needed to force
@@ -181,20 +193,21 @@ FUNCTION(ADD_GUILE_MODULE)
         # scriptable" errors. This error is hit when copying scheme
         # files auto-generated by the  OPENCOG_ADD_ATOM_TYPES macro.
         FOREACH(FILE_PATH ${SCM_FILES})
-            INSTALL (FILES
-                ${FILE_PATH}
-                DESTINATION ${FILE_INSTALL_PATH}
-            )
+
+            PROCESS_MODULE_STRUCTURE(${FILE_PATH})
+
+            INSTALL (FILES ${FILE_PATH}
+                     DESTINATION ${FILE_INSTALL_PATH})
         ENDFOREACH()
 
     ELSE()
         IF(NOT DEFINED SCM_FILES)
-            MESSAGE(FATAL_ERROR "The keyword argument 'FILES' is not set")
+            MESSAGE(FATAL_ERROR "The keyword argument 'SCM_FILES' is not set")
         ENDIF()
 
         IF(NOT DEFINED SCM_MODULE_DESTINATION)
-            MESSAGE(FATAL_ERROR "The keyword argument 'MODULE_DESTINATION' "
-                "is not set")
+            MESSAGE(FATAL_ERROR "The keyword argument "
+                   "'SCM_MODULE_DESTINATION' is not set")
         ENDIF()
     ENDIF()
   ENDIF()

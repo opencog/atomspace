@@ -3,10 +3,6 @@
 
 ADD_GUILE_MODULE (FILES
 	opencog.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/"
-)
-
-ADD_GUILE_MODULE (FILES
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
 	opencog/base/core-docs.scm
@@ -16,9 +12,14 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/tv.scm
 	opencog/base/types.scm
 	opencog/base/utilities.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/base"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}"
+	DEPENDS opencog_atom_types
 )
 
+# Actually, each of these are distinct modules, and really
+# should be listed seperately, one module each. But, as it
+# happens, the ADD_GUILE_MODULE macro still does the right
+# thing for a mass listing like this, so .. OK. Whatever.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
 	opencog/extension.scm

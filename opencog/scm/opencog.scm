@@ -27,6 +27,7 @@ cog-arity
 cog-as
 cog-atom?
 cog-atom-less?
+cog-atomspace
 cog-atomspace?
 cog-atomspace-clear
 cog-atomspace-env
@@ -53,6 +54,7 @@ cog-link?
 cog-map-type
 cog-mean
 cog-name
+cog-new-atomspace
 cog-new-link
 cog-new-node
 cog-new-value
@@ -62,6 +64,7 @@ cog-number
 cog-outgoing-atom
 cog-outgoing-by-type
 cog-outgoing-set
+cog-set-atomspace!
 cog-set-tv!
 cog-set-value!
 cog-subtype?
@@ -93,8 +96,6 @@ cog-value-ref
 ; I'm not sure. The below is simple and painless, I'm leaving it for
 ; now.
 
-(export cog-atomspace cog-new-atomspace cog-set-atomspace!)
-
 (define-public cog-initial-as (cog-atomspace))
 (define-public my-as (cog-atomspace))
 (if (eq? cog-initial-as #f)
@@ -104,7 +105,7 @@ cog-value-ref
 		(cog-set-atomspace! cog-initial-as)))
 
 ; Load core atom types.
-(include-from-path "opencog/atoms/atom_types/core_types.scm")
+(include-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
