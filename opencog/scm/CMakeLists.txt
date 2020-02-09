@@ -2,11 +2,6 @@
 #ADD_SUBDIRECTORY (wires)
 
 ADD_GUILE_MODULE (FILES
-	opencog.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/"
-)
-
-ADD_GUILE_MODULE (FILES
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
 	opencog/base/core-docs.scm
@@ -17,6 +12,12 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/types.scm
 	opencog/base/utilities.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/base"
+)
+
+ADD_GUILE_MODULE (FILES
+	opencog.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/"
+	DEPENDS opencog_atom_types
 )
 
 ADD_GUILE_MODULE (FILES
