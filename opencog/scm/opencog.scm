@@ -27,6 +27,7 @@ cog-arity
 cog-as
 cog-atom?
 cog-atom-less?
+cog-atomspace
 cog-atomspace?
 cog-atomspace-clear
 cog-atomspace-env
@@ -53,6 +54,7 @@ cog-link?
 cog-map-type
 cog-mean
 cog-name
+cog-new-atomspace
 cog-new-link
 cog-new-node
 cog-new-value
@@ -62,6 +64,7 @@ cog-number
 cog-outgoing-atom
 cog-outgoing-by-type
 cog-outgoing-set
+cog-set-atomspace!
 cog-set-tv!
 cog-set-value!
 cog-subtype?
@@ -92,8 +95,6 @@ cog-value-ref
 ; FIXME: Both of the above-described problems might no longer exist.
 ; I'm not sure. The below is simple and painless, I'm leaving it for
 ; now.
-
-(export cog-atomspace cog-new-atomspace cog-set-atomspace!)
 
 (define-public cog-initial-as (cog-atomspace))
 (define-public my-as (cog-atomspace))
