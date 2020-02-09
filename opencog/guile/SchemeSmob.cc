@@ -224,7 +224,7 @@ void SchemeSmob::module_init(void*)
 	// The portion of (opencog) done in C++
 	register_procs();
 	
-	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/atom_types/core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
