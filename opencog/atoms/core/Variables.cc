@@ -1197,6 +1197,16 @@ bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 	return (n <= intervals.second or intervals.second < 0);
 }
 
+static const GlobInterval& default_interval(Type t)
+{
+	static const GlobInterval var_def_interval =
+			GlobInterval(1, 1);
+	static const GlobInterval glob_def_interval =
+			GlobInterval(1, SIZE_MAX);
+	return t == GLOB_NODE ? glob_def_interval :
+			 var_def_interval;
+}
+
 const GlobInterval& Variables::get_interval(const Handle& var) const
 {
 	const auto interval = _glob_intervalmap.find(var);

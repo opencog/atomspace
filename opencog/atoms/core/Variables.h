@@ -340,18 +340,6 @@ protected:
 			const Handle&) const;
 
 	void extend_interval(const Handle &h, const Variables &vset);
-
-private:
-	inline const GlobInterval &default_interval(Type t) const
-	{
-		static const GlobInterval var_def_interval =
-				GlobInterval(1, 1);
-		static const GlobInterval glob_def_interval =
-				GlobInterval(1, SIZE_MAX);
-		return t == GLOB_NODE ? glob_def_interval :
-		       var_def_interval;
-	}
-
 };
 
 // Debugging helpers see
