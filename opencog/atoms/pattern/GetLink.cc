@@ -66,9 +66,8 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	{
 		HandleSet hs(do_execute(as, silent));
 		for (const Handle& h : hs)
-		{
 			as->add_link(MEMBER_LINK, h, _variables._anchor);
-		}
+
 		return _variables._anchor;
 	}
 

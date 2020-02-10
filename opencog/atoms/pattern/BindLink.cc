@@ -66,10 +66,21 @@ BindLink::BindLink(const HandleSeq& hseq, Type t)
 /** Wrap query results in a SetLink, place them in the AtomSpace. */
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
+	ValueSet rslt(do_execute(as, silent));
+
+	// If there is an anchor, then attach results to the anchor.
+	// Otherwise, create a SetLink and return that.
+	if (_variables._anchor and as)
+	{
+		for (const ValuePtr& v: rslt)
+			as->add_link(MEMBER_LINK, HandleCast(v), _variables._anchor);
+
+		return _variables._anchor;
+	}
+
 	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.
-	ValueSet rslt(do_execute(as, silent));
 	HandleSeq hlist;
 	for (const ValuePtr& v: rslt) hlist.emplace_back(HandleCast(v));
 	Handle rewr(createUnorderedLink(hlist, SET_LINK));
