@@ -1495,10 +1495,14 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		{
 			get_vartype(h);
 		}
+		else if (ANCHOR_NODE == t)
+		{
+			_anchor = h;
+		}
 		else
 		{
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"Expected a Variable or TypedVariable or Anchor, got: %s"
 				"\nVariableList is %s",
 					nameserver().getTypeName(t).c_str(),
 					to_string().c_str());

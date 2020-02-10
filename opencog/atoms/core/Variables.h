@@ -224,6 +224,9 @@ struct Variables : public FreeVariables,
 	/// GlobNodes in the pattern.
 	GlobIntervalMap _glob_intervalmap;
 
+	/// Anchor, if present, else undefined.
+	Handle _anchor;
+
 	// See VariableList.cc for comments
 	void get_vartype(const Handle&);
 
