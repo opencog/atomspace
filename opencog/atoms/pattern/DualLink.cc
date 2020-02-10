@@ -73,6 +73,16 @@ ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	Recognizer reco(as);
 	satisfy(reco);
+
+	// If there is an anchor, then attach results to the anchor.
+	// Otherwise, create a SetLink and return that.
+	if (_variables._anchor and as)
+	{
+		for (const Handle& h : reco._rules)
+			as->add_link(MEMBER_LINK, h, _variables._anchor);
+
+		return _variables._anchor;
+	}
 	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }
 

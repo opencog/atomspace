@@ -67,6 +67,7 @@ public:
 
 	void test_get(void);
 	void test_bind(void);
+	void test_dual(void);
 };
 
 void AnchorUTest::tearDown(void)
@@ -111,6 +112,25 @@ void AnchorUTest::test_bind(void)
 	IncomingSet results = anchor->getIncomingSetByType(MEMBER_LINK);
 
 	TSM_ASSERT_EQUALS("Expecting three answers", results.size(), 3);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * DualLink unit test.
+ */
+void AnchorUTest::test_dual(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/anchor.scm\")");
+
+	Handle anchor = eval->eval_h("(cog-execute! (Dual srai))");
+
+	IncomingSet results = anchor->getIncomingSetByType(MEMBER_LINK);
+
+	TSM_ASSERT_EQUALS("Expecting two answers", results.size(), 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

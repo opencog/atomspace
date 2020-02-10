@@ -16,15 +16,24 @@
 				(List (Variable "$x") (Concept "alpha"))))))
 
 ; (cog-execute! getli)
+; (cog-incoming-by-type (AnchorNode "get-results") 'MemberLink)
 ; ----------------------------------
 
 (define bindli
 	(Bind (VariableList
-			(Variable "$x")
+			(Variable "$z")
 			(Anchor "bind-results"))
 		(Present
 			(Evaluation (Predicate "foo")
-				(List (Variable "$x") (Concept "alpha"))))
-		(Inheritance (Variable "$x") (Concept "letters"))))
+				(List (Variable "$z") (Concept "alpha"))))
+		(Inheritance (Variable "$z") (Concept "letters"))))
 
 ; (cog-execute! bindli)
+; (cog-incoming-by-type (AnchorNode "bind-results") 'MemberLink)
+; ----------------------------------
+
+; Stimulous-Response-style AI
+(define srai
+	(Evaluation (Predicate "foo") (List (Concept "C") (Concept "alpha"))))
+
+; (cog-execute! (Dual srai))
