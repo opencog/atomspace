@@ -157,6 +157,10 @@ FUNCTION(ADD_GUILE_MODULE)
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
         # FILE_PATH is used for variable name because files in
         # sub-directories may be passed.
+
+# Arghhh FILE TOUCH first appears in version 3.12.0
+# Everyone else is screwed.  Well, that explains a lot.
+if(${CMAKE_VERSION} VERSION_GREATER "3.11.0")
         FOREACH(FILE_PATH ${SCM_FILES})
 
             PROCESS_MODULE_STRUCTURE(${FILE_PATH})
@@ -183,6 +187,7 @@ FUNCTION(ADD_GUILE_MODULE)
             ")
 
         ENDFOREACH()
+endif()
 
         # Run the loop again, this time installing. We need to run
         # the loop a second time, because the file-touch above sets
