@@ -208,7 +208,7 @@
 "object. It effectively creates a smaller matrix from a bigger one,\n"
 "by overloading the default access functions.\n"
 )
-				(LLOBJ 'id) ID-STR (if REANME "enabled" "disabled")))
+				(LLOBJ 'id) ID-STR (if RENAME "enabled" "disabled")))
 
 		(define (describe)
 			(display (procedure-property add-generic-filter 'documentation)))
