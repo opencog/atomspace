@@ -66,6 +66,7 @@ public:
 	void Getter(void);
 
 	void test_get(void);
+	void test_bind(void);
 };
 
 void AnchorUTest::tearDown(void)
@@ -87,6 +88,25 @@ void AnchorUTest::test_get(void)
 	eval->eval("(load-from-path \"tests/query/anchor.scm\")");
 
 	Handle anchor = eval->eval_h("(cog-execute! getli)");
+
+	IncomingSet results = anchor->getIncomingSetByType(MEMBER_LINK);
+
+	TSM_ASSERT_EQUALS("Expecting three answers", results.size(), 3);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * BindLink unit test.
+ */
+void AnchorUTest::test_bind(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/anchor.scm\")");
+
+	Handle anchor = eval->eval_h("(cog-execute! bindli)");
 
 	IncomingSet results = anchor->getIncomingSetByType(MEMBER_LINK);
 

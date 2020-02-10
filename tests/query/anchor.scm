@@ -16,3 +16,15 @@
 				(List (Variable "$x") (Concept "alpha"))))))
 
 ; (cog-execute! getli)
+; ----------------------------------
+
+(define bindli
+	(Bind (VariableList
+			(Variable "$x")
+			(Anchor "bind-results"))
+		(Present
+			(Evaluation (Predicate "foo")
+				(List (Variable "$x") (Concept "alpha"))))
+		(Inheritance (Variable "$x") (Concept "letters"))))
+
+; (cog-execute! bindli)
