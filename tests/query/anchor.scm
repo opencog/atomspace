@@ -9,7 +9,7 @@
 
 (define getli
 	(Get (VariableList
-			(Variable "$x")
+			(TypedVariable (Variable "$x") (Type 'ConceptNode))
 			(Anchor "get-results"))
 		(Present
 			(Evaluation (Predicate "foo")
@@ -21,7 +21,7 @@
 
 (define bindli
 	(Bind (VariableList
-			(Variable "$z")
+			(TypedVariable (Variable "$z") (Type 'ConceptNode))
 			(Anchor "bind-results"))
 		(Present
 			(Evaluation (Predicate "foo")
