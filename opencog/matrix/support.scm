@@ -133,17 +133,33 @@
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
 	;--------
+	(define (error-no-data)
+		(format #t
+			(string-append
+"Error: support-api: There isn't any cached data on ~A\n"
+"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data\n")
+			ID)
+		*unspecified*)
+
 	(define (get-total-support-left)
-		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+		(catch 'wrong-type-arg
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+			(lambda (key . args) (error-no-data))))
 
 	(define (get-total-count-left)
-		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
+		(catch 'wrong-type-arg
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
+			(lambda (key . args) (error-no-data))))
 
 	(define (get-total-support-right)
-		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
+		(catch 'wrong-type-arg
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
+			(lambda (key . args) (error-no-data))))
 
 	(define (get-total-count-right)
-		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
+		(catch 'wrong-type-arg
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
+			(lambda (key . args) (error-no-data))))
 
 	;--------
 	; Backwards-compatibility method. Remove this someday.
@@ -161,7 +177,8 @@
 			(string-append
 "This is the `add-support-api` object applied to the \"~A\"\n"
 "object.  It provides methods to access the support, count and length\n"
-"subtotals on rows and columns. See the documentation for\n"
+"subtotals on rows and columns. These must have been previously computed\n"
+"using the `add-support-compute` object. See the documentation for\n"
 "`add-support-compute` for precise definitions of \"support\", \"count\"\n"
 "and \"length\".\n"
 "\n"
