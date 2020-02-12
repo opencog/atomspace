@@ -113,8 +113,8 @@ public:
     unsigned long getChildren(Type type, OutputIterator result) const
     {
         unsigned long n_children = 0;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (inheritanceMap[type][i] and (type != i)) {
+        for (Type i = type+1; i < nTypes; ++i) {
+            if (inheritanceMap[type][i]) {
                 *(result++) = i;
                 n_children++;
             }
@@ -132,8 +132,8 @@ public:
     unsigned long getParents(Type type, OutputIterator result) const
     {
         unsigned long n_parents = 0;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (inheritanceMap[i][type] and (type != i)) {
+        for (Type i = 0; i < type; ++i) {
+            if (inheritanceMap[i][type]) {
                 *(result++) = i;
                 n_parents++;
             }
@@ -151,8 +151,8 @@ public:
     unsigned long getChildrenRecursive(Type type, OutputIterator result) const
     {
         unsigned long n_children = 0;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[type][i] and (type != i)) {
+        for (Type i = type+1; i < nTypes; ++i) {
+            if (recursiveMap[type][i]) {
                 *(result++) = i;
                 n_children++;
             }
@@ -162,8 +162,8 @@ public:
     TypeSet getChildrenRecursive(Type type) const
     {
         TypeSet ts;
-        for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[type][i] and (type != i)) {
+        for (Type i = type+1; i < nTypes; ++i) {
+            if (recursiveMap[type][i]) {
                 ts.insert(i);
             }
         }
@@ -236,7 +236,7 @@ public:
          * impact on atom insertion into atomspace.  The unit tests
          * don't need it to pass.  Most users probably dont need it
          * at all, because most type creation/update happens in
-         * shared-lib ctors, which mistly should be done by the time
+         * shared-lib ctors, which mostly should be done by the time
          * that this gets called. How big a price do you want to pay
          * for avoiding a possible crash on a shared-lib load while
          * also running some multi-threaded app?
