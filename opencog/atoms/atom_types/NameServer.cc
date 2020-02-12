@@ -102,7 +102,7 @@ Type NameServer::declType(const Type parent, const std::string& name)
     // Check if a type with this name already exists. If it does, then
     // the second and subsequent calls are to be interpreted as defining
     // multiple inheritance for this type.  A real-life example is the
-    // GroundedSchemeNode, which inherits from several types.
+    // GroundedSchemaNode, which inherits from several types.
     Type type = getType(name);
     if (type != NOTYPE) {
         std::lock_guard<std::mutex> l(type_mutex);
