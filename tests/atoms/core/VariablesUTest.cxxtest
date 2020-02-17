@@ -69,6 +69,7 @@ public:
 	void test_extend_4();
 	void test_extend_5();
 	void test_extend_6();
+
 	void test_find_variables_ordered_1();
 	void test_find_variables_ordered_2();
 	void test_find_variables_ordered_3();
@@ -93,6 +94,8 @@ public:
 	void test_is_type_2();
 	void test_is_type_3();
 	void test_is_type_4();
+
+	void xtest_substitute_nocheck_scope();
 };
 
 void VariablesUTest::test_extend_1()
@@ -845,4 +848,28 @@ void VariablesUTest::test_is_type_4()
 
 	TS_ASSERT(is_x);
 	TS_ASSERT(is_y);
+}
+
+void VariablesUTest::xtest_substitute_nocheck_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Body with only one variable declared X, thus Y can be
+	// substituted but not X.
+	Handle body = al(SATISFACTION_LINK,
+	                 X,
+	                 al(PRESENT_LINK, al(INHERITANCE_LINK, X, Y)));
+
+	// Replace Y by X, thus X in the satisfaction link above should be
+	// renamed to avoid name collision.
+	HandleMap var2val{{Y, X}};
+	Handle result = Variables(Y).substitute_nocheck(body, var2val);
+	Handle expect = al(SATISFACTION_LINK,
+	                   Z,
+	                   al(PRESENT_LINK, al(INHERITANCE_LINK, Z, X)));
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
 }
