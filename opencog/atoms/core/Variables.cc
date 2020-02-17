@@ -389,14 +389,14 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleSeq& args,
                                          bool silent) const
 {
-	return substitute_scoped(term, args, silent, index, 0);
+	return substitute_scoped(term, args, silent, index);
 }
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleMap& vm,
                                          bool silent) const
 {
-	return substitute_scoped(term, make_sequence(vm), silent, index, 0);
+	return substitute_scoped(term, make_sequence(vm), silent, index);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const
