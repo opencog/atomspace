@@ -47,7 +47,7 @@ class Quotation : public boost::totally_ordered<Quotation>
 	bool _local_quote;
 
 public:
-	Quotation(int ql=0, bool lq=false);
+	explicit Quotation(int ql=0, bool lq=false);
 
 	int level() const;
 	bool is_locally_quoted() const;
