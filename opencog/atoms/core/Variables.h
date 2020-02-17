@@ -232,7 +232,6 @@ struct Variables : public FreeVariables,
 
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);
-	void validate_vardecl(const HandleSeq&);
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is

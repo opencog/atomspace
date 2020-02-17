@@ -579,6 +579,9 @@ Variables::Variables(bool ordered)
 Variables::Variables(const Handle& vardecl, bool ordered)
 	: _ordered(ordered)
 {
+	// Order matters only if it is a list of variables
+	_ordered = VARIABLE_LIST == vardecl->get_type();
+
 	validate_vardecl(vardecl);
 	init_index();
 }
@@ -586,7 +589,8 @@ Variables::Variables(const Handle& vardecl, bool ordered)
 Variables::Variables(const HandleSeq& vardecls, bool ordered)
 	: _ordered(ordered)
 {
-	validate_vardecl(vardecls);
+	for (auto elem : vardecls)
+		validate_vardecl(elem);
 	init_index();
 }
 
@@ -889,9 +893,6 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	// variable, a list or a set of variable declarations.
 	Type tdecls = hdecls->get_type();
 
-	// Order matters only if it is a list of variables
-	_ordered = VARIABLE_LIST == tdecls;
-
 	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
 	{
 		varset.insert(hdecls);
@@ -901,12 +902,17 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	{
 		get_vartype(hdecls);
 	}
+	else if (ANCHOR_NODE == tdecls)
+	{
+		_anchor = hdecls;
+	}
 	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
 	{
 		// Extract the list of set of variables and make sure its as
 		// expected.
 		const HandleSeq& dset = hdecls->getOutgoingSet();
-		validate_vardecl(dset);
+		for (auto elem : dset)
+			validate_vardecl(elem);
 	}
 	else if (UNQUOTE_LINK == tdecls)
 	{
@@ -1479,35 +1485,6 @@ Handle Variables::get_vardecl() const
 		return Handle(createVariableList(std::move(vardecls)));
 
 	return Handle(createVariableSet(std::move(vardecls)));
-}
-
-void Variables::validate_vardecl(const HandleSeq& oset)
-{
-	for (const Handle& h: oset)
-	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE == t or GLOB_NODE == t)
-		{
-			varset.insert(h);
-			varseq.emplace_back(h);
-		}
-		else if (TYPED_VARIABLE_LINK == t)
-		{
-			get_vartype(h);
-		}
-		else if (ANCHOR_NODE == t)
-		{
-			_anchor = h;
-		}
-		else
-		{
-			throw InvalidParamException(TRACE_INFO,
-				"Expected a Variable or TypedVariable or Anchor, got: %s"
-				"\nVariableList is %s",
-					nameserver().getTypeName(t).c_str(),
-					to_string().c_str());
-		}
-	}
 }
 
 void Variables::find_variables(const Handle& body)
