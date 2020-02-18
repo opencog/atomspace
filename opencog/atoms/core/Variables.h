@@ -177,6 +177,9 @@ protected:
 	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
 	                         const IndexMap&,
 	                         Quotation quotation=Quotation()) const;
+
+	IndexMap alpha_hide(const FreeVariables& scope_vars,
+	                    const IndexMap& index_map) const;
 };
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;
