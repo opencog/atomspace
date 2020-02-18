@@ -81,7 +81,7 @@ public:
 
 	void test_rand_alpha_conversion();
 	void test_names_alpha_conversion();
-	void xtest_vardecl_bindlink_alpha_conversion();
+	void test_vardecl_bindlink_alpha_conversion();
 };
 
 void ScopeLinkUTest::test_content_less()
@@ -439,8 +439,7 @@ void ScopeLinkUTest::test_names_alpha_conversion()
 
 // Like test_vardecl_bindlink_alpha_conversion but using a BindLink
 // instead of a ScopeLink
-// TODO: re-enable?
-void ScopeLinkUTest::xtest_vardecl_bindlink_alpha_conversion()
+void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
