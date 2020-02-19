@@ -37,7 +37,7 @@
 
 using namespace opencog;
 
-void Link::init(const HandleSeq& outgoingVector)
+void Link::init()
 {
     if (not nameserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
@@ -46,29 +46,10 @@ void Link::init(const HandleSeq& outgoingVector)
     }
 
     // Yes, people actually send us bad data.
-    for (const Handle& h: outgoingVector)
+    for (const Handle& h: _outgoing)
         if (nullptr == h)
             throw InvalidParamException(TRACE_INFO,
                 "Link ctor: invalid outgoing set!");
-
-    _outgoing = outgoingVector;
-}
-
-void Link::init(const HandleSeq&& outgoingVector)
-{
-    if (not nameserver().isA(_type, LINK)) {
-        throw InvalidParamException(TRACE_INFO,
-            "Link ctor: Atom type is not a Link: '%d' %s.",
-            _type, nameserver().getTypeName(_type).c_str());
-    }
-
-    // Yes, people actually send us bad data.
-    for (const Handle& h: outgoingVector)
-        if (nullptr == h)
-            throw InvalidParamException(TRACE_INFO,
-                "Link ctor: invalid outgoing set!");
-
-    _outgoing = std::move(outgoingVector);
 }
 
 Link::~Link()
