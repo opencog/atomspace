@@ -24,12 +24,12 @@
 (Inheritance (Concept "snail") (Concept "gastropod"))
 
 (define get-snail
-	(GetLink (Variable "x")
+	(GetLink (TypedVariable (Variable "x") (Type 'ConceptNode))
 		(And
 			(Present (Inheritance (Variable "x") (Concept "animal")))
 
 			; Find some inheritance relation that is not already known.
-			(Satisfaction (Variable "y")
+			(Satisfaction (TypedVariable (Variable "y") (Type 'ConceptNode))
 				(And
 					(Present (Inheritance (Variable "x") (Variable "y")))
 					(Not (Equal (Variable "y") (Concept "animal")))
