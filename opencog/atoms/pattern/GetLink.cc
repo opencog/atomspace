@@ -60,6 +60,17 @@ HandleSet GetLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
+	// If there is an anchor, then attach results to the anchor.
+	// Otherwise, create a SetLink and return that.
+	if (_variables._anchor and as)
+	{
+		HandleSet hs(do_execute(as, silent));
+		for (const Handle& h : hs)
+			as->add_link(MEMBER_LINK, h, _variables._anchor);
+
+		return _variables._anchor;
+	}
+
 	// Create the satisfying set, and cache it.
 	Handle satset(createUnorderedLink(do_execute(as, silent), SET_LINK));
 

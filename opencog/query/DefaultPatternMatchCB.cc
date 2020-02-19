@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 #define DO_LOG(STUFF) STUFF
 #else
@@ -155,7 +155,6 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();
 	_pattern_body = pat.body;
-	_globs = &pat.globby_terms;
 }
 
 /* ======================================================== */
@@ -247,7 +246,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat) and lpat->get_arity() != lsoln->get_arity())
+	if (not ptm->hasGlobbyVar() and lpat->get_arity() != lsoln->get_arity())
 		return false;
 
 	// If the link is a ScopeLink, we need to deal with the

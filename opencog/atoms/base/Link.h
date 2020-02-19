@@ -50,7 +50,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&&);
+    void init();
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -70,40 +70,40 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq&& oset, Type t=LINK)
-        : Atom(t)
+    Link(const HandleSeq oset, Type t=LINK)
+        : Atom(t), _outgoing(std::move(oset))
     {
-        init(std::move(oset));
+        init();
     }
 
     Link(Type t)
         : Atom(t)
     {
-        init({});
+        init();
     }
 
 	Link(Type t, const Handle& h)
-        : Atom(t)
+        : Atom(t), _outgoing({h})
     {
-        init({h});
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb})
     {
-        init({ha, hb});
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc})
     {
-        init({ha, hb, hc});
+        init();
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc, hd})
     {
-        init({ha, hb, hc, hd});
+        init();
     }
 
     Link(const Link&) = delete;
@@ -206,6 +206,7 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
+typedef std::shared_ptr<Link> LinkPtr;
 static inline LinkPtr LinkCast(const Handle& h)
     { return std::dynamic_pointer_cast<Link>(h); }
 static inline LinkPtr LinkCast(const AtomPtr& a)

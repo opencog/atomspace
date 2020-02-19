@@ -74,6 +74,7 @@ class PatternTerm
 protected:
 	Handle _handle;
 	Handle _quote;
+
 	// TODO: it would probably be more efficient to swap which of these
 	// two is weak, since I think _outgoing is requested far more often
 	// than _parent, and having it run faster would be a performance win.
@@ -83,10 +84,40 @@ protected:
 	// Quotation level and local quotation
 	Quotation _quotation;
 
-	// True if the pattern subtree rooted in this tree node does not
-	// contain any bound variables. This means that the term is constant
-	// and may be self-grounded.
+	// True if any pattern subtree rooted in this tree node contains
+	// a variable bound to the search pattern. Trees without any bound
+	// search variables are constants, and are satisfied by themselves.
 	bool _has_any_bound_var;
+
+	// True if none of the outgoing set of this particular term are
+	// variables bound to the search pattern. Unlike the above flag,
+	// this flag is set for the immediate outgoing set only, and not
+	// any deeper terms.  That is, deeper terms may contain bound
+	// variables, but this flag will not be set.
+	bool _has_bound_var;
+
+	// True if any pattern subtree rooted in this tree node contains
+	// an GlobNode. Trees without any GlobNodes can be searched in a
+	// straight-forward manner; those with them need to have all
+	// possible glob matches explored.
+	bool _has_any_globby_var;
+
+	// As above, but only one level deep.
+	bool _has_globby_var;
+
+	// As above, but for evaluatables.
+	bool _has_any_evaluatable;
+	bool _has_evaluatable;
+
+	// True if any pattern subtree rooted in this tree node contains
+	// an unordered link. Trees without any unordered links can be
+	// searched in a straight-forward manner; those with them need to
+	// have all possible permutations explored.
+	bool _has_any_unordered_link;
+
+	void addAnyBoundVar();
+	void addAnyGlobbyVar();
+	void addAnyEvaluatable();
 
 public:
 	static const PatternTermPtr UNDEFINED;
@@ -113,6 +144,18 @@ public:
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
+	bool hasBoundVariable() const noexcept { return _has_bound_var; }
+
+	void addGlobbyVar();
+	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
+	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
+
+	void addEvaluatable();
+	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }
+	bool hasEvaluatable() const noexcept { return _has_evaluatable; }
+
+	void addUnorderedLink();
+	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
 
 	bool operator==(const PatternTerm&);
 
@@ -121,6 +164,8 @@ public:
 	std::string to_string() const;
 	std::string to_string(const std::string& indent) const;
 };
+
+#define createPatternTerm std::make_shared<PatternTerm>
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

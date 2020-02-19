@@ -39,8 +39,6 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.unquoted_clauses);
-	locate_globs(_pat.unquoted_clauses);
-	locate_globs(_pat.quoted_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -65,6 +63,8 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
@@ -225,7 +225,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 		}
 	}
 	locate_defines(compo);
-	locate_globs(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
@@ -452,22 +451,40 @@ void PatternLink::locate_defines(const HandleSeq& clauses)
 	}
 }
 
-void PatternLink::locate_globs(const HandleSeq& clauses)
+/* ================================================================= */
+/**
+ * Locate cacheable clauses. These are clauses whose groundings can be
+ * cached for later re-use. To qualify for being cacheable, the clause
+ * must not contain any evaluatable terms (as that would result in a
+ * changing grounding), cannot contain any unordered or choice links
+ * (as these have multiple groundings) and the clause can only contain
+ * one variable (there is no use-cases for two or more variables, at
+ * this time. Similarly, no Globs either.)
+ *
+ * Caching is used to "prune" or "cut" clauses during search; once the
+ * joining variable is known, the "up" exploration can be skipped, and
+ * pruned clause re-attached with the known grounding.
+ *
+ * This is kind-of the opposite of `is_virtual()`.
+ */
+void PatternLink::locate_cacheable(const HandleSeq& clauses)
 {
-	for (const Handle& clause: clauses)
+	for (const Handle& claw: clauses)
 	{
-		FindAtoms fgn(GLOB_NODE, true);
-		fgn.search_set(clause);
+		// Skip over anything unsuitable.
+		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
 
-		for (const Handle& sh : fgn.least_holders)
-		{
-			_pat.globby_terms.insert(sh);
-		}
+// XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
+// which means we need to have terms, here ...
+		// if (claw->hasAnyGlobbyVar()) continue;
+		// black terms are evalutable; no need to do it twice.
+		// if (_pat.black.find(claw) != _pat.black.end()) continue;
 
-		for (const Handle& h : fgn.holders)
-		{
-			_pat.globby_holders.insert(h);
-		}
+		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
+		if (contains_atomtype(claw, CHOICE_LINK)) continue;
+
+		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+			_pat.cacheable_clauses.insert(claw);
 	}
 }
 
@@ -605,21 +622,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 	{
 		bool is_virtu = false;
 		bool is_black = false;
-
-#ifdef BROKEN_DOESNT_WORK
-// The below should have worked to set things up, but it doesn't,
-// and I'm too lazy to investigate, because an alternate hack is
-// working, at the moment.
-		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaluatable, so that we can evaluate
-		// it later.
-		if (VARIABLE_NODE == clause->get_type())
-		{
-			_pat.evaluatable_terms.insert(clause);
-			add_to_map(_pat.in_evaluatable, clause, clause);
-			is_black = true;
-		}
-#endif
 
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.stopset.insert(SCOPE_LINK);
@@ -838,27 +840,29 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 	for (const Handle& clause : _pat.always)
 	{
-		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 	}
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           Handle h,
+                                           const Handle& term,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
-	h = ptm->getHandle();
+	PatternTermPtr ptm(createPatternTerm(parent, term));
+
+	// `h` is usually the same as `term`, unless there's quotation.
+	Handle h(ptm->getHandle());
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
@@ -872,8 +876,13 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		if (GLOB_NODE == t) ptm->addGlobbyVar();
 		return;
 	}
+
+	// If the term is unordered, all parents must know about it.
+	if (nameserver().isA(t, UNORDERED_LINK))
+		ptm->addUnorderedLink();
 
 	if (h->is_link())
 	{

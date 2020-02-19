@@ -517,7 +517,7 @@
 "
  cog-atom-less? L-ATOM R-ATOM
     Return #t if L-ATOM is less than R-ATOM, else return #f.  This
-    predicate is usefule for creating sorted lists of atoms; for
+    predicate is useful for creating sorted lists of atoms; for
     example, to rapidly remove duplicate atoms from a long list.
 
     Example:

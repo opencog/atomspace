@@ -330,6 +330,11 @@ void SQLAtomStorage::create_database(std::string uri)
 		Response rp(conn_pool);
 		rp.exec("CREATE DATABASE " + dbname + ";");
 	}
+	{
+		Response rp(conn_pool);
+		rp.exec("COMMENT ON DATABASE " + dbname +
+			" IS 'OpenCog AtomSpace';");
+	}
 	close_conn_pool();
 
 	// Now reconnect, and create the tables.

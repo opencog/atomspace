@@ -11,7 +11,7 @@
 (define is-human
 	(GetLink (InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
 
-;; two variables, including type restrictions
+;; Two variables, including type restrictions
 (define is-something
 	(GetLink
 		(VariableList
@@ -19,7 +19,16 @@
 			(VariableNode "$B"))
 		(InheritanceLink (VariableNode "$A") (VariableNode "$B"))))
 
-;; looks for queries.
+;; An empty TypeChoice means the variable can have no type at all.
+;; This is the same as the bottom type. It's also the same as
+;;    (TypeChoice (Type 'Notype))
+;; See https://github.com/opencog/atomspace/issues/2490
+(define is-nothing
+	(GetLink
+		(TypedVariableLink (VariableNode "$H") (TypeChoice))
+		(InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
+
+;; Look for queries.
 ;; This binds only the second variable, thus, the first variable
 ;; remains free. Running this should results in a grounding to is-human,
 ;; above. That is, it should find
@@ -28,6 +37,8 @@
 	(GetLink
 		(VariableNode "$B") ;; bind only the second variable.
 		(InheritanceLink (VariableNode "$H") (VariableNode "$B"))))
+
+;; --------------------------------------------------------------
 
 (define g-take-contain
    (GetLink

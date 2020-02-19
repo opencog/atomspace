@@ -70,22 +70,24 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-/// On top of that initialize _body and _implicand with the
-/// clauses and the rewrite rule.
+/// On top of that, initialize _body and _implicand with the
+/// clauses and the rewrite rule(s). (Multiple implicands are
+/// allowed, this can save some CPU cycles when one search needs to
+/// create several rewrites.)
 ///
 void QueryLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
-	if (sz < 2 or 3 < sz)
+	if (sz < 2)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
+			"Expecting an outgoing set size of at least two, got %d", sz);
 
 	// If the outgoing set size is two, then there are no variable
 	// declarations; extract all free variables.
 	if (2 == sz)
 	{
 		_body = oset[0];
-		_implicand = oset[1];
+		_implicand.push_back(oset[1]);
 		_variables.find_variables(oset);
 		return;
 	}
@@ -94,7 +96,8 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	// a variable declaration.
 	_vardecl = oset[0];
 	_body = oset[1];
-	_implicand = oset[2];
+	for (size_t i=2; i < oset.size(); i++)
+		_implicand.push_back(oset[i]);
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
@@ -178,7 +181,8 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	    and not intu->optionals_present())
 	{
 		ValueSet result;
-		result.insert(impl.inst.execute(impl.implicand, true));
+		for (const Handle& himp: impl.implicand)
+			result.insert(impl.inst.execute(himp, true));
 		return result;
 	}
 

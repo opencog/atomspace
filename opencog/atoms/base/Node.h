@@ -44,7 +44,7 @@ class Node : public Atom
 protected:
     // properties
     std::string _name;
-    void init(const std::string&&);
+    void init();
 
     virtual ContentHash compute_hash() const;
 
@@ -56,10 +56,10 @@ public:
      * @param Node name A reference to a std::string with the name of
      *                  the node.  Use empty string for unamed node.
      */
-    Node(Type t, const std::string&& s)
-        : Atom(t)
+    Node(Type t, const std::string s)
+        : Atom(t), _name(std::move(s))
     {
-        init(std::move(s));
+        init();
     }
 
     Node(const Node&) = delete;

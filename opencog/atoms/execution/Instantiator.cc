@@ -618,6 +618,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		Handle eolh = reduce_exout(expr, silent);
 		if (not eolh->is_executable()) return eolh;
+		eolh = _as->add_atom(eolh);
 		return eolh->execute(_as, silent);
 	}
 

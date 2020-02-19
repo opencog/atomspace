@@ -12,7 +12,9 @@
 // CamelCase names).
 // ===========================================================
 
-// Special type designating that no atom type has been assigned.
+// Special type designating that no atom type has been assigned. It is
+// equivalent to the bottom type in type theory, see
+// https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
 
 // --------------------------------------------------------------
@@ -436,6 +438,8 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
+// Note that the empty type choice corresponds to the bottom type.
+// see, https://wiki.opencog.org/w/TypeChoice#Bottom_type
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type definitions
@@ -578,10 +582,6 @@ TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
-ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
-STI_OF_LINK <- VALUE_OF_LINK
-LTI_OF_LINK <- VALUE_OF_LINK
-
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
 // GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
@@ -644,6 +644,8 @@ CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+ANY_NODE <- NODE  // Wild-card node, very useful for counting.
 
 // ==============================================================
 // Procedure and schema nodes.

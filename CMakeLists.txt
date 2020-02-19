@@ -9,6 +9,8 @@
 # -- print pretty summary
 #
 # cogutils already requires 2.8.12.2, so may as well ask for that.
+# Correct handling of guile module install requires cmake version 3.12
+# or newer, but ubuntu bionic 18.04 only has 3.10. Bummer about that.
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
@@ -200,7 +202,7 @@ MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 # ----------------------------------------------------------
 # Mandatory Postgres
 
-FIND_PACKAGE(PGSQL 9.5 REQUIRED)
+FIND_PACKAGE(PGSQL 9.5)
 IF (PGSQL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
@@ -309,10 +311,6 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
-
-IF(HAVE_COGUTIL)
-	SET(HAVE_ATOMSPACE 1)
-ENDIF(HAVE_COGUTIL)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
@@ -446,7 +444,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("AtomSpace" "A weighted and typed graph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)

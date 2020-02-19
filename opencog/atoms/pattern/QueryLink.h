@@ -35,7 +35,7 @@ protected:
 	void init(void);
 
 	/// The rewrite term
-	Handle _implicand;
+	HandleSeq _implicand;
 
 	// Overwrite PatternLink::extract_variables as QueryLink has one
 	// more outgoing for the rewrite rule. In addition this method
@@ -52,7 +52,7 @@ public:
 	QueryLink(const QueryLink&) = delete;
 	QueryLink& operator=(const QueryLink&) = delete;
 
-	const Handle& get_implicand(void) { return _implicand; }
+	const HandleSeq& get_implicand(void) { return _implicand; }
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

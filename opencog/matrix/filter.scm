@@ -199,6 +199,21 @@
 			(string-append (LLOBJ 'id) " " ID-STR))
 
 		; ---------------
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-generic-filter` object applied to \"~A\" to\n"
+"create \"~A\", with filtering ~A. The filter object knocks\n"
+"out rows, columns and individual entries from the larger matrix\n"
+"object. It effectively creates a smaller matrix from a bigger one,\n"
+"by overloading the default access functions.\n"
+)
+				(LLOBJ 'id) ID-STR (if RENAME "enabled" "disabled")))
+
+		(define (describe)
+			(display (procedure-property add-generic-filter 'documentation)))
+
+		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
@@ -233,6 +248,12 @@
 				((get-all-elts)     (get-all-elts))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
+
+				((help)             (help))
+				((describe)         (describe))
+				((obj)              "add-generic-filter")
+				((base)             LLOBJ)
+
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
@@ -411,4 +432,28 @@
 		pair-pred id-str RENAME)
 )
 
+; ---------------------------------------------------------------------
+
+(define-public (add-zero-filter LLOBJ RENAME)
+"
+  add-zero-filter LLOBJ RENAME - discard zero rows and columns.
+
+  Given a matrix LLOBJ, this defines a new matrix that contains
+  only those rows and columns with non-zero counts. This is useful
+  when analyzing matrix-wide reports, where zero rows/columns can
+  throw off averages.
+"
+	(define (left-basis-p ATOM)
+		(any (lambda (PR) (< 0 (LLOBJ 'get-count PR)))
+			(LLOBJ 'right-stars ATOM)))
+
+	(define (right-basis-p ATOM)
+		(any (lambda (PR) (< 0 (LLOBJ 'get-count PR)))
+			(LLOBJ 'left-stars ATOM)))
+
+	(define (pair-p PAIR) (< 0 (LLOBJ 'get-count PAIR)))
+
+	(add-generic-filter LLOBJ left-basis-p right-basis-p pair-p
+		"zero-filter" RENAME)
+)
 ; ---------------------------------------------------------------------

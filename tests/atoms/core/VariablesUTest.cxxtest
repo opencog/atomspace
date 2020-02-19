@@ -35,7 +35,7 @@ using namespace opencog;
 class VariablesUTest : public CxxTest::TestSuite
 {
 private:
-	Handle A, B, W, X, Y, Z, NT, PNT, CNT;
+	Handle A, B, W, X, Y, Z, G1, G2, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
 
 	AtomSpace _as;
 
@@ -52,13 +52,24 @@ public:
 		Y = an(VARIABLE_NODE, "$Y");
 		Z = an(VARIABLE_NODE, "$Z");
 		W = an(VARIABLE_NODE, "$W");
+		G1 = an(GLOB_NODE, "$G1");
+		G2 = an(GLOB_NODE, "$G2");
 		NT = an(TYPE_NODE, "Node");
 		PNT = an(TYPE_NODE, "PredicateNode");
 		CNT = an(TYPE_NODE, "ConceptNode");
+		NTI = an(TYPE_INH_NODE, "Node");
+		DPTCI = an(TYPE_CO_INH_NODE, "DefinedPredicateNode");
+		LLT = an(TYPE_NODE, "ListLink");
+		LTI = an(TYPE_INH_NODE, "Link");
 	}
 
 	void test_extend_1();
 	void test_extend_2();
+	void test_extend_3();
+	void test_extend_4();
+	void test_extend_5();
+	void test_extend_6();
+
 	void test_find_variables_ordered_1();
 	void test_find_variables_ordered_2();
 	void test_find_variables_ordered_3();
@@ -78,6 +89,13 @@ public:
 	void test_find_variables_mixed_8();
 	void test_find_variables_mixed_9();
 	void test_find_variables_mixed_10();
+
+	void test_is_type_1();
+	void test_is_type_2();
+	void test_is_type_3();
+	void test_is_type_4();
+
+	void test_substitute_nocheck_scope();
 };
 
 void VariablesUTest::test_extend_1()
@@ -119,8 +137,152 @@ void VariablesUTest::test_extend_2()
 		              al(TYPED_VARIABLE_LINK, X, PNT),
 		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
 		expect = al(VARIABLE_LIST,
-		            al(TYPED_VARIABLE_LINK, X, PNT),
+		            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE)),
 		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, NTI),
+			              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LLT, NTI)),
+			              al(TYPED_VARIABLE_LINK, Y, NT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LTI, CNT)),
+			              al(TYPED_VARIABLE_LINK, Y, DPTCI)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, CNT, LLT)),
+			            al(TYPED_VARIABLE_LINK, Y, NT));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          NTI)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          PNT))),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, G1,
+			                 al(TYPE_SET_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "-1")),
+			                    PNT)),
+			              al(TYPED_VARIABLE_LINK, G2,
+			                 al(TYPE_SET_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "3")),
+			                    PNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, G1,
+			               al(TYPE_SET_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)),
+			            al(TYPED_VARIABLE_LINK, G2,
+			               al(TYPE_SET_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)));
+
+	VariableList vl1(vardecl1), vl2(vardecl2);
+
+	Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void VariablesUTest::test_extend_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                     al(TYPED_VARIABLE_LINK, X, NTI),
+	                     al(TYPED_VARIABLE_LINK, G2, PNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, G2, PNT)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, G2, PNT));
 
 	VariableList vl1(vardecl1), vl2(vardecl2);
 
@@ -593,4 +755,121 @@ void VariablesUTest::test_find_variables_mixed_10()
 	logger().debug() << "varseq = " << oc_to_string(varseq);
 
 	TS_ASSERT_EQUALS(varseq, HandleSeq());
+}
+
+void VariablesUTest::test_is_type_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, X, PNT),
+	                    al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	Variables v1(vardecl);
+
+	bool is_x = v1.is_type(X, A);
+	bool is_y = v1.is_type(Y, A);
+
+	TS_ASSERT(not is_x);
+	TS_ASSERT(is_y);
+}
+
+void VariablesUTest::test_is_type_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "1")),
+	                          CNT)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          CNT)));
+
+	Variables v1(vardecl);
+
+	bool is_x = v1.is_type(G1, al(LIST_LINK, A, B));
+	bool is_y = v1.is_type(G2, al(LIST_LINK, A, B));
+
+	TS_ASSERT(not is_x);
+	TS_ASSERT(is_y);
+}
+
+void VariablesUTest::test_is_type_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1, CNT),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          PNT)));
+
+	Variables v1(vardecl);
+
+	bool is_x = v1.is_type(G1, al(LIST_LINK, A, B));
+	bool is_y = v1.is_type(G2, al(LIST_LINK, A, B));
+
+	TS_ASSERT(is_x);
+	TS_ASSERT(not is_y);
+}
+
+void VariablesUTest::test_is_type_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "1"),
+	                             an(NUMBER_NODE, "1")),
+	                          CNT)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_SET_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "1"),
+	                             an(NUMBER_NODE, "1")),
+	                          CNT)));
+
+	Variables v1(vardecl);
+
+	bool is_x = v1.is_type(G1, al(LIST_LINK, A));
+	bool is_y = v1.is_type(G2, A);
+
+	TS_ASSERT(is_x);
+	TS_ASSERT(is_y);
+}
+
+void VariablesUTest::test_substitute_nocheck_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Body with only one variable declared X, thus Y can be
+	// substituted but not X.
+	Handle body = al(SATISFACTION_LINK,
+	                 X,
+	                 al(PRESENT_LINK, al(INHERITANCE_LINK, X, Y)));
+
+	// Replace Y by X, thus X in the satisfaction link above should be
+	// renamed to avoid name collision.
+	HandleMap var2val{{Y, X}};
+	Handle result = Variables(Y).substitute_nocheck(body, var2val);
+	Handle expect = al(SATISFACTION_LINK,
+	                   Z,
+	                   al(PRESENT_LINK, al(INHERITANCE_LINK, Z, X)));
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT(content_eq(result, expect));
 }

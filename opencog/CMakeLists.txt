@@ -8,29 +8,29 @@ DECLARE_GUILE_CONFIG_TARGET(SCM_CONFIG "opencog as-config" "ATOMSPACE_TEST")
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
-IF (HAVE_ATOMSPACE)
-	ADD_SUBDIRECTORY (atoms)
-	ADD_SUBDIRECTORY (atomspace)
-	ADD_SUBDIRECTORY (atomspaceutils)
-	ADD_SUBDIRECTORY (eval)
-	ADD_SUBDIRECTORY (query)
-	ADD_SUBDIRECTORY (persist)
-ENDIF (HAVE_ATOMSPACE)
+ADD_SUBDIRECTORY (atoms)
+ADD_SUBDIRECTORY (atomspace)
+ADD_SUBDIRECTORY (atomspaceutils)
+ADD_SUBDIRECTORY (eval)
+ADD_SUBDIRECTORY (query)
+ADD_SUBDIRECTORY (persist)
 
 # Extension language support
-IF (HAVE_ATOMSPACE AND HAVE_GUILE)
+IF (HAVE_GUILE)
 	ADD_SUBDIRECTORY (guile)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (matrix)
 	ADD_SUBDIRECTORY (sheaf)
-ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
+ENDIF (HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
 # Haskell bindings.
-ADD_SUBDIRECTORY (haskell)
+IF (HAVE_STACK)
+	ADD_SUBDIRECTORY (haskell)
+ENDIF (HAVE_STACK)
 
 WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config.scm SCM_CONFIG TRUE)
 

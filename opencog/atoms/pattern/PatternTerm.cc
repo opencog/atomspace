@@ -19,14 +19,26 @@ PatternTerm::PatternTerm()
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
+	  _has_bound_var(false),
+	  _has_any_globby_var(false),
+	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
+	  _has_any_unordered_link(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	: _handle(h), _quote(Handle::UNDEFINED), _parent(parent),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
-	  _has_any_bound_var(false)
+	  _has_any_bound_var(false),
+	  _has_bound_var(false),
+	  _has_any_globby_var(false),
+	  _has_globby_var(false),
+	  _has_any_evaluatable(false),
+	  _has_evaluatable(false),
+	  _has_any_unordered_link(false)
 {
 	Type t = h->get_type();
 
@@ -91,6 +103,7 @@ bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
 	return _parent->isDescendant(ptm);
 }
 
+// ==============================================================
 /**
  * Equality operator.  Both the content must match, and the path
  * taken to get to the content must match.
@@ -104,15 +117,95 @@ bool PatternTerm::operator==(const PatternTerm& other)
 	return _parent->operator==(*other._parent);
 }
 
-void PatternTerm::addBoundVariable()
+// ==============================================================
+
+// Mark recursively, all the way to the root.
+void PatternTerm::addAnyBoundVar()
 {
-	if (!_has_any_bound_var)
+	if (not _has_any_bound_var)
 	{
 		_has_any_bound_var = true;
 		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addBoundVariable();
+			_parent->addAnyBoundVar();
 	}
 }
+
+/// Set two flags: one flag (the "any" flag) is set recursively from
+/// a variable, all the way up to the root, indicating that there's
+/// a variable on this path.  The other flag gets set only on the
+/// variable, and it's immediate parent (i.e. the holder of the
+/// variable).
+void PatternTerm::addBoundVariable()
+{
+	// Mark just this term (the variable itself)
+	// and mark the term that holds us.
+	_has_bound_var = true;
+	if (_parent != PatternTerm::UNDEFINED)
+			_parent->_has_bound_var = true;
+
+	// Mark recursively, all the way to the root.
+	addAnyBoundVar();
+}
+
+// ==============================================================
+// Just like above, but for globs.
+
+void PatternTerm::addAnyGlobbyVar()
+{
+	if (not _has_any_globby_var)
+	{
+		_has_any_globby_var = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyGlobbyVar();
+	}
+}
+
+void PatternTerm::addGlobbyVar()
+{
+	_has_globby_var = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_globby_var = true;
+
+	addAnyGlobbyVar();
+}
+
+// ==============================================================
+// Just like above, but for evaluatables.
+
+void PatternTerm::addAnyEvaluatable()
+{
+	if (not _has_any_evaluatable)
+	{
+		_has_any_evaluatable = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addAnyEvaluatable();
+	}
+}
+
+void PatternTerm::addEvaluatable()
+{
+	_has_evaluatable = true;
+
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->_has_evaluatable = true;
+
+	addAnyEvaluatable();
+}
+
+// ==============================================================
+
+void PatternTerm::addUnorderedLink()
+{
+	if (not _has_any_unordered_link)
+	{
+		_has_any_unordered_link = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addUnorderedLink();
+	}
+}
+
+// ==============================================================
 
 std::string PatternTerm::to_string() const { return to_string(":"); }
 

@@ -226,24 +226,23 @@
 ; -----------------------------------------------------------------------
 (define-public (cog-get-atoms atom-type . subtypes)
 "
-
-  cog-get-atoms -- Return a list of all atoms of type 'atom-type', optionally
-                   if its subtypes as well.
-
-  Usage: (cog-get-atoms atom-type [subtypes])
+  cog-get-atoms TYPE [BOOL] -- Return list of all atoms of TYPE,
+                   including subtypes if BOOL is #t.
 
   Return a list of all atoms in the atomspace that are of type
-  'atom-type'. If the optional argument 'subtypes' is provided and set
-  to #t, then all atoms of subtypes of `atom-type` are returned as
-  well, otherwise only atoms of type `atom-type` are returned.
+  TYPE. If the optional argument BOOL is provided and set to #t,
+  then all atoms of the subtypes of TYPE are returned as
+  well.  Otherwise, only atoms of type TYPE are returned.
 
   Examples:
 
-  (display (cog-get-atoms 'ConceptNode))
+     (display (cog-get-atoms 'ConceptNode))
   will return and display all atoms of type 'ConceptNode
 
-  (display (cog-get-atoms 'Atom #t))
-  will return and display all atoms, including outgoing duplicates.
+     (display (cog-get-atoms 'Atom #t))
+  will return and display all atoms in the AtomSpace.
+
+  See also: cog-get-all-roots to get only the roots.
 "
 	(let ((lst '()))
 		(define (mklist atom)
@@ -293,6 +292,8 @@
   atomspace, or its ancestors), and thus are at the top of a tree.
   All other atoms (those which do have an incoming set) will appear
   somewhere underneath these top-most atoms.
+
+  This is equivalent to `(display (cog-get-all-roots))`.
 "
 	(traverse-roots display ATOMSPACE)
 )
@@ -308,6 +309,8 @@
   atomspace, or its ancestors), and thus are at the top of a tree.
   All other atoms (those which do have an incoming set) will appear
   somewhere underneath these top-most atoms.
+
+  See also: cog-get-atoms, cog-get-root
 "
   (define roots '())
   (define (cons-roots x) (set! roots (cons x roots)))
@@ -322,6 +325,11 @@
 
   Return all links that contain ATOM and are also roots. A root
   is any atom that has a null incoming set.
+
+  The opposite of this function is `cog-get-all-nodes`, which
+  returns the leaves under ATOM.
+
+  See also: cog-get-all-roots, cog-get-trunk
 "
 	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
@@ -334,8 +342,8 @@
 "
   cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 
-  Return all links that contain ATOM at some level.  Unlike cog-get-root,
-  these are not necessarily roots.
+  Return all links that contain ATOM at some level.  Unlike
+  `cog-get-root`, these are not necessarily roots.
 "
 	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
@@ -347,12 +355,13 @@
 ; -----------------------------------------------------------------------
 (define-public (cog-get-all-nodes LINK)
 "
-  cog-get-all-nodes -- Get all the nodes within `LINK` and its sublinks
+  cog-get-all-nodes ATOM -- Get all the nodes (leaves) under `ATOM`.
 
-  Get all the nodes (non-link atoms) within a hypergraph, and return as
+  Get all the nodes (leaves) within a hypergraph, and return as
   a list.
+
+  See also: cog-get-root, cog-get-trunk
 "
-	(define oset (cog-outgoing-set LINK))
 	(define (recursive-helper ATOM)
 		(if (cog-link? ATOM)
 			(cog-get-all-nodes ATOM)
@@ -360,7 +369,9 @@
 		)
 	)
 
-	(append-map recursive-helper oset)
+	(if (cog-node? LINK)
+		(list LINK)
+		(append-map recursive-helper (cog-outgoing-set LINK)))
 )
 
 ; -----------------------------------------------------------------------
@@ -378,9 +389,7 @@
 	(let ((plist (cog-outgoing-set pare)))
 		(if (equal? atom (car plist))
 			(cadr plist)
-			(car plist)
-		)
-	)
+			(car plist)))
 )
 
 ; -----------------------------------------------------------------------

@@ -1,4 +1,4 @@
-IF(HAVE_GUILE)
-	ADD_CXXTEST(MapLinkUTest)
-	TARGET_LINK_LIBRARIES(MapLinkUTest execution smob atomspace)
-ENDIF(HAVE_GUILE)
+LINK_LIBRARIES(execution smob atomspace)
+
+ADD_CXXTEST(DefinedSchemaUTest)
+ADD_CXXTEST(MapLinkUTest)

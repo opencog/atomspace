@@ -37,7 +37,7 @@
 
 using namespace opencog;
 
-void Link::init(const HandleSeq&& outgoingVector)
+void Link::init()
 {
     if (not nameserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
@@ -46,12 +46,10 @@ void Link::init(const HandleSeq&& outgoingVector)
     }
 
     // Yes, people actually send us bad data.
-    for (const Handle& h: outgoingVector)
+    for (const Handle& h: _outgoing)
         if (nullptr == h)
             throw InvalidParamException(TRACE_INFO,
                 "Link ctor: invalid outgoing set!");
-
-    _outgoing = std::move(outgoingVector);
 }
 
 Link::~Link()
@@ -193,16 +191,14 @@ ContentHash Link::compute_hash() const
 ///
 void Link::install()
 {
-	LinkPtr llc(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->insert_atom(llc);
+	Handle llc(get_handle());
+	for (Handle& h : _outgoing)
+		h->insert_atom(llc);
 }
 
 void Link::remove()
 {
-	LinkPtr lll(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->remove_atom(lll);
+	Handle lll(get_handle());
+	for (Handle& h : _outgoing)
+		h->remove_atom(lll);
 }

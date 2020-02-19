@@ -297,6 +297,15 @@ unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
                                            const HandleSet& atoms);
 
 /**
+ * Return the subset of `atoms` that occur somewhere in the tree
+ * that are not quoted or bound. This acts as a filter on the set
+ * of atoms; the number in the returned set equals the value
+ * returned by `num_unquoted_unscoped_in_tree()` above.
+ */
+HandleSet unquoted_unscoped_in_tree(const Handle& tree,
+                                    const HandleSet& atoms);
+
+/**
  * Return true if the indicated atom occurs somewhere in any of the trees.
  */
 bool is_atom_in_any_tree(const HandleSeq& trees,

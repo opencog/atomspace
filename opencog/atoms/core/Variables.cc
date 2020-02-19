@@ -389,14 +389,14 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleSeq& args,
                                          bool silent) const
 {
-	return substitute_scoped(term, args, silent, index, 0);
+	return substitute_scoped(term, args, silent, index);
 }
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleMap& vm,
                                          bool silent) const
 {
-	return substitute_scoped(term, make_sequence(vm), silent, index, 0);
+	return substitute_scoped(term, make_sequence(vm), silent, index);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const
@@ -430,13 +430,16 @@ std::string FreeVariables::to_string(const std::string& indent) const
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely
-/// syntactic beta-reduction, except for two "tiny" semantic parts:
-/// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
-/// variables are not reduced, and the semantics of scoping
-/// (alpha-conversion) is honored, so that any bound variables with the
-/// same name as the free variables are alpha-hidden in the region where
-/// the bound variable has scope.
-Handle FreeVariables::substitute_scoped(const Handle& term,
+/// syntactic beta-reduction, except for two semantic parts:
+///
+/// 1. The semantics of QuoteLink, UnquoteLink is honoured, so that
+///    quoted variables are not reduced.
+///
+/// 2. The semantics of scoping (alpha-conversion) is honored, so that
+///    any scoped variables with the same name as the free variables
+///    are alpha-hidden, possibly alpha-converted if the substituting
+///    values are variables of the same name.
+Handle FreeVariables::substitute_scoped(Handle term,
                                         const HandleSeq& args,
                                         bool silent,
                                         const IndexMap& index_map,
@@ -462,76 +465,34 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// Update for subsequent recursive calls of substitute_scoped
 	quotation.update(ty);
 
+	// If the term is a scope the index map might change, to avoid copy
+	// we either point to the original map, or the new one.
+	const IndexMap* index_map_ptr = &index_map;
+	IndexMap hidden_map;
+
 	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
-		// Perform alpha-conversion duck-n-cover.  We don't actually need
-		// to alpha-convert anything, if we happen to encounter a bound
-		// variable that happens to have the same name as a free variable.
-		// Instead, the bound variable simply "hides" the free variable
-		// for as long as the bound variable is in scope. We hide it by
-		// removing it from the index.
-		ScopeLinkPtr sco(ScopeLinkCast(term));
+		// Perform alpha-conversion duck-n-cover.
 
-		const Variables& vees = sco->get_variables();
-		bool alpha_hide = false;
-		for (const Handle& v : vees.varseq)
+		// If a substituting value is equal to a variable of that scope,
+		// then alpha-convert the scope to avoid variable name
+		// collision. Loop in the rare case the new names collide.
+		while (must_alpha_convert(term, args))
+			term = ScopeLinkCast(term)->alpha_convert();
+
+		// Hide any variables of the scope that are to be substituted,
+		// that is remove them from the index.
+		if (must_alpha_hide(term, index_map))
 		{
-			IndexMap::const_iterator idx = index_map.find(v);
-			if (idx != index_map.end())
-			{
-				alpha_hide = true;
-				break;
-			}
-		}
-
-		// Hiding is expensive, so perform it only if we really have to.
-		if (alpha_hide)
-		{
-			// Make a copy... this is what's computationally expensive.
-			IndexMap hidden_map = index_map;
-
-			// Remove the alpha-hidden variables.
-			for (const Handle& v : vees.varseq)
-			{
-				IndexMap::const_iterator idx = hidden_map.find(v);
-				if (idx != hidden_map.end())
-				{
-					hidden_map.erase(idx);
-				}
-			}
-
-			// Also remove everything that is not a variable.
-			// The map will, in general, contain terms that
-			// contain alpha-hidden variables; those also have
-			// to go, or they will mess up the substitution.
-			for (auto it = hidden_map.begin(); it != hidden_map.end();)
-			{
-				Type tt = it->first->get_type();
-				if (tt != VARIABLE_NODE and tt != GLOB_NODE)
-				{
-					it = hidden_map.erase(it);
-				}
-				else
-				{
-					++it;
-				}
-			}
-
+			hidden_map = alpha_hide(term, index_map);
 
 			// If the hidden map is empty, then there is no more
 			// substitution to be done.
 			if (hidden_map.empty())
 				return term;
 
-			// Recursively fill out the subtrees. Same as below, but
-			// using the alpha-renamed variable index map.
-			HandleSeq oset;
-			for (const Handle& h : term->getOutgoingSet())
-			{
-				oset.emplace_back(substitute_scoped(h, args, silent,
-				                                    hidden_map, quotation));
-			}
-			return createLink(std::move(oset), term->get_type());
+			// Otherwise the new map must be passed down below
+			index_map_ptr = &hidden_map;
 		}
 	}
 
@@ -545,7 +506,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
+			Handle glst(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
@@ -558,7 +519,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		}
 		else
 		{
-			Handle sub(substitute_scoped(h, args, silent, index_map, quotation));
+			Handle sub(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
 			if (sub != h) changed = true;
 			oset.emplace_back(sub);
 		}
@@ -567,6 +528,67 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// Return the original atom, if it was not modified.
 	if (not changed) return term;
 	return createLink(std::move(oset), term->get_type());
+}
+
+bool FreeVariables::must_alpha_convert(const Handle& scope,
+                                       const HandleSeq& args) const
+{
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& value : args)
+		if (vars.find(value) != vars.end())
+			return true;
+	return false;
+}
+
+// Evaluate whether any variable must be hidden/removed from the
+// index_map.
+bool FreeVariables::must_alpha_hide(const Handle& scope,
+                                    const IndexMap& index_map) const
+{
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& v : vars)
+		if (index_map.find(v) != index_map.end())
+			return true;
+	return false;
+}
+
+/// Remove the variables from the given index map that are present in
+/// the given the variables of a scope, as well as non variables
+FreeVariables::IndexMap FreeVariables::alpha_hide(const Handle& scope,
+                                                  const IndexMap& index_map) const
+{
+	// Make a copy... this is what's computationally expensive.
+	IndexMap hidden_map = index_map;
+
+	// Remove the alpha-hidden variables.
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& v : vars)
+	{
+		IndexMap::const_iterator idx = hidden_map.find(v);
+		if (idx != hidden_map.end())
+		{
+			hidden_map.erase(idx);
+		}
+	}
+
+	// Also remove everything that is not a variable.
+	// The map will, in general, contain terms that
+	// contain alpha-hidden variables; those also have
+	// to go, or they will mess up the substitution.
+	for (auto it = hidden_map.begin(); it != hidden_map.end();)
+	{
+		Type tt = it->first->get_type();
+		if (tt != VARIABLE_NODE and tt != GLOB_NODE)
+		{
+			it = hidden_map.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+	return hidden_map;
 }
 
 /* ================================================================= */
@@ -681,7 +703,9 @@ void Variables::get_vartype(const Handle& htypelink)
 			if (INTERVAL_LINK == th)
 				intervals = h->getOutgoingSet();
 
-			else if (TYPE_NODE == th)
+			else if (TYPE_NODE == th or
+			         TYPE_INH_NODE == th or
+			         TYPE_CO_INH_NODE == th)
 			{
 				vartype = h;
 				t = th;
@@ -707,17 +731,13 @@ void Variables::get_vartype(const Handle& htypelink)
 	else if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getChildren(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getChildrenRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts;
-		TypeSet::iterator it = ts.begin();
-		nameserver().getChildren(vt, std::inserter(ts, it));
+		TypeSet ts = nameserver().getParentsRecursive(vt);
 		_simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
@@ -736,6 +756,24 @@ void Variables::get_vartype(const Handle& htypelink)
 			{
 				Type vt = TypeNodeCast(ht)->get_kind();
 				if (ATOM != vt) typeset.insert(vt);
+			}
+			else if (TYPE_INH_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt)
+				{
+					TypeSet ts = nameserver().getChildrenRecursive(vt);
+					typeset.insert(ts.begin(), ts.end());
+				}
+			}
+			else if (TYPE_CO_INH_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt)
+				{
+					TypeSet ts = nameserver().getParentsRecursive(vt);
+					typeset.insert(ts.begin(), ts.end());
+				}
 			}
 			else if (SIGNATURE_LINK == var_type)
 			{
@@ -772,6 +810,18 @@ void Variables::get_vartype(const Handle& htypelink)
 			_deep_typemap.insert({varname, deepset});
 		if (0 < fuzzset.size())
 			_fuzzy_typemap.insert({varname, fuzzset});
+
+		// An empty disjunction corresponds to a bottom type.
+		if (tset.empty())
+			_simple_typemap.insert({varname, {NOTYPE}});
+
+		// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
+		if (1 == tset.size() and TYPE_CO_INH_NODE == tset[0]->get_type())
+		{
+			Type vt = TypeNodeCast(tset[0])->get_kind();
+			if (ATOM == vt)
+				_simple_typemap.insert({varname, {NOTYPE}});
+		}
 	}
 	else if (SIGNATURE_LINK == t)
 	{
@@ -817,9 +867,12 @@ void Variables::get_vartype(const Handle& htypelink)
 
 	if (0 < intervals.size())
 	{
-		_glob_intervalmap.insert({varname, std::make_pair(
-			std::round(NumberNodeCast(intervals[0])->get_value()),
-			std::round(NumberNodeCast(intervals[1])->get_value()))});
+		long lb = std::lround(NumberNodeCast(intervals[0])->get_value());
+		long ub = std::lround(NumberNodeCast(intervals[1])->get_value());
+		if (lb < 0) lb = 0;
+		if (ub < 0) ub = SIZE_MAX;
+
+		_glob_intervalmap.insert({varname, std::make_pair(lb, ub)});
 	}
 
 	varset.insert(varname);
@@ -1021,10 +1074,44 @@ bool Variables::is_type(const Handle& h) const
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	if (varset.end() == varset.find(var)) return false;
+
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
+	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
+
+	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
+
+	// If one is allowed in interval then there are two alternatives.
+	// one: val must satisfy type restriction.
+	// two: val must be list_link and its unique outgoing satisfies
+	//      type restriction.
+	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
+	    and is_type(tit, dit, fit, val))
+		return true;
+	else if (val->get_type() != LIST_LINK or
+	         not is_lower_bound(var, num_args) or
+	         not is_upper_bound(var, num_args))
+		// If the number of arguments is out of the allowed interval
+		// of the variable/glob or val is not List_link, return false.
+		return false;
+
+	// Every outgoing atom in list must satisfy type restriction of var.
+	for (size_t i = 0; i < num_args; i++)
+		if (!is_type(tit, dit, fit, val->getOutgoingAtom(i)))
+			return false;
+
+	return true;
+}
+
+bool Variables::is_type(VariableTypeMap::const_iterator tit,
+                        VariableDeepTypeMap::const_iterator dit,
+                        VariableDeepTypeMap::const_iterator fit,
+                        const Handle& val) const
+{
 	bool ret = true;
 
 	// Simple type restrictions?
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
 		const TypeSet &tchoice = tit->second;
@@ -1039,8 +1126,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Deep type restrictions?
-	VariableDeepTypeMap::const_iterator dit =
-		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
 		const HandleSet &sigset = dit->second;
@@ -1052,18 +1137,13 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Fuzzy deep type restrictions?
-	VariableDeepTypeMap::const_iterator fit =
-		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
 		// const HandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
+		                       "Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
-
-	// Maybe we don't know this variable?
-	if (varset.end() == varset.find(var)) return false;
 
 	// There appear to be no type restrictions...
 	return ret;
@@ -1123,16 +1203,7 @@ bool Variables::is_type(Type gtype) const
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default restriction is 1 or more,
-	// so return true as long as `n` is larger than 0.
-	if (_glob_intervalmap.end() == iit)
-		return (n > 0);
-
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n >= intervals.first);
 }
 
@@ -1142,20 +1213,30 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  * Returns true/false if the glob satisfies the upper bound
  * interval restriction.
  */
-bool Variables::is_upper_bound(const Handle& glob, size_t n) const
+bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default upper bound is
-	// "unbounded"; any number of matches are OK.
-	if (_glob_intervalmap.end() == iit)
-		return true;
-
-	// Negative upper bound means "unbounded" (infinity).
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n <= intervals.second or intervals.second < 0);
+}
+
+static const GlobInterval& default_interval(Type t)
+{
+	static const GlobInterval var_def_interval =
+			GlobInterval(1, 1);
+	static const GlobInterval glob_def_interval =
+			GlobInterval(1, SIZE_MAX);
+	return t == GLOB_NODE ? glob_def_interval :
+			 var_def_interval;
+}
+
+const GlobInterval& Variables::get_interval(const Handle& var) const
+{
+	const auto interval = _glob_intervalmap.find(var);
+
+	if (interval == _glob_intervalmap.end())
+		return default_interval(var->get_type());
+
+	return interval->second;
 }
 
 /* ================================================================= */
@@ -1271,11 +1352,11 @@ void Variables::extend(const Variables& vset)
 			if (typemap_it != vset._simple_typemap.end())
 			{
 				const TypeSet& tms = typemap_it->second;
-				TypeSet mytypes =
-					type_intersection(_simple_typemap[h], tms);
-				_simple_typemap.erase(h);	 // is it safe to erase if
-                                             // h not in already?
-				_simple_typemap.insert({h, mytypes});
+				auto tti = _simple_typemap.find(h);
+				if(tti != _simple_typemap.end())
+					tti->second = set_intersection(tti->second, tms);
+				else
+					_simple_typemap.insert({h, tms});
 			}
 		}
 		else
@@ -1292,10 +1373,32 @@ void Variables::extend(const Variables& vset)
 				_simple_typemap.insert({h, typemap_it->second});
 			}
 		}
+		// extend _glob_interval_map
+		extend_interval(h, vset);
 	}
 
 	// If either this or the other are ordered then the result is ordered
 	_ordered = _ordered or vset._ordered;
+}
+
+inline GlobInterval interval_intersection(const GlobInterval &lhs,
+                                          const GlobInterval &rhs)
+{
+	const auto lb = std::max(lhs.first, rhs.first);
+	const auto ub = std::min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
+}
+
+void Variables::extend_interval(const Handle &h, const Variables &vset)
+{
+	auto it = _glob_intervalmap.find(h);
+	auto is_in_gim = it != _glob_intervalmap.end();
+	const auto intersection = not is_in_gim ? vset.get_interval(h) :
+			interval_intersection(vset.get_interval(h), get_interval(h));
+	if (intersection != default_interval(h->get_type())) {
+		if (is_in_gim) it->second = intersection;
+		else _glob_intervalmap.insert({h, intersection});
+	}
 }
 
 void Variables::erase(const Handle& var)
@@ -1330,16 +1433,13 @@ bool Variables::operator<(const Variables& other) const
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
+	HandleSeq types;
 	// Simple type info
 	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
 	{
-		HandleSeq types;
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
-		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(std::move(types), TYPE_CHOICE);
-		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
 	auto dit = _deep_typemap.find(var);
@@ -1354,8 +1454,37 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		OC_ASSERT(false, "TODO: support fuzzy type info");
 	}
 
-	// TODO: _glob_intervalmap?
+	// Check if ill-typed a.k.a invalid type intersection.
+	if(types.empty() and sit != _simple_typemap.end())
+	{
+		const Handle ill_type = createLink(TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
+	}
 
+	const auto interval = get_interval(var);
+	if (interval != default_interval(var->get_type())) {
+		Handle il = createLink(INTERVAL_LINK,
+		                       Handle(createNumberNode(interval.first)),
+		                       Handle(createNumberNode(interval.second)));
+
+		if (types.empty())
+			return createLink(TYPED_VARIABLE_LINK, alt, il);
+
+		HandleSeq tcs;
+		for (Handle tn : types)
+			tcs.push_back(createLink(TYPE_SET_LINK, il, tn));
+		return tcs.size() == 1 ?
+		       createLink(TYPED_VARIABLE_LINK, alt, tcs[0]) :
+		       createLink(TYPED_VARIABLE_LINK, alt,
+		                  createLink(tcs, TYPE_CHOICE));
+	}
+	// No/Default interval found
+	if (!types.empty()) {
+		Handle types_h = types.size() == 1 ?
+		                 types[0] :
+		                 createLink(std::move(types), TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
+	}
 	// No type info
 	return alt;
 }
@@ -1388,10 +1517,14 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		{
 			get_vartype(h);
 		}
+		else if (ANCHOR_NODE == t)
+		{
+			_anchor = h;
+		}
 		else
 		{
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"Expected a Variable or TypedVariable or Anchor, got: %s"
 				"\nVariableList is %s",
 					nameserver().getTypeName(t).c_str(),
 					to_string().c_str());
@@ -1423,19 +1556,12 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// Simple typemap
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
-	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
-	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size();
-	unsigned i = 0;
-	for (const auto& v : _simple_typemap)
-	{
-		ss << std::endl << indent_p << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent_pp)
-		   << indent_p << "types[" << i << "]:";
-		for (auto& t : v.second)
-			ss << " " << nameserver().getTypeName(t);
-		i++;
-	}
+	ss << indent << "_simple_typemap:" << std::endl
+	   << oc_to_string(_simple_typemap, indent_p) << std::endl;
+
+	// Glob interval map
+	ss << indent << "_glob_intervalmap:" << std::endl
+	   << oc_to_string(_glob_intervalmap, indent_p);
 
 	return ss.str();
 }
@@ -1499,6 +1625,42 @@ std::string oc_to_string(const FreeVariables::IndexMap& imap,
 	for (const auto& el : imap) {
 		ss << std::endl << indent << "index[" << el.second << "]: "
 		   << el.first->id_to_string();
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const VariableTypeMap& vtm, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << vtm.size();
+	unsigned i = 0;
+	for (const auto& v : vtm)
+	{
+		ss << std::endl << indent << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "types[" << i << "]:";
+		for (auto& t : v.second)
+			ss << " " << nameserver().getTypeName(t);
+		i++;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const GlobIntervalMap& gim, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << gim.size();
+	unsigned i = 0;
+	for (const auto& v : gim)
+	{
+		ss << std::endl << indent << "glob[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "interval[" << i << "]: ";
+		double lo = v.second.first;
+		double up = v.second.second;
+		ss << ((0 <= lo and std::isfinite(lo)) ? "[" : "(") << lo << ", "
+		   << up << ((0 <= up and std::isfinite(up)) ? "]" : ")");
+		i++;
 	}
 	return ss.str();
 }

@@ -174,14 +174,18 @@ struct FreeVariables
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
-	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
-	                         const IndexMap&,
+	Handle substitute_scoped(Handle, const HandleSeq&, bool, const IndexMap&,
 	                         Quotation quotation=Quotation()) const;
+
+	bool must_alpha_convert(const Handle& scope, const HandleSeq& args) const;
+	bool must_alpha_hide(const Handle& scope, const IndexMap& index_map) const;
+	IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map) const;
 };
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;
 typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
-typedef std::map<Handle, std::pair<double, double>> GlobIntervalMap;
+typedef std::pair<size_t, size_t> GlobInterval;
+typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -222,6 +226,9 @@ struct Variables : public FreeVariables,
 	/// To restrict how many atoms should be matched for each of the
 	/// GlobNodes in the pattern.
 	GlobIntervalMap _glob_intervalmap;
+
+	/// Anchor, if present, else undefined.
+	Handle _anchor;
 
 	// See VariableList.cc for comments
 	void get_vartype(const Handle&);
@@ -327,8 +334,18 @@ struct Variables : public FreeVariables,
 	void find_variables(const Handle& body);
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
+	const GlobInterval& get_interval(const Handle&) const;
+
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
+
+protected:
+	bool is_type(VariableTypeMap::const_iterator,
+			VariableDeepTypeMap::const_iterator,
+			VariableDeepTypeMap::const_iterator,
+			const Handle&) const;
+
+	void extend_interval(const Handle &h, const Variables &vset);
 };
 
 // Debugging helpers see
@@ -348,6 +365,10 @@ std::string oc_to_string(const HandlePathsMap& hpsm,
 std::string oc_to_string(const VarScraper& vsc,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables::IndexMap& imap,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const VariableTypeMap& vtm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const GlobIntervalMap& gim,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const FreeVariables& var,
                          const std::string& indent=empty_string);

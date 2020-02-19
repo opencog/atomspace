@@ -101,7 +101,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		const Variables* _vars = nullptr;
 		const HandleSet* _dynamic = nullptr;
 		bool _have_evaluatables = false;
-		const HandleSet* _globs = nullptr;
 
 		bool _have_variables;
 		Handle _pattern_body;
