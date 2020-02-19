@@ -50,7 +50,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&&);
+    void init();
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -71,39 +71,39 @@ public:
      * @param Link truthvalue.
      */
     Link(const HandleSeq oset, Type t=LINK)
-        : Atom(t)
+        : Atom(t), _outgoing(std::move(oset))
     {
-        init(std::move(oset));
+        init();
     }
 
     Link(Type t)
         : Atom(t)
     {
-        init({});
+        init();
     }
 
 	Link(Type t, const Handle& h)
-        : Atom(t)
+        : Atom(t), _outgoing({h})
     {
-        init({h});
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb})
     {
-        init({ha, hb});
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc})
     {
-        init({ha, hb, hc});
+        init();
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc, hd})
     {
-        init({ha, hb, hc, hd});
+        init();
     }
 
     Link(const Link&) = delete;

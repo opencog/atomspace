@@ -44,7 +44,7 @@ class Node : public Atom
 protected:
     // properties
     std::string _name;
-    void init(const std::string&&);
+    void init();
 
     virtual ContentHash compute_hash() const;
 
@@ -57,9 +57,9 @@ public:
      *                  the node.  Use empty string for unamed node.
      */
     Node(Type t, const std::string s)
-        : Atom(t)
+        : Atom(t), _name(std::move(s))
     {
-        init(std::move(s));
+        init();
     }
 
     Node(const Node&) = delete;
