@@ -26,7 +26,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/RewriteLink.h>
-#include <opencog/atoms/pattern/BindLink.h>
 
 
 #include <cxxtest/TestSuite.h>
@@ -68,9 +67,6 @@ public:
 
 	void tearDown() {}
 
-	void test_rand_alpha_conversion();
-	void test_names_alpha_conversion();
-	void xtest_vardecl_bindlink_alpha_conversion();
 	void test_unordered();
 	void test_beta_reduce_1();
 	void test_beta_reduce_2();
@@ -86,79 +82,6 @@ public:
 
 #define NB _asb.add_node
 #define LB _asb.add_link
-
-// Test RewriteLink::alpha_conversion with no arguments
-void RewriteLinkUTest::test_rand_alpha_conversion()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	// Test simple RewriteLink
-	Handle hsc =
-	LA(REWRITE_LINK,
-		NA(VARIABLE_NODE, "$X"),
-		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
-
-	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle scac = sc->alpha_convert();
-
-	std::cout << "sc = " << oc_to_string(Handle(sc));
-	std::cout << "scac = " << oc_to_string(scac);
-
-	TS_ASSERT(sc->is_equal(scac));
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
-// Test RewriteLink::alpha_conversion with provided variable names
-void RewriteLinkUTest::test_names_alpha_conversion()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	// Test simple RewriteLink
-	Handle X = NA(VARIABLE_NODE, "$X"),
-		Y = NA(VARIABLE_NODE, "$Y"),
-		hsc = LA(REWRITE_LINK, X, LA(AND_LINK, X));
-	Handle expected = createLink(REWRITE_LINK, Y, LA(AND_LINK, Y));
-
-	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->alpha_convert(HandleMap{{X, Y}});
-
-	std::cout << "result = " << oc_to_string(result);
-	std::cout << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT(content_eq(result, expected));
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
-// Like test_vardecl_bindlink_alpha_conversion but using a BindLink
-// instead of a RewriteLink
-// TODO: re-enable?
-void RewriteLinkUTest::xtest_vardecl_bindlink_alpha_conversion()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	// Test simple RewriteLink
-	Handle X = NA(VARIABLE_NODE, "$X"),
-		Y = NA(VARIABLE_NODE, "$Y"),
-		CT = NA(TYPE_NODE, "ConceptNode"),
-		Y_vardecl = LA(TYPED_VARIABLE_LINK, Y, CT),
-		hbl = LA(BIND_LINK, LA(AND_LINK, X), LA(OR_LINK, X)),
-		expected_wo_vardecl = LA(BIND_LINK,
-		                         LA(AND_LINK, Y), LA(OR_LINK, Y)),
-		expected = LA(BIND_LINK, Y_vardecl,
-		              LA(AND_LINK, Y), LA(OR_LINK, Y));
-
-	BindLinkPtr bl(BindLinkCast(hbl));
-	Handle result_wo_vardecl = _asa.add_atom(bl->alpha_convert({Y}));
-
-	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
-	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
-
-	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
 
 // Test RewriteLink::is_equal with undordered links
 void RewriteLinkUTest::test_unordered()

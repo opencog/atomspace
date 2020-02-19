@@ -430,13 +430,16 @@ std::string FreeVariables::to_string(const std::string& indent) const
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely
-/// syntactic beta-reduction, except for two "tiny" semantic parts:
-/// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
-/// variables are not reduced, and the semantics of scoping
-/// (alpha-conversion) is honored, so that any bound variables with the
-/// same name as the free variables are alpha-hidden in the region where
-/// the bound variable has scope.
-Handle FreeVariables::substitute_scoped(const Handle& term,
+/// syntactic beta-reduction, except for two semantic parts:
+///
+/// 1. The semantics of QuoteLink, UnquoteLink is honoured, so that
+///    quoted variables are not reduced.
+///
+/// 2. The semantics of scoping (alpha-conversion) is honored, so that
+///    any scoped variables with the same name as the free variables
+///    are alpha-hidden, possibly alpha-converted if the substituting
+///    values are variables of the same name.
+Handle FreeVariables::substitute_scoped(Handle term,
                                         const HandleSeq& args,
                                         bool silent,
                                         const IndexMap& index_map,
@@ -462,76 +465,33 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// Update for subsequent recursive calls of substitute_scoped
 	quotation.update(ty);
 
+	// If the term is a scope the index map might change, to avoid copy
+	// we either point to the original map, or the new one.
+	const IndexMap* index_map_ptr = &index_map;
+
 	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
-		// Perform alpha-conversion duck-n-cover.  We don't actually need
-		// to alpha-convert anything, if we happen to encounter a bound
-		// variable that happens to have the same name as a free variable.
-		// Instead, the bound variable simply "hides" the free variable
-		// for as long as the bound variable is in scope. We hide it by
-		// removing it from the index.
-		ScopeLinkPtr sco(ScopeLinkCast(term));
+		// Perform alpha-conversion duck-n-cover.
 
-		const Variables& vees = sco->get_variables();
-		bool alpha_hide = false;
-		for (const Handle& v : vees.varseq)
+		// If a substituting value is equal to a variable of that scope,
+		// then alpha-convert the scope to avoid variable name
+		// collision. Loop in the rare case the new names collide.
+		while (must_alpha_convert(term, args))
+			term = ScopeLinkCast(term)->alpha_convert();
+
+		// Hide any variables of the scope that are to be substituted,
+		// that is remove them from the index.
+		if (must_alpha_hide(term, index_map))
 		{
-			IndexMap::const_iterator idx = index_map.find(v);
-			if (idx != index_map.end())
-			{
-				alpha_hide = true;
-				break;
-			}
-		}
-
-		// Hiding is expensive, so perform it only if we really have to.
-		if (alpha_hide)
-		{
-			// Make a copy... this is what's computationally expensive.
-			IndexMap hidden_map = index_map;
-
-			// Remove the alpha-hidden variables.
-			for (const Handle& v : vees.varseq)
-			{
-				IndexMap::const_iterator idx = hidden_map.find(v);
-				if (idx != hidden_map.end())
-				{
-					hidden_map.erase(idx);
-				}
-			}
-
-			// Also remove everything that is not a variable.
-			// The map will, in general, contain terms that
-			// contain alpha-hidden variables; those also have
-			// to go, or they will mess up the substitution.
-			for (auto it = hidden_map.begin(); it != hidden_map.end();)
-			{
-				Type tt = it->first->get_type();
-				if (tt != VARIABLE_NODE and tt != GLOB_NODE)
-				{
-					it = hidden_map.erase(it);
-				}
-				else
-				{
-					++it;
-				}
-			}
-
+			IndexMap hidden_map = alpha_hide(term, index_map);
 
 			// If the hidden map is empty, then there is no more
 			// substitution to be done.
 			if (hidden_map.empty())
 				return term;
 
-			// Recursively fill out the subtrees. Same as below, but
-			// using the alpha-renamed variable index map.
-			HandleSeq oset;
-			for (const Handle& h : term->getOutgoingSet())
-			{
-				oset.emplace_back(substitute_scoped(h, args, silent,
-				                                    hidden_map, quotation));
-			}
-			return createLink(std::move(oset), term->get_type());
+			// Otherwise the new map must be passed down below
+			index_map_ptr = &hidden_map;
 		}
 	}
 
@@ -545,7 +505,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
+			Handle glst(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
@@ -558,7 +518,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		}
 		else
 		{
-			Handle sub(substitute_scoped(h, args, silent, index_map, quotation));
+			Handle sub(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
 			if (sub != h) changed = true;
 			oset.emplace_back(sub);
 		}
@@ -567,6 +527,67 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// Return the original atom, if it was not modified.
 	if (not changed) return term;
 	return createLink(std::move(oset), term->get_type());
+}
+
+bool FreeVariables::must_alpha_convert(const Handle& scope,
+                                       const HandleSeq& args) const
+{
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& value : args)
+		if (vars.find(value) != vars.end())
+			return true;
+	return false;
+}
+
+// Evaluate whether any variable must be hidden/removed from the
+// index_map.
+bool FreeVariables::must_alpha_hide(const Handle& scope,
+                                    const IndexMap& index_map) const
+{
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& v : vars)
+		if (index_map.find(v) != index_map.end())
+			return true;
+	return false;
+}
+
+/// Remove the variables from the given index map that are present in
+/// the given the variables of a scope, as well as non variables
+FreeVariables::IndexMap FreeVariables::alpha_hide(const Handle& scope,
+                                                  const IndexMap& index_map) const
+{
+	// Make a copy... this is what's computationally expensive.
+	IndexMap hidden_map = index_map;
+
+	// Remove the alpha-hidden variables.
+	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
+	for (const Handle& v : vars)
+	{
+		IndexMap::const_iterator idx = hidden_map.find(v);
+		if (idx != hidden_map.end())
+		{
+			hidden_map.erase(idx);
+		}
+	}
+
+	// Also remove everything that is not a variable.
+	// The map will, in general, contain terms that
+	// contain alpha-hidden variables; those also have
+	// to go, or they will mess up the substitution.
+	for (auto it = hidden_map.begin(); it != hidden_map.end();)
+	{
+		Type tt = it->first->get_type();
+		if (tt != VARIABLE_NODE and tt != GLOB_NODE)
+		{
+			it = hidden_map.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+	return hidden_map;
 }
 
 /* ================================================================= */

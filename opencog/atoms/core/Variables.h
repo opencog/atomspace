@@ -174,9 +174,12 @@ struct FreeVariables
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
-	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
-	                         const IndexMap&,
+	Handle substitute_scoped(Handle, const HandleSeq&, bool, const IndexMap&,
 	                         Quotation quotation=Quotation()) const;
+
+	bool must_alpha_convert(const Handle& scope, const HandleSeq& args) const;
+	bool must_alpha_hide(const Handle& scope, const IndexMap& index_map) const;
+	IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map) const;
 };
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;

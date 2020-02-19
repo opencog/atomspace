@@ -95,7 +95,7 @@ public:
 	void test_is_type_3();
 	void test_is_type_4();
 
-	void xtest_substitute_nocheck_scope();
+	void test_substitute_nocheck_scope();
 };
 
 void VariablesUTest::test_extend_1()
@@ -850,7 +850,7 @@ void VariablesUTest::test_is_type_4()
 	TS_ASSERT(is_y);
 }
 
-void VariablesUTest::xtest_substitute_nocheck_scope()
+void VariablesUTest::test_substitute_nocheck_scope()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -871,5 +871,5 @@ void VariablesUTest::xtest_substitute_nocheck_scope()
 	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
 
-	TS_ASSERT_EQUALS(result, expect);
+	TS_ASSERT(content_eq(result, expect));
 }
