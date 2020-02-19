@@ -468,6 +468,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
 	// If the term is a scope the index map might change, to avoid copy
 	// we either point to the original map, or the new one.
 	const IndexMap* index_map_ptr = &index_map;
+	IndexMap hidden_map;
 
 	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
@@ -483,7 +484,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
 		// that is remove them from the index.
 		if (must_alpha_hide(term, index_map))
 		{
-			IndexMap hidden_map = alpha_hide(term, index_map);
+			hidden_map = alpha_hide(term, index_map);
 
 			// If the hidden map is empty, then there is no more
 			// substitution to be done.
