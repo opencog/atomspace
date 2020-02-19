@@ -50,7 +50,6 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&);
     void init(const HandleSeq&&);
 
 protected:
@@ -71,13 +70,7 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq& oset, Type t=LINK)
-        : Atom(t)
-    {
-        init(oset);
-    }
-
-    Link(const HandleSeq&& oset, Type t=LINK)
+    Link(const HandleSeq oset, Type t=LINK)
         : Atom(t)
     {
         init(std::move(oset));
