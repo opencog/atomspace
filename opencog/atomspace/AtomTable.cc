@@ -139,13 +139,13 @@ void AtomTable::clear()
     clear_all_atoms();
 }
 
-Handle AtomTable::getHandle(Type t, std::string n) const
+Handle AtomTable::getHandle(Type t, const std::string&& n) const
 {
     Handle h(createNode(t, std::move(n)));
     return lookupHandle(h);
 }
 
-Handle AtomTable::getHandle(Type t, HandleSeq seq) const
+Handle AtomTable::getHandle(Type t, const HandleSeq&& seq) const
 {
     Handle h(createLink(std::move(seq), t));
     return lookupHandle(h);
