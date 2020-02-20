@@ -105,7 +105,7 @@ void RandomAtomGenerator::make_random_node()
     node_name += std::to_string(_counter);
 
     // Add the node to the atomspace.
-    Handle node = _atomspace->add_node(node_type, node_name);
+    Handle node = _atomspace->add_node(node_type, std::move(node_name));
 
     // Set the truth value (non-default based on random chance and threshold).
     set_truth_value(node);
@@ -171,7 +171,7 @@ void RandomAtomGenerator::make_random_link()
         }
 
         // Add the link to the atomspace.
-        link = _atomspace->add_link(link_type, outgoing);
+        link = _atomspace->add_link(link_type, std::move(outgoing));
 
     // Until we've actually added a link.
     } while (_atomspace->get_size() == initial_atom_count);

@@ -152,7 +152,7 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, std::string name="");
+    Handle add_node(Type t, std::string&&);
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -162,7 +162,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type, HandleSeq);
+    Handle add_link(Type, HandleSeq&&);
 
     inline Handle add_link(Type t)
     {
@@ -376,8 +376,8 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle get_node(Type, std::string = "");
-    inline Handle get_handle(Type t, std::string str) {
+    Handle get_node(Type, std::string&&);
+    inline Handle get_handle(Type t, std::string&& str) {
         return get_node(t, std::move(str));
     }
 
@@ -394,7 +394,7 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle get_link(Type, HandleSeq);
+    Handle get_link(Type, HandleSeq&&);
     inline Handle get_link(Type t, const Handle& ha) {
         return get_link(t, HandleSeq({ha}));
     }

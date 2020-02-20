@@ -85,6 +85,6 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 	}
 
 	if (changed)
-		args = as->add_link(LIST_LINK, new_oset);
+		args = as->add_link(LIST_LINK, std::move(new_oset));
 	return args;
 }
