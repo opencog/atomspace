@@ -401,27 +401,32 @@ public:
      *        the outgoing set of the link.
     */
     Handle get_link(Type, HandleSeq&&) const;
-    inline Handle get_link(Type t, const Handle& ha) {
+    inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb) const {
         return get_link(t, {ha, hb});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc) const
+    {
         return get_link(t, {ha, hb, hc});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc, const Handle& hd) const
+    {
         return get_link(t, {ha, hb, hc, hd});
     }
-    Handle get_handle(Type t, HandleSeq outgoing) {
+    Handle get_handle(Type t, HandleSeq outgoing) const {
         return get_link(t, std::move(outgoing));
     }
-    Handle get_handle(Type t, const Handle& ha) {
+    Handle get_handle(Type t, const Handle& ha) const {
 	    return get_handle(t, HandleSeq({ha}));
     }
-    Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_handle(Type t, const Handle& ha, const Handle& hb) const {
 	    return get_handle(t, HandleSeq({ha, hb}));
     }
+
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
