@@ -209,14 +209,15 @@ void LargeZipfTest::fetch_space(AtomSpace *space)
 {
 	for (int w=0; w<NWORDS; w++)
 	{
-		Handle h = space->add_node(hword[w]->get_type(), hword[w]->get_name());
+		Handle h = space->add_node(hword[w]->get_type(),
+		                  std::move(std::string(hword[w]->get_name())));
 		space->fetch_atom(h); // get the TV
 	}
 
 	for (int p=0; p<npairs; p++)
 	{
 		Handle h = space->add_link(hpair[p]->get_type(),
-		                           hpair[p]->getOutgoingSet());
+		                  std::move(HandleSeq(hpair[p]->getOutgoingSet())));
 		space->fetch_atom(h); // get the TV
 	}
 }

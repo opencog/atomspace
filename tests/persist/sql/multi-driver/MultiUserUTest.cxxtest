@@ -364,7 +364,7 @@ void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     hvec.push_back(h4[idx]);
 
     // Note that SetLink is an unordered link.
-    hl[idx] = as->add_link(SET_LINK, hvec);
+    hl[idx] = as->add_link(SET_LINK, std::move(hvec));
     as->store_atom(hl[idx]);
     l[idx] = LinkCast(hl[idx]);
 
