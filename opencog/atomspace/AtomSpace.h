@@ -162,7 +162,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, HandleSeq outgoing);
+    Handle add_link(Type, HandleSeq);
 
     inline Handle add_link(Type t)
     {
@@ -376,7 +376,7 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle get_node(Type t, std::string name="");
+    Handle get_node(Type, std::string = "");
     inline Handle get_handle(Type t, std::string str) {
         return get_node(t, std::move(str));
     }
@@ -394,7 +394,7 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle get_link(Type t, HandleSeq outgoing);
+    Handle get_link(Type, HandleSeq);
     inline Handle get_link(Type t, const Handle& ha) {
         return get_link(t, HandleSeq({ha}));
     }
@@ -407,8 +407,8 @@ public:
     Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
         return get_link(t, {ha, hb, hc, hd});
     }
-    Handle get_handle(Type t, const HandleSeq& outgoing) {
-        return get_link(t, outgoing);
+    Handle get_handle(Type t, HandleSeq outgoing) {
+        return get_link(t, std::move(outgoing));
     }
     Handle get_handle(Type t, const Handle& ha) {
 	    return get_handle(t, HandleSeq({ha}));

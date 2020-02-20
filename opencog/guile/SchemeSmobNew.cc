@@ -402,7 +402,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		Handle h(atomspace->add_node(t, name));
+		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (h)
 		{
@@ -437,7 +437,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	Handle h(atomspace->get_handle(t, name));
+	Handle h(atomspace->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
@@ -520,7 +520,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		Handle h(atomspace->add_link(t, outgoing_set));
+		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
 		// Fish out a truth value, if its there.
 		if (h)
@@ -555,7 +555,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
-	Handle h(atomspace->get_handle(t, outgoing_set));
+	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
