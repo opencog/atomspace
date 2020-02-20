@@ -335,17 +335,15 @@ Handle AtomSpace::add_link(Type t, HandleSeq outgoing)
     if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
-    Handle rh;
+    Handle h(createLink(std::move(outgoing), t));
     try {
-        rh = _atom_table.add(createLink(std::move(outgoing), t));
+        return _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
-        if (_backing_store) {
-           Handle h(createLink(std::move(outgoing), t));
+        if (_backing_store)
            _backing_store->removeAtom(h, false);
-        }
     }
-    return rh;
+    return Handle::UNDEFINED;
 }
 
 Handle AtomSpace::get_link(Type t, HandleSeq outgoing)
