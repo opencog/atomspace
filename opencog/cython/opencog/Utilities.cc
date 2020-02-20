@@ -31,20 +31,20 @@ void opencog::finalize_python()
     global_python_finalize();
 }
 
-Handle opencog::add_node(Type t, const std::string& name){
+Handle opencog::add_node(Type t, std::string name) {
     AtomSpace * atomspace = get_context_atomspace();
     if (atomspace == nullptr){
         throw std::runtime_error("current atomspace is not set");
     }
 
-    return atomspace->add_node(t, name);
+    return atomspace->add_node(t, std::move(name));
 }
 
-Handle opencog::add_link(Type t, const HandleSeq& outgoing){
+Handle opencog::add_link(Type t, HandleSeq outgoing) {
     AtomSpace * atomspace = get_context_atomspace();
     if (atomspace == nullptr){
         throw std::runtime_error("current atomspace is not set");
     }
 
-    return atomspace->add_link(t, outgoing);
+    return atomspace->add_link(t, std::move(outgoing));
 }

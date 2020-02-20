@@ -48,7 +48,7 @@ int AtomSpace_addLink( AtomSpace* this_ptr
         if(!oset[i]) // Atom doesn't exist.
             return -1;
     }
-    *atom_out = this_ptr->add_link(t,oset);
+    *atom_out = this_ptr->add_link(t, std::move(oset));
     return 0;
 }
 
@@ -80,7 +80,7 @@ int AtomSpace_getLink( AtomSpace* this_ptr
     HandleSeq oset;
     for(int i=0;i<size;i++)
         oset.push_back(*outgoing[i]);
-    Handle h = this_ptr->get_link(t,oset);
+    Handle h = this_ptr->get_link(t, std::move(oset));
     *atom_out = h;
 
     return h == Handle::UNDEFINED;

@@ -1325,7 +1325,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			// there isn't any direct way of doing this (at this time).
 			// So hack around this by asking the AtomSpace about it,
 			// instead.
-			Handle hup(hg->getAtomSpace()->get_link(t, oset));
+			Handle hup(hg->getAtomSpace()->get_link(t, std::move(oset)));
 			if (nullptr == hup) return false;
 			return explore_type_branches(parent, hup, clause);
 		}

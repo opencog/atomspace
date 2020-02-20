@@ -50,7 +50,7 @@ void NumberNodeUTest::test_number_equivalence()
 	Handle n3 = an(NUMBER_NODE, "42.0");
 	Handle n4 = an(NUMBER_NODE, "42.00");
 	Handle n5 = an(NUMBER_NODE, "42.000");
-	Handle n6 = an(NUMBER_NODE, n1->get_name());
+	Handle n6 = an(NUMBER_NODE, std::move(std::string(n1->get_name())));
 	TS_ASSERT_EQUALS(n1, n2);
 	TS_ASSERT_EQUALS(n1, n3);
 	TS_ASSERT_EQUALS(n1, n4);
@@ -64,7 +64,7 @@ void NumberNodeUTest::test_number_equivalence()
 	TS_ASSERT_LESS_THAN(ft-42.0, 1e-10);
 
 	Handle f1 = an(NUMBER_NODE, "31415.926");
-	Handle f2 = an(NUMBER_NODE, f1->get_name());
+	Handle f2 = an(NUMBER_NODE, std::move(std::string(f1->get_name())));
 	TS_ASSERT_EQUALS(f1, f2);
 
 	ft = NumberNodeCast(f1)->get_value();

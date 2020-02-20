@@ -438,7 +438,7 @@ public:
 
             Type t = LIST_LINK;
             hs.push_back(ha);
-            atomSpace->add_link(t, hs)->setTruthValue(tv);
+            atomSpace->add_link(t, std::move(hs))->setTruthValue(tv);
         }
     }
 
@@ -638,7 +638,8 @@ public:
             // trying to erase the links below.
 #define NEST 16
             for (int k=0; k<NEST; k++) {
-                Handle hl = atomSpace->add_link(LIST_LINK, hs);
+                Handle hl = atomSpace->add_link(LIST_LINK,
+                                                std::move(HandleSeq(hs)));
                 hs.push_back(hl);
             }
         }

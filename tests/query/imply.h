@@ -37,7 +37,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	HandleSeq hlist;
 	for (const ValuePtr& v: impl.get_result_set())
 		hlist.push_back(HandleCast(v));
-	Handle gl = as->add_link(LIST_LINK, hlist);
+	Handle gl = as->add_link(LIST_LINK, std::move(hlist));
 	return gl;
 }
 
