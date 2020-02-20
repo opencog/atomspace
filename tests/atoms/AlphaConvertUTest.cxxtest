@@ -54,7 +54,7 @@ public:
 	void test_bindlink_ordered();
 	void test_vardecl_free_scope();
 	void test_variable_set_scope();
-	void xtest_inner_scope();
+	void test_inner_scope();
 };
 
 #define NA _asa.add_node
@@ -411,7 +411,7 @@ void AlphaConvertUTest::test_variable_set_scope()
 
 // Test alpha equivalence between 2 scopes containing inner scopes
 // where variable names are changed both on the outer and inner scopes.
-void AlphaConvertUTest::xtest_inner_scope()
+void AlphaConvertUTest::test_inner_scope()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

@@ -183,8 +183,7 @@ ContentHash Link::compute_hash() const
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }
 
 /// Place `this` into the incoming set of each outgoing atom.

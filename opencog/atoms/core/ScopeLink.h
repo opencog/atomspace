@@ -64,9 +64,11 @@ protected:
 	void init_scoped_variables(const Handle& vardecl);
 
 	bool skip_init(Type);
-	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
-	                      Quotation quotation = Quotation()) const;
 	virtual ContentHash compute_hash() const;
+	ContentHash scope_hash(const FreeVariables::IndexMap& index) const;
+	ContentHash term_hash(const Handle&,
+	                      const FreeVariables::IndexMap& index,
+	                      Quotation quotation = Quotation()) const;
 
 public:
 	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);

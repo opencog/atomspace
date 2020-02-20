@@ -243,7 +243,8 @@ public:
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
-        return compute_hash();
+        _content_hash = compute_hash();
+        return _content_hash;
     }
 
     virtual const std::string& get_name() const {
