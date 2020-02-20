@@ -337,8 +337,7 @@ ContentHash ScopeLink::compute_hash() const
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }
 
 /// Recursive helper for computing the content hash correctly for

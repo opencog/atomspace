@@ -104,6 +104,5 @@ ContentHash Node::compute_hash() const
 	hsh &= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }
