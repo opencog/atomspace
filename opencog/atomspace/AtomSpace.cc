@@ -148,12 +148,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (atom_first->is_node())
         {
             atom_second = table_second.getHandle(atom_first->get_type(),
-                        atom_first->get_name());
+                        std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
             atom_second =  table_second.getHandle(atom_first->get_type(),
-                        atom_first->getOutgoingSet());
+                        HandleSeq(atom_first->getOutgoingSet()));
         }
         else
         {
@@ -314,43 +314,43 @@ Handle AtomSpace::add_atom(const Handle& h)
     return rh;
 }
 
-Handle AtomSpace::add_node(Type t, const string& name)
+Handle AtomSpace::add_node(Type t, std::string name)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, name);
+    if (_read_only) return _atom_table.getHandle(t, std::move(name));
 
-    return _atom_table.add(createNode(t, name));
+    return _atom_table.add(createNode(t, std::move(name)));
 }
 
-Handle AtomSpace::get_node(Type t, const string& name)
+Handle AtomSpace::get_node(Type t, string name)
 {
-    return _atom_table.getHandle(t, name);
+    return _atom_table.getHandle(t, std::move(name));
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::add_link(Type t, HandleSeq outgoing)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, outgoing);
+    if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(createLink(outgoing, t));
+        rh = _atom_table.add(createLink(std::move(outgoing), t));
     }
     catch (const DeleteException& ex) {
         if (_backing_store) {
-           Handle h(createLink(outgoing, t));
+           Handle h(createLink(std::move(outgoing), t));
            _backing_store->removeAtom(h, false);
         }
     }
     return rh;
 }
 
-Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::get_link(Type t, HandleSeq outgoing)
 {
-    return _atom_table.getHandle(t, outgoing);
+    return _atom_table.getHandle(t, std::move(outgoing));
 }
 
 void AtomSpace::store_atom(const Handle& h)
