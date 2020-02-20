@@ -37,7 +37,8 @@ namespace opencog
 class ValueOfLink : public FunctionLink
 {
 public:
-	ValueOfLink(const HandleSeq&, Type=VALUE_OF_LINK);
+	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
+
 	ValueOfLink(const ValueOfLink&) = delete;
 	ValueOfLink& operator=(const ValueOfLink&) = delete;
 

@@ -26,8 +26,8 @@
 
 using namespace opencog;
 
-TruthValueOfLink::TruthValueOfLink(const HandleSeq& oset, Type t)
-	: ValueOfLink(oset, t)
+TruthValueOfLink::TruthValueOfLink(const HandleSeq&& oset, Type t)
+	: ValueOfLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, TRUTH_VALUE_OF_LINK))
 	{
@@ -66,8 +66,8 @@ ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 
 // =============================================================
 
-StrengthOfLink::StrengthOfLink(const HandleSeq& oset, Type t)
-	: ValueOfLink(oset, t)
+StrengthOfLink::StrengthOfLink(const HandleSeq&& oset, Type t)
+	: ValueOfLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, STRENGTH_OF_LINK))
 	{
@@ -115,8 +115,8 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 
 // =============================================================
 
-ConfidenceOfLink::ConfidenceOfLink(const HandleSeq& oset, Type t)
-	: ValueOfLink(oset, t)
+ConfidenceOfLink::ConfidenceOfLink(const HandleSeq&& oset, Type t)
+	: ValueOfLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, CONFIDENCE_OF_LINK))
 	{

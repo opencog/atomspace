@@ -68,7 +68,7 @@ protected:
 
 public:
 	// Sadly, need to make this public, else the factory code fails.
-	FunctionLink(const HandleSeq& oset, Type = FUNCTION_LINK);
+	FunctionLink(const HandleSeq&&, Type = FUNCTION_LINK);
 
 	FunctionLink(const FunctionLink&) = delete;
 	FunctionLink& operator=(const FunctionLink&) = delete;

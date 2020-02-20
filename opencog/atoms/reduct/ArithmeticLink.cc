@@ -30,8 +30,8 @@
 
 using namespace opencog;
 
-ArithmeticLink::ArithmeticLink(const HandleSeq& oset, Type t)
-    : FoldLink(oset, t)
+ArithmeticLink::ArithmeticLink(const HandleSeq&& oset, Type t)
+    : FoldLink(std::move(oset), t)
 {
 	init();
 }

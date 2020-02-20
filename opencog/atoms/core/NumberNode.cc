@@ -66,8 +66,8 @@ std::vector<double> NumberNode::to_vector(const std::string& str)
 // ============================================================
 // Constructors
 
-NumberNode::NumberNode(Type t, const std::string& s)
-	: Node(t, s)
+NumberNode::NumberNode(Type t, const std::string&& s)
+	: Node(t, std::move(s))
 {
 	// Convert to number and back to string to avoid miscompares.
 	_value = to_vector(s);
@@ -77,8 +77,8 @@ NumberNode::NumberNode(Type t, const std::string& s)
 		"Bad NumberNode constructor!");
 }
 
-NumberNode::NumberNode(const std::string& s)
-	: Node(NUMBER_NODE, s)
+NumberNode::NumberNode(const std::string&& s)
+	: Node(NUMBER_NODE, std::move(s))
 {
 	_value = to_vector(s);
 	_name = vector_to_plain(_value);

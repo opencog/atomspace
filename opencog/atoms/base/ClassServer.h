@@ -136,7 +136,7 @@ Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
    Handle h(create##CNAME(base->get_type(),                       \
-            std::move(base->get_name())));                        \
+                          std::move(base->get_name())));          \
    return h;                                                      \
 }                                                                 \
                                                                   \

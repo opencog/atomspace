@@ -53,8 +53,8 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	}
 }
 
-ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,

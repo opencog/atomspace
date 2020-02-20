@@ -48,8 +48,8 @@ RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
-	: ScopeLink(oset, t), _silent(false)
+RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
+	: ScopeLink(std::move(oset), t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();
@@ -430,7 +430,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
 	                                   quotation, needless_quotation,
 	                                   clause_root);
-	Handle ch = createLink(chs, h->get_type());
+	Handle ch = createLink(std::move(chs), h->get_type());
 	ch->copyValues(h);
 	return ch;
 }

@@ -34,7 +34,8 @@ class SatisfactionLink : public PatternLink
 protected:
 	void init(void);
 public:
-	SatisfactionLink(const HandleSeq&, Type=SATISFACTION_LINK);
+	SatisfactionLink(const HandleSeq&&, Type=SATISFACTION_LINK);
+
 	SatisfactionLink(const SatisfactionLink&) = delete;
 	SatisfactionLink& operator=(const SatisfactionLink&) = delete;
 

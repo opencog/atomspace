@@ -47,7 +47,7 @@ protected:
 	void check_schema(const Handle& schema) const;
 
 public:
-	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
+	ExecutionOutputLink(const HandleSeq&&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const ExecutionOutputLink&) = delete;
 	ExecutionOutputLink& operator=(const ExecutionOutputLink&) = delete;

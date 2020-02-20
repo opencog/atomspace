@@ -38,8 +38,8 @@ void VariableSet::throw_if_not_variable_set(Type t) const
 	}
 }
 
-VariableSet::VariableSet(const HandleSeq& vardecls, Type t)
-	: UnorderedLink(vardecls, t), _variables(vardecls, false)
+VariableSet::VariableSet(const HandleSeq&& vardecls, Type t)
+	: UnorderedLink(std::move(vardecls), t), _variables(_outgoing, false)
 {
 	throw_if_not_variable_set(t);
 }

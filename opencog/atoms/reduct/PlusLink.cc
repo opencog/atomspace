@@ -17,8 +17,8 @@ using namespace opencog;
 
 Handle PlusLink::zero;
 
-PlusLink::PlusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+PlusLink::PlusLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }

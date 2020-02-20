@@ -30,8 +30,8 @@ void ImplicationScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
-ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq, Type t)
-	: ScopeLink(hseq, t)
+ImplicationScopeLink::ImplicationScopeLink(const HandleSeq&& hseq, Type t)
+	: ScopeLink(std::move(hseq), t)
 {
 	init();
 }

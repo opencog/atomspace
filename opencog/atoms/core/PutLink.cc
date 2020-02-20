@@ -28,8 +28,8 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset, Type t)
-    : PrenexLink(oset, t)
+PutLink::PutLink(const HandleSeq&& oset, Type t)
+    : PrenexLink(std::move(oset), t)
 {
 	init();
 }

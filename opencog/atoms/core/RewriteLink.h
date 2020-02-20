@@ -113,7 +113,7 @@ protected:
 	static bool is_logical_connector(const Handle&);
 
 public:
-	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
+	RewriteLink(const HandleSeq&&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
 	RewriteLink(const RewriteLink &) = delete;
 	RewriteLink& operator=(const RewriteLink &) = delete;

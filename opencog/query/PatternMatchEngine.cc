@@ -813,7 +813,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		glob_grd[glob] = glob_seq.size();
 		_glob_state[osp] = {glob_grd, glob_pos_stack};
 
-		Handle glp(createLink(glob_seq, LIST_LINK));
+		Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
 
 		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})

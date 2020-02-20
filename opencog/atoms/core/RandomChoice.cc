@@ -31,8 +31,8 @@ using namespace opencog;
 
 static MT19937RandGen randy(43);
 
-RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+RandomChoiceLink::RandomChoiceLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, RANDOM_CHOICE_LINK))
 	{

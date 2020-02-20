@@ -34,7 +34,8 @@ class DualLink : public PatternLink
 protected:
 	void init(void);
 public:
-	DualLink(const HandleSeq&, Type=DUAL_LINK);
+	DualLink(const HandleSeq&&, Type=DUAL_LINK);
+
 	DualLink(const DualLink&) = delete;
 	DualLink& operator=(const DualLink&) = delete;
 

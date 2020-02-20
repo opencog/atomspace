@@ -53,8 +53,8 @@ VariableList::VariableList(const Handle& vardecl)
 {
 }
 
-VariableList::VariableList(const HandleSeq& oset, Type t)
-	: Link(oset, t), _variables(oset, true)
+VariableList::VariableList(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t), _variables(_outgoing, true)
 {
 	throw_if_not_variable_list(t);
 }

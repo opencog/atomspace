@@ -27,8 +27,8 @@
 
 using namespace opencog;
 
-ArityLink::ArityLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+ArityLink::ArityLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, ARITY_LINK))
 	{

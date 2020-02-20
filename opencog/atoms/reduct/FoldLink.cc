@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-FoldLink::FoldLink(const HandleSeq& oset, Type t)
-    : FunctionLink(oset, t)
+FoldLink::FoldLink(const HandleSeq&& oset, Type t)
+    : FunctionLink(std::move(oset), t)
 {
 	init();
 }

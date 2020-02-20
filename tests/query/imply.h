@@ -20,11 +20,11 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	HandleSeq vars(fv.varset.begin(), fv.varset.end());
 
 	// Stuff the variables into a proper variable list.
-	Handle hvars(createLink(vars, VARIABLE_LIST));
+	Handle hvars(createLink(std::move(vars), VARIABLE_LIST));
 
 	HandleSeq oset = {hvars, hclauses, himplicand};
 
-	BindLinkPtr bl(createBindLink(oset));
+	BindLinkPtr bl(createBindLink(std::move(oset)));
 
 	// Now perform the search.
 	DefaultImplicator impl(as);
@@ -37,7 +37,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	HandleSeq hlist;
 	for (const ValuePtr& v: impl.get_result_set())
 		hlist.push_back(HandleCast(v));
-	Handle gl = as->add_link(LIST_LINK,hlist);
+	Handle gl = as->add_link(LIST_LINK, hlist);
 	return gl;
 }
 

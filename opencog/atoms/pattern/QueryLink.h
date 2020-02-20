@@ -45,9 +45,10 @@ protected:
 	virtual ValueSet do_execute(AtomSpace*, bool silent);
 
 public:
-	QueryLink(const HandleSeq&, Type=QUERY_LINK);
+	QueryLink(const HandleSeq&&, Type=QUERY_LINK);
 	QueryLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	QueryLink(const Handle& body, const Handle& rewrite);
+
 	QueryLink(const QueryLink&) = delete;
 	QueryLink& operator=(const QueryLink&) = delete;
 

@@ -37,8 +37,8 @@ void FunctionLink::init(void)
 	FreeLink::init();
 }
 
-FunctionLink::FunctionLink(const HandleSeq& oset, Type t)
-    : FreeLink(oset, t)
+FunctionLink::FunctionLink(const HandleSeq&& oset, Type t)
+    : FreeLink(std::move(oset), t)
 {
 	check_type(t);
 	init();

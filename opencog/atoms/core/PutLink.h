@@ -82,7 +82,7 @@ protected:
 	Handle do_reduce(void) const;
 
 public:
-	PutLink(const HandleSeq& oset, Type=PUT_LINK);
+	PutLink(const HandleSeq&&, Type=PUT_LINK);
 	PutLink(const PutLink&) = delete;
 	PutLink& operator=(const PutLink&) = delete;
 	virtual ~PutLink() {}

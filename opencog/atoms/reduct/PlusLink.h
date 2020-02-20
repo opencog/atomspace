@@ -31,7 +31,8 @@ protected:
 
 public:
 	PlusLink(const Handle& a, const Handle& b);
-	PlusLink(const HandleSeq&, Type=PLUS_LINK);
+	PlusLink(const HandleSeq&&, Type=PLUS_LINK);
+
 	PlusLink(const PlusLink&) = delete;
 	PlusLink& operator=(const PlusLink&) = delete;
 

@@ -68,8 +68,8 @@ bool ScopeLink::skip_init(Type t)
 	return false;
 }
 
-ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	if (skip_init(t)) return;
 	init();

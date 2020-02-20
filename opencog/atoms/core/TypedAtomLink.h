@@ -50,7 +50,7 @@ class TypedAtomLink : public UniqueLink
 protected:
 	void init();
 public:
-	TypedAtomLink(const HandleSeq&, Type=TYPED_ATOM_LINK);
+	TypedAtomLink(const HandleSeq&&, Type=TYPED_ATOM_LINK);
 	TypedAtomLink(const Handle& alias, const Handle& body);
 
 	TypedAtomLink(const TypedAtomLink&) = delete;

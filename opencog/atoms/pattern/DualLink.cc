@@ -62,8 +62,8 @@ void DualLink::init(void)
 	make_term_trees();
 }
 
-DualLink::DualLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+DualLink::DualLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }

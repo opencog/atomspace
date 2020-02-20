@@ -53,7 +53,7 @@ namespace opencog
 class LambdaLink : public PrenexLink
 {
 public:
-	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
+	LambdaLink(const HandleSeq&&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const LambdaLink &) = delete;
 	LambdaLink& operator=(const LambdaLink &) = delete;

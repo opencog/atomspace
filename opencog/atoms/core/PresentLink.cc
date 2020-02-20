@@ -56,8 +56,8 @@ void PresentLink::init(void)
 	_outgoing.swap(uniq);
 }
 
-PresentLink::PresentLink(const HandleSeq& oset, Type t)
-	: UnorderedLink(oset, t)
+PresentLink::PresentLink(const HandleSeq&& oset, Type t)
+	: UnorderedLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, PRESENT_LINK))
 	{

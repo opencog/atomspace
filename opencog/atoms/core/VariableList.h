@@ -54,8 +54,9 @@ protected:
 
 	void throw_if_not_variable_list(Type t) const;
 public:
-	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
+	VariableList(const HandleSeq&& vardecls, Type=VARIABLE_LIST);
 	VariableList(const Handle& hvardecls);
+
 	VariableList(const VariableList&) = delete;
 	VariableList& operator=(const VariableList&) = delete;
 

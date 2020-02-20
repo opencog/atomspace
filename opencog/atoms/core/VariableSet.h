@@ -45,7 +45,7 @@ protected:
 	void throw_if_not_variable_set(Type t) const;
 	
 public:
-	VariableSet(const HandleSeq& vardecls, Type=VARIABLE_SET);
+	VariableSet(const HandleSeq&& vardecls, Type=VARIABLE_SET);
 	VariableSet(const Handle& hvardecls);
 	VariableSet(const VariableSet&) = delete;
 	VariableSet& operator=(const VariableSet&) = delete;

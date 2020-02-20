@@ -40,8 +40,8 @@ void SatisfactionLink::init(void)
 	}
 }
 
-SatisfactionLink::SatisfactionLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+SatisfactionLink::SatisfactionLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }

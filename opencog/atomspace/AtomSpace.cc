@@ -323,7 +323,7 @@ Handle AtomSpace::add_node(Type t, std::string name)
     return _atom_table.add(createNode(t, std::move(name)));
 }
 
-Handle AtomSpace::get_node(Type t, string name)
+Handle AtomSpace::get_node(Type t, std::string name)
 {
     return _atom_table.getHandle(t, std::move(name));
 }

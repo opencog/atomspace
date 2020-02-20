@@ -82,7 +82,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 		Handle h(_tlbuf.getAtom(p->uuid));
 		if (h) return h;
 
-		Handle node(createNode(p->type, p->name));
+		Handle node(createNode(p->type, std::move(p->name)));
 		_tlbuf.addAtom(node, p->uuid);
 		_num_rec_nodes ++;
 		return node;
@@ -170,7 +170,7 @@ Handle SQLAtomStorage::getNode(Type t, const char * str)
 Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 {
 	// First, check to see if we already know this Link.
-	Handle link(createLink(hseq, t));
+	Handle link(createLink(std::move(HandleSeq(hseq)), t));
 	UUID uuid = _tlbuf.getUUID(link);
 	if (TLB::INVALID_UUID != uuid)
 		return _tlbuf.getAtom(uuid);

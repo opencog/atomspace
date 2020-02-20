@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
-    : FreeLink(oset, t)
+EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
+    : FreeLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, EVALUATION_LINK))
 		throw RuntimeException(TRACE_INFO,
@@ -674,7 +674,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle lh(createLink(cargs, LIST_LINK));
+	Handle lh(createLink(std::move(cargs), LIST_LINK));
 	Handle args(force_execute(as, lh, silent));
 
 	// Get the schema name.
@@ -865,7 +865,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				goset.emplace_back(pl->get_vardecl());
 			goset.emplace_back(pl->get_body());
 			goset.emplace_back(gvals);
-			pl = createPutLink(goset);
+			pl = createPutLink(std::move(goset));
 		}
 		// Step (2)
 		Handle red = HandleCast(pl->execute(as));

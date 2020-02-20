@@ -68,8 +68,8 @@ void CondLink::init(void)
 	}
 }
 
-CondLink::CondLink(const HandleSeq &oset, Type t)
-		: FunctionLink(oset, t)
+CondLink::CondLink(const HandleSeq &&oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, COND_LINK)) {
 		const std::string &tname = nameserver().getTypeName(t);

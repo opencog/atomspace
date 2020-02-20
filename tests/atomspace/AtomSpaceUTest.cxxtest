@@ -807,19 +807,19 @@ public:
     // Helpers for testQuoteLink
     Handle make_node(Type type, std::string name)
     {
-        return Handle(createNode(type, name));
+        return createNode(type, std::move(name));
     }
     Handle make_link(Type type, Handle h)
     {
-        return Handle(createLink(type, h));
+        return createLink(type, h);
     }
     Handle make_link(Type type, Handle h1, Handle h2)
     {
-        return Handle(createLink(type, h1, h2));
+        return createLink(type, h1, h2);
     }
     Handle make_link(Type type, Handle h1, Handle h2, Handle h3)
     {
-        return Handle(createLink(type, h1, h2, h3));
+        return createLink(type, h1, h2, h3);
     }
 
     void testQuoteLink()
@@ -866,19 +866,19 @@ public:
     // Helpers for testPreconstructedQuote
     Handle factory_node(Type type, std::string name)
     {
-        return classserver().factory(Handle(createNode(type, name)));
+        return classserver().factory(createNode(type, std::move(name)));
     }
     Handle factory_link(Type type, Handle h)
     {
-        return classserver().factory(Handle(createLink(type, h)));
+        return classserver().factory(createLink(type, h));
     }
     Handle factory_link(Type type, Handle h1, Handle h2)
     {
-        return classserver().factory(Handle(createLink(type, h1, h2)));
+        return classserver().factory(createLink(type, h1, h2));
     }
     Handle factory_link(Type type, Handle h1, Handle h2, Handle h3)
     {
-        return classserver().factory(Handle(createLink(type, h1, h2, h3)));
+        return classserver().factory(createLink(type, h1, h2, h3));
     }
 
     // Create atom structures not in any atomspace, then add the

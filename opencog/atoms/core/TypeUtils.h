@@ -207,7 +207,7 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl);
  * element, return a VariableList if ordered is true, or a VariableSet
  * if ordered is false.
  */
-Handle gen_vardecl(const HandleSeq& varlist, bool ordered=true);
+Handle gen_vardecl(const HandleSeq&& varlist, bool ordered=true);
 
 /** @}*/
 }

@@ -379,14 +379,13 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 	return vardecl;
 }
 
-Handle gen_vardecl(const HandleSeq& varlist, bool ordered)
+Handle gen_vardecl(const HandleSeq&& varlist, bool ordered)
 {
-	Handle vardecl;
 	if (1 == varlist.size())
 		return varlist[0];
 	else
-		return ordered ? Handle(createVariableList(varlist))
-			: Handle(createVariableSet(varlist));
+		return ordered ? Handle(createVariableList(std::move(varlist)))
+			: Handle(createVariableSet(std::move(varlist)));
 }
 
 } // ~namespace opencog

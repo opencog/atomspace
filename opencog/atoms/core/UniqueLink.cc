@@ -59,8 +59,8 @@ void UniqueLink::init(bool allow_open)
 	}
 }
 
-UniqueLink::UniqueLink(const HandleSeq& oset, Type type)
-	: FreeLink(oset, type)
+UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
+	: FreeLink(std::move(oset), type)
 {
 	if (not nameserver().isA(type, UNIQUE_LINK))
 	{
