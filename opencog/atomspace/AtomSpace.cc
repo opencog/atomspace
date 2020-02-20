@@ -323,7 +323,7 @@ Handle AtomSpace::add_node(Type t, std::string&& name)
     return _atom_table.add(createNode(t, std::move(name)));
 }
 
-Handle AtomSpace::get_node(Type t, std::string&& name)
+Handle AtomSpace::get_node(Type t, std::string&& name) const
 {
     return _atom_table.getHandle(t, std::move(name));
 }
@@ -346,7 +346,7 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing)
+Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
     return _atom_table.getHandle(t, std::move(outgoing));
 }
