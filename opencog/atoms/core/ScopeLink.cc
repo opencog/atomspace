@@ -371,8 +371,10 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	if (h->is_node()) return h->get_hash();
 
 	// If it is a scope, call specialized scope hash with the index
-	// completemented with the new variables of that scope, hiding the
-	// old ones if necessary.
+	// complemented with the new variables of that scope, hiding the
+	// old ones if necessary.  This fixes an issue regarding
+	// alpha-equivalence of scopes containing inner scopes, see
+	// https://github.com/opencog/atomspace/issues/2507
 	if (nameserver().isA(t, SCOPE_LINK) and quotation.is_unquoted())
 	{
 		FreeVariables::IndexMap new_index(index);
