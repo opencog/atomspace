@@ -127,54 +127,20 @@ void DisconnectedUTest::test_variables(void)
 
 	eval->eval("(load-from-path \"tests/query/disco-vars.scm\")");
 
-#if DO_NOT_TEST_THIS_IS_NOW_LEGAL
-	// We expect to catch an error here. ------------------------------
-	bool caught = false;
-	try
-	{
-		eval->eval_h("(B)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
-#endif
+	// We do NOT expect to catch an error here.
+	Handle h = eval->eval_h("(B)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
-	// We expect to catch an error here. ------------------------------
-	bool caught = false;
-	try
-	{
-		eval->eval_h("(Ba)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	h = eval->eval_h("(Ba)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
-	// We expect to catch an error here. ------------------------------
-	caught = false;
-	try
-	{
-		eval->eval_h("(Bu)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	h = eval->eval_h("(Bu)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Similar to above, except that the stuff is build up in C++ not in
+// Similar to above, except that the stuff is built up in C++ not in
 // scheme.  See bug #172.
 void DisconnectedUTest::test_cvariables(void)
 {
