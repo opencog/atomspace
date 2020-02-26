@@ -96,10 +96,11 @@ void PatternLink::common_init(void)
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
-	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
+
+	_num_comps = _components.size();
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -812,10 +813,9 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 
 /// Make sure that every variable appears in some groundable clause.
 /// Variables have to be grounded before an evaluatable clause
-/// containing them can be evaluated.  If they can never be grounded,
-/// then any clauses in which they appear cannot ever be evaluated,
-/// leading to an undefined condition.  So, explicitly check and throw
-/// an error if a pattern is ill-formed.
+/// containing them can be evaluated. Add disjoint components for
+/// any variable that wasn't explicitly specified in a groundable
+/// clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
                                        const HandleSetSeq& compvars)
 {
@@ -824,14 +824,19 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
-	// Is every variable in some component? If not, then throw.
+	// Is every variable in some component? If not, then create
+	// a new component holding only that variable. Implicitly,
+	// this new component becomes `(PresentLink (Variable "foo"))`.
+	// We don't explicitly create the PresentLink cause we don't
+	// need to; that would dirty up the atomspace, and it's already
+	// handled automatically.
 	for (const Handle& v : vars)
 	{
 		auto it = vunion.find(v);
 		if (vunion.end() == it)
 		{
-			throw InvalidParamException(TRACE_INFO,
-				"Variable not groundable: %s\n", v->to_string().c_str());
+			_components.push_back(HandleSeq({v}));
+			_component_vars.push_back(HandleSet({v}));
 		}
 	}
 }
