@@ -18,7 +18,8 @@ class TestExceptions(unittest.TestCase):
         # Hackery due to broken test environment.
         rv = scheme_eval(self.space, '(format #t "CWD is ~A\n" (getcwd))')
         print("The scheme cwd is " + str(rv))
-        scheme_eval(self.space, '(add-to-load-path ".")')
+        scheme_eval(self.space, '(add-to-load-path "build/opencog/scm")')
+        scheme_eval(self.space, '(add-to-load-path "opencog/scm")')
         rv = scheme_eval(self.space, '(format #t "Loadpath is ~A\n" %load-path)')
         print("The scheme loadpath is " + str(rv))
 
