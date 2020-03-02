@@ -12,7 +12,9 @@ def return_concept(atom):
 __main__.return_concept = return_concept
 
 
-class TestExecutionOutputLink(unittest.TestCase):
+# All iof these tests try to make sure that python doesn't
+# crash when a C++ exception is thrown.
+class TestExceptions(unittest.TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
@@ -22,8 +24,14 @@ class TestExecutionOutputLink(unittest.TestCase):
         finalize_opencog()
         del self.space
 
-    # This test is trying to make sure that python doesn't
-    # crash when a C++ exception is thrown.
+    def test_bogus_get(self):
+        atom1 = ConceptNode("atom1")
+        try:
+           GetLink(atom1, atom1, atom1)
+           self.assertFalse("call should fail")
+        except RuntimeError as e:
+           self.assertTrue("RuntimeError" in str(e))
+
     def test_bogus_evaluation(self):
         atom1 = ConceptNode("atom1")
         eval_link = EvaluationLink(GroundedPredicateNode("py:foobar"),
@@ -32,4 +40,4 @@ class TestExecutionOutputLink(unittest.TestCase):
            evaluate_atom(self.space, eval_link)
            self.assertFalse("call should fail")
         except RuntimeError as e:
-           self.assertTrue("bad evaluation link" in str(e))
+           self.assertTrue("RuntimeError" in str(e))
