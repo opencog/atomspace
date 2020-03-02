@@ -58,4 +58,14 @@ class TestExceptions(unittest.TestCase):
            print("The exception message is " + str(e))
            self.assertTrue("Expecting" in str(e))
 
+    def test_bogus_path(self):
+        try:
+           code = '''(load-from-path "/blargle/Betelgeuse")'''
+           scheme_eval(self.space, code)
+           self.assertFalse("call should fail")
+        except RuntimeError as e:
+           # Use `nosetests3 --nocapture` to see this print...
+           print("The exception message is " + str(e))
+           self.assertTrue("Unable to find" in str(e))
+
 # ===================== END OF FILE =================
