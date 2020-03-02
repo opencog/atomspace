@@ -30,7 +30,9 @@ class TestExceptions(unittest.TestCase):
            GetLink(atom1, atom1, atom1)
            self.assertFalse("call should fail")
         except RuntimeError as e:
-           self.assertTrue("RuntimeError" in str(e))
+           # Use `nosetests3 --nocapture` to see this print...
+           print("The exception message is " + str(e))
+           self.assertTrue("Expecting" in str(e))
 
     def test_bogus_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -40,4 +42,6 @@ class TestExceptions(unittest.TestCase):
            evaluate_atom(self.space, eval_link)
            self.assertFalse("call should fail")
         except RuntimeError as e:
-           self.assertTrue("RuntimeError" in str(e))
+           # Use `nosetests3 --nocapture` to see this print...
+           print("The exception message is " + str(e))
+           self.assertTrue("not found in module" in str(e))
