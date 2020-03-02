@@ -2,6 +2,8 @@ import unittest
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 from opencog.bindlink import evaluate_atom
+from opencog.scheme_wrapper import scheme_eval
+
 import __main__
 
 
@@ -12,7 +14,7 @@ def return_concept(atom):
 __main__.return_concept = return_concept
 
 
-# All iof these tests try to make sure that python doesn't
+# All of these tests try to make sure that python doesn't
 # crash when a C++ exception is thrown.
 class TestExceptions(unittest.TestCase):
 
@@ -45,3 +47,15 @@ class TestExceptions(unittest.TestCase):
            # Use `nosetests3 --nocapture` to see this print...
            print("The exception message is " + str(e))
            self.assertTrue("not found in module" in str(e))
+
+    def test_bogus_scheme(self):
+        try:
+           code = '''(Get (Concept "a") (Concept "a") (Concept "a"))'''
+           scheme_eval(self.space, code)
+           self.assertFalse("call should fail")
+        except RuntimeError as e:
+           # Use `nosetests3 --nocapture` to see this print...
+           print("The exception message is " + str(e))
+           self.assertTrue("Expecting" in str(e))
+
+# ===================== END OF FILE =================
