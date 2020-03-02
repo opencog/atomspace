@@ -7,13 +7,6 @@ from opencog.scheme_wrapper import scheme_eval
 import __main__
 
 
-def return_concept(atom):
-    return atom.atomspace.add_node(types.ConceptNode, "test")
-
-
-__main__.return_concept = return_concept
-
-
 # All of these tests try to make sure that python doesn't
 # crash when a C++ exception is thrown.
 class TestExceptions(unittest.TestCase):
@@ -21,6 +14,13 @@ class TestExceptions(unittest.TestCase):
     def setUp(self):
         self.space = AtomSpace()
         initialize_opencog(self.space)
+
+        # Hackery due to broken test environment.
+        rv = scheme_eval(self.space, '(format #t "CWD is ~A\n" (getcwd))')
+        print("The scheme cwd is " + str(rv))
+        scheme_eval(self.space, '(add-to-load-path ".")')
+        rv = scheme_eval(self.space, '(format #t "Loadpath is ~A\n" %load-path)')
+        print("The scheme loadpath is " + str(rv))
 
     def tearDown(self):
         finalize_opencog()
