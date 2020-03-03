@@ -2390,12 +2390,11 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	if (_pat->always.size() == 0)
 		return _pmc.grounding(var_soln, term_soln);
 
-	// If we are here, we need to record groundings, until later,
-	// when we find out if the for-all clauses were satsified.
-
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
 	_var_ground_cache.push_back(var_soln);
 	_term_ground_cache.push_back(term_soln);
 
