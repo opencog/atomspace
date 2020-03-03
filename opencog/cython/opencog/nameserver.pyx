@@ -70,8 +70,8 @@ def get_refreshed_types():
 cdef create_python_value_from_c_value(cValuePtr& value):
     if value.get() == NULL:
         return None
-    type = value.get().get_type()
-    type_name = get_type_name(type)
+    value_type = value.get().get_type()
+    type_name = get_type_name(value_type)
     ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
 
     thismodule = sys.modules[__name__]
@@ -80,11 +80,11 @@ cdef create_python_value_from_c_value(cValuePtr& value):
         return clazz(ptr_holder = ptr_holder)
 
     # For handling the children types of TruthValue.
-    if is_a(type, types.TruthValue):
+    if is_a(value_type, types.TruthValue):
         return TruthValue(ptr_holder = ptr_holder)
 
     # For handling the children types of Atom.
-    if is_a(type, types.Atom):
+    if is_a(value_type, types.Atom):
         return Atom(ptr_holder = ptr_holder)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
