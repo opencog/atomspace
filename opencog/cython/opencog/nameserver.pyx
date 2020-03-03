@@ -80,12 +80,13 @@ cdef create_python_value_from_c_value(cValuePtr& value):
         return clazz(ptr_holder = ptr_holder)
 
     # For handling the children types of TruthValue.
-    if is_a(get_type(type_name), types.TruthValue):
+    if is_a(type, types.TruthValue):
         return TruthValue(ptr_holder = ptr_holder)
 
     # For handling the children types of Atom.
-    if is_a(get_type(type_name), types.Atom):
+    if is_a(type, types.Atom):
         return Atom(ptr_holder = ptr_holder)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
 
+# ========================== END OF FILE =========================
