@@ -1960,7 +1960,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		joiner = next_joint;
 		curr_root = next_clause;
 
-		DO_LOG({logmsg("Next optional clause is", curr_root);})
 		if (nullptr == curr_root)
 		{
 			DO_LOG({logger().fine("==================== FINITO BANDITO!");
@@ -1969,6 +1968,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
+			DO_LOG({logmsg("Next optional clause is", curr_root);})
+
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
@@ -2389,12 +2390,11 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	if (_pat->always.size() == 0)
 		return _pmc.grounding(var_soln, term_soln);
 
-	// If we are here, we need to record groundings, until later,
-	// when we find out if the for-all clauses were satsified.
-
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
 	_var_ground_cache.push_back(var_soln);
 	_term_ground_cache.push_back(term_soln);
 
@@ -2789,10 +2789,11 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
+		// AbsentLink's won't be grounded...
 		if (not m->second)
 		{
 			Handle mf(m->first);
-			logmsg("ERROR: ungrounded clause", mf);
+			logmsg("Ungrounded clause", mf);
 			continue;
 		}
 		std::string str = m->second->to_short_string();
