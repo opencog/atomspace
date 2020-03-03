@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
 import os
 
 
