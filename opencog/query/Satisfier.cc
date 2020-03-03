@@ -47,10 +47,10 @@ bool Satisfier::grounding(const GroundingMap &var_soln,
 		HandleSeq vargnds;
 		for (const Handle& hv : _varseq)
 		{
-			// Optional clauses appearing in a GetLink may have
+			// Optional clauses (e.g. AbsentLink) may have
 			// variables in them that are not grounded.
-			// (e.g. AbsentLink). Those variables won't have
-			// a grounding; this will cause std::map::at to throw.
+			// Those variables won't have a grounding;
+			// this will cause std::map::at to throw.
 			try
 			{
 				vargnds.push_back(var_soln.at(hv));
