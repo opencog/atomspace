@@ -2789,10 +2789,11 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
+		// AbsentLink's won't be grounded...
 		if (not m->second)
 		{
 			Handle mf(m->first);
-			logmsg("ERROR: ungrounded clause", mf);
+			logmsg("Ungrounded clause", mf);
 			continue;
 		}
 		std::string str = m->second->to_short_string();
