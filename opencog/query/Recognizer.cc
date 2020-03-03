@@ -28,8 +28,8 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
 #define dbgprt(f, varargs...)

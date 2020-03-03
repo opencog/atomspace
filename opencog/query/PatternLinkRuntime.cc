@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+// #define QDEBUG 1
 
 /* ================================================================= */
 /// A pass-through class, which wraps a regular callback, but captures
@@ -160,7 +160,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
-#ifdef DEBUG
+#ifdef QDEBUG
 		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
@@ -213,7 +213,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
 	}
-#ifdef DEBUG
+#ifdef QDEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
 #endif
 
@@ -330,7 +330,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		pmcb.set_pattern(_variables, _pat);
 		bool found = pmcb.initiate_search(pmcb);
 
-#ifdef DEBUG
+#ifdef QDEBUG
 		logger().fine("================= Done with Search =================");
 #endif
 		found = pmcb.search_finished(found);
@@ -350,7 +350,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-#ifdef DEBUG
+#ifdef QDEBUG
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
@@ -371,7 +371,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-#ifdef DEBUG
+#ifdef QDEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
 		              << " of " << _num_comps << ": ===========\n";
 #endif
@@ -400,7 +400,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			// to try to solve the other components, their product
 			// will have no solution.
 			if (gcb._term_groundings.empty()) {
-#ifdef DEBUG
+#ifdef QDEBUG
 				logger().fine("No solution for this component. "
 				              "Abort search as no product solution may exist.");
 #endif
@@ -413,7 +413,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 
 	// And now, try grounding each of the virtual clauses.
-#ifdef DEBUG
+#ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();

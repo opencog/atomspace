@@ -39,8 +39,8 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
@@ -954,7 +954,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// Plain-old, olde-fashioned sequential search loop.
 	// This works.
 
-#ifdef DEBUG
+#ifdef QDEBUG
 	size_t i = 0, hsz = _search_set.size();
 #endif
 

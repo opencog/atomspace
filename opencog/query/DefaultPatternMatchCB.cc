@@ -33,8 +33,8 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)

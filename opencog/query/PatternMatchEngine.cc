@@ -45,20 +45,20 @@ using namespace opencog;
  */
 /* ======================================================== */
 
-// The macro POPSTK has an OC_ASSERT when DEBUG is defined, so we keep
+// The macro POPSTK has an OC_ASSERT when QDEBUG is defined, so we keep
 // that #define around, although it's not clear why that OC_ASSERT
 // wouldn't be kept no matter what (it's not like it's gonna take up a
 // lot of resources).
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
 #endif
 
 
-#ifdef DEBUG
+#ifdef QDEBUG
 static inline void log(const Handle& h)
 {
 	LAZY_LOG_FINE << h->to_short_string();
@@ -80,7 +80,7 @@ static inline void log(const Handle& h) {}
 /* ======================================================== */
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
-#ifdef DEBUG
+#ifdef QDEBUG
    #define POPSTK(stack,soln) {         \
       OC_ASSERT(not stack.empty(),      \
            "Unbalanced stack " #stack); \
@@ -454,7 +454,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		_perm_odo.clear();
 
 	// If we are here, we've got possibilities to explore.
-#ifdef DEBUG
+#ifdef QDEBUG
 	int num_perms = 0;
 	if (logger().is_fine_enabled())
 	{
@@ -2730,7 +2730,7 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 
 /* ======================================================== */
 
-#ifdef DEBUG
+#ifdef QDEBUG
 void PatternMatchEngine::print_solution(
 	const GroundingMap &vars,
 	const GroundingMap &clauses)
