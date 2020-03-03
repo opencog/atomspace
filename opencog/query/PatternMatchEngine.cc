@@ -1960,7 +1960,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		joiner = next_joint;
 		curr_root = next_clause;
 
-		DO_LOG({logmsg("Next optional clause is", curr_root);})
 		if (nullptr == curr_root)
 		{
 			DO_LOG({logger().fine("==================== FINITO BANDITO!");
@@ -1969,6 +1968,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
+			DO_LOG({logmsg("Next optional clause is", curr_root);})
+
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
