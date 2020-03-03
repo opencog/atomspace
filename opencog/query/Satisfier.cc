@@ -49,13 +49,16 @@ bool Satisfier::grounding(const GroundingMap &var_soln,
 		{
 			// Optional clauses appearing in a GetLink may have
 			// variables in them that are not grounded.
-			// (e.g. AbsentLink). Variables in them won't have
+			// (e.g. AbsentLink). Those variables won't have
 			// a grounding; this will cause std::map::at to throw.
 			try
 			{
 				vargnds.push_back(var_soln.at(hv));
 			}
-			catch (...) {}
+			catch (...)
+			{
+				vargnds.push_back(hv);
+			}
 		}
 		_ground = createLink(std::move(vargnds), LIST_LINK);
 	}
@@ -149,13 +152,16 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 	for (const Handle& hv : _varseq)
 	{
 		// Optional clauses (e.g. AbsentLink) may have variables
-		// in them that are not grounded. Variables in them won't
+		// in them that are not grounded. Those variables won't
 		// have a grounding; this will cause std::map::at to throw.
 		try
 		{
 			vargnds.push_back(var_soln.at(hv));
 		}
-		catch (...) {}
+		catch (...)
+		{
+			vargnds.push_back(hv);
+		}
 	}
 	_satisfying_set.emplace(createLink(std::move(vargnds), LIST_LINK));
 
