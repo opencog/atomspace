@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/VariableList.h
+ * opencog/atoms/core/VariableSet.h
  *
  * Copyright (C) 2019 SingularityNET Foundation
  * All Rights Reserved
