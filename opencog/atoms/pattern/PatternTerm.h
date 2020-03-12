@@ -70,6 +70,7 @@ typedef std::vector<PatternTermPtr> PatternTermSeq;
 typedef std::vector<PatternTermWPtr> PatternTermWSeq;
 
 class PatternTerm
+	: public std::enable_shared_from_this<PatternTerm>
 {
 protected:
 	Handle _handle;
