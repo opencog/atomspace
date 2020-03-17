@@ -208,7 +208,17 @@ class GroundedObjectNodeTest(unittest.TestCase):
                     )
 
         result = execute_atom(self.space,  exec_link)
-        self.assertEqual(result, None)
+        self.assertEqual(result.get_object(), None)
+
+    def test_call_grounded_object_return_tv(self):
+        exec_link = ApplyLink(
+            MethodOfLink(
+                GroundedObjectNode("obj", TestObject("obj")),
+                ConceptNode("return_tv")),
+            ListLink())
+
+        result = execute_atom(self.space,  exec_link)
+        self.assertEqual(result, TruthValue(0.5, 0.6))
 
 def return_true(atom):
     return TruthValue(1.0, 1.0)
@@ -242,8 +252,11 @@ class TestObject:
     def truth(self):
         return (1.0, 1.0)
 
-    def no_return_value():
+    def no_return_value(self):
         print("test")
+
+    def return_tv(self):
+        return TruthValue(0.5, 0.6)
 
 if __name__ == '__main__':
     unittest.main()
