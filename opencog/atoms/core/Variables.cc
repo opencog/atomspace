@@ -120,6 +120,20 @@ struct VarScraper
 	                                  const HandleSeq& rhs) const;
 
 	/**
+	 * Return true iff the two handle are alpha-equivalent, according
+	 * to the following rules:
+	 *
+	 * - constant nodes: atom equality
+	 * - variable nodes: path equality
+	 * - links: type equality and equivalence of their outgoings
+	 */
+	bool is_equivalent(const Handle& rh, const Handle& lh) const;
+	bool is_equivalent_ordered_outgoing(const HandleSeq& rhs,
+	                                    const HandleSeq& lhs) const;
+	bool is_equivalent_unordered_outgoing(const HandleSeq& rhs,
+	                                      const HandleSeq& lhs) const;
+
+	/**
 	 * Return true iff h is a Variable or Glob node.
 	 */
 	static bool is_variable(const Handle& h);
@@ -261,9 +275,8 @@ bool VarScraper::less_than(const Handle& lh, const Handle& rh) const
 	if (lps != rps)
 		return lps < rps;
 
-	// Still a tie? These 2 variables are semantically equivalent. Sort
-	// by atom order then.
-	return lh < rh;
+	// No way to establish the order, they are likely equivalent
+	return false;
 }
 
 bool VarScraper::less_than_ordered_outgoing(const HandleSeq& lhs,
@@ -271,7 +284,7 @@ bool VarScraper::less_than_ordered_outgoing(const HandleSeq& lhs,
 {
 	OC_ASSERT(lhs.size() == rhs.size());
 	for (std::size_t i = 0; i < lhs.size(); i++)
-		if (not content_eq(lhs[i], rhs[i]))
+		if (not is_equivalent(lhs[i], rhs[i]))
 			return less_than(lhs[i], rhs[i]);
 	return false;
 }
@@ -291,6 +304,59 @@ bool VarScraper::is_variable(const Handle& h)
 bool VarScraper::is_unordered(Type t)
 {
 	return nameserver().isA(t, UNORDERED_LINK);
+}
+
+bool VarScraper::is_equivalent(const Handle& rh, const Handle& lh) const
+{
+	//////////////////
+   // Base cases   //
+   //////////////////
+
+	Type rt = rh->get_type();
+	Type lt = lh->get_type();
+	if (rt != lt)
+		return false;
+
+	// Variable node equivalence is path equality
+	if (is_variable(rh))
+		return _paths.at(rh) == _paths.at(lh);
+
+	// Constant node equivalence is atom equality
+	if (rh->is_node())
+		return content_eq(rh, lh);
+
+	// Now rh and lh are links, make sure they have the same arity
+	Arity lty = lh->get_arity();
+	Arity rty = rh->get_arity();
+	if (lty != rty)
+		return false;
+
+	///////////////////////
+   // Recursive cases   //
+   ///////////////////////
+
+	// Now rh and lh are links with same type and arity, make sure
+	// their outgoings are equivalent
+	const HandleSeq& ro = rh->getOutgoingSet();
+	const HandleSeq& lo = lh->getOutgoingSet();
+	return is_unordered(rt) ? is_equivalent_unordered_outgoing(ro, lo)
+		: is_equivalent_ordered_outgoing(ro, lo);
+}
+
+bool VarScraper::is_equivalent_ordered_outgoing(const HandleSeq& rhs,
+                                                const HandleSeq& lhs) const
+{
+	OC_ASSERT(lhs.size() == rhs.size());
+	for (std::size_t i = 0; i < lhs.size(); i++)
+		if (not is_equivalent(lhs[i], rhs[i]))
+			return false;
+	return true;
+}
+
+bool VarScraper::is_equivalent_unordered_outgoing(const HandleSeq& rhs,
+                                                  const HandleSeq& lhs) const
+{
+	return is_equivalent_ordered_outgoing(sorted(rhs), sorted(lhs));
 }
 
 /* ================================================================= */

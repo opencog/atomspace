@@ -55,6 +55,7 @@ public:
 	void test_vardecl_free_scope();
 	void test_variable_set_scope();
 	void test_inner_scope();
+	void test_getlink();
 };
 
 #define NA _asa.add_node
@@ -430,3 +431,29 @@ void AlphaConvertUTest::test_inner_scope()
 
 	TS_ASSERT(sc1->is_equal(h2));
 }
+
+// Test alpha equivalence between 2 get links.
+void AlphaConvertUTest::test_getlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+	Handle A = NA(CONCEPT_NODE, "A");
+	Handle B = NA(CONCEPT_NODE, "B");
+
+	// h1 and h2 are alpha-equivalent, indeed renaming X->Y and Y->X in
+	// h1 yields h2.
+	Handle h1 = LA(GET_LINK, LA(PRESENT_LINK,
+	                            LA(INHERITANCE_LINK, X, A),
+	                            LA(INHERITANCE_LINK, Y, B)));
+	Handle h2 = LA(GET_LINK, LA(PRESENT_LINK,
+	                            LA(INHERITANCE_LINK, Y, A),
+	                            LA(INHERITANCE_LINK, X, B)));
+
+	ScopeLinkPtr sc1 = ScopeLinkCast(h1);
+	ScopeLinkPtr sc2 = ScopeLinkCast(h2);
+
+	TS_ASSERT(sc1->is_equal(h2));
+}
+

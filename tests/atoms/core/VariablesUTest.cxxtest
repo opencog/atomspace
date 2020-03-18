@@ -42,7 +42,7 @@ private:
 public:
 	VariablesUTest()
 	{
-		logger().set_level(Logger::INFO);
+		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
@@ -89,6 +89,7 @@ public:
 	void test_find_variables_mixed_8();
 	void test_find_variables_mixed_9();
 	void test_find_variables_mixed_10();
+	void test_find_variables_mixed_11();
 
 	void test_is_type_1();
 	void test_is_type_2();
@@ -755,6 +756,34 @@ void VariablesUTest::test_find_variables_mixed_10()
 	logger().debug() << "varseq = " << oc_to_string(varseq);
 
 	TS_ASSERT_EQUALS(varseq, HandleSeq());
+}
+
+void VariablesUTest::test_find_variables_mixed_11()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Inferred vardecl of body1 should be the reverse of vardecl of
+	// body2 because swapping names makes them equivalent.
+	Handle body1 = al(PRESENT_LINK,
+	                  al(INHERITANCE_LINK, X, A),
+	                  al(INHERITANCE_LINK, Y, B));
+	Handle body2 = al(PRESENT_LINK,
+	                  al(INHERITANCE_LINK, Y, A),
+	                  al(INHERITANCE_LINK, X, B));
+	Variables vars1;
+	Variables vars2;
+	vars1.find_variables(body1);
+	vars2.find_variables(body2);
+	HandleSeq varseq1 = vars1.varseq;
+	HandleSeq varseq2 = vars2.varseq;
+
+	logger().debug() << "varseq1 = " << oc_to_string(varseq1);
+	logger().debug() << "varseq2 = " << oc_to_string(varseq2);
+
+	// Reverse varseq2 to test it if it equal to varseq1
+	std::reverse(varseq2.begin(), varseq2.end());
+
+	TS_ASSERT_EQUALS(varseq1, varseq2);
 }
 
 void VariablesUTest::test_is_type_1()
