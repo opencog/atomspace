@@ -590,7 +590,16 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			else
 			{
 				Handle hg(walk_tree(h, silent));
-				if (hg) oset_results.push_back(hg);
+
+				// Globs will return a matching list. Arithmetic
+				// links will choke on lists, so expand them.
+				if (GLOB_NODE == h->get_type())
+				{
+					for (const Handle& gg : hg->getOutgoingSet())
+						oset_results.push_back(gg);
+				}
+				else
+					oset_results.push_back(hg);
 			}
 		}
 		Handle flp(createLink(std::move(oset_results), t));
