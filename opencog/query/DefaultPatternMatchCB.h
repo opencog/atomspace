@@ -94,8 +94,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 
 		bool optionals_present(void) { return _optionals_present; }
-	protected:
 
+	protected:
 		NameServer& _nameserver;
 
 		const Variables* _vars = nullptr;
