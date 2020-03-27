@@ -919,7 +919,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 			throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 		}
-		return createSimpleTruthValue(nums);
+		return createSimpleTruthValue(std::move(nums));
 	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{

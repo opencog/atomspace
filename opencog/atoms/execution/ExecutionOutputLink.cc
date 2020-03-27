@@ -123,7 +123,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 		elts.push_back(elt);
 	}
 
-	return createLink(elts, SET_LINK);
+	return createLink(std::move(elts), SET_LINK);
 }
 
 /// execute_args -- execute a seq of arguments, return a seq of results.
@@ -232,7 +232,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 			results.push_back(vars.substitute_nocheck(body, yargs));
 		}
 
-		return createLink(results, SET_LINK);
+		return createLink(std::move(results), SET_LINK);
 	}
 
 	return get_handle();
