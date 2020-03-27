@@ -2529,6 +2529,22 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	if (term->get_type() == VARIABLE_NODE)
 		var_grounding[term] = grnd;
 
+#ifdef QDEBUG
+	// This is an expensive, CPU-wasting check to catch the bug described
+	// in https://github.com/opencog/atomspace/issues/2315
+	// It would be nice to have a better fix, but its not clear what
+	// that fix should be; its a thorny architectural problem.
+	for (const Handle &v : _variables->varset)
+	{
+		if (is_unquoted_unscoped_in_tree(clause, v) and
+		    var_grounding.find(v) == var_grounding.end())
+		{
+			throw RuntimeException(TRACE_INFO,
+			      "Unable to evaluate clause with ungrounded variables!");
+		}
+	}
+#endif
+
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
