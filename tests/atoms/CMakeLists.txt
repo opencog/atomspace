@@ -13,6 +13,8 @@ ADD_SUBDIRECTORY (value)
 
 ADD_SUBDIRECTORY (reduct)
 
+ADD_SUBDIRECTORY (flow)
+
 ADD_SUBDIRECTORY (pattern)
 
 IF(HAVE_GUILE)
@@ -51,9 +53,6 @@ TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
 
 ADD_CXXTEST(ExistsLinkUTest)
 TARGET_LINK_LIBRARIES(ExistsLinkUTest execution atomspace)
-
-ADD_CXXTEST(ValueOfUTest)
-TARGET_LINK_LIBRARIES(ValueOfUTest clearbox execution atomspace)
 
 ADD_CXXTEST(StreamUTest)
 TARGET_LINK_LIBRARIES(StreamUTest clearbox execution smob atomspace)
