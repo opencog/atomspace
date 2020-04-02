@@ -54,8 +54,5 @@ TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
 ADD_CXXTEST(ExistsLinkUTest)
 TARGET_LINK_LIBRARIES(ExistsLinkUTest execution atomspace)
 
-ADD_CXXTEST(StreamUTest)
-TARGET_LINK_LIBRARIES(StreamUTest clearbox execution smob atomspace)
-
 ADD_CXXTEST(IdenticalLinkUTest)
 TARGET_LINK_LIBRARIES(IdenticalLinkUTest execution atomspace)
