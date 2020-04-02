@@ -444,7 +444,7 @@ void StreamUTest::test_guile()
 
 	SchemeEval eval(&_as);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	eval.eval("(load-from-path \"tests/atoms/stream.scm\")");
+	eval.eval("(load-from-path \"tests/atoms/value/stream.scm\")");
 
 	FloatValuePtr voex = createFloatValue(std::vector<double>{1.0, 2.0, 3.0});
 	ValuePtr vo = eval.eval_v("(cog-execute! vo)");
@@ -471,4 +471,3 @@ void StreamUTest::test_guile()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
