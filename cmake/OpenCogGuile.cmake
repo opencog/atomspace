@@ -138,7 +138,7 @@ FUNCTION(ADD_GUILE_MODULE)
   # current source directory to the build directory. This is done so
   # as to be able to run scheme unit-tests without having to run
   # 'make install'.
-  STRING(REPLACE "/" "_" _TARGET_NAME_SUFFIX ${CMAKE_CURRENT_SOURCE_DIR})
+  STRING(REGEX REPLACE "[/~]" "_" _TARGET_NAME_SUFFIX ${CMAKE_CURRENT_SOURCE_DIR})
   SET(TARGET_NAME "COPY_TO_LOAD_PATH_IN_BUILD_DIR_FROM_${_TARGET_NAME_SUFFIX}")
   IF (NOT (TARGET ${TARGET_NAME}))
     ADD_CUSTOM_TARGET(${TARGET_NAME} ALL)
