@@ -26,13 +26,11 @@ ADD_LIBRARY (atomcore
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
-	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
 	TypeUtils.cc
 	UniqueLink.cc
 	UnorderedLink.cc
-	ValueOfLink.cc
 	Variables.cc
 	VariableList.cc
 	VariableSet.cc
@@ -72,13 +70,11 @@ INSTALL (FILES
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
-	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
 	TypeUtils.h
 	UniqueLink.h
 	UnorderedLink.h
-	ValueOfLink.h
 	Variables.h
 	VariableList.h
 	VariableSet.h

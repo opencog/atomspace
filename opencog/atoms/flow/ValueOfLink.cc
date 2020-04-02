@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "FunctionLink.h"
+#include <opencog/atoms/core/FunctionLink.h>
 #include "ValueOfLink.h"
 
 using namespace opencog;
