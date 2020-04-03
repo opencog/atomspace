@@ -32,6 +32,7 @@ TARGET_LINK_LIBRARIES(smob
 	clearbox
 	lambda
 	execution
+	atomflow
 	atomcore
 	atombase
 	truthvalue

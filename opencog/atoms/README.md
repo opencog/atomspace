@@ -44,6 +44,8 @@ Listed in order of dependency:
    not depend on other C++ subsystems, such as scheme, python, the
    pattern matcher, etc.
 
+ * `flow` -- Atoms that move (get/set) Values from/to Atoms.
+
  * `pattern` -- Atoms involved with pattern matching: `BindLink`,
    `GetLink`, `DualLink`, `SatisfactionLink`, `SatisfactionSetLink`.
    These are al quite complicated, and cache various pre-compiled

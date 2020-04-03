@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/TruthValueOfLink.h
+ * opencog/atoms/flow/TruthValueOfLink.h
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TRUTH_VALUE_OF_LINK_H
 #define _OPENCOG_TRUTH_VALUE_OF_LINK_H
 
-#include <opencog/atoms/core/ValueOfLink.h>
+#include <opencog/atoms/flow/ValueOfLink.h>
 
 namespace opencog
 {
