@@ -31,8 +31,9 @@ namespace opencog
  *  @{
  */
 
-/// The SetValueLink returns the value on the indicated atom (first
-/// argument) at the indicated key (second argument).
+/// The SetValueLink sets a Value on the indicated atom (first
+/// argument) at the indicated key (second argument). The Value
+/// to be set is obtained by executing the third argument.
 ///
 class SetValueLink : public FunctionLink
 {

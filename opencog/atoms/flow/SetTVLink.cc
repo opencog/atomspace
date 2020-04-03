@@ -1,5 +1,5 @@
 /*
- * SetValueLink.cc
+ * SetTVLink.cc
  *
  * Copyright (C) 2015, 2018, 2020 Linas Vepstas
  *
@@ -23,43 +23,42 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
-#include "SetValueLink.h"
+#include "SetTVLink.h"
 
 using namespace opencog;
 
-SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
+	: SetValueLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, SET_VALUE_LINK))
+	if (not nameserver().isA(t, SET_TV_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an SetValueLink, got %s", tname.c_str());
+			"Expecting an SetTVLink, got %s", tname.c_str());
 	}
 }
 
 // ---------------------------------------------------------------
 
-/// When executed, this will execute the third argument to obtain
-/// a Value, and then set that Value at the indicated key on the
-/// first argument. The computed value is returned.
-ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
+/// When evaluated, this will evaluate the second argument to obtain
+/// a TruthValue, and then set that TruthValue on the indicated Atom
+/// (first argument). The computed TV is returned.
+TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
-	if (3 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
+	if (2 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
 	// Obtain the value that we will be setting.
-	ValuePtr pap = _outgoing[2]->execute(as, silent);
+	TruthValuePtr tv = _outgoing[1]->evaluate(as, silent);
 
-	// We cannot set Values unless we are working with the unique
+	// We cannot set TVs unless we are working with the unique
 	// version of the atom that sits in the AtomSpace!
 	Handle ah(as->get_atom(_outgoing[0]));
-	Handle ak(as->get_atom(_outgoing[1]));
-	if (ah and ak)
+	if (ah)
 	{
-		ah->setValue(ak, pap);
-		return pap;
+		ah->setTruthValue(tv);
+		return tv;
 	}
 
 	// Hmm. shouldn't this be SilentException?
@@ -67,11 +66,10 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
-		"No atom %s or no key %s",
-		_outgoing[0]->to_string().c_str(),
-		_outgoing[1]->to_string().c_str());
+		"No atom %s",
+		_outgoing[0]->to_string().c_str());
 }
 
-DEFINE_LINK_FACTORY(SetValueLink, SET_VALUE_LINK)
+DEFINE_LINK_FACTORY(SetTVLink, SET_TV_LINK)
 
 /* ===================== END OF FILE ===================== */
