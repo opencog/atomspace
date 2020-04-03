@@ -1,5 +1,5 @@
 /*
- * tests/atoms/ValueOfUTest.cxxtest
+ * tests/atoms/flow/ValueOfUTest.cxxtest
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
@@ -49,7 +49,7 @@ public:
 
 ValueOfUTest::ValueOfUTest(void)
 {
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
 	// Hack to force library to load to work around linking bug.
@@ -86,7 +86,7 @@ void ValueOfUTest::test_basic()
 	Instantiator inst(&_as);
    Handle result = HandleCast(inst.execute(valof));
 
-	printf("expect: %s", value->to_string().c_str());
+	printf("expect: %s\n", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -103,7 +103,7 @@ void ValueOfUTest::test_basic_value()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 	ValuePtr result = FunctionLinkCast(valof)->execute();
 
-	printf("expect: %s", value->to_string().c_str());
+	printf("expect: %s\n", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -429,7 +429,7 @@ void ValueOfUTest::test_number()
 	ValuePtr result = FunctionLinkCast(divide)->execute();
 
 	NumberNodePtr expect = NumberNodeCast(an(NUMBER_NODE, "0.75"));
-	printf("expect: %s", expect->to_string().c_str());
+	printf("expect: %s\n", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *NumberNodeCast(result));

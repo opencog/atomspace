@@ -927,7 +927,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// then ... compute the truth value, on the fly!
 		Handle ofatom = evelnk->getOutgoingAtom(0);
 		TruthValuePtr tvp;
-		if (ofatom->is_evaluatable())
+		if (nameserver().isA(ofatom->get_type(), EVALUATABLE_LINK))
 			tvp = EvaluationLink::do_eval_scratch(as,
 		                  ofatom, scratch, silent);
 		else
