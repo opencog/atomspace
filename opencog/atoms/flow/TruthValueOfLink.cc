@@ -39,8 +39,8 @@ TruthValueOfLink::TruthValueOfLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return the TruthValue
-ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
+/// When evaluated, this will return the TruthValue
+TruthValuePtr TruthValueOfLink::evaluate(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
 	if (1 != ary)
@@ -50,7 +50,7 @@ ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 	// working with the unique version that sits in the AtomSpace!
 	Handle ah(as->get_atom(_outgoing[0]));
 	if (ah)
-		return ValueCast(ah->getTruthValue());
+		return ah->getTruthValue();
 
 	if (silent)
 		throw SilentException();
@@ -61,7 +61,7 @@ ValuePtr TruthValueOfLink::execute(AtomSpace* as, bool silent)
 		"Asked for TruthValue of atom not in any atomspace: %s",
 		this->to_string().c_str());
 
-	return Handle();
+	return TruthValue::DEFAULT_TV();
 }
 
 // =============================================================
