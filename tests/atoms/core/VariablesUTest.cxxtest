@@ -522,8 +522,9 @@ void VariablesUTest::test_find_variables_mixed_1()
 	HandleSeq varseq = vars.varseq;
 
 	logger().debug() << "varseq = " << oc_to_string(varseq);
+	HandleSeq expected({X, Y});
 
-	TS_ASSERT_EQUALS(varseq, HandleSeq(vars.varset.begin(), vars.varset.end()));
+	TS_ASSERT_EQUALS(varseq, expected);
 }
 
 void VariablesUTest::test_find_variables_mixed_2()
@@ -595,8 +596,8 @@ void VariablesUTest::test_find_variables_mixed_4()
 	vars.find_variables(body);
 	HandleSeq varseq = vars.varseq;
 
-	HandleSet XY{X, Y};
-	HandleSet ZW{Z, W};
+	HandleSeq XY{X, Y};
+	HandleSeq ZW{Z, W};
 	HandleSeq expect1;
 	expect1.insert(expect1.end(), XY.begin(), XY.end());
 	expect1.insert(expect1.end(), ZW.begin(), ZW.end());
@@ -626,8 +627,9 @@ void VariablesUTest::test_find_variables_mixed_5()
 	HandleSeq varseq = vars.varseq;
 
 	logger().debug() << "varseq = " << oc_to_string(varseq);
+	HandleSeq expected({X, Y});
 
-	TS_ASSERT_EQUALS(varseq, HandleSeq(vars.varset.begin(), vars.varset.end()));
+	TS_ASSERT_EQUALS(varseq, expected);
 }
 
 void VariablesUTest::test_find_variables_mixed_6()
