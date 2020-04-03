@@ -24,6 +24,7 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         cLogger()
         cLogger(string s)
         void set_level(loglevel lvl)
+        void set_component(string c)
         loglevel get_level()
         void set_print_to_stdout_flag(bool flag)
 
@@ -68,6 +69,8 @@ cdef class Logger:
         def __get__(self): return DEBUG
     property FINE:
         def __get__(self): return FINE
+    def set_component(self, c):
+        self.clog.set_component(c)
     cdef _set_level(self,int lvl):
         self.clog.set_level(<loglevel>lvl)
     def set_level(self,level_name):
