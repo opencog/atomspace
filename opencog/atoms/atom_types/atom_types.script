@@ -583,8 +583,8 @@ STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
 // Opposite of the above; attach a value to an atom.
-SET_VALUE_LINK <- ORDERED_LINK
-SET_TV_LINK <- SET_VALUE_LINK "SetTVLink"
+SET_VALUE_LINK <- FUNCTION_LINK
+SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
