@@ -17,3 +17,15 @@
 	(SetTV
 		(Concept "bar")
 		(TruthValueOf (Concept "foo"))))
+
+; Verify that the TV on "bar" has changed.
+(cog-tv (Concept "bar"))
+
+; SetTV is interesting because it allows complex arithmetic expressions
+; to be specified in Atomese.
+(cog-execute!
+	(SetTV
+		(Concept "bar")
+		(Times
+			(TruthValueOf (Concept "foo"))
+			(TruthValueOf (Concept "foo")))))

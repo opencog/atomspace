@@ -70,11 +70,15 @@ SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
 SimpleTruthValue::SimpleTruthValue(const ValuePtr& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-	if (source->get_type() != SIMPLE_TRUTH_VALUE)
+	if (not nameserver().isA(source->get_type(), FLOAT_VALUE))
 		throw RuntimeException(TRACE_INFO,
-			"Source must be a SimpleTruthValue");
+			"Source must be a FloatValue");
 
 	FloatValuePtr fp(FloatValueCast(source));
+	if (fp->value().size() < 2)
+		throw RuntimeException(TRACE_INFO,
+			"FloatValue must have at least two elements!");
+
 	_value.resize(2);
 	_value[MEAN] = fp->value()[MEAN];
 	_value[CONFIDENCE] = fp->value()[CONFIDENCE];

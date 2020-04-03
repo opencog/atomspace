@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
 using namespace opencog;
@@ -50,7 +51,20 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
 	// Obtain the value that we will be setting.
-	TruthValuePtr tv = _outgoing[1]->evaluate(as, silent);
+	const Handle& evex(_outgoing[1]);
+	TruthValuePtr tv;
+	if (evex->is_evaluatable())
+		tv = evex->evaluate(as, silent);
+	else if (evex->is_executable())
+	{
+		ValuePtr vp = evex->execute(as, silent);
+		if (nameserver().isA(vp->get_type(), TRUTH_VALUE))
+			tv = TruthValueCast(evex->execute(as, silent));
+		else
+			tv = createSimpleTruthValue(vp);
+	}
+	else
+		tv = evex->getTruthValue();
 
 	// We cannot set TVs unless we are working with the unique
 	// version of the atom that sits in the AtomSpace!
