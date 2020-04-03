@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/TruthValueOfLink.h
+ * opencog/atoms/flow/TruthValueOfLink.h
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
