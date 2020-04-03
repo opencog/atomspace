@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/flow/ValueOfLink.h
+ * opencog/atoms/flow/SetValueLink.h
  *
- * Copyright (C) 2018 Linas Vepstas
+ * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_VALUE_OF_LINK_H
-#define _OPENCOG_VALUE_OF_LINK_H
+#ifndef _OPENCOG_SET_VALUE_LINK_H
+#define _OPENCOG_SET_VALUE_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,32 +31,32 @@ namespace opencog
  *  @{
  */
 
-/// The ValueOfLink returns the value on the indicated atom (first
+/// The SetValueLink returns the value on the indicated atom (first
 /// argument) at the indicated key (second argument).
 ///
-class ValueOfLink : public FunctionLink
+class SetValueLink : public FunctionLink
 {
 public:
-	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
+	SetValueLink(const HandleSeq&&, Type=SET_VALUE_LINK);
 
-	ValueOfLink(const ValueOfLink&) = delete;
-	ValueOfLink& operator=(const ValueOfLink&) = delete;
+	SetValueLink(const SetValueLink&) = delete;
+	SetValueLink& operator=(const SetValueLink&) = delete;
 
-	// Return a pointer to the value at the specified key.
+	// Return a pointer to the value that was set.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ValueOfLink> ValueOfLinkPtr;
-static inline ValueOfLinkPtr ValueOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ValueOfLink>(h); }
-static inline ValueOfLinkPtr ValueOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ValueOfLink>(a); }
+typedef std::shared_ptr<SetValueLink> SetValueLinkPtr;
+static inline SetValueLinkPtr SetValueLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<SetValueLink>(h); }
+static inline SetValueLinkPtr SetValueLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<SetValueLink>(a); }
 
-#define createValueOfLink std::make_shared<ValueOfLink>
+#define createSetValueLink std::make_shared<SetValueLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_VALUE_OF_LINK_H
+#endif // _OPENCOG_SET_VALUE_LINK_H

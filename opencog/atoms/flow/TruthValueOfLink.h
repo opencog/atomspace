@@ -41,7 +41,7 @@ public:
 	TruthValueOfLink(const TruthValueOfLink &) = delete;
 	TruthValueOfLink operator=(const TruthValueOfLink &) = delete;
 
-	// Return a pointer to the extracted value.
+	// Return a pointer to the truth value for the wrapped atom.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
