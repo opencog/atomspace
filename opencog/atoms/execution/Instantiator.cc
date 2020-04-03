@@ -666,6 +666,18 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
+	// Try to execute directly, if possible. Not everything is
+	// capable of this, yet, but the FunctionLinks all do seem to work.
+	//
+	// if (expr->is_executable())
+	if (nameserver().isA(expr->get_type(), FUNCTION_LINK))
+	{
+		ValuePtr vp = expr->execute(_as, silent);
+		if (vp->is_atom())
+			return _as->add_atom(HandleCast(vp));
+		return vp;
+	}
+
 	// Since we do not actually instantiate anything, we should not
 	// consume quotations (as it might change the semantics.)
 	// We are not instantiating anything, because the map is empty.

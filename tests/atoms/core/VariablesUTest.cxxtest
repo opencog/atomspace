@@ -384,18 +384,18 @@ void VariablesUTest::test_find_variables_unordered_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Inferred vardecl should follow the atom hash order since the
+	// Inferred vardecl may not follow any particular order since the
 	// body structure imposes no asymmetry.
 	Handle body = al(AND_LINK, X, Y);
 	Variables vars;
 	vars.find_variables(body);
-	HandleSeq varseq = vars.varseq;
-	HandleSeq expect(vars.varset.begin(), vars.varset.end());
+	HandleSet result = vars.varset;
+	HandleSet expect{X, Y};
 
-	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(varseq, expect);
+	TS_ASSERT_EQUALS(result, expect);
 }
 
 void VariablesUTest::test_find_variables_unordered_2()
@@ -512,19 +512,21 @@ void VariablesUTest::test_find_variables_mixed_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Inferred vardecl should follow the atom hash order since the
+	// Inferred vardecl may not follow any particular order since the
 	// body structure imposes no asymmetry.
 	Handle body = al(AND_LINK,
 	                 al(INHERITANCE_LINK, X, Y),
 	                 al(INHERITANCE_LINK, Y, X));
 	Variables vars;
 	vars.find_variables(body);
-	HandleSeq varseq = vars.varseq;
+	HandleSet result = vars.varset;
+	HandleSet expect{X, Y};
 
-	logger().debug() << "varseq = " << oc_to_string(varseq);
-	HandleSeq expected({X, Y});
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(varseq, expected);
+	// Just make sure the vardecl has X and Y, regardless of the order
+	TS_ASSERT_EQUALS(result, expect);
 }
 
 void VariablesUTest::test_find_variables_mixed_2()
@@ -578,15 +580,8 @@ void VariablesUTest::test_find_variables_mixed_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Inferred vardecl should be
-	//
-	// 1. sorted({X, Y}) + sorted({Z, W})
-	//
-	// or
-	//
-	// 2. sorted({Z, W}) + sorted({X, Y})
-	//
-	// because there is no asymmetry in the AndLink
+	// Inferred vardecl can be any combination where {X, Y} and {Z, W}
+	// do not interleave.
 	Handle body = al(AND_LINK,
 	                 al(INHERITANCE_LINK, X, Y),
 	                 al(INHERITANCE_LINK, Y, X),
@@ -594,22 +589,34 @@ void VariablesUTest::test_find_variables_mixed_4()
 	                 al(INHERITANCE_LINK, W, Z));
 	Variables vars;
 	vars.find_variables(body);
-	HandleSeq varseq = vars.varseq;
+	HandleSeq result = vars.varseq;
+	HandleSeq expect1{X, Y, Z, W};
+	HandleSeq expect2{Y, X, Z, W};
+	HandleSeq expect3{X, Y, W, Z};
+	HandleSeq expect4{Y, X, W, Z};
+	HandleSeq expect5{Z, W, X, Y};
+	HandleSeq expect6{Z, W, Y, X};
+	HandleSeq expect7{W, Z, X, Y};
+	HandleSeq expect8{W, Z, Y, X};
 
-	HandleSeq XY{X, Y};
-	HandleSeq ZW{Z, W};
-	HandleSeq expect1;
-	expect1.insert(expect1.end(), XY.begin(), XY.end());
-	expect1.insert(expect1.end(), ZW.begin(), ZW.end());
-	HandleSeq expect2;
-	expect2.insert(expect2.end(), ZW.begin(), ZW.end());
-	expect2.insert(expect2.end(), XY.begin(), XY.end());
-
-	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect1 = " << oc_to_string(expect1);
 	logger().debug() << "expect2 = " << oc_to_string(expect2);
+	logger().debug() << "expect3 = " << oc_to_string(expect3);
+	logger().debug() << "expect4 = " << oc_to_string(expect4);
+	logger().debug() << "expect5 = " << oc_to_string(expect5);
+	logger().debug() << "expect6 = " << oc_to_string(expect6);
+	logger().debug() << "expect7 = " << oc_to_string(expect7);
+	logger().debug() << "expect8 = " << oc_to_string(expect8);
 
-	TS_ASSERT(varseq == expect1 or varseq == expect2);
+	TS_ASSERT(result == expect1 or
+	          result == expect2 or
+	          result == expect3 or
+	          result == expect4 or
+	          result == expect5 or
+	          result == expect6 or
+	          result == expect7 or
+	          result == expect8);
 }
 
 void VariablesUTest::test_find_variables_mixed_5()
@@ -624,12 +631,14 @@ void VariablesUTest::test_find_variables_mixed_5()
 	                 al(INHERITANCE_LINK, A, B));
 	Variables vars;
 	vars.find_variables(body);
-	HandleSeq varseq = vars.varseq;
+	HandleSet result = vars.varset;
+	HandleSet expect{X, Y};
 
-	logger().debug() << "varseq = " << oc_to_string(varseq);
-	HandleSeq expected({X, Y});
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(varseq, expected);
+	// Just make sure the vardecl has X and Y, regardless of the order
+	TS_ASSERT_EQUALS(result, expect);
 }
 
 void VariablesUTest::test_find_variables_mixed_6()
