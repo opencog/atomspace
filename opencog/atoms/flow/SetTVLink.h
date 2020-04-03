@@ -44,6 +44,7 @@ public:
 	SetTVLink& operator=(const SetTVLink&) = delete;
 
 	// Return a pointer to the TV that was set.
+	virtual bool is_evaluatable() const { return true; }
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
 		return ValueCast(evaluate(as, silent));

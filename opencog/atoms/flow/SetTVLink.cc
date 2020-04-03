@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
@@ -55,6 +56,8 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 	TruthValuePtr tv;
 	if (evex->is_evaluatable())
 		tv = evex->evaluate(as, silent);
+	else if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
+		tv = EvaluationLink::do_evaluate(as, evex, silent);
 	else if (evex->is_executable())
 	{
 		ValuePtr vp = evex->execute(as, silent);

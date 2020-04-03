@@ -22,10 +22,40 @@
 (cog-tv (Concept "bar"))
 
 ; SetTV is interesting because it allows complex arithmetic expressions
-; to be specified in Atomese.
+; to be specified in Atomese. Below, simply take the square of the TV.
 (cog-execute!
 	(SetTV
 		(Concept "bar")
 		(Times
 			(TruthValueOf (Concept "foo"))
 			(TruthValueOf (Concept "foo")))))
+
+; Formulas can be used to compute TV's, as shown in the `formula.scm`
+; example. Consider a named formula, with variables.
+(DefineLink
+   (DefinedPredicate "has a reddish color")
+   (PredicateFormula
+      (Minus
+         (Number 1)
+         (Times
+            (StrengthOf (Variable "$X"))
+            (StrengthOf (Variable "$Y"))))
+      (Times
+         (ConfidenceOf (Variable "$X"))
+         (ConfidenceOf (Variable "$Y")))))
+
+; Some data...
+(Concept "A" (stv 0.9 0.98))
+(Concept "B" (stv 0.9 0.98))
+
+; Use the formula to compute a new TV, and attach that TV to some Atom.
+; This is little more than the copy above, except that the Evaluation
+; is actually performed, so that the new TV is computed, before being
+; copied. In general, if the second Atom passed to SetTV is evaluatable,
+; then it will be evaluated to obtain the TV.
+(cog-execute!
+	(SetTV
+		(Concept "bar")
+		(Evaluation
+			(DefinedPredicate "has a reddish color")
+			(List (Concept "A") (Concept "B")))))
