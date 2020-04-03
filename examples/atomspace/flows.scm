@@ -7,7 +7,7 @@
 
 (Concept "foo" (stv 0.3 0.7))
 
-(cog-evaluate! (TruthValueOf (Concept "foo"))
+(cog-evaluate! (TruthValueOf (Concept "foo")))
 
 (cog-execute!
 	(SetTV

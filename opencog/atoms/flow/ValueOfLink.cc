@@ -57,14 +57,14 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		if (pap) return pap;
 	}
 
-	// Hmm. shouldn't this be SilentException?
 	if (silent)
-		throw NotEvaluatableException();
+		throw SilentException();
 
-	throw InvalidParamException(TRACE_INFO,
-		"No such key %s on atom %s",
-		_outgoing[1]->to_string().c_str(),
-		_outgoing[0]->to_string().c_str());
+	// If the user asked for a Value not in any atomspace,
+   // what should we do? I dunno, so I'm throwing an error.
+   throw InvalidParamException(TRACE_INFO,
+      "Asked for a Value of atom not in any atomspace: %s",
+		this->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

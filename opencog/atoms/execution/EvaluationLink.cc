@@ -926,11 +926,15 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// If the truth value of the link is being requested,
 		// then ... compute the truth value, on the fly!
 		Handle ofatom = evelnk->getOutgoingAtom(0);
-		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(as,
-		                  ofatom, scratch, silent));
+		TruthValuePtr tvp;
+		if (ofatom->is_evaluatable())
+			tvp = EvaluationLink::do_eval_scratch(as,
+		                  ofatom, scratch, silent);
+		else
+			tvp = ofatom->getTruthValue();
 
 		// Cache the computed truth value...
-		// XXX FIXME: is this a good idea, or not?
+		// This seems like an OK idea, do users use it?
 		evelnk->setTruthValue(tvp);
 		return tvp;
 	}
