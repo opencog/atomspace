@@ -82,5 +82,47 @@
 		(Concept "bar")
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
+
+; -----------------------------------------------------------
+; Everything demonstrated above can be done in a generalized way, for
+; arbitrary values. The primary difference is that the SetValueLink is
+; used for this, and a key must be provided as an additional argument.
+
+(define foo (Concept "foo"))
+(define bar (Concept "bar"))
+(define key (Predicate "some key"))
+(define kee (Predicate "other key"))
+
+; Start by setting a value in the "traditional fashion"
+(cog-set-value! foo key (FloatValue 1 2 3 4 5))
+
+; Take a look at it
+(cog-execute! (ValueOf foo key))
+
+; Copy from foo to bar
+(cog-execute! (SetValue bar kee (ValueOf foo key)))
+
+; Take a look at it
+(cog-execute! (ValueOf bar kee))
+
+; Try out some math
+(cog-execute! (SetValue bar kee
+	(Times (ValueOf foo key) (ValueOf foo key))))
+
+; Verify
+(cog-execute! (ValueOf bar kee))
+
+(DefineLink
+   (DefinedPredicate "triangle numbers")
+   (PredicateFormula
+      (Divide
+         (Times (Variable "$X") (Plus (Variable "$X") (Number 1)))
+			(Number 2))))
+				
+(cog-execute!
+	(SetValue bar kee
+		(DefinedPredicate "triangle numbers")
+		(ValueOf foo key)))
+
 ;
 ; -------- THE END -----------

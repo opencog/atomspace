@@ -16,6 +16,9 @@
 ; be applied to (time-changing) Values. This example shows how formulas
 ; are used to modify TruthValues.
 ;
+; The next example, `flows.scm`, shows how to attach such TV's to
+; arbitrary Atoms.
+;
 (use-modules (opencog) (opencog exec))
 
 ; The StrengthOfLink returns a single floating-point number,

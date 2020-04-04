@@ -55,16 +55,23 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	{
 		ValuePtr pap = ah->getValue(ak);
 		if (pap) return pap;
+
+		if (silent)
+			throw SilentException();
+
+		throw InvalidParamException(TRACE_INFO,
+		   "No value at key %s on atom %s",
+		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
 	if (silent)
 		throw SilentException();
 
 	// If the user asked for a Value not in any atomspace,
-   // what should we do? I dunno, so I'm throwing an error.
-   throw InvalidParamException(TRACE_INFO,
-      "Asked for a Value of atom not in any atomspace: %s",
-		this->to_string().c_str());
+	// what should we do? I dunno, so I'm throwing an error.
+	throw InvalidParamException(TRACE_INFO,
+	   "Asked for a Value of atom not in any atomspace: %s",
+	   this->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)
