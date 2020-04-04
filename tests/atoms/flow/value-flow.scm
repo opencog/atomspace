@@ -19,8 +19,6 @@
 ; Copy from foo to bar
 (define set-value (SetValue bar kee (ValueOf foo key)))
 
-(cog-execute! (ValueOf bar kee))
-
 ; Try out some math
 (define square (SetValue bar kee
 	(Times (ValueOf foo key) (ValueOf foo key))))

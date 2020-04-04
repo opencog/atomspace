@@ -32,8 +32,8 @@ public:
 	void check(void);
 
 	void test_copy();
-	// void test_square();
-	// void test_triangele();
+	void test_square();
+	void test_triangle();
 };
 
 SetValueUTest::SetValueUTest(void) : _eval(&_as)
@@ -50,12 +50,12 @@ void SetValueUTest::setUp(void)
 }
 
 // ====================================================================
-// Basic copy of TV
+// Basic copy of Value
 void SetValueUTest::test_copy()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr tvp = _eval.eval_v("(cog-execute! set-value)");
+	ValuePtr tvp = _eval.eval_v("(cog-value foo key)");
 
 	ValuePtr result = _eval.eval_v("seq");
 	printf("expect: %s\n", tvp->to_string().c_str());
@@ -63,14 +63,17 @@ void SetValueUTest::test_copy()
 
 	TS_ASSERT_EQUALS(tvp, result);
 
-	result = _eval.eval_v("(cog-execute! (ValueOf bar key))");
-	printf("expect: %s\n", tvp->to_string().c_str());
+	tvp = _eval.eval_v("(cog-execute! set-value)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
 
-	result = _eval.eval_v("(cog-value bar key)");
-	printf("expect: %s\n", tvp->to_string().c_str());
+	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	result = _eval.eval_v("(cog-value bar kee)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
@@ -78,23 +81,26 @@ void SetValueUTest::test_copy()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-#if 0
 // ====================================================================
-// Numeric calculations of TV
-void SetValueUTest::test_product()
+// Basic math applied to a value
+void SetValueUTest::test_square()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TruthValuePtr tvp = _eval.eval_tv("(stv 0.09 0.49)");
+	ValuePtr tvp = _eval.eval_v("(cog-execute! square)");
 
-	TruthValuePtr result = _eval.eval_tv("(cog-execute! product)");
+	ValuePtr result = _eval.eval_v("squ");
 	printf("expect: %s\n", tvp->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
-	printf("expect: %s\n", tvp->to_string().c_str());
+	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	result = _eval.eval_v("(cog-value bar kee)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
@@ -103,21 +109,25 @@ void SetValueUTest::test_product()
 }
 
 // ====================================================================
-// EvaluationLink
-void SetValueUTest::test_evlink()
+// Basic copy of TV
+void SetValueUTest::test_triangle()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TruthValuePtr tvp = _eval.eval_tv("(stv 0.19 0.9604)");
+	ValuePtr tvp = _eval.eval_v("(cog-execute! triangle)");
 
-	TruthValuePtr result = _eval.eval_tv("(cog-execute! set-eval)");
+	ValuePtr result = _eval.eval_v("tri");
 	printf("expect: %s\n", tvp->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
-	printf("expect: %s\n", tvp->to_string().c_str());
+	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	result = _eval.eval_v("(cog-value bar kee)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
@@ -126,4 +136,3 @@ void SetValueUTest::test_evlink()
 }
 
 // ====================================================================
-#endif
