@@ -1,0 +1,129 @@
+/*
+ * tests/atoms/flow/SetValueUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/flow/SetValueLink.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class SetValueUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	
+public:
+	SetValueUTest(void);
+
+	void setUp(void);
+	void check(void);
+
+	void test_copy();
+	// void test_square();
+	// void test_triangele();
+};
+
+SetValueUTest::SetValueUTest(void) : _eval(&_as)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	_eval.eval("(load-from-path \"tests/atoms/flow/value-flow.scm\")");
+}
+
+void SetValueUTest::setUp(void)
+{
+}
+
+// ====================================================================
+// Basic copy of TV
+void SetValueUTest::test_copy()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ValuePtr tvp = _eval.eval_v("(cog-execute! set-value)");
+
+	ValuePtr result = _eval.eval_v("seq");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	result = _eval.eval_v("(cog-execute! (ValueOf bar key))");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	result = _eval.eval_v("(cog-value bar key)");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#if 0
+// ====================================================================
+// Numeric calculations of TV
+void SetValueUTest::test_product()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	TruthValuePtr tvp = _eval.eval_tv("(stv 0.09 0.49)");
+
+	TruthValuePtr result = _eval.eval_tv("(cog-execute! product)");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// EvaluationLink
+void SetValueUTest::test_evlink()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	TruthValuePtr tvp = _eval.eval_tv("(stv 0.19 0.9604)");
+
+	TruthValuePtr result = _eval.eval_tv("(cog-execute! set-eval)");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*tvp == *result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+#endif

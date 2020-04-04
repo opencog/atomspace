@@ -8,3 +8,6 @@ ADD_CXXTEST(ValueOfUTest)
 
 ADD_CXXTEST(SetTVUTest)
 TARGET_LINK_LIBRARIES(SetTVUTest execution smob)
+
+ADD_CXXTEST(SetValueUTest)
+TARGET_LINK_LIBRARIES(SetValueUTest execution smob)
