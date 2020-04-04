@@ -124,6 +124,12 @@ std::vector<double> opencog::plus(const std::vector<double>& fva,
 	size_t lena = fva.size();
 	size_t lenb = fvb.size();
 
+	if (1 == lena)
+		return plus(fva[0], fvb);
+
+	if (1 == lenb)
+		return plus(fvb[0], fva);
+
 	std::vector<double> sum(std::max(lena, lenb));
 	if (lena < lenb)
 	{
@@ -151,6 +157,12 @@ std::vector<double> opencog::minus(const std::vector<double>& fva,
 {
 	size_t lena = fva.size();
 	size_t lenb = fvb.size();
+
+	if (1 == lena)
+		return minus(fva[0], fvb);
+
+	if (1 == lenb)
+		return minus(fva, fvb[0]);
 
 	std::vector<double> diff(std::max(lena, lenb));
 	if (lena < lenb)
