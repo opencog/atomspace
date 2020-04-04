@@ -73,7 +73,12 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 				put->to_string().c_str());
 
 		LambdaLinkPtr lamp(LambdaLinkCast(put));
-		Handle reduct(lamp->beta_reduce(_outgoing[3]->getOutgoingSet()));
+		const Handle& args(_outgoing[3]);
+		Handle reduct;
+		if (LIST_LINK == args->get_type())
+			reduct = lamp->beta_reduce(args->getOutgoingSet());
+		else
+			reduct = lamp->beta_reduce({args});
 		pap = reduct->execute(as, silent);
 	}
 
