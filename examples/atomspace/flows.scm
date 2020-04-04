@@ -59,3 +59,17 @@
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
+
+; In many ways, the SetTVLink behaves a lot like a generalized
+; EvaluationLink. So: normally, an EvaluationLink consists of a
+; predicate, and the list of arguments that it applies to. The
+; SetTVLink is similar, except that it couples the predicate to
+; the target Atom that it should apply to.  This can be seen in
+; the equivalent form, below.
+(cog-execute!
+	(SetTV
+		(Concept "bar")
+		(DefinedPredicate "has a reddish color")
+		(List (Concept "A") (Concept "B"))))
+;
+; -------- THE END -----------

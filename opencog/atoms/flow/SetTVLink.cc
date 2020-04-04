@@ -38,6 +38,10 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SetTVLink, got %s", tname.c_str());
 	}
+
+	size_t ary = _outgoing.size();
+	if (2 != ary and 3 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -48,12 +52,18 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
-	if (2 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
 	// Obtain the value that we will be setting.
-	const Handle& evex(_outgoing[1]);
 	TruthValuePtr tv;
+
+	// The expression to evaluate
+	Handle evex;
+	if (2 == ary)
+		evex = _outgoing[1];
+	else if (3 == ary)
+		evex = createEvaluationLink(_outgoing[1], _outgoing[2]);
+
+	// Now, evaluate it.
 	if (evex->is_evaluatable())
 		tv = evex->evaluate(as, silent);
 	else if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
