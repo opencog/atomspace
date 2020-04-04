@@ -60,6 +60,17 @@
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
+; That the above really does flow the TV from one place to another can
+; be seen by looking at dynamic changes. So -- change the TV on A,
+; and recompute...
+(Concept "A" (stv 0.8 0.9))
+(cog-execute!
+	(SetTV
+		(Concept "bar")
+		(Evaluation
+			(DefinedPredicate "has a reddish color")
+			(List (Concept "A") (Concept "B")))))
+
 ; In many ways, the SetTVLink behaves a lot like a generalized
 ; EvaluationLink. So: normally, an EvaluationLink consists of a
 ; predicate, and the list of arguments that it applies to. The
