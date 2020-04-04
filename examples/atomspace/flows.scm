@@ -1,7 +1,28 @@
 ;
 ; flows.scm -- Flowing Values between Atoms.
 ;
+; Atoms can be thought of as "pipes", and Values as the thing that
+; "flows through the pipes".  This is a reasonable analogy, because
+; Atoms are fairly heavyweight and are immutable, and require a lot of
+; machinery to be placed in the AtomSpace. That machinery is required
+; in order to be able to search (perform queries) over Atoms. Values,
+; by contrast, are much smaller and simpler. They are mutable,
+; ephemeral, and can change rapidly. (The price for this: they cannot
+; be searched!).
 ;
+; But how does the "fluid" flow in the "pipes"? The example below walks
+; through ways in which TruthValues (in the first part of the example)
+; and general Values can be pulled out of specific Atoms, then
+; transformed or mutated in some specific way, and then re-injected.
+; In these examples, the mutations are arithmetic formulas that are
+; applied to the Values. The formulas themselves are expressed as
+; Atomese.
+;
+; The goal of having formulas in Atomese is that such formulas, rather
+; than being hard-coded in Python, C++ or scheme, can instead be
+; imported from either existing datasets (such as the Systems Biology
+; Markup Language) or they can be obtained by machine learning (such
+; as MOSES).
 
 (use-modules (opencog) (opencog exec))
 
@@ -112,17 +133,23 @@
 ; Verify
 (cog-execute! (ValueOf bar kee))
 
+; Define a schema that computes N(N+1)/2 aka a "triangle number".
+; A Schema is used, instead of a DefinedPredicate, since, in principle,
+; DefinedPredicates should be limited to TruthValues, whereas this
+; can be applied to arbitrary (numeric) expressions.
 (DefineLink
-   (DefinedPredicate "triangle numbers")
-   (PredicateFormula
-      (Divide
-         (Times (Variable "$X") (Plus (Variable "$X") (Number 1)))
+   (DefinedSchema "triangle numbers")
+	(Lambda
+		(Variable "$X")
+		(Divide
+			(Times (Variable "$X") (Plus (Variable "$X") (Number 1)))
 			(Number 2))))
-				
+
+; Apply the schema to a vector of numbers, and attach the result to
+; the bar Atom, much as before.
 (cog-execute!
 	(SetValue bar kee
-		(DefinedPredicate "triangle numbers")
+		(DefinedSchema "triangle numbers")
 		(ValueOf foo key)))
-
 ;
 ; -------- THE END -----------
