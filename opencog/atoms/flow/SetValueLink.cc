@@ -22,7 +22,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include "SetValueLink.h"
 
 using namespace opencog;
@@ -36,6 +38,10 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SetValueLink, got %s", tname.c_str());
 	}
+
+	size_t ary = _outgoing.size();
+	if (SET_VALUE_LINK == t and 3 != ary and 4 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -45,12 +51,31 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 /// first argument. The computed value is returned.
 ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
-	if (3 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
-
 	// Obtain the value that we will be setting.
-	ValuePtr pap = _outgoing[2]->execute(as, silent);
+	ValuePtr pap;
+	if (3 == _outgoing.size())
+		pap = _outgoing[2]->execute(as, silent);
+	else
+	{
+		Handle put(_outgoing[2]);
+		Type pt = put->get_type();
+		if (DEFINED_PREDICATE_NODE == pt or DEFINED_SCHEMA_NODE == pt)
+		{
+			put = DefineLink::get_definition(put);
+			pt = put->get_type();
+		}
+
+		// XXX TODO we should perform a type-check to make sure
+		// variable declarations match the args.
+		if (not nameserver().isA(pt, LAMBDA_LINK))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a LambdaLink, got %s",
+				put->to_string().c_str());
+
+		LambdaLinkPtr lamp(LambdaLinkCast(put));
+		Handle reduct(lamp->beta_reduce(_outgoing[3]->getOutgoingSet()));
+		pap = reduct->execute(as, silent);
+	}
 
 	// We cannot set Values unless we are working with the unique
 	// version of the atom that sits in the AtomSpace!
