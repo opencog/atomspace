@@ -1,0 +1,80 @@
+/*
+ * tests/atoms/flow/SetTVUTest.cxxtest
+ *
+ * Copyright (C) 2018 Linas Vepstas
+ * All Rights Reserved
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/flow/SetTVLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class SetTVUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	
+public:
+	SetTVUTest(void);
+
+	void setUp(void);
+	void check(void);
+
+	void test_copy();
+	// void test_product();
+	// void test_evlink();
+	// void test_args();
+};
+
+SetTVUTest::SetTVUTest(void) : _eval(&_as)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	_eval.eval("(load-from-path \"tests/atoms/flow/tv-flow.scm\")");
+}
+
+void SetTVUTest::setUp(void)
+{
+}
+
+// ====================================================================
+// Basic copy of TV
+void SetTVUTest::test_copy()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	TruthValuePtr tvp = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
+	TS_ASSERT_EQUALS(tvp, TruthValue::DEFAULT_TV());
+
+	tvp = _eval.eval_tv("(cog-tv (Concept \"foo\"))");
+
+	TruthValuePtr result = _eval.eval_tv("(cog-execute! copy-tv)");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(tvp, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
