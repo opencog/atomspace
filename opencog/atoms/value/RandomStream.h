@@ -25,7 +25,6 @@
 
 #include <vector>
 #include <opencog/atoms/value/StreamValue.h>
-#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {

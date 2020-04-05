@@ -58,5 +58,4 @@ std::string RandomStream::to_string(const std::string& indent) const
 // ==============================================================
 
 // Adds factor when library is loaded.
-DEFINE_VALUE_FACTORY(RANDOM_STREAM,
-                     createRandomStream, int)
+DEFINE_VALUE_FACTORY(RANDOM_STREAM, createRandomStream, int)

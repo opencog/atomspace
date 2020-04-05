@@ -58,10 +58,10 @@ public:
 
 	const std::vector<double>& value() const { update(); return _value; }
 
-	/** Returns a string representation of the value.  */
+	/** Returns a string representation of the value. */
 	virtual std::string to_string(const std::string& indent = "") const;
 
-	/** Returns true if two atoms are equal.  */
+	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
 };
 

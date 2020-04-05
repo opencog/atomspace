@@ -35,7 +35,9 @@ namespace opencog
  */
 
 /**
- * StreamValues provide an example of streaming data.
+ * StreamValues provide a continuously-updating, dynamic stream of data.
+ * They are meant to hold any kind of rapidly-changing data, including
+ * video and audio feeds, or other kinds of high-bandwidth data.
  */
 class StreamValue
 	: public FloatValue
