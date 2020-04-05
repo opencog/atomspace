@@ -54,6 +54,9 @@ STREAM_VALUE <- FLOAT_VALUE
 // An example of a time-varying value stream
 RANDOM_STREAM <- STREAM_VALUE
 
+// A strem computed by a formula held in the AtomSpace.
+FORMULA_STREAM <- STREAM_VALUE
+
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
 // and are immutable (unchangeable).
@@ -589,9 +592,11 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // The opposite of the above: given something that evaluates to a
 // FloatValue, return a TruthValue.  Kind-of-like
 // GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
-// This is not really needed, but will make the transition process
-// smoother.
+// When evaluated, returns a SimpleTruthValue
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+
+// Much like a PREDICATE_FORMULA, except it returns a FormulaStream.
+DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
