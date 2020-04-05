@@ -44,6 +44,8 @@ Instantiator::Instantiator(AtomSpace* as)
 /// have to actually be VariableNode's; they can be any atom.)
 static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 {
+	if (vmap.empty()) return expr;
+
 	// Format conversion. FreeVariables::substitute_nocheck() performs
 	// beta-reduction correctly, so we just use that. But we have to
 	// jam the map into the format it expects.
@@ -116,8 +118,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	Handle sn(eolp->get_schema());
 	Handle args(eolp->get_args());
 
-	if (not _vmap->empty())
-		sn = beta_reduce(sn, *_vmap);
+	sn = beta_reduce(sn, *_vmap);
 
 	// If its a DSN, obtain the correct body for it.
 	if (DEFINED_SCHEMA_NODE == sn->get_type())
@@ -135,8 +136,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		Variables vars(flp->get_variables());
 
 		// Perform substitution on the args, only.
-		if (not _vmap->empty())
-			args = beta_reduce(args, *_vmap);
+		args = beta_reduce(args, *_vmap);
 
 		// unpack list link
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
@@ -449,10 +449,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	//
 	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
 	if (nameserver().isA(t, VIRTUAL_LINK))
-	{
-		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
-	}
 
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
@@ -496,10 +493,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (DONT_EXEC_LINK == t)
 	{
 #ifdef CONSUME_THE_EXEC
-		if (_vmap->empty()) return expr->getOutgoingAtom(0);
 		return beta_reduce(expr->getOutgoingAtom(0), *_vmap);
 #else
-		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
 #endif
 	}
