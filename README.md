@@ -372,25 +372,24 @@ Essentially all Linux distributions will provide these packages.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.2.2 or newer is required)
+* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 preferred.)
 * https://www.gnu.org/software/guile/guile.html
-* For Ubuntu bionic/cosmic  `apt-get install guile-2.2-dev`
+* For Debian/Ubuntu,  `apt-get install guile-2.2-dev`
 
 ###### cxxtest
-* Test framework
+* Unit test framework
 * Required for running unit tests. Breaking unit tests is verboten!
-* https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
+* https://cxxtest.com/ | `apt-get install cxxtest`
 
 ### Optional Prerequisites
 
 The following packages are optional. If they are not installed, some
-optional parts of the AtomSpace will not be built.  The CMake command,
+optional parts of the AtomSpace will not be built.  The `cmake` command,
 during the build, will be more precise as to which parts will not be built.
 
 ###### Cython
-* C bindings for Python. (version 0.23 or higher)
-* Strongly recommended, as many examples and important subsystems
-  assume python bindings.
+* C bindings for Python. (version 0.23 or newer)
+* Recommended, as many users enjoy using python.
 * https://cython.org | `apt-get install cython`
 
 ###### Haskell
