@@ -23,6 +23,9 @@
 ; imported from either existing datasets (such as the Systems Biology
 ; Markup Language) or they can be obtained by machine learning (such
 ; as MOSES).
+;
+; See the `flow-formulas.scm` example for how to work with dyanmically
+; updating flows.
 
 (use-modules (opencog) (opencog exec))
 
