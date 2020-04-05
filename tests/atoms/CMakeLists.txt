@@ -26,8 +26,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ParallelUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(RandomUTest)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(FormulaUTest)
-	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
@@ -44,9 +42,6 @@ TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
 
 ADD_CXXTEST(EqualLinkUTest)
 TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
-
-ADD_CXXTEST(GroundedSchemaLocalUTest)
-TARGET_LINK_LIBRARIES(GroundedSchemaLocalUTest execution atomspace)
 
 ADD_CXXTEST(StateLinkUTest)
 TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)

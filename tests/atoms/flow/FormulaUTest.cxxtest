@@ -1,5 +1,5 @@
 /*
- * tests/atoms/FormulaUTest.cxxtest
+ * tests/atoms/flow/FormulaUTest.cxxtest
  *
  * Copyright (C) 2019 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -29,7 +29,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-		_eval.eval("(load-from-path \"tests/atoms/formulas.scm\")");
+		_eval.eval("(load-from-path \"tests/atoms/flow/formulas.scm\")");
 	}
 
 	void setUp() {}

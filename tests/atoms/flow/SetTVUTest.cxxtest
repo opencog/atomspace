@@ -44,7 +44,7 @@ SetTVUTest::SetTVUTest(void) : _eval(&_as)
 	logger().set_print_to_stdout_flag(true);
 
 	_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	_eval.eval("(load-from-path \"tests/atoms/flow/tv-flow.scm\")");
+	_eval.eval("(load-from-path \"tests/atoms/flow/set-tv-flow.scm\")");
 }
 
 void SetTVUTest::setUp(void)
