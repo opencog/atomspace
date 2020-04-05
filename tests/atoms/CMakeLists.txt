@@ -26,8 +26,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ParallelUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(RandomUTest)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(FormulaUTest)
-	TARGET_LINK_LIBRARIES(FormulaUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)

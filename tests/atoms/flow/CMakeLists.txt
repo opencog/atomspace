@@ -6,6 +6,9 @@ LINK_LIBRARIES(
 
 ADD_CXXTEST(ValueOfUTest)
 
+ADD_CXXTEST(FormulaUTest)
+TARGET_LINK_LIBRARIES(FormulaUTest execution smob)
+
 ADD_CXXTEST(SetTVUTest)
 TARGET_LINK_LIBRARIES(SetTVUTest execution smob)
 
