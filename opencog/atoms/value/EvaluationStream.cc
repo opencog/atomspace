@@ -24,20 +24,31 @@
 #include <opencog/atoms/value/EvaluationStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
 // ==============================================================
 
 EvaluationStream::EvaluationStream(const Handle& h) :
-	StreamValue(EVALUATION_STREAM), _formula(h)
+	StreamValue(EVALUATION_STREAM), _formula(h), _as(h->getAtomSpace())
 {
-	if (not h->is_executable())
+	ValuePtr vp;
+	if (h->is_executable())
+	{
+		vp = h->execute(_as);
+	}
+	else if (h->is_evaluatable())
+	{
+		vp = ValueCast(h->evaluate(_as));
+	}
+	else
+	{
 		throw SyntaxException(TRACE_INFO,
 			"Expecting an executable/evaluatable atom, got %s",
 			h->to_string().c_str());
+	}
 
-	ValuePtr vp = _formula->execute();
 	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting formula to return a FloatValue, got %s",
@@ -50,9 +61,17 @@ EvaluationStream::EvaluationStream(const Handle& h) :
 
 void EvaluationStream::update() const
 {
-	ValuePtr vp = _formula->execute();
+	FloatValuePtr vp;
+	if (_formula->is_evaluatable())
+	{
+		vp = _formula->evaluate(_as);
+	}
+	else if (_formula->is_executable())
+	{
+		vp = FloatValueCast(_formula->execute(_as));
+	}
 
-	_value = FloatValueCast(vp)->value();
+	_value = vp->value();
 }
 
 // ==============================================================

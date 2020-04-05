@@ -26,6 +26,7 @@
 #include <vector>
 #include <opencog/atoms/value/StreamValue.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -46,6 +47,7 @@ protected:
 
 	virtual void update() const;
 	Handle _formula;
+	AtomSpace* _as;
 
 public:
 	EvaluationStream(const Handle&);
