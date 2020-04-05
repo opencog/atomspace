@@ -61,7 +61,7 @@ PrenexLink::PrenexLink(const HandleSeq&& oset, Type t)
 /// If the result of beta reduction is an expression with bound
 /// variables in it, then those bound variables should be moved
 /// to the outermost link, viz, be put into prenex form. All of
-/// the analysis of the term has alrady happened; here, we just
+/// the analysis of the term has already happened; here, we just
 /// need to assemble the final prenex form.
 //
 Handle PrenexLink::reassemble(Type prenex,

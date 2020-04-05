@@ -1,5 +1,5 @@
 /*
- * tests/atoms/ValueOfUTest.cxxtest
+ * tests/atoms/flow/ValueOfUTest.cxxtest
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
@@ -11,6 +11,7 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/ValueOfLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
@@ -39,6 +40,7 @@ public:
 	void test_basic();
 	void test_basic_value();
 	void test_truth_value();
+	void test_cached_tv();
 	void test_times();
 	void test_plus();
 	void test_times_plus();
@@ -49,7 +51,7 @@ public:
 
 ValueOfUTest::ValueOfUTest(void)
 {
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
 	// Hack to force library to load to work around linking bug.
@@ -86,7 +88,7 @@ void ValueOfUTest::test_basic()
 	Instantiator inst(&_as);
    Handle result = HandleCast(inst.execute(valof));
 
-	printf("expect: %s", value->to_string().c_str());
+	printf("expect: %s\n", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -103,7 +105,7 @@ void ValueOfUTest::test_basic_value()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 	ValuePtr result = FunctionLinkCast(valof)->execute();
 
-	printf("expect: %s", value->to_string().c_str());
+	printf("expect: %s\n", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -134,6 +136,61 @@ void ValueOfUTest::test_truth_value()
 	printf("result: %s\n\n", tvp->to_string().c_str());
 
 	TS_ASSERT(*tvp == *TruthValue::TRUE_TV());
+
+	// -----------
+
+	TruthValuePtr expect = createSimpleTruthValue(0.4, 0.7);
+	Handle foo = an(CONCEPT_NODE, "foo");
+	foo->setTruthValue(expect);
+	tvof = al(TRUTH_VALUE_OF_LINK, foo);
+	tvp = EvaluationLink::do_evaluate(&_as, tvof);
+
+	printf("expect: %s\n", expect->to_string().c_str());
+	printf("result: %s\n\n", tvp->to_string().c_str());
+
+	TS_ASSERT(*tvp == *expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure caching works
+void ValueOfUTest::test_cached_tv()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle tvof = al(TRUTH_VALUE_OF_LINK, al(FALSE_LINK));
+	EvaluationLink::do_evaluate(&_as, tvof);
+	TruthValuePtr tvp = tvof->getTruthValue();
+
+	printf("expect: %s\n", TruthValue::FALSE_TV()->to_string().c_str());
+	printf("result: %s\n\n", tvp->to_string().c_str());
+
+	TS_ASSERT(*tvp == *TruthValue::FALSE_TV());
+
+	// -----------
+
+	tvof = al(TRUTH_VALUE_OF_LINK, al(TRUE_LINK));
+	EvaluationLink::do_evaluate(&_as, tvof);
+	tvp = tvof->getTruthValue();
+
+	printf("expect: %s\n", TruthValue::TRUE_TV()->to_string().c_str());
+	printf("result: %s\n\n", tvp->to_string().c_str());
+
+	TS_ASSERT(*tvp == *TruthValue::TRUE_TV());
+
+	// -----------
+	TruthValuePtr expect = createSimpleTruthValue(0.4, 0.7);
+	Handle foo = an(CONCEPT_NODE, "foo");
+	foo->setTruthValue(expect);
+	tvof = al(TRUTH_VALUE_OF_LINK, foo);
+	EvaluationLink::do_evaluate(&_as, tvof);
+	tvp = tvof->getTruthValue();
+
+	printf("expect: %s\n", expect->to_string().c_str());
+	printf("result: %s\n\n", tvp->to_string().c_str());
+
+	TS_ASSERT(*tvp == *expect);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -204,7 +261,7 @@ void ValueOfUTest::test_plus()
 
 	ValuePtr result = FunctionLinkCast(plus)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 1.0, 2.0});
+	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 4.0, 5.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -218,7 +275,7 @@ void ValueOfUTest::test_plus()
 
 	result = FunctionLinkCast(plus)->execute();
 
-	expect = createFloatValue(std::vector<double>{7.0, 1.0, 2.0});
+	expect = createFloatValue(std::vector<double>{7.0, 8.0, 9.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -258,7 +315,7 @@ void ValueOfUTest::test_times_plus()
 
 	ValuePtr result = FunctionLinkCast(times)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{5.0, 3.0, 6.0});
+	FloatValuePtr expect = createFloatValue(std::vector<double>{5.0, 8.0, 11.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -273,7 +330,7 @@ void ValueOfUTest::test_times_plus()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{15.0, 5.0, 10.0});
+	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -289,7 +346,7 @@ void ValueOfUTest::test_times_plus()
 
 	result = FunctionLinkCast(times)->execute();
 
-	expect = createFloatValue(std::vector<double>{15.0, 5.0, 10.0});
+	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -314,7 +371,7 @@ void ValueOfUTest::test_minus()
 
 	ValuePtr result = FunctionLinkCast(minus)->execute();
 
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, -1.0, -2.0});
+	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 2.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -328,7 +385,7 @@ void ValueOfUTest::test_minus()
 
 	result = FunctionLinkCast(minus)->execute();
 
-	expect = createFloatValue(std::vector<double>{-7.0, 1.0, 2.0});
+	expect = createFloatValue(std::vector<double>{-7.0, -6.0, -5.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
@@ -429,7 +486,7 @@ void ValueOfUTest::test_number()
 	ValuePtr result = FunctionLinkCast(divide)->execute();
 
 	NumberNodePtr expect = NumberNodeCast(an(NUMBER_NODE, "0.75"));
-	printf("expect: %s", expect->to_string().c_str());
+	printf("expect: %s\n", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *NumberNodeCast(result));

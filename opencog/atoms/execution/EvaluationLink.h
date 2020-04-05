@@ -26,6 +26,7 @@ public:
 	EvaluationLink(const EvaluationLink&) = delete;
 	EvaluationLink& operator=(const EvaluationLink&) = delete;
 
+	virtual bool is_evaluatable() const { return true; }
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
 		return do_evaluate(as, get_handle());
 	}

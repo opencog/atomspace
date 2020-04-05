@@ -82,6 +82,7 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 // Scalar multiplication and addition
 std::vector<double> plus(double, const std::vector<double>&);
 std::vector<double> minus(double, const std::vector<double>&);
+std::vector<double> minus(const std::vector<double>&, double);
 std::vector<double> times(double, const std::vector<double>&);
 std::vector<double> divide(double, const std::vector<double>&);
 
@@ -92,6 +93,10 @@ ValuePtr plus(double f, const FloatValuePtr& fvp) {
 inline
 ValuePtr minus(double f, const FloatValuePtr& fvp) {
 	return createFloatValue(minus(f, fvp->value()));
+}
+inline
+ValuePtr minus(const FloatValuePtr& fvp, double f) {
+	return createFloatValue(minus(fvp->value(), f));
 }
 inline
 ValuePtr times(double f, const FloatValuePtr& fvp) {

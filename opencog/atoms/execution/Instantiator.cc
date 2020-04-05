@@ -571,6 +571,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	//   impedes lazy evaluations.
 	Type t = expr->get_type();
 	if (nameserver().isA(t, VALUE_OF_LINK) or
+	    nameserver().isA(t, SET_VALUE_LINK) or
 	    nameserver().isA(t, ARITHMETIC_LINK))
 	{
 		// Perform substitution on non-numeric arguments before
@@ -583,6 +584,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		{
 			Type th = h->get_type();
 			if (nameserver().isA(th, VALUE_OF_LINK) or
+			    nameserver().isA(th, SET_VALUE_LINK) or
 			    nameserver().isA(th, ARITHMETIC_LINK))
 			{
 			   oset_results.push_back(h);
@@ -625,6 +627,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
+		// XXX Don't we need to plug in the vars, first!?
+		// Maybe this is just not tested?
 		Handle eolh = reduce_exout(expr, silent);
 		if (not eolh->is_executable()) return eolh;
 		eolh = _as->add_atom(eolh);

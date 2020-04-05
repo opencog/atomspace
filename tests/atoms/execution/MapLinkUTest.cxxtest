@@ -312,7 +312,7 @@ void MapLinkUTest::test_local_quote_map(void)
         expected1 = eval->eval_h("local-quote-map-result-1"),
         expected2 = eval->eval_h("local-quote-map-result-2");
 
-    printf("result %s", result->to_string().c_str());
+    printf("result %s\n", result->to_string().c_str());
     printf("expected1 %s\n", expected1->to_string().c_str());
     printf("expected2 %s\n", expected2->to_string().c_str());
 

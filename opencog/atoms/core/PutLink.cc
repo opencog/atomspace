@@ -339,8 +339,16 @@ Handle PutLink::do_reduce(void) const
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 	Handle args(_arguments);
 
-	if (args->is_executable())
+	// There is no eager execution of arguments, before performing
+	// the reduction ... with one exception. If the argument is a
+	// GetLink, we perform the search to find what to plug in.
+	if (nameserver().isA(args->get_type(), GET_LINK))
+	{
 		args = HandleCast(args->execute());
+		if (nullptr == args)
+			throw SyntaxException(TRACE_INFO,
+			       "Execution must result in an Atom!");
+	}
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.

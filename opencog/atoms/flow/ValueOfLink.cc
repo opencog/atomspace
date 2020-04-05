@@ -50,20 +50,28 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the AtomSpace!
 	Handle ah(as->get_atom(_outgoing[0]));
-	if (ah)
+	Handle ak(as->get_atom(_outgoing[1]));
+	if (ah and ak)
 	{
-		ValuePtr pap = ah->getValue(_outgoing[1]);
+		ValuePtr pap = ah->getValue(ak);
 		if (pap) return pap;
+
+		if (silent)
+			throw SilentException();
+
+		throw InvalidParamException(TRACE_INFO,
+		   "No value at key %s on atom %s",
+		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
-	// Hmm. shouldn't this be SilentException?
 	if (silent)
-		throw NotEvaluatableException();
+		throw SilentException();
 
+	// If the user asked for a Value not in any atomspace,
+	// what should we do? I dunno, so I'm throwing an error.
 	throw InvalidParamException(TRACE_INFO,
-		"No such key %s on atom %s",
-		_outgoing[1]->to_string().c_str(),
-		_outgoing[0]->to_string().c_str());
+	   "Asked for a Value of atom not in any atomspace: %s",
+	   this->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

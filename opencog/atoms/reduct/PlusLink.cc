@@ -204,7 +204,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
-	// Vector times vector
+	// Vector plus vector
 	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return plus(FloatValueCast(vi), FloatValueCast(vj));
