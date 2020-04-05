@@ -167,6 +167,17 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, dim);
 	}
 
+	if (EVALUATION_STREAM == t)
+	{
+		if (!scm_is_pair(svalue_list))
+			scm_wrong_type_arg_msg("cog-new-value", 1,
+				svalue_list, "An Atom");
+
+		SCM svalue = SCM_CAR(svalue_list);
+		Handle h = verify_handle(svalue, "cog-new-value", 2);
+		return valueserver().create(t, h);
+	}
+
 	// Catch and handle generic FloatValues not named above.
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
