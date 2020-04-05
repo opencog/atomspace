@@ -28,7 +28,7 @@ public:
 
 	virtual bool is_evaluatable() const { return true; }
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
-		return do_evaluate(as, get_handle());
+		return do_evaluate(as, get_handle(), silent);
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
