@@ -26,7 +26,8 @@
 
 (use-modules (opencog) (opencog exec))
 
-; An atom with a TruthValue on it...
+; An atom with a TruthValue on it...  See below for a way of setting
+; TruthValues directly, using NumberNodes.
 (Concept "foo" (stv 0.3 0.7))
 
 ; The TruthValue can be fetched in either of two ways.
@@ -40,6 +41,14 @@
 		(TruthValueOf (Concept "foo"))))
 
 ; Verify that the TV on "bar" has changed.
+(cog-tv (Concept "bar"))
+
+; The DefinedFormulaLink can be used to create SimpleTruthValues out
+; of a pair of numbers. For example:
+(cog-execute! (SetTV (Concept "bar")
+	(PredicateFormula (Number 0.2718) (Number 0.314))))
+
+; Explicitly look at it.
 (cog-tv (Concept "bar"))
 
 ; SetTV is interesting because it allows complex arithmetic expressions
