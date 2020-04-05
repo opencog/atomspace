@@ -47,9 +47,10 @@ bool FloatValue::operator==(const Value& other) const
 
 // ==============================================================
 
-std::string FloatValue::to_string(const std::string& indent) const
+std::string FloatValue::to_string(const std::string& indent, Type t) const
 {
-	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	update();
+	std::string rv = indent + "(" + nameserver().getTypeName(t);
 	for (double v :_value)
 	{
 		char buf[40];

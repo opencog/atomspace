@@ -59,7 +59,9 @@ public:
 	const std::vector<double>& value() const { update(); return _value; }
 
 	/** Returns a string representation of the value. */
-	virtual std::string to_string(const std::string& indent = "") const;
+	virtual std::string to_string(const std::string& indent = "") const
+	{ return to_string(indent, _type); }
+	std::string to_string(const std::string& indent, Type) const;
 
 	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;

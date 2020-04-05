@@ -51,7 +51,8 @@ std::string RandomStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += " " + std::to_string(_len);
-	rv += ")\n";
+	rv += ")\n" + indent + "; Current sample:\n";
+	rv += indent + "; " + FloatValue::to_string("", FLOAT_VALUE);
 	return rv;
 }
 
