@@ -30,7 +30,19 @@
 using namespace opencog;
 
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
-	: SimpleTruthValue(0, 0), _formula(h), _as(h->getAtomSpace())
+	: SimpleTruthValue(0, 0), _formula({h}), _as(h->getAtomSpace())
+{
+	update();
+}
+
+FormulaTruthValue::FormulaTruthValue(const Handle& stn, const Handle& cnf)
+	: SimpleTruthValue(0, 0), _formula({stn, cnf}), _as(stn->getAtomSpace())
+{
+	update();
+}
+
+FormulaTruthValue::FormulaTruthValue(const HandleSeq&& seq)
+	: SimpleTruthValue(0, 0), _formula(seq), _as(seq[0]->getAtomSpace())
 {
 	update();
 }
@@ -40,14 +52,39 @@ FormulaTruthValue::~FormulaTruthValue()
 
 void FormulaTruthValue::update(void) const
 {
-	if (_formula->is_evaluatable())
+	// If there are two formulas, they produce the strength and
+	// the confidence, respectively.  We ignore more than two formulas.
+	if (1 < _formula.size())
 	{
-		TruthValuePtr tvp = _formula->evaluate(_as);
+		for (size_t i=0; i<2; i++)
+		{
+			const Handle& fo = _formula[i];
+			if (not fo->is_executable())
+				throw SyntaxException(TRACE_INFO,
+					"Formula needs to be executable; got %s",
+						fo->to_string().c_str());
+
+			ValuePtr vp = fo->execute(_as);
+			if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+				throw SyntaxException(TRACE_INFO,
+					"Expecting FloatValue, got %s",
+						vp->to_string().c_str());
+			_value[i] = FloatValueCast(vp)->value()[0];
+		}
+		return;
+	}
+
+	// If there is just one formula, then we expect it to produce
+	// two numbers, the strength and the confidence.
+	const Handle& fo = _formula[0];
+	if (fo->is_evaluatable())
+	{
+		TruthValuePtr tvp = fo->evaluate(_as);
 		_value = tvp->value();
 	}
-	else if (_formula->is_executable())
+	else if (fo->is_executable())
 	{
-		ValuePtr vp = _formula->execute(_as);
+		ValuePtr vp = fo->execute(_as);
 		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
 			throw SyntaxException(TRACE_INFO,
 				"Expecting FloatValue, got %s",
@@ -56,7 +93,7 @@ void FormulaTruthValue::update(void) const
 	}
 	else
 	{
-		TruthValuePtr tvp = _formula->getTruthValue();
+		TruthValuePtr tvp = fo->getTruthValue();
 		_value = tvp->value();
 	}
 }
@@ -71,7 +108,8 @@ std::string FormulaTruthValue::to_string(const std::string& indent) const
 {
 	update();
 	std::string rv = indent + "(FormulaTruthValue\n";
-	rv += _formula->to_string(indent + "   ") + "\n";
+	for (const Handle& fo: _formula)
+		rv += fo->to_string(indent + "   ") + "\n";
 	rv += indent + "   ; Current sample:\n";
 	rv += indent + "   ; " + SimpleTruthValue::to_string() + "\n)";
 	return rv;

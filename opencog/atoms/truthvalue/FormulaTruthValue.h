@@ -39,11 +39,13 @@ class FormulaTruthValue : public SimpleTruthValue
 {
 protected:
 	virtual void update(void) const;
-	Handle _formula;
+	HandleSeq _formula;
 	AtomSpace* _as;
 
 public:
 	FormulaTruthValue(const Handle&);
+	FormulaTruthValue(const Handle&, const Handle&);
+	FormulaTruthValue(const HandleSeq&&);
 	virtual ~FormulaTruthValue();
 
 	virtual bool operator==(const Value& rhs) const;
