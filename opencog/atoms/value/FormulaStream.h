@@ -65,7 +65,8 @@ static inline FormulaStreamPtr FormulaStreamCast(ValuePtr& a)
 	{ return std::dynamic_pointer_cast<FormulaStream>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<FormulaStream> createFormulaStream(Type&&... args) {
+static inline std::shared_ptr<FormulaStream> createFormulaStream(Type&&... args)
+{
 	return std::make_shared<FormulaStream>(std::forward<Type>(args)...);
 }
 

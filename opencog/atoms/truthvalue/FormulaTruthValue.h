@@ -24,7 +24,9 @@
 #define _OPENCOG_FORMULA_TRUTH_VALUE_H_
 
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
+// #include <opencog/atoms/value/FormulaStream.h>
 
 namespace opencog
 {
@@ -32,14 +34,17 @@ namespace opencog
  *  @{
  */
 
-class FormulaTruthValue;
-typedef std::shared_ptr<const FormulaTruthValue> FormulaTruthValuePtr;
-
 //! A TruthValue that recomputes the TV from a stored formula.
-class FormulaTruthValue : public SimpleTruthValue, FormulaStream
+class FormulaTruthValue : public SimpleTruthValue
 {
+protected:
+	virtual void update(void) const;
+	Handle _formula;
+	AtomSpace* _as;
+
 public:
 	FormulaTruthValue(const Handle&);
+	virtual ~FormulaTruthValue();
 
 	virtual bool operator==(const Value& rhs) const;
 
@@ -47,11 +52,19 @@ public:
 
 	// Shouldn't these be virtual?
 	strength_t get_mean() const;
-	count_t get_count() const;
+	// count_t get_count() const;
 	confidence_t get_confidence() const;
 };
 
-#define createFormulaTrutValue std::make_shared<FormulaTruthValue>
+typedef std::shared_ptr<const FormulaTruthValue> FormulaTruthValuePtr;
+static inline FormulaTruthValuePtr FormulaTruthValueCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<FormulaTruthValue>(a); }
+
+template<typename ... Type>
+static inline std::shared_ptr<FormulaTruthValue> createFormulaTruthValue(Type&&... args)
+{
+   return std::make_shared<FormulaTruthValue>(std::forward<Type>(args)...);
+}
 
 /** @}*/
 } // namespace opencog

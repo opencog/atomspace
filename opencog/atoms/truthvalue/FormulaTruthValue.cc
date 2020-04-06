@@ -30,10 +30,16 @@
 using namespace opencog;
 
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
-	: SimpleTruthValue(0, 0), FormulaStream(h)
+	: SimpleTruthValue(0, 0), _formula(h), _as(h->getAtomSpace())
 {
 	_value.resize(2);
 }
+
+FormulaTruthValue::~FormulaTruthValue()
+{}
+
+void FormulaTruthValue::update(void) const
+{}
 
 strength_t FormulaTruthValue::get_mean() const
 {
@@ -57,7 +63,7 @@ std::string FormulaTruthValue::to_string(const std::string& indent) const
 
 bool FormulaTruthValue::operator==(const Value& rhs) const
 {
-	if (FORMULA_TRUTH_VALUE != rhs->get_type()) return false;
+	if (FORMULA_TRUTH_VALUE != rhs.get_type()) return false;
 
 	const FormulaTruthValue *ftv = dynamic_cast<const FormulaTruthValue *>(&rhs);
 	return ftv->_formula == _formula;
