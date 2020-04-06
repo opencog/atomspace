@@ -50,13 +50,13 @@ FORMULA_STREAM <- STREAM_VALUE
 // are vital and centrally important for getting things to work.
 //
 TRUTH_VALUE                <- FLOAT_VALUE
-SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE "SimpleTV"
-COUNT_TRUTH_VALUE          <- TRUTH_VALUE "CountTV"
+SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
+COUNT_TRUTH_VALUE          <- TRUTH_VALUE
 INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
 FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
-FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM "FormulaTV"
+FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
