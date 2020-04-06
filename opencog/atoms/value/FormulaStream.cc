@@ -82,7 +82,7 @@ std::string FormulaStream::to_string(const std::string& indent) const
 	rv += "\n" + _formula->to_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
 	rv += indent + "   ; " + FloatValue::to_string("", FLOAT_VALUE);
-	rv += "\n)\n";
+	rv += "\n)";
 	return rv;
 }
 

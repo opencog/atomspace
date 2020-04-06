@@ -65,11 +65,12 @@ confidence_t FormulaTruthValue::get_confidence() const
 
 std::string FormulaTruthValue::to_string(const std::string& indent) const
 {
-	char buf[1024];
-	sprintf(buf, "(stv %f %f)",
-			static_cast<float>(get_mean()),
-			static_cast<float>(get_confidence()));
-	return buf;
+	update();
+	std::string rv = indent + "(FormulaTruthValue\n";
+	rv += _formula->to_string(indent + "   ") + "\n";
+	rv += indent + "   ; Current sample:\n";
+	rv += indent + "   ; " + SimpleTruthValue::to_string() + "\n)";
+	return rv;
 }
 
 bool FormulaTruthValue::operator==(const Value& rhs) const
