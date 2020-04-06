@@ -590,11 +590,18 @@ CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 SET_VALUE_LINK <- FUNCTION_LINK
 SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
-// The opposite of the above: given something that evaluates to a
-// FloatValue, return a TruthValue.  Kind-of-like
-// GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
-// When evaluated, returns a SimpleTruthValue
+// Return a SimpleTruthValue when evaluated.
+// This is used to wrap any atom that returns a FloatValue; all this
+// does is to provide some formatting.  We don't really need to have
+// PredicateFormulaLink, because anything returning FloatValue is
+// enough. But during a transition period, this is handy to have.
+// Its handy because it looks a lot like a GROUNDED_PREDICATE_NODE,
+// except that the formula is in the Atomese, not scheme/python.
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+
+// Return a FormulaTruthValue when evaluated.
+// Like the above, but the TV is not a constant, but the formula itself.
+DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
