@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/EvaluationStream.cc
+ * opencog/atoms/value/FormulaStream.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -21,7 +21,7 @@
  */
 
 #include <stdlib.h>
-#include <opencog/atoms/value/EvaluationStream.h>
+#include <opencog/atoms/value/FormulaStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -30,8 +30,8 @@ using namespace opencog;
 
 // ==============================================================
 
-EvaluationStream::EvaluationStream(const Handle& h) :
-	StreamValue(EVALUATION_STREAM), _formula(h), _as(h->getAtomSpace())
+FormulaStream::FormulaStream(const Handle& h) :
+	StreamValue(FORMULA_STREAM), _formula(h), _as(h->getAtomSpace())
 {
 	ValuePtr vp;
 	if (h->is_executable())
@@ -59,7 +59,7 @@ EvaluationStream::EvaluationStream(const Handle& h) :
 
 // ==============================================================
 
-void EvaluationStream::update() const
+void FormulaStream::update() const
 {
 	FloatValuePtr vp;
 	if (_formula->is_evaluatable())
@@ -76,7 +76,7 @@ void EvaluationStream::update() const
 
 // ==============================================================
 
-std::string EvaluationStream::to_string(const std::string& indent) const
+std::string FormulaStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += "\n" + _formula->to_string(indent + "   ");
@@ -88,15 +88,15 @@ std::string EvaluationStream::to_string(const std::string& indent) const
 
 // ==============================================================
 
-bool EvaluationStream::operator==(const Value& other) const
+bool FormulaStream::operator==(const Value& other) const
 {
-	if (EVALUATION_STREAM != other.get_type()) return false;
+	if (FORMULA_STREAM != other.get_type()) return false;
 
-	const EvaluationStream* eso = (const EvaluationStream*) &other;
+	const FormulaStream* eso = (const FormulaStream*) &other;
 	return eso->_formula == _formula;
 }
 
 // ==============================================================
 
 // Adds factor when library is loaded.
-DEFINE_VALUE_FACTORY(EVALUATION_STREAM, createEvaluationStream, const Handle&)
+DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const Handle&)

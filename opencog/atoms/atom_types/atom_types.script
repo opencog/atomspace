@@ -27,6 +27,17 @@ LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
 
 // ===========================================================
+// A base class for time-varying (floating-point) values.
+// XXX TODO we need other base classes for other kinds of varying values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
+// A stream computed by a formula held in the AtomSpace.
+FORMULA_STREAM <- STREAM_VALUE
+
+// ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
 // to generalize the notion of a subset (in exactly the same way that
 // a subobject classifier does so in an arbitrary topos.) In some cases,
@@ -45,17 +56,7 @@ INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
 FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
-
-// ===========================================================
-// A base class for time-varying (floating-point) values.
-// XXX TODO we need other base classes for other kinds of varying values.
-STREAM_VALUE <- FLOAT_VALUE
-
-// An example of a time-varying value stream
-RANDOM_STREAM <- STREAM_VALUE
-
-// A stream computed by a formula held in the AtomSpace.
-EVALUATION_STREAM <- STREAM_VALUE
+FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
@@ -594,9 +595,6 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
 // When evaluated, returns a SimpleTruthValue
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
-
-// Much like a PREDICATE_FORMULA, except it returns a EvaluationStream.
-DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK

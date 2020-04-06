@@ -33,7 +33,7 @@
 (cog-evaluate! evlnk)
 (cog-tv evlnk)
 
-; The EvaluationStream is a kind of FloatValue, such that, every time
+; The FormulaStream is a kind of FloatValue, such that, every time
 ; that it is accessed, the current value -- that is, the current vector
 ; of floating point numbers -- is recomputed.  The recomputation is
 ; forced by calling evaluate (or execute, if available) on the Atom
@@ -43,7 +43,7 @@
 ; current numeric value of the stream. This is illustrated below.
 ;
 ; First, create the stream:
-(define evstream (EvaluationStream evlnk))
+(define evstream (FormulaStream evlnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:

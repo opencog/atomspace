@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/EvaluationStream.h
+ * opencog/atoms/value/FormulaStream.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EVALUATION_STREAM_H
-#define _OPENCOG_EVALUATION_STREAM_H
+#ifndef _OPENCOG_FORMULA_STREAM_H
+#define _OPENCOG_FORMULA_STREAM_H
 
 #include <vector>
 #include <opencog/atoms/value/StreamValue.h>
@@ -36,22 +36,22 @@ namespace opencog
  */
 
 /**
- * EvaluationStream will evaluate the stored Atom to obtain a fresh
+ * FormulaStream will evaluate the stored Atom to obtain a fresh
  * FloatValue, every time it is queried for data.
  */
-class EvaluationStream
+class FormulaStream
 	: public StreamValue
 {
 protected:
-	EvaluationStream(Type t, const Handle&) : StreamValue(t) {}
+	FormulaStream(Type t, const Handle&) : StreamValue(t) {}
 
 	virtual void update() const;
 	Handle _formula;
 	AtomSpace* _as;
 
 public:
-	EvaluationStream(const Handle&);
-	virtual ~EvaluationStream() {}
+	FormulaStream(const Handle&);
+	virtual ~FormulaStream() {}
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
@@ -60,17 +60,17 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<EvaluationStream> EvaluationStreamPtr;
-static inline EvaluationStreamPtr EvaluationStreamCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<EvaluationStream>(a); }
+typedef std::shared_ptr<FormulaStream> FormulaStreamPtr;
+static inline FormulaStreamPtr FormulaStreamCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<FormulaStream>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<EvaluationStream> createEvaluationStream(Type&&... args) {
-	return std::make_shared<EvaluationStream>(std::forward<Type>(args)...);
+static inline std::shared_ptr<FormulaStream> createFormulaStream(Type&&... args) {
+	return std::make_shared<FormulaStream>(std::forward<Type>(args)...);
 }
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_EVALUATION_STREAM_H
+#endif // _OPENCOG_FORMULA_STREAM_H
