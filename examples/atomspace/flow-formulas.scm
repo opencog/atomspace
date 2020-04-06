@@ -92,7 +92,14 @@
 
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
-; the setting of truth values.
+; the setting of truth values. Can we do the same, without using scheme?
+; Yes, we can. Just use the DynamicFormulaLink.  This is quite similar
+; to the PredicateFormulaLink, demoed in `formulas.scm`, but in this
+; case, instead of producing a single, static TV, this wraps the entire
+; formula into a FormulasTruthValue. Thus, it is enough to set the TV
+; only once; after that, the TV updates will be automatic.
+
+; For example:
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
