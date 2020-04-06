@@ -167,7 +167,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, dim);
 	}
 
-	if (EVALUATION_STREAM == t)
+	if (nameserver().isA(t, FORMULA_STREAM))
 	{
 		if (!scm_is_pair(svalue_list))
 			scm_wrong_type_arg_msg("cog-new-value", 1,
