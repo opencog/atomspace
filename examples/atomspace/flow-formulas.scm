@@ -27,7 +27,7 @@
 		(List (Concept "A") (Concept "B"))))
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
-; every time that it is evaluated.
+; every time that it is evaluated. We repeat this experiment here.
 (cog-set-tv! (Concept "A") (stv 0.3 0.7))
 (cog-set-tv! (Concept "B") (stv 0.4 0.6))
 (cog-evaluate! evlnk)
@@ -71,7 +71,12 @@
 ; ... and then attach this auto-updating TV to it.
 (cog-set-tv! a-implies-b tv-stream)
 
-; Lets take a look at it's current value:
+; Take a look at it, make sure that it is actually there.
+(cog-tv a-implies-b)
+
+; The above printed the "actual" TV, as it sits on the Atom.
+; However, typically, we want the numeric values, and not the formula.
+; These can be gotten simply by asking for them, directly, by name.
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
@@ -88,9 +93,18 @@
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values.
-(SetTV
-	(Implication (Concept "A") (Concept "B"))
-	(FormulaTruthValue evlnk))
+(cog-execute!
+	(SetTV
+		(Implication (Concept "A") (Concept "B"))
+		(DynamicFormula
+			(Minus
+				(Number 1)
+				(Times
+					(StrengthOf (Concept "A"))
+					(StrengthOf (Concept "B"))))
+			(Times
+				(ConfidenceOf (Concept "A"))
+				(ConfidenceOf (Concept "B"))))))
 
 ; -------------------------------------------------------------
 ; The FormulaStream is the generalization of FormulaTruthValue, suitable

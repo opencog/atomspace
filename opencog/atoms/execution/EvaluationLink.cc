@@ -8,15 +8,16 @@
 #include <thread>
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
-#include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/truthvalue/FormulaTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
@@ -537,6 +538,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 }
 
 /// Evaluate a formula defined by a PREDICATE_FORMULA_LINK
+/// This always returns a SimpleTruthValue.
 static TruthValuePtr eval_formula(AtomSpace* as,
                                   const Handle& predform,
                                   const HandleSeq& cargs,
@@ -597,9 +599,6 @@ static TruthValuePtr eval_formula(AtomSpace* as,
 		throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 	}
 
-	// XXX FIXME; if we are given more than two floats, then
-	// perhaps we should create some other kind of TruthValue?
-	// Maybe a distributional one ?? Or a CountTV ??
 	return createSimpleTruthValue(nums);
 }
 
@@ -639,9 +638,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		}
 
 		if (PREDICATE_FORMULA_LINK == dtype)
-		{
 			return eval_formula(as, defn, cargs, silent);
-		}
 
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
@@ -659,15 +656,12 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// Like a GPN, but the entire function is declared in the
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
-	{
 		return eval_formula(as, pn, cargs, silent);
-	}
 
+	// The remaining code below handles GROUNDED_PREDICATE_NODE
+	// Throw a silent exception; this is called in some try..catch blocks.
 	if (GROUNDED_PREDICATE_NODE != pntype)
-	{
-		// Throw a silent exception; this is called in some try..catch blocks.
 		throw NotEvaluatableException();
-	}
 
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
@@ -920,6 +914,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
 		}
 		return createSimpleTruthValue(std::move(nums));
+	}
+	else if (DYNAMIC_FORMULA_LINK == t)
+	{
+		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
 	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{
