@@ -32,15 +32,7 @@ using namespace opencog;
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
 	: SimpleTruthValue(0, 0), _formula(h), _as(h->getAtomSpace())
 {
-	_value.resize(2);
-
-	if (not h->is_evaluatable())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an evaluatable atom, got %s",
-			h->to_string().c_str());
-
-	TruthValuePtr tvp = h->evaluate(_as);
-	_value = tvp->value();
+	update();
 }
 
 FormulaTruthValue::~FormulaTruthValue()
@@ -48,19 +40,31 @@ FormulaTruthValue::~FormulaTruthValue()
 
 void FormulaTruthValue::update(void) const
 {
-	TruthValuePtr tvp = _formula->evaluate(_as);
-	_value = tvp->value();
+	if (_formula->is_evaluatable())
+	{
+		TruthValuePtr tvp = _formula->evaluate(_as);
+		_value = tvp->value();
+	}
+	else if (_formula->is_executable())
+	{
+		ValuePtr vp = _formula->execute(_as);
+		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting FloatValue, got %s",
+					vp->to_string().c_str());
+		_value = FloatValueCast(vp)->value();
+	}
+	else
+	{
+		TruthValuePtr tvp = _formula->getTruthValue();
+		_value = tvp->value();
+	}
 }
 
 strength_t FormulaTruthValue::get_mean() const
 {
 	update();
 	return _value[MEAN];
-}
-
-confidence_t FormulaTruthValue::get_confidence() const
-{
-	return _value[CONFIDENCE];
 }
 
 std::string FormulaTruthValue::to_string(const std::string& indent) const
