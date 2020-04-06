@@ -33,13 +33,24 @@ FormulaTruthValue::FormulaTruthValue(const Handle& h)
 	: SimpleTruthValue(0, 0), _formula(h), _as(h->getAtomSpace())
 {
 	_value.resize(2);
+
+	if (not h->is_evaluatable())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an evaluatable atom, got %s",
+			h->to_string().c_str());
+
+	TruthValuePtr tvp = h->evaluate(_as);
+	_value = tvp->value();
 }
 
 FormulaTruthValue::~FormulaTruthValue()
 {}
 
 void FormulaTruthValue::update(void) const
-{}
+{
+	TruthValuePtr tvp = _formula->evaluate(_as);
+	_value = tvp->value();
+}
 
 strength_t FormulaTruthValue::get_mean() const
 {
