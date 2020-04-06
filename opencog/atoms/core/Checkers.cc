@@ -44,6 +44,7 @@ bool check_evaluatable(const Handle& bool_atom)
 	// Make an exception for AndLink, its used in pattern matcher
 	// in an unseemly way.
 	if (bool_atom->get_type() == AND_LINK) return true;
+	if (bool_atom->get_type() == OR_LINK) return true;
 
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
