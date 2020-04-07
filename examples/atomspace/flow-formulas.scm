@@ -157,8 +157,33 @@
 ; forced by calling `execute()` on the Atom that the stream is created
 ; with.
 ;
-; First, create the stream:
-(define ev-stream (FormulaStream evlnk))
+; Create an Atom, a key, and a random stream of five numbers.
+; The random stream is a FloatValue vector, of length 5; each of
+; the numbers are randomly distributed between 0.0 and 1.0
+(define foo (Concept "foo"))
+(define bar (Concept "bar"))
+(define akey (Predicate "some key"))
+(define bkey (Predicate "other key"))
 
+(cog-set-value! foo akey (RandomStream 5))
+
+; Take a look at what was created.
+(cog-value foo akey)
+
+; Verify that it really is a vector, and that it changes with each
+; access.
+(cog-value->list (cog-value foo akey))
+(cog-value->list (cog-value foo akey))
+(cog-value->list (cog-value foo akey))
+
+; Apply a formula to that stream, to get a different stream.
+(define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
+
+; Place it on an atom, take a look at it, and make sure that it works.
+(cog-set-value! bar bkey fstream)
+(cog-value bar bkey)
+(cog-value->list (cog-value bar bkey))
+(cog-value->list (cog-value bar bkey))
+(cog-value->list (cog-value bar bkey))
 
 ; ------- THE END -------
