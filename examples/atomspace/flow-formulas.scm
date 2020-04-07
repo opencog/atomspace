@@ -1,6 +1,7 @@
 ;
 ; flow-formulas.scm -- Dynamically changing flows.
 ;
+;
 
 (use-modules (opencog) (opencog exec))
 
@@ -185,5 +186,9 @@
 (cog-value->list (cog-value bar bkey))
 (cog-value->list (cog-value bar bkey))
 (cog-value->list (cog-value bar bkey))
+
+; TODO: At this time, there is no DynamicSchema that would be the
+; generalized analog of DynamicFormula demonstrated above.  This
+; should be created...
 
 ; ------- THE END -------
