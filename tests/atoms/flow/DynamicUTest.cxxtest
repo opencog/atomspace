@@ -6,8 +6,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <stdlib.h>
+
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/util/Logger.h>
@@ -34,6 +38,7 @@ public:
 	void test_formula_tv();
 	void test_dynamic_formula();
 	void test_defined_dynamic();
+	void test_formula_stream();
 };
 
 DynamicUTest::DynamicUTest(void) : _eval(&_as)
@@ -161,6 +166,46 @@ void DynamicUTest::test_defined_dynamic()
 	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
 	TS_ASSERT(fabs(stv->get_mean()       - 0.96) <= EPSI);
 	TS_ASSERT(fabs(stv->get_confidence() - 0.54) <= EPSI);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Formula stream
+void DynamicUTest::test_formula_stream()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ValuePtr result = _eval.eval_v("(cog-value bar bkey)");
+	printf("result: %s\n", result->to_string().c_str());
+	printf("Got type=%s\n",
+		nameserver().getTypeName(result->get_type()).c_str());
+	TS_ASSERT_EQUALS(result->get_type(), FORMULA_STREAM);
+
+	Handle foo = _as.get_handle(CONCEPT_NODE, "foo");
+	Handle akey = _as.get_handle(PREDICATE_NODE, "some key");
+
+	for (int i=0; i<10; i++)
+	{
+		std::vector<double> rv;
+		for (int k=0; k<5; k++)
+			rv.push_back(((double) random()) / RAND_MAX);
+
+		foo->setValue(akey, createFloatValue(std::vector<double>(rv)));
+
+		ValuePtr vp = _eval.eval_v("(cog-value bar bkey)");
+		TS_ASSERT_EQUALS(vp->get_type(), FORMULA_STREAM);
+
+		FloatValuePtr fvp = FloatValueCast(vp);
+
+		std::vector<double> result = fvp->value();
+		TS_ASSERT_EQUALS(result.size(), 5);
+		for (int k=0; k<5; k++)
+		{
+			// printf("i=%d idx=%d Got %f vs %f\n", i, k, result[k], rv[k]);
+			TS_ASSERT(fabs(result[k] - rv[k] - 10.0) <= EPSI);
+		}
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
