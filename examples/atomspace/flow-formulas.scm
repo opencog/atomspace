@@ -113,6 +113,10 @@
 				(ConfidenceOf (Concept "A"))
 				(ConfidenceOf (Concept "B"))))))
 
+; The above can be tedious, as it requires manually creating a new
+; formula for each SetTV.  Some of this tedium can be avoided by
+; using formulas with variables in them. Using the same formula as
+; before, we get a dynamic example:
 (DefineLink
    (DefinedPredicate "dynamic example")
    (DynamicFormula
@@ -125,11 +129,26 @@
          (ConfidenceOf (Variable "$X"))
          (ConfidenceOf (Variable "$Y")))))
 
+; This can be used as anywhere any other predicate can be used;
+; anywhere a PredicdeNode, GroundedPredicateNode, DefinedPredicate,
+; or PredicateForumla can be used. They all provide the same utility:
+; they provide a TruthValue.
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
 		(DefinedPredicate "dynamic example")
 		(List (Concept "A") (Concept "B"))))
+
+; Double-check, as before:
+(cog-tv a-implies-b)
+
+; Change the TV on A and B ...
+(cog-set-tv! (Concept "A") (stv 0.1 0.9))
+(cog-set-tv! (Concept "B") (stv 0.1 0.9))
+
+; And take another look.
+(format #t "A implies B has strength ~6F and confidence ~6F\n"
+	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
 ; -------------------------------------------------------------
 ; The FormulaStream is the generalization of FormulaTruthValue, suitable
