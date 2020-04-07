@@ -32,6 +32,8 @@ public:
 	void check(void);
 
 	void test_formula_tv();
+	void test_dynamic_formula();
+	void test_defined_dynamic();
 };
 
 DynamicUTest::DynamicUTest(void) : _eval(&_as)
@@ -50,12 +52,88 @@ void DynamicUTest::setUp(void)
 #define EPSI 1.0e-8
 
 // ====================================================================
-// Basic copy of Value
+// Basic FormulaTruthValue
 void DynamicUTest::test_formula_tv()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	ValuePtr result = _eval.eval_v("tv-stream");
+	// printf("result: %s\n", result->to_string().c_str());
+	printf("Got type=%s\n",
+		nameserver().getTypeName(result->get_type()).c_str());
+	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+
+	TruthValuePtr stv = TruthValueCast(result);
+	// printf("stv: %s\n", stv->to_string().c_str());
+
+	_eval.eval("(cog-set-tv! A (stv 0.1 0.9))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.99) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.81) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.98) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.72) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.3 0.7))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.94) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.56) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.4 0.6))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.96) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.54) <= EPSI);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Basic dynamic truth value
+void DynamicUTest::test_dynamic_formula()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ValuePtr result = _eval.eval_v("(cog-tv a-implies-b)");
+	// printf("result: %s\n", result->to_string().c_str());
+	printf("Got type=%s\n",
+		nameserver().getTypeName(result->get_type()).c_str());
+	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+
+	TruthValuePtr stv = TruthValueCast(result);
+	// printf("stv: %s\n", stv->to_string().c_str());
+
+	_eval.eval("(cog-set-tv! A (stv 0.1 0.9))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.99) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.81) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.98) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.72) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.3 0.7))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.94) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.56) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.4 0.6))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.96) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.54) <= EPSI);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Same as above, but with predicate
+void DynamicUTest::test_defined_dynamic()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ValuePtr result = _eval.eval_v("(cog-tv p-implies-q)");
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());

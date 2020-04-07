@@ -28,10 +28,7 @@
 
 ; ----------
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
-(cog-set-tv! a-implies-b tv-stream)
 
-; ----------
-; For example:
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
@@ -57,17 +54,12 @@
          (ConfidenceOf (Variable "$X"))
          (ConfidenceOf (Variable "$Y")))))
 
+(define p-implies-q (Implication (Concept "P") (Concept "Q")))
 (cog-execute!
 	(SetTV
-		(Implication (Concept "A") (Concept "B"))
+		(Implication (Concept "P") (Concept "Q"))
 		(DefinedPredicate "dynamic example")
 		(List (Concept "A") (Concept "B"))))
-
-(cog-tv a-implies-b)
-
-; Change the TV on A and B ...
-(cog-set-tv! (Concept "A") (stv 0.1 0.9))
-(cog-set-tv! (Concept "B") (stv 0.1 0.9))
 
 ; -------------------------------------------------------------
 (define foo (Concept "foo"))
