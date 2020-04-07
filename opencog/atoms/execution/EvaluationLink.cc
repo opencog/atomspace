@@ -608,24 +608,28 @@ static TruthValuePtr reduce_formula(const Handle& pred,
 	HandleSeq reduced;
 	for (Handle flh : pred->getOutgoingSet())
 	{
-		// We expect a FunctionLink of some kind.
-		// XXX TODO It could be a LAMBDA, too.
-		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+		if (LAMBDA_LINK == flh->get_type())
+			flh = LambdaLinkCast(flh)->beta_reduce(args);
 
-		// The FunctionLink presumably has free variables in it.
-		// Reduce them with the provided arguments.
-		FunctionLinkPtr flp(FunctionLinkCast(flh));
-		const FreeVariables& fvars = flp->get_vars();
-		if (not fvars.empty())
+		if (nameserver().isA(flh->get_type(), FUNCTION_LINK))
 		{
-			// Wherever the args live, the reduced formula must
-			// live there also: it's lifettime must be identical
-			// to the args.
-			AtomSpace* as = args[0]->getAtomSpace();
-			flh = fvars.substitute_nocheck(flh, args);
-			flh = as->add_atom(flh);
+			// The FunctionLink presumably has free variables in it.
+			// Reduce them with the provided arguments.
+			FunctionLinkPtr flp(FunctionLinkCast(flh));
+			const FreeVariables& fvars = flp->get_vars();
+			if (not fvars.empty())
+				flh = fvars.substitute_nocheck(flh, args);
 		}
+		else
+			// We expected something executable...
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a Lambda or FunctionLink");
+
+		// Wherever the args live, the reduced formula must
+		// live there also: it's lifettime must be identical
+		// to the args.
+		AtomSpace* as = args[0]->getAtomSpace();
+		flh = as->add_atom(flh);
 		reduced.push_back(flh);
 	}
 
