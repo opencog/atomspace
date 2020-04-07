@@ -602,6 +602,36 @@ static TruthValuePtr eval_formula(AtomSpace* as,
 	return createSimpleTruthValue(nums);
 }
 
+static TruthValuePtr reduce_formula(const Handle& pred,
+                                    const HandleSeq& args)
+{
+	HandleSeq reduced;
+	for (Handle flh : pred->getOutgoingSet())
+	{
+		// We expect a FunctionLink of some kind.
+		// XXX TODO It could be a LAMBDA, too.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+
+		// The FunctionLink presumably has free variables in it.
+		// Reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			// Wherever the args live, the reduced formula must
+			// live there also: it's lifettime must be identical
+			// to the args.
+			AtomSpace* as = args[0]->getAtomSpace();
+			flh = fvars.substitute_nocheck(flh, args);
+			flh = as->add_atom(flh);
+		}
+		reduced.push_back(flh);
+	}
+
+	return createFormulaTruthValue(std::move(reduced));
+}
+
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
@@ -640,6 +670,9 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		if (PREDICATE_FORMULA_LINK == dtype)
 			return eval_formula(as, defn, cargs, silent);
 
+		if (DYNAMIC_FORMULA_LINK == dtype)
+			return reduce_formula(defn, cargs);
+
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
 			throw SyntaxException(TRACE_INFO,
@@ -657,6 +690,9 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
 		return eval_formula(as, pn, cargs, silent);
+
+	if (DYNAMIC_FORMULA_LINK == pntype)
+		return reduce_formula(pn, cargs);
 
 	// The remaining code below handles GROUNDED_PREDICATE_NODE
 	// Throw a silent exception; this is called in some try..catch blocks.

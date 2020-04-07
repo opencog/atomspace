@@ -113,6 +113,24 @@
 				(ConfidenceOf (Concept "A"))
 				(ConfidenceOf (Concept "B"))))))
 
+(DefineLink
+   (DefinedPredicate "dynamic example")
+   (DynamicFormula
+      (Minus
+         (Number 1)
+         (Times
+            (StrengthOf (Variable "$X"))
+            (StrengthOf (Variable "$Y"))))
+      (Times
+         (ConfidenceOf (Variable "$X"))
+         (ConfidenceOf (Variable "$Y")))))
+
+(cog-execute!
+	(SetTV
+		(Implication (Concept "A") (Concept "B"))
+		(DefinedPredicate "dynamic example")
+		(List (Concept "A") (Concept "B"))))
+
 ; -------------------------------------------------------------
 ; The FormulaStream is the generalization of FormulaTruthValue, suitable
 ; for streaming a FloatValue of arbitary length. As before, whenever it
