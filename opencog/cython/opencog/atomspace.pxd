@@ -213,7 +213,7 @@ cdef class AtomSpace:
     cdef object parent_atomspace
 
 
-cdef create_python_value_from_c_value(cValuePtr& value)
+cdef create_python_value_from_c_value(const cValuePtr& value)
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
