@@ -7,6 +7,7 @@
  */
 
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/util/Logger.h>
@@ -46,6 +47,8 @@ void DynamicUTest::setUp(void)
 {
 }
 
+#define EPSI 1.0e-8
+
 // ====================================================================
 // Basic copy of Value
 void DynamicUTest::test_formula_tv()
@@ -54,11 +57,32 @@ void DynamicUTest::test_formula_tv()
 
 	ValuePtr result = _eval.eval_v("tv-stream");
 	// printf("result: %s\n", result->to_string().c_str());
-	TS_ASSERT_EQUALS(result->gettype(), FORMULA_TRUTH_VALUE);
+	printf("Got type=%s\n",
+		nameserver().getTypeName(result->get_type()).c_str());
+	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
 
-	// printf("expect: %s\n", tvp->to_string().c_str());
+	TruthValuePtr stv = TruthValueCast(result);
+	// printf("stv: %s\n", stv->to_string().c_str());
 
-	// TS_ASSERT_EQUALS(tvp, result);
+	_eval.eval("(cog-set-tv! A (stv 0.1 0.9))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.99) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.81) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.98) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.72) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.2 0.8))");
+	_eval.eval("(cog-set-tv! B (stv 0.3 0.7))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.94) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.56) <= EPSI);
+
+	_eval.eval("(cog-set-tv! A (stv 0.4 0.6))");
+	_eval.eval("(cog-set-tv! B (stv 0.1 0.9))");
+	TS_ASSERT(fabs(stv->get_mean()       - 0.96) <= EPSI);
+	TS_ASSERT(fabs(stv->get_confidence() - 0.54) <= EPSI);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

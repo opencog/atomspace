@@ -32,18 +32,21 @@ using namespace opencog;
 FormulaTruthValue::FormulaTruthValue(const Handle& h)
 	: SimpleTruthValue(0, 0), _formula({h}), _as(h->getAtomSpace())
 {
+	_type = FORMULA_TRUTH_VALUE;
 	update();
 }
 
 FormulaTruthValue::FormulaTruthValue(const Handle& stn, const Handle& cnf)
 	: SimpleTruthValue(0, 0), _formula({stn, cnf}), _as(stn->getAtomSpace())
 {
+	_type = FORMULA_TRUTH_VALUE;
 	update();
 }
 
 FormulaTruthValue::FormulaTruthValue(const HandleSeq&& seq)
 	: SimpleTruthValue(0, 0), _formula(seq), _as(seq[0]->getAtomSpace())
 {
+	_type = FORMULA_TRUTH_VALUE;
 	update();
 }
 
