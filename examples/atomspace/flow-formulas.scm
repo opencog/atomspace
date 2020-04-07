@@ -1,13 +1,70 @@
 ;
 ; flow-formulas.scm -- Dynamically changing flows.
 ;
+; The concept of a "value flow" is the idea that a Value can change
+; dynamically, recomputed from a formula that draws on it's inputs.
+; Examples of such formulas are provided below, together with the
+; code for wiring them into Atoms.
 ;
+; The core implementation is in two parts: the FormulaTruthValue,
+; which implements a dyanamically-variable TruthValue, and the
+; DynamicFormulaLink, which installs this TruthValue into an Atom.
+;
+; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
+; time that it is accessed, the current value -- that is, the current
+; pair of floating point numbers -- is recomputed.  The recomputation
+; occurs every time the numeric value is accessed (i.e. when the
+; strength and confidence of the TV are accessed).
+;
+; The ForumlaStream is a generalization of the FormulaTruthValue, in
+; that it allows for the computation of any FloatValue. That is, the
+; SimpleTV's are just vectors of length two - the strength and
+; confidence, whereas the FloatValue is a vector of arbitrary length.
 
 (use-modules (opencog) (opencog exec))
 
-; A formula for computing a SimpleTruthValue, based on two input Atoms.
-; See the `formulas.scm` example for a detailed explanation of how
-; this should be understood.
+; The FormulaTruthValue is a kind of TruthValue that is recomputed,
+; every time it is accessed. Thus, it is a kind of dynamically-changing
+; TruthValue. The value to be computed can be defined in Atomese. Thus,
+; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
+(define tv-stream
+	(FormulaTruthValue
+		(PredicateFormula
+			(Minus
+				(Number 1)
+				(Times
+					(StrengthOf (Concept "A"))
+					(StrengthOf (Concept "B"))))
+			(Times
+				(ConfidenceOf (Concept "A"))
+				(ConfidenceOf (Concept "B"))))))
+
+; Print it out. Notice a sampling of the current numeric value, printed
+; at the bottom. Of course, at this point Concept A and B only have the
+; default TV of (1, 0), and so the computed value should be (0, 0).
+(display tv-stream) (newline)
+
+; The numeric values only, are printed in a shorter, more readable
+; fashion:
+(cog-value->list tv-stream)
+
+; When the inputs change, the value will track:
+(cog-set-tv! (Concept "A") (stv 0.9 0.2))
+(cog-set-tv! (Concept "B") (stv 0.4 0.7))
+(cog-value->list tv-stream)
+
+(cog-set-tv! (Concept "A") (stv 0.5 0.8))
+(cog-value->list tv-stream)
+
+(cog-set-tv! (Concept "B") (stv 0.314159 0.9))
+(cog-value->list tv-stream)
+
+; ----------
+; The above example hard-codes the Atoms to be used in the formula.
+; It is often convenient to use variables, so that a formula definition
+; can be reused.  Thus, lets recycle a portion of the `formulas.scm`
+; example and create a formula for computing a SimpleTruthValue, based
+; on two input Atoms.
 (DefineLink
    (DefinedPredicate "has a reddish color")
    (PredicateFormula
@@ -21,7 +78,7 @@
          (ConfidenceOf (Variable "$Y")))))
 
 ; Create an EvalationLink that will apply the formula above to a pair
-; of Atoms. See the `formulas.scm` example for details.
+; of Atoms. This is as before; see the `formulas.scm` example for details.
 (define evlnk
 	(Evaluation
 		(DefinedPredicate "has a reddish color")
@@ -34,32 +91,23 @@
 (cog-evaluate! evlnk)
 (cog-tv evlnk)
 
-; ----------
-; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
-; time that it is accessed, the current value -- that is, the current
-; pair of floating point numbers -- is recomputed.  The recomputation
-; is forced by calling evaluate on the Atom that the stream is created
-; with. In this example, that means that the EvaluationLink, created
-; above, will be evaluated, and the result of that evaluation (which
-; is a SimpleTruthValue) is taken as the current numeric value of the
-; stream. This is illustrated below.
-;
-; First, create the stream:
-(define tv-stream (FormulaTruthValue evlnk))
+; Now that we've verified that the EvaluationLink works as expected,
+; it can be deployed in the stream.
+(define ev-stream (FormulaTruthValue evlnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:
-(display tv-stream) (newline)
+(display ev-stream) (newline)
 
 ; Change one of the inputs, and notice the output tracks:
 (cog-set-tv! (Concept "A") (stv 0.9 0.2))
-(display tv-stream) (newline)
+(cog-value->list ev-stream)
 
 (cog-set-tv! (Concept "A") (stv 0.5 0.8))
-(display tv-stream) (newline)
+(cog-value->list ev-stream)
 
 (cog-set-tv! (Concept "B") (stv 0.314159 0.9))
-(display tv-stream) (newline)
+(cog-value->list ev-stream)
 
 ; ----------
 ; This new kind of TV becomes interesting when it is used to
