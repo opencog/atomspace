@@ -341,3 +341,5 @@
 	(cog-outgoing-atom (cog-execute!
 		(Get (State (Anchor "sum") (Variable "$x"))))
 		0))
+
+(*unspecified*)

@@ -51,4 +51,18 @@
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
+; -----------------
+; GPN test
+
+(define (reddish-tv A B)
+	(SimpleTruthValue
+		(- 1 (*  (cog-mean A) (cog-mean B)))
+		(*  (cog-confidence A) (cog-confidence B))))
+
+(define set-gpn
+	(SetTV
+		(Concept "martian rock")
+		(GroundedPredicate "scm: reddish-tv")
+		(List (Concept "A") (Concept "B"))))
+
 (*unspecified*)
