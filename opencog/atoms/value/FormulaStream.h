@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/value/RandomStream.h
+ * opencog/atoms/value/FormulaStream.h
  *
- * Copyright (C) 2015, 2018 Linas Vepstas
+ * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_RANDOM_STREAM_H
-#define _OPENCOG_RANDOM_STREAM_H
+#ifndef _OPENCOG_FORMULA_STREAM_H
+#define _OPENCOG_FORMULA_STREAM_H
 
 #include <vector>
 #include <opencog/atoms/value/StreamValue.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -34,37 +36,42 @@ namespace opencog
  */
 
 /**
- * RandomStreams provide an example of streaming data.
+ * FormulaStream will evaluate the stored Atom to obtain a fresh
+ * FloatValue, every time it is queried for data.
  */
-class RandomStream
+class FormulaStream
 	: public StreamValue
 {
 protected:
-	RandomStream(Type t) : StreamValue(t) {}
-	int _len;
+	FormulaStream(Type t, const Handle&) : StreamValue(t) {}
 
 	virtual void update() const;
+	Handle _formula;
+	AtomSpace* _as;
 
 public:
-	// int is the desired size of the vector.
-	RandomStream(int=1);
-	virtual ~RandomStream() {}
+	FormulaStream(const Handle&);
+	virtual ~FormulaStream() {}
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
+
+	/** Returns true if two values are equal. */
+	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<RandomStream> RandomStreamPtr;
-static inline RandomStreamPtr RandomStreamCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<RandomStream>(a); }
+typedef std::shared_ptr<FormulaStream> FormulaStreamPtr;
+static inline FormulaStreamPtr FormulaStreamCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<FormulaStream>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<RandomStream> createRandomStream(Type&&... args) {
-	return std::make_shared<RandomStream>(std::forward<Type>(args)...);
+static inline std::shared_ptr<FormulaStream> createFormulaStream(Type&&... args)
+{
+	return std::make_shared<FormulaStream>(std::forward<Type>(args)...);
 }
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_RANDOM_STREAM_H
+#endif // _OPENCOG_FORMULA_STREAM_H

@@ -51,6 +51,7 @@ first).
 * `stream.scm`         -- Using a stream of time-varying Values.
 * `formulas.scm`       -- Representing arithmetic and computing Values.
 * `flows.scm`          -- Flowing Values around.
+* `flow-formulas.scm`  -- Dynamically updating value flows.
 
 There is an important collection of demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching

@@ -1,6 +1,7 @@
 ADD_LIBRARY (truthvalue
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
+	FormulaTruthValue.cc
 	FuzzyTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
@@ -22,6 +23,7 @@ INSTALL (TARGETS truthvalue EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	CountTruthValue.h
+	FormulaTruthValue.h
 	FuzzyTruthValue.h
 	IndefiniteTruthValue.h
 	ProbabilisticTruthValue.h

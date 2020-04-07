@@ -27,6 +27,17 @@ LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
 
 // ===========================================================
+// A base class for time-varying (floating-point) values.
+// XXX TODO we need other base classes for other kinds of varying values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
+// A stream computed by a formula held in the AtomSpace.
+FORMULA_STREAM <- STREAM_VALUE
+
+// ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
 // to generalize the notion of a subset (in exactly the same way that
 // a subobject classifier does so in an arbitrary topos.) In some cases,
@@ -45,14 +56,7 @@ INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
 FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
-
-// ===========================================================
-// A base class for time-varying (floating-point) values.
-// XXX TODO we need other base classes for other kinds of varying values.
-STREAM_VALUE <- FLOAT_VALUE
-
-// An example of a time-varying value stream
-RANDOM_STREAM <- STREAM_VALUE
+FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
@@ -586,12 +590,18 @@ CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 SET_VALUE_LINK <- FUNCTION_LINK
 SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
-// The opposite of the above: given something that evaluates to a
-// FloatValue, return a TruthValue.  Kind-of-like
-// GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
-// This is not really needed, but will make the transition process
-// smoother.
+// Return a SimpleTruthValue when evaluated.
+// This is used to wrap any atom that returns a FloatValue; all this
+// does is to provide some formatting.  We don't really need to have
+// PredicateFormulaLink, because anything returning FloatValue is
+// enough. But during a transition period, this is handy to have.
+// Its handy because it looks a lot like a GROUNDED_PREDICATE_NODE,
+// except that the formula is in the Atomese, not scheme/python.
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+
+// Return a FormulaTruthValue when evaluated.
+// Like the above, but the TV is not a constant, but the formula itself.
+DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
