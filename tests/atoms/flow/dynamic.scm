@@ -4,7 +4,21 @@
 
 (use-modules (opencog) (opencog exec))
 
-; For DynamicUTest::test_formula_tv()
+; For DynamicUTest::test_predicate_formula()
+
+(define A (Concept "A"))
+(define B (Concept "B"))
+
+(define ftv
+	(FormulaTruthValue
+		(PredicateFormula
+			(Minus
+				(Number 1)
+				(Times (StrengthOf A) (StrengthOf B)))
+			(Times (ConfidenceOf A) (ConfidenceOf B)))))
+
+; ----------
+; For DynamicUTest::test_formula_define()
 (DefineLink
    (DefinedPredicate "has a reddish color")
    (PredicateFormula
@@ -23,9 +37,6 @@
 		(List (Concept "A") (Concept "B"))))
 
 (define tv-stream (FormulaTruthValue evlnk))
-
-(define A (Concept "A"))
-(define B (Concept "B"))
 
 ; ----------
 ; for DynamicUTest::test_dynamic_formula()
