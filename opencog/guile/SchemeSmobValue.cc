@@ -68,8 +68,13 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<double>
 SchemeSmob::scm_to_float_list (SCM svalue_list)
 {
-	std::vector<double> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<double> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
