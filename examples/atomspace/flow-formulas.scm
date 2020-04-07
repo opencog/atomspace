@@ -7,7 +7,7 @@
 ; code for wiring them into Atoms.
 ;
 ; The core implementation is in two parts: the FormulaTruthValue,
-; which implements a dyanamically-variable TruthValue, and the
+; which implements a dynamically-variable TruthValue, and the
 ; DynamicFormulaLink, which installs this TruthValue into an Atom.
 ;
 ; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
@@ -16,7 +16,7 @@
 ; occurs every time the numeric value is accessed (i.e. when the
 ; strength and confidence of the TV are accessed).
 ;
-; The ForumlaStream is a generalization of the FormulaTruthValue, in
+; The FormulaStream is a generalization of the FormulaTruthValue, in
 ; that it allows for the computation of any FloatValue. That is, the
 ; SimpleTV's are just vectors of length two - the strength and
 ; confidence, whereas the FloatValue is a vector of arbitrary length.
@@ -77,7 +77,7 @@
          (ConfidenceOf (Variable "$X"))
          (ConfidenceOf (Variable "$Y")))))
 
-; Create an EvalationLink that will apply the formula above to a pair
+; Create an EvaluationLink that will apply the formula above to a pair
 ; of Atoms. This is as before; see the `formulas.scm` example for details.
 (define evlnk
 	(Evaluation
@@ -145,7 +145,7 @@
 ; Yes, we can. Just use the DynamicFormulaLink.  This is quite similar
 ; to the PredicateFormulaLink, demoed in `formulas.scm`, but in this
 ; case, instead of producing a single, static TV, this wraps the entire
-; formula into a FormulasTruthValue. Thus, it is enough to set the TV
+; formula into a FormulaTruthValue. Thus, it is enough to set the TV
 ; only once; after that, the TV updates will be automatic.
 
 ; For example:
@@ -179,8 +179,8 @@
          (ConfidenceOf (Variable "$Y")))))
 
 ; This can be used as anywhere any other predicate can be used;
-; anywhere a PredicdeNode, GroundedPredicateNode, DefinedPredicate,
-; or PredicateForumla can be used. They all provide the same utility:
+; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
+; or PredicateFormula can be used. They all provide the same utility:
 ; they provide a TruthValue.
 (cog-execute!
 	(SetTV
@@ -201,7 +201,7 @@
 
 ; -------------------------------------------------------------
 ; The FormulaStream is the generalization of FormulaTruthValue, suitable
-; for streaming a FloatValue of arbitary length. As before, whenever it
+; for streaming a FloatValue of arbitrary length. As before, whenever it
 ; is accessed, the current vector value is recomputed. The recomputation
 ; forced by calling `execute()` on the Atom that the stream is created
 ; with.
