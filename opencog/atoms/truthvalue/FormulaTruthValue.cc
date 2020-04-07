@@ -24,6 +24,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include "FormulaTruthValue.h"
 
@@ -80,7 +81,12 @@ void FormulaTruthValue::update(void) const
 	// If there is just one formula, then we expect it to produce
 	// two numbers, the strength and the confidence.
 	const Handle& fo = _formula[0];
-	if (fo->is_evaluatable())
+	if (fo->get_type() == PREDICATE_FORMULA_LINK)
+	{
+		TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, fo);
+		_value = tvp->value();
+	}
+	else if (fo->is_evaluatable())
 	{
 		TruthValuePtr tvp = fo->evaluate(_as);
 		_value = tvp->value();
