@@ -97,6 +97,9 @@ public:
     }
 };
 
+static inline SimpleTruthValuePtr SimpleTruthValueCast(const ValuePtr& pa)
+    { return std::dynamic_pointer_cast<const SimpleTruthValue>(pa); }
+
 template<typename ... Type>
 static inline TruthValuePtr createSimpleTruthValue(Type&&...  args) {
    return SimpleTruthValue::createTV(std::forward<Type>(args)...);
