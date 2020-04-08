@@ -84,12 +84,19 @@ repos, including:
   (as-moses repo)
 
 
-Examples
-========
+Examples, Documentation, Blog
+=============================
 If you are impatient, a good way to learn the AtomSpace is to run the
 example demos. [Start with these.](examples/atomspace) Then move on to
 the [pattern-matcher examples](examples/pattern-matcher).
 
+Documentation is on the OpenCog wiki. Good places to start are here:
+* [AtomSpace](https://wiki.opencog.org/w/AtomSpace)
+* [Atom types](https://wiki.opencog.org/w/Atom_types)
+* [Pattern matching](https://wiki.opencog.org/w/Pattern_matching)
+
+The [OpenCog Brainwave blog](https://blog.opencog.org/) provides reading
+material for what this is all about, and why.
 
 A Theoretical Overview
 ======================
@@ -112,7 +119,7 @@ variables and for lambda expressions and for beta-reduction and mapping;
 for uniqueness constraints, state and a messaging "blackboard"; for
 searching and satisfiability and graph re-writing; for the specification
 of types and type signatures, including type polymorphism and type
-construction.
+construction. See [Atom types](https://wiki.opencog.org/w/Atom_types).
 
 ### Atomese
 Because of these many and varied Atom types, constructing graphs to
@@ -128,6 +135,7 @@ designed for automation and machine learning.  That is, like any
 knowledge representation system, the data and procedures encoded
 in "Atomese" are meant to be accessed by other automated subsystems
 manipulating and querying and inferencing over the data/programs.
+See [Atomese](https://wiki.opencog.org/w/Atomese).
 
 Aside from the various advanced features, Atomese also has some very
 basic and familiar atom types: atoms for arithmetic operations like
@@ -198,7 +206,10 @@ atoms are related to one-another as a graph. The graph is searchable,
 editable; it holds rules and relations and ontologies and axioms.
 Values are the data that stream and flow through this network, like 
 water through pipes. Atoms define the pipes, the connectivity. Values
-flow and change.
+flow and change. See the blog entry
+[value flows](https://blog.opencog.org/2020/04/08/value-flows/) as
+well as [Atom](https://wiki.opencog.org/w/Atom) and
+[Value](https://wiki.opencog.org/w/Value).
 
 ### More info
 The primary documentation for the atomspace and Atomese is here:
@@ -312,7 +323,9 @@ some important design decisions to be made. Developers have not begun
 to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
-2018-2022 time-frame.
+2020-2024 time-frame. See the
+[value flows](https://blog.opencog.org/2020/04/08/value-flows/) blog
+entry.
 
 
 ### Sheaf theory
@@ -336,6 +349,10 @@ Some primitive, basic infrastructure has been built. Huge remaining
 work items are using neural nets to perform the tensor-like factorization
 of sheaves, and to redesign the rule engine to use sheaf-type theorem
 proving techniques.
+
+Current work is split between two locations: the "sheaf" subdirectory
+in this repo, and the [generate](https://github.com/opencog/generate)
+repo.
 
 
 Building and Installing
