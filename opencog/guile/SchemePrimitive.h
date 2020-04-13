@@ -456,7 +456,7 @@ protected:
 	virtual SCM invoke (SCM args)
 	{
 		super::cpp_invoke(args);
-		return SCM_EOL;
+		return SCM_UNSPECIFIED;
 	}
 };
 
