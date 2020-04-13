@@ -59,6 +59,7 @@ class AtomSpace
     friend class BackingStore;
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
+    friend class UuidSCM;            // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
