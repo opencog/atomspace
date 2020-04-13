@@ -39,7 +39,6 @@ protected:
 
 	UUID add_atom(Handle, UUID);
 	Handle get_atom(UUID);
-	UUID get_uuid(Handle);
 	void remove_atom(Handle);
 	void remove_uuid(UUID);
 
@@ -56,11 +55,6 @@ UUID UuidSCM::add_atom(Handle h, UUID uuid)
 Handle UuidSCM::get_atom(UUID uuid)
 {
 	return _tlb.getAtom(uuid);
-}
-
-UUID UuidSCM::get_uuid(Handle h)
-{
-	return _tlb.getUUID(h);
 }
 
 void UuidSCM::remove_atom(Handle h)
@@ -90,12 +84,10 @@ void UuidSCM::init(void)
 	AtomSpace* as = SchemeSmob::ss_get_env_as("uuid");
 	_tlb.set_resolver(&as->get_atomtable());
 
-	define_scheme_primitive("cog-assign-uuid",
+	define_scheme_primitive("cog-add-uuid",
 		&UuidSCM::add_atom, this, "uuid");
-	define_scheme_primitive("cog-atom-from-uuid",
+	define_scheme_primitive("cog-lookup-uuid",
 		&UuidSCM::get_atom, this, "uuid");
-	define_scheme_primitive("cog-uuid-from-atom",
-		&UuidSCM::get_uuid, this, "uuid");
 	define_scheme_primitive("cog-unassign-uuid",
 		&UuidSCM::remove_atom, this, "uuid");
 	define_scheme_primitive("cog-remove-uuid",

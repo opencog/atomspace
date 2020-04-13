@@ -34,6 +34,7 @@ TARGET_LINK_LIBRARIES(type-utils
 ADD_GUILE_EXTENSION(SCM_CONFIG type-utils "opencog-ext-path-type-utils")
 
 TARGET_LINK_LIBRARIES(guile-uuid
+	atomspaceutils
 	smob
 	${COGUTIL_LIBRARY}
 )
