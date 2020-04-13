@@ -33,21 +33,18 @@
 
    Example:
       ; Generate new UUID's
-      (cog-assign-uuid (Concept "A"))
-      (cog-assign-uuid (Concept "B"))
-      (cog-assign-uuid (Concept "C") 4)
-      (cog-assign-uuid (Concept "D"))
-      (cog-assign-uuid (Concept "E"))
+      (cog-assign-uuid (Concept \"A\"))    ;; gets 1
+      (cog-assign-uuid (Concept \"B\"))    ;; gets 2
+      (cog-assign-uuid (Concept \"C\") 4)  ;; gets 4, as requested
+      (cog-assign-uuid (Concept \"D\"))    ;; gets 3
+      (cog-assign-uuid (Concept \"E\"))    ;; gets 5
 
       ; Fetch existing UUID's
-      (cog-assign-uuid (Concept "A"))
-      (cog-assign-uuid (Concept "B"))
-      (cog-assign-uuid (Concept "C") 444)
-      (cog-assign-uuid (Concept "D"))
-      (cog-assign-uuid (Concept "E"))
-
-   The second call, attempting to assign a new UUID to `C` will throw
-   an error.
+      (cog-assign-uuid (Concept \"A\"))    ;; returns 1, as before
+      (cog-assign-uuid (Concept \"B\"))    ;; returns 2, as before
+      (cog-assign-uuid (Concept \"C\") 44) ;; throws error
+      (cog-assign-uuid (Concept \"D\"))    ;; returns 3, as before
+      (cog-assign-uuid (Concept \"E\"))    ;; returns 5, as before
 
    See also: cog-lookup-uuid cog-remove-uuid cog-unassign-uuid
 "
