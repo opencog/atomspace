@@ -151,7 +151,7 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 
 SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
-	if (nullptr == pa) return SCM_EOL;
+	if (nullptr == pa) return SCM_BOOL_F;
 
 	// Use new so that the smart pointer increments!
 	ValuePtr* pap = new ValuePtr(pa);
