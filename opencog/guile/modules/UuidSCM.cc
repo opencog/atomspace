@@ -54,7 +54,9 @@ UUID UuidSCM::add_atom(Handle h, UUID uuid)
 
 Handle UuidSCM::get_atom(UUID uuid)
 {
-	return _tlb.getAtom(uuid);
+	Handle h = _tlb.getAtom(uuid);
+	if (h) return h;
+	return SCM_BOOL_F;
 }
 
 void UuidSCM::remove_atom(Handle h)
