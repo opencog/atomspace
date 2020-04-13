@@ -21,6 +21,7 @@
 
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspaceutils/TLB.h>
 
 using namespace opencog;
@@ -33,6 +34,7 @@ namespace opencog {
 class UuidSCM : public ModuleWrap
 {
 protected:
+	TLB _tlb;
 	virtual void init();
 
 	UUID add_atom(Handle, UUID);
@@ -48,7 +50,27 @@ public:
 
 UUID UuidSCM::add_atom(Handle h, UUID uuid)
 {
-	return 0;
+	return _tlb.addAtom(h, uuid);
+}
+
+Handle UuidSCM::get_atom(UUID uuid)
+{
+	return _tlb.getAtom(uuid);
+}
+
+UUID UuidSCM::get_uuid(Handle h)
+{
+	return _tlb.getUUID(h);
+}
+
+void UuidSCM::remove_atom(Handle h)
+{
+	_tlb.removeAtom(h);
+}
+
+void UuidSCM::remove_uuid(UUID uuid)
+{
+	_tlb.removeAtom(uuid);
 }
 
 } /*end of namespace opencog*/
@@ -59,8 +81,25 @@ UuidSCM::UuidSCM() : ModuleWrap("opencog uuid") {}
 /// Thus, all the definitions below happen in that module.
 void UuidSCM::init(void)
 {
+	// OK, this is a terrible hack, but basically, we grab whatever
+	// atomspace there happens to be there, when this module is loaded,
+	// and use that. This will fail utterly when there are multiple
+	// atomspaces, and really, we should have nested hierarchical TLB
+	// resolvers for nested atomspaces. But for now, no one uses this so
+	// what the heck. I'm gonna punt. XXX FIXME.
+	AtomSpace* as = SchemeSmob::ss_get_env_as("uuid");
+	_tlb.set_resolver(&as->get_atomtable());
+
 	define_scheme_primitive("cog-assign-uuid",
 		&UuidSCM::add_atom, this, "uuid");
+	define_scheme_primitive("cog-atom-from-uuid",
+		&UuidSCM::get_atom, this, "uuid");
+	define_scheme_primitive("cog-uuid-from-atom",
+		&UuidSCM::get_uuid, this, "uuid");
+	define_scheme_primitive("cog-unassign-uuid",
+		&UuidSCM::remove_atom, this, "uuid");
+	define_scheme_primitive("cog-remove-uuid",
+		&UuidSCM::remove_uuid, this, "uuid");
 }
 
 extern "C" {
@@ -69,6 +108,6 @@ void opencog_uuid_init(void);
 
 void opencog_uuid_init(void)
 {
-    static UuidSCM uuid_scm;
-    uuid_scm.module_init();
+	static UuidSCM uuid_scm;
+	uuid_scm.module_init();
 }
