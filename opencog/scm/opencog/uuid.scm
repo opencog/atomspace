@@ -56,7 +56,7 @@
  cog-lookup-uuid UUID
 
    Given the `UUID` (universally-unique integer), return the
-   corresponding Atom in the lookup table. Otherwise return #f.
+   corresponding Atom in the lookup table. Otherwise return '().
 
    Example:
       (define uuid-for-a (cog-assign-uuid (Concept \"A\")))
