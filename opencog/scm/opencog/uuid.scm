@@ -15,11 +15,19 @@
 ; because other scheme code cannot guess what names the shared lib
 ; actually exported.  So we list them here.
 (export
+	cog-add-uuid
 	cog-assign-uuid
 	cog-lookup-uuid
 	cog-unassign-uuid
 	cog-remove-uuid
 )
+
+(set-procedure-property! cog-add-uuid 'documentation
+"
+ cog-add-uuid ATOM UUID
+
+   Same as `cog-assign-uuid`, except the UUID argument is mandatory.
+")
 
 (define* (cog-assign-uuid ATOM #:optional (UUID -1))
 "
