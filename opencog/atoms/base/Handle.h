@@ -55,13 +55,15 @@ namespace opencog
 {
 
 //! UUID == Universally Unique Identifier
-typedef unsigned long UUID;
+typedef size_t UUID;
+
+//! ContentHash == 64-bit hash of an Atom.
 typedef size_t ContentHash;
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
 
-//! contains an unique identificator
+//! Pointer to an Atom, providing extra utility/convenience methods.
 class Handle : public AtomPtr
 {
 

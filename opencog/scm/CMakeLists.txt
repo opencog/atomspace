@@ -29,6 +29,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/query.scm
 	opencog/test-runner.scm
 	opencog/type-utils.scm
+	opencog/uuid.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
