@@ -70,10 +70,21 @@ public:
 	 *    <name>
 	 *    <body>
 	 *
-	 * return <body>
+	 * return <body>. Throws exception if there is no such StateLink.
+	 */
+	static Handle get_state(const Handle& alias);
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * StateLink
+	 *    <name>
+	 *    <body>
+	 *
+	 * return the whole StateLink. Throws exception if there is
+	 * no such StateLink.
 	 */
 	static Handle get_link(const Handle& alias);
-	static Handle get_state(const Handle& alias);
 
 	static Handle factory(const Handle&);
 };
