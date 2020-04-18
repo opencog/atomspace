@@ -66,6 +66,11 @@ void CondLink::init(void)
 			exps.push_back(_outgoing[i]);
 		}
 	}
+
+	// Hmm. Not sure what to do if no default was specified. For right
+	// now, it seems like creating a FalseLink is a good idea ...!?
+	if (nullptr == default_exp)
+		default_exp = createLink(FALSE_LINK);
 }
 
 CondLink::CondLink(const HandleSeq &&oset, Type t)
@@ -94,6 +99,7 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 			return exps[i];
 		}
 	}
+
 	if (default_exp->is_executable())
 		return default_exp->execute(scratch, silent);
 	return default_exp;
