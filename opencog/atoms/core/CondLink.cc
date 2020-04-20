@@ -21,6 +21,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "CondLink.h"
 
@@ -96,7 +97,10 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 		{
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
-			return exps[i];
+
+			// Reduce the clause further, if possible.
+			Instantiator inst(scratch);
+			return inst.execute(exps[i]);
 		}
 	}
 
