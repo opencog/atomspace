@@ -48,20 +48,13 @@ TruthValuePtr TruthValueOfLink::evaluate(AtomSpace* as, bool silent)
 
 	// We cannot know the TruthValue of the Atom unless we are
 	// working with the unique version that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	if (ah)
-		return ah->getTruthValue();
+	// It can happen, during evaluation e.g. of a PutLink, that we
+	// are given an Atom that is not in any AtomSpace. In this case,
+	// `as` will be a scratch space; we can add the Atom there, and
+	// things will trickle out properly in the end.
 
-	if (silent)
-		throw SilentException();
-
-	// If the user asked for a TV not in any atomspace,
-	// what should we do? I dunno, so I'm throwing an error.
-	throw InvalidParamException(TRACE_INFO,
-		"Asked for TruthValue of atom not in any atomspace: %s",
-		this->to_string().c_str());
-
-	return TruthValue::DEFAULT_TV();
+	Handle ah(as->add_atom(_outgoing[0]));
+	return ah->getTruthValue();
 }
 
 // =============================================================

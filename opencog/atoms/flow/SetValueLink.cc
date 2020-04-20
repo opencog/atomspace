@@ -54,7 +54,12 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	// Obtain the value that we will be setting.
 	ValuePtr pap;
 	if (3 == _outgoing.size())
-		pap = _outgoing[2]->execute(as, silent);
+	{
+		if (_outgoing[2]->is_executable())
+			pap = _outgoing[2]->execute(as, silent);
+		else
+			pap = _outgoing[2];
+	}
 	else
 	{
 		Handle put(_outgoing[2]);
@@ -79,7 +84,11 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 			reduct = lamp->beta_reduce(args->getOutgoingSet());
 		else
 			reduct = lamp->beta_reduce({args});
-		pap = reduct->execute(as, silent);
+
+		if (reduct->is_executable())
+			pap = reduct->execute(as, silent);
+		else
+			pap = reduct;
 	}
 
 	// We cannot set Values unless we are working with the unique

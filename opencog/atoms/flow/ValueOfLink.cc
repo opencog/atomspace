@@ -48,30 +48,25 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
 	// We cannot know the Value of the Atom unless we are
-	// working with the unique version that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	Handle ak(as->get_atom(_outgoing[1]));
-	if (ah and ak)
-	{
-		ValuePtr pap = ah->getValue(ak);
-		if (pap) return pap;
+	// working with the unique version that sits in the
+	// AtomSpace! It can happen, during evaluation e.g. of
+	// a PutLink, that we are given an Atom that is not in
+	// any AtomSpace. In this case, `as` will be a scratch
+	// space; we can add the Atom there, and things will
+	// trickle out properly in the end.
+	//
+	Handle ah(as->add_atom(_outgoing[0]));
+	Handle ak(as->add_atom(_outgoing[1]));
 
-		if (silent)
-			throw SilentException();
-
-		throw InvalidParamException(TRACE_INFO,
-		   "No value at key %s on atom %s",
-		   ak->to_string().c_str(), ah->to_string().c_str());
-	}
+	ValuePtr pap = ah->getValue(ak);
+	if (pap) return pap;
 
 	if (silent)
 		throw SilentException();
 
-	// If the user asked for a Value not in any atomspace,
-	// what should we do? I dunno, so I'm throwing an error.
 	throw InvalidParamException(TRACE_INFO,
-	   "Asked for a Value of atom not in any atomspace: %s",
-	   this->to_string().c_str());
+	   "No value at key %s on atom %s",
+	   ak->to_string().c_str(), ah->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)
