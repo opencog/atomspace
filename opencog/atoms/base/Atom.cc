@@ -379,12 +379,27 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize() const
+size_t Atom::getIncomingSetSize(AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
+
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
+    if (as)
+    {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const auto& bucket : _incoming_set->_iset)
+        {
+            for (const WinkPtr& w : bucket.second)
+            {
+                Handle l(w.lock());
+                if (l and atab->in_environ(l)) cnt++;
+            }
+        }
+        return cnt;
+    }
+
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
