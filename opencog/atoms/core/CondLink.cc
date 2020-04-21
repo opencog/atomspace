@@ -106,7 +106,8 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 
 	if (default_exp->is_executable())
 		return default_exp->execute(scratch, silent);
-	return default_exp;
+	Instantiator inst(scratch);
+	return inst.execute(default_exp);
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)
