@@ -336,7 +336,7 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 SCM SchemeSmob::ss_incoming_size (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size");
-	AtomSpace* as = ss_get_env_as("cog-incoming-set");
+	AtomSpace* as = ss_get_env_as("cog-incoming-size");
 
 	size_t sz = h->getIncomingSetSize(as);
 	return scm_from_size_t(sz);
@@ -352,7 +352,7 @@ SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
 	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
 	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-set");
+	AtomSpace* as = ss_get_env_as("cog-incoming-size-by-type");
 	size_t sz = h->getIncomingSetSizeByType(t, as);
 	return scm_from_size_t(sz);
 }
