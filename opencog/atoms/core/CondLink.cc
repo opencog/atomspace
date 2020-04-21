@@ -98,7 +98,9 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
 
-			// Reduce the clause further, if possible.
+			// At this time, not every Atom type knows how to execute
+			// itself. So if the above didn't work, try again, forcing
+			// further reduction.
 			Instantiator inst(scratch);
 			return inst.execute(exps[i]);
 		}
