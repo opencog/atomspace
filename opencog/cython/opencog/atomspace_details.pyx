@@ -3,7 +3,8 @@ from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from atomspace cimport *
+# from atomspace cimport *
+
 
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy

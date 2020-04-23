@@ -9,9 +9,6 @@ def createStringValue(arg):
 
 cdef class StringValue(Value):
 
-    def __init__(self, ptr_holder):
-        super(StringValue, self).__init__(ptr_holder)
-
     def to_list(self):
         return StringValue.vector_of_strings_to_list(
             &((<cStringValue*>self.get_c_value_ptr().get()).value()))
