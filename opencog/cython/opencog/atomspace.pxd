@@ -5,6 +5,7 @@ from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
+
 cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
     cdef void* PyLong_AsVoidPtr(object)
@@ -55,12 +56,14 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
 
 cdef class PtrHolder:
     cdef shared_ptr[void] shared_ptr
+
     @staticmethod
     cdef PtrHolder create(shared_ptr[void]& ptr)
 
 cdef class Value:
     cdef PtrHolder ptr_holder
     cdef cValuePtr get_c_value_ptr(self)
+
     @staticmethod
     cdef Value create(cValuePtr& ptr)
 
@@ -96,9 +99,9 @@ cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "openco
         bint operator!=(cTruthValue h)
 
 cdef class TruthValue(Value):
-    cdef _mean(self)
-    cdef _confidence(self)
-    cdef _count(self)
+    cdef strength_t _mean(self)
+    cdef confidence_t _confidence(self)
+    cdef count_t _count(self)
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
 
@@ -207,6 +210,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
+
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
@@ -215,6 +219,7 @@ cdef class AtomSpace:
 
 cdef create_python_value_from_c_value(const cValuePtr& value)
 
+
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
@@ -222,12 +227,14 @@ cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
         cFloatValue(const vector[double]& values)
         const vector[double]& value() const
 
+
 # StringValue
 cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
         cStringValue(const string& value)
         cStringValue(const vector[string]& values)
         const vector[string]& value() const
+
 
 # LinkValue
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":

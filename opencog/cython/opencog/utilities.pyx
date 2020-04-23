@@ -1,9 +1,11 @@
-from contextlib import contextmanager
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport AtomSpace, Atom, TruthValue
-from opencog.atomspace import create_child_atomspace
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factory
+
+from contextlib import contextmanager
+from opencog.atomspace import create_child_atomspace
+
 import warnings
 
 

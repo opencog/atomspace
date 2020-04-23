@@ -21,7 +21,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-2" "-f")
+SET(CYTHON_FLAGS "-3" "-f")
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -132,7 +132,7 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
-############################## bindlink #####################
+############################## bindlink LEGACY #####################
 
 CYTHON_ADD_MODULE_PYX(bindlink
 	"atomspace.pxd"
