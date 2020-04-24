@@ -1,8 +1,8 @@
 import unittest
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, Atom, TruthValue
-from opencog.bindlink import execute_atom
+from opencog.atomspace import Atom
+from opencog.exec import execute_atom
 
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 

@@ -9,9 +9,6 @@ def createFloatValue(arg):
 
 cdef class FloatValue(Value):
 
-    def __init__(self, ptr_holder):
-        super(FloatValue, self).__init__(ptr_holder)
-
     def to_list(self):
         return FloatValue.vector_of_doubles_to_list(
             &((<cFloatValue*>self.get_c_value_ptr().get()).value()))

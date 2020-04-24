@@ -1,4 +1,6 @@
 from cpython.object cimport Py_EQ, Py_NE
+from cython.operator cimport dereference as deref
+
 
 cdef class PtrHolder:
     """C++ shared_ptr object wrapper for Python clients. Cython cannot create
@@ -16,6 +18,8 @@ cdef class PtrHolder:
 
 cdef class Value:
     """C++ Value object wrapper for Python clients"""
+    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
+        self.ptr_holder = ptr_holder
 
     @staticmethod
     cdef Value create(cValuePtr& ptr):
@@ -32,13 +36,13 @@ cdef class Value:
         """Return C++ shared_ptr from PtrHolder instance"""
         return <cValuePtr&>(self.ptr_holder.shared_ptr)
 
-    property type:
-         def __get__(self):
-             return self.get_c_value_ptr().get().get_type()
+    @property
+    def type(self):
+        return self.get_c_value_ptr().get().get_type()
 
-    property type_name:
-        def __get__(self):
-            return get_type_name(self.type)
+    @property
+    def type_name(self):
+        return get_type_name(self.type)
 
     def is_atom(self):
         return is_a(self.type, types.Atom)
