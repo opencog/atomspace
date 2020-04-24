@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The TimesLink implements the mathematical operation of "times".
+ * The TimesLink implements the arithmetic operation of "times".
  */
 class TimesLink : public ArithmeticLink
 {

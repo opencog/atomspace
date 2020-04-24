@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The DivideLink implements the mathematical operation of "divide".
+ * The DivideLink implements the arithmetic operation of "divide".
  */
 class DivideLink : public TimesLink
 {

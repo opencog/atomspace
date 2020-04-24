@@ -6,6 +6,7 @@ ADD_LIBRARY (clearbox
 	ArithmeticLink.cc
 	DivideLink.cc
 	FoldLink.cc
+	HeavisideLink.cc
 	MinusLink.cc
 	PlusLink.cc
 	TimesLink.cc
@@ -30,6 +31,7 @@ INSTALL (FILES
 	ArithmeticLink.h
 	DivideLink.h
 	FoldLink.h
+	HeavisideLink.h
 	MinusLink.h
 	PlusLink.h
 	TimesLink.h
