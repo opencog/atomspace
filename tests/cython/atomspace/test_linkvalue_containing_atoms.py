@@ -1,7 +1,6 @@
 import unittest
 import re
 
-from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
 

@@ -12,7 +12,7 @@ import warnings
 
 from opencog.atomspace import (createFloatValue, createLinkValue,
                                createStringValue, createTruthValue)
-from opencog.atomspace import types
+from opencog.atomspace import types, AtomSpace
 from opencog.utilities import add_node, add_link
 from opencog.utilities import get_default_atomspace, set_default_atomspace
 

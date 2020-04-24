@@ -5,7 +5,7 @@ from opencog.atomspace cimport create_python_value_from_c_value
 
 from cython.operator cimport dereference as deref
 
-from opencog.type_constructors import *
+from opencog.type_constructors import TruthValue
 
 
 def execute_atom(AtomSpace atomspace, Atom atom):
