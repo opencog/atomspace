@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/HeavisideLink.cc
+ * opencog/atoms/reduct/AccumulateLink.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -10,44 +10,44 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
-#include "HeavisideLink.h"
+#include "AccumulateLink.h"
 
 using namespace opencog;
 
-HeavisideLink::HeavisideLink(const HandleSeq&& oset, Type t)
+AccumulateLink::AccumulateLink(const HandleSeq&& oset, Type t)
     : FunctionLink(std::move(oset), t)
 {
 	init();
 }
 
-HeavisideLink::HeavisideLink(const Handle& a)
-    : FunctionLink({a}, HEAVISIDE_LINK)
+AccumulateLink::AccumulateLink(const Handle& a)
+    : FunctionLink({a}, ACCUMULATE_LINK)
 {
 	init();
 }
 
-HeavisideLink::HeavisideLink(const Handle& a, const Handle& b)
-    : FunctionLink({a, b}, HEAVISIDE_LINK)
+AccumulateLink::AccumulateLink(const Handle& a, const Handle& b)
+    : FunctionLink({a, b}, ACCUMULATE_LINK)
 {
 	init();
 }
 
-void HeavisideLink::init(void)
+void AccumulateLink::init(void)
 {
 	Type tscope = get_type();
-	if (not nameserver().isA(tscope, HEAVISIDE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a HeavisideLink");
+	if (not nameserver().isA(tscope, ACCUMULATE_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a AccumulateLink");
 
 	size_t nargs = _outgoing.size();
 	if (1 != nargs)
 		throw InvalidParamException(TRACE_INFO,
-			"HeavisideLink expects one, got %s",
+			"AccumulateLink expects one, got %s",
 			to_string().c_str());
 }
 
 // ============================================================
 
-ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
+ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 {
 	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
 	Type vitype = vi->get_type();
@@ -55,36 +55,30 @@ ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
 	if (NUMBER_NODE == vitype)
 	{
 		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
-		std::vector<double> gtvec;
+		double acc = 0.0;
 		for (double dv : dvec)
-		{
-			if (dv > 0.0) gtvec.push_back(1.0);
-			else gtvec.push_back(0.0);
-		}
-		return createNumberNode(gtvec);
+			acc += dv;
+		return createNumberNode(acc);
 	}
 
 	if (nameserver().isA(vitype, FLOAT_VALUE))
 	{
 		const std::vector<double>& dvec(FloatValueCast(vi)->value());
-		std::vector<double> gtvec;
+		double acc = 0.0;
 		for (double dv : dvec)
-		{
-			if (dv > 0.0) gtvec.push_back(1.0);
-			else gtvec.push_back(0.0);
-		}
-		return createFloatValue(gtvec);
+			acc += dv;
+		return createFloatValue(acc);
 	}
 
 	// If it did not fully reduce, then return the best-possible
 	// reduction that we did get.
 	if (vi->is_atom())
-		return createHeavisideLink(HandleCast(vi));
+		return createAccumulateLink(HandleCast(vi));
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
 }
 
-DEFINE_LINK_FACTORY(HeavisideLink, HEAVISIDE_LINK);
+DEFINE_LINK_FACTORY(AccumulateLink, ACCUMULATE_LINK);
 
 // ============================================================
