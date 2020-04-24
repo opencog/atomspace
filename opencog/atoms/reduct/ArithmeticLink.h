@@ -43,8 +43,6 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
-	ValuePtr get_value(AtomSpace*, bool, ValuePtr) const;
-
 	// Provide compatible behavior for kons(stream, knil)
 	// (e.g. adding zero to a stream value)
 	static inline ValuePtr sample_stream(ValuePtr& v, Type vt) {
@@ -62,6 +60,8 @@ public:
 	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
+
+	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

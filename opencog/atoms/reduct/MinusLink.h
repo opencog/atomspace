@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The MinusLink implements the mathematical operation of "minus"
+ * The MinusLink implements the arithmetic operation of "minus"
  */
 class MinusLink : public PlusLink
 {

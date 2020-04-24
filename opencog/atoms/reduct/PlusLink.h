@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The PlusLink implements the mathematical operation of "plus"
+ * The PlusLink implements the arithmetic operation of "plus"
  */
 class PlusLink : public ArithmeticLink
 {

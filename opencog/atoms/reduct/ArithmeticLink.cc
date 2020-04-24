@@ -151,7 +151,7 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
-ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
+ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
 	if (DEFINED_SCHEMA_NODE == vptr->get_type())
 	{

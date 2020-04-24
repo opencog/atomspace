@@ -228,7 +228,7 @@ void ReductUTest::test_arithmetic_inf(void)
 	Handle inf = eval->eval_h(
 			"(cog-execute! (PlusLink (NumberNode 0) (NumberNode \"inf\")))"
 	);
-	printf("expecting res: %s\n", inf->to_short_string().c_str());
+	printf("expecting inf: %s\n", inf->to_short_string().c_str());
 
 	Handle einf = eval->eval_h("(NumberNode \"inf\")");
 	TS_ASSERT_EQUALS(inf, einf)
@@ -240,10 +240,13 @@ void ReductUTest::test_arithmetic_inf(void)
 			"      (NumberNode \"inf 0 3.0\")"
 			"      (NumberNode \"inf -inf 1.0\")))"
 	);
-	printf("expecting res: %s\n", pninf4->to_short_string().c_str());
+	printf("expecting inf: %s\n", pninf4->to_short_string().c_str());
 
 	Handle epninf4 = eval->eval_h("(NumberNode \"inf -inf 4.0\")");
 	TS_ASSERT_EQUALS(pninf4, epninf4)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -269,10 +272,13 @@ void ReductUTest::test_arithmetic_nan(void)
 			"      (NumberNode \"nan nan 3.0\")"
 			"      (NumberNode \"inf -inf 1.0\")))"
 	);
-	printf("expecting nn4: %s\n", nn4->to_short_string().c_str());
+	printf("expecting nan-nan-4: %s\n", nn4->to_short_string().c_str());
 
 	Handle enn4 = eval->eval_h("(NumberNode \"nan nan 4.0\")");
 	TS_ASSERT_EQUALS(nn4, enn4)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Test SetLink, which the pattern matcher gives to us.

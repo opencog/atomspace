@@ -611,6 +611,9 @@ MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- TIMES_LINK
 
+// Heaviside step function; same as GreaterThan, but works
+// for vectors, and returns numeric value.
+HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return arity of the wrapped link.
