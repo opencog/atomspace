@@ -1,7 +1,7 @@
 #
 # Test Functions
 
-from opencog.atomspace import types, Atom, TruthValue
+from opencog.atomspace import types, Atom
 from opencog.type_constructors import *
 
 
