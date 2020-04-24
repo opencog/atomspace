@@ -20,13 +20,13 @@ cdef class TruthValue(Value):
     # exported in opencog.atomspace. To keep it work before proper fix
     # TruthValue constructor is modified to accept both old parameters
     # (strength and confidence) and new ptr_holder parameter.
-    def __init__(self, strength_t strength=1.0, confidence_t confidence=1.0, PtrHolder ptr_holder=None):
-        cdef tv_ptr c_ptr
-        if ptr_holder is not None:
-            super().__init__(ptr_holder)
-        else:
-            c_ptr.reset(new cSimpleTruthValue(strength, confidence))
-            super().__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    # def __init__(self, strength_t strength=1.0, confidence_t confidence=1.0, PtrHolder ptr_holder=None):
+    #     cdef tv_ptr c_ptr
+    #     if ptr_holder is not None:
+    #         super().__init__(ptr_holder)
+    #     else:
+    #         c_ptr.reset(new cSimpleTruthValue(strength, confidence))
+    #         super().__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
     @property
     def mean(self):
