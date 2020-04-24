@@ -58,7 +58,8 @@ public:
 	void tearDown(void);
 
 	void test_heaviside(void);
-	void test_heavi_reduct(void);
+	void test_infnan(void);
+	void test_reduct(void);
 };
 
 void HeavisideUTest::tearDown(void)
@@ -101,34 +102,40 @@ void HeavisideUTest::test_heaviside(void)
 }
 
 /*
- * Expressions with variables.
+ * Behavior of inf and nan.
  */
-void HeavisideUTest::test_heavi_reduct(void)
+void HeavisideUTest::test_infnan(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-#if 0
 	// ---------
 	Handle inf = eval->eval_h(
-			"(cog-execute! (PlusLink (NumberNode 0) (NumberNode \"inf\")))"
-			"(cog-execute! (PlusLink (NumberNode 0) (NumberNode \"nan\")))"
+			"(cog-execute! (Heaviside (NumberNode \"inf -inf inf -inf\")))"
 	);
-	printf("expecting res: %s\n", inf->to_short_string().c_str());
+	printf("expecting inf: %s\n", inf->to_short_string().c_str());
 
-	Handle einf = eval->eval_h("(NumberNode \"inf\")");
+	Handle einf = eval->eval_h("(NumberNode 1 0 1 0)");
 	TS_ASSERT_EQUALS(inf, einf)
 
 	// ---------
-	Handle pninf4 = eval->eval_h(
-			"(cog-execute! "
-			"   (PlusLink"
-			"      (NumberNode \"inf 0 3.0\")"
-			"      (NumberNode \"inf -inf 1.0\")))"
+	Handle nan = eval->eval_h(
+			"(cog-execute! (Heaviside (NumberNode \"nan 0 inf 0 -nan\")))"
 	);
-	printf("expecting res: %s\n", pninf4->to_short_string().c_str());
+	printf("expecting nan: %s\n", nan->to_short_string().c_str());
 
-	Handle epninf4 = eval->eval_h("(NumberNode \"inf -inf 4.0\")");
-	TS_ASSERT_EQUALS(pninf4, epninf4)
-#endif
+	Handle enan = eval->eval_h("(NumberNode 0 0 1 0 0)");
+	TS_ASSERT_EQUALS(nan, enan)
 
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+/*
+ * Expressions with variables.
+ */
+void HeavisideUTest::test_reduct(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
