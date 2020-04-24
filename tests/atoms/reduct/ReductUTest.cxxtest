@@ -244,6 +244,9 @@ void ReductUTest::test_arithmetic_inf(void)
 
 	Handle epninf4 = eval->eval_h("(NumberNode \"inf -inf 4.0\")");
 	TS_ASSERT_EQUALS(pninf4, epninf4)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -273,6 +276,9 @@ void ReductUTest::test_arithmetic_nan(void)
 
 	Handle enn4 = eval->eval_h("(NumberNode \"nan nan 4.0\")");
 	TS_ASSERT_EQUALS(nn4, enn4)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Test SetLink, which the pattern matcher gives to us.
