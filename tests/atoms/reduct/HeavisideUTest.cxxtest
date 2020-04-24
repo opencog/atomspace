@@ -150,5 +150,15 @@ void HeavisideUTest::test_reduct(void)
 	TS_ASSERT_EQUALS(var, evar)
 
 	// ---------
+	Handle des = eval->eval_h(
+			"(cog-execute! (Plus (Heaviside "
+			"     (NumberNode 3 4  -5 -6)) (Number 6 6 11 11)))"
+	);
+	printf("expecting 7/11: %s\n", des->to_short_string().c_str());
+
+	Handle edes = eval->eval_h("(NumberNode 7 7 11 11)");
+	TS_ASSERT_EQUALS(des, edes)
+
+	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
