@@ -77,7 +77,13 @@ ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
 		return createFloatValue(gtvec);
 	}
 
-	return vi;
+	// If it did not fully reduce, then return the best-possible
+	// reduction that we did get.
+	if (vi->is_atom())
+		return createHeavisideLink(HandleCast(vi));
+
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
 }
 
 DEFINE_LINK_FACTORY(HeavisideLink, HEAVISIDE_LINK);

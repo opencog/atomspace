@@ -137,5 +137,18 @@ void HeavisideUTest::test_reduct(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// ---------
+	Handle var = eval->eval_h(
+			"(cog-execute! (Heaviside (Plus "
+			"     (NumberNode 3 4  -5 -6) (Variable \"$x\"))))"
+	);
+	printf("expecting var: %s\n", var->to_short_string().c_str());
+
+	Handle evar = eval->eval_h(
+			"(cog-execute! (Heaviside (Plus "
+			"     (Variable \"$x\") (NumberNode 3 4  -5 -6))))"
+	);
+	TS_ASSERT_EQUALS(var, evar)
+
+	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
