@@ -270,7 +270,7 @@ public:
     {
         PythonEval::create_singleton_instance();
         PythonEval* python = &PythonEval::instance();
-	std::vector<std::thread> threads;
+        std::vector<std::thread> threads;
         std::string s = 
                 "tmp = 0\n"
                 "def fun(x):\n"
@@ -309,15 +309,15 @@ public:
         // Initialize and finalize Python.
         global_python_initialize();
         global_python_finalize();
-	bool thrown = false;
+        bool thrown = false;
 
         // Initialize and finalize Python.
-	try{
-	    global_python_initialize(); }
-	catch (const std::runtime_error & e){
-	    if (std::string(e.what()) != "reinitialization is not supported by python")
-	        throw e;
-	    thrown = true;
+        try{
+            global_python_initialize(); }
+        catch (const std::runtime_error & e){
+            if (std::string(e.what()) != "reinitialization is not supported by python")
+                throw e;
+            thrown = true;
         }
         TS_ASSERT(thrown);
         global_python_finalize();
