@@ -309,17 +309,9 @@ public:
         // Initialize and finalize Python.
         global_python_initialize();
         global_python_finalize();
-        bool thrown = false;
-
-        // Initialize and finalize Python.
-        try{
-            global_python_initialize(); }
-        catch (const std::runtime_error & e){
-            if (std::string(e.what()) != "reinitialization is not supported by python")
-                throw e;
-            thrown = true;
-        }
-        TS_ASSERT(thrown);
+        global_python_initialize();
+        global_python_finalize();
+        global_python_initialize();
         global_python_finalize();
 
         logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization() DONE");
