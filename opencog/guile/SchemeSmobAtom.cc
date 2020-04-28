@@ -217,7 +217,8 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	}
 	new_value[ref] += cnt;
 
-	h->setValue(key, createFloatValue(new_value));
+	AtomSpace* as = ss_get_env_as("cog-inc-value!");
+	as->set_value(h, key, createFloatValue(new_value));
 	return satom;
 }
 
