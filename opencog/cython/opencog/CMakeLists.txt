@@ -21,7 +21,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-2" "-f")
+SET(CYTHON_FLAGS "-3" "-f")
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -85,6 +85,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	value_types.pxd
 	DESTINATION "include/opencog/cython/opencog"
 )
 
@@ -132,34 +133,40 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
-############################## bindlink #####################
+############################## bindlink (exec module) #####################
 
-CYTHON_ADD_MODULE_PYX(bindlink
+CYTHON_ADD_MODULE_PYX(exec
 	"atomspace.pxd"
 	opencog_atom_types
 )
 
-ADD_LIBRARY(bindlink_cython
-	BindlinkStub.cc
-	bindlink.cpp
+ADD_LIBRARY(exec_cython
+	"BindlinkStub.cc"
+	"exec.cpp"
 )
 
-TARGET_LINK_LIBRARIES(bindlink_cython
+TARGET_LINK_LIBRARIES(exec_cython
 	atomspace_cython
 	atomspace
 	${PYTHON_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
+SET_TARGET_PROPERTIES(exec_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME bindlink)
+	OUTPUT_NAME exec)
 
-INSTALL (TARGETS
+### install the modules ###
+INSTALL(TARGETS
 	atomspace_cython
-	bindlink_cython
+	exec_cython
 	logger_cython
 	type_constructors
 	utilities_cython
+	DESTINATION "${PYTHON_DEST}")
+
+# install the legacy bindlink module
+INSTALL(FILES
+	"bindlink.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)

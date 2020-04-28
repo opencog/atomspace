@@ -2,7 +2,7 @@ import unittest
 import threading
 
 from opencog.type_constructors import *
-from opencog.bindlink import execute_atom
+from opencog.exec import execute_atom
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.utilities import push_default_atomspace, get_default_atomspace
 

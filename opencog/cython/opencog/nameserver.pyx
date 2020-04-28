@@ -1,6 +1,6 @@
-from atomspace cimport (cNameServer, nameserver, NOTYPE, string, Type,
-                        AtomSpace, PtrHolder)
+# from atomspace cimport cNameServer, nameserver, NOTYPE, Type
 from libc.string cimport strcmp
+from libcpp cimport string
 import sys
 
 
