@@ -312,6 +312,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace-readonly?", 0, 1, 0, C(ss_as_readonly_p));
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));
 	register_proc("cog-atomspace-rw!",     0, 1, 0, C(ss_as_mark_readwrite));
+	register_proc("cog-atomspace-cow?",    0, 1, 0, C(ss_as_cow_p));
+	register_proc("cog-atomspace-cow!",    1, 1, 0, C(ss_as_mark_cow));
 
 	// Taking AtomSpace as optional argument
 	register_proc("cog-count-atoms",       1, 1, 0, C(ss_count));
