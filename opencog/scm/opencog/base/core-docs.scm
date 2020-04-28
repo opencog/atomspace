@@ -901,6 +901,80 @@
      remove them from the backingstore.
 ")
 
+(set-procedure-property! cog-atomspace-ro! 'documentation
+"
+ cog-atomspace-ro! [ATOMSPACE]
+     Mark the ATOMSPACE as being read-only. New atoms cannot be added
+     to a read-only atomspace, nor can atoms be removed. The Values
+     (including the TruthValues) of atoms in the read-only atomspace
+     cannot be changed.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-rw!, cog-atomspace-readonly?,
+         cog-atomspace-cow! and cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-rw! 'documentation
+"
+ cog-atomspace-rw! [ATOMSPACE]
+     Mark the ATOMSPACE as being read-write. See cog-atomspace-ro!
+     for a detailed explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-readonly?, cog-atomspace-cow! and
+         cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-readonly? 'documentation
+"
+ cog-atomspace-readonly? [ATOMSPACE]
+     Return #t if the ATOMSPACE is marked read-only. See
+     cog-atomspace-ro! for a detailed explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-cow! and cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-cow! 'documentation
+"
+ cog-atomspace-cow! BOOL [ATOMSPACE]
+     Set the copy-on-write (COW) bit on the ATOMSPACE to BOOL.
+
+     A COW atomspace behaves as if the parent has been marked read-only,
+     and so any modifications to atoms in a COW space do not affect the
+     parent. (It does not make sense to mark an atomsapce as being COW,
+     if there is no parent.)
+
+     COW spaces are useful as temporary or transient AtomSpaces, so that
+     scratch calculations and updates can be performed without affecting
+     the parent.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-cow?, cog-atomspace-readonly?,
+         cog-atomspace-ro! and cog-atomspace-rw!,
+")
+
+(set-procedure-property! cog-atomspace-cow? 'documentation
+"
+ cog-atomspace-cow? [ATOMSPACE]
+     Return the copy-on-write (COW) bit on the ATOMSPACE to BOOL.
+     See cog-atomspace-cow! for an explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-ro! and cog-atomspace-rw! and
+         cog-atomspace-readonly?,
+")
+
 ;set-procedure-property! cog-yield 'documentation
 ;"
 ; cog-yield
