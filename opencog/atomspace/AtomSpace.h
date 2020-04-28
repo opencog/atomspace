@@ -81,6 +81,7 @@ class AtomSpace
     AtomTable& get_atomtable(void) { return _atom_table; }
 
     bool _read_only;
+    bool _copy_on_write;
 protected:
 
     /**
@@ -96,15 +97,29 @@ public:
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
-    // Transient atomspaces are lighter-weight, faster, but are missing
-    // some features. They are used during pattern matching, to hold
-    // temporary results.
+    /// Transient atomspaces are lighter-weight, faster, but are missing
+    /// some features. They are used during pattern matching, to hold
+    /// temporary results. The are always copy-on-write spaces.
     void ready_transient(AtomSpace* parent);
     void clear_transient();
 
+    /// Read-only (RO) atomspaces provide protection against update of the
+    /// AtomSpace contents. Atoms in a read-only atomspace canot be
+    /// deleted, nor can thier values (including truthvalues) be changed.
+    /// New atoms cannot be added to a read-only atomspace.
     void set_read_only(void);
     void set_read_write(void);
     bool get_read_only(void) { return _read_only; }
+
+    /// Copy-on-write (COW) atomspaces provide protection against the
+    /// update of the parent atomspace. When an atomspace is marked COW,
+    /// it behaves as if it is read-write, but the parent is read-only.
+    /// This is convenient for creating temporary atomspaces, wherein
+    /// updates will not trash the parent. Transient atomspaces are
+    /// always COW.
+    void set_copy_on_write(void) { _copy_on_write = true; }
+    void clear_copy_on_write(void) { _copy_on_write = false; }
+    bool get_copy_on_write(void) { return _copy_on_write; }
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {

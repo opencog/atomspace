@@ -61,7 +61,8 @@ using namespace opencog;
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _backing_store(nullptr),
-    _read_only(false)
+    _read_only(false),
+    _copy_on_write(transient)
 {
 }
 
@@ -71,6 +72,7 @@ AtomSpace::~AtomSpace()
 
 void AtomSpace::ready_transient(AtomSpace* parent)
 {
+    _copy_on_write = true;
     _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
 }
 
@@ -458,8 +460,9 @@ Handle AtomSpace::set_value(const Handle& h,
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, true));
             copy->setValue(key, value);
@@ -489,8 +492,9 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, true));
             copy->setTruthValue(tvp);
