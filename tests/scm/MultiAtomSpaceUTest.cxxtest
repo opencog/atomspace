@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
@@ -565,6 +566,10 @@ void MultiAtomSpace::test_readonly_scm(void)
 
 	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(cog-set-tv! A tv)"));
 	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(Concept \"A\" tv)"));
+
+	// Verify that the TV never changed.
+	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
+	TS_ASSERT (TruthValue::DEFAULT_TV() == tvp);
 
 	logger().debug("END TEST: %s", __FUNCTION__);	
 }

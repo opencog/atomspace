@@ -263,6 +263,20 @@ SCM SchemeSmob::ss_as_readonly_p(SCM sas)
 	return SCM_BOOL_F;
 }
 
+/**
+ * Return COW flag of the atomspace.  If no atomspace specified,
+ * then get the current atomspace.
+ */
+SCM SchemeSmob::ss_as_cow_p(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	scm_remember_upto_here_1(sas);
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-cow?");
+
+	if (as->get_copy_on_write()) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
 /* ============================================================== */
 /**
  * Set the readonly flag of the atomspace.  If no atomspace specified,
@@ -286,6 +300,18 @@ SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
 	if (nullptr == as) as = ss_get_env_as("cog-atomspace-rw!");
 
 	as->set_read_write();
+	return SCM_BOOL_T;
+}
+
+SCM SchemeSmob::ss_as_mark_cow(SCM scow, SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	scm_remember_upto_here_1(sas);
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-cow!");
+
+	bool cow = scm_to_bool(scow);
+	if (cow) as->set_copy_on_write();
+	else as->clear_copy_on_write();
 	return SCM_BOOL_T;
 }
 
