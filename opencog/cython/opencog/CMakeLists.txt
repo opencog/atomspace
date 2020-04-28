@@ -85,6 +85,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	value_types.pxd
 	DESTINATION "include/opencog/cython/opencog"
 )
 
