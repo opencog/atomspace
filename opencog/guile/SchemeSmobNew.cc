@@ -407,7 +407,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h->setTruthValue(tv);
+			if (tv) atomspace->set_truthvalue(h, tv);
 		}
 
 		return handle_to_scm(h);
@@ -526,10 +526,10 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h->setTruthValue(tv);
+			if (tv) atomspace->set_truthvalue(h, tv);
 		}
 
-		return handle_to_scm (h);
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
