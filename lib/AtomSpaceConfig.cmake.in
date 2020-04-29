@@ -23,6 +23,7 @@ set_property(TARGET query-engine
 set(ATOMSPACE_LIBRARY atomspace)
 set(ATOMSPACE_atombase_LIBRARY atombase)
 set(ATOMSPACE_atomcore_LIBRARY atomcore)
+set(ATOMSPACE_atomflow_LIBRARY atomflow)
 set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atomspace_LIBRARY atomspace)
 set(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils)
@@ -40,6 +41,7 @@ set(ATOMSPACE_LIBRARIES
 	value
 	atombase
 	atomcore
+	atomflow
 	atomspaceutils
 	truthvalue
 	clearbox
