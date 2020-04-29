@@ -95,4 +95,21 @@
 (cog-set-tv! b (cog-new-stv 0.6 0.6))
 (cog-prt-atomspace)
 
-(ListLink (Concept "a") (Concept "b") (stv 0.7 0.7))
+; Verify that the COW-ed' `b` is not in the base.
+(cog-set-atomspace! base)
+(cog-prt-atomspace)
+
+; Create a ListLink in the base, with a non-default TV.
+; While we're at it, change the TV on `b` as well.
+(ListLink a b (stv 0.7 0.7))
+(cog-set-tv! b (cog-new-stv 0.8 0.8))
+(cog-prt-atomspace)
+
+; Verify that the ListLink in the overlay has the default TV.
+; Notice that the ListLink in the overlay was composed with the
+; version of `b` that was in the base, and so the TV on that has
+; changed.
+(cog-set-atomspace! ovly)
+(cog-prt-atomspace)
+
+(OrderedLink a (Concept "b"))  ; note that `a` is in the base

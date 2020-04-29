@@ -468,6 +468,12 @@ Handle AtomSpace::set_value(const Handle& h,
             copy->setValue(key, value);
             return copy;
         }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setValue(key, value);
+            return h;
+        }
     } else {
         h->setValue(key, value);
         return h;
@@ -499,6 +505,12 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
             Handle copy(_atom_table.add(h, true));
             copy->setTruthValue(tvp);
             return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setTruthValue(tvp);
+            return h;
         }
     } else {
         h->setTruthValue(tvp);
