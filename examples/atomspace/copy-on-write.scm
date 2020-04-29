@@ -111,5 +111,3 @@
 ; changed.
 (cog-set-atomspace! ovly)
 (cog-prt-atomspace)
-
-(OrderedLink a (Concept "b"))  ; note that `a` is in the base
