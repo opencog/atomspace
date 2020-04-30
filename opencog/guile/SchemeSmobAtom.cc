@@ -180,8 +180,10 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 		tv->get_mean(), tv->get_confidence(), cnt);
 
 	AtomSpace* as = ss_get_env_as("cog-inc-count!");
-	as->set_truthvalue(h, tv);
-	return satom;
+	Handle ha(as->set_truthvalue(h, tv));
+	if (ha == h)
+		return satom;
+	return handle_to_scm(ha);
 }
 
 /* ============================================================== */
@@ -218,8 +220,10 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	new_value[ref] += cnt;
 
 	AtomSpace* as = ss_get_env_as("cog-inc-value!");
-	as->set_value(h, key, createFloatValue(new_value));
-	return satom;
+	Handle ha(as->set_value(h, key, createFloatValue(new_value)));
+	if (ha == h)
+		return satom;
+	return handle_to_scm(ha);
 }
 
 /* ============================================================== */
