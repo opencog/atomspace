@@ -1,0 +1,187 @@
+/*
+ * tests/atoms/MinMaxUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecSCM.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MinMaxUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	MinMaxUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec))");
+	}
+
+	~MinMaxUTest()
+	{
+		delete as;
+		delete eval;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_minmax(void);
+	void test_infnan(void);
+	void test_reduct(void);
+};
+
+void MinMaxUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void MinMaxUTest::setUp(void)
+{
+	as->clear();
+}
+
+/*
+ * Basic MinLink and MaxLink unit test.
+ */
+void MinMaxUTest::test_minmax(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle minim = eval->eval_h(
+		"(cog-execute! (Min (Number 1 6 7) (Number 2 5 8) (Number 3 4 9)))"
+	);
+	printf("expecting minim: %s\n", minim->to_short_string().c_str());
+
+	Handle eminim = eval->eval_h("(NumberNode 1 4 7)");
+	TS_ASSERT_EQUALS(minim, eminim);
+
+	// ---------
+	Handle maxim = eval->eval_h(
+		"(cog-execute! (Max (Number 1 6 7) (Number 2 5 8) (Number 3 4 9)))"
+	);
+	printf("expecting maxim: %s\n", maxim->to_short_string().c_str());
+
+	Handle emaxim = eval->eval_h("(NumberNode 3 6 9)");
+	TS_ASSERT_EQUALS(maxim, emaxim);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Behavior of inf and nan.
+ */
+void MinMaxUTest::test_infnan(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle inf = eval->eval_h(
+		"(cog-execute! (Min (Number 1 2 3) (Number \"inf -inf inf\")))"
+	);
+	Handle einf = eval->eval_h("(Number \"1 -inf 3\")");
+	printf("expect: %s\n", einf->to_short_string().c_str());
+	printf("   got: %s\n",  inf->to_short_string().c_str());
+
+	TS_ASSERT(*inf == *einf)
+	TS_ASSERT_EQUALS(inf, einf)
+
+	// ---------
+	Handle xinf = eval->eval_h(
+		"(cog-execute! (Max (Number 1 2 3) (Number \"inf -inf inf\")))"
+	);
+
+	Handle exinf = eval->eval_h("(Number \"inf 2 inf\")");
+	printf("expect: %s\n", exinf->to_short_string().c_str());
+	printf("   got: %s\n",  xinf->to_short_string().c_str());
+
+	TS_ASSERT(*xinf == *exinf)
+	TS_ASSERT_EQUALS(xinf, exinf)
+
+	// ---------
+	Handle nan = eval->eval_h(
+		"(cog-execute! (Min (Number 1 2 3) (Number \"nan -inf inf\")))"
+	);
+	Handle enan = eval->eval_h("(Number \"1 -inf 3\")");
+
+	printf("expect: %s\n", enan->to_short_string().c_str());
+	printf("   got: %s\n",  nan->to_short_string().c_str());
+	TS_ASSERT_EQUALS(nan, enan)
+
+	// ---------
+	Handle xnan = eval->eval_h(
+		"(cog-execute! (Max (Number 1 2 3) (Number \"nan -inf inf\")))"
+	);
+	Handle exnan = eval->eval_h("(NumberNode \"1 2 inf\")");
+
+	printf("expect: %s\n", exnan->to_short_string().c_str());
+	printf("   got: %s\n",  xnan->to_short_string().c_str());
+	TS_ASSERT_EQUALS(xnan, exnan)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Expressions with variables.
+ */
+void MinMaxUTest::test_reduct(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle mini = eval->eval_h(
+		"(cog-execute! (Min (Number 1 6 7) (Number 2 5 8) (Variable \"$x\")))");
+	printf("expecting mini: %s\n", mini->to_short_string().c_str());
+
+	Handle emini = eval->eval_h(
+		"(Min (Variable \"$x\") (Number 1 5 7))");
+
+	TS_ASSERT_EQUALS(mini, emini)
+
+	// ---------
+	Handle maxi = eval->eval_h(
+		"(cog-execute! (Max (Number 1 6 7) (Number 2 5 8) (Variable \"$x\")))");
+	printf("expecting maxi: %s\n", maxi->to_short_string().c_str());
+
+	Handle emaxi = eval->eval_h(
+		"(Max (Variable \"$x\") (Number 2 6 8))");
+
+	TS_ASSERT_EQUALS(maxi, emaxi)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
