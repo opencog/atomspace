@@ -462,6 +462,131 @@ In type theory, it is common to assign types to the different constants,
 \end_layout
 
 \begin_layout Subsubsection*
+In set theory:
+\end_layout
+
+\begin_layout Standard
+In (well-founded) (naive) set theory, there is effectively just one function
+ symbol: the set, and only one constant: the empty set.
+ There are no variables, in the sense that proper sets do not contain variables
+ in them.
+ Of course, in the definition of the axioms that define set theory, and
+ in the articulation of the theory itself, it is impossible to avoid variables;
+ its just that variables are not set elements.
+ By definition, 
+\begin_inset Quotes eld
+\end_inset
+
+well-foundedness
+\begin_inset Quotes erd
+\end_inset
+
+ disallows infinitely recursive sets.
+ Thus, effectively, all finite sets in set theory have the shape of a DAG.
+\end_layout
+
+\begin_layout Subsubsection*
+In computer science:
+\end_layout
+
+\begin_layout Standard
+Lambda calculus can be thought of as having arbitrary constants and varaibles,
+ but only one function symbol: the lambda.
+ It is effectively a theory of linear strings (sequences) of symbols arranged
+ in order, on a line.
+ Insofar as lambda expressions can be beta-reduced, they form a DAG.
+ Lambda calculus is manifestly finite: it is very unusual to study countable
+ or uncountable limits of lambda calculus.
+ In general, lambda calculus is always assumed to be well-founded, so that
+ the expressions are always DAGs.
+ An exception to this is chemlambda (Buliga 2003), which redefines lambda
+ as having input and output connectors, thus allowing looping connections
+ to be made.
+\end_layout
+
+\begin_layout Standard
+The simply typed lambda calculus is important, as it is the 
+\begin_inset Quotes eld
+\end_inset
+
+internal language
+\begin_inset Quotes erd
+\end_inset
+
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+Cartesian closed categories
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The Cartesian-closed catgories naturally describe 
+\begin_inset Quotes eld
+\end_inset
+
+tuples
+\begin_inset Quotes erd
+\end_inset
+
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+things
+\begin_inset Quotes erd
+\end_inset
+
+: that is, things that can be placed in an ordered list.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+things
+\begin_inset Quotes erd
+\end_inset
+
+ are presumed to be discernable items that have an identity.
+ Indiscernables are not described by cartesian closed categories; for this,
+ needs symmetric monoidal categories.
+ Tensors and tensor algebras and Hilbert spaces fmously belong to this category;
+ the internal language is 
+\begin_inset Quotes eld
+\end_inset
+
+linear logic
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The general typed lambda calculus famously corresponds to computer programs,
+ this is the Curry-Howard correspondance.
+ Infinite loops can be thought of in two ways in computing.
+ One way is as a non-directed graph: a loop, that calls back onto itself.
+ The state transitions are described by points (for states) and arrows (denoting
+ state transitions), arranged such that one (or more!) collections of arrows
+ can be traced in a circular loop.
+ The other way of thinking of infinite loops is as recursive structures:
+ one unrolls the loop so that it becomes an infinitely-long unterminating
+ sequence of arrows.
+ In 
+\begin_inset Quotes eld
+\end_inset
+
+proof theory
+\begin_inset Quotes erd
+\end_inset
+
+, the infinite binary tree provides a simple non-trivial example.
+ Both the left and right elements can loop back onto themselves; when unrolled,
+ the tree becomes infinite DAG (rather than containing a pair of loops).
+\end_layout
+
+\begin_layout Subsubsection*
 In model theory:
 \end_layout
 
@@ -470,12 +595,35 @@ Supplmented by relations.
  Theory of equality.
 \end_layout
 
+\begin_layout Subsubsection*
+In knowledge representation:
+\end_layout
+
+\begin_layout Standard
+is-a, has-a, part-of.
+ Lattice theory.
+\end_layout
+
 \begin_layout Section*
 Bibliography
 \end_layout
 
-\begin_layout Standard
-* Van Inwagen, P.
+\begin_layout Itemize
+Marius Buliga (2003).
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Artificial chemistry experiments with chemlambda, lambda calculus, interaction
+ combinators.
+\begin_inset Quotes erd
+\end_inset
+
+ https://arxiv.org/abs/2003.14332
+\end_layout
+
+\begin_layout Itemize
+Van Inwagen, P.
  (2002).
  “The Number of Things.” 
 \emph on
