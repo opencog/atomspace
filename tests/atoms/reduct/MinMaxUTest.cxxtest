@@ -112,10 +112,10 @@ void MinMaxUTest::test_infnan(void)
 	Handle inf = eval->eval_h(
 		"(cog-execute! (Min (Number 1 2 3) (Number \"inf -inf inf\")))"
 	);
-	printf("got: %s\n", inf->to_short_string().c_str());
+	Handle einf = eval->eval_h("(Number \"1 -inf 3\")");
+	printf("expect: %s\n", einf->to_short_string().c_str());
+	printf("   got: %s\n",  inf->to_short_string().c_str());
 
-	Handle einf = eval->eval_h("(NumberNode 1 \"-inf\" 3)");
-	printf("expecting: %s\n", einf->to_short_string().c_str());
 	TS_ASSERT(*inf == *einf)
 	TS_ASSERT_EQUALS(inf, einf)
 
@@ -123,9 +123,11 @@ void MinMaxUTest::test_infnan(void)
 	Handle xinf = eval->eval_h(
 		"(cog-execute! (Max (Number 1 2 3) (Number \"inf -inf inf\")))"
 	);
-	printf("expecting +inf: %s\n", xinf->to_short_string().c_str());
 
-	Handle exinf = eval->eval_h("(NumberNode \"inf\" 2 \"inf\")");
+	Handle exinf = eval->eval_h("(Number \"inf 2 inf\")");
+	printf("expect: %s\n", exinf->to_short_string().c_str());
+	printf("   got: %s\n",  xinf->to_short_string().c_str());
+
 	TS_ASSERT(*xinf == *exinf)
 	TS_ASSERT_EQUALS(xinf, exinf)
 
@@ -133,18 +135,20 @@ void MinMaxUTest::test_infnan(void)
 	Handle nan = eval->eval_h(
 		"(cog-execute! (Min (Number 1 2 3) (Number \"nan -inf inf\")))"
 	);
-	printf("expecting nan: %s\n", nan->to_short_string().c_str());
+	Handle enan = eval->eval_h("(Number \"1 -inf 3\")");
 
-	Handle enan = eval->eval_h("(NumberNode 1 \"-inf\" 3)");
+	printf("expect: %s\n", enan->to_short_string().c_str());
+	printf("   got: %s\n",  nan->to_short_string().c_str());
 	TS_ASSERT_EQUALS(nan, enan)
 
 	// ---------
 	Handle xnan = eval->eval_h(
 		"(cog-execute! (Max (Number 1 2 3) (Number \"nan -inf inf\")))"
 	);
-	printf("expecting nan: %s\n", xnan->to_short_string().c_str());
+	Handle exnan = eval->eval_h("(NumberNode \"1 2 inf\")");
 
-	Handle exnan = eval->eval_h("(NumberNode 1 2 \"inf\")");
+	printf("expect: %s\n", exnan->to_short_string().c_str());
+	printf("   got: %s\n",  xnan->to_short_string().c_str());
 	TS_ASSERT_EQUALS(xnan, exnan)
 
 	// ---------
