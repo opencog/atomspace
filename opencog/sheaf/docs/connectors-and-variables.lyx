@@ -247,8 +247,8 @@ socket
 \begin_layout Standard
 This observation seems nearly trivial; it is so painfully obvious that one
  wonders what more can be said.
- Yet there are tremendous consequences that arise from this, in some sense
- equally trivial and obvious.
+ Yet there are tremendous consequences that arise from this, conseuqnces
+ that are in some sense equally trivial and obvious.
  That something is 
 \begin_inset Quotes eld
 \end_inset
@@ -258,7 +258,52 @@ obvious
 \end_inset
 
  is perhaps an indicator that it is important.
- This note dwells on these ideas, due to thier importance.
+ This note dwells on these 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ ideas, and demonstrates thier importance.
+ The problem with 
+\begin_inset Quotes eld
+\end_inset
+
+obviousness
+\begin_inset Quotes erd
+\end_inset
+
+ is that it frames all manner of thinking: it is Aristotles 
+\begin_inset Quotes eld
+\end_inset
+
+formal cause
+\begin_inset Quotes erd
+\end_inset
+
+, applied to thinking.
+ It is provides a normative framework in which all conversation takes place.
+ Design and thinking happen in the foreground; there is a 
+\begin_inset Quotes eld
+\end_inset
+
+figure
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+ground
+\begin_inset Quotes erd
+\end_inset
+
+, and anything that is obvious falls into the background, becomes implicit,
+ and serves as a barrier to further thought.
+ Thus, the impetus for this note.
 \end_layout
 
 \begin_layout Standard
@@ -297,6 +342,24 @@ at the top
 \end_inset
 
 at the bottom
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Although the connectors in a jigsaw puzzle have a polarity, the sense of
+ direction that they offer is immaterial to the final construction.
+\end_layout
+
+\begin_layout Standard
+The desired conclusion is that by approaching knowledge representation as
+ an assemblege of connections, rather than as a unidirectional network of
+ inferences, one can gain considerable power in working with the common
+ problems and stumbling blocks of AI and AGI, including problems of planning,
+ inference, constraint satisfaction, combinatorial explosion and the 
+\begin_inset Quotes eld
+\end_inset
+
+frame problem
 \begin_inset Quotes erd
 \end_inset
 
@@ -352,7 +415,7 @@ An object is anything that can be the value of a variable, that is, anything
 \begin_layout Standard
 This conception of an object then leads to confused discussions about the
  identity of indiscernables, and the importance of location (spacetime)
- in merology.
+ in mereology.
  The notion of connectors can be used as an alternate foundation for the
  conception of 
 \begin_inset Quotes eld
@@ -505,6 +568,70 @@ Lambda calculus can be thought of as having arbitrary constants and varaibles,
 \end_layout
 
 \begin_layout Standard
+The general typed lambda calculus famously corresponds to computer programs,
+ this is the Curry-Howard correspondance.
+ Infinite loops can be thought of in two ways in computing.
+ One way is as a non-directed graph: a loop, that calls back onto itself.
+ The state transitions are described by points (for states) and arrows (denoting
+ state transitions), arranged such that one (or more!) collections of arrows
+ can be traced in a circular loop.
+ The other way of thinking of infinite loops is as recursive structures:
+ one unrolls the loop so that it becomes an infinitely-long unterminating
+ sequence of arrows.
+\end_layout
+
+\begin_layout Standard
+The moral of the story that is being presented here is that almost all of
+ computer science is founded on a theory of DAGs.
+ Even when loops are allowed, the graphs are formed from edges that are
+ directed: the edges are always arrows.
+ This is not the same as a general theory of connectors connecting things
+ together.
+\end_layout
+
+\begin_layout Subsubsection*
+In topology:
+\end_layout
+
+\begin_layout Standard
+The infinite binary tree provides a simple example of unrolling a pair of
+ interconnected loops.
+ Axiomatically, a binary tree is constructed from a pair of left-right,
+ and each element can be aonther pair.
+ In this sense, both the left and right elements can loop back onto themselves;
+ when unrolled, the tree becomes infinite DAG (rather than containing a
+ pair of loops).
+ The endpoints of a binary tree form the Cantor set; there are an uncountable
+ infinity of them.
+ These are the 
+\begin_inset Quotes eld
+\end_inset
+
+points
+\begin_inset Quotes erd
+\end_inset
+
+ of point-set topology.
+\end_layout
+
+\begin_layout Standard
+One can also have a point-free topology, built on top of lattice theory.
+ Rather than considering points as mereological simples, one instead focuses
+ on the directedness of set inclusion.
+ Starting with the notion of a partially-ordered set, the axioms of lattice
+ theory allow one to concentrate on meets and joins, filters and ideals,
+ frames and locales, without once bringing up the notion of a point.
+ Yet, in the end, partial orders are founded on the idea of direction, of
+ inclusion, with set theoretic notions of the same providing much of the
+ intuititive grounding.
+ There is a DAG, even if discussion of terminal elements is avoided.
+\end_layout
+
+\begin_layout Subsubsection*
+In category theory:
+\end_layout
+
+\begin_layout Standard
 The simply typed lambda calculus is important, as it is the 
 \begin_inset Quotes eld
 \end_inset
@@ -550,8 +677,8 @@ things
  are presumed to be discernable items that have an identity.
  Indiscernables are not described by cartesian closed categories; for this,
  needs symmetric monoidal categories.
- Tensors and tensor algebras and Hilbert spaces fmously belong to this category;
- the internal language is 
+ Tensors and tensor algebras, vector spaces and Hilbert spaces famously
+ belong to this category; the internal language is 
 \begin_inset Quotes eld
 \end_inset
 
@@ -560,30 +687,34 @@ linear logic
 \end_inset
 
 .
+ Yet, the tensor category is daggar-compact: it has a left-right symmetry
+ to it that constrains structure.
 \end_layout
 
 \begin_layout Standard
-The general typed lambda calculus famously corresponds to computer programs,
- this is the Curry-Howard correspondance.
- Infinite loops can be thought of in two ways in computing.
- One way is as a non-directed graph: a loop, that calls back onto itself.
- The state transitions are described by points (for states) and arrows (denoting
- state transitions), arranged such that one (or more!) collections of arrows
- can be traced in a circular loop.
- The other way of thinking of infinite loops is as recursive structures:
- one unrolls the loop so that it becomes an infinitely-long unterminating
- sequence of arrows.
- In 
-\begin_inset Quotes eld
-\end_inset
+A pending critique of neural nets is that they are founded on vector spaces
+ (and thus are part of the tensor category, which is symmetric) whereas
+ natural language is described by monoidal categories that are manifestly
+ not symmetric.
+ This observation has been pursued elsewhere, in various writings by this
+ author.
+\end_layout
 
-proof theory
-\begin_inset Quotes erd
-\end_inset
+\begin_layout Standard
+Category theory itself is a theory of dots and arrows.
+ Every dot has an arrow back to itself (thus, a loop), and arrows can be
+ composed: if there is a sequence of two arrows conneting three dots, then
+ there always is an arrow, going in the same sense, between the two endpoints.
+ This is all that a category is.
+\end_layout
 
-, the infinite binary tree provides a simple non-trivial example.
- Both the left and right elements can loop back onto themselves; when unrolled,
- the tree becomes infinite DAG (rather than containing a pair of loops).
+\begin_layout Standard
+The moral of the story that is being presented here is that almost all of
+ computer science is founded on a theory of DAGs.
+ Even when loops are allowed, the graphs are formed from edges that are
+ directed: the edges are always arrows.
+ This is not the same as a general theory of connectors connecting things
+ together.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -591,7 +722,7 @@ In model theory:
 \end_layout
 
 \begin_layout Standard
-Supplmented by relations.
+Model theory takes the idea of a Supplemented by relations.
  Theory of equality.
 \end_layout
 
@@ -601,7 +732,45 @@ In knowledge representation:
 
 \begin_layout Standard
 is-a, has-a, part-of.
- Lattice theory.
+ gunk in philosophy.
+\end_layout
+
+\begin_layout Subsubsection*
+In graph theory:
+\end_layout
+
+\begin_layout Standard
+graph theory allows undirected edges.
+\end_layout
+
+\begin_layout Subsubsection*
+In AI:
+\end_layout
+
+\begin_layout Standard
+Inference, theorem proving, planning, consraint satisfaction.
+\end_layout
+
+\begin_layout Subsubsection*
+In philosophy, again:
+\end_layout
+
+\begin_layout Standard
+Can the idea of conector provide a foundation for Derrida's ideas of deconstruct
+ion? If there is no difference between appearance and true form, or that
+ the difference is undecidable, perhaps this is why?
+\end_layout
+
+\begin_layout Standard
+connectors offer contrast
+\end_layout
+
+\begin_layout Standard
+signifier and signified.
+\end_layout
+
+\begin_layout Standard
+Deleuze, Lyotard
 \end_layout
 
 \begin_layout Section*
