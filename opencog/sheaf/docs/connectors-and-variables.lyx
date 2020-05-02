@@ -261,6 +261,48 @@ obvious
  This note dwells on these ideas, due to thier importance.
 \end_layout
 
+\begin_layout Standard
+The primary point of this note is that, when one thinks of variables and
+ functions, one is inevitabley lead to the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+directed acyclic graphs
+\begin_inset Quotes erd
+\end_inset
+
+ (DAGs).
+ That is, plugging variables into functions, and those into other functions
+ invariably leads to a DAG, because the sense of direction of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ must be preserved: one cannot plug a variable into a value; one cannot
+ plug a function into a variable; the plugging is always directed.
+ By contrast, that act of connecting together connectors has no such constraint:
+ a jigsaw puzzle is not a DAG; there is no jigsaw piece 
+\begin_inset Quotes eld
+\end_inset
+
+at the top
+\begin_inset Quotes erd
+\end_inset
+
+, and none 
+\begin_inset Quotes eld
+\end_inset
+
+at the bottom
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Subsubsection*
 In philosophy:
 \end_layout
@@ -353,7 +395,93 @@ In term algebra:
 \end_layout
 
 \begin_layout Standard
-The
+The theory of term algebras is a specific branch of mathematics that deals
+ with the abstract process of performing generic algebraic manipulations,
+ as any mathematician or engineer might do when working with pencil and
+ paper.
+ It is important for the theory of computation, because much what we do
+ with computers is to manipulate symbols; term algebras provide a coherent
+ vocabulary of ideas for thinking about algorithms that manipulate symbols.
+ This is, in turn, important for both logic, and for symbolic AI, since
+ reasoning engines and algorithmic theorem provers are built on such symbolic
+ manipulations.
+\end_layout
+
+\begin_layout Standard
+Consider a typical definition of a term algebra.
+ It consists of:
+\end_layout
+
+\begin_layout Itemize
+A set of constants 
+\begin_inset Formula $c_{0},c_{1},\cdots$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of variables 
+\begin_inset Formula $x,y,z,\cdots$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of 
+\begin_inset Formula $n$
+\end_inset
+
+-ary function symbols 
+\begin_inset Formula $f\left(x_{1},\cdots,x_{n}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The terms of a term algebra are then anything that can be constructed from
+ the above, by recurisvely 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That the resulting terms always have the structure of a DAG should be intuitive
+ly obvious.
+\end_layout
+
+\begin_layout Standard
+In type theory, it is common to assign types to the different constants,
+ variables and function symbols; this does not alter the result that the
+ terms are DAGs.
+\end_layout
+
+\begin_layout Subsubsection*
+In model theory:
+\end_layout
+
+\begin_layout Standard
+Supplmented by relations.
+ Theory of equality.
+\end_layout
+
+\begin_layout Section*
+Bibliography
+\end_layout
+
+\begin_layout Standard
+* Van Inwagen, P.
+ (2002).
+ “The Number of Things.” 
+\emph on
+Philosophical Issues
+\emph default
+ 12 pp.176–196.
 \end_layout
 
 \end_body
