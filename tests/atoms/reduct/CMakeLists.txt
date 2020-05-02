@@ -3,5 +3,6 @@ IF(HAVE_GUILE)
 
 	ADD_CXXTEST(ReductUTest)
 	ADD_CXXTEST(HeavisideUTest)
+	ADD_CXXTEST(MinMaxUTest)
 	ADD_CXXTEST(AccumulateUTest)
 ENDIF(HAVE_GUILE)
