@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/MinLink.cc
+ * opencog/atoms/reduct/MaxLink.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -10,26 +10,26 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
-#include "MinLink.h"
+#include "MaxLink.h"
 
 using namespace opencog;
 
-MinLink::MinLink(const HandleSeq&& oset, Type t)
+MaxLink::MaxLink(const HandleSeq&& oset, Type t)
     : FunctionLink(std::move(oset), t)
 {
 	init();
 }
 
-void MinLink::init(void)
+void MaxLink::init(void)
 {
 	Type tscope = get_type();
-	if (not nameserver().isA(tscope, MIN_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a MinLink");
+	if (not nameserver().isA(tscope, MAX_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a MaxLink");
 }
 
 // ============================================================
 
-ValuePtr MinLink::execute(AtomSpace* as, bool silent)
+ValuePtr MaxLink::execute(AtomSpace* as, bool silent)
 {
 	Type result_type = FLOAT_VALUE;
 	std::vector<double> result;
@@ -48,7 +48,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 			len = std::min(len, dvec.size());
 			result.resize(len, DBL_MAX);
 			for (size_t i = 0; i<len; i++)
-				result[i] = std::min(result[i], dvec[i]);
+				result[i] = std::max(result[i], dvec[i]);
 		}
 		else if (nameserver().isA(vitype, FLOAT_VALUE))
 		{
@@ -56,7 +56,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 			len = std::min(len, dvec.size());
 			result.resize(len, DBL_MAX);
 			for (size_t i = 0; i<len; i++)
-				result[i] = std::min(result[i], dvec[i]);
+				result[i] = std::max(result[i], dvec[i]);
 		}
 		else
 			nan.push_back(arg);
@@ -71,7 +71,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 	if (0 < nan.size())
 	{
 		nan.push_back(HandleCast(createNumberNode(result)));
-		return createMinLink(std::move(nan));
+		return createMaxLink(std::move(nan));
 	}
 
 	if (FLOAT_VALUE == result_type)
@@ -80,6 +80,6 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 	return createNumberNode(result);
 }
 
-DEFINE_LINK_FACTORY(MinLink, MIN_LINK);
+DEFINE_LINK_FACTORY(MaxLink, MAX_LINK);
 
 // ============================================================
