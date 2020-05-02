@@ -46,7 +46,7 @@ ValuePtr MaxLink::execute(AtomSpace* as, bool silent)
 			result_type = NUMBER_NODE;
 			const std::vector<double>& dvec(NumberNodeCast(vi)->value());
 			len = std::min(len, dvec.size());
-			result.resize(len, DBL_MAX);
+			result.resize(len, -DBL_MAX);
 			for (size_t i = 0; i<len; i++)
 				result[i] = std::max(result[i], dvec[i]);
 		}
@@ -54,7 +54,7 @@ ValuePtr MaxLink::execute(AtomSpace* as, bool silent)
 		{
 			const std::vector<double>& dvec(FloatValueCast(vi)->value());
 			len = std::min(len, dvec.size());
-			result.resize(len, DBL_MAX);
+			result.resize(len, -DBL_MAX);
 			for (size_t i = 0; i<len; i++)
 				result[i] = std::max(result[i], dvec[i]);
 		}
