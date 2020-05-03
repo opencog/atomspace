@@ -155,6 +155,14 @@ more general
 , and that, as a mathematical framework, it is far less explored.
 \end_layout
 
+\begin_layout Abstract
+As a footnote, it is noted that the use of connectors (and the implied sheaf
+ theory) appears to have impact on a number of philosophical arguments,
+ ranging from mereology to postmodernism(!) This is a surprise.
+ (The author acknowledges that it sounds perhaps cranky to place such claims
+ in the abstract, but the notions are heart-felt.)
+\end_layout
+
 \begin_layout Section*
 Introduction
 \end_layout
@@ -1446,7 +1454,7 @@ In AI:
 \end_layout
 
 \begin_layout Standard
-Inference, theorem proving, planning, consraint satisfaction.
+Inference, theorem proving, planning, constraint satisfaction.
 \end_layout
 
 \begin_layout Section*
