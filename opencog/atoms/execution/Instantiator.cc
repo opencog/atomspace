@@ -461,10 +461,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
-		// XXX I don't get it... don't we need to perform var
-		// substitution here? Is this just not tested?
-		// beta_reduce(expr, *_vmap);
-		return HandleCast(expr->execute(_as, silent));
+		Handle flh = beta_reduce(expr, *_vmap);
+		return HandleCast(flh->execute(_as, silent));
 	}
 
 	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
@@ -579,8 +577,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		{
 			Type th = h->get_type();
 			if (nameserver().isA(th, VALUE_OF_LINK) or
-			    nameserver().isA(th, SET_VALUE_LINK) or
-			    nameserver().isA(th, ARITHMETIC_LINK))
+			    nameserver().isA(th, SET_VALUE_LINK))
 			{
 			   oset_results.push_back(h);
 			}
