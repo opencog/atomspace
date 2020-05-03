@@ -1305,11 +1305,25 @@ type theory
 \end_layout
 
 \begin_layout Subsubsection*
-Compostionality, sheaf axioms
+Sections and Compostionality
 \end_layout
 
 \begin_layout Standard
-It obeys the sheaf axioms.
+The burrs/seeds/puzzle-pieces, as presented above, are obviously 
+\begin_inset Quotes eld
+\end_inset
+
+compositional
+\begin_inset Quotes erd
+\end_inset
+
+, in that there is an obvious way to connect them together.
+ Once connected, the resulting structure is again of the same form: some
+ network of vertices connected with edges, and some unconnected half-edges
+ sticking out of it.
+ Furthermore, it should be clear that the order in which pieces are assembled
+ is immaterial: one obtains the same figure, no matter what the sequence.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1604,6 +1618,14 @@ Why, link-grammar, of course.
  Pre-group grammar.
  Stay and Baez rosetta stone.
  And
+\end_layout
+
+\begin_layout Subsubsection*
+Sheaf Axioms:
+\end_layout
+
+\begin_layout Standard
+It obeys the sheaf axioms.
 \end_layout
 
 \begin_layout Subsubsection*
