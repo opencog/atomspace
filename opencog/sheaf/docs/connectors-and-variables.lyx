@@ -255,7 +255,7 @@ socket
 \begin_layout Standard
 This observation seems nearly trivial; it is so painfully obvious that one
  wonders what more can be said.
- Yet there are tremendous consequences that arise from this, conseuqnces
+ Yet there are tremendous consequences that arise from this, consequences
  that are in some sense equally trivial and obvious.
  That something is 
 \begin_inset Quotes eld
@@ -274,7 +274,7 @@ obvious
 \begin_inset Quotes erd
 \end_inset
 
- ideas, and demonstrates thier importance.
+ ideas, and demonstrates their importance.
  The problem with 
 \begin_inset Quotes eld
 \end_inset
@@ -283,7 +283,7 @@ obviousness
 \begin_inset Quotes erd
 \end_inset
 
- is that it frames all manner of thinking: it is Aristotles 
+ is that it frames all manner of thinking: it is Aristotle's 
 \begin_inset Quotes eld
 \end_inset
 
@@ -310,13 +310,13 @@ ground
 \end_inset
 
 , and anything that is obvious falls into the background, becomes implicit,
- and serves as a barrier to further thought.
+ and serves as a barrier to further thought and examination.
  Thus, the impetus for this note.
 \end_layout
 
 \begin_layout Standard
-The primary point of this note is that, when one thinks of variables and
- functions, one is inevitabley lead to the notion of 
+The starting point of this note is that, when one thinks of variables and
+ functions, one is inevitably lead to the notion of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -335,7 +335,8 @@ plugging in
 \end_inset
 
  must be preserved: one cannot plug a variable into a value; one cannot
- plug a function into a variable; the plugging is always directed.
+ plug a function into a value; the plugging is always directed.
+ One is a receptacle, the other is not.
  By contrast, that act of connecting together connectors has no such constraint:
  a jigsaw puzzle is not a DAG; there is no jigsaw piece 
 \begin_inset Quotes eld
@@ -360,7 +361,7 @@ at the bottom
 
 \begin_layout Standard
 The desired conclusion is that by approaching knowledge representation as
- an assemblege of connections, rather than as a unidirectional network of
+ an assemblage of connections, rather than as a unidirectional network of
  inferences, one can gain considerable power in working with the common
  problems and stumbling blocks of AI and AGI, including problems of planning,
  inference, constraint satisfaction, combinatorial explosion and the 
@@ -377,8 +378,18 @@ frame problem
 \begin_layout Standard
 This note begins with a long review of everywhere that the notion of variables
  and functions appear, or, more generally, of arrows and directed graphs.
- This may seem pointless, but serves only to underscore thier ubiquity.
+ This may seem pointless, but serves only to underscore their ubiquity.
  This is followed by a section that develops the proposed alternative.
+ Along the way, assorted commentary is made with regards to outstanding
+ philosophical problems, as befits any exploration that belabors the 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section*
@@ -389,7 +400,7 @@ Arrows
 Arrows, and usually accompanying DAGs are everywhere.
  They really are pervasive in descriptions of mathematics, in symbolic AI
  and knowledge representation, and even underpin vast tracts of philosophy.
- This is again, so potently 
+ This is, again, so potently 
 \begin_inset Quotes eld
 \end_inset
 
@@ -405,7 +416,7 @@ In philosophy:
 \end_layout
 
 \begin_layout Standard
-Here's a hint of how pervasively important the conecept of variables and
+Here's a hint of how pervasively important the concept of variables and
  values can be.
  Some philosophers use these notions to anchor the idea of 
 \begin_inset Quotes eld
@@ -448,7 +459,7 @@ An object is anything that can be the value of a variable, that is, anything
 
 \begin_layout Standard
 This conception of an object then leads to confused discussions about the
- identity of indiscernables, and the importance of location (spacetime)
+ identity of indiscernibles, and the importance of location (space-time)
  in mereology.
  The notion of connectors can be used as an alternate foundation for the
  conception of 
@@ -539,7 +550,7 @@ A set of
 
 \begin_layout Standard
 The terms of a term algebra are then anything that can be constructed from
- the above, by recurisvely 
+ the above, by recursively 
 \begin_inset Quotes eld
 \end_inset
 
@@ -567,9 +578,9 @@ In (well-founded) (naive) set theory, there is effectively just one function
  symbol: the set, and only one constant: the empty set.
  There are no variables, in the sense that proper sets do not contain variables
  in them.
- Of course, in the definition of the axioms that define set theory, and
- in the articulation of the theory itself, it is impossible to avoid variables;
- its just that variables are not set elements.
+ Of course, in the definition of the axioms (and axiom schemas!) that define
+ set theory, and in the articulation of the theory itself, it is impossible
+ to avoid variables; its just that variables are not set elements.
  By definition, 
 \begin_inset Quotes eld
 \end_inset
@@ -579,7 +590,8 @@ well-foundedness
 \end_inset
 
  disallows infinitely recursive sets.
- Thus, effectively, all finite sets in set theory have the shape of a DAG.
+ Thus, effectively, all finite sets in set theory have the shape of a DAG
+ (they form a partial order).
 \end_layout
 
 \begin_layout Subsubsection*
@@ -587,7 +599,7 @@ In computer science:
 \end_layout
 
 \begin_layout Standard
-Lambda calculus can be thought of as having arbitrary constants and varaibles,
+Lambda calculus can be thought of as having arbitrary constants and variables,
  but only one function symbol: the lambda.
  It is effectively a theory of linear strings (sequences) of symbols arranged
  in order, on a line.
@@ -596,22 +608,33 @@ Lambda calculus can be thought of as having arbitrary constants and varaibles,
  or uncountable limits of lambda calculus.
  In general, lambda calculus is always assumed to be well-founded, so that
  the expressions are always DAGs.
- An exception to this is chemlambda (Buliga 2003), which redefines lambda
+ An exception to this is chem-lambda (Buliga 2003), which redefines lambda
  as having input and output connectors, thus allowing looping connections
  to be made.
 \end_layout
 
 \begin_layout Standard
 The general typed lambda calculus famously corresponds to computer programs,
- this is the Curry-Howard correspondance.
+ this is the Curry-Howard correspondence.
  Infinite loops can be thought of in two ways in computing.
- One way is as a non-directed graph: a loop, that calls back onto itself.
+ One way is as a directed graph containing a loop: the arrows denote a function
+ that recursively calls back to itself.
  The state transitions are described by points (for states) and arrows (denoting
  state transitions), arranged such that one (or more!) collections of arrows
  can be traced in a circular loop.
  The other way of thinking of infinite loops is as recursive structures:
  one unrolls the loop so that it becomes an infinitely-long unterminating
  sequence of arrows.
+ Roughly speaking, infinite loops correspond to ill-founded sets.
+ They are the 
+\begin_inset Quotes eld
+\end_inset
+
+gunk
+\begin_inset Quotes erd
+\end_inset
+
+ of philosophy.
 \end_layout
 
 \begin_layout Standard
@@ -630,11 +653,11 @@ In topology:
 \begin_layout Standard
 The infinite binary tree provides a simple example of unrolling a pair of
  interconnected loops.
- Axiomatically, a binary tree is constructed from a pair of left-right,
- and each element can be aonther pair.
+ Axiomatically, a binary tree is constructed from a pair of left-right elements,
+ and each element can be another pair, or the termination symbol.
  In this sense, both the left and right elements can loop back onto themselves;
- when unrolled, the tree becomes infinite DAG (rather than containing a
- pair of loops).
+ when the loops are unrolled, the tree becomes infinite DAG (rather than
+ a small graph containing a pair of loops).
  The endpoints of a binary tree form the Cantor set; there are an uncountable
  infinity of them.
  These are the 
@@ -657,7 +680,7 @@ One can also have a point-free topology, built on top of lattice theory.
  frames and locales, without once bringing up the notion of a point.
  Yet, in the end, partial orders are founded on the idea of direction, of
  inclusion, with set theoretic notions of the same providing much of the
- intuititive grounding.
+ intuitive grounding.
  There is a DAG, even if discussion of terminal elements is avoided.
 \end_layout
 
@@ -683,7 +706,7 @@ Cartesian closed categories
 \end_inset
 
 .
- The Cartesian-closed catgories naturally describe 
+ The Cartesian-closed categories naturally describe 
 \begin_inset Quotes eld
 \end_inset
 
@@ -699,7 +722,15 @@ things
 \begin_inset Quotes erd
 \end_inset
 
-: that is, things that can be placed in an ordered list.
+: that is, things that can be placed in an ordered list (a 
+\begin_inset Quotes eld
+\end_inset
+
+Cartesian product
+\begin_inset Quotes erd
+\end_inset
+
+).
  The 
 \begin_inset Quotes eld
 \end_inset
@@ -708,8 +739,44 @@ things
 \begin_inset Quotes erd
 \end_inset
 
- are presumed to be discernable items that have an identity.
- Indiscernables are not described by cartesian closed categories; for this,
+ are presumed to be discernible items
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+One could say 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+items
+\begin_inset Quotes erd
+\end_inset
+
+, as that is the appropriate term for category theory.
+ It is, however, useful in the present case to use the slightly more vague
+ term 
+\begin_inset Quotes eld
+\end_inset
+
+items
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ that have an identity.
+ Indiscernibles are not described by Cartesian closed categories; for this,
  needs symmetric monoidal categories.
  Tensors and tensor algebras, vector spaces and Hilbert spaces famously
  belong to this category; the internal language is 
@@ -721,7 +788,7 @@ linear logic
 \end_inset
 
 .
- Yet, the tensor category is daggar-compact: it has a left-right symmetry
+ Yet, the tensor category is dagger-compact: it has a left-right symmetry
  to it that constrains structure.
 \end_layout
 
@@ -737,9 +804,11 @@ A pending critique of neural nets is that they are founded on vector spaces
 \begin_layout Standard
 Category theory itself is a theory of dots and arrows.
  Every dot has an arrow back to itself (thus, a loop), and arrows can be
- composed: if there is a sequence of two arrows conneting three dots, then
+ composed: if there is a sequence of two arrows connecting three dots, then
  there always is an arrow, going in the same sense, between the two endpoints.
  This is all that a category is.
+ Deep theorems follow, such as the existence of all limits, given only spans
+ and equalizers! Category theory is surprising in it's power.
 \end_layout
 
 \begin_layout Standard
@@ -825,13 +894,13 @@ for all
 \end_inset
 
 .
- Curiously enough, the rules for combining these operators again for a DAG:
- the sigma-pi hierarchy.
+ Curiously enough, the rules for combining these operators again form a
+ DAG: the sigma-pi hierarchy.
  Combining terms with predicates seems nearly enough to serve as a foundation
  for all mathematics.
  The sigma-pi hierarchy, taken on set theory, is extremely powerful.
- Just the first few levels: first-order and second-order logic are enough
- to meet the concerns of most classical mathematics.
+ Just the first few levels: first-order logic and second-order logic are
+ enough to meet the concerns of most classical mathematics.
  Even things that are 
 \begin_inset Quotes eld
 \end_inset
@@ -849,7 +918,8 @@ The moral of the story is as before: when viewed from the meta-perspective,
  DAGs appear to be sufficient to describe all of mathematics.
  It is hardly a surprise that they are part of the ground, the background,
  and not a part of the figure.
- They are almost never overtly discussed.
+ They are a part of the under-pinnings of the meta-mathematics, and are
+ almost never overtly discussed.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -900,13 +970,14 @@ gunk
 \begin_inset Quotes erd
 \end_inset
 
- in philosphy (that, roughly speaking, infinite recursion is possible, when
- considering the structure of phsycial reality), as well as a number of
- puzzles dating to Ancient Greece (the Ship of Theseus, the Statue and the
- Lump of Clay).
- That there are such puzzles is perhaps endemic to the desire to view part-whole
- relationships, and the adduced DAG partial orders as a fundamental ground
- on which to build philosophy.
+ in philosophy (that, roughly speaking, infinite recursion is possible,
+ when considering the structure of physical reality), as well as a number
+ of puzzles dating to Ancient Greece (the Ship of Theseus: what happens
+ when parts are replaced? The Statue and the Lump of Clay: what happens
+ when parts are rearranged?).
+ That there are such puzzles is perhaps endemic to the desire to apply part-whol
+e relationships, and the adduced DAG partial orders as a fundamental ground
+ on which to build philosophical discussions.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -944,7 +1015,7 @@ slot
 
  named by the key).
  Hierarchical relations can be built by placing keys into slots: thus, for
- example, the unix file-system is effectively a key-value database.
+ example, the Unix file-system is effectively a key-value database.
  On the surface, SQL databases seem to be quite different, having a tabular
  structure, consisting of a fixed schema (a fixed 
 \begin_inset Formula $n$
@@ -957,8 +1028,8 @@ slot
 \end_layout
 
 \begin_layout Standard
-Actual datasets occuring in knowledge representation include WordNet, which
- provides synonym, holonym and meronym relations.
+Actual data-sets occurring in knowledge representation include WordNet,
+ which provides synonym, holonym and meronym relations.
  The urge to solve the 
 \begin_inset Quotes eld
 \end_inset
@@ -978,8 +1049,8 @@ upper ontologies
 , such as SUMO, which asserts that things are objects, and classifies types
  of things.
  Ontologies themselves force the user to make distinctions between intensional
- and extensional membership, intentional and extensional inheritance.
- For example, one can assert that dogs are a kind of animal (intentional)
+ and extensional membership, intensional and extensional inheritance.
+ For example, one can assert that dogs are a kind of animal (intensional)
  and then assert that 
 \begin_inset Quotes eld
 \end_inset
@@ -988,7 +1059,7 @@ Fluffy
 \begin_inset Quotes erd
 \end_inset
 
- is an example of a dog (extensional).
+ is an example of a dog (extensional - belongs to the class of dogs).
 \end_layout
 
 \begin_layout Standard
@@ -1002,13 +1073,13 @@ semantic triples
 \begin_inset Quotes erd
 \end_inset
 
-: these are effectively labelled arrows: the two endpoints (head and tail)
+: these are effectively labeled arrows: the two endpoints (head and tail)
  of the arrow, and a label for the relationship type.
 \end_layout
 
 \begin_layout Standard
-As before, the presence of arrows implies ordering relationships, with concomitt
-ent notions of transitivity, (anti-)reflexivity, (anti-)symmetry, even when
+As before, the presence of arrows implies ordering relationships, with concomita
+nt notions of transitivity, (anti-)reflexivity, (anti-)symmetry, even when
  they may be a good bit more fuzzy and vague, as in the domain of 
 \begin_inset Quotes eld
 \end_inset
@@ -1018,6 +1089,7 @@ common sense
 \end_inset
 
 .
+ As Spock might say, human gut feels are not logical.
 \end_layout
 
 \begin_layout Section*
@@ -1062,7 +1134,7 @@ The canonical definition of a graph is that of two sets: a set
 \end_inset
 
 .
- Although this defintion is adequate for most mathematical applications,
+ Although this definition is adequate for most mathematical applications,
  it is severely deficient for algorithmic applications.
  The biggest issue is that of non-locality of data.
  If one merely stuffs the vertices and edges into a table, then a graph
@@ -1104,7 +1176,7 @@ half-edges
 \end_inset
 
 , as it is enough to identify the remote end to which they connect; the
- local end is implcit: it is just the vertex 
+ local end is implicit: it is just the vertex 
 \begin_inset Formula $v_{i}$
 \end_inset
 
@@ -1133,7 +1205,7 @@ center
 \begin_layout Standard
 The black dot represents the vertex; the open circles represent the unconnected
  half-edges.
- As this vaguely resembles a burr, this general shape will be refered to
+ As this vaguely resembles a burr, this general shape will be referred to
  as a 
 \begin_inset Quotes eld
 \end_inset
@@ -1203,9 +1275,27 @@ The explicit polarity of the mating, despite the fact that the resulting
  polarity, they cannot attach.
  Secondly, they can be used to establish directionality, when that is needed.
  As the previous section noted, directed edges are everywhere; this did
- not mean to imply that they are useless! Most importantly, the concept
- of vertices adorned with connectors allows one to define a concept of a
- grammar.
+ not mean to imply that they are useless! The collection of tabs and sockets
+ can come in a large variety of shapes.
+ These shapes correspond to the 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+type theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Most importantly, the concept of vertices adorned with connectors allows
+ one to define a concept of a grammar.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1221,7 +1311,7 @@ In philosophy:
 \end_layout
 
 \begin_layout Standard
-The paradoces of mereology were touched on in the previous section: the
+The paradoxes of mereology were touched on in the previous section: the
  difficulty of defining part-whole relationships in a consistent manner,
  the problem of the existence or non-existence of 
 \begin_inset Quotes eld
@@ -1243,7 +1333,7 @@ restricted composition
 \begin_inset Quotes erd
 \end_inset
 
-.
+ (see Wikipedia).
  The idea is that 
 \begin_inset Quotes eld
 \end_inset
@@ -1260,7 +1350,7 @@ other things
 \begin_inset Quotes erd
 \end_inset
 
-, but the manner in which these can be compsed is restricted.
+, but the manner in which these can be composed is restricted.
  The body of ideas is very nearly identical to the concept of sheaves.
  Quoting directly from the Wikipedia article on mereology, we can can learn
  that these are:
@@ -1285,6 +1375,7 @@ viz.
 
 \emph default
  seeds attach only if the connectors allow mating.
+ Once mated, they are fastened together.
 \end_layout
 
 \begin_layout Itemize
@@ -1354,7 +1445,7 @@ The last point is perhaps the most interesting notion coming out of restricted
  It is not an ingredient, it is rather a consequence.
  If one abandons the explicit DAGs of partial orders, one then also abandons
  the notion of logical predicates and truth assignments.
- One no longer arrange logical connectives into a tree structure, or even
+ One no longer arranges logical connectives into a tree structure, or even
  into Horn clauses.
  The network, rather, represents things 
 \begin_inset Quotes eld
@@ -1366,7 +1457,7 @@ as they are
 
 .
  This is not to deny predicate logic, or Boolean satisfiability: these are
- tremensouly important concepts.
+ tremendously useful concepts.
  Rather, this is to avoid the symbol grounding problem (ref Wikipedia, again).
  By discarding the arrow from 
 \begin_inset Quotes eld
@@ -1397,7 +1488,7 @@ what does this symbol mean?
 
 \begin_layout Standard
 This is very much in line with theories of postmodernism and deconstruction
- evident in the works for Derrida, Deleuze, Lyotard.
+ evident in the works of Derrida, Deleuze, Lyotard.
  There is no difference between appearance and true form; the difference
  is undecidable.
  The constructed network of connections and relations is all there is.
@@ -1409,16 +1500,17 @@ In the following sections, the sheaf construction will be used as a tool
  Whether the constructed network is an accurate representation of reality
  is undecidable, and this is true even in a narrow formal sense.
  Famously, it is known that the question of whether two different presentations
- of a group refer to the same group is undecidable, in the computational
- sense: there is no algorithm, gauranteeed to terminate in finite time,
- that is capable of making this decision.
+ of a (group-theoretical) group refer to the same group is undecidable,
+ in the computational sense: there is no algorithm, guaranteed to terminate
+ in finite time, that is capable of making this decision.
+ This is the undecidability problem in group theory.
  That this result carries over into the fullness of a network built from
  a sheaf should come as no surprise: the presentation of a group is little
- more than a certain collection of labelled vertexes and edges (the group
+ more than a certain collection of labeled vertexes and edges (the group
  elements and the group operations) and decidability requires the graph-rewritin
 g of these into a different form.
  There are no graph rewrite rules that can always bring two different presentati
-ons into norrmal form.
+ons into normal form.
  Oddly enough, such 
 \begin_inset Quotes eld
 \end_inset
@@ -1432,7 +1524,7 @@ received wisdom
 \end_layout
 
 \begin_layout Standard
-A more explicit bridge can be constructed via lingustics, as follows.
+A more explicit bridge can be constructed via linguistics, as follows.
 \end_layout
 
 \begin_layout Subsubsection*
