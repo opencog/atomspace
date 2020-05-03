@@ -366,6 +366,32 @@ frame problem
 .
 \end_layout
 
+\begin_layout Standard
+This note begins with a long review of everywhere that the notion of variables
+ and functions appear, or, more generally, of arrows and directed graphs.
+ This may seem pointless, but serves only to underscore thier ubiquity.
+ This is followed by a section that develops the proposed alternative.
+\end_layout
+
+\begin_layout Section*
+Arrows
+\end_layout
+
+\begin_layout Standard
+Arrows, and usually accompanying DAGs are everywhere.
+ They really are pervasive in descriptions of mathematics, in symbolic AI
+ and knowledge representation, and even underpin vast tracts of philosophy.
+ This is again, so potently 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ that an explicit review is called for.
+\end_layout
+
 \begin_layout Subsubsection*
 In philosophy:
 \end_layout
@@ -880,26 +906,319 @@ In knowledge representation:
 \end_layout
 
 \begin_layout Standard
+A practical application of relational algebras can be found in the field
+ of knowledge representation.
+ Practical systems embodying relational algebras include key-value databases
+ and SQL databases.
+ The 
 \begin_inset Quotes eld
 \end_inset
 
-holonym
+key
 \begin_inset Quotes erd
 \end_inset
 
-, meronym SQL key-value DB.
+ is a named slot, the 
+\begin_inset Quotes eld
+\end_inset
+
+value
+\begin_inset Quotes erd
+\end_inset
+
+ is the item that is attached to the key (that occupies the 
+\begin_inset Quotes eld
+\end_inset
+
+slot
+\begin_inset Quotes erd
+\end_inset
+
+ named by the key).
+ Hierarchical relations can be built by placing keys into slots: thus, for
+ example, the unix file-system is effectively a key-value database.
+ On the surface, SQL databases seem to be quite different, having a tabular
+ structure, consisting of a fixed schema (a fixed 
+\begin_inset Formula $n$
+\end_inset
+
+-ary predicate), the instances of which are rows in a table.
+ Yet it is famously the case that SQL and key-value databases are categorial
+ opposites to one-another: if one takes the arrow relationships in one,
+ and reverses the sense of the arrows, one obtains the other (Meyer 2011).
 \end_layout
 
 \begin_layout Standard
-is-a, has-a, part-of.
+Actual datasets occuring in knowledge representation include WordNet, which
+ provides synonym, holonym and meronym relations.
+ The urge to solve the 
+\begin_inset Quotes eld
+\end_inset
+
+grounding problem
+\begin_inset Quotes erd
+\end_inset
+
+ leads to 
+\begin_inset Quotes eld
+\end_inset
+
+upper ontologies
+\begin_inset Quotes erd
+\end_inset
+
+, such as SUMO, which asserts that things are objects, and classifies types
+ of things.
+ Ontologies themselves force the user to make distinctions between intensional
+ and extensional membership, intentional and extensional inheritance.
+ For example, one can assert that dogs are a kind of animal (intentional)
+ and then assert that 
+\begin_inset Quotes eld
+\end_inset
+
+Fluffy
+\begin_inset Quotes erd
+\end_inset
+
+ is an example of a dog (extensional).
+\end_layout
+
+\begin_layout Standard
+Ontologies provide only a handful of such relationships (is-a, has-a, part-of).
+ To generalize to a greater number of relations, one arrives at the notion
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+semantic triples
+\begin_inset Quotes erd
+\end_inset
+
+: these are effectively labelled arrows: the two endpoints (head and tail)
+ of the arrow, and a label for the relationship type.
+\end_layout
+
+\begin_layout Standard
+As before, the presence of arrows implies ordering relationships, with concomitt
+ent notions of transitivity, (anti-)reflexivity, (anti-)symmetry, even when
+ they may be a good bit more fuzzy and vague, as in the domain of 
+\begin_inset Quotes eld
+\end_inset
+
+common sense
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Graphs
+\end_layout
+
+\begin_layout Standard
+Unlike the examples above, graph theory offers a different possibility:
+ the undirected edge.
+ Unfortunately, this is again 
+\begin_inset Quotes eld
+\end_inset
+
+painfully obvious
+\begin_inset Quotes erd
+\end_inset
+
+, and we'll have to slog through a lot of rather obvious observations to
+ make anything resembling progress.
+\end_layout
+
+\begin_layout Standard
+The canonical definition of a graph is that of two sets: a set 
+\begin_inset Formula $V$
+\end_inset
+
+ of vertices and a set 
+\begin_inset Formula $E$
+\end_inset
+
+ of edges.
+ An edge 
+\begin_inset Formula $e_{k}\in E$
+\end_inset
+
+ is a pair 
+\begin_inset Formula $e_{k}=\left\{ v_{i},v_{j}\right\} $
+\end_inset
+
+ of vertices, with each 
+\begin_inset Formula $v_{i}\in V$
+\end_inset
+
+.
+ Although this defintion is adequate for most mathematical applications,
+ it is severely deficient for algorithmic applications.
+ The biggest issue is that of non-locality of data.
+ If one merely stuffs the vertices and edges into a table, then a graph
+ walk in general appears to look like a uniformly distributed random hop
+ through those tables: terrible for modern computers which rely on locality,
+ so that caches can speed data access performance.
+\end_layout
+
+\begin_layout Standard
+This section develops an alternative representation for graphs, and argues
+ that it is foundational in nature.
+ It addresses not only some of the practical problems in the DAG-view of
+ the world (of the noosphere) but also provides an alternative to some of
+ the philosophical foundations of the same.
 \end_layout
 
 \begin_layout Subsubsection*
-In graph theory:
+Seeds
 \end_layout
 
 \begin_layout Standard
-graph theory allows undirected edges.
+The problem of locality can be (partly) solved by defining graphs in a different
+ way: in terms of vertexes, and the (half-)edges that attach to each vertex.
+ In this case, one creates a table of pairs 
+\begin_inset Formula $\left(v_{i},\left\{ e_{i1},e_{i2},\cdots,e_{ik}\right\} \right)$
+\end_inset
+
+ of a vertex 
+\begin_inset Formula $v_{i}$
+\end_inset
+
+ and the set of all edges landing on that vertex.
+ It is convenient to think of the edges as 
+\begin_inset Quotes eld
+\end_inset
+
+half-edges
+\begin_inset Quotes erd
+\end_inset
+
+, as it is enough to identify the remote end to which they connect; the
+ local end is implcit: it is just the vertex 
+\begin_inset Formula $v_{i}$
+\end_inset
+
+ at the 
+\begin_inset Quotes eld
+\end_inset
+
+center
+\begin_inset Quotes erd
+\end_inset
+
+.
+ As this is obvious, it can be belabored with a diagram.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed.eps
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The black dot represents the vertex; the open circles represent the unconnected
+ half-edges.
+ As this vaguely resembles a burr, this general shape will be refered to
+ as a 
+\begin_inset Quotes eld
+\end_inset
+
+seed
+\begin_inset Quotes erd
+\end_inset
+
+, or sometimes a 
+\begin_inset Quotes eld
+\end_inset
+
+germ
+\begin_inset Quotes erd
+\end_inset
+
+ in what follows.
+ Connecting these proceeds in the 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ fashion, and so a pair of connected seeds is shown below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seeds-two.eps
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The unconnected dots, the half-edges, can be called connectors, in which
+ the jigsaw-puzzle piece analogy comes into full force.
+ Another 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ diagram illustrates this:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle.eps
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The explicit polarity of the mating, despite the fact that the resulting
+ edge is an undirected edge, serves several purposes.
+ Foremost, it helps avoid mating errors: if the connectors do not have opposite
+ polarity, they cannot attach.
+ Secondly, they can be used to establish directionality, when that is needed.
+ As the previous section noted, directed edges are everywhere; this did
+ not mean to imply that they are useless! Most importantly, the concept
+ of vertices adorned with connectors allows one to define a concept of a
+ grammar.
+\end_layout
+
+\begin_layout Subsubsection*
+Compostionality, sheaf axioms
+\end_layout
+
+\begin_layout Subsubsection*
+In linguistics:
+\end_layout
+
+\begin_layout Standard
+Its a grammar.
+\end_layout
+
+\begin_layout Subsubsection*
+In philosophy:
+\end_layout
+
+\begin_layout Standard
+Restricted composition.
+ Contact, Fastenation, Cohesion, Fusion, Organicism, Brutal Composition.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -948,6 +1267,23 @@ Artificial chemistry experiments with chemlambda, lambda calculus, interaction
 \end_inset
 
  https://arxiv.org/abs/2003.14332
+\end_layout
+
+\begin_layout Itemize
+Erik Meijer and Gavin Bierman (2011).
+ 
+\begin_inset Quotes eld
+\end_inset
+
+A co-Relational Model of Data for Large Shared Data Banks.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\emph on
+ACM Databases
+\emph default
+ Volume 9, issue 3.
 \end_layout
 
 \begin_layout Itemize
