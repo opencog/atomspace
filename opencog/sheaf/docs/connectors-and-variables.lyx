@@ -1196,6 +1196,7 @@ center
 \align center
 \begin_inset Graphics
 	filename graphics/seed.eps
+	width 25col%
 
 \end_inset
 
@@ -1238,6 +1239,7 @@ obvious
 \align center
 \begin_inset Graphics
 	filename graphics/seeds-two.eps
+	width 30col%
 
 \end_inset
 
@@ -1262,6 +1264,7 @@ obvious
 \align center
 \begin_inset Graphics
 	filename graphics/puzzle.eps
+	width 45col%
 
 \end_inset
 
