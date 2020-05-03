@@ -33,6 +33,9 @@ using namespace opencog;
 void PrenexLink::init(void)
 {
 	Type t = get_type();
+	if (PRENEX_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"PrenexLinks are private and cannot be instantiated.");
 	if (not nameserver().isA(t, PRENEX_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);

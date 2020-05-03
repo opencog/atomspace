@@ -39,6 +39,10 @@ ArithmeticLink::ArithmeticLink(const HandleSeq&& oset, Type t)
 void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();
+	if (ARITHMETIC_LINK == tscope)
+		throw InvalidParamException(TRACE_INFO,
+			"ArithmeticLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
 
