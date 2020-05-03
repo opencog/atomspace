@@ -722,8 +722,157 @@ In model theory:
 \end_layout
 
 \begin_layout Standard
-Model theory takes the idea of a Supplemented by relations.
- Theory of equality.
+Model theory takes the idea of a term algebra, and supplements it with relations.
+ Relations are 
+\begin_inset Formula $n$
+\end_inset
+
+-ary predicates 
+\begin_inset Formula $P\left(t_{1},\cdots,t_{n}\right)$
+\end_inset
+
+ of terms 
+\begin_inset Formula $t_{k}$
+\end_inset
+
+ from the term algebra.
+ A predicate is either true, or it is false: it either holds or does not.
+ The most famous predicate is that of equality; the 
+\begin_inset Quotes eld
+\end_inset
+
+theory of pure equality
+\begin_inset Quotes erd
+\end_inset
+
+ is a term algebra supplemented with a predicate defining equality.
+\end_layout
+
+\begin_layout Standard
+Predicates are useless unless they can be combined using the operators of
+ logic: 
+\begin_inset Quotes eld
+\end_inset
+
+and
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+or
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+not
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+there exists
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+for all
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Curiously enough, the rules for combining these operators again for a DAG:
+ the sigma-pi hierarchy.
+ Combining terms with predicates seems nearly enough to serve as a foundation
+ for all mathematics.
+ The sigma-pi hierarchy, taken on set theory, is extremely powerful.
+ Just the first few levels: first-order and second-order logic are enough
+ to meet the concerns of most classical mathematics.
+ Even things that are 
+\begin_inset Quotes eld
+\end_inset
+
+larger
+\begin_inset Quotes erd
+\end_inset
+
+ than set theory can be represented in this hierarchy: this is the content
+ of the Yoneda lemma.
+\end_layout
+
+\begin_layout Standard
+The moral of the story is as before: when viewed from the meta-perspective,
+ DAGs appear to be sufficient to describe all of mathematics.
+ It is hardly a surprise that they are part of the ground, the background,
+ and not a part of the figure.
+ They are almost never overtly discussed.
+\end_layout
+
+\begin_layout Subsubsection*
+In relational algebras:
+\end_layout
+
+\begin_layout Standard
+Removing the term algebra but keeping the relations results in a 
+\begin_inset Quotes eld
+\end_inset
+
+relational algebra
+\begin_inset Quotes erd
+\end_inset
+
+, with examples of relations being 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+part-of
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Limiting oneself to a single part-whole relationship, one arrives at mereology
+ as a possible alternative to set theory as a foundation for mathematics.
+ But one also arrives the the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+gunk
+\begin_inset Quotes erd
+\end_inset
+
+ in philosphy (that, roughly speaking, infinite recursion is possible, when
+ considering the structure of phsycial reality), as well as a number of
+ puzzles dating to Ancient Greece (the Ship of Theseus, the Statue and the
+ Lump of Clay).
+ That there are such puzzles is perhaps endemic to the desire to view part-whole
+ relationships, and the adduced DAG partial orders as a fundamental ground
+ on which to build philosophy.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -731,8 +880,18 @@ In knowledge representation:
 \end_layout
 
 \begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+holonym
+\begin_inset Quotes erd
+\end_inset
+
+, meronym SQL key-value DB.
+\end_layout
+
+\begin_layout Standard
 is-a, has-a, part-of.
- gunk in philosophy.
 \end_layout
 
 \begin_layout Subsubsection*
