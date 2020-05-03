@@ -52,6 +52,13 @@ ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 bool ScopeLink::skip_init(Type t)
 {
 	// Type must be as expected.
+#if 0
+	// ScopeLinks are created directly in unit tests, so this safety
+	// check won't work.
+	if (SCOPE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"ScopeLinks are private and cannot be instantiated.");
+#endif
 	if (not nameserver().isA(t, SCOPE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
