@@ -657,7 +657,7 @@ A seed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename seed.eps
+	filename graphics/seed.eps
 	width 25col%
 
 \end_inset
@@ -827,7 +827,7 @@ Two linked (connected) seeds
 
 
 \begin_inset Graphics
-	filename seeds-two.eps
+	filename graphics/seeds-two.eps
 	width 35col%
 
 \end_inset
@@ -914,7 +914,7 @@ A connected section
 
 
 \begin_inset Graphics
-	filename hedgehog.eps
+	filename graphics/hedgehog.eps
 	width 25col%
 
 \end_inset
@@ -997,7 +997,7 @@ Joining two connectors to form a link
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename puzzle.eps
+	filename graphics/puzzle.eps
 	width 40col%
 
 \end_inset
@@ -1205,7 +1205,7 @@ Seed connectors might be types, not vertexes
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename seed-puzzle.eps
+	filename graphics/seed-puzzle.eps
 	width 35col%
 
 \end_inset
@@ -1357,7 +1357,7 @@ ion of ADP to ATP, shown in the figure below.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename phosphorylation.svg
+	filename graphics/phosphorylation.svg
 	lyxscale 50
 	width 35col%
 
@@ -1392,7 +1392,7 @@ An example of a connected section would be the Krebs cycle, taken as a whole:
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename krebs.svg
+	filename graphics/krebs.svg
 	lyxscale 30
 	width 55col%
 
@@ -1470,7 +1470,7 @@ A dependency parse decomposed into four seeds
 
 
 \begin_inset Graphics
-	filename example.eps
+	filename graphics/example.eps
 	width 85col%
 
 \end_inset
@@ -2008,7 +2008,7 @@ A tensor with three input wires and two output wires
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename tensor.eps
+	filename graphics/tensor.eps
 	width 30col%
 
 \end_inset
@@ -2541,7 +2541,7 @@ The history of a text as a sequence of words
 
 
 \begin_inset Graphics
-	filename history.eps
+	filename graphics/history.eps
 	width 40col%
 
 \end_inset
@@ -2630,7 +2630,7 @@ name "fig:A-Viterbi-parse"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename viterbi.eps
+	filename graphics/viterbi.eps
 	width 20page%
 
 \end_inset
@@ -2848,7 +2848,7 @@ Likely and unlikely word sequences
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename chain.eps
+	filename graphics/chain.eps
 	width 35col%
 
 \end_inset
@@ -3377,7 +3377,7 @@ name "fig:Creating-a-quotient"
 
 
 \begin_inset Graphics
-	filename similar.eps
+	filename graphics/similar.eps
 	width 55col%
 
 \end_inset
@@ -3829,7 +3829,7 @@ A stalk and it's projection
 
 
 \begin_inset Graphics
-	filename stalk.eps
+	filename graphics/stalk.eps
 	width 60col%
 
 \end_inset
@@ -3889,7 +3889,7 @@ A corn stalk, a stack of puzzle pieces
 
 
 \begin_inset Graphics
-	filename cornstalk.jpg
+	filename graphics/cornstalk.jpg
 	lyxscale 50
 	width 25text%
 
@@ -3897,7 +3897,7 @@ A corn stalk, a stack of puzzle pieces
 
 
 \begin_inset Graphics
-	filename stack-jigsaw-puzzle-pieces.jpg
+	filename graphics/stack-jigsaw-puzzle-pieces.jpg
 	width 25col%
 
 \end_inset
@@ -4160,7 +4160,7 @@ Germs and connectors project consistently
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename project.eps
+	filename graphics/project.eps
 	width 60col%
 
 \end_inset
@@ -4342,7 +4342,7 @@ The problem, and it's intended solution
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename sheaf.eps
+	filename graphics/sheaf.eps
 	width 45col%
 
 \end_inset
@@ -4763,7 +4763,7 @@ name "fig:N-gram-base"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corpus-ngram.eps
+	filename graphics/corpus-ngram.eps
 	width 50col%
 
 \end_inset
@@ -4863,7 +4863,7 @@ name "fig:Dependency-base"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corpus-dep.eps
+	filename graphics/corpus-dep.eps
 	width 75col%
 
 \end_inset
@@ -5023,14 +5023,14 @@ A Sheaf of Stalks; a Sheaf of Paper
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename sheaf-of-stalks.jpg
+	filename graphics/sheaf-of-stalks.jpg
 	width 35col%
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename sheaf-of-papers.jpg
+	filename graphics/sheaf-of-papers.jpg
 	width 51col%
 
 \end_inset
@@ -6041,7 +6041,7 @@ Corn field; stalk field
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corn-field.jpg
+	filename graphics/corn-field.jpg
 	lyxscale 50
 	width 40col%
 
@@ -6053,7 +6053,7 @@ Corn field; stalk field
 
 
 \begin_inset Graphics
-	filename stalk-field.eps
+	filename graphics/stalk-field.eps
 	lyxscale 50
 	width 25col%
 
@@ -6115,7 +6115,7 @@ name "fig:General-Sheaf"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename section-field.eps
+	filename graphics/section-field.eps
 	lyxscale 60
 	width 45col%
 
@@ -8530,7 +8530,7 @@ Three stalks and two typed links
 
 
 \begin_inset Graphics
-	filename grammar.eps
+	filename graphics/grammar.eps
 	width 40col%
 
 \end_inset
@@ -8795,7 +8795,7 @@ Two unconnected seeds
 
 
 \begin_inset Graphics
-	filename bad-graph.eps
+	filename graphics/bad-graph.eps
 	width 55col%
 
 \end_inset
@@ -8854,7 +8854,7 @@ Parsing is the creation of links
 
 
 \begin_inset Graphics
-	filename parsing.eps
+	filename graphics/parsing.eps
 	width 45col%
 
 \end_inset
@@ -9457,7 +9457,7 @@ name "fig:Polymorphism"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename polymorph.eps
+	filename graphics/polymorph.eps
 	width 75col%
 
 \end_inset
