@@ -1196,6 +1196,7 @@ center
 \align center
 \begin_inset Graphics
 	filename graphics/seed.eps
+	lyxscale 60
 	width 25col%
 
 \end_inset
@@ -1239,6 +1240,7 @@ obvious
 \align center
 \begin_inset Graphics
 	filename graphics/seeds-two.eps
+	lyxscale 60
 	width 30col%
 
 \end_inset
@@ -1264,6 +1266,7 @@ obvious
 \align center
 \begin_inset Graphics
 	filename graphics/puzzle.eps
+	lyxscale 60
 	width 45col%
 
 \end_inset
@@ -1435,6 +1438,27 @@ Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
  Connectors, once connected, serve no further purpose, and are discarded.
  What mattered was the link that was made.
  In this sense, the links are the fusion of connectors.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This is remeniscent of Derridas statement that 
+\begin_inset Quotes eld
+\end_inset
+
+deconstruction is not analysis
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One cannot break up meaning into atomic parts; there are no self-sufficient
+ atomic parts of meaning.
+ Meaning derives only from the fusion of words into text and into language.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -1491,7 +1515,19 @@ what does this symbol mean?
 
 \begin_layout Standard
 This is very much in line with theories of postmodernism and deconstruction
- evident in the works of Derrida, Deleuze, Lyotard.
+ evident in the works of Derrida,
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The différance of Derrida can be seen as a rejection of the linguistic equivalen
+t of mereological nihilism: there is no infinite regression of looking up
+ the meanings of words in a dictionary.
+\end_layout
+
+\end_inset
+
+ Deleuze, Lyotard.
  There is no difference between appearance and true form; the difference
  is undecidable.
  The constructed network of connections and relations is all there is.
