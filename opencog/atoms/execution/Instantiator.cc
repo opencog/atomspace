@@ -462,6 +462,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
 		Handle flh = beta_reduce(expr, *_vmap);
+
+		// Some function links are guaranteed to return values.
+		// We cannot/must not execute them here.
+		Type tbr = flh->get_type();
+		if (nameserver().isA(tbr, VALUE_OF_LINK) or
+		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
+
 		return HandleCast(flh->execute(_as, silent));
 	}
 
@@ -567,34 +574,20 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	    nameserver().isA(t, SET_VALUE_LINK) or
 	    nameserver().isA(t, ARITHMETIC_LINK))
 	{
-		// Perform substitution on non-numeric arguments before
-		// applying the function itself.  We should not do any
-		// eager evaluation here, for the numeric functions, as
-		// these might be working with values, not atoms.
-		//
 		HandleSeq oset_results;
 		for (const Handle& h: expr->getOutgoingSet())
 		{
-			Type th = h->get_type();
-			if (nameserver().isA(th, VALUE_OF_LINK) or
-			    nameserver().isA(th, SET_VALUE_LINK))
+			Handle hg(walk_tree(h, silent));
+
+			// Globs will return a matching list. Arithmetic
+			// links will choke on lists, so expand them.
+			if (GLOB_NODE == h->get_type())
 			{
-			   oset_results.push_back(h);
+				for (const Handle& gg : hg->getOutgoingSet())
+					oset_results.push_back(gg);
 			}
 			else
-			{
-				Handle hg(walk_tree(h, silent));
-
-				// Globs will return a matching list. Arithmetic
-				// links will choke on lists, so expand them.
-				if (GLOB_NODE == h->get_type())
-				{
-					for (const Handle& gg : hg->getOutgoingSet())
-						oset_results.push_back(gg);
-				}
-				else
-					oset_results.push_back(hg);
-			}
+				oset_results.push_back(hg);
 		}
 		Handle flp(createLink(std::move(oset_results), t));
 		ValuePtr pap(flp->execute(_as, silent));
