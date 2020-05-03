@@ -1614,6 +1614,65 @@ In AI:
 Inference, theorem proving, planning, constraint satisfaction.
 \end_layout
 
+\begin_layout Standard
+The planning aspect is that one cann arrange a collection of unconnected
+ connectors at one end (the starting state) and another at the other end
+ (the goal state) and build a bridge between the two.
+\end_layout
+
+\begin_layout Standard
+Conclusions:
+\end_layout
+
+\begin_layout Standard
+There is no such thing as non-fiction; all writing is fundamentally fictional
+ at it's root.
+ The only way to be non-fictional is to be quarks and spacetime, the universe
+ itself.
+\end_layout
+
+\begin_layout Standard
+The above is a fancy way of saying that analytic philosophy is blarney,
+ and that the quest for symbolic AI is doomed.
+ One cannot unambiguously assign speech-act labels to text, or symbols to
+ meaning.
+ The problem lies beyond mere 
+\begin_inset Quotes eld
+\end_inset
+
+fuzziness
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+probability
+\begin_inset Quotes erd
+\end_inset
+
+, Bayesian or otherwise.
+\end_layout
+
+\begin_layout Standard
+Yet, despite these problems, there is a way forward in relationships, without
+ insisting on cause and effect, premise and inference, (Bayesian) prior
+ and deduction.
+ Directionality can be useful, but it is an infelicity, a trap with yawning
+ abysses of doundational problems, not the least of which is the concept
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+well-foundedness
+\begin_inset Quotes erd
+\end_inset
+
+ itself.
+ Restricted compositionality is more powerful and more general.
+\end_layout
+
 \begin_layout Section*
 Bibliography
 \end_layout
