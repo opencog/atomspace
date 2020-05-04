@@ -74,7 +74,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                                   const Handle& grnd,
 		                                   const GroundingMap&);
 
-		/** Called for AlawaysLink */
+		/** Called for AlwaysLink */
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
 		                                 const GroundingMap&);
