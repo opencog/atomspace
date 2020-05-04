@@ -27,6 +27,49 @@ using namespace opencog;
 
 // ==============================================================
 
+// This will clear the return value, and then block until the
+// writer closes the queue. Only then does this return. Upon
+// return, all of the values that the writer ever wrote are
+// in the list of values.
+//
+// Basically, the reader should open the queue, the writer should
+// produce a bunch of values, and, when done, close the queue. The
+// reader can then hoover them all up by calling LinkValue::value()
+//
+// Alternately, more clever users can work with the concurrent queue
+// API directly; they do not need to go through this API.
+void QueueValue::update() const
+{
+	// Reset, to start with.
+	_value.clear();
+
+	// Loop forever, as long as the queue is open.
+	try
+	{
+		while (true)
+		{
+			ValuePtr val;
+			const_cast<QueueValue*>(this) -> pop(val);
+			_value.emplace_back(val);
+		}
+	}
+	catch (typename concurrent_queue<ValuePtr>::Canceled& e)
+	{}
+
+	// If we are here, the queue closed up. Reopen it
+	// just long enough to drain any remaining values.
+	const_cast<QueueValue*>(this) -> cancel_reset();
+	while (not is_empty())
+	{
+		ValuePtr val;
+		const_cast<QueueValue*>(this) -> pop(val);
+		_value.emplace_back(val);
+	}
+	const_cast<QueueValue*>(this) -> cancel();
+}
+
+// ==============================================================
+
 bool QueueValue::operator==(const Value& other) const
 {
 	return &other == this;

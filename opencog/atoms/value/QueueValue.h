@@ -40,10 +40,11 @@ namespace opencog
  * values are to be handled in sequential order, in a different thread.
  */
 class QueueValue
-	: public LinkStreamValue, concurrent_queue<ValuePtr>
+	: public LinkStreamValue, public concurrent_queue<ValuePtr>
 {
 protected:
 	QueueValue(Type t) : LinkStreamValue(t) {}
+	virtual void update() const;
 
 public:
 	virtual ~QueueValue() {}
