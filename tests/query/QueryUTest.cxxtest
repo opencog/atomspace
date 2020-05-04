@@ -91,13 +91,14 @@ void QueryUTest::test_basic(void)
 
 	// Can we execute it?
 	ValuePtr sv = h->execute(as);
-	TS_ASSERT_EQUALS(sv->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(sv->get_type(), LINK_VALUE));
 	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
 
 	// A more complex query
 	ValuePtr v = eval->eval_v("(cog-execute! query)");
-	TS_ASSERT_EQUALS(v->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
 	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
+	printf("Got: %s\n", v->to_string().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
