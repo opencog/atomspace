@@ -30,7 +30,7 @@ INSTALL (FILES
 	FormulaStream.h
 	LinkStreamValue.h
 	LinkValue.h
-	QueueStream.h
+	QueueValue.h
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
