@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_QUEUE_VALUE_H
 #define _OPENCOG_QUEUE_VALUE_H
 
-#include <vector>
+#include <opencog/util/concurrent_queue.h>
 #include <opencog/atoms/value/LinkStreamValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
@@ -35,12 +35,12 @@ namespace opencog
  */
 
 /**
- * QueueValues provide a thread-safe FIFO queue of Values,
- * They are meant to be used for producer-consumer API, where the
- * produced values are to be handled in order, in a different thread.
+ * QueueValues provide a thread-safe FIFO queue of Values. They are
+ * meant to be used for producer-consumer APIs, where the produced
+ * values are to be handled in sequential order, in a different thread.
  */
 class QueueValue
-	: public LinkStreamValue
+	: public LinkStreamValue, concurrent_queue<ValuePtr>
 {
 protected:
 	QueueValue(Type t) : LinkStreamValue(t) {}
