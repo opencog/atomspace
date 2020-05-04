@@ -75,7 +75,7 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 	return false;
 }
 
-bool Recognizer::initiate_search(PatternMatchCallback& pmc)
+bool Recognizer::perform_search(PatternMatchCallback& pmc)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 

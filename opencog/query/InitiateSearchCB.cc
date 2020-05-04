@@ -432,7 +432,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  *    really want a lenient `node_match()`, then use variables instead.
  *    Don't overload `node_match` with something weird, and you should
  *    be OK.  Otherwise, you'll have to implement your own
- *    `initiate_search()` callback.
+ *    `perform_search()` callback.
  *
  * 2) If the clauses consist entirely of variables, i.e. if there is not
  *    even one single non-variable node in the pattern, then a search is
@@ -456,7 +456,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  *    `link_match()` callback alone, and use variables for links, instead.
  *    This is probably the best strategy, because then the fairly
  *    standard reasoning can be used when thinking about the problem.
- *    Of course, you can always write your own `initiate_search()` callback.
+ *    Of course, you can always write your own `perform_search()` callback.
  *
  * If the constraint 1) can be met, (which is always the case for
  * "standard, canonical" searches, then the pattern match should be
@@ -477,7 +477,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
+bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 {
 	jit_analyze();
 
