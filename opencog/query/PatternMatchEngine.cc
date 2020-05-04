@@ -2433,7 +2433,7 @@ bool PatternMatchEngine::report_forall(void)
  * of the starter clause, looking for a match.  The idea here is that
  * it is much easier to traverse a connected graph looking for the
  * appropriate subgraph (pattern) than it is to try to explore the
- * whole atomspace, at random.  The user callback `initiate_search()`
+ * whole atomspace, at random.  The user callback `perform_search()`
  * should call this method, suggesting a clause to start with, and
  * where in the clause the search should begin.
  *

@@ -324,7 +324,19 @@ class PatternMatchCallback
 		{ static const TypeSet _empty; return _empty; }
 
 		/**
-		 * Called to initiate the search. This callback is responsible
+		 * Called before when the search is started. This gives the system
+		 * a chance to perform neeeded intializations before the actual
+		 * search is started.  In principle, this callback is not really
+		 * needed, since the `perform_search()` callback "knows" that the
+		 * search is starting when it is called.  In practice,  the
+		 * implementation is much simpler if there is a distinct callback
+		 * to handle this situation.  Return `true` to abort the search
+		 * before it is even started, else return `false`.
+		 */
+		virtual bool start_search(void) { return false; }
+
+		/**
+		 * Called to perform the search. This callback is responsible
 		 * for performing the top-most, outer loop of the search. That is,
 		 * it gets to pick the starting points for the search, thereby
 		 * possibly limiting the breadth of the search.  It may also cull
@@ -336,15 +348,15 @@ class PatternMatchCallback
 		 * values on all the other callbacks; it summarizes (passes
 		 * through) the return values of all the others.
 		 */
-		virtual bool initiate_search(PatternMatchCallback&) = 0;
+		virtual bool perform_search(PatternMatchCallback&) = 0;
 
 		/**
-		 * Called when the search has completed. In principle, this is not
-		 * really needed, since the above callback "knows" when the search
-		 * is completed: its completed when the above returns. In practice,
-		 * the implementation is much simpler if we have a distinct
-		 * callback to handle this situation.  The argument, is the return
-		 * value from initiatate_search().
+		 * Called when the search has completed. In principle, this
+		 * callback is not really needed, since the `perform_search()`
+		 * callback "knows" when the search is completed: its completed when
+		 * it returns. In practice, the implementation is much simpler if
+		 * there is a distinct callback to announce completion.  The argument
+		 * is the return value from `perform_search()`.
 		 */
 		virtual bool search_finished(bool done) { return done; }
 

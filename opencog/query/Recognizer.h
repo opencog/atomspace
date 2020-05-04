@@ -75,7 +75,7 @@ class Recognizer :
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
-		virtual bool initiate_search(PatternMatchCallback&);
+		virtual bool perform_search(PatternMatchCallback&);
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);

@@ -103,9 +103,14 @@ class PMCGroundings : public PatternMatchCallback
 			_cb.set_pattern(vars, pat);
 		}
 
-		bool initiate_search(PatternMatchCallback& pmcb)
+		bool start_search(void)
 		{
-			return _cb.initiate_search(pmcb);
+			return _cb.start_search();
+		}
+
+		bool perform_search(PatternMatchCallback& pmcb)
+		{
+			return _cb.perform_search(pmcb);
 		}
 
 		bool search_finished(bool done)
@@ -328,7 +333,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		debug_log();
 
 		pmcb.set_pattern(_variables, _pat);
-		bool found = pmcb.initiate_search(pmcb);
+		bool found = pmcb.start_search();
+		if (found) return found;
+
+		found = pmcb.perform_search(pmcb);
 
 #ifdef QDEBUG
 		logger().fine("================= Done with Search =================");
