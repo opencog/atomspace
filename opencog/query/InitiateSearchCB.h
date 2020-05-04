@@ -53,7 +53,7 @@ public:
 	 * in order to drive a reasonably-fast search.
 	 */
 	virtual void set_pattern(const Variables&, const Pattern&);
-	virtual bool initiate_search(PatternMatchCallback&);
+	virtual bool perform_search(PatternMatchCallback&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 

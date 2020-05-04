@@ -36,7 +36,7 @@ namespace opencog {
 /**
  * Callback mixin class, used to provide a default node and link
  * matching behaviour. This class is a pure virtual class, since
- * it does not implement either the `initiate_search()` method,
+ * it does not implement either the `perform_search()` method,
  * nor the `solution()` method.
  *
  * It provides is node and link matching, assuming the canonical
