@@ -31,6 +31,7 @@ using namespace opencog;
 Implicator::Implicator(AtomSpace* as)
 	: _as(as), inst(as), max_results(SIZE_MAX)
 {
+	_result_queue = createQueueValue();
 }
 
 /**
@@ -82,18 +83,18 @@ void Implicator::insert_result(ValuePtr v)
 	if (_result_set.end() != _result_set.find(v)) return;
 
 	_result_set.insert(v);
-	_result_queue.push (std::move(v));
+	_result_queue->push (std::move(v));
 }
 
 bool Implicator::start_search(void)
 {
-	_result_queue.open();
+	_result_queue->open();
 	return false;
 }
 
 bool Implicator::search_finished(bool done)
 {
-	_result_queue.close();
+	_result_queue->close();
 	return done;
 }
 

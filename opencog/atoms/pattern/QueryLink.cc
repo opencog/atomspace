@@ -155,9 +155,9 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	this->PatternLink::satisfy(impl);
 
 	// If we got a non-empty answer, just return it.
-	QueueValue& qv(impl.get_result_queue());
-	OC_ASSERT(qv.is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv.wait_and_take_all());
+	QueueValuePtr qv(impl.get_result_queue());
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv->wait_and_take_all());
 	if (0 < vals.size())
 	{
 		// The result_set contains a list of the grounded expressions.

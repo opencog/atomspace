@@ -36,9 +36,9 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	HandleSeq hlist;
-	QueueValue& qv(impl.get_result_queue());
-	OC_ASSERT(qv.is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv.wait_and_take_all());
+	QueueValuePtr qv(impl.get_result_queue());
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv->wait_and_take_all());
 	while (not vals.empty())
 	{
 		hlist.push_back(HandleCast(vals.front()));

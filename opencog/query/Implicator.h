@@ -59,7 +59,7 @@ class Implicator :
 		AtomSpace* _as;
 
 		ValueSet _result_set;
-		QueueValue _result_queue;
+		QueueValuePtr _result_queue;
 		void insert_result(ValuePtr);
 
 	public:
@@ -74,7 +74,7 @@ class Implicator :
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);
 
-		virtual QueueValue& get_result_queue()
+		virtual QueueValuePtr get_result_queue()
 		{ return _result_queue; }
 };
 
