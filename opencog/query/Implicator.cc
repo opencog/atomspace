@@ -28,6 +28,11 @@
 
 using namespace opencog;
 
+Implicator::Implicator(AtomSpace* as)
+	: _as(as), inst(as), max_results(SIZE_MAX)
+{
+}
+
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
@@ -78,6 +83,12 @@ void Implicator::insert_result(ValuePtr v)
 
 	_result_set.insert(v);
 	_result_queue.push (std::move(v));
+}
+
+bool Implicator::start_search(void)
+{
+	_result_queue.open();
+	return false;
 }
 
 bool Implicator::search_finished(bool done)

@@ -63,7 +63,7 @@ class Implicator :
 		void insert_result(ValuePtr);
 
 	public:
-		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace*);
 		Instantiator inst;
 		HandleSeq implicand;
 		size_t max_results;
@@ -71,6 +71,7 @@ class Implicator :
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
 
+		virtual bool start_search(void);
 		virtual bool search_finished(bool);
 
 		virtual QueueValue& get_result_queue()
