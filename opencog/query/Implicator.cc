@@ -31,7 +31,6 @@ using namespace opencog;
 Implicator::Implicator(AtomSpace* as)
 	: _as(as), inst(as), max_results(SIZE_MAX)
 {
-	_result_queue = createQueueValue();
 }
 
 /**
@@ -88,7 +87,10 @@ void Implicator::insert_result(ValuePtr v)
 
 bool Implicator::start_search(void)
 {
-	_result_queue->open();
+	// *Every* search gets a brand new, fresh queue!
+	// This allows users to hang on to the old queue, holding
+	// previous results, if they need to.
+	_result_queue = createQueueValue();
 	return false;
 }
 
