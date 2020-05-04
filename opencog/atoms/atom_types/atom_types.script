@@ -27,8 +27,7 @@ LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
 
 // ===========================================================
-// A base class for time-varying (floating-point) values.
-// XXX TODO we need other base classes for other kinds of varying values.
+// A base class for time-varying floating-point values.
 STREAM_VALUE <- FLOAT_VALUE
 
 // An example of a time-varying value stream
@@ -36,6 +35,12 @@ RANDOM_STREAM <- STREAM_VALUE
 
 // A stream computed by a formula held in the AtomSpace.
 FORMULA_STREAM <- STREAM_VALUE
+
+// A base class for time-varying value sequences.
+LINK_STREAM_VALUE <- LINK_VALUE
+
+// A thread-safe FIFO queue of value sequences.
+QUEUE_VALUE <- LINK_STREAM_VALUE
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used

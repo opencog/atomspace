@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/value/StreamValue.h
+ * opencog/atoms/value/LinkStreamValue.h
  *
- * Copyright (C) 2015, 2018 Linas Vepstas
+ * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_STREAM_VALUE_H
-#define _OPENCOG_STREAM_VALUE_H
+#ifndef _OPENCOG_LINK_STREAM_VALUE_H
+#define _OPENCOG_LINK_STREAM_VALUE_H
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -34,32 +34,28 @@ namespace opencog
  */
 
 /**
- * StreamValues provide a continuously-updating, dynamic stream of
- * floating-point data. They are meant to hold any kind of
- * rapidly-changing data encoded as floats, including video and
- * audio feeds, or other kinds of high-bandwidth data.
- *
- * See also LinkStreamValue when the data is encoded as Atoms or
- * as other (non-floating-point) Values.
+ * LinkStreamValues provide a base class for rapidly time-varying
+ * values.
  */
-class StreamValue
-	: public FloatValue
+class LinkStreamValue
+	: public LinkValue
 {
 protected:
-	StreamValue(Type t) : FloatValue(t) {}
+	LinkStreamValue(Type t) : LinkValue(t) {}
 
 public:
-	virtual ~StreamValue() {}
+	virtual ~LinkStreamValue() {}
 
 	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<StreamValue> StreamValuePtr;
-static inline StreamValuePtr StreamValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<StreamValue>(a); }
+typedef std::shared_ptr<LinkStreamValue> LinkStreamValuePtr;
+static inline LinkStreamValuePtr LinkStreamValueCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<LinkStreamValue>(a); }
+
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_STREAM_VALUE_H
+#endif // _OPENCOG_LINK_STREAM_VALUE_H

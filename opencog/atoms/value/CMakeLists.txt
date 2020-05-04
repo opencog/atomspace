@@ -4,7 +4,9 @@ ADD_LIBRARY (value
 	Value.cc
 	FloatValue.cc
 	FormulaStream.cc
+	LinkStreamValue.cc
 	LinkValue.cc
+	QueueValue.cc
 	RandomStream.cc
 	StreamValue.cc
 	StringValue.cc
@@ -26,11 +28,13 @@ INSTALL (TARGETS value EXPORT AtomSpaceTargets
 INSTALL (FILES
 	FloatValue.h
 	FormulaStream.h
+	LinkStreamValue.h
 	LinkValue.h
-	Value.h
+	QueueValue.h
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
+	Value.h
 	ValueFactory.h
 	DESTINATION "include/opencog/atoms/value"
 )

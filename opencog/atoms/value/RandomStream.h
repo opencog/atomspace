@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_RANDOM_STREAM_H
 #define _OPENCOG_RANDOM_STREAM_H
 
-#include <vector>
 #include <opencog/atoms/value/StreamValue.h>
 
 namespace opencog
