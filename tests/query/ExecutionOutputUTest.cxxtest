@@ -359,7 +359,7 @@ void ExecutionOutputUTest::test_value(void)
 	eval.eval("(load-from-path \"tests/query/exec-gsn.scm\")");
 
 	ValuePtr result = eval.eval_v("(cog-execute! exec-query-handle)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	ValueSeq vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -367,7 +367,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-link-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -375,7 +375,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-string-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -383,7 +383,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
