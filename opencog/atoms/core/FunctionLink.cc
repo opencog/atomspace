@@ -28,6 +28,9 @@ using namespace opencog;
 
 void FunctionLink::check_type(Type t)
 {
+	if (FUNCTION_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"FunctionLinks are private and cannot be instantiated.");
 	if (not nameserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 }

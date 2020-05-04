@@ -34,6 +34,13 @@ using namespace opencog;
 void RewriteLink::init(void)
 {
 	Type t = get_type();
+
+#if 0
+	// The unit tests create this directly, so this check bombs.
+	if (REWRITE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"RewriteLinks are private and cannot be instantiated.");
+#endif
 	if (not nameserver().isA(t, REWRITE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);

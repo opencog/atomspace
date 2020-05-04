@@ -38,6 +38,10 @@ FoldLink::FoldLink(const HandleSeq&& oset, Type t)
 void FoldLink::init(void)
 {
 	Type tscope = get_type();
+	if (FOLD_LINK == tscope)
+		throw InvalidParamException(TRACE_INFO,
+			"FoldLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(tscope, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 }
