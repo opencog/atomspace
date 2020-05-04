@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -154,11 +155,20 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	this->PatternLink::satisfy(impl);
 
 	// If we got a non-empty answer, just return it.
-	if (0 < impl.get_result_set().size())
+	QueueValue& qv(impl.get_result_queue());
+	OC_ASSERT(qv.is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv.wait_and_take_all());
+	if (0 < vals.size())
 	{
 		// The result_set contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
-		return impl.get_result_set();
+		ValueSet vset;
+		while (not vals.empty())
+		{
+			vset.insert(vals.front());
+			vals.pop();
+		}
+		return vset;
 	}
 
 	// If we are here, then there were zero matches.

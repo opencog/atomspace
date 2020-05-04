@@ -64,21 +64,26 @@ bool Implicator::grounding(const GroundingMap &var_soln,
 	return (_result_set.size() >= max_results);
 }
 
-void Implicator::insert_result(const ValuePtr& v)
+void Implicator::insert_result(ValuePtr v)
 {
-	if (v and _result_set.end() == _result_set.find(v))
-	{
-		// Insert atom into the atomspace immediately, so that
-		// it becomes visible in other threads.
-		if (v->is_atom())
-		{
-			_result_set.insert(_as->add_atom(HandleCast(v)));
-		}
-		else
-		{
-			_result_set.insert(v);
-		}
-	}
+	if (nullptr == v) return;
+	if (_result_set.end() != _result_set.find(v)) return;
+
+	// Insert atom into the atomspace immediately, so that
+	// it becomes visible in other threads.
+	if (v->is_atom())
+		v = _as->add_atom(HandleCast(v));
+
+	if (_result_set.end() != _result_set.find(v)) return;
+
+	_result_set.insert(v);
+	_result_queue.push (std::move(v));
+}
+
+bool Implicator::search_finished(bool done)
+{
+	_result_queue.close();
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */

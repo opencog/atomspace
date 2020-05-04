@@ -29,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 
@@ -58,7 +59,8 @@ class Implicator :
 		AtomSpace* _as;
 
 		ValueSet _result_set;
-		void insert_result(const ValuePtr&);
+		QueueValue _result_queue;
+		void insert_result(ValuePtr);
 
 	public:
 		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
@@ -69,8 +71,10 @@ class Implicator :
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
 
-		virtual const ValueSet& get_result_set() const
-		{ return _result_set; }
+		virtual bool search_finished(bool);
+
+		virtual QueueValue& get_result_queue()
+		{ return _result_queue; }
 };
 
 }; // namespace opencog

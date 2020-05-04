@@ -1,4 +1,5 @@
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -35,8 +36,14 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	HandleSeq hlist;
-	for (const ValuePtr& v: impl.get_result_set())
-		hlist.push_back(HandleCast(v));
+	QueueValue& qv(impl.get_result_queue());
+	OC_ASSERT(qv.is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv.wait_and_take_all());
+	while (not vals.empty())
+	{
+		hlist.push_back(HandleCast(vals.front()));
+		vals.pop();
+	}
 	Handle gl = as->add_link(LIST_LINK, std::move(hlist));
 	return gl;
 }
