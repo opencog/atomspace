@@ -33,7 +33,7 @@ class GetLink : public PatternLink
 {
 protected:
 	void init(void);
-	virtual HandleSet do_execute(AtomSpace*, bool silent);
+	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
 public:
 	GetLink(const HandleSeq&&, Type=GET_LINK);

@@ -130,7 +130,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
+QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
@@ -157,19 +157,8 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	// If we got a non-empty answer, just return it.
 	QueueValuePtr qv(impl.get_result_queue());
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv->wait_and_take_all());
-	if (0 < vals.size())
-	{
-		// The result_set contains a list of the grounded expressions.
-		// (The order of the list has no significance, so it's really a set.)
-		ValueSet vset;
-		while (not vals.empty())
-		{
-			vset.insert(vals.front());
-			vals.pop();
-		}
-		return vset;
-	}
+	if (0 < qv->size())
+		return qv;
 
 	// If we are here, then there were zero matches.
 	//
@@ -190,20 +179,19 @@ ValueSet QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		ValueSet result;
+		qv->open();
 		for (const Handle& himp: impl.implicand)
-			result.insert(impl.inst.execute(himp, true));
-		return result;
+			qv->push(std::move(impl.inst.execute(himp, true)));
+		qv->close();
+		return qv;
 	}
 
-	return ValueSet();
+	return qv;
 }
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
 {
-	// The result_set contains a list of the grounded expressions.
-	// (The order of the list has no significance, so it's really a set.)
-	return createLinkValue(do_execute(as, silent));
+	return do_execute(as, silent);
 }
 
 DEFINE_LINK_FACTORY(QueryLink, QUERY_LINK)

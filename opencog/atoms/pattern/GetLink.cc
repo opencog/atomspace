@@ -6,8 +6,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,8 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -49,32 +47,32 @@ GetLink::GetLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-HandleSet GetLink::do_execute(AtomSpace* as, bool silent)
+QueueValuePtr GetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
 	SatisfyingSet sater(as);
 	this->satisfy(sater);
 
-	QueueValuePtr qv(sater.get_result_queue());
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv->wait_and_take_all());
-	HandleSet hset;
-	while (not vals.empty())
-	{
-		hset.emplace(HandleCast(vals.front()));
-		vals.pop();
-	}
-	return hset;
+	return sater.get_result_queue();
 }
 
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
+	HandleSeq hs;
+	QueueValuePtr qv(do_execute(as, silent));
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv->wait_and_take_all());
+	while (not vals.empty())
+	{
+		hs.push_back(HandleCast(vals.front()));
+		vals.pop();
+	}
+
 	// If there is an anchor, then attach results to the anchor.
 	// Otherwise, create a SetLink and return that.
 	if (_variables._anchor and as)
 	{
-		HandleSet hs(do_execute(as, silent));
 		for (const Handle& h : hs)
 			as->add_link(MEMBER_LINK, h, _variables._anchor);
 
@@ -82,7 +80,7 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(do_execute(as, silent), SET_LINK));
+	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE

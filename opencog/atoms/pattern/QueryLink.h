@@ -23,6 +23,7 @@
 #define _OPENCOG_QUERY_LINK_H
 
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/value/QueueValue.h>
 
 namespace opencog
 {
@@ -42,7 +43,7 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
-	virtual ValueSet do_execute(AtomSpace*, bool silent);
+	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
 public:
 	QueryLink(const HandleSeq&&, Type=QUERY_LINK);
