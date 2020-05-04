@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/Satisfier.h>
@@ -55,7 +56,16 @@ HandleSet GetLink::do_execute(AtomSpace* as, bool silent)
 	SatisfyingSet sater(as);
 	this->satisfy(sater);
 
-	return sater._satisfying_set;
+	QueueValuePtr qv(sater.get_result_queue());
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv->wait_and_take_all());
+	HandleSet hset;
+	while (not vals.empty())
+	{
+		hset.emplace(HandleCast(vals.front()));
+		vals.pop();
+	}
+	return hset;
 }
 
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)

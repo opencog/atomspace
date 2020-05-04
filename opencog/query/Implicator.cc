@@ -82,7 +82,7 @@ void Implicator::insert_result(ValuePtr v)
 	if (_result_set.end() != _result_set.find(v)) return;
 
 	_result_set.insert(v);
-	_result_queue->push (std::move(v));
+	_result_queue->push(std::move(v));
 }
 
 bool Implicator::start_search(void)

@@ -133,7 +133,14 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			_satisfying_set.emplace(var_soln.at(_varseq[0]));
+			// Insert atom into the atomspace immediately, so that
+			// it becomes visible in other threads.
+			Handle gnd(_as->add_atom(var_soln.at(_varseq[0])));
+			if (_satisfying_set.end() == _satisfying_set.find(gnd))
+			{
+				_satisfying_set.emplace(gnd);
+				_result_queue->push(std::move(gnd));
+			}
 		}
 		catch (...)
 		{
@@ -163,10 +170,31 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 			vargnds.push_back(hv);
 		}
 	}
-	_satisfying_set.emplace(createLink(std::move(vargnds), LIST_LINK));
+	Handle gnds(_as->add_atom(createLink(std::move(vargnds), LIST_LINK)));
+
+	if (_satisfying_set.end() == _satisfying_set.find(gnds))
+	{
+		_satisfying_set.emplace(gnds);
+		_result_queue->push(std::move(gnds));
+	}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);
+}
+
+bool SatisfyingSet::start_search(void)
+{
+	// *Every* search gets a brand new, fresh queue!
+	// This allows users to hang on to the old queue, holding
+	// previous results, if they need to.
+	_result_queue = createQueueValue();
+	return false;
+}
+
+bool SatisfyingSet::search_finished(bool done)
+{
+	_result_queue->close();
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */
