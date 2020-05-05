@@ -900,13 +900,13 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// initialization here might hurt some users.  See the benchmark
 	// `nano-en.scm` in the benchmark get repo, for example.
 	// Note also: parallelizing will require adding locks to some
-	// portions of the callback, e.g. the `grounding()` callback,
-	// so that two parallel reports don't clobber each other.
+	// ... currently unknown locations ...  so that two parallel
+	// searches don't clobber each other.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
-	// Parallel loop. This requires C++17 to work.
+	// Parallel loop. This requires linking to -ltbb to work.
 	// This does not pass unit tests, because a lock is needed in
-	// the `grounding()` callback. And maybe other locks too.
+	// ... various unknown places.
 
 	bool found = false;
 	std::for_each(
@@ -928,8 +928,8 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 // #define OMP_PM_PARALLEL 1
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
-	// This does not pass unit tests, because a lock is needed in
-	// the `grounding()` callback. And maybe other locks too.
+	// This does not pass unit tests. Locks are needed ... somewhere.
+	// Not sure where.
 
 	bool found = false;
 
