@@ -32,6 +32,12 @@ QueueValue::QueueValue(const ValueSeq& vseq)
 {
 	for (const ValuePtr& v: vseq)
 		push(v); // concurrent_queue<ValutePtr>::push(v);
+
+	// Since this constructor placed stuff on the queue,
+	// we also close it, to indicate we are "done" placing
+	// things on the queue. If some user needs to add more,
+	// then they need to re-open.
+	close();
 }
 
 // ==============================================================
@@ -49,6 +55,9 @@ QueueValue::QueueValue(const ValueSeq& vseq)
 // API directly; they do not need to go through this API.
 void QueueValue::update() const
 {
+	// Do nothing; we don't want to clobber the _value
+	if (is_closed() and 0 == size()) return;
+
 	// Reset, to start with.
 	_value.clear();
 
@@ -81,7 +90,9 @@ void QueueValue::update() const
 
 bool QueueValue::operator==(const Value& other) const
 {
-	return &other == this;
+	// LinkValue::operator== does a content compare,
+	// and that is what we want, too.
+	return LinkValue::operator==(other);
 }
 
 // ==============================================================
