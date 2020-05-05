@@ -48,6 +48,7 @@ protected:
 
 public:
 	QueueValue(void) : LinkStreamValue(QUEUE_VALUE) {}
+	QueueValue(const ValueSeq&);
 	virtual ~QueueValue() {}
 
 	/** Returns true if two atoms are equal.  */

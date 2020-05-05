@@ -27,6 +27,15 @@ using namespace opencog;
 
 // ==============================================================
 
+QueueValue::QueueValue(const ValueSeq& vseq)
+	: LinkStreamValue(QUEUE_VALUE)
+{
+	for (const ValuePtr& v: vseq)
+		push(v); // concurrent_queue<ValutePtr>::push(v);
+}
+
+// ==============================================================
+
 // This will clear the return value, and then block until the
 // writer closes the queue. Only then does this return. Upon
 // return, all of the values that the writer ever wrote are
