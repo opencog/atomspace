@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
 #include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
@@ -85,3 +85,7 @@ bool QueueValue::operator==(const Value& other) const
 }
 
 // ==============================================================
+
+// Adds factory when library is loaded.
+DEFINE_VALUE_FACTORY(QUEUE_VALUE,
+                     createQueueValue, std::vector<ValuePtr>)
