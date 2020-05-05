@@ -471,7 +471,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 
 	// -------------------------
 	// Multi-threading primitives
-	if (JOIN_LINK == t)
+	if (THREAD_JOIN_LINK == t)
 	{
 		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
