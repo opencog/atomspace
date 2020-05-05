@@ -899,16 +899,32 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// always the bottleneck, and so adding heavy-weight thread
 	// initialization here might hurt some users.  See the benchmark
 	// `nano-en.scm` in the benchmark get repo, for example.
-	// Note also: parallelizing will require adding locks to some
-	// ... currently unknown locations ...  so that two parallel
-	// searches don't clobber each other.
+	//
+	// Currently, the code below fails unit tests. The one (and only?)
+	// reason seems to be that, for multi-component patterns, this
+	// entire class is used recursively in multiple threads. The reason
+	// for this is subtle: PatternLink::satisfy() is recursive, when
+	// there are multiple components. So: we start here, create multiple
+	// threads, and then pass ourselves into each thread. When there are
+	// components, this gets wrapped in PMCGroundings and then
+	// PatternLink::satisfy() is called .. once in each thread! Which
+	// causes a new start-point to be searched for, for each component
+	// which clobbers this structure against itself.  Ick. Fail.
+	// To add insult to injury, the PMCGroundings::grounding() is
+	// called from these multiple threads, with no protection for
+	// the structures it's using.
+	//
+	// The solution for this seems to be to create a clone() method
+	// on pmc, and create a new copy of pmc for each thread. What's
+	// more, if any of those copies arrive here again, we should
+	// NOT create any new threads for them, we should continue
+	// single-threaded. This would avoid the need for locks in
+	// PMCGroundings::grounding(). I'm too lazy to do this right now.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
 	// Parallel loop. This requires linking to -ltbb to work.
-	// This does not pass unit tests, because a lock is needed in
-	// ... various unknown places.
 
-	bool found = false;
+	std::atomic<size_t> nfnd = 0;
 	std::for_each(
 		std::execution::par_unseq,
 		_search_set.begin(),
@@ -918,35 +934,36 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
-			found |= pme.explore_neighborhood(_root, _starter_term, h);
+			if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
 		});
 
-	return found;
+	return 0 < nfnd;
 
 #endif
 
 // #define OMP_PM_PARALLEL 1
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
-	// This does not pass unit tests. Locks are needed ... somewhere.
-	// Not sure where.
 
-	bool found = false;
+#ifdef QDEBUG
+	size_t i = 0;
+#endif
 
+	std::atomic<size_t> nfnd = 0;
 	size_t hsz = _search_set.size();
 	#pragma omp parallel for
-	for (size_t i=0; i< hsz; i++)
+	for (size_t j=0; j<hsz; j++)
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
-		Handle h(_search_set[i]);
+		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		found |= pme.explore_neighborhood(_root, _starter_term, h);
+		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
 	}
-	return found;
+	return 0 < nfnd;
 #endif
 
 #define SEQUENTIAL_LOOP 1
