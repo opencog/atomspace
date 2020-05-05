@@ -88,25 +88,6 @@ void QueueValue::update() const
 
 // ==============================================================
 
-bool QueueValue::operator==(const Value& other) const
-{
-	if (QUEUE_VALUE != other.get_type()) return false;
-
-	update();
-	const QueueValue* qov = (const QueueValue*) &other;
-	qov->update();
-
-	if (_value.size() != qov->_value.size()) return false;
-
-	// Content-compare, NOT pointer-compare!
-	size_t len = _value.size();
-	for (size_t i=0; i<len; i++)
-		if (*(_value[i]) != *(qov->_value[i])) return false;
-	return true;
-}
-
-// ==============================================================
-
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(QUEUE_VALUE,
                      createQueueValue, std::vector<ValuePtr>)

@@ -50,9 +50,6 @@ public:
 	QueueValue(void) : LinkStreamValue(QUEUE_VALUE) {}
 	QueueValue(const ValueSeq&);
 	virtual ~QueueValue() {}
-
-	/** Returns true if two atoms are equal.  */
-	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<QueueValue> QueueValuePtr;
