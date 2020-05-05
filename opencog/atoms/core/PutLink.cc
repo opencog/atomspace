@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "DefineLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
@@ -338,16 +339,19 @@ Handle PutLink::do_reduce(void) const
 	Variables vars(_variables);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 	Handle args(_arguments);
+	ValuePtr vargs(_arguments);
 
 	// There is no eager execution of arguments, before performing
 	// the reduction ... with one exception. If the argument is a
-	// GetLink, we perform the search to find what to plug in.
-	if (nameserver().isA(args->get_type(), GET_LINK))
+	// MeetLink, we perform the search to find what to plug in.
+	if (nameserver().isA(_arguments->get_type(), MEET_LINK))
 	{
-		args = HandleCast(args->execute());
-		if (nullptr == args)
+		vargs = _arguments->execute();
+		if (nullptr == vargs)
 			throw SyntaxException(TRACE_INFO,
 			       "Execution must result in an Atom!");
+		if (vargs->is_atom())
+			args = HandleCast(vargs);
 	}
 
 	// Resolve the body, if needed. That is, if the body is
@@ -385,7 +389,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the arguments that we will plug into the body.
-	Type vtype = args->get_type();
+	Type vtype = vargs->get_type();
 	size_t nvars = vars.varseq.size();
 
 	// FunctionLinks behave like pointless lambdas; that is, one can
@@ -400,6 +404,15 @@ Handle PutLink::do_reduce(void) const
 	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
 	if (0 == nvars and nameserver().isA(btype, FUNCTION_LINK))
 	{
+		if (nameserver().isA(vtype, LINK_VALUE))
+		{
+			HandleSeq oset(bods->getOutgoingSet());
+			HandleSeq argl(LinkValueCast(vargs)->to_handle_seq());
+			for (const Handle& arg : argl)
+				oset.emplace_back(expand(arg, _silent));
+			return createLink(std::move(oset), btype);
+		}
+
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
@@ -439,6 +452,11 @@ Handle PutLink::do_reduce(void) const
 	// If there is only one variable in the PutLink body...
 	if (1 == nvars)
 	{
+		if (nameserver().isA(vtype, LINK_VALUE))
+		{
+			return reddy(subs, LinkValueCast(vargs)->to_handle_seq());
+		}
+
 		if (SET_LINK != vtype)
 		{
 			return reddy(subs, {args});
@@ -460,9 +478,22 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// If we are here, then there are multiple variables in the body.
-	// See how many arguments there are.  If the arguments are in a
-	// ListLink, then assume that there is only a single set of
-	// arguments to plug in.
+
+	// If the arguments are in a LinkValue, then assume that there is
+	// only a single set of arguments to plug in. Same as LIST_LINK
+	// below.
+	if (nameserver().isA(vtype, LINK_VALUE))
+	{
+		HandleSeq argl(LinkValueCast(vargs)->to_handle_seq());
+
+		HandleSeq oset;
+		for (const Handle& h: argl)
+			oset.push_back(expand(h, _silent));
+		return reddy(subs, oset);
+	}
+
+	// If the arguments are in a ListLink, then assume that there is
+	// only a single set of arguments to plug in.
 	if (LIST_LINK == vtype)
 	{
 		HandleSeq oset;
@@ -476,9 +507,7 @@ Handle PutLink::do_reduce(void) const
 	// don't need any more checking. Just pass it through.
 	if (LAMBDA_LINK == vtype)
 	{
-		HandleSeq oset;
-		oset.emplace_back(args);
-		return reddy(subs, oset);
+		return reddy(subs, {args});
 	}
 
 	// If we are here, then there are multiple arguments.
