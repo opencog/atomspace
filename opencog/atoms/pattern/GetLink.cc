@@ -59,15 +59,9 @@ QueueValuePtr GetLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq hs;
 	QueueValuePtr qv(do_execute(as, silent));
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv->wait_and_take_all());
-	while (not vals.empty())
-	{
-		hs.push_back(HandleCast(vals.front()));
-		vals.pop();
-	}
+	HandleSeq hs(qv->to_handle_seq());
 
 	// If there is an anchor, then attach results to the anchor.
 	// Otherwise, create a SetLink and return that.

@@ -65,15 +65,9 @@ BindLink::BindLink(const HandleSeq&& hseq, Type t)
 /** Wrap query results in a SetLink, place them in the AtomSpace. */
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq rslt;
 	QueueValuePtr qv(do_execute(as, silent));
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv->wait_and_take_all());
-	while (not vals.empty())
-	{
-		rslt.push_back(HandleCast(vals.front()));
-		vals.pop();
-	}
+	HandleSeq rslt(qv->to_handle_seq());
 
 	// If there is an anchor, then attach results to the anchor.
 	// Otherwise, create a SetLink and return that.

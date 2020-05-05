@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -57,6 +58,7 @@ public:
 	virtual ~LinkValue() {}
 
 	const std::vector<ValuePtr>& value() const { update(); return _value; }
+	HandleSeq to_handle_seq(void) const;
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
