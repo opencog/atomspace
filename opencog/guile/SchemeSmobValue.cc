@@ -191,14 +191,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);
 	}
 
-	if (STRING_VALUE == t)
+	if (nameserver().isA(t, STRING_VALUE))
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
