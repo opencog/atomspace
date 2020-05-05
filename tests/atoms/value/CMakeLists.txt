@@ -1,5 +1,7 @@
 LINK_LIBRARIES(
 	value
+	atombase
+	exec
 )
 
 # Tests in order of increasing functional complexity/dependency

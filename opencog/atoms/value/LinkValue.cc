@@ -20,10 +20,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
+
+
+HandleSeq LinkValue::to_handle_seq(void) const
+{
+	update();
+	HandleSeq hs;
+	for (const ValuePtr& v : _value)
+	{
+		if (v->is_atom())
+			hs.push_back(HandleCast(v));
+	}
+	return hs;
+}
+
+// ==============================================================
 
 bool LinkValue::operator==(const Value& other) const
 {

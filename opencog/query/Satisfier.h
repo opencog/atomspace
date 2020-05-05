@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/InitiateSearchCB.h>
@@ -95,13 +96,20 @@ class SatisfyingSet :
 	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
+	protected:
+		AtomSpace* _as;
+		HandleSeq _varseq;
+// XXX fixme tempt hack for pattern miner
+public:
+		HandleSet _satisfying_set;
+protected:
+		QueueValuePtr _result_queue;
+
 	public:
 		SatisfyingSet(AtomSpace* as) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as),
-			max_results(SIZE_MAX) {}
+			_as(as), max_results(SIZE_MAX) {}
 
-		HandleSeq _varseq;
-		HandleSet _satisfying_set;
 		size_t max_results;
 
 		virtual void set_pattern(const Variables& vars,
@@ -119,6 +127,12 @@ class SatisfyingSet :
 		// groundings.
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
+
+		virtual bool start_search(void);
+		virtual bool search_finished(bool);
+
+		virtual QueueValuePtr get_result_queue()
+		{ return _result_queue; }
 };
 
 }; // namespace opencog

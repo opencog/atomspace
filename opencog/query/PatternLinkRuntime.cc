@@ -429,9 +429,13 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
 	pmcb.set_pattern(_variables, _pat);
-	return recursive_virtual(pmcb, _virtual, _pat.optionals,
+	bool done = pmcb.start_search();
+	if (done) return done;
+	done = recursive_virtual(pmcb, _virtual, _pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
+	done = pmcb.search_finished(done);
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */
