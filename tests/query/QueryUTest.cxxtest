@@ -24,6 +24,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
@@ -64,6 +65,7 @@ public:
 	void tearDown(void);
 
 	void test_basic(void);
+	void test_meet(void);
 };
 
 void QueryUTest::tearDown(void)
@@ -103,6 +105,44 @@ void QueryUTest::test_basic(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/*
+ * Basic MeetLink unit test.
+ */
+void QueryUTest::test_meet(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/query-meet.scm\")");
+	TS_ASSERT_EQUALS(false, eval->eval_error());
+
+	// Can we create it?
+	Handle h = eval->eval_h("(Meet (List (Variable \"x\")))");
+	TS_ASSERT_EQUALS(h->get_type(), MEET_LINK);
+
+	// Can we execute it?
+	ValuePtr sv = h->execute(as);
+	TS_ASSERT(nameserver().isA(sv->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
+
+	// A more complex query
+	ValuePtr v = eval->eval_v("(cog-execute! meet)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
+	printf("Got: %s\n", v->to_string().c_str());
+
+	ValuePtr ev = eval->eval_v("(QueueValue "
+		"(ConceptNode \"thing\")"
+		"(ConceptNode \"story\")"
+		"(ConceptNode \"joke\")) ");
+
+	printf("Expected: %s\n", ev->to_string().c_str());
+	LinkValuePtr lv(LinkValueCast(v));
+	LinkValuePtr lev(LinkValueCast(ev));
+	TS_ASSERT_EQUALS(*lev, *lv);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 #undef al
 #undef an

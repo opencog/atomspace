@@ -43,7 +43,8 @@ HandleSeq LinkValue::to_handle_seq(void) const
 
 bool LinkValue::operator==(const Value& other) const
 {
-	if (LINK_VALUE != other.get_type()) return false;
+	// Derived classes use this, so use get_type()
+	if (get_type() != other.get_type()) return false;
 
 	const LinkValue* lov = (const LinkValue*) &other;
 
@@ -60,6 +61,7 @@ bool LinkValue::operator==(const Value& other) const
 
 std::string LinkValue::to_string(const std::string& indent) const
 {
+	update();
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 	for (ValuePtr v :_value)
 		rv += std::string(" ") + v->to_string(indent + "   ") + "\n";

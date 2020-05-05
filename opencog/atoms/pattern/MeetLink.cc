@@ -1,5 +1,5 @@
 /*
- * GetLink.cc
+ * MeetLink.cc
  *
  * Copyright (C) 2019 Linas Vepstas
  *
@@ -24,59 +24,44 @@
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/Satisfier.h>
 
-#include "GetLink.h"
+#include "MeetLink.h"
 
 using namespace opencog;
 
-void GetLink::init(void)
+void MeetLink::init(void)
 {
 	Type t = get_type();
-	if (not nameserver().isA(t, GET_LINK))
+	if (not nameserver().isA(t, MEET_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a GetLink, got %s", tname.c_str());
+			"Expecting a MeetLink, got %s", tname.c_str());
 	}
 }
 
-GetLink::GetLink(const HandleSeq&& hseq, Type t)
-	: MeetLink(std::move(hseq), t)
+MeetLink::MeetLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }
 
 /* ================================================================= */
 
-ValuePtr GetLink::execute(AtomSpace* as, bool silent)
+QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 {
-	QueueValuePtr qv(MeetLink::do_execute(as, silent));
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	HandleSeq hs(qv->to_handle_seq());
+	if (nullptr == as) as = _atom_space;
 
-	// If there is an anchor, then attach results to the anchor.
-	// Otherwise, create a SetLink and return that.
-	if (_variables._anchor and as)
-	{
-		for (const Handle& h : hs)
-			as->add_link(MEMBER_LINK, h, _variables._anchor);
+	SatisfyingSet sater(as);
+	this->satisfy(sater);
 
-		return _variables._anchor;
-	}
-
-	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));
-
-#define PLACE_RESULTS_IN_ATOMSPACE
-#ifdef PLACE_RESULTS_IN_ATOMSPACE
-	// Shoot. XXX FIXME. Most of the unit tests require that the atom
-	// that we return is in the atomspace. But it would be nice if we
-	// could defer this indefinitely, until its really needed.
-	if (as) satset = as->add_atom(satset);
-#endif /* PLACE_RESULTS_IN_ATOMSPACE */
-
-	return satset;
+	return sater.get_result_queue();
 }
 
-DEFINE_LINK_FACTORY(GetLink, GET_LINK)
+ValuePtr MeetLink::execute(AtomSpace* as, bool silent)
+{
+	return do_execute(as, silent);
+}
+
+DEFINE_LINK_FACTORY(MeetLink, MEET_LINK)
 
 /* ===================== END OF FILE ===================== */

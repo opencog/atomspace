@@ -20,10 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
 #include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
+
+// ==============================================================
+
+QueueValue::QueueValue(const ValueSeq& vseq)
+	: LinkStreamValue(QUEUE_VALUE)
+{
+	for (const ValuePtr& v: vseq)
+		push(v); // concurrent_queue<ValutePtr>::push(v);
+
+	// Since this constructor placed stuff on the queue,
+	// we also close it, to indicate we are "done" placing
+	// things on the queue. If some user needs to add more,
+	// then they need to re-open.
+	close();
+}
 
 // ==============================================================
 
@@ -40,6 +55,9 @@ using namespace opencog;
 // API directly; they do not need to go through this API.
 void QueueValue::update() const
 {
+	// Do nothing; we don't want to clobber the _value
+	if (is_closed() and 0 == size()) return;
+
 	// Reset, to start with.
 	_value.clear();
 
@@ -70,9 +88,6 @@ void QueueValue::update() const
 
 // ==============================================================
 
-bool QueueValue::operator==(const Value& other) const
-{
-	return &other == this;
-}
-
-// ==============================================================
+// Adds factory when library is loaded.
+DEFINE_VALUE_FACTORY(QUEUE_VALUE,
+                     createQueueValue, std::vector<ValuePtr>)
