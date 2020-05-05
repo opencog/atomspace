@@ -45,9 +45,7 @@ bool LinkValue::operator==(const Value& other) const
 {
 	if (LINK_VALUE != other.get_type()) return false;
 
-	update();
 	const LinkValue* lov = (const LinkValue*) &other;
-	lov->update();
 
 	if (_value.size() != lov->_value.size()) return false;
 

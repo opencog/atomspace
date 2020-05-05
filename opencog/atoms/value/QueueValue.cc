@@ -90,9 +90,19 @@ void QueueValue::update() const
 
 bool QueueValue::operator==(const Value& other) const
 {
-	// LinkValue::operator== does a content compare,
-	// and that is what we want, too.
-	return LinkValue::operator==(other);
+	if (QUEUE_VALUE != other.get_type()) return false;
+
+	update();
+	const QueueValue* qov = (const QueueValue*) &other;
+	qov->update();
+
+	if (_value.size() != qov->_value.size()) return false;
+
+	// Content-compare, NOT pointer-compare!
+	size_t len = _value.size();
+	for (size_t i=0; i<len; i++)
+		if (*(_value[i]) != *(qov->_value[i])) return false;
+	return true;
 }
 
 // ==============================================================
