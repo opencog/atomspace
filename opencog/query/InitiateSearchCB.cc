@@ -910,6 +910,16 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// PatternLink::satisfy() is called .. once in each thread! Which
 	// causes a new start-point to be searched for, for each component
 	// which clobbers this structure against itself.  Ick. Fail.
+	// To add insult to injury, the PMCGroundings::grounding() is
+	// called from these multiple threads, with no protection for
+	// the structures it's using.
+	//
+	// The solution for this seems to be to create a clone() method
+	// on pmc, and create a new copy of pmc for each thread. What's
+	// more, if any of those copies arrive here again, we should
+	// NOT create any new threads for them, we should continue
+	// single-threaded. This would avoid the need for locks in
+	// PMCGroundings::grounding(). I'm too lazy to do this right now.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
 	// Parallel loop. This requires linking to -ltbb to work.
