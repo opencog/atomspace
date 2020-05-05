@@ -99,10 +99,7 @@ class SatisfyingSet :
 	protected:
 		AtomSpace* _as;
 		HandleSeq _varseq;
-// XXX fixme tempt hack for pattern miner
-public:
 		HandleSet _satisfying_set;
-protected:
 		QueueValuePtr _result_queue;
 
 	public:
