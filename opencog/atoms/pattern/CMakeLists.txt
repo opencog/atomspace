@@ -6,6 +6,7 @@ ADD_LIBRARY (lambda
 	BindLink.cc
 	DualLink.cc
 	GetLink.cc
+	MeetLink.cc
 	PatternLink.cc
 	PatternTerm.cc
 	PatternUtils.cc
@@ -32,6 +33,7 @@ INSTALL (FILES
 	BindLink.h
 	DualLink.h
 	GetLink.h
+	MeetLink.h
 	PatternLink.h
 	Pattern.h
 	PatternTerm.h
