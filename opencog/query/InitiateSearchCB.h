@@ -100,7 +100,7 @@ protected:
 	AtomSpace *_as;
 };
 
-// Primaliry for gdb debugging, see
+// Primarily for gdb debugging, see
 // https://wiki.opencog.org/w/Development_standards#Pretty_Print_OpenCog_Objects
 std::string oc_to_string(const InitiateSearchCB& iscb,
                          const std::string& indent=empty_string);
