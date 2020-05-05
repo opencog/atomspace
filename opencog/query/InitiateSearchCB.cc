@@ -930,23 +930,25 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// Parallel loop. This requies OpenMP to work.
 	// This does not pass unit tests. Locks are needed ... somewhere.
 	// Not sure where.
+#ifdef QDEBUG
+	size_t i = 0;
+#endif
 
-	bool found = false;
-
+	std::atomic<size_t> nfnd = 0;
 	size_t hsz = _search_set.size();
 	#pragma omp parallel for
-	for (size_t i=0; i< hsz; i++)
+	for (size_t j=0; j<hsz; j++)
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
-		Handle h(_search_set[i]);
+		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		found |= pme.explore_neighborhood(_root, _starter_term, h);
+		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
 	}
-	return found;
+	return 0 < nfnd;
 #endif
 
 #define SEQUENTIAL_LOOP 1
