@@ -181,6 +181,30 @@ static bool identical(const Handle& h)
 	return (oset[0] == oset[1]);
 }
 
+static ValuePtr exec_or_eval(AtomSpace* as,
+                             const Handle& term,
+                             AtomSpace* scratch,
+                             bool silent)
+{
+	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
+	{
+		try
+		{
+			return ValueCast(EvaluationLink::do_eval_scratch(as,
+			                    term, scratch, silent));
+		}
+		catch (const SilentException& ex)
+		{
+			return term;
+		}
+	}
+
+	Instantiator inst(as);
+	ValuePtr vp(inst.execute(term, silent));
+	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
+	return vp;
+}
+
 /// Check for semantic equality
 static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -189,11 +213,12 @@ static bool equal(AtomSpace* as, const Handle& h, bool silent)
 		throw SyntaxException(TRACE_INFO,
 		     "EqualLink expects two arguments");
 
-	Instantiator inst(as);
-	Handle h0(HandleCast(inst.execute(oset[0], silent)));
-	Handle h1(HandleCast(inst.execute(oset[1], silent)));
+	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
 
-	return (h0 == h1);
+	if (v0 == v1) return true;
+	if (nullptr == v0) return false;
+	return (*v0 == *v1);
 }
 
 /// Check for alpha equivalence. If the link contains no free
@@ -300,8 +325,7 @@ static TruthValuePtr bool_to_tv(bool truf)
 	return TruthValue::FALSE_TV();
 }
 
-
-/// `crisp_eval_sratch()` -- evaluate any Atoms that can meaningfully
+/// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
 /// There are two general kinds "truth values" that we are concerned
@@ -364,20 +388,9 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		// atoms into the atomspace, to signal some event or state.
 		// These cannot be discarded. This is explictly tested by
 		// SequenceUTest::test_or_put().
-		if (0 < evelnk->get_arity())
-		{
-			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
-			{
-				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
-			}
-			else
-			{
-				Instantiator inst(as);
-				Handle result(HandleCast(inst.execute(term, silent)));
-				if (result) scratch->add_atom(result);
-			}
-		}
+		for (const Handle& term : evelnk->getOutgoingSet())
+			exec_or_eval(as, term, scratch, silent);
+
 		if (TRUE_LINK == t) return true;
 		return false;
 	}
@@ -698,10 +711,24 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (DYNAMIC_FORMULA_LINK == pntype)
 		return reduce_formula(pn, cargs);
 
+	// Treat LambdaLink as if it were a PutLink -- perform
+	// the beta-reduction, and evaluate the result.
+	if (LAMBDA_LINK == pntype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(pn));
+		Handle reduct = lam->beta_reduce(cargs);
+		return EvaluationLink::do_evaluate(as, reduct, silent);
+	}
+
 	// The remaining code below handles GROUNDED_PREDICATE_NODE
 	// Throw a silent exception; this is called in some try..catch blocks.
 	if (GROUNDED_PREDICATE_NODE != pntype)
-		throw NotEvaluatableException();
+	{
+		if (silent)
+			throw NotEvaluatableException();
+		throw SyntaxException(TRACE_INFO,
+			"This predicate is not evaluatable: %s", pn->to_string().c_str());
+	}
 
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted

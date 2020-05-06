@@ -1,0 +1,6 @@
+
+ADD_CXXTEST(EqualLinkUTest)
+TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
+
+ADD_CXXTEST(IdenticalLinkUTest)
+TARGET_LINK_LIBRARIES(IdenticalLinkUTest execution atomspace)
