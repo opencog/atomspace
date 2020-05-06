@@ -701,7 +701,12 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// The remaining code below handles GROUNDED_PREDICATE_NODE
 	// Throw a silent exception; this is called in some try..catch blocks.
 	if (GROUNDED_PREDICATE_NODE != pntype)
-		throw NotEvaluatableException();
+	{
+		if (silent)
+			throw NotEvaluatableException();
+		throw SyntaxException(TRACE_INFO,
+			"This predicate is not evaluatable: %s", pn->to_string().c_str());
+	}
 
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
