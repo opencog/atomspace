@@ -300,8 +300,21 @@ static TruthValuePtr bool_to_tv(bool truf)
 	return TruthValue::FALSE_TV();
 }
 
+static ValuePtr exec_or_eval(AtomSpace* as,
+                             const Handle& term,
+                             AtomSpace* scratch,
+                             bool silent)
+{
+	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
+		return ValueCast(EvaluationLink::do_eval_scratch(as, term, scratch, silent));
 
-/// `crisp_eval_sratch()` -- evaluate any Atoms that can meaningfully
+	Instantiator inst(as);
+	ValuePtr vp(inst.execute(term, silent));
+	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
+	return vp;
+}
+
+/// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
 /// There are two general kinds "truth values" that we are concerned
@@ -367,16 +380,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		if (0 < evelnk->get_arity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
-			{
-				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
-			}
-			else
-			{
-				Instantiator inst(as);
-				Handle result(HandleCast(inst.execute(term, silent)));
-				if (result) scratch->add_atom(result);
-			}
+			exec_or_eval(as, term, scratch, silent);
 		}
 		if (TRUE_LINK == t) return true;
 		return false;
