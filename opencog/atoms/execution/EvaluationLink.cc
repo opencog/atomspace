@@ -181,6 +181,20 @@ static bool identical(const Handle& h)
 	return (oset[0] == oset[1]);
 }
 
+static ValuePtr exec_or_eval(AtomSpace* as,
+                             const Handle& term,
+                             AtomSpace* scratch,
+                             bool silent)
+{
+	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
+		return ValueCast(EvaluationLink::do_eval_scratch(as, term, scratch, silent));
+
+	Instantiator inst(as);
+	ValuePtr vp(inst.execute(term, silent));
+	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
+	return vp;
+}
+
 /// Check for semantic equality
 static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -189,11 +203,10 @@ static bool equal(AtomSpace* as, const Handle& h, bool silent)
 		throw SyntaxException(TRACE_INFO,
 		     "EqualLink expects two arguments");
 
-	Instantiator inst(as);
-	Handle h0(HandleCast(inst.execute(oset[0], silent)));
-	Handle h1(HandleCast(inst.execute(oset[1], silent)));
+	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
 
-	return (h0 == h1);
+	return (v0 == v1);
 }
 
 /// Check for alpha equivalence. If the link contains no free
@@ -298,20 +311,6 @@ static TruthValuePtr bool_to_tv(bool truf)
 {
 	if (truf) return TruthValue::TRUE_TV();
 	return TruthValue::FALSE_TV();
-}
-
-static ValuePtr exec_or_eval(AtomSpace* as,
-                             const Handle& term,
-                             AtomSpace* scratch,
-                             bool silent)
-{
-	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
-		return ValueCast(EvaluationLink::do_eval_scratch(as, term, scratch, silent));
-
-	Instantiator inst(as);
-	ValuePtr vp(inst.execute(term, silent));
-	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
-	return vp;
 }
 
 /// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
