@@ -18,6 +18,7 @@
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
@@ -201,6 +202,17 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 
 	Instantiator inst(as);
 	ValuePtr vp(inst.execute(term, silent));
+
+	// If the return value is a QueueValue, we assume that this
+	// is the result of executing a MeetLink or QueryLink.
+	// In this case, unwrap it, to get the "actual value".
+	// This feels slightly hacky, but will do for just right now.
+	if (QUEUE_VALUE == vp->get_type())
+	{
+		HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+		if (1 == hs.size())
+			vp = hs[0];
+	}
 	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
 	return vp;
 }
