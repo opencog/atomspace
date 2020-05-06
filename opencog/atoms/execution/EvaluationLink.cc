@@ -698,6 +698,15 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (DYNAMIC_FORMULA_LINK == pntype)
 		return reduce_formula(pn, cargs);
 
+	// Treat LambdaLink as if it were a PutLink -- perform
+	// the beta-reduction, and evaluate the result.
+	if (LAMBDA_LINK == pntype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(pn));
+		Handle reduct = lam->beta_reduce(cargs);
+		return EvaluationLink::do_evaluate(as, reduct, silent);
+	}
+
 	// The remaining code below handles GROUNDED_PREDICATE_NODE
 	// Throw a silent exception; this is called in some try..catch blocks.
 	if (GROUNDED_PREDICATE_NODE != pntype)
