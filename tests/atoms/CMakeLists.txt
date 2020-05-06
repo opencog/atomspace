@@ -1,11 +1,13 @@
 
 ADD_SUBDIRECTORY (atom_types)
 
-ADD_SUBDIRECTORY (execution)
-
 ADD_SUBDIRECTORY (base)
 
 ADD_SUBDIRECTORY (core)
+
+ADD_SUBDIRECTORY (evaluation)
+
+ADD_SUBDIRECTORY (execution)
 
 ADD_SUBDIRECTORY (truthvalue)
 
@@ -40,14 +42,8 @@ TARGET_LINK_LIBRARIES(DefineLinkUTest atomspace)
 ADD_CXXTEST(DeleteLinkUTest)
 TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
 
-ADD_CXXTEST(EqualLinkUTest)
-TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
-
 ADD_CXXTEST(StateLinkUTest)
 TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
 
 ADD_CXXTEST(ExistsLinkUTest)
 TARGET_LINK_LIBRARIES(ExistsLinkUTest execution atomspace)
-
-ADD_CXXTEST(IdenticalLinkUTest)
-TARGET_LINK_LIBRARIES(IdenticalLinkUTest execution atomspace)
