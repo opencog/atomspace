@@ -269,6 +269,30 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	return (*((AtomPtr)h0) == *((AtomPtr)h1a));
 }
 
+/// Check for set membership
+static bool member(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "MemberLink expects two arguments");
+
+	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
+
+	// Is v0 a member of v1?  This question makes sense only
+	// if v0 is an atom and v1 is a set.
+	if (not v0->is_atom()) return false;
+	if (not nameserver().isA(v1->get_type(), SET_LINK)) return false;
+
+	for (const Handle& hs: HandleCast(v1)->getOutgoingSet())
+	{
+		if (v0 == hs) return true;
+	}
+
+	return false;
+}
+
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -481,17 +505,21 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	{
 		return identical(evelnk);
 	}
-	else if (EQUAL_LINK == t)
+	if (EQUAL_LINK == t)
 	{
 		return equal(scratch, evelnk, silent);
 	}
-	else if (ALPHA_EQUAL_LINK == t)
+	if (ALPHA_EQUAL_LINK == t)
 	{
 		return alpha_equal(scratch, evelnk, silent);
 	}
-	else if (GREATER_THAN_LINK == t)
+	if (GREATER_THAN_LINK == t)
 	{
 		return greater(scratch, evelnk, silent);
+	}
+	if (MEMBER_LINK == t)
+	{
+		return member(scratch, evelnk, silent);
 	}
 
 	// -------------------------
