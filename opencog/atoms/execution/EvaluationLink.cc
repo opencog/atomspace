@@ -377,11 +377,9 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		// atoms into the atomspace, to signal some event or state.
 		// These cannot be discarded. This is explictly tested by
 		// SequenceUTest::test_or_put().
-		if (0 < evelnk->get_arity())
-		{
-			const Handle& term = evelnk->getOutgoingAtom(0);
+		for (const Handle& term : evelnk->getOutgoingSet())
 			exec_or_eval(as, term, scratch, silent);
-		}
+
 		if (TRUE_LINK == t) return true;
 		return false;
 	}
