@@ -139,7 +139,7 @@ TYPE_OUTPUT_LINK <- LINK
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
