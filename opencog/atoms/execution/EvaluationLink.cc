@@ -187,7 +187,17 @@ static ValuePtr exec_or_eval(AtomSpace* as,
                              bool silent)
 {
 	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
-		return ValueCast(EvaluationLink::do_eval_scratch(as, term, scratch, silent));
+	{
+		try
+		{
+			return ValueCast(EvaluationLink::do_eval_scratch(as,
+			                    term, scratch, silent));
+		}
+		catch (const SilentException& ex)
+		{
+			return term;
+		}
+	}
 
 	Instantiator inst(as);
 	ValuePtr vp(inst.execute(term, silent));
@@ -206,7 +216,9 @@ static bool equal(AtomSpace* as, const Handle& h, bool silent)
 	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
 	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
 
-	return (v0 == v1);
+	if (v0 == v1) return true;
+	if (nullptr == v0) return false;
+	return (*v0 == *v1);
 }
 
 /// Check for alpha equivalence. If the link contains no free
