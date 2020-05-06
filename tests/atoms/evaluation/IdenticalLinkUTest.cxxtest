@@ -61,11 +61,19 @@ void IdenticalLinkUTest::test_identical()
 
 	Handle AA = L(IDENTICAL_LINK, A, A);
 	Handle AB = L(IDENTICAL_LINK, A, B);
+	Handle AAA = L(IDENTICAL_LINK, A, A, A);
+	Handle ABB = L(IDENTICAL_LINK, A, B, B);
 
 	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AA);
 	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
 
+	tvp = EvaluationLink::do_evaluate(&_as, AAA);
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
 	tvp = EvaluationLink::do_evaluate(&_as, AB);
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	tvp = EvaluationLink::do_evaluate(&_as, ABB);
 	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
 
 	logger().info("END TEST: %s", __FUNCTION__);

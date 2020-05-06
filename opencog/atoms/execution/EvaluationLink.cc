@@ -171,17 +171,6 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 	return (v0 > v1);
 }
 
-/// Check for syntactic equality
-static bool identical(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "IdenticalLink expects two arguments");
-
-	return (oset[0] == oset[1]);
-}
-
 static ValuePtr exec_or_eval(AtomSpace* as,
                              const Handle& term,
                              AtomSpace* scratch,
@@ -217,20 +206,40 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	return vp;
 }
 
-/// Check for semantic equality
+/// Check for syntactic equality. Specifically, when comparing
+/// atoms, the handles MUST be the same handle.
+/// If there are two or more elements, they must ALL be equal.
+static bool identical(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	size_t nelts = oset.size();
+	if (2 > nelts) return true;
+
+	for (size_t j=1; j<nelts; j++)
+	{
+		if (oset[0] != oset[j]) return false;
+	}
+	return true;
+}
+
+/// Check for semantic equality. Specifically, when comparing
+/// atoms, then handles might be different, but the contents must
+/// compare as being the same, after the evaluation of the contents.
+/// If there are two or more elements, they must ALL be equal.
 static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "EqualLink expects two arguments");
+	size_t nelts = oset.size();
+	if (2 > nelts) return true;
 
 	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
-	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
 
-	if (v0 == v1) return true;
-	if (nullptr == v0) return false;
-	return (*v0 == *v1);
+	for (size_t j=1; j<nelts; j++)
+	{
+		ValuePtr v1(exec_or_eval(as, oset[j], as, silent));
+		if (v0 != v1 and *v0 != *v1) return false;
+	}
+	return true;
 }
 
 /// Check for alpha equivalence. If the link contains no free
