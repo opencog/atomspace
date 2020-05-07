@@ -24,11 +24,7 @@
 #define _OPENCOG_REPLACEMENT_H
 
 #include <map>
-#include <set>
 
-#include <boost/operators.hpp>
-
-#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/Quotation.h>

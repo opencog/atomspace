@@ -23,23 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/algorithm.h>
-
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/Context.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/NumberNode.h>
-
 #include "ScopeLink.h"
-#include "VariableList.h"
-#include "VariableSet.h"
-#include "Variables.h"
 
 namespace opencog {
 

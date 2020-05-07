@@ -24,7 +24,7 @@
 #define _OPENCOG_FREE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/FreeVariables.h>
 
 namespace opencog
 {
