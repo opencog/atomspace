@@ -85,6 +85,10 @@ HandleSet JoinLink::min_container(void)
 /// This recursively walks to the top, till there is no more.
 void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 {
+	// Ignore other containers!
+	if (nameserver().isA(h->get_type(), JOIN_LINK))
+		return;
+
 	IncomingSet is(h->getIncomingSet());
 	if (0 == is.size())
 	{
