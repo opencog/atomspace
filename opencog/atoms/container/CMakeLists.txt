@@ -10,8 +10,10 @@ ADD_LIBRARY (container
 ADD_DEPENDENCIES(container opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(container
+	execution
 	atomcore
 	atombase
+	atomspace
 	${COGUTIL_LIBRARY}
 )
 
