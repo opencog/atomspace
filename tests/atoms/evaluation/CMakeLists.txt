@@ -1,12 +1,8 @@
 
+LINK_LIBRARIES(execution atomspace)
+
 ADD_CXXTEST(EqualLinkUTest)
-TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
-
 ADD_CXXTEST(IdenticalLinkUTest)
-TARGET_LINK_LIBRARIES(IdenticalLinkUTest execution atomspace)
-
 ADD_CXXTEST(MemberLinkUTest)
-TARGET_LINK_LIBRARIES(MemberLinkUTest execution atomspace)
-
 ADD_CXXTEST(SubsetLinkUTest)
-TARGET_LINK_LIBRARIES(SubsetLinkUTest execution atomspace)
+ADD_CXXTEST(ExclusiveLinkUTest)

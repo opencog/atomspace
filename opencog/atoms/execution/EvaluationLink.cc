@@ -332,6 +332,31 @@ static bool subset(AtomSpace* as, const Handle& h, bool silent)
 	return true;
 }
 
+/// Check to make sure all atoms differ
+static bool exclusive(AtomSpace* as, const Handle& h, bool silent)
+{
+	HandleSeq oset(h->getOutgoingSet());
+	ValueSeq vset;
+
+	size_t olen = oset.size();
+	while (true)
+	{
+		if (2 > olen) return true;
+
+		Handle last(oset.back());
+		oset.pop_back();
+		olen --;
+
+		ValuePtr v0(exec_or_eval(as, last, as, silent));
+		for (size_t j=0; j< olen; j++)
+		{
+			if (vset.size() <= j)
+				vset.push_back(exec_or_eval(as, oset[j], as, silent));
+			if (v0 == vset[j] or *v0 == *vset[j]) return false;
+		}
+	}
+}
+
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -539,31 +564,14 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	}
 
 	// -------------------------
-	// Arity-two relations
-	if (IDENTICAL_LINK == t)
-	{
-		return identical(evelnk);
-	}
-	if (EQUAL_LINK == t)
-	{
-		return equal(scratch, evelnk, silent);
-	}
-	if (ALPHA_EQUAL_LINK == t)
-	{
-		return alpha_equal(scratch, evelnk, silent);
-	}
-	if (GREATER_THAN_LINK == t)
-	{
-		return greater(scratch, evelnk, silent);
-	}
-	if (MEMBER_LINK == t)
-	{
-		return member(scratch, evelnk, silent);
-	}
-	if (SUBSET_LINK == t)
-	{
-		return subset(scratch, evelnk, silent);
-	}
+	// Assorted relations
+	if (IDENTICAL_LINK == t) return identical(evelnk);
+	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
+	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
+	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
+	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
+	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
+	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
 
 	// -------------------------
 	// Multi-threading primitives

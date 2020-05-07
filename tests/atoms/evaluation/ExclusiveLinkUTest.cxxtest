@@ -1,5 +1,5 @@
 /*
- * tests/atoms/SubsetLinkUTest.cxxtest
+ * tests/atoms/ExclusiveLinkUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -28,13 +28,13 @@
 
 using namespace opencog;
 
-class SubsetLinkUTest :  public CxxTest::TestSuite
+class ExclusiveLinkUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 
 public:
-	SubsetLinkUTest()
+	ExclusiveLinkUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
@@ -45,14 +45,14 @@ public:
 
 	void tearDown() {}
 
-	void test_subset();
+	void test_exclusive();
 };
 
 #define N _as.add_node
 #define L _as.add_link
 
 // Basic test
-void SubsetLinkUTest::test_subset()
+void ExclusiveLinkUTest::test_exclusive()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -60,24 +60,15 @@ void SubsetLinkUTest::test_subset()
 	Handle B = N(CONCEPT_NODE, "B");
 	Handle C = N(CONCEPT_NODE, "C");
 	Handle D = N(CONCEPT_NODE, "D");
-	Handle S = L(SET_LINK, A, B, C);
+	Handle S = L(EXCLUSIVE_LINK, A, B, C, D);
+	Handle T = L(EXCLUSIVE_LINK, A, B, C, A);
 
-	Handle AS = L(SUBSET_LINK, L(SET_LINK, A), S);
-	Handle ABS = L(SUBSET_LINK, L(SET_LINK, A, B), S);
-	Handle DS = L(SUBSET_LINK, L(SET_LINK, D), S);
-	Handle ADS = L(SUBSET_LINK, L(SET_LINK, A, D), S);
 
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AS);
+	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, S);
 	printf("Got tvp=%s\n", tvp->to_string().c_str());
 	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
 
-	tvp = EvaluationLink::do_evaluate(&_as, ABS);
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
-
-	tvp = EvaluationLink::do_evaluate(&_as, DS);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
-
-	tvp = EvaluationLink::do_evaluate(&_as, ADS);
+	tvp = EvaluationLink::do_evaluate(&_as, T);
 	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
 
 	logger().info("END TEST: %s", __FUNCTION__);
