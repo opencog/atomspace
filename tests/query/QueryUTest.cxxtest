@@ -66,6 +66,7 @@ public:
 
 	void test_basic(void);
 	void test_meet(void);
+	void test_exclusive(void);
 };
 
 void QueryUTest::tearDown(void)
@@ -139,6 +140,50 @@ void QueryUTest::test_meet(void)
 	printf("Expected: %s\n", ev->to_string().c_str());
 	LinkValuePtr lv(LinkValueCast(v));
 	LinkValuePtr lev(LinkValueCast(ev));
+	TS_ASSERT_EQUALS(*lev, *lv);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ExclusiveLink unit test.
+ */
+void QueryUTest::test_exclusive(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/query-exclusive.scm\")");
+	TS_ASSERT_EQUALS(false, eval->eval_error());
+
+	// expect empty set.
+	ValuePtr v = eval->eval_v("(cog-execute! exclude-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 0);
+
+	v = eval->eval_v("(cog-execute! not-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 0);
+
+	eval->eval_h("(State (Concept \"stop light\") (Concept \"green\"))");
+
+	v = eval->eval_v("(cog-execute! exclude-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 1);
+	printf("Got: %s\n", v->to_string().c_str());
+
+	ValuePtr ev = eval->eval_v("(QueueValue (Concept \"green\"))");
+	printf("Expected: %s\n", ev->to_string().c_str());
+
+	LinkValuePtr lv(LinkValueCast(v));
+	LinkValuePtr lev(LinkValueCast(ev));
+	TS_ASSERT_EQUALS(*lev, *lv);
+
+	v = eval->eval_v("(cog-execute! not-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 1);
+
+	lv = LinkValueCast(v);
 	TS_ASSERT_EQUALS(*lev, *lv);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
