@@ -23,65 +23,92 @@ databases than you can shake a stick at. What makes the AtomSpace
 different? A dozen features that no other graph DB does, or has even
 dreamed of doing.
 
-But, first: four things everyone else does:
+But, first: five things everyone else does:
 * Perform [graphical database queries](https://wiki.opencog.org/w/Pattern_engine),
   returning results that satsify a provided search pattern.
 * Arbitrarily complex patterns with an arbitrary number of variable
   regions can be specied, by unifying multiple clauses.
 * Modify searches with conditionals, such as "greater than", and with
   user callbacks into scheme, python or haskell.
-* Perform graph rewriting.
-* Trigger execution of user callbacks... or executable graphs.
+* Perform graph rewriting: use search results to create new graphs.
+* Trigger execution of user callbacks... or of executable graphs (as
+  explained below).
 
-Things no one else does:
-* Search queries are graphs. That is, every query, every search is also
-  a graph. That means one can store preformed searches in the database,
-  and access them later. This allows a graph rule engine to be built up.
-* Inverted searches. Normally, a search involves "asking a question" and
-  "getting an answer". For the inverted search, one "has an answer" and
-  is looking for all "questions" that it answers. This is pattern
-  recongnition, as opposed to pattrn search. All chatbots do this as
+Things that no one else does:
+* **Search queries are graphs.**
+  (The API to the [pattern engine](https://wiki.opencog.org/w/Pattern_engine)
+  is a graph.). That is, every query, every search is also a graph. That
+  means one can store a collection of searches in the database, and
+  access them later. This allows a graph rule engine to be built up.
+* **Inverted searches.**
+  ([DualLink](https://wiki.opencog.org/w/DualLink)).
+  Normally, a search is like "asking a question" and "getting an
+  answer". For the inverted search, one "has an answer" and is looking
+  for all "questions" for which its a solution. This is pattern
+  recongnition, as opposed to pattern search. All chatbots do this as
   a matter of course, to handle chat dialog. No chatbot can host
   arbitrary graph data, or search it. The AtomSpace can. This is because
   queries are also graphs, and not just data.
-* Both ["meet" and "join"](https://en.wikipedia.org/wiki/Join_and_meet)
+* Both [**"meet" and "join"**](https://en.wikipedia.org/wiki/Join_and_meet)
   searches are possible: One can perform a "fill in the blanks" search
   (a meet, with [MeetLink](https://wiki.opencog.org/w/MeetLink))
   and one can perform a "what contains this?" search (a join, with
   [JoinLink](https://wiki.opencog.org/w/JoinLink)).
-* Graphs are executable. Graph vertex types include "plus", "times",
+* **Graphs are executable.** Graph vertex types include "plus", "times",
   "greater than" and many other programming constructs. The resulting
   graphs are called [Atomese](https://wiki.opencog.org/w/Atomese).
-* Graphs are typed. Graph elements have types, and there are half a
-  dozen type constructors, including types for graphs that are
-  functions.
-* Graph elements host dynamic, mutable key-value databases. That is,
-  every graph element has an associated key-value database. Think of
-  the graph is "pipes" or "plumbing"; the key-value data is the mutable,
-  dynamically changing "water" that flows through those pipes.
-* Unordered sets
+* **Graphs are typed**
+  ([TypeNode](https://wiki.opencog.org/w/TypeNode) and
+  [type constructors](https://wiki.opencog.org/w/Type_constructor))
+  Graph elements have types, and there are half a dozen type
+  constructors, including types for graphs that are functions. This
+  resembles programming systems that have type constructors, such as
+  CaML or Haskell.
+* **Graphs specify flows**
+  ([Values](https://wiki.opencog.org/w/Value) and
+  [DynamicFormulaLink](https://wiki.opencog.org/w/DynamicFormulaLink)
+  Graph elements host dynamic, mutable
+  key-value databases. That is, every graph element has an associated
+  key-value database. Think of the graph is "pipes" or "plumbing"; the
+  key-value data is the mutable, dynamically changing "water" that flows
+  through those pipes.
+* **Unordered sets**
   ([UnorderedLink](https://wiki.opencog.org/w/UnorderedLink)).
-  A graph vertex can be an unordered set. When searching for a matching
-  pattern, one must consider **all** permutations of the set. For only
-  one set, this is not hard, but if they are nested and linked, this
-  becomes incredibly hard. The AtomSpace pattern engine handles all of
-  these cases correctly.
-* Patterns can include a menu of sub-patterns to be matched. Such menus
+  A graph vertex can be an unordered set (Think of a list of edges, but
+  they are not in any fixed order.) When searching for a matching
+  pattern, one must consider **all** permutations of the set. This is
+  easy, if the search has only one unordered set. This is hard, if
+  they are nested and intr-linked: it becomes a constraint-satisfaction
+  problem.  The AtomSpace pattern engine handles all of these cases
+  correctly.
+* **Alternative sub-patterns.** A search query can include a menu of
+  sub-patterns to be matched. Such sets of alternatives
   ([ChoiceLink](https://wiki.opencog.org/w/ChiceLink)) can be nested
-  arbitrarily.
-* One can match zero, one or more subgraphs with globs
-  ([GlobNode](https://wiki.opencog.org/w/GlobNode)). This is similar to
-  the idea of globbing in a regex.
-* Executable graphs can be quoted
-  ([QuoteLink](https://wiki.opencog.org/w/QuoteLink)). This allows
-  searching for executable graphs!
-* Reject matches to subgraphs having a particular pattern
+  and composed arbitrarily. (i.e. they can contain variables, etc.)
+* **Globby matching**
+  ([GlobNode](https://wiki.opencog.org/w/GlobNode)).
+  One can match zero, one or more subgraphs with globs This is similar
+  to the idea of globbing in a regex. Thus, a variable need not be
+  grounded by only one subgraph: a variable can be grounded by an
+  indeterminate range of subgraphs.
+* **Quotations** ([QuoteLink](https://wiki.opencog.org/w/QuoteLink)).
+  Executable graphs can be quoted.  This is similar to quotations in
+  functional programming languages. In this case, it allows queries
+  to search for other queries, without triggering the query that was
+  searched for. Handy for rule-engines that use rules to find other
+  rules.
+* **Negation as failure**
   ([AbsentLink](https://wiki.opencog.org/w/AbsentLink)).
-* Require that all matches contain a particular subgraph or satisfy
-  a particular predicate.  For example: find all baskets that have
-  only red balls in them. This requires not only finding the baskets,
-  but also testing the balls in each.  This is a kind-of "for all"
-  search predicate ([AlwaysLink](https://wiki.opencog.org/w/AlwaysLink)).
+  Reject matches to subgraphs having particular sub-patterns in them.
+  That is, find all graphs of some shape, except those having these
+  other sub-shapes.
+* **For-all predicate**
+  ([AlwaysLink](https://wiki.opencog.org/w/AlwaysLink)).
+  Require that all matches contain a particular subgraph or satisfy a
+  particular predicate.  For example: find all baskets that have only
+  red balls in them. This requires not only finding the baskets, making
+  sure they have balls in them, but also testing each and every ball in
+  a basket.
 
 As it turns out, knowledge representation is hard, and so the AtomSpace
 has been (and continues to be) a platform for active scientific research
@@ -242,7 +269,7 @@ annotations can be stored as Values.  Essentially, the AtomSpace looks
 like a database-of-databases; each atom is a key-value database; the
 atoms are related to one-another as a graph. The graph is searchable,
 editable; it holds rules and relations and ontologies and axioms.
-Values are the data that stream and flow through this network, like 
+Values are the data that stream and flow through this network, like
 water through pipes. Atoms define the pipes, the connectivity. Values
 flow and change. See the blog entry
 [value flows](https://blog.opencog.org/2020/04/08/value-flows/) as
