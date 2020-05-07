@@ -1627,7 +1627,11 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// Glob interval map
 	ss << indent << "_glob_intervalmap:" << std::endl
-	   << oc_to_string(_glob_intervalmap, indent_p);
+	   << oc_to_string(_glob_intervalmap, indent_p) << std::endl;
+
+	// Deep typemap
+	ss << indent << "_deep_typemap:" << std::endl
+	   << oc_to_string(_deep_typemap, indent_p);
 
 	return ss.str();
 }
