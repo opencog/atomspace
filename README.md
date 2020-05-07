@@ -18,6 +18,71 @@ operation in a day-to-day production environment.
 
 Data as Graphs
 ==============
+It is now commplace to represent data as graphs; there are more graph
+databases than you can shake a stick at. What makes the AtomSpace
+different? A dozen features that no other graph DB does, or has even
+dreamed of doing.
+
+But, first: four things everyone else does:
+* Perform [graphical database queries](https://wiki.opencog.org/w/Pattern_engine),
+  returning results that satsify a provided search pattern.
+* Arbitrarily complex patterns with an arbitrary number of variable
+  regions can be specied, by unifying multiple clauses.
+* Modify searches with conditionals, such as "greater than", and with
+  user callbacks into scheme, python or haskell.
+* Perform graph rewriting.
+* Trigger execution of user callbacks... or executable graphs.
+
+Things no one else does:
+* Search queries are graphs. That is, every query, every search is also
+  a graph. That means one can store preformed searches in the database,
+  and access them later. This allows a graph rule engine to be built up.
+* Inverted searches. Normally, a search involves "asking a question" and
+  "getting an answer". For the inverted search, one "has an answer" and
+  is looking for all "questions" that it answers. This is pattern
+  recongnition, as opposed to pattrn search. All chatbots do this as
+  a matter of course, to handle chat dialog. No chatbot can host
+  arbitrary graph data, or search it. The AtomSpace can. This is because
+  queries are also graphs, and not just data.
+* Both ["meet" and "join"](https://en.wikipedia.org/wiki/Join_and_meet)
+  searches are possible: One can perform a "fill in the blanks" search
+  (a meet, with [MeetLink](https://wiki.opencog.org/w/MeetLink))
+  and one can perform a "what contains this?" search (a join, with
+  [JoinLink](https://wiki.opencog.org/w/JoinLink)).
+* Graphs are executable. Graph vertex types include "plus", "times",
+  "greater than" and many other programming constructs. The resulting
+  graphs are called [Atomese](https://wiki.opencog.org/w/Atomese).
+* Graphs are typed. Graph elements have types, and there are half a
+  dozen type constructors, including types for graphs that are
+  functions.
+* Graph elements host dynamic, mutable key-value databases. That is,
+  every graph element has an associated key-value database. Think of
+  the graph is "pipes" or "plumbing"; the key-value data is the mutable,
+  dynamically changing "water" that flows through those pipes.
+* Unordered sets
+  ([UnorderedLink](https://wiki.opencog.org/w/UnorderedLink)).
+  A graph vertex can be an unordered set. When searching for a matching
+  pattern, one must consider **all** permutations of the set. For only
+  one set, this is not hard, but if they are nested and linked, this
+  becomes incredibly hard. The AtomSpace pattern engine handles all of
+  these cases correctly.
+* Patterns can include a menu of sub-patterns to be matched. Such menus
+  ([ChoiceLink](https://wiki.opencog.org/w/ChiceLink)) can be nested
+  arbitrarily.
+* One can match zero, one or more subgraphs with globs
+  ([GlobNode](https://wiki.opencog.org/w/GlobNode)). This is similar to
+  the idea of globbing in a regex.
+* Executable graphs can be quoted
+  ([QuoteLink](https://wiki.opencog.org/w/QuoteLink)). This allows
+  searching for executable graphs!
+* Reject matches to subgraphs having a particular pattern
+  ([AbsentLink](https://wiki.opencog.org/w/AbsentLink)).
+* Require that all matches contain a particular subgraph or satisfy
+  a particular predicate.  For example: find all baskets that have
+  only red balls in them. This requires not only finding the baskets,
+  but also testing the balls in each.  This is a kind-of "for all"
+  search predicate ([AlwaysLink](https://wiki.opencog.org/w/AlwaysLink)).
+
 Data is represented in the form of graphs; more precisely, as typed,
 directed hypergraphs.  The vertices and edges of a graph, known as
 "Atoms", are used to represent not only "data", but also "procedures";
