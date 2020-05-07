@@ -168,25 +168,12 @@ HandleSet JoinLink::max_container(bool silent)
 /// while honoring all scoping and quoting.
 HandleSet JoinLink::replace(const HandleSet& containers, bool silent) const
 {
-	// FreeVariables::substitute_scoped() uses a weird API.
-	// Create the two things that API wants.
-	HandleSeq to_insert;
-	FreeVariables::IndexMap insert_index;
-	size_t idx = 0;
-	for (const auto& pr : _replacements)
-	{
-		to_insert.push_back(pr.second);
-		insert_index.insert({pr.first, idx});
-		idx++;
-	}
-
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::substitute_scoped(top,
-		                        to_insert, silent, insert_index);
+		Handle rep = FreeVariables::replace_nocheck(top, _replacements);
 		replaced.insert(rep);
 	}
 

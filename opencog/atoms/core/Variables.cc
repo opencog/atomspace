@@ -455,14 +455,29 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleSeq& args,
                                          bool silent) const
 {
-	return substitute_scoped(term, args, silent, index);
+	return substitute_scoped(term, args, index);
 }
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleMap& vm,
                                          bool silent) const
 {
-	return substitute_scoped(term, make_sequence(vm), silent, index);
+	return substitute_scoped(term, make_sequence(vm), index);
+}
+
+Handle FreeVariables::replace_nocheck(const Handle& term,
+                                      const HandleMap& vm)
+{
+	HandleSeq to_insert;
+	IndexMap insert_index;
+	size_t idx = 0;
+	for (const auto& pr : vm)
+	{
+		to_insert.push_back(pr.second);
+		insert_index.insert({pr.first, idx});
+		idx++;
+	}
+	return substitute_scoped(term, to_insert, insert_index);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const
@@ -507,7 +522,6 @@ std::string FreeVariables::to_string(const std::string& indent) const
 ///    values are variables of the same name.
 Handle FreeVariables::substitute_scoped(Handle term,
                                         const HandleSeq& args,
-                                        bool silent,
                                         const IndexMap& index_map,
                                         Quotation quotation)
 {
@@ -572,7 +586,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
+			Handle glst(substitute_scoped(h, args, *index_map_ptr, quotation));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
@@ -585,7 +599,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
 		}
 		else
 		{
-			Handle sub(substitute_scoped(h, args, silent, *index_map_ptr, quotation));
+			Handle sub(substitute_scoped(h, args, *index_map_ptr, quotation));
 			if (sub != h) changed = true;
 			oset.emplace_back(sub);
 		}
