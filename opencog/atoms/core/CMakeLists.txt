@@ -21,6 +21,7 @@ ADD_LIBRARY (atomcore
 	Quotation.cc
 	RandomChoice.cc
 	RandomNumber.cc
+	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	SleepLink.cc
@@ -65,6 +66,7 @@ INSTALL (FILES
 	Quotation.h
 	RandomChoice.h
 	RandomNumber.h
+	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
 	SleepLink.h

@@ -31,32 +31,13 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/Replacement.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-/// Given a tree, replace one Atom by another in that tree, respecting
-/// quotation (QuoteLink) and scoping (ScopeLink).
-struct Replacement
-{
-	typedef std::map<Handle, unsigned int> IndexMap;
-
-	/// Walk the tree given in the first argument, and replace
-	/// any atoms that occur in the map by thier mapped value.
-	static Handle replace_nocheck(const Handle&, const HandleMap&);
-
-protected:
-	static Handle substitute_scoped(Handle, const HandleSeq&,
-	                                const IndexMap&,
-	                                Quotation quotation=Quotation());
-	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
-	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
-	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
-};
 
 // Struct to build paths between variables and root. A path is a
 // sequence of pairs (Type, Index), where Type is the type of a link
