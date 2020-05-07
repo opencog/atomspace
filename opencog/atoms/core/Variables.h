@@ -317,7 +317,7 @@ struct Variables : public FreeVariables,
 
 	/// Inverse of Variables(vardecl).get_variable()
 	///
-	/// That is, convert Variables object into avariable declaration,
+	/// That is, convert Variables object into a variable declaration,
 	/// that is a VariableList, VariableSet, TypedVariableLink,
 	/// VariableNode or GlobNode, suitable for direct use in a
 	/// ScopeLink.
