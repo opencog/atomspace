@@ -925,6 +925,12 @@ void Variables::get_vartype(const Handle& htypelink)
 	}
 	else
 	{
+		// Instead of throwing here, we could also assume that
+		// there is an implied SignatureLink, and just poke the
+		// contents into the _deep_typemap. On the other hand,
+		// it seems better to throw, so that beginers aren't
+		// thrown off the trail for what essentially becomes
+		// a silent error with unexpected effects...
 		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
 			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",

@@ -34,6 +34,10 @@ class JoinLink : public PrenexLink
 {
 protected:
 	void init(void);
+
+	HandleSet min_container(void);
+	HandleSet max_container(void);
+
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
 public:

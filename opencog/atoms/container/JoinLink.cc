@@ -44,11 +44,76 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
+HandleSet JoinLink::min_container(void)
+{
+	Handle starter;
+
+	// If there's only one variable, things should be easy...
+	if (_variables.varseq.size() == 1)
+	{
+		Handle var(_variables.varseq[0]);
+
+		if (_variables._simple_typemap.size() != 0)
+			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+		// Get the type.
+		HandleSet dtset = _variables._deep_typemap.at(var);
+		if (dtset.size() != 1)
+			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+		Handle dt = *dtset.begin();
+		Type dtype = dt->get_type();
+
+		if (SIGNATURE_LINK != dtype)
+			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+		starter = dt->getOutgoingAtom(0);
+	}
+
+	if (_variables.varseq.size() != 1)
+		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+	HandleSet containers;
+	containers.insert(starter);
+
+	return containers;
+}
+
+/* ================================================================= */
+
+HandleSet JoinLink::max_container(void)
+{
+	HandleSet hs = min_container();
+	HandleSet containers;
+	for (const Handle& h: hs)
+	{
+		containers.insert(h);
+	}
+	return containers;
+}
+
+/* ================================================================= */
+
 QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 {
-	if (nullptr == as) as = _atom_space;
+	// if (nullptr == as) as = _atom_space;
+	QueueValuePtr qvp(createQueueValue());
 
-	return nullptr;
+printf("duude vardecls=%s\n", _vardecl->to_string().c_str());
+printf("duude body=%s\n", _body->to_string().c_str());
+printf("duude vars=%s\n", oc_to_string(_variables).c_str());
+
+	HandleSet hs = max_container();
+
+	// XXX FIXME this is really dumb, using a queue and then
+	// copying things into it. Whatever. Fix this.
+	for (const Handle& h : hs)
+	{
+		qvp->push(h);
+	}
+
+	qvp->close();
+	return qvp;
 }
 
 ValuePtr JoinLink::execute(AtomSpace* as, bool silent)
