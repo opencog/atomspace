@@ -1,3 +1,3 @@
 
-LINK_LIBRARIES(container execution atomspace)
+LINK_LIBRARIES(container smob execution atomspace)
 ADD_CXXTEST(JoinLinkUTest)

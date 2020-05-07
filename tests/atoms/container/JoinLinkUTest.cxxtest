@@ -78,13 +78,10 @@ void JoinLinkUTest::test_basic(void)
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-#if 0
     eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
 
-    Handle stuff = eval->eval_h(
-        "(cog-execute! stuff)");
-    printf("stuff = %s\n", stuff->to_string().c_str());
-#endif
+    ValuePtr vp = eval->eval_v("(cog-execute! join)");
+    printf("basic-join = %s\n", vp->to_string().c_str());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
