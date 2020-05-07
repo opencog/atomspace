@@ -39,6 +39,25 @@ namespace opencog
  *  @{
  */
 
+/// Given a tree, replace one Atom by another in that tree, respecting
+/// quotation (QuoteLink) and scoping (ScopeLink).
+struct Replacement
+{
+	typedef std::map<Handle, unsigned int> IndexMap;
+
+	/// Walk the tree given in the first argument, and replace
+	/// any atoms that occur in the map by thier mapped value.
+	static Handle replace_nocheck(const Handle&, const HandleMap&);
+
+protected:
+	static Handle substitute_scoped(Handle, const HandleSeq&,
+	                                const IndexMap&,
+	                                Quotation quotation=Quotation());
+	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
+	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
+	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
+};
+
 // Struct to build paths between variables and root. A path is a
 // sequence of pairs (Type, Index), where Type is the type of a link
 // and index is the index of the outgoing of that link. If the type
@@ -49,8 +68,8 @@ namespace opencog
 // being always zero. We do that to be able to use std::operator<
 // rather than provide our own.
 //
-// Note: a notion of path is already implemented in PatternTerm, there
-// might be ways to unify the two.
+// Note: a notion of path is already implemented in PatternTerm,
+// It might be a good idea to unity this mechanism with that one.
 typedef std::pair<Type, Arity> TypeArityPair;
 typedef std::vector<TypeArityPair> Path;
 typedef std::multiset<Path> PathMultiset;
@@ -64,7 +83,7 @@ typedef std::map<Handle, PathMultiset> HandlePathsMap;
 /// argument for the variable).  This class implements the data that is
 /// used by FreeLink to work with free variables.
 ///
-struct FreeVariables
+struct FreeVariables : Replacement
 {
 	/// Unbundled variables (i.e. pulled out of the graph they live in).
 	///
@@ -79,7 +98,6 @@ struct FreeVariables
 	/// aka "PutLink") method.
 	HandleSeq varseq;
 	HandleSet varset;
-	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
 	// CTor, mostly convenient for unit tests
@@ -160,10 +178,6 @@ struct FreeVariables
 	                          const HandleMap&,
 	                          bool silent=false) const;
 
-	/// Unlike the above, this makes no assumptions that the tree,
-	/// or the map, has any variables in it(!). This just beta-reduces...
-	static Handle replace_nocheck(const Handle&, const HandleMap&);
-
 	/// Comparison operator. Used to enable containers holding
 	/// this class.
 	bool operator<(const FreeVariables& other) const;
@@ -176,14 +190,6 @@ struct FreeVariables
 
 	/// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
-
-protected:
-	static Handle substitute_scoped(Handle, const HandleSeq&,
-	                                const IndexMap&,
-	                                Quotation quotation=Quotation());
-	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
-	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
-	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
 };
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;

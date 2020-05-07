@@ -465,8 +465,8 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 	return substitute_scoped(term, make_sequence(vm), index);
 }
 
-Handle FreeVariables::replace_nocheck(const Handle& term,
-                                      const HandleMap& vm)
+Handle Replacement::replace_nocheck(const Handle& term,
+                                    const HandleMap& vm)
 {
 	HandleSeq to_insert;
 	IndexMap insert_index;
@@ -520,10 +520,10 @@ std::string FreeVariables::to_string(const std::string& indent) const
 ///    any scoped variables with the same name as the free variables
 ///    are alpha-hidden, possibly alpha-converted if the substituting
 ///    values are variables of the same name.
-Handle FreeVariables::substitute_scoped(Handle term,
-                                        const HandleSeq& args,
-                                        const IndexMap& index_map,
-                                        Quotation quotation)
+Handle Replacement::substitute_scoped(Handle term,
+                                      const HandleSeq& args,
+                                      const IndexMap& index_map,
+                                      Quotation quotation)
 {
 	bool unquoted = quotation.is_unquoted();
 
@@ -610,8 +610,8 @@ Handle FreeVariables::substitute_scoped(Handle term,
 	return createLink(std::move(oset), term->get_type());
 }
 
-bool FreeVariables::must_alpha_convert(const Handle& scope,
-                                       const HandleSeq& args)
+bool Replacement::must_alpha_convert(const Handle& scope,
+                                     const HandleSeq& args)
 {
 	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
 	for (const Handle& value : args)
@@ -622,8 +622,8 @@ bool FreeVariables::must_alpha_convert(const Handle& scope,
 
 // Evaluate whether any variable must be hidden/removed from the
 // index_map.
-bool FreeVariables::must_alpha_hide(const Handle& scope,
-                                    const IndexMap& index_map)
+bool Replacement::must_alpha_hide(const Handle& scope,
+                                  const IndexMap& index_map)
 {
 	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
 	for (const Handle& v : vars)
@@ -634,8 +634,8 @@ bool FreeVariables::must_alpha_hide(const Handle& scope,
 
 /// Remove the variables from the given index map that are present in
 /// the given the variables of a scope, as well as non variables
-FreeVariables::IndexMap FreeVariables::alpha_hide(const Handle& scope,
-                                                  const IndexMap& index_map)
+Replacement::IndexMap Replacement::alpha_hide(const Handle& scope,
+                                              const IndexMap& index_map)
 {
 	// Make a copy... this is what's computationally expensive.
 	IndexMap hidden_map = index_map;
