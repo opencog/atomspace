@@ -35,7 +35,8 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
-	void setup_variable_replacements(void);
+	void setup_variables(void);
+	void setup_replacements(void);
 	HandleMap _replacements;
 	HandleSet replace(const HandleSet&, bool) const;
 

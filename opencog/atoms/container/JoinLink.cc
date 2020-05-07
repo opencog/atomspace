@@ -40,7 +40,8 @@ void JoinLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"JoinLinks are private and cannot be instantiated.");
 
-	setup_variable_replacements();
+	setup_variables();
+	setup_replacements();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -51,7 +52,7 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-void JoinLink::setup_variable_replacements(void)
+void JoinLink::setup_variables(void)
 {
 	for (const Handle& var : _variables.varseq)
 	{
@@ -71,6 +72,23 @@ void JoinLink::setup_variable_replacements(void)
 
 		Handle starter = deet->getOutgoingAtom(0);
 		_replacements.insert({starter, var});
+	}
+}
+
+/* ================================================================= */
+
+void JoinLink::setup_replacements(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& h(_outgoing[i]);
+		if (h->get_type() != REPLACEMENT_LINK) continue;
+		if (h->get_arity() != 2)
+			throw SyntaxException(TRACE_INFO,
+				"ReplacementLink expecting two arguments, got %s",
+				h->to_short_string().c_str());
+
+		_replacements.insert({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
 	}
 }
 
