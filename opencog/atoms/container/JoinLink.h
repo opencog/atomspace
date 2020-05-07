@@ -35,6 +35,8 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
+	void find_top(HandleSet&, const Handle&) const;
+
 	HandleSet min_container(void);
 	HandleSet max_container(void);
 

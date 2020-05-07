@@ -81,13 +81,32 @@ HandleSet JoinLink::min_container(void)
 
 /* ================================================================= */
 
+/// find_top() - walk upwards from h and insert topmost atoms into set.
+/// This recursively walks to the top, till there is no more.
+void JoinLink::find_top(HandleSet& containers, const Handle& h) const
+{
+	IncomingSet is(h->getIncomingSet());
+	if (0 == is.size())
+	{
+		containers.insert(h);
+		return;
+	}
+
+	for (const Handle& ih: is)
+	{
+		find_top(containers, ih);
+	}
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::max_container(void)
 {
 	HandleSet hs = min_container();
 	HandleSet containers;
 	for (const Handle& h: hs)
 	{
-		containers.insert(h);
+		find_top(containers, h);
 	}
 	return containers;
 }
