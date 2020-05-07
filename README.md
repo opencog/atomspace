@@ -56,7 +56,14 @@ Things that no one else does:
   [JoinLink](https://wiki.opencog.org/w/JoinLink).)
 * **Graphs are executable.** Graph vertex types include "plus", "times",
   "greater than" and many other programming constructs. The resulting
-  graphs are called [Atomese](https://wiki.opencog.org/w/Atomese).
+  graphs encode
+  ["abstract syntax trees"](https://en.wikipedia.org/wiki/Abstract_syntax_tree)
+  and the resulting language is called
+  [Atomese](https://wiki.opencog.org/w/Atomese).
+  It resembles the
+  [intermediate representation](https://en.wikipedia.org/wiki/Intermediate_representation)
+  commonly found in compilers, except that, here, its explicitly exposed
+  to the user as a storable, queriable, manipulable, executable graph.
 * **Graphs are typed**
   ([TypeNode](https://wiki.opencog.org/w/TypeNode) and
   [type constructors](https://wiki.opencog.org/w/Type_constructor).)
