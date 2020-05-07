@@ -21,8 +21,10 @@ TARGET_LINK_LIBRARIES(atomspace
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
+	container
 	lambda
 	execution
+	atomflow
 	atomcore
 	atombase
 	truthvalue

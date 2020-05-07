@@ -39,6 +39,9 @@ void JoinLink::init(void)
 	if (JOIN_LINK == t)
 		throw InvalidParamException(TRACE_INFO,
 			"JoinLinks are private and cannot be instantiated.");
+
+	setup_variables();
+	setup_replacements();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -49,15 +52,10 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(bool silent)
+void JoinLink::setup_variables(void)
 {
-	Handle starter;
-
-	// If there's only one variable, things should be easy...
-	if (_variables.varseq.size() == 1)
+	for (const Handle& var : _variables.varseq)
 	{
-		Handle var(_variables.varseq[0]);
-
 		if (_variables._simple_typemap.size() != 0)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
@@ -66,19 +64,59 @@ HandleSet JoinLink::min_container(bool silent)
 		if (dtset.size() != 1)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
-		Handle dt = *dtset.begin();
-		Type dtype = dt->get_type();
+		Handle deet = *dtset.begin();
+		Type dtype = deet->get_type();
 
 		if (SIGNATURE_LINK != dtype)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
-		starter = dt->getOutgoingAtom(0);
-
+		Handle starter = deet->getOutgoingAtom(0);
 		_replacements.insert({starter, var});
 	}
+}
 
-	if (_variables.varseq.size() != 1)
+/* ================================================================= */
+
+/// Scan for ReplacementLinks in the body of the JoinLink.
+/// Each of these should have a corresponding variable declaration.
+/// Update the replacement map so that the "from" part of the variable
+/// (obtained from the signature) gets replaced by the ... replacement.
+void JoinLink::setup_replacements(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& h(_outgoing[i]);
+		if (h->get_type() != REPLACEMENT_LINK) continue;
+		if (h->get_arity() != 2)
+			throw SyntaxException(TRACE_INFO,
+				"ReplacementLink expecting two arguments, got %s",
+				h->to_short_string().c_str());
+
+		const Handle& from(h->getOutgoingAtom(0));
+		bool found = false;
+		for (const auto& pr : _replacements)
+		{
+			if (pr.second != from) continue;
+			_replacements[pr.first] = h->getOutgoingAtom(1);
+			found = true;
+			break;
+		}
+
+		if (not found)
+			throw SyntaxException(TRACE_INFO,
+				"No matching variable declaration for: %s",
+				h->to_short_string().c_str());
+	}
+}
+
+/* ================================================================= */
+
+HandleSet JoinLink::min_container(bool silent)
+{
+	if (_replacements.size() != 1)
 		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+	Handle starter = _replacements.begin()->first;
 
 	HandleSet containers;
 	containers.insert(starter);
@@ -130,25 +168,12 @@ HandleSet JoinLink::max_container(bool silent)
 /// while honoring all scoping and quoting.
 HandleSet JoinLink::replace(const HandleSet& containers, bool silent) const
 {
-	// FreeVariables::substitute_scoped() uses a weird API.
-	// Create the two things that API wants.
-	HandleSeq to_insert;
-	FreeVariables::IndexMap insert_index;
-	size_t idx = 0;
-	for (const auto& pr : _replacements)
-	{
-		to_insert.push_back(pr.second);
-		insert_index.insert({pr.first, idx});
-		idx++;
-	}
-
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::substitute_scoped(top,
-		                        to_insert, silent, insert_index);
+		Handle rep = FreeVariables::replace_nocheck(top, _replacements);
 		replaced.insert(rep);
 	}
 
@@ -162,11 +187,7 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-/*
-printf("duude vardecls=%s\n", _vardecl->to_string().c_str());
-printf("duude body=%s\n", _body->to_string().c_str());
 printf("duude vars=%s\n", oc_to_string(_variables).c_str());
-*/
 
 	HandleSet hs;
 	if (MAXIMAL_JOIN_LINK == get_type())

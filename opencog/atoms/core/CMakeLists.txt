@@ -11,6 +11,7 @@ ADD_LIBRARY (atomcore
 	DeleteLink.cc
 	FindUtils.cc
 	FreeLink.cc
+	FreeVariables.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
 	LambdaLink.cc
@@ -21,6 +22,7 @@ ADD_LIBRARY (atomcore
 	Quotation.cc
 	RandomChoice.cc
 	RandomNumber.cc
+	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	SleepLink.cc
@@ -56,6 +58,7 @@ INSTALL (FILES
 	DeleteLink.h
 	FindUtils.h
 	FreeLink.h
+	FreeVariables.h
 	FunctionLink.h
 	LambdaLink.h
 	NumberNode.h
@@ -65,6 +68,7 @@ INSTALL (FILES
 	Quotation.h
 	RandomChoice.h
 	RandomNumber.h
+	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
 	SleepLink.h

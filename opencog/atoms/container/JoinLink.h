@@ -35,6 +35,8 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
+	void setup_variables(void);
+	void setup_replacements(void);
 	HandleMap _replacements;
 	HandleSet replace(const HandleSet&, bool) const;
 
@@ -52,7 +54,7 @@ public:
 	JoinLink operator=(const JoinLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace*, bool silent=false);
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
