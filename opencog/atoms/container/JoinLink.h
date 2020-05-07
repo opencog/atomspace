@@ -35,10 +35,13 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
+	HandleSeq _replacements;
+	FreeVariables::IndexMap _replace_map;
+
 	void find_top(HandleSet&, const Handle&) const;
 
-	HandleSet min_container(void);
-	HandleSet max_container(void);
+	HandleSet min_container(bool);
+	HandleSet max_container(bool);
 
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 

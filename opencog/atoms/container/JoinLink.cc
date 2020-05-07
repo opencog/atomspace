@@ -44,7 +44,7 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(void)
+HandleSet JoinLink::min_container(bool silent)
 {
 	Handle starter;
 
@@ -68,6 +68,9 @@ HandleSet JoinLink::min_container(void)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
 		starter = dt->getOutgoingAtom(0);
+
+		_replacements.push_back(var);
+		_replace_map.insert({starter, 0});
 	}
 
 	if (_variables.varseq.size() != 1)
@@ -104,15 +107,24 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(void)
+HandleSet JoinLink::max_container(bool silent)
 {
-	HandleSet hs = min_container();
+	HandleSet hs = min_container(silent);
 	HandleSet containers;
 	for (const Handle& h: hs)
 	{
 		find_top(containers, h);
 	}
-	return containers;
+
+	HandleSet replaced;
+	for (const Handle& top: containers)
+	{
+		Handle rep = FreeVariables::substitute_scoped(top,
+		                        _replacements, silent, _replace_map);
+		replaced.insert(rep);
+	}
+
+	return replaced;
 }
 
 /* ================================================================= */
@@ -126,7 +138,7 @@ printf("duude vardecls=%s\n", _vardecl->to_string().c_str());
 printf("duude body=%s\n", _body->to_string().c_str());
 printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
-	HandleSet hs = max_container();
+	HandleSet hs = max_container(silent);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.

@@ -173,11 +173,10 @@ struct FreeVariables
 	/// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
 
-protected:
 	static Handle substitute_scoped(Handle, const HandleSeq&, bool,
 	                                const IndexMap&,
 	                                Quotation quotation=Quotation());
-
+protected:
 	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
 	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
 	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
