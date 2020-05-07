@@ -69,8 +69,7 @@ HandleSet JoinLink::min_container(bool silent)
 
 		starter = dt->getOutgoingAtom(0);
 
-		_replacements.push_back(var);
-		_replace_map.insert({starter, 0});
+		_replacements.insert({starter, var});
 	}
 
 	if (_variables.varseq.size() != 1)
@@ -116,11 +115,25 @@ HandleSet JoinLink::max_container(bool silent)
 		find_top(containers, h);
 	}
 
+	// FreeVariables::substitute_scoped() uses a weird API.
+	// Create the two things that API wants.
+	HandleSeq to_insert;
+	FreeVariables::IndexMap insert_index;
+	size_t idx = 0;
+	for (const auto& pr : _replacements)
+	{
+		to_insert.push_back(pr.second);
+		insert_index.insert({pr.first, idx});
+		idx++;
+	}
+
+	// Use the FreeVariables utility, so that all scoping and
+	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
 		Handle rep = FreeVariables::substitute_scoped(top,
-		                        _replacements, silent, _replace_map);
+		                        to_insert, silent, insert_index);
 		replaced.insert(rep);
 	}
 

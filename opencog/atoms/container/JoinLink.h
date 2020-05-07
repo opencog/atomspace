@@ -35,8 +35,7 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
-	HandleSeq _replacements;
-	FreeVariables::IndexMap _replace_map;
+	HandleMap _replacements;
 
 	void find_top(HandleSet&, const Handle&) const;
 
