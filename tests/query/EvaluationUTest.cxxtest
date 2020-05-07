@@ -290,7 +290,10 @@ void EvaluationUTest::test_lambda(void)
 
 	TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
 	printf ("Red light TV: %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
 
+	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
+	printf ("Red light (meet): %s\n", tvp->to_string().c_str());
 	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
 
 	eval->eval_h(
@@ -298,7 +301,10 @@ void EvaluationUTest::test_lambda(void)
 
 	tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
 	printf ("Green light TV: %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
 
+	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
+	printf ("Green light (meet): %s\n", tvp->to_string().c_str());
 	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
 
 	logger().debug("END TEST: %s", __FUNCTION__);

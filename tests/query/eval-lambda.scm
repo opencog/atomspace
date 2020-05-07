@@ -14,3 +14,12 @@
 				(Set (Variable "a"))
 				(Get (Variable "x") (State (Variable "b") (Variable "x")))))
 		(List (Concept "red light") (Concept "stop light"))))
+
+(define meet-is-red-light
+	(Evaluation 
+		(Lambda
+			(VariableList (Variable "a") (Variable "b"))
+			(Equal
+				(Variable "a")
+				(Meet (Variable "x") (State (Variable "b") (Variable "x")))))
+		(List (Concept "red light") (Concept "stop light"))))
