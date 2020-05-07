@@ -57,6 +57,18 @@ struct VarScraper
 	 * that when the type is a subtype of unordered link, the index is
 	 * zero, because it is semantically meaningless.
 	 */
+	// The _paths holds paths between variables and root. A path is a
+	// sequence of pairs (Type, Index), where Type is the type of a link
+	// and index is the index of the outgoing of that link. If the type
+	// unordered however, then index is zero, because in such case the
+	// index has no meaning. The collection of paths is stored in a
+	// multiset because some paths can be identical looking while in
+	// fact different in reality, due to the index of a unordered link
+	// being always zero. We do that to be able to use std::operator<
+	// rather than provide our own.
+	//
+	// Note: a notion of path is already implemented in PatternTerm,
+	// It might be a good idea to unify this mechanism with that one.
 	HandlePathsMap _paths;
 
 	/**

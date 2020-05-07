@@ -39,23 +39,6 @@ namespace opencog
  *  @{
  */
 
-// Struct to build paths between variables and root. A path is a
-// sequence of pairs (Type, Index), where Type is the type of a link
-// and index is the index of the outgoing of that link. If the type
-// unordered however, then index is zero, because in such case the
-// index has no meaning. The collection of paths is stored in a
-// multiset because some paths can be identically looking while in
-// fact different in reality, due to the index of a unordered link
-// being always zero. We do that to be able to use std::operator<
-// rather than provide our own.
-//
-// Note: a notion of path is already implemented in PatternTerm,
-// It might be a good idea to unity this mechanism with that one.
-typedef std::pair<Type, Arity> TypeArityPair;
-typedef std::vector<TypeArityPair> Path;
-typedef std::multiset<Path> PathMultiset;
-typedef std::map<Handle, PathMultiset> HandlePathsMap;
-
 /// The FreeVariables struct defines a list of free, untyped variables
 /// "unbundled" from the hypergraph in which they normally occur. The
 /// goal of this structure is to make it easier and faster to work with
@@ -345,6 +328,10 @@ protected:
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
 struct VarScraper;
+typedef std::pair<Type, Arity> TypeArityPair;
+typedef std::vector<TypeArityPair> Path;
+typedef std::multiset<Path> PathMultiset;
+typedef std::map<Handle, PathMultiset> HandlePathsMap;
 std::string oc_to_string(const TypeArityPair& tap,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const Path& path,
