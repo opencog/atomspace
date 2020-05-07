@@ -280,6 +280,10 @@ LOCAL_QUOTE_LINK <- ORDERED_LINK
 // instead of blocking beta-reduction, it blocks execution.
 DONT_EXEC_LINK <- ORDERED_LINK
 
+// Substitution - replace first arg by second arg. Used in JoinLink.
+// Could be used in PatternLink too.
+REPLACEMENT_LINK <- ORDERED_LINK
+
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
 // free variables in the link. The primary user is the pattern matcher.
