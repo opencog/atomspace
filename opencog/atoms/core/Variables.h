@@ -173,13 +173,13 @@ struct FreeVariables
 	/// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
 
+	static Handle substitute_scoped(Handle, const HandleSeq&, bool,
+	                                const IndexMap&,
+	                                Quotation quotation=Quotation());
 protected:
-	Handle substitute_scoped(Handle, const HandleSeq&, bool, const IndexMap&,
-	                         Quotation quotation=Quotation()) const;
-
-	bool must_alpha_convert(const Handle& scope, const HandleSeq& args) const;
-	bool must_alpha_hide(const Handle& scope, const IndexMap& index_map) const;
-	IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map) const;
+	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
+	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
+	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
 };
 
 typedef std::map<Handle, TypeSet> VariableTypeMap;
@@ -317,7 +317,7 @@ struct Variables : public FreeVariables,
 
 	/// Inverse of Variables(vardecl).get_variable()
 	///
-	/// That is, convert Variables object into avariable declaration,
+	/// That is, convert Variables object into a variable declaration,
 	/// that is a VariableList, VariableSet, TypedVariableLink,
 	/// VariableNode or GlobNode, suitable for direct use in a
 	/// ScopeLink.

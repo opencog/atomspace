@@ -378,6 +378,13 @@ LAMBDA_LINK <- PRENEX_LINK
 // beta-redexes.
 PUT_LINK <- PRENEX_LINK
 
+// The JoinLink searches for containing links that satsify the specified
+// predicates. This is the AtomSpace version of "join and meet" in a
+// partially ordered set. See wikipedia "meet and join".
+JOIN_LINK <- PRENEX_LINK
+MINIMAL_JOIN_LINK <- JOIN_LINK
+MAXIMAL_JOIN_LINK <- JOIN_LINK
+
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to

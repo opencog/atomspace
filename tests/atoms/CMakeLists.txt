@@ -5,6 +5,8 @@ ADD_SUBDIRECTORY (base)
 
 ADD_SUBDIRECTORY (core)
 
+ADD_SUBDIRECTORY (container)
+
 ADD_SUBDIRECTORY (evaluation)
 
 ADD_SUBDIRECTORY (execution)

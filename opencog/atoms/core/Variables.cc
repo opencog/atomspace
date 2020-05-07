@@ -509,7 +509,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
                                         const HandleSeq& args,
                                         bool silent,
                                         const IndexMap& index_map,
-                                        Quotation quotation) const
+                                        Quotation quotation)
 {
 	bool unquoted = quotation.is_unquoted();
 
@@ -597,7 +597,7 @@ Handle FreeVariables::substitute_scoped(Handle term,
 }
 
 bool FreeVariables::must_alpha_convert(const Handle& scope,
-                                       const HandleSeq& args) const
+                                       const HandleSeq& args)
 {
 	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
 	for (const Handle& value : args)
@@ -609,7 +609,7 @@ bool FreeVariables::must_alpha_convert(const Handle& scope,
 // Evaluate whether any variable must be hidden/removed from the
 // index_map.
 bool FreeVariables::must_alpha_hide(const Handle& scope,
-                                    const IndexMap& index_map) const
+                                    const IndexMap& index_map)
 {
 	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
 	for (const Handle& v : vars)
@@ -621,7 +621,7 @@ bool FreeVariables::must_alpha_hide(const Handle& scope,
 /// Remove the variables from the given index map that are present in
 /// the given the variables of a scope, as well as non variables
 FreeVariables::IndexMap FreeVariables::alpha_hide(const Handle& scope,
-                                                  const IndexMap& index_map) const
+                                                  const IndexMap& index_map)
 {
 	// Make a copy... this is what's computationally expensive.
 	IndexMap hidden_map = index_map;
@@ -925,6 +925,12 @@ void Variables::get_vartype(const Handle& htypelink)
 	}
 	else
 	{
+		// Instead of throwing here, we could also assume that
+		// there is an implied SignatureLink, and just poke the
+		// contents into the _deep_typemap. On the other hand,
+		// it seems better to throw, so that beginers aren't
+		// thrown off the trail for what essentially becomes
+		// a silent error with unexpected effects...
 		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
 			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
@@ -1627,7 +1633,11 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// Glob interval map
 	ss << indent << "_glob_intervalmap:" << std::endl
-	   << oc_to_string(_glob_intervalmap, indent_p);
+	   << oc_to_string(_glob_intervalmap, indent_p) << std::endl;
+
+	// Deep typemap
+	ss << indent << "_deep_typemap:" << std::endl
+	   << oc_to_string(_deep_typemap, indent_p);
 
 	return ss.str();
 }
