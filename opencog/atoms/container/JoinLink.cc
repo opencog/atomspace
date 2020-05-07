@@ -20,6 +20,8 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "JoinLink.h"
 
@@ -34,6 +36,9 @@ void JoinLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a JoinLink, got %s", tname.c_str());
 	}
+	if (JOIN_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"JoinLinks are private and cannot be instantiated.");
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -115,6 +120,16 @@ HandleSet JoinLink::max_container(bool silent)
 		find_top(containers, h);
 	}
 
+	return containers;
+}
+
+/* ================================================================= */
+
+/// Given a top-level set of containing links, perform
+/// replacements, substituting the bottom-most atoms as requested,
+/// while honoring all scoping and quoting.
+HandleSet JoinLink::replace(const HandleSet& containers, bool silent) const
+{
 	// FreeVariables::substitute_scoped() uses a weird API.
 	// Create the two things that API wants.
 	HandleSeq to_insert;
@@ -144,20 +159,28 @@ HandleSet JoinLink::max_container(bool silent)
 
 QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 {
-	// if (nullptr == as) as = _atom_space;
+	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
+/*
 printf("duude vardecls=%s\n", _vardecl->to_string().c_str());
 printf("duude body=%s\n", _body->to_string().c_str());
 printf("duude vars=%s\n", oc_to_string(_variables).c_str());
+*/
 
-	HandleSet hs = max_container(silent);
+	HandleSet hs;
+	if (MAXIMAL_JOIN_LINK == get_type())
+		hs = max_container(silent);
+	else
+		hs = min_container(silent);
+
+	hs = replace(hs, silent);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.
 	for (const Handle& h : hs)
 	{
-		qvp->push(h);
+		qvp->push(as->add_atom(h));
 	}
 
 	qvp->close();

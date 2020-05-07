@@ -36,6 +36,7 @@ protected:
 	void init(void);
 
 	HandleMap _replacements;
+	HandleSet replace(const HandleSet&, bool) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 

@@ -7,7 +7,12 @@
 (Member (Concept "A") (Concept "S"))
 (Evaluation (Predicate "P") (List (Concept "A")))
 
-(define join
-	(Join
+(define max-join
+	(MaximalJoin
+		(TypedVariable (Variable "X") (Signature (Concept "A")))
+		(PresentLink (Variable "X"))))
+
+(define min-join
+	(MinimalJoin
 		(TypedVariable (Variable "X") (Signature (Concept "A")))
 		(PresentLink (Variable "X"))))

@@ -20,8 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -29,59 +30,87 @@ using namespace opencog;
 class JoinLinkUTest: public CxxTest::TestSuite
 {
 private:
-    AtomSpace *as;
-    SchemeEval* eval;
+	AtomSpace* _as;
+	SchemeEval* eval;
 
 public:
-    JoinLinkUTest(void)
-    {
-        logger().set_level(Logger::INFO);
-        logger().set_print_to_stdout_flag(true);
-        logger().set_timestamp_flag(false);
-        logger().set_sync_flag(true);
+	JoinLinkUTest(void)
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_as = new AtomSpace();
+		eval = new SchemeEval(_as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
 
-    }
+	~JoinLinkUTest()
+	{
+		delete eval;
+		delete _as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
 
-    ~JoinLinkUTest()
-    {
-        delete eval;
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().get_filename().c_str());
-    }
+	void setUp(void);
+	void tearDown(void);
 
-    void setUp(void);
-    void tearDown(void);
-
-    void test_basic(void);
+	void test_basic(void);
 };
 
 void JoinLinkUTest::tearDown(void)
 {
-    as->clear();
+	_as->clear();
 }
 
 void JoinLinkUTest::setUp(void)
 {
-    as->clear();
+	_as->clear();
 }
+
+#define N _as->add_node
+#define L _as->add_link
 
 /*
  * basic stuff
  */
 void JoinLinkUTest::test_basic(void)
 {
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
 
-    ValuePtr vp = eval->eval_v("(cog-execute! join)");
-    printf("basic-join = %s\n", vp->to_string().c_str());
+	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
+	printf("min-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+	TS_ASSERT_EQUALS(results[0], N(VARIABLE_NODE, "X"));
 
-    logger().info("END TEST: %s", __FUNCTION__);
+	vp = eval->eval_v("(cog-execute! max-join)");
+	printf("max-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle X = N(VARIABLE_NODE, "X");
+	Handle E = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "P"), L(LIST_LINK, X));
+	Handle M = L(MEMBER_LINK, X, N(CONCEPT_NODE, "S"));
+
+	if (results[0] == E)
+	{
+		TS_ASSERT_EQUALS(results[0], E);
+		TS_ASSERT_EQUALS(results[1], M);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[0], M);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+
+	logger().info("END TEST: %s", __FUNCTION__);
 }
