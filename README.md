@@ -18,18 +18,18 @@ operation in a day-to-day production environment.
 
 Data as Graphs
 ==============
-It is now commplace to represent data as graphs; there are more graph
+It is now commonplace to represent data as graphs; there are more graph
 databases than you can shake a stick at. What makes the AtomSpace
 different? A dozen features that no other graph DB does, or has even
 dreamed of doing.
 
 But, first: five things everyone else does:
 * Perform [graphical database queries](https://wiki.opencog.org/w/Pattern_engine),
-  returning results that satsify a provided search pattern.
+  returning results that satisfy a provided search pattern.
 * Arbitrarily complex patterns with an arbitrary number of variable
-  regions can be specied, by unifying multiple clauses.
+  regions can be specified, by unifying multiple clauses.
 * Modify searches with conditionals, such as "greater than", and with
-  user callbacks into scheme, python or haskell.
+  user callbacks into scheme, python or Haskell.
 * Perform graph rewriting: use search results to create new graphs.
 * Trigger execution of user callbacks... or of executable graphs (as
   explained below).
@@ -45,7 +45,7 @@ Things that no one else does:
   Normally, a search is like "asking a question" and "getting an
   answer". For the inverted search, one "has an answer" and is looking
   for all "questions" for which its a solution. This is pattern
-  recongnition, as opposed to pattern search. All chatbots do this as
+  recognition, as opposed to pattern search. All chatbots do this as
   a matter of course, to handle chat dialog. No chatbot can host
   arbitrary graph data, or search it. The AtomSpace can. This is because
   queries are also graphs, and not just data.
@@ -78,12 +78,12 @@ Things that no one else does:
   they are not in any fixed order.) When searching for a matching
   pattern, one must consider **all** permutations of the set. This is
   easy, if the search has only one unordered set. This is hard, if
-  they are nested and intr-linked: it becomes a constraint-satisfaction
+  they are nested and inter-linked: it becomes a constraint-satisfaction
   problem.  The AtomSpace pattern engine handles all of these cases
   correctly.
 * **Alternative sub-patterns.** A search query can include a menu of
   sub-patterns to be matched. Such sets of alternatives
-  ([ChoiceLink](https://wiki.opencog.org/w/ChiceLink)) can be nested
+  ([ChoiceLink](https://wiki.opencog.org/w/ChoiceLink)) can be nested
   and composed arbitrarily. (i.e. they can contain variables, etc.)
 * **Globby matching**
   ([GlobNode](https://wiki.opencog.org/w/GlobNode)).
