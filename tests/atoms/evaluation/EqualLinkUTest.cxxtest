@@ -45,6 +45,7 @@ public:
 
 	void test_equality();
 	void test_alpha();
+	void test_nway();
 };
 
 #define N _as.add_node
@@ -144,6 +145,36 @@ void EqualLinkUTest::test_alpha()
 
 	tv = EvaluationLink::do_evaluate(&_as, alpha_xy);
 	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test 3-way, 4-way tests
+void EqualLinkUTest::test_nway()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle thing_a = N(CONCEPT_NODE, "thing A");
+	Handle thing_b = N(CONCEPT_NODE, "thing B");
+
+	Handle equal_aaa = L(EQUAL_LINK, thing_a, thing_a, thing_a);
+	Handle equal_aba = L(EQUAL_LINK, thing_a, thing_b, thing_a);
+
+	Handle equal_aaaa = L(EQUAL_LINK, thing_a, thing_a, thing_a, thing_a);
+	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_aaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_aaaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_aba);
+	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_abaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
