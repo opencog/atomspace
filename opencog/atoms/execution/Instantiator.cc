@@ -482,6 +482,16 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return HandleCast(expr->execute(_as, silent));
 	}
 
+	// If there is a JoinLink
+	// we have to perform it and return the satisfying set.
+	if (nameserver().isA(t, JOIN_LINK))
+	{
+		// XXX I don't get it... don't we need to perform var
+		// substitution here? Is this just not tested?
+		// beta_reduce(expr, *_vmap);
+		return HandleCast(expr->execute(_as, silent));
+	}
+
 	// Do not reduce PredicateFormulaLink. That is because it contains
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.
@@ -598,7 +608,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	// If there is a SatisfyingLink, we have to perform it
 	// and return the satisfying set.
-	if (nameserver().isA(t, SATISFYING_LINK))
+	if (nameserver().isA(t, SATISFYING_LINK) or
+	    nameserver().isA(t, JOIN_LINK))
 	{
 		if (0 == vars.size())
 			return expr->execute(_as, silent);
