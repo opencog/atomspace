@@ -39,6 +39,8 @@ void JoinLink::init(void)
 	if (JOIN_LINK == t)
 		throw InvalidParamException(TRACE_INFO,
 			"JoinLinks are private and cannot be instantiated.");
+
+	setup_variable_replacements();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -49,15 +51,10 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(bool silent)
+void JoinLink::setup_variable_replacements(void)
 {
-	Handle starter;
-
-	// If there's only one variable, things should be easy...
-	if (_variables.varseq.size() == 1)
+	for (const Handle& var : _variables.varseq)
 	{
-		Handle var(_variables.varseq[0]);
-
 		if (_variables._simple_typemap.size() != 0)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
@@ -66,19 +63,25 @@ HandleSet JoinLink::min_container(bool silent)
 		if (dtset.size() != 1)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
-		Handle dt = *dtset.begin();
-		Type dtype = dt->get_type();
+		Handle deet = *dtset.begin();
+		Type dtype = deet->get_type();
 
 		if (SIGNATURE_LINK != dtype)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
-		starter = dt->getOutgoingAtom(0);
-
+		Handle starter = deet->getOutgoingAtom(0);
 		_replacements.insert({starter, var});
 	}
+}
 
-	if (_variables.varseq.size() != 1)
+/* ================================================================= */
+
+HandleSet JoinLink::min_container(bool silent)
+{
+	if (_replacements.size() != 1)
 		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+	Handle starter = _replacements.begin()->first;
 
 	HandleSet containers;
 	containers.insert(starter);
@@ -162,11 +165,7 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-/*
-printf("duude vardecls=%s\n", _vardecl->to_string().c_str());
-printf("duude body=%s\n", _body->to_string().c_str());
 printf("duude vars=%s\n", oc_to_string(_variables).c_str());
-*/
 
 	HandleSet hs;
 	if (MAXIMAL_JOIN_LINK == get_type())
