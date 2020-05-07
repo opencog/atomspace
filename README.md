@@ -83,36 +83,8 @@ Things no one else does:
   but also testing the balls in each.  This is a kind-of "for all"
   search predicate ([AlwaysLink](https://wiki.opencog.org/w/AlwaysLink)).
 
-Data is represented in the form of graphs; more precisely, as typed,
-directed hypergraphs.  The vertices and edges of a graph, known as
-"Atoms", are used to represent not only "data", but also "procedures";
-thus, many graphs are executable programs as well as data structures.
-Associated with each Atom (each vertex or edge of the graph) is a
-key-value database, meant for hold transient, (rapidly) time-varying
-"Values", ideal for holding audio or video streams, or even GPU
-processing streams, such as deep-learning, dataflow networks.
-
-The query language allows arbitrarily-complex queries to be specified,
-joining together arbitrary subgraphs with arbitrary relations between
-variables. Unlike any other graph database, the queries are themselves
-represented as graphs, and so can be stored in the AtomSpace. This
-enables numerous new possibilities. Just like ordinary databases, a
-a single query can find all matching graphs. Unlike others, this
-can be run in reverse: a single graph can be used to find all
-queries that would have matched it. Reverse queries are extremely
-common in chatbot systems, where one must fish out a limited set of
-rules from out of a big sea of possibilities. We believe that (as of
-this writing) that there is no other general-purpose database system
-out there that supports reverse queries.
-
-But this is just the tip of the iceberg. There's much more.  There are
-many features in the AtomSpace that are not found in ordinary graph
-databases or other systems.  Thus, the AtomSpace can be thought of as
-a processing layer on top of existing distributed processing systems,
-providing a number of advanced features and capabilities.
-
-As it turns out that knowledge representation is hard, so it also turns
-out that the AtomSpace is a platform for active scientific research
+As it turns out, knowledge representation is hard, and so the AtomSpace
+has been (and continues to be) a platform for active scientific research
 on knowledge representation, knowledge discovery and knowledge
 manipulation.  If you are comfortable with extremely complex
 mathematical theory, and just also happen to be extremely comfortable
@@ -121,10 +93,11 @@ writing code, you are invited -- encouraged -- to join the project.
 
 Using Atomese and the AtomSpace
 ===============================
-The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
-platform. It is probably easiest to think of it as kind-of-like an operating
-system kernel: you don't need to know how it works to use it.  You probably
-don't need to tinker with it. It just works, and it's there when you need it.
+The AtomSpace is not an "app". Rather, it is a knowledge-base platform.
+It is probably easiest to think of it as kind-of-like an operating
+system kernel: you don't need to know how it works to use it. You
+probably don't need to tinker with it. It just works, and it's there
+when you need it.
 
 End-users and application developers will want to use one of the existing
 "app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
