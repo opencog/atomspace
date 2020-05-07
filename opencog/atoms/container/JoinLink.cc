@@ -77,6 +77,10 @@ void JoinLink::setup_variables(void)
 
 /* ================================================================= */
 
+/// Scan for ReplacementLinks in the body of the JoinLink.
+/// Each of these should have a corresponding variable declaration.
+/// Update the replacement map so that the "from" part of the variable
+/// (obtained from the signature) gets replaced by the ... replacement.
 void JoinLink::setup_replacements(void)
 {
 	for (size_t i=1; i<_outgoing.size(); i++)
@@ -88,7 +92,20 @@ void JoinLink::setup_replacements(void)
 				"ReplacementLink expecting two arguments, got %s",
 				h->to_short_string().c_str());
 
-		_replacements.insert({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
+		const Handle& from(h->getOutgoingAtom(0));
+		bool found = false;
+		for (const auto& pr : _replacements)
+		{
+			if (pr.second != from) continue;
+			_replacements[pr.first] = h->getOutgoingAtom(1);
+			found = true;
+			break;
+		}
+
+		if (not found)
+			throw SyntaxException(TRACE_INFO,
+				"No matching variable declaration for: %s",
+				h->to_short_string().c_str());
 	}
 }
 
