@@ -4,32 +4,36 @@
 
 (use-modules (opencog) (opencog exec))
 
-(Evaluation (Predicate "is blue") (List (Concept "sky")))
-
-(Context 
+(Context
    (Concept "moon")
-   (Similarity 
+   (Similarity
        (Evaluation (Predicate "is blue") (List (Concept "sky")))
        (Concept "unlikely")))
 
-(define max-blue
+(Context
+   (Concept "moon")
+   (Similarity
+       (Evaluation (Predicate "is blue") (List (Concept "sea")))
+       (Concept "unlikely")))
+
+(define max-blue-sky
 	(MaximalJoin
 		(TypedVariable (Variable "X")
-			(Signature 
+			(Signature
 				(Evaluation (Predicate "is blue") (List (Concept "sky")))))
 		(Present (Variable "X"))))
 
-(define min-blue
+(define min-blue-sky
 	(MinimalJoin
 		(TypedVariable (Variable "X")
-			(Signature 
+			(Signature
 				(Evaluation (Predicate "is blue") (List (Concept "sky")))))
 		(Present (Variable "X"))))
 
 (define max-replace
 	(MaximalJoin
 		(TypedVariable (Variable "X")
-			(Signature 
+			(Signature
 				(Evaluation (Predicate "is blue") (List (Concept "sky")))))
 		(Present (Variable "X"))
 		(Replacement (Variable "X") (Concept "green cheese"))))
@@ -37,7 +41,22 @@
 (define min-replace
 	(MinimalJoin
 		(TypedVariable (Variable "X")
-			(Signature 
+			(Signature
 				(Evaluation (Predicate "is blue") (List (Concept "sky")))))
 		(Present (Variable "X"))
 		(Replacement (Variable "X") (Concept "green cheese"))))
+
+(define max-blue-out
+	(MaximalJoin
+		(TypedVariable (Variable "X")
+			(Signature
+				(Evaluation (Predicate "is blue") (List (Type 'ConceptNode)))))
+		(Present (Variable "X"))))
+
+(define min-blue-out
+	(MinimalJoin
+		(TypedVariable (Variable "X")
+			(Signature
+				(Evaluation (Predicate "is blue") (List (Type 'ConceptNode)))))
+		(Present (Variable "X"))))
+
