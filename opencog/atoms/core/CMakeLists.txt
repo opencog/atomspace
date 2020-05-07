@@ -11,6 +11,7 @@ ADD_LIBRARY (atomcore
 	DeleteLink.cc
 	FindUtils.cc
 	FreeLink.cc
+	FreeVariables.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
 	LambdaLink.cc
@@ -57,6 +58,7 @@ INSTALL (FILES
 	DeleteLink.h
 	FindUtils.h
 	FreeLink.h
+	FreeVariables.h
 	FunctionLink.h
 	LambdaLink.h
 	NumberNode.h
