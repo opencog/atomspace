@@ -81,7 +81,11 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (_context.is_unquoted() and GLOB_NODE == h->get_type() and hg != h)
+		Type ht = h->get_type();
+		if (changed and
+		    ((_context.is_unquoted() and GLOB_NODE == ht) or
+		    ((UNQUOTE_LINK == ht and
+		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
 		{
 			for (const Handle& gloe: hg->getOutgoingSet())
 			{
@@ -271,7 +275,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (VARIABLE_NODE == t and not context_cp.is_free_variable(expr))
 			return expr;
 
-		// If we are here, we found a free variable (or glob?). Look
+		// If we are here, we found a free variable or glob. Look
 		// it up. Return a grounding if it has one, otherwise return
 		// the variable itself.
 		GroundingMap::const_iterator it = _vmap->find(expr);
