@@ -718,7 +718,6 @@ bool InitiateSearchCB::setup_variable_search(void)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-
 		if (not _variables->_deep_typemap.empty())
 		{
 			logger().warn("Full deep-type support not implemented!");
@@ -744,7 +743,7 @@ bool InitiateSearchCB::setup_variable_search(void)
 			if (prev != _pattern) { prev = _pattern; count = 0; }
 			else {
 				count++;
-				if (300 < count)
+				if (5 < count)
 					throw RuntimeException(TRACE_INFO,
 						"Infinite Loop detected! Recursed %u times!", count);
 			}

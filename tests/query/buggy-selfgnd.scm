@@ -1,5 +1,5 @@
 ;
-; In this case, the instatiator tried to instantiate and add a new
+; In this case, the instantiator tried to instantiate and add a new
 ; BindLink atom to Atomspace, throwing exception. More details here:
 ; https://github.com/opencog/atomspace/issues/210
 
