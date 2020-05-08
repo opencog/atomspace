@@ -426,11 +426,20 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 {
 	eval.eval("(load-from-path \"blair-witch.scm\")");
 
-	Handle query = eval.eval_h("query"),
-		result = bindlink(&as, query),
-		expected = al(SET_LINK, A);
+	Handle query = eval.eval_h("find-something");
+	Handle result = bindlink(&as, query);
+	Handle expected = al(SET_LINK, A);
 
-	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "y result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	query = eval.eval_h("find-nothing"),
+	result = bindlink(&as, query),
+	expected = al(SET_LINK);
+
+	logger().debug() << "n result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
