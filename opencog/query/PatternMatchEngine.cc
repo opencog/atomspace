@@ -2000,7 +2000,7 @@ bool PatternMatchEngine::do_next_clause(void)
  * The "issued" set contains those clauses which are currently in play,
  * i.e. those for which a grounding is currently being explored. Both
  * grounded, and as-yet-ungrounded clauses may be in this set.  The
- * sole reason of this set is to avoid infinite resursion, i.e. of
+ * sole reason of this set is to avoid infinite recursion, i.e. of
  * re-identifying the same clause over and over as unsolved.
  *
  * The words "solved" and "grounded" are used as synonyms through out
