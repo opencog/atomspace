@@ -163,11 +163,18 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
 	meet = temp.add_atom(meet);
 	ValuePtr vp = meet->execute();
 
-	// The MeetLink returned everything our variable could be...
-	Handle term(clause->getOutgoingAtom(0));
+	// The MeetLink returned everything that the variables in the
+	// clause could ever be...
+	const HandleSet& varset(_mandatory.at(clause));
+	if (1 != varset.size())
+		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+	const Handle& var(*varset.begin());
+
 	HandleMap replace_map;
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-		replace_map.insert({hst, term});
+	{
+		replace_map.insert({hst, var});
+	}
 	return replace_map;
 }
 
@@ -190,7 +197,6 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 			replace_map.insert(pr);
 		}
 	}
-
 	fixup_replacements(replace_map);
 
 	return containers;
