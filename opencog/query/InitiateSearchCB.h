@@ -75,8 +75,8 @@ protected:
 	struct Choice
 	{
 		Handle clause;
-		Handle best_start;
 		Handle start_term;
+		HandleSeq search_set;
 	};
 	Handle _curr_clause;
 	std::vector<Choice> _choices;

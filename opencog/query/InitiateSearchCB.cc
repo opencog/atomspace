@@ -196,8 +196,8 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
-				ch.best_start = s;
 				ch.start_term = sbr;
+				ch.search_set = get_incoming_set(s, sbr->get_type());
 				_choices.push_back(ch);
 			}
 			else
@@ -342,8 +342,9 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 	{
 		Choice ch;
 		ch.clause = bestclause;
-		ch.best_start = best_start;
 		ch.start_term = _starter_term;
+		// XXX ?? Why incoming set ???
+		ch.search_set = get_incoming_set(best_start, _starter_term->get_type());
 		_choices.push_back(ch);
 	}
 	else
@@ -362,21 +363,13 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 	{
 		_root = ch.clause;
 		_starter_term = ch.start_term;
-		Handle best_start = ch.best_start;
+		_search_set = ch.search_set;
 
-		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
-		DO_LOG({LAZY_LOG_FINE << "Start term is: "
+		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_string());})
-		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
-
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by
-		// attentional focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
-		_search_set.clear();
-		for (const Handle& lptr: iset)
-			_search_set.emplace_back(lptr);
+		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
+		              <<  _root->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -1123,10 +1116,10 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 		for (const Choice& ch : _choices) {
 			ss << indent_p << "choice[" << i << "]:" << std::endl
 			   << indent_pp << "clause = " << ch.clause << std::endl;
-			ss << indent_pp << "best_start:" << std::endl
-			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
 			ss << indent_pp << "start_term:" << std::endl
 			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+			ss << indent_pp << "start points:" << std::endl
+			   << oc_to_string(ch.search_set, indent_ppp) << std::endl;
 		}
 	}
 
