@@ -559,7 +559,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 typedef std::map<Handle, unsigned> DepthMap;
 static void find_deep_constants(const Handle& h,
                                 DepthMap& const_list,
-                                size_t depth)
+                                unsigned depth)
 {
 	if (is_constant(h))
 	{
@@ -577,14 +577,27 @@ static void find_deep_constants(const Handle& h,
 // Another utility for starting points. We know that the actual
 // grounding for the variable is either `h` or something in it's
 // incoming set, but we don't know which. The matcher will sort
-// it out.  Biggest problem here is that we are going too high up
-// the incoming set, which gives an inefficient search. Oh well.
-// FIXME -- we don't have to go any higher than the deep type...
-static void all_starts(const Handle& h, HandleSeq& start_list)
+// it out. Limit the depth so we don't search too much.
+// We use HandleSet not HandleSeq to disambiguate multiple
+// inclusion.
+static void all_starts_rec(const Handle& h,
+                           unsigned depth,
+                           HandleSet& start_set)
 {
-	start_list.emplace_back(h);
+	start_set.insert(h);
+	if (0 == depth) return;
+	depth--;
 	for (const Handle& hi : h->getIncomingSet())
-		all_starts(hi, start_list);
+		all_starts_rec(hi, depth, start_set);
+}
+
+static HandleSeq all_starts(const Handle& h, unsigned depth)
+{
+	HandleSet start_set;
+	all_starts_rec(h, depth, start_set);
+	HandleSeq start_list;
+	for (const Handle& hs : start_set) start_list.emplace_back(hs);
+	return start_list;
 }
 
 /**
@@ -639,11 +652,8 @@ bool InitiateSearchCB::setup_deep_type_search()
 			Choice ch;
 			ch.clause = root;
 			ch.start_term = var;
-			HandleSeq seas;
-			all_starts(pr.first, seas);
-			ch.search_set = seas;
+			ch.search_set = all_starts(pr.first, pr.second);
 			_choices.push_back(ch);
-
 		}
 	}
 
