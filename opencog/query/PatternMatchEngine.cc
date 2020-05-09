@@ -1110,7 +1110,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 			return variable_compare(hp, hg);
 
 		// Report other variables that might be found.
-		if (VARIABLE_NODE == tp)
+		if (VARIABLE_NODE == tp or GLOB_NODE == tp)
 			return _pmc.scope_match(hp, hg);
 	}
 
@@ -1868,6 +1868,13 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (not is_evaluatable(clause_root))
 	{
 		clause_grounding[clause_root] = hg;
+
+		// Handle the highly unusual case of the top-most clause
+		// being a GlobNode. We were unable to record this earlier,
+		// in variable_compare(), so we do it here.
+		if (clause_root->get_type() == GLOB_NODE)
+			var_grounding[clause_root] = hg;
+
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
 
@@ -1993,7 +2000,7 @@ bool PatternMatchEngine::do_next_clause(void)
  * The "issued" set contains those clauses which are currently in play,
  * i.e. those for which a grounding is currently being explored. Both
  * grounded, and as-yet-ungrounded clauses may be in this set.  The
- * sole reason of this set is to avoid infinite resursion, i.e. of
+ * sole reason of this set is to avoid infinite recursion, i.e. of
  * re-identifying the same clause over and over as unsolved.
  *
  * The words "solved" and "grounded" are used as synonyms through out
@@ -2526,7 +2533,8 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	// giant variable, matching almost anything. Keep these folks
 	// happy, and record the suggested grounding. There's nowhere
 	// else to do this, so we do it here.
-	if (term->get_type() == VARIABLE_NODE)
+	Type tt = term->get_type();
+	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
 		var_grounding[term] = grnd;
 
 #ifdef QDEBUG

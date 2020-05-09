@@ -571,6 +571,10 @@ EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // alpha-renaming of any variables that they may have.
 ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
+// ExclusiveLink tests to make sure all elements differ from
+// one-another. True only if they all differ...
+EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
 SATISFACTION_LINK <- SATISFYING_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK

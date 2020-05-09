@@ -292,7 +292,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	{
 		// TODO: the following has no unit test!!! Yet it introduces a
 		// bug covered by RewriteLinkUTest::test_consume_quotations_4(),
-		// thus this code is disable till a unit test it created for it
+		// thus this code is disabled till a unit test it created for it
 		// and we understand what it fixes and how it fixes.
 		//
 		// // Make sure quotation is not removed around

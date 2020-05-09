@@ -18,6 +18,7 @@
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
@@ -170,17 +171,6 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 	return (v0 > v1);
 }
 
-/// Check for syntactic equality
-static bool identical(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "IdenticalLink expects two arguments");
-
-	return (oset[0] == oset[1]);
-}
-
 static ValuePtr exec_or_eval(AtomSpace* as,
                              const Handle& term,
                              AtomSpace* scratch,
@@ -201,24 +191,55 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 
 	Instantiator inst(as);
 	ValuePtr vp(inst.execute(term, silent));
+
+	// If the return value is a QueueValue, we assume that this
+	// is the result of executing a MeetLink or QueryLink.
+	// In this case, unwrap it, to get the "actual value".
+	// This feels slightly hacky, but will do for just right now.
+	if (QUEUE_VALUE == vp->get_type())
+	{
+		HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+		if (1 == hs.size())
+			vp = hs[0];
+	}
 	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
 	return vp;
 }
 
-/// Check for semantic equality
+/// Check for syntactic equality. Specifically, when comparing
+/// atoms, the handles MUST be the same handle.
+/// If there are two or more elements, they must ALL be equal.
+static bool identical(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	size_t nelts = oset.size();
+	if (2 > nelts) return true;
+
+	for (size_t j=1; j<nelts; j++)
+	{
+		if (oset[0] != oset[j]) return false;
+	}
+	return true;
+}
+
+/// Check for semantic equality. Specifically, when comparing
+/// atoms, then handles might be different, but the contents must
+/// compare as being the same, after the evaluation of the contents.
+/// If there are two or more elements, they must ALL be equal.
 static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "EqualLink expects two arguments");
+	size_t nelts = oset.size();
+	if (2 > nelts) return true;
 
 	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
-	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
 
-	if (v0 == v1) return true;
-	if (nullptr == v0) return false;
-	return (*v0 == *v1);
+	for (size_t j=1; j<nelts; j++)
+	{
+		ValuePtr v1(exec_or_eval(as, oset[j], as, silent));
+		if (v0 != v1 and *v0 != *v1) return false;
+	}
+	return true;
 }
 
 /// Check for alpha equivalence. If the link contains no free
@@ -255,6 +276,85 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	// Actually alpha-convert, and compare.
 	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
 	return (*((AtomPtr)h0) == *((AtomPtr)h1a));
+}
+
+/// Check for set membership
+static bool member(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "MemberLink expects two arguments");
+
+	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
+
+	// Is v0 a member of v1?  This question makes sense only
+	// if v0 is an atom and v1 is a set.
+	if (not v0->is_atom()) return false;
+	if (not nameserver().isA(v1->get_type(), SET_LINK)) return false;
+
+	for (const Handle& hs: HandleCast(v1)->getOutgoingSet())
+	{
+		if (v0 == hs) return true;
+	}
+
+	return false;
+}
+
+/// Check for subset relationship
+static bool subset(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "SubsetLink expects two arguments");
+
+	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+	ValuePtr v1(exec_or_eval(as, oset[1], as, silent));
+
+	// Is v0 a subset of v1?  This question makes sense only
+	// if v0 and v1 are sets.
+	if (not nameserver().isA(v0->get_type(), SET_LINK)) return false;
+	if (not nameserver().isA(v1->get_type(), SET_LINK)) return false;
+
+	const HandleSeq& superset(HandleCast(v1)->getOutgoingSet());
+	for (const Handle& h0: HandleCast(v0)->getOutgoingSet())
+	{
+		bool found = false;
+		for (const Handle& h1 : superset)
+		{
+			if (h0 == h1) {found = true; break;}
+		}
+		if (not found) return false;
+	}
+
+	return true;
+}
+
+/// Check to make sure all atoms differ
+static bool exclusive(AtomSpace* as, const Handle& h, bool silent)
+{
+	HandleSeq oset(h->getOutgoingSet());
+	ValueSeq vset;
+
+	size_t olen = oset.size();
+	while (true)
+	{
+		if (2 > olen) return true;
+
+		Handle last(oset.back());
+		oset.pop_back();
+		olen --;
+
+		ValuePtr v0(exec_or_eval(as, last, as, silent));
+		for (size_t j=0; j< olen; j++)
+		{
+			if (vset.size() <= j)
+				vset.push_back(exec_or_eval(as, oset[j], as, silent));
+			if (v0 == vset[j] or *v0 == *vset[j]) return false;
+		}
+	}
 }
 
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
@@ -464,23 +564,14 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	}
 
 	// -------------------------
-	// Arity-two relations
-	if (IDENTICAL_LINK == t)
-	{
-		return identical(evelnk);
-	}
-	else if (EQUAL_LINK == t)
-	{
-		return equal(scratch, evelnk, silent);
-	}
-	else if (ALPHA_EQUAL_LINK == t)
-	{
-		return alpha_equal(scratch, evelnk, silent);
-	}
-	else if (GREATER_THAN_LINK == t)
-	{
-		return greater(scratch, evelnk, silent);
-	}
+	// Assorted relations
+	if (IDENTICAL_LINK == t) return identical(evelnk);
+	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
+	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
+	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
+	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
+	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
+	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
 
 	// -------------------------
 	// Multi-threading primitives
