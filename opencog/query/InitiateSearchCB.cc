@@ -498,12 +498,16 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 		return pme.explore_constant_evaluatables(_pattern->mandatory);
 	}
 
+	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
+	if (setup_deep_type_search())
+		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
+	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
 	if (setup_link_type_search())
 		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
@@ -553,6 +557,95 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	const HandleSeq& oset = clause->getOutgoingSet();
 	for (const Handle& h : oset)
 		find_rarest(h, rarest, count, quotation);
+}
+
+/* ======================================================== */
+//
+// Handy utility to find all the constants under h.
+void find_constants(const Handle& h, HandleSeq& const_list)
+{
+	if (is_constant(h))
+	{
+		const_list.push_back(h);
+		return;
+	}
+	if (h->is_link())
+	{
+		for (const Handle& ho : h->getOutgoingSet())
+			find_constants(ho, const_list);
+	}
+}
+
+/**
+ * Deep types can/should behave a lot like neighbor-search. So try that
+ * next, and use it if possible. Same general idea as the neighbor
+ * search: we look for the thinnest location to start at. The search
+ * for this thinnest bit is very different, though.
+ *
+ * This is heavily used by the JoinLink mechanism.
+ */
+bool InitiateSearchCB::setup_deep_type_search()
+{
+	if (_variables->_deep_typemap.size() == 0)
+		return false;
+
+	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	size_t count = SIZE_MAX;
+	Handle best_start = Handle::UNDEFINED;
+	Handle best_clause = Handle::UNDEFINED;
+	Handle best_term = Handle::UNDEFINED;
+
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		DO_LOG({LAZY_LOG_FINE
+			 << "Examine deep-type " << oc_to_string(dit.second);})
+
+		// Find something suitable in the type specification.
+		HandleSeq starts;
+		for (const Handle& sig: dit.second)
+		{
+			find_constants(sig, starts);
+		}
+
+		const Handle& var = dit.first;
+		Handle root = Handle::UNDEFINED;
+		for (const Handle& clause: _pattern->mandatory)
+		{
+			if (is_free_in_tree(clause, var))
+			{
+				root = clause;
+				break;
+			}
+		}
+		if (nullptr == root) continue;
+
+		// Find the thinest of the set.
+		for (const Handle& cand: starts)
+		{
+			size_t num = cand->getIncomingSetSize();
+			if (num < count)
+			{
+				best_clause = root;
+				best_term = var;
+				best_start = cand;
+				count = num;
+			}
+		}
+	}
+
+	if (best_start)
+	{
+		Choice ch;
+		ch.clause = best_clause;
+		ch.best_start = best_start;
+		ch.start_term = best_term;
+		_choices.push_back(ch);
+		return true;
+	}
+	return false;
 }
 
 /* ======================================================== */
@@ -615,6 +708,8 @@ bool InitiateSearchCB::setup_link_type_search()
  * the allowed variable types (as set with the `set_type_restrictions()`
  * method).  This assumes that the varset contains the variables to be
  * searched over, and that the type restrictions are set up appropriately.
+ * This handles only the simple types; the "deep types" were attempted
+ * earlier.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -652,17 +747,7 @@ bool InitiateSearchCB::setup_variable_search(void)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
 
-#ifdef _IMPLEMENT_ME_LATER
-		// XXX TODO FIXME --- if there is a deep type in the mix, that
-		// will offer a far-superior place to start the search.
-		// Unfortunately, implementing this will require a bit more work,
-		// so we punt for now, as there are no users ....
-		auto dit = _variables->_deep_typemap.find(var);
-		if (_variables->_deep_typemap.end() != dit)
-			throw RuntimeException(TRACE_INFO, "Not implemented!");
-#endif
-
-		auto tit = _variables->_simple_typemap.find(var);
+		const auto& tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
@@ -718,38 +803,30 @@ bool InitiateSearchCB::setup_variable_search(void)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-
-		if (not _variables->_deep_typemap.empty())
-		{
-			logger().warn("Full deep-type support not implemented!");
-		}
-		else
-		{
 // #define THROW_HARD_ERROR 1
 #ifdef THROW_HARD_ERROR
-			throw SyntaxException(TRACE_INFO,
-				"Error: There were no type restrictions! That's infinite-recursive!");
+		throw SyntaxException(TRACE_INFO,
+			"Error: There were no type restrictions! That's infinite-recursive!");
 #else
-			logger().warn("No type restrictions! Your code has a bug in it!");
-			for (const Handle& var: _variables->varset)
-				logger().warn("Offending variable=%s\n", var->to_string().c_str());
-			for (const Handle& cl : clauses)
-				logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
+		logger().warn("No type restrictions! Your code has a bug in it!");
+		for (const Handle& var: _variables->varset)
+			logger().warn("Offending variable=%s\n", var->to_string().c_str());
+		for (const Handle& cl : clauses)
+			logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
 
-			// Terrible, terrible hack for detecting infinite loops.
-			// When the world is ready for us, we should instead just
-			// throw the hard error, as ifdef'ed above.
-			static const Pattern* prev = nullptr;
-			static unsigned int count = 0;
-			if (prev != _pattern) { prev = _pattern; count = 0; }
-			else {
-				count++;
-				if (300 < count)
-					throw RuntimeException(TRACE_INFO,
-						"Infinite Loop detected! Recursed %u times!", count);
-			}
-#endif
+		// Terrible, terrible hack for detecting infinite loops.
+		// When the world is ready for us, we should instead just
+		// throw the hard error, as ifdef'ed above.
+		static const Pattern* prev = nullptr;
+		static unsigned int count = 0;
+		if (prev != _pattern) { prev = _pattern; count = 0; }
+		else {
+			count++;
+			if (5 < count)
+				throw RuntimeException(TRACE_INFO,
+					"Infinite Loop detected! Recursed %u times!", count);
 		}
+#endif
 
 		// There are no clauses. This is kind-of weird, but it can happen
 		// if all clauses are optional.
