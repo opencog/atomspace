@@ -557,12 +557,9 @@ void DeepTypeUTest::test_aybe_sea(void)
 
 	Handle result = eval->eval_h("(cog-execute! constant-a)");
 	Handle expected = eval->eval_h("(SetLink (Concept \"A\"))");
-
 	TSM_ASSERT_EQUALS("Bad simple constant", result, expected);
 
 	result = eval->eval_h("(cog-execute! constant-zappa)");
-	expected = eval->eval_h("expect-zappa");
-
 	TSM_ASSERT_EQUALS("Bad constant abc", result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);

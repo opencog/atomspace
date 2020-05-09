@@ -112,9 +112,11 @@
 				(ListLink
 					(Variable "X") (Concept "B") (Concept "C"))))))
 
-(define expect-zappa
-	(Evaluation (Predicate "Aybe Sea")
-		(ListLink (Concept "A") (Concept "B") (Concept "C"))))
+; Above should find the below.
+(Evaluation (Predicate "Aybe Sea")
+	(ListLink (Concept "A") (Concept "B") (Concept "C")))
+
+; (cog-execute! constant-zappa)
 
 ; =============================================================
 
