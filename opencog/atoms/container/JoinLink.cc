@@ -60,7 +60,7 @@ void JoinLink::setup_variables(void)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
 		// Get the type.
-		HandleSet dtset = _variables._deep_typemap.at(var);
+		const HandleSet& dtset = _variables._deep_typemap.at(var);
 		if (dtset.size() != 1)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
@@ -111,15 +111,44 @@ void JoinLink::setup_replacements(void)
 
 /* ================================================================= */
 
+/// Given the PresentLink in the body of the JoinLink, examine
+/// the atomspace to see ... what can be found that matches it.
+HandleSeq JoinLink::find_starts(const Handle& hpr)
+{
+	Handle clause(hpr->getOutgoingAtom(0));
+	Type ct = clause->get_type();
+
+	// If the user just said `(Present (Variable X))`
+	if (VARIABLE_NODE == ct)
+	{
+		// Get the variable type.
+		const HandleSet& dtset = _variables._deep_typemap.at(clause);
+
+		// We assume its a SignatureLink
+		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
+		Type tsig = sig->get_type();
+
+		if (nameserver().isA(tsig, NODE))
+			return HandleSeq({sig});
+	}
+	return HandleSeq();
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::min_container(bool silent)
 {
-	if (_replacements.size() != 1)
-		throw RuntimeException(TRACE_INFO, "Not supported yet!");
-
-	Handle starter = _replacements.begin()->first;
-
 	HandleSet containers;
-	containers.insert(starter);
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& h(_outgoing[i]);
+		if (h->get_type() != PRESENT_LINK) continue;
+
+		HandleSeq starts(find_starts(h));
+
+		for (const Handle& starter: starts)
+			containers.insert(starter);
+	}
 
 	return containers;
 }

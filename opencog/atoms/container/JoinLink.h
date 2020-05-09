@@ -40,6 +40,8 @@ protected:
 	HandleMap _replacements;
 	HandleSet replace(const HandleSet&, bool) const;
 
+	HandleSeq find_starts(const Handle&);
+
 	void find_top(HandleSet&, const Handle&) const;
 
 	HandleSet min_container(bool);
