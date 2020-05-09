@@ -35,12 +35,12 @@ class JoinLink : public PrenexLink
 protected:
 	void init(void);
 
-	void setup_variables(void);
-	void setup_replacements(void);
-	HandleMap _replacements;
-	HandleSet replace(const HandleSet&, const HandleMap&) const;
+	void validate(void);
 
 	HandleMap find_starts(AtomSpace*, const Handle&) const;
+
+	void fixup_replacements(HandleMap&) const;
+	HandleSet replace(const HandleSet&, const HandleMap&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 

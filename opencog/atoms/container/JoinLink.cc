@@ -42,8 +42,7 @@ void JoinLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"JoinLinks are private and cannot be instantiated.");
 
-	setup_variables();
-	setup_replacements();
+	validate();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -54,7 +53,8 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-void JoinLink::setup_variables(void)
+/// Temporary scaffolding to validate what we can do, so far.
+void JoinLink::validate(void)
 {
 	for (const Handle& var : _variables.varseq)
 	{
@@ -71,9 +71,6 @@ void JoinLink::setup_variables(void)
 
 		if (SIGNATURE_LINK != dtype)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
-
-		Handle starter = deet->getOutgoingAtom(0);
-		_replacements.insert({starter, var});
 	}
 }
 
@@ -83,7 +80,7 @@ void JoinLink::setup_variables(void)
 /// Each of these should have a corresponding variable declaration.
 /// Update the replacement map so that the "from" part of the variable
 /// (obtained from the signature) gets replaced by the ... replacement.
-void JoinLink::setup_replacements(void)
+void JoinLink::fixup_replacements(HandleMap& replace_map) const
 {
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
@@ -96,10 +93,10 @@ void JoinLink::setup_replacements(void)
 
 		const Handle& from(h->getOutgoingAtom(0));
 		bool found = false;
-		for (const auto& pr : _replacements)
+		for (const auto& pr : replace_map)
 		{
 			if (pr.second != from) continue;
-			_replacements[pr.first] = h->getOutgoingAtom(1);
+			replace_map[pr.first] = h->getOutgoingAtom(1);
 			found = true;
 			break;
 		}
@@ -175,6 +172,8 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 			replace_map.insert(pr);
 		}
 	}
+
+	fixup_replacements(replace_map);
 
 	return containers;
 }
