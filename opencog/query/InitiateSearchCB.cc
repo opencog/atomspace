@@ -600,6 +600,24 @@ static HandleSeq all_starts(const Handle& h, unsigned depth)
 	return start_list;
 }
 
+// We need to know which clause this is for. Seems that we
+// dont have a map for this; the _pattern->connectivity_map
+// is non-empty only when a var is in two (or more) clauses.
+// So we brute-force search in this loop.
+static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
+{
+	Handle root;
+	for (const Handle& clause: clauses)
+	{
+		if (is_free_in_tree(clause, term))
+		{
+			root = clause;
+			break;
+		}
+	}
+	return root;
+}
+
 /**
  * Deep types can/should behave a lot like neighbor-search. So try that
  * next, and use it if possible. Same general idea as the neighbor
@@ -627,24 +645,11 @@ bool InitiateSearchCB::setup_deep_type_search()
 		// Find something suitable in the type specification.
 		DepthMap starts;
 		for (const Handle& sig: dit.second)
-		{
 			find_deep_constants(sig, starts, 0);
-		}
 
-		// We need to know which clause this is for. Seems that we
-		// dont have a map for this; the _pattern->connectivity_map
-		// is non-empty only when a var is in two (or more) clauses.
-		// So we brute-force search in this loop.
+		// What clause is the variable in?
 		const Handle& var = dit.first;
-		Handle root = Handle::UNDEFINED;
-		for (const Handle& clause: _pattern->mandatory)
-		{
-			if (is_free_in_tree(clause, var))
-			{
-				root = clause;
-				break;
-			}
-		}
+		Handle root = root_of_term (var, _pattern->mandatory);
 		if (nullptr == root) continue;
 
 		for (const auto& pr: starts)
