@@ -154,45 +154,21 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /// of these MemberLinks (as the first elt of the pair) and will have
 /// `(Variable "X")` as the second elt of both pairs.
 ///
-HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
+HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
 {
-	Handle clause(hpr->getOutgoingAtom(0));
-	Type ct = clause->get_type();
+	const bool TRANSIENT_SPACE = true;
 
+	Handle meet = _meets.at(clause);
+	AtomSpace temp(as, TRANSIENT_SPACE);
+	meet = temp.add_atom(meet);
+	ValuePtr vp = meet->execute();
+
+	// The MeetLink returned everything our variable could be...
+	Handle term(clause->getOutgoingAtom(0));
 	HandleMap replace_map;
-
-	// If the user just said `(Present (Variable X))`
-	if (VARIABLE_NODE == ct)
-	{
-		// Get the variable type.
-		const HandleSet& dtset = _variables._deep_typemap.at(clause);
-
-		// We assume its a SignatureLink
-		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
-
-		// Pure constant (no free variables, no types)
-		if (is_constant(sig))
-		{
-			replace_map.insert({sig, clause});
-			return replace_map;
-		}
-
-		// The type signature is non-trivial. We perform a search
-		// to find all atoms having that signature.
-		Handle typedecl = _variables.get_type_decl(clause, clause);
-
-		Handle meet = createLink(MEET_LINK, typedecl, hpr);
-// XXX this needs to be in a temp atomspace ...
-		meet = as->add_atom(meet);
-		ValuePtr vp = meet->execute();
-
-		// The MeetLink returned everything our variable could be...
-		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-			replace_map.insert({hst, clause});
-		return replace_map;
-	}
-	throw RuntimeException(TRACE_INFO, "Not supported yet!");
-	return HandleMap();
+	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+		replace_map.insert({hst, term});
+	return replace_map;
 }
 
 /* ================================================================= */
