@@ -21,6 +21,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "JoinLink.h"
@@ -113,7 +114,7 @@ void JoinLink::setup_replacements(void)
 
 /// Given the PresentLink in the body of the JoinLink, examine
 /// the atomspace to see ... what can be found that matches it.
-HandleSeq JoinLink::find_starts(const Handle& hpr)
+HandleSeq JoinLink::find_starts(AtomSpace* as, const Handle& hpr)
 {
 	Handle clause(hpr->getOutgoingAtom(0));
 	Type ct = clause->get_type();
@@ -128,15 +129,28 @@ HandleSeq JoinLink::find_starts(const Handle& hpr)
 		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
 		Type tsig = sig->get_type();
 
+		// Naked node
+// XXX check instead if its a const
 		if (nameserver().isA(tsig, NODE))
 			return HandleSeq({sig});
+
+		// Perform a search
+		Handle typedecl = _variables.get_type_decl(clause, clause);
+
+		Handle meet = createLink(MEET_LINK, typedecl, hpr);
+// XXX this need to be in a temp atomspace ...
+		meet = as->add_atom(meet);
+		ValuePtr vp = meet->execute();
+printf("duuude vpt=%s\n", vp->to_string().c_str());
+		return LinkValueCast(vp)->to_handle_seq();
+
 	}
 	return HandleSeq();
 }
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(bool silent)
+HandleSet JoinLink::min_container(AtomSpace* as, bool silent)
 {
 	HandleSet containers;
 	for (size_t i=1; i<_outgoing.size(); i++)
@@ -144,7 +158,7 @@ HandleSet JoinLink::min_container(bool silent)
 		const Handle& h(_outgoing[i]);
 		if (h->get_type() != PRESENT_LINK) continue;
 
-		HandleSeq starts(find_starts(h));
+		HandleSeq starts(find_starts(as, h));
 
 		for (const Handle& starter: starts)
 			containers.insert(starter);
@@ -178,9 +192,9 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(bool silent)
+HandleSet JoinLink::max_container(AtomSpace* as, bool silent)
 {
-	HandleSet hs = min_container(silent);
+	HandleSet hs = min_container(as, silent);
 	HandleSet containers;
 	for (const Handle& h: hs)
 	{
@@ -220,9 +234,9 @@ printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
 	HandleSet hs;
 	if (MAXIMAL_JOIN_LINK == get_type())
-		hs = max_container(silent);
+		hs = max_container(as, silent);
 	else
-		hs = min_container(silent);
+		hs = min_container(as, silent);
 
 	hs = replace(hs, silent);
 

@@ -40,12 +40,12 @@ protected:
 	HandleMap _replacements;
 	HandleSet replace(const HandleSet&, bool) const;
 
-	HandleSeq find_starts(const Handle&);
+	HandleSeq find_starts(AtomSpace*, const Handle&);
 
 	void find_top(HandleSet&, const Handle&) const;
 
-	HandleSet min_container(bool);
-	HandleSet max_container(bool);
+	HandleSet min_container(AtomSpace*, bool);
+	HandleSet max_container(AtomSpace*, bool);
 
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
