@@ -493,7 +493,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
 	if (setup_deep_type_search())
-		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -644,6 +644,7 @@ bool InitiateSearchCB::setup_deep_type_search()
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	_choices.clear();
+	_search_set.clear();
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
@@ -668,15 +669,13 @@ bool InitiateSearchCB::setup_deep_type_search()
 		HandleSeq start_list;
 		for (const Handle& hs : start_set) start_list.emplace_back(hs);
 
-		Choice ch;
-		ch.clause = root;
-		ch.start_term = var;
-		ch.search_set = start_list;
-		_choices.push_back(ch);
+		_root = root;
+		_starter_term = var;
+		_search_set = start_list;
 
 		// We only need enough startng points to get started;
 		// the matcher will crawl the rest of the graph.
-		if (0 < start_set.size()) return true;
+		if (0 < _search_set.size()) return true;
 	}
 
 	for (const auto& dit: _variables->_deep_typemap)
@@ -699,15 +698,13 @@ bool InitiateSearchCB::setup_deep_type_search()
 		}
 		if (NOTYPE == t) continue;
 
-		Choice ch;
-		ch.clause = root;
-		ch.start_term = var;
-		_as->get_handles_by_type(ch.search_set, t);
-		_choices.push_back(ch);
-		break;
+		_root = root;
+		_starter_term = var;
+		_as->get_handles_by_type(_search_set, t);
+		if (0 < _search_set.size()) return true;
 	}
 
-	return 0 < _choices.size();
+	return false;
 }
 
 /* ======================================================== */
