@@ -296,9 +296,7 @@ void JoinLinkUTest::test_embed(void)
 	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
-	Handle T = L(EVALUATION_LINK,
-		N(PREDICATE_NODE, "is blue"),
-		L(LIST_LINK, N(VARIABLE_NODE, "$thing")));
+	Handle T = N(VARIABLE_NODE, "$thing");
 	TS_ASSERT_EQUALS(results[0], T);
 
 	// ------------
@@ -308,9 +306,11 @@ void JoinLinkUTest::test_embed(void)
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
+	Handle ET = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "is blue"), L(LIST_LINK, T));
 	Handle MT = L(CONTEXT_LINK,
 		N(CONCEPT_NODE, "moon"),
-		L(SIMILARITY_LINK, T, N(CONCEPT_NODE, "unlikely")));
+		L(SIMILARITY_LINK, ET, N(CONCEPT_NODE, "unlikely")));
 	TS_ASSERT_EQUALS(results[0], MT);
 
 	// ------------
@@ -320,9 +320,7 @@ void JoinLinkUTest::test_embed(void)
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
-	Handle G = L(EVALUATION_LINK,
-		N(PREDICATE_NODE, "is blue"),
-		L(LIST_LINK, N(CONCEPT_NODE, "green cheese")));
+	Handle G = N(CONCEPT_NODE, "green cheese");
 	TS_ASSERT_EQUALS(results[0], G);
 
 	// ------------
@@ -332,9 +330,11 @@ void JoinLinkUTest::test_embed(void)
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
+	Handle EG = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "is blue"), L(LIST_LINK, G));
 	Handle MG = L(CONTEXT_LINK,
 		N(CONCEPT_NODE, "moon"),
-		L(SIMILARITY_LINK, G, N(CONCEPT_NODE, "unlikely")));
+		L(SIMILARITY_LINK, EG, N(CONCEPT_NODE, "unlikely")));
 	TS_ASSERT_EQUALS(results[0], MG);
 
 	// ------------
