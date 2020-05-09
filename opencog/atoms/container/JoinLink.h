@@ -38,14 +38,14 @@ protected:
 	void setup_variables(void);
 	void setup_replacements(void);
 	HandleMap _replacements;
-	HandleSet replace(const HandleSet&, bool) const;
+	HandleSet replace(const HandleSet&, const HandleMap&) const;
 
 	HandleMap find_starts(AtomSpace*, const Handle&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 
-	HandleSet min_container(AtomSpace*, bool, HandleMap&);
-	HandleSet max_container(AtomSpace*, bool, HandleMap&);
+	HandleSet min_container(AtomSpace*, bool, HandleMap&) const;
+	HandleSet max_container(AtomSpace*, bool, HandleMap&) const;
 
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 

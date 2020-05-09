@@ -134,7 +134,7 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 		// Pure constant (no free variables, no types)
 		if (is_constant(sig))
 		{
-			replace_map.insert({clause, sig});
+			replace_map.insert({sig, clause});
 			return replace_map;
 		}
 
@@ -149,7 +149,7 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 
 		// The MeetLink returned everything our variable could be...
 		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-			replace_map.insert({clause, hst});
+			replace_map.insert({hst, clause});
 		return replace_map;
 	}
 	throw RuntimeException(TRACE_INFO, "Not supported yet!");
@@ -159,7 +159,7 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 /* ================================================================= */
 
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map)
+                                  HandleMap& replace_map) const
 {
 	HandleSet containers;
 	for (size_t i=1; i<_outgoing.size(); i++)
@@ -171,7 +171,7 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 
 		for (const auto& pr: start_map)
 		{
-			containers.insert(pr.second);
+			containers.insert(pr.first);
 			replace_map.insert(pr);
 		}
 	}
@@ -205,7 +205,7 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 /* ================================================================= */
 
 HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map)
+                                  HandleMap& replace_map) const
 {
 	HandleSet hs = min_container(as, silent, replace_map);
 	HandleSet containers;
@@ -222,14 +222,15 @@ HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
 /// Given a top-level set of containing links, perform
 /// replacements, substituting the bottom-most atoms as requested,
 /// while honoring all scoping and quoting.
-HandleSet JoinLink::replace(const HandleSet& containers, bool silent) const
+HandleSet JoinLink::replace(const HandleSet& containers,
+                            const HandleMap& replace_map) const
 {
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, _replacements);
+		Handle rep = FreeVariables::replace_nocheck(top, replace_map);
 		replaced.insert(rep);
 	}
 
@@ -243,7 +244,7 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-printf("duude vars=%s\n", oc_to_string(_variables).c_str());
+// printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
 	HandleMap replace_map;
 	HandleSet hs;
@@ -252,7 +253,7 @@ printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 	else
 		hs = min_container(as, silent, replace_map);
 
-	hs = replace(hs, silent);
+	hs = replace(hs, replace_map);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.
