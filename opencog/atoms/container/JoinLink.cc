@@ -65,11 +65,33 @@ void JoinLink::validate(void)
 /// the locations that will be joined together.
 void JoinLink::setup_meets(void)
 {
+	HandleSet done;
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
-		const Handle& h(_outgoing[i]);
-		if (h->get_type() != PRESENT_LINK) continue;
-		setup_clause(h);
+		const Handle& clause(_outgoing[i]);
+
+		// Create a mandatory clause for each PresentLink
+		if (clause->get_type() != PRESENT_LINK) continue;
+
+		// Find the variables in the clause
+		FreeVariables fv;
+		fv.find_variables(clause);
+		_mandatory.insert({clause, fv.varset});
+
+		// Create a MeetLink for each mandatory clause.
+		setup_clause(clause, fv.varset);
+
+		done.merge(fv.varset);
+	}
+
+	// Are there any variables that are NOT in a PresentLink? If so,
+	// then create a PresentLink for each; we need that to get started.
+	for (const Handle& var: _variables.varseq)
+	{
+		if (done.find(var) != done.end()) continue;
+		Handle pres(createLink(PRESENT_LINK, var));
+		_mandatory.insert({pres, {var}});
+		setup_clause(pres, {var});
 	}
 }
 
@@ -79,16 +101,12 @@ void JoinLink::setup_meets(void)
 /// a map with all of the variables that appear in it, and create
 /// a MeetLink that can be used to find the atoms to be joined.
 ///
-void JoinLink::setup_clause(const Handle& clause)
+void JoinLink::setup_clause(const Handle& clause,
+                            const HandleSet& varset)
 {
-	// Find the variables in the clause
-	FreeVariables fv;
-	fv.find_variables(clause);
-	_mandatory.insert({clause, fv.varset});
-
 	// Build a Meet
 	HandleSeq vardecls;
-	for (const Handle& var : fv.varset)
+	for (const Handle& var : varset)
 	{
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);

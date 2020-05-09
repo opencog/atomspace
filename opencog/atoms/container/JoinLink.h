@@ -41,7 +41,7 @@ protected:
 	typedef std::map<Handle, HandleSet> PlaceMap;
 	PlaceMap _mandatory;
 	HandleMap _meets;
-	void setup_clause(const Handle& h);
+	void setup_clause(const Handle&, const HandleSet&);
 	void setup_meets(void);
 
 	HandleMap find_starts(AtomSpace*, const Handle&) const;
