@@ -56,22 +56,6 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
-	for (const Handle& var : _variables.varseq)
-	{
-		if (_variables._simple_typemap.size() != 0)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
-
-		// Get the type.
-		const HandleSet& dtset = _variables._deep_typemap.at(var);
-		if (dtset.size() != 1)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
-
-		Handle deet = *dtset.begin();
-		Type dtype = deet->get_type();
-
-		if (SIGNATURE_LINK != dtype)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
-	}
 }
 
 /* ================================================================= */
