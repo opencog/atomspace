@@ -580,24 +580,15 @@ static void find_deep_constants(const Handle& h,
 // it out. Limit the depth so we don't search too much.
 // We use HandleSet not HandleSeq to disambiguate multiple
 // inclusion.
-static void all_starts_rec(const Handle& h,
-                           unsigned depth,
-                           HandleSet& start_set)
+static void all_starts(const Handle& h,
+                       unsigned depth,
+                       HandleSet& start_set)
 {
 	start_set.insert(h);
 	if (0 == depth) return;
 	depth--;
 	for (const Handle& hi : h->getIncomingSet())
-		all_starts_rec(hi, depth, start_set);
-}
-
-static HandleSeq all_starts(const Handle& h, unsigned depth)
-{
-	HandleSet start_set;
-	all_starts_rec(h, depth, start_set);
-	HandleSeq start_list;
-	for (const Handle& hs : start_set) start_list.emplace_back(hs);
-	return start_list;
+		all_starts(hi, depth, start_set);
 }
 
 // Find the first link type that is NOT a type specifier.
@@ -670,22 +661,23 @@ bool InitiateSearchCB::setup_deep_type_search()
 		for (const Handle& sig: dit.second)
 			find_deep_constants(sig, starts, 0);
 
+		HandleSet start_set;
 		for (const auto& pr: starts)
-		{
-			Choice ch;
-			ch.clause = root;
-			ch.start_term = var;
-			ch.search_set = all_starts(pr.first, pr.second);
-			_choices.push_back(ch);
-		}
+			all_starts(pr.first, pr.second, start_set);
+
+		HandleSeq start_list;
+		for (const Handle& hs : start_set) start_list.emplace_back(hs);
+
+		Choice ch;
+		ch.clause = root;
+		ch.start_term = var;
+		ch.search_set = start_list;
+		_choices.push_back(ch);
 
 		// We only need enough startng points to get started;
 		// the matcher will crawl the rest of the graph.
-		break;
+		if (0 < start_set.size()) return true;
 	}
-
-	// Did we find anything?
-	if (0 < _choices.size()) return true;
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
