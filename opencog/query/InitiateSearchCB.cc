@@ -493,7 +493,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
 	if (setup_deep_type_search())
-		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -580,24 +580,32 @@ static void find_deep_constants(const Handle& h,
 // it out. Limit the depth so we don't search too much.
 // We use HandleSet not HandleSeq to disambiguate multiple
 // inclusion.
-static void all_starts_rec(const Handle& h,
-                           unsigned depth,
-                           HandleSet& start_set)
+static void all_starts(const Handle& h,
+                       unsigned depth,
+                       HandleSet& start_set)
 {
 	start_set.insert(h);
 	if (0 == depth) return;
 	depth--;
 	for (const Handle& hi : h->getIncomingSet())
-		all_starts_rec(hi, depth, start_set);
+		all_starts(hi, depth, start_set);
 }
 
-static HandleSeq all_starts(const Handle& h, unsigned depth)
+// Find the first link type that is NOT a type specifier.
+static Type find_plain_type(const Handle& h)
 {
-	HandleSet start_set;
-	all_starts_rec(h, depth, start_set);
-	HandleSeq start_list;
-	for (const Handle& hs : start_set) start_list.emplace_back(hs);
-	return start_list;
+	Type t = h->get_type();
+	if (not nameserver().isA(t, TYPE_NODE) and
+	    not nameserver().isA(t, TYPE_CHOICE) and
+	    not nameserver().isA(t, TYPE_OUTPUT_LINK))
+		return t;
+	if (h->is_node()) return NOTYPE;
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		t = find_plain_type(ho);
+		if (NOTYPE != t) return t;
+	}
+	return NOTYPE;
 }
 
 // We need to know which clause this is for. Seems that we
@@ -636,9 +644,16 @@ bool InitiateSearchCB::setup_deep_type_search()
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	_choices.clear();
+	_search_set.clear();
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
+		const Handle& var = dit.first;
+		Handle root = root_of_term (var, _pattern->mandatory);
+		if (nullptr == root) continue;
+
 		DO_LOG({LAZY_LOG_FINE
 			 << "Examine deep-type " << oc_to_string(dit.second);})
 
@@ -647,23 +662,49 @@ bool InitiateSearchCB::setup_deep_type_search()
 		for (const Handle& sig: dit.second)
 			find_deep_constants(sig, starts, 0);
 
-		// What clause is the variable in?
+		HandleSet start_set;
+		for (const auto& pr: starts)
+			all_starts(pr.first, pr.second, start_set);
+
+		HandleSeq start_list;
+		for (const Handle& hs : start_set) start_list.emplace_back(hs);
+
+		_root = root;
+		_starter_term = var;
+		_search_set = start_list;
+
+		// We only need enough startng points to get started;
+		// the matcher will crawl the rest of the graph.
+		if (0 < _search_set.size()) return true;
+	}
+
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
 		const Handle& var = dit.first;
 		Handle root = root_of_term (var, _pattern->mandatory);
 		if (nullptr == root) continue;
 
-		for (const auto& pr: starts)
+		DO_LOG({LAZY_LOG_FINE
+			 << "Re-examine deep-type " << oc_to_string(dit.second);})
+
+		// Find the first link type that is not a type
+		Type t = NOTYPE;
+		for (const Handle& sig: dit.second)
 		{
-			Choice ch;
-			ch.clause = root;
-			ch.start_term = var;
-			ch.search_set = all_starts(pr.first, pr.second);
-			_choices.push_back(ch);
+			t = find_plain_type(sig);
+			if (NOTYPE != t) break;
 		}
+		if (NOTYPE == t) continue;
+
+		_root = root;
+		_starter_term = var;
+		_as->get_handles_by_type(_search_set, t);
+		if (0 < _search_set.size()) return true;
 	}
 
-	// Did we find anything?
-	return 0 < _choices.size();
+	return false;
 }
 
 /* ======================================================== */
