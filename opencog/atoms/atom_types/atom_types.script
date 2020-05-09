@@ -461,6 +461,16 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // Used for type polymorphism.
 // Note that the empty type choice corresponds to the bottom type.
 // see, https://wiki.opencog.org/w/TypeChoice#Bottom_type
+//
+// This "should" inherit from TYPE_LINK. However, it is currently valid
+// to write `(TypeChoice (Type 'ConceptNode) (Predicate "foo"))` and the
+// `(Predicate "foo")` causes the type checker to fail. Maybe the spec
+// should be changed to only allow
+// `(TypeChoice (Type 'ConceptNode) (Signature (Predicate "foo")))` if
+// such a "constant" type is wanted. I dunno. Not sure. Changing this
+// causes DeepTypeUTest to fail. ... I think forcing use of Signature
+// seems "more correct" ... XXX FIXME. maybe?
+// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type definitions

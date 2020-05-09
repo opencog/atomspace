@@ -21,6 +21,8 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "JoinLink.h"
@@ -40,8 +42,7 @@ void JoinLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"JoinLinks are private and cannot be instantiated.");
 
-	setup_variables();
-	setup_replacements();
+	validate();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -52,7 +53,8 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
-void JoinLink::setup_variables(void)
+/// Temporary scaffolding to validate what we can do, so far.
+void JoinLink::validate(void)
 {
 	for (const Handle& var : _variables.varseq)
 	{
@@ -60,7 +62,7 @@ void JoinLink::setup_variables(void)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
 		// Get the type.
-		HandleSet dtset = _variables._deep_typemap.at(var);
+		const HandleSet& dtset = _variables._deep_typemap.at(var);
 		if (dtset.size() != 1)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
 
@@ -69,9 +71,6 @@ void JoinLink::setup_variables(void)
 
 		if (SIGNATURE_LINK != dtype)
 			throw RuntimeException(TRACE_INFO, "Not supported yet!");
-
-		Handle starter = deet->getOutgoingAtom(0);
-		_replacements.insert({starter, var});
 	}
 }
 
@@ -81,7 +80,7 @@ void JoinLink::setup_variables(void)
 /// Each of these should have a corresponding variable declaration.
 /// Update the replacement map so that the "from" part of the variable
 /// (obtained from the signature) gets replaced by the ... replacement.
-void JoinLink::setup_replacements(void)
+void JoinLink::fixup_replacements(HandleMap& replace_map) const
 {
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
@@ -94,12 +93,11 @@ void JoinLink::setup_replacements(void)
 
 		const Handle& from(h->getOutgoingAtom(0));
 		bool found = false;
-		for (const auto& pr : _replacements)
+		for (const auto& pr : replace_map)
 		{
 			if (pr.second != from) continue;
-			_replacements[pr.first] = h->getOutgoingAtom(1);
+			replace_map[pr.first] = h->getOutgoingAtom(1);
 			found = true;
-			break;
 		}
 
 		if (not found)
@@ -111,15 +109,88 @@ void JoinLink::setup_replacements(void)
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(bool silent)
+/// Given one PresentLink in the body of the JoinLink, examine
+/// the atomspace to see ... what can be found that matches it.
+/// This returns a "replacement map" - a map of pairs, from a
+/// concrete atom in the atomspace, to the variable in the
+/// the PresentLink. For example, suppose that
+///
+///    (Join
+///       (TypedVariable (Variable "X")
+///          (Signature (Member (Variable "X") (Concept "beach"))))
+///       (Present (Variable "X"))
+///
+/// and that
+///
+///    (Member (Concept "sea") (Concept "beach"))
+///    (Member (Concept "sand") (Concept "beach"))
+///
+/// then the returned HandleMap will have two pairs, one for each of
+/// of these MemberLinks (as the first elt of the pair) and will have
+/// `(Variable "X")` as the second elt of both pairs.
+///
+HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 {
-	if (_replacements.size() != 1)
-		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+	Handle clause(hpr->getOutgoingAtom(0));
+	Type ct = clause->get_type();
 
-	Handle starter = _replacements.begin()->first;
+	HandleMap replace_map;
 
+	// If the user just said `(Present (Variable X))`
+	if (VARIABLE_NODE == ct)
+	{
+		// Get the variable type.
+		const HandleSet& dtset = _variables._deep_typemap.at(clause);
+
+		// We assume its a SignatureLink
+		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
+
+		// Pure constant (no free variables, no types)
+		if (is_constant(sig))
+		{
+			replace_map.insert({sig, clause});
+			return replace_map;
+		}
+
+		// The type signature is non-trivial. We perform a search
+		// to find all atoms having that signature.
+		Handle typedecl = _variables.get_type_decl(clause, clause);
+
+		Handle meet = createLink(MEET_LINK, typedecl, hpr);
+// XXX this needs to be in a temp atomspace ...
+		meet = as->add_atom(meet);
+		ValuePtr vp = meet->execute();
+
+		// The MeetLink returned everything our variable could be...
+		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+			replace_map.insert({hst, clause});
+		return replace_map;
+	}
+	throw RuntimeException(TRACE_INFO, "Not supported yet!");
+	return HandleMap();
+}
+
+/* ================================================================= */
+
+HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
+                                  HandleMap& replace_map) const
+{
 	HandleSet containers;
-	containers.insert(starter);
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& h(_outgoing[i]);
+		if (h->get_type() != PRESENT_LINK) continue;
+
+		HandleMap start_map(find_starts(as, h));
+
+		for (const auto& pr: start_map)
+		{
+			containers.insert(pr.first);
+			replace_map.insert(pr);
+		}
+	}
+
+	fixup_replacements(replace_map);
 
 	return containers;
 }
@@ -149,9 +220,10 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(bool silent)
+HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
+                                  HandleMap& replace_map) const
 {
-	HandleSet hs = min_container(silent);
+	HandleSet hs = min_container(as, silent, replace_map);
 	HandleSet containers;
 	for (const Handle& h: hs)
 	{
@@ -166,14 +238,15 @@ HandleSet JoinLink::max_container(bool silent)
 /// Given a top-level set of containing links, perform
 /// replacements, substituting the bottom-most atoms as requested,
 /// while honoring all scoping and quoting.
-HandleSet JoinLink::replace(const HandleSet& containers, bool silent) const
+HandleSet JoinLink::replace(const HandleSet& containers,
+                            const HandleMap& replace_map) const
 {
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, _replacements);
+		Handle rep = FreeVariables::replace_nocheck(top, replace_map);
 		replaced.insert(rep);
 	}
 
@@ -187,15 +260,16 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-printf("duude vars=%s\n", oc_to_string(_variables).c_str());
+// printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
+	HandleMap replace_map;
 	HandleSet hs;
 	if (MAXIMAL_JOIN_LINK == get_type())
-		hs = max_container(silent);
+		hs = max_container(as, silent, replace_map);
 	else
-		hs = min_container(silent);
+		hs = min_container(as, silent, replace_map);
 
-	hs = replace(hs, silent);
+	hs = replace(hs, replace_map);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.

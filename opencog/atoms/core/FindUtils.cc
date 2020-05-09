@@ -436,4 +436,15 @@ bool is_closed(const Handle& h, Quotation quotation)
 	return get_free_variables(h, quotation).empty();
 }
 
+bool is_constant(const Handle& h, Quotation quotation)
+{
+	if (not is_closed(h, quotation)) return false;
+
+	if (contains_atomtype(h, TYPE_NODE, quotation)) return false;
+	if (contains_atomtype(h, TYPE_CHOICE, quotation)) return false;
+	if (contains_atomtype(h, TYPE_OUTPUT_LINK, quotation)) return false;
+
+	return true;
+}
+
 } // namespace opencog
