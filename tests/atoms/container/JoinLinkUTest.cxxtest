@@ -64,6 +64,7 @@ public:
 	void test_basic_implicit(void);
 	void test_replace(void);
 	void test_replace_implicit(void);
+	void test_shallow(void);
 	void test_naming(void);
 	void test_region(void);
 	void test_embed(void);
@@ -127,8 +128,8 @@ void JoinLinkUTest::test_basic(void)
 }
 
 /*
- * Most Basic test
- * wiki page: "Motivating example"
+ * Implicit test
+ * wiki page: "PresentLinks are implicit"
  */
 void JoinLinkUTest::test_basic_implicit(void)
 {
@@ -213,8 +214,9 @@ void JoinLinkUTest::test_replace(void)
 }
 
 /*
- * Basic Replacement
+ * Implicit Replacement
  * Wiki page: "Replacement"
+ * Wiki page: "PresentLinks are implicit"
  */
 void JoinLinkUTest::test_replace_implicit(void)
 {
@@ -239,6 +241,41 @@ void JoinLinkUTest::test_replace_implicit(void)
 	Handle E = L(EVALUATION_LINK,
 		N(PREDICATE_NODE, "P"), L(LIST_LINK, B));
 	Handle M = L(MEMBER_LINK, B, N(CONCEPT_NODE, "S"));
+
+	if (results[0] == E)
+	{
+		TS_ASSERT_EQUALS(results[0], E);
+		TS_ASSERT_EQUALS(results[1], M);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[0], M);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Shallow searches
+ * wiki page: "Shallow types"
+ */
+void JoinLinkUTest::test_shallow(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+
+	ValuePtr vp = eval->eval_v("(cog-execute! shallow-join)");
+	printf("shallow-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle X = N(VARIABLE_NODE, "X");
+	Handle E = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "P"), L(LIST_LINK, X));
+	Handle M = L(MEMBER_LINK, X, X);
 
 	if (results[0] == E)
 	{

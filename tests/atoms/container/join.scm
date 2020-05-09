@@ -48,3 +48,9 @@
 	(MinimalJoin
 		(TypedVariable (Variable "X") (Signature (Concept "A")))
 		(Replacement (Variable "X") (Concept "B"))))
+
+; --------------------------------------
+
+(define shallow-join
+	(MaximalJoin
+		(TypedVariable (Variable "X") (Type 'ConceptNode))))
