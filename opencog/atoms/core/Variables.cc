@@ -890,6 +890,7 @@ bool Variables::operator<(const Variables& other) const
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
 	HandleSeq types;
+
 	// Simple type info
 	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
@@ -898,27 +899,30 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 			types.push_back(Handle(createTypeNode(t)));
 	}
 
-	auto dit = _deep_typemap.find(var);
+	const auto& dit = _deep_typemap.find(var);
 	if (dit != _deep_typemap.end())
 	{
-		OC_ASSERT(false, "TODO: support deep type info");
+		for (const Handle& sig: dit->second)
+			types.push_back(sig);
 	}
 
-	auto fit = _fuzzy_typemap.find(var);
+	const auto& fit = _fuzzy_typemap.find(var);
 	if (fit != _fuzzy_typemap.end())
 	{
-		OC_ASSERT(false, "TODO: support fuzzy type info");
+		for (const Handle& fuz: fit->second)
+			types.push_back(fuz);
 	}
 
 	// Check if ill-typed a.k.a invalid type intersection.
-	if(types.empty() and sit != _simple_typemap.end())
+	if (types.empty() and sit != _simple_typemap.end())
 	{
 		const Handle ill_type = createLink(TYPE_CHOICE);
 		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
 	}
 
 	const auto interval = get_interval(var);
-	if (interval != default_interval(var->get_type())) {
+	if (interval != default_interval(var->get_type()))
+	{
 		Handle il = createLink(INTERVAL_LINK,
 		                       Handle(createNumberNode(interval.first)),
 		                       Handle(createNumberNode(interval.second)));
@@ -934,13 +938,16 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 		       createLink(TYPED_VARIABLE_LINK, alt,
 		                  createLink(tcs, TYPE_CHOICE));
 	}
+
 	// No/Default interval found
-	if (!types.empty()) {
+	if (not types.empty())
+	{
 		Handle types_h = types.size() == 1 ?
 		                 types[0] :
 		                 createLink(std::move(types), TYPE_CHOICE);
 		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
 	}
+
 	// No type info
 	return alt;
 }
