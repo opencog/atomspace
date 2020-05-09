@@ -21,6 +21,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -127,18 +128,17 @@ HandleSeq JoinLink::find_starts(AtomSpace* as, const Handle& hpr)
 
 		// We assume its a SignatureLink
 		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
-		Type tsig = sig->get_type();
 
-		// Naked node
-// XXX check instead if its a const
-		if (nameserver().isA(tsig, NODE))
+		// Pure constant (no free variables, no types)
+		if (is_constant(sig))
 			return HandleSeq({sig});
 
-		// Perform a search
+		// The type signature is non-trivial. We perform a search
+		// to find all atoms having that signature.
 		Handle typedecl = _variables.get_type_decl(clause, clause);
 
 		Handle meet = createLink(MEET_LINK, typedecl, hpr);
-// XXX this need to be in a temp atomspace ...
+// XXX this needs to be in a temp atomspace ...
 		meet = as->add_atom(meet);
 		ValuePtr vp = meet->execute();
 printf("duuude vpt=%s\n", vp->to_string().c_str());
