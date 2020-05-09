@@ -75,8 +75,8 @@ protected:
 	struct Choice
 	{
 		Handle clause;
-		Handle best_start;
 		Handle start_term;
+		HandleSeq search_set;
 	};
 	Handle _curr_clause;
 	std::vector<Choice> _choices;
@@ -92,6 +92,7 @@ protected:
 
 	bool setup_neighbor_search(void);
 	bool setup_no_search(void);
+	bool setup_deep_type_search(void);
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 

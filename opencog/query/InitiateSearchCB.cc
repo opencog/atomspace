@@ -196,8 +196,8 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
-				ch.best_start = s;
 				ch.start_term = sbr;
+				ch.search_set = get_incoming_set(s, sbr->get_type());
 				_choices.push_back(ch);
 			}
 			else
@@ -342,8 +342,9 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 	{
 		Choice ch;
 		ch.clause = bestclause;
-		ch.best_start = best_start;
 		ch.start_term = _starter_term;
+		// XXX ?? Why incoming set ???
+		ch.search_set = get_incoming_set(best_start, _starter_term->get_type());
 		_choices.push_back(ch);
 	}
 	else
@@ -362,21 +363,13 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 	{
 		_root = ch.clause;
 		_starter_term = ch.start_term;
-		Handle best_start = ch.best_start;
+		_search_set = ch.search_set;
 
-		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
-		DO_LOG({LAZY_LOG_FINE << "Start term is: "
+		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_string());})
-		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
-
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by
-		// attentional focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
-		_search_set.clear();
-		for (const auto& lptr: iset)
-			_search_set.emplace_back(HandleCast(lptr));
+		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
+		              <<  _root->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -498,12 +491,16 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 		return pme.explore_constant_evaluatables(_pattern->mandatory);
 	}
 
+	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
+	if (setup_deep_type_search())
+		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
+	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
 	if (setup_link_type_search())
 		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
@@ -553,6 +550,120 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	const HandleSeq& oset = clause->getOutgoingSet();
 	for (const Handle& h : oset)
 		find_rarest(h, rarest, count, quotation);
+}
+
+/* ======================================================== */
+
+// Handy utility to find all atoms that are not types or type
+// constructors. (Or free variables, for that matter).
+typedef std::map<Handle, unsigned> DepthMap;
+static void find_deep_constants(const Handle& h,
+                                DepthMap& const_list,
+                                unsigned depth)
+{
+	if (is_constant(h))
+	{
+		const_list.insert({h, depth});
+		return;
+	}
+	if (h->is_link())
+	{
+		if (h->get_type() != TYPE_CHOICE) depth++;
+		for (const Handle& ho : h->getOutgoingSet())
+			find_deep_constants(ho, const_list, depth);
+	}
+}
+
+// Another utility for starting points. We know that the actual
+// grounding for the variable is either `h` or something in it's
+// incoming set, but we don't know which. The matcher will sort
+// it out. Limit the depth so we don't search too much.
+// We use HandleSet not HandleSeq to disambiguate multiple
+// inclusion.
+static void all_starts_rec(const Handle& h,
+                           unsigned depth,
+                           HandleSet& start_set)
+{
+	start_set.insert(h);
+	if (0 == depth) return;
+	depth--;
+	for (const Handle& hi : h->getIncomingSet())
+		all_starts_rec(hi, depth, start_set);
+}
+
+static HandleSeq all_starts(const Handle& h, unsigned depth)
+{
+	HandleSet start_set;
+	all_starts_rec(h, depth, start_set);
+	HandleSeq start_list;
+	for (const Handle& hs : start_set) start_list.emplace_back(hs);
+	return start_list;
+}
+
+// We need to know which clause this is for. Seems that we
+// dont have a map for this; the _pattern->connectivity_map
+// is non-empty only when a var is in two (or more) clauses.
+// So we brute-force search in this loop.
+static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
+{
+	Handle root;
+	for (const Handle& clause: clauses)
+	{
+		if (is_free_in_tree(clause, term))
+		{
+			root = clause;
+			break;
+		}
+	}
+	return root;
+}
+
+/**
+ * Deep types can/should behave a lot like neighbor-search. So try that
+ * next, and use it if possible. Same general idea as the neighbor
+ * search: we look for the thinnest location to start at. The search
+ * for this thinnest bit is very different, though.
+ *
+ * This is heavily used by the JoinLink mechanism.
+ */
+bool InitiateSearchCB::setup_deep_type_search()
+{
+	if (_variables->_deep_typemap.size() == 0)
+		return false;
+
+	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	_choices.clear();
+
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		DO_LOG({LAZY_LOG_FINE
+			 << "Examine deep-type " << oc_to_string(dit.second);})
+
+		// Find something suitable in the type specification.
+		DepthMap starts;
+		for (const Handle& sig: dit.second)
+			find_deep_constants(sig, starts, 0);
+
+		// What clause is the variable in?
+		const Handle& var = dit.first;
+		Handle root = root_of_term (var, _pattern->mandatory);
+		if (nullptr == root) continue;
+
+		for (const auto& pr: starts)
+		{
+			Choice ch;
+			ch.clause = root;
+			ch.start_term = var;
+			ch.search_set = all_starts(pr.first, pr.second);
+			_choices.push_back(ch);
+		}
+	}
+
+	// Did we find anything?
+	return 0 < _choices.size();
 }
 
 /* ======================================================== */
@@ -615,6 +726,8 @@ bool InitiateSearchCB::setup_link_type_search()
  * the allowed variable types (as set with the `set_type_restrictions()`
  * method).  This assumes that the varset contains the variables to be
  * searched over, and that the type restrictions are set up appropriately.
+ * This handles only the simple types; the "deep types" were attempted
+ * earlier.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -652,17 +765,7 @@ bool InitiateSearchCB::setup_variable_search(void)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
 
-#ifdef _IMPLEMENT_ME_LATER
-		// XXX TODO FIXME --- if there is a deep type in the mix, that
-		// will offer a far-superior place to start the search.
-		// Unfortunately, implementing this will require a bit more work,
-		// so we punt for now, as there are no users ....
-		auto dit = _variables->_deep_typemap.find(var);
-		if (_variables->_deep_typemap.end() != dit)
-			throw RuntimeException(TRACE_INFO, "Not implemented!");
-#endif
-
-		auto tit = _variables->_simple_typemap.find(var);
+		const auto& tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
@@ -718,37 +821,30 @@ bool InitiateSearchCB::setup_variable_search(void)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-		if (not _variables->_deep_typemap.empty())
-		{
-			logger().warn("Full deep-type support not implemented!");
-		}
-		else
-		{
 // #define THROW_HARD_ERROR 1
 #ifdef THROW_HARD_ERROR
-			throw SyntaxException(TRACE_INFO,
-				"Error: There were no type restrictions! That's infinite-recursive!");
+		throw SyntaxException(TRACE_INFO,
+			"Error: There were no type restrictions! That's infinite-recursive!");
 #else
-			logger().warn("No type restrictions! Your code has a bug in it!");
-			for (const Handle& var: _variables->varset)
-				logger().warn("Offending variable=%s\n", var->to_string().c_str());
-			for (const Handle& cl : clauses)
-				logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
+		logger().warn("No type restrictions! Your code has a bug in it!");
+		for (const Handle& var: _variables->varset)
+			logger().warn("Offending variable=%s\n", var->to_string().c_str());
+		for (const Handle& cl : clauses)
+			logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
 
-			// Terrible, terrible hack for detecting infinite loops.
-			// When the world is ready for us, we should instead just
-			// throw the hard error, as ifdef'ed above.
-			static const Pattern* prev = nullptr;
-			static unsigned int count = 0;
-			if (prev != _pattern) { prev = _pattern; count = 0; }
-			else {
-				count++;
-				if (5 < count)
-					throw RuntimeException(TRACE_INFO,
-						"Infinite Loop detected! Recursed %u times!", count);
-			}
-#endif
+		// Terrible, terrible hack for detecting infinite loops.
+		// When the world is ready for us, we should instead just
+		// throw the hard error, as ifdef'ed above.
+		static const Pattern* prev = nullptr;
+		static unsigned int count = 0;
+		if (prev != _pattern) { prev = _pattern; count = 0; }
+		else {
+			count++;
+			if (5 < count)
+				throw RuntimeException(TRACE_INFO,
+					"Infinite Loop detected! Recursed %u times!", count);
 		}
+#endif
 
 		// There are no clauses. This is kind-of weird, but it can happen
 		// if all clauses are optional.
@@ -1024,10 +1120,10 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 		for (const Choice& ch : _choices) {
 			ss << indent_p << "choice[" << i << "]:" << std::endl
 			   << indent_pp << "clause = " << ch.clause << std::endl;
-			ss << indent_pp << "best_start:" << std::endl
-			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
 			ss << indent_pp << "start_term:" << std::endl
 			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+			ss << indent_pp << "start points:" << std::endl
+			   << oc_to_string(ch.search_set, indent_ppp) << std::endl;
 		}
 	}
 

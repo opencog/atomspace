@@ -115,7 +115,7 @@ struct Pattern
 	/// Clauses that can be grounded in only one way; thus the result
 	/// of that grounding can be cached, for avoid rechecking.
 	/// These clauses cannot contain evaluatable elements (as that would
-	/// invalidate the results), cannot contiain unordered or choice links
+	/// invalidate the results), cannot contain unordered or choice links
 	/// (as those can have multiple groundings) and can only contain one
 	/// variable (there is no use case for two or more, right now.)
 	/// The idea could be extended to cacheable sub-terms, but this is
