@@ -64,6 +64,7 @@ public:
 	void test_replace(void);
 	void test_naming(void);
 	void test_region(void);
+	void test_embed(void);
 };
 
 void JoinLinkUTest::tearDown(void)
@@ -89,6 +90,7 @@ void JoinLinkUTest::test_basic(void)
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
 
+	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
 	printf("min-join = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
@@ -96,6 +98,7 @@ void JoinLinkUTest::test_basic(void)
 	TS_ASSERT_EQUALS(results.size(), 1);
 	TS_ASSERT_EQUALS(results[0], N(VARIABLE_NODE, "X"));
 
+	// ---------------------------------------------
 	vp = eval->eval_v("(cog-execute! max-join)");
 	printf("max-join = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
@@ -264,6 +267,65 @@ void JoinLinkUTest::test_region(void)
 	// ------------
 	vp = eval->eval_v("(cog-execute! max-blue-rep)");
 	printf("max-blue-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle MG = L(CONTEXT_LINK,
+		N(CONCEPT_NODE, "moon"),
+		L(SIMILARITY_LINK, G, N(CONCEPT_NODE, "unlikely")));
+	TS_ASSERT_EQUALS(results[0], MG);
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Embedded names
+ * Wiki page "Embedded names"
+ */
+void JoinLinkUTest::test_embed(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/blue-sky.scm\")");
+
+	ValuePtr vp = eval->eval_v("(cog-execute! min-thing)");
+	printf("min-thing = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle T = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "is blue"),
+		L(LIST_LINK, N(VARIABLE_NODE, "$thing")));
+	TS_ASSERT_EQUALS(results[0], T);
+
+	// ------------
+	vp = eval->eval_v("(cog-execute! max-thing)");
+	printf("max-thing-out = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle MT = L(CONTEXT_LINK,
+		N(CONCEPT_NODE, "moon"),
+		L(SIMILARITY_LINK, T, N(CONCEPT_NODE, "unlikely")));
+	TS_ASSERT_EQUALS(results[0], MT);
+
+	// ------------
+	vp = eval->eval_v("(cog-execute! min-thing-rep)");
+	printf("min-thing-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle G = N(CONCEPT_NODE, "green cheese");
+	TS_ASSERT_EQUALS(results[0], G);
+
+	// ------------
+	vp = eval->eval_v("(cog-execute! max-thing-rep)");
+	printf("max-thing-rep = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
