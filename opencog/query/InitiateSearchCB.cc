@@ -375,8 +375,8 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 		// attentional focus in the AttentionalFocusCB class...
 		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
 		_search_set.clear();
-		for (const auto& lptr: iset)
-			_search_set.emplace_back(HandleCast(lptr));
+		for (const Handle& lptr: iset)
+			_search_set.emplace_back(lptr);
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -500,7 +500,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
 	if (setup_deep_type_search())
-		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -561,8 +561,8 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 
 /* ======================================================== */
 //
-// Handy utility to find all the constants under h.
-void find_constants(const Handle& h, HandleSeq& const_list)
+// Handy utility to find all the constants underneath h.
+static void find_constants(const Handle& h, HandleSeq& const_list)
 {
 	if (is_constant(h))
 	{
@@ -574,6 +574,19 @@ void find_constants(const Handle& h, HandleSeq& const_list)
 		for (const Handle& ho : h->getOutgoingSet())
 			find_constants(ho, const_list);
 	}
+}
+
+// Another utility for starting points. We know that the actual
+// grounding for the variable is either `h` or something in it's
+// incoming set, but we don't know which. The matcher will sort
+// it out.  Biggest problem here is that we are going too high up
+// the incoming set, which gives an inefficient search. Oh well.
+// FIXME -- we don't have to go any higher than the deep type...
+static void all_starts(const Handle& h, HandleSeq& start_list)
+{
+	start_list.emplace_back(h);
+	for (const Handle& hi : h->getIncomingSet())
+		all_starts(hi, start_list);
 }
 
 /**
@@ -593,10 +606,8 @@ bool InitiateSearchCB::setup_deep_type_search()
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	size_t count = SIZE_MAX;
 	Handle best_start = Handle::UNDEFINED;
-	Handle best_clause = Handle::UNDEFINED;
-	Handle best_term = Handle::UNDEFINED;
+	size_t count = SIZE_MAX;
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
@@ -610,6 +621,10 @@ bool InitiateSearchCB::setup_deep_type_search()
 			find_constants(sig, starts);
 		}
 
+		// We need to know which clause this is for. Seems that we
+		// dont have a map for this; the _pattern->connectivity_map
+		// is non-empty only when a var is in two (or more) clauses.
+		// So we brute-force search in this loop.
 		const Handle& var = dit.first;
 		Handle root = Handle::UNDEFINED;
 		for (const Handle& clause: _pattern->mandatory)
@@ -622,29 +637,30 @@ bool InitiateSearchCB::setup_deep_type_search()
 		}
 		if (nullptr == root) continue;
 
-		// Find the thinest of the set.
+		// Of all the non-type atoms if the typespec, find the one
+		// with the thinnest incoming set.
 		for (const Handle& cand: starts)
 		{
 			size_t num = cand->getIncomingSetSize();
 			if (num < count)
 			{
-				best_clause = root;
-				best_term = var;
+				_root = root;
+				_starter_term = var;
 				best_start = cand;
 				count = num;
 			}
 		}
 	}
 
+	// We found something. Create a list of suitable starting points.
 	if (best_start)
 	{
-		Choice ch;
-		ch.clause = best_clause;
-		ch.best_start = best_start;
-		ch.start_term = best_term;
-		_choices.push_back(ch);
+		_search_set.clear();
+		all_starts(best_start, _search_set);
 		return true;
 	}
+
+	// We failed. Boo.
 	return false;
 }
 
