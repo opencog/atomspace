@@ -115,10 +115,12 @@ void JoinLink::setup_replacements(void)
 
 /// Given the PresentLink in the body of the JoinLink, examine
 /// the atomspace to see ... what can be found that matches it.
-HandleSeq JoinLink::find_starts(AtomSpace* as, const Handle& hpr)
+HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 {
 	Handle clause(hpr->getOutgoingAtom(0));
 	Type ct = clause->get_type();
+
+	HandleMap replace_map;
 
 	// If the user just said `(Present (Variable X))`
 	if (VARIABLE_NODE == ct)
@@ -131,7 +133,10 @@ HandleSeq JoinLink::find_starts(AtomSpace* as, const Handle& hpr)
 
 		// Pure constant (no free variables, no types)
 		if (is_constant(sig))
-			return HandleSeq({sig});
+		{
+			replace_map.insert({clause, sig});
+			return replace_map;
+		}
 
 		// The type signature is non-trivial. We perform a search
 		// to find all atoms having that signature.
@@ -141,16 +146,20 @@ HandleSeq JoinLink::find_starts(AtomSpace* as, const Handle& hpr)
 // XXX this needs to be in a temp atomspace ...
 		meet = as->add_atom(meet);
 		ValuePtr vp = meet->execute();
-printf("duuude vpt=%s\n", vp->to_string().c_str());
-		return LinkValueCast(vp)->to_handle_seq();
 
+		// The MeetLink returned everything our variable could be...
+		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+			replace_map.insert({clause, hst});
+		return replace_map;
 	}
-	return HandleSeq();
+	throw RuntimeException(TRACE_INFO, "Not supported yet!");
+	return HandleMap();
 }
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(AtomSpace* as, bool silent)
+HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
+                                  HandleMap& replace_map)
 {
 	HandleSet containers;
 	for (size_t i=1; i<_outgoing.size(); i++)
@@ -158,10 +167,13 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent)
 		const Handle& h(_outgoing[i]);
 		if (h->get_type() != PRESENT_LINK) continue;
 
-		HandleSeq starts(find_starts(as, h));
+		HandleMap start_map(find_starts(as, h));
 
-		for (const Handle& starter: starts)
-			containers.insert(starter);
+		for (const auto& pr: start_map)
+		{
+			containers.insert(pr.second);
+			replace_map.insert(pr);
+		}
 	}
 
 	return containers;
@@ -192,9 +204,10 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(AtomSpace* as, bool silent)
+HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
+                                  HandleMap& replace_map)
 {
-	HandleSet hs = min_container(as, silent);
+	HandleSet hs = min_container(as, silent, replace_map);
 	HandleSet containers;
 	for (const Handle& h: hs)
 	{
@@ -232,11 +245,12 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 
 printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
+	HandleMap replace_map;
 	HandleSet hs;
 	if (MAXIMAL_JOIN_LINK == get_type())
-		hs = max_container(as, silent);
+		hs = max_container(as, silent, replace_map);
 	else
-		hs = min_container(as, silent);
+		hs = min_container(as, silent, replace_map);
 
 	hs = replace(hs, silent);
 
