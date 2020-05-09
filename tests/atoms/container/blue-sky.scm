@@ -60,3 +60,18 @@
 				(Evaluation (Predicate "is blue") (List (Type 'ConceptNode)))))
 		(Present (Variable "X"))))
 
+(define max-blue-rep
+	(MaximalJoin
+		(TypedVariable (Variable "X")
+			(Signature
+				(Evaluation (Predicate "is blue") (List (Type 'ConceptNode)))))
+		(Replacement (Variable "X") (Concept "green cheese"))
+		(Present (Variable "X"))))
+
+(define min-blue-rep
+	(MinimalJoin
+		(TypedVariable (Variable "X")
+			(Signature
+				(Evaluation (Predicate "is blue") (List (Type 'ConceptNode)))))
+		(Replacement (Variable "X") (Concept "green cheese"))
+		(Present (Variable "X"))))
