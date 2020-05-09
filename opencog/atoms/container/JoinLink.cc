@@ -184,11 +184,9 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
 	HandleSet containers;
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (const auto& memb : _mandatory)
 	{
-		const Handle& h(_outgoing[i]);
-		if (h->get_type() != PRESENT_LINK) continue;
-
+		const Handle& h(memb.first);
 		HandleMap start_map(find_starts(as, h));
 
 		for (const auto& pr: start_map)
