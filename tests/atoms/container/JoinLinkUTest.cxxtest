@@ -65,6 +65,8 @@ public:
 	void test_replace(void);
 	void test_replace_implicit(void);
 	void test_shallow(void);
+	void test_empty(void);
+
 	void test_naming(void);
 	void test_region(void);
 	void test_embed(void);
@@ -92,6 +94,7 @@ void JoinLinkUTest::test_basic(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
@@ -136,6 +139,7 @@ void JoinLinkUTest::test_basic_implicit(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! implicit-min-join)");
@@ -180,6 +184,7 @@ void JoinLinkUTest::test_replace(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! min-replace)");
 	printf("min-replace = %s\n", vp->to_string().c_str());
@@ -223,6 +228,7 @@ void JoinLinkUTest::test_replace_implicit(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! implicit-min-replace)");
 	printf("min-replace = %s\n", vp->to_string().c_str());
@@ -265,6 +271,7 @@ void JoinLinkUTest::test_shallow(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! shallow-join)");
 	printf("shallow-join = %s\n", vp->to_string().c_str());
@@ -287,6 +294,49 @@ void JoinLinkUTest::test_shallow(void)
 		TS_ASSERT_EQUALS(results[0], M);
 		TS_ASSERT_EQUALS(results[1], E);
 	}
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic test but on empty atompsace (no data, unsatisfiable)
+ * wiki page: "Motivating example"
+ */
+void JoinLinkUTest::test_empty(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+
+	// ---------------------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
+	printf("min-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+	TS_ASSERT_EQUALS(results[0], N(VARIABLE_NODE, "X"));
+
+	// ---------------------------------------------
+	vp = eval->eval_v("(cog-execute! max-join)");
+	printf("max-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 0);
+
+	// ---------------------------------------------
+	vp = eval->eval_v("(cog-execute! min-replace)");
+	printf("min-replace = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+	TS_ASSERT_EQUALS(results[0], N(CONCEPT_NODE, "B"));
+
+	// ---------------------------------------------
+	vp = eval->eval_v("(cog-execute! max-replace)");
+	printf("max-replace = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 0);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -1,11 +1,9 @@
 ;
 ; join.scm
 ; JoinLink unit test.
+; See `join-content.scm` for the data that these search for.
 
 (use-modules (opencog) (opencog exec))
-
-(Member (Concept "A") (Concept "S"))
-(Evaluation (Predicate "P") (List (Concept "A")))
 
 ; --------------------------------------
 (define max-join
