@@ -560,19 +560,24 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 }
 
 /* ======================================================== */
-//
-// Handy utility to find all the constants underneath h.
-static void find_constants(const Handle& h, HandleSeq& const_list)
+
+// Handy utility to find all atoms that are not types or type
+// constructors. (Or free variables, for that matter).
+typedef std::map<Handle, unsigned> DepthMap;
+static void find_deep_constants(const Handle& h,
+                                DepthMap& const_list,
+                                size_t depth)
 {
 	if (is_constant(h))
 	{
-		const_list.push_back(h);
+		const_list.insert({h, depth});
 		return;
 	}
 	if (h->is_link())
 	{
+		if (h->get_type() != TYPE_CHOICE) depth++;
 		for (const Handle& ho : h->getOutgoingSet())
-			find_constants(ho, const_list);
+			find_deep_constants(ho, const_list, depth);
 	}
 }
 
@@ -615,10 +620,10 @@ bool InitiateSearchCB::setup_deep_type_search()
 			 << "Examine deep-type " << oc_to_string(dit.second);})
 
 		// Find something suitable in the type specification.
-		HandleSeq starts;
+		DepthMap starts;
 		for (const Handle& sig: dit.second)
 		{
-			find_constants(sig, starts);
+			find_deep_constants(sig, starts, 0);
 		}
 
 		// We need to know which clause this is for. Seems that we
@@ -639,14 +644,14 @@ bool InitiateSearchCB::setup_deep_type_search()
 
 		// Of all the non-type atoms if the typespec, find the one
 		// with the thinnest incoming set.
-		for (const Handle& cand: starts)
+		for (const auto& pr: starts)
 		{
-			size_t num = cand->getIncomingSetSize();
+			size_t num = pr.first->getIncomingSetSize();
 			if (num < count)
 			{
 				_root = root;
 				_starter_term = var;
-				best_start = cand;
+				best_start = pr.first;
 				count = num;
 			}
 		}
