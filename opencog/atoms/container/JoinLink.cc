@@ -109,8 +109,26 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 
 /* ================================================================= */
 
-/// Given the PresentLink in the body of the JoinLink, examine
+/// Given one PresentLink in the body of the JoinLink, examine
 /// the atomspace to see ... what can be found that matches it.
+/// This returns a "replacement map" - a map of pairs, from a
+/// concrete atom in the atomspace, to the variable in the
+/// the PresentLink. For example, suppose that
+///
+///    (Join
+///       (TypedVariable (Variable "X")
+///          (Signature (Member (Variable "X") (Concept "beach"))))
+///       (Present (Variable "X"))
+///
+/// and that
+///
+///    (Member (Concept "sea") (Concept "beach"))
+///    (Member (Concept "sand") (Concept "beach"))
+///
+/// then the returned HandleMap will have two pairs, one for each of
+/// of these MemberLinks (as the first elt of the pair) and will have
+/// `(Variable "X")` as the second elt of both pairs.
+///
 HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
 {
 	Handle clause(hpr->getOutgoingAtom(0));
