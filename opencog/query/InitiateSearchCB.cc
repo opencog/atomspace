@@ -493,7 +493,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
 	if (setup_deep_type_search())
-		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+		return choice_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
@@ -604,8 +604,7 @@ bool InitiateSearchCB::setup_deep_type_search()
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	Handle best_start = Handle::UNDEFINED;
-	size_t count = SIZE_MAX;
+	_choices.clear();
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
@@ -635,31 +634,21 @@ bool InitiateSearchCB::setup_deep_type_search()
 		}
 		if (nullptr == root) continue;
 
-		// Of all the non-type atoms if the typespec, find the one
-		// with the thinnest incoming set.
 		for (const auto& pr: starts)
 		{
-			size_t num = pr.first->getIncomingSetSize();
-			if (num < count)
-			{
-				_root = root;
-				_starter_term = var;
-				best_start = pr.first;
-				count = num;
-			}
+			Choice ch;
+			ch.clause = root;
+			ch.start_term = var;
+			HandleSeq seas;
+			all_starts(pr.first, seas);
+			ch.search_set = seas;
+			_choices.push_back(ch);
+
 		}
 	}
 
-	// We found something. Create a list of suitable starting points.
-	if (best_start)
-	{
-		_search_set.clear();
-		all_starts(best_start, _search_set);
-		return true;
-	}
-
-	// We failed. Boo.
-	return false;
+	// Did we find anything?
+	return 0 < _choices.size();
 }
 
 /* ======================================================== */
