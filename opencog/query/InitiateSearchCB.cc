@@ -600,6 +600,23 @@ static HandleSeq all_starts(const Handle& h, unsigned depth)
 	return start_list;
 }
 
+// Find the first link type that is NOT a type specifier.
+static Type find_plain_type(const Handle& h)
+{
+	Type t = h->get_type();
+	if (not nameserver().isA(t, TYPE_NODE) and
+	    not nameserver().isA(t, TYPE_CHOICE) and
+	    not nameserver().isA(t, TYPE_OUTPUT_LINK))
+		return t;
+	if (h->is_node()) return NOTYPE;
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		t = find_plain_type(ho);
+		if (NOTYPE != t) return t;
+	}
+	return NOTYPE;
+}
+
 // We need to know which clause this is for. Seems that we
 // dont have a map for this; the _pattern->connectivity_map
 // is non-empty only when a var is in two (or more) clauses.
@@ -639,13 +656,14 @@ bool InitiateSearchCB::setup_deep_type_search()
 
 	for (const auto& dit: _variables->_deep_typemap)
 	{
-		DO_LOG({LAZY_LOG_FINE
-			 << "Examine deep-type " << oc_to_string(dit.second);})
-
-		// What clause is the variable in?
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
 		const Handle& var = dit.first;
 		Handle root = root_of_term (var, _pattern->mandatory);
 		if (nullptr == root) continue;
+
+		DO_LOG({LAZY_LOG_FINE
+			 << "Examine deep-type " << oc_to_string(dit.second);})
 
 		// Find something suitable in the type specification.
 		DepthMap starts;
@@ -660,13 +678,44 @@ bool InitiateSearchCB::setup_deep_type_search()
 			ch.search_set = all_starts(pr.first, pr.second);
 			_choices.push_back(ch);
 		}
+
+		// We only need enough startng points to get started;
+		// the matcher will crawl the rest of the graph.
+		break;
 	}
 
 	// Did we find anything?
 	if (0 < _choices.size()) return true;
 
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
+		const Handle& var = dit.first;
+		Handle root = root_of_term (var, _pattern->mandatory);
+		if (nullptr == root) continue;
 
-	return false;
+		DO_LOG({LAZY_LOG_FINE
+			 << "Re-examine deep-type " << oc_to_string(dit.second);})
+
+		// Find the first link type that is not a type
+		Type t = NOTYPE;
+		for (const Handle& sig: dit.second)
+		{
+			t = find_plain_type(sig);
+			if (NOTYPE != t) break;
+		}
+		if (NOTYPE == t) continue;
+
+		Choice ch;
+		ch.clause = root;
+		ch.start_term = var;
+		_as->get_handles_by_type(ch.search_set, t);
+		_choices.push_back(ch);
+		break;
+	}
+
+	return 0 < _choices.size();
 }
 
 /* ======================================================== */
