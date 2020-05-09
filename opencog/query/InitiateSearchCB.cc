@@ -642,15 +642,15 @@ bool InitiateSearchCB::setup_deep_type_search()
 		DO_LOG({LAZY_LOG_FINE
 			 << "Examine deep-type " << oc_to_string(dit.second);})
 
-		// Find something suitable in the type specification.
-		DepthMap starts;
-		for (const Handle& sig: dit.second)
-			find_deep_constants(sig, starts, 0);
-
 		// What clause is the variable in?
 		const Handle& var = dit.first;
 		Handle root = root_of_term (var, _pattern->mandatory);
 		if (nullptr == root) continue;
+
+		// Find something suitable in the type specification.
+		DepthMap starts;
+		for (const Handle& sig: dit.second)
+			find_deep_constants(sig, starts, 0);
 
 		for (const auto& pr: starts)
 		{
@@ -663,7 +663,10 @@ bool InitiateSearchCB::setup_deep_type_search()
 	}
 
 	// Did we find anything?
-	return 0 < _choices.size();
+	if (0 < _choices.size()) return true;
+
+
+	return false;
 }
 
 /* ======================================================== */
