@@ -98,7 +98,6 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 			if (pr.second != from) continue;
 			replace_map[pr.first] = h->getOutgoingAtom(1);
 			found = true;
-			break;
 		}
 
 		if (not found)
