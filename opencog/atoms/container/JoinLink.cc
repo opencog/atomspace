@@ -43,6 +43,7 @@ void JoinLink::init(void)
 			"JoinLinks are private and cannot be instantiated.");
 
 	validate();
+	setup_meets();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -56,6 +57,46 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
+}
+
+/* ================================================================= */
+
+/// setup_meets() -- create a search that can find the all of
+/// the locations that will be joined together.
+void JoinLink::setup_meets(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& h(_outgoing[i]);
+		if (h->get_type() != PRESENT_LINK) continue;
+		setup_clause(h);
+	}
+}
+
+/* ================================================================= */
+
+/// Given one PresentLink in the body of the JoinLink, create
+/// a map with all of the variables that appear in it, and create
+/// a MeetLink that can be used to find the atoms to be joined.
+///
+void JoinLink::setup_clause(const Handle& clause)
+{
+	// Find the variables in the clause
+	FreeVariables fv;
+	fv.find_variables(clause);
+	_mandatory.insert({clause, fv.varset});
+
+	// Build a Meet
+	HandleSeq vardecls;
+	for (const Handle& var : fv.varset)
+	{
+		Handle typedecl(_variables.get_type_decl(var, var));
+		vardecls.emplace_back(typedecl);
+	}
+
+	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
+	Handle meet(createLink(MEET_LINK, hdecls, clause));
+	_meets.insert({clause, meet});
 }
 
 /* ================================================================= */
