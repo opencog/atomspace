@@ -22,3 +22,15 @@
 		(VariableList
 			(TypedVariable (Variable "X") (Signature (Concept "A")))
 			(TypedVariable (Variable "Y") (Signature (Concept "B"))))))
+
+(define min-filter-ap
+	(MinimalJoin
+		(VariableList
+			(TypedVariable (Variable "Y") (Signature (Concept "B")))
+			(TypedVariable (Variable "P") (Type 'PredicateNode)))))
+
+(define max-filter-ap
+	(MaximalJoin
+		(VariableList
+			(TypedVariable (Variable "Y") (Signature (Concept "B")))
+			(TypedVariable (Variable "P") (Type 'PredicateNode)))))

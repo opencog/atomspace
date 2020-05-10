@@ -61,6 +61,7 @@ public:
 	// Test the examples on the wiki page
 	// https://wiki.opencog.org/w/JoinLink
 	void test_filter(void);
+	void test_filter_again(void);
 };
 
 void TrueJoinUTest::tearDown(void)
@@ -118,6 +119,64 @@ void TrueJoinUTest::test_filter(void)
 
 	Handle PAB = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pab"), LAB);
 	Handle PABC = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pabc"), LABC);
+
+	if (results[0] == PAB)
+	{
+		TS_ASSERT_EQUALS(results[0], PAB);
+		TS_ASSERT_EQUALS(results[1], PABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], PAB);
+		TS_ASSERT_EQUALS(results[0], PABC);
+	}
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Wiki page "Filter intersection, again"
+ */
+void TrueJoinUTest::test_filter_again(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
+
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-filter-ap)");
+	printf("min-filter-ab = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle A = N(CONCEPT_NODE, "A");
+	Handle Y = N(VARIABLE_NODE, "Y");
+	Handle P = N(VARIABLE_NODE, "P");
+	Handle C = N(CONCEPT_NODE, "C");
+	Handle LAB = L(LIST_LINK, A, Y);
+	Handle LABC = L(LIST_LINK, A, Y, C);
+	Handle PAB = L(EVALUATION_LINK, P, LAB);
+	Handle PABC = L(EVALUATION_LINK, P, LABC);
+
+	if (results[0] == PAB)
+	{
+		TS_ASSERT_EQUALS(results[0], PAB);
+		TS_ASSERT_EQUALS(results[1], PABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], PAB);
+		TS_ASSERT_EQUALS(results[0], PABC);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-filter-ap)");
+	printf("max-filter-ab = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
 
 	if (results[0] == PAB)
 	{
