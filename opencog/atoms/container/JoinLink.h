@@ -53,6 +53,7 @@ protected:
 
 	HandleSet upper_set(AtomSpace*, bool, HandleMap&) const;
 	HandleSet supremum(AtomSpace*, bool, HandleMap&) const;
+	HandleSet supr_one(AtomSpace*, bool, HandleMap&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 	HandleSet min_container(AtomSpace*, bool, HandleMap&) const;

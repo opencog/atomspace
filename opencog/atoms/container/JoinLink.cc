@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -283,6 +284,9 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
                              HandleMap& replace_map) const
 {
+	if (_mandatory.size() == 1)
+		return supr_one(as, silent, replace_map);
+
 	HandleSet upset = upper_set(as, silent, replace_map);
 
 	HandleSet non_minimal;
@@ -307,28 +311,29 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
+HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
+                             HandleMap& replace_map) const
+{
+	OC_ASSERT(_mandatory.size() == 1);
+
+	const Handle& h(_mandatory.begin()->first);
+	HandleMap start_map(supremum_map(as, h));
+
+	HandleSet containers;
+	for (const auto& pr: start_map)
+	{
+		containers.insert(pr.first);
+		replace_map.insert(pr);
+	}
+	return containers;
+}
+/* ================================================================= */
+
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
-#if 0
-	HandleSet containers;
-	for (const auto& memb : _mandatory)
-	{
-		const Handle& h(memb.first);
-		HandleMap start_map(supremum_map(as, h));
-
-		for (const auto& pr: start_map)
-		{
-			containers.insert(pr.first);
-			replace_map.insert(pr);
-		}
-	}
-#endif
-HandleSet containers =
-supremum(as, silent, replace_map);
-
+	HandleSet containers(supremum(as, silent, replace_map));
 	fixup_replacements(replace_map);
-
 	return containers;
 }
 
@@ -363,9 +368,7 @@ HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
 	HandleSet hs = min_container(as, silent, replace_map);
 	HandleSet containers;
 	for (const Handle& h: hs)
-	{
 		find_top(containers, h);
-	}
 
 	return containers;
 }
