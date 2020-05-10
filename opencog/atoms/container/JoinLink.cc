@@ -61,6 +61,14 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		if (clause->get_type() == PRESENT_LINK) continue;
+		if (clause->get_type() == REPLACEMENT_LINK) continue;
+		// if (clause->is_evaluatable()) continue;
+		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
+	}
 }
 
 /* ================================================================= */
