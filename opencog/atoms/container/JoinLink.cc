@@ -279,16 +279,33 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
-/// Compute the supremum of the upper set -- the smallest set of
-/// elements that aren't contained in any other elements.
+/// Return the supremum of all the clauses. If there is only one
+/// clause, it's easy, just get the set of principal elements for
+/// that one clause, and we are done. If there is more than one clause
+/// then it's harder: we have to:
+/// (1) get the principal elements for each clause.
+/// (2) get the principal filters for each principal element.
+/// (3) intersect the filters to get the upper set of the clauses.
+/// (4) remove all elements that are not minimal.
+/// The general concern here is that this algo is inefficient, but
+/// I cannot think of any better way of doing it. In particular,
+/// walking to the top for step (2) seems unavoidable, and I cannot
+/// think of any way of combining steps (2) and (3) that would avoid
+/// step (4) ... or even would reduce the work for stpe (4). Oh well.
+///
+/// TODO: it might be faster to use hash tables instead of rb-trees
+/// i.e. to use UnorderedHandleSet instead of HandleSet. XXX FIXME.
 HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
                              HandleMap& replace_map) const
 {
+	// If there is only one clause, we do not have to get
+	// upper sets, and trim them back down. Avoid extra work.
 	if (_mandatory.size() == 1)
 		return supr_one(as, silent, replace_map);
 
 	HandleSet upset = upper_set(as, silent, replace_map);
 
+	// Create a set of non-minimal elements.
 	HandleSet non_minimal;
 	for (const Handle& h : upset)
 	{
@@ -302,6 +319,8 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 			}
 		}
 	}
+
+	// Remove the non-minimal elements.
 	HandleSet minimal;
 	std::set_difference(upset.begin(), upset.end(),
 	                    non_minimal.begin(), non_minimal.end(),
@@ -311,6 +330,8 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
+/// If there is only one clause, then the supremum is just the
+/// principal element for that clause. Special case, for speed.
 HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
                              HandleMap& replace_map) const
 {
@@ -327,6 +348,7 @@ HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
 	}
 	return containers;
 }
+
 /* ================================================================= */
 
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
@@ -355,9 +377,7 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 	}
 
 	for (const Handle& ih: is)
-	{
 		find_top(containers, ih);
-	}
 }
 
 /* ================================================================= */
@@ -399,8 +419,6 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
-
-// printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
 	HandleMap replace_map;
 	HandleSet hs;
