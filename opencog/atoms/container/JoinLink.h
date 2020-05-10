@@ -44,6 +44,10 @@ protected:
 	void setup_clause(const Handle&, const HandleSeq&);
 	void setup_meets(void);
 
+	// A list of all evaluatable clauses.
+	HandleSeq _evaluatable;
+	void setup_evaluatable(void);
+
 	HandleMap principal_map(AtomSpace*, const Handle&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
 
@@ -51,12 +55,13 @@ protected:
 	HandleSet supremum(AtomSpace*, bool, HandleMap&) const;
 	HandleSet supr_one(AtomSpace*, bool, HandleMap&) const;
 
+	void constrain(AtomSpace*, bool) const;
+
 	void fixup_replacements(HandleMap&) const;
 	HandleSet replace(const HandleSet&, const HandleMap&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
-	HandleSet min_container(AtomSpace*, bool, HandleMap&) const;
-	HandleSet max_container(AtomSpace*, bool, HandleMap&) const;
+	HandleSet container(AtomSpace*, bool) const;
 
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 

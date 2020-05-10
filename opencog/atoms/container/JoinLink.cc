@@ -48,6 +48,7 @@ void JoinLink::init(void)
 
 	validate();
 	setup_meets();
+	setup_evaluatable();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -66,8 +67,20 @@ void JoinLink::validate(void)
 		const Handle& clause(_outgoing[i]);
 		if (clause->get_type() == PRESENT_LINK) continue;
 		if (clause->get_type() == REPLACEMENT_LINK) continue;
-		// if (clause->is_evaluatable()) continue;
+		if (clause->is_evaluatable()) continue;
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
+	}
+}
+
+/* ================================================================= */
+
+void JoinLink::setup_evaluatable(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		if (not clause->is_evaluatable()) continue;
+		_evaluatable.push_back(clause);
 	}
 }
 
@@ -239,7 +252,7 @@ HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
 /// it's  incoming tree into the handle-set. This recursively walks to
 /// the top, till there is no more. Of course, this can get large.
 void JoinLink::principal_filter(HandleSet& containers,
-                                    const Handle& h) const
+                                const Handle& h) const
 {
 	// Ignore type sepcifications, other containers!
 	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
@@ -413,16 +426,6 @@ HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
-HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map) const
-{
-	HandleSet containers(supremum(as, silent, replace_map));
-	fixup_replacements(replace_map);
-	return containers;
-}
-
-/* ================================================================= */
-
 /// find_top() - walk upwards from `h` and insert topmost atoms into
 /// the container set.  This recursively walks to the top, until there
 /// is nothing more above.
@@ -445,15 +448,21 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map) const
+HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
-	HandleSet hs = min_container(as, silent, replace_map);
-	HandleSet containers;
-	for (const Handle& h: hs)
-		find_top(containers, h);
+	HandleMap replace_map;
+	HandleSet containers(supremum(as, silent, replace_map));
+	fixup_replacements(replace_map);
+	if (MAXIMAL_JOIN_LINK == get_type())
+	{
+		HandleSet tops;
+		for (const Handle& h: containers)
+			find_top(tops, h);
+		containers.swap(tops);
+	}
 
-	return containers;
+	// Perform the actual rewriting.
+	return replace(containers, replace_map);
 }
 
 /* ================================================================= */
@@ -483,22 +492,12 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-	HandleMap replace_map;
-	HandleSet hs;
-	if (MAXIMAL_JOIN_LINK == get_type())
-		hs = max_container(as, silent, replace_map);
-	else
-		hs = min_container(as, silent, replace_map);
-
-	// Perform the actual rewriting.
-	hs = replace(hs, replace_map);
+	HandleSet hs = container(as, silent);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.
 	for (const Handle& h : hs)
-	{
 		qvp->push(as->add_atom(h));
-	}
 
 	qvp->close();
 	return qvp;
