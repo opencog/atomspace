@@ -79,14 +79,15 @@ void TrueJoinUTest::setUp(void)
 /*
  * Wiki page "Filter intersection"
  */
-void TrueJoinUTest::test_naming(void)
+void TrueJoinUTest::test_filter(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
 
-	ValuePtr vp = eval->eval_v("(cog-execute! filter-ab)");
-	printf("filter-ab = %s\n", vp->to_string().c_str());
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-filter-ab)");
+	printf("min-filter-ab = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 2);
@@ -94,10 +95,29 @@ void TrueJoinUTest::test_naming(void)
 	Handle X = N(VARIABLE_NODE, "X");
 	Handle Y = N(VARIABLE_NODE, "Y");
 	Handle C = N(CONCEPT_NODE, "C");
-	Handle PAB = L(EVALUATION_LINK,
-		N(PREDICATE_NODE, "Pab"), L(LIST_LINK, X, Y));
-	Handle PABC = L(EVALUATION_LINK,
-		N(PREDICATE_NODE, "Pabc"), L(LIST_LINK, X, Y, C));
+	Handle LAB = L(LIST_LINK, X, Y);
+	Handle LABC = L(LIST_LINK, X, Y, C);
+
+	if (results[0] == LAB)
+	{
+		TS_ASSERT_EQUALS(results[0], LAB);
+		TS_ASSERT_EQUALS(results[1], LABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], LAB);
+		TS_ASSERT_EQUALS(results[0], LABC);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-filter-ab)");
+	printf("max-filter-ab = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle PAB = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pab"), LAB);
+	Handle PABC = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pabc"), LABC);
 
 	if (results[0] == PAB)
 	{
