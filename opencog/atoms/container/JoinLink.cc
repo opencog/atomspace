@@ -80,10 +80,10 @@ void JoinLink::setup_meets(void)
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		_mandatory.insert({clause, fv.varset});
+		_mandatory.insert({clause, fv.varseq});
 
 		// Create a MeetLink for each mandatory clause.
-		setup_clause(clause, fv.varset);
+		setup_clause(clause, fv.varseq);
 
 		done.merge(fv.varset);
 	}
@@ -106,11 +106,11 @@ void JoinLink::setup_meets(void)
 /// a MeetLink that can be used to find the atoms to be joined.
 ///
 void JoinLink::setup_clause(const Handle& clause,
-                            const HandleSet& varset)
+                            const HandleSeq& varseq)
 {
 	// Build a Meet
 	HandleSeq vardecls;
-	for (const Handle& var : varset)
+	for (const Handle& var : varseq)
 	{
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);
@@ -157,31 +157,39 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /* ================================================================= */
 
 /// Given one mandatory-presence term in the body of the JoinLink,
-/// obtain every atom that satisfies the type constraints it specifies.
-/// Its a map because ... argh ... this will change/needs refactoring
-/// maybe, depending on the structure of the presence term.
-/// This returns a "replacement map" - a map of pairs, from a
-/// concrete atom in the atomspace, to the variable in the
-/// the PresentLink. For example, suppose that
+/// obtain every atom that satisfies it, including all relevant type
+/// constraints it specifies. Return a "replacement map", which
+/// pairs up atoms in the atomspace with variables in the PresentLink.
+///
+/// An example: one is looking for MemberLinks:
 ///
 ///    (Join
-///       (TypedVariable (Variable "X")
-///          (Signature (Member (Variable "X") (Concept "beach"))))
-///       (Present (Variable "X"))
+///       (VariableList
+///          (TypedVariable (Variable "X") (Type 'ConceptNode))
+///          (TypedVariable (Variable "Y") (Type 'ConceptNode)))
+///       (Present (Member (Variable "X") (Variable "Y"))))
 ///
-/// and that
+/// and that the atomspace contains:
 ///
 ///    (Member (Concept "sea") (Concept "beach"))
 ///    (Member (Concept "sand") (Concept "beach"))
 ///
-/// then the returned HandleMap will have two pairs, one for each of
-/// of these MemberLinks (as the first elt of the pair) and will have
-/// `(Variable "X")` as the second elt of both pairs.
+/// then the returned HandleMap will have three pairs, of the form
 ///
-/// This is the formally speaking the "supremum" of the presence term:
-/// its the smallest set of atoms that satisfy the constraints...
+///    { (Concept "sea"),   (Variable "X") }
+///    { (Concept "sand"),  (Variable "X") }
+///    { (Concept "beach"), (Variable "Y") }
 ///
-HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
+/// This is the "supremum" of the PresentLink: it is the smallest set of
+/// atoms that satisfy the constraints given by the PresentLink and the
+/// type constraints on the variables. The returned elements are the
+/// "principal elements" from which the "principal filters" will be
+/// constructed.
+///
+/// Explained a different way: this performs a wild-card search, to find
+/// all of the principal elements specified by the wild-cards.
+///
+HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
 {
 	const bool TRANSIENT_SPACE = true;
 
@@ -192,27 +200,37 @@ HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
-	const HandleSet& varset(_mandatory.at(clause));
-	if (1 != varset.size())
-		throw RuntimeException(TRACE_INFO, "Not supported yet!");
-	const Handle& var(*varset.begin());
+	const HandleSeq& varseq(_mandatory.at(clause));
+	size_t vsize = varseq.size();
+	if (1 == vsize)
+	{
+		const Handle& var(varseq[0]);
+		HandleMap replace_map;
+		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+			replace_map.insert({hst, var});
+		return replace_map;
+	}
 
+	// If we are here, then the MeetLink has returned a collection
+	// of ListLinks, holding the variable values in the lists.
 	HandleMap replace_map;
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
-		replace_map.insert({hst, var});
+		const HandleSeq& glist(hst->getOutgoingSet());
+		for (size_t i=0; i<vsize; i++)
+			replace_map.insert({glist[i], varseq[i]});
 	}
 	return replace_map;
 }
 
 /* ================================================================= */
 
-/// get_principal_filter() - Get everything that contains `h`.
+/// principal_filter() - Get everything that contains `h`.
 /// This is the "principal filter" on the "principal element" `h`.
 /// Algorithmically: walk upwards from h and insert everything in
 /// it's  incoming tree into the handle-set. This recursively walks to
 /// the top, till there is no more. Of course, this can get large.
-void JoinLink::get_principal_filter(HandleSet& containers,
+void JoinLink::principal_filter(HandleSet& containers,
                                     const Handle& h) const
 {
 	// Ignore type sepcifications, other containers!
@@ -224,14 +242,50 @@ void JoinLink::get_principal_filter(HandleSet& containers,
 	containers.insert(h);
 
 	for (const Handle& ih: is)
-		get_principal_filter(containers, ih);
+		principal_filter(containers, ih);
 }
 
 /* ================================================================= */
 
-/// Compute the upper set -- the intersection of all of the
-/// principal filters for each clause. The replacements are
-/// collected up as well.
+/// Compute the upper set -- the intersection of all of the principal
+/// filters for each mandatory clause.  This is a three-step process.
+///
+/// (1) Each mandatory clause is a PresentLink, with type constraints.
+///     It defines a wild-card search on the AtomSpace, and the results
+///     of that search is a set of principal elements. (See
+///     `principal_map()` above, for details).
+/// (2) For each principal element, obtain the corresponding "principal
+///     filter".  This is the set of all elements above the given
+///     principal element, "above" in the sense of "lies in the incoming
+///     tree". (See `principal_filter()` above for details.)
+///     Thus, each mandatory clause generates a set of principal filters.
+///     Union these all together; the union of filters is still a
+///     filter.
+/// (3) Intersect all of the filters, to obtain an upper set.
+///
+/// That's a mouthful, so lets unpack it.
+/// (1) For each mandatory clause c_i, obtain a set of principal
+///     elements {p_i}. If there are n clauses, this forms a Cartesian
+///     product ({p_1}, ... , {p_n}).
+/// (2) For each p_ij in {p_i} construct the corresponding filter f_ij.
+///     Compute the union filter f_i = f_i1 v f_i2 v ... v f_in
+///     This forms a Cartesian product (f_1, ... , f_n)
+/// (3) Compute the intersection f_1 & ... & f_n. This intersection
+///     is an upper set, because it contains one element from each
+///     of the {p_i}.
+///
+/// I think this is technically a pushout (fibered sum, co-cartesian
+/// square). (Not quite sure, I'm doing this in my head...) So...
+/// Start with the JoinLink .. call this "Z". Suppose it has two
+/// clauses, call them X and Y, so this is a "span" (category theory).
+/// The morphisms compute the union-filters. The co-span is the
+/// intersection ... is a disjoint union of containers of tuples ...
+/// Ick. That's roughly the idea. Caveat emptor. The code works.
+///
+/// See wikipedia for definitions of "upper set", "principal filter",
+/// "principal element", "disjoint union" and "pushout". Or just read
+/// the code -- the code is easier to understand.
+///
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
                               HandleMap& replace_map) const
 {
@@ -240,25 +294,23 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	bool first_time = true;
 	for (const auto& memb : _mandatory)
 	{
-		// For a single presence-clause, find the supremum.
-		// The "smallest" atoms that satisfy the type constraints.
+		// For a single PresentLink clause, find the set of
+		// principal elements. These are the "smallest" atoms
+		// that satisfy the PresentLink constraints and the type
+		// constraints.
 		const Handle& h(memb.first);
-		HandleMap start_map(supremum_map(as, h));
+		HandleMap start_map(principal_map(as, h));
 
-		// Get all atoms above the supremum.
-		// Record the re-map, as needed.
-		// XXX right now only single-variable presence clauses
-		// are supported, there is a throw otherwise.
-		// I think this is buggy when ther are two variables...
-		// so clarify and fix...
+		// Get a principal filter for each principal element,
+		// and union all of them together.
 		HandleSet containers;
 		for (const auto& pr: start_map)
 		{
-			get_principal_filter(containers, pr.first);
+			principal_filter(containers, pr.first);
 			replace_map.insert(pr);
 		}
 
-		// First time only...
+		// Starting filter of the sequence, first time only...
 		if (first_time)
 		{
 			first_time = false;
@@ -281,12 +333,14 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 
 /// Return the supremum of all the clauses. If there is only one
 /// clause, it's easy, just get the set of principal elements for
-/// that one clause, and we are done. If there is more than one clause
-/// then it's harder: we have to:
-/// (1) get the principal elements for each clause.
-/// (2) get the principal filters for each principal element.
-/// (3) intersect the filters to get the upper set of the clauses.
-/// (4) remove all elements that are not minimal.
+/// that one clause, and we are done. If there is more than one
+/// clause, then it's harder: we have to:
+///
+/// (1) Get the principal elements for each clause.
+/// (2) Get the principal filters for each principal element.
+/// (3) Intersect the filters to get the upper set of the clauses.
+/// (4) Remove all elements that are not minimal.
+///
 /// The general concern here is that this algo is inefficient, but
 /// I cannot think of any better way of doing it. In particular,
 /// walking to the top for step (2) seems unavoidable, and I cannot
@@ -338,7 +392,7 @@ HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
 	OC_ASSERT(_mandatory.size() == 1);
 
 	const Handle& h(_mandatory.begin()->first);
-	HandleMap start_map(supremum_map(as, h));
+	HandleMap start_map(principal_map(as, h));
 
 	HandleSet containers;
 	for (const auto& pr: start_map)
@@ -361,8 +415,9 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
-/// find_top() - walk upwards from h and insert topmost atoms into set.
-/// This recursively walks to the top, till there is no more.
+/// find_top() - walk upwards from `h` and insert topmost atoms into
+/// the container set.  This recursively walks to the top, until there
+/// is nothing more above.
 void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 {
 	// Ignore other containers!
@@ -427,6 +482,7 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	else
 		hs = min_container(as, silent, replace_map);
 
+	// Perform the actual rewriting.
 	hs = replace(hs, replace_map);
 
 	// XXX FIXME this is really dumb, using a queue and then
