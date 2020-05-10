@@ -19,6 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <iterator>
+
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -152,8 +155,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 
 /* ================================================================= */
 
-/// Given one PresentLink in the body of the JoinLink, examine
-/// the atomspace to see ... what can be found that matches it.
+/// Given one mandatory-presence term in the body of the JoinLink,
+/// obtain every atom that satisfies the type constraints it specifies.
+/// Its a map because ... argh ... this will change/needs refactoring
+/// maybe, depending on the structure of the presence term.
 /// This returns a "replacement map" - a map of pairs, from a
 /// concrete atom in the atomspace, to the variable in the
 /// the PresentLink. For example, suppose that
@@ -172,7 +177,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /// of these MemberLinks (as the first elt of the pair) and will have
 /// `(Variable "X")` as the second elt of both pairs.
 ///
-HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
+/// This is the formally speaking the "supremum" of the presence term:
+/// its the smallest set of atoms that satisfy the constraints...
+///
+HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 {
 	const bool TRANSIENT_SPACE = true;
 
@@ -198,6 +206,77 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
 
 /* ================================================================= */
 
+/// get_principal_filter() - Get everything that contains `h`.
+/// This is the "principal filter" on the "principal element" `h`.
+/// Algorithmically: walk upwards from h and insert everything in
+/// it's  incoming tree into the handle-set. This recursively walks to
+/// the top, till there is no more. Of course, this can get large.
+void JoinLink::get_principal_filter(HandleSet& containers,
+                                    const Handle& h) const
+{
+	// Ignore other containers!
+	if (nameserver().isA(h->get_type(), JOIN_LINK))
+		return;
+
+	IncomingSet is(h->getIncomingSet());
+	containers.insert(h);
+
+	for (const Handle& ih: is)
+		get_principal_filter(containers, ih);
+}
+
+/* ================================================================= */
+
+/// Compute the upper set -- the intersection of all of the
+/// principle filters for each clause. The replacements are
+/// collected up as well.
+HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
+                              HandleMap& replace_map) const
+{
+	// Insect will hold the intersection of all the supremums.
+	HandleSet insect;
+	bool first_time = true;
+	for (const auto& memb : _mandatory)
+	{
+		// For a single presence-clause, find the supremum.
+		// The "smallest" atoms that satisfy the type constraints.
+		const Handle& h(memb.first);
+		HandleMap start_map(supremum_map(as, h));
+
+		// Get all atoms above the supremum.
+		// Record the re-map, as needed.
+		// XXX right now only single-variable presence clauses
+		// are supported, there is a throw otherwise.
+		// I think this is buggy when ther are two variables...
+		// so clarify and fix...
+		HandleSet containers;
+		for (const auto& pr: start_map)
+		{
+			get_principal_filter(containers, pr.first);
+			replace_map.insert(pr);
+		}
+
+		// First time only...
+		if (first_time)
+		{
+			first_time = false;
+			insect.swap(containers);
+			continue;
+		}
+
+		// Not the first time. Perform set intersection.
+		HandleSet smaller;
+		std::set_intersection(insect.begin(), insect.end(),
+		                      containers.begin(), containers.end(),
+		                      std::inserter(smaller, smaller.begin()));
+		insect.swap(smaller);
+	}
+
+	return insect;
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
@@ -205,7 +284,7 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 	for (const auto& memb : _mandatory)
 	{
 		const Handle& h(memb.first);
-		HandleMap start_map(find_starts(as, h));
+		HandleMap start_map(supremum_map(as, h));
 
 		for (const auto& pr: start_map)
 		{
