@@ -214,8 +214,9 @@ HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 void JoinLink::get_principal_filter(HandleSet& containers,
                                     const Handle& h) const
 {
-	// Ignore other containers!
-	if (nameserver().isA(h->get_type(), JOIN_LINK))
+	// Ignore type sepcifications, other containers!
+	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
+	    nameserver().isA(h->get_type(), JOIN_LINK))
 		return;
 
 	IncomingSet is(h->getIncomingSet());
@@ -228,7 +229,7 @@ void JoinLink::get_principal_filter(HandleSet& containers,
 /* ================================================================= */
 
 /// Compute the upper set -- the intersection of all of the
-/// principle filters for each clause. The replacements are
+/// principal filters for each clause. The replacements are
 /// collected up as well.
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
                               HandleMap& replace_map) const
