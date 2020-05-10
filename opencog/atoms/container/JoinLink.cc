@@ -190,12 +190,11 @@ HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 	meet = temp.add_atom(meet);
 	ValuePtr vp = meet->execute();
 
-printf("duude clause %s\ngives %s\n", clause->to_string().c_str(),
-vp->to_string().c_str());
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
 	const HandleSeq& varseq(_mandatory.at(clause));
-	if (1 == varseq.size())
+	size_t vsize = varseq.size();
+	if (1 == vsize)
 	{
 		const Handle& var(varseq[0]);
 		HandleMap replace_map;
@@ -203,7 +202,17 @@ vp->to_string().c_str());
 			replace_map.insert({hst, var});
 		return replace_map;
 	}
-	throw RuntimeException(TRACE_INFO, "Not supported yet!");
+
+	// If we are here, then the MeetLink has returned a collection
+	// of ListLinks, holding the variable values in the lists.
+	HandleMap replace_map;
+	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+	{
+		const HandleSeq& glist(hst->getOutgoingSet());
+		for (size_t i=0; i<vsize; i++)
+			replace_map.insert({glist[i], varseq[i]});
+	}
+	return replace_map;
 }
 
 /* ================================================================= */
