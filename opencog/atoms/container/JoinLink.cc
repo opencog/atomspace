@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <iterator>
+
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -152,8 +156,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 
 /* ================================================================= */
 
-/// Given one PresentLink in the body of the JoinLink, examine
-/// the atomspace to see ... what can be found that matches it.
+/// Given one mandatory-presence term in the body of the JoinLink,
+/// obtain every atom that satisfies the type constraints it specifies.
+/// Its a map because ... argh ... this will change/needs refactoring
+/// maybe, depending on the structure of the presence term.
 /// This returns a "replacement map" - a map of pairs, from a
 /// concrete atom in the atomspace, to the variable in the
 /// the PresentLink. For example, suppose that
@@ -172,7 +178,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /// of these MemberLinks (as the first elt of the pair) and will have
 /// `(Variable "X")` as the second elt of both pairs.
 ///
-HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
+/// This is the formally speaking the "supremum" of the presence term:
+/// its the smallest set of atoms that satisfy the constraints...
+///
+HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 {
 	const bool TRANSIENT_SPACE = true;
 
@@ -198,23 +207,155 @@ HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
 
 /* ================================================================= */
 
+/// get_principal_filter() - Get everything that contains `h`.
+/// This is the "principal filter" on the "principal element" `h`.
+/// Algorithmically: walk upwards from h and insert everything in
+/// it's  incoming tree into the handle-set. This recursively walks to
+/// the top, till there is no more. Of course, this can get large.
+void JoinLink::get_principal_filter(HandleSet& containers,
+                                    const Handle& h) const
+{
+	// Ignore type sepcifications, other containers!
+	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
+	    nameserver().isA(h->get_type(), JOIN_LINK))
+		return;
+
+	IncomingSet is(h->getIncomingSet());
+	containers.insert(h);
+
+	for (const Handle& ih: is)
+		get_principal_filter(containers, ih);
+}
+
+/* ================================================================= */
+
+/// Compute the upper set -- the intersection of all of the
+/// principal filters for each clause. The replacements are
+/// collected up as well.
+HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
+                              HandleMap& replace_map) const
+{
+	// Insect will hold the intersection of all the supremums.
+	HandleSet insect;
+	bool first_time = true;
+	for (const auto& memb : _mandatory)
+	{
+		// For a single presence-clause, find the supremum.
+		// The "smallest" atoms that satisfy the type constraints.
+		const Handle& h(memb.first);
+		HandleMap start_map(supremum_map(as, h));
+
+		// Get all atoms above the supremum.
+		// Record the re-map, as needed.
+		// XXX right now only single-variable presence clauses
+		// are supported, there is a throw otherwise.
+		// I think this is buggy when ther are two variables...
+		// so clarify and fix...
+		HandleSet containers;
+		for (const auto& pr: start_map)
+		{
+			get_principal_filter(containers, pr.first);
+			replace_map.insert(pr);
+		}
+
+		// First time only...
+		if (first_time)
+		{
+			first_time = false;
+			insect.swap(containers);
+			continue;
+		}
+
+		// Not the first time. Perform set intersection.
+		HandleSet smaller;
+		std::set_intersection(insect.begin(), insect.end(),
+		                      containers.begin(), containers.end(),
+		                      std::inserter(smaller, smaller.begin()));
+		insect.swap(smaller);
+	}
+
+	return insect;
+}
+
+/* ================================================================= */
+
+/// Return the supremum of all the clauses. If there is only one
+/// clause, it's easy, just get the set of principal elements for
+/// that one clause, and we are done. If there is more than one clause
+/// then it's harder: we have to:
+/// (1) get the principal elements for each clause.
+/// (2) get the principal filters for each principal element.
+/// (3) intersect the filters to get the upper set of the clauses.
+/// (4) remove all elements that are not minimal.
+/// The general concern here is that this algo is inefficient, but
+/// I cannot think of any better way of doing it. In particular,
+/// walking to the top for step (2) seems unavoidable, and I cannot
+/// think of any way of combining steps (2) and (3) that would avoid
+/// step (4) ... or even would reduce the work for stpe (4). Oh well.
+///
+/// TODO: it might be faster to use hash tables instead of rb-trees
+/// i.e. to use UnorderedHandleSet instead of HandleSet. XXX FIXME.
+HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
+                             HandleMap& replace_map) const
+{
+	// If there is only one clause, we do not have to get
+	// upper sets, and trim them back down. Avoid extra work.
+	if (_mandatory.size() == 1)
+		return supr_one(as, silent, replace_map);
+
+	HandleSet upset = upper_set(as, silent, replace_map);
+
+	// Create a set of non-minimal elements.
+	HandleSet non_minimal;
+	for (const Handle& h : upset)
+	{
+		if (h->is_node()) continue;
+		for (const Handle& ho : h->getOutgoingSet())
+		{
+			if (upset.find(ho) != upset.end())
+			{
+				non_minimal.insert(h);
+				break;
+			}
+		}
+	}
+
+	// Remove the non-minimal elements.
+	HandleSet minimal;
+	std::set_difference(upset.begin(), upset.end(),
+	                    non_minimal.begin(), non_minimal.end(),
+	                    std::inserter(minimal, minimal.begin()));
+	return minimal;
+}
+
+/* ================================================================= */
+
+/// If there is only one clause, then the supremum is just the
+/// principal element for that clause. Special case, for speed.
+HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
+                             HandleMap& replace_map) const
+{
+	OC_ASSERT(_mandatory.size() == 1);
+
+	const Handle& h(_mandatory.begin()->first);
+	HandleMap start_map(supremum_map(as, h));
+
+	HandleSet containers;
+	for (const auto& pr: start_map)
+	{
+		containers.insert(pr.first);
+		replace_map.insert(pr);
+	}
+	return containers;
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
-	HandleSet containers;
-	for (const auto& memb : _mandatory)
-	{
-		const Handle& h(memb.first);
-		HandleMap start_map(find_starts(as, h));
-
-		for (const auto& pr: start_map)
-		{
-			containers.insert(pr.first);
-			replace_map.insert(pr);
-		}
-	}
+	HandleSet containers(supremum(as, silent, replace_map));
 	fixup_replacements(replace_map);
-
 	return containers;
 }
 
@@ -236,9 +377,7 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 	}
 
 	for (const Handle& ih: is)
-	{
 		find_top(containers, ih);
-	}
 }
 
 /* ================================================================= */
@@ -249,9 +388,7 @@ HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
 	HandleSet hs = min_container(as, silent, replace_map);
 	HandleSet containers;
 	for (const Handle& h: hs)
-	{
 		find_top(containers, h);
-	}
 
 	return containers;
 }
@@ -282,8 +419,6 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
-
-// printf("duude vars=%s\n", oc_to_string(_variables).c_str());
 
 	HandleMap replace_map;
 	HandleSet hs;
