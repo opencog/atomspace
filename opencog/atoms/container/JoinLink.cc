@@ -80,10 +80,10 @@ void JoinLink::setup_meets(void)
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		_mandatory.insert({clause, fv.varset});
+		_mandatory.insert({clause, fv.varseq});
 
 		// Create a MeetLink for each mandatory clause.
-		setup_clause(clause, fv.varset);
+		setup_clause(clause, fv.varseq);
 
 		done.merge(fv.varset);
 	}
@@ -106,11 +106,11 @@ void JoinLink::setup_meets(void)
 /// a MeetLink that can be used to find the atoms to be joined.
 ///
 void JoinLink::setup_clause(const Handle& clause,
-                            const HandleSet& varset)
+                            const HandleSeq& varseq)
 {
 	// Build a Meet
 	HandleSeq vardecls;
-	for (const Handle& var : varset)
+	for (const Handle& var : varseq)
 	{
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);
@@ -190,19 +190,20 @@ HandleMap JoinLink::supremum_map(AtomSpace* as, const Handle& clause) const
 	meet = temp.add_atom(meet);
 	ValuePtr vp = meet->execute();
 
+printf("duude clause %s\ngives %s\n", clause->to_string().c_str(),
+vp->to_string().c_str());
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
-	const HandleSet& varset(_mandatory.at(clause));
-	if (1 != varset.size())
-		throw RuntimeException(TRACE_INFO, "Not supported yet!");
-	const Handle& var(*varset.begin());
-
-	HandleMap replace_map;
-	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+	const HandleSeq& varseq(_mandatory.at(clause));
+	if (1 == varseq.size())
 	{
-		replace_map.insert({hst, var});
+		const Handle& var(varseq[0]);
+		HandleMap replace_map;
+		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
+			replace_map.insert({hst, var});
+		return replace_map;
 	}
-	return replace_map;
+	throw RuntimeException(TRACE_INFO, "Not supported yet!");
 }
 
 /* ================================================================= */

@@ -38,10 +38,10 @@ protected:
 	void validate(void);
 
 	// A list of all PresentLinks, and the variables in them
-	typedef std::map<Handle, HandleSet> PlaceMap;
+	typedef std::map<Handle, HandleSeq> PlaceMap;
 	PlaceMap _mandatory;
 	HandleMap _meets;
-	void setup_clause(const Handle&, const HandleSet&);
+	void setup_clause(const Handle&, const HandleSeq&);
 	void setup_meets(void);
 
 	HandleMap supremum_map(AtomSpace*, const Handle&) const;
