@@ -44,16 +44,15 @@ protected:
 	void setup_clause(const Handle&, const HandleSeq&);
 	void setup_meets(void);
 
-	HandleMap supremum_map(AtomSpace*, const Handle&) const;
-
-	void fixup_replacements(HandleMap&) const;
-	HandleSet replace(const HandleSet&, const HandleMap&) const;
-
-	void get_principal_filter(HandleSet&, const Handle&) const;
+	HandleMap principal_map(AtomSpace*, const Handle&) const;
+	void principal_filter(HandleSet&, const Handle&) const;
 
 	HandleSet upper_set(AtomSpace*, bool, HandleMap&) const;
 	HandleSet supremum(AtomSpace*, bool, HandleMap&) const;
 	HandleSet supr_one(AtomSpace*, bool, HandleMap&) const;
+
+	void fixup_replacements(HandleMap&) const;
+	HandleSet replace(const HandleSet&, const HandleMap&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 	HandleSet min_container(AtomSpace*, bool, HandleMap&) const;
