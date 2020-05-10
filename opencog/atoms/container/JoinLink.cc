@@ -178,9 +178,25 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 /* ================================================================= */
 
 /// Given one mandatory-presence term in the body of the JoinLink,
-/// obtain every atom that satisfies it, including all relevant type
-/// constraints it specifies. Return a "replacement map", which
-/// pairs up atoms in the atomspace with variables in the PresentLink.
+/// obtain every atom that satisfies it, including satisfying all
+/// relevant type constraints it specifies. Return the a set of
+/// those atoms. This is a set of "principal elements", on top of
+/// which the "principal filters" will be built.
+///
+/// This is the "supremum" of the PresentLink: it is the smallest set of
+/// atoms that satisfy the constraints given by the PresentLink and the
+/// type constraints on the variables. The returned elements are the
+/// "principal elements" from which the "principal filters" will be
+/// constructed.
+///
+/// Explained a different way: this performs a wild-card search, to find
+/// all of the principal elements specified by the wild-cards.
+///
+/// During construction, several maps are built. One is a "replacement
+/// map", which is needed to perform substitution on the discovered
+/// results.  It pairs up atoms in the atomspace with variables in
+/// the PresentLink. Another map is the "constraint map"; it reverses
+/// the pairing. It is needed to apply constraint clauses.
 ///
 /// An example: one is looking for MemberLinks:
 ///
@@ -195,22 +211,16 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 ///    (Member (Concept "sea") (Concept "beach"))
 ///    (Member (Concept "sand") (Concept "beach"))
 ///
-/// then the returned HandleMap will have three pairs, of the form
+/// then the replacement map will have three pairs, of the form
 ///
 ///    { (Concept "sea"),   (Variable "X") }
 ///    { (Concept "sand"),  (Variable "X") }
 ///    { (Concept "beach"), (Variable "Y") }
 ///
-/// This is the "supremum" of the PresentLink: it is the smallest set of
-/// atoms that satisfy the constraints given by the PresentLink and the
-/// type constraints on the variables. The returned elements are the
-/// "principal elements" from which the "principal filters" will be
-/// constructed.
 ///
-/// Explained a different way: this performs a wild-card search, to find
-/// all of the principal elements specified by the wild-cards.
-///
-HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
+HandleSet JoinLink::principals(AtomSpace* as,
+                               const Handle& clause,
+                               Traverse& trav) const
 {
 	const bool TRANSIENT_SPACE = true;
 
@@ -226,22 +236,28 @@ HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
 	if (1 == vsize)
 	{
 		const Handle& var(varseq[0]);
-		HandleMap replace_map;
+		HandleSet princes;
 		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-			replace_map.insert({hst, var});
-		return replace_map;
+		{
+			princes.insert(hst);
+			trav.replace_map.insert({hst, var});
+		}
+		return princes;
 	}
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
-	HandleMap replace_map;
+	HandleSet princes;
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
 		const HandleSeq& glist(hst->getOutgoingSet());
 		for (size_t i=0; i<vsize; i++)
-			replace_map.insert({glist[i], varseq[i]});
+		{
+			princes.insert(glist[i]);
+			trav.replace_map.insert({glist[i], varseq[i]});
+		}
 	}
-	return replace_map;
+	return princes;
 }
 
 /* ================================================================= */
@@ -320,16 +336,13 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 		// that satisfy the PresentLink constraints and the type
 		// constraints.
 		const Handle& h(memb.first);
-		HandleMap start_map(principal_map(as, h));
+		HandleSet princes(principals(as, h, trav));
 
 		// Get a principal filter for each principal element,
 		// and union all of them together.
 		HandleSet containers;
-		for (const auto& pr: start_map)
-		{
-			principal_filter(containers, pr.first);
-			trav.replace_map.insert(pr);
-		}
+		for (const Handle& pr: princes)
+			principal_filter(containers, pr);
 
 		// Starting filter of the sequence, first time only...
 		if (first_time)
@@ -376,7 +389,10 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 	// If there is only one clause, we do not have to get
 	// upper sets, and trim them back down. Avoid extra work.
 	if (_mandatory.size() == 1)
-		return supr_one(as, silent, trav);
+	{
+		const Handle& h(_mandatory.begin()->first);
+		return principals(as, h, trav);
+	}
 
 	HandleSet upset = upper_set(as, silent, trav);
 
@@ -401,27 +417,6 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 	                    non_minimal.begin(), non_minimal.end(),
 	                    std::inserter(minimal, minimal.begin()));
 	return minimal;
-}
-
-/* ================================================================= */
-
-/// If there is only one clause, then the supremum is just the
-/// principal element for that clause. Special case, for speed.
-HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
-                             Traverse& trav) const
-{
-	OC_ASSERT(_mandatory.size() == 1);
-
-	const Handle& h(_mandatory.begin()->first);
-	HandleMap start_map(principal_map(as, h));
-
-	HandleSet containers;
-	for (const auto& pr: start_map)
-	{
-		containers.insert(pr.first);
-		trav.replace_map.insert(pr);
-	}
-	return containers;
 }
 
 /* ================================================================= */

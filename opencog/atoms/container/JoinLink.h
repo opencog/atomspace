@@ -54,12 +54,11 @@ protected:
 		HandleMap replace_map;
 	};
 
-	HandleMap principal_map(AtomSpace*, const Handle&) const;
+	HandleSet principals(AtomSpace*, const Handle&, Traverse&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
 
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
 	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
-	HandleSet supr_one(AtomSpace*, bool, Traverse&) const;
 
 	void constrain(AtomSpace*, bool) const;
 
