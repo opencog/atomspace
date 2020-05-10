@@ -48,17 +48,23 @@ protected:
 	HandleSeq _evaluatable;
 	void setup_evaluatable(void);
 
+	// Traversal context
+	struct Traverse
+	{
+		HandleMap replace_map;
+	};
+
 	HandleMap principal_map(AtomSpace*, const Handle&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
 
-	HandleSet upper_set(AtomSpace*, bool, HandleMap&) const;
-	HandleSet supremum(AtomSpace*, bool, HandleMap&) const;
-	HandleSet supr_one(AtomSpace*, bool, HandleMap&) const;
+	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
+	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
+	HandleSet supr_one(AtomSpace*, bool, Traverse&) const;
 
 	void constrain(AtomSpace*, bool) const;
 
-	void fixup_replacements(HandleMap&) const;
-	HandleSet replace(const HandleSet&, const HandleMap&) const;
+	void fixup_replacements(Traverse&) const;
+	HandleSet replace(const HandleSet&, const Traverse&) const;
 
 	void find_top(HandleSet&, const Handle&) const;
 	HandleSet container(AtomSpace*, bool) const;

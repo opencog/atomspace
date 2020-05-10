@@ -148,7 +148,7 @@ void JoinLink::setup_clause(const Handle& clause,
 /// Each of these should have a corresponding variable declaration.
 /// Update the replacement map so that the "from" part of the variable
 /// (obtained from the signature) gets replaced by the ... replacement.
-void JoinLink::fixup_replacements(HandleMap& replace_map) const
+void JoinLink::fixup_replacements(Traverse& trav) const
 {
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
@@ -161,10 +161,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 
 		const Handle& from(h->getOutgoingAtom(0));
 		bool found = false;
-		for (const auto& pr : replace_map)
+		for (const auto& pr : trav.replace_map)
 		{
 			if (pr.second != from) continue;
-			replace_map[pr.first] = h->getOutgoingAtom(1);
+			trav.replace_map[pr.first] = h->getOutgoingAtom(1);
 			found = true;
 		}
 
@@ -308,7 +308,7 @@ void JoinLink::principal_filter(HandleSet& containers,
 /// the code -- the code is easier to understand.
 ///
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
-                              HandleMap& replace_map) const
+                              Traverse& trav) const
 {
 	// Insect will hold the intersection of all the supremums.
 	HandleSet insect;
@@ -328,7 +328,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 		for (const auto& pr: start_map)
 		{
 			principal_filter(containers, pr.first);
-			replace_map.insert(pr);
+			trav.replace_map.insert(pr);
 		}
 
 		// Starting filter of the sequence, first time only...
@@ -371,14 +371,14 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 /// TODO: it might be faster to use hash tables instead of rb-trees
 /// i.e. to use UnorderedHandleSet instead of HandleSet. XXX FIXME.
 HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
-                             HandleMap& replace_map) const
+                             Traverse& trav) const
 {
 	// If there is only one clause, we do not have to get
 	// upper sets, and trim them back down. Avoid extra work.
 	if (_mandatory.size() == 1)
-		return supr_one(as, silent, replace_map);
+		return supr_one(as, silent, trav);
 
-	HandleSet upset = upper_set(as, silent, replace_map);
+	HandleSet upset = upper_set(as, silent, trav);
 
 	// Create a set of non-minimal elements.
 	HandleSet non_minimal;
@@ -408,7 +408,7 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 /// If there is only one clause, then the supremum is just the
 /// principal element for that clause. Special case, for speed.
 HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
-                             HandleMap& replace_map) const
+                             Traverse& trav) const
 {
 	OC_ASSERT(_mandatory.size() == 1);
 
@@ -419,7 +419,7 @@ HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
 	for (const auto& pr: start_map)
 	{
 		containers.insert(pr.first);
-		replace_map.insert(pr);
+		trav.replace_map.insert(pr);
 	}
 	return containers;
 }
@@ -450,9 +450,9 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
-	HandleMap replace_map;
-	HandleSet containers(supremum(as, silent, replace_map));
-	fixup_replacements(replace_map);
+	Traverse trav;
+	HandleSet containers(supremum(as, silent, trav));
+	fixup_replacements(trav);
 	if (MAXIMAL_JOIN_LINK == get_type())
 	{
 		HandleSet tops;
@@ -462,7 +462,7 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 	}
 
 	// Perform the actual rewriting.
-	return replace(containers, replace_map);
+	return replace(containers, trav);
 }
 
 /* ================================================================= */
@@ -471,14 +471,14 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 /// replacements, substituting the bottom-most atoms as requested,
 /// while honoring all scoping and quoting.
 HandleSet JoinLink::replace(const HandleSet& containers,
-                            const HandleMap& replace_map) const
+                            const Traverse& trav) const
 {
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, replace_map);
+		Handle rep = FreeVariables::replace_nocheck(top, trav.replace_map);
 		replaced.insert(rep);
 	}
 
