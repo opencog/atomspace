@@ -277,9 +277,39 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
+/// Compute the supremum of the upper set -- the smallest set of
+/// elements that aren't contained in any other elements.
+HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
+                             HandleMap& replace_map) const
+{
+	HandleSet upset = upper_set(as, silent, replace_map);
+
+	HandleSet non_minimal;
+	for (const Handle& h : upset)
+	{
+		if (h->is_node()) continue;
+		for (const Handle& ho : h->getOutgoingSet())
+		{
+			if (upset.find(ho) != upset.end())
+			{
+				non_minimal.insert(h);
+				break;
+			}
+		}
+	}
+	HandleSet minimal;
+	std::set_difference(upset.begin(), upset.end(),
+	                    non_minimal.begin(), non_minimal.end(),
+	                    std::inserter(minimal, minimal.begin()));
+	return minimal;
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
+#if 0
 	HandleSet containers;
 	for (const auto& memb : _mandatory)
 	{
@@ -292,6 +322,10 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 			replace_map.insert(pr);
 		}
 	}
+#endif
+HandleSet containers =
+supremum(as, silent, replace_map);
+
 	fixup_replacements(replace_map);
 
 	return containers;
