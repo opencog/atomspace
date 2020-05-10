@@ -43,6 +43,7 @@ void JoinLink::init(void)
 			"JoinLinks are private and cannot be instantiated.");
 
 	validate();
+	setup_meets();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -56,22 +57,64 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
-	for (const Handle& var : _variables.varseq)
+}
+
+/* ================================================================= */
+
+/// setup_meets() -- create a search that can find the all of
+/// the locations that will be joined together.
+void JoinLink::setup_meets(void)
+{
+	HandleSet done;
+	for (size_t i=1; i<_outgoing.size(); i++)
 	{
-		if (_variables._simple_typemap.size() != 0)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+		const Handle& clause(_outgoing[i]);
 
-		// Get the type.
-		const HandleSet& dtset = _variables._deep_typemap.at(var);
-		if (dtset.size() != 1)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+		// Create a mandatory clause for each PresentLink
+		if (clause->get_type() != PRESENT_LINK) continue;
 
-		Handle deet = *dtset.begin();
-		Type dtype = deet->get_type();
+		// Find the variables in the clause
+		FreeVariables fv;
+		fv.find_variables(clause);
+		_mandatory.insert({clause, fv.varset});
 
-		if (SIGNATURE_LINK != dtype)
-			throw RuntimeException(TRACE_INFO, "Not supported yet!");
+		// Create a MeetLink for each mandatory clause.
+		setup_clause(clause, fv.varset);
+
+		done.merge(fv.varset);
 	}
+
+	// Are there any variables that are NOT in a PresentLink? If so,
+	// then create a PresentLink for each; we need that to get started.
+	for (const Handle& var: _variables.varseq)
+	{
+		if (done.find(var) != done.end()) continue;
+		Handle pres(createLink(PRESENT_LINK, var));
+		_mandatory.insert({pres, {var}});
+		setup_clause(pres, {var});
+	}
+}
+
+/* ================================================================= */
+
+/// Given one PresentLink in the body of the JoinLink, create
+/// a map with all of the variables that appear in it, and create
+/// a MeetLink that can be used to find the atoms to be joined.
+///
+void JoinLink::setup_clause(const Handle& clause,
+                            const HandleSet& varset)
+{
+	// Build a Meet
+	HandleSeq vardecls;
+	for (const Handle& var : varset)
+	{
+		Handle typedecl(_variables.get_type_decl(var, var));
+		vardecls.emplace_back(typedecl);
+	}
+
+	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
+	Handle meet(createLink(MEET_LINK, hdecls, clause));
+	_meets.insert({clause, meet});
 }
 
 /* ================================================================= */
@@ -129,45 +172,28 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /// of these MemberLinks (as the first elt of the pair) and will have
 /// `(Variable "X")` as the second elt of both pairs.
 ///
-HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& hpr) const
+HandleMap JoinLink::find_starts(AtomSpace* as, const Handle& clause) const
 {
-	Handle clause(hpr->getOutgoingAtom(0));
-	Type ct = clause->get_type();
+	const bool TRANSIENT_SPACE = true;
+
+	Handle meet = _meets.at(clause);
+	AtomSpace temp(as, TRANSIENT_SPACE);
+	meet = temp.add_atom(meet);
+	ValuePtr vp = meet->execute();
+
+	// The MeetLink returned everything that the variables in the
+	// clause could ever be...
+	const HandleSet& varset(_mandatory.at(clause));
+	if (1 != varset.size())
+		throw RuntimeException(TRACE_INFO, "Not supported yet!");
+	const Handle& var(*varset.begin());
 
 	HandleMap replace_map;
-
-	// If the user just said `(Present (Variable X))`
-	if (VARIABLE_NODE == ct)
+	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
-		// Get the variable type.
-		const HandleSet& dtset = _variables._deep_typemap.at(clause);
-
-		// We assume its a SignatureLink
-		Handle sig = (*dtset.begin())->getOutgoingAtom(0);
-
-		// Pure constant (no free variables, no types)
-		if (is_constant(sig))
-		{
-			replace_map.insert({sig, clause});
-			return replace_map;
-		}
-
-		// The type signature is non-trivial. We perform a search
-		// to find all atoms having that signature.
-		Handle typedecl = _variables.get_type_decl(clause, clause);
-
-		Handle meet = createLink(MEET_LINK, typedecl, hpr);
-// XXX this needs to be in a temp atomspace ...
-		meet = as->add_atom(meet);
-		ValuePtr vp = meet->execute();
-
-		// The MeetLink returned everything our variable could be...
-		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-			replace_map.insert({hst, clause});
-		return replace_map;
+		replace_map.insert({hst, var});
 	}
-	throw RuntimeException(TRACE_INFO, "Not supported yet!");
-	return HandleMap();
+	return replace_map;
 }
 
 /* ================================================================= */
@@ -176,11 +202,9 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
                                   HandleMap& replace_map) const
 {
 	HandleSet containers;
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (const auto& memb : _mandatory)
 	{
-		const Handle& h(_outgoing[i]);
-		if (h->get_type() != PRESENT_LINK) continue;
-
+		const Handle& h(memb.first);
 		HandleMap start_map(find_starts(as, h));
 
 		for (const auto& pr: start_map)
@@ -189,7 +213,6 @@ HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
 			replace_map.insert(pr);
 		}
 	}
-
 	fixup_replacements(replace_map);
 
 	return containers;

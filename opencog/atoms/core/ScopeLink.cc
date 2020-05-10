@@ -128,15 +128,16 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	if (oset.size() < 2)
+	size_t sz = oset.size();
+	if (sz < 1)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting an outgoing set size of at least two; got %s",
-			oset[0]->to_string().c_str());
+			"Expecting an outgoing set size of at least one; got %s",
+			to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
+	// a variable declaration. JoinLinks need not have a body.
 	_vardecl = oset[0];
-	_body = oset[1];
+	if (2 <= sz) _body = oset[1];
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);

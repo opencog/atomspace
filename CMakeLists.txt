@@ -368,6 +368,12 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running pattern matcher tests..."
 	)
+	ADD_CUSTOM_TARGET(test_join
+		DEPENDS tests/atoms/container
+		WORKING_DIRECTORY tests/atoms/container
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running container tests..."
+	)
 ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)

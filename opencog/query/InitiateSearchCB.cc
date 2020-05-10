@@ -662,9 +662,11 @@ bool InitiateSearchCB::setup_deep_type_search()
 		for (const Handle& sig: dit.second)
 			find_deep_constants(sig, starts, 0);
 
+		// Subtract one from the depth -- this uwraps the top-most
+		// SignatureLink, which can't ever provide a valid match.
 		HandleSet start_set;
 		for (const auto& pr: starts)
-			all_starts(pr.first, pr.second, start_set);
+			all_starts(pr.first, pr.second-1, start_set);
 
 		HandleSeq start_list;
 		for (const Handle& hs : start_set) start_list.emplace_back(hs);

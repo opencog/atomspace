@@ -1,4 +1,7 @@
 ;
+; deep-types.scm
+; Used for Unit test DeepTypesUTest based on example code.
+;
 ; A demonstration of using type signatures aka "deep types" during
 ; pattern matching.  Type signatures are a way of specifying the type
 ; of a hypergraph.  This can be used to restrict the search space during
@@ -92,6 +95,29 @@
 		(AndLink (Variable "$x"))))
 
 ; (cog-execute! predicate-search)
+; =============================================================
+; A somewhat silly special case involving a constant
+
+(define constant-a
+	(Get
+		(TypedVariable (Variable "X") (Signature (Concept "A")))
+		(Present (Variable "X"))))
+
+; After Holiday in Berlin ...
+(define constant-zappa
+	(Get
+		(TypedVariable (Variable "X") (Signature (Concept "A")))
+		(Present
+			(Evaluation (Predicate "Aybe Sea")
+				(ListLink
+					(Variable "X") (Concept "B") (Concept "C"))))))
+
+; Above should find the below.
+(Evaluation (Predicate "Aybe Sea")
+	(ListLink (Concept "A") (Concept "B") (Concept "C")))
+
+; (cog-execute! constant-zappa)
+
 ; =============================================================
 
 ; The cog-value-is-type? function allows signatures to be
