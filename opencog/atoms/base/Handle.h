@@ -205,8 +205,11 @@ typedef std::map<Handle, Handle> HandleMap;
 //! a hash table. Usually has faster insertion.
 typedef std::unordered_map<Handle, Handle> UnorderedHandleMap;
 
-//! an ordered map from Handle to Handle set
+//! an ordered map from Handle to HandleSet
 typedef std::map<Handle, HandleSet> HandleMultimap;
+
+//! an ordered map from Handle to HandleSeq
+typedef std::map<Handle, HandleSeq> HandleSeqMap;
 
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
@@ -335,6 +338,8 @@ std::string oc_to_string(const HandleMap::value_type& hmv,
 std::string oc_to_string(const UnorderedHandleMap& hm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMultimap& hmm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSeqMap& hsm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
                          const std::string& indent=empty_string);
