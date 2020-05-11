@@ -61,6 +61,7 @@ public:
 	// Test the examples on the wiki page
 	// https://wiki.opencog.org/w/JoinLink
 	void test_gpn(void);
+	void test_top(void);
 };
 
 void GPNJoinUTest::tearDown(void)
@@ -84,6 +85,81 @@ void GPNJoinUTest::test_gpn(void)
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/atoms/container/gpn-join.scm\")");
+
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-gpn)");
+	printf("min-gpn = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle P = N(VARIABLE_NODE, "P");
+	TS_ASSERT_EQUALS(results[0], P);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-gpn)");
+	printf("max-gpn = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle A = L(EVALUATION_LINK, P, L(LIST_LINK, N(CONCEPT_NODE, "A")));
+	Handle E = L(EVALUATION_LINK, P, L(LIST_LINK, N(CONCEPT_NODE, "E")));
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! min-gpn-rep)");
+	printf("min-gpn-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle ILP = N(CONCEPT_NODE, "I Like Pie!");
+	TS_ASSERT_EQUALS(results[0], ILP);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-gpn-rep)");
+	printf("max-gpn-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	A = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "A")));
+	E = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "E")));
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Wiki page "Naming the container"
+ */
+void GPNJoinUTest::test_top(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/gpn-container.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-gpn)");
