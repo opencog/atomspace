@@ -33,6 +33,18 @@
 		(throw 'test-failure "like-both-pie" "You blew it!"))
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
 
+(define (like-triple-pie PRED ARG EVAL)
+	(define pred (cog-outgoing-atom EVAL 0))
+	(define lst (cog-outgoing-atom EVAL 1))
+	(define arg (cog-outgoing-atom lst 0))
+	(define label (cog-name pred))
+	(format #t "I was told ~A and ~A" PRED EVAL)
+	(if (not (equal? PRED pred))
+		(throw 'test-failure "like-triple-pie" "Not what I wanted!"))
+	(if (not (equal? ARG arg))
+		(throw 'test-failure "like-triple-pie" "Bad bad bad!"))
+	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+
 (define min-gpn
 	(MinimalJoin
 		(VariableList
@@ -56,6 +68,16 @@
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Evaluation (GroundedPredicate "scm:like-both-pie")
 			(List (Variable "P") (Variable "$top")))))
+
+(define triple-gpn
+	(MaximalJoin
+		(VariableList
+			(TypedVariable (Variable "A") (Type 'ConceptNode))
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Present (Evaluation (Variable "P") (List (Variable "A"))))
+		(Evaluation (GroundedPredicate "scm:like-triple-pie")
+			(List (Variable "P") (Variable "A") (Variable "$top")))))
 
 (define min-gpn-rep
 	(MinimalJoin
@@ -83,3 +105,14 @@
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:like-both-pie")
 			(List (Variable "P") (Variable "$top")))))
+
+(define triple-gpn-rep
+	(MaximalJoin
+		(VariableList
+			(TypedVariable (Variable "A") (Type 'ConceptNode))
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Present (Evaluation (Variable "P") (List (Variable "A"))))
+		(Replacement (Variable "P") (Concept "I Like Pie!"))
+		(Evaluation (GroundedPredicate "scm:like-triple-pie")
+			(List (Variable "P") (Variable "A") (Variable "$top")))))
