@@ -17,6 +17,8 @@
 			(TypedVariable (Variable "X") (Signature (Concept "A")))
 			(TypedVariable (Variable "Y") (Signature (Concept "B"))))))
 
+; (cog-execute! min-filter-ab)
+
 (define max-filter-ab
 	(MaximalJoin
 		(VariableList

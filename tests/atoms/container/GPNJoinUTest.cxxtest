@@ -1,5 +1,5 @@
 /*
- * tests/atoms/container/CompoundJoinUTest.cxxtest
+ * tests/atoms/container/GPNJoinUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -27,14 +27,14 @@
 
 using namespace opencog;
 
-class CompoundJoinUTest: public CxxTest::TestSuite
+class GPNJoinUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace* _as;
 	SchemeEval* eval;
 
 public:
-	CompoundJoinUTest(void)
+	GPNJoinUTest(void)
 	{
 		logger().set_level(Logger::INFO);
 		logger().set_print_to_stdout_flag(true);
@@ -46,7 +46,7 @@ public:
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
-	~CompoundJoinUTest()
+	~GPNJoinUTest()
 	{
 		delete eval;
 		delete _as;
@@ -60,15 +60,15 @@ public:
 
 	// Test the examples on the wiki page
 	// https://wiki.opencog.org/w/JoinLink
-	void test_compound(void);
+	void test_gpn(void);
 };
 
-void CompoundJoinUTest::tearDown(void)
+void GPNJoinUTest::tearDown(void)
 {
 	_as->clear();
 }
 
-void CompoundJoinUTest::setUp(void)
+void GPNJoinUTest::setUp(void)
 {
 	_as->clear();
 }
@@ -77,36 +77,75 @@ void CompoundJoinUTest::setUp(void)
 #define L _as->add_link
 
 /*
- * Wiki page "Compound structures"
+ * Wiki page "User callbacks via GPN's"
  */
-void CompoundJoinUTest::test_compound(void)
+void GPNJoinUTest::test_gpn(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/compound-join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/gpn-join.scm\")");
 
 	// ----------------------------------
-	ValuePtr vp = eval->eval_v("(cog-execute! min-compound)");
-	printf("min-compound = %s\n", vp->to_string().c_str());
+	ValuePtr vp = eval->eval_v("(cog-execute! min-gpn)");
+	printf("min-gpn = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
-	Handle X = N(VARIABLE_NODE, "X");
-	Handle Y = N(VARIABLE_NODE, "Y");
-	Handle LXY = L(LIST_LINK, X,Y);
-	TS_ASSERT_EQUALS(results[0], LXY);
+	Handle P = N(VARIABLE_NODE, "P");
+	TS_ASSERT_EQUALS(results[0], P);
 
 	// ----------------------------------
-	vp = eval->eval_v("(cog-execute! max-compound)");
-	printf("max-compound = %s\n", vp->to_string().c_str());
+	vp = eval->eval_v("(cog-execute! max-gpn)");
+	printf("max-gpn = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle A = L(EVALUATION_LINK, P, L(LIST_LINK, N(CONCEPT_NODE, "A")));
+	Handle E = L(EVALUATION_LINK, P, L(LIST_LINK, N(CONCEPT_NODE, "E")));
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! min-gpn-rep)");
+	printf("min-gpn-rep = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 
-	Handle E = L(EVALUATION_LINK, N(PREDICATE_NODE, "part of"), LXY);
+	Handle ILP = N(CONCEPT_NODE, "I Like Pie!");
+	TS_ASSERT_EQUALS(results[0], ILP);
 
-	TS_ASSERT_EQUALS(results[0], E);
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-gpn-rep)");
+	printf("max-gpn-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	A = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "A")));
+	E = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "E")));
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
 
 	// ------------
 	logger().info("END TEST: %s", __FUNCTION__);

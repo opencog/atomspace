@@ -38,23 +38,18 @@ protected:
 	void validate(void);
 
 	// A list of all PresentLinks, and the variables in them
-	typedef std::map<Handle, HandleSeq> PlaceMap;
-	PlaceMap _mandatory;
-	HandleMap _meets;
-	void setup_clause(const Handle&, const HandleSeq&);
-	void setup_meets(void);
-
-	// A list of all evaluatable clauses.
-	HandleSeq _evaluatable;
-	void setup_evaluatable(void);
+	size_t _vsize;
+	Handle _meet;
+	void setup_meet(void);
 
 	// Traversal context
 	struct Traverse
 	{
 		HandleMap replace_map;
+		HandleSetSeq join_map;
 	};
 
-	HandleSet principals(AtomSpace*, const Handle&, Traverse&) const;
+	HandleSet principals(AtomSpace*, Traverse&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
 
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
