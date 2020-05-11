@@ -485,7 +485,8 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 		HandleSet tops;
 		for (const Handle& h: containers)
 			find_top(tops, h);
-		containers.swap(tops);
+		if (0 < tops.size())
+			containers.swap(tops);
 	}
 
 	// Apply constraints on the top type, if any
