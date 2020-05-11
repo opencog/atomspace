@@ -38,6 +38,7 @@ protected:
 	void validate(void);
 
 	// A list of all PresentLinks, and the variables in them
+	size_t _vsize;
 	Handle _meet;
 	void setup_meet(void);
 
@@ -49,6 +50,7 @@ protected:
 	struct Traverse
 	{
 		HandleMap replace_map;
+		HandleSetSeq join_map;
 	};
 
 	HandleSet principals(AtomSpace*, Traverse&) const;

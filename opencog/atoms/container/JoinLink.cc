@@ -126,6 +126,9 @@ void JoinLink::setup_meet(void)
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
 	Handle hbody(createLink(std::move(jclauses), AND_LINK));
 	_meet = createLink(MEET_LINK, hdecls, hbody);
+
+	// Handy cache
+	_vsize = _variables.varseq.size();
 }
 
 /* ================================================================= */
@@ -216,8 +219,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
 	const HandleSeq& varseq(_variables.varseq);
-	size_t vsize = varseq.size();
-	if (1 == vsize)
+	if (1 == _vsize)
 	{
 		const Handle& var(varseq[0]);
 		HandleSet princes;
@@ -226,19 +228,22 @@ HandleSet JoinLink::principals(AtomSpace* as,
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
 		}
+		trav.join_map.push_back(princes);
 		return princes;
 	}
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
 	HandleSet princes;
+	trav.join_map.resize(_vsize);
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
 		const HandleSeq& glist(hst->getOutgoingSet());
-		for (size_t i=0; i<vsize; i++)
+		for (size_t i=0; i<_vsize; i++)
 		{
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
+			trav.join_map[i].insert(glist[i]);
 		}
 	}
 	return princes;
@@ -318,7 +323,28 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	for (const Handle& pr: princes)
 		principal_filter(containers, pr);
 
-	return containers;
+	if (1 == _vsize)
+		return containers;
+
+	// Create a set of unjoined elements.
+	HandleSet unjoined;
+	for (const Handle& h : containers)
+	{
+		for (size_t i=0; i<_vsize; i++)
+		{
+			if (not any_atom_in_tree(h, trav.join_map[i]))
+			{
+				unjoined.insert(h);
+				break;
+			}
+		}
+	}
+
+	HandleSet joined;
+	std::set_difference(containers.begin(), containers.end(),
+	                    unjoined.begin(), unjoined.end(),
+	                    std::inserter(joined, joined.begin()));
+	return joined;
 }
 
 /* ================================================================= */
