@@ -118,5 +118,6 @@
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Present (Evaluation (Variable "P") (List (Variable "A"))))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
+		(Replacement (Variable "A") (Concept "Loser"))
 		(Evaluation (GroundedPredicate "scm:like-triple-pie")
 			(List (Variable "P") (Variable "A") (Variable "$top")))))

@@ -215,18 +215,10 @@ void GPNJoinUTest::test_top(void)
 	printf("triple-gpn = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
-	TS_ASSERT_EQUALS(results.size(), 2);
+	TS_ASSERT_EQUALS(results.size(), 1);
 
-	if (results[0] == A)
-	{
-		TS_ASSERT_EQUALS(results[0], A);
-		TS_ASSERT_EQUALS(results[1], E);
-	}
-	else
-	{
-		TS_ASSERT_EQUALS(results[1], A);
-		TS_ASSERT_EQUALS(results[0], E);
-	}
+	Handle RA = L(EVALUATION_LINK, P, L(LIST_LINK, N(VARIABLE_NODE, "A")));
+	TS_ASSERT_EQUALS(results[0], RA);
 
 	// ----------------------------------
 	vp = eval->eval_v("(cog-execute! min-gpn-rep)");
@@ -282,18 +274,10 @@ void GPNJoinUTest::test_top(void)
 	printf("triple-gpn-rep = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
-	TS_ASSERT_EQUALS(results.size(), 2);
+	TS_ASSERT_EQUALS(results.size(), 1);
 
-	if (results[0] == A)
-	{
-		TS_ASSERT_EQUALS(results[0], A);
-		TS_ASSERT_EQUALS(results[1], E);
-	}
-	else
-	{
-		TS_ASSERT_EQUALS(results[1], A);
-		TS_ASSERT_EQUALS(results[0], E);
-	}
+	Handle LA = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "Loser")));
+	TS_ASSERT_EQUALS(results[0], LA);
 
 	// ------------
 	logger().info("END TEST: %s", __FUNCTION__);
