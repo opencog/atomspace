@@ -14,10 +14,15 @@
 (Evaluation (Predicate "spinach") (List (Concept "G")))
 (Evaluation (Predicate "sinister shoes") (List (Concept "Zappa")))
 
-(define (like-pie ATOM)
+(define (min-like-pie ATOM)
+	(define label (cog-name ATOM))
+	(format #t "I was minimally told ~A" ATOM)
+	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+
+(define (max-like-pie ATOM)
 	(define pred (cog-outgoing-atom ATOM 0))
 	(define label (cog-name pred))
-	(format #t "I was told ~A" ATOM)
+	(format #t "I was maximally told ~A" ATOM)
 	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
 
 (define min-gpn
@@ -25,14 +30,14 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
-		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
+		(Evaluation (GroundedPredicate "scm:min-like-pie") (List (Variable "$top")))))
 
 (define max-gpn
 	(MaximalJoin
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
-		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
+		(Evaluation (GroundedPredicate "scm:max-like-pie") (List (Variable "$top")))))
 
 (define min-gpn-rep
 	(MinimalJoin
@@ -40,7 +45,7 @@
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
-		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
+		(Evaluation (GroundedPredicate "scm:min-like-pie") (List (Variable "$top")))))
 
 (define max-gpn-rep
 	(MaximalJoin
@@ -48,4 +53,4 @@
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
-		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
+		(Evaluation (GroundedPredicate "scm:max-like-pie") (List (Variable "$top")))))
