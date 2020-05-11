@@ -48,6 +48,11 @@ protected:
 	size_t _jsize;
 	size_t _vsize;
 
+	// A named top-variable, if it exists
+	Handle _top_var;
+	HandleSeq _top_clauses(void);
+	void setup_top_clauses(void);
+
 	// A list of type-checks to be applied to the top.
 	HandleSeq _top_types;
 	void setup_top_types(void);

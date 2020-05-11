@@ -49,6 +49,7 @@ void JoinLink::init(void)
 
 	validate();
 	setup_meet();
+	setup_top_clauses();
 	setup_top_types();
 }
 
@@ -86,7 +87,8 @@ void JoinLink::validate(void)
 		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
 		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
 
-		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
+		throw SyntaxException(TRACE_INFO, "Not supported (yet?) Got %s",
+			clause->to_string().c_str());
 	}
 }
 
@@ -157,6 +159,46 @@ void JoinLink::setup_meet(void)
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
 	Handle hbody(createLink(std::move(jclauses), AND_LINK));
 	_meet = createLink(MEET_LINK, hdecls, hbody);
+}
+
+/* ================================================================= */
+
+/// Setup the top variable, if one is asked for, and
+/// any constraints applied to it.
+void JoinLink::setup_top_clauses(void)
+{
+	// Search for a named top var.
+	for (const Handle& var : _variables.varseq)
+	{
+		// If its anywhere, its in the simple typemap.
+		const auto& styp = _variables._simple_typemap.find(var);
+		if (_variables._simple_typemap.end() == styp) continue;
+
+		// If it's specified, its a plain single type.
+		if (styp->second.size() != 1) continue;
+
+		// Its got to be JoinLink, or a derived type.
+		Type vt = *(styp->second.begin());
+		if (nameserver().isA(vt, JOIN_LINK))
+		{
+			_top_var = var;
+			break;
+		}
+	}
+
+	if (nullptr == _top_var) return;
+
+#if 0
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		Type t = clause->get_type();
+
+		{
+			_top_types.push_back(clause);
+		}
+	}
+#endif
 }
 
 /* ================================================================= */
