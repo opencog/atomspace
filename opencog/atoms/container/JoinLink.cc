@@ -26,6 +26,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -416,6 +417,30 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
+HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
+                              const HandleSet& containers) const
+{
+	HandleSet rejects;
+	for (const Handle& h : containers)
+	{
+		for (const Handle& toty : _top_types)
+		{
+			if (value_is_type(toty, h)) continue;
+			rejects.insert(h);
+			break;
+		}
+	}
+
+	// Remove the rejects
+	HandleSet accept;
+	std::set_difference(containers.begin(), containers.end(),
+	                    rejects.begin(), rejects.end(),
+	                    std::inserter(accept, accept.begin()));
+	return accept;
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
 	Traverse trav;
@@ -427,6 +452,10 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 			find_top(tops, h);
 		containers.swap(tops);
 	}
+
+	// Apply constraints on the top type, if any
+	if (0 < _top_types.size())
+		containers = constrain(as, silent, containers);
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);
