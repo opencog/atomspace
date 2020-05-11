@@ -47,7 +47,7 @@ void JoinLink::init(void)
 			"JoinLinks are private and cannot be instantiated.");
 
 	validate();
-	setup_meets();
+	setup_meet();
 	setup_evaluatable();
 }
 
@@ -88,58 +88,44 @@ void JoinLink::setup_evaluatable(void)
 
 /// setup_meets() -- create a search that can find the all of
 /// the locations that will be joined together.
-void JoinLink::setup_meets(void)
+void JoinLink::setup_meet(void)
 {
+	HandleSeq jclauses;
 	HandleSet done;
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 
-		// Create a mandatory clause for each PresentLink
-		if (clause->get_type() != PRESENT_LINK) continue;
+		if (clause->get_type() == REPLACEMENT_LINK) continue;
+
+		jclauses.push_back(clause);
 
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		_mandatory.insert({clause, fv.varseq});
-
-		// Create a MeetLink for each mandatory clause.
-		setup_clause(clause, fv.varseq);
-
 		done.merge(fv.varset);
 	}
 
-	// Are there any variables that are NOT in a PresentLink? If so,
-	// then create a PresentLink for each; we need that to get started.
+	// Are there any variables that are NOT in some clause? If so,
+	// then create a PresentLink for each.
 	for (const Handle& var: _variables.varseq)
 	{
 		if (done.find(var) != done.end()) continue;
 		Handle pres(createLink(PRESENT_LINK, var));
-		_mandatory.insert({pres, {var}});
-		setup_clause(pres, {var});
+		jclauses.emplace_back(pres);
 	}
-}
 
-/* ================================================================= */
-
-/// Given one PresentLink in the body of the JoinLink, create
-/// a map with all of the variables that appear in it, and create
-/// a MeetLink that can be used to find the atoms to be joined.
-///
-void JoinLink::setup_clause(const Handle& clause,
-                            const HandleSeq& varseq)
-{
 	// Build a Meet
 	HandleSeq vardecls;
-	for (const Handle& var : varseq)
+	for (const Handle& var : _variables.varseq)
 	{
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);
 	}
 
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
-	Handle meet(createLink(MEET_LINK, hdecls, clause));
-	_meets.insert({clause, meet});
+	Handle hbody(createLink(std::move(jclauses), AND_LINK));
+	_meet = createLink(MEET_LINK, hdecls, hbody);
 }
 
 /* ================================================================= */
@@ -219,19 +205,17 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 ///
 ///
 HandleSet JoinLink::principals(AtomSpace* as,
-                               const Handle& clause,
                                Traverse& trav) const
 {
 	const bool TRANSIENT_SPACE = true;
 
-	Handle meet = _meets.at(clause);
 	AtomSpace temp(as, TRANSIENT_SPACE);
-	meet = temp.add_atom(meet);
+	Handle meet = temp.add_atom(_meet);
 	ValuePtr vp = meet->execute();
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
-	const HandleSeq& varseq(_mandatory.at(clause));
+	const HandleSeq& varseq(_variables.varseq);
 	size_t vsize = varseq.size();
 	if (1 == vsize)
 	{
@@ -326,41 +310,15 @@ void JoinLink::principal_filter(HandleSet& containers,
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
                               Traverse& trav) const
 {
-	// Insect will hold the intersection of all the supremums.
-	HandleSet insect;
-	bool first_time = true;
-	for (const auto& memb : _mandatory)
-	{
-		// For a single PresentLink clause, find the set of
-		// principal elements. These are the "smallest" atoms
-		// that satisfy the PresentLink constraints and the type
-		// constraints.
-		const Handle& h(memb.first);
-		HandleSet princes(principals(as, h, trav));
+	HandleSet princes(principals(as, trav));
 
-		// Get a principal filter for each principal element,
-		// and union all of them together.
-		HandleSet containers;
-		for (const Handle& pr: princes)
-			principal_filter(containers, pr);
+	// Get a principal filter for each principal element,
+	// and union all of them together.
+	HandleSet containers;
+	for (const Handle& pr: princes)
+		principal_filter(containers, pr);
 
-		// Starting filter of the sequence, first time only...
-		if (first_time)
-		{
-			first_time = false;
-			insect.swap(containers);
-			continue;
-		}
-
-		// Not the first time. Perform set intersection.
-		HandleSet smaller;
-		std::set_intersection(insect.begin(), insect.end(),
-		                      containers.begin(), containers.end(),
-		                      std::inserter(smaller, smaller.begin()));
-		insect.swap(smaller);
-	}
-
-	return insect;
+	return containers;
 }
 
 /* ================================================================= */
@@ -386,14 +344,6 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
                              Traverse& trav) const
 {
-	// If there is only one clause, we do not have to get
-	// upper sets, and trim them back down. Avoid extra work.
-	if (_mandatory.size() == 1)
-	{
-		const Handle& h(_mandatory.begin()->first);
-		return principals(as, h, trav);
-	}
-
 	HandleSet upset = upper_set(as, silent, trav);
 
 	// Create a set of non-minimal elements.
