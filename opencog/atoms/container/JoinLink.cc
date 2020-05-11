@@ -63,7 +63,7 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (size_t i=0; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 		Type t = clause->get_type();
@@ -81,6 +81,11 @@ void JoinLink::validate(void)
 		if (nameserver().isA(t, TYPE_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
+		// Variable decls are allowed only in the first location.
+		if (0 == i and nameserver().isA(t, VARIABLE_LIST)) continue;
+		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
+		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
+
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
 	}
 }
@@ -93,7 +98,7 @@ void JoinLink::setup_meet(void)
 {
 	HandleSeq jclauses;
 	HandleSet done;
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (size_t i=0; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 
@@ -104,15 +109,28 @@ void JoinLink::setup_meet(void)
 		if (nameserver().isA(t, TYPE_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
+		// If variable declarations are missing, then
+		// we insist on the first link being a PresentLink
+		if (i == 0 and not (PRESENT_LINK == t)) continue;
+
 		jclauses.push_back(clause);
 
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		if (0 == fv.varset.size())
-			_const_terms.insert(clause);
-		else
+		if (0 < fv.varset.size())
+		{
 			done.merge(fv.varset);
+			continue;
+		}
+
+		// If we are here, there are no variables. Its a constant
+		if (PRESENT_LINK != t)
+			throw SyntaxException(TRACE_INFO,
+				"Constant terms should be wrapped in a PresentLink, got %s",
+				clause->to_short_string().c_str());
+
+		_const_terms.insert(clause->getOutgoingAtom(0));
 	}
 
 	_vsize = _variables.varseq.size();
@@ -242,7 +260,12 @@ HandleSet JoinLink::principals(AtomSpace* as,
 {
 	// No variables, no search needed.
 	if (0 == _vsize)
+	{
+		// Trivial replace-map.
+		for (const Handle& h : _const_terms)
+			trav.replace_map.insert({h, h});
 		return _const_terms;
+	}
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
@@ -296,8 +319,10 @@ void JoinLink::principal_filter(HandleSet& containers,
                                 const Handle& h) const
 {
 	// Ignore type specifications, other containers!
-	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
-	    nameserver().isA(h->get_type(), JOIN_LINK))
+	Type t = h->get_type();
+	if (nameserver().isA(t, PRESENT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, JOIN_LINK))
 		return;
 
 	IncomingSet is(h->getIncomingSet());
@@ -323,7 +348,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	for (const Handle& pr: princes)
 		principal_filter(containers, pr);
 
-	if (1 == _vsize)
+	if (1 >= _vsize)
 		return containers;
 
 	// The meet link provided us with elements that are "too low",
@@ -410,7 +435,8 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 {
 	// Ignore other containers!
-	if (nameserver().isA(h->get_type(), JOIN_LINK))
+	Type t = h->get_type();
+	if (nameserver().isA(t, JOIN_LINK))
 		return;
 
 	IncomingSet is(h->getIncomingSet());
