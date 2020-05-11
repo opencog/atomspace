@@ -27,6 +27,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -139,6 +140,7 @@ void JoinLink::setup_meet(void)
 	}
 
 	_vsize = _variables.varseq.size();
+	if (_top_var) _vsize--;
 	_jsize = _vsize + _const_terms.size();
 	if (0 == _vsize) return;
 
@@ -147,6 +149,7 @@ void JoinLink::setup_meet(void)
 	for (const Handle& var: _variables.varseq)
 	{
 		if (done.find(var) != done.end()) continue;
+		if (var == _top_var) continue;
 		Handle pres(createLink(PRESENT_LINK, var));
 		jclauses.emplace_back(pres);
 	}
@@ -155,6 +158,7 @@ void JoinLink::setup_meet(void)
 	HandleSeq vardecls;
 	for (const Handle& var : _variables.varseq)
 	{
+		if (var == _top_var) continue;
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);
 	}
@@ -542,6 +546,16 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 		// Run the evaluatable constraint clauses
 		for (const Handle& toc : _top_clauses)
 		{
+			// Plug in any variables ...
+#if 0
+			TruthValuePtr tvp =
+				EvaluationLink::do_evaluate(as, toc, silent);
+			if (TruthValue::TRUE_TV() == tvp)
+			{
+				rejects.insert(h);
+				break;
+			}
+#endif
 		}
 	}
 
