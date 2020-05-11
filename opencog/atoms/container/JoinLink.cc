@@ -48,9 +48,9 @@ void JoinLink::init(void)
 			"JoinLinks are private and cannot be instantiated.");
 
 	validate();
-	setup_meet();
 	setup_top_clauses();
 	setup_top_types();
+	setup_meet();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -114,6 +114,9 @@ void JoinLink::setup_meet(void)
 		// If variable declarations are missing, then
 		// we insist on the first link being a PresentLink
 		if (i == 0 and not (PRESENT_LINK == t)) continue;
+
+		// The top-var clauses cannot be passed to the meet.
+		if (_top_var and is_free_in_tree(clause, _top_var)) continue;
 
 		jclauses.push_back(clause);
 
@@ -188,17 +191,12 @@ void JoinLink::setup_top_clauses(void)
 
 	if (nullptr == _top_var) return;
 
-#if 0
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
-		Type t = clause->get_type();
-
-		{
-			_top_types.push_back(clause);
-		}
+		if (is_free_in_tree(clause, _top_var))
+			_top_clauses.push_back(clause);
 	}
-#endif
 }
 
 /* ================================================================= */
@@ -523,17 +521,27 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
+/// Apply constraints that involve the top-most, containing
+/// term.  This include type constraints, as well as evaluatable
+/// terms that name the top variable.
 HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
                               const HandleSet& containers) const
 {
 	HandleSet rejects;
+
 	for (const Handle& h : containers)
 	{
+		// Weed out anything that is the wrong type
 		for (const Handle& toty : _top_types)
 		{
 			if (value_is_type(toty, h)) continue;
 			rejects.insert(h);
 			break;
+		}
+
+		// Run the evaluatable constraint clauses
+		for (const Handle& toc : _top_clauses)
+		{
 		}
 	}
 
@@ -566,7 +574,7 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 	}
 
 	// Apply constraints on the top type, if any
-	if (0 < _top_types.size())
+	if (0 < _top_types.size() or 0 < _top_clauses.size())
 		containers = constrain(as, silent, containers);
 
 	// Perform the actual rewriting.

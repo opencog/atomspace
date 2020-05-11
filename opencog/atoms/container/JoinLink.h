@@ -50,7 +50,7 @@ protected:
 
 	// A named top-variable, if it exists
 	Handle _top_var;
-	HandleSeq _top_clauses(void);
+	HandleSeq _top_clauses;
 	void setup_top_clauses(void);
 
 	// A list of type-checks to be applied to the top.
