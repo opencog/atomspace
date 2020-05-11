@@ -48,6 +48,7 @@ void JoinLink::init(void)
 
 	validate();
 	setup_meets();
+	setup_evaluatable();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -61,6 +62,26 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		if (clause->get_type() == PRESENT_LINK) continue;
+		if (clause->get_type() == REPLACEMENT_LINK) continue;
+		if (clause->is_evaluatable()) continue;
+		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
+	}
+}
+
+/* ================================================================= */
+
+void JoinLink::setup_evaluatable(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		if (not clause->is_evaluatable()) continue;
+		_evaluatable.push_back(clause);
+	}
 }
 
 /* ================================================================= */
@@ -127,7 +148,7 @@ void JoinLink::setup_clause(const Handle& clause,
 /// Each of these should have a corresponding variable declaration.
 /// Update the replacement map so that the "from" part of the variable
 /// (obtained from the signature) gets replaced by the ... replacement.
-void JoinLink::fixup_replacements(HandleMap& replace_map) const
+void JoinLink::fixup_replacements(Traverse& trav) const
 {
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
@@ -140,10 +161,10 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 
 		const Handle& from(h->getOutgoingAtom(0));
 		bool found = false;
-		for (const auto& pr : replace_map)
+		for (const auto& pr : trav.replace_map)
 		{
 			if (pr.second != from) continue;
-			replace_map[pr.first] = h->getOutgoingAtom(1);
+			trav.replace_map[pr.first] = h->getOutgoingAtom(1);
 			found = true;
 		}
 
@@ -157,9 +178,25 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 /* ================================================================= */
 
 /// Given one mandatory-presence term in the body of the JoinLink,
-/// obtain every atom that satisfies it, including all relevant type
-/// constraints it specifies. Return a "replacement map", which
-/// pairs up atoms in the atomspace with variables in the PresentLink.
+/// obtain every atom that satisfies it, including satisfying all
+/// relevant type constraints it specifies. Return the a set of
+/// those atoms. This is a set of "principal elements", on top of
+/// which the "principal filters" will be built.
+///
+/// This is the "supremum" of the PresentLink: it is the smallest set of
+/// atoms that satisfy the constraints given by the PresentLink and the
+/// type constraints on the variables. The returned elements are the
+/// "principal elements" from which the "principal filters" will be
+/// constructed.
+///
+/// Explained a different way: this performs a wild-card search, to find
+/// all of the principal elements specified by the wild-cards.
+///
+/// During construction, several maps are built. One is a "replacement
+/// map", which is needed to perform substitution on the discovered
+/// results.  It pairs up atoms in the atomspace with variables in
+/// the PresentLink. Another map is the "constraint map"; it reverses
+/// the pairing. It is needed to apply constraint clauses.
 ///
 /// An example: one is looking for MemberLinks:
 ///
@@ -174,22 +211,16 @@ void JoinLink::fixup_replacements(HandleMap& replace_map) const
 ///    (Member (Concept "sea") (Concept "beach"))
 ///    (Member (Concept "sand") (Concept "beach"))
 ///
-/// then the returned HandleMap will have three pairs, of the form
+/// then the replacement map will have three pairs, of the form
 ///
 ///    { (Concept "sea"),   (Variable "X") }
 ///    { (Concept "sand"),  (Variable "X") }
 ///    { (Concept "beach"), (Variable "Y") }
 ///
-/// This is the "supremum" of the PresentLink: it is the smallest set of
-/// atoms that satisfy the constraints given by the PresentLink and the
-/// type constraints on the variables. The returned elements are the
-/// "principal elements" from which the "principal filters" will be
-/// constructed.
 ///
-/// Explained a different way: this performs a wild-card search, to find
-/// all of the principal elements specified by the wild-cards.
-///
-HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
+HandleSet JoinLink::principals(AtomSpace* as,
+                               const Handle& clause,
+                               Traverse& trav) const
 {
 	const bool TRANSIENT_SPACE = true;
 
@@ -205,22 +236,28 @@ HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
 	if (1 == vsize)
 	{
 		const Handle& var(varseq[0]);
-		HandleMap replace_map;
+		HandleSet princes;
 		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
-			replace_map.insert({hst, var});
-		return replace_map;
+		{
+			princes.insert(hst);
+			trav.replace_map.insert({hst, var});
+		}
+		return princes;
 	}
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
-	HandleMap replace_map;
+	HandleSet princes;
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
 		const HandleSeq& glist(hst->getOutgoingSet());
 		for (size_t i=0; i<vsize; i++)
-			replace_map.insert({glist[i], varseq[i]});
+		{
+			princes.insert(glist[i]);
+			trav.replace_map.insert({glist[i], varseq[i]});
+		}
 	}
-	return replace_map;
+	return princes;
 }
 
 /* ================================================================= */
@@ -231,7 +268,7 @@ HandleMap JoinLink::principal_map(AtomSpace* as, const Handle& clause) const
 /// it's  incoming tree into the handle-set. This recursively walks to
 /// the top, till there is no more. Of course, this can get large.
 void JoinLink::principal_filter(HandleSet& containers,
-                                    const Handle& h) const
+                                const Handle& h) const
 {
 	// Ignore type sepcifications, other containers!
 	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
@@ -287,7 +324,7 @@ void JoinLink::principal_filter(HandleSet& containers,
 /// the code -- the code is easier to understand.
 ///
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
-                              HandleMap& replace_map) const
+                              Traverse& trav) const
 {
 	// Insect will hold the intersection of all the supremums.
 	HandleSet insect;
@@ -299,16 +336,13 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 		// that satisfy the PresentLink constraints and the type
 		// constraints.
 		const Handle& h(memb.first);
-		HandleMap start_map(principal_map(as, h));
+		HandleSet princes(principals(as, h, trav));
 
 		// Get a principal filter for each principal element,
 		// and union all of them together.
 		HandleSet containers;
-		for (const auto& pr: start_map)
-		{
-			principal_filter(containers, pr.first);
-			replace_map.insert(pr);
-		}
+		for (const Handle& pr: princes)
+			principal_filter(containers, pr);
 
 		// Starting filter of the sequence, first time only...
 		if (first_time)
@@ -350,14 +384,17 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 /// TODO: it might be faster to use hash tables instead of rb-trees
 /// i.e. to use UnorderedHandleSet instead of HandleSet. XXX FIXME.
 HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
-                             HandleMap& replace_map) const
+                             Traverse& trav) const
 {
 	// If there is only one clause, we do not have to get
 	// upper sets, and trim them back down. Avoid extra work.
 	if (_mandatory.size() == 1)
-		return supr_one(as, silent, replace_map);
+	{
+		const Handle& h(_mandatory.begin()->first);
+		return principals(as, h, trav);
+	}
 
-	HandleSet upset = upper_set(as, silent, replace_map);
+	HandleSet upset = upper_set(as, silent, trav);
 
 	// Create a set of non-minimal elements.
 	HandleSet non_minimal;
@@ -384,37 +421,6 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 
 /* ================================================================= */
 
-/// If there is only one clause, then the supremum is just the
-/// principal element for that clause. Special case, for speed.
-HandleSet JoinLink::supr_one(AtomSpace* as, bool silent,
-                             HandleMap& replace_map) const
-{
-	OC_ASSERT(_mandatory.size() == 1);
-
-	const Handle& h(_mandatory.begin()->first);
-	HandleMap start_map(principal_map(as, h));
-
-	HandleSet containers;
-	for (const auto& pr: start_map)
-	{
-		containers.insert(pr.first);
-		replace_map.insert(pr);
-	}
-	return containers;
-}
-
-/* ================================================================= */
-
-HandleSet JoinLink::min_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map) const
-{
-	HandleSet containers(supremum(as, silent, replace_map));
-	fixup_replacements(replace_map);
-	return containers;
-}
-
-/* ================================================================= */
-
 /// find_top() - walk upwards from `h` and insert topmost atoms into
 /// the container set.  This recursively walks to the top, until there
 /// is nothing more above.
@@ -437,15 +443,21 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
-HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
-                                  HandleMap& replace_map) const
+HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
-	HandleSet hs = min_container(as, silent, replace_map);
-	HandleSet containers;
-	for (const Handle& h: hs)
-		find_top(containers, h);
+	Traverse trav;
+	HandleSet containers(supremum(as, silent, trav));
+	fixup_replacements(trav);
+	if (MAXIMAL_JOIN_LINK == get_type())
+	{
+		HandleSet tops;
+		for (const Handle& h: containers)
+			find_top(tops, h);
+		containers.swap(tops);
+	}
 
-	return containers;
+	// Perform the actual rewriting.
+	return replace(containers, trav);
 }
 
 /* ================================================================= */
@@ -454,14 +466,14 @@ HandleSet JoinLink::max_container(AtomSpace* as, bool silent,
 /// replacements, substituting the bottom-most atoms as requested,
 /// while honoring all scoping and quoting.
 HandleSet JoinLink::replace(const HandleSet& containers,
-                            const HandleMap& replace_map) const
+                            const Traverse& trav) const
 {
 	// Use the FreeVariables utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, replace_map);
+		Handle rep = FreeVariables::replace_nocheck(top, trav.replace_map);
 		replaced.insert(rep);
 	}
 
@@ -475,22 +487,12 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	QueueValuePtr qvp(createQueueValue());
 
-	HandleMap replace_map;
-	HandleSet hs;
-	if (MAXIMAL_JOIN_LINK == get_type())
-		hs = max_container(as, silent, replace_map);
-	else
-		hs = min_container(as, silent, replace_map);
-
-	// Perform the actual rewriting.
-	hs = replace(hs, replace_map);
+	HandleSet hs = container(as, silent);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.
 	for (const Handle& h : hs)
-	{
 		qvp->push(as->add_atom(h));
-	}
 
 	qvp->close();
 	return qvp;
