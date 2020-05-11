@@ -508,14 +508,19 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
 	Traverse trav;
-	HandleSet containers(supremum(as, silent, trav));
-	if (MAXIMAL_JOIN_LINK == get_type())
+	HandleSet containers;
+	Type t = get_type();
+	if (MINIMAL_JOIN_LINK == t)
+		containers = supremum(as, silent, trav);
+	else if (UPPER_SET_LINK == t)
+		containers = upper_set(as, silent, trav);
+	else if (MAXIMAL_JOIN_LINK == t)
 	{
-		HandleSet tops;
-		for (const Handle& h: containers)
-			find_top(tops, h);
-		if (0 < tops.size())
-			containers.swap(tops);
+		HandleSet supset(supremum(as, silent, trav));
+		for (const Handle& h: supset)
+			find_top(containers, h);
+		if (0 == containers.size())
+			containers = supset;
 	}
 
 	// Apply constraints on the top type, if any
