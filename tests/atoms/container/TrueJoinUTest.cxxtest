@@ -62,6 +62,7 @@ public:
 	// https://wiki.opencog.org/w/JoinLink
 	void test_filter(void);
 	void test_filter_again(void);
+	void test_top_type(void);
 };
 
 void TrueJoinUTest::tearDown(void)
@@ -188,6 +189,38 @@ void TrueJoinUTest::test_filter_again(void)
 		TS_ASSERT_EQUALS(results[1], PAB);
 		TS_ASSERT_EQUALS(results[0], PABC);
 	}
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Wiki page "Container type"
+ */
+void TrueJoinUTest::test_top_type(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/true-container.scm\")");
+
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-top)");
+	printf("min-top = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 0);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-top)");
+	printf("max-top = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle E = L(EVALUATION_LINK, N(PREDICATE_NODE, "P"),
+		L(LIST_LINK, N(VARIABLE_NODE, "X")));
+
+	TS_ASSERT_EQUALS(results[0], E);
 
 	// ------------
 	logger().info("END TEST: %s", __FUNCTION__);
