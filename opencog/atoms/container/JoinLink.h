@@ -62,15 +62,18 @@ protected:
 	{
 		HandleMap replace_map;
 		HandleSetSeq join_map;
+		HandleSeqMap top_map;
 	};
 
 	HandleSet principals(AtomSpace*, Traverse&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
+	void principal_filter_map(Traverse&, const HandleSeq&,
+	                          HandleSet&, const Handle&) const;
 
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
 	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
 
-	HandleSet constrain(AtomSpace*, bool, const HandleSet&) const;
+	HandleSet constrain(AtomSpace*, bool, Traverse&, const HandleSet&) const;
 
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;

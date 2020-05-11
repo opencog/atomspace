@@ -324,6 +324,8 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		return _const_terms;
 	}
 
+	bool need_top_map = (0 < _top_clauses.size());
+
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
 	AtomSpace temp(as, TRANSIENT_SPACE);
@@ -341,6 +343,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		{
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
+			if (need_top_map) trav.top_map.insert({hst, {hst}});
 		}
 
 		// Place constants into the join map, first.
@@ -376,6 +379,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
 			trav.join_map[n+i].insert(glist[i]);
+			if (need_top_map) trav.top_map.insert({glist[i], glist});
 		}
 	}
 	return princes;
@@ -398,11 +402,31 @@ void JoinLink::principal_filter(HandleSet& containers,
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 
-	IncomingSet is(h->getIncomingSet());
 	containers.insert(h);
 
+	IncomingSet is(h->getIncomingSet());
 	for (const Handle& ih: is)
 		principal_filter(containers, ih);
+}
+
+void JoinLink::principal_filter_map(Traverse& trav,
+                                    const HandleSeq& base,
+                                    HandleSet& containers,
+                                    const Handle& h) const
+{
+	// Ignore type specifications, other containers!
+	Type t = h->get_type();
+	if (nameserver().isA(t, PRESENT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, JOIN_LINK))
+		return;
+
+	containers.insert(h);
+	trav.top_map.insert({h, base});
+
+	IncomingSet is(h->getIncomingSet());
+	for (const Handle& ih: is)
+		principal_filter_map(trav, base, containers, ih);
 }
 
 /* ================================================================= */
@@ -418,8 +442,28 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	// Get a principal filter for each principal element,
 	// and union all of them together.
 	HandleSet containers;
-	for (const Handle& pr: princes)
-		principal_filter(containers, pr);
+	if (0 == _top_clauses.size())
+	{
+		for (const Handle& pr: princes)
+			principal_filter(containers, pr);
+	}
+	else
+	{
+		// Argh. This is complicated. Unamed, anonymous terms
+		// just like above.
+		size_t ncon = _const_terms.size();
+		for (size_t i=0; i<ncon; i++)
+		{
+			for (const Handle& prc: trav.join_map[i])
+				principal_filter(containers, prc);
+		}
+
+		// Named terms -- we need to build a lookup table,
+		// so that we can pass them into any evaluatable predicates.
+		HandleSeqMap base_map(trav.top_map);
+		for (const auto& pare: base_map)
+			principal_filter_map(trav, pare.second, containers, pare.first);
+	}
 
 	if (1 >= _jsize)
 		return containers;
@@ -529,6 +573,7 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 /// term.  This include type constraints, as well as evaluatable
 /// terms that name the top variable.
 HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
+                              Traverse& trav,
                               const HandleSet& containers) const
 {
 	HandleSet rejects;
@@ -552,6 +597,10 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 		{
 			HandleMap plugs;
 			plugs.insert({_top_var, h});
+
+			const HandleSeq& gnds(trav.top_map.at(h));
+			for (size_t i=0; i<_vsize; i++)
+				plugs.insert({_variables.varseq[i], gnds[i]});
 
 			// Plug in any variables ...
 			Handle topper = Replacement::replace_nocheck(toc, plugs);
@@ -597,7 +646,7 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 
 	// Apply constraints on the top type, if any
 	if (0 < _top_types.size() or 0 < _top_clauses.size())
-		containers = constrain(as, silent, containers);
+		containers = constrain(as, silent, trav, containers);
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);
