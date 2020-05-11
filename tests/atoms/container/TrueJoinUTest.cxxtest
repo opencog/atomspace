@@ -286,22 +286,9 @@ void TrueJoinUTest::test_const(void)
 	printf("min-const-ap = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
-	TS_ASSERT_EQUALS(results.size(), 2);
+	TS_ASSERT_EQUALS(results.size(), 1);
 
-	Handle P = N(VARIABLE_NODE, "P");
-	Handle VPAB = L(EVALUATION_LINK, P, LAB);
-	Handle VPABC = L(EVALUATION_LINK, P, LABC);
-
-	if (results[0] == VPAB)
-	{
-		TS_ASSERT_EQUALS(results[0], VPAB);
-		TS_ASSERT_EQUALS(results[1], VPABC);
-	}
-	else
-	{
-		TS_ASSERT_EQUALS(results[1], VPAB);
-		TS_ASSERT_EQUALS(results[0], VPABC);
-	}
+	TS_ASSERT_EQUALS(results[0], B);
 
 	// ----------------------------------
 	vp = eval->eval_v("(cog-execute! max-const-ap)");
@@ -309,6 +296,10 @@ void TrueJoinUTest::test_const(void)
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle P = N(VARIABLE_NODE, "P");
+	Handle VPAB = L(EVALUATION_LINK, P, LAB);
+	Handle VPABC = L(EVALUATION_LINK, P, LABC);
 
 	if (results[0] == VPAB)
 	{

@@ -55,6 +55,8 @@
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
 		(Present (Concept "B"))))
 
+; (cog-execute! min-const-ap)
+
 (define max-const-ap
 	(MaximalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
