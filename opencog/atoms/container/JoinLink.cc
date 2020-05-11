@@ -48,7 +48,6 @@ void JoinLink::init(void)
 
 	validate();
 	setup_meet();
-	setup_evaluatable();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -74,19 +73,7 @@ void JoinLink::validate(void)
 
 /* ================================================================= */
 
-void JoinLink::setup_evaluatable(void)
-{
-	for (size_t i=1; i<_outgoing.size(); i++)
-	{
-		const Handle& clause(_outgoing[i]);
-		if (not clause->is_evaluatable()) continue;
-		_evaluatable.push_back(clause);
-	}
-}
-
-/* ================================================================= */
-
-/// setup_meets() -- create a search that can find the all of
+/// setup_meet() -- create a search that can find the all of
 /// the locations that will be joined together.
 void JoinLink::setup_meet(void)
 {
@@ -166,17 +153,13 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 
 /* ================================================================= */
 
-/// Given one mandatory-presence term in the body of the JoinLink,
-/// obtain every atom that satisfies it, including satisfying all
-/// relevant type constraints it specifies. Return the a set of
-/// those atoms. This is a set of "principal elements", on top of
-/// which the "principal filters" will be built.
-///
-/// This is the "supremum" of the PresentLink: it is the smallest set of
-/// atoms that satisfy the constraints given by the PresentLink and the
-/// type constraints on the variables. The returned elements are the
-/// "principal elements" from which the "principal filters" will be
-/// constructed.
+/// Given the JoinLink, obtain a set of atoms that lie "below" the join.
+/// Below, in the sense that the join is guaranteed to be contained
+/// in the incoming trees of these atoms. The minimal join (the
+/// supremum) is guaranteed to be a slice through the above trees,
+/// and its the minimal one that joins the atoms. Basically, we let
+/// the pattern engine do all the hard work of checking for the
+/// satisfiability of all the various clauses.
 ///
 /// Explained a different way: this performs a wild-card search, to find
 /// all of the principal elements specified by the wild-cards.
@@ -184,8 +167,9 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 /// During construction, several maps are built. One is a "replacement
 /// map", which is needed to perform substitution on the discovered
 /// results.  It pairs up atoms in the atomspace with variables in
-/// the PresentLink. Another map is the "constraint map"; it reverses
-/// the pairing. It is needed to apply constraint clauses.
+/// the JoinLink. Another map is the "join map"; it reverses the
+/// pairing. It is needed to rule out unjoined responses from the
+/// pattern engine.
 ///
 /// An example: one is looking for MemberLinks:
 ///
@@ -206,6 +190,10 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 ///    { (Concept "sand"),  (Variable "X") }
 ///    { (Concept "beach"), (Variable "Y") }
 ///
+/// The join-map will contain
+///
+///    { (Variable "X"), { (Concept "sea"), (Concept "sand") }}
+///    { (Variable "Y"), { (Concept "beach") }}
 ///
 HandleSet JoinLink::principals(AtomSpace* as,
                                Traverse& trav) const
@@ -254,12 +242,12 @@ HandleSet JoinLink::principals(AtomSpace* as,
 /// principal_filter() - Get everything that contains `h`.
 /// This is the "principal filter" on the "principal element" `h`.
 /// Algorithmically: walk upwards from h and insert everything in
-/// it's  incoming tree into the handle-set. This recursively walks to
+/// it's incoming tree into the handle-set. This recursively walks to
 /// the top, till there is no more. Of course, this can get large.
 void JoinLink::principal_filter(HandleSet& containers,
                                 const Handle& h) const
 {
-	// Ignore type sepcifications, other containers!
+	// Ignore type specifications, other containers!
 	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
 	    nameserver().isA(h->get_type(), JOIN_LINK))
 		return;
@@ -274,43 +262,7 @@ void JoinLink::principal_filter(HandleSet& containers,
 /* ================================================================= */
 
 /// Compute the upper set -- the intersection of all of the principal
-/// filters for each mandatory clause.  This is a three-step process.
-///
-/// (1) Each mandatory clause is a PresentLink, with type constraints.
-///     It defines a wild-card search on the AtomSpace, and the results
-///     of that search is a set of principal elements. (See
-///     `principal_map()` above, for details).
-/// (2) For each principal element, obtain the corresponding "principal
-///     filter".  This is the set of all elements above the given
-///     principal element, "above" in the sense of "lies in the incoming
-///     tree". (See `principal_filter()` above for details.)
-///     Thus, each mandatory clause generates a set of principal filters.
-///     Union these all together; the union of filters is still a
-///     filter.
-/// (3) Intersect all of the filters, to obtain an upper set.
-///
-/// That's a mouthful, so lets unpack it.
-/// (1) For each mandatory clause c_i, obtain a set of principal
-///     elements {p_i}. If there are n clauses, this forms a Cartesian
-///     product ({p_1}, ... , {p_n}).
-/// (2) For each p_ij in {p_i} construct the corresponding filter f_ij.
-///     Compute the union filter f_i = f_i1 v f_i2 v ... v f_in
-///     This forms a Cartesian product (f_1, ... , f_n)
-/// (3) Compute the intersection f_1 & ... & f_n. This intersection
-///     is an upper set, because it contains one element from each
-///     of the {p_i}.
-///
-/// I think this is technically a pushout (fibered sum, co-cartesian
-/// square). (Not quite sure, I'm doing this in my head...) So...
-/// Start with the JoinLink .. call this "Z". Suppose it has two
-/// clauses, call them X and Y, so this is a "span" (category theory).
-/// The morphisms compute the union-filters. The co-span is the
-/// intersection ... is a disjoint union of containers of tuples ...
-/// Ick. That's roughly the idea. Caveat emptor. The code works.
-///
-/// See wikipedia for definitions of "upper set", "principal filter",
-/// "principal element", "disjoint union" and "pushout". Or just read
-/// the code -- the code is easier to understand.
+/// filters for each mandatory clause.
 ///
 HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
                               Traverse& trav) const
@@ -326,7 +278,13 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	if (1 == _vsize)
 		return containers;
 
-	// Create a set of unjoined elements.
+	// The meet link provided us with elements that are "too low",
+	// fail to be joins. Remove them. Ther shouldn't be all that
+	// many of them; it depends on how the join got written.
+	// Well, this could be rather CPU intensive... there's a lot
+	// of fishing going on here.
+	//
+	// So - two steps. First, create a set of unjoined elements.
 	HandleSet unjoined;
 	for (const Handle& h : containers)
 	{
@@ -340,6 +298,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 		}
 	}
 
+	// and now banish them
 	HandleSet joined;
 	std::set_difference(containers.begin(), containers.end(),
 	                    unjoined.begin(), unjoined.end(),

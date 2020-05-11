@@ -42,10 +42,6 @@ protected:
 	Handle _meet;
 	void setup_meet(void);
 
-	// A list of all evaluatable clauses.
-	HandleSeq _evaluatable;
-	void setup_evaluatable(void);
-
 	// Traversal context
 	struct Traverse
 	{
