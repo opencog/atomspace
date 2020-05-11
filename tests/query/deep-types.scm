@@ -12,6 +12,37 @@
 (use-modules (opencog exec))
 (use-modules (opencog type-utils))
 
+; =============================================================
+
+; The cog-value-is-type? function allows signatures to be
+; directly validated. Consider these examples:
+
+; Should evaluate to true.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+
+; We can define new types, too.
+(DefineLink
+   (DefinedType "My foo type")
+   (Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+
+; Should evaluate to true
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+
+; =============================================================
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))
 (Inheritance (Concept "bar") (Concept "bingo"))
@@ -119,31 +150,17 @@
 ; (cog-execute! constant-zappa)
 
 ; =============================================================
+; Disconennted components with deep types.
 
-; The cog-value-is-type? function allows signatures to be
-; directly validated. Consider these examples:
+(define deep-disconnect
+   (Get
+      (VariableList
+         (TypedVariable (Variable "X") (Signature (Concept "A")))
+         (TypedVariable (Variable "Y") (Signature (Concept "B"))))
+      (And
+         (Present (Variable "X"))
+         (Present (Variable "Y")))))
 
-; Should evaluate to true.
-;(cog-value-is-type?
-;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
-;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+; (cog-execute! deep-disconnect)
 
-; Should evaluate to false.
-;(cog-value-is-type?
-;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
-;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
-
-; We can define new types, too.
-(DefineLink
-   (DefinedType "My foo type")
-   (Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
-
-; Should evaluate to true
-;(cog-value-is-type?
-;   (DefinedType "My foo type")
-;   (Inheritance (Concept "foo") (ConceptNode "bar")))
-
-; Should evaluate to false.
-;(cog-value-is-type?
-;   (DefinedType "My foo type")
-;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+; =============================================================
