@@ -64,9 +64,12 @@ void JoinLink::validate(void)
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
-		if (clause->get_type() == PRESENT_LINK) continue;
-		if (clause->get_type() == REPLACEMENT_LINK) continue;
+		Type t = clause->get_type();
+		if (PRESENT_LINK == t) continue;
+		if (REPLACEMENT_LINK == t) continue;
 		if (clause->is_evaluatable()) continue;
+		if (nameserver().isA(t, EVALUATABLE_LINK)) continue;
+
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
 	}
 }
@@ -420,12 +423,12 @@ HandleSet JoinLink::replace(const HandleSet& containers,
 QueueValuePtr JoinLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
-	QueueValuePtr qvp(createQueueValue());
 
 	HandleSet hs = container(as, silent);
 
 	// XXX FIXME this is really dumb, using a queue and then
 	// copying things into it. Whatever. Fix this.
+	QueueValuePtr qvp(createQueueValue());
 	for (const Handle& h : hs)
 		qvp->push(as->add_atom(h));
 
