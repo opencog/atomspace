@@ -64,6 +64,7 @@ public:
 	void test_filter_again(void);
 	void test_top_type(void);
 	void test_const(void);
+	void test_upper(void);
 };
 
 void TrueJoinUTest::tearDown(void)
@@ -315,3 +316,58 @@ void TrueJoinUTest::test_const(void)
 	// ------------
 	logger().info("END TEST: %s", __FUNCTION__);
 }
+
+/*
+ * Wiki page "Minimal vs. Upper vs. Maximal"
+ */
+void TrueJoinUTest::test_upper(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/true-upper.scm\")");
+
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
+	printf("min-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle B = N(CONCEPT_NODE, "bird");
+	Handle C = N(CONCEPT_NODE, "crow");
+	Handle M = L(MEMBER_LINK, C, B);
+
+	TS_ASSERT_EQUALS(results[0], M);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-join)");
+	printf("max-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle R = L(LIST_LINK, N(CONCEPT_NODE, "class"), M);
+	Handle E = L(EVALUATION_LINK, N(PREDICATE_NODE, "ontology"), R);
+
+	TS_ASSERT_EQUALS(results[0], E);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! upper-set)");
+	printf("max-join = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 3);
+
+	bool m=false, r=false, e=false;
+	for (const Handle& hr : results)
+	{
+		if (hr == M) m=true;
+		if (hr == R) r=true;
+		if (hr == E) e=true;
+	}
+	TSM_ASSERT(m and r and e, "failed to find all three!");
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+

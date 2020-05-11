@@ -385,8 +385,12 @@ PUT_LINK <- PRENEX_LINK
 // The JoinLink searches for containing links that satsify the specified
 // predicates. This is the AtomSpace version of "join and meet" in a
 // partially ordered set. See wikipedia "meet and join".
+// The MinimalJoin is the supremum.
+// The MaximalJoin is the top.
+// The UpperSet is everything in between.
 JOIN_LINK <- PRENEX_LINK
 MINIMAL_JOIN_LINK <- JOIN_LINK
+UPPER_SET_LINK <- JOIN_LINK
 MAXIMAL_JOIN_LINK <- JOIN_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
@@ -509,6 +513,8 @@ FUZZY_LINK <- SIGNATURE_LINK
 // of "true", if the indicated variable is of the given type, else
 // it evaluates to "false".  The predicate specifying the concrete
 // test is the signature (SignatureLink, etc) that is tested.
+// XXX this inheritance seems to be making RuleUTest fail???
+// TYPED_VARIABLE_LINK <- ORDERED_LINK, EVALUATABLE_LINK
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
