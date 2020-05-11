@@ -109,8 +109,14 @@ void JoinLink::setup_meet(void)
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		done.merge(fv.varset);
+		if (0 == fv.varset.size())
+			_const_terms.insert(clause);
+		else
+			done.merge(fv.varset);
 	}
+
+	_vsize = _variables.varseq.size();
+	if (0 == _vsize) return;
 
 	// Are there any variables that are NOT in some clause? If so,
 	// then create a PresentLink for each.
@@ -132,9 +138,6 @@ void JoinLink::setup_meet(void)
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
 	Handle hbody(createLink(std::move(jclauses), AND_LINK));
 	_meet = createLink(MEET_LINK, hdecls, hbody);
-
-	// Handy cache
-	_vsize = _variables.varseq.size();
 }
 
 /* ================================================================= */
@@ -237,6 +240,12 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 HandleSet JoinLink::principals(AtomSpace* as,
                                Traverse& trav) const
 {
+	// No variables, no search needed.
+	if (0 == _vsize)
+		return _const_terms;
+
+	// If we are here, the expression had variables in it.
+	// Perform a search to ground those.
 	const bool TRANSIENT_SPACE = true;
 
 	AtomSpace temp(as, TRANSIENT_SPACE);
@@ -249,7 +258,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 	if (1 == _vsize)
 	{
 		const Handle& var(varseq[0]);
-		HandleSet princes;
+		HandleSet princes(_const_terms);
 		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 		{
 			princes.insert(hst);
@@ -261,7 +270,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
-	HandleSet princes;
+	HandleSet princes(_const_terms);
 	trav.join_map.resize(_vsize);
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{

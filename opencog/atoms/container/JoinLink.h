@@ -37,6 +37,9 @@ protected:
 
 	void validate(void);
 
+	// Terms without variable declarations in them.
+	HandleSet _const_terms;
+
 	// The base from which we will work upwards from.
 	size_t _vsize;
 	Handle _meet;
