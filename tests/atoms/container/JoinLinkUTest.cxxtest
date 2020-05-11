@@ -66,6 +66,8 @@ public:
 	void test_replace_implicit(void);
 	void test_shallow(void);
 	void test_empty(void);
+	void test_const(void);
+	// void test_const_empty(void);
 };
 
 void JoinLinkUTest::tearDown(void)
@@ -335,6 +337,83 @@ void JoinLinkUTest::test_empty(void)
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 1);
 	TS_ASSERT_EQUALS(results[0], N(CONCEPT_NODE, "B"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Constant test
+ * wiki page: "Motivating example"
+ */
+void JoinLinkUTest::test_const(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+
+	// ---------------------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-const)");
+	printf("min-const = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle A = N(CONCEPT_NODE, "A");
+	TS_ASSERT_EQUALS(results[0], A);
+
+	// ---------------------------------------------
+	vp = eval->eval_v("(cog-execute! max-const)");
+	printf("max-const = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle E = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "P"), L(LIST_LINK, A));
+	Handle M = L(MEMBER_LINK, A, N(CONCEPT_NODE, "S"));
+
+	if (results[0] == E)
+	{
+		TS_ASSERT_EQUALS(results[0], E);
+		TS_ASSERT_EQUALS(results[1], M);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[0], M);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+
+	// ---------------------------------------------
+	vp = eval->eval_v("(cog-execute! min-const-replace)");
+	printf("min-const-replace = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	Handle B = N(CONCEPT_NODE, "B");
+	TS_ASSERT_EQUALS(results[0], B);
+
+	vp = eval->eval_v("(cog-execute! max-const-replace)");
+	printf("max-const-replace = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	E = L(EVALUATION_LINK,
+		N(PREDICATE_NODE, "P"), L(LIST_LINK, B));
+	M = L(MEMBER_LINK, B, N(CONCEPT_NODE, "S"));
+
+	if (results[0] == E)
+	{
+		TS_ASSERT_EQUALS(results[0], E);
+		TS_ASSERT_EQUALS(results[1], M);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[0], M);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
