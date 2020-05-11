@@ -35,6 +35,8 @@
 
 using namespace opencog;
 
+static const bool TRANSIENT_SPACE = true;
+
 void JoinLink::init(void)
 {
 	Type t = get_type();
@@ -324,8 +326,6 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	const bool TRANSIENT_SPACE = true;
-
 	AtomSpace temp(as, TRANSIENT_SPACE);
 	Handle meet = temp.add_atom(_meet);
 	ValuePtr vp = meet->execute();
@@ -533,6 +533,10 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 {
 	HandleSet rejects;
 
+	AtomSpace* temp = nullptr;
+	if (0 < _top_clauses.size())
+		temp = new AtomSpace(as, TRANSIENT_SPACE);
+
 	for (const Handle& h : containers)
 	{
 		// Weed out anything that is the wrong type
@@ -546,18 +550,22 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 		// Run the evaluatable constraint clauses
 		for (const Handle& toc : _top_clauses)
 		{
+			HandleMap plugs;
+			plugs.insert({_top_var, h});
+
 			// Plug in any variables ...
-#if 0
+			Handle topper = Replacement::replace_nocheck(toc, plugs);
+			topper = temp->add_atom(topper);
 			TruthValuePtr tvp =
-				EvaluationLink::do_evaluate(as, toc, silent);
-			if (TruthValue::TRUE_TV() == tvp)
+				EvaluationLink::do_evaluate(temp, topper, silent);
+			if (tvp->get_mean() < 0.5)
 			{
 				rejects.insert(h);
 				break;
 			}
-#endif
 		}
 	}
+	if (temp) delete temp;
 
 	// Remove the rejects
 	HandleSet accept;
@@ -604,12 +612,12 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 HandleSet JoinLink::replace(const HandleSet& containers,
                             const Traverse& trav) const
 {
-	// Use the FreeVariables utility, so that all scoping and
+	// Use the Replacement utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, trav.replace_map);
+		Handle rep = Replacement::replace_nocheck(top, trav.replace_map);
 		replaced.insert(rep);
 	}
 
