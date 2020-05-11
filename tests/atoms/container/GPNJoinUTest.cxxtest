@@ -193,6 +193,24 @@ void GPNJoinUTest::test_top(void)
 	}
 
 	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! both-gpn)");
+	printf("both-gpn = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
+
+	// ----------------------------------
 	vp = eval->eval_v("(cog-execute! min-gpn-rep)");
 	printf("min-gpn-rep = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
@@ -211,6 +229,24 @@ void GPNJoinUTest::test_top(void)
 
 	A = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "A")));
 	E = L(EVALUATION_LINK, ILP, L(LIST_LINK, N(CONCEPT_NODE, "E")));
+
+	if (results[0] == A)
+	{
+		TS_ASSERT_EQUALS(results[0], A);
+		TS_ASSERT_EQUALS(results[1], E);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], A);
+		TS_ASSERT_EQUALS(results[0], E);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! both-gpn-rep)");
+	printf("both-gpn-rep = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
 
 	if (results[0] == A)
 	{
