@@ -22,26 +22,30 @@
 
 (define min-gpn
 	(MinimalJoin
-		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(TypedVariable (Variable "$top") (Type 'JoinNode))
+		(VariableList
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
 
 (define max-gpn
 	(MaximalJoin
-		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(TypedVariable (Variable "$top") (Type 'JoinNode))
+		(VariableList
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
 
 (define min-gpn-rep
 	(MinimalJoin
-		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(TypedVariable (Variable "$top") (Type 'JoinNode))
+		(VariableList
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
 
 (define max-gpn-rep
 	(MaximalJoin
-		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(TypedVariable (Variable "$top") (Type 'JoinNode))
+		(VariableList
+			(TypedVariable (Variable "P") (Type 'PredicateNode))
+			(TypedVariable (Variable "$top") (Type 'JoinLink)))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:like-pie") (List (Variable "$top")))))
