@@ -119,17 +119,12 @@ void PatternLink::setup_components(void)
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
-	//
-	// There is a pathological case where there are no virtuals, but
-	// there are multiple disconnected components.  I think that this is
-	// a user-error, but in fact PLN does have a rule which wants to
-	// explore that combinatoric explosion, on purpose. So we have to
-	// allow the multiple disconnected components for that case.
 	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _variables._simple_typemap,
-		                           _variables._glob_intervalmap, _components[i],
+		Handle h(createPatternLink(_component_vars[i],
+		                           _variables,
+		                           _components[i],
 		                           _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -185,8 +180,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
 PatternLink::PatternLink(const HandleSet& vars,
-                         const VariableTypeMap& typemap,
-                         const GlobIntervalMap& intervalmap,
+                         const Variables& varspec,
                          const HandleSeq& compo,
                          const HandleSeq& opts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
@@ -202,11 +196,21 @@ PatternLink::PatternLink(const HandleSet& vars,
 	for (const Handle& v : vars)
 	{
 		_variables.varseq.emplace_back(v);
-		auto it = typemap.find(v);
-		if (it != typemap.end())
+
+		auto it = varspec._simple_typemap.find(v);
+		if (it != varspec._simple_typemap.end())
 			_variables._simple_typemap.insert(*it);
-		auto imit = intervalmap.find(v);
-		if (imit != intervalmap.end())
+
+		auto dit = varspec._deep_typemap.find(v);
+		if (dit != varspec._deep_typemap.end())
+			_variables._deep_typemap.insert(*dit);
+
+		auto fit = varspec._fuzzy_typemap.find(v);
+		if (fit != varspec._fuzzy_typemap.end())
+			_variables._fuzzy_typemap.insert(*fit);
+
+		auto imit = varspec._glob_intervalmap.find(v);
+		if (imit != varspec._glob_intervalmap.end())
 			_variables._glob_intervalmap.insert(*imit);
 	}
 

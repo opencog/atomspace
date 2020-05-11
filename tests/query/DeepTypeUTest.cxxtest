@@ -66,6 +66,7 @@ public:
 	void test_get_signature(void);
 	void test_unbundle_defined_type_node(void);
 	void test_aybe_sea(void);
+	void test_deep_disconnect(void);
 };
 
 void DeepTypeUTest::tearDown(void)
@@ -561,6 +562,23 @@ void DeepTypeUTest::test_aybe_sea(void)
 
 	result = eval->eval_h("(cog-execute! constant-zappa)");
 	TSM_ASSERT_EQUALS("Bad constant abc", result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test disconnected deep components
+ */
+void DeepTypeUTest::test_deep_disconnect(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! deep-disconnect)");
+	Handle expected = eval->eval_h(
+		"(SetLink (List (Concept \"A\") (Concept \"B\")))");
+	TSM_ASSERT_EQUALS("Bad disconnect", result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
