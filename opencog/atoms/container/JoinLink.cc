@@ -26,6 +26,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -48,6 +49,7 @@ void JoinLink::init(void)
 
 	validate();
 	setup_meet();
+	setup_top_types();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -65,10 +67,19 @@ void JoinLink::validate(void)
 	{
 		const Handle& clause(_outgoing[i]);
 		Type t = clause->get_type();
-		if (PRESENT_LINK == t) continue;
+
+		// Replacement links get special treatment, here.
 		if (REPLACEMENT_LINK == t) continue;
+
+		// Anything evaluatable goes into the MeetLink
+		if (PRESENT_LINK == t) continue;
 		if (clause->is_evaluatable()) continue;
 		if (nameserver().isA(t, EVALUATABLE_LINK)) continue;
+
+		// Tye type nodes get applied to the container.
+		if (nameserver().isA(t, TYPE_NODE)) continue;
+		if (nameserver().isA(t, TYPE_LINK)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
 	}
@@ -86,7 +97,12 @@ void JoinLink::setup_meet(void)
 	{
 		const Handle& clause(_outgoing[i]);
 
-		if (clause->get_type() == REPLACEMENT_LINK) continue;
+		// Clauses handled at the container level
+		Type t = clause->get_type();
+		if (REPLACEMENT_LINK == t) continue;
+		if (nameserver().isA(t, TYPE_NODE)) continue;
+		if (nameserver().isA(t, TYPE_LINK)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
 		jclauses.push_back(clause);
 
@@ -119,6 +135,26 @@ void JoinLink::setup_meet(void)
 
 	// Handy cache
 	_vsize = _variables.varseq.size();
+}
+
+/* ================================================================= */
+
+/// Setup the type constraints that will be applied to the top.
+void JoinLink::setup_top_types(void)
+{
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		Type t = clause->get_type();
+
+		// Tye type nodes get applied to the container.
+		if (nameserver().isA(t, TYPE_NODE) or
+		    nameserver().isA(t, TYPE_LINK) or
+		    nameserver().isA(t, TYPE_OUTPUT_LINK))
+		{
+			_top_types.push_back(clause);
+		}
+	}
 }
 
 /* ================================================================= */
@@ -381,11 +417,34 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
+HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
+                              const HandleSet& containers) const
+{
+	HandleSet rejects;
+	for (const Handle& h : containers)
+	{
+		for (const Handle& toty : _top_types)
+		{
+			if (value_is_type(toty, h)) continue;
+			rejects.insert(h);
+			break;
+		}
+	}
+
+	// Remove the rejects
+	HandleSet accept;
+	std::set_difference(containers.begin(), containers.end(),
+	                    rejects.begin(), rejects.end(),
+	                    std::inserter(accept, accept.begin()));
+	return accept;
+}
+
+/* ================================================================= */
+
 HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 {
 	Traverse trav;
 	HandleSet containers(supremum(as, silent, trav));
-	fixup_replacements(trav);
 	if (MAXIMAL_JOIN_LINK == get_type())
 	{
 		HandleSet tops;
@@ -394,7 +453,12 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 		containers.swap(tops);
 	}
 
+	// Apply constraints on the top type, if any
+	if (0 < _top_types.size())
+		containers = constrain(as, silent, containers);
+
 	// Perform the actual rewriting.
+	fixup_replacements(trav);
 	return replace(containers, trav);
 }
 

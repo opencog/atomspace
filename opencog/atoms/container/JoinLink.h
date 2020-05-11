@@ -37,10 +37,14 @@ protected:
 
 	void validate(void);
 
-	// A list of all PresentLinks, and the variables in them
+	// The base from which we will work upwards from.
 	size_t _vsize;
 	Handle _meet;
 	void setup_meet(void);
+
+	// A list of type-checks to be applied to the top.
+	HandleSeq _top_types;
+	void setup_top_types(void);
 
 	// Traversal context
 	struct Traverse
@@ -55,7 +59,7 @@ protected:
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
 	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
 
-	void constrain(AtomSpace*, bool) const;
+	HandleSet constrain(AtomSpace*, bool, const HandleSet&) const;
 
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;
