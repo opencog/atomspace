@@ -134,6 +134,7 @@ void JoinLink::setup_meet(void)
 	}
 
 	_vsize = _variables.varseq.size();
+	_jsize = _vsize + _const_terms.size();
 	if (0 == _vsize) return;
 
 	// Are there any variables that are NOT in some clause? If so,
@@ -264,6 +265,16 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		// Trivial replace-map.
 		for (const Handle& h : _const_terms)
 			trav.replace_map.insert({h, h});
+
+		// Not quite trivial join map
+		trav.join_map.resize(_jsize);
+		size_t i=0;
+		for (const Handle& hc : _const_terms)
+		{
+			trav.join_map[i].insert(hc);
+			i++;
+		}
+
 		return _const_terms;
 	}
 
@@ -287,14 +298,32 @@ HandleSet JoinLink::principals(AtomSpace* as,
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
 		}
-		trav.join_map.push_back(princes);
+
+		// Place constants into the join map, first.
+		trav.join_map.resize(_jsize);
+		size_t i=0;
+		for (const Handle& hc : _const_terms)
+		{
+			trav.join_map[i].insert(hc);
+			i++;
+		}
+		trav.join_map[i] = princes;
 		return princes;
 	}
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
+
+	// But first, deal with the constant terms
 	HandleSet princes(_const_terms);
-	trav.join_map.resize(_vsize);
+	trav.join_map.resize(_jsize);
+	size_t n=0;
+	for (const Handle& hc : _const_terms)
+	{
+		trav.join_map[n].insert(hc);
+		n++;
+	}
+
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
 		const HandleSeq& glist(hst->getOutgoingSet());
@@ -302,7 +331,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		{
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
-			trav.join_map[i].insert(glist[i]);
+			trav.join_map[n+i].insert(glist[i]);
 		}
 	}
 	return princes;
@@ -348,7 +377,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	for (const Handle& pr: princes)
 		principal_filter(containers, pr);
 
-	if (1 >= _vsize)
+	if (1 >= _jsize)
 		return containers;
 
 	// The meet link provided us with elements that are "too low",
@@ -361,7 +390,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	HandleSet unjoined;
 	for (const Handle& h : containers)
 	{
-		for (size_t i=0; i<_vsize; i++)
+		for (size_t i=0; i<_jsize; i++)
 		{
 			if (not any_atom_in_tree(h, trav.join_map[i]))
 			{

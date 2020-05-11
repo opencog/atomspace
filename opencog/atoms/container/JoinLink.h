@@ -41,9 +41,12 @@ protected:
 	HandleSet _const_terms;
 
 	// The base from which we will work upwards from.
-	size_t _vsize;
 	Handle _meet;
 	void setup_meet(void);
+
+	// Total number of terms to join together.
+	size_t _jsize;
+	size_t _vsize;
 
 	// A list of type-checks to be applied to the top.
 	HandleSeq _top_types;
