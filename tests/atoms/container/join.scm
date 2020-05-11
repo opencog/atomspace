@@ -52,3 +52,20 @@
 (define shallow-join
 	(MaximalJoin
 		(TypedVariable (Variable "X") (Type 'ConceptNode))))
+
+; --------------------------------------
+(define max-const
+	(MaximalJoin (Present (Concept "A"))))
+
+(define min-const
+	(MinimalJoin (Present (Concept "A"))))
+
+(define max-const-replace
+	(MaximalJoin
+		(Present (Concept "A"))
+		(Replacement (Concept "A") (Concept "B"))))
+
+(define min-const-replace
+	(MinimalJoin
+		(Present (Concept "A"))
+		(Replacement (Concept "A") (Concept "B"))))

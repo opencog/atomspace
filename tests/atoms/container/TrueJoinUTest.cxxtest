@@ -63,6 +63,7 @@ public:
 	void test_filter(void);
 	void test_filter_again(void);
 	void test_top_type(void);
+	void test_const(void);
 };
 
 void TrueJoinUTest::tearDown(void)
@@ -147,7 +148,7 @@ void TrueJoinUTest::test_filter_again(void)
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-filter-ap)");
-	printf("min-filter-ab = %s\n", vp->to_string().c_str());
+	printf("min-filter-ap = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 2);
@@ -174,7 +175,7 @@ void TrueJoinUTest::test_filter_again(void)
 
 	// ----------------------------------
 	vp = eval->eval_v("(cog-execute! max-filter-ap)");
-	printf("max-filter-ab = %s\n", vp->to_string().c_str());
+	printf("max-filter-ap = %s\n", vp->to_string().c_str());
 	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 	results = LinkValueCast(vp)->to_handle_seq();
 	TS_ASSERT_EQUALS(results.size(), 2);
@@ -221,6 +222,95 @@ void TrueJoinUTest::test_top_type(void)
 		L(LIST_LINK, N(VARIABLE_NODE, "X")));
 
 	TS_ASSERT_EQUALS(results[0], E);
+
+	// ------------
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * constant tests. Not on the wiki page, but follows almost trivially.
+ */
+void TrueJoinUTest::test_const(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
+
+	// ----------------------------------
+	ValuePtr vp = eval->eval_v("(cog-execute! min-const-ab)");
+	printf("min-const-ab = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	HandleSeq results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle A = N(CONCEPT_NODE, "A");
+	Handle B = N(CONCEPT_NODE, "B");
+	Handle C = N(CONCEPT_NODE, "C");
+	Handle LAB = L(LIST_LINK, A, B);
+	Handle LABC = L(LIST_LINK, A, B, C);
+
+	if (results[0] == LAB)
+	{
+		TS_ASSERT_EQUALS(results[0], LAB);
+		TS_ASSERT_EQUALS(results[1], LABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], LAB);
+		TS_ASSERT_EQUALS(results[0], LABC);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-const-ab)");
+	printf("max-const-ab = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle PAB = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pab"), LAB);
+	Handle PABC = L(EVALUATION_LINK, N(PREDICATE_NODE, "Pabc"), LABC);
+
+	if (results[0] == PAB)
+	{
+		TS_ASSERT_EQUALS(results[0], PAB);
+		TS_ASSERT_EQUALS(results[1], PABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], PAB);
+		TS_ASSERT_EQUALS(results[0], PABC);
+	}
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! min-const-ap)");
+	printf("min-const-ap = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 1);
+
+	TS_ASSERT_EQUALS(results[0], B);
+
+	// ----------------------------------
+	vp = eval->eval_v("(cog-execute! max-const-ap)");
+	printf("max-const-ap = %s\n", vp->to_string().c_str());
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	results = LinkValueCast(vp)->to_handle_seq();
+	TS_ASSERT_EQUALS(results.size(), 2);
+
+	Handle P = N(VARIABLE_NODE, "P");
+	Handle VPAB = L(EVALUATION_LINK, P, LAB);
+	Handle VPABC = L(EVALUATION_LINK, P, LABC);
+
+	if (results[0] == VPAB)
+	{
+		TS_ASSERT_EQUALS(results[0], VPAB);
+		TS_ASSERT_EQUALS(results[1], VPABC);
+	}
+	else
+	{
+		TS_ASSERT_EQUALS(results[1], VPAB);
+		TS_ASSERT_EQUALS(results[0], VPABC);
+	}
 
 	// ------------
 	logger().info("END TEST: %s", __FUNCTION__);

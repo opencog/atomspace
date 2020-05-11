@@ -63,7 +63,7 @@ JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
 /// Temporary scaffolding to validate what we can do, so far.
 void JoinLink::validate(void)
 {
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (size_t i=0; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 		Type t = clause->get_type();
@@ -81,6 +81,11 @@ void JoinLink::validate(void)
 		if (nameserver().isA(t, TYPE_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
+		// Variable decls are allowed only in the first location.
+		if (0 == i and nameserver().isA(t, VARIABLE_LIST)) continue;
+		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
+		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
+
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
 	}
 }
@@ -93,7 +98,7 @@ void JoinLink::setup_meet(void)
 {
 	HandleSeq jclauses;
 	HandleSet done;
-	for (size_t i=1; i<_outgoing.size(); i++)
+	for (size_t i=0; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 
@@ -104,13 +109,33 @@ void JoinLink::setup_meet(void)
 		if (nameserver().isA(t, TYPE_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
+		// If variable declarations are missing, then
+		// we insist on the first link being a PresentLink
+		if (i == 0 and not (PRESENT_LINK == t)) continue;
+
 		jclauses.push_back(clause);
 
 		// Find the variables in the clause
 		FreeVariables fv;
 		fv.find_variables(clause);
-		done.merge(fv.varset);
+		if (0 < fv.varset.size())
+		{
+			done.merge(fv.varset);
+			continue;
+		}
+
+		// If we are here, there are no variables. Its a constant
+		if (PRESENT_LINK != t)
+			throw SyntaxException(TRACE_INFO,
+				"Constant terms should be wrapped in a PresentLink, got %s",
+				clause->to_short_string().c_str());
+
+		_const_terms.insert(clause->getOutgoingAtom(0));
 	}
+
+	_vsize = _variables.varseq.size();
+	_jsize = _vsize + _const_terms.size();
+	if (0 == _vsize) return;
 
 	// Are there any variables that are NOT in some clause? If so,
 	// then create a PresentLink for each.
@@ -132,9 +157,6 @@ void JoinLink::setup_meet(void)
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
 	Handle hbody(createLink(std::move(jclauses), AND_LINK));
 	_meet = createLink(MEET_LINK, hdecls, hbody);
-
-	// Handy cache
-	_vsize = _variables.varseq.size();
 }
 
 /* ================================================================= */
@@ -237,6 +259,27 @@ void JoinLink::fixup_replacements(Traverse& trav) const
 HandleSet JoinLink::principals(AtomSpace* as,
                                Traverse& trav) const
 {
+	// No variables, no search needed.
+	if (0 == _vsize)
+	{
+		// Trivial replace-map.
+		for (const Handle& h : _const_terms)
+			trav.replace_map.insert({h, h});
+
+		// Not quite trivial join map
+		trav.join_map.resize(_jsize);
+		size_t i=0;
+		for (const Handle& hc : _const_terms)
+		{
+			trav.join_map[i].insert(hc);
+			i++;
+		}
+
+		return _const_terms;
+	}
+
+	// If we are here, the expression had variables in it.
+	// Perform a search to ground those.
 	const bool TRANSIENT_SPACE = true;
 
 	AtomSpace temp(as, TRANSIENT_SPACE);
@@ -249,20 +292,38 @@ HandleSet JoinLink::principals(AtomSpace* as,
 	if (1 == _vsize)
 	{
 		const Handle& var(varseq[0]);
-		HandleSet princes;
+		HandleSet princes(_const_terms);
 		for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 		{
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
 		}
-		trav.join_map.push_back(princes);
+
+		// Place constants into the join map, first.
+		trav.join_map.resize(_jsize);
+		size_t i=0;
+		for (const Handle& hc : _const_terms)
+		{
+			trav.join_map[i].insert(hc);
+			i++;
+		}
+		trav.join_map[i] = princes;
 		return princes;
 	}
 
 	// If we are here, then the MeetLink has returned a collection
 	// of ListLinks, holding the variable values in the lists.
-	HandleSet princes;
-	trav.join_map.resize(_vsize);
+
+	// But first, deal with the constant terms
+	HandleSet princes(_const_terms);
+	trav.join_map.resize(_jsize);
+	size_t n=0;
+	for (const Handle& hc : _const_terms)
+	{
+		trav.join_map[n].insert(hc);
+		n++;
+	}
+
 	for (const Handle& hst : LinkValueCast(vp)->to_handle_seq())
 	{
 		const HandleSeq& glist(hst->getOutgoingSet());
@@ -270,7 +331,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		{
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
-			trav.join_map[i].insert(glist[i]);
+			trav.join_map[n+i].insert(glist[i]);
 		}
 	}
 	return princes;
@@ -287,8 +348,10 @@ void JoinLink::principal_filter(HandleSet& containers,
                                 const Handle& h) const
 {
 	// Ignore type specifications, other containers!
-	if (nameserver().isA(h->get_type(), TYPE_OUTPUT_LINK) or
-	    nameserver().isA(h->get_type(), JOIN_LINK))
+	Type t = h->get_type();
+	if (nameserver().isA(t, PRESENT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, JOIN_LINK))
 		return;
 
 	IncomingSet is(h->getIncomingSet());
@@ -314,7 +377,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	for (const Handle& pr: princes)
 		principal_filter(containers, pr);
 
-	if (1 == _vsize)
+	if (1 >= _jsize)
 		return containers;
 
 	// The meet link provided us with elements that are "too low",
@@ -327,7 +390,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	HandleSet unjoined;
 	for (const Handle& h : containers)
 	{
-		for (size_t i=0; i<_vsize; i++)
+		for (size_t i=0; i<_jsize; i++)
 		{
 			if (not any_atom_in_tree(h, trav.join_map[i]))
 			{
@@ -401,7 +464,8 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 {
 	// Ignore other containers!
-	if (nameserver().isA(h->get_type(), JOIN_LINK))
+	Type t = h->get_type();
+	if (nameserver().isA(t, JOIN_LINK))
 		return;
 
 	IncomingSet is(h->getIncomingSet());
@@ -450,7 +514,8 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 		HandleSet tops;
 		for (const Handle& h: containers)
 			find_top(tops, h);
-		containers.swap(tops);
+		if (0 < tops.size())
+			containers.swap(tops);
 	}
 
 	// Apply constraints on the top type, if any

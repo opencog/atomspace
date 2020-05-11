@@ -36,3 +36,28 @@
 		(VariableList
 			(TypedVariable (Variable "Y") (Signature (Concept "B")))
 			(TypedVariable (Variable "P") (Type 'PredicateNode)))))
+
+; ---------------------------------
+; Same as above, but with constants
+
+(define min-const-ab
+	(MinimalJoin
+		(Present (Concept "A"))
+		(Present (Concept "B"))))
+
+(define max-const-ab
+	(MaximalJoin
+		(Present (Concept "A"))
+		(Present (Concept "B"))))
+
+(define min-const-ap
+	(MinimalJoin
+		(TypedVariable (Variable "P") (Type 'PredicateNode))
+		(Present (Concept "B"))))
+
+; (cog-execute! min-const-ap)
+
+(define max-const-ap
+	(MaximalJoin
+		(TypedVariable (Variable "P") (Type 'PredicateNode))
+		(Present (Concept "B"))))
