@@ -147,8 +147,7 @@ public:
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).
 	PatternLink(const HandleSet& vars,
-	            const VariableTypeMap& typemap,
-	            const GlobIntervalMap& intervalmap,
+	            const Variables& varspec,
 	            const HandleSeq& component,
 	            const HandleSeq& optionals);
 
