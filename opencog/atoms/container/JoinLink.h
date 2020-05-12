@@ -48,6 +48,12 @@ protected:
 	size_t _jsize;
 	size_t _vsize;
 
+	// A named top-variable, if it exists
+	Handle _top_var;
+	HandleSeq _top_clauses;
+	bool _need_top_map;
+	void setup_top_clauses(void);
+
 	// A list of type-checks to be applied to the top.
 	HandleSeq _top_types;
 	void setup_top_types(void);
@@ -57,15 +63,18 @@ protected:
 	{
 		HandleMap replace_map;
 		HandleSetSeq join_map;
+		HandleSeqMap top_map;
 	};
 
 	HandleSet principals(AtomSpace*, Traverse&) const;
 	void principal_filter(HandleSet&, const Handle&) const;
+	void principal_filter_map(Traverse&, const HandleSeq&,
+	                          HandleSet&, const Handle&) const;
 
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
 	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
 
-	HandleSet constrain(AtomSpace*, bool, const HandleSet&) const;
+	HandleSet constrain(AtomSpace*, bool, Traverse&, const HandleSet&) const;
 
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;

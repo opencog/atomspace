@@ -27,12 +27,15 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "JoinLink.h"
 
 using namespace opencog;
+
+static const bool TRANSIENT_SPACE = true;
 
 void JoinLink::init(void)
 {
@@ -48,8 +51,9 @@ void JoinLink::init(void)
 			"JoinLinks are private and cannot be instantiated.");
 
 	validate();
-	setup_meet();
+	setup_top_clauses();
 	setup_top_types();
+	setup_meet();
 }
 
 JoinLink::JoinLink(const HandleSeq&& hseq, Type t)
@@ -86,7 +90,8 @@ void JoinLink::validate(void)
 		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
 		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
 
-		throw SyntaxException(TRACE_INFO, "Not supported (yet?)");
+		throw SyntaxException(TRACE_INFO, "Not supported (yet?) Got %s",
+			clause->to_string().c_str());
 	}
 }
 
@@ -113,6 +118,9 @@ void JoinLink::setup_meet(void)
 		// we insist on the first link being a PresentLink
 		if (i == 0 and not (PRESENT_LINK == t)) continue;
 
+		// The top-var clauses cannot be passed to the meet.
+		if (_top_var and is_free_in_tree(clause, _top_var)) continue;
+
 		jclauses.push_back(clause);
 
 		// Find the variables in the clause
@@ -134,6 +142,7 @@ void JoinLink::setup_meet(void)
 	}
 
 	_vsize = _variables.varseq.size();
+	if (_top_var) _vsize--;
 	_jsize = _vsize + _const_terms.size();
 	if (0 == _vsize) return;
 
@@ -142,6 +151,7 @@ void JoinLink::setup_meet(void)
 	for (const Handle& var: _variables.varseq)
 	{
 		if (done.find(var) != done.end()) continue;
+		if (var == _top_var) continue;
 		Handle pres(createLink(PRESENT_LINK, var));
 		jclauses.emplace_back(pres);
 	}
@@ -150,6 +160,7 @@ void JoinLink::setup_meet(void)
 	HandleSeq vardecls;
 	for (const Handle& var : _variables.varseq)
 	{
+		if (var == _top_var) continue;
 		Handle typedecl(_variables.get_type_decl(var, var));
 		vardecls.emplace_back(typedecl);
 	}
@@ -157,6 +168,64 @@ void JoinLink::setup_meet(void)
 	Handle hdecls(createLink(std::move(vardecls), VARIABLE_LIST));
 	Handle hbody(createLink(std::move(jclauses), AND_LINK));
 	_meet = createLink(MEET_LINK, hdecls, hbody);
+}
+
+/* ================================================================= */
+
+/// Setup the top variable, if one is asked for, and
+/// any constraints applied to it.
+void JoinLink::setup_top_clauses(void)
+{
+	_need_top_map = false;
+
+	// Search for a named top var.
+	for (const Handle& var : _variables.varseq)
+	{
+		// If its anywhere, its in the simple typemap.
+		const auto& styp = _variables._simple_typemap.find(var);
+		if (_variables._simple_typemap.end() == styp) continue;
+
+		// If it's specified, its a plain single type.
+		if (styp->second.size() != 1) continue;
+
+		// Its got to be JoinLink, or a derived type.
+		Type vt = *(styp->second.begin());
+		if (nameserver().isA(vt, JOIN_LINK))
+		{
+			_top_var = var;
+			break;
+		}
+	}
+
+	// If there is no top variable, we are done.
+	if (nullptr == _top_var) return;
+
+	// Find all the clauses that need/use the top variable.
+	// In general, there should be at least one, but I suppose
+	// that devious users could do something unexpected.
+	for (size_t i=1; i<_outgoing.size(); i++)
+	{
+		const Handle& clause(_outgoing[i]);
+		if (is_free_in_tree(clause, _top_var))
+			_top_clauses.push_back(clause);
+	}
+
+	// Do any of thes clauses require any of the other variables
+	// that were specified? If so then we have to burn a fair bit
+	// of extra RAM to keep track of thier groundings. This is
+	// unpleasant but unavoidable.
+	for (const Handle& tclause : _top_clauses)
+	{
+		for (const Handle& var : _variables.varseq)
+		{
+			if (var == _top_var) continue;
+			if (is_free_in_tree(tclause, var))
+			{
+				_need_top_map = true;
+				break;
+			}
+		}
+	}
 }
 
 /* ================================================================= */
@@ -280,8 +349,6 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	const bool TRANSIENT_SPACE = true;
-
 	AtomSpace temp(as, TRANSIENT_SPACE);
 	Handle meet = temp.add_atom(_meet);
 	ValuePtr vp = meet->execute();
@@ -297,6 +364,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		{
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
+			if (_need_top_map) trav.top_map.insert({hst, {hst}});
 		}
 
 		// Place constants into the join map, first.
@@ -332,6 +400,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
 			trav.join_map[n+i].insert(glist[i]);
+			if (_need_top_map) trav.top_map.insert({glist[i], glist});
 		}
 	}
 	return princes;
@@ -354,11 +423,31 @@ void JoinLink::principal_filter(HandleSet& containers,
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 
-	IncomingSet is(h->getIncomingSet());
 	containers.insert(h);
 
+	IncomingSet is(h->getIncomingSet());
 	for (const Handle& ih: is)
 		principal_filter(containers, ih);
+}
+
+void JoinLink::principal_filter_map(Traverse& trav,
+                                    const HandleSeq& base,
+                                    HandleSet& containers,
+                                    const Handle& h) const
+{
+	// Ignore type specifications, other containers!
+	Type t = h->get_type();
+	if (nameserver().isA(t, PRESENT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, JOIN_LINK))
+		return;
+
+	containers.insert(h);
+	trav.top_map.insert({h, base});
+
+	IncomingSet is(h->getIncomingSet());
+	for (const Handle& ih: is)
+		principal_filter_map(trav, base, containers, ih);
 }
 
 /* ================================================================= */
@@ -374,8 +463,28 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	// Get a principal filter for each principal element,
 	// and union all of them together.
 	HandleSet containers;
-	for (const Handle& pr: princes)
-		principal_filter(containers, pr);
+	if (not _need_top_map)
+	{
+		for (const Handle& pr: princes)
+			principal_filter(containers, pr);
+	}
+	else
+	{
+		// Argh. This is complicated. Un-named, anonymous terms
+		// are just like above.
+		size_t ncon = _const_terms.size();
+		for (size_t i=0; i<ncon; i++)
+		{
+			for (const Handle& prc: trav.join_map[i])
+				principal_filter(containers, prc);
+		}
+
+		// Named terms -- we need to build a lookup table,
+		// so that we can pass them into any evaluatable predicates.
+		HandleSeqMap base_map(trav.top_map);
+		for (const auto& pare: base_map)
+			principal_filter_map(trav, pare.second, containers, pare.first);
+	}
 
 	if (1 >= _jsize)
 		return containers;
@@ -481,19 +590,56 @@ void JoinLink::find_top(HandleSet& containers, const Handle& h) const
 
 /* ================================================================= */
 
+/// Apply constraints that involve the top-most, containing
+/// term.  This include type constraints, as well as evaluatable
+/// terms that name the top variable.
 HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
+                              Traverse& trav,
                               const HandleSet& containers) const
 {
 	HandleSet rejects;
+
+	AtomSpace* temp = nullptr;
+	if (0 < _top_clauses.size())
+		temp = new AtomSpace(as, TRANSIENT_SPACE);
+
 	for (const Handle& h : containers)
 	{
+		// Weed out anything that is the wrong type
 		for (const Handle& toty : _top_types)
 		{
 			if (value_is_type(toty, h)) continue;
 			rejects.insert(h);
 			break;
 		}
+
+		// Run the evaluatable constraint clauses
+		for (const Handle& toc : _top_clauses)
+		{
+			HandleMap plugs;
+			plugs.insert({_top_var, h});
+
+			// If the top clauses have other variables in them :-/
+			if (_need_top_map)
+			{
+				const HandleSeq& gnds(trav.top_map.at(h));
+				for (size_t i=0; i<_vsize; i++)
+					plugs.insert({_variables.varseq[i], gnds[i]});
+			}
+
+			// Plug in any variables ...
+			Handle topper = Replacement::replace_nocheck(toc, plugs);
+			topper = temp->add_atom(topper);
+			TruthValuePtr tvp =
+				EvaluationLink::do_evaluate(temp, topper, silent);
+			if (tvp->get_mean() < 0.5)
+			{
+				rejects.insert(h);
+				break;
+			}
+		}
 	}
+	if (temp) delete temp;
 
 	// Remove the rejects
 	HandleSet accept;
@@ -524,8 +670,8 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 	}
 
 	// Apply constraints on the top type, if any
-	if (0 < _top_types.size())
-		containers = constrain(as, silent, containers);
+	if (0 < _top_types.size() or 0 < _top_clauses.size())
+		containers = constrain(as, silent, trav, containers);
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);
@@ -540,12 +686,12 @@ HandleSet JoinLink::container(AtomSpace* as, bool silent) const
 HandleSet JoinLink::replace(const HandleSet& containers,
                             const Traverse& trav) const
 {
-	// Use the FreeVariables utility, so that all scoping and
+	// Use the Replacement utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
 	for (const Handle& top: containers)
 	{
-		Handle rep = FreeVariables::replace_nocheck(top, trav.replace_map);
+		Handle rep = Replacement::replace_nocheck(top, trav.replace_map);
 		replaced.insert(rep);
 	}
 
