@@ -176,6 +176,8 @@ void JoinLink::setup_meet(void)
 /// any constraints applied to it.
 void JoinLink::setup_top_clauses(void)
 {
+	_need_top_map = false;
+
 	// Search for a named top var.
 	for (const Handle& var : _variables.varseq)
 	{
@@ -195,13 +197,34 @@ void JoinLink::setup_top_clauses(void)
 		}
 	}
 
+	// If there is no top variable, we are done.
 	if (nullptr == _top_var) return;
 
+	// Find all the clauses that need/use the top variable.
+	// In general, there should be at least one, but I suppose
+	// that devious users could do something unexpected.
 	for (size_t i=1; i<_outgoing.size(); i++)
 	{
 		const Handle& clause(_outgoing[i]);
 		if (is_free_in_tree(clause, _top_var))
 			_top_clauses.push_back(clause);
+	}
+
+	// Do any of thes clauses require any of the other variables
+	// that were specified? If so then we have to burn a fair bit
+	// of extra RAM to keep track of thier groundings. This is
+	// unpleasant but unavoidable.
+	for (const Handle& tclause : _top_clauses)
+	{
+		for (const Handle& var : _variables.varseq)
+		{
+			if (var == _top_var) continue;
+			if (is_free_in_tree(tclause, var))
+			{
+				_need_top_map = true;
+				break;
+			}
+		}
 	}
 }
 
@@ -324,8 +347,6 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		return _const_terms;
 	}
 
-	bool need_top_map = (0 < _top_clauses.size());
-
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
 	AtomSpace temp(as, TRANSIENT_SPACE);
@@ -343,7 +364,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 		{
 			princes.insert(hst);
 			trav.replace_map.insert({hst, var});
-			if (need_top_map) trav.top_map.insert({hst, {hst}});
+			if (_need_top_map) trav.top_map.insert({hst, {hst}});
 		}
 
 		// Place constants into the join map, first.
@@ -379,7 +400,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 			princes.insert(glist[i]);
 			trav.replace_map.insert({glist[i], varseq[i]});
 			trav.join_map[n+i].insert(glist[i]);
-			if (need_top_map) trav.top_map.insert({glist[i], glist});
+			if (_need_top_map) trav.top_map.insert({glist[i], glist});
 		}
 	}
 	return princes;
@@ -442,15 +463,15 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 	// Get a principal filter for each principal element,
 	// and union all of them together.
 	HandleSet containers;
-	if (0 == _top_clauses.size())
+	if (not _need_top_map)
 	{
 		for (const Handle& pr: princes)
 			principal_filter(containers, pr);
 	}
 	else
 	{
-		// Argh. This is complicated. Unamed, anonymous terms
-		// just like above.
+		// Argh. This is complicated. Un-named, anonymous terms
+		// are just like above.
 		size_t ncon = _const_terms.size();
 		for (size_t i=0; i<ncon; i++)
 		{
@@ -598,9 +619,13 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 			HandleMap plugs;
 			plugs.insert({_top_var, h});
 
-			const HandleSeq& gnds(trav.top_map.at(h));
-			for (size_t i=0; i<_vsize; i++)
-				plugs.insert({_variables.varseq[i], gnds[i]});
+			// If the top clauses have other variables in them :-/
+			if (_need_top_map)
+			{
+				const HandleSeq& gnds(trav.top_map.at(h));
+				for (size_t i=0; i<_vsize; i++)
+					plugs.insert({_variables.varseq[i], gnds[i]});
+			}
 
 			// Plug in any variables ...
 			Handle topper = Replacement::replace_nocheck(toc, plugs);
