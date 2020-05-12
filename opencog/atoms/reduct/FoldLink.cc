@@ -54,7 +54,7 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-/// Actually, what is implemete here is not pure delta-reduction.
+/// Actually, what is implemented here is not pure delta-reduction.
 /// If the arguments to Fold are executale, then they are executed
 /// first, and only then is the delta-reduction performed.
 ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
