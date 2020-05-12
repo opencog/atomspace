@@ -115,22 +115,37 @@ std::vector<double> minus(const std::vector<double>&, const std::vector<double>&
 std::vector<double> times(const std::vector<double>&, const std::vector<double>&);
 std::vector<double> divide(const std::vector<double>&, const std::vector<double>&);
 
-// Vector multiplication and addition
+/// Vector multiplication and addition. When operating on an object
+/// times itself, take a sample first; this is needed to correctly
+/// handle streaming values, as they issue new values every time
+/// they are called. Failing to sample results in violations...
 inline
 ValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(plus(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(plus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(plus(sample, fvpb->value()));
 }
 inline
 ValuePtr minus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(minus(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(minus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(minus(sample, fvpb->value()));
 }
 inline
 ValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(times(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(times(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(times(sample, fvpb->value()));
 }
 inline
 ValuePtr divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(divide(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(divide(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(divide(sample, fvpb->value()));
 }
 
 /** @}*/
