@@ -54,8 +54,10 @@ public:
 
 StreamUTest::StreamUTest(void)
 {
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
+	logger().set_sync_flag(true);
+	logger().set_timestamp_flag(false);
 }
 
 // This unit test is a stand-in test for the concept of a streaming API
