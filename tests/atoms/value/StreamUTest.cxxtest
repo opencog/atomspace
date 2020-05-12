@@ -158,7 +158,7 @@ void StreamUTest::test_times()
 	// there is no non-hacky way of forcing only a single evaluation
 	// which is squared, instead of two independent ones.  This
 	// is even tricker if we tried (TIMES_LINK, valof, valof, valof).
-	printf("Expect 0.0.245 < %g < 0.255\n", sum);
+	printf("Expect 0.245 < %g < 0.255\n", sum);
 	TS_ASSERT_LESS_THAN(0.245, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.255);
 
