@@ -46,6 +46,9 @@ void PlusLink::init(void)
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return fi;
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
