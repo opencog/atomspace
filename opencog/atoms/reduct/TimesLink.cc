@@ -90,6 +90,14 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 	// but FloatValue+Number->FloatValue
 	try
 	{
+		if (fj == knil)
+		{
+			// Always sample the stream. Per StreamUTest
+			if (nameserver().isA(vitype, STREAM_VALUE))
+				return createFloatValue(FloatValueCast(vi)->value());
+			return vi;
+		}
+
 		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
 			return createNumberNode(times(vi, vj, true));
 
