@@ -66,13 +66,14 @@ void ArithmeticLink::init(void)
 /// is (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
 ///
-/// This is certainly not an efficient, effective way to build a
-/// computer algebra system.  It works, its just barely good enough
+/// This is certainly NOT a simple, easy-to-maintain way to build a
+/// computer algebra system!  It works, its just barely good enough
 /// for single-variable arithmetic, but that's all.  For general
 /// reduction tasks, there are two choices:
 ///
-/// A) Convert atoms to some other CAS format, reduce that, and then
-///    convert back to atoms.
+/// A) Find some other library that does CAS, convert atoms to whatever
+///    format that library uses, reduce that, and then convert back to
+///    atoms.
 ///
 /// B) Implement reduction with the Rule Engine, together with a set
 ///    of reduction rules for arithmetic.
@@ -80,7 +81,7 @@ void ArithmeticLink::init(void)
 /// In some sense B) is better, but is likely to have poorer performance
 /// than A).  It also threatens to spiral out of control: We can add
 /// ever-more rules to the rule engine to reduce ever-more interesting
-/// algebraic expressions.
+/// algebraic expressions. CAS is actually hard.
 ///
 ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 {
