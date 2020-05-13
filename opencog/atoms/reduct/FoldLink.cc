@@ -54,9 +54,6 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-/// Actually, what is implemented here is not pure delta-reduction.
-/// If the arguments to Fold are executale, then they are executed
-/// first, and only then is the delta-reduction performed.
 ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
@@ -65,29 +62,7 @@ ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 	// This is right to left.
 	size_t osz = _outgoing.size();
 	for (int i = osz-1; 0 <= i; i--)
-	{
-		Handle h(_outgoing[i]);
-
-		// Special-case hack for atoms returned by the pattern matcher.
-		// ... The pattern matcher returns things wrapped in a SetLink.
-		// Unwrap them and use them.
-		if (SET_LINK == h->get_type() and h->get_arity() == 1)
-		{
-			h = h->getOutgoingAtom(0);
-		}
-
-		// Well, we lied; this is not pure delta-reduction. If the
-		// arguments to fold are executable atoms, then execute them,
-		// and fold in the results.
-		if (h->is_executable())
-		{
-			expr = kons(as, silent, h->execute(as, silent), expr);
-		}
-		else
-		{
-			expr = kons(as, silent, h, expr);
-		}
-	}
+		expr = kons(as, silent, _outgoing[i], expr);
 
 	return expr;
 }
