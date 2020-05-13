@@ -254,6 +254,10 @@ THREAD_JOIN_LINK <- PARALLEL_LINK
 // It can evaluate to true, if something belongs to this lexical entry.
 LEXICAL_NODE <- PREDICATE_NODE
 
+// Wild-card node, very useful for counting. Similar to LexicalNode,
+// except that it can be "anything" - most importantly, VariableNode.
+ANY_NODE <- NODE
+
 // Generic connector. Its a link, because if contains all of the details
 // and restrictions required to define the allowable conections that
 // can be made.
@@ -281,7 +285,7 @@ SECTION <- ORDERED_LINK             // Sheaf section, connector set
 // pattern matcher will fail.
 
 // A Variable.  Use Lambda's to hide these. Use types to type them.
-VARIABLE_NODE <- NODE
+VARIABLE_NODE <- ANY_NODE
 
 // A list of variables or variable declarations.
 VARIABLE_LIST <- CONNECTOR_SEQ
@@ -526,14 +530,16 @@ TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
-// arg is output.
-ARROW_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
+// arg is output.  It is a ConnectorSeq, since it specifies a pair of
+// connectors (the input, and the output).
+ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
-// type specification, below.
+// type specification, below. It is a Connector, as it specifies
+// only one connectable thing at a time.
 SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
@@ -550,12 +556,13 @@ FUZZY_LINK <- SIGNATURE_LINK
 // never globally unique.
 //
 // The inherits from Connector, as it is a special case...
+// The variable name is not lexical -- its a wild-card.
 TYPED_VARIABLE_LINK <- CONNECTOR
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position cannot be
 // any atom except for a VariableNode, the second must be a type.
-//  A given atom can only ever have just one type, thus, this is unique.
+// A given atom can only ever have just one type, thus, this is unique.
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // An arity-2 link, used for specifying numeric intervals, that is,
@@ -571,9 +578,6 @@ INTERVAL_LINK <- ORDERED_LINK
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
-
-// Wild-card node, very useful for counting.
-ANY_NODE <- NODE
 
 // ====================================================================
 // Relations. A "relation" is a subset of a Cartesian product, or more
