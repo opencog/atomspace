@@ -57,9 +57,6 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	Type vjtype = vj->get_type();
 
 	// If adding zero, just drop the zero.
-	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
-		return vj;
-
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
 		return vi;
 
