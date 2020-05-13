@@ -91,18 +91,34 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		}
 
 		// flatten the right
-		if (PLUS_LINK == vjtype)
-		{
-			for (const Handle& rhs: HandleCast(vj)->getOutgoingSet())
-				seq.push_back(rhs);
-		}
-		else
+		if (PLUS_LINK != vjtype)
 		{
 			seq.push_back(HandleCast(vj));
+			Handle foo(createLink(std::move(seq), PLUS_LINK));
+			PlusLinkPtr ap = PlusLinkCast(foo);
+			return ap->delta_reduce(as, silent);
 		}
+
+		// Paste on one at a time; this avoid what would otherwise
+		// be infinite recursion on `(Plus A B C)` where kons was
+		// unable to reduce `(Plus B C)`. So we instead try to do
+		// `(Plus (Plus A B) C)` which should work out...
+		HandleSeq oset(HandleCast(vj)->getOutgoingSet());
+		seq.push_back(oset[0]);
 		Handle foo(createLink(std::move(seq), PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
-		return ap->delta_reduce(as, silent);
+		ValuePtr vsum(ap->delta_reduce(as, silent));
+
+		for (size_t i=1; i<oset.size(); i++)
+		{
+			if (not vsum->is_atom())
+				throw RuntimeException(TRACE_INFO,
+					"Implementation bug! Open a bug report!");
+
+			PlusLinkPtr ap = createPlusLink(oset[i], HandleCast(vsum));
+			vsum = ap->delta_reduce(as, silent);
+		}
+		return vsum;
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
