@@ -43,14 +43,6 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
-	// Provide compatible behavior for kons(stream, knil)
-	// (e.g. adding zero to a stream value)
-	static inline ValuePtr sample_stream(ValuePtr& v, Type vt) {
-		if (nameserver().isA(vt, STREAM_VALUE))
-			return createFloatValue(FloatValueCast(v)->value());
-		return v;
-	}
-
 public:
 	ArithmeticLink(const HandleSeq&&, Type=ARITHMETIC_LINK);
 

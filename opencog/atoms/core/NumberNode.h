@@ -36,7 +36,7 @@ private:
 	// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0067r0.html
 	// This was a painful discovery that ate the chatbot's lunch.
 	// So we perform a hack here.  The core issue is that the rest of the
-	// system is explcitly defined to be locale-independent, including
+	// system is explicitly defined to be locale-independent, including
 	// the natural-language pipeline in guile/scheme. Thus, printing
 	// the European comma as a decimal separator blows up the code.
 	// Using boost::lexical_cast<> avoids this issue.

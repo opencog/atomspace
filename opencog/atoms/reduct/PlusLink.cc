@@ -46,6 +46,9 @@ void PlusLink::init(void)
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return fi;
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
@@ -54,14 +57,11 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 	Type vjtype = vj->get_type();
 
 	// If adding zero, just drop the zero.
-	// Unless the other side is a StreamValue, in which case, we
-	// have to behave consistently with adding a non-zero number.
-	// Adding a number to a stream samples one value out of that stream.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
-		return sample_stream(vj, vjtype);
+		return vj;
 
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		return sample_stream(vi, vitype);
+		return vi;
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	// Always lower the strength: Number+Number->Number

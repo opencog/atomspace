@@ -47,6 +47,9 @@ void TimesLink::init(void)
 ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return fi;
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
@@ -102,9 +105,9 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	// If either one is the unit, then just drop it.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
-		return sample_stream(vj, vjtype);
+		return vj;
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return sample_stream(vi, vitype);
+		return vi;
 
    if (nameserver().isA(vjtype, NUMBER_NODE))
    {
