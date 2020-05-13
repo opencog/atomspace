@@ -308,7 +308,7 @@ FUNCTION(WRITE_GUILE_CONFIG OUTPUT_FILE CONFIG_TARGET SCM_IN_BUILD_DIR)
                 "(define-public ${SYMBOL} \"${LIBPATH}/\")\n")
         ELSE (SCM_IN_BUILD_DIR)
             FILE(APPEND "${OUTPUT_FILE}"
-                "(define-public ${SYMBOL} \"${CMAKE_INSTALL_PREFIX}/lib/opencog/\")\n")
+                "(define-public ${SYMBOL} \"${CMAKE_INSTALL_PREFIX}/lib${LIB_DIR_SUFFIX}/opencog/\")\n")
 
         ENDIF (SCM_IN_BUILD_DIR)
     endforeach()
