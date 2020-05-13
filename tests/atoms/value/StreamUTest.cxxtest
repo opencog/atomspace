@@ -155,7 +155,7 @@ void StreamUTest::test_times()
 	// which is not the same as
 	// Integral of x^2 dx from 0 to 1 = 1/3
 	// Each `valof` is evaluated independently of the other.
-	printf("Expect 0.245 < %g < 0.255\n", sum);
+	printf("Expect 0.25 so 0.245 < %g < 0.255\n", sum);
 	TS_ASSERT_LESS_THAN(0.245, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.255);
 
@@ -164,16 +164,16 @@ void StreamUTest::test_times()
 
 	sum = loop(times);
 	// (Integral of x dx from 0 to y1)^3 = 1/8
-	printf("Expect 0.124 < %g < 0.1255\n", sum);
-	TS_ASSERT_LESS_THAN(0.124, sum);
-	TS_ASSERT_LESS_THAN(sum, 0.1255);
+	printf("Expect 0.125 so 0.122 < %g < 0.128\n", sum);
+	TS_ASSERT_LESS_THAN(0.122, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.128);
 
 	// vector times vector ----------------------------------------------
 	times = al(TIMES_LINK, valof, valof, valof, valof);
 
 	sum = loop(times);
 	// (Integral of x dx from 0 to y1)^4 = 1/16
-	printf("Expect 0.0615 < %g < 0.0635\n", sum);
+	printf("Expect 0.0625 so 0.0615 < %g < 0.0635\n", sum);
 	TS_ASSERT_LESS_THAN(0.0615, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.0635);
 
@@ -182,9 +182,9 @@ void StreamUTest::test_times()
 
 	sum = loop(times);
 	// (Integral of x dx from 0 to y1)^5 = 1/32
-	printf("Expect 0.0305 < %g < 0.032\n", sum);
-	TS_ASSERT_LESS_THAN(0.0305, sum);
-	TS_ASSERT_LESS_THAN(sum, 0.032);
+	printf("Expect 0.03125 so 0.0300 < %g < 0.0325\n", sum);
+	TS_ASSERT_LESS_THAN(0.0300, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.0325);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -48,13 +48,13 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-		return fi;
+		return get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.

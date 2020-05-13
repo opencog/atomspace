@@ -64,6 +64,7 @@ public:
 	void test_minus(void);
 	void test_plus_minus(void);
 	void test_execution(void);
+	void test_recursion(void);
 };
 
 void ReductUTest::tearDown(void)
@@ -525,6 +526,88 @@ void ReductUTest::test_execution(void)
 	double val = nn->get_value();
 	TS_ASSERT_LESS_THAN_EQUALS(15.0, val);
 	TS_ASSERT_LESS_THAN_EQUALS(val, 19.0);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test fix for infinite recursion in
+ * https://github.com/opencog/atomspace/issues/2603
+ */
+void ReductUTest::test_recursion(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle sxp5 = eval->eval_h(
+		"(cog-execute! (Plus"
+		"   (Times (Variable \"$x\") (Number 3))"
+		"   (Times (Variable \"$x\") (Number 4))"
+		"   (Number 5)))"
+	);
+	Handle esxp = eval->eval_h(
+		"(Plus"
+		"   (Times (Variable \"$x\") (Number 7))"
+		"   (Number 5))"
+	);
+	printf("expect: %s\n", esxp->to_short_string().c_str());
+	printf("   got: %s\n", sxp5->to_short_string().c_str());
+
+	TS_ASSERT_EQUALS(sxp5, esxp);
+
+	// ---------
+	sxp5 = eval->eval_h(
+		"(cog-execute! (Plus"
+		"   (Times (Variable \"$x\") (Number 3))"
+		"   (Times (Variable \"$x\") (Number 4))"
+		"   (Times (Variable \"$y\") (Number 6))"
+		"   (Number 5)))"
+	);
+	esxp = eval->eval_h(
+		"(Plus"
+		"   (Times (Variable \"$x\") (Number 7))"
+		"   (Times (Variable \"$y\") (Number 6))"
+		"   (Number 5))"
+	);
+	printf("expect: %s\n", esxp->to_short_string().c_str());
+	printf("   got: %s\n", sxp5->to_short_string().c_str());
+
+	TS_ASSERT_EQUALS(sxp5, esxp);
+
+	// ---------
+	sxp5 = eval->eval_h(
+		"(cog-execute! (Plus"
+		"   (Times (Variable \"$y\") (Number 6))"
+		"   (Times (Variable \"$x\") (Number 3))"
+		"   (Times (Variable \"$x\") (Number 4))"
+		"   (Number 5)))"
+	);
+	esxp = eval->eval_h(
+		"(Plus"
+		"   (Times (Variable \"$y\") (Number 6))"
+		"   (Times (Variable \"$x\") (Number 7))"
+		"   (Number 5))"
+	);
+	printf("expect: %s\n", esxp->to_short_string().c_str());
+	printf("   got: %s\n", sxp5->to_short_string().c_str());
+
+	TS_ASSERT_EQUALS(sxp5, esxp);
+
+	// ---------
+	sxp5 = eval->eval_h(
+		"(cog-execute! (Plus"
+		"   (Times (Variable \"$x\") (Number 3))"
+		"   (Times (Variable \"$y\") (Number 6))"
+		"   (Times (Variable \"$x\") (Number 4))"
+		"   (Number 5)))"
+	);
+	esxp = sxp5;
+
+	printf("expect: %s\n", esxp->to_short_string().c_str());
+	printf("   got: %s\n", sxp5->to_short_string().c_str());
+
+	TSM_ASSERT_EQUALS("Maybe you made reduct smarter??", sxp5, esxp);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
