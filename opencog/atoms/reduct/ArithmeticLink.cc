@@ -100,6 +100,7 @@ ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 // ============================================================
 
 /// re-order the contents of an ArithmeticLink into "lexicographic" order.
+/// This provides a canonical order that helps guarantee reduction.
 ///
 /// The goal of the re-ordering is to simplify the reduction code,
 /// by placing atoms where they are easily found.  For now, this

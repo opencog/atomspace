@@ -75,53 +75,40 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		// If we are here, they were not simple numbers.
 	}
 
-	// Is either one a PlusLink? If so, then flatten.
-	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
+	// Is vi a PlusLink? If so, then flatten.
+	if (PLUS_LINK == vitype)
 	{
-		HandleSeq seq;
-		// flatten the left
-		if (PLUS_LINK == vitype)
+		HandleSeq seq = HandleCast(vi)->getOutgoingSet();
+
+		// flatten the right
+		if (PLUS_LINK == vjtype)
 		{
-			for (const Handle& lhs: HandleCast(vi)->getOutgoingSet())
-				seq.push_back(lhs);
+			for (const Handle& rhs: HandleCast(vj)->getOutgoingSet())
+				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(HandleCast(vi));
-		}
-
-		// flatten the right
-		if (PLUS_LINK != vjtype)
-		{
 			seq.push_back(HandleCast(vj));
-			Handle foo(createLink(std::move(seq), PLUS_LINK));
-			PlusLinkPtr ap = PlusLinkCast(foo);
-			return ap->delta_reduce(as, silent);
 		}
+		PlusLinkPtr ap = createPlusLink(std::move(seq));
+		return ap->delta_reduce(as, silent);
+	}
 
+	if (PLUS_LINK == vjtype)
+	{
 		// Paste on one at a time; this avoid what would otherwise
 		// be infinite recursion on `(Plus A B C)` where kons was
 		// unable to reduce `(Plus B C)`. So we instead try to do
 		// `(Plus (Plus A B) C)` which should work out...
-		HandleSeq oset(HandleCast(vj)->getOutgoingSet());
-		seq.push_back(oset[0]);
-		Handle foo(createLink(std::move(seq), PLUS_LINK));
-		PlusLinkPtr ap = PlusLinkCast(foo);
-		ValuePtr vsum(ap->delta_reduce(as, silent));
-
-		for (size_t i=1; i<oset.size(); i++)
+		ValuePtr vsum = vi;
+		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
 		{
-			if (not vsum->is_atom())
-				throw RuntimeException(TRACE_INFO,
-					"Implementation bug! Open a bug report!");
-
-			PlusLinkPtr ap = createPlusLink(oset[i], HandleCast(vsum));
-			vsum = ap->delta_reduce(as, silent);
+			vsum = kons(as, silent, vsum, h);
 		}
 		return vsum;
 	}
 
-	// Is fi identical to fj? If so, then replace by 2*fi
+	// Is vi identical to vj? If so, then replace by 2*vi
 	Handle hvi(HandleCast(vi));
 	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
