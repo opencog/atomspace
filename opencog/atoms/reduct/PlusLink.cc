@@ -103,7 +103,16 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		ValuePtr vsum = vi;
 		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
 		{
-			vsum = kons(as, silent, vsum, h);
+			if (PLUS_LINK == vsum->get_type())
+			{
+				HandleSeq vout(HandleCast(vsum)->getOutgoingSet());
+				vout.push_back(h);
+				vsum = createPlusLink(std::move(vout));
+			}
+			else
+			{
+				vsum = kons(as, silent, vsum, h);
+			}
 		}
 		return vsum;
 	}
