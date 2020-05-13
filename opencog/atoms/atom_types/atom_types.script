@@ -229,6 +229,40 @@ PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 THREAD_JOIN_LINK <- PARALLEL_LINK
 
 // ====================================================================
+// Connectors and sections.
+//
+// The generic structure encoded here would be:
+//
+//     Section
+//         Lexical "something"
+//         ConnectorSeq
+//             Connector
+//                 Lexical "it's"
+//                 ConnectorDir "-"
+//             Connector
+//                 Lexical "curious"
+//                 ConnectorDir "+"
+//
+// LexicalNode is for anything we keep a table of.
+// It inherits from PredicateNode because it is a kind of predicate:
+// It can evaluate to true, if something belongs to this lexical entry.
+LEXICAL_NODE <- PREDICATE_NODE
+
+// Generic connector. Its a link, because if contains all of the details
+// and restrictions required to define the allowable conections that
+// can be made.
+// TODO: This should be Evlautable, so that it can return t/f to
+// indicate if a specifi connection can be made...
+// CONNECTOR <- EVALUATABLE_LINK
+CONNECTOR <- ORDERED_LINK
+
+CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
+LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
+CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
+CONNECTOR_SET <- ORDERED_LINK  // Unuordered set of connectors
+SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+// ====================================================================
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
 // These embody some of the common and recurring themes from predicate
 // logic, model theory, term rewriting and lambda calculus. There is
@@ -244,13 +278,13 @@ THREAD_JOIN_LINK <- PARALLEL_LINK
 VARIABLE_NODE <- NODE
 
 // A list of variables or variable declarations.
-VARIABLE_LIST <- LIST_LINK
+VARIABLE_LIST <- CONNECTOR_SEQ
 
 // A set (thus unordered) of variables or variable declarations. This
 // is convenient when combined with a scope link where the order of
 // variables is irrelevant to the semantics of the scope, like a
 // BindLink.
-VARIABLE_SET <- SET_LINK
+VARIABLE_SET <- CONNECTOR_SET
 
 // A non-greedy globbing variable; matches one or more atoms in a
 // sequence.  XXX TODO - this could be changed to a link, so that
@@ -348,7 +382,12 @@ DEFINE_LINK <- UNIQUE_LINK
 // tracks only the bound variables (and not the free ones). The
 // FreeLink cannot have type restrictions on the variables; the
 // ScopeLink can (and usually does).
-SCOPE_LINK <- ORDERED_LINK
+//
+// This inherits from Section, as its a special case of a lexical
+// entry with connector definitions inside of it. Viz, the scope
+// body is the lexical entry, and the variable declarations are the
+// connector declarations.
+SCOPE_LINK <- SECTION
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
@@ -445,13 +484,8 @@ EQUIVALENCE_LINK <- UNORDERED_LINK
 // defined in this file. It cannot hold compound types (deep types),
 // because compound types are Atoms, and this is a Node, not a Link,
 // and so it cannot hold any atoms. Use DefinedTypeNode for compound
-// types.
-//
-// It inherits from PredicateNode because it is a kind of predicate:
-// It can evaluate to true, if something is of the indicated type,
-// else it would evaluate to false.
-//
-TYPE_NODE <- PREDICATE_NODE
+// types. Its a LexicalNode, whose lexis consists of Atom types.
+TYPE_NODE <- LEXICAL_NODE
 
 // Non-strict versions of above. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
@@ -509,13 +543,8 @@ FUZZY_LINK <- SIGNATURE_LINK
 // where variables are not free. Thus, unlike TypedAtomLink, this is
 // never globally unique.
 //
-// It inherits from Evaluatable, because it typically obtains a value
-// of "true", if the indicated variable is of the given type, else
-// it evaluates to "false".  The predicate specifying the concrete
-// test is the signature (SignatureLink, etc) that is tested.
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPED_VARIABLE_LINK <- ORDERED_LINK, EVALUATABLE_LINK
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+// The inherits from Connector, as it is a special case...
+TYPED_VARIABLE_LINK <- CONNECTOR
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position cannot be
@@ -536,6 +565,9 @@ INTERVAL_LINK <- ORDERED_LINK
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
+
+// Wild-card node, very useful for counting.
+ANY_NODE <- NODE
 
 // ====================================================================
 // Relations. A "relation" is a subset of a Cartesian product, or more
@@ -686,29 +718,6 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
-
-// ====================================================================
-// Grammatical inference on time series
-//
-// The generic structure encoded here would be:
-//
-//     Section
-//         LexicalAtom "something"
-//         ConnectorSeq
-//             Connector
-//                 LexicalAtom "it's"
-//                 ConnectorDir "-"
-//             Connector
-//                 LexicalAtom "curious"
-//                 ConnectorDir "+"
-//
-CONNECTOR <- LINK              // Link-grammar connector
-CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
-LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
-CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
-SECTION <- ORDERED_LINK        // Sheaf section, connector set
-
-ANY_NODE <- NODE  // Wild-card node, very useful for counting.
 
 // ==============================================================
 // Procedure and schema nodes.
