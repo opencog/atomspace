@@ -48,13 +48,7 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-	{
-		// Always sample the stream. Per StreamUTest
-		// However, this suggests there's a bug somewhere else...
-		if (nameserver().isA(fi->get_type(), STREAM_VALUE))
-			return createFloatValue(FloatValueCast(fi)->value());
 		return fi;
-	}
 
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
