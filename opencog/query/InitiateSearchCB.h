@@ -64,6 +64,7 @@ protected:
 	const Variables* _variables;
 	const Pattern* _pattern;
 	const HandleSet* _dynamic;
+	bool _recursing;
 
 	PatternLinkPtr _pl;
 	void jit_analyze(void);
