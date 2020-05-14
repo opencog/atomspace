@@ -23,18 +23,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeEval.h>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
+
 #include "fast_load.h"
 
 using namespace opencog;
-
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <stdexcept>
 
 // Extract s-expression. Given a string `s`, update the `l` and `r`
 // values so that `l` points at the next open-parenthsis (left paren)
@@ -93,8 +95,9 @@ static void get_next_token(const std::string& s, uint& l, uint& r)
     }
 }
 
-// Handle, Atomspace
-static Handle recursive_parse(const std::string& s, AtomSpace& as)
+// Parse the string `s`, returning a Handle that corresponds to that
+// string.
+static Handle recursive_parse(const std::string& s)
 {
     NameServer & nameserver = opencog::nameserver();
 
@@ -118,15 +121,18 @@ static Handle recursive_parse(const std::string& s, AtomSpace& as)
 
             if(l1 < r1) {
                 std::string expr = s.substr(l1, r1-l1+1);
+
+                // FIXME -- support not only stv (SimpleTruthValues)
+                // but also other Values.
                 if(expr.find("stv") == std::string::npos) {
-                    outgoing.push_back(recursive_parse(expr, as));
+                    outgoing.push_back(recursive_parse(expr));
                 } else {
                     //std::cout << "Need to parse " + expr << std::endl;
                 }
             }
             l = r1 + 2;
         } while(l < r);
-        return as.add_link(atype, std::move(outgoing));
+        return createLink(std::move(outgoing), atype);
     } else {
         l1 = l;
         r1 = r;
@@ -143,7 +149,7 @@ static Handle recursive_parse(const std::string& s, AtomSpace& as)
             token = s.substr(l, r1 - l1 + 1);
             throw std::runtime_error("Unexpexted token " + token + " in " + s);
         }
-        return as.add_node(atype, std::move(token));
+        return createNode(atype, std::move(token));
     }
     throw std::runtime_error("Syntax error in type " + stype + " in " + s);
 }
@@ -194,7 +200,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
         cnt++;
         if(r != -1) {
             assert(0 <= r);
-            recursive_parse(expr.substr(l, r - l + 1), as);
+            as.add_atom(recursive_parse(expr.substr(l, r - l + 1)));
         }
     }
     f.close();
