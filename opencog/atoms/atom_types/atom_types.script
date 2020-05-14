@@ -260,14 +260,13 @@ ANY_NODE <- NODE
 
 // Generic connector. Its a link, because if contains all of the details
 // and restrictions required to define the allowable conections that
-// can be made.
-// TODO: This should be Evlautable, so that it can return t/f to
-// indicate if a specifi connection can be made...
-// CONNECTOR <- EVALUATABLE_LINK
-CONNECTOR <- ORDERED_LINK
+// can be made. It inherits from Evaluatable, so that the ability for
+// it to mate to something can be encoded in a TruthValue (typically
+// a crisp T/F for type specifications.)
+CONNECTOR <- EVALUATABLE_LINK
 
-CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
-LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
+CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
+LINK_CLASS_NODE <- LEXICAL_NODE "LinkClass" // Connector class
 CONNECTOR_SEQ <- ORDERED_LINK       // Sequence of connectors
 CONNECTOR_SET <- UNORDERED_LINK     // Unordered set of connectors
 SECTION <- ORDERED_LINK             // Sheaf section, connector set
