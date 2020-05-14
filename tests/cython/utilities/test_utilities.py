@@ -34,11 +34,31 @@ class UtilitiesTest(TestCase):
             new_space = AtomSpace()
             load_file(tmp_file, new_space)
             self.assertTrue(len(new_space) == len(self.atomspace))
+            checklist = """(ListLink(ConceptNode "vfjv\\"jnvfé")
+                (ConceptNode "conceptIR~~gF\\",KV"))"""
+            with open(tmp_file, 'wt') as f:
+                f.write(checklist)
+            new_space1 = AtomSpace()
+            load_file(tmp_file, new_space1)
+            self.assertTrue(len(new_space1) == 3)
+
+
+def gen_name():
+    tmp = []
+    ascii = [chr(x) for x in range(32, 127)]
+    for i in range(10):
+        char = random.choice(ascii)
+        if char == '"':
+            char = '\\"'
+        if char == '\\':
+            char = ''
+        tmp.append(char)
+    return ''.join(tmp)
 
 
 def gen_atoms(atomspace, num=100000):
     predicates = [atomspace.add_node(types.PredicateNode, 'predicate' + str(x)) for x in range(1)]
-    concepts = [atomspace.add_node(types.ConceptNode, 'concept' + str(x)) for x in range(1000)]
+    concepts = [atomspace.add_node(types.ConceptNode, 'concept' + gen_name()) for x in range(1000)]
     link_types = [types.ListLink, types.InheritanceLink, types.MemberLink]
     while(len(atomspace) < num):
         c1 = random.choice(concepts)
@@ -52,4 +72,3 @@ def gen_atoms(atomspace, num=100000):
                 [predicate,
                 arg])
     return atomspace
-
