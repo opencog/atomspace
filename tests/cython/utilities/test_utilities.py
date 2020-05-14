@@ -35,12 +35,13 @@ class UtilitiesTest(TestCase):
             load_file(tmp_file, new_space)
             self.assertTrue(len(new_space) == len(self.atomspace))
             checklist = """(ListLink(ConceptNode "vfjv\\"jnvfé")
-                (ConceptNode "conceptIR~~gF\\",KV"))"""
+                (ConceptNode "conceptIR~~gF\\",KV"))
+                (ConceptNode "вверху плыли редкие облачка"))"""
             with open(tmp_file, 'wt') as f:
                 f.write(checklist)
             new_space1 = AtomSpace()
             load_file(tmp_file, new_space1)
-            self.assertTrue(len(new_space1) == 3)
+            self.assertTrue(len(new_space1) == 4)
 
 
 def gen_name():
