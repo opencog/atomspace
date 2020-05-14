@@ -1,5 +1,28 @@
-#ifndef FAST_LOAD_CPP
-#define FAST_LOAD_CPP
+/*
+ * fast_load.cc
+ * fast load of Atomese in s-expression format.
+ *
+ * Copyright (C) 2020 Alexey Potapov, Anatoly Belikov
+ *
+ * Authors: Alexey Potapov
+ *          Anatoly Belikov
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -13,9 +36,9 @@ using namespace opencog;
 #include <vector>
 #include <stdexcept>
 
-
-
-// extract s-expression
+// Extract s-expression. Given a string `s`, update the `l` and `r`
+// values so that `l` points at the next open-parenthsis (left paren)
+// and `r` points at the matching close-paren.
 void get_next_expr(const std::string& s, uint& l, uint& r)
 {
     uint l1 = l;
@@ -48,7 +71,12 @@ void get_next_expr(const std::string& s, uint& l, uint& r)
     r = l1 - 1;
 }
 
-// tokenizer - extracts link or node type or name
+// Tokenizer - extracts link or node type or name. Given the string `s`,
+// this updates the `l` and `r` values such that `l` points at the first
+// non-whitespace character of the name, and `r` points at the last.
+// The string is considered to start *after* the first quote, and ends
+// just before the last quote. In this case, escaped quotes \" are
+// ignored (are considered to be part of the string).
 void get_next_token(const std::string& s, uint& l, uint& r)
 {
     for(; l < r && (s[l] == ' ' || s[l] == '\t' || s[l] == '\n'); l++);
@@ -120,7 +148,7 @@ Handle recursive_parse(const std::string& s, AtomSpace& as)
     throw std::runtime_error("Syntax error in type " + stype + " in " + s);
 }
 
-
+/// load_file -- load the given file into the given AtomSpace.
 void opencog::load_file(std::string fname, AtomSpace& as)
 {
     std::ifstream f(fname);
@@ -171,7 +199,3 @@ void opencog::load_file(std::string fname, AtomSpace& as)
     }
     f.close();
 }
-
-
-
-#endif // FAST_LOAD_CPP
