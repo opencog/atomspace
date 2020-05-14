@@ -39,7 +39,7 @@ using namespace opencog;
 // Extract s-expression. Given a string `s`, update the `l` and `r`
 // values so that `l` points at the next open-parenthsis (left paren)
 // and `r` points at the matching close-paren.
-void get_next_expr(const std::string& s, uint& l, uint& r)
+static void get_next_expr(const std::string& s, uint& l, uint& r)
 {
     uint l1 = l;
     while(s[l1] != '(' && l1 < r) {
@@ -77,7 +77,7 @@ void get_next_expr(const std::string& s, uint& l, uint& r)
 // The string is considered to start *after* the first quote, and ends
 // just before the last quote. In this case, escaped quotes \" are
 // ignored (are considered to be part of the string).
-void get_next_token(const std::string& s, uint& l, uint& r)
+static void get_next_token(const std::string& s, uint& l, uint& r)
 {
     for(; l < r && (s[l] == ' ' || s[l] == '\t' || s[l] == '\n'); l++);
 
@@ -94,7 +94,7 @@ void get_next_token(const std::string& s, uint& l, uint& r)
 }
 
 // Handle, Atomspace
-Handle recursive_parse(const std::string& s, AtomSpace& as)
+static Handle recursive_parse(const std::string& s, AtomSpace& as)
 {
     NameServer & nameserver = opencog::nameserver();
 
