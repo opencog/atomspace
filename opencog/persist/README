@@ -38,10 +38,10 @@ Future directions:
 ------------------
 To understand the future directions for the (distributed) atomspace
 and its relation to storage, read the "Big Graph Anti-Pattern" blog
-post: http://blog.bigdata.com/?p=628
+post: https://blog.blazegraph.com/?p=628
 
 OpenCog most closely resembles the fourth bullet in that post:
 "Graph query (aka graph pattern matching)"  Based on this, the
-most promising backend would seem to be "bigdata":
+most promising backend would seem to be "blazegraph":
 http://sourceforge.net/projects/bigdata/ (GPLv2)
-http://www.bigdata.com/
+http://www.blazegraph.com/
