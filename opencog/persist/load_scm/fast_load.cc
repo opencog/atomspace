@@ -79,20 +79,29 @@ static void get_next_expr(const std::string& s, uint& l, uint& r)
 // The string is considered to start *after* the first quote, and ends
 // just before the last quote. In this case, escaped quotes \" are
 // ignored (are considered to be part of the string).
-static void get_next_token(const std::string& s, uint& l, uint& r)
+static std::string get_next_token(const std::string& s, uint& l, uint& r)
 {
+    std::string token;
     for(; l < r && (s[l] == ' ' || s[l] == '\t' || s[l] == '\n'); l++);
 
     if(s[l] == '"') {  // we are parsing string
         l++;
         uint l1 = l;
-        for(; l1 < r && (s[l1] != '"' or ((0 < l1) and (s[l1 - 1] == '\\'))); l1++);
+        for(; l1 < r && (s[l1] != '"' or ((0 < l1) and (s[l1 - 1] == '\\'))); l1++)
+        {
+            // Unescape esaped quotes.
+            // XXX is there anything else we want to unescape?
+            if (s[l1] != '\\' or s[l1+1] != '"')
+                token.push_back(s[l1]);
+        }
         r = l1-1;
     } else {  // Node type or something
         uint l1 = l;
-        for(; l < r && s[l1] != '(' && s[l1] != ' ' && s[l1] != '\t' && s[l1] != '\n'; l1++);
+        for(; l < r && s[l1] != '(' && s[l1] != ' ' && s[l1] != '\t' && s[l1] != '\n'; l1++)
+            token.push_back(s[l1]);
         r = l1 - 1;
     }
+    return token;
 }
 
 // Parse the string `s`, returning a Handle that corresponds to that
@@ -104,8 +113,7 @@ static Handle recursive_parse(const std::string& s)
     uint l = 0, r = s.length() - 1;
 
     uint l1 = l, r1 = r;
-    get_next_token(s, l1, r1);
-    const std::string stype = s.substr(l1, r1-l1+1);
+    const std::string stype = get_next_token(s, l1, r1);
 
     l = r1 + 1;
     opencog::Type atype = nameserver.getType(stype);
@@ -136,8 +144,7 @@ static Handle recursive_parse(const std::string& s)
     } else {
         l1 = l;
         r1 = r;
-        get_next_token(s, l1, r1);
-        std::string token = s.substr(l1, r1-l1+1);
+        std::string token = get_next_token(s, l1, r1);
 
         if(l1 >= r1) {
             throw std::runtime_error("Syntax error in " + s.substr(l, r-l+1));
