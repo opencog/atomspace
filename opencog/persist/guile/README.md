@@ -1,5 +1,5 @@
-                          Persist Guile API
-                          ------------------
+Persist Guile API
+-----------------
 
 Provides a scheme module for the generic persistence API. This API
 is compatible with anything that uses the generic "backend" API in
@@ -28,3 +28,8 @@ The provided functions are:
 * `barrier` --
       Complete any async, pending load/store operations before
       continuing with the next load/store operation.
+
+Recall that you can always get more information and documentation with
+the `,a` `,apropos` `,d` and `,describe` commands. For example, saying
+`,a fetch` will list all commands with `fetch` in thier name, and 
+`,d fetch-incoming-set` will print the full documentation.
