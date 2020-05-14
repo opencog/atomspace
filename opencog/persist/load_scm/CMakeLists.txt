@@ -1,6 +1,6 @@
 
 ADD_LIBRARY (load_scm
-        fast_load
+	fast_load
 )
 
 ADD_DEPENDENCIES(load_scm opencog_atom_types)
@@ -15,6 +15,6 @@ INSTALL (TARGETS load_scm EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-        fast_load.h
+	fast_load.h
 	DESTINATION "include/opencog/persist/load_scm"
 )
