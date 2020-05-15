@@ -45,7 +45,6 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
-	const GroundingMap *_vmap;
 	bool _halt;
 
 	/**
@@ -94,8 +93,12 @@ private:
 	 * any execution. See also PutLink, which does substitution.
 	 * (actually, beta reduction).
 	 */
-	Handle walk_tree(const Handle& tree, bool silent=false);
-	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
+	Handle walk_tree(const Handle& tree,
+	                 const GroundingMap&,
+	                 bool silent=false);
+	bool walk_sequence(HandleSeq&, const HandleSeq&,
+	                   const GroundingMap&,
+	                   bool silent=false);
 
 	/// Substitute, but do not execute ExecutionOutputLinks
 	Handle reduce_exout(const Handle& exout,
@@ -127,7 +130,6 @@ public:
 	void clear()
 	{
 		_as = nullptr;
-		_vmap = nullptr;
 		_consume_quotations = true;
 	}
 

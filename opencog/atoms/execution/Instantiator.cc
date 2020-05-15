@@ -32,7 +32,7 @@
 using namespace opencog;
 
 Instantiator::Instantiator(AtomSpace* as)
-	: _as(as), _vmap(nullptr), _halt(false),
+	: _as(as), _halt(false),
 	  _consume_quotations(true),
 	  _needless_quotation(true)
 	  {}
@@ -68,13 +68,14 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 /// result of execution/evaluation changed something.
 bool Instantiator::walk_sequence(HandleSeq& oset_results,
                                  const HandleSeq& expr,
+                                 const GroundingMap& varmap,
                                  bool silent)
 {
 	bool changed = false;
 	Context cp_context = _context;
 	for (const Handle& h : expr)
 	{
-		Handle hg(walk_tree(h, silent));
+		Handle hg(walk_tree(h, varmap, silent));
 		_context = cp_context;
 		if (hg != h) changed = true;
 
@@ -171,7 +172,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 		    (IMPLICATION_LINK == at0 and
 		     QUOTE_LINK == args->getOutgoingAtom(1)->get_type()))
 		{
-			args = walk_tree(args);
+			args = walk_tree(args, varmap);
 			done = true;
 		}
 	}
@@ -195,7 +196,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
-/// with the groundings held in _vmap.
+/// with the groundings held in `varmap`.
 ///
 /// Second, during the above process, if any executable functions are
 /// encountered, then execute them. This is "eager-execution".  The
@@ -218,7 +219,9 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 /// substitution on the function args, and then executes the function.
 /// Its up to the function itself to get more done, as needed.
 ///
-Handle Instantiator::walk_tree(const Handle& expr, bool silent)
+Handle Instantiator::walk_tree(const Handle& expr,
+                               const GroundingMap& varmap,
+                               bool silent)
 {
 	Type t = expr->get_type();
 
@@ -237,7 +240,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
 		Handle child = expr->getOutgoingAtom(0);
-		Handle walked_child = walk_tree(child, silent);
+		Handle walked_child = walk_tree(child, varmap, silent);
 
 		// Only consume if the quotation is really needless (walking
 		// the children might have changed _needless_quotation).
@@ -266,7 +269,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree(DefineLink::get_definition(expr), silent);
+			return walk_tree(DefineLink::get_definition(expr), varmap, silent);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -280,8 +283,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// If we are here, we found a free variable or glob. Look
 		// it up. Return a grounding if it has one, otherwise return
 		// the variable itself.
-		GroundingMap::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() == it) return expr;
+		GroundingMap::const_iterator it = varmap.find(expr);
+		if (varmap.end() == it) return expr;
 
 		// Not so fast, pardner. VariableNodes can be grounded by
 		// links, and those links may be executable. In that case,
@@ -292,7 +295,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			return expr;
 
 		_halt = true;
-		Handle hgnd(walk_tree(it->second, silent));
+		Handle hgnd(walk_tree(it->second, varmap, silent));
 		_halt = false;
 		return hgnd;
 	}
@@ -315,7 +318,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (PUT_LINK == t)
 	{
 		// Step one: perform variable substituions
-		Handle hexpr(beta_reduce(expr, *_vmap));
+		Handle hexpr(beta_reduce(expr, varmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
 		// Step two: beta-reduce.
@@ -332,7 +335,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
 
-		Handle rex(walk_tree(red, silent));
+		Handle rex(walk_tree(red, varmap, silent));
 		if (nullptr == rex)
 			return rex;
 
@@ -387,7 +390,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 		// Recursively walk vardecl
 		if (vardecl)
-			vardecl = walk_tree(vardecl, silent);
+			vardecl = walk_tree(vardecl, varmap, silent);
 
 		// Recursively walk body, making sure quotation is preserved
 		Handle body = ll->get_body();
@@ -405,13 +408,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		{
 			_context.update(body);
 			_needless_quotation = false;
-			body = walk_tree(body->getOutgoingAtom(0), silent);
+			body = walk_tree(body->getOutgoingAtom(0), varmap, silent);
 			body = createLink(bt, body);
 			_needless_quotation = true;
 		}
 		else
 		{
-			body = walk_tree(body, silent);
+			body = walk_tree(body, varmap, silent);
 		}
 
 		// Reconstruct Lambda, if it has changed
@@ -431,7 +434,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+		walk_sequence(oset_results, expr->getOutgoingSet(), varmap, silent);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->get_type();
@@ -455,19 +458,19 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	//
 	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
 	if (nameserver().isA(t, VIRTUAL_LINK))
-		return beta_reduce(expr, *_vmap);
+		return beta_reduce(expr, varmap);
 
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
-		Handle eolh = reduce_exout(expr, *_vmap, silent);
+		Handle eolh = reduce_exout(expr, varmap, silent);
 		return HandleCast(eolh->execute(_as, silent));
 	}
 
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
-		Handle flh = beta_reduce(expr, *_vmap);
+		Handle flh = beta_reduce(expr, varmap);
 
 		// Some function links are guaranteed to return values.
 		// We cannot/must not execute them here.
@@ -484,7 +487,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
-		// beta_reduce(expr, *_vmap);
+		// beta_reduce(expr, varmap);
 		return HandleCast(expr->execute(_as, silent));
 	}
 
@@ -494,7 +497,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
-		// beta_reduce(expr, *_vmap);
+		// beta_reduce(expr, varmap);
 		return HandleCast(expr->execute(_as, silent));
 	}
 
@@ -514,9 +517,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (DONT_EXEC_LINK == t)
 	{
 #ifdef CONSUME_THE_EXEC
-		return beta_reduce(expr->getOutgoingAtom(0), *_vmap);
+		return beta_reduce(expr->getOutgoingAtom(0), varmap);
 #else
-		return beta_reduce(expr, *_vmap);
+		return beta_reduce(expr, varmap);
 #endif
 	}
 
@@ -524,7 +527,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// set where the variables have been substituted by their values.
 mere_recursive_call:
 	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(),
+	                             varmap, silent);
 	if (changed)
 	{
 		Handle subl(createLink(std::move(oset_results), t));
@@ -560,7 +564,7 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                   const GroundingMap &vars,
+                                   const GroundingMap& varmap,
                                    bool silent)
 {
 	// throw, not assert, because this is a user error ...
@@ -570,8 +574,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	_context = Context(false);
 	_needless_quotation = true;
-
-	_vmap = &vars;
 
 	// Most of the work happens in walk_tree (which returns a Handle
 	// to the instantiated tree). However, special-case the handling
@@ -593,7 +595,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		HandleSeq oset_results;
 		for (const Handle& h: expr->getOutgoingSet())
 		{
-			Handle hg(walk_tree(h, silent));
+			Handle hg(walk_tree(h, varmap, silent));
 
 			// Globs will return a matching list. Arithmetic
 			// links will choke on lists, so expand them.
@@ -617,11 +619,11 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, SATISFYING_LINK) or
 	    nameserver().isA(t, JOIN_LINK))
 	{
-		if (0 == vars.size())
+		if (0 == varmap.size())
 			return expr->execute(_as, silent);
 
 		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, silent));
+		Handle grounded(walk_tree(expr, varmap, silent));
 		if (_as) grounded = _as->add_atom(grounded);
 		return grounded->execute(_as, silent);
 	}
@@ -631,7 +633,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
-		Handle eolh = reduce_exout(expr, *_vmap, silent);
+		Handle eolh = reduce_exout(expr, varmap, silent);
 		if (not eolh->is_executable()) return eolh;
 		eolh = _as->add_atom(eolh);
 		return eolh->execute(_as, silent);
@@ -654,7 +656,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	}
 
 	// Instantiate.
-	Handle grounded(walk_tree(expr, silent));
+	Handle grounded(walk_tree(expr, varmap, silent));
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
