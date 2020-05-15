@@ -199,10 +199,6 @@ void opencog::load_file(std::string fname, AtomSpace& as)
                 }
             }
             shift += line.size();
-            if(expr.size() > 10000) {
-                std::cout << expr << "\n\n";
-                exit(-1);
-            }
         } while(r == -1 && !f.eof());
         cnt++;
         if(r != -1) {
