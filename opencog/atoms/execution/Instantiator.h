@@ -145,10 +145,6 @@ public:
 		_as = nullptr;
 	}
 
-	void reset_halt()
-	{
-	}
-
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,
 	                     bool silent=false);
