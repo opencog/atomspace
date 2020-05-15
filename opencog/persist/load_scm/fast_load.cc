@@ -162,6 +162,9 @@ static Handle recursive_parse(const std::string& s)
 void opencog::load_file(std::string fname, AtomSpace& as)
 {
     std::ifstream f(fname);
+    if (not f.is_open())
+       throw std::runtime_error("Cannot find file >>" + fname + "<<");
+
     int cnt = 0;
     while(!f.eof()) {
         std::string line, expr;
@@ -170,7 +173,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
         bool par = false;
         char prev = ' ';
         do {
-            getline(f, line);
+            std::getline(f, line);
             line += " ";
             expr += line;
             for(uint i = 0; i < line.size(); i++) {
