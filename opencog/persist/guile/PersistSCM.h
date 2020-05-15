@@ -46,6 +46,7 @@ private:
 	void load_type(Type);
 	void load_atomspace(void);
 	void store_atomspace(void);
+        void load_file(const std::string & path);
 	void barrier(void);
 
 public:
