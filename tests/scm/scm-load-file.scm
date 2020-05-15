@@ -14,7 +14,7 @@
 (test-begin tname)
 
 ; fill atomspace from a file's content
-(load-file "test_data.scm")
+(load-file "scm-load-file-test-data.scm")
 
 (define names (map cog-name (cog-get-atoms "ConceptNode")))
 
