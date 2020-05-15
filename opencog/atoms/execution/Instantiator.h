@@ -50,7 +50,6 @@ private:
 	{
 		Instate(const GroundingMap& varmap) :
 			_varmap(varmap),
-			_context(false),
 			_consume_quotations(true),
 			_needless_quotation(true),
 			_halt(false)

@@ -28,8 +28,6 @@
 #include <list>
 #include <string>
 
-#include <boost/operators.hpp>
-
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
@@ -54,31 +52,19 @@ namespace opencog
  *
  * This notion of context is distinct and unrelated to ContextLink.
  */
-struct Context : public boost::totally_ordered<Context>
+struct Context
 {
 	typedef std::list<Variables> VariablesStack;
 
 	// Default ctor
 	Context(const Quotation& quotation=Quotation(),
-	        const HandleSet& shadow=HandleSet(),
-	        bool store_scope_variables=true,
-	        const VariablesStack& scope_variables=VariablesStack());
-	Context(bool store_scope_variables);
+	        const HandleSet& shadow=HandleSet());
 
 	// Quotation state
 	Quotation quotation;
 
 	// Set of shadowing variables
 	HandleSet shadow;
-
-	// Flag to ignore pushing scope variables to avoid that cost when
-	// not necessary
-	bool store_scope_variables;
-
-	// Stack of variable declarations corresponding to each ancestor
-	// unquoted scopes, pushed in encountering order from the current
-	// handle to the root.
-	VariablesStack scope_variables;
 
 	/**
 	 * Update the context over an atom. That is if the atom is a

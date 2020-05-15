@@ -413,7 +413,7 @@ void FreeVariables::canonical_sort(const HandleSeq& hs)
 
 	// Ignore free variables in body not in the FreeVariables object
 	HandleSet ignored_vars = set_symmetric_difference(fv, varset);
-	Context ctx(Quotation(), ignored_vars, false);
+	Context ctx(Quotation(), ignored_vars);
 
 	VarScraper vsc;
 	vsc._paths = vsc.variables_paths(ORDERED_LINK, hs);
