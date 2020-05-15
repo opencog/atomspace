@@ -1,5 +1,5 @@
 /*
- * opencog/persist/guile/PersistSCM.h
+ * opencog/persist/guile/PersistFileSCM.h
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
@@ -21,11 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PERSIST_SCM_H
-#define _OPENCOG_PERSIST_SCM_H
+#ifndef _OPENCOG_PERSIST_FILE_SCM_H
+#define _OPENCOG_PERSIST_FILE_SCM_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog
@@ -34,29 +32,21 @@ namespace opencog
  *  @{
  */
 
-class PersistSCM : public ModuleWrap
+class PersistFileSCM : public ModuleWrap
 {
 private:
 	void init(void);
 
-	Handle fetch_atom(Handle);
-	Handle fetch_incoming_set(Handle);
-	Handle fetch_incoming_by_type(Handle, Type);
-	Handle store_atom(Handle);
-	void load_type(Type);
-	void load_atomspace(void);
-	void store_atomspace(void);
-	void barrier(void);
-
+	void load_file(const std::string&);
 public:
-	PersistSCM(void);
+	PersistFileSCM(void);
 }; // class
 
 /** @}*/
 }  // namespace
 
 extern "C" {
-void opencog_persist_init(void);
+void opencog_persist_file_init(void);
 };
 
-#endif // _OPENCOG_PERSIST_SCM_H
+#endif // _OPENCOG_PERSIST_FILE_SCM_H

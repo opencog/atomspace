@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/persist/load_scm/fast_load.h>
 
 #include "PersistSCM.h"
 
@@ -56,8 +55,6 @@ void PersistSCM::init(void)
 	             &PersistSCM::store_atomspace, this, "persist");
 	define_scheme_primitive("barrier",
 	             &PersistSCM::barrier, this, "persist");
-	define_scheme_primitive("load-file",
-	             &PersistSCM::load_file, this, "persist");
 }
 
 // =====================================================================
@@ -122,10 +119,4 @@ void PersistSCM::barrier(void)
 void opencog_persist_init(void)
 {
 	static PersistSCM patty;
-}
-
-void PersistSCM::load_file(const std::string & path)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("load-file");
-	opencog::load_file(path, *as);
 }
