@@ -89,10 +89,7 @@ static std::string get_next_token(const std::string& s, uint& l, uint& r)
         uint l1 = l;
         for(; l1 < r && (s[l1] != '"' or ((0 < l1) and (s[l1 - 1] == '\\'))); l1++)
         {
-            // Unescape esaped quotes.
-            // XXX is there anything else we want to unescape?
-            if (s[l1] != '\\' or s[l1+1] != '"')
-                token.push_back(s[l1]);
+            token.push_back(s[l1]);
         }
         r = l1-1;
     } else {  // Node type or something
@@ -165,6 +162,9 @@ static Handle recursive_parse(const std::string& s)
 void opencog::load_file(std::string fname, AtomSpace& as)
 {
     std::ifstream f(fname);
+    if (not f.is_open())
+       throw std::runtime_error("Cannot find file >>" + fname + "<<");
+
     int cnt = 0;
     while(!f.eof()) {
         std::string line, expr;
@@ -173,7 +173,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
         bool par = false;
         char prev = ' ';
         do {
-            getline(f, line);
+            std::getline(f, line);
             line += " ";
             expr += line;
             for(uint i = 0; i < line.size(); i++) {
@@ -199,10 +199,6 @@ void opencog::load_file(std::string fname, AtomSpace& as)
                 }
             }
             shift += line.size();
-            if(expr.size() > 10000) {
-                std::cout << expr << "\n\n";
-                exit(-1);
-            }
         } while(r == -1 && !f.eof());
         cnt++;
         if(r != -1) {

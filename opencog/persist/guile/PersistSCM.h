@@ -48,6 +48,7 @@ private:
 	void store_atomspace(void);
 	void barrier(void);
 
+	void load_file(const std::string&);
 public:
 	PersistSCM(void);
 }; // class

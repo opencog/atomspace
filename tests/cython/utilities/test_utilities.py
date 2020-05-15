@@ -1,6 +1,7 @@
 import os
 import random
 import tempfile
+import filecmp
 
 from unittest import TestCase
 
@@ -9,6 +10,13 @@ from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog, finalize_opencog, load_file
 
 __author__ = 'Curtis Faith'
+
+
+def write_sorted_file(path, atomspace):
+    with open(path, 'wt') as f:
+        for atom in sorted([x for x in atomspace]):
+            f.write(str(atom))
+            f.write('\n')
 
 
 class UtilitiesTest(TestCase):
@@ -27,13 +35,14 @@ class UtilitiesTest(TestCase):
         gen_atoms(self.atomspace)
         with tempfile.TemporaryDirectory() as tmpdirname:
             tmp_file = os.path.join(tmpdirname, 'tmp.scm')
-            with open(tmp_file, 'wt') as f:
-                for atom in self.atomspace:
-                    f.write(str(atom))
-                    f.write('\n')
+            write_sorted_file(tmp_file, self.atomspace)
             new_space = AtomSpace()
             load_file(tmp_file, new_space)
             self.assertTrue(len(new_space) == len(self.atomspace))
+            # files should be binary equal
+            new_tmp = os.path.join(tmpdirname, 'tmp1.scm')
+            write_sorted_file(new_tmp, new_space)
+            self.assertTrue(filecmp.cmp(tmp_file, new_tmp, shallow=False), "files are not equal")
             checklist = """(ListLink(ConceptNode "vfjv\\"jnvfé")
                 (ConceptNode "conceptIR~~gF\\",KV"))
                 (ConceptNode "вверху плыли редкие облачка"))"""
