@@ -4,18 +4,14 @@
 (use-modules (opencog persist))
 (use-modules (opencog test-runner))
 
-
 (define (contains? el lst)
-                    (any (lambda (x) (equal? el x)) lst)
+    (any (lambda (x) (equal? el x)) lst)
 )
 
 (opencog-test-runner)
 
-
-
 (define tname "load_file")
 (test-begin tname)
-
 
 ; fill atomspace from a file's content
 (load-file "test_data.scm")
@@ -29,5 +25,7 @@
 
 ; would fail on slashes at the end of string: (ConceptNode "a\\")
 (test-assert "load data from file"
-	     contain_all
+  contain_all
 )
+
+(test-end tname)
