@@ -53,6 +53,7 @@ class Recognizer :
 	protected:
 		const Pattern* _pattern;
 
+		DECLARE_PE_MUTEX;
 		Handle _root;
 		Handle _starter_term;
 		size_t _cnt;

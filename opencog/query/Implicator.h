@@ -58,6 +58,7 @@ class Implicator :
 	protected:
 		AtomSpace* _as;
 
+		DECLARE_PE_MUTEX;
 		ValueSet _result_set;
 		QueueValuePtr _result_queue;
 		void insert_result(ValuePtr);

@@ -240,6 +240,7 @@ bool Recognizer::grounding(const GroundingMap& var_soln,
 	Handle rule = term_soln.at(_root);
 
 	if (rule != _root) {
+		LOCK_PE_MUTEX;
 		_rules.insert(rule);
 	}
 

@@ -23,6 +23,7 @@
 #include <thread>
 
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -129,18 +130,20 @@ void QueryUTest::test_meet(void)
 	// A more complex query
 	ValuePtr v = eval->eval_v("(cog-execute! meet)");
 	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
-	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
+	LinkValuePtr lv(LinkValueCast(v));
 	printf("Got: %s\n", v->to_string().c_str());
+	TS_ASSERT_EQUALS(lv->value().size(), 3);
 
-	ValuePtr ev = eval->eval_v("(QueueValue "
+	Handle uv(createUnorderedLink(lv->to_handle_seq()));
+	printf("Got as Unordered: %s\n", uv->to_string().c_str());
+
+	Handle euv = eval->eval_h("(UnorderedLink "
 		"(ConceptNode \"thing\")"
 		"(ConceptNode \"story\")"
 		"(ConceptNode \"joke\")) ");
 
-	printf("Expected: %s\n", ev->to_string().c_str());
-	LinkValuePtr lv(LinkValueCast(v));
-	LinkValuePtr lev(LinkValueCast(ev));
-	TS_ASSERT_EQUALS(*lev, *lv);
+	printf("Expected: %s\n", euv->to_string().c_str());
+	TS_ASSERT(content_eq(euv, uv));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

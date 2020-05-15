@@ -32,6 +32,7 @@ using namespace opencog;
 bool Satisfier::grounding(const GroundingMap &var_soln,
                           const GroundingMap &term_soln)
 {
+	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
@@ -122,6 +123,7 @@ bool Satisfier::search_finished(bool done)
 bool SatisfyingSet::grounding(const GroundingMap &var_soln,
                               const GroundingMap &term_soln)
 {
+	LOCK_PE_MUTEX;
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached

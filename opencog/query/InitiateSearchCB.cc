@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// #include <algorithm>
-// #include <execution>
-// #include <opencog/util/oc_omp.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -36,6 +32,12 @@
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
 #include "Substitutor.h"
+
+#ifdef USE_THREADED_PATTERN_ENGINE
+	// #include <algorithm>
+	// #include <execution>
+	#include <opencog/util/oc_omp.h>
+#endif // USE_THREADED_PATTERN_ENGINE
 
 using namespace opencog;
 
@@ -1029,20 +1031,22 @@ void InitiateSearchCB::jit_analyze(void)
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
-	// TODO: This is the main entry point into the CPU-cycle
-	// sucking part of the pattern search.  It might be worth
-	// parallelizing at this point. That is, ***if*** the _search_set
-	// is large, or the pattern is large/complex, then it might be
-	// worth it to create N threads, and N copies of PatternMatchEngine
-	// and run one search per thread.  Maybe. CAUTION: this is not
-	// always the bottleneck, and so adding heavy-weight thread
-	// initialization here might hurt some users.  See the benchmark
-	// `nano-en.scm` in the benchmark get repo, for example.
+	// This is the main entry point into the CPU-cycle sucking part of
+	// the pattern search.  If `USE_THREADED_PATTERN_ENGINE` is defined,
+	// then it runs in parallel. It works, unit-tests pass. But ...
+	// But the overhead is so large, that, for small pattern matches,
+	// the setup of going parallel is far more expensive than the gain
+	// from parallelism. (RandomUTest runs 25x slower! GetStateUTest
+	// runs 33x slower!) So this code is currently disabled.
 	//
-	// The if-defs further below attempt this parallelization.
-	// At this time, they do not yet pass unit tests.
-#define SEQUENTIAL_LOOP 1
-#ifdef SEQUENTIAL_LOOP
+	// If `_search_set` is large, or the if pattern is large/complex,
+	// then the extra cost might be worth it. However, this is NOT
+	// always the bottleneck! Be careful not to penalize small users!
+	// See the benchmark `nano-en.scm` in the opencog/benchmark GitHub
+	// repo, for example.
+	//
+#ifndef USE_THREADED_PATTERN_ENGINE
+	// See explanation below for the `_recursing` flag.
 	_recursing = true;
 #endif
 
@@ -1069,10 +1073,6 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 		return false;
 	}
 
-	// Currently, the code below fails unit tests. The main reason
-	// seems to be that the PatternMatchCallback::grounding() is
-	// not thread-safe in most callbacks.
-	//
 	// Note also: for multi-component patterns, this entire class
 	// is used recursively in multiple threads. This is because
 	// `PatternLink::satisfy()` is recursive, when there are multiple
@@ -1081,11 +1081,8 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	// components, this gets wrapped in PMCGroundings and then
 	// `PatternLink::satisfy()` is called .. once in each thread!
 	// Which causes a new start-point to be searched for, for each
-	// component which clobbers this structure against itself.  Ick. Fail.
-	// To add insult to injury, the PMCGroundings::grounding() is
-	// called from these multiple threads, with no protection for
-	// the structures it's using. The `_recursing` flag is an attempt
-	// to deal with this.
+	// component which clobbers this structure against itself.  Fail.
+	// The `_recursing` flag prevents this double-threading.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
 	// Parallel loop. This requires linking to -ltbb to work.
@@ -1109,7 +1106,9 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 
 #endif
 
-// #define OMP_PM_PARALLEL 1
+#ifdef USE_THREADED_PATTERN_ENGINE
+	#define OMP_PM_PARALLEL 1
+#endif
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
 	_recursing = true;
