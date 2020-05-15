@@ -111,13 +111,13 @@ private:
 	 * (actually, beta reduction).
 	 */
 	Handle walk_tree(const Handle& tree,
-	                 Instate&);
+	                 Instate&) const;
 	bool walk_sequence(HandleSeq&, const HandleSeq&,
-	                   Instate&);
+	                   Instate&) const;
 
 	/// Substitute, but do not execute ExecutionOutputLinks
 	Handle reduce_exout(const Handle& exout,
-	                    Instate&);
+	                    Instate&) const;
 
 	/**
 	 * Return true iff the following atom type may not match to
@@ -137,7 +137,7 @@ public:
 
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,
-	                     bool silent=false);
+	                     bool silent=false) const;
 
 	ValuePtr execute(const Handle& expr, bool silent=false);
 };

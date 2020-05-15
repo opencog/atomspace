@@ -65,7 +65,7 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 /// result of execution/evaluation changed something.
 bool Instantiator::walk_sequence(HandleSeq& oset_results,
                                  const HandleSeq& expr,
-                                 Instate& ist)
+                                 Instate& ist) const
 {
 	bool changed = false;
 	Context cp_context = ist._context;
@@ -109,7 +109,7 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 /// did the lazy execution themselves... but this is too much to
 /// ask for. So we always eager-evaluate those args.
 Handle Instantiator::reduce_exout(const Handle& expr,
-                                  Instate& ist)
+                                  Instate& ist) const
 {
 	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 
@@ -215,7 +215,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 /// Its up to the function itself to get more done, as needed.
 ///
 Handle Instantiator::walk_tree(const Handle& expr,
-                               Instate& ist)
+                               Instate& ist) const
 {
 	Type t = expr->get_type();
 
@@ -558,7 +558,7 @@ bool Instantiator::not_self_match(Type t)
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
                                    const GroundingMap& varmap,
-                                   bool silent)
+                                   bool silent) const
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
