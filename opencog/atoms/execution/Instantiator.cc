@@ -65,14 +65,13 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 /// result of execution/evaluation changed something.
 bool Instantiator::walk_sequence(HandleSeq& oset_results,
                                  const HandleSeq& expr,
-                                 Instate& ist,
-                                 bool silent)
+                                 Instate& ist)
 {
 	bool changed = false;
 	Context cp_context = ist._context;
 	for (const Handle& h : expr)
 	{
-		Handle hg(walk_tree(h, ist, silent));
+		Handle hg(walk_tree(h, ist));
 		ist._context = cp_context;
 		if (hg != h) changed = true;
 
@@ -110,8 +109,7 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 /// did the lazy execution themselves... but this is too much to
 /// ask for. So we always eager-evaluate those args.
 Handle Instantiator::reduce_exout(const Handle& expr,
-                                  Instate& ist,
-                                  bool silent)
+                                  Instate& ist)
 {
 	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 
@@ -217,8 +215,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 /// Its up to the function itself to get more done, as needed.
 ///
 Handle Instantiator::walk_tree(const Handle& expr,
-                               Instate& ist,
-                               bool silent)
+                               Instate& ist)
 {
 	Type t = expr->get_type();
 
@@ -237,7 +234,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
 		Handle child = expr->getOutgoingAtom(0);
-		Handle walked_child = walk_tree(child, ist, silent);
+		Handle walked_child = walk_tree(child, ist);
 
 		// Only consume if the quotation is really needless (walking
 		// the children might have changed _needless_quotation).
@@ -266,7 +263,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree(DefineLink::get_definition(expr), ist, silent);
+			return walk_tree(DefineLink::get_definition(expr), ist);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -292,7 +289,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			return expr;
 
 		ist._halt = true;
-		Handle hgnd(walk_tree(it->second, ist, silent));
+		Handle hgnd(walk_tree(it->second, ist));
 		ist._halt = false;
 		return hgnd;
 	}
@@ -319,7 +316,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
 		// Step two: beta-reduce.
-		Handle red(HandleCast(ppp->execute(_as, silent)));
+		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
 
 		// TODO -- Maybe the PutLink should also do everything below,
 		// itself? i.e. we should not have to do the below for it,
@@ -332,7 +329,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
 
-		Handle rex(walk_tree(red, ist, silent));
+		Handle rex(walk_tree(red, ist));
 		if (nullptr == rex)
 			return rex;
 
@@ -387,7 +384,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 		// Recursively walk vardecl
 		if (vardecl)
-			vardecl = walk_tree(vardecl, ist, silent);
+			vardecl = walk_tree(vardecl, ist);
 
 		// Recursively walk body, making sure quotation is preserved
 		Handle body = ll->get_body();
@@ -395,7 +392,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// an exception then
 		if (not body)
 		{
-			if (silent)
+			if (ist._silent)
 				throw NotEvaluatableException();
 			throw SyntaxException(TRACE_INFO, "body is ill-formed");
 		}
@@ -405,13 +402,13 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		{
 			ist._context.update(body);
 			ist._needless_quotation = false;
-			body = walk_tree(body->getOutgoingAtom(0), ist, silent);
+			body = walk_tree(body->getOutgoingAtom(0), ist);
 			body = createLink(bt, body);
 			ist._needless_quotation = true;
 		}
 		else
 		{
-			body = walk_tree(body, ist, silent);
+			body = walk_tree(body, ist);
 		}
 
 		// Reconstruct Lambda, if it has changed
@@ -431,7 +428,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_sequence(oset_results, expr->getOutgoingSet(), ist, silent);
+		walk_sequence(oset_results, expr->getOutgoingSet(), ist);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->get_type();
@@ -460,8 +457,8 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
-		Handle eolh = reduce_exout(expr, ist, silent);
-		return HandleCast(eolh->execute(_as, silent));
+		Handle eolh = reduce_exout(expr, ist);
+		return HandleCast(eolh->execute(_as, ist._silent));
 	}
 
 	// Fire any other function links, not handled above.
@@ -475,7 +472,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (nameserver().isA(tbr, VALUE_OF_LINK) or
 		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
 
-		return HandleCast(flh->execute(_as, silent));
+		return HandleCast(flh->execute(_as, ist._silent));
 	}
 
 	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
@@ -485,7 +482,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
 		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, silent));
+		return HandleCast(expr->execute(_as, ist._silent));
 	}
 
 	// If there is a JoinLink
@@ -495,7 +492,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// XXX I don't get it... don't we need to perform var
 		// substitution here? Is this just not tested?
 		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, silent));
+		return HandleCast(expr->execute(_as, ist._silent));
 	}
 
 	// Do not reduce PredicateFormulaLink. That is because it contains
@@ -524,8 +521,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// set where the variables have been substituted by their values.
 mere_recursive_call:
 	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(),
-	                             ist, silent);
+	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), ist);
 	if (changed)
 	{
 		Handle subl(createLink(std::move(oset_results), t));
@@ -570,6 +566,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	Instate ist(varmap);
+	ist._silent = silent;
 
 	// Since we do not actually instantiate anything, we should not
 	// consume quotations (as it might change the semantics.)
@@ -597,7 +594,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		HandleSeq oset_results;
 		for (const Handle& h: expr->getOutgoingSet())
 		{
-			Handle hg(walk_tree(h, ist, silent));
+			Handle hg(walk_tree(h, ist));
 
 			// Globs will return a matching list. Arithmetic
 			// links will choke on lists, so expand them.
@@ -625,7 +622,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			return expr->execute(_as, silent);
 
 		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, ist, silent));
+		Handle grounded(walk_tree(expr, ist));
 		if (_as) grounded = _as->add_atom(grounded);
 		return grounded->execute(_as, silent);
 	}
@@ -635,7 +632,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
-		Handle eolh = reduce_exout(expr, ist, silent);
+		Handle eolh = reduce_exout(expr, ist);
 		if (not eolh->is_executable()) return eolh;
 		eolh = _as->add_atom(eolh);
 		return eolh->execute(_as, silent);
@@ -658,7 +655,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	}
 
 	// Instantiate.
-	Handle grounded(walk_tree(expr, ist, silent));
+	Handle grounded(walk_tree(expr, ist));
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding

@@ -87,6 +87,9 @@ private:
 
 		/** Avoid infinite recursion. */
 		bool _halt;
+
+		/** Non-printing throws */
+		bool _silent;
 	};
 
 	/**
@@ -108,16 +111,13 @@ private:
 	 * (actually, beta reduction).
 	 */
 	Handle walk_tree(const Handle& tree,
-	                 Instate&,
-	                 bool silent=false);
+	                 Instate&);
 	bool walk_sequence(HandleSeq&, const HandleSeq&,
-	                   Instate&,
-	                   bool silent=false);
+	                   Instate&);
 
 	/// Substitute, but do not execute ExecutionOutputLinks
 	Handle reduce_exout(const Handle& exout,
-	                    Instate&,
-	                    bool silent=false);
+	                    Instate&);
 
 	/**
 	 * Return true iff the following atom type may not match to
