@@ -111,7 +111,9 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 /// it might do.  It would be great if the authors of ExOutLinks
 /// did the lazy execution themselves... but this is too much to
 /// ask for. So we always eager-evaluate those args.
-Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
+Handle Instantiator::reduce_exout(const Handle& expr,
+                                  const GroundingMap& varmap,
+                                  bool silent)
 {
 	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 
@@ -122,7 +124,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	Handle sn(eolp->get_schema());
 	Handle args(eolp->get_args());
 
-	sn = beta_reduce(sn, *_vmap);
+	sn = beta_reduce(sn, varmap);
 
 	// If its a DSN, obtain the correct body for it.
 	if (DEFINED_SCHEMA_NODE == sn->get_type())
@@ -140,7 +142,7 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 		Variables vars(flp->get_variables());
 
 		// Perform substitution on the args, only.
-		args = beta_reduce(args, *_vmap);
+		args = beta_reduce(args, varmap);
 
 		// unpack list link
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
@@ -175,10 +177,10 @@ Handle Instantiator::reduce_exout(const Handle& expr, bool silent)
 	}
 
 	// Perform substitution on the args, only.
-	if (not done) args = beta_reduce(args, *_vmap);
+	if (not done) args = beta_reduce(args, varmap);
 #else
 	// Perform substitution on the args, only.
-	args = beta_reduce(args, *_vmap);
+	args = beta_reduce(args, varmap);
 #endif
 
 	Type t = expr->get_type();
@@ -458,7 +460,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// ExecutionOutputLinks
 	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 	{
-		Handle eolh = reduce_exout(expr, silent);
+		Handle eolh = reduce_exout(expr, *_vmap, silent);
 		return HandleCast(eolh->execute(_as, silent));
 	}
 
@@ -629,7 +631,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
-		Handle eolh = reduce_exout(expr, silent);
+		Handle eolh = reduce_exout(expr, *_vmap, silent);
 		if (not eolh->is_executable()) return eolh;
 		eolh = _as->add_atom(eolh);
 		return eolh->execute(_as, silent);

@@ -98,7 +98,9 @@ private:
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
 	/// Substitute, but do not execute ExecutionOutputLinks
-	Handle reduce_exout(const Handle& exout, bool silent=false);
+	Handle reduce_exout(const Handle& exout,
+	                    const GroundingMap&,
+	                    bool silent=false);
 
 	/**
 	 * Return true iff the following atom type may not match to
