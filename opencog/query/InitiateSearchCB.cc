@@ -23,7 +23,7 @@
 
 // #include <algorithm>
 // #include <execution>
-// #include <opencog/util/oc_omp.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -1041,8 +1041,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 	//
 	// The if-defs further below attempt this parallelization.
 	// At this time, they do not yet pass unit tests.
-#define SEQUENTIAL_LOOP 1
-#ifdef SEQUENTIAL_LOOP
+#ifndef USE_THREADED_PATTERN_ENGINE
 	_recursing = true;
 #endif
 
@@ -1109,7 +1108,9 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 
 #endif
 
-// #define OMP_PM_PARALLEL 1
+#ifdef USE_THREADED_PATTERN_ENGINE
+	#define OMP_PM_PARALLEL 1
+#endif
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
 	_recursing = true;

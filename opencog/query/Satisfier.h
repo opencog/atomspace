@@ -56,6 +56,7 @@ class Satisfier :
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 
+		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		Handle _ground;
 		TruthValuePtr _result;
@@ -98,6 +99,7 @@ class SatisfyingSet :
 {
 	protected:
 		AtomSpace* _as;
+		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		HandleSet _satisfying_set;
 		QueueValuePtr _result_queue;

@@ -46,6 +46,7 @@ Implicator::Implicator(AtomSpace* as)
 bool Implicator::grounding(const GroundingMap &var_soln,
                            const GroundingMap &term_soln)
 {
+	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
 	// Catch and ignore SilentExceptions. This arises when

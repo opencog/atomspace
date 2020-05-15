@@ -123,11 +123,13 @@ class PMCGroundings : public PatternMatchCallback
 		bool grounding(const GroundingMap &var_soln,
 		               const GroundingMap &term_soln)
 		{
+			LOCK_PE_MUTEX;
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
+		DECLARE_PE_MUTEX;
 		GroundingMapSeq _term_groundings;
 		GroundingMapSeq _var_groundings;
 };

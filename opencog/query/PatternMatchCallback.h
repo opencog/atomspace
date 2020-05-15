@@ -369,6 +369,15 @@ class PatternMatchCallback
 		                         const Pattern& pat) = 0;
 };
 
+#define USE_THREADED_PATTERN_ENGINE
+#ifdef USE_THREADED_PATTERN_ENGINE
+	#define DECLARE_PE_MUTEX std::mutex _mtx;
+	#define LOCK_PE_MUTEX std::lock_guard<std::mutex> lck(_mtx);
+#else
+	#define DECLARE_PE_MUTEX
+	#define LOCK_PE_MUTEX
+#endif // USE_THREADED_PATTERN_ENGINE
+
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_MATCH_CALLBACK_H
