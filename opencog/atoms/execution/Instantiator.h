@@ -135,16 +135,6 @@ private:
 public:
 	Instantiator(AtomSpace* as);
 
-	void ready(AtomSpace* as)
-	{
-		_as = as;
-	}
-
-	void clear()
-	{
-		_as = nullptr;
-	}
-
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,
 	                     bool silent=false);
