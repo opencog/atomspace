@@ -89,10 +89,7 @@ static std::string get_next_token(const std::string& s, uint& l, uint& r)
         uint l1 = l;
         for(; l1 < r && (s[l1] != '"' or ((0 < l1) and (s[l1 - 1] == '\\'))); l1++)
         {
-            // Unescape esaped quotes.
-            // XXX is there anything else we want to unescape?
-            if (s[l1] != '\\' or s[l1+1] != '"')
-                token.push_back(s[l1]);
+            token.push_back(s[l1]);
         }
         r = l1-1;
     } else {  // Node type or something
