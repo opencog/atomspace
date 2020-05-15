@@ -2,6 +2,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog persist))
+(use-modules (opencog persist-file))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

@@ -11,7 +11,7 @@
 
 ; This avoids complaints, when the docs are set, below.
 (export fetch-atom fetch-incoming-set fetch-incoming-by-type
-store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
+store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 
 ;; -----------------------------------------------------
 ;;
@@ -19,6 +19,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! fetch-atom 'documentation
 "
  fetch-atom ATOM
+
     Fetch all of the values on the indicated ATOM from SQL/persistent
     storage. This updates (clobbers) all of the values in the atomspace,
     and replaces them with the ones fetched from the database.
@@ -27,6 +28,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! fetch-incoming-set 'documentation
 "
  fetch-incoming-set ATOM
+
     Fetch the incoming set of the ATOM from SQL storage. The fetch is
     NOT recursive.  See `load-referers` for a recursive fetch.
 
@@ -36,6 +38,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! fetch-incoming-by-type 'documentation
 "
  fetch-incoming-by-type ATOM TYPE
+
     Fetch those links of the incoming set of ATOM that are of type TYPE.
     This is a more limited fetch than the one done by `fetch-incoming-set`
     and can be useful when the incoming set is large.
@@ -44,6 +47,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! store-atom 'documentation
 "
  store-atom ATOM
+
     Store indicated ATOM, and all of its associated keys and values, to
     SQL/persistent storage. This updates (clobbers) the values
     previously stored in the database, replacing them by the values in
@@ -53,6 +57,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! load-atoms-of-type 'documentation
 "
  load-atoms-of-type TYPE
+
     Fetch atoms of the given TYPE from SQL/persistent storage. This
     fetches the atoms, and all the associated values attached to them.
 ")
@@ -60,6 +65,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! barrier 'documentation
 "
  barrier
+
     Block (do not return to the caller) until the SQL Atom write queues
     are empty. Just because the atomspace write queues are empty, it
     does not mean that the data was actually written to disk. It merely
@@ -70,6 +76,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! load-atomspace 'documentation
 "
  load-atomspace - load all atoms in the database.
+
     This will cause ALL of the atoms in the open database to be loaded
     into the atomspace. This can be a very time-consuming operation.
     In normal operation, it is rarely necessary to load all atoms;
@@ -79,17 +86,13 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 (set-procedure-property! store-atomspace 'documentation
 "
  store-atomspace - Store all atoms in the atomspace to the database.
+
     This will dump the ENTIRE contents of the atomspace to the databse.
     Depending on the size of the database, this can potentially take a
     lot of time.  During normal operation, a bulk-save is rarely
     required, as individual atoms can always be stored, one at a time.
 ")
 
-(set-procedure-property! load-file 'documentation
-"
- load-file PATH
- 	load atomese from a file
-")
 ;
 ; --------------------------------------------------------------------
 (define-public (store-referers ATOM)
