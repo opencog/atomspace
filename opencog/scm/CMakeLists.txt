@@ -26,6 +26,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
 	opencog/randgen.scm
 	opencog/persist.scm
+	opencog/persist-file.scm
 	opencog/query.scm
 	opencog/test-runner.scm
 	opencog/type-utils.scm
