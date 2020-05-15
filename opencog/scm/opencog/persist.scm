@@ -11,7 +11,7 @@
 
 ; This avoids complaints, when the docs are set, below.
 (export fetch-atom fetch-incoming-set fetch-incoming-by-type
-store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
+store-atom load-atoms-of-type barrier load-atomspace store-atomspace load-file)
 
 ;; -----------------------------------------------------
 ;;
@@ -85,6 +85,11 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
     required, as individual atoms can always be stored, one at a time.
 ")
 
+(set-procedure-property! load-file 'documentation
+"
+ load-file PATH
+ 	load atomese from a file
+")
 ;
 ; --------------------------------------------------------------------
 (define-public (store-referers ATOM)
