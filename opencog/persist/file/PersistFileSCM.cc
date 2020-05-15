@@ -59,7 +59,7 @@ void opencog_persist_file_init(void);
 using namespace opencog;
 
 PersistFileSCM::PersistFileSCM(void)
-	: ModuleWrap("opencog persist file")
+	: ModuleWrap("opencog persist-file")
 {
 	static bool is_init = false;
 	if (is_init) return;
@@ -75,7 +75,7 @@ PersistFileSCM::PersistFileSCM(void)
 void PersistFileSCM::init(void)
 {
 	define_scheme_primitive("load-file",
-	             &PersistFileSCM::load_file, this, "persist file");
+	             &PersistFileSCM::load_file, this, "persist-file");
 }
 
 // =====================================================================
