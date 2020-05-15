@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// #include <algorithm>
-// #include <execution>
-#include <opencog/util/oc_omp.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -36,6 +32,12 @@
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
 #include "Substitutor.h"
+
+#ifdef USE_THREADED_PATTERN_ENGINE
+	// #include <algorithm>
+	// #include <execution>
+	#include <opencog/util/oc_omp.h>
+#endif // USE_THREADED_PATTERN_ENGINE
 
 using namespace opencog;
 
