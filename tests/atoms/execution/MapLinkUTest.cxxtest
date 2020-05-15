@@ -64,7 +64,7 @@ public:
     void test_glob(void);
     void test_implication_nodecl(void);
     void test_local_quote_map(void);
-    void test_quote_arg_map(void);
+    void xtest_quote_arg_map(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -321,7 +321,7 @@ void MapLinkUTest::test_local_quote_map(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void MapLinkUTest::test_quote_arg_map(void)
+void MapLinkUTest::xtest_quote_arg_map(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
