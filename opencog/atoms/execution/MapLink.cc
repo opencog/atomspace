@@ -378,7 +378,12 @@ ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 	}
 
 	// Its a singleton. Just remap that.
-	return rewrite_one(valh, scratch);
+	Handle mone = rewrite_one(valh, scratch);
+	if (mone) return mone;
+
+	// Avoid returning null handle.  This is broken.
+	// I don't link MapLink much any more.
+	return createLink(SET_LINK);
 }
 
 DEFINE_LINK_FACTORY(MapLink, MAP_LINK)
