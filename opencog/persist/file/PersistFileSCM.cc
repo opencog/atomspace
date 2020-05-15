@@ -58,7 +58,7 @@ void opencog_persist_file_init(void);
 
 using namespace opencog;
 
-PersistFileSCM::PersistSCM(void)
+PersistFileSCM::PersistFileSCM(void)
 	: ModuleWrap("opencog persist file")
 {
 	static bool is_init = false;
