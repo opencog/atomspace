@@ -174,48 +174,53 @@ void opencog::load_file(std::string fname, AtomSpace& as)
     if (not f.is_open())
        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
-    int expr_cnt = 0;
-    int line_cnt = 0;
-    while(!f.eof()) {
-        std::string line, expr;
-        uint count = 0, l = 0, shift = 0;
-        int r = -1;
-        bool par = false;
-        char prev = ' ';
+    uint expr_cnt = 0;
+    uint line_cnt = 0;
+    std::string expr;
+    while (!f.eof()) {
+        std::string line;
+        uint l = 0;
+        uint r = 0;
         do {
             std::getline(f, line);
             line_cnt++;
-            line += " ";
+            uint paren_count = 0;
+            l = 0;
+            r = 0;
+            bool par = false;
+            char prev = ' ';
             expr += line;
-            for(uint i = 0; i < line.size(); i++) {
-                if(line[i] == '"') {
-                    if (prev != '\\'){
+            for (uint i = 0; i < expr.size(); i++) {
+                if (expr[i] == '"') {
+                    if (prev != '\\') {
                         par = !par;
                     }
                 }
-                if(par) {
-                    prev = line[i];
+                if (par) {
+                    prev = expr[i];
                     continue;
                 }
                 assert(not par);
-                if(line[i] == '(') {
-                    if(count == 0)
-                        l = shift + i + 1;
-                    count++;
-                } else if(line[i] == ')') {
-                    count--;
-                    assert(0 <= count);
-                    if(count == 0)
-                        r = shift + i - 1;
+                if (expr[i] == '(') {
+                    if (paren_count == 0)
+                        l = i + 1;
+                    paren_count++;
+                } else if (expr[i] == ')') {
+                    paren_count--;
+                    assert(0 <= paren_count);
+                    if (paren_count == 0) {
+                        r = i;
+                        break;
+                    }
                 }
             }
-            shift += line.size();
-        } while(r == -1 && !f.eof());
+        } while (r == 0 and !f.eof());
 
-        if(r != -1) {
+        if (r != 0) {
             expr_cnt++;
-            assert(0 <= r);
-            as.add_atom(recursive_parse(expr.substr(l, r - l + 1), line_cnt));
+            assert(0 < r);
+            as.add_atom(recursive_parse(expr.substr(l, r - l), line_cnt));
+            expr = expr.substr(r+1);
         }
     }
     f.close();
