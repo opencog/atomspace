@@ -166,6 +166,17 @@ Type NameServer::declType(const Type parent, const std::string& name)
     setParentRecursively(parent, type, maxd);
     if (_maxDepth < maxd) _maxDepth = maxd;
 
+    // Short-hand names ... without the trailing "Node", "Link" at the
+    // end.
+    size_t len = name.size();
+    if (4 < len and
+         ((std::string::npos != name.find("Node", len-4)) or
+          (std::string::npos != name.find("Link", len-4))))
+    {
+        std::string short_name = name.substr(0, len-4);
+        name2CodeMap[short_name] = type;
+    }
+
     // unlock mutex before sending signal which could call
     l.unlock();
 
