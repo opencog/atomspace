@@ -101,26 +101,26 @@ static std::string get_next_token(const std::string& s, uint& l, uint& r)
     return token;
 }
 
+static NameServer& namer = nameserver();
+
 // Parse the string `s`, returning a Handle that corresponds to that
 // string. The line_cnt is the current location in the file, for
 // files that have bugs in them.
 static Handle recursive_parse(const std::string& s, int line_cnt)
 {
-    NameServer & nameserver = opencog::nameserver();
-
     uint l = 0, r = s.length() - 1;
 
     uint l1 = l, r1 = r;
     const std::string stype = get_next_token(s, l1, r1);
 
     l = r1 + 1;
-    opencog::Type atype = nameserver.getType(stype);
+    opencog::Type atype = namer.getType(stype);
     if (atype == opencog::NOTYPE) {
        throw std::runtime_error(
            "Syntax error at line " + std::to_string(line_cnt) +
            " Unknown link type: " + stype);
     }
-    if (nameserver.isLink(atype)){
+    if (namer.isLink(atype)){
         HandleSeq outgoing;
         do {
             l1 = l;
