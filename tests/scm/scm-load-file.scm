@@ -37,6 +37,13 @@
 (test-assert "load data from file" contain_all)
 
 ; Make sure corect number of atoms loaded:
-(test-assert "correct number of atoms" (equal? 10 (count-all)))
+(test-assert "correct number of atoms" (equal? 19 (count-all)))
+
+(test-assert "Concept" (equal? 7 (cog-count-atoms 'Concept)))
+(test-assert "Predicate" (equal? 2 (cog-count-atoms 'Predicate)))
+(test-assert "List" (equal? 4 (cog-count-atoms 'List)))
+(test-assert "Evaluation" (equal? 2 (cog-count-atoms 'Evaluation)))
+(test-assert "Member" (equal? 2 (cog-count-atoms 'Member)))
+(test-assert "Lexical" (equal? 2 (cog-count-atoms 'Lexical)))
 
 (test-end tname)

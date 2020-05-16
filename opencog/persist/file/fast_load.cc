@@ -56,14 +56,14 @@ static void get_next_expr(const std::string& s, uint& l, uint& r)
     }
     l = l1 + 1;
     int count = 1;
-    bool par = false;
+    bool quoted = false;
     do {
         l1++;
         if(s[l1] == '"')
             if (0 < l1 and s[l1 - 1] != '\\'){
-                par = !par;
+                quoted = !quoted;
             }
-        if(par) continue;
+        if(quoted) continue;
         if(s[l1] == '(') count++;
         if(s[l1] == ')') count--;
     } while(l1 <= r && count > 0);
@@ -101,26 +101,26 @@ static std::string get_next_token(const std::string& s, uint& l, uint& r)
     return token;
 }
 
+static NameServer& namer = nameserver();
+
 // Parse the string `s`, returning a Handle that corresponds to that
 // string. The line_cnt is the current location in the file, for
 // files that have bugs in them.
 static Handle recursive_parse(const std::string& s, int line_cnt)
 {
-    NameServer & nameserver = opencog::nameserver();
-
     uint l = 0, r = s.length() - 1;
 
     uint l1 = l, r1 = r;
     const std::string stype = get_next_token(s, l1, r1);
 
     l = r1 + 1;
-    opencog::Type atype = nameserver.getType(stype);
+    opencog::Type atype = namer.getType(stype);
     if (atype == opencog::NOTYPE) {
        throw std::runtime_error(
            "Syntax error at line " + std::to_string(line_cnt) +
            " Unknown link type: " + stype);
     }
-    if (nameserver.isLink(atype)){
+    if (namer.isLink(atype)){
         HandleSeq outgoing;
         do {
             l1 = l;
@@ -174,48 +174,61 @@ void opencog::load_file(std::string fname, AtomSpace& as)
     if (not f.is_open())
        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
-    int expr_cnt = 0;
-    int line_cnt = 0;
-    while(!f.eof()) {
-        std::string line, expr;
-        uint count = 0, l = 0, shift = 0;
-        int r = -1;
-        bool par = false;
-        char prev = ' ';
+    uint expr_cnt = 0;
+    uint line_cnt = 0;
+    std::string expr;
+    while (!f.eof()) {
+        std::string line;
+        uint l = 0;
+        uint r = 0;
         do {
             std::getline(f, line);
             line_cnt++;
-            line += " ";
+            uint paren_count = 0;
+            l = 0;
+            r = 0;
+            bool quoted = false;
+            char prev = ' ';
             expr += line;
-            for(uint i = 0; i < line.size(); i++) {
-                if(line[i] == '"') {
-                    if (prev != '\\'){
-                        par = !par;
+            for (uint i = 0; i < expr.size(); i++) {
+                if (expr[i] == '"') {
+                    if (prev != '\\') {
+                        quoted = !quoted;
                     }
                 }
-                if(par) {
-                    prev = line[i];
+                if (quoted) {
+                    prev = expr[i];
                     continue;
                 }
-                assert(not par);
-                if(line[i] == '(') {
-                    if(count == 0)
-                        l = shift + i + 1;
-                    count++;
-                } else if(line[i] == ')') {
-                    count--;
-                    assert(0 <= count);
-                    if(count == 0)
-                        r = shift + i - 1;
+                assert(not quoted);
+
+                // Ignore comments
+                if (expr[i] == ';') {
+                    expr = expr.substr(0, i);
+                    break;
+                }
+
+                // Find matching parenthesis
+                if (expr[i] == '(') {
+                    if (paren_count == 0)
+                        l = i + 1;
+                    paren_count++;
+                } else if (expr[i] == ')') {
+                    paren_count--;
+                    assert(0 <= paren_count);
+                    if (paren_count == 0) {
+                        r = i;
+                        break;
+                    }
                 }
             }
-            shift += line.size();
-        } while(r == -1 && !f.eof());
+        } while (r == 0 and !f.eof());
 
-        if(r != -1) {
+        if (r != 0) {
             expr_cnt++;
-            assert(0 <= r);
-            as.add_atom(recursive_parse(expr.substr(l, r - l + 1), line_cnt));
+            assert(0 < r);
+            as.add_atom(recursive_parse(expr.substr(l, r - l), line_cnt));
+            expr = expr.substr(r+1);
         }
     }
     f.close();
