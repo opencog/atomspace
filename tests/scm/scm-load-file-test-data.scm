@@ -1,3 +1,6 @@
+
+(Evaluation (Predicate "P") (List (Concept "A") (Concept "B")))
+
 (ListLink(ConceptNode "тестирование кода приводит к успеху")
 
 

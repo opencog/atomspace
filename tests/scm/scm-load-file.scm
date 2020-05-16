@@ -28,7 +28,10 @@
 (define contain_all 
   (and (contains? "тестирование кода приводит к успеху" names)
        (contains? "Codeprüfung führt zum Erfolg" names)
-       (contains? "'''''''''1;" names)))
+       (contains? "'''''''''1;" names)
+       (contains? "A" names)
+       (contains? "B" names)
+  ))
 
 ; would fail on slashes at the end of string: (ConceptNode "a\\")
 (test-assert "load data from file" contain_all)

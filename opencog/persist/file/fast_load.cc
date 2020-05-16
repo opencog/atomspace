@@ -146,7 +146,7 @@ static Handle recursive_parse(const std::string& s, int line_cnt)
         r1 = r;
         std::string token = get_next_token(s, l1, r1);
 
-        if(l1 >= r1) {
+        if(l1 > r1) {
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
                 " Bad expr: " + s.substr(l, r-l+1));
