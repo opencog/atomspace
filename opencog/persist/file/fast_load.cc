@@ -56,14 +56,14 @@ static void get_next_expr(const std::string& s, uint& l, uint& r)
     }
     l = l1 + 1;
     int count = 1;
-    bool par = false;
+    bool quoted = false;
     do {
         l1++;
         if(s[l1] == '"')
             if (0 < l1 and s[l1 - 1] != '\\'){
-                par = !par;
+                quoted = !quoted;
             }
-        if(par) continue;
+        if(quoted) continue;
         if(s[l1] == '(') count++;
         if(s[l1] == ')') count--;
     } while(l1 <= r && count > 0);
@@ -187,20 +187,20 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             uint paren_count = 0;
             l = 0;
             r = 0;
-            bool par = false;
+            bool quoted = false;
             char prev = ' ';
             expr += line;
             for (uint i = 0; i < expr.size(); i++) {
                 if (expr[i] == '"') {
                     if (prev != '\\') {
-                        par = !par;
+                        quoted = !quoted;
                     }
                 }
-                if (par) {
+                if (quoted) {
                     prev = expr[i];
                     continue;
                 }
-                assert(not par);
+                assert(not quoted);
 
                 // Ignore comments
                 if (expr[i] == ';') {
