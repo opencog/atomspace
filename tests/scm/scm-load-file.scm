@@ -36,4 +36,7 @@
 ; would fail on slashes at the end of string: (ConceptNode "a\\")
 (test-assert "load data from file" contain_all)
 
+; Make sure corect number of atoms loaded:
+(test-assert "correct number of atoms" (equal? 10 (count-all)))
+
 (test-end tname)
