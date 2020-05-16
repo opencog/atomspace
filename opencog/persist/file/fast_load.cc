@@ -102,8 +102,9 @@ static std::string get_next_token(const std::string& s, uint& l, uint& r)
 }
 
 // Parse the string `s`, returning a Handle that corresponds to that
-// string.
-static Handle recursive_parse(const std::string& s)
+// string. The line_cnt is the current location in the file, for
+// files that have bugs in them.
+static Handle recursive_parse(const std::string& s, int line_cnt)
 {
     NameServer & nameserver = opencog::nameserver();
 
@@ -115,7 +116,9 @@ static Handle recursive_parse(const std::string& s)
     l = r1 + 1;
     opencog::Type atype = nameserver.getType(stype);
     if (atype == opencog::NOTYPE) {
-       throw std::runtime_error("Unknown link type " + stype);
+       throw std::runtime_error(
+           "Syntax error at line " + std::to_string(line_cnt) +
+           " Unknown link type: " + stype);
     }
     if (nameserver.isLink(atype)){
         HandleSeq outgoing;
@@ -130,7 +133,7 @@ static Handle recursive_parse(const std::string& s)
                 // FIXME -- support not only stv (SimpleTruthValues)
                 // but also other Values.
                 if(expr.find("stv") == std::string::npos) {
-                    outgoing.push_back(recursive_parse(expr));
+                    outgoing.push_back(recursive_parse(expr, line_cnt));
                 } else {
                     //std::cout << "Need to parse " + expr << std::endl;
                 }
@@ -144,18 +147,24 @@ static Handle recursive_parse(const std::string& s)
         std::string token = get_next_token(s, l1, r1);
 
         if(l1 >= r1) {
-            throw std::runtime_error("Syntax error in " + s.substr(l, r-l+1));
+            throw std::runtime_error(
+                "Syntax error at line " + std::to_string(line_cnt) +
+                " Bad expr: " + s.substr(l, r-l+1));
         }
         l1 = r1 + 1;
         r1 = r;
         get_next_token(s, l1, r1);
         if(l1 < r1) {
             token = s.substr(l, r1 - l1 + 1);
-            throw std::runtime_error("Unexpexted token " + token + " in " + s);
+            throw std::runtime_error(
+                "Unexpexted token at line " + std::to_string(line_cnt) +
+                " Token: " + token + " in expr: " + s);
         }
         return createNode(atype, std::move(token));
     }
-    throw std::runtime_error("Syntax error in type " + stype + " in " + s);
+    throw std::runtime_error(
+       "Syntax error at line " + std::to_string(line_cnt) +
+       " Strange type: " + stype + " in " + s);
 }
 
 /// load_file -- load the given file into the given AtomSpace.
@@ -165,7 +174,8 @@ void opencog::load_file(std::string fname, AtomSpace& as)
     if (not f.is_open())
        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
-    int cnt = 0;
+    int expr_cnt = 0;
+    int line_cnt = 0;
     while(!f.eof()) {
         std::string line, expr;
         uint count = 0, l = 0, shift = 0;
@@ -174,6 +184,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
         char prev = ' ';
         do {
             std::getline(f, line);
+            line_cnt++;
             line += " ";
             expr += line;
             for(uint i = 0; i < line.size(); i++) {
@@ -200,10 +211,11 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             }
             shift += line.size();
         } while(r == -1 && !f.eof());
-        cnt++;
+
         if(r != -1) {
+            expr_cnt++;
             assert(0 <= r);
-            as.add_atom(recursive_parse(expr.substr(l, r - l + 1)));
+            as.add_atom(recursive_parse(expr.substr(l, r - l + 1), line_cnt));
         }
     }
     f.close();
