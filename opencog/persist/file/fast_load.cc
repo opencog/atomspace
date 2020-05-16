@@ -201,6 +201,14 @@ void opencog::load_file(std::string fname, AtomSpace& as)
                     continue;
                 }
                 assert(not par);
+
+                // Ignore comments
+                if (expr[i] == ';') {
+                    expr = expr.substr(0, i);
+                    break;
+                }
+
+                // Find matching parenthesis
                 if (expr[i] == '(') {
                     if (paren_count == 0)
                         l = i + 1;
