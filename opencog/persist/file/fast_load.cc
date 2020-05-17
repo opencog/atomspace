@@ -43,7 +43,8 @@ using namespace opencog;
 // and `r` points at the matching close-paren.  Returns parenthesis
 // count. If zero, the parens match. If non-zero, then `r` points
 // at the first non-valid character in the string (e.g. comment char).
-static int get_next_expr(const std::string& s, size_t& l, size_t& r)
+static int get_next_expr(const std::string& s, size_t& l, size_t& r,
+                         size_t line_cnt)
 {
     // Advance past whitespace.
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
@@ -53,7 +54,9 @@ static int get_next_expr(const std::string& s, size_t& l, size_t& r)
     if (s[l] == ';') { r = l; return 1; }
 
     if (s[l] != '(')
-        throw std::runtime_error("Unexpected text: >>" + s + "<<");
+        throw std::runtime_error(
+            "Syntax error at line " + std::to_string(line_cnt) +
+            " Unexpected text: >>" + s + "<<");
 
     size_t p = l;
     int count = 1;
@@ -135,7 +138,7 @@ static Handle recursive_parse(const std::string& s,
         do {
             l1 = l;
             r1 = r;
-            get_next_expr(s, l1, r1);
+            get_next_expr(s, l1, r1, line_cnt);
 
             if (l1 == r1)
                 throw std::runtime_error(
@@ -200,7 +203,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             size_t r = expr.length();
 
             // Zippy the Pinhead says: Are we having fun yet?
-            int pcount = get_next_expr(expr, l, r);
+            int pcount = get_next_expr(expr, l, r, line_cnt);
 
             // Trim away comments at end of line
             if (0 < pcount)
