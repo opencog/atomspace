@@ -56,7 +56,7 @@ static int get_next_expr(const std::string& s, size_t& l, size_t& r,
     if (s[l] != '(')
         throw std::runtime_error(
             "Syntax error at line " + std::to_string(line_cnt) +
-            " Unexpected text: >>" + s + "<<");
+            " Unexpected text: >>" + s.substr(l) + "<<");
 
     size_t p = l;
     int count = 1;
@@ -170,13 +170,13 @@ static Handle recursive_parse(const std::string& s,
         get_node_name(s, l1, r1, line_cnt);
 
         // There might be an stv in the content. Handle it.. or not
-        size_t l2 = r1;
+        size_t l2 = r1+1;
         size_t r2 = r;
         get_next_expr(s, l2, r2, line_cnt);
         if (l2 < r2)
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Unsupported markup: " + s.substr(l2, r2-l2) +
+                " Unsupported markup: " + s.substr(l2, r2-l2+1) +
                 " in expr: " + s);
 
         const std::string name = s.substr(l1, r1-l1);
