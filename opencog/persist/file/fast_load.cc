@@ -78,39 +78,49 @@ static int get_next_expr(const std::string& s, size_t& l, size_t& r,
     return count;
 }
 
-// Tokenizer - extracts link or node type or name. Given the string `s`,
-// this updates the `l` and `r` values such that `l` points at the first
+// Extracts link or node type. Given the string `s`, this updates
+// the `l` and `r` values such that `l` points at the first
 // non-whitespace character of the name, and `r` points at the last.
-// The string is considered to start *after* the first quote, and ends
-// just before the last quote. In this case, escaped quotes \" are
-// ignored (are considered to be part of the string).
-static void get_next_token(const std::string& s, size_t& l, size_t& r)
+static void get_typename(const std::string& s, size_t& l, size_t& r,
+                         size_t line_cnt)
 {
     // Advance past whitespace.
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
-    // We are parsing string
-    if (s[l] == '"')
-    {
-        l++;
-        size_t p = l;
-        for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
-        r = p-1;
-        return;
-    }
+    if (s[l] != '(')
+        throw std::runtime_error(
+            "Syntax error at line " + std::to_string(line_cnt) +
+            " Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
 
-    if (s[l] == '(')
-    {
-        // Atom type name. Advance until whitespace.
-        // Faster to use strtok!?
-        l++;
-        size_t p = l;
-        for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
-        r = p - 1;
-        return;
-    }
-    throw std::runtime_error(
-        "Wasn't a token: >>" + s.substr(l, r-l+1) + "<< in " + s);
+    // Advance until whitespace. Might be fast to use strtok?
+    l++;
+    size_t p = l;
+    for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
+    r = p;
+}
+
+// Extracts Node name-string. Given the string `s`, this updates
+// the `l` and `r` values such that `l` points at the first
+// non-whitespace character of the name, and `r` points at the last.
+// The string is considered to start *after* the first quote, and ends
+// just before the last quote. In this case, escaped quotes \" are
+// ignored (are considered to be part of the string).
+static void get_node_name(const std::string& s, size_t& l, size_t& r,
+                          size_t line_cnt)
+{
+    // Advance past whitespace.
+    while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+
+    // Tell caller to throw, if the syntax is bad.
+    if (s[l] != '"')
+        throw std::runtime_error(
+            "Syntax error at line " + std::to_string(line_cnt) +
+            " Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
+
+    l++;
+    size_t p = l;
+    for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+    r = p;
 }
 
 static NameServer& namer = nameserver();
@@ -121,8 +131,8 @@ static Handle recursive_parse(const std::string& s,
                               size_t l, size_t r, size_t line_cnt)
 {
     size_t l1 = l, r1 = r;
-    get_next_token(s, l1, r1);
-    const std::string stype = s.substr(l1, r1-l1+1);
+    get_typename(s, l1, r1, line_cnt);
+    const std::string stype = s.substr(l1, r1-l1);
 
     opencog::Type atype = namer.getType(stype);
     if (atype == opencog::NOTYPE)
@@ -130,7 +140,7 @@ static Handle recursive_parse(const std::string& s,
             "Syntax error at line " + std::to_string(line_cnt) +
             " Unknown Atom type: " + stype);
 
-    l = r1 + 1;
+    l = r1;
     if (namer.isLink(atype))
     {
         r--; // get rid of trailing paren
@@ -157,22 +167,19 @@ static Handle recursive_parse(const std::string& s,
     {
         l1 = l;
         r1 = r;
-        get_next_token(s, l1, r1);
-        if (l1 > r1)
-            throw std::runtime_error(
-                "Syntax error at line " + std::to_string(line_cnt) +
-                " Can't find Atom name");
+        get_node_name(s, l1, r1, line_cnt);
 
-        size_t l2 = r1 + 1;
+        // There might be an stv in the content. Handle it.. or not
+        size_t l2 = r1;
         size_t r2 = r;
-        get_next_token(s, l2, r2);
+        get_next_expr(s, l2, r2, line_cnt);
         if (l2 < r2)
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Unexpected content: " + s.substr(l2, r2-l2) +
+                " Unsupported markup: " + s.substr(l2, r2-l2) +
                 " in expr: " + s);
 
-        const std::string name = s.substr(l1, r1-l1+1);
+        const std::string name = s.substr(l1, r1-l1);
         return createNode(atype, std::move(name));
     }
     throw std::runtime_error(
