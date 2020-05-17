@@ -41,36 +41,33 @@ using namespace opencog;
 // Extract s-expression. Given a string `s`, update the `l` and `r`
 // values so that `l` points at the next open-parenthsis (left paren)
 // and `r` points at the matching close-paren.
-static void get_next_expr(const std::string& s, uint& l, uint& r)
+static void get_next_expr(const std::string& s, size_t& l, size_t& r)
 {
-    uint l1 = l;
-    while(s[l1] != '(' && l1 < r) {
-        if(s[l1] != ' ' && s[l1] != '\t' && s[l1] != '\n') {
-            throw std::runtime_error("Invalid syntax #1 in " + s.substr(l,r-l+1) + " at |" + s[l1] + "|");
-        }
-        l1++;
-    }
-    if(l1 >= r) {
-        l = l1;
-        return;
-    }
-    l = l1 + 1;
+    // Advance past whitespace
+    while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+    if (l >= r) return;
+    if (s[l] != '(')
+        throw std::runtime_error("Unexpected text");
+
+    size_t p = l;
     int count = 1;
     bool quoted = false;
     do {
-        l1++;
-        if(s[l1] == '"')
-            if (0 < l1 and s[l1 - 1] != '\\'){
+        p++;
+        if (s[p] == '"')
+        {
+            if (0 < p and s[p - 1] != '\\')
                 quoted = !quoted;
-            }
-        if(quoted) continue;
-        if(s[l1] == '(') count++;
-        if(s[l1] == ')') count--;
-    } while(l1 <= r && count > 0);
-    if(count != 0) {
-        throw std::runtime_error("Invalid syntax #2 in " + s);
-    }
-    r = l1 - 1;
+        }
+        else if (quoted) continue;
+        else if (s[p] == '(') count++;
+        else if (s[p] == ')') count--;
+    } while (p < r and count > 0);
+
+    if (count != 0)
+        throw std::runtime_error("Parenthsis mismatch");
+
+    r = p;
 }
 
 // Tokenizer - extracts link or node type or name. Given the string `s`,
@@ -79,92 +76,96 @@ static void get_next_expr(const std::string& s, uint& l, uint& r)
 // The string is considered to start *after* the first quote, and ends
 // just before the last quote. In this case, escaped quotes \" are
 // ignored (are considered to be part of the string).
-static std::string get_next_token(const std::string& s, uint& l, uint& r)
+static void get_next_token(const std::string& s, size_t& l, size_t& r)
 {
-    std::string token;
-    for(; l < r && (s[l] == ' ' || s[l] == '\t' || s[l] == '\n'); l++);
+    // Advance past whitespace.
+    while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
-    if(s[l] == '"') {  // we are parsing string
+    // We are parsing string
+    if (s[l] == '"')
+    {
         l++;
-        uint l1 = l;
-        for(; l1 < r && (s[l1] != '"' or ((0 < l1) and (s[l1 - 1] == '\\'))); l1++)
-        {
-            token.push_back(s[l1]);
-        }
-        r = l1-1;
-    } else {  // Node type or something
-        uint l1 = l;
-        for(; l < r && s[l1] != '(' && s[l1] != ' ' && s[l1] != '\t' && s[l1] != '\n'; l1++)
-            token.push_back(s[l1]);
-        r = l1 - 1;
+        size_t p = l;
+        for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+        r = p-1;
     }
-    return token;
+    else if (s[l] == '(')
+    {
+        // Atom type name. Advance until whitespace.
+        // Faster to use strtok!?
+        l++;
+        size_t p = l;
+        for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
+        r = p - 1;
+    }
+    throw std::runtime_error("Wasn't a token");
 }
 
 static NameServer& namer = nameserver();
 
 // Parse the string `s`, returning a Handle that corresponds to that
-// string. The line_cnt is the current location in the file, for
-// files that have bugs in them.
-static Handle recursive_parse(const std::string& s, int line_cnt)
+// string.
+static Handle recursive_parse(const std::string& s,
+                              size_t l, size_t r, size_t line_cnt)
 {
-    uint l = 0, r = s.length() - 1;
+    size_t l1 = l, r1 = r;
+    get_next_token(s, l1, r1);
+    const std::string stype = s.substr(l1, r1-l1+1);
 
-    uint l1 = l, r1 = r;
-    const std::string stype = get_next_token(s, l1, r1);
+    opencog::Type atype = namer.getType(stype);
+    if (atype == opencog::NOTYPE)
+        throw std::runtime_error(
+            "Syntax error at line " + std::to_string(line_cnt) +
+            " Unknown Atom type: " + stype);
 
     l = r1 + 1;
-    opencog::Type atype = namer.getType(stype);
-    if (atype == opencog::NOTYPE) {
-       throw std::runtime_error(
-           "Syntax error at line " + std::to_string(line_cnt) +
-           " Unknown link type: " + stype);
-    }
-    if (namer.isLink(atype)){
+    if (namer.isLink(atype))
+    {
+        r--; // get rid of trailing paren
         HandleSeq outgoing;
         do {
             l1 = l;
             r1 = r;
             get_next_expr(s, l1, r1);
 
-            if(l1 < r1) {
-                std::string expr = s.substr(l1, r1-l1+1);
+            if (l1 == r1)
+                throw std::runtime_error(
+                    "Syntax error at line " + std::to_string(line_cnt) +
+                    " Expecting an Atom");
 
-                // FIXME -- support not only stv (SimpleTruthValues)
-                // but also other Values.
-                if(expr.find("stv") == std::string::npos) {
-                    outgoing.push_back(recursive_parse(expr, line_cnt));
-                } else {
-                    //std::cout << "Need to parse " + expr << std::endl;
-                }
-            }
-            l = r1 + 2;
-        } while(l < r);
+            outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
+
+            l = r1 + 1;
+        } while (l < r);
+
         return createLink(std::move(outgoing), atype);
-    } else {
+    }
+    else
+    if (namer.isNode(atype))
+    {
         l1 = l;
         r1 = r;
-        std::string token = get_next_token(s, l1, r1);
-
-        if(l1 > r1) {
+        get_next_token(s, l1, r1);
+        if (l1 >= r1)
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Bad expr: " + s.substr(l, r-l+1));
-        }
-        l1 = r1 + 1;
-        r1 = r;
-        get_next_token(s, l1, r1);
-        if(l1 < r1) {
-            token = s.substr(l, r1 - l1 + 1);
+                " Bad Atom name: " + s.substr(l, r-l+1));
+
+        size_t l2 = r1 + 1;
+        size_t r2 = r;
+        get_next_token(s, l2, r2);
+        if (l2 < r2)
             throw std::runtime_error(
-                "Unexpexted token at line " + std::to_string(line_cnt) +
-                " Token: " + token + " in expr: " + s);
-        }
-        return createNode(atype, std::move(token));
+                "Syntax error at line " + std::to_string(line_cnt) +
+                " Unexpected content: " + s.substr(l, r2-l2+1) +
+                " in expr: " + s);
+
+        const std::string name = s.substr(l1, r1-l1+1);
+        return createNode(atype, std::move(name));
     }
     throw std::runtime_error(
-       "Syntax error at line " + std::to_string(line_cnt) +
-       " Strange type: " + stype + " in " + s);
+        "Syntax error at line " + std::to_string(line_cnt) +
+        "Got a Value, not supported: " + s);
 }
 
 /// load_file -- load the given file into the given AtomSpace.
@@ -174,62 +175,33 @@ void opencog::load_file(std::string fname, AtomSpace& as)
     if (not f.is_open())
        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
-    uint expr_cnt = 0;
-    uint line_cnt = 0;
+    size_t expr_cnt = 0;
+    size_t line_cnt = 0;
+
     std::string expr;
-    while (!f.eof()) {
+    while (!f.eof())
+    {
         std::string line;
-        uint l = 0;
-        uint r = 0;
-        do {
-            std::getline(f, line);
-            line_cnt++;
-            uint paren_count = 0;
-            l = 0;
-            r = 0;
-            bool quoted = false;
-            char prev = ' ';
-            expr += line;
-            for (uint i = 0; i < expr.size(); i++) {
-                if (expr[i] == '"') {
-                    if (prev != '\\') {
-                        quoted = !quoted;
-                    }
-                }
-                if (quoted) {
-                    prev = expr[i];
-                    continue;
-                }
-                assert(not quoted);
+        std::getline(f, line);
+        line_cnt++;
+        expr += line;
+        size_t r = 0;
+        while (true)
+        {
+            size_t len = expr.length();
+            size_t l = 0;
+            r = len;
 
-                // Ignore comments
-                if (expr[i] == ';') {
-                    expr = expr.substr(0, i);
-                    break;
-                }
-
-                // Find matching parenthesis
-                if (expr[i] == '(') {
-                    if (paren_count == 0)
-                        l = i + 1;
-                    paren_count++;
-                } else if (expr[i] == ')') {
-                    paren_count--;
-                    assert(0 <= paren_count);
-                    if (paren_count == 0) {
-                        r = i;
-                        break;
-                    }
-                }
-            }
-        } while (r == 0 and !f.eof());
-
-        if (r != 0) {
+            get_next_expr(expr, l, r);
+            if (l == r) break;
             expr_cnt++;
-            assert(0 < r);
-            as.add_atom(recursive_parse(expr.substr(l, r - l), line_cnt));
-            expr = expr.substr(r+1);
+            r++;
+
+            as.add_atom(recursive_parse(expr, l, r, line_cnt));
+            l = r + 1;
+            r = len;
         }
+        expr = expr.substr(r+1);
     }
     f.close();
 }
