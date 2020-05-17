@@ -44,7 +44,7 @@ class UtilitiesTest(TestCase):
             write_sorted_file(new_tmp, new_space)
             self.assertTrue(filecmp.cmp(tmp_file, new_tmp, shallow=False), "files are not equal")
             checklist = """(ListLink(ConceptNode "vfjv\\"jnvfé")
-                (ConceptNode "conceptIR~~gF\\",KV"))
+                (ConceptNode "conceptIR~~gF\\",KV")
                 (ConceptNode "вверху плыли редкие облачка"))"""
             with open(tmp_file, 'wt') as f:
                 f.write(checklist)

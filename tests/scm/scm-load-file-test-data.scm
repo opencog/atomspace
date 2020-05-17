@@ -2,6 +2,8 @@
 ; Test single-letter names; this was buggy.
 (Evaluation (Predicate "P") (List (Concept "A") (Concept "B")))
 
+; (Concept "B" (stv 1 1))
+
 ; Test UTF-8
 (ListLink(ConceptNode "тестирование кода приводит к успеху")
 
