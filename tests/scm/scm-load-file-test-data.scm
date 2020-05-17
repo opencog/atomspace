@@ -27,4 +27,25 @@
 (PredicateNode "has_name");test comment at end of line
 (ListLink
 (ConceptNode "SMP0000055");;;;; here too.
-(ConceptNode "Alanine Metabolism")))
+(ConceptNode "Alanine Metabolism")))		
+
+;gaf-version: 2.1
+  
+;
+
+			
+(MemberLink
+	(LexicalNode "APOC4-APOC2")
+	(ConceptNode "GO:0006629"))
+(EvaluationLink
+	 (PredicateNode "has_name")
+	 (ListLink
+		 (LexicalNode "APOC4-APOC2")
+		 (ConceptNode "Apolipoprotein C-II isoform 1")
+	 )
+)
+                      
+(MemberLink
+	(LexicalNode "APOC4-APOC2")            
+	(ConceptNode "GO:0006869"))			
+

@@ -148,11 +148,7 @@ static Handle recursive_parse(const std::string& s,
             l1 = l;
             r1 = r;
             get_next_expr(s, l1, r1, line_cnt);
-
-            if (l1 == r1)
-                throw std::runtime_error(
-                    "Syntax error at line " + std::to_string(line_cnt) +
-                    " Expecting an Atom");
+            if (l1 == r1) break;
 
             outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
 
