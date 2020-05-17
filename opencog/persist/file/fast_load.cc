@@ -143,7 +143,6 @@ static Handle recursive_parse(const std::string& s,
     l = r1;
     if (namer.isLink(atype))
     {
-        r--; // get rid of trailing paren
         HandleSeq outgoing;
         do {
             l1 = l;
@@ -223,9 +222,8 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             if (l == r) break;
 
             expr_cnt++;
-            r++;
             as.add_atom(recursive_parse(expr, l, r, line_cnt));
-            expr = expr.substr(r);
+            expr = expr.substr(r+1);
         }
     }
     f.close();
