@@ -45,9 +45,13 @@ using namespace opencog;
 // at the first non-valid character in the string (e.g. comment char).
 static int get_next_expr(const std::string& s, size_t& l, size_t& r)
 {
-    // Advance past whitespace
+    // Advance past whitespace.
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
     if (l == r) return 0;
+
+    // Ignore comment lines.
+    if (s[l] == ';') { r = l; return 1; }
+
     if (s[l] != '(')
         throw std::runtime_error("Unexpected text: >>" + s + "<<");
 
@@ -195,28 +199,21 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             size_t l = 0;
             size_t r = expr.length();
 
-            // Advance past whitespace
-            while (l < r and (expr[l] == ' ' or expr[l] == '\t' or
-                              expr[l] == '\n')) l++;
-            if (l == r) break;
-
-            // Ignore comments
-            if (expr[l] == ';')
-            {
-                expr = expr.substr(0, l);
-                break;
-            }
-
             // Zippy the Pinhead says: Are we having fun yet?
             int pcount = get_next_expr(expr, l, r);
+
+            // Trim away comments at end of line
             if (0 < pcount)
             {
                 expr = expr.substr(l, r-l);
                 break;
             }
+
+            // Nothing to do.
+            if (l == r) break;
+
             expr_cnt++;
             r++;
-
             as.add_atom(recursive_parse(expr, l, r, line_cnt));
             expr = expr.substr(r);
         }
