@@ -40,14 +40,16 @@ using namespace opencog;
 
 // Extract s-expression. Given a string `s`, update the `l` and `r`
 // values so that `l` points at the next open-parenthsis (left paren)
-// and `r` points at the matching close-paren.
-static void get_next_expr(const std::string& s, size_t& l, size_t& r)
+// and `r` points at the matching close-paren.  Returns parenthesis
+// count. If zero, the parens match. If non-zero, then `r` points
+// at the first non-valid character in the string (e.g. comment char).
+static int get_next_expr(const std::string& s, size_t& l, size_t& r)
 {
     // Advance past whitespace
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
-    if (l >= r) return;
+    if (l == r) return 0;
     if (s[l] != '(')
-        throw std::runtime_error("Unexpected text");
+        throw std::runtime_error("Unexpected text: >>" + s + "<<");
 
     size_t p = l;
     int count = 1;
@@ -62,12 +64,11 @@ static void get_next_expr(const std::string& s, size_t& l, size_t& r)
         else if (quoted) continue;
         else if (s[p] == '(') count++;
         else if (s[p] == ')') count--;
+        else if (s[p] == ';') break;      // comments!
     } while (p < r and count > 0);
 
-    if (count != 0)
-        throw std::runtime_error("Parenthsis mismatch");
-
     r = p;
+    return count;
 }
 
 // Tokenizer - extracts link or node type or name. Given the string `s`,
@@ -88,8 +89,10 @@ static void get_next_token(const std::string& s, size_t& l, size_t& r)
         size_t p = l;
         for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
         r = p-1;
+        return;
     }
-    else if (s[l] == '(')
+
+    if (s[l] == '(')
     {
         // Atom type name. Advance until whitespace.
         // Faster to use strtok!?
@@ -97,8 +100,10 @@ static void get_next_token(const std::string& s, size_t& l, size_t& r)
         size_t p = l;
         for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
         r = p - 1;
+        return;
     }
-    throw std::runtime_error("Wasn't a token");
+    throw std::runtime_error(
+        "Wasn't a token: >>" + s.substr(l, r-l+1) + "<< in " + s);
 }
 
 static NameServer& namer = nameserver();
@@ -146,10 +151,10 @@ static Handle recursive_parse(const std::string& s,
         l1 = l;
         r1 = r;
         get_next_token(s, l1, r1);
-        if (l1 >= r1)
+        if (l1 > r1)
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Bad Atom name: " + s.substr(l, r-l+1));
+                " Can't find Atom name");
 
         size_t l2 = r1 + 1;
         size_t r2 = r;
@@ -157,7 +162,7 @@ static Handle recursive_parse(const std::string& s,
         if (l2 < r2)
             throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Unexpected content: " + s.substr(l, r2-l2+1) +
+                " Unexpected content: " + s.substr(l2, r2-l2) +
                 " in expr: " + s);
 
         const std::string name = s.substr(l1, r1-l1+1);
@@ -185,23 +190,36 @@ void opencog::load_file(std::string fname, AtomSpace& as)
         std::getline(f, line);
         line_cnt++;
         expr += line;
-        size_t r = 0;
         while (true)
         {
-            size_t len = expr.length();
             size_t l = 0;
-            r = len;
+            size_t r = expr.length();
 
-            get_next_expr(expr, l, r);
+            // Advance past whitespace
+            while (l < r and (expr[l] == ' ' or expr[l] == '\t' or
+                              expr[l] == '\n')) l++;
             if (l == r) break;
+
+            // Ignore comments
+            if (expr[l] == ';')
+            {
+                expr = expr.substr(0, l);
+                break;
+            }
+
+            // Zippy the Pinhead says: Are we having fun yet?
+            int pcount = get_next_expr(expr, l, r);
+            if (0 < pcount)
+            {
+                expr = expr.substr(l, r-l);
+                break;
+            }
             expr_cnt++;
             r++;
 
             as.add_atom(recursive_parse(expr, l, r, line_cnt));
-            l = r + 1;
-            r = len;
+            expr = expr.substr(r);
         }
-        expr = expr.substr(r+1);
     }
     f.close();
 }
