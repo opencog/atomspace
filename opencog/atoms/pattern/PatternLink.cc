@@ -346,6 +346,13 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
+	// Handle in-line variable declarations
+	if (not reverse and TYPED_VARIABLE_LINK == typ)
+	{
+		_variables.validate_vardecl(h);
+		return true;
+	}
+
 	return false;
 }
 
