@@ -78,7 +78,7 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	if (TIMES_LINK == vjtype)
 	{
-		// Paste on one at a time; this avoid what would otherwise
+		// Paste on one at a time; this avoids what would otherwise
 		// be infinite recursion on `(Times A B C)` where kons was
 		// unable to reduce `(Times B C)`. So we instead try to do
 		// `(Times (Times A B) C)` which should work out...

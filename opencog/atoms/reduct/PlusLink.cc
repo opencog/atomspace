@@ -96,7 +96,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 
 	if (PLUS_LINK == vjtype)
 	{
-		// Paste on one at a time; this avoid what would otherwise
+		// Paste on one at a time; this avoids what would otherwise
 		// be infinite recursion on `(Plus A B C)` where kons was
 		// unable to reduce `(Plus B C)`. So we instead try to do
 		// `(Plus (Plus A B) C)` which should work out...
