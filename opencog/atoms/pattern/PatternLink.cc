@@ -995,6 +995,9 @@ void PatternLink::debug_log(void) const
 
 	if (_variables.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
+	else
+		logger().fine() << "Type declarations are:\n"
+		                << oc_to_string(_variables);
 }
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
