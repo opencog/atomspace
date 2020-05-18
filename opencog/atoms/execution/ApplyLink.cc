@@ -28,7 +28,7 @@
 using namespace opencog;
 
 ApplyLink::ApplyLink(const HandleSeq& oset, Type t)
-	: ExecutionOutputLink(oset, t)
+	: ExecutionOutputLink(HandleSeq(oset), t)
 {
 	forward_to_execution_output_link =
 		!nameserver().isA(get_schema()->get_type(), GROUNDED_FUNCTION_LINK);
