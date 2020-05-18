@@ -25,6 +25,9 @@ INCLUDE_DIRECTORIES(
 FILE(MAKE_DIRECTORY opencog)
 FILE(COPY opencog/__init__.py DESTINATION opencog)
 
+# Legacy bindlink
+FILE(COPY opencog/bindlink.py DESTINATION opencog)
+
 ADD_LIBRARY(PythonEval
 	PythonEval.cc
 )
@@ -32,8 +35,10 @@ ADD_LIBRARY(PythonEval
 ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	atomflow
 	atombase
 	executioncontext
+ 	load_scm
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

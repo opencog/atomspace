@@ -113,33 +113,12 @@ protected:
 	static bool is_logical_connector(const Handle&);
 
 public:
-	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
+	RewriteLink(const HandleSeq&&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
 	RewriteLink(const RewriteLink &) = delete;
 	RewriteLink& operator=(const RewriteLink &) = delete;
 
 	void make_silent(bool s) { _silent = s; }
-
-	/**
-	 * Return an alpha-converted copy of this atom. Optionally,
-	 * new variable names can be provided. If none are provided,
-	 * then new randomly generated names are created.
-	 *
-	 * Warning: the atomspace treats all alpha-convertible atoms
-	 * as identical; if the new copy is inserted into the atomspace,
-	 * the original version will be returned.  Alpha-converted atoms
-	 * can only be used outside of the atomspace, for temporary
-	 * operations.
-	 */
-	Handle alpha_convert() const;
-	Handle alpha_convert(const HandleSeq& vars) const;
-
-	/**
-	 * Like the above, but using a mapping from old variable names
-	 * to new variable names. If an existing variable doesn't have
-	 * a mapping specified, then a new random name is generated.
-	 */
-	Handle alpha_convert(const HandleMap& vsmap) const;
 
 	/**
 	 * Perform a beta-reduction and optional alpha-conversion,

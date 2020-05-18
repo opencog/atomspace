@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import opencog.atomspace
-from opencog.atomspace import AtomSpace, TruthValue, Atom
+from opencog.atomspace import Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *

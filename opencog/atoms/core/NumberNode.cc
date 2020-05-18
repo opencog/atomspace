@@ -66,8 +66,8 @@ std::vector<double> NumberNode::to_vector(const std::string& str)
 // ============================================================
 // Constructors
 
-NumberNode::NumberNode(Type t, const std::string& s)
-	: Node(t, s)
+NumberNode::NumberNode(Type t, const std::string&& s)
+	: Node(t, std::move(s))
 {
 	// Convert to number and back to string to avoid miscompares.
 	_value = to_vector(s);
@@ -77,8 +77,8 @@ NumberNode::NumberNode(Type t, const std::string& s)
 		"Bad NumberNode constructor!");
 }
 
-NumberNode::NumberNode(const std::string& s)
-	: Node(NUMBER_NODE, s)
+NumberNode::NumberNode(const std::string&& s)
+	: Node(NUMBER_NODE, std::move(s))
 {
 	_value = to_vector(s);
 	_name = vector_to_plain(_value);
@@ -206,10 +206,20 @@ ValuePtr opencog::plus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 		return plus(NumberNodeCast(vi), NumberNodeCast(vj));
 
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return plus(NumberNodeCast(vi), FloatValueCast(vj));
+	{
+		NumberNodePtr nn(NumberNodeCast(vi));
+		if (1 == nn->size())
+			return plus(nn->get_value(), FloatValueCast(vj));
+		return plus(nn, FloatValueCast(vj));
+	}
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return plus(FloatValueCast(vi), NumberNodeCast(vj));
+	{
+		NumberNodePtr nn(NumberNodeCast(vj));
+		if (1 == nn->size())
+			return plus(nn->get_value(), FloatValueCast(vi));
+		return plus(nn, FloatValueCast(vi));
+	}
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))
@@ -232,10 +242,20 @@ ValuePtr opencog::minus(const ValuePtr& vi, const ValuePtr& vj, bool silent)
 		return minus(NumberNodeCast(vi), NumberNodeCast(vj));
 
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-		return minus(NumberNodeCast(vi), FloatValueCast(vj));
+	{
+		NumberNodePtr nn(NumberNodeCast(vi));
+		if (1 == nn->size())
+			return minus(nn->get_value(), FloatValueCast(vj));
+		return minus(nn, FloatValueCast(vj));
+	}
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-		return minus(FloatValueCast(vi), NumberNodeCast(vj));
+	{
+		NumberNodePtr nn(NumberNodeCast(vj));
+		if (1 == nn->size())
+			return minus(FloatValueCast(vi), nn->get_value());
+		return minus(FloatValueCast(vi), nn);
+	}
 
 	if (nameserver().isA(vitype, FLOAT_VALUE) and
 		 nameserver().isA(vjtype, FLOAT_VALUE))

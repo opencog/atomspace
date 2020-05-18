@@ -50,7 +50,10 @@ public:
 		ovly = new AtomSpace(base);
 	}
 
-	void tearDown() {}
+	void tearDown() {
+		delete ovly;
+		delete base;
+	}
 
 	void testSimple()
 	{
@@ -95,6 +98,65 @@ public:
 		Handle h2c = base->add_node(CONCEPT_NODE, "Grade A2");
 		TS_ASSERT(h2 == h2c);
 		TS_ASSERT(h2c->getTruthValue() == tv2);
+
+		logger().debug("END TEST: %s", __FUNCTION__);
+	}
+
+	void testCOW()
+	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		TruthValuePtr tv1(SimpleTruthValue::createTV(0.1, 0.1));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.2, 0.2));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.3, 0.3));
+		TruthValuePtr tv4(SimpleTruthValue::createTV(0.4, 0.4));
+		TruthValuePtr tv5(SimpleTruthValue::createTV(0.5, 0.5));
+
+		// Mark the overlay as a COW space.
+		ovly->set_copy_on_write();
+
+		// Create two atoms in the base atomspace
+		Handle h1 = base->add_node(CONCEPT_NODE, "A1 beef");
+		Handle h1t = base->set_truthvalue(h1, tv1);
+		TS_ASSERT(h1 == h1t);
+
+		Handle h2 = base->add_node(CONCEPT_NODE, "Grade A2");
+		Handle h2t = base->set_truthvalue(h2, tv2);
+		TS_ASSERT(h2 == h2t);
+
+		// Setting truth value in overlay should trigger COW
+		Handle h2o = ovly->set_truthvalue(h2, tv3);
+		TS_ASSERT(h2 != h2o);
+		TS_ASSERT(h2o->getTruthValue() == tv3);
+		TS_ASSERT(h2->getTruthValue() == tv2);
+
+		// No problem touching the base space.
+		Handle h2b = base->add_node(CONCEPT_NODE, "Grade A2");
+		TS_ASSERT(h2 == h2b);
+		TS_ASSERT(h2b->getTruthValue() == tv2);
+
+		// No problem altering the base space.
+		Handle h4b = base->set_truthvalue(h2, tv4);
+		TS_ASSERT(h2 == h4b);
+		TS_ASSERT(h4b->getTruthValue() == tv4);
+
+		// The TV in the overlay should not have been affected,
+		// when the TV in the base was changed.
+		Handle h2u = ovly->add_node(CONCEPT_NODE, "Grade A2");
+		TS_ASSERT(h2 != h2u);
+		TS_ASSERT(h2o == h2u);
+		TS_ASSERT(h2u->getTruthValue() == tv3);
+
+		// Setting truth value a second time in overlay should NOT COW
+		Handle h2v = ovly->set_truthvalue(h2, tv5);
+		TS_ASSERT(h2 != h2v);
+		TS_ASSERT(h2o == h2v);
+		TS_ASSERT(h2o->getTruthValue() == tv5);
+		TS_ASSERT(h2->getTruthValue() == tv4);
+
+		// Base should be OK.
+		Handle h2c = base->add_node(CONCEPT_NODE, "Grade A2");
+		TS_ASSERT(h2 == h2c);
+		TS_ASSERT(h2c->getTruthValue() == tv4);
 
 		logger().debug("END TEST: %s", __FUNCTION__);
 	}

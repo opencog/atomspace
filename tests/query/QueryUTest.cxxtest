@@ -23,7 +23,9 @@
 #include <thread>
 
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
@@ -64,6 +66,8 @@ public:
 	void tearDown(void);
 
 	void test_basic(void);
+	void test_meet(void);
+	void test_exclusive(void);
 };
 
 void QueryUTest::tearDown(void)
@@ -91,17 +95,102 @@ void QueryUTest::test_basic(void)
 
 	// Can we execute it?
 	ValuePtr sv = h->execute(as);
-	TS_ASSERT_EQUALS(sv->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(sv->get_type(), LINK_VALUE));
 	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
 
 	// A more complex query
 	ValuePtr v = eval->eval_v("(cog-execute! query)");
-	TS_ASSERT_EQUALS(v->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
 	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 3);
+	printf("Got: %s\n", v->to_string().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/*
+ * Basic MeetLink unit test.
+ */
+void QueryUTest::test_meet(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/query-meet.scm\")");
+	TS_ASSERT_EQUALS(false, eval->eval_error());
+
+	// Can we create it?
+	Handle h = eval->eval_h("(Meet (List (Variable \"x\")))");
+	TS_ASSERT_EQUALS(h->get_type(), MEET_LINK);
+
+	// Can we execute it?
+	ValuePtr sv = h->execute(as);
+	TS_ASSERT(nameserver().isA(sv->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(sv)->value().size(), 0);
+
+	// A more complex query
+	ValuePtr v = eval->eval_v("(cog-execute! meet)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	LinkValuePtr lv(LinkValueCast(v));
+	printf("Got: %s\n", v->to_string().c_str());
+	TS_ASSERT_EQUALS(lv->value().size(), 3);
+
+	Handle uv(createUnorderedLink(lv->to_handle_seq()));
+	printf("Got as Unordered: %s\n", uv->to_string().c_str());
+
+	Handle euv = eval->eval_h("(UnorderedLink "
+		"(ConceptNode \"thing\")"
+		"(ConceptNode \"story\")"
+		"(ConceptNode \"joke\")) ");
+
+	printf("Expected: %s\n", euv->to_string().c_str());
+	TS_ASSERT(content_eq(euv, uv));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ExclusiveLink unit test.
+ */
+void QueryUTest::test_exclusive(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(load-from-path \"tests/query/query-exclusive.scm\")");
+	TS_ASSERT_EQUALS(false, eval->eval_error());
+
+	// expect empty set.
+	ValuePtr v = eval->eval_v("(cog-execute! exclude-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 0);
+
+	v = eval->eval_v("(cog-execute! not-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 0);
+
+	eval->eval_h("(State (Concept \"stop light\") (Concept \"green\"))");
+
+	v = eval->eval_v("(cog-execute! exclude-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 1);
+	printf("Got: %s\n", v->to_string().c_str());
+
+	ValuePtr ev = eval->eval_v("(QueueValue (Concept \"green\"))");
+	printf("Expected: %s\n", ev->to_string().c_str());
+
+	LinkValuePtr lv(LinkValueCast(v));
+	LinkValuePtr lev(LinkValueCast(ev));
+	TS_ASSERT_EQUALS(*lev, *lv);
+
+	v = eval->eval_v("(cog-execute! not-red)");
+	TS_ASSERT(nameserver().isA(v->get_type(), LINK_VALUE));
+	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 1);
+
+	lv = LinkValueCast(v);
+	TS_ASSERT_EQUALS(*lev, *lv);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 #undef al
 #undef an

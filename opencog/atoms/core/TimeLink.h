@@ -37,7 +37,7 @@ namespace opencog
 class TimeLink : public FunctionLink
 {
 public:
-	TimeLink(const HandleSeq&, Type=TIME_LINK);
+	TimeLink(const HandleSeq&&, Type=TIME_LINK);
 	TimeLink(const TimeLink&) = delete;
 	TimeLink& operator=(const TimeLink&) = delete;
 

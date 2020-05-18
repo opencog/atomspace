@@ -31,11 +31,15 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink is supposed to closely model the traditional concept
+/// The LambdaLink is supposed to model the traditional concept
 /// of a lambda from lambda calculus (or functional programming). It
-/// is meant to behave just like a combinator, and supports the standard
-/// operations of beta-reduction and alpha-conversion (modulo that the
-/// atomspace enforces alpha-equivalence).
+/// is meant to behave like a combinator, and supports the standard
+/// operations of beta-reduction and alpha-conversion (modulo that
+/// alpha-equivalence is enforced when Atoms are inserted into the
+/// AtomSpace). This is NOT "exactly" like a lambda-calculus-lambda;
+/// there are subtle differences, because Atomese is a term algebra,
+/// not a string algebra, and so assorted issues arise, that don't
+/// occur in traditional settings.
 ///
 /// The actual implementation of the alpha and beta reduction sits on
 /// the PrenexLink, so this class is effectively a no-op, from the
@@ -46,14 +50,14 @@ namespace opencog
 /// other classes derived from PrenexLink, and they are NOT lambdas!
 /// The most prominent example are the various PatternLinks; a simpler
 /// example is the PutLink, which is a beta-redex and therefore cannot
-/// ever be an actual lambda, elthough it derives from PrenexLink
+/// ever be an actual lambda, although it derives from PrenexLink
 /// to do it's beta-reduction.  And so that's why we have a no-op C++
 /// class, here.
 ///
 class LambdaLink : public PrenexLink
 {
 public:
-	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
+	LambdaLink(const HandleSeq&&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const LambdaLink &) = delete;
 	LambdaLink& operator=(const LambdaLink &) = delete;

@@ -136,18 +136,18 @@ protected:
 	}
 
 public:
-	PatternLink(const HandleSeq&, Type=PATTERN_LINK);
+	PatternLink(const HandleSeq&&, Type=PATTERN_LINK);
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
+
 	PatternLink(const PatternLink&) = delete;
 	PatternLink& operator=(const PatternLink&) = delete;
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).
 	PatternLink(const HandleSet& vars,
-	            const VariableTypeMap& typemap,
-	            const GlobIntervalMap& intervalmap,
+	            const Variables& varspec,
 	            const HandleSeq& component,
 	            const HandleSeq& optionals);
 

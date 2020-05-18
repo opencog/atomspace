@@ -28,8 +28,8 @@
 
 using namespace opencog;
 
-TimeLink::TimeLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+TimeLink::TimeLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, TIME_LINK))

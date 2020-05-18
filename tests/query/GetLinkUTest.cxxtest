@@ -43,6 +43,8 @@ public:
 	GetLinkUTest(void)
 	{
 		// logger().set_level(Logger::FINE);
+		logger().set_level(Logger::DEBUG);
+		logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
 
@@ -65,6 +67,7 @@ public:
 	void tearDown(void);
 
 	void test_unary_get(void);
+	void test_get_ill_typed(void);
 	void test_binary_get(void);
 	void test_free_bound(void);
 	void test_eval_clause(void);
@@ -126,6 +129,27 @@ void GetLinkUTest::test_binary_get(void)
 		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
 		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
 		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic bottom_type GetLink unit test.
+ */
+void GetLinkUTest::test_get_ill_typed(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-execute! is-nothing)");
+	Handle hans = eval->eval_h("(SetLink )");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());

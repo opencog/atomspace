@@ -62,7 +62,7 @@ namespace opencog
 class RandomChoiceLink : public FunctionLink
 {
 public:
-	RandomChoiceLink(const HandleSeq&, Type=RANDOM_CHOICE_LINK);
+	RandomChoiceLink(const HandleSeq&&, Type=RANDOM_CHOICE_LINK);
 	RandomChoiceLink(const RandomChoiceLink&) = delete;
 	RandomChoiceLink& operator=(const RandomChoiceLink&) = delete;
 

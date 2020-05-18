@@ -98,7 +98,7 @@ public:
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
-        table->add(createLink(os, INHERITANCE_LINK));
+        table->add(createLink(std::move(os), INHERITANCE_LINK));
         table->barrier();
     }
 
@@ -220,7 +220,7 @@ public:
 
         HandleSeq os;
         os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
-        Handle l1(createLink(os, LIST_LINK));
+        Handle l1(createLink(std::move(os), LIST_LINK));
         Handle hl1 = table->add(l1);
 
         // Now, remove hn1 from the table ...
@@ -233,7 +233,7 @@ public:
         os.push_back(h3);
         os.push_back(h3);
 
-        Handle l33 = table->add(createLink(os, LIST_LINK));
+        Handle l33 = table->add(createLink(std::move(os), LIST_LINK));
         HandleSeq hs = l33->getOutgoingSet();
         printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
         TS_ASSERT_EQUALS(hs[0], hs[1]);
@@ -251,15 +251,14 @@ public:
         Handle word = table->add(wp);
         Handle sp = createNode(MY_CONCEPT_NODE, "28675194");
         Handle sense = table->add(sp);
+        Handle lp = createLink(MY_INHERITANCE_LINK, word, sense);
+        Handle lh = table->add(lp);
+
+        TS_ASSERT(table->getHandle(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
+        TS_ASSERT(table->getHandle(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);
         HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
-        Handle lp = createLink(os, MY_INHERITANCE_LINK);
-        Handle lh = table->add(lp);
-
-#define getHandlex(N,T) getHandle(T,N)
-        TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+        TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, std::move(os)) != Handle::UNDEFINED);
     }
 };

@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The DivideLink implements the mathematical operation of "divide".
+ * The DivideLink implements the arithmetic operation of "divide".
  */
 class DivideLink : public TimesLink
 {
@@ -28,7 +28,8 @@ protected:
 	ValuePtr kons(AtomSpace*, bool, const ValuePtr&, const ValuePtr&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
-	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);
+	DivideLink(const HandleSeq&&, Type=DIVIDE_LINK);
+
 	DivideLink(const DivideLink&) = delete;
 	DivideLink& operator=(const DivideLink&) = delete;
 

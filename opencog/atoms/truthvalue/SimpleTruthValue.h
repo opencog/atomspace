@@ -58,11 +58,11 @@ public:
 
     virtual bool operator==(const Value& rhs) const;
 
-    std::string to_string(const std::string&) const;
+    std::string to_string(const std::string& = "") const;
 
-    strength_t get_mean() const;
-    count_t get_count() const;
-    confidence_t get_confidence() const;
+    virtual strength_t get_mean() const;
+    virtual count_t get_count() const;
+    virtual confidence_t get_confidence() const;
 
     /**
      * Truth value merge formula, as specified by PLN.
@@ -96,6 +96,9 @@ public:
             std::make_shared<const SimpleTruthValue>(pap));
     }
 };
+
+static inline SimpleTruthValuePtr SimpleTruthValueCast(const ValuePtr& pa)
+    { return std::dynamic_pointer_cast<const SimpleTruthValue>(pa); }
 
 template<typename ... Type>
 static inline TruthValuePtr createSimpleTruthValue(Type&&...  args) {

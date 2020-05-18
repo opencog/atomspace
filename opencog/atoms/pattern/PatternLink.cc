@@ -96,10 +96,11 @@ void PatternLink::common_init(void)
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
-	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
+
+	_num_comps = _components.size();
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -118,17 +119,12 @@ void PatternLink::setup_components(void)
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
-	//
-	// There is a pathological case where there are no virtuals, but
-	// there are multiple disconnected components.  I think that this is
-	// a user-error, but in fact PLN does have a rule which wants to
-	// explore that combinatoric explosion, on purpose. So we have to
-	// allow the multiple disconnected components for that case.
 	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _variables._simple_typemap,
-		                           _variables._glob_intervalmap, _components[i],
+		Handle h(createPatternLink(_component_vars[i],
+		                           _variables,
+		                           _components[i],
 		                           _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -184,8 +180,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
 PatternLink::PatternLink(const HandleSet& vars,
-                         const VariableTypeMap& typemap,
-                         const GlobIntervalMap& intervalmap,
+                         const Variables& varspec,
                          const HandleSeq& compo,
                          const HandleSeq& opts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
@@ -201,11 +196,21 @@ PatternLink::PatternLink(const HandleSet& vars,
 	for (const Handle& v : vars)
 	{
 		_variables.varseq.emplace_back(v);
-		auto it = typemap.find(v);
-		if (it != typemap.end())
+
+		auto it = varspec._simple_typemap.find(v);
+		if (it != varspec._simple_typemap.end())
 			_variables._simple_typemap.insert(*it);
-		auto imit = intervalmap.find(v);
-		if (imit != intervalmap.end())
+
+		auto dit = varspec._deep_typemap.find(v);
+		if (dit != varspec._deep_typemap.end())
+			_variables._deep_typemap.insert(*dit);
+
+		auto fit = varspec._fuzzy_typemap.find(v);
+		if (fit != varspec._fuzzy_typemap.end())
+			_variables._fuzzy_typemap.insert(*fit);
+
+		auto imit = varspec._glob_intervalmap.find(v);
+		if (imit != varspec._glob_intervalmap.end())
 			_variables._glob_intervalmap.insert(*imit);
 	}
 
@@ -273,8 +278,8 @@ PatternLink::PatternLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-PatternLink::PatternLink(const HandleSeq& hseq, Type t)
-	: PrenexLink(hseq, t)
+PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
+	: PrenexLink(std::move(hseq), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, PATTERN_LINK))
@@ -812,10 +817,9 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 
 /// Make sure that every variable appears in some groundable clause.
 /// Variables have to be grounded before an evaluatable clause
-/// containing them can be evaluated.  If they can never be grounded,
-/// then any clauses in which they appear cannot ever be evaluated,
-/// leading to an undefined condition.  So, explicitly check and throw
-/// an error if a pattern is ill-formed.
+/// containing them can be evaluated. Add disjoint components for
+/// any variable that wasn't explicitly specified in a groundable
+/// clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
                                        const HandleSetSeq& compvars)
 {
@@ -824,14 +828,19 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
-	// Is every variable in some component? If not, then throw.
+	// Is every variable in some component? If not, then create
+	// a new component holding only that variable. Implicitly,
+	// this new component becomes `(PresentLink (Variable "foo"))`.
+	// We don't explicitly create the PresentLink cause we don't
+	// need to; that would dirty up the atomspace, and it's already
+	// handled automatically.
 	for (const Handle& v : vars)
 	{
 		auto it = vunion.find(v);
 		if (vunion.end() == it)
 		{
-			throw InvalidParamException(TRACE_INFO,
-				"Variable not groundable: %s\n", v->to_string().c_str());
+			_components.push_back(HandleSeq({v}));
+			_component_vars.push_back(HandleSet({v}));
 		}
 	}
 }

@@ -1,12 +1,17 @@
 ;
 ; disco-vars.scm
 ;
-; Several patterns with ill-formed variable declarations.
+; Several patterns with implicit clauses.
+;
+; Prior to issue #2516, these were considered to be ill-formed
+; search patterns, because they lacked explicit clauses that
+; asserted the presence of a variable in the atompsace.  However,
+; it seems to be OK to assume implicit presence, when it is not
+; declared explicity. So, in fact, everything below should be
+; considered to be valid.
 
-; The below used to be ill-formed, but the current matcher
-; accepts this and ... wastes CPU time with it.  Technically,
-; it is kind-of ill-formed, since there should be a "present"
-; search being made for it. But we punt for now.
+(use-modules (opencog))
+
 (define (B)
 (GetLink
    (VariableList (VariableNode "$A") (VariableNode "$B"))

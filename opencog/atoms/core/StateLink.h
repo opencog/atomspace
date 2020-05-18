@@ -48,13 +48,13 @@ protected:
 	void init();
 	virtual void install();
 public:
-	StateLink(const HandleSeq&, Type=STATE_LINK);
+	StateLink(const HandleSeq&&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
 
 	StateLink(const StateLink&) = delete;
 	StateLink& operator=(const StateLink&) = delete;
-	Handle get_alias(void) const { return _outgoing[0]; }
-	Handle get_state(void) const { return _outgoing[1]; }
+	Handle get_alias(void) const { return _outgoing.at(0); }
+	Handle get_state(void) const { return _outgoing.at(1); }
 
 	/**
 	 * Return false, if the state contains a variable.
@@ -70,10 +70,21 @@ public:
 	 *    <name>
 	 *    <body>
 	 *
-	 * return <body>
+	 * return <body>. Throws exception if there is no such StateLink.
+	 */
+	static Handle get_state(const Handle& alias);
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * StateLink
+	 *    <name>
+	 *    <body>
+	 *
+	 * return the whole StateLink. Throws exception if there is
+	 * no such StateLink.
 	 */
 	static Handle get_link(const Handle& alias);
-	static Handle get_state(const Handle& alias);
 
 	static Handle factory(const Handle&);
 };

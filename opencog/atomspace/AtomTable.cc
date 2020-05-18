@@ -139,16 +139,16 @@ void AtomTable::clear()
     clear_all_atoms();
 }
 
-Handle AtomTable::getHandle(Type t, const std::string& n) const
+Handle AtomTable::getHandle(Type t, const std::string&& n) const
 {
-    Handle a(createNode(t, n));
-    return lookupHandle(a);
+    Handle h(createNode(t, std::move(n)));
+    return lookupHandle(h);
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
+Handle AtomTable::getHandle(Type t, const HandleSeq&& seq) const
 {
-    Handle a(createLink(seq, t));
-    return lookupHandle(a);
+    Handle h(createLink(std::move(seq), t));
+    return lookupHandle(h);
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
@@ -263,7 +263,10 @@ Handle AtomTable::add(const Handle& orig, bool force)
         }
     }
     else if (atom->getAtomTable())
-        atom = createNode(atom->get_type(), atom->get_name());
+    {
+        std::string name(atom->get_name());
+        atom = createNode(atom->get_type(), std::move(name));
+    }
 
     if (atom != orig) atom->copyValues(orig);
     atom->install();

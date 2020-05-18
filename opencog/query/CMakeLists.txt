@@ -10,6 +10,9 @@ ADD_LIBRARY(query-engine
 	Satisfier.cc
 )
 
+# Optionally enable debug logging for the pattern matcher.
+# TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DQDEBUG=1)
+
 ADD_DEPENDENCIES(query-engine
 	opencog_atom_types
 )

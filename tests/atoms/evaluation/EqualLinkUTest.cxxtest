@@ -1,0 +1,180 @@
+/*
+ * tests/atoms/EqualUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+
+using namespace opencog;
+
+// Test the EqualLink.
+//
+class EqualLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	EqualLinkUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_equality();
+	void test_alpha();
+	void test_nway();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Test equality vs. identity
+void EqualLinkUTest::test_equality()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle thing_a = N(CONCEPT_NODE, "thing A");
+	Handle thing_b = N(CONCEPT_NODE, "thing B");
+	Handle semantic_a =
+		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_a);
+
+	Handle semantic_b =
+		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_b);
+
+	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
+	Handle ident_asa = L(IDENTICAL_LINK, thing_a, semantic_a);
+
+	Handle ident_ab = L(IDENTICAL_LINK, thing_a, thing_b);
+	Handle ident_asb = L(IDENTICAL_LINK, thing_a, semantic_b);
+
+	// -------
+	Handle equal_aa = L(EQUAL_LINK, thing_a, thing_a);
+	Handle equal_asa = L(EQUAL_LINK, thing_a, semantic_a);
+
+	Handle equal_ab = L(EQUAL_LINK, thing_a, thing_b);
+	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, ident_aa);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_asa);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_ab);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_asb);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	// -------
+	tv = EvaluationLink::do_evaluate(&_as, equal_aa);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_asa);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_ab);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test alpha-conversion equality
+void EqualLinkUTest::test_alpha()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle x_plus_2 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$x"), N(NUMBER_NODE, "2"));
+
+	Handle x_plus_3 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$x"), N(NUMBER_NODE, "3"));
+
+	Handle y_plus_3 =
+		L(PLUS_LINK, N(VARIABLE_NODE, "$y"), N(NUMBER_NODE, "3"));
+
+	Handle equal_23 = L(EQUAL_LINK, x_plus_2, x_plus_3);
+	Handle alpha_23 = L(ALPHA_EQUAL_LINK, x_plus_2, x_plus_3);
+	Handle equal_xx = L(EQUAL_LINK, x_plus_3, x_plus_3);
+	Handle alpha_xx = L(ALPHA_EQUAL_LINK, x_plus_3, x_plus_3);
+	Handle equal_xy = L(EQUAL_LINK, x_plus_3, y_plus_3);
+	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_23);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_23);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_xx);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_xy);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, alpha_xy);
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test 3-way, 4-way tests
+void EqualLinkUTest::test_nway()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle thing_a = N(CONCEPT_NODE, "thing A");
+	Handle thing_b = N(CONCEPT_NODE, "thing B");
+
+	Handle equal_aaa = L(EQUAL_LINK, thing_a, thing_a, thing_a);
+	Handle equal_aba = L(EQUAL_LINK, thing_a, thing_b, thing_a);
+
+	Handle equal_aaaa = L(EQUAL_LINK, thing_a, thing_a, thing_a, thing_a);
+	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_aaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_aaaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_aba);
+	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_abaa);
+	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

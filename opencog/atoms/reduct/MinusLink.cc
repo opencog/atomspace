@@ -14,8 +14,8 @@
 
 using namespace opencog;
 
-MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : PlusLink(oset, t)
+MinusLink::MinusLink(const HandleSeq&& oset, Type t)
+    : PlusLink(std::move(oset), t)
 {
 	init();
 }
@@ -52,7 +52,7 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
 
 	// If vj is zero, just drop it.
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		return sample_stream(vi, vitype);
+		return vi;
 
 	// Are they numbers? If so, perform vector (pointwise) subtraction.
 	// Always lower the strength: Number+Number->Number

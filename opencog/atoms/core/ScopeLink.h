@@ -59,18 +59,19 @@ protected:
 	/// Variables bound in the body.
 	Variables _variables;
 
-protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& vardecl);
 
 	bool skip_init(Type);
-	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
-	                      Quotation quotation = Quotation()) const;
 	virtual ContentHash compute_hash() const;
+	ContentHash scope_hash(const FreeVariables::IndexMap& index) const;
+	ContentHash term_hash(const Handle&,
+	                      const FreeVariables::IndexMap& index,
+	                      Quotation quotation = Quotation()) const;
 
 public:
-	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
+	ScopeLink(const HandleSeq&&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
 	ScopeLink(const ScopeLink&) = delete;
 	ScopeLink& operator=(const ScopeLink&) = delete;
@@ -79,6 +80,22 @@ public:
 	const Variables& get_variables(void) const { return _variables; }
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
+
+	// Return an alpha-converted copy of this atom. Optionally, new
+	// variable names can be provided. If none are provided, then new
+	// randomly generated names are created.
+	//
+	// Warning: the atomspace treats all alpha-convertible atoms as
+	// identical; if the new copy is inserted into the atomspace, the
+	// original version will be returned.  Alpha-converted atoms can
+	// only be used outside of the atomspace, for temporary operations.
+	Handle alpha_convert() const;
+	Handle alpha_convert(const HandleSeq& vars) const;
+
+	// Like the above, but using a mapping from old variable names to
+	// new variable names. If an existing variable doesn't have a
+	// mapping specified, then a new random name is generated.
+	Handle alpha_convert(const HandleMap& vsmap) const;
 
 	// Return true if the other Handle is equal to this one,
 	// i.e. is the same, up to alpha conversion. i.e. is the same,

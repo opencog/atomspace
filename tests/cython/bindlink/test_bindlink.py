@@ -1,8 +1,8 @@
 import unittest
 import os
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import execute_atom, evaluate_atom
+from opencog.atomspace import Atom, types
+from opencog.exec import execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
 

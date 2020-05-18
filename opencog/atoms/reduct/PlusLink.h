@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The PlusLink implements the mathematical operation of "plus"
+ * The PlusLink implements the arithmetic operation of "plus"
  */
 class PlusLink : public ArithmeticLink
 {
@@ -31,7 +31,8 @@ protected:
 
 public:
 	PlusLink(const Handle& a, const Handle& b);
-	PlusLink(const HandleSeq&, Type=PLUS_LINK);
+	PlusLink(const HandleSeq&&, Type=PLUS_LINK);
+
 	PlusLink(const PlusLink&) = delete;
 	PlusLink& operator=(const PlusLink&) = delete;
 

@@ -1,5 +1,5 @@
-#LyX 2.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 508
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
 \begin_document
 \begin_header
 \save_transient_properties true
@@ -31,6 +31,8 @@ figs-within-sections
 \font_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -69,6 +71,7 @@ figs-within-sections
 \suppress_date false
 \justification true
 \use_refstyle 0
+\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
@@ -77,7 +80,10 @@ figs-within-sections
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language english
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -291,6 +297,7 @@ This document resides in, accompanies source code that implements the ideas
 LatexCommand href
 name "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
 target "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
+literal "false"
 
 \end_inset
 
@@ -299,6 +306,7 @@ target "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
 LatexCommand href
 name "https://github.com/opencog/opencog/blob/master/ opencog/nlp/learn/scm/gram-class.scm"
 target "https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/scm/gram-class.scm"
+literal "false"
 
 \end_inset
 
@@ -657,7 +665,7 @@ A seed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename seed.eps
+	filename graphics/seed.eps
 	width 25col%
 
 \end_inset
@@ -827,7 +835,7 @@ Two linked (connected) seeds
 
 
 \begin_inset Graphics
-	filename seeds-two.eps
+	filename graphics/seeds-two.eps
 	width 35col%
 
 \end_inset
@@ -914,7 +922,7 @@ A connected section
 
 
 \begin_inset Graphics
-	filename hedgehog.eps
+	filename graphics/hedgehog.eps
 	width 25col%
 
 \end_inset
@@ -969,7 +977,7 @@ This motivates a different way of looking at seeds: they can be visualized
  as jigsaw puzzle pieces, where any given tab on one jigsaw piece can fit
  into one and only one slot on another jigsaw piece.
  This union of a tab+slot is the link.
- Connectors must be of the same type in order to be connectible.
+ Connectors must be of the same type in order to be connectable.
  The types of the connectors will later be seen to be the same thing as
  the types of type theory; that is, they are bona-fide types, in the proper
  sense of the word.
@@ -997,7 +1005,7 @@ Joining two connectors to form a link
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename puzzle.eps
+	filename graphics/puzzle.eps
 	width 40col%
 
 \end_inset
@@ -1020,6 +1028,7 @@ The jigsaw puzzle-piece illustration is not uncommon in the literature;
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Coecke2010,Kart2014,Baez2009"
+literal "true"
 
 \end_inset
 
@@ -1205,7 +1214,7 @@ Seed connectors might be types, not vertexes
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename seed-puzzle.eps
+	filename graphics/seed-puzzle.eps
 	width 35col%
 
 \end_inset
@@ -1254,8 +1263,8 @@ Why sections?
 \end_layout
 
 \begin_layout Standard
-What's the point of introducing this seemingly non-standard approach to something
- that looks a lot like graph theory? There are several reasons.
+What's the point of introducing this seemingly non-standard approach to
+ something that looks a lot like graph theory? There are several reasons.
 \end_layout
 
 \begin_layout Itemize
@@ -1357,7 +1366,7 @@ ion of ADP to ATP, shown in the figure below.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename phosphorylation.svg
+	filename graphics/phosphorylation.svg
 	lyxscale 50
 	width 35col%
 
@@ -1392,7 +1401,7 @@ An example of a connected section would be the Krebs cycle, taken as a whole:
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename krebs.svg
+	filename graphics/krebs.svg
 	lyxscale 30
 	width 55col%
 
@@ -1426,6 +1435,7 @@ Readers familiar with Link Grammar
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
+literal "true"
 
 \end_inset
 
@@ -1470,7 +1480,7 @@ A dependency parse decomposed into four seeds
 
 
 \begin_inset Graphics
-	filename example.eps
+	filename graphics/example.eps
 	width 85col%
 
 \end_inset
@@ -1754,6 +1764,7 @@ lus notation.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Poon2009"
+literal "true"
 
 \end_inset
 
@@ -1951,6 +1962,7 @@ Note also that there have been extensions of the ideas of lambda calculus
 LatexCommand href
 name "PutLink"
 target "http://wiki.opencog.org/w/PutLink"
+literal "false"
 
 \end_inset
 
@@ -1978,6 +1990,7 @@ The
 LatexCommand href
 name "tensor algebra"
 target "https://en.wikipedia.org/w/Tensor_algebra"
+literal "false"
 
 \end_inset
 
@@ -2008,7 +2021,7 @@ A tensor with three input wires and two output wires
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename tensor.eps
+	filename graphics/tensor.eps
 	width 30col%
 
 \end_inset
@@ -2032,6 +2045,7 @@ t is given by Baez and Stay
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Baez2009"
+literal "true"
 
 \end_inset
 
@@ -2286,6 +2300,7 @@ The foundations of categorial grammars date back to Lambek in 1961
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Lambek61,Marcus1967"
+literal "true"
 
 \end_inset
 
@@ -2295,6 +2310,7 @@ y in modern times.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kart2013,Kart2014"
+literal "true"
 
 \end_inset
 
@@ -2338,6 +2354,7 @@ men built houses
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kart2013"
+literal "true"
 
 \end_inset
 
@@ -2389,6 +2406,7 @@ Another worthwhile example of tensor algebra can be found in equation 13
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kart2014"
+literal "true"
 
 \end_inset
 
@@ -2456,6 +2474,7 @@ is
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pentus98"
+literal "true"
 
 \end_inset
 
@@ -2480,6 +2499,7 @@ history
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rosen1996"
+literal "true"
 
 \end_inset
 
@@ -2502,6 +2522,7 @@ key "Rosen1996"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ash1965"
+literal "true"
 
 \end_inset
 
@@ -2541,7 +2562,7 @@ The history of a text as a sequence of words
 
 
 \begin_inset Graphics
-	filename history.eps
+	filename graphics/history.eps
 	width 40col%
 
 \end_inset
@@ -2630,7 +2651,7 @@ name "fig:A-Viterbi-parse"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename viterbi.eps
+	filename graphics/viterbi.eps
 	width 20page%
 
 \end_inset
@@ -2848,7 +2869,7 @@ Likely and unlikely word sequences
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename chain.eps
+	filename graphics/chain.eps
 	width 35col%
 
 \end_inset
@@ -3377,7 +3398,7 @@ name "fig:Creating-a-quotient"
 
 
 \begin_inset Graphics
-	filename similar.eps
+	filename graphics/similar.eps
 	width 55col%
 
 \end_inset
@@ -3477,6 +3498,7 @@ The first issue to be cleared out of the way is the use of the word
 LatexCommand href
 name "quotienting"
 target "https://en.wikipedia.org/wiki/Quotient"
+literal "false"
 
 \end_inset
 
@@ -3829,7 +3851,7 @@ A stalk and it's projection
 
 
 \begin_inset Graphics
-	filename stalk.eps
+	filename graphics/stalk.eps
 	width 60col%
 
 \end_inset
@@ -3889,7 +3911,7 @@ A corn stalk, a stack of puzzle pieces
 
 
 \begin_inset Graphics
-	filename cornstalk.jpg
+	filename graphics/cornstalk.jpg
 	lyxscale 50
 	width 25text%
 
@@ -3897,7 +3919,7 @@ A corn stalk, a stack of puzzle pieces
 
 
 \begin_inset Graphics
-	filename stack-jigsaw-puzzle-pieces.jpg
+	filename graphics/stack-jigsaw-puzzle-pieces.jpg
 	width 25col%
 
 \end_inset
@@ -4160,7 +4182,7 @@ Germs and connectors project consistently
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename project.eps
+	filename graphics/project.eps
 	width 60col%
 
 \end_inset
@@ -4342,7 +4364,7 @@ The problem, and it's intended solution
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename sheaf.eps
+	filename graphics/sheaf.eps
 	width 45col%
 
 \end_inset
@@ -4711,8 +4733,9 @@ fly
 
 , one above another.
  Each phrase or section can be visualized as a botanical branch or botanical
- leaf branching off the central stalk. The projection of all of the stalks
- obtained from collocation is shown below, in figure 
+ leaf branching off the central stalk.
+ The projection of all of the stalks obtained from collocation is shown
+ below, in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:N-gram-base"
@@ -4763,7 +4786,7 @@ name "fig:N-gram-base"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corpus-ngram.eps
+	filename graphics/corpus-ngram.eps
 	width 50col%
 
 \end_inset
@@ -4863,7 +4886,7 @@ name "fig:Dependency-base"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corpus-dep.eps
+	filename graphics/corpus-dep.eps
 	width 75col%
 
 \end_inset
@@ -4925,6 +4948,7 @@ By collapsing in this way, one obtains a natural place to store
 LatexCommand href
 name "marginal distributions"
 target "https://en.wikipedia.org/wiki/Marginal_distribution"
+literal "false"
 
 \end_inset
 
@@ -5023,14 +5047,14 @@ A Sheaf of Stalks; a Sheaf of Paper
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename sheaf-of-stalks.jpg
+	filename graphics/sheaf-of-stalks.jpg
 	width 35col%
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename sheaf-of-papers.jpg
+	filename graphics/sheaf-of-papers.jpg
 	width 51col%
 
 \end_inset
@@ -5898,6 +5922,7 @@ If one was working with a dependency parse, as opposed to 3-grams, and if
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kart2014"
+literal "true"
 
 \end_inset
 
@@ -6041,7 +6066,7 @@ Corn field; stalk field
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename corn-field.jpg
+	filename graphics/corn-field.jpg
 	lyxscale 50
 	width 40col%
 
@@ -6053,7 +6078,7 @@ Corn field; stalk field
 
 
 \begin_inset Graphics
-	filename stalk-field.eps
+	filename graphics/stalk-field.eps
 	lyxscale 50
 	width 25col%
 
@@ -6115,7 +6140,7 @@ name "fig:General-Sheaf"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename section-field.eps
+	filename graphics/section-field.eps
 	lyxscale 60
 	width 45col%
 
@@ -6409,7 +6434,7 @@ Since
 \begin_inset Formula $F\left(V\right)$
 \end_inset
 
-to be smaller, also.
+ to be smaller, also.
  The restriction morphism trims away the unwanted parts.
  The trimming needs to stay faithful, to preserve the structure.
  Thus
@@ -6707,7 +6732,7 @@ In the above, the phrase
 Gluing is perhaps not as trivial as it sounds.
  It will be seen later on that gluing is essentially the same thing as parsing.
  Obtaining a successful parse is the same thing as assembling a valid section
- ut of the parts.
+ out of the parts.
  In the case of natural language, a parse succeeds if and only if a sentence
  is grammatically valid.
  But of course! The sections of a natural language sheaf are exactly the
@@ -6771,6 +6796,7 @@ The sheaf axioms presented above are standardized and are presented in many
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Eisenbud2000"
+literal "true"
 
 \end_inset
 
@@ -6778,6 +6804,7 @@ key "Eisenbud2000"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "MacLane1992"
+literal "true"
 
 \end_inset
 
@@ -6815,6 +6842,7 @@ open subgraphs
 LatexCommand href
 name "Grothendieck topology,"
 target "https://en.wikipedia.org/wiki/Grothendieck_topology"
+literal "false"
 
 \end_inset
 
@@ -6869,6 +6897,7 @@ The use of the jigsaw-puzzle piece analogy to define connectors is strongly
 LatexCommand href
 name "Čech nerve"
 target "https://en.wikipedia.org/wiki/Nerve_of_a_covering"
+literal "false"
 
 \end_inset
 
@@ -7004,6 +7033,7 @@ It can be argued that orthodox corpus linguistics studies the sheaf of surface
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Louw2007"
+literal "true"
 
 \end_inset
 
@@ -8015,6 +8045,7 @@ Several comments are in order.
 LatexCommand href
 name "binary discrimination"
 target "https://en.wikipedia.org/wiki/Binary_classification"
+literal "false"
 
 \end_inset
 
@@ -8025,6 +8056,7 @@ target "https://en.wikipedia.org/wiki/Binary_classification"
 LatexCommand href
 name "ROC curves"
 target "https://en.wikipedia.org/wiki/Receiver_operating_characteristic"
+literal "false"
 
 \end_inset
 
@@ -8127,7 +8159,7 @@ This observation of recursion, of course, raises the question: can clustering
 \end_layout
 
 \begin_layout Subsection*
-Related concepts: neurlal nets, adagram.
+Related concepts: neural nets, adagram.
 \end_layout
 
 \begin_layout Standard
@@ -8155,6 +8187,7 @@ orig neural net:
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bengio2003"
+literal "true"
 
 \end_inset
 
@@ -8530,7 +8563,7 @@ Three stalks and two typed links
 
 
 \begin_inset Graphics
-	filename grammar.eps
+	filename graphics/grammar.eps
 	width 40col%
 
 \end_inset
@@ -8795,7 +8828,7 @@ Two unconnected seeds
 
 
 \begin_inset Graphics
-	filename bad-graph.eps
+	filename graphics/bad-graph.eps
 	width 55col%
 
 \end_inset
@@ -8854,7 +8887,7 @@ Parsing is the creation of links
 
 
 \begin_inset Graphics
-	filename parsing.eps
+	filename graphics/parsing.eps
 	width 45col%
 
 \end_inset
@@ -9277,6 +9310,7 @@ The first step is to observe that the presented algorithm is essentially
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1993"
+literal "true"
 
 \end_inset
 
@@ -9290,6 +9324,7 @@ The second step is to observe that the theory of Link Grammar is more-or-less
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kart2014"
+literal "true"
 
 \end_inset
 
@@ -9298,6 +9333,7 @@ key "Kart2014"
 LatexCommand href
 name "Wikipedia"
 target "https://en.wikipedia.org/wiki/Pregroup_grammar"
+literal "false"
 
 \end_inset
 
@@ -9387,7 +9423,7 @@ fly
 \begin_inset Quotes erd
 \end_inset
 
- occurs as a noun (the subject, with dterminer and adjective) in one sentence,
+ occurs as a noun (the subject, with determiner and adjective) in one sentence,
  and a verb (with subject and object) in the other.
  Suppose that the equivalence relation, described in the clustering section,
  also has the power to discern that this one word should really be split
@@ -9457,7 +9493,7 @@ name "fig:Polymorphism"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename polymorph.eps
+	filename graphics/polymorph.eps
 	width 75col%
 
 \end_inset
@@ -9740,6 +9776,7 @@ If one uses a technique, such as MST parsing
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yuret1998"
+literal "true"
 
 \end_inset
 
@@ -9776,6 +9813,7 @@ The N-gram
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rosen1996"
+literal "true"
 
 \end_inset
 
@@ -9783,6 +9821,7 @@ key "Rosen1996"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guthrie2006"
+literal "true"
 
 \end_inset
 
@@ -9917,7 +9956,7 @@ fly
 \end_inset
 
 : one tagged as a noun, the other as a verb.
- The observation of hyperfine-grained parts of speech can push this agressively
+ The observation of hyperfine-grained parts of speech can push this aggressively
  farther.
  
 \end_layout
@@ -9986,7 +10025,7 @@ apple
 \begin_layout Standard
 To summarize: the arrangement of vertexes into polymorphic seeds and sections
  enables the vertexes to be tagged with extra information.
- The tags are the connectors themselves: thier presence or absence carries
+ The tags are the connectors themselves: their presence or absence carries
  information.
  That extra information can be treated as 
 \begin_inset Quotes eld
@@ -9997,7 +10036,7 @@ semantic information
 \end_inset
 
 , identifying different types or kinds, rather than as purely syntactic
- information about arrangments and relationships.
+ information about arrangements and relationships.
 \end_layout
 
 \begin_layout Section*

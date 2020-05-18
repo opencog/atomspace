@@ -42,10 +42,10 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
         for (int i = 0; i < len; ++i) {
             name += alphanum[randGen().randint() % (sizeof(alphanum) - 1)];
         }
-        result = as.get_handle(t, name);
+        result = as.get_handle(t, std::move(std::string(name)));
     } while (as.is_valid_handle(result));
 
-    return as.add_node(t, name);
+    return as.add_node(t, std::move(name));
 }
 
 /// Return true if all of h was removed.

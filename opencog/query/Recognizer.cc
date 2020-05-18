@@ -28,8 +28,8 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
 #define dbgprt(f, varargs...)
@@ -75,7 +75,7 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 	return false;
 }
 
-bool Recognizer::initiate_search(PatternMatchCallback& pmc)
+bool Recognizer::perform_search(PatternMatchCallback& pmc)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -240,6 +240,7 @@ bool Recognizer::grounding(const GroundingMap& var_soln,
 	Handle rule = term_soln.at(_root);
 
 	if (rule != _root) {
+		LOCK_PE_MUTEX;
 		_rules.insert(rule);
 	}
 

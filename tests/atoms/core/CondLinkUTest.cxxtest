@@ -59,12 +59,10 @@ public:
 	void tearDown(void);
 
 	void test_singleton(void);
-
 	void test_nondefault_exp(void);
-
 	void test_wrapped_exp();
-
 	void test_grounded_cond();
+	void test_knobs();
 };
 
 void CondLinkUTest::tearDown(void)
@@ -90,6 +88,8 @@ void CondLinkUTest::test_singleton()
 	printf("expected %s\n", baz->to_string().c_str());
 
 	TS_ASSERT(result == baz);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void CondLinkUTest::test_nondefault_exp()
@@ -105,6 +105,8 @@ void CondLinkUTest::test_nondefault_exp()
 	printf("expected %s\n", baz->to_string().c_str());
 
 	TS_ASSERT(result == baz);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void CondLinkUTest::test_wrapped_exp()
@@ -120,6 +122,8 @@ void CondLinkUTest::test_wrapped_exp()
 	printf("expected %s\n", baz->to_string().c_str());
 
 	TS_ASSERT(result == baz);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void CondLinkUTest::test_grounded_cond()
@@ -135,4 +139,47 @@ void CondLinkUTest::test_grounded_cond()
 	printf("expected %s\n", baz->to_string().c_str());
 
 	TS_ASSERT(result == baz);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void CondLinkUTest::test_knobs()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! put-00)");
+
+	Handle baz = eval->eval_h("(Not (And (Predicate \"$a\") (Not (Predicate \"$b\"))))");
+	printf("p00 got %s\n", result->to_string().c_str());
+	printf("p00 expected %s\n\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+
+	result = eval->eval_h("(cog-execute! put-01)");
+
+	baz = eval->eval_h("(Not (And (Predicate \"$a\") (Predicate \"$b\")))");
+	printf("p01 got %s\n", result->to_string().c_str());
+	printf("p01 expected %s\n\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+
+	result = eval->eval_h("(cog-execute! put-10)");
+
+	baz = eval->eval_h("(And (Predicate \"$a\") (Not (Predicate \"$b\")))");
+	printf("p10 got %s\n", result->to_string().c_str());
+	printf("p10 expected %s\n\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+
+	result = eval->eval_h("(cog-execute! put-11)");
+
+	baz = eval->eval_h("(And (Predicate \"$a\") (Predicate \"$b\"))");
+	printf("p11 got %s\n", result->to_string().c_str());
+	printf("p11 expected %s\n\n", baz->to_string().c_str());
+
+	TS_ASSERT(result == baz);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

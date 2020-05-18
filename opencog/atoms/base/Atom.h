@@ -243,7 +243,8 @@ public:
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
-        return compute_hash();
+        _content_hash = compute_hash();
+        return _content_hash;
     }
 
     virtual const std::string& get_name() const {
@@ -305,7 +306,7 @@ public:
     std::string valuesToString() const;
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize() const;
+    size_t getIncomingSetSize(AtomSpace* = nullptr) const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms

@@ -33,6 +33,9 @@ using namespace opencog;
 void PrenexLink::init(void)
 {
 	Type t = get_type();
+	if (PRENEX_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"PrenexLinks are private and cannot be instantiated.");
 	if (not nameserver().isA(t, PRENEX_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
@@ -47,8 +50,8 @@ PrenexLink::PrenexLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-PrenexLink::PrenexLink(const HandleSeq& oset, Type t)
-	: RewriteLink(oset, t)
+PrenexLink::PrenexLink(const HandleSeq&& oset, Type t)
+	: RewriteLink(std::move(oset), t)
 {
 	if (skip_init(t)) return;
 	init();
@@ -61,7 +64,7 @@ PrenexLink::PrenexLink(const HandleSeq& oset, Type t)
 /// If the result of beta reduction is an expression with bound
 /// variables in it, then those bound variables should be moved
 /// to the outermost link, viz, be put into prenex form. All of
-/// the analysis of the term has alrady happened; here, we just
+/// the analysis of the term has already happened; here, we just
 /// need to assemble the final prenex form.
 //
 Handle PrenexLink::reassemble(Type prenex,

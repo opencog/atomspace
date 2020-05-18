@@ -16,8 +16,8 @@ using namespace opencog;
 
 Handle TimesLink::one;
 
-TimesLink::TimesLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+TimesLink::TimesLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
@@ -47,11 +47,14 @@ void TimesLink::init(void)
 ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return get_value(as, silent, fi);
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
@@ -80,7 +83,7 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, TIMES_LINK));
+		Handle foo(createLink(std::move(seq), TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
 		return ap->delta_reduce(as, silent);
 	}
@@ -102,9 +105,9 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	// If either one is the unit, then just drop it.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
-		return sample_stream(vj, vjtype);
+		return vj;
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return sample_stream(vi, vitype);
+		return vi;
 
    if (nameserver().isA(vjtype, NUMBER_NODE))
    {

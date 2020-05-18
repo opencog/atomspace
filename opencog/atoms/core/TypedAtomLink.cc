@@ -57,14 +57,14 @@ void TypedAtomLink::init()
 
 }
 
-TypedAtomLink::TypedAtomLink(const HandleSeq& oset, Type t)
-	: UniqueLink(oset, t)
+TypedAtomLink::TypedAtomLink(const HandleSeq&& oset, Type t)
+	: UniqueLink(std::move(oset), t)
 {
 	init();
 }
 
 TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), TYPED_ATOM_LINK)
+	: UniqueLink({name, defn}, TYPED_ATOM_LINK)
 {
 	init();
 }

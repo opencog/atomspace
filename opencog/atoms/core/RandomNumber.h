@@ -48,7 +48,7 @@ protected:
 	void init();
 
 public:
-	RandomNumberLink(const HandleSeq&, Type=RANDOM_NUMBER_LINK);
+	RandomNumberLink(const HandleSeq&&, Type=RANDOM_NUMBER_LINK);
 	RandomNumberLink(const RandomNumberLink&) = delete;
 	RandomNumberLink& operator=(const RandomNumberLink&) = delete;
 

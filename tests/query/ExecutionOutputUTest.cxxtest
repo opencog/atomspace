@@ -234,7 +234,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr situation(createBindLink(situ->getOutgoingSet()));
+	BindLinkPtr situation(BindLinkCast(situ));
 
 	Handle pred =
 	al(BIND_LINK,
@@ -244,7 +244,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr predicament(createBindLink(pred->getOutgoingSet()));
+	BindLinkPtr predicament(BindLinkCast(pred));
 
 	// Now perform the search.
 	DefaultImplicator simpl(&as);
@@ -252,7 +252,8 @@ void ExecutionOutputUTest::test_varsub(void)
 	situation->satisfy(simpl);
 
 	// The result_list contains a list of the grounded expressions.
-	Handle res = HandleCast(*simpl.get_result_set().begin());
+	simpl.get_result_queue()->open();
+	Handle res = HandleCast(simpl.get_result_queue()->value_pop());
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
@@ -262,7 +263,8 @@ void ExecutionOutputUTest::test_varsub(void)
 	predicament->satisfy(pimpl);
 
 	// The result_list contains a list of the grounded expressions.
-	Handle del = HandleCast(*pimpl.get_result_set().begin());
+	pimpl.get_result_queue()->open();
+	Handle del = HandleCast(pimpl.get_result_queue()->value_pop());
 	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 
@@ -358,7 +360,7 @@ void ExecutionOutputUTest::test_value(void)
 	eval.eval("(load-from-path \"tests/query/exec-gsn.scm\")");
 
 	ValuePtr result = eval.eval_v("(cog-execute! exec-query-handle)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	ValueSeq vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -366,7 +368,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-link-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -374,7 +376,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-string-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
@@ -382,7 +384,7 @@ void ExecutionOutputUTest::test_value(void)
 
 	//------------
 	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
-	TS_ASSERT_EQUALS(result->get_type(), LINK_VALUE);
+	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)

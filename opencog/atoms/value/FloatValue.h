@@ -58,10 +58,12 @@ public:
 
 	const std::vector<double>& value() const { update(); return _value; }
 
-	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent = "") const;
+	/** Returns a string representation of the value. */
+	virtual std::string to_string(const std::string& indent = "") const
+	{ return to_string(indent, _type); }
+	std::string to_string(const std::string& indent, Type) const;
 
-	/** Returns true if two atoms are equal.  */
+	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
 };
 
@@ -82,6 +84,7 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 // Scalar multiplication and addition
 std::vector<double> plus(double, const std::vector<double>&);
 std::vector<double> minus(double, const std::vector<double>&);
+std::vector<double> minus(const std::vector<double>&, double);
 std::vector<double> times(double, const std::vector<double>&);
 std::vector<double> divide(double, const std::vector<double>&);
 
@@ -92,6 +95,10 @@ ValuePtr plus(double f, const FloatValuePtr& fvp) {
 inline
 ValuePtr minus(double f, const FloatValuePtr& fvp) {
 	return createFloatValue(minus(f, fvp->value()));
+}
+inline
+ValuePtr minus(const FloatValuePtr& fvp, double f) {
+	return createFloatValue(minus(fvp->value(), f));
 }
 inline
 ValuePtr times(double f, const FloatValuePtr& fvp) {
@@ -108,22 +115,37 @@ std::vector<double> minus(const std::vector<double>&, const std::vector<double>&
 std::vector<double> times(const std::vector<double>&, const std::vector<double>&);
 std::vector<double> divide(const std::vector<double>&, const std::vector<double>&);
 
-// Vector multiplication and addition
+/// Vector multiplication and addition. When operating on an object
+/// times itself, take a sample first; this is needed to correctly
+/// handle streaming values, as they issue new values every time
+/// they are called. Failing to sample results in violations...
 inline
 ValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(plus(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(plus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(plus(sample, fvpb->value()));
 }
 inline
 ValuePtr minus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(minus(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(minus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(minus(sample, fvpb->value()));
 }
 inline
 ValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(times(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(times(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(times(sample, fvpb->value()));
 }
 inline
 ValuePtr divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(divide(fvpa->value(), fvpb->value()));
+	if (fvpa != fvpb)
+		return createFloatValue(divide(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(divide(sample, fvpb->value()));
 }
 
 /** @}*/

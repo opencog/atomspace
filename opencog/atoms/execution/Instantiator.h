@@ -45,36 +45,52 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
-	const GroundingMap *_vmap;
-	bool _halt;
 
-	/**
-	 * Instatiator removes first level QuoteLinks and in such cases
-	 * returns verbatim atoms. This is incorrect when the QuoteLink
-	 * occurs in any scoped link (anything inheriting from ScopeLink,
-	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
-	 * their own scope. We must avoid damaging quotes for these atoms.
-	 */
-	Context _context;
+	struct Instate
+	{
+		Instate(const GroundingMap& varmap) :
+			_varmap(varmap),
+			_context(false),
+			_consume_quotations(true),
+			_needless_quotation(true),
+			_halt(false)
+		{}
+		const GroundingMap& _varmap;
 
-	/**
-	 * Consuming quotation should only take place when this is called
-	 * by a pattern matcher function, such as BindLink, GetLink and
-	 * PutLink, etc, as part of the substitution mechanics. Otherwise,
-	 * consuming quotes systematically may changes the semantics of
-	 * the program. This flag is here properly control that.
-	 */
-	bool _consume_quotations;
+		/**
+		 * Instatiator removes first level QuoteLinks and in such cases
+		 * returns verbatim atoms. This is incorrect when the QuoteLink
+		 * occurs in any scoped link (anything inheriting from ScopeLink,
+		 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
+		 * their own scope. We must avoid damaging quotes for these atoms.
+		 */
+		Context _context;
 
-	/**
-	 * In case _consume_quotations is set to false, this can be set
-	 * temporarily to false when consuming the quotation would change
-	 * the semantics.
-	 *
-	 * TODO: maybe this can eliminate the need for
-	 * _avoid_discarding_quotes_level
-	 */
-	bool _needless_quotation;
+		/**
+		 * Consuming quotation should only take place when this is called
+		 * by a pattern matcher function, such as BindLink, GetLink and
+		 * PutLink, etc, as part of the substitution mechanics. Otherwise,
+		 * consuming quotes systematically may changes the semantics of
+		 * the program. This flag is here properly control that.
+		 */
+		bool _consume_quotations;
+
+		/**
+		 * In case _consume_quotations is set to false, this can be set
+		 * temporarily to false when consuming the quotation would change
+		 * the semantics.
+		 *
+		 * TODO: maybe this can eliminate the need for
+		 * _avoid_discarding_quotes_level
+		 */
+		bool _needless_quotation;
+
+		/** Avoid infinite recursion. */
+		bool _halt;
+
+		/** Non-printing throws */
+		bool _silent;
+	};
 
 	/**
 	 * Recursively walk a tree starting with the root of the
@@ -94,11 +110,14 @@ private:
 	 * any execution. See also PutLink, which does substitution.
 	 * (actually, beta reduction).
 	 */
-	Handle walk_tree(const Handle& tree, bool silent=false);
-	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
+	Handle walk_tree(const Handle& tree,
+	                 Instate&) const;
+	bool walk_sequence(HandleSeq&, const HandleSeq&,
+	                   Instate&) const;
 
 	/// Substitute, but do not execute ExecutionOutputLinks
-	Handle reduce_exout(const Handle& exout, bool silent=false);
+	Handle reduce_exout(const Handle& exout,
+	                    Instate&) const;
 
 	/**
 	 * Return true iff the following atom type may not match to
@@ -116,27 +135,9 @@ private:
 public:
 	Instantiator(AtomSpace* as);
 
-	void ready(AtomSpace* as)
-	{
-		_as = as;
-		_halt = false;
-	}
-
-	void clear()
-	{
-		_as = nullptr;
-		_vmap = nullptr;
-		_consume_quotations = true;
-	}
-
-	void reset_halt()
-	{
-		_halt = false;
-	}
-
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,
-	                     bool silent=false);
+	                     bool silent=false) const;
 
 	ValuePtr execute(const Handle& expr, bool silent=false);
 };

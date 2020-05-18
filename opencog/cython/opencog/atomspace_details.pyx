@@ -3,7 +3,8 @@ from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from atomspace cimport *
+# from atomspace cimport *
+
 
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
@@ -115,7 +116,7 @@ cdef class AtomSpace:
         if self.atomspace == NULL:
             return None
         cdef string name = atom_name.encode('UTF-8')
-        cdef cHandle result = self.atomspace.add_node(t, name)
+        cdef cHandle result = self.atomspace.xadd_node(t, name)
 
         if result == result.UNDEFINED: return None
         atom = Atom.createAtom(result);
@@ -134,7 +135,7 @@ cdef class AtomSpace:
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
-        result = self.atomspace.add_link(t, handle_vector)
+        result = self.atomspace.xadd_link(t, handle_vector)
         if result == result.UNDEFINED: return None
         atom = Atom.createAtom(result);
         if tv :

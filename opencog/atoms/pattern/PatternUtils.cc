@@ -302,7 +302,7 @@ void get_bridged_components(const HandleSet& vars,
 	// The user might want to reject such bridges, but allow each
 	// opt individually, as long as they don't bridge. As of today,
 	// specifying this kind of pattern would take some hard work,
-	// (I'm not sure its even possible with toeay's API) and so it
+	// (I'm not sure its even possible with today's API) and so it
 	// seems very unlikely that any user would want this, and thus
 	// very unlikely that they'll hit this bug.
 }

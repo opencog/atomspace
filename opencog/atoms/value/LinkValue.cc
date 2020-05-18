@@ -20,14 +20,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
+
+HandleSeq LinkValue::to_handle_seq(void) const
+{
+	update();
+	HandleSeq hs;
+	for (const ValuePtr& v : _value)
+	{
+		if (v->is_atom())
+			hs.push_back(HandleCast(v));
+	}
+	return hs;
+}
+
+// ==============================================================
+
 bool LinkValue::operator==(const Value& other) const
 {
-	if (LINK_VALUE != other.get_type()) return false;
+	// Derived classes use this, so use get_type()
+	if (get_type() != other.get_type()) return false;
 
 	const LinkValue* lov = (const LinkValue*) &other;
 
@@ -44,6 +61,7 @@ bool LinkValue::operator==(const Value& other) const
 
 std::string LinkValue::to_string(const std::string& indent) const
 {
+	update();
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 	for (ValuePtr v :_value)
 		rv += std::string(" ") + v->to_string(indent + "   ") + "\n";

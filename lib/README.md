@@ -16,3 +16,7 @@ Memory leaks:      `valgrind --leak-check=full`
 Memory non-leaks:  `valgrind --leak-check=full --show-leak-kinds=all`
 
 Memory profile:    `valgrind --tool=massif`
+
+CPU profile:       `valgrind --tool=callgrind`
+
+then: `callgrind_annotate callgrind.out.nnnn`

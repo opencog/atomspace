@@ -29,6 +29,16 @@ using namespace opencog;
 
 void UniqueLink::init(bool allow_open)
 {
+	if (UNIQUE_LINK == _type)
+		throw InvalidParamException(TRACE_INFO,
+			"UniqueLinks are private and cannot be instantiated.");
+	if (not nameserver().isA(_type, UNIQUE_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(_type);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a UniqueLink, got %s", tname.c_str());
+	}
+
 	if (allow_open)
 	{
 		FreeLink::init();
@@ -59,16 +69,9 @@ void UniqueLink::init(bool allow_open)
 	}
 }
 
-UniqueLink::UniqueLink(const HandleSeq& oset, Type type)
-	: FreeLink(oset, type)
+UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
+	: FreeLink(std::move(oset), type)
 {
-	if (not nameserver().isA(type, UNIQUE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(type);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a UniqueLink, got %s", tname.c_str());
-	}
-
 	// Derived types have thier own initialization
 	if (UNIQUE_LINK != type) return;
 	init(true);

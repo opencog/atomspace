@@ -177,15 +177,6 @@ bool is_well_typed(Type t);
 bool is_well_typed(const TypeSet& ts);
 
 /**
- * Return shallow type intersection between lhs and rhs. Take into
- * account type inheritance as well.
- */
-Type type_intersection(Type lhs, Type rhs);
-TypeSet type_intersection(Type lhs, const TypeSet& rhs);
-TypeSet type_intersection(const TypeSet& lhs,
-                          const TypeSet& rhs);
-
-/**
  * Generate a VariableSet of the free variables of a given atom h.
  */
 VariableSetPtr gen_variable_set(const Handle& h);
@@ -216,7 +207,7 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl);
  * element, return a VariableList if ordered is true, or a VariableSet
  * if ordered is false.
  */
-Handle gen_vardecl(const HandleSeq& varlist, bool ordered=true);
+Handle gen_vardecl(const HandleSeq&& varlist, bool ordered=true);
 
 /** @}*/
 }

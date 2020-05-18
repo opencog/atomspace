@@ -18,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The TimesLink implements the mathematical operation of "times".
+ * The TimesLink implements the arithmetic operation of "times".
  */
 class TimesLink : public ArithmeticLink
 {
@@ -30,8 +30,9 @@ protected:
 	void init(void);
 
 public:
-	TimesLink(const HandleSeq&, Type=TIMES_LINK);
+	TimesLink(const HandleSeq&&, Type=TIMES_LINK);
 	TimesLink(const Handle& a, const Handle& b);
+
 	TimesLink(const TimesLink&) = delete;
 	TimesLink& operator=(const TimesLink&) = delete;
 

@@ -30,8 +30,10 @@ TARGET_LINK_LIBRARIES(smob
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
+	container
 	lambda
 	execution
+	atomflow
 	atomcore
 	atombase
 	truthvalue

@@ -45,20 +45,20 @@ using namespace opencog;
  */
 /* ======================================================== */
 
-// The macro POPSTK has an OC_ASSERT when DEBUG is defined, so we keep
+// The macro POPSTK has an OC_ASSERT when QDEBUG is defined, so we keep
 // that #define around, although it's not clear why that OC_ASSERT
 // wouldn't be kept no matter what (it's not like it's gonna take up a
 // lot of resources).
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
 #endif
 
 
-#ifdef DEBUG
+#ifdef QDEBUG
 static inline void log(const Handle& h)
 {
 	LAZY_LOG_FINE << h->to_short_string();
@@ -80,7 +80,7 @@ static inline void log(const Handle& h) {}
 /* ======================================================== */
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
-#ifdef DEBUG
+#ifdef QDEBUG
    #define POPSTK(stack,soln) {         \
       OC_ASSERT(not stack.empty(),      \
            "Unbalanced stack " #stack); \
@@ -454,7 +454,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		_perm_odo.clear();
 
 	// If we are here, we've got possibilities to explore.
-#ifdef DEBUG
+#ifdef QDEBUG
 	int num_perms = 0;
 	if (logger().is_fine_enabled())
 	{
@@ -813,7 +813,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		glob_grd[glob] = glob_seq.size();
 		_glob_state[osp] = {glob_grd, glob_pos_stack};
 
-		Handle glp(createLink(glob_seq, LIST_LINK));
+		Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
 
 		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
@@ -860,7 +860,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		if (GLOB_NODE == ptype)
 		{
 			HandleSeq glob_seq;
-			PatternTermPtr glob(osp[ip]);
+			const PatternTermPtr& glob(osp[ip]);
 
 			// A glob may appear more than once in the pattern,
 			// so check if that's the case. If we have already
@@ -969,45 +969,28 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			}
 
 			// Try to match as many atoms as possible.
-			bool tc;
-			do
+			// Iterate from the maximum allowed number of match to the minimum.
+			// Till valid match is found.
+			const GlobInterval& interval = _variables->get_interval(ohp);
+			for (auto i = std::min({interval.second, osg_size - jg, last_grd - 1});
+			     i >= interval.first; i--)
 			{
-				tc = tree_compare(glob, osg[jg], CALL_GLOB);
+				HandleSeq osg_seq = HandleSeq(osg.begin() + jg,
+				                              osg.begin() + i + jg);
+				Handle wr_h = createLink(osg_seq, LIST_LINK);
+
+				auto tc = tree_compare(glob, wr_h, CALL_GLOB);
 				if (tc)
 				{
-					// Can't match more than it did last time.
-					if (glob_seq.size()+1 >= last_grd)
-					{
-						jg--;
-						break;
-					}
-
-					// Can't exceed the upper bound.
-					if (not _variables->is_upper_bound(ohp, glob_seq.size()+1))
-					{
-						jg--;
-						break;
-					}
-
-					glob_seq.push_back(osg[jg]);
-
-					// See if we can match the next one.
-					jg++;
+					glob_seq.insert(glob_seq.end(),
+					                osg_seq.begin(),
+					                osg_seq.end());
+					jg += i - 1;
+					break;
 				}
-				// Can't match more, e.g. a type mis-match
-				else jg--;
-			} while (tc and jg<osg_size);
-
-			// Try again if we can't ground the glob after all.
-			if (0 == glob_seq.size())
-			{
-				backtrack(true);
-				continue;
 			}
 
-			// Try again if we can't ground enough atoms to satisfy
-			// the lower bound restriction.
-			if (not _variables->is_lower_bound(ohp, glob_seq.size()))
+			if (0 == glob_seq.size())
 			{
 				backtrack(true);
 				continue;
@@ -1127,7 +1110,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 			return variable_compare(hp, hg);
 
 		// Report other variables that might be found.
-		if (VARIABLE_NODE == tp)
+		if (VARIABLE_NODE == tp or GLOB_NODE == tp)
 			return _pmc.scope_match(hp, hg);
 	}
 
@@ -1342,7 +1325,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			// there isn't any direct way of doing this (at this time).
 			// So hack around this by asking the AtomSpace about it,
 			// instead.
-			Handle hup(hg->getAtomSpace()->get_link(t, oset));
+			Handle hup(hg->getAtomSpace()->get_link(t, std::move(oset)));
 			if (nullptr == hup) return false;
 			return explore_type_branches(parent, hup, clause);
 		}
@@ -1885,6 +1868,13 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (not is_evaluatable(clause_root))
 	{
 		clause_grounding[clause_root] = hg;
+
+		// Handle the highly unusual case of the top-most clause
+		// being a GlobNode. We were unable to record this earlier,
+		// in variable_compare(), so we do it here.
+		if (clause_root->get_type() == GLOB_NODE)
+			var_grounding[clause_root] = hg;
+
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
 
@@ -1977,7 +1967,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		joiner = next_joint;
 		curr_root = next_clause;
 
-		DO_LOG({logmsg("Next optional clause is", curr_root);})
 		if (nullptr == curr_root)
 		{
 			DO_LOG({logger().fine("==================== FINITO BANDITO!");
@@ -1986,6 +1975,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
+			DO_LOG({logmsg("Next optional clause is", curr_root);})
+
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
@@ -2009,7 +2000,7 @@ bool PatternMatchEngine::do_next_clause(void)
  * The "issued" set contains those clauses which are currently in play,
  * i.e. those for which a grounding is currently being explored. Both
  * grounded, and as-yet-ungrounded clauses may be in this set.  The
- * sole reason of this set is to avoid infinite resursion, i.e. of
+ * sole reason of this set is to avoid infinite recursion, i.e. of
  * re-identifying the same clause over and over as unsolved.
  *
  * The words "solved" and "grounded" are used as synonyms through out
@@ -2406,12 +2397,11 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	if (_pat->always.size() == 0)
 		return _pmc.grounding(var_soln, term_soln);
 
-	// If we are here, we need to record groundings, until later,
-	// when we find out if the for-all clauses were satsified.
-
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
+	// If we are here, we need to record groundings, until later,
+	// when we find out if the for-all clauses were satsified.
 	_var_ground_cache.push_back(var_soln);
 	_term_ground_cache.push_back(term_soln);
 
@@ -2450,7 +2440,7 @@ bool PatternMatchEngine::report_forall(void)
  * of the starter clause, looking for a match.  The idea here is that
  * it is much easier to traverse a connected graph looking for the
  * appropriate subgraph (pattern) than it is to try to explore the
- * whole atomspace, at random.  The user callback `initiate_search()`
+ * whole atomspace, at random.  The user callback `perform_search()`
  * should call this method, suggesting a clause to start with, and
  * where in the clause the search should begin.
  *
@@ -2543,8 +2533,25 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	// giant variable, matching almost anything. Keep these folks
 	// happy, and record the suggested grounding. There's nowhere
 	// else to do this, so we do it here.
-	if (term->get_type() == VARIABLE_NODE)
+	Type tt = term->get_type();
+	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
 		var_grounding[term] = grnd;
+
+#ifdef QDEBUG
+	// This is an expensive, CPU-wasting check to catch the bug described
+	// in https://github.com/opencog/atomspace/issues/2315
+	// It would be nice to have a better fix, but its not clear what
+	// that fix should be; its a thorny architectural problem.
+	for (const Handle &v : _variables->varset)
+	{
+		if (is_unquoted_unscoped_in_tree(clause, v) and
+		    var_grounding.find(v) == var_grounding.end())
+		{
+			throw RuntimeException(TRACE_INFO,
+			      "Unable to evaluate clause with ungrounded variables!");
+		}
+	}
+#endif
 
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
@@ -2747,7 +2754,7 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 
 /* ======================================================== */
 
-#ifdef DEBUG
+#ifdef QDEBUG
 void PatternMatchEngine::print_solution(
 	const GroundingMap &vars,
 	const GroundingMap &clauses)
@@ -2806,10 +2813,11 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
+		// AbsentLink's won't be grounded...
 		if (not m->second)
 		{
 			Handle mf(m->first);
-			logmsg("ERROR: ungrounded clause", mf);
+			logmsg("Ungrounded clause", mf);
 			continue;
 		}
 		std::string str = m->second->to_short_string();

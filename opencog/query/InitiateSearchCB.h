@@ -53,7 +53,7 @@ public:
 	 * in order to drive a reasonably-fast search.
 	 */
 	virtual void set_pattern(const Variables&, const Pattern&);
-	virtual bool initiate_search(PatternMatchCallback&);
+	virtual bool perform_search(PatternMatchCallback&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -64,6 +64,7 @@ protected:
 	const Variables* _variables;
 	const Pattern* _pattern;
 	const HandleSet* _dynamic;
+	bool _recursing;
 
 	PatternLinkPtr _pl;
 	void jit_analyze(void);
@@ -75,8 +76,8 @@ protected:
 	struct Choice
 	{
 		Handle clause;
-		Handle best_start;
 		Handle start_term;
+		HandleSeq search_set;
 	};
 	Handle _curr_clause;
 	std::vector<Choice> _choices;
@@ -92,6 +93,7 @@ protected:
 
 	bool setup_neighbor_search(void);
 	bool setup_no_search(void);
+	bool setup_deep_type_search(void);
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 
@@ -100,7 +102,7 @@ protected:
 	AtomSpace *_as;
 };
 
-// Primaliry for gdb debugging, see
+// Primarily for gdb debugging, see
 // https://wiki.opencog.org/w/Development_standards#Pretty_Print_OpenCog_Objects
 std::string oc_to_string(const InitiateSearchCB& iscb,
                          const std::string& indent=empty_string);

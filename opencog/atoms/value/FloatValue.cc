@@ -47,9 +47,10 @@ bool FloatValue::operator==(const Value& other) const
 
 // ==============================================================
 
-std::string FloatValue::to_string(const std::string& indent) const
+std::string FloatValue::to_string(const std::string& indent, Type t) const
 {
-	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	update();
+	std::string rv = indent + "(" + nameserver().getTypeName(t);
 	for (double v :_value)
 	{
 		char buf[40];
@@ -84,6 +85,16 @@ std::vector<double> opencog::minus(double scalar, const std::vector<double>& fv)
 	return diff;
 }
 
+std::vector<double> opencog::minus(const std::vector<double>& fv, double scalar)
+{
+	size_t len = fv.size();
+	std::vector<double> diff(len);
+	for (size_t i=0; i<len; i++)
+		diff[i] = fv[i] - scalar;
+
+	return diff;
+}
+
 /// Scalar multiplication
 std::vector<double> opencog::times(double scalar, const std::vector<double>& fv)
 {
@@ -114,6 +125,12 @@ std::vector<double> opencog::plus(const std::vector<double>& fva,
 	size_t lena = fva.size();
 	size_t lenb = fvb.size();
 
+	if (1 == lena)
+		return plus(fva[0], fvb);
+
+	if (1 == lenb)
+		return plus(fvb[0], fva);
+
 	std::vector<double> sum(std::max(lena, lenb));
 	if (lena < lenb)
 	{
@@ -137,10 +154,16 @@ std::vector<double> opencog::plus(const std::vector<double>& fva,
 /// Vector (point-wise) subtraction
 /// The shorter vector is assumed to be zero-padded.
 std::vector<double> opencog::minus(const std::vector<double>& fva,
-                                  const std::vector<double>& fvb)
+                                   const std::vector<double>& fvb)
 {
 	size_t lena = fva.size();
 	size_t lenb = fvb.size();
+
+	if (1 == lena)
+		return minus(fva[0], fvb);
+
+	if (1 == lenb)
+		return minus(fva, fvb[0]);
 
 	std::vector<double> diff(std::max(lena, lenb));
 	if (lena < lenb)

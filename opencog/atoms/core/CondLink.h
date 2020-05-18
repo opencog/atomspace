@@ -39,7 +39,7 @@ protected:
 	void init(void);
 
 public:
-	CondLink(const HandleSeq&, Type=COND_LINK);
+	CondLink(const HandleSeq&&, Type=COND_LINK);
 	CondLink(const CondLink&) = delete;
 	CondLink& operator=(const CondLink&) = delete;
 

@@ -48,8 +48,8 @@ void RandomNumberLink::init()
 			to_string().c_str());
 }
 
-RandomNumberLink::RandomNumberLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	init();
 }

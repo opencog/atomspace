@@ -5,6 +5,7 @@ ADD_GUILE_MODULE (FILES
 	cosine.scm
 	dynamic.scm
 	entropy.scm
+	eval-pairs.scm
 	filter.scm
 	fold-api.scm
 	loop-api.scm

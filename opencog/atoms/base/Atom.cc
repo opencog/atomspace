@@ -90,6 +90,10 @@ namespace opencog {
 Atom::~Atom()
 {
     _atom_space = nullptr;
+
+    // Disable for now. This assert has never tripped; there
+    // seems to be no point to checking it.
+#if 0
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
@@ -99,6 +103,7 @@ Atom::~Atom()
              "Atom deletion failure; incoming set not empty for %s h=%x",
              nameserver().getTypeName(_type).c_str(), get_hash());
     }
+#endif
     drop_incoming_set();
 }
 
@@ -302,7 +307,7 @@ void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
-    _incoming_set->_iset.clear();
+    // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
 
@@ -374,12 +379,27 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize() const
+size_t Atom::getIncomingSetSize(AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
+
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
+    if (as)
+    {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const auto& bucket : _incoming_set->_iset)
+        {
+            for (const WinkPtr& w : bucket.second)
+            {
+                Handle l(w.lock());
+                if (l and atab->in_environ(l)) cnt++;
+            }
+        }
+        return cnt;
+    }
+
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;

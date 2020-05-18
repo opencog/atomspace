@@ -59,6 +59,7 @@ class AtomSpace
     friend class BackingStore;
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
+    friend class UuidSCM;            // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
@@ -80,6 +81,7 @@ class AtomSpace
     AtomTable& get_atomtable(void) { return _atom_table; }
 
     bool _read_only;
+    bool _copy_on_write;
 protected:
 
     /**
@@ -95,15 +97,29 @@ public:
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
-    // Transient atomspaces are lighter-weight, faster, but are missing
-    // some features. They are used during pattern matching, to hold
-    // temporary results.
+    /// Transient atomspaces are lighter-weight, faster, but are missing
+    /// some features. They are used during pattern matching, to hold
+    /// temporary results. The are always copy-on-write spaces.
     void ready_transient(AtomSpace* parent);
     void clear_transient();
 
+    /// Read-only (RO) atomspaces provide protection against update of the
+    /// AtomSpace contents. Atoms in a read-only atomspace canot be
+    /// deleted, nor can thier values (including truthvalues) be changed.
+    /// New atoms cannot be added to a read-only atomspace.
     void set_read_only(void);
     void set_read_write(void);
     bool get_read_only(void) { return _read_only; }
+
+    /// Copy-on-write (COW) atomspaces provide protection against the
+    /// update of the parent atomspace. When an atomspace is marked COW,
+    /// it behaves as if it is read-write, but the parent is read-only.
+    /// This is convenient for creating temporary atomspaces, wherein
+    /// updates will not trash the parent. Transient atomspaces are
+    /// always COW.
+    void set_copy_on_write(void) { _copy_on_write = true; }
+    void clear_copy_on_write(void) { _copy_on_write = false; }
+    bool get_copy_on_write(void) { return _copy_on_write; }
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
@@ -152,7 +168,10 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name="");
+    Handle add_node(Type, std::string&&);
+    Handle xadd_node(Type t, std::string str) {
+        return add_node(t, std::move(str));
+    }
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -162,7 +181,10 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing);
+    Handle add_link(Type, HandleSeq&&);
+    Handle xadd_link(Type t, HandleSeq seq) {
+        return add_link(t, std::move(seq));
+    }
 
     inline Handle add_link(Type t)
     {
@@ -376,9 +398,9 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle get_node(Type t, const std::string& name="");
-    inline Handle get_handle(Type t, const std::string& str) {
-        return get_node(t, str);
+    Handle get_node(Type, std::string&&) const;
+    inline Handle get_handle(Type t, std::string str) const {
+        return get_node(t, std::move(str));
     }
 
     /**
@@ -394,28 +416,33 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle get_link(Type t, const HandleSeq& outgoing);
-    inline Handle get_link(Type t, const Handle& ha) {
+    Handle get_link(Type, HandleSeq&&) const;
+    inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb) const {
         return get_link(t, {ha, hb});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc) const
+    {
         return get_link(t, {ha, hb, hc});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc, const Handle& hd) const
+    {
         return get_link(t, {ha, hb, hc, hd});
     }
-    Handle get_handle(Type t, const HandleSeq& outgoing) {
-        return get_link(t, outgoing);
+    Handle get_handle(Type t, HandleSeq outgoing) const {
+        return get_link(t, std::move(outgoing));
     }
-    Handle get_handle(Type t, const Handle& ha) {
+    Handle get_handle(Type t, const Handle& ha) const {
 	    return get_handle(t, HandleSeq({ha}));
     }
-    Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_handle(Type t, const Handle& ha, const Handle& hb) const {
 	    return get_handle(t, HandleSeq({ha, hb}));
     }
+
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.

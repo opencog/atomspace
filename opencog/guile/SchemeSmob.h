@@ -155,6 +155,8 @@ private:
 	static SCM ss_as_mark_readonly(SCM);
 	static SCM ss_as_mark_readwrite(SCM);
 	static SCM ss_as_readonly_p(SCM);
+	static SCM ss_as_mark_cow(SCM, SCM);
+	static SCM ss_as_cow_p(SCM);
 	static SCM make_as(AtomSpace *);
 	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);

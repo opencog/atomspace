@@ -24,6 +24,7 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         cLogger()
         cLogger(string s)
         void set_level(loglevel lvl)
+        void set_component(string c)
         loglevel get_level()
         void set_print_to_stdout_flag(bool flag)
 
@@ -56,18 +57,27 @@ cdef class Logger:
         if self.not_singleton_logger: del self.clog
     def __init__(self):
         self.clog = &logger()
-    property NONE:
-        def __get__(self): return NONE
-    property ERROR:
-        def __get__(self): return ERROR
-    property WARN:
-        def __get__(self): return WARN
-    property INFO:
-        def __get__(self): return INFO
-    property DEBUG:
-        def __get__(self): return DEBUG
-    property FINE:
-        def __get__(self): return FINE
+    
+    @property
+    def NONE(self): return NONE
+    
+    @property
+    def ERROR(self): return ERROR
+    
+    @property
+    def WARN(self): return WARN
+    
+    @property
+    def INFO(self): return INFO
+    
+    @property
+    def DEBUG(self): return DEBUG
+    
+    @property
+    def FINE(self): return FINE
+    
+    def set_component(self, c):
+        self.clog.set_component(c)
     cdef _set_level(self,int lvl):
         self.clog.set_level(<loglevel>lvl)
     def set_level(self,level_name):

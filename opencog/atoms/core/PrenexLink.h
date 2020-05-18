@@ -47,7 +47,7 @@ protected:
 	Handle reassemble(Type, const HandleMap&, const Variables&) const;
 
 public:
-	PrenexLink(const HandleSeq&, Type=PRENEX_LINK);
+	PrenexLink(const HandleSeq&&, Type=PRENEX_LINK);
 	PrenexLink(const Handle& varcdecls, const Handle& body);
 	PrenexLink(const PrenexLink &) = delete;
 	PrenexLink& operator=(const PrenexLink &) = delete;

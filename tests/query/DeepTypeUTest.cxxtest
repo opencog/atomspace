@@ -37,14 +37,15 @@ public:
 	DeepTypeUTest(void)
 	{
 		// logger().setLevel(Logger::FINE);
-		logger().set_level(Logger::INFO);
+		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec) (opencog type-utils))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-
 	}
 
 	~DeepTypeUTest()
@@ -64,6 +65,8 @@ public:
 	void test_match_arrow(void);
 	void test_get_signature(void);
 	void test_unbundle_defined_type_node(void);
+	void test_aybe_sea(void);
+	void test_deep_disconnect(void);
 };
 
 void DeepTypeUTest::tearDown(void)
@@ -541,5 +544,41 @@ void DeepTypeUTest::test_unbundle_defined_type_node(void)
 		"         (ConceptNode \"yay!\"))))");
 
 	TSM_ASSERT("Didn't get expected result", result == result_expected);
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test trivial constant types.
+ */
+void DeepTypeUTest::test_aybe_sea(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! constant-a)");
+	Handle expected = eval->eval_h("(SetLink (Concept \"A\"))");
+	TSM_ASSERT_EQUALS("Bad simple constant", result, expected);
+
+	result = eval->eval_h("(cog-execute! constant-zappa)");
+	TSM_ASSERT_EQUALS("Bad constant abc", result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test disconnected deep components
+ */
+void DeepTypeUTest::test_deep_disconnect(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
+
+	Handle result = eval->eval_h("(cog-execute! deep-disconnect)");
+	Handle expected = eval->eval_h(
+		"(SetLink (List (Concept \"A\") (Concept \"B\")))");
+	TSM_ASSERT_EQUALS("Bad disconnect", result, expected);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }

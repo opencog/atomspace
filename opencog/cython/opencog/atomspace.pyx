@@ -5,13 +5,13 @@
 # Note that the ordering of include statements may influence whether
 # things work or not
 
-include "nameserver.pyx"
-include "truth_value.pyx"
-include "atomspace_details.pyx"
-include "atom.pyx"
 include "value.pyx"
+include "atomspace_details.pyx"
+include "truth_value.pyx"
 include "float_value.pyx"
 include "string_value.pyx"
+include "atom.pyx"
+include "nameserver.pyx"
 include "link_value.pyx"
 include "ptrvalue.pyx"
 include "grounded_object_node.pyx"

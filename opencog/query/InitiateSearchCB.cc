@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// #include <algorithm>
-// #include <execution>
-// #include <opencog/util/oc_omp.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -37,10 +33,16 @@
 #include "PatternMatchEngine.h"
 #include "Substitutor.h"
 
+#ifdef USE_THREADED_PATTERN_ENGINE
+	// #include <algorithm>
+	// #include <execution>
+	#include <opencog/util/oc_omp.h>
+#endif // USE_THREADED_PATTERN_ENGINE
+
 using namespace opencog;
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
@@ -54,6 +56,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_variables = nullptr;
 	_pattern = nullptr;
 	_dynamic = nullptr;
+	_recursing = false;
 	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
@@ -196,8 +199,8 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
-				ch.best_start = s;
 				ch.start_term = sbr;
+				ch.search_set = get_incoming_set(s, sbr->get_type());
 				_choices.push_back(ch);
 			}
 			else
@@ -342,8 +345,9 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 	{
 		Choice ch;
 		ch.clause = bestclause;
-		ch.best_start = best_start;
 		ch.start_term = _starter_term;
+		// XXX ?? Why incoming set ???
+		ch.search_set = get_incoming_set(best_start, _starter_term->get_type());
 		_choices.push_back(ch);
 	}
 	else
@@ -362,21 +366,13 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
 	{
 		_root = ch.clause;
 		_starter_term = ch.start_term;
-		Handle best_start = ch.best_start;
+		_search_set = ch.search_set;
 
-		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
-		DO_LOG({LAZY_LOG_FINE << "Start term is: "
+		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_string());})
-		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
-
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by
-		// attentional focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start, _starter_term->get_type());
-		_search_set.clear();
-		for (const auto& lptr: iset)
-			_search_set.emplace_back(HandleCast(lptr));
+		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
+		              <<  _root->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -432,7 +428,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  *    really want a lenient `node_match()`, then use variables instead.
  *    Don't overload `node_match` with something weird, and you should
  *    be OK.  Otherwise, you'll have to implement your own
- *    `initiate_search()` callback.
+ *    `perform_search()` callback.
  *
  * 2) If the clauses consist entirely of variables, i.e. if there is not
  *    even one single non-variable node in the pattern, then a search is
@@ -456,7 +452,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  *    `link_match()` callback alone, and use variables for links, instead.
  *    This is probably the best strategy, because then the fairly
  *    standard reasoning can be used when thinking about the problem.
- *    Of course, you can always write your own `initiate_search()` callback.
+ *    Of course, you can always write your own `perform_search()` callback.
  *
  * If the constraint 1) can be met, (which is always the case for
  * "standard, canonical" searches, then the pattern match should be
@@ -477,7 +473,7 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
+bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 {
 	jit_analyze();
 
@@ -498,12 +494,16 @@ bool InitiateSearchCB::initiate_search(PatternMatchCallback& pmc)
 		return pme.explore_constant_evaluatables(_pattern->mandatory);
 	}
 
+	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
+	if (setup_deep_type_search())
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
+	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
 	if (setup_link_type_search())
 		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
@@ -553,6 +553,163 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	const HandleSeq& oset = clause->getOutgoingSet();
 	for (const Handle& h : oset)
 		find_rarest(h, rarest, count, quotation);
+}
+
+/* ======================================================== */
+
+// Handy utility to find all atoms that are not types or type
+// constructors. (Or free variables, for that matter).
+typedef std::map<Handle, unsigned> DepthMap;
+static void find_deep_constants(const Handle& h,
+                                DepthMap& const_list,
+                                unsigned depth)
+{
+	if (is_constant(h))
+	{
+		const_list.insert({h, depth});
+		return;
+	}
+	if (h->is_link())
+	{
+		if (h->get_type() != TYPE_CHOICE) depth++;
+		for (const Handle& ho : h->getOutgoingSet())
+			find_deep_constants(ho, const_list, depth);
+	}
+}
+
+// Another utility for starting points. We know that the actual
+// grounding for the variable is either `h` or something in it's
+// incoming set, but we don't know which. The matcher will sort
+// it out. Limit the depth so we don't search too much.
+// We use HandleSet not HandleSeq to disambiguate multiple
+// inclusion.
+static void all_starts(const Handle& h,
+                       unsigned depth,
+                       HandleSet& start_set)
+{
+	start_set.insert(h);
+	if (0 == depth) return;
+	depth--;
+	for (const Handle& hi : h->getIncomingSet())
+		all_starts(hi, depth, start_set);
+}
+
+// Find the first link type that is NOT a type specifier.
+static Type find_plain_type(const Handle& h)
+{
+	Type t = h->get_type();
+	if (not nameserver().isA(t, TYPE_NODE) and
+	    not nameserver().isA(t, TYPE_CHOICE) and
+	    not nameserver().isA(t, TYPE_OUTPUT_LINK))
+		return t;
+	if (h->is_node()) return NOTYPE;
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		t = find_plain_type(ho);
+		if (NOTYPE != t) return t;
+	}
+	return NOTYPE;
+}
+
+// We need to know which clause this is for. Seems that we
+// dont have a map for this; the _pattern->connectivity_map
+// is non-empty only when a var is in two (or more) clauses.
+// So we brute-force search in this loop.
+static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
+{
+	Handle root;
+	for (const Handle& clause: clauses)
+	{
+		if (is_free_in_tree(clause, term))
+		{
+			root = clause;
+			break;
+		}
+	}
+	return root;
+}
+
+/**
+ * Deep types can/should behave a lot like neighbor-search. So try that
+ * next, and use it if possible. Same general idea as the neighbor
+ * search: we look for the thinnest location to start at. The search
+ * for this thinnest bit is very different, though.
+ *
+ * This is heavily used by the JoinLink mechanism.
+ */
+bool InitiateSearchCB::setup_deep_type_search()
+{
+	if (_variables->_deep_typemap.size() == 0)
+		return false;
+
+	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	_choices.clear();
+	_search_set.clear();
+
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
+		const Handle& var = dit.first;
+		Handle root = root_of_term (var, _pattern->mandatory);
+		if (nullptr == root) continue;
+
+		DO_LOG({LAZY_LOG_FINE
+			 << "Examine deep-type " << oc_to_string(dit.second);})
+
+		// Find something suitable in the type specification.
+		DepthMap starts;
+		for (const Handle& sig: dit.second)
+			find_deep_constants(sig, starts, 0);
+
+		// Subtract one from the depth -- this uwraps the top-most
+		// SignatureLink, which can't ever provide a valid match.
+		HandleSet start_set;
+		for (const auto& pr: starts)
+			all_starts(pr.first, pr.second-1, start_set);
+
+		HandleSeq start_list;
+		for (const Handle& hs : start_set) start_list.emplace_back(hs);
+
+		_root = root;
+		_starter_term = var;
+		_search_set = start_list;
+
+		// We only need enough startng points to get started;
+		// the matcher will crawl the rest of the graph.
+		if (0 < _search_set.size()) return true;
+	}
+
+	for (const auto& dit: _variables->_deep_typemap)
+	{
+		// What clause is the variable in? If its not in a mandatory
+		// term, then things are confusing ...
+		const Handle& var = dit.first;
+		Handle root = root_of_term (var, _pattern->mandatory);
+		if (nullptr == root) continue;
+
+		DO_LOG({LAZY_LOG_FINE
+			 << "Re-examine deep-type " << oc_to_string(dit.second);})
+
+		// Find the first link type that is not a type
+		Type t = NOTYPE;
+		for (const Handle& sig: dit.second)
+		{
+			t = find_plain_type(sig);
+			if (NOTYPE != t) break;
+		}
+		if (NOTYPE == t) continue;
+
+		_root = root;
+		_starter_term = var;
+		_as->get_handles_by_type(_search_set, t);
+		if (0 < _search_set.size()) return true;
+	}
+
+	return false;
 }
 
 /* ======================================================== */
@@ -615,6 +772,8 @@ bool InitiateSearchCB::setup_link_type_search()
  * the allowed variable types (as set with the `set_type_restrictions()`
  * method).  This assumes that the varset contains the variables to be
  * searched over, and that the type restrictions are set up appropriately.
+ * This handles only the simple types; the "deep types" were attempted
+ * earlier.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -652,17 +811,7 @@ bool InitiateSearchCB::setup_variable_search(void)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
 
-#ifdef _IMPLEMENT_ME_LATER
-		// XXX TODO FIXME --- if there is a deep type in the mix, that
-		// will offer a far-superior place to start the search.
-		// Unfortunately, implementing this will require a bit more work,
-		// so we punt for now, as there are no users ....
-		auto dit = _variables->_deep_typemap.find(var);
-		if (_variables->_deep_typemap.end() != dit)
-			throw RuntimeException(TRACE_INFO, "Not implemented!");
-#endif
-
-		auto tit = _variables->_simple_typemap.find(var);
+		const auto& tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
@@ -718,38 +867,30 @@ bool InitiateSearchCB::setup_variable_search(void)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-
-		if (not _variables->_deep_typemap.empty())
-		{
-			logger().warn("Full deep-type support not implemented!");
-		}
-		else
-		{
 // #define THROW_HARD_ERROR 1
 #ifdef THROW_HARD_ERROR
-			throw SyntaxException(TRACE_INFO,
-				"Error: There were no type restrictions! That's infinite-recursive!");
+		throw SyntaxException(TRACE_INFO,
+			"Error: There were no type restrictions! That's infinite-recursive!");
 #else
-			logger().warn("No type restrictions! Your code has a bug in it!");
-			for (const Handle& var: _variables->varset)
-				logger().warn("Offending variable=%s\n", var->to_string().c_str());
-			for (const Handle& cl : clauses)
-				logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
+		logger().warn("No type restrictions! Your code has a bug in it!");
+		for (const Handle& var: _variables->varset)
+			logger().warn("Offending variable=%s\n", var->to_string().c_str());
+		for (const Handle& cl : clauses)
+			logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
 
-			// Terrible, terrible hack for detecting infinite loops.
-			// When the world is ready for us, we should instead just
-			// throw the hard error, as ifdef'ed above.
-			static const Pattern* prev = nullptr;
-			static unsigned int count = 0;
-			if (prev != _pattern) { prev = _pattern; count = 0; }
-			else {
-				count++;
-				if (300 < count)
-					throw RuntimeException(TRACE_INFO,
-						"Infinite Loop detected! Recursed %u times!", count);
-			}
-#endif
+		// Terrible, terrible hack for detecting infinite loops.
+		// When the world is ready for us, we should instead just
+		// throw the hard error, as ifdef'ed above.
+		static const Pattern* prev = nullptr;
+		static unsigned int count = 0;
+		if (prev != _pattern) { prev = _pattern; count = 0; }
+		else {
+			count++;
+			if (5 < count)
+				throw RuntimeException(TRACE_INFO,
+					"Infinite Loop detected! Recursed %u times!", count);
 		}
+#endif
 
 		// There are no clauses. This is kind-of weird, but it can happen
 		// if all clauses are optional.
@@ -890,25 +1031,64 @@ void InitiateSearchCB::jit_analyze(void)
 bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
-	// TODO: This is kind-of the main entry point into the CPU-cycle
-	// sucking part of the pattern search.  It might be worth
-	// parallelizing at this point. That is, ***if*** the _search_set
-	// is large, or the pattern is large/complex, then it might be
-	// worth it to create N threads, and N copies of PatternMatchEngine
-	// and run one search per thread.  Maybe. CAUTION: this is not
-	// always the bottleneck, and so adding heavy-weight thread
-	// initialization here might hurt some users.  See the benchmark
-	// `nano-en.scm` in the benchmark get repo, for example.
-	// Note also: parallelizing will require adding locks to some
-	// portions of the callback, e.g. the `grounding()` callback,
-	// so that two parallel reports don't clobber each other.
+	// This is the main entry point into the CPU-cycle sucking part of
+	// the pattern search.  If `USE_THREADED_PATTERN_ENGINE` is defined,
+	// then it runs in parallel. It works, unit-tests pass. But ...
+	// But the overhead is so large, that, for small pattern matches,
+	// the setup of going parallel is far more expensive than the gain
+	// from parallelism. (RandomUTest runs 25x slower! GetStateUTest
+	// runs 33x slower!) So this code is currently disabled.
+	//
+	// If `_search_set` is large, or the if pattern is large/complex,
+	// then the extra cost might be worth it. However, this is NOT
+	// always the bottleneck! Be careful not to penalize small users!
+	// See the benchmark `nano-en.scm` in the opencog/benchmark GitHub
+	// repo, for example.
+	//
+#ifndef USE_THREADED_PATTERN_ENGINE
+	// See explanation below for the `_recursing` flag.
+	_recursing = true;
+#endif
+
+	if (_recursing)
+	{
+		// Plain-old, olde-fashioned sequential search loop.
+		// This works.
+#ifdef QDEBUG
+		size_t i = 0, hsz = _search_set.size();
+#endif
+
+		PatternMatchEngine pme(pmc);
+		pme.set_pattern(*_variables, *_pattern);
+
+		for (const Handle& h : _search_set)
+		{
+			DO_LOG({LAZY_LOG_FINE << dbg_banner
+			             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
+			             << h->to_string();})
+			bool found = pme.explore_neighborhood(_root, _starter_term, h);
+			if (found) return true;
+		}
+
+		return false;
+	}
+
+	// Note also: for multi-component patterns, this entire class
+	// is used recursively in multiple threads. This is because
+	// `PatternLink::satisfy()` is recursive, when there are multiple
+	// components. So: we start here, create multiple threads,
+	// and then pass ourselves into each thread. When there are
+	// components, this gets wrapped in PMCGroundings and then
+	// `PatternLink::satisfy()` is called .. once in each thread!
+	// Which causes a new start-point to be searched for, for each
+	// component which clobbers this structure against itself.  Fail.
+	// The `_recursing` flag prevents this double-threading.
 // #define PM_PARALLEL 1
 #ifdef PM_PARALLEL
-	// Parallel loop. This requires C++17 to work.
-	// This does not pass unit tests, because a lock is needed in
-	// the `grounding()` callback. And maybe other locks too.
+	// Parallel loop. This requires linking to -ltbb to work.
+	_recursing = true;
 
-	bool found = false;
+	std::atomic<size_t> nfnd = 0;
 	std::for_each(
 		std::execution::par_unseq,
 		_search_set.begin(),
@@ -918,57 +1098,41 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
-			found |= pme.explore_neighborhood(_root, _starter_term, h);
+			if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
 		});
 
-	return found;
+	_recursing = false;
+	return 0 < nfnd;
 
 #endif
 
-// #define OMP_PM_PARALLEL 1
+#ifdef USE_THREADED_PATTERN_ENGINE
+	#define OMP_PM_PARALLEL 1
+#endif
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
-	// This does not pass unit tests, because a lock is needed in
-	// the `grounding()` callback. And maybe other locks too.
+	_recursing = true;
 
-	bool found = false;
+#ifdef QDEBUG
+	size_t i = 0;
+#endif
 
+	std::atomic<size_t> nfnd = 0;
 	size_t hsz = _search_set.size();
 	#pragma omp parallel for
-	for (size_t i=0; i< hsz; i++)
+	for (size_t j=0; j<hsz; j++)
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
-		Handle h(_search_set[i]);
+		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		found |= pme.explore_neighborhood(_root, _starter_term, h);
+		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
 	}
-	return found;
-#endif
-
-#define SEQUENTIAL_LOOP 1
-#ifdef SEQUENTIAL_LOOP
-	// Plain-old, olde-fashioned sequential search loop.
-	// This works.
-
-#ifdef DEBUG
-	size_t i = 0, hsz = _search_set.size();
-#endif
-
-	PatternMatchEngine pme(pmc);
-	pme.set_pattern(*_variables, *_pattern);
-
-	for (const Handle& h : _search_set)
-	{
-		DO_LOG({LAZY_LOG_FINE << dbg_banner
-		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
-		             << h->to_string();})
-		bool found = pme.explore_neighborhood(_root, _starter_term, h);
-		if (found) return true;
-	}
+	_recursing = false;
+	return 0 < nfnd;
 #endif
 
 	return false;
@@ -1008,10 +1172,10 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 		for (const Choice& ch : _choices) {
 			ss << indent_p << "choice[" << i << "]:" << std::endl
 			   << indent_pp << "clause = " << ch.clause << std::endl;
-			ss << indent_pp << "best_start:" << std::endl
-			   << oc_to_string(ch.best_start, indent_ppp) << std::endl;
 			ss << indent_pp << "start_term:" << std::endl
 			   << oc_to_string(ch.start_term, indent_ppp) << std::endl;
+			ss << indent_pp << "start points:" << std::endl
+			   << oc_to_string(ch.search_set, indent_ppp) << std::endl;
 		}
 	}
 

@@ -21,7 +21,6 @@
 
 #include <string>
 
-#include <opencog/util/random.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -35,6 +34,13 @@ using namespace opencog;
 void RewriteLink::init(void)
 {
 	Type t = get_type();
+
+#if 0
+	// The unit tests create this directly, so this check bombs.
+	if (REWRITE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"RewriteLinks are private and cannot be instantiated.");
+#endif
 	if (not nameserver().isA(t, REWRITE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
@@ -49,75 +55,11 @@ RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
-	: ScopeLink(oset, t), _silent(false)
+RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
+	: ScopeLink(std::move(oset), t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();
-}
-
-/* ================================================================= */
-
-inline Handle append_rand_str(const Handle& var)
-{
-	std::string new_var_name = randstr(var->get_name() + "-");
-	return createNode(var->get_type(), std::move(new_var_name));
-}
-
-inline HandleSeq append_rand_str(const HandleSeq& vars)
-{
-	HandleSeq new_vars;
-	for (const Handle& h : vars)
-		new_vars.push_back(append_rand_str(h));
-	return new_vars;
-}
-
-/**
- * Wrap every glob node with a ListLink
- *
- * Since GlobNodes can be matched/substituted with one or more
- * arguments, The arguments are expected to be wrapped with
- * ListLink.
- * In case of alpha conversion, Alpha converted GlobNodes in a
- * program needs to be wrapped before passed to substitute the Glob.
- */
-inline HandleSeq wrap_glob_with_list(const HandleSeq& vars)
-{
-	HandleSeq new_vars;
-	for (const Handle& var : vars) {
-		if (GLOB_NODE == var->get_type())
-			new_vars.push_back(createLink(HandleSeq{var}, LIST_LINK));
-		else new_vars.push_back(var);
-	}
-	return new_vars;
-}
-
-Handle RewriteLink::alpha_convert() const
-{
-	HandleSeq vars = append_rand_str(_variables.varseq);
-	return alpha_convert(vars);
-}
-
-Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
-{
-	const auto wrapped = wrap_glob_with_list(vars);
-	// Perform alpha conversion
-	HandleSeq hs;
-	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped, _silent));
-
-	// Create the alpha converted scope link
-	return createLink(std::move(hs), get_type());
-}
-
-Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
-{
-	HandleSeq vars;
-	for (const Handle& var : _variables.varseq) {
-		auto it = vsmap.find(var);
-		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
-	}
-	return alpha_convert(vars);
 }
 
 /* ================================================================= */
@@ -350,7 +292,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	{
 		// TODO: the following has no unit test!!! Yet it introduces a
 		// bug covered by RewriteLinkUTest::test_consume_quotations_4(),
-		// thus this code is disable till a unit test it created for it
+		// thus this code is disabled till a unit test it created for it
 		// and we understand what it fixes and how it fixes.
 		//
 		// // Make sure quotation is not removed around
@@ -495,7 +437,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
 	                                   quotation, needless_quotation,
 	                                   clause_root);
-	Handle ch = createLink(chs, h->get_type());
+	Handle ch = createLink(std::move(chs), h->get_type());
 	ch->copyValues(h);
 	return ch;
 }

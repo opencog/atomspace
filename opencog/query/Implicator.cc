@@ -28,6 +28,11 @@
 
 using namespace opencog;
 
+Implicator::Implicator(AtomSpace* as)
+	: _as(as), inst(as), max_results(SIZE_MAX)
+{
+}
+
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
@@ -41,39 +46,59 @@ using namespace opencog;
 bool Implicator::grounding(const GroundingMap &var_soln,
                            const GroundingMap &term_soln)
 {
+	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
-	// Ignore the case where the URE creates ill-formed links
+	// Catch and ignore SilentExceptions. This arises when
+	// running with the URE, which creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
 	// be treated as a user error, that is, the user should
 	// design rule pre-conditions to prevent them from producing
 	// nothing.  In practice it is difficult to insure, so
 	// meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
+	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
 	try {
-		ValuePtr v(inst.instantiate(implicand, var_soln, true));
-		insert_result(v);
+		for (const Handle& himp: implicand)
+		{
+			ValuePtr v(inst.instantiate(himp, var_soln, true));
+			insert_result(v);
+		}
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
 }
 
-void Implicator::insert_result(const ValuePtr& v)
+void Implicator::insert_result(ValuePtr v)
 {
-	if (v and _result_set.end() == _result_set.find(v))
-	{
-		// Insert atom into the atomspace immediately, so that
-		// it becomes visible in other threads.
-		if (v->is_atom())
-		{
-			_result_set.insert(_as->add_atom(HandleCast(v)));
-		}
-		else
-		{
-			_result_set.insert(v);
-		}
-	}
+	if (nullptr == v) return;
+	if (_result_set.end() != _result_set.find(v)) return;
+
+	// Insert atom into the atomspace immediately, so that
+	// it becomes visible in other threads.
+	if (v->is_atom())
+		v = _as->add_atom(HandleCast(v));
+
+	if (_result_set.end() != _result_set.find(v)) return;
+
+	_result_set.insert(v);
+	_result_queue->push(std::move(v));
+}
+
+bool Implicator::start_search(void)
+{
+	// *Every* search gets a brand new, fresh queue!
+	// This allows users to hang on to the old queue, holding
+	// previous results, if they need to.
+	_result_queue = createQueueValue();
+	return false;
+}
+
+bool Implicator::search_finished(bool done)
+{
+	_result_queue->close();
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */

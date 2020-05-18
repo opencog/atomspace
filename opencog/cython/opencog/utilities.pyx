@@ -1,9 +1,12 @@
-from contextlib import contextmanager
 from cython.operator cimport dereference as deref
+from libcpp.string cimport string
 from opencog.atomspace cimport AtomSpace, Atom, TruthValue
-from opencog.atomspace import create_child_atomspace
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factory
+
+from contextlib import contextmanager
+from opencog.atomspace import create_child_atomspace
+from opencog.utilities cimport load_file as c_load_file
 import warnings
 
 
@@ -112,3 +115,6 @@ def get_default_atomspace():
 def pop_default_atomspace():
     return AtomSpace_factory(pop_context_atomspace())
 
+def load_file(path, AtomSpace atomspace):
+    cdef string p = path.encode('utf-8')
+    c_load_file(p, deref(atomspace.atomspace))

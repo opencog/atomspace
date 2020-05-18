@@ -26,6 +26,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -70,12 +71,17 @@ public:
 	void test_content_less_uno();
 	void test_content_less_st();
 	void test_content_less_cpt();
+
 	void test_get_variables_1();
 	void test_get_variables_2();
 	void test_get_variables_3();
 	void test_get_variables_4();
 	void test_get_variables_5();
 	void test_get_variables_6();
+
+	void test_rand_alpha_conversion();
+	void test_names_alpha_conversion();
+	void test_vardecl_bindlink_alpha_conversion();
 };
 
 void ScopeLinkUTest::test_content_less()
@@ -383,6 +389,78 @@ void ScopeLinkUTest::test_get_variables_6()
 
 	// Test that variables are in canonical order
 	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with no arguments
+void ScopeLinkUTest::test_rand_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc =
+	al(SCOPE_LINK,
+		an(VARIABLE_NODE, "$X"),
+		al(AND_LINK, an(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle scac = sc->alpha_convert();
+
+	std::cout << "sc = " << oc_to_string(Handle(sc));
+	std::cout << "scac = " << oc_to_string(scac);
+
+	TS_ASSERT(sc->is_equal(scac));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with provided variable names
+void ScopeLinkUTest::test_names_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		hsc = al(SCOPE_LINK, X, al(AND_LINK, X));
+	Handle expected = createLink(SCOPE_LINK, Y, al(AND_LINK, Y));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result = sc->alpha_convert(HandleMap{{X, Y}});
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_names_alpha_conversion() but using a BindLink instead of
+// a ScopeLink
+void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple BindLink
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		CT = an(TYPE_NODE, "ConceptNode"),
+		Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT),
+		hbl = al(BIND_LINK, al(AND_LINK, X), al(OR_LINK, X)),
+		expected_wo_vardecl = al(BIND_LINK,
+		                         al(AND_LINK, Y), al(OR_LINK, Y)),
+		expected = al(BIND_LINK, Y_vardecl,
+		              al(AND_LINK, Y), al(OR_LINK, Y));
+
+	BindLinkPtr bl(BindLinkCast(hbl));
+	Handle result_wo_vardecl = _as.add_atom(bl->alpha_convert({Y}));
+
+	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
+	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
+
+	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

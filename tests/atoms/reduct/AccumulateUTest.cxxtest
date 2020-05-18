@@ -1,0 +1,162 @@
+/*
+ * tests/atoms/AccumulateUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecSCM.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class AccumulateUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	AccumulateUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec))");
+	}
+
+	~AccumulateUTest()
+	{
+		delete as;
+		delete eval;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_accumulate(void);
+	void test_infnan(void);
+	void test_float(void);
+};
+
+void AccumulateUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void AccumulateUTest::setUp(void)
+{
+	as->clear();
+}
+
+/*
+ * Basic AccumulateLink unit test.
+ */
+void AccumulateUTest::test_accumulate(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (Accumulate (Number -3 -2 -1 0 1 2 3)))"
+	);
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(NumberNode 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle series = eval->eval_h(
+		"(cog-execute! (Accumulate (Divide "
+		"  (Number 1) (Number 1 2 4 8 16 32))))"
+	);
+	printf("expecting 63/32: %s\n", series->to_short_string().c_str());
+
+	Handle eseries = eval->eval_h("(NumberNode 1.96875)");
+	TS_ASSERT_EQUALS(series, eseries);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Behavior of inf and nan.
+ */
+void AccumulateUTest::test_infnan(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle inf = eval->eval_h(
+			"(cog-execute! (Accumulate (NumberNode \"inf inf 42\")))"
+	);
+	printf("expecting inf: %s\n", inf->to_short_string().c_str());
+
+	Handle einf = eval->eval_h("(NumberNode \"inf\")");
+	TS_ASSERT_EQUALS(inf, einf)
+
+	// ---------
+	Handle nan = eval->eval_h(
+			"(cog-execute! (Accumulate (NumberNode \"nan 0 inf 0 -nan\")))"
+	);
+	printf("expecting nan: %s\n", nan->to_short_string().c_str());
+
+	Handle enan = eval->eval_h("(NumberNode \"nan\")");
+	TS_ASSERT_EQUALS(nan, enan)
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AccumulateUTest::test_float(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	std::string set = eval->eval(
+		"(cog-set-value! (Concept \"abc\") (Predicate \"key\")"
+		"       (FloatValue 0.1 0.2 0.3))"
+	);
+
+	ValuePtr six = eval->eval_v(
+		"(cog-execute! (Accumulate"
+		"       (ValueOf (Concept \"abc\") (Predicate \"key\"))))"
+	);
+	printf("expecting six: %s\n", six->to_short_string().c_str());
+
+	ValuePtr esix = eval->eval_v("(FloatValue 0.6)");
+
+	// Arghhhh. Rounding errors....
+	double dsix = FloatValueCast(six)->value()[0];
+	double desix = FloatValueCast(esix)->value()[0];
+
+	TS_ASSERT(fabs(dsix-desix) < 1.0e-12);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

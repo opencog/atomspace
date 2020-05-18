@@ -76,6 +76,7 @@ public:
 	void test_partition(void);
 	void test_pivot(void);
 	void test_multi_pivot(void);
+	void test_number(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -718,6 +719,35 @@ void GlobUTest::test_multi_pivot(void)
 	printf("multi-chase got %s\n", mhase->to_string().c_str());
 	TS_ASSERT_EQUALS(1, mhase->get_arity());
 	TS_ASSERT_EQUALS(mhase, chesponse);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test arithmetic links with Globs in them.
+ * Tests Issue #2528
+ */
+void GlobUTest::test_number(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-number.scm\")");
+
+	Handle fifteen = eval->eval_h("(cog-execute! glob-for-plus)");
+	printf("Number expect 15: %s\n", fifteen->to_string().c_str());
+	TS_ASSERT_EQUALS(1, fifteen->get_arity());
+
+	Handle response = eval->eval_h("(SetLink (Number 15))");
+	TS_ASSERT_EQUALS(fifteen, response);
+
+	// ----
+	Handle big = eval->eval_h("(cog-execute! glob-for-ten)");
+	printf("Number expect 390: %s\n", big->to_string().c_str());
+	TS_ASSERT_EQUALS(1, big->get_arity());
+
+	response = eval->eval_h("(SetLink (Number 390))");
+	TS_ASSERT_EQUALS(big, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

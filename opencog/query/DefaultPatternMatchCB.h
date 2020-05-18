@@ -36,7 +36,7 @@ namespace opencog {
 /**
  * Callback mixin class, used to provide a default node and link
  * matching behaviour. This class is a pure virtual class, since
- * it does not implement either the `initiate_search()` method,
+ * it does not implement either the `perform_search()` method,
  * nor the `solution()` method.
  *
  * It provides is node and link matching, assuming the canonical
@@ -74,7 +74,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                                   const Handle& grnd,
 		                                   const GroundingMap&);
 
-		/** Called for AlawaysLink */
+		/** Called for AlwaysLink */
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
 		                                 const GroundingMap&);
@@ -94,8 +94,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 
 		bool optionals_present(void) { return _optionals_present; }
-	protected:
 
+	protected:
 		NameServer& _nameserver;
 
 		const Variables* _vars = nullptr;

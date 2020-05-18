@@ -83,7 +83,6 @@ void SchemeSmob::init_smob_type(void)
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
-	// scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
 }
 
@@ -225,7 +224,7 @@ void SchemeSmob::module_init(void*)
 	// The portion of (opencog) done in C++
 	register_procs();
 	
-	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/atom_types/core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
@@ -313,6 +312,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace-readonly?", 0, 1, 0, C(ss_as_readonly_p));
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));
 	register_proc("cog-atomspace-rw!",     0, 1, 0, C(ss_as_mark_readwrite));
+	register_proc("cog-atomspace-cow?",    0, 1, 0, C(ss_as_cow_p));
+	register_proc("cog-atomspace-cow!",    1, 1, 0, C(ss_as_mark_cow));
 
 	// Taking AtomSpace as optional argument
 	register_proc("cog-count-atoms",       1, 1, 0, C(ss_count));

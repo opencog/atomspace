@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
@@ -63,6 +64,7 @@ public:
 	void test_arg_scm(void);
 	void test_pm_scm(void);
 	void test_as_of_atom_scm(void);
+	void test_readonly_scm(void);
 };
 
 /*
@@ -549,4 +551,25 @@ void MultiAtomSpace::test_as_of_atom_scm(void)
 	TS_ASSERT_DIFFERS(A_as, nullptr);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure modifying an atom in a readonly atomspace is forbidden.
+ */
+void MultiAtomSpace::test_readonly_scm(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	evaluator->eval("(define A (Concept \"A\"))");
+	evaluator->eval("(cog-atomspace-ro!)");
+	evaluator->eval("(define tv (stv 0.1 0.1))");
+
+	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(cog-set-tv! A tv)"));
+	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(Concept \"A\" tv)"));
+
+	// Verify that the TV never changed.
+	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
+	TS_ASSERT (TruthValue::DEFAULT_TV() == tvp);
+
+	logger().debug("END TEST: %s", __FUNCTION__);	
 }

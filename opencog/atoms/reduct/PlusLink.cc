@@ -17,8 +17,8 @@ using namespace opencog;
 
 Handle PlusLink::zero;
 
-PlusLink::PlusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+PlusLink::PlusLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
@@ -46,22 +46,19 @@ void PlusLink::init(void)
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return get_value(as, silent, fi);
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
 	// If adding zero, just drop the zero.
-	// Unless the other side is a StreamValue, in which case, we
-	// have to behave consistently with adding a non-zero number.
-	// Adding a number to a stream samples one value out of that stream.
-	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
-		return sample_stream(vj, vjtype);
-
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		return sample_stream(vi, vitype);
+		return vi;
 
 	// Are they numbers? If so, perform vector (pointwise) addition.
 	// Always lower the strength: Number+Number->Number
@@ -78,20 +75,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		// If we are here, they were not simple numbers.
 	}
 
-	// Is either one a PlusLink? If so, then flatten.
-	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
+	// Is vi a PlusLink? If so, then flatten.
+	if (PLUS_LINK == vitype)
 	{
-		HandleSeq seq;
-		// flatten the left
-		if (PLUS_LINK == vitype)
-		{
-			for (const Handle& lhs: HandleCast(vi)->getOutgoingSet())
-				seq.push_back(lhs);
-		}
-		else
-		{
-			seq.push_back(HandleCast(vi));
-		}
+		HandleSeq seq = HandleCast(vi)->getOutgoingSet();
 
 		// flatten the right
 		if (PLUS_LINK == vjtype)
@@ -103,12 +90,34 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(std::move(seq), PLUS_LINK));
-		PlusLinkPtr ap = PlusLinkCast(foo);
+		PlusLinkPtr ap = createPlusLink(std::move(seq));
 		return ap->delta_reduce(as, silent);
 	}
 
-	// Is fi identical to fj? If so, then replace by 2*fi
+	if (PLUS_LINK == vjtype)
+	{
+		// Paste on one at a time; this avoid what would otherwise
+		// be infinite recursion on `(Plus A B C)` where kons was
+		// unable to reduce `(Plus B C)`. So we instead try to do
+		// `(Plus (Plus A B) C)` which should work out...
+		ValuePtr vsum = vi;
+		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
+		{
+			if (PLUS_LINK == vsum->get_type())
+			{
+				HandleSeq vout(HandleCast(vsum)->getOutgoingSet());
+				vout.push_back(h);
+				vsum = createPlusLink(std::move(vout));
+			}
+			else
+			{
+				vsum = kons(as, silent, vsum, h);
+			}
+		}
+		return vsum;
+	}
+
+	// Is vi identical to vj? If so, then replace by 2*vi
 	Handle hvi(HandleCast(vi));
 	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
@@ -204,7 +213,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
-	// Vector times vector
+	// Vector plus vector
 	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return plus(FloatValueCast(vi), FloatValueCast(vj));

@@ -151,7 +151,7 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 
 SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
-	if (nullptr == pa) return SCM_EOL;
+	if (nullptr == pa) return SCM_BOOL_F;
 
 	// Use new so that the smart pointer increments!
 	ValuePtr* pap = new ValuePtr(pa);
@@ -402,12 +402,12 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		Handle h(atomspace->add_node(t, name));
+		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h->setTruthValue(tv);
+			if (tv) h = atomspace->set_truthvalue(h, tv);
 		}
 
 		return handle_to_scm(h);
@@ -437,12 +437,12 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	Handle h(atomspace->get_handle(t, name));
+	Handle h(atomspace->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) atomspace->set_truthvalue(h, tv);
+	if (tv) h = atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -520,16 +520,16 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		Handle h(atomspace->add_link(t, outgoing_set));
+		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
 		// Fish out a truth value, if its there.
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h->setTruthValue(tv);
+			if (tv) h = atomspace->set_truthvalue(h, tv);
 		}
 
-		return handle_to_scm (h);
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
@@ -555,12 +555,12 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
-	Handle h(atomspace->get_handle(t, outgoing_set));
+	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) atomspace->set_truthvalue(h, tv);
+	if (tv) h = atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

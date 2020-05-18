@@ -6,8 +6,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,12 +14,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/query/Satisfier.h>
@@ -40,28 +39,32 @@ void GetLink::init(void)
 	}
 }
 
-GetLink::GetLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
+GetLink::GetLink(const HandleSeq&& hseq, Type t)
+	: MeetLink(std::move(hseq), t)
 {
 	init();
 }
 
 /* ================================================================= */
 
-HandleSet GetLink::do_execute(AtomSpace* as, bool silent)
-{
-	if (nullptr == as) as = _atom_space;
-
-	SatisfyingSet sater(as);
-	this->satisfy(sater);
-
-	return sater._satisfying_set;
-}
-
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
+	QueueValuePtr qv(MeetLink::do_execute(as, silent));
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	HandleSeq hs(qv->to_handle_seq());
+
+	// If there is an anchor, then attach results to the anchor.
+	// Otherwise, create a SetLink and return that.
+	if (_variables._anchor and as)
+	{
+		for (const Handle& h : hs)
+			as->add_link(MEMBER_LINK, h, _variables._anchor);
+
+		return _variables._anchor;
+	}
+
 	// Create the satisfying set, and cache it.
-	Handle satset(createUnorderedLink(do_execute(as, silent), SET_LINK));
+	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE

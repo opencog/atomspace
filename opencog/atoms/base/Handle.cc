@@ -273,6 +273,21 @@ std::string oc_to_string(const HandleMultimap& hmultimap, const std::string& ind
 	return ss.str();
 }
 
+std::string oc_to_string(const HandleSeqMap& hsm, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hsm.size();
+	int i = 0;
+	for (const auto& p : hsm) {
+		ss << std::endl << indent << "key[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "values[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
+}
+
 std::string oc_to_string(const HandleMapSeq& hms, const std::string& indent)
 {
 	std::stringstream ss;

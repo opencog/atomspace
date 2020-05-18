@@ -61,7 +61,8 @@ using namespace opencog;
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _backing_store(nullptr),
-    _read_only(false)
+    _read_only(false),
+    _copy_on_write(transient)
 {
 }
 
@@ -71,6 +72,7 @@ AtomSpace::~AtomSpace()
 
 void AtomSpace::ready_transient(AtomSpace* parent)
 {
+    _copy_on_write = true;
     _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
 }
 
@@ -148,12 +150,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (atom_first->is_node())
         {
             atom_second = table_second.getHandle(atom_first->get_type(),
-                        atom_first->get_name());
+                        std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
             atom_second =  table_second.getHandle(atom_first->get_type(),
-                        atom_first->getOutgoingSet());
+                        HandleSeq(atom_first->getOutgoingSet()));
         }
         else
         {
@@ -314,43 +316,41 @@ Handle AtomSpace::add_atom(const Handle& h)
     return rh;
 }
 
-Handle AtomSpace::add_node(Type t, const string& name)
+Handle AtomSpace::add_node(Type t, std::string&& name)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, name);
+    if (_read_only) return _atom_table.getHandle(t, std::move(name));
 
-    return _atom_table.add(createNode(t, name));
+    return _atom_table.add(createNode(t, std::move(name)));
 }
 
-Handle AtomSpace::get_node(Type t, const string& name)
+Handle AtomSpace::get_node(Type t, std::string&& name) const
 {
-    return _atom_table.getHandle(t, name);
+    return _atom_table.getHandle(t, std::move(name));
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, outgoing);
+    if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
-    Handle rh;
+    Handle h(createLink(std::move(outgoing), t));
     try {
-        rh = _atom_table.add(createLink(outgoing, t));
+        return _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
-        if (_backing_store) {
-           Handle h(createLink(outgoing, t));
+        if (_backing_store)
            _backing_store->removeAtom(h, false);
-        }
     }
-    return rh;
+    return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
-    return _atom_table.getHandle(t, outgoing);
+    return _atom_table.getHandle(t, std::move(outgoing));
 }
 
 void AtomSpace::store_atom(const Handle& h)
@@ -460,12 +460,19 @@ Handle AtomSpace::set_value(const Handle& h,
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, true));
             copy->setValue(key, value);
             return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setValue(key, value);
+            return h;
         }
     } else {
         h->setValue(key, value);
@@ -491,12 +498,19 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, true));
             copy->setTruthValue(tvp);
             return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setTruthValue(tvp);
+            return h;
         }
     } else {
         h->setTruthValue(tvp);

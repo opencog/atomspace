@@ -13,8 +13,8 @@
 
 using namespace opencog;
 
-DivideLink::DivideLink(const HandleSeq& oset, Type t)
-    : TimesLink(oset, t)
+DivideLink::DivideLink(const HandleSeq&& oset, Type t)
+    : TimesLink(std::move(oset), t)
 {
 	init();
 }
@@ -66,7 +66,7 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 
 	// If vj is one, just drop it
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return sample_stream(vi, vitype);
+		return vi;
 
 	// Collapse (3 / (5 * x)) and (3 / (x * 5))
 	if (NUMBER_NODE == vitype and TIMES_LINK == vjtype)

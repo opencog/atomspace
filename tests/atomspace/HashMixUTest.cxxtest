@@ -64,7 +64,7 @@ public:
 			// Create a width-ary tree. (e.g. binary tree for width=2)
 			HandleSeq hs;
 			for (int j=0; j< width; j++) hs.push_back(h);
-			h = as->add_link(LIST_LINK, hs);
+			h = as->add_link(LIST_LINK, std::move(hs));
 		}
 
 		// Just for grins. This is meaningless.

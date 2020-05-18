@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-void Node::init(const std::string& cname)
+void Node::init()
 {
     if (not nameserver().isA(_type, NODE))
     {
@@ -35,18 +35,6 @@ void Node::init(const std::string& cname)
             "Node - Invalid node type '%d' %s.",
             _type, nameserver().getTypeName(_type).c_str());
     }
-    _name = cname;
-}
-
-void Node::init(const std::string&& cname)
-{
-    if (not nameserver().isA(_type, NODE))
-    {
-        throw InvalidParamException(TRACE_INFO,
-            "Node - Invalid node type '%d' %s.",
-            _type, nameserver().getTypeName(_type).c_str());
-    }
-    _name = std::move(cname);
 }
 
 /// Return a universally-unique string for each distinct node.
@@ -116,6 +104,5 @@ ContentHash Node::compute_hash() const
 	hsh &= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }

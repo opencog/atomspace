@@ -23,9 +23,8 @@
 
 #include <string>
 
-// #include <opencog/util/mt19937ar.h>
-// #include <opencog/util/random.h>
 // #include <opencog/util/Logger.h>
+#include <opencog/util/random.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/hash.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -53,6 +52,13 @@ ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 bool ScopeLink::skip_init(Type t)
 {
 	// Type must be as expected.
+#if 0
+	// ScopeLinks are created directly in unit tests, so this safety
+	// check won't work.
+	if (SCOPE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"ScopeLinks are private and cannot be instantiated.");
+#endif
 	if (not nameserver().isA(t, SCOPE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
@@ -69,8 +75,8 @@ bool ScopeLink::skip_init(Type t)
 	return false;
 }
 
-ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	if (skip_init(t)) return;
 	init();
@@ -122,15 +128,16 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	if (oset.size() < 2)
+	size_t sz = oset.size();
+	if (sz < 1)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting an outgoing set size of at least two; got %s",
-			oset[0]->to_string().c_str());
+			"Expecting an outgoing set size of at least one; got %s",
+			to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
+	// a variable declaration. JoinLinks need not have a body.
 	_vardecl = oset[0];
-	_body = oset[1];
+	if (2 <= sz) _body = oset[1];
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
@@ -149,6 +156,70 @@ void ScopeLink::init_scoped_variables(const Handle& vardecl)
 		HandleSeq owv(std::next(_outgoing.begin()), _outgoing.end());
 		_variables.canonical_sort(owv);
 	}
+}
+
+/* ================================================================= */
+
+inline Handle append_rand_str(const Handle& var)
+{
+	std::string new_var_name = randstr(var->get_name() + "-");
+	return createNode(var->get_type(), std::move(new_var_name));
+}
+
+inline HandleSeq append_rand_str(const HandleSeq& vars)
+{
+	HandleSeq new_vars;
+	for (const Handle& h : vars)
+		new_vars.push_back(append_rand_str(h));
+	return new_vars;
+}
+
+/**
+ * Wrap every glob node with a ListLink
+ *
+ * Since GlobNodes can be matched/substituted with one or more
+ * arguments, The arguments are expected to be wrapped with
+ * ListLink.
+ * In case of alpha conversion, Alpha converted GlobNodes in a
+ * program needs to be wrapped before passed to substitute the Glob.
+ */
+inline HandleSeq wrap_glob_with_list(const HandleSeq& vars)
+{
+	HandleSeq new_vars;
+	for (const Handle& var : vars) {
+		if (GLOB_NODE == var->get_type())
+			new_vars.push_back(createLink(HandleSeq{var}, LIST_LINK));
+		else new_vars.push_back(var);
+	}
+	return new_vars;
+}
+
+Handle ScopeLink::alpha_convert() const
+{
+	HandleSeq vars = append_rand_str(_variables.varseq);
+	return alpha_convert(vars);
+}
+
+Handle ScopeLink::alpha_convert(const HandleSeq& vars) const
+{
+	const auto wrapped = wrap_glob_with_list(vars);
+	// Perform alpha conversion
+	HandleSeq hs;
+	for (size_t i = 0; i < get_arity(); ++i)
+		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped));
+
+	// Create the alpha converted scope link
+	return createLink(std::move(hs), get_type());
+}
+
+Handle ScopeLink::alpha_convert(const HandleMap& vsmap) const
+{
+	HandleSeq vars;
+	for (const Handle& var : _variables.varseq) {
+		auto it = vsmap.find(var);
+		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
+	}
+	return alpha_convert(vars);
 }
 
 /* ================================================================= */
@@ -232,6 +303,11 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 
 ContentHash ScopeLink::compute_hash() const
 {
+	return scope_hash(_variables.index);
+}
+
+ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
+{
 	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
 	fnv1a_hash(hsh, get_type());
 	fnv1a_hash(hsh, _variables.varseq.size());
@@ -266,7 +342,7 @@ ContentHash ScopeLink::compute_hash() const
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
 		const Handle& h(_outgoing[i + vardecl_offset]);
-		fnv1a_hash(hsh, term_hash(h, hidden));
+		fnv1a_hash(hsh, term_hash(h, index));
 	}
 
 	// Links will always have the MSB set.
@@ -274,48 +350,54 @@ ContentHash ScopeLink::compute_hash() const
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }
 
 /// Recursive helper for computing the content hash correctly for
 /// scoped links.  The algorithm here is almost identical to that
 /// used in VarScraper::find_vars(), with obvious alterations.
 ContentHash ScopeLink::term_hash(const Handle& h,
-                                 UnorderedHandleSet& bound_vars,
+                                 const FreeVariables::IndexMap& index,
                                  Quotation quotation) const
 {
 	Type t = h->get_type();
-	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-	    quotation.is_unquoted() and
-	    0 != _variables.varset.count(h) and
-	    0 == bound_vars.count(h))
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and quotation.is_unquoted())
 	{
-		// Alpha-convert the variable "name" to its unique position
-		// in the sequence of bound vars.  Thus, the name is unique.
-		ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
-		fnv1a_hash(hsh, (1 + _variables.index.find(h)->second));
-		return hsh;
+		auto it = index.find(h);
+		if (it != index.end())
+		{
+			// Alpha-convert the variable "name" to its unique position
+			// in the sequence of bound vars.  Thus, the name is unique.
+			ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+			fnv1a_hash(hsh, 1 + it->second);
+			return hsh;
+		}
+		// Otherwise treat that variable as a constant, i.e. move on
 	}
 
 	// Just the plain old hash for all other nodes.
 	if (h->is_node()) return h->get_hash();
 
+	// If it is a scope, call specialized scope hash with the index
+	// complemented with the new variables of that scope, hiding the
+	// old ones if necessary.  This fixes an issue regarding
+	// alpha-equivalence of scopes containing inner scopes, see
+	// https://github.com/opencog/atomspace/issues/2507
+	if (nameserver().isA(t, SCOPE_LINK) and quotation.is_unquoted())
+	{
+		FreeVariables::IndexMap new_index(index);
+		ScopeLinkPtr sco(ScopeLinkCast(h));
+		const Variables& sco_vars = sco->get_variables();
+		const FreeVariables::IndexMap& sco_index = sco_vars.index;
+		for (const auto& vi : sco_index)
+			new_index[vi.first] = vi.second + index.size();
+		return sco->scope_hash(new_index);
+	}
+
+	// Otherwise h is a regular link, recursively calculate its hash
+
 	// Quotation
 	quotation.update(t);
-
-	// Other embedded ScopeLinks might be hiding some of our variables...
-	bool issco = nameserver().isA(t, SCOPE_LINK);
-	UnorderedHandleSet bsave;
-	if (issco)
-	{
-		// Protect current hidden vars from harm.
-		bsave = bound_vars;
-		// Add the Scope link vars to the hidden set.
-		ScopeLinkPtr sco(ScopeLinkCast(h));
-		const Variables& vees = sco->get_variables();
-		for (const Handle& v : vees.varseq) bound_vars.insert(v);
-	}
 
 	// As discussed in issue #1176, compute the individual term_hashes
 	// first, then sort them, and then mix them!  This provides the
@@ -324,7 +406,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	std::vector<ContentHash> hash_vec;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hash_vec.push_back(term_hash(ho, bound_vars, quotation));
+		hash_vec.push_back(term_hash(ho, index, quotation));
 	}
 
 	// hash_vec should be sorted only for unordered links
@@ -337,9 +419,6 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	for (ContentHash & t_hash: hash_vec) {
 		fnv1a_hash(hsh, t_hash);
 	}
-
-	// Restore saved vars from stack.
-	if (issco) bound_vars = bsave;
 
 	return hsh;
 }

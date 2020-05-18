@@ -33,8 +33,8 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
@@ -547,7 +547,6 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 	{
 		// The instantiation above can throw an exception if the
 		// it is ill-formed. If so, assume the opt clause is absent.
-		_instor->reset_halt();
 		return true;
 	}
 
@@ -625,11 +624,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		// around the eval_sentence call in
 		// Satisfier::search_finished, because in case such virtual
 		// term is embdded in a NotLink returning false here is gonna
-		// validate the NotLink, which might not be desirable. The
-		// main reason it is here now is is order to easily access
-		// _instor to reset Instantiator::_halt and avoid falsely
-		// detecting infinite recursion.
-		_instor->reset_halt();
+		// validate the NotLink, which might not be desirable.
 		return false;
 	}
 

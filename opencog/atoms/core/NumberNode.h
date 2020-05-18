@@ -36,7 +36,7 @@ private:
 	// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0067r0.html
 	// This was a painful discovery that ate the chatbot's lunch.
 	// So we perform a hack here.  The core issue is that the rest of the
-	// system is explcitly defined to be locale-independent, including
+	// system is explicitly defined to be locale-independent, including
 	// the natural-language pipeline in guile/scheme. Thus, printing
 	// the European comma as a decimal separator blows up the code.
 	// Using boost::lexical_cast<> avoids this issue.
@@ -50,10 +50,10 @@ protected:
 
 public:
 	// Please to NOT use this constructor!
-	NumberNode(Type, const std::string&);
+	NumberNode(Type, const std::string&&);
 
 public:
-	NumberNode(const std::string&);
+	NumberNode(const std::string&&);
 	NumberNode(const std::vector<double>&);
 	NumberNode(const FloatValuePtr&);
 	NumberNode(const ValuePtr&);
@@ -74,6 +74,7 @@ public:
 		return vector_to_plain(to_vector(str));
 	}
 
+	size_t size(void) { return _value.size(); }
 	std::vector<double> value(void) { return _value; }
 	double get_value(void) { return _value[0]; }
 

@@ -63,7 +63,7 @@ protected:
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 
 public:
-	MapLink(const HandleSeq&, Type=MAP_LINK);
+	MapLink(const HandleSeq&&, Type=MAP_LINK);
 	MapLink(const Handle& pattern, const Handle& term);
 	MapLink(const MapLink&) = delete;
 	MapLink operator=(const MapLink&) = delete;

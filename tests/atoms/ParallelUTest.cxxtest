@@ -171,7 +171,7 @@ void ParallelUTest::test_parallel(void)
 }
 
 /*
- * JoinLink unit test.
+ * ThreadJoinLink unit test.
  */
 void ParallelUTest::test_join(void)
 {
@@ -206,7 +206,7 @@ void ParallelUTest::test_join(void)
     int cnt = atoi(str.c_str());
     TS_ASSERT_EQUALS(cnt, 2);
 
-    // The Join is an AndLink...
+    // The ThreadJoin is an AndLink...
     double mean = tvp->get_mean();
     TS_ASSERT_LESS_THAN(mean, 0.5);
 
@@ -214,7 +214,7 @@ void ParallelUTest::test_join(void)
 }
 
 /*
- * ParallelLink, JoinLink exceptions
+ * ParallelLink, ThreadJoinLink exceptions
  */
 void ParallelUTest::test_throw(void)
 {

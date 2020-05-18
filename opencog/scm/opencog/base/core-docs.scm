@@ -70,7 +70,7 @@
 
     Optionally, a truth value can be included in the list of atoms.
 
-    Throws errors if the link type is not a valid opencog link type,
+    Throws errors if the link type is not a valid OpenCog link type,
     or if any of the arguments after the link type are not atoms or
     truth values.
 
@@ -101,7 +101,7 @@
     Optionally, a truth value can be included in the list of atoms.
     If the link exists, then the truth value is modified.
 
-    Throws errors if the link type is not a valid opencog link type,
+    Throws errors if the link type is not a valid OpenCog link type,
     or if any of the arguments after the link type are not atoms or
     truth values.
 
@@ -517,7 +517,7 @@
 "
  cog-atom-less? L-ATOM R-ATOM
     Return #t if L-ATOM is less than R-ATOM, else return #f.  This
-    predicate is usefule for creating sorted lists of atoms; for
+    predicate is useful for creating sorted lists of atoms; for
     example, to rapidly remove duplicate atoms from a long list.
 
     Example:
@@ -650,7 +650,7 @@
     Create a new value of type TYPE, hold the LIST of strings, floats
     or values.  The TYPE must be either 'StringValue, 'FloatValue
     or 'LinkValue. The LIST must be an ordinary guile list, consisting
-    entirely of guile strings, guile numbers, or opencog values,
+    entirely of guile strings, guile numbers, or OpenCog values,
     respectively, for each of the three types.
 
     Example:
@@ -713,7 +713,7 @@
 (set-procedure-property! cog-value? 'documentation
 "
  cog-value? EXP
-    Return #t if EXP is an opencog value, else return #f
+    Return #t if EXP is an OpenCog value, else return #f
 
     Example:
        guile> (cog-value? (FloatValue 42))
@@ -725,7 +725,7 @@
 (set-procedure-property! cog-value->list 'documentation
 "
  cog-value->list VALUE
-    Return a scheme list holding the values in the opencog VALUE.
+    Return a scheme list holding the values in the OpenCog VALUE.
     If VALUE is a Link, this returns the outgoing set.
     If VALUE is a Node, this returns list containing the node name.
     If VALUE is a StringValue, FloatValue or LinkValue, this returns
@@ -739,7 +739,7 @@
 (set-procedure-property! cog-value-ref 'documentation
 "
  cog-value-ref VALUE N
-    Return the N'th entry in the opencog VALUE.
+    Return the N'th entry in the OpenCog VALUE.
     If VALUE is a Link, this returns the N'th atom in the outgoing set.
         That is, it returns the same atom as cog-outgoing-atom.
     If VALUE is a Node, and N is zero, this returns the node name.
@@ -757,8 +757,8 @@
 (set-procedure-property! cog-as 'documentation
 "
  cog-as ATOM
-    Return the atomspace of the ATOM.  If the ATOM does not belong to
-    any atomspace, null is returned.
+    Return the AtomSpace of the ATOM.  If the ATOM does not belong to
+    any AtomSpace, null is returned.
 ")
 
 (set-procedure-property! cog-get-types 'documentation
@@ -810,15 +810,15 @@
 (set-procedure-property! cog-map-type 'documentation
 "
  cog-map-type PROC TYPE [ATOMSPACE]
-    Call proceedure PROC for each atom in the ATOMSPACE that is of
-    type TYPE. If proc returns any value other than #f, then the
+    Call procedure PROC for each atom in the ATOMSPACE that is of
+    type TYPE. If PROC returns any value other than #f, then the
     iteration is terminated.  Note that this iterates only over the
-    given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
-    will never call proc, because no atoms in the atomspace can have
+    given type, and not its sub-types. Thus (cog-map-type PROC 'Atom)
+    will never call PROC, because no atoms in the AtomSpace can have
     the type Atom: they are all subtypes of Atom.
 
     The ATOMSPACE argument is optional; if absent, the default
-    atomspace is used.
+    AtomSpace is used.
 
     Example:
        ; define a function that prints the atoms:
@@ -834,7 +834,7 @@
 
   Return a count of the number of atoms of the given type `ATOM-TYPE`.
   If the optional argument `ATOMSPACE` is given, then a count is
-  returned for that atomspace; otherwise, the default atomspace is used.
+  returned for that AtomSpace; otherwise, the default AtomSpace is used.
 
   Example usage:
      (display (cog-count-atoms 'ConceptNode))
@@ -870,7 +870,7 @@
  cog-new-atomspace [ATOMSPACE]
     Create a new atomspace.  If the optional argument ATOMSPACE
     is present, then the new atomspace will be an expansion (child)
-    of ATOMSPACE.  Atomspaces are automatically deleted when no more
+    of ATOMSPACE.  AtomSpaces are automatically deleted when no more
     references to them remain. Returns the new atomspace.
 
     Note that this does NOT set the current atomspace to the new one;
@@ -899,6 +899,80 @@
 
      This only removes the atoms from the atomspace, it does NOT
      remove them from the backingstore.
+")
+
+(set-procedure-property! cog-atomspace-ro! 'documentation
+"
+ cog-atomspace-ro! [ATOMSPACE]
+     Mark the ATOMSPACE as being read-only. New atoms cannot be added
+     to a read-only atomspace, nor can atoms be removed. The Values
+     (including the TruthValues) of atoms in the read-only atomspace
+     cannot be changed.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-rw!, cog-atomspace-readonly?,
+         cog-atomspace-cow! and cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-rw! 'documentation
+"
+ cog-atomspace-rw! [ATOMSPACE]
+     Mark the ATOMSPACE as being read-write. See cog-atomspace-ro!
+     for a detailed explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-readonly?, cog-atomspace-cow! and
+         cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-readonly? 'documentation
+"
+ cog-atomspace-readonly? [ATOMSPACE]
+     Return #t if the ATOMSPACE is marked read-only. See
+     cog-atomspace-ro! for a detailed explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-cow! and cog-atomspace-cow?
+")
+
+(set-procedure-property! cog-atomspace-cow! 'documentation
+"
+ cog-atomspace-cow! BOOL [ATOMSPACE]
+     Set the copy-on-write (COW) bit on the ATOMSPACE to BOOL.
+
+     A COW atomspace behaves as if the parent has been marked read-only,
+     and so any modifications to atoms in a COW space do not affect the
+     parent. (It does not make sense to mark an atomspace as being COW,
+     if there is no parent.)
+
+     COW spaces are useful as temporary or transient AtomSpaces, so that
+     scratch calculations and updates can be performed without affecting
+     the parent.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-cow?, cog-atomspace-readonly?,
+         cog-atomspace-ro! and cog-atomspace-rw!,
+")
+
+(set-procedure-property! cog-atomspace-cow? 'documentation
+"
+ cog-atomspace-cow? [ATOMSPACE]
+     Return the copy-on-write (COW) bit on the ATOMSPACE to BOOL.
+     See cog-atomspace-cow! for an explanation.
+
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
+     See also: cog-atomspace-ro! and cog-atomspace-rw! and
+         cog-atomspace-readonly?,
 ")
 
 ;set-procedure-property! cog-yield 'documentation

@@ -19,3 +19,7 @@ cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog"
     cAtomSpace * pop_context_atomspace();
     void c_clear_context "opencog::clear_context" ();
 
+
+cdef extern from "opencog/persist/file/fast_load.h" namespace "opencog":
+    void load_file(const string path, cAtomSpace & atomspace);
+

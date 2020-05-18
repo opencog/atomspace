@@ -29,9 +29,8 @@ namespace opencog {
 
 void initialize_python();
 void finalize_python();
-Handle add_node(Type t, const std::string& name="");
-Handle add_link(Type t, const HandleSeq& outgoing);
-
+Handle add_node(Type, std::string);
+Handle add_link(Type, HandleSeq);
 
 } // namespace opencog
 

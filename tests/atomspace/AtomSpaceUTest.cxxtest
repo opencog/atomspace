@@ -68,7 +68,8 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     if (node) {
         result = as.get_handle(node->get_type(), node->get_name());
         if (result == Handle::UNDEFINED) {
-            result = as.add_node(node->get_type(), node->get_name());
+            result = as.add_node(node->get_type(),
+                                 std::move(std::string(node->get_name())));
             result->setTruthValue(newTV);
             return result;
         }
@@ -76,7 +77,8 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
         LinkPtr link(LinkCast(atom));
         result = as.get_handle(link->get_type(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
-            result = as.add_link(link->get_type(), link->getOutgoingSet());
+            result = as.add_link(link->get_type(),
+                                 std::move(HandleSeq(link->getOutgoingSet())));
             result->setTruthValue(newTV);
             return result;
         }
@@ -115,7 +117,7 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         }
     }
 
-    Handle hh = as.add_link(*head_type_ptr, handles);
+    Handle hh = as.add_link(*head_type_ptr, std::move(handles));
     hh->setTruthValue(tvn);
     return hh;
 }
@@ -148,12 +150,12 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
     outgoing1.push_back(h3);
-    Handle l1 = atomSpace->add_link(LIST_LINK, outgoing1);
+    Handle l1 = atomSpace->add_link(LIST_LINK, std::move(outgoing1));
     l1->setTruthValue(tv1);
     HandleSeq outgoing2;
     outgoing2.push_back(h1);
     outgoing2.push_back(l1);
-    Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
+    Handle l2 = atomSpace->add_link(EVALUATION_LINK, std::move(outgoing2));
     l2->setTruthValue(tv2);
 
     HandleSeq testAtoms;
@@ -358,7 +360,7 @@ public:
             HandleSeq temp(2);
             temp[0] = h[i];
             temp[1] = h[4];
-            FU[i] = atomSpace->add_link(SUBSET_LINK, temp);
+            FU[i] = atomSpace->add_link(SUBSET_LINK, std::move(temp));
             FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], 0.99));
         }
         logger().debug("ForceUser links created");
@@ -369,7 +371,8 @@ public:
         for (int i = 0; i < 4; i++) {
             out[i].push_back(h[i]);
             out[i].push_back(h[5]);
-            H[i] = atomSpace->add_link(INHERITANCE_LINK, out[i]);
+            H[i] = atomSpace->add_link(INHERITANCE_LINK,
+                                       std::move(HandleSeq(out[i])));
             H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], 0.99));
         }
         logger().debug("Human links created");
@@ -700,22 +703,26 @@ public:
         HandleSeq outgoing1;
         outgoing1.push_back(h2);
         outgoing1.push_back(h3);
-        Handle l1 = atomSpace->add_link(LIST_LINK, outgoing1);
+        Handle l1 = atomSpace->add_link(LIST_LINK,
+                                        std::move(HandleSeq(outgoing1)));
         l1->setTruthValue(tv1);
         HandleSeq outgoing2;
         outgoing2.push_back(h1);
         outgoing2.push_back(l1);
-        Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
+        Handle l2 = atomSpace->add_link(EVALUATION_LINK,
+                                        std::move(HandleSeq(outgoing2)));
         l2->setTruthValue(tv2);
 
         TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002, 0.00002);
         tv1->merge(tv1_);
         l1->setTruthValue(tv1);
-        Handle l1_ = atomSpace->add_link(LIST_LINK, outgoing1);
+        Handle l1_ = atomSpace->add_link(LIST_LINK,
+                                         std::move(HandleSeq(outgoing1)));
         TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1, 0.0);
         tv2->merge(tv2_);
         l2->setTruthValue(tv2);
-        Handle l2_ = atomSpace->add_link(EVALUATION_LINK, outgoing2);
+        Handle l2_ = atomSpace->add_link(EVALUATION_LINK,
+                                         std::move(HandleSeq(outgoing2)));
 
         TS_ASSERT(l1 == l1_);
         TruthValuePtr l1tv = l1->getTruthValue();
@@ -785,7 +792,8 @@ public:
         HandleSeq emptyOutgoing;
         Handle result = atomSpace->get_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result == Handle::UNDEFINED);
-        atomSpace->add_link(LIST_LINK, emptyOutgoing);
+        atomSpace->add_link(LIST_LINK,
+                            std::move(HandleSeq(emptyOutgoing)));
         result = atomSpace->get_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result != Handle::UNDEFINED);
     }
@@ -807,19 +815,19 @@ public:
     // Helpers for testQuoteLink
     Handle make_node(Type type, std::string name)
     {
-        return Handle(createNode(type, name));
+        return createNode(type, std::move(name));
     }
     Handle make_link(Type type, Handle h)
     {
-        return Handle(createLink(type, h));
+        return createLink(type, h);
     }
     Handle make_link(Type type, Handle h1, Handle h2)
     {
-        return Handle(createLink(type, h1, h2));
+        return createLink(type, h1, h2);
     }
     Handle make_link(Type type, Handle h1, Handle h2, Handle h3)
     {
-        return Handle(createLink(type, h1, h2, h3));
+        return createLink(type, h1, h2, h3);
     }
 
     void testQuoteLink()
@@ -866,19 +874,19 @@ public:
     // Helpers for testPreconstructedQuote
     Handle factory_node(Type type, std::string name)
     {
-        return classserver().factory(Handle(createNode(type, name)));
+        return classserver().factory(createNode(type, std::move(name)));
     }
     Handle factory_link(Type type, Handle h)
     {
-        return classserver().factory(Handle(createLink(type, h)));
+        return classserver().factory(createLink(type, h));
     }
     Handle factory_link(Type type, Handle h1, Handle h2)
     {
-        return classserver().factory(Handle(createLink(type, h1, h2)));
+        return classserver().factory(createLink(type, h1, h2));
     }
     Handle factory_link(Type type, Handle h1, Handle h2, Handle h3)
     {
-        return classserver().factory(Handle(createLink(type, h1, h2, h3)));
+        return classserver().factory(createLink(type, h1, h2, h3));
     }
 
     // Create atom structures not in any atomspace, then add the

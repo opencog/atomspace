@@ -50,6 +50,8 @@ first).
 * `values.scm`         -- Using Values and attaching them to Atoms.
 * `stream.scm`         -- Using a stream of time-varying Values.
 * `formulas.scm`       -- Representing arithmetic and computing Values.
+* `flows.scm`          -- Flowing Values around.
+* `flow-formulas.scm`  -- Dynamically updating value flows.
 
 There is an important collection of demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
@@ -73,6 +75,15 @@ be effective.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
+
+Documentation
+-------------
+The wiki provides more detailed documentation for each of the AtomSpace
+Atom types, and more. Some good places to start are here:
+
+* [AtomSpace](https://wiki.opencog.org/w/AtomSpace)
+* [Atom types](https://wiki.opencog.org/w/Atom_types)
+* [Pattern matching](https://wiki.opencog.org/w/Pattern_matching)
 
 
 Introduction to Scheme and Guile

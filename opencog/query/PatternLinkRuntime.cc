@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+// #define QDEBUG 1
 
 /* ================================================================= */
 /// A pass-through class, which wraps a regular callback, but captures
@@ -103,9 +103,14 @@ class PMCGroundings : public PatternMatchCallback
 			_cb.set_pattern(vars, pat);
 		}
 
-		bool initiate_search(PatternMatchCallback& pmcb)
+		bool start_search(void)
 		{
-			return _cb.initiate_search(pmcb);
+			return _cb.start_search();
+		}
+
+		bool perform_search(PatternMatchCallback& pmcb)
+		{
+			return _cb.perform_search(pmcb);
 		}
 
 		bool search_finished(bool done)
@@ -118,11 +123,13 @@ class PMCGroundings : public PatternMatchCallback
 		bool grounding(const GroundingMap &var_soln,
 		               const GroundingMap &term_soln)
 		{
+			LOCK_PE_MUTEX;
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
+		DECLARE_PE_MUTEX;
 		GroundingMapSeq _term_groundings;
 		GroundingMapSeq _var_groundings;
 };
@@ -160,7 +167,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
-#ifdef DEBUG
+#ifdef QDEBUG
 		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
@@ -213,7 +220,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
 	}
-#ifdef DEBUG
+#ifdef QDEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
 #endif
 
@@ -328,9 +335,12 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		debug_log();
 
 		pmcb.set_pattern(_variables, _pat);
-		bool found = pmcb.initiate_search(pmcb);
+		bool found = pmcb.start_search();
+		if (found) return found;
 
-#ifdef DEBUG
+		found = pmcb.perform_search(pmcb);
+
+#ifdef QDEBUG
 		logger().fine("================= Done with Search =================");
 #endif
 		found = pmcb.search_finished(found);
@@ -350,7 +360,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-#ifdef DEBUG
+#ifdef QDEBUG
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
@@ -371,7 +381,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-#ifdef DEBUG
+#ifdef QDEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
 		              << " of " << _num_comps << ": ===========\n";
 #endif
@@ -400,7 +410,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			// to try to solve the other components, their product
 			// will have no solution.
 			if (gcb._term_groundings.empty()) {
-#ifdef DEBUG
+#ifdef QDEBUG
 				logger().fine("No solution for this component. "
 				              "Abort search as no product solution may exist.");
 #endif
@@ -413,7 +423,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 
 	// And now, try grounding each of the virtual clauses.
-#ifdef DEBUG
+#ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();
@@ -421,9 +431,13 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
 	pmcb.set_pattern(_variables, _pat);
-	return recursive_virtual(pmcb, _virtual, _pat.optionals,
+	bool done = pmcb.start_search();
+	if (done) return done;
+	done = recursive_virtual(pmcb, _virtual, _pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
+	done = pmcb.search_finished(done);
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */

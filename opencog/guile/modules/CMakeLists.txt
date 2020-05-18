@@ -11,6 +11,10 @@ ADD_LIBRARY (type-utils
 	TypeUtilsSCM.cc
 )
 
+ADD_LIBRARY (guile-uuid
+	UuidSCM.cc
+)
+
 TARGET_LINK_LIBRARIES(logger
 	smob
 	${COGUTIL_LIBRARY}
@@ -29,7 +33,14 @@ TARGET_LINK_LIBRARIES(type-utils
 )
 ADD_GUILE_EXTENSION(SCM_CONFIG type-utils "opencog-ext-path-type-utils")
 
-INSTALL (TARGETS logger randgen type-utils
+TARGET_LINK_LIBRARIES(guile-uuid
+	atomspaceutils
+	smob
+	${COGUTIL_LIBRARY}
+)
+ADD_GUILE_EXTENSION(SCM_CONFIG guile-uuid "opencog-ext-path-uuid")
+
+INSTALL (TARGETS logger randgen type-utils guile-uuid
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

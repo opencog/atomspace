@@ -38,6 +38,7 @@ public:
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_sync_flag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
@@ -66,6 +67,8 @@ public:
 	void test_eval_overlay(void);
 	void test_logic_overlay(void);
 	void test_varval_overlay(void);
+
+	void test_lambda(void);
 };
 
 void EvaluationUTest::tearDown(void)
@@ -88,8 +91,6 @@ void EvaluationUTest::setUp(void)
  */
 void EvaluationUTest::do_test_eval(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
 	Handle five = eval->eval_h("(cog-execute! (five-arcs))");
 	printf ("five: found:\n%s\n", five->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(five));
@@ -113,8 +114,6 @@ void EvaluationUTest::do_test_eval(void)
 	Handle two = eval->eval_h("(cog-execute! (two-arcs))");
 	printf ("two: found:\n%s\n", two->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(two));
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -122,8 +121,6 @@ void EvaluationUTest::do_test_eval(void)
  */
 void EvaluationUTest::do_test_logic(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
 	Handle four = eval->eval_h("(cog-execute! (four-not))");
 	printf ("four-not: found:\n%s\n", four->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(four));
@@ -142,8 +139,6 @@ void EvaluationUTest::do_test_logic(void)
 
 	// Both the searches should return the same two (the first two)
 	TS_ASSERT_EQUALS(two, fancy);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -152,8 +147,6 @@ void EvaluationUTest::do_test_logic(void)
  */
 void EvaluationUTest::do_test_varval(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
 	Handle do_things = eval->eval_h("(do-things)");
 	printf ("do-pattern: \n%s\n", do_things->to_short_string().c_str());
 	Handle do_things_results = bindlink(as, do_things);
@@ -185,30 +178,42 @@ void EvaluationUTest::do_test_varval(void)
 
 	// Of the two possibilities, we only expect one to pass.
 	TS_ASSERT_EQUALS(expected, nndostuff);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_eval_rw(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 	do_test_eval();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_logic_rw(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 	do_test_logic();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_varval_rw(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/eval-var.scm\")");
 	do_test_varval();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_eval_overlay(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	// Mark base-space as readonly; create a read-write overlay.
@@ -225,10 +230,14 @@ void EvaluationUTest::test_eval_overlay(void)
 	delete as;
 	as = save;
 	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_logic_overlay(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	// Mark base-space as readonly; create a read-write overlay.
@@ -245,10 +254,14 @@ void EvaluationUTest::test_logic_overlay(void)
 	delete as;
 	as = save;
 	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void EvaluationUTest::test_varval_overlay(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(load-from-path \"tests/query/eval-var.scm\")");
 
 	// Mark base-space as readonly; create a read-write overlay.
@@ -265,4 +278,34 @@ void EvaluationUTest::test_varval_overlay(void)
 	delete as;
 	as = save;
 	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void EvaluationUTest::test_lambda(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/eval-lambda\")");
+
+	TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
+	printf ("Red light TV: %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
+	printf ("Red light (meet): %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	eval->eval_h(
+		"(State (Concept \"stop light\") (Concept \"green light\"))");
+
+	tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
+	printf ("Green light TV: %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
+	printf ("Green light (meet): %s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

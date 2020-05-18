@@ -12,7 +12,9 @@
 // CamelCase names).
 // ===========================================================
 
-// Special type designating that no atom type has been assigned.
+// Special type designating that no atom type has been assigned. It is
+// equivalent to the bottom type in type theory, see
+// https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
 
 // --------------------------------------------------------------
@@ -25,6 +27,22 @@ LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
 
 PTR_VALUE <- VALUE 		// value which represends pointer to the object
+
+// ===========================================================
+// A base class for time-varying floating-point values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
+// A stream computed by a formula held in the AtomSpace.
+FORMULA_STREAM <- STREAM_VALUE
+
+// A base class for time-varying value sequences.
+LINK_STREAM_VALUE <- LINK_VALUE
+
+// A thread-safe FIFO queue of value sequences.
+QUEUE_VALUE <- LINK_STREAM_VALUE
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
@@ -46,14 +64,7 @@ FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 TENSOR_TRUTH_VALUE          <- TRUTH_VALUE "TensorTruthValue"
-
-// ===========================================================
-// A base class for time-varying (floating-point) values.
-// XXX TODO we need other base classes for other kinds of varying values.
-STREAM_VALUE <- FLOAT_VALUE
-
-// An example of a time-varying value stream
-RANDOM_STREAM <- STREAM_VALUE
+FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
@@ -78,22 +89,28 @@ UNORDERED_LINK <- LINK
 PREDICATE_NODE <- NODE
 
 // ===========================================================
-// Type-safety links.  These are used to enforce type safety
-// at Atom creation time. The mechanism that employs these fails
-// to handle "deep types", so this is kind-of inadequate for
-// strong type checking. In fact, doing it this way is kind of
-// a cheesy hack - really, there should be some ArrowLink
-// associated to each atom type, and that should determine the
-// behavior of the atom. But, for now, we do it the hacky way.
-// Basically, it works, and it handles most of the basic cases
-// in a fairly straightforward fashion.
+// Type-safety links.  These are used to enforce type safety at
+// Atom creation time.  This is done in the ClassServer, with the
+// ClassServer::addValidator() method and the factory which runs the
+// validators. viz. std::vector<Validator*> _validator; in that class.
 //
-// By doing type-checking at atom-creation time, this is a kind-of
-// static type-checking, and thus suffers from the typical issues
-// of static type-checking.
+// This mechanism is adequate to deal with simple user errors, but
+// isn't very strong. Issues include:
 //
-// Also -- polymorphic outputs are broken.  For example, ValueOfLink
-// can return both numbers, and not-numbers...
+// *) By doing type-checking at atom-creation time, this is a kind-of
+//    static type-checking, and thus suffers from the typical issues
+//    of static type-checking.
+// *) Polymorphic outputs are broken.  For example, ValueOfLink
+//    can return both numbers, and not-numbers...
+// *) It fails to handle "deep types", as there should be some form
+//    of ArrowLink associated with each atom atype.
+// *) It fails to handle connector polarities beyond just "input"
+//    and "output". That is, there are more ways of connecting things
+//    than merely saying "outputs are things that can be plugged into
+//    inputs, and thier types must match."
+//
+// So... deficient in many ways, but basically, it works for now, and it
+// handles most of the basic cases in a fairly straightforward fashion.
 
 
 // Evaluatable link. Any link type which might be evaluated, resulting
@@ -131,7 +148,7 @@ TYPE_OUTPUT_LINK <- LINK
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
@@ -214,11 +231,48 @@ ALWAYS_LINK <- PRESENT_LINK
 
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
-// them to return.  JoinLink launches multiple threads, and waits for
-// all of them to return, and then returns the And of their truth
+// them to return.  ThreadJoinLink launches multiple threads, and waits
+// for all of them to return, and then returns the And of their truth
 // values.
 PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-JOIN_LINK <- PARALLEL_LINK
+THREAD_JOIN_LINK <- PARALLEL_LINK
+
+// ====================================================================
+// Connectors and sections.
+//
+// The generic structure encoded here would be:
+//
+//     Section
+//         Lexical "something"
+//         ConnectorSeq
+//             Connector
+//                 Lexical "it's"
+//                 ConnectorDir "-"
+//             Connector
+//                 Lexical "curious"
+//                 ConnectorDir "+"
+//
+// LexicalNode is for anything we keep a table of.
+// It inherits from PredicateNode because it is a kind of predicate:
+// It can evaluate to true, if something belongs to this lexical entry.
+LEXICAL_NODE <- PREDICATE_NODE
+
+// Wild-card node, very useful for counting. Similar to LexicalNode,
+// except that it can be "anything" - most importantly, VariableNode.
+ANY_NODE <- NODE
+
+// Generic connector. Its a link, because if contains all of the details
+// and restrictions required to define the allowable conections that
+// can be made. It inherits from Evaluatable, so that the ability for
+// it to mate to something can be encoded in a TruthValue (typically
+// a crisp T/F for type specifications.)
+CONNECTOR <- EVALUATABLE_LINK
+
+CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
+LINK_CLASS_NODE <- LEXICAL_NODE "LinkClass" // Connector class
+CONNECTOR_SEQ <- ORDERED_LINK       // Sequence of connectors
+CONNECTOR_SET <- UNORDERED_LINK     // Unordered set of connectors
+SECTION <- ORDERED_LINK             // Sheaf section, connector set
 
 // ====================================================================
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
@@ -233,16 +287,16 @@ JOIN_LINK <- PARALLEL_LINK
 // pattern matcher will fail.
 
 // A Variable.  Use Lambda's to hide these. Use types to type them.
-VARIABLE_NODE <- NODE
+VARIABLE_NODE <- ANY_NODE
 
 // A list of variables or variable declarations.
-VARIABLE_LIST <- LIST_LINK
+VARIABLE_LIST <- CONNECTOR_SEQ
 
 // A set (thus unordered) of variables or variable declarations. This
 // is convenient when combined with a scope link where the order of
 // variables is irrelevant to the semantics of the scope, like a
 // BindLink.
-VARIABLE_SET <- SET_LINK
+VARIABLE_SET <- CONNECTOR_SET
 
 // A non-greedy globbing variable; matches one or more atoms in a
 // sequence.  XXX TODO - this could be changed to a link, so that
@@ -271,6 +325,10 @@ LOCAL_QUOTE_LINK <- ORDERED_LINK
 // matched pattern is itself executable. Vaguely like QuoteLink, but
 // instead of blocking beta-reduction, it blocks execution.
 DONT_EXEC_LINK <- ORDERED_LINK
+
+// Substitution - replace first arg by second arg. Used in JoinLink.
+// Could be used in PatternLink too.
+REPLACEMENT_LINK <- ORDERED_LINK
 
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
@@ -336,7 +394,12 @@ DEFINE_LINK <- UNIQUE_LINK
 // tracks only the bound variables (and not the free ones). The
 // FreeLink cannot have type restrictions on the variables; the
 // ScopeLink can (and usually does).
-SCOPE_LINK <- ORDERED_LINK
+//
+// This inherits from Section, as its a special case of a lexical
+// entry with connector definitions inside of it. Viz, the scope
+// body is the lexical entry, and the variable declarations are the
+// connector declarations.
+SCOPE_LINK <- SECTION
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
@@ -370,6 +433,17 @@ LAMBDA_LINK <- PRENEX_LINK
 // beta-redexes.
 PUT_LINK <- PRENEX_LINK
 
+// The JoinLink searches for containing links that satsify the specified
+// predicates. This is the AtomSpace version of "join and meet" in a
+// partially ordered set. See wikipedia "meet and join".
+// The MinimalJoin is the supremum.
+// The MaximalJoin is the top.
+// The UpperSet is everything in between.
+JOIN_LINK <- PRENEX_LINK
+MINIMAL_JOIN_LINK <- JOIN_LINK
+UPPER_SET_LINK <- JOIN_LINK
+MAXIMAL_JOIN_LINK <- JOIN_LINK
+
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
@@ -394,7 +468,8 @@ SATISFYING_LINK <- PATTERN_LINK
 // Both return SetLinks holding the results.
 // QueryLink is identical to BindLink, except it returns a LinkValue
 // holding the result, instead of a SetLink. (Less atomspace pollution).
-GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
+MEET_LINK <- SATISFYING_LINK       // Finds all groundings, returns them
+GET_LINK <- MEET_LINK              // Finds all groundings, returns them
 QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
 BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
 
@@ -421,13 +496,8 @@ EQUIVALENCE_LINK <- UNORDERED_LINK
 // defined in this file. It cannot hold compound types (deep types),
 // because compound types are Atoms, and this is a Node, not a Link,
 // and so it cannot hold any atoms. Use DefinedTypeNode for compound
-// types.
-//
-// It inherits from PredicateNode because it is a kind of predicate:
-// It can evaluate to true, if something is of the indicated type,
-// else it would evaluate to false.
-//
-TYPE_NODE <- PREDICATE_NODE
+// types. Its a LexicalNode, whose lexis consists of Atom types.
+TYPE_NODE <- LEXICAL_NODE
 
 // Non-strict versions of above. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
@@ -439,6 +509,18 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
+// Note that the empty type choice corresponds to the bottom type.
+// see, https://wiki.opencog.org/w/TypeChoice#Bottom_type
+//
+// This "should" inherit from TYPE_LINK. However, it is currently valid
+// to write `(TypeChoice (Type 'ConceptNode) (Predicate "foo"))` and the
+// `(Predicate "foo")` causes the type checker to fail. Maybe the spec
+// should be changed to only allow
+// `(TypeChoice (Type 'ConceptNode) (Signature (Predicate "foo")))` if
+// such a "constant" type is wanted. I dunno. Not sure. Changing this
+// causes DeepTypeUTest to fail. ... I think forcing use of Signature
+// seems "more correct" ... XXX FIXME. maybe?
+// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type definitions
@@ -450,15 +532,17 @@ TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
-// arg is output.
-ARROW_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
+// arg is output.  It is a ConnectorSeq, since it specifies a pair of
+// connectors (the input, and the output).
+ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
-// type specification, below.
-SIGNATURE_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
+// type specification, below. It is a Connector, as it specifies
+// only one connectable thing at a time.
+SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
 // It is used to specify a pattern that is then matched only
@@ -473,16 +557,14 @@ FUZZY_LINK <- SIGNATURE_LINK
 // where variables are not free. Thus, unlike TypedAtomLink, this is
 // never globally unique.
 //
-// It inherits from Evaluatable, because it typically obtains a value
-// of "true", if the indicated variable is of the given type, else
-// it evaluates to "false".  The predicate specifying the concrete
-// test is the signature (SignatureLink, etc) that is tested.
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+// The inherits from Connector, as it is a special case...
+// The variable name is not lexical -- its a wild-card.
+TYPED_VARIABLE_LINK <- CONNECTOR
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position cannot be
 // any atom except for a VariableNode, the second must be a type.
-//  A given atom can only ever have just one type, thus, this is unique.
+// A given atom can only ever have just one type, thus, this is unique.
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // An arity-2 link, used for specifying numeric intervals, that is,
@@ -539,6 +621,10 @@ EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 // alpha-renaming of any variables that they may have.
 ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
+// ExclusiveLink tests to make sure all elements differ from
+// one-another. True only if they all differ...
+EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
 SATISFACTION_LINK <- SATISFYING_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
@@ -586,16 +672,22 @@ TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
 
-ATTENTION_VALUE_OF_LINK <- VALUE_OF_LINK
-STI_OF_LINK <- VALUE_OF_LINK
-LTI_OF_LINK <- VALUE_OF_LINK
+// Opposite of the above; attach a value to an atom.
+SET_VALUE_LINK <- FUNCTION_LINK
+SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
-// The opposite of the above: given something that evaluates to a
-// FloatValue, return a TruthValue.  Kind-of-like
-// GROUNDED_PREDICATE_NODE, but holding the formula in the AtomSpace.
-// This is not really needed, but will make the transition process
-// smoother.
+// Return a SimpleTruthValue when evaluated.
+// This is used to wrap any atom that returns a FloatValue; all this
+// does is to provide some formatting.  We don't really need to have
+// PredicateFormulaLink, because anything returning FloatValue is
+// enough. But during a transition period, this is handy to have.
+// Its handy because it looks a lot like a GROUNDED_PREDICATE_NODE,
+// except that the formula is in the Atomese, not scheme/python.
 PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+
+// Return a FormulaTruthValue when evaluated.
+// Like the above, but the TV is not a constant, but the formula itself.
+DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
@@ -605,7 +697,19 @@ MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- TIMES_LINK
 
+// Minimum and maxmimum of a set of numbers.
+MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Heaviside step function; same as GreaterThan, but works
+// for vectors, and returns numeric value.
+HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return uniformly distributed random number between two limits.
 RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return the sum of vector components of a number/float-value.
+ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return arity of the wrapped link.
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
@@ -631,29 +735,6 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
-
-// ====================================================================
-// Grammatical inference on time series
-//
-// The generic structure encoded here would be:
-//
-//     Section
-//         LexicalAtom "something"
-//         ConnectorSeq
-//             Connector
-//                 LexicalAtom "it's"
-//                 ConnectorDir "-"
-//             Connector
-//                 LexicalAtom "curious"
-//                 ConnectorDir "+"
-//
-CONNECTOR <- LINK              // Link-grammar connector
-CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
-LINK_CLASS_NODE <- NODE "LinkClass" // Connector class
-CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
-SECTION <- ORDERED_LINK        // Sheaf section, connector set
-
-ANY_NODE <- NODE  // Wild-card node, very useful for counting.
 
 // ==============================================================
 // Procedure and schema nodes.
