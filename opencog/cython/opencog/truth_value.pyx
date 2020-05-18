@@ -115,10 +115,10 @@ cdef class TensorTruthValue(TruthValue):
             c_ptr = <tv_ptr>createTensorTruthValue(<PyObject*>self.ttv)
             super(TruthValue, self).__init__(PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
-    cdef _mean(self):
+    cdef strength_t _mean(self):
         return self.ttv.mean
 
-    cdef _confidence(self):
+    cdef confidence_t _confidence(self):
         return self.ttv.confidence
 
     def torch(self):
