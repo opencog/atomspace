@@ -346,9 +346,11 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
-	// Handle in-line variable declarations
+	// Handle in-line variable declarations.
 	if (not reverse and TYPED_VARIABLE_LINK == typ)
 	{
+		// We have to erase first, else it gets duplicated.
+		_variables.erase(h->getOutgoingAtom(0));
 		_variables.validate_vardecl(h);
 		return true;
 	}
