@@ -346,6 +346,15 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
+	// Handle in-line variable declarations.
+	if (not reverse and TYPED_VARIABLE_LINK == typ)
+	{
+		// We have to erase first, else it gets duplicated.
+		_variables.erase(h->getOutgoingAtom(0));
+		_variables.validate_vardecl(h);
+		return true;
+	}
+
 	return false;
 }
 
@@ -995,6 +1004,9 @@ void PatternLink::debug_log(void) const
 
 	if (_variables.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
+	else
+		logger().fine() << "Type declarations are:\n"
+		                << oc_to_string(_variables);
 }
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
