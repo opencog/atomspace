@@ -511,12 +511,18 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 /// grounded (or not).
 void PatternLink::get_clause_variables()
 {
-	// At this time, useful only for the mandatory clauses.
-	for (const Handle& h : _pat.mandatory)
+	for (const Handle& hcl : _pat.quoted_clauses)
 	{
 		HandleSet vset;
-		get_clause_variables_recursive(h, vset);
-		_clause_variables.insert({h, vset});
+		get_clause_variables_recursive(hcl, vset);
+		_clause_variables.insert({hcl, vset});
+	}
+
+	for (const Handle& hcl : _pat.unquoted_clauses)
+	{
+		HandleSet vset;
+		get_clause_variables_recursive(hcl, vset);
+		_clause_variables.insert({hcl, vset});
 	}
 }
 
