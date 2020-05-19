@@ -1098,20 +1098,20 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
-	// its definition. XXX TODO.
+	// its definition. XXX TODO. Hmm. Should we do this at runtime,
+	// i.e. here, or at compile time, when creating the PattenLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not ptm->isQuoted())
+	if ((VARIABLE_NODE == tp or GLOB_NODE == tp) and not ptm->isQuoted())
 	{
 		if (_variables->varset.end() != _variables->varset.find(hp))
 			return variable_compare(hp, hg);
 
 		// Report other variables that might be found.
-		if (VARIABLE_NODE == tp or GLOB_NODE == tp)
-			return _pmc.scope_match(hp, hg);
+		return _pmc.scope_match(hp, hg);
 	}
 
 	// If they're the same atom, then clearly they match.
