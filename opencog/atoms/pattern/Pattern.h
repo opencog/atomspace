@@ -112,8 +112,8 @@ struct Pattern
 	/// or a DefineSchemaNode (DSN).
 	HandleSet defined_terms;    // The DPN/DSN itself.
 
-	/// Clauses that can be grounded in only one way; thus the result
-	/// of that grounding can be cached, for avoid rechecking.
+	/// Clauses that can be grounded in only one way; thus the
+	/// result of that grounding can be cached, to avoid rechecking.
 	/// These clauses cannot contain evaluatable elements (as that would
 	/// invalidate the results), cannot contain unordered or choice links
 	/// (as those can have multiple groundings) and can only contain one
