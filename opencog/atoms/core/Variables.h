@@ -183,9 +183,8 @@ struct Variables : public FreeVariables,
 	Handle get_vardecl() const;
 
 	/// Like FreeVariables::find_variables but set _ordered to false,
-	/// on the ground that if such a method is called then no ordered
-	/// was provided by the creator of that scope, and thus order is
-	/// not relevant.
+	/// on the ground that if this method is called, then no order
+	/// was intended in the variable scope.
 	void find_variables(const Handle& body);
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
