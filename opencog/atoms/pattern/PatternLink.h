@@ -79,9 +79,6 @@ protected:
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
-	/// For each clause, the variables that appear in that clause.
-	HandleMultimap _clause_variables;
-
 	/// The graph components. Set by validate_clauses().
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.

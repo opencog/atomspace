@@ -515,14 +515,14 @@ void PatternLink::get_clause_variables()
 	{
 		HandleSet vset;
 		get_clause_variables_recursive(hcl, vset);
-		_clause_variables.insert({hcl, vset});
+		_pat.clause_variables.insert({hcl, vset});
 	}
 
 	for (const Handle& hcl : _pat.unquoted_clauses)
 	{
 		HandleSet vset;
 		get_clause_variables_recursive(hcl, vset);
-		_clause_variables.insert({hcl, vset});
+		_pat.clause_variables.insert({hcl, vset});
 	}
 }
 
