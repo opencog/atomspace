@@ -239,7 +239,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 		// Halt recursion if the term is executable.
 		if (subtr->is_executable()) return true;
 
-		// Halt rescursion if scoped.
+		// Halt recursion if scoped.
 		if (nameserver().isA(subtr->get_type(), SCOPE_LINK))
 		{
 			ScopeLinkPtr stree(ScopeLinkCast(subtr));
