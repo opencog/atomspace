@@ -388,10 +388,10 @@ void ConstantClausesUTest::test_complex()
 		"        (ConceptNode \"compound-A\")"
 		"      )"
 		"    )"
-		"    (TypedVariableLink"
+		"    (Present (TypedVariableLink"
 		"      (VariableNode \"$X\")"
 		"      (TypeNode \"ConceptNode\")"
-		"    )"
+		"    ))"
 		"  )"
 		"  (ConceptNode \"B\")"
 		")");
