@@ -771,17 +771,16 @@ bool PatternLink::add_dummies()
 		    IDENTICAL_LINK == tt)
 		{
 			const Handle& left = t->getOutgoingAtom(0);
-			if (any_free_in_tree(left, _variables.varset))
-			{
-				_pat.mandatory.emplace_back(left);
-				_fixed.emplace_back(left);
-			}
-
 			const Handle& right = t->getOutgoingAtom(1);
-			if (any_free_in_tree(right, _variables.varset))
+
+			for (const Handle& v : _variables.varset)
 			{
-				_pat.mandatory.emplace_back(right);
-				_fixed.emplace_back(right);
+				if (is_free_in_tree(left, v) or
+				    is_free_in_tree(right, v))
+				{
+					_pat.mandatory.emplace_back(v);
+					_fixed.emplace_back(v);
+				}
 			}
 		}
 	}
