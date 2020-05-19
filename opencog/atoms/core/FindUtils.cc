@@ -236,9 +236,6 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 		// Plow through any quotes.
 		if (is_quoted_in_tree(tree, subtr)) return false;
 
-		// Halt recursion if the term is executable.
-		if (subtr->is_executable()) return true;
-
 		// Halt recursion if scoped.
 		if (nameserver().isA(subtr->get_type(), SCOPE_LINK))
 		{
