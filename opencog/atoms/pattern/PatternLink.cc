@@ -109,7 +109,7 @@ void PatternLink::common_init(void)
 	   make_connectivity_map(_pat.mandatory);
 
 	make_term_trees();
-	get_clause_variables();
+	get_clause_variables(all_clauses);
 }
 
 
@@ -215,7 +215,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_variables._glob_intervalmap.insert(*imit);
 	}
 
-	// Next, the body... there's no _body for lambda. The compo is
+	// Next, the body... there's no `_body` for lambda. The compo is
 	// the mandatory clauses; we have to reconstruct the optionals.
 	for (const Handle& h : compo)
 	{
@@ -244,6 +244,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_pat.redex_name = "Unpacked component of a virtual link";
 
 	make_term_trees();
+	get_clause_variables(_pat.mandatory);
 }
 
 /* ================================================================= */
@@ -509,16 +510,9 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 /// get_clause_variables -- for every clause, record the variables in it.
 /// This is used at runtime, to determine if the clause has been fully
 /// grounded (or not).
-void PatternLink::get_clause_variables()
+void PatternLink::get_clause_variables(const HandleSeq& clauses)
 {
-	for (const Handle& hcl : _pat.quoted_clauses)
-	{
-		HandleSet vset;
-		get_clause_variables_recursive(hcl, vset);
-		_pat.clause_variables.insert({hcl, vset});
-	}
-
-	for (const Handle& hcl : _pat.unquoted_clauses)
+	for (const Handle& hcl : clauses)
 	{
 		HandleSet vset;
 		get_clause_variables_recursive(hcl, vset);

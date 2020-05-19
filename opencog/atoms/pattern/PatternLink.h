@@ -124,7 +124,7 @@ protected:
 	void make_term_tree_recursive(const Handle&, const Handle&,
 	                              PatternTermPtr&);
 
-	void get_clause_variables();
+	void get_clause_variables(const HandleSeq&);
 	void get_clause_variables_recursive(const Handle&, HandleSet&);
 
 	void init(void);
