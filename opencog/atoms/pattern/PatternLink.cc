@@ -299,10 +299,10 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 /* ================================================================= */
 
 /// Make a note of any clauses that must be present (or absent)
-/// in the pattern in thier literal form, i.e. uninterpreted.
+/// in the pattern in their literal form, i.e. uninterpreted.
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
 /// but are taken as a request to search for and ground these terms in
-/// the form they are given, in tier literal form, without evaluation.
+/// the form they are given, in their literal form, without evaluation.
 bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
@@ -635,7 +635,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// A term is "evalutable" if it contains a GroundedPredicateNode,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
-/// thier truth values.
+/// their truth values.
 ///
 /// A term may also be evaluatable if consists of connectives (such as
 /// AndLink, OrLink, NotLink) used to join together evaluatable terms.
@@ -655,7 +655,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// A term is "executable" if it is an ExecutionOutputLink
 /// or if it inherits from one (such as PlusLink, TimesLink).
 /// Such terms need execution at grounding time, to determine
-/// thier actual form.  Note that executable terms may frequently
+/// their actual form.  Note that executable terms may frequently
 /// occur underneath evaluatable terms, e.g. if something is greater
 /// than the sum of two other things.
 ///
