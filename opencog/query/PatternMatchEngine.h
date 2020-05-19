@@ -62,6 +62,8 @@ private:
 		const HandleSeq& o(_pat->always);
 		return o.end() != std::find(o.begin(), o.end(), h); }
 
+	// If you have a PatternTerm in hand, its probably faster
+	// to call ptm->hasAnyEvaluatable() instead of this.
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
 

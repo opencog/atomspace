@@ -1122,7 +1122,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// evaluation may have side-effects (e.g. send a message) and
 	// (2) evaluation may depend on external state. These are
 	// typically used to implement behavior trees, e.g SequenceUTest
-	if ((hp == hg) and not is_evaluatable(hp))
+	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
 
 	// If both are nodes, compare them as such.
