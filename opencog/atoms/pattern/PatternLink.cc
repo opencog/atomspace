@@ -109,6 +109,7 @@ void PatternLink::common_init(void)
 	   make_connectivity_map(_pat.mandatory);
 
 	make_term_trees();
+	get_clause_variables();
 }
 
 
@@ -486,7 +487,8 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 	for (const Handle& claw: clauses)
 	{
 		// Skip over anything unsuitable.
-		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
+		if (_pat.evaluatable_holders.find(claw) !=
+		    _pat.evaluatable_holders.end()) continue;
 
 // XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
 // which means we need to have terms, here ...
@@ -499,6 +501,42 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
 			_pat.cacheable_clauses.insert(claw);
+	}
+}
+
+/* ================================================================= */
+
+/// get_clause_variables -- for every clause, record the variables in it.
+/// This is used at runtime, to determine if the clause has been fully
+/// grounded (or not).
+void PatternLink::get_clause_variables()
+{
+	// At this time, useful only for the mandatory clauses.
+	for (const Handle& h : _pat.mandatory)
+	{
+		HandleSet vset;
+		get_clause_variables_recursive(h, vset);
+		_clause_variables.insert({h, vset});
+	}
+}
+
+/// Helper for above.
+void PatternLink::get_clause_variables_recursive(const Handle& h,
+                                                 HandleSet& vset)
+{
+	if (h->is_link())
+	{
+		for (const Handle& ho : h->getOutgoingSet())
+			get_clause_variables_recursive(ho, vset);
+		return;
+	}
+
+	Type t = h->get_type();
+	if (VARIABLE_NODE == t or GLOB_NODE == t)
+	{
+		// _variables hold the unquoted, bound vars. Use that.
+		if (_variables.varset.end() != _variables.varset.find(h))
+			vset.insert(h);
 	}
 }
 
