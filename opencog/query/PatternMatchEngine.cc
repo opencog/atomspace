@@ -2537,21 +2537,26 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
 		var_grounding[term] = grnd;
 
-#ifdef QDEBUG
-	// This is an expensive, CPU-wasting check to catch the bug described
-	// in https://github.com/opencog/atomspace/issues/2315
-	// It would be nice to have a better fix, but its not clear what
-	// that fix should be; its a thorny architectural problem.
-	for (const Handle &v : _variables->varset)
+	// Has every variable in the clause been fully grounded already?
+	// If so, then we merely have to check if the grounde form of the
+	// clause exists in the atomspace (or evaluate the clause, if it's
+	// evaluatable).
+	bool clause_vars_gnded = true;
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	for (const Handle& hvar : it->second)
 	{
-		if (is_unquoted_unscoped_in_tree(clause, v) and
-		    var_grounding.find(v) == var_grounding.end())
+		if (var_grounding.end() == var_grounding.find(hvar))
 		{
-			throw RuntimeException(TRACE_INFO,
-			      "Unable to evaluate clause with ungrounded variables!");
+			clause_vars_gnded = false;
+			break;
 		}
 	}
-#endif
+
+	// All variables in the clause had better be grounded!
+	if (not clause_vars_gnded)
+		throw RuntimeException(TRACE_INFO,
+		      "Unable to evaluate clause with ungrounded variables!");
 
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
