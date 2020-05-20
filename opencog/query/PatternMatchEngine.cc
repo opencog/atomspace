@@ -2489,7 +2489,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 /// Has every variable in the clause been fully grounded already?
 /// If so, then we can deal with this clause directly, without
 /// having to perform any further searches.
-bool PatternMatchEngine::is_clause_grounded(const Handle& clause)
+bool PatternMatchEngine::is_clause_grounded(const Handle& clause) const
 {
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
@@ -2497,6 +2497,23 @@ bool PatternMatchEngine::is_clause_grounded(const Handle& clause)
 	{
 		if (var_grounding.end() == var_grounding.find(hvar))
 			return false;
+	}
+	return true;
+}
+
+/// Return a lookup key for this clause.
+bool PatternMatchEngine::clause_grounding_key(const Handle& clause,
+                                              HandleSeq& key) const
+{
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	key.push_back(clause);
+	for (const Handle& hvar : it->second)
+	{
+		const auto& gv = var_grounding.find(hvar);
+		if (var_grounding.end() == gv)
+			return false;
+		key.push_back(gv->second);
 	}
 	return true;
 }
@@ -2635,11 +2652,22 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (is_evaluatable(clause))
 		return explore_clause_evaluatable(term, grnd, clause);
 
-	// Single-variable cache
+	// Build the cache lookup key
+	HandleSeq key;
+
+	// Single-variable cache.
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
+		key = HandleSeq({clause, grnd});
+
+#if 0
+	// Multi-variable cache.
+	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
+		clause_grounding_key(clause, key);
+#endif
+
+	if (0 < key.size())
 	{
-		// Do we have a cached value for this? If so, then use it.
-		auto cac = _gnd_cache.find({clause,grnd});
+		const auto& cac = _gnd_cache.find(key);
 		if (cac != _gnd_cache.end())
 		{
 			var_grounding[clause] = cac->second;
@@ -2647,15 +2675,16 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		}
 
 		// Do we have a negative cache? If so, it will always fail.
-		auto nac = _nack_cache.find({clause,grnd});
+		const auto& nac = _nack_cache.find(key);
 		if (nac != _nack_cache.end())
 			return false;
 
 		bool okay = explore_clause_direct(term, grnd, clause);
 		if (not okay)
-			_nack_cache.insert({clause, grnd});
+			_nack_cache.insert(key);
 		return okay;
 	}
+
 	return explore_clause_direct(term, grnd, clause);
 }
 
