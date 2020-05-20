@@ -109,6 +109,10 @@ void PatternLink::common_init(void)
 	   make_connectivity_map(_pat.mandatory);
 
 	make_term_trees();
+
+	// add_dummies() may have added some more a few more ...
+	all_clauses.insert(all_clauses.end(),
+	    _fixed.begin(), _fixed.end());
 	get_clause_variables(all_clauses);
 }
 
@@ -245,6 +249,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 
 	make_term_trees();
 	get_clause_variables(_pat.mandatory);
+	get_clause_variables(_pat.optionals);
 }
 
 /* ================================================================= */
