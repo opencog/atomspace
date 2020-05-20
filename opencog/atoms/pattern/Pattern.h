@@ -122,8 +122,8 @@ struct Pattern
 	/// more complex, and not implemented.
 	HandleSet cacheable_clauses;
 
-	/// For each clause, the variables that appear in that clause.
-	HandleMultimap clause_variables;
+	/// For each clause, the list of variables that appear in that clause.
+	HandleSeqMap clause_variables;
 
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because

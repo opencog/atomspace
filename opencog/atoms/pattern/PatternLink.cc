@@ -521,7 +521,11 @@ void PatternLink::get_clause_variables(const HandleSeq& clauses)
 	{
 		HandleSet vset;
 		get_clause_variables_recursive(hcl, vset);
-		_pat.clause_variables.insert({hcl, vset});
+
+		// Put them into a sequence; any fixed sequence will do.
+		HandleSeq vseq;
+		for (const Handle& v: vset) vseq.emplace_back(v);
+		_pat.clause_variables.insert({hcl, vseq});
 	}
 }
 
