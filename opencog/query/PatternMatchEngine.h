@@ -198,7 +198,7 @@ private:
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
 	bool is_clause_grounded(const Handle&) const;
-	bool clause_grounding_key(const Handle&, HandleSeq&) const;
+	HandleSeq clause_grounding_key(const Handle&) const;
 
 	// Positive and negative caches of clauses.
 	std::unordered_map<HandleSeq, Handle> _gnd_cache;

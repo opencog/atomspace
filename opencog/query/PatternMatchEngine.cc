@@ -2502,20 +2502,21 @@ bool PatternMatchEngine::is_clause_grounded(const Handle& clause) const
 }
 
 /// Return a lookup key for this clause.
-bool PatternMatchEngine::clause_grounding_key(const Handle& clause,
-                                              HandleSeq& key) const
+HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause) const
 {
+	static HandleSeq empty;
+
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
-	key.push_back(clause);
+	HandleSeq key({clause});
 	for (const Handle& hvar : it->second)
 	{
 		const auto& gv = var_grounding.find(hvar);
 		if (var_grounding.end() == gv)
-			return false;
+			return empty;
 		key.push_back(gv->second);
 	}
-	return true;
+	return key;
 }
 
 /**
@@ -2662,7 +2663,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 #if 0
 	// Multi-variable cache.
 	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
-		clause_grounding_key(clause, key);
+		key = clause_grounding_key(clause);
 #endif
 
 	if (0 < key.size())
