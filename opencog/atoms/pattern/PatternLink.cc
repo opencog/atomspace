@@ -65,7 +65,6 @@ void PatternLink::common_init(void)
 
 	// Find prunable terms.
 	locate_cacheable(all_clauses);
-	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the DefaultPatternMatchCB, and so we assume
@@ -93,6 +92,8 @@ void PatternLink::common_init(void)
 		trace_connectives(connectives, _pat.body);
 	}
 
+	add_dummies();
+
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
@@ -110,10 +111,9 @@ void PatternLink::common_init(void)
 
 	make_term_trees();
 
-	// add_dummies() may have added some more a few more ...
-	all_clauses.insert(all_clauses.end(),
-	    _fixed.begin(), _fixed.end());
-	get_clause_variables(all_clauses);
+	get_clause_variables(_pat.quoted_clauses);
+	get_clause_variables(_pat.unquoted_clauses);
+	get_clause_variables(_pat.mandatory);
 }
 
 
@@ -540,6 +540,8 @@ void PatternLink::get_clause_variables_recursive(const Handle& h,
 	if (VARIABLE_NODE == t or GLOB_NODE == t)
 	{
 		// _variables hold the unquoted, bound vars. Use that.
+		// XXX FIXME, except that the var might be quoted, in this
+		// particular clause!!
 		if (_variables.varset.end() != _variables.varset.find(h))
 			vset.insert(h);
 	}
@@ -812,8 +814,8 @@ void PatternLink::trace_connectives(const TypeSet& connectives,
 
 	quotation.update(t);
 
-	if (quotation.is_quoted() or connectives.find(t) == connectives.end())
-		return;
+	if (quotation.is_quoted()) return;
+	if (connectives.find(t) == connectives.end()) return;
 
 	_pat.evaluatable_holders.insert(term);
 	add_to_map(_pat.in_evaluatable, term, term);
