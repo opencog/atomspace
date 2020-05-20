@@ -807,6 +807,7 @@ bool InitiateSearchCB::setup_variable_search(void)
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
+	bool empty = false;
 	for (const Handle& var: _variables->varset)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
@@ -822,9 +823,10 @@ bool InitiateSearchCB::setup_variable_search(void)
 		for (Type t : typeset)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
-		DO_LOG({LAZY_LOG_FINE << var->to_string() << "has "
+		DO_LOG({LAZY_LOG_FINE << var->to_string() << " has "
 		                      << num << " atoms in the atomspace";})
 
+		if (0 == num) empty = true;
 		if (0 < num and num < count)
 		{
 			for (const Handle& cl : clauses)
@@ -867,6 +869,8 @@ bool InitiateSearchCB::setup_variable_search(void)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
+		if (empty) return false;
+
 // #define THROW_HARD_ERROR 1
 #ifdef THROW_HARD_ERROR
 		throw SyntaxException(TRACE_INFO,
