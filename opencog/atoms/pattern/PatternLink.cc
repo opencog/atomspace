@@ -63,9 +63,6 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
-	// Find prunable terms.
-	locate_cacheable(all_clauses);
-
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
@@ -114,6 +111,9 @@ void PatternLink::common_init(void)
 	get_clause_variables(_pat.quoted_clauses);
 	get_clause_variables(_pat.unquoted_clauses);
 	get_clause_variables(_pat.mandatory);
+
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 }
 
 

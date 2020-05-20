@@ -201,6 +201,7 @@ private:
 
 	// Cacheable grounded clauses
 	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
+	std::unordered_set<std::pair<Handle,Handle>> _nack_cache;
 
 	// -------------------------------------------
 	// Stack used to store current traversal state for a single

@@ -2519,8 +2519,6 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
-	// Evaluatable clauses are not patterns; they are clauses that
-	// evaluate to true or false.
 	if (not is_evaluatable(clause))
 	{
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
@@ -2645,8 +2643,14 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		var_grounding[clause] = cac->second;
 		return do_next_clause();
 	}
+	auto nac = _nack_cache.find({clause,grnd});
+	if (nac != _nack_cache.end())
+		return false;
 
-	return explore_clause_direct(term, grnd, clause);
+	bool okay = explore_clause_direct(term, grnd, clause);
+	if (not okay)
+		_nack_cache.insert({clause, grnd});
+	return okay;
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
