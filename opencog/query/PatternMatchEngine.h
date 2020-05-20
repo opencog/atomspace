@@ -199,9 +199,9 @@ private:
 	// Methods that help avoid pointless searches
 	bool is_clause_grounded(const Handle&);
 
-	// Cacheable grounded clauses
-	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
-	std::unordered_set<std::pair<Handle,Handle>> _nack_cache;
+	// Positive and negative caches of clauses.
+	std::unordered_map<HandleSeq, Handle> _gnd_cache;
+	std::unordered_set<HandleSeq> _nack_cache;
 
 	// -------------------------------------------
 	// Stack used to store current traversal state for a single
