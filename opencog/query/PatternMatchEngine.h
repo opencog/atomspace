@@ -195,6 +195,10 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
+	// -------------------------------------------
+	// Methods that help avoid pointless searches
+	bool is_clause_grounded(const Handle&);
+
 	// Cacheable grounded clauses
 	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
 

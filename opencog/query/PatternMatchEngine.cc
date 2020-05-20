@@ -2486,6 +2486,21 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 	return explore_clause(term, grnd, first_clause);
 }
 
+/// Has every variable in the clause been fully grounded already?
+/// If so, then we can deal with this clause directly, without
+/// having to perform any further searches.
+bool PatternMatchEngine::is_clause_grounded(const Handle& clause)
+{
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	for (const Handle& hvar : it->second)
+	{
+		if (var_grounding.end() == var_grounding.find(hvar))
+			return false;
+	}
+	return true;
+}
+
 /**
  * Every clause in a pattern is one of two types:  it either
  * specifies a pattern to be matched, or it specifies an evaluatable
@@ -2537,24 +2552,8 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
 		var_grounding[term] = grnd;
 
-	// Has every variable in the clause been fully grounded already?
-	// If so, then we merely have to check if the grounde form of the
-	// clause exists in the atomspace (or evaluate the clause, if it's
-	// evaluatable).
-	bool clause_vars_gnded = true;
-	const auto& it = _pat->clause_variables.find(clause);
-	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
-	for (const Handle& hvar : it->second)
-	{
-		if (var_grounding.end() == var_grounding.find(hvar))
-		{
-			clause_vars_gnded = false;
-			break;
-		}
-	}
-
 	// All variables in the clause had better be grounded!
-	if (not clause_vars_gnded)
+	if (not is_clause_grounded(clause))
 		throw RuntimeException(TRACE_INFO,
 		      "Unable to evaluate clause with ungrounded variables!");
 
