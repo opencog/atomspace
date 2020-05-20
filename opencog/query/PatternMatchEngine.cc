@@ -2635,27 +2635,28 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (is_evaluatable(clause))
 		return explore_clause_evaluatable(term, grnd, clause);
 
-	// If not cacheable, nothing to do.
-	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
-		return explore_clause_direct(term, grnd, clause);
-
-	// Do we have a cached value for this? If so, then use it.
-	auto cac = _gnd_cache.find({clause,grnd});
-	if (cac != _gnd_cache.end())
+	// Single-variable cache
+	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 	{
-		var_grounding[clause] = cac->second;
-		return do_next_clause();
+		// Do we have a cached value for this? If so, then use it.
+		auto cac = _gnd_cache.find({clause,grnd});
+		if (cac != _gnd_cache.end())
+		{
+			var_grounding[clause] = cac->second;
+			return do_next_clause();
+		}
+
+		// Do we have a negative cache? If so, it will always fail.
+		auto nac = _nack_cache.find({clause,grnd});
+		if (nac != _nack_cache.end())
+			return false;
+
+		bool okay = explore_clause_direct(term, grnd, clause);
+		if (not okay)
+			_nack_cache.insert({clause, grnd});
+		return okay;
 	}
-
-	// Do we have a negative cache? If so, it will always fail.
-	auto nac = _nack_cache.find({clause,grnd});
-	if (nac != _nack_cache.end())
-		return false;
-
-	bool okay = explore_clause_direct(term, grnd, clause);
-	if (not okay)
-		_nack_cache.insert({clause, grnd});
-	return okay;
+	return explore_clause_direct(term, grnd, clause);
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
