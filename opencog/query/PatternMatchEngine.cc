@@ -2643,6 +2643,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		var_grounding[clause] = cac->second;
 		return do_next_clause();
 	}
+
+	// Do we have a negative cache? If so, it will always fail.
 	auto nac = _nack_cache.find({clause,grnd});
 	if (nac != _nack_cache.end())
 		return false;
