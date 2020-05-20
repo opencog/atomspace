@@ -2509,8 +2509,8 @@ bool PatternMatchEngine::is_clause_grounded(const Handle& clause)
  * boolean-logic formulas, although the infrastructure is designed
  * to handle other situations as well, e.g. Bayesian formulas, etc.)
  *
- * This method simply dispatches a given clause to be either pattern
- * matched, or to be evaluated.
+ * `explore_clause_direct()` handles pattern matching, while
+ * `explore_clause_evaluatable()` handles the evaluatable ones.
  *
  * Returns true if there was a match, else returns false to reject it.
  */
@@ -2519,27 +2519,26 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
-	if (not is_evaluatable(clause))
+	DO_LOG({logger().fine("Clause is matchable; start matching it");})
+
+	_did_check_forall = false;
+	bool found = explore_term_branches(term, grnd, clause);
+
+	if (not _did_check_forall and is_always(clause))
 	{
-		DO_LOG({logger().fine("Clause is matchable; start matching it");})
-
-		_did_check_forall = false;
-		bool found = explore_term_branches(term, grnd, clause);
-
-		if (not _did_check_forall and is_always(clause))
-		{
-			// We need to record failures for the AlwaysLink
-			Handle empty;
-			_forall_state = _forall_state and
-				_pmc.always_clause_match(clause, empty, var_grounding);
-		}
-
-		// If found is false, then there's no solution here.
-		// Bail out, return false to try again with the next candidate.
-		return found;
+		// We need to record failures for the AlwaysLink
+		Handle empty;
+		_forall_state = _forall_state and
+			_pmc.always_clause_match(clause, empty, var_grounding);
 	}
 
-	// If we are here, we have an evaluatable clause on our hands.
+	return found;
+}
+
+bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
+                                                    const Handle& grnd,
+                                                    const Handle& clause)
+{
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
 
 	// Some people like to have a clause that is just one big
@@ -2632,6 +2631,10 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
                                         const Handle& clause)
 {
+	// Evaluatable clauses are not cacheable.
+	if (is_evaluatable(clause))
+		return explore_clause_evaluatable(term, grnd, clause);
+
 	// If not cacheable, nothing to do.
 	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
 		return explore_clause_direct(term, grnd, clause);

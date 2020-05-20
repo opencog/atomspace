@@ -267,6 +267,7 @@ private:
 	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
+	bool explore_clause_evaluatable(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
