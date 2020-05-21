@@ -394,14 +394,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			Type ot = ho->get_type();
-			if (connectives.find(ot) != connectives.end() and
+			if (not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
-			{
-				_pat.unquoted_clauses.emplace_back(ho);
-				_pat.mandatory.emplace_back(ho);
-			}
-			if (not record_literal(ho))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
