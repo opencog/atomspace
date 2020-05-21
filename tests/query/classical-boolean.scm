@@ -48,3 +48,33 @@
 	(And
 		(Present (Variable "s"))
 		(Or (Not (Present (State (Variable "s") (Predicate "hungry"))))))))
+
+(define single-a
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(Absent (State (Variable "s") (Predicate "hungry")))))
+
+(define single-b
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(Not (Present (State (Variable "s") (Predicate "hungry"))))))
+
+(define single-c
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(Not (And (Present (State (Variable "s") (Predicate "hungry")))))))
+
+(define single-d
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(Not (Or (Present (State (Variable "s") (Predicate "hungry")))))))
+
+(define single-e
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(And (Not (Present (State (Variable "s") (Predicate "hungry")))))))
+
+(define single-f
+(Get
+	(TypedVariable (Variable "s") (Type 'Concept))
+	(Or (Not (Present (State (Variable "s") (Predicate "hungry")))))))

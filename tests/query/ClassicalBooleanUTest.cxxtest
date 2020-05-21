@@ -63,8 +63,7 @@ public:
 	void tearDown(void);
 
 	void test_double_clause(void);
-	// void test_positive_single_clause(void);
-	void xtest_negative_single_clause(void);
+	void test_single_clause(void);
 };
 
 void ClassicalBooleanUTest::tearDown(void)
@@ -118,10 +117,39 @@ void ClassicalBooleanUTest::test_double_clause(void)
 /*
  * Test negative single-clause boolean constructions.
  * These have no positive clauses, and so should return the empty set.
+ * Unlike the above, the universe is never exampled.
  */
-void ClassicalBooleanUTest::xtest_negative_single_clause(void)
+void ClassicalBooleanUTest::test_single_clause(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval->eval("(load-from-path \"tests/query/classical-boolean.scm\")");
+
+	Handle hans = eval->eval_h("(Set)");
+	printf("Expected this: %s\n", hans->to_string().c_str());
+
+	Handle hgnd = eval->eval_h("(cog-execute! single-a)");
+	printf("Found single-a: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-a bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-b)");
+	printf("Found single-b: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-b bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-c)");
+	printf("Found single-c: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-c bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-d)");
+	printf("Found single-d: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-d bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-e)");
+	printf("Found single-e: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-e bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-f)");
+	printf("Found single-f: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-f bad grounding", hans == hgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
