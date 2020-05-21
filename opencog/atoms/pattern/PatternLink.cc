@@ -497,9 +497,22 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 		    _pat.evaluatable_holders.end()) continue;
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+		{
 			_pat.cacheable_clauses.insert(claw);
-		else
-			_pat.cacheable_multi.insert(claw);
+			continue;
+		}
+
+		// Caching works fine, if there are UnorderedLinks. However,
+		// if there is a lot of them, so that the engine is exploring
+		// a combinatorially deep arrangement, then caching becomes
+		// counter-productive.  Based on running UnorderedUTest, the
+		// knee in the curve is at 4 or fewer UnorderedLinks in a clause.
+		// Note that UnorderedUTest has some very unusual patterns,
+		// exploring many tens of thousands of combinations, something
+		// that most ussers will surely almost never do :-)
+		if (4 < contains_atomtype_count(claw, UNORDERED_LINK)) continue;
+
+		_pat.cacheable_multi.insert(claw);
 	}
 }
 
