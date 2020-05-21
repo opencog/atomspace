@@ -353,7 +353,8 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
 	return false;
 }
 
-bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation)
+bool contains_atomtype(const Handle& clause, Type atom_type,
+                       Quotation quotation)
 {
 	Type clause_type = clause->get_type();
 	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
@@ -368,6 +369,25 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 		if (contains_atomtype(subclause, atom_type, quotation)) return true;
 	}
 	return false;
+}
+
+size_t contains_atomtype_count(const Handle& clause, Type atom_type,
+                               Quotation quotation)
+{
+	Type clause_type = clause->get_type();
+	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
+		return 1;
+
+	quotation.update(clause_type);
+
+	if (not clause->is_link()) return 0;
+
+	size_t cnt = 0;
+	for (const Handle& subclause: clause->getOutgoingSet())
+	{
+		cnt += contains_atomtype_count(subclause, atom_type, quotation);
+	}
+	return cnt;
 }
 
 HandleSet get_free_variables(const Handle& h, Quotation quotation)
