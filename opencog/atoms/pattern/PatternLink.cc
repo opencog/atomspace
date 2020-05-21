@@ -368,6 +368,13 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 /// SequentialAnd's must be grounded and evaluated sequentially, and
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
+///
+/// This makes built-in assumptions about using the DefaultPatternMatchCB,
+/// which are not going to be true in general. However, the vast
+/// majority of users expect to be able to use the boolean operators
+/// in a naive, classical-logic manner, and so we cater to those users.
+/// More sophisticated users are SOL and will have to come here and fix
+/// things when bugs appear. Sorry.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
@@ -381,18 +388,14 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (AND_LINK == t)
 	{
+		// XXX FIXME Handle of OrLink is incorrect, here.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			if (NOT_LINK == ho->get_type())
-			{
-				if (not record_literal(ho->getOutgoingAtom(0), true))
-				{
-					_pat.unquoted_clauses.emplace_back(ho);
-					_pat.mandatory.emplace_back(ho);
-				}
-			}
-			else if (not record_literal(ho))
+			if (not record_literal(ho) and
+			    not unbundle_clauses_rec(ho, connectives))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -419,6 +422,36 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
+
+	// Sigh. Handle a top-level OrLink with a single member.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (OR_LINK == t and 1 == hbody->get_arity())
+	{
+		// BUG - XXX FIXME Handle of OrLink is incorrect, here.
+		// See also FIXME above.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+		unbundle_clauses_rec(hbody, connectives);
+		if (not unbundle_clauses_rec(hbody, connectives))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
+	}
+
+	// A single top-level clause that is a NotLink.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (NOT_LINK == t)
+	{
+		// XXX FIXME Handle of OrLink is incorrect, here.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+		if (not unbundle_clauses_rec(hbody, connectives))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
+	}
 	else
 	{
 		// There's just one single clause!
@@ -430,25 +463,27 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
 /// groundable clauses.
-void PatternLink::unbundle_clauses_rec(const Handle& bdy,
+bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
-	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
-	const HandleSeq& oset = bdy->getOutgoingSet();
-	for (const Handle& ho : oset)
+	Type t = bdy->get_type();
+
+	if (connectives.find(t) == connectives.end())
+		return false;
+
+	if (NOT_LINK == t) reverse = not reverse;
+
+	bool recorded = true;
+	for (const Handle& ho : bdy->getOutgoingSet())
 	{
-		Type ot = ho->get_type();
-		if (record_literal(ho, reverse))
-		{
-			/* no-op */
-		}
-		else if (connectives.find(ot) != connectives.end())
-		{
-			unbundle_clauses_rec(ho, connectives, reverse);
-		}
+		if (not record_literal(ho, reverse))
+			recorded = recorded and unbundle_clauses_rec(ho, connectives, reverse);
 	}
+	return recorded;
 }
+
+/* ================================================================= */
 
 void PatternLink::locate_defines(const HandleSeq& clauses)
 {
@@ -512,7 +547,6 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
  */
 void PatternLink::validate_variables(HandleSet& vars,
                                      const HandleSeq& clauses)
-
 {
 	for (const Handle& v : vars)
 	{

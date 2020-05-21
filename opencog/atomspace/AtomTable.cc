@@ -269,9 +269,9 @@ Handle AtomTable::add(const Handle& orig, bool force)
     }
 
     if (atom != orig) atom->copyValues(orig);
+    atom->setAtomSpace(_as);
     atom->install();
     atom->keep_incoming_set();
-    atom->setAtomSpace(_as);
 
     typeIndex.insertAtom(atom);
 
