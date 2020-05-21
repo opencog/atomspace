@@ -388,18 +388,20 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (AND_LINK == t)
 	{
+		// XXX FIXME Handle of OrLink is incorrect, here.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			if (NOT_LINK == ho->get_type())
+			Type ot = ho->get_type();
+			if (connectives.find(ot) != connectives.end() and
+				 not unbundle_clauses_rec(ho, connectives))
 			{
-				if (not record_literal(ho->getOutgoingAtom(0), true))
-				{
-					_pat.unquoted_clauses.emplace_back(ho);
-					_pat.mandatory.emplace_back(ho);
-				}
+				_pat.unquoted_clauses.emplace_back(ho);
+				_pat.mandatory.emplace_back(ho);
 			}
-			else if (not record_literal(ho))
+			if (not record_literal(ho))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -468,7 +470,7 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
-	bool unquoted = false;
+	bool recorded = true;
 	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
 	const HandleSeq& oset = bdy->getOutgoingSet();
 	for (const Handle& ho : oset)
@@ -480,13 +482,15 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
-			unbundle_clauses_rec(ho, connectives, reverse);
+			recorded = recorded and unbundle_clauses_rec(ho, connectives, reverse);
 		}
 		else
-			unquoted = true;
+			recorded = false;
 	}
-	return unquoted;
+	return recorded;
 }
+
+/* ================================================================= */
 
 void PatternLink::locate_defines(const HandleSeq& clauses)
 {
