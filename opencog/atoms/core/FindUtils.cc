@@ -374,15 +374,16 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
 size_t contains_atomtype_count(const Handle& clause, Type atom_type,
                                Quotation quotation)
 {
+	size_t cnt = 0;
+
 	Type clause_type = clause->get_type();
 	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
-		return 1;
+		cnt++;
 
 	quotation.update(clause_type);
 
 	if (not clause->is_link()) return 0;
 
-	size_t cnt = 0;
 	for (const Handle& subclause: clause->getOutgoingSet())
 	{
 		cnt += contains_atomtype_count(subclause, atom_type, quotation);
