@@ -368,6 +368,13 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 /// SequentialAnd's must be grounded and evaluated sequentially, and
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
+///
+/// This makes built-in assumptions about using the DefaultPatternMatchCB,
+/// which are not going to be true in general. However, the vast
+/// majority of users expect to be able to use the boolean operators
+/// in a naive, classical-logic manner, and so we cater to those users.
+/// More sophisticated users are SOL and will have to come here and fix
+/// things when bugs appear. Sorry.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
@@ -418,6 +425,30 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
+	}
+
+	// Sigh. Handle a top-level OrLink with a single member.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (OR_LINK == t and 1 == hbody->get_arity())
+	{
+		if (not record_literal(hbody->getOutgoingAtom(0)))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
+	}
+
+	// A single top-level clause that is a NotLink.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (NOT_LINK == t)
+	{
+		if (not record_literal(hbody->getOutgoingAtom(0), true))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
 	}
 	else
 	{
@@ -512,7 +543,6 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
  */
 void PatternLink::validate_variables(HandleSet& vars,
                                      const HandleSeq& clauses)
-
 {
 	for (const Handle& v : vars)
 	{
