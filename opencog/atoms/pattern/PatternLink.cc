@@ -432,11 +432,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// for anyone giving alternative interpretations. Yuck.
 	else if (OR_LINK == t and 1 == hbody->get_arity())
 	{
-		if (not record_literal(hbody->getOutgoingAtom(0)))
-		{
-			_pat.unquoted_clauses.emplace_back(hbody);
-			_pat.mandatory.emplace_back(hbody);
-		}
+		// BUG - XXX FIXME Handle of OrLink is incorrect, here.
+		// See also FIXME above.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+		unbundle_clauses_rec(hbody, connectives);
 	}
 
 	// A single top-level clause that is a NotLink.
@@ -446,6 +445,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	{
 		if (not record_literal(hbody->getOutgoingAtom(0), true))
 		{
+			// XXX FIXME Handle of OrLink is incorrect, here.
+			TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+			unbundle_clauses_rec(hbody, connectives);
+
 			_pat.unquoted_clauses.emplace_back(hbody);
 			_pat.mandatory.emplace_back(hbody);
 		}
