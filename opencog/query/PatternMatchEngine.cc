@@ -1898,8 +1898,14 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		}
 		if (0 < key.size())
 		{
-			// OC_ASSERT(_gnd_cache.find(key) == _gnd_cache.end(),
-			//           "Internal error!");
+#ifdef QDEBUG
+			// The same clause can sometimes be grounded multiple
+			// times, but if the caching is valid, then it should
+			// always be grounded exactly the same way.
+			const auto& prev = _gnd_cache.find(key);
+			if (_gnd_cache.end() != prev)
+				OC_ASSERT(prev->second == hg, "Internal Error");
+#endif
 			_gnd_cache.insert({key, hg});
 		}
 	}
