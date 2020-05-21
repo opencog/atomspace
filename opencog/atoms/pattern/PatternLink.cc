@@ -464,10 +464,11 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
 /// groundable clauses.
-void PatternLink::unbundle_clauses_rec(const Handle& bdy,
+bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
+	bool unquoted = false;
 	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
 	const HandleSeq& oset = bdy->getOutgoingSet();
 	for (const Handle& ho : oset)
@@ -481,7 +482,10 @@ void PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		{
 			unbundle_clauses_rec(ho, connectives, reverse);
 		}
+		else
+			unquoted = true;
 	}
+	return unquoted;
 }
 
 void PatternLink::locate_defines(const HandleSeq& clauses)
