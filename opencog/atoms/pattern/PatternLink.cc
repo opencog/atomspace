@@ -396,7 +396,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		{
 			Type ot = ho->get_type();
 			if (connectives.find(ot) != connectives.end() and
-				 not unbundle_clauses_rec(ho, connectives))
+			    not unbundle_clauses_rec(ho, connectives))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -470,22 +470,18 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
+	Type t = bdy->get_type();
+
+	if (connectives.find(t) == connectives.end())
+		return false;
+
+	if (NOT_LINK == t) reverse = not reverse;
+
 	bool recorded = true;
-	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
-	const HandleSeq& oset = bdy->getOutgoingSet();
-	for (const Handle& ho : oset)
+	for (const Handle& ho : bdy->getOutgoingSet())
 	{
-		Type ot = ho->get_type();
-		if (record_literal(ho, reverse))
-		{
-			/* no-op */
-		}
-		else if (connectives.find(ot) != connectives.end())
-		{
+		if (not record_literal(ho, reverse))
 			recorded = recorded and unbundle_clauses_rec(ho, connectives, reverse);
-		}
-		else
-			recorded = false;
 	}
 	return recorded;
 }
