@@ -1880,13 +1880,27 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 
 		// Cache the result, so that it can be reused.
 		// See commentary on `explore_clause()` for more info.
-		if (next_joint and
-			(_pat->cacheable_clauses.find(clause_root) !=
-		    _pat->cacheable_clauses.end()))
+		HandleSeq key;
+		const HandleSeq& clvars(_pat->clause_variables.at(clause_root));
+		size_t cvsz = clvars.size();
+		if (1 == cvsz and
+			 _pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end())
 		{
-			auto jgnd(var_grounding.find(next_joint));
-			if (jgnd != var_grounding.end())
-				_gnd_cache.insert({{clause_root, jgnd->second}, hg});
+			const Handle& jgnd(var_grounding.at(clvars[0]));
+			key = HandleSeq({clause_root, jgnd});
+		}
+		if (1 < cvsz and
+			 _pat->cacheable_multi.find(clause_root) !=
+		    _pat->cacheable_multi.end())
+		{
+			key = clause_grounding_key(clause_root);
+		}
+		if (0 < key.size())
+		{
+			// OC_ASSERT(_gnd_cache.find(key) == _gnd_cache.end(),
+			//           "Internal error!");
+			_gnd_cache.insert({key, hg});
 		}
 	}
 
@@ -2660,11 +2674,9 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 		key = HandleSeq({clause, grnd});
 
-#if 0
 	// Multi-variable cache.
 	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
 		key = clause_grounding_key(clause);
-#endif
 
 	if (0 < key.size())
 	{
