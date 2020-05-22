@@ -393,7 +393,7 @@ ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleMap&);
 
-// This works for me, per note immediately above.
+// Hash, needed for std::unordered_map
 template<>
 struct hash<opencog::Handle>
 {
@@ -445,6 +445,43 @@ struct equal_to<opencog::HandlePair>
         std::equal_to<opencog::Handle> eq;
         return eq.operator()(lhp.first, rhp.first) and
                eq.operator()(lhp.second, rhp.second);
+    }
+};
+
+template<>
+struct hash<opencog::HandleSeq>
+{
+    typedef std::size_t result_type;
+    typedef opencog::HandleSeq argument_type;
+    std::size_t
+    operator()(const opencog::HandleSeq& hseq) const noexcept
+    {
+        std::size_t hsh = 0;
+        for (const opencog::Handle& h : hseq) hsh += hash_value(h);
+        return hsh;
+    }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::HandleSeq>
+{
+    typedef bool result_type;
+    typedef opencog::HandleSeq first_argument;
+    typedef opencog::HandleSeq second_argument;
+    bool
+    operator()(const opencog::HandleSeq& lhs,
+               const opencog::HandleSeq& rhs) const noexcept
+    {
+        if (lhs == rhs) return true;
+        size_t len = lhs.size();
+        if (rhs.size() != len) return false;
+        std::equal_to<opencog::Handle> eq;
+        for (size_t i=0; i<len; i++)
+        {
+            if (not eq.operator()(lhs[i], rhs[i])) return false;
+        }
+        return true;
     }
 };
 

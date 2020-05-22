@@ -37,6 +37,8 @@ public:
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
@@ -61,7 +63,7 @@ public:
 	void test_compose(void);
 	void test_nest(void);
 	void test_reversive(void);
-	void test_recursive(void);
+	void xtest_recursive(void);
 };
 
 void DefinedSchemaUTest::tearDown(void)
@@ -182,7 +184,7 @@ void DefinedSchemaUTest::test_reversive(void)
 
 // Test the recursive operation of ExecutionOutputLinks, where the
 // DefinedSchema is used to define recursive execution.
-void DefinedSchemaUTest::test_recursive(void)
+void DefinedSchemaUTest::xtest_recursive(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

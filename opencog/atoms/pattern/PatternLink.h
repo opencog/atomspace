@@ -79,7 +79,7 @@ protected:
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
-	/// The graph components. Set by validate_clauses()
+	/// The graph components. Set by validate_clauses().
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.
 	/// The list of component_vars are the variables that appear
@@ -123,6 +123,9 @@ protected:
 	void make_term_trees();
 	void make_term_tree_recursive(const Handle&, const Handle&,
 	                              PatternTermPtr&);
+
+	void get_clause_variables(const HandleSeq&);
+	void get_clause_variables_recursive(const Handle&, HandleSet&);
 
 	void init(void);
 	void common_init(void);

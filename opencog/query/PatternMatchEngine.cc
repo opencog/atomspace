@@ -1098,20 +1098,20 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
-	// its definition. XXX TODO.
+	// its definition. XXX TODO. Hmm. Should we do this at runtime,
+	// i.e. here, or at compile time, when creating the PattenLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not ptm->isQuoted())
+	if ((VARIABLE_NODE == tp or GLOB_NODE == tp) and not ptm->isQuoted())
 	{
 		if (_variables->varset.end() != _variables->varset.find(hp))
 			return variable_compare(hp, hg);
 
 		// Report other variables that might be found.
-		if (VARIABLE_NODE == tp or GLOB_NODE == tp)
-			return _pmc.scope_match(hp, hg);
+		return _pmc.scope_match(hp, hg);
 	}
 
 	// If they're the same atom, then clearly they match.
@@ -1122,7 +1122,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// evaluation may have side-effects (e.g. send a message) and
 	// (2) evaluation may depend on external state. These are
 	// typically used to implement behavior trees, e.g SequenceUTest
-	if ((hp == hg) and not is_evaluatable(hp))
+	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
 
 	// If both are nodes, compare them as such.
@@ -1878,16 +1878,59 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
 
+		// The multi-variable cache is is disabled for now, because in the
+		// one large test that I can test on (complex search over millions
+		// of atoms - the tetrahedron search) this slows things down by
+		// about 2%. .. Which is not much, but it also didn't speed
+		// anything up either... so, until a clear benefit shows up,
+		// this is disabled. Single-variable caching is enabled, it is
+		// a big winner (improving MOZI genome search code by 25%-30%).
+#ifndef ENABLE_MULTIVARIABLE_CACHE
 		// Cache the result, so that it can be reused.
 		// See commentary on `explore_clause()` for more info.
-		if (next_joint and
-			(_pat->cacheable_clauses.find(clause_root) !=
-		    _pat->cacheable_clauses.end()))
+		const HandleSeq& clvars(_pat->clause_variables.at(clause_root));
+		size_t cvsz = clvars.size();
+		if (1 == cvsz and
+			 _pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end())
 		{
-			auto jgnd(var_grounding.find(next_joint));
-			if (jgnd != var_grounding.end())
-				_gnd_cache.insert({{clause_root, jgnd->second}, hg});
+			const Handle& jgnd(var_grounding.at(clvars[0]));
+			HandleSeq key({clause_root, jgnd});
+			_gnd_cache.insert({key, hg});
 		}
+
+#else // ENABLE_MULTIVARIABLE_CACHE
+		// Cache the result, so that it can be reused.
+		// See commentary on `explore_clause()` for more info.
+		HandleSeq key;
+		const HandleSeq& clvars(_pat->clause_variables.at(clause_root));
+		size_t cvsz = clvars.size();
+		if (1 == cvsz and
+			 _pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end())
+		{
+			const Handle& jgnd(var_grounding.at(clvars[0]));
+			key = HandleSeq({clause_root, jgnd});
+		}
+		if (1 < cvsz and
+			 _pat->cacheable_multi.find(clause_root) !=
+		    _pat->cacheable_multi.end())
+		{
+			key = clause_grounding_key(clause_root, clvars);
+		}
+		if (0 < key.size())
+		{
+#ifdef QDEBUG
+			// The same clause can sometimes be grounded multiple
+			// times, but if the caching is valid, then it should
+			// always be grounded exactly the same way.
+			const auto& prev = _gnd_cache.find(key);
+			if (_gnd_cache.end() != prev)
+				OC_ASSERT(prev->second == hg, "Internal Error");
+#endif
+			_gnd_cache.insert({key, hg});
+		}
+#endif // ENABLE_MULTIVARIABLE_CACHE
 	}
 
 	// Now go and do more clauses.
@@ -2486,6 +2529,39 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 	return explore_clause(term, grnd, first_clause);
 }
 
+/// Has every variable in the clause been fully grounded already?
+/// If so, then we can deal with this clause directly, without
+/// having to perform any further searches.
+bool PatternMatchEngine::is_clause_grounded(const Handle& clause) const
+{
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	for (const Handle& hvar : it->second)
+	{
+		if (var_grounding.end() == var_grounding.find(hvar))
+			return false;
+	}
+	return true;
+}
+
+/// Return a lookup key for this clause.
+/// The `varseq` should be the variables in this clause
+/// as recorded in ` _pat->clause_variables.find(clause)`
+HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
+                                                   const HandleSeq& varseq) const
+{
+	static HandleSeq empty;
+	HandleSeq key({clause});
+	for (const Handle& hvar : varseq)
+	{
+		const auto& gv = var_grounding.find(hvar);
+		if (var_grounding.end() == gv)
+			return empty;
+		key.push_back(gv->second);
+	}
+	return key;
+}
+
 /**
  * Every clause in a pattern is one of two types:  it either
  * specifies a pattern to be matched, or it specifies an evaluatable
@@ -2494,8 +2570,8 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  * boolean-logic formulas, although the infrastructure is designed
  * to handle other situations as well, e.g. Bayesian formulas, etc.)
  *
- * This method simply dispatches a given clause to be either pattern
- * matched, or to be evaluated.
+ * `explore_clause_direct()` handles pattern matching, while
+ * `explore_clause_evaluatable()` handles the evaluatable ones.
  *
  * Returns true if there was a match, else returns false to reject it.
  */
@@ -2504,29 +2580,26 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
-	// Evaluatable clauses are not patterns; they are clauses that
-	// evaluate to true or false.
-	if (not is_evaluatable(clause))
+	DO_LOG({logger().fine("Clause is matchable; start matching it");})
+
+	_did_check_forall = false;
+	bool found = explore_term_branches(term, grnd, clause);
+
+	if (not _did_check_forall and is_always(clause))
 	{
-		DO_LOG({logger().fine("Clause is matchable; start matching it");})
-
-		_did_check_forall = false;
-		bool found = explore_term_branches(term, grnd, clause);
-
-		if (not _did_check_forall and is_always(clause))
-		{
-			// We need to record failures for the AlwaysLink
-			Handle empty;
-			_forall_state = _forall_state and
-				_pmc.always_clause_match(clause, empty, var_grounding);
-		}
-
-		// If found is false, then there's no solution here.
-		// Bail out, return false to try again with the next candidate.
-		return found;
+		// We need to record failures for the AlwaysLink
+		Handle empty;
+		_forall_state = _forall_state and
+			_pmc.always_clause_match(clause, empty, var_grounding);
 	}
 
-	// If we are here, we have an evaluatable clause on our hands.
+	return found;
+}
+
+bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
+                                                    const Handle& grnd,
+                                                    const Handle& clause)
+{
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
 
 	// Some people like to have a clause that is just one big
@@ -2537,21 +2610,10 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
 		var_grounding[term] = grnd;
 
-#ifdef QDEBUG
-	// This is an expensive, CPU-wasting check to catch the bug described
-	// in https://github.com/opencog/atomspace/issues/2315
-	// It would be nice to have a better fix, but its not clear what
-	// that fix should be; its a thorny architectural problem.
-	for (const Handle &v : _variables->varset)
-	{
-		if (is_unquoted_unscoped_in_tree(clause, v) and
-		    var_grounding.find(v) == var_grounding.end())
-		{
-			throw RuntimeException(TRACE_INFO,
-			      "Unable to evaluate clause with ungrounded variables!");
-		}
-	}
-#endif
+	// All variables in the clause had better be grounded!
+	if (not is_clause_grounded(clause))
+		throw RuntimeException(TRACE_INFO,
+		      "Unable to evaluate clause with ungrounded variables!");
 
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
@@ -2630,16 +2692,49 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
                                         const Handle& clause)
 {
-	// If not cacheable, nothing to do.
-	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
-		return explore_clause_direct(term, grnd, clause);
+	// Evaluatable clauses are not cacheable.
+	if (is_evaluatable(clause))
+		return explore_clause_evaluatable(term, grnd, clause);
 
-	// Do we have a cached value for this? If so, then use it.
-	auto cac = _gnd_cache.find({clause,grnd});
-	if (cac != _gnd_cache.end())
+	// Build the cache lookup key
+	HandleSeq key;
+
+	// Single-variable cache. Due to the way we are called, `term`
+	// is the variable in the clause, and `grnd` is it's grounding.
+	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
+		key = HandleSeq({clause, grnd});
+
+#ifdef ENABLE_MULTIVARIABLE_CACHE
+	// This is disabled for now, because in the one large test that
+	// I have (complex search over millions of atoms - the tetrahedron
+	// search) this slows things down by about 2%. .. Which is not
+	// much, but it also didn't speed anything up either...
+	// Multi-variable cache.
+	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
 	{
-		var_grounding[clause] = cac->second;
-		return do_next_clause();
+		const HandleSeq& varseq = _pat->clause_variables.at(clause);
+		key = clause_grounding_key(clause, varseq);
+	}
+#endif // ENABLE_MULTIVARIABLE_CACHE
+
+	if (0 < key.size())
+	{
+		const auto& cac = _gnd_cache.find(key);
+		if (cac != _gnd_cache.end())
+		{
+			var_grounding[clause] = cac->second;
+			return do_next_clause();
+		}
+
+		// Do we have a negative cache? If so, it will always fail.
+		const auto& nac = _nack_cache.find(key);
+		if (nac != _nack_cache.end())
+			return false;
+
+		bool okay = explore_clause_direct(term, grnd, clause);
+		if (not okay)
+			_nack_cache.insert(key);
+		return okay;
 	}
 
 	return explore_clause_direct(term, grnd, clause);
