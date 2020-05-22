@@ -57,4 +57,3 @@ cdef class TruthValue(Value):
 
     def truth_value_ptr_object(self):
         return PyLong_FromVoidPtr(<void*>self._tvptr())
-

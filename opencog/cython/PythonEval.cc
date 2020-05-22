@@ -1061,6 +1061,17 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    // Did we actually get a TruthValue?
+    if (0 == PyObject_HasAttrString(pyTruthValue,
+                                    "truth_value_ptr_object"))
+    {
+        Py_DECREF(pyTruthValue);
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' did not return TruthValue!",
+            func.c_str());
+    }
+
     // Get the truth value pointer from the object (will be encoded
     // as a long by PyVoidPtr_asLong)
     PyObject *pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue,
@@ -1068,8 +1079,10 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
 
     // Make sure we got a truth value pointer.
     PyObject *pyError = PyErr_Occurred();
-    if (pyError or !pyTruthValuePtrPtr)
+    if (pyError or nullptr == pyTruthValuePtrPtr)
     {
+        Py_DECREF(pyTruthValue);
+        if (pyTruthValuePtrPtr) Py_DECREF(pyTruthValuePtrPtr);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return TruthValue!",
