@@ -1878,6 +1878,28 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		logmsg("---------------------\nclause:", clause_root);
 		logmsg("ground:", hg);
 
+		// The multi-variable cache is is disabled for now, because in the
+		// one large test that I can test on (complex search over millions
+		// of atoms - the tetrahedron search) this slows things down by
+		// about 2%. .. Which is not much, but it also didn't speed
+		// anything up either... so, until a clear benefit shows up,
+		// this is disabled. Single-variable caching is enabled, it is
+		// a big winner (improving MOZI genome search code by 25%-30%).
+#ifndef ENABLE_MULTIVARIABLE_CACHE
+		// Cache the result, so that it can be reused.
+		// See commentary on `explore_clause()` for more info.
+		const HandleSeq& clvars(_pat->clause_variables.at(clause_root));
+		size_t cvsz = clvars.size();
+		if (1 == cvsz and
+			 _pat->cacheable_clauses.find(clause_root) !=
+		    _pat->cacheable_clauses.end())
+		{
+			const Handle& jgnd(var_grounding.at(clvars[0]));
+			HandleSeq key({clause_root, jgnd});
+			_gnd_cache.insert({key, hg});
+		}
+
+#else // ENABLE_MULTIVARIABLE_CACHE
 		// Cache the result, so that it can be reused.
 		// See commentary on `explore_clause()` for more info.
 		HandleSeq key;
@@ -1908,6 +1930,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 #endif
 			_gnd_cache.insert({key, hg});
 		}
+#endif // ENABLE_MULTIVARIABLE_CACHE
 	}
 
 	// Now go and do more clauses.
@@ -2681,12 +2704,18 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 		key = HandleSeq({clause, grnd});
 
+#ifdef ENABLE_MULTIVARIABLE_CACHE
+	// This is disabled for now, because in the one large test that
+	// I have (complex search over millions of atoms - the tetrahedron
+	// search) this slows things down by about 2%. .. Which is not
+	// much, but it also didn't speed anything up either...
 	// Multi-variable cache.
 	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
 	{
 		const HandleSeq& varseq = _pat->clause_variables.at(clause);
 		key = clause_grounding_key(clause, varseq);
 	}
+#endif // ENABLE_MULTIVARIABLE_CACHE
 
 	if (0 < key.size())
 	{
