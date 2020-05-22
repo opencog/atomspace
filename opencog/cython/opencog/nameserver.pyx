@@ -58,10 +58,9 @@ cdef generate_type_module():
 
 types = type('atom_types', (), generate_type_module())
 
-#This function is for refreshing new types
-#ex. When you import a cython module which include non-core atom types in C++
-#And you can refresh these new types by this function
-
+# Update/refresh list of types. This needs to be called whenever
+# additional atom types were declared in other atomspace modules.
+# i.e. when new types were added to the C++ nameserver.
 def get_refreshed_types():
     global types
     types = type('atom_types', (), generate_type_module())
