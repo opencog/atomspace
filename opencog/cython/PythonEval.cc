@@ -985,127 +985,76 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(AtomSpace * as, const std::string& func, Handle varargs)
-{
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    push_context_atomspace(as);
-    // Get the atom object returned by this user function.
-    BOOST_SCOPE_EXIT(void) {
-        pop_context_atomspace();
-    } BOOST_SCOPE_EXIT_END
-    PyObject* pyReturnAtom = this->call_user_function(func, varargs);
-
-    // If we got a non-null atom were no errors.
-    if (pyReturnAtom)
-    {
-        // Grab the GIL.
-        PyGILState_STATE gstate;
-        gstate = PyGILState_Ensure();
-
-        // Get the handle from the atom.
-        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom,
-                (char*) "handle_ptr", NULL);
-
-        // Make sure we got an atom pointer.
-        PyObject* pyError = PyErr_Occurred();
-        if (pyError or nullptr == pyAtomPATOM)
-        {
-            PyGILState_Release(gstate);
-            throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return Atom!", func.c_str());
-        }
-
-        // Get the atom pointer from the python atom pointer.
-        // Save it, because the DECREF will blow it away.
-        Handle hresult = *((Handle*)(PyLong_AsLong(pyAtomPATOM)));
-
-        // Cleanup the reference counts.
-        Py_DECREF(pyReturnAtom);
-        Py_DECREF(pyAtomPATOM);
-
-        // Release the GIL. No Python API allowed beyond this point.
-        PyGILState_Release(gstate);
-        return hresult;
-    }
-    else
-    {
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return Atom!", func.c_str());
-    }
-
-    return Handle::UNDEFINED;
-}
-
 /**
  * Apply the user function to the arguments passed in varargs and
- * return the extracted truth value.
+ * return the extracted Value.
  */
-TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
-                                   const std::string& func,
-                                   Handle varargs)
+ValuePtr PythonEval::apply_v(AtomSpace * as,
+                             const std::string& func,
+                             Handle varargs)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     push_context_atomspace(as);
     BOOST_SCOPE_EXIT(void) {
         pop_context_atomspace();
     } BOOST_SCOPE_EXIT_END
-    // Get the python truth value object returned by this user function.
-    PyObject *pyTruthValue = call_user_function(func, varargs);
 
-    // If we got a non-null truth value there were no errors.
-    if (NULL == pyTruthValue)
+    // Get the python value object returned by this user function.
+    PyObject *pyValue = call_user_function(func, varargs);
+
+    // If we got a non-null Value there were no errors.
+    if (NULL == pyValue)
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return a TruthValue!",
+            "Python function '%s' did not return Atomese!",
             func.c_str());
 
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
     // Did we actually get a TruthValue?
-    if (0 == PyObject_HasAttrString(pyTruthValue,
-                                    "truth_value_ptr_object"))
+    if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
     {
-        Py_DECREF(pyTruthValue);
+        Py_DECREF(pyValue);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return a TruthValue!",
+            "Python function '%s' did not return Atomese!",
             func.c_str());
     }
 
     // Get the truth value pointer from the object (will be encoded
     // as a long by PyVoidPtr_asLong)
-    PyObject *pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue,
-            (char*) "truth_value_ptr_object", NULL);
+    PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
+            (char*) "value_ptr", NULL);
 
     // Make sure we got a truth value pointer.
     PyObject *pyError = PyErr_Occurred();
-    if (pyError or nullptr == pyTruthValuePtrPtr)
+    if (pyError or nullptr == pyValuePtrPtr)
     {
-        Py_DECREF(pyTruthValue);
-        if (pyTruthValuePtrPtr) Py_DECREF(pyTruthValuePtrPtr);
+        Py_DECREF(pyValue);
+        if (pyValuePtrPtr) Py_DECREF(pyValuePtrPtr);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return a TruthValue!",
+            "Python function '%s' did not return Atomese!",
             func.c_str());
     }
 
-    // Get the pointer to the truth value pointer. Yes, it does
+    // Get the pointer to the Value pointer. Yes, it does
     // contain a pointer to the shared_ptr not the underlying.
-    TruthValuePtr* tvpPtr = static_cast<TruthValuePtr*>
-            (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
+    ValuePtr* vpPtr = static_cast<ValuePtr*>
+            (PyLong_AsVoidPtr(pyValuePtrPtr));
 
     // Assign the truth value pointer using this pointer before
     // we decrement the reference to pyTruthValue since that
     // will delete this pointer.
-    TruthValuePtr tvp = *tvpPtr;
+    ValuePtr vptr = *vpPtr;
 
     // Cleanup the reference counts.
-    Py_DECREF(pyTruthValuePtrPtr);
-    Py_DECREF(pyTruthValue);
+    Py_DECREF(pyValuePtrPtr);
+    Py_DECREF(pyValue);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
-    return tvp;
+    return vptr;
 }
 
 /**
