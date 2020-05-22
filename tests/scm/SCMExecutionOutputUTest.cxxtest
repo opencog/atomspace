@@ -75,6 +75,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void test_evaluate_single_arg(void);
 
 	void test_bad_gsn(void);
+	void test_bad_gpn(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -684,6 +685,42 @@ void SCMExecutionOutputUTest::test_bad_gsn(void)
 	   "   (cog-execute!"
 	   "      (ExecutionOutputLink"
 	   "         (GroundedSchema str)"
+	   "         (Concept \"A\"))))"
+	);
+	CHKEV(eval);
+
+	eval->eval("(define (no-ret x) *unspecified*)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: no-ret\")"));
+
+	eval->eval("(define (ret-num x) 42)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-num\")"));
+
+	eval->eval("(define (ret-str x) \"oh noooo!\")");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-str\")"));
+
+	eval->eval("(define (ret-nil x) '())");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-nil\")"));
+
+	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-lst\")"));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SCMExecutionOutputUTest::test_bad_gpn(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+	   "(define (call-gpn str)"
+	   "   (cog-evaluate!"
+	   "      (EvaluationLink"
+	   "         (GroundedPredicate str)"
 	   "         (Concept \"A\"))))"
 	);
 	CHKEV(eval);
