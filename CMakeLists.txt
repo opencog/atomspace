@@ -172,6 +172,10 @@ ENDIF (HAVE_SECURE_GETENV)
 # ----------------------------------------------------------
 # Python stuff.
 
+# Search for Python3 first, and use that, if found. Else use Python2.
+# To use Python2 only, run the following in the build directory:
+# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
+
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
