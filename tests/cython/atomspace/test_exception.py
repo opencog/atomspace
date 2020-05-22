@@ -1,7 +1,7 @@
 import unittest
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
-from opencog.bindlink import evaluate_atom
+from opencog.exec import evaluate_atom, execute_atom
 
 import __main__
 
@@ -27,6 +27,7 @@ class TestExceptions(unittest.TestCase):
            print("The exception message is " + str(e))
            self.assertTrue("Expecting" in str(e))
 
+    # --------------------------------------------------------------
     # First, make sure that evaluation works.
     def test_good_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -39,6 +40,7 @@ class TestExceptions(unittest.TestCase):
         expect = TruthValue(0.5, 0.5)
         self.assertTrue(okay == expect)
 
+    # --------------------------------------------------------------
     # Call a non-existent function.
     def test_bogus_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -52,6 +54,7 @@ class TestExceptions(unittest.TestCase):
            print("The exception message is " + str(e))
            self.assertTrue("not found in module" in str(e))
 
+    # Call function that returns None
     def test_pass_evaluation(self):
         atom1 = ConceptNode("atom1")
         eval_link = EvaluationLink(GroundedPredicateNode("py:no_ret"),
@@ -112,6 +115,95 @@ class TestExceptions(unittest.TestCase):
             print("The exception message is " + str(e))
             self.assertTrue("did not return a TruthValue" in str(e))
 
+    # --------------------------------------------------------------
+    # First, make sure that evaluation works.
+    def test_good_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:good_tv"),
+                                        ListLink(atom1, atom1, atom1))
+        okay = execute_atom(self.space, exec_link)
+
+        # Use `nosetests3 --nocapture` to see this print...
+        print("The good TV is " + str(okay))
+        expect = TruthValue(0.5, 0.5)
+        self.assertTrue(okay == expect)
+
+    # --------------------------------------------------------------
+    # Call a non-existent function.
+    def test_bogus_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:foobar"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+    # Call function that returns None
+    def test_pass_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:no_ret"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+    def test_num_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:ret_num"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+    def test_str_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:ret_str"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+    def test_nil_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:ret_nil"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+    def test_lst_execution(self):
+        atom1 = ConceptNode("atom1")
+        exec_link = ExecutionOutputLink(GroundedSchemaNode("py:ret_lst"),
+                                        ListLink(atom1, atom1, atom1))
+        try:
+            execute_atom(self.space, exec_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("not found in module" in str(e))
+
+
 
 def good_tv(*args):
     print(args)
@@ -123,19 +215,19 @@ def no_ret(*args):
 
 def ret_num(*args):
     print(args)
-    42
+    return 42
 
 def ret_str(*args):
     print(args)
-    "My name is Jon Jonson, I come from Wisconsin"
+    return "My name is Jon Jonson, I come from Wisconsin"
 
 def ret_nil(*args):
     print(args)
-    []
+    return {}
 
 def ret_lst(*args):
     print(args)
-    ['a', 'b', 'c']
+    return ['a', 'b', 'c']
 
 __main__.good_tv = good_tv
 __main__.no_ret = no_ret
