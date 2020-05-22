@@ -36,6 +36,9 @@ cdef class Value:
         """Return C++ shared_ptr from PtrHolder instance"""
         return <cValuePtr&>(self.ptr_holder.shared_ptr)
 
+    def value_ptr(self):
+        return PyLong_FromVoidPtr(<cValuePtr*>&(self.ptr_holder.shared_ptr))
+
     @property
     def type(self):
         return self.get_c_value_ptr().get().get_type()
