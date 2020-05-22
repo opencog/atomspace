@@ -52,9 +52,57 @@ class TestExceptions(unittest.TestCase):
            print("The exception message is " + str(e))
            self.assertTrue("not found in module" in str(e))
 
-    def test_null_evaluation(self):
+    def test_pass_evaluation(self):
         atom1 = ConceptNode("atom1")
         eval_link = EvaluationLink(GroundedPredicateNode("py:no_ret"),
+                                        atom1, atom1, atom1)
+        try:
+            evaluate_atom(self.space, eval_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("did not return a TruthValue" in str(e))
+
+    def test_num_evaluation(self):
+        atom1 = ConceptNode("atom1")
+        eval_link = EvaluationLink(GroundedPredicateNode("py:ret_num"),
+                                        atom1, atom1, atom1)
+        try:
+            evaluate_atom(self.space, eval_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("did not return a TruthValue" in str(e))
+
+    def test_str_evaluation(self):
+        atom1 = ConceptNode("atom1")
+        eval_link = EvaluationLink(GroundedPredicateNode("py:ret_str"),
+                                        atom1, atom1, atom1)
+        try:
+            evaluate_atom(self.space, eval_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("did not return a TruthValue" in str(e))
+
+    def test_nil_evaluation(self):
+        atom1 = ConceptNode("atom1")
+        eval_link = EvaluationLink(GroundedPredicateNode("py:ret_nil"),
+                                        atom1, atom1, atom1)
+        try:
+            evaluate_atom(self.space, eval_link)
+            self.assertFalse("call should fail")
+        except RuntimeError as e:
+            # Use `nosetests3 --nocapture` to see this print...
+            print("The exception message is " + str(e))
+            self.assertTrue("did not return a TruthValue" in str(e))
+
+    def test_lst_evaluation(self):
+        atom1 = ConceptNode("atom1")
+        eval_link = EvaluationLink(GroundedPredicateNode("py:ret_lst"),
                                         atom1, atom1, atom1)
         try:
             evaluate_atom(self.space, eval_link)
@@ -73,8 +121,28 @@ def no_ret(*args):
     print(args)
     pass
 
+def ret_num(*args):
+    print(args)
+    42
+
+def ret_str(*args):
+    print(args)
+    "My name is Jon Jonson, I come from Wisconsin"
+
+def ret_nil(*args):
+    print(args)
+    []
+
+def ret_lst(*args):
+    print(args)
+    ['a', 'b', 'c']
+
 __main__.good_tv = good_tv
 __main__.no_ret = no_ret
+__main__.ret_num = ret_num
+__main__.ret_str = ret_str
+__main__.ret_nil = ret_nil
+__main__.ret_lst = ret_lst
 
 if __name__ == '__main__':
     unittest.main()
