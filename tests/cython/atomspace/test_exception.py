@@ -65,7 +65,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("did not return a TruthValue" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_num_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -77,7 +77,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("did not return a TruthValue" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_str_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -89,7 +89,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("did not return a TruthValue" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_nil_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -101,7 +101,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("did not return a TruthValue" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_lst_evaluation(self):
         atom1 = ConceptNode("atom1")
@@ -113,7 +113,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("did not return a TruthValue" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     # --------------------------------------------------------------
     # First, make sure that evaluation works.
@@ -153,7 +153,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_num_execution(self):
         atom1 = ConceptNode("atom1")
@@ -165,7 +165,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_str_execution(self):
         atom1 = ConceptNode("atom1")
@@ -177,7 +177,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_nil_execution(self):
         atom1 = ConceptNode("atom1")
@@ -189,7 +189,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
     def test_lst_execution(self):
         atom1 = ConceptNode("atom1")
@@ -201,7 +201,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print("The exception message is " + str(e))
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("did not return Atomese" in str(e))
 
 
 
