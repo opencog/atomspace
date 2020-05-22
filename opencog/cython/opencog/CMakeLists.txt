@@ -21,7 +21,11 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
+# IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+# SET(CYTHON_FLAGS "-2" "-f")
+# ELSE
 SET(CYTHON_FLAGS "-3" "-f")
+# ENDIF
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
