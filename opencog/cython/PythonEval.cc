@@ -1011,7 +1011,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // Did we actually get a TruthValue?
+    // Did we actually get a Value?
     if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
     {
         Py_DECREF(pyValue);
