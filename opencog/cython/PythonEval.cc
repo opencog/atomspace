@@ -1055,7 +1055,7 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
     // If we got a non-null truth value there were no errors.
     if (NULL == pyTruthValue)
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return TruthValue!",
+            "Python function '%s' did not return a TruthValue!",
             func.c_str());
 
     // Grab the GIL.
@@ -1068,7 +1068,7 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
         Py_DECREF(pyTruthValue);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return TruthValue!",
+            "Python function '%s' did not return a TruthValue!",
             func.c_str());
     }
 
@@ -1085,7 +1085,7 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
         if (pyTruthValuePtrPtr) Py_DECREF(pyTruthValuePtrPtr);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return TruthValue!",
+            "Python function '%s' did not return a TruthValue!",
             func.c_str());
     }
 

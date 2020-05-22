@@ -21,9 +21,9 @@ export PYTHONPATH=build/opencog/cython
 Then from atomspace root source dir execute:
 
 ```
-nosetests -vs ./tests/cython/
-nosetests -vs ./tests/cython/atomspace/
-nosetests -vs ./tests/cython/bindlink/
-nosetests -vs ./tests/cython/guile/
-nosetests -vs ./tests/cython/utilities/
+nosetests3 -vs ./tests/cython/
+nosetests3 -vs ./tests/cython/atomspace/
+nosetests3 -vs ./tests/cython/bindlink/
+nosetests3 -vs ./tests/cython/guile/
+nosetests3 -vs ./tests/cython/utilities/
 ```
