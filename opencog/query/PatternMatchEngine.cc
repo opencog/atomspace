@@ -2599,7 +2599,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 		      "Unable to evaluate clause with ungrounded variables!");
 #else
 		logger().warn("Evaluating clause with ungrounded variables!");
-		logger().info("You are depending on unspecified behavior!");
+		logger().info("This is an internal bug! See issue #2631");
 		logger().info("Clause variables are %s",
 			oc_to_string(_pat->clause_variables.at(clause)).c_str());
 		logger().info("Current grounding=%s",
