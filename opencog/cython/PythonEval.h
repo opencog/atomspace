@@ -86,7 +86,6 @@ class PythonEval : public GenericEval
                                  PyObject*& pyModule, PyObject*& pyObject,
                                  std::string& functionName);
         PyObject* do_call_user_function(const std::string& moduleFunction,
-                                        PyGILState_STATE gstate,
                                         PyObject* pyArguments);
 
         // Call functions; execute scripts.

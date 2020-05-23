@@ -869,7 +869,6 @@ std::recursive_mutex PythonEval::_mtx;
  * On error throws an exception.
  */
 PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
-                                            PyGILState_STATE gstate,
                                             PyObject* pyArguments)
 {
     // Get the module and stripped function name.
@@ -880,12 +879,8 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
 
     // If we can't find that module then throw an exception.
     if (!pyModule)
-    {
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
-            "Python module for '%s' not found!",
-            moduleFunction.c_str());
-    }
+            "Python module for '%s' not found!", moduleFunction.c_str());
 
     // Get a reference to the user function.
     PyObject* pyUserFunc;
@@ -902,15 +897,12 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
         pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
     }
     else
-    {
         pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
-    }
 
     // If we can't find that function then throw an exception.
     if (!pyUserFunc)
     {
         if (pyObject) Py_DECREF(pyObject);
-        PyGILState_Release(gstate);
         const char * moduleName = PyModule_GetName(pyModule);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not found in module '%s'!",
@@ -928,7 +920,6 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
     if (!PyCallable_Check(pyUserFunc))
     {
         Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not callable!", moduleFunction.c_str());
     }
@@ -950,11 +941,7 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
         std::string errorString =
             build_python_error_message(moduleFunction);
         PyErr_Clear();
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
     return pyReturnValue;
 }
@@ -978,6 +965,15 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     size_t actualArgumentCount = arguments->get_arity();
@@ -996,13 +992,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         ++tupleItem;
     }
 
-    PyObject* pyRetVal = do_call_user_function(moduleFunction,
-                                               gstate, pyArguments);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-
-    return pyRetVal;
+    return do_call_user_function(moduleFunction, pyArguments);
 }
 
 /**
@@ -1096,6 +1086,15 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
@@ -1105,10 +1104,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Py_DECREF(pyAtomSpace);
 
     // Execute the user function.
-    do_call_user_function(moduleFunction, gstate, pyArguments);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
+    do_call_user_function(moduleFunction, pyArguments);
 }
 
 // ===================================================================
