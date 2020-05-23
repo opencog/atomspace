@@ -87,6 +87,11 @@ class PythonEval : public GenericEval
                                  std::string& functionName);
         PyObject* get_user_function(const std::string& moduleFunction,
                                     PyGILState_STATE gstate);
+        PyObject* call_function(PyObject* pyUserFunc,
+                                PyObject* pyArguments,
+                                PyGILState_STATE gstate,
+                                const std::string& moduleFunction);
+
 
         // Call functions; execute scripts.
         PyObject* call_user_function(const std::string& func,
@@ -100,13 +105,12 @@ class PythonEval : public GenericEval
         // Single-threded design.
         static PythonEval* singletonInstance;
 
-
         // Single, global mutex for serializing access to the atomspace.
         // The singleton-instance design of this class forces us to
         // serialize access (the GIL is not enough), because there is
         // no way to guarantee that python won't accidentally be called
         // from multiple threads.  That's because the EvaluationLink
-        // is called from scheme and from the pattern matcher, and its
+        // is called from scheme and from the pattern engine, and its
         // unknown how many threads those things might be running in.
         // The lock is recursive, because we may need to use multiple
         // different atomspaces with the evaluator, in some nested

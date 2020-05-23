@@ -936,6 +936,38 @@ PyObject* PythonEval::get_user_function(const std::string& moduleFunction,
     return pyUserFunc;
 }
 
+/// Wrapper for PyObject_CallObject() with additional error checking.
+PyObject* PythonEval::call_function(PyObject* pyUserFunc,
+                                    PyObject* pyArguments,
+                                    PyGILState_STATE gstate,
+                                    const std::string& moduleFunction)
+{
+    // Execute the user function and store its return value.
+    PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
+
+    // Cleanup the reference counts for Python objects we no longer reference.
+    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
+    // to decrement it here. Do this before error checking below since we'll
+    // need to decrement these references even if there is an error.
+    Py_DECREF(pyUserFunc);
+    Py_DECREF(pyArguments);
+
+    // Check for errors.
+    if (PyErr_Occurred())
+    {
+        // Construct the error message and throw an exception.
+        std::string errorString =
+            build_python_error_message(moduleFunction);
+        PyErr_Clear();
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+
+        // PyErr_Occurred returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyError);
+    }
+    return pyReturnValue;
+}
+
 /**
  * Call the user defined function with the arguments passed in the
  * ListLink handle 'arguments'.
@@ -975,29 +1007,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         ++tupleItem;
     }
 
-    // Execute the user function and store its return value.
-    PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
-
-    // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
-    // to decrement it here. Do this before error checking below since we'll
-    // need to decrement these references even if there is an error.
-    Py_DECREF(pyUserFunc);
-    Py_DECREF(pyArguments);
-
-    // Check for errors.
-    if (PyErr_Occurred())
-    {
-        // Construct the error message and throw an exception.
-        std::string errorString =
-            build_python_error_message(moduleFunction);
-        PyErr_Clear();
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
-    }
+    PyObject* pyReturnValue = call_function(pyUserFunc, pyArguments,
+                                            gstate, moduleFunction);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -1107,25 +1118,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Py_DECREF(pyAtomSpace);
 
     // Execute the user function.
-    PyObject_CallObject(pyUserFunc, pyArguments);
-
-    // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
-    // to decrement it here. Do this before error checking below since we'll
-    // need to decrement these references even if there is an error.
-    Py_DECREF(pyUserFunc);
-    Py_DECREF(pyArguments);
-
-    // Check for errors.
-    if (PyErr_Occurred())
-    {
-        // Construct the error message and throw an exception.
-        std::string errorString =
-            build_python_error_message(moduleFunction);
-        PyErr_Clear();
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-    }
+    call_function(pyUserFunc, pyArguments,
+                  gstate, moduleFunction);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
