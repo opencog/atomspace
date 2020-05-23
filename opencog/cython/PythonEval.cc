@@ -780,18 +780,18 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 }
 
 /**
- * Find the Python object by its name in the given module'.
+ * Find the Python object by its name in the given module.
  */
-PyObject* PythonEval::find_object(const PyObject* pyModule,
+PyObject* PythonEval::find_object(PyObject* pyModule,
                                   const std::string& objectName)
 {
-    PyObject* pyDict = PyModule_GetDict(_pyRootModule);
+    PyObject* pyDict = PyModule_GetDict(pyModule);
     return PyDict_GetItemString(pyDict, objectName.c_str());
 }
 
 /**
- * Get the Python module and/or object and stripped function name given the identifer of
- * the form '[module.][object.[attribute.]*]function'.
+ * Get the Python module and/or object and stripped function name, given
+ * the identifer of the form '[module.][object.[attribute.]*]function'.
  */
 void PythonEval::module_for_function(const std::string& moduleFunction,
                                      PyObject*& pyModule,

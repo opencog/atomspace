@@ -80,7 +80,7 @@ class PythonEval : public GenericEval
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
-        PyObject* find_object(const PyObject* pyModule,
+        PyObject* find_object(PyObject* pyModule,
                               const std::string& objectName);
         void module_for_function(const std::string& moduleFunction,
                                  PyObject*& pyModule, PyObject*& pyObject,
