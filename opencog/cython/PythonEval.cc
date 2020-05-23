@@ -810,7 +810,7 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
         // Then try loading it.
         // We have to guess, if its a single file, or an entire
         // directory with an __init__.py file in it ...
-        if (nullptr == pyModuleTmp &&
+        if (nullptr == pyModuleTmp and
             nullptr == find_object(pyModule, moduleName))
         {
             add_modules_from_path(moduleName);
@@ -825,11 +825,6 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
             functionName = moduleFunction.substr(index+1);
         }
     }
-
-    // If we can't find that module then throw an exception.
-    if (!pyModule)
-        throw RuntimeException(TRACE_INFO,
-            "Python module for '%s' not found!", moduleFunction.c_str());
 
     // Iteratively check for objects in the selected (either root
     // or loaded) module.
