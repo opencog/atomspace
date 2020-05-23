@@ -48,6 +48,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/eval/GenericEval.h>
