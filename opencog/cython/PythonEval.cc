@@ -887,27 +887,23 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     }
 
     // Get a reference to the user function.
-    PyObject* pyDict = PyModule_GetDict(pyModule);
-
     PyObject* pyUserFunc;
     // If there is no object, then search in module
-    if(nullptr == pyObject) {
+    if (nullptr == pyObject) {
 #ifdef DEBUG
         printf("Looking for %s in module %s; here's what we have:\n",
             functionName.c_str(), PyModule_GetName(pyModule));
         print_dictionary(pyDict);
 #endif
+        PyObject* pyDict = PyModule_GetDict(pyModule);
         pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
     } else {
         pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
     }
 
-    // PyModule_GetDict returns a borrowed reference, so don't do this:
-    // Py_DECREF(pyDict);
-
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
-        if(pyObject) Py_DECREF(pyObject);
+        if (pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
         const char * moduleName = PyModule_GetName(pyModule);
         throw RuntimeException(TRACE_INFO,
@@ -1073,7 +1069,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     PyObject *pyModule, *pyObject, *pyUserFunc;
-    PyObject *pyDict;
     std::string functionName;
 
     // Grab the GIL.
@@ -1095,16 +1090,13 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     }
 
     // Get a reference to the user function.
-    pyDict = PyModule_GetDict(pyModule);
     // If there is no object, then search in module
-    if(nullptr == pyObject) {
+    if (nullptr == pyObject) {
+        PyObject *pyDict = PyModule_GetDict(pyModule);
         pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
     } else {
         pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
     }
-
-    // PyModule_GetDict returns a borrowed reference, so don't do this:
-    // Py_DECREF(pyDict);
 
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
