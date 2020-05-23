@@ -82,9 +82,7 @@ class PythonEval : public GenericEval
         void print_dictionary(PyObject*);
         PyObject* find_object(PyObject* pyModule,
                               const std::string& objectName);
-        void module_for_function(const std::string& moduleFunction,
-                                 PyObject*& pyModule, PyObject*& pyObject,
-                                 std::string& functionName);
+        PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
 

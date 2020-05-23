@@ -793,14 +793,11 @@ PyObject* PythonEval::find_object(PyObject* pyModule,
  * Get the Python module and/or object and stripped function name, given
  * the identifer of the form '[module.][object.[attribute.]*]function'.
  */
-void PythonEval::module_for_function(const std::string& moduleFunction,
-                                     PyObject*& pyModule,
-                                     PyObject*& pyObject,
-                                     std::string& functionName)
+PyObject* PythonEval::get_function(const std::string& moduleFunction)
 {
-    pyModule = _pyRootModule;
-    pyObject = nullptr;
-    functionName = moduleFunction;
+    PyObject* pyModule = _pyRootModule;
+    PyObject* pyObject = nullptr;
+    std::string functionName = moduleFunction;
 
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
@@ -828,6 +825,11 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
             functionName = moduleFunction.substr(index+1);
         }
     }
+
+    // If we can't find that module then throw an exception.
+    if (!pyModule)
+        throw RuntimeException(TRACE_INFO,
+            "Python module for '%s' not found!", moduleFunction.c_str());
 
     // Iteratively check for objects in the selected (either root
     // or loaded) module.
@@ -862,33 +864,7 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
 
     // For uniformity to DEC later in any case
     if (pyObject && !bDecRef) Py_INCREF(pyObject);
-}
 
-// ===========================================================
-// Calling functions and applying functions to arguments
-// Most of these are part of the public API.
-
-std::recursive_mutex PythonEval::_mtx;
-
-/**
- * Get the user defined function.
- * On error throws an exception.
- */
-PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
-                                            PyObject* pyArguments)
-{
-    // Get the module and stripped function name.
-    std::string functionName;
-    PyObject* pyModule;
-    PyObject* pyObject;
-    module_for_function(moduleFunction, pyModule, pyObject, functionName);
-
-    // If we can't find that module then throw an exception.
-    if (!pyModule)
-        throw RuntimeException(TRACE_INFO,
-            "Python module for '%s' not found!", moduleFunction.c_str());
-
-    // Get a reference to the user function.
     PyObject* pyUserFunc;
 
     // If there is no object, then search in module
@@ -921,6 +897,25 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
     // do this only for PyDict_GetItemString
     if (nullptr == pyObject) Py_INCREF(pyUserFunc);
     if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+
+    return pyUserFunc;
+}
+
+// ===========================================================
+// Calling functions and applying functions to arguments
+// Most of these are part of the public API.
+
+std::recursive_mutex PythonEval::_mtx;
+
+/**
+ * Get the user defined function.
+ * On error throws an exception.
+ */
+PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
+                                            PyObject* pyArguments)
+{
+    // Get a reference to the user function.
+    PyObject* pyUserFunc = get_function(moduleFunction);
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc))
