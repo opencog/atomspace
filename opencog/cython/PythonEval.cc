@@ -1021,6 +1021,10 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
     // Did we actually get a Value?
     // One way to do this would be to say
     //    PyObject *vtype = find_object("Value");
@@ -1029,7 +1033,6 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
     {
         Py_DECREF(pyValue);
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atomese!",
             func.c_str());
@@ -1038,36 +1041,24 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     // Get the truth value pointer from the object (will be encoded
     // as a long by PyVoidPtr_asLong)
     PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
-            (char*) "value_ptr", NULL);
-
+                                    (char*) "value_ptr", NULL);
     // Make sure we got a truth value pointer.
     PyObject *pyError = PyErr_Occurred();
     if (pyError or nullptr == pyValuePtrPtr)
     {
         Py_DECREF(pyValue);
         if (pyValuePtrPtr) Py_DECREF(pyValuePtrPtr);
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atomese!",
             func.c_str());
     }
 
-    // Get the pointer to the Value pointer. Yes, it does
-    // contain a pointer to the shared_ptr not the underlying.
-    ValuePtr* vpPtr = static_cast<ValuePtr*>
-            (PyLong_AsVoidPtr(pyValuePtrPtr));
+    // Get the ValuePtr. Static cast, we were passed a ulong int.
+    ValuePtr vptr(*(static_cast<ValuePtr*>
+            (PyLong_AsVoidPtr(pyValuePtrPtr))));
 
-    // Assign the truth value pointer using this pointer before
-    // we decrement the reference to pyTruthValue since that
-    // will delete this pointer.
-    ValuePtr vptr = *vpPtr;
-
-    // Cleanup the reference counts.
     Py_DECREF(pyValuePtrPtr);
     Py_DECREF(pyValue);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
     return vptr;
 }
 
