@@ -1012,6 +1012,10 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     PyGILState_STATE gstate = PyGILState_Ensure();
 
     // Did we actually get a Value?
+    // One way to do this would be to say
+    //    PyObject *vtype = find_object("Value");
+    //    if (0 == PyObject_IsInstance(pyValue, vtype)) ...
+    // but just grabbing the attr is easier, for now.
     if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
     {
         Py_DECREF(pyValue);
