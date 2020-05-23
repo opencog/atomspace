@@ -801,6 +801,7 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
     pyModule = _pyRootModule;
     pyObject = nullptr;
     functionName = moduleFunction;
+
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
     if (0 < index) {
@@ -823,20 +824,24 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
             functionName = moduleFunction.substr(index+1);
         }
     }
-    // Iteratively check for objects in the selected (either root or loaded) module
+
+    // Iteratively check for objects in the selected (either root
+    // or loaded) module.
     index = functionName.find_first_of('.');
     bool bDecRef = false;
     while (0 < index) {
         std::string objectName = functionName.substr(0, index);
         // If there is no object yet, find it in Module
         // Else find it as Attr in Object
-        if(nullptr == pyObject) {
+        if (nullptr == pyObject) {
             pyObject = find_object(pyModule, objectName);
         } else {
-            PyObject* pyTmp = PyObject_GetAttrString(pyObject, objectName.c_str());
-            if(bDecRef) Py_DECREF(pyObject);
+            PyObject* pyTmp = PyObject_GetAttrString(pyObject,
+                                              objectName.c_str());
+            if (bDecRef) Py_DECREF(pyObject);
             pyObject =  pyTmp;
-            // next time, we should use DECREF, since PyObject_GetAttrString returns new reference
+            // Next time, we should use DECREF, since
+            // PyObject_GetAttrString returns new reference
             bDecRef = true;
         }
 
@@ -848,7 +853,9 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
         functionName = functionName.substr(index+1);
         index = functionName.find_first_of('.');
     }
-    if(pyObject && !bDecRef) Py_INCREF(pyObject); // for uniformity to DEC later in any case
+
+    // For uniformity to DEC later in any case
+    if (pyObject && !bDecRef) Py_INCREF(pyObject);
 }
 
 // ===========================================================
@@ -914,7 +921,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
     // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
-    if(nullptr == pyObject) Py_INCREF(pyUserFunc);
+    if (nullptr == pyObject) Py_INCREF(pyUserFunc);
     if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
     // Make sure the function is callable.
@@ -1100,7 +1107,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
-        if(pyObject) Py_DECREF(pyObject);
+        if (pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not found!",
