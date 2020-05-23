@@ -804,9 +804,11 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
 
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
-    if (0 < index) {
+    if (0 < index)
+    {
         std::string moduleName = moduleFunction.substr(0, index);
         PyObject* pyModuleTmp = _modules[moduleName];
+
         // If not found, first check that it is not an object.
         // Then try loading it.
         // We have to guess, if its a single file, or an entire
@@ -818,8 +820,10 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
             add_modules_from_path(moduleName + ".py");
             pyModuleTmp = _modules[moduleName];
         }
+
         // If found, set new module and truncate the function name
-        if (pyModuleTmp) {
+        if (pyModuleTmp)
+        {
             pyModule = pyModuleTmp;
             functionName = moduleFunction.substr(index+1);
         }
@@ -829,13 +833,15 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
     // or loaded) module.
     index = functionName.find_first_of('.');
     bool bDecRef = false;
-    while (0 < index) {
+    while (0 < index)
+    {
         std::string objectName = functionName.substr(0, index);
         // If there is no object yet, find it in Module
         // Else find it as Attr in Object
-        if (nullptr == pyObject) {
+        if (nullptr == pyObject)
             pyObject = find_object(pyModule, objectName);
-        } else {
+        else
+        {
             PyObject* pyTmp = PyObject_GetAttrString(pyObject,
                                               objectName.c_str());
             if (bDecRef) Py_DECREF(pyObject);
@@ -845,11 +851,11 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
             bDecRef = true;
         }
 
-        if (nullptr == pyObject) {
+        if (nullptr == pyObject)
             throw RuntimeException(TRACE_INFO,
                 "Python object/attribute for '%s' not found!",
                 functionName.c_str());
-        }
+
         functionName = functionName.substr(index+1);
         index = functionName.find_first_of('.');
     }
@@ -976,21 +982,11 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
-    size_t actualArgumentCount = arguments->get_arity();
-    PyObject* pyArguments = PyTuple_New(actualArgumentCount);
-    const HandleSeq& argumentHandles = arguments->getOutgoingSet();
-    size_t tupleItem = 0;
-    for (const Handle& h: argumentHandles)
-    {
-        // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(h);
-        PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
-
-        // PyTuple_SetItem steals the item so don't do this:
-        // Py_DECREF(pyAtom)
-
-        ++tupleItem;
-    }
+    size_t nargs = arguments->get_arity();
+    PyObject* pyArguments = PyTuple_New(nargs);
+    const HandleSeq& args = arguments->getOutgoingSet();
+    for (size_t i=0; i<nargs; i++)
+        PyTuple_SetItem(pyArguments, i, py_atom(args[i]));
 
     return do_call_user_function(moduleFunction, pyArguments);
 }
@@ -1145,11 +1141,13 @@ std::string PythonEval::build_python_error_message(
 
         PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
 
-        while (pyTracebackObject != NULL) {
-
+        while (pyTracebackObject != NULL)
+        {
             int line_number = pyTracebackObject-> tb_lineno;
-            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
-            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
+            const char* filename = PyUnicode_AsUTF8(
+                    pyTracebackObject->tb_frame->f_code->co_filename);
+            const char* code_name = PyUnicode_AsUTF8(
+                    pyTracebackObject->tb_frame->f_code->co_name);
 
             errorStringStream << "File \"" << filename <<"\", ";
             errorStringStream << "line " << line_number <<", ";
@@ -1286,7 +1284,8 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     rc = dup2(pipefd[1], fileno(stdout));
     OC_ASSERT(0 < rc, "pipe splice failure");
 
-    BOOST_SCOPE_EXIT(&pipefd, &rc, &stdout_backup, &_capture_stdout) {
+    BOOST_SCOPE_EXIT(&pipefd, &rc, &stdout_backup, &_capture_stdout)
+    {
         // Restore stdout
         fflush(stdout);
         rc = write(pipefd[1], "", 1); // null-terminated string!
