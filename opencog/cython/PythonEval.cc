@@ -868,8 +868,9 @@ std::recursive_mutex PythonEval::_mtx;
  * Get the user defined function.
  * On error throws an exception.
  */
-PyObject* PythonEval::get_user_function(const std::string& moduleFunction,
-                                        PyGILState_STATE gstate)
+PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
+                                            PyGILState_STATE gstate,
+                                            PyObject* pyArguments)
 {
     // Get the module and stripped function name.
     std::string functionName;
@@ -932,16 +933,6 @@ PyObject* PythonEval::get_user_function(const std::string& moduleFunction,
             "Python function '%s' not callable!", moduleFunction.c_str());
     }
 
-    // All is well, return it to the user.
-    return pyUserFunc;
-}
-
-/// Wrapper for PyObject_CallObject() with additional error checking.
-PyObject* PythonEval::call_function(PyObject* pyUserFunc,
-                                    PyObject* pyArguments,
-                                    PyGILState_STATE gstate,
-                                    const std::string& moduleFunction)
-{
     // Execute the user function and store its return value.
     PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
 
@@ -987,8 +978,6 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    PyObject* pyUserFunc = get_user_function(moduleFunction, gstate);
-
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     size_t actualArgumentCount = arguments->get_arity();
@@ -1007,13 +996,13 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         ++tupleItem;
     }
 
-    PyObject* pyReturnValue = call_function(pyUserFunc, pyArguments,
-                                            gstate, moduleFunction);
+    PyObject* pyRetVal = do_call_user_function(moduleFunction,
+                                               gstate, pyArguments);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    return pyReturnValue;
+    return pyRetVal;
 }
 
 /**
@@ -1107,8 +1096,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    PyObject* pyUserFunc = get_user_function(moduleFunction, gstate);
-
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
@@ -1118,8 +1105,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Py_DECREF(pyAtomSpace);
 
     // Execute the user function.
-    call_function(pyUserFunc, pyArguments,
-                  gstate, moduleFunction);
+    do_call_user_function(moduleFunction, gstate, pyArguments);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
