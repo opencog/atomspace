@@ -484,8 +484,22 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 	bool recorded = true;
 	for (const Handle& ho : bdy->getOutgoingSet())
 	{
-		if (not record_literal(ho, reverse))
-			recorded = recorded and unbundle_clauses_rec(ho, connectives, reverse);
+		if (record_literal(ho, reverse)) continue;
+
+		bool did_rec = unbundle_clauses_rec(ho, connectives, reverse);
+		recorded = recorded and did_rec;
+		Type ot = ho->get_type();
+		if (not did_rec and
+		    (not nameserver().isA(ot, EVALUATABLE_LINK) or
+		     (ot == EVALUATION_LINK and 0 < ho->get_arity() and
+		       ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE)))
+		{
+			_pat.unquoted_clauses.emplace_back(ho);
+			if (reverse)
+				_pat.optionals.emplace_back(ho);
+			else
+				_pat.mandatory.emplace_back(ho);
+		}
 	}
 	return recorded;
 }
