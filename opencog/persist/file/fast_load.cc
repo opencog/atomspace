@@ -167,7 +167,8 @@ static Handle recursive_parse(const std::string& s,
             get_next_expr(s, l1, r1, line_cnt);
             if (l1 == r1) break;
 
-            if (0 == s.compare(l1, 5, "(stv "))
+            // Atom names never start with lower-case.
+            if ('s' == s[l1+1])
                 tvp = get_stv(s, l1, r1, line_cnt);
             else
                 outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
