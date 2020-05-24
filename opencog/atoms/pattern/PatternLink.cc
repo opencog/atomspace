@@ -495,10 +495,7 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		       ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE)))
 		{
 			_pat.unquoted_clauses.emplace_back(ho);
-			if (reverse)
-				_pat.optionals.emplace_back(ho);
-			else
-				_pat.mandatory.emplace_back(ho);
+			_pat.mandatory.emplace_back(ho);
 		}
 	}
 	return recorded;
