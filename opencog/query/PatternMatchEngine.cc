@@ -2592,24 +2592,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 		var_grounding[term] = grnd;
 
 	// All variables in the clause had better be grounded!
-	if (not is_clause_grounded(clause))
-	{
-#ifdef THROW_NASTY_ERROR
-		throw RuntimeException(TRACE_INFO,
-		      "Unable to evaluate clause with ungrounded variables!");
-#else
-		logger().warn("Evaluating clause with ungrounded variables!");
-		logger().info("This is an internal bug! See issue #2631");
-		logger().info("Clause variables are %s",
-			oc_to_string(_pat->clause_variables.at(clause)).c_str());
-		logger().info("Current grounding=%s",
-			oc_to_string(var_grounding).c_str());
-		logger().info("The ungrounded clause is:\n%s",
-			clause->to_string().c_str());
-		logger().info("The pattern body containing this clause is:\n%s",
-			_pat->to_string("").c_str());
-#endif
-	}
+	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
 
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
