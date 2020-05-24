@@ -469,7 +469,23 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
-/// groundable clauses.
+/// groundable clauses. `record_literal` does this.
+///
+/// If there weren't any literal Present or Absent Links, (i.e. if
+/// `record_literal` didn't spot anything) then take some guesses.
+/// This guessing is slightly convoluted, but seems to make sense.
+/// So:
+/// * If a clause is not evaluatable, then assume `Present` was intended.
+/// * If it is evaluatable, then assume some later stage will evaluate it.
+/// * If it is a variable, then assume something else will ground it, and
+///   that some later stage will evaluate it.
+/// * If it is an EvalutationLink-PredicateNode combination, then demand
+///   that it be Present. A later stage will *also* treat this as
+///   evaluatable, and will look at the TV on the EvaluationLink.
+/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
+///   as the predicate) are evaluatable, and cannot be treated as
+///   Present.
+///
 bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
@@ -489,10 +505,12 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		bool did_rec = unbundle_clauses_rec(ho, connectives, reverse);
 		recorded = recorded and did_rec;
 		Type ot = ho->get_type();
-		if (not did_rec and
-		    (not nameserver().isA(ot, EVALUATABLE_LINK) or
-		     (ot == EVALUATION_LINK and 0 < ho->get_arity() and
-		       ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE)))
+		if ((not did_rec and
+		     not (ot == VARIABLE_NODE) and
+		     not nameserver().isA(ot, EVALUATABLE_LINK)) or
+		    (ot == EVALUATION_LINK and
+		     0 < ho->get_arity() and
+		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
 		{
 			_pat.unquoted_clauses.emplace_back(ho);
 			_pat.mandatory.emplace_back(ho);
