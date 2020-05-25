@@ -401,7 +401,7 @@ void ExecutionOutputUTest::test_value(void)
 void ExecutionOutputUTest::test_exec_variable(void)
 {
 	al(DEFINE_LINK,
-		an(DEFINED_SCHEMA_NODE, "x+y"),
+		an(DEFINED_SCHEMA_NODE, "x*y"),
 		al(LAMBDA_LINK,
 			al(VARIABLE_LIST,
 				an(VARIABLE_NODE, "x"),
@@ -410,11 +410,11 @@ void ExecutionOutputUTest::test_exec_variable(void)
 				an(VARIABLE_NODE, "x"),
 				an(VARIABLE_NODE, "y"))
 		));
-	Handle get_link =
+	Handle bind_link =
 	al(BIND_LINK,
 		al(TYPED_VARIABLE_LINK,
 			an(VARIABLE_NODE, "x"), an(TYPE_NODE, "DefinedSchemaNode")),
-		al(AND_LINK, al(TRUE_LINK, an(VARIABLE_NODE, "x"))),
+		al(AND_LINK, al(PRESENT_LINK, an(VARIABLE_NODE, "x"))),
 		al(EXECUTION_OUTPUT_LINK,
 			an(VARIABLE_NODE, "x"),
 			al(LIST_LINK, an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7"))
@@ -422,7 +422,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 	);
 	Instantiator inst(&as);
 
-	ValuePtr result = inst.execute(get_link);
+	ValuePtr result = inst.execute(bind_link);
 
 	TS_ASSERT_EQUALS(result, al(SET_LINK, an(NUMBER_NODE, "42")));
 }
