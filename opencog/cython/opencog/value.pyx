@@ -17,9 +17,6 @@ cdef class PtrHolder:
         return ptr_holder
 
 cdef class Value:
-    """C++ Value object wrapper for Python clients"""
-    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
-        self.ptr_holder = ptr_holder
 
     @staticmethod
     cdef Value create(cValuePtr& ptr):
