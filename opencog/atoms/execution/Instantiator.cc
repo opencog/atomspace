@@ -676,7 +676,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	if (nameserver().isA(expr->get_type(), FUNCTION_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
-		if (vp->is_atom())
+		if (vp && vp->is_atom())
 			return _as->add_atom(HandleCast(vp));
 		return vp;
 	}
