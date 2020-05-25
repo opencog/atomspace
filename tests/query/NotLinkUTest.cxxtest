@@ -41,8 +41,10 @@ public:
 	NotLinkUTest(void)
 	{
 		// logger().set_level(Logger::FINE);
+		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);

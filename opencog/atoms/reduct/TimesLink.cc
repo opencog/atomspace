@@ -58,20 +58,9 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
-	if (TIMES_LINK == vitype or TIMES_LINK == vjtype)
+	if (TIMES_LINK == vitype)
 	{
-		Handle hi(HandleCast(vi));
-		HandleSeq seq;
-		// flatten the left
-		if (TIMES_LINK == vitype)
-		{
-			for (const Handle& lhs: hi->getOutgoingSet())
-				seq.push_back(lhs);
-		}
-		else
-		{
-			seq.push_back(hi);
-		}
+		HandleSeq seq = HandleCast(vi)->getOutgoingSet();
 
 		// flatten the right
 		if (TIMES_LINK == vjtype)
@@ -83,9 +72,31 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(std::move(seq), TIMES_LINK));
-		TimesLinkPtr ap = TimesLinkCast(foo);
+		TimesLinkPtr ap = createTimesLink(std::move(seq));
 		return ap->delta_reduce(as, silent);
+	}
+
+	if (TIMES_LINK == vjtype)
+	{
+		// Paste on one at a time; this avoids what would otherwise
+		// be infinite recursion on `(Times A B C)` where kons was
+		// unable to reduce `(Times B C)`. So we instead try to do
+		// `(Times (Times A B) C)` which should work out...
+		ValuePtr vsum = vi;
+		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
+		{
+			if (TIMES_LINK == vsum->get_type())
+			{
+				HandleSeq vout(HandleCast(vsum)->getOutgoingSet());
+				vout.push_back(h);
+				vsum = createTimesLink(std::move(vout));
+			}
+			else
+			{
+				vsum = kons(as, silent, vsum, h);
+			}
+		}
+		return vsum;
 	}
 
 	// Are they numbers? If so, perform vector (pointwise) subtraction.

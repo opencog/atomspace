@@ -138,11 +138,11 @@ struct Variables : public FreeVariables,
 	// restrictions (if any).
 	bool is_type(const HandleSeq& hseq) const;
 
-	// Return true if the it satisfies the lower bound interval restriction.
+	// Return true if the int satisfies the lower bound interval restriction.
 	// Return false otherwise.
 	bool is_lower_bound(const Handle& glob, size_t n) const;
 
-	// Return true if the it satisfies the upper bound interval restriction.
+	// Return true if the int satisfies the upper bound interval restriction.
 	// Return false otherwise.
 	bool is_upper_bound(const Handle& glob, size_t n) const;
 
@@ -180,14 +180,11 @@ struct Variables : public FreeVariables,
 	/// ScopeLink.
 	///
 	/// If empty then return the empty VariableList or VariableSet.
-	///
-	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;
 
 	/// Like FreeVariables::find_variables but set _ordered to false,
-	/// on the ground that if such a method is called then no ordered
-	/// was provided by the creator of that scope, and thus order is
-	/// not relevant.
+	/// on the ground that if this method is called, then no order
+	/// was intended in the variable scope.
 	void find_variables(const Handle& body);
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 

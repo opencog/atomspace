@@ -56,9 +56,6 @@ cdef class TruthValue(Value):
     cdef tv_ptr* _tvptr(self):
         return <tv_ptr*>&((<PtrHolder>self.ptr_holder).shared_ptr)
 
-    def truth_value_ptr_object(self):
-        return PyLong_FromVoidPtr(<void*>self._tvptr())
-
 
 class SimpleTruthValue(TruthValue):
     pass

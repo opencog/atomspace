@@ -78,16 +78,21 @@ void StateLink::install()
 		return;
 	}
 
-	// Find all existing copies of this particular StateLink
-	// (There should be only one).
+	// Find all existing copies of this particular StateLink.
+	// There should be only one, **in this atomspace**.
+	// We do allow child atomspaces to over-ride the state in
+	// the parent; the net effect is that the state in the child
+	// will hide the state in the parent.
+	//
 	// Perform an atomic swap, replacing the old with the new.
 	bool swapped = false;
 	const Handle& alias = get_alias();
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
 	for (const Handle& defl : defs)
 	{
-		if (defl->getOutgoingAtom(0) != alias) continue;
 		if (defl.get() == this) continue;
+		if (defl->getOutgoingAtom(0) != alias) continue;
+		if (defl->getAtomSpace() != getAtomSpace()) continue;
 
 		StateLinkPtr old_state(StateLinkCast(defl));
 		if (not old_state->is_closed()) continue;

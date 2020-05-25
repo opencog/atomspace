@@ -17,9 +17,6 @@ cdef class PtrHolder:
         return ptr_holder
 
 cdef class Value:
-    """C++ Value object wrapper for Python clients"""
-    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
-        self.ptr_holder = ptr_holder
 
     @staticmethod
     cdef Value create(cValuePtr& ptr):
@@ -35,6 +32,9 @@ cdef class Value:
     cdef cValuePtr get_c_value_ptr(self):
         """Return C++ shared_ptr from PtrHolder instance"""
         return <cValuePtr&>(self.ptr_holder.shared_ptr)
+
+    def value_ptr(self):
+        return PyLong_FromVoidPtr(<cValuePtr*>&(self.ptr_holder.shared_ptr))
 
     @property
     def type(self):

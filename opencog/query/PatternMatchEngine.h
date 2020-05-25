@@ -62,6 +62,8 @@ private:
 		const HandleSeq& o(_pat->always);
 		return o.end() != std::find(o.begin(), o.end(), h); }
 
+	// If you have a PatternTerm in hand, its probably faster
+	// to call ptm->hasAnyEvaluatable() instead of this.
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
 
@@ -193,8 +195,15 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
-	// Cacheable grounded clauses
-	std::unordered_map<std::pair<Handle,Handle>, Handle> _gnd_cache;
+	// -------------------------------------------
+	// Methods that help avoid pointless searches
+	bool is_clause_grounded(const Handle&) const;
+	HandleSeq clause_grounding_key(const Handle&,
+	                               const HandleSeq&) const;
+
+	// Positive and negative caches of clauses.
+	std::unordered_map<HandleSeq, Handle> _gnd_cache;
+	std::unordered_set<HandleSeq> _nack_cache;
 
 	// -------------------------------------------
 	// Stack used to store current traversal state for a single
@@ -260,6 +269,7 @@ private:
 	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
+	bool explore_clause_evaluatable(const Handle&, const Handle&, const Handle&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const Handle&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,

@@ -780,75 +780,120 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 }
 
 /**
- * Find the Python object by its name in the given module'.
+ * Find the Python object by its name in the given module.
  */
-PyObject* PythonEval::find_object(const PyObject* pyModule,
+PyObject* PythonEval::find_object(PyObject* pyModule,
                                   const std::string& objectName)
 {
-    PyObject* pyDict = PyModule_GetDict(_pyRootModule);
+    PyObject* pyDict = PyModule_GetDict(pyModule);
     return PyDict_GetItemString(pyDict, objectName.c_str());
 }
 
 /**
- * Get the Python module and/or object and stripped function name given the identifer of
- * the form '[module.][object.[attribute.]*]function'.
+ * Get the Python module and/or object and stripped function name, given
+ * the identifer of the form '[module.][object.[attribute.]*]function'.
  */
-void PythonEval::module_for_function(const std::string& moduleFunction,
-                                     PyObject*& pyModule,
-                                     PyObject*& pyObject,
-                                     std::string& functionName)
+PyObject* PythonEval::get_function(const std::string& moduleFunction)
 {
-    pyModule = _pyRootModule;
-    pyObject = nullptr;
-    functionName = moduleFunction;
+    PyObject* pyModule = _pyRootModule;
+    PyObject* pyObject = nullptr;
+    std::string functionName = moduleFunction;
+
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
-    if (0 < index) {
+    if (0 < index)
+    {
         std::string moduleName = moduleFunction.substr(0, index);
         PyObject* pyModuleTmp = _modules[moduleName];
+
         // If not found, first check that it is not an object.
         // Then try loading it.
         // We have to guess, if its a single file, or an entire
         // directory with an __init__.py file in it ...
-        if (nullptr == pyModuleTmp &&
+        if (nullptr == pyModuleTmp and
             nullptr == find_object(pyModule, moduleName))
         {
             add_modules_from_path(moduleName);
             add_modules_from_path(moduleName + ".py");
             pyModuleTmp = _modules[moduleName];
         }
+
         // If found, set new module and truncate the function name
-        if (pyModuleTmp) {
+        if (pyModuleTmp)
+        {
             pyModule = pyModuleTmp;
             functionName = moduleFunction.substr(index+1);
         }
     }
-    // Iteratively check for objects in the selected (either root or loaded) module
+
+    // Iteratively check for objects in the selected (either root
+    // or loaded) module.
     index = functionName.find_first_of('.');
     bool bDecRef = false;
-    while (0 < index) {
+    while (0 < index)
+    {
         std::string objectName = functionName.substr(0, index);
         // If there is no object yet, find it in Module
         // Else find it as Attr in Object
-        if(nullptr == pyObject) {
+        if (nullptr == pyObject)
             pyObject = find_object(pyModule, objectName);
-        } else {
-            PyObject* pyTmp = PyObject_GetAttrString(pyObject, objectName.c_str());
-            if(bDecRef) Py_DECREF(pyObject);
+        else
+        {
+            PyObject* pyTmp = PyObject_GetAttrString(pyObject,
+                                              objectName.c_str());
+            if (bDecRef) Py_DECREF(pyObject);
             pyObject =  pyTmp;
-            // next time, we should use DECREF, since PyObject_GetAttrString returns new reference
+            // Next time, we should use DECREF, since
+            // PyObject_GetAttrString returns new reference
             bDecRef = true;
         }
 
-        if (nullptr == pyObject) {
+        if (nullptr == pyObject)
             throw RuntimeException(TRACE_INFO,
                 "Python object/attribute for '%s' not found!",
                 functionName.c_str());
-        }
+
         functionName = functionName.substr(index+1);
         index = functionName.find_first_of('.');
     }
-    if(pyObject && !bDecRef) Py_INCREF(pyObject); // for uniformity to DEC later in any case
+
+    // For uniformity to DEC later in any case
+    if (pyObject && !bDecRef) Py_INCREF(pyObject);
+
+    PyObject* pyUserFunc;
+
+    // If there is no object, then search in module
+    if (nullptr == pyObject)
+    {
+#ifdef DEBUG
+        printf("Looking for %s in module %s; here's what we have:\n",
+            functionName.c_str(), PyModule_GetName(pyModule));
+        print_dictionary(pyDict);
+#endif
+        PyObject* pyDict = PyModule_GetDict(pyModule);
+        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    }
+    else
+        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
+
+    // If we can't find that function then throw an exception.
+    if (!pyUserFunc)
+    {
+        if (pyObject) Py_DECREF(pyObject);
+        const char * moduleName = PyModule_GetName(pyModule);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not found in module '%s'!",
+            moduleFunction.c_str(), moduleName);
+    }
+
+    // Promote the borrowed reference for pyUserFunc since it will
+    // be passed to a Python C API function later that "steals" it.
+    // PyObject_GetAttrString already returns new reference, so we
+    // do this only for PyDict_GetItemString
+    if (nullptr == pyObject) Py_INCREF(pyUserFunc);
+    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+
+    return pyUserFunc;
 }
 
 // ===========================================================
@@ -858,101 +903,21 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
 std::recursive_mutex PythonEval::_mtx;
 
 /**
- * Call the user defined function with the arguments passed in the
- * ListLink handle 'arguments'.
- *
+ * Get the user defined function.
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
-                                         Handle arguments)
+PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
+                                            PyObject* pyArguments)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    // Grab the GIL.
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
-    // Get the module and stripped function name.
-    std::string functionName;
-    PyObject* pyModule;
-    PyObject* pyObject;
-    module_for_function(moduleFunction, pyModule, pyObject, functionName);
-
-    // If we can't find that module then throw an exception.
-    if (!pyModule) {
-        PyGILState_Release(gstate);
-        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
-        throw RuntimeException(TRACE_INFO,
-            "Python module for '%s' not found!",
-            moduleFunction.c_str());
-    }
-
     // Get a reference to the user function.
-    PyObject* pyDict = PyModule_GetDict(pyModule);
-
-    PyObject* pyUserFunc;
-    // If there is no object, then search in module
-    if(nullptr == pyObject) {
-#ifdef DEBUG
-        printf("Looking for %s in module %s; here's what we have:\n",
-            functionName.c_str(), PyModule_GetName(pyModule));
-        print_dictionary(pyDict);
-#endif
-        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
-    } else {
-        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
-    }
-
-    // PyModule_GetDict returns a borrowed reference, so don't do this:
-    // Py_DECREF(pyDict);
-
-    // If we can't find that function then throw an exception.
-    if (!pyUserFunc) {
-        if(pyObject) Py_DECREF(pyObject);
-        PyGILState_Release(gstate);
-        const char * moduleName = PyModule_GetName(pyModule);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found in module '%s'!",
-            moduleFunction.c_str(), moduleName);
-    }
-
-    // Promote the borrowed reference for pyUserFunc since it will
-    // be passed to a Python C API function later that "steals" it.
-    // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
-    if(nullptr == pyObject) Py_INCREF(pyUserFunc);
-    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+    PyObject* pyUserFunc = get_function(moduleFunction);
 
     // Make sure the function is callable.
-    if (!PyCallable_Check(pyUserFunc)) {
+    if (!PyCallable_Check(pyUserFunc))
+    {
         Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not callable!", moduleFunction.c_str());
-    }
-
-    // Get the actual argument count, passed in the ListLink.
-    if (arguments->get_type() != LIST_LINK) {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Expecting arguments to be a ListLink!");
-    }
-    int actualArgumentCount = arguments->get_arity();
-    // Create the Python tuple for the function call with python
-    // atoms for each of the atoms in the link arguments.
-    PyObject* pyArguments = PyTuple_New(actualArgumentCount);
-    const HandleSeq& argumentHandles = arguments->getOutgoingSet();
-    int tupleItem = 0;
-    for (const Handle& h: argumentHandles)
-    {
-        // Place a Python atom object for this handle into the tuple.
-
-        PyObject* pyAtom = py_atom(h);
-        PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
-
-        // PyTuple_SetItem steals it's item so don't do this:
-        // Py_DECREF(pyAtom)
-
-        ++tupleItem;
     }
 
     // Execute the user function and store its return value.
@@ -972,127 +937,115 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         std::string errorString =
             build_python_error_message(moduleFunction);
         PyErr_Clear();
-        PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(AtomSpace * as, const std::string& func, Handle varargs)
+/**
+ * Call the user defined function with the arguments passed in the
+ * ListLink handle 'arguments'.
+ *
+ * On error throws an exception.
+ */
+PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
+                                         Handle arguments)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    push_context_atomspace(as);
-    // Get the atom object returned by this user function.
-    BOOST_SCOPE_EXIT(void) {
-        pop_context_atomspace();
-    } BOOST_SCOPE_EXIT_END
-    PyObject* pyReturnAtom = this->call_user_function(func, varargs);
-
-    // If we got a non-null atom were no errors.
-    if (pyReturnAtom)
-    {
-        // Grab the GIL.
-        PyGILState_STATE gstate;
-        gstate = PyGILState_Ensure();
-
-        // Get the handle from the atom.
-        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom,
-                (char*) "handle_ptr", NULL);
-
-        // Make sure we got an atom pointer.
-        PyObject* pyError = PyErr_Occurred();
-        if (pyError or nullptr == pyAtomPATOM)
-        {
-            PyGILState_Release(gstate);
-            throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return Atom!", func.c_str());
-        }
-
-        // Get the atom pointer from the python atom pointer.
-        // Save it, because the DECREF will blow it away.
-        Handle hresult = *((Handle*)(PyLong_AsLong(pyAtomPATOM)));
-
-        // Cleanup the reference counts.
-        Py_DECREF(pyReturnAtom);
-        Py_DECREF(pyAtomPATOM);
-
-        // Release the GIL. No Python API allowed beyond this point.
-        PyGILState_Release(gstate);
-        return hresult;
-    }
-    else
-    {
+    // Get the actual argument count, passed in the ListLink.
+    if (arguments->get_type() != LIST_LINK)
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return Atom!", func.c_str());
-    }
+            "Expecting arguments to be a ListLink!");
 
-    return Handle::UNDEFINED;
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    // Grab the GIL.
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
+        PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
+    // Create the Python tuple for the function call with python
+    // atoms for each of the atoms in the link arguments.
+    size_t nargs = arguments->get_arity();
+    PyObject* pyArguments = PyTuple_New(nargs);
+    const HandleSeq& args = arguments->getOutgoingSet();
+    for (size_t i=0; i<nargs; i++)
+        PyTuple_SetItem(pyArguments, i, py_atom(args[i]));
+
+    return do_call_user_function(moduleFunction, pyArguments);
 }
 
 /**
  * Apply the user function to the arguments passed in varargs and
- * return the extracted truth value.
+ * return the extracted Value.
  */
-TruthValuePtr PythonEval::apply_tv(AtomSpace * as,
-                                   const std::string& func,
-                                   Handle varargs)
+ValuePtr PythonEval::apply_v(AtomSpace * as,
+                             const std::string& func,
+                             Handle varargs)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     push_context_atomspace(as);
     BOOST_SCOPE_EXIT(void) {
         pop_context_atomspace();
     } BOOST_SCOPE_EXIT_END
-    // Get the python truth value object returned by this user function.
-    PyObject *pyTruthValue = call_user_function(func, varargs);
 
-    // If we got a non-null truth value there were no errors.
-    if (NULL == pyTruthValue)
+    // Get the python value object returned by this user function.
+    PyObject *pyValue = call_user_function(func, varargs);
+
+    // If we got a non-null Value there were no errors.
+    if (NULL == pyValue)
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return TruthValue!",
+            "Python function '%s' did not return Atomese!",
             func.c_str());
 
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // Get the truth value pointer from the object (will be encoded
-    // as a long by PyVoidPtr_asLong)
-    PyObject *pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue,
-            (char*) "truth_value_ptr_object", NULL);
-
-    // Make sure we got a truth value pointer.
-    PyObject *pyError = PyErr_Occurred();
-    if (pyError or !pyTruthValuePtrPtr)
-    {
+    BOOST_SCOPE_EXIT(&gstate) {
         PyGILState_Release(gstate);
+    } BOOST_SCOPE_EXIT_END
+
+    // Did we actually get a Value?
+    // One way to do this would be to say
+    //    PyObject *vtype = find_object("Value");
+    //    if (0 == PyObject_IsInstance(pyValue, vtype)) ...
+    // but just grabbing the attr is easier, for now.
+    if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
+    {
+        Py_DECREF(pyValue);
         throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return TruthValue!",
+            "Python function '%s' did not return Atomese!",
             func.c_str());
     }
 
-    // Get the pointer to the truth value pointer. Yes, it does
-    // contain a pointer to the shared_ptr not the underlying.
-    TruthValuePtr* tvpPtr = static_cast<TruthValuePtr*>
-            (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
+    // Get the truth value pointer from the object (will be encoded
+    // as a long by PyVoidPtr_asLong)
+    PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
+                                    (char*) "value_ptr", NULL);
+    // Make sure we got a truth value pointer.
+    PyObject *pyError = PyErr_Occurred();
+    if (pyError or nullptr == pyValuePtrPtr)
+    {
+        Py_DECREF(pyValue);
+        if (pyValuePtrPtr) Py_DECREF(pyValuePtrPtr);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' did not return Atomese!",
+            func.c_str());
+    }
 
-    // Assign the truth value pointer using this pointer before
-    // we decrement the reference to pyTruthValue since that
-    // will delete this pointer.
-    TruthValuePtr tvp = *tvpPtr;
+    // Get the ValuePtr. Static cast, we were passed a ulong int.
+    ValuePtr vptr(*(static_cast<ValuePtr*>
+            (PyLong_AsVoidPtr(pyValuePtrPtr))));
 
-    // Cleanup the reference counts.
-    Py_DECREF(pyTruthValuePtrPtr);
-    Py_DECREF(pyTruthValue);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
-    return tvp;
+    Py_DECREF(pyValuePtrPtr);
+    Py_DECREF(pyValue);
+    return vptr;
 }
 
 /**
@@ -1106,64 +1059,18 @@ void PythonEval::apply_as(const std::string& moduleFunction,
                           AtomSpace* as_argument)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    PyObject *pyModule, *pyObject, *pyUserFunc;
-    PyObject *pyDict;
-    std::string functionName;
 
     // Grab the GIL.
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // Get the module and stripped function name.
-    module_for_function(moduleFunction, pyModule, pyObject, functionName);
-
-    // If we can't find that module then throw an exception.
-    if (!pyModule)
-    {
+    // BOOST_SCOPE_EXIT is a declaration for a scope-exit handler.
+    // It will call PyGILState_Release() when this function returns
+    // (e.g. due to a throw).  The below is not a call; it's just a
+    // declaration. Anyway, once the GIL is released, no more python
+    // API calls are allowed.
+    BOOST_SCOPE_EXIT(&gstate) {
         PyGILState_Release(gstate);
-        logger().warn("Python module for '%s' not found!",
-                      moduleFunction.c_str());
-        throw RuntimeException(TRACE_INFO,
-            "Python module for '%s' not found!",
-            moduleFunction.c_str());
-    }
-
-    // Get a reference to the user function.
-    pyDict = PyModule_GetDict(pyModule);
-    // If there is no object, then search in module
-    if(nullptr == pyObject) {
-        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
-    } else {
-        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
-    }
-
-    // PyModule_GetDict returns a borrowed reference, so don't do this:
-    // Py_DECREF(pyDict);
-
-    // If we can't find that function then throw an exception.
-    if (!pyUserFunc) {
-        if(pyObject) Py_DECREF(pyObject);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found!",
-            moduleFunction.c_str());
-    }
-
-    // Promote the borrowed reference for pyUserFunc since it will
-    // be passed to a Python C API function later that "steals" it.
-    // PyObject_GetAttrString already returns new reference, so we
-    // do this only for PyDict_GetItemString().
-    if (nullptr == pyObject) Py_INCREF(pyUserFunc);
-    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
-
-    // Make sure the function is callable.
-    if (!PyCallable_Check(pyUserFunc))
-    {
-        Py_DECREF(pyUserFunc);
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not callable!", moduleFunction.c_str());
-    }
+    } BOOST_SCOPE_EXIT_END
 
     // Create the Python tuple for the function call with python
     // atomspace.
@@ -1174,28 +1081,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Py_DECREF(pyAtomSpace);
 
     // Execute the user function.
-    PyObject_CallObject(pyUserFunc, pyArguments);
-
-    // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
-    // to decrement it here. Do this before error checking below since we'll
-    // need to decrement these references even if there is an error.
-    Py_DECREF(pyUserFunc);
-    Py_DECREF(pyArguments);
-
-    // Check for errors.
-    if (PyErr_Occurred())
-    {
-        // Construct the error message and throw an exception.
-        std::string errorString =
-            build_python_error_message(moduleFunction);
-        PyErr_Clear();
-        PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-    }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
+    do_call_user_function(moduleFunction, pyArguments);
 }
 
 // ===================================================================
@@ -1245,11 +1131,13 @@ std::string PythonEval::build_python_error_message(
 
         PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
 
-        while (pyTracebackObject != NULL) {
-
+        while (pyTracebackObject != NULL)
+        {
             int line_number = pyTracebackObject-> tb_lineno;
-            const char* filename = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_filename);
-            const char* code_name = PyUnicode_AsUTF8(pyTracebackObject->tb_frame->f_code->co_name);
+            const char* filename = PyUnicode_AsUTF8(
+                    pyTracebackObject->tb_frame->f_code->co_filename);
+            const char* code_name = PyUnicode_AsUTF8(
+                    pyTracebackObject->tb_frame->f_code->co_name);
 
             errorStringStream << "File \"" << filename <<"\", ";
             errorStringStream << "line " << line_number <<", ";
@@ -1386,7 +1274,8 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     rc = dup2(pipefd[1], fileno(stdout));
     OC_ASSERT(0 < rc, "pipe splice failure");
 
-    BOOST_SCOPE_EXIT(&pipefd, &rc, &stdout_backup, &_capture_stdout) {
+    BOOST_SCOPE_EXIT(&pipefd, &rc, &stdout_backup, &_capture_stdout)
+    {
         // Restore stdout
         fflush(stdout);
         rc = write(pipefd[1], "", 1); // null-terminated string!

@@ -127,9 +127,6 @@ cdef class Atom(Value):
         self.tv = createTruthValue(mean, count)
         return self
 
-    def handle_ptr(self):
-        return PyLong_FromVoidPtr(self.handle)
-
     def __richcmp__(self, other, int op):
         assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
         if op == Py_LT:

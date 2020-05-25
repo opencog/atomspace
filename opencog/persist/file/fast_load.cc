@@ -32,6 +32,8 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "fast_load.h"
@@ -123,6 +125,20 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
     r = p;
 }
 
+// Extract SimpleTruthValue and return that, else throw an error.
+static TruthValuePtr get_stv(const std::string& s,
+                             size_t l, size_t r, size_t line_cnt)
+{
+    if (s.compare(l, 5, "(stv "))
+        throw std::runtime_error(
+                "Syntax error at line " + std::to_string(line_cnt) +
+                " Unsupported markup: " + s.substr(l, r-l+1) +
+                " in expr: " + s);
+
+    return createSimpleTruthValue(
+                NumberNode::to_vector(s.substr(l+4, r-l-4)));
+}
+
 static NameServer& namer = nameserver();
 
 // Parse the string `s`, returning a Handle that corresponds to that
@@ -143,6 +159,7 @@ static Handle recursive_parse(const std::string& s,
     l = r1;
     if (namer.isLink(atype))
     {
+        TruthValuePtr tvp;
         HandleSeq outgoing;
         do {
             l1 = l;
@@ -150,12 +167,18 @@ static Handle recursive_parse(const std::string& s,
             get_next_expr(s, l1, r1, line_cnt);
             if (l1 == r1) break;
 
-            outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
+            // Atom names never start with lower-case.
+            if ('s' == s[l1+1])
+                tvp = get_stv(s, l1, r1, line_cnt);
+            else
+                outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
 
             l = r1 + 1;
         } while (l < r);
 
-        return createLink(std::move(outgoing), atype);
+        Handle h(createLink(std::move(outgoing), atype));
+        if (tvp) h->setTruthValue(tvp);
+        return h;
     }
     else
     if (namer.isNode(atype))
@@ -163,19 +186,17 @@ static Handle recursive_parse(const std::string& s,
         l1 = l;
         r1 = r;
         get_node_name(s, l1, r1, line_cnt);
+        const std::string name = s.substr(l1, r1-l1);
+        Handle h(createNode(atype, std::move(name)));
 
-        // There might be an stv in the content. Handle it.. or not
+        // There might be an stv in the content. Handle it.
         size_t l2 = r1+1;
         size_t r2 = r;
         get_next_expr(s, l2, r2, line_cnt);
         if (l2 < r2)
-            throw std::runtime_error(
-                "Syntax error at line " + std::to_string(line_cnt) +
-                " Unsupported markup: " + s.substr(l2, r2-l2+1) +
-                " in expr: " + s);
+            h->setTruthValue(get_stv(s, l2, r2, line_cnt));
 
-        const std::string name = s.substr(l1, r1-l1);
-        return createNode(atype, std::move(name));
+        return h;
     }
     throw std::runtime_error(
         "Syntax error at line " + std::to_string(line_cnt) +

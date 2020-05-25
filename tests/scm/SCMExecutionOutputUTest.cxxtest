@@ -42,6 +42,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
 	}
 
 	~SCMExecutionOutputUTest()
@@ -71,6 +73,9 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 	void test_execute_single_arg(void);
 	void test_evaluate_single_arg(void);
+
+	void test_bad_gsn(void);
+	void test_bad_gpn(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -90,8 +95,11 @@ void SCMExecutionOutputUTest::tearDown(void)
 #define CHKEV(ev) \
 	TSM_ASSERT("Caught scm error during eval", \
 		(false == ev->eval_error()));
+
 void SCMExecutionOutputUTest::test_execute(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle julian = as->add_node(CONCEPT_NODE, "julian");
 	Handle prince = as->add_node(CONCEPT_NODE, "prince");
 	Handle king = as->add_node(CONCEPT_NODE, "king");
@@ -116,6 +124,8 @@ void SCMExecutionOutputUTest::test_execute(void)
 
 	// Now there should be a king
 	TS_ASSERT_EQUALS(king->getIncomingSetSize(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 
@@ -209,6 +219,8 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 // Thus, this winds up the C++ stack for the recursion.
 void SCMExecutionOutputUTest::test_recursive(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Empty out the atomspace
 	as->clear();
 	size_t size = as->get_size();
@@ -310,6 +322,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	TS_ASSERT_EQUALS(size, 9);
 
 	size = as->get_size();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Test nested execution links. github issue #1340
@@ -329,6 +343,8 @@ void SCMExecutionOutputUTest::test_recursive(void)
 //
 void SCMExecutionOutputUTest::test_nested(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Empty out the atomspace
 	as->clear();
 	size_t size = as->get_size();
@@ -367,10 +383,14 @@ void SCMExecutionOutputUTest::test_nested(void)
 	double dni = ni->get_value();
 	TS_ASSERT_LESS_THAN(fabs(dne - dni), 0.000001);
 	TS_ASSERT_LESS_THAN(fabs(9.0 - dne), 0.000001);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void SCMExecutionOutputUTest::test_evaluate(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Define a Scheme procedure that return a TV
 	eval->eval("(define (grab-tv x) (cog-tv x))");
 	CHKEV(eval);
@@ -398,12 +418,16 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	CHKEV(eval);
 	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 
 // the fix for bug #695 (contents of True/False links not evaluated)
 void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Define a Scheme procedure that return a TV
 	eval->eval(
 		"(define (copy-tv x) "
@@ -436,10 +460,14 @@ void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 	CHKEV(eval);
 	eval->eval("(chk-copied-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void SCMExecutionOutputUTest::test_numeric(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// A Numeric expression
 	eval->eval(
 		"(define expr "
@@ -462,10 +490,14 @@ void SCMExecutionOutputUTest::test_numeric(void)
 	double dnt = nt->get_value();
 	TS_ASSERT_LESS_THAN(fabs(dne - dnt), 0.000001);
 	TS_ASSERT_LESS_THAN(fabs(24.0 - dne), 0.000001);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void SCMExecutionOutputUTest::test_boolean(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// A boolean-valued expression
 	eval->eval(
 		"(define expr "
@@ -491,10 +523,14 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	// When evaluated, this one should be false.
 	tv = EvaluationLink::do_evaluate(as, boolex);
 	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.001);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void SCMExecutionOutputUTest::test_dsn(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// A boolean-valued expression
 	eval->eval(
 	   "(DefineLink"
@@ -549,12 +585,16 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	std::cout << "Lambda is " << result->to_string() << std::endl;
 	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Execute a call with a single argument, by-passing the need for
 // wrapping the arguments in a ListLink.
 void SCMExecutionOutputUTest::test_execute_single_arg(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Test scheme execution function taking a single argument
 
 	eval->eval(
@@ -596,10 +636,14 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 	std::cout << "Expression is " << result->to_string() << std::endl;
 	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	// Define a Scheme procedure that return a TV
 	eval->eval("(define (grab-tv x) (cog-tv x))");
 	CHKEV(eval);
@@ -627,4 +671,79 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 	CHKEV(eval);
 	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Execute calls with badly-defined return values.
+void SCMExecutionOutputUTest::test_bad_gsn(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+	   "(define (call-gsn str)"
+	   "   (cog-execute!"
+	   "      (ExecutionOutputLink"
+	   "         (GroundedSchema str)"
+	   "         (Concept \"A\"))))"
+	);
+	CHKEV(eval);
+
+	eval->eval("(define (no-ret x) *unspecified*)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: no-ret\")"));
+
+	eval->eval("(define (ret-num x) 42)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-num\")"));
+
+	eval->eval("(define (ret-str x) \"oh noooo!\")");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-str\")"));
+
+	eval->eval("(define (ret-nil x) '())");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-nil\")"));
+
+	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-lst\")"));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SCMExecutionOutputUTest::test_bad_gpn(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+	   "(define (call-gpn str)"
+	   "   (cog-evaluate!"
+	   "      (EvaluationLink"
+	   "         (GroundedPredicate str)"
+	   "         (Concept \"A\"))))"
+	);
+	CHKEV(eval);
+
+	eval->eval("(define (no-ret x) *unspecified*)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: no-ret\")"));
+
+	eval->eval("(define (ret-num x) 42)");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-num\")"));
+
+	eval->eval("(define (ret-str x) \"oh noooo!\")");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-str\")"));
+
+	eval->eval("(define (ret-nil x) '())");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-nil\")"));
+
+	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
+	CHKEV(eval);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-lst\")"));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

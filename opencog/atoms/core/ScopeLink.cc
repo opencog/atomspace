@@ -103,9 +103,12 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		return;
 
 	// If the first atom is not explicitly a variable declaration, then
-	// there are no variable declarations. There are two cases that can
-	// apply here: either the body is a lambda, in which case, we copy
-	// the variables from the lambda; else we extract all free variables.
+	// there are no prenex-order variable declarations. (There might
+	// still be in-line variable declarations; these are allowed for
+	// some link types, e.g. the various query links.) Anyway, handle
+	// one of two cases: either the body is a lambda, in which case,
+	// we copy the variables from the lambda; else we extract all free
+	// variables.
 	if (VARIABLE_LIST != decls and VARIABLE_SET != decls and
 	    // A VariableNode could a be valid body, if it has no variable
 	    // declaration, that is if the Scope has only one argument.

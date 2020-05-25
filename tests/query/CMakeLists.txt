@@ -61,6 +61,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AnchorUTest)
 	ADD_CXXTEST(NotLinkUTest)
 	ADD_CXXTEST(GetStateUTest)
+	ADD_CXXTEST(ClassicalBooleanUTest)
 	ADD_CXXTEST(DeepTypeUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)

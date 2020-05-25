@@ -10,34 +10,58 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-exec "librandgen") "opencog_randgen_init")
 
-(display "\n")
-(display "====> Attention!\n")
-(display "====> Deprecated! Please port your code to use the native\n")
-(display "====> scheme random number functions. See, for example,\n")
-(display "====> https://www.gnu.org/software/guile/manual/html_node/Random.html\n")
-(display "\n")
-
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-randgen-set-seed! 'documentation
 "
  cog-randgen-set-seed! SEED
-    Deprecated! Please use scheme's native `*random-state*` instead!
 
-    Set the random seed to SEED
+    Set the random seed of OpenCog's random generator to SEED.
+
+    Warning: this function affects OpenCog's random generator only.
+    If you want to set the seed of scheme's native random generator
+    use `*random-state*` instead.
+
+    OpenCog offers its own random generator singleton (defined in
+    cogutil) to have a central point of control (random seed, etc)
+    which can make it easier to achieve reproducability. Note that
+    it is neither guarantied nor even desirable that all components
+    use OpenCog's random generator. However for those that do, such
+    a binding is provided.
 ")
 
 (set-procedure-property! cog-randgen-randint 'documentation
 "
  cog-randgen-randint N
-    Deprecated! Please use scheme's native `random` instead!
 
-    Return a random integer between 0 and N excluded.
+    Return a random integer between 0 and N excluded using OpenCog's
+    random generator.
+
+    Warning: this function affects OpenCog's random generator only.
+    If you want to select a random integer using scheme's native
+    random generator, use `random` instead.
+
+    OpenCog offers its own random generator singleton (defined in
+    cogutil) to have a central point of control (random seed, etc)
+    which can make it easier to achieve reproducability. Note that
+    it is neither guarantied nor even desirable that all components
+    use OpenCog's random generator. However for those that do, such
+    a binding is provided.
 ")
 
 (set-procedure-property! cog-randgen-randfloat 'documentation
 "
  cog-randgen-float
-    Deprecated! Please use scheme's native `random:uniform` instead!
 
     Return a random float within [0, 1].
+
+    Warning: this function affects OpenCog's random generator only.
+    If you want to select a random floating number using scheme's
+    native random generator, use `random:uniform` instead.
+
+    OpenCog offers its own random generator singleton (defined in
+    cogutil) to have a central point of control (random seed, etc)
+    which can make it easier to achieve reproducability. Note that
+    it is neither guarantied nor even desirable that all components
+    use OpenCog's random generator. However for those that do, such
+    a binding is provided.
 ")

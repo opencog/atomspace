@@ -378,7 +378,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, scm_from_string)
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		CPPL_TO_SCML(v, protom_to_scm)

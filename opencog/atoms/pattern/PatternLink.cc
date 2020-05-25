@@ -63,10 +63,6 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
 
-	// Find prunable terms.
-	locate_cacheable(all_clauses);
-	add_dummies();
-
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
@@ -93,6 +89,8 @@ void PatternLink::common_init(void)
 		trace_connectives(connectives, _pat.body);
 	}
 
+	add_dummies();
+
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
@@ -109,6 +107,13 @@ void PatternLink::common_init(void)
 	   make_connectivity_map(_pat.mandatory);
 
 	make_term_trees();
+
+	get_clause_variables(_pat.quoted_clauses);
+	get_clause_variables(_pat.unquoted_clauses);
+	get_clause_variables(_pat.mandatory);
+
+	// Find prunable terms.
+	locate_cacheable(all_clauses);
 }
 
 
@@ -214,7 +219,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_variables._glob_intervalmap.insert(*imit);
 	}
 
-	// Next, the body... there's no _body for lambda. The compo is
+	// Next, the body... there's no `_body` for lambda. The compo is
 	// the mandatory clauses; we have to reconstruct the optionals.
 	for (const Handle& h : compo)
 	{
@@ -243,6 +248,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_pat.redex_name = "Unpacked component of a virtual link";
 
 	make_term_trees();
+	get_clause_variables(_pat.mandatory);
+	get_clause_variables(_pat.optionals);
 }
 
 /* ================================================================= */
@@ -298,10 +305,10 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 /* ================================================================= */
 
 /// Make a note of any clauses that must be present (or absent)
-/// in the pattern in thier literal form, i.e. uninterpreted.
+/// in the pattern in their literal form, i.e. uninterpreted.
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
 /// but are taken as a request to search for and ground these terms in
-/// the form they are given, in tier literal form, without evaluation.
+/// the form they are given, in their literal form, without evaluation.
 bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
@@ -346,6 +353,15 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
+	// Handle in-line variable declarations.
+	if (not reverse and TYPED_VARIABLE_LINK == typ)
+	{
+		// We have to erase first, else it gets duplicated.
+		_variables.erase(h->getOutgoingAtom(0));
+		_variables.validate_vardecl(h);
+		return true;
+	}
+
 	return false;
 }
 
@@ -359,6 +375,13 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 /// SequentialAnd's must be grounded and evaluated sequentially, and
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
+///
+/// This makes built-in assumptions about using the DefaultPatternMatchCB,
+/// which are not going to be true in general. However, the vast
+/// majority of users expect to be able to use the boolean operators
+/// in a naive, classical-logic manner, and so we cater to those users.
+/// More sophisticated users are SOL and will have to come here and fix
+/// things when bugs appear. Sorry.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
@@ -372,18 +395,14 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (AND_LINK == t)
 	{
+		// XXX FIXME Handle of OrLink is incorrect, here.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			if (NOT_LINK == ho->get_type())
-			{
-				if (not record_literal(ho->getOutgoingAtom(0), true))
-				{
-					_pat.unquoted_clauses.emplace_back(ho);
-					_pat.mandatory.emplace_back(ho);
-				}
-			}
-			else if (not record_literal(ho))
+			if (not record_literal(ho) and
+			    not unbundle_clauses_rec(ho, connectives))
 			{
 				_pat.unquoted_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
@@ -410,6 +429,36 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.unquoted_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
+
+	// Sigh. Handle a top-level OrLink with a single member.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (OR_LINK == t and 1 == hbody->get_arity())
+	{
+		// BUG - XXX FIXME Handle of OrLink is incorrect, here.
+		// See also FIXME above.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+		unbundle_clauses_rec(hbody, connectives);
+		if (not unbundle_clauses_rec(hbody, connectives))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
+	}
+
+	// A single top-level clause that is a NotLink.
+	// This assumes the DefaultPatternMatchCB, so its broken
+	// for anyone giving alternative interpretations. Yuck.
+	else if (NOT_LINK == t)
+	{
+		// XXX FIXME Handle of OrLink is incorrect, here.
+		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
+		if (not unbundle_clauses_rec(hbody, connectives))
+		{
+			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.mandatory.emplace_back(hbody);
+		}
+	}
 	else
 	{
 		// There's just one single clause!
@@ -420,26 +469,57 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
 /// embedded inside some evaluatable clause.  Note these as literal,
-/// groundable clauses.
-void PatternLink::unbundle_clauses_rec(const Handle& bdy,
+/// groundable clauses. `record_literal` does this.
+///
+/// If there weren't any literal Present or Absent Links, (i.e. if
+/// `record_literal` didn't spot anything) then take some guesses.
+/// This guessing is slightly convoluted, but seems to make sense.
+/// So:
+/// * If a clause is not evaluatable, then assume `Present` was intended.
+/// * If it is evaluatable, then assume some later stage will evaluate it.
+/// * If it is a variable, then assume something else will ground it, and
+///   that some later stage will evaluate it.
+/// * If it is an EvalutationLink-PredicateNode combination, then demand
+///   that it be Present. A later stage will *also* treat this as
+///   evaluatable, and will look at the TV on the EvaluationLink.
+/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
+///   as the predicate) are evaluatable, and cannot be treated as
+///   Present.
+///
+bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
-	if (NOT_LINK == bdy->get_type()) reverse = not reverse;
-	const HandleSeq& oset = bdy->getOutgoingSet();
-	for (const Handle& ho : oset)
+	Type t = bdy->get_type();
+
+	if (connectives.find(t) == connectives.end())
+		return false;
+
+	if (NOT_LINK == t) reverse = not reverse;
+
+	bool recorded = true;
+	for (const Handle& ho : bdy->getOutgoingSet())
 	{
+		if (record_literal(ho, reverse)) continue;
+
+		bool did_rec = unbundle_clauses_rec(ho, connectives, reverse);
+		recorded = recorded and did_rec;
 		Type ot = ho->get_type();
-		if (record_literal(ho, reverse))
+		if ((not did_rec and
+		     not (ot == VARIABLE_NODE) and
+		     not nameserver().isA(ot, EVALUATABLE_LINK)) or
+		    (ot == EVALUATION_LINK and
+		     0 < ho->get_arity() and
+		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
 		{
-			/* no-op */
-		}
-		else if (connectives.find(ot) != connectives.end())
-		{
-			unbundle_clauses_rec(ho, connectives, reverse);
+			_pat.unquoted_clauses.emplace_back(ho);
+			_pat.mandatory.emplace_back(ho);
 		}
 	}
+	return recorded;
 }
+
+/* ================================================================= */
 
 void PatternLink::locate_defines(const HandleSeq& clauses)
 {
@@ -477,19 +557,67 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 	for (const Handle& claw: clauses)
 	{
 		// Skip over anything unsuitable.
-		if (_pat.evaluatable_holders.find(claw) != _pat.evaluatable_holders.end()) continue;
-
-// XXX FIXME later ... we need to be able to call hasAnyGlobbyVar()
-// which means we need to have terms, here ...
-		// if (claw->hasAnyGlobbyVar()) continue;
-		// black terms are evalutable; no need to do it twice.
-		// if (_pat.black.find(claw) != _pat.black.end()) continue;
-
-		if (contains_atomtype(claw, UNORDERED_LINK)) continue;
-		if (contains_atomtype(claw, CHOICE_LINK)) continue;
+		if (_pat.evaluatable_holders.find(claw) !=
+		    _pat.evaluatable_holders.end()) continue;
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
+		{
 			_pat.cacheable_clauses.insert(claw);
+			continue;
+		}
+
+		// Caching works fine, if there are UnorderedLinks. However,
+		// if there is a lot of them, so that the engine is exploring
+		// a combinatorially deep arrangement, then caching becomes
+		// counter-productive.  Based on running UnorderedUTest, the
+		// knee in the curve is at 4 or fewer UnorderedLinks in a clause.
+		// Note that UnorderedUTest has some very unusual patterns,
+		// exploring many tens of thousands of combinations, something
+		// that most ussers will surely almost never do :-)
+		if (4 < contains_atomtype_count(claw, UNORDERED_LINK)) continue;
+
+		_pat.cacheable_multi.insert(claw);
+	}
+}
+
+/* ================================================================= */
+
+/// get_clause_variables -- for every clause, record the variables in it.
+/// This is used at runtime, to determine if the clause has been fully
+/// grounded (or not).
+void PatternLink::get_clause_variables(const HandleSeq& clauses)
+{
+	for (const Handle& hcl : clauses)
+	{
+		HandleSet vset;
+		get_clause_variables_recursive(hcl, vset);
+
+		// Put them into a sequence; any fixed sequence will do.
+		HandleSeq vseq;
+		for (const Handle& v: vset) vseq.emplace_back(v);
+		_pat.clause_variables.insert({hcl, vseq});
+	}
+}
+
+/// Helper for above.
+void PatternLink::get_clause_variables_recursive(const Handle& h,
+                                                 HandleSet& vset)
+{
+	if (h->is_link())
+	{
+		for (const Handle& ho : h->getOutgoingSet())
+			get_clause_variables_recursive(ho, vset);
+		return;
+	}
+
+	Type t = h->get_type();
+	if (VARIABLE_NODE == t or GLOB_NODE == t)
+	{
+		// _variables hold the unquoted, bound vars. Use that.
+		// XXX FIXME, except that the var might be quoted, in this
+		// particular clause!!
+		if (_variables.varset.end() != _variables.varset.find(h))
+			vset.insert(h);
 	}
 }
 
@@ -503,7 +631,6 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
  */
 void PatternLink::validate_variables(HandleSet& vars,
                                      const HandleSeq& clauses)
-
 {
 	for (const Handle& v : vars)
 	{
@@ -582,7 +709,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// A term is "evalutable" if it contains a GroundedPredicateNode,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
-/// thier truth values.
+/// their truth values.
 ///
 /// A term may also be evaluatable if consists of connectives (such as
 /// AndLink, OrLink, NotLink) used to join together evaluatable terms.
@@ -602,7 +729,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// A term is "executable" if it is an ExecutionOutputLink
 /// or if it inherits from one (such as PlusLink, TimesLink).
 /// Such terms need execution at grounding time, to determine
-/// thier actual form.  Note that executable terms may frequently
+/// their actual form.  Note that executable terms may frequently
 /// occur underneath evaluatable terms, e.g. if something is greater
 /// than the sum of two other things.
 ///
@@ -724,17 +851,16 @@ bool PatternLink::add_dummies()
 		    IDENTICAL_LINK == tt)
 		{
 			const Handle& left = t->getOutgoingAtom(0);
-			if (any_free_in_tree(left, _variables.varset))
-			{
-				_pat.mandatory.emplace_back(left);
-				_fixed.emplace_back(left);
-			}
-
 			const Handle& right = t->getOutgoingAtom(1);
-			if (any_free_in_tree(right, _variables.varset))
+
+			for (const Handle& v : _variables.varset)
 			{
-				_pat.mandatory.emplace_back(right);
-				_fixed.emplace_back(right);
+				if (is_free_in_tree(left, v) or
+				    is_free_in_tree(right, v))
+				{
+					_pat.mandatory.emplace_back(v);
+					_fixed.emplace_back(v);
+				}
 			}
 		}
 	}
@@ -761,8 +887,8 @@ void PatternLink::trace_connectives(const TypeSet& connectives,
 
 	quotation.update(t);
 
-	if (quotation.is_quoted() or connectives.find(t) == connectives.end())
-		return;
+	if (quotation.is_quoted()) return;
+	if (connectives.find(t) == connectives.end()) return;
 
 	_pat.evaluatable_holders.insert(term);
 	add_to_map(_pat.in_evaluatable, term, term);
@@ -995,6 +1121,9 @@ void PatternLink::debug_log(void) const
 
 	if (_variables.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
+	else
+		logger().fine() << "Type declarations are:\n"
+		                << oc_to_string(_variables);
 }
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)

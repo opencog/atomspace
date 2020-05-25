@@ -60,6 +60,13 @@ void DualLink::init(void)
 	_pat.body = _body;
 
 	make_term_trees();
+
+	// Well, there won't be any variables, but we still need
+	// to have an empty-set-per-clause to not trigger asserts
+	// in the PatternMatcherEngine. (... I'm confused about this.
+	// I'm thinking that the pattern matcher should be smarter
+	// than this ... but for now, let this slide...)
+	get_clause_variables(_outgoing);
 }
 
 DualLink::DualLink(const HandleSeq&& hseq, Type t)

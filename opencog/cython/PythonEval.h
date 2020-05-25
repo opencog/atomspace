@@ -48,6 +48,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/eval/GenericEval.h>
@@ -79,11 +80,11 @@ class PythonEval : public GenericEval
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpace *);
         void print_dictionary(PyObject*);
-        PyObject* find_object(const PyObject* pyModule,
+        PyObject* find_object(PyObject* pyModule,
                               const std::string& objectName);
-        void module_for_function(const std::string& moduleFunction,
-                                 PyObject*& pyModule, PyObject*& pyObject,
-                                 std::string& functionName);
+        PyObject* get_function(const std::string& moduleFunction);
+        PyObject* do_call_user_function(const std::string& moduleFunction,
+                                        PyObject* pyArguments);
 
         // Call functions; execute scripts.
         PyObject* call_user_function(const std::string& func,
@@ -97,13 +98,12 @@ class PythonEval : public GenericEval
         // Single-threded design.
         static PythonEval* singletonInstance;
 
-
         // Single, global mutex for serializing access to the atomspace.
         // The singleton-instance design of this class forces us to
         // serialize access (the GIL is not enough), because there is
         // no way to guarantee that python won't accidentally be called
         // from multiple threads.  That's because the EvaluationLink
-        // is called from scheme and from the pattern matcher, and its
+        // is called from scheme and from the pattern engine, and its
         // unknown how many threads those things might be running in.
         // The lock is recursive, because we may need to use multiple
         // different atomspaces with the evaluator, in some nested
@@ -167,13 +167,24 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
-        Handle apply(AtomSpace * as, const std::string& func, Handle varargs);
+        ValuePtr apply_v(AtomSpace * as, const std::string& func,
+                         Handle varargs);
+
+        /**
+         * Calls the Python function passed in `func`, passing it
+         * the `varargs` as an argument, and returning a Handle.
+         */
+        Handle apply(AtomSpace * as, const std::string& func,
+                     Handle varargs)
+        { return HandleCast(apply_v(as, func, varargs)); }
 
         /**
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, returning a TruthValuePtr.
          */
-        TruthValuePtr apply_tv(opencog::AtomSpace *as, const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(AtomSpace *as,
+                               const std::string& func, Handle varargs)
+        { return TruthValueCast(apply_v(as, func, varargs)); }
 
         /**
          * Calls the Python function passed in `func`, passing it

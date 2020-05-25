@@ -236,10 +236,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 		// Plow through any quotes.
 		if (is_quoted_in_tree(tree, subtr)) return false;
 
-		// Halt recursion if the term is executable.
-		if (subtr->is_executable()) return true;
-
-		// Halt rescursion if scoped.
+		// Halt recursion if scoped.
 		if (nameserver().isA(subtr->get_type(), SCOPE_LINK))
 		{
 			ScopeLinkPtr stree(ScopeLinkCast(subtr));
@@ -356,7 +353,8 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
 	return false;
 }
 
-bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation)
+bool contains_atomtype(const Handle& clause, Type atom_type,
+                       Quotation quotation)
 {
 	Type clause_type = clause->get_type();
 	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
@@ -371,6 +369,26 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 		if (contains_atomtype(subclause, atom_type, quotation)) return true;
 	}
 	return false;
+}
+
+size_t contains_atomtype_count(const Handle& clause, Type atom_type,
+                               Quotation quotation)
+{
+	size_t cnt = 0;
+
+	Type clause_type = clause->get_type();
+	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
+		cnt++;
+
+	quotation.update(clause_type);
+
+	if (not clause->is_link()) return 0;
+
+	for (const Handle& subclause: clause->getOutgoingSet())
+	{
+		cnt += contains_atomtype_count(subclause, atom_type, quotation);
+	}
+	return cnt;
 }
 
 HandleSet get_free_variables(const Handle& h, Quotation quotation)
