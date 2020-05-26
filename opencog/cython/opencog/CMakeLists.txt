@@ -25,9 +25,10 @@ INCLUDE_DIRECTORIES(
 # ROS Kinetic which requires Python2. So we still support Python2.
 # Use ${PYTHONLIBS_VERSION_STRING} instead of ${PYTHON_VERSION_STRING}
 IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
-	SET(CYTHON_FLAGS "-2" "-f")
+	SET(CYTHON_FLAGS "-2" "-f" "-Wextra")
 ELSE ()
-	SET(CYTHON_FLAGS "-3" "-f")
+	# SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+	SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
 ENDIF ()
 
 # Use this as a guide:
