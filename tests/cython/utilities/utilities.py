@@ -1,7 +1,7 @@
 
 from opencog.atomspace import AtomSpace, types
 from opencog.utilities import initialize_opencog, finalize_opencog
-from opencog.exec import execute_atom
+from opencog.execute import execute_atom
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import scheme_eval
 from opencog.type_constructors import *
