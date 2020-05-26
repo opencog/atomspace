@@ -23,11 +23,12 @@ INCLUDE_DIRECTORIES(
 
 # Even though Python2 is deprecated, we still have users running
 # ROS Kinetic which requires Python2. So we still support Python2.
-IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+# Use ${PYTHONLIBS_VERSION_STRING} instead of ${PYTHON_VERSION_STRING}
+IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
 	SET(CYTHON_FLAGS "-2" "-f")
-ELSE
+ELSE ()
 	SET(CYTHON_FLAGS "-3" "-f")
-ENDIF
+ENDIF ()
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
