@@ -317,14 +317,10 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	Handle hp(lpat);
 	if (_dynamic->find(hp) == _dynamic->end()) return true;
 
-	// We will find ourselves here whenever the link contains
-	// a GroundedPredicateNode. In this case, execute the
-	// node, and declare a match, or no match, depending
-	// one how the evaluation turned out.  Its "crisp logic"
-	// because we use a greater-than-half for the TV.
-	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd));
-	return tv->get_mean() >= 0.5;
+	// We will find ourselves here whenever the link contains a
+	// GroundedPredicateNode. In this case, execute the node, and
+	// declare a match, or no match, depending on the resulting TV.
+	return crisp_truth_from_tv(EvaluationLink::do_evaluate(_as, lgnd));
 }
 
 void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
@@ -501,11 +497,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
 		              << std::endl << tvp->to_string() << std::endl;})
 
-		// XXX FIXME: we are making a crisp-logic go/no-go decision
-		// based on the TV strength. Perhaps something more subtle might be
-		// wanted, here.
-		bool relation_holds = tvp->get_mean() > 0.5;
-		return relation_holds;
+		return crisp_truth_from_tv(tvp);
 	}
 
 	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
@@ -637,8 +629,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		            "Expecting a TruthValue for an evaluatable link: %s\n",
 		            virt->to_short_string().c_str());
 
-		// Convert into a crisp boolean, per usual.
-		return tvp->get_mean() > 0.5;
+		return crisp_truth_from_tv(tvp);
 	}
 
 	// Its an atom... now we have to evaluate it.
@@ -721,11 +712,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
 	              << tvp->to_string() << std::endl;})
 
-	// XXX FIXME: we are making a crisp-logic go/no-go decision
-	// based on the TV strength. Perhaps something more subtle might be
-	// wanted, here.
-	bool relation_holds = tvp->get_mean() > 0.5;
-	return relation_holds;
+	return crisp_truth_from_tv(tvp);
 }
 
 /* ======================================================== */
@@ -839,28 +826,27 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 	// --------------------------------------------------------
 	// If we are here, then what we have is some atom that is not
-	// normally "truth-valued". We can do one of three things:
-	// a) Throw an exception and complain.
-	// b) Tell user that they must use the TruthValueOfLink, which
-	//   'returns' the TV of the atom that it wraps.
-	// c) Do the above, without inventing a new link type.
-	// The below implements choice (c): i.e. it gets the TV of this
-	// atom, and checks to see if it is greater than 0.5 or not.
+	// normally "truth-valued". We can do one of two things:
+	//
+	// a) Throw an exception and complain, and tell the user to say
+	//  `(GreaterThan (TruthValueOf X) (Number 0.5))`, to get a yes/no
+	//   decision.
+	// b) Just assume the user wanted the above, by default.
+	//
+	// Currently, the below implements choice (b): i.e. it gets the TV
+	// of this atom, and checks to see if it is greater than 0.5 or not.
+	// In the long run, we might want to switch to option (a) ... ?
 	//
 	// There are several minor issues: 1) we need to check the TV
 	// of the grounded atom, not the TV of the pattern, and 2) if
 	// the atom is executable, we need to execute it.
-	auto g = gnds.find(top);
+	const auto& g = gnds.find(top);
 	if (gnds.end() != g)
 	{
 		TruthValuePtr tvp(g->second->getTruthValue());
 		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->to_string() << std::endl;})
-		// XXX FIXME: we are making a crisp-logic go/no-go decision
-		// based on the TV strength. Perhaps something more subtle might be
-		// wanted, here.
-		bool relation_holds = tvp->get_mean() > 0.5;
-		return relation_holds;
+		return crisp_truth_from_tv(tvp);
 	}
 
 	// If it's not grounded, then perhaps its executable.
