@@ -141,16 +141,16 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
-############################## bindlink (exec module) #####################
+############################## execute module #####################
 
-CYTHON_ADD_MODULE_PYX(exec
+CYTHON_ADD_MODULE_PYX(execute
 	"atomspace.pxd"
 	opencog_atom_types
 )
 
 ADD_LIBRARY(exec_cython
 	"BindlinkStub.cc"
-	"exec.cpp"
+	"execute.cpp"
 )
 
 TARGET_LINK_LIBRARIES(exec_cython
@@ -161,7 +161,7 @@ TARGET_LINK_LIBRARIES(exec_cython
 
 SET_TARGET_PROPERTIES(exec_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME exec)
+	OUTPUT_NAME execute)
 
 ### install the modules ###
 INSTALL(TARGETS
@@ -175,6 +175,7 @@ INSTALL(TARGETS
 # install the legacy bindlink module
 INSTALL(FILES
 	"bindlink.py"
+	"exec.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)
