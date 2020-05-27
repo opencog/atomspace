@@ -792,6 +792,19 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+		// For each virtual link, look at it's members. If they
+		// are concrete terms, then add them to the _fixed set.
+		// For example, `(Equal (Var X) (List (Var A) (Var B)))`
+		// the `(List (Var A) (Var B))` must be implcitly present.
+		// That is, assuming the two sides are not virtual
+		// themselves... XXX FIXME.
+		for (const Handle& sh : fgtl.varset)
+		{
+			if (SATISFACTION_LINK == sh->get_type()) continue;
+			for (const Handle& term : sh->getOutgoingSet())
+				_fixed.emplace_back(term);
+		}
+
 		if (is_virtu)
 			_virtual.emplace_back(clause);
 		else
@@ -947,9 +960,8 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 
 /// Make sure that every variable appears in some groundable clause.
 /// Variables have to be grounded before an evaluatable clause
-/// containing them can be evaluated. Add disjoint components for
-/// any variable that wasn't explicitly specified in a groundable
-/// clause.
+/// containing them can be evaluated. Throw an error if some variable
+/// wasn't explicitly specified in a groundable clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
                                        const HandleSetSeq& compvars)
 {
@@ -958,20 +970,12 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
-	// Is every variable in some component? If not, then create
-	// a new component holding only that variable. Implicitly,
-	// this new component becomes `(PresentLink (Variable "foo"))`.
-	// We don't explicitly create the PresentLink cause we don't
-	// need to; that would dirty up the atomspace, and it's already
-	// handled automatically.
+	// Is every variable in some component? If not, then it's an
+	// internal consistency error. Each one should be somewhere.
 	for (const Handle& v : vars)
 	{
-		auto it = vunion.find(v);
-		if (vunion.end() == it)
-		{
-			_components.push_back(HandleSeq({v}));
-			_component_vars.push_back(HandleSet({v}));
-		}
+		const auto& it = vunion.find(v);
+		OC_ASSERT(vunion.end() != it, "Internal Error.")
 	}
 }
 
