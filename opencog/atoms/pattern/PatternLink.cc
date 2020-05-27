@@ -754,6 +754,9 @@ bool PatternLink::is_virtual(const Handle& clause)
 ///
 void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
+	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+
 	for (const Handle& clause: clauses)
 	{
 		bool is_virtu = false;
@@ -804,8 +807,10 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			for (const Handle& term : sh->getOutgoingSet())
 			{
 				if (is_constant(_variables.varset, term)) continue;
-
-				_fixed.emplace_back(term);
+				if (term->get_type() == VARIABLE_NODE)
+					_fixed.emplace_back(term);
+				else
+					unbundle_clauses_rec(term, connectives);
 			}
 		}
 
