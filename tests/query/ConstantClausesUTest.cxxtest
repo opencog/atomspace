@@ -403,8 +403,11 @@ void ConstantClausesUTest::test_complex()
 }
 
 /**
- * Constant clauses in a child atomspace are expected not to be accessible
- * from the parent atomspace (so the rewrite term should not be triggered).
+ * Constant clauses in a child atomspace would be expected not to be
+ * accessible from the parent atomspace, so the rewrite term would not
+ * be triggered, however constant clause are removed, regardless of
+ * whether they belong to the queried atomspace or not, thus, since
+ * empty is synonymous to true, the rewrite term is triggered.
  */
 void ConstantClausesUTest::test_constant_pattern()
 {
@@ -416,7 +419,7 @@ void ConstantClausesUTest::test_constant_pattern()
 		                         derived_as.add_link(INHERITANCE_LINK, DA, DB),
 		                         DB),
 		result = bindlink(&as, bl),
-		expected = al(SET_LINK);
+		expected = al(SET_LINK, DB);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
