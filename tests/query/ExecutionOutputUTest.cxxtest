@@ -67,7 +67,6 @@ public:
 	void test_clear_box_single_argument(void);
 	void test_clear_box_single_argument_link(void);
 	void test_value(void);
-	void test_exec_variable(void);
 	void test_recursion(void);
 	void test_lambda(void);
 	void test_lambda_get(void);
@@ -397,35 +396,6 @@ void ExecutionOutputUTest::test_value(void)
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ExecutionOutputUTest::test_exec_variable(void)
-{
-	al(DEFINE_LINK,
-		an(DEFINED_SCHEMA_NODE, "x*y"),
-		al(LAMBDA_LINK,
-			al(VARIABLE_LIST,
-				an(VARIABLE_NODE, "x"),
-				an(VARIABLE_NODE, "y")),
-			al(TIMES_LINK,
-				an(VARIABLE_NODE, "x"),
-				an(VARIABLE_NODE, "y"))
-		));
-	Handle bind_link =
-	al(BIND_LINK,
-		al(TYPED_VARIABLE_LINK,
-			an(VARIABLE_NODE, "x"), an(TYPE_NODE, "DefinedSchemaNode")),
-		al(AND_LINK, al(PRESENT_LINK, an(VARIABLE_NODE, "x"))),
-		al(EXECUTION_OUTPUT_LINK,
-			an(VARIABLE_NODE, "x"),
-			al(LIST_LINK, an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7"))
-		)
-	);
-	Instantiator inst(&as);
-
-	ValuePtr result = inst.execute(bind_link);
-
-	TS_ASSERT_EQUALS(result, al(SET_LINK, an(NUMBER_NODE, "42")));
 }
 
 // This tests recursion of ExecutionOutputLinks, on a classic algo:
