@@ -754,9 +754,6 @@ bool PatternLink::is_virtual(const Handle& clause)
 ///
 void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
-	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-
 	for (const Handle& clause: clauses)
 	{
 		bool is_virtu = false;
@@ -800,17 +797,16 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		// For example, `(Equal (Var X) (List (Var A) (Var B)))`
 		// the `(List (Var A) (Var B))` must be implcitly present.
 		// That is, assuming the two sides are not virtual
-		// themselves... XXX FIXME.
+		// themselves... XXX FIXME. We could call `unbundle_clauses_rec`
+		// to do this, but it seems premature, as that step hasn't been
+		// started yet. This is a bit of a mess ...
 		for (const Handle& sh : fgtl.varset)
 		{
 			if (SATISFACTION_LINK == sh->get_type()) continue;
 			for (const Handle& term : sh->getOutgoingSet())
 			{
 				if (is_constant(_variables.varset, term)) continue;
-				if (term->get_type() == VARIABLE_NODE)
-					_fixed.emplace_back(term);
-				else
-					unbundle_clauses_rec(term, connectives);
+				_fixed.emplace_back(term);
 			}
 		}
 
