@@ -48,6 +48,10 @@ void QueryLink::init(void)
 	common_init();
 	setup_components();
 	_pat.redex_name = "anonymous QueryLink";
+
+#ifdef QDEBUG
+	logger().fine("Query: %s", to_long_string("").c_str());
+#endif
 }
 
 QueryLink::QueryLink(const Handle& vardecl,

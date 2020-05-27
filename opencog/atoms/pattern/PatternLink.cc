@@ -159,6 +159,10 @@ void PatternLink::init(void)
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
+
+#ifdef QDEBUG
+	logger().fine("Pattern: %s", to_long_string("").c_str());
+#endif
 }
 
 /* ================================================================= */
@@ -1132,7 +1136,7 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 {
 	std::string indent_p = indent + oc_to_string_indent;
 	std::stringstream ss;
-	ss << to_string(indent);
+	ss << to_string(indent) << std::endl;
 	ss << indent << "_pat:" << std::endl
 	   << oc_to_string(_pat, indent_p) << std::endl;
 	ss << indent << "_fixed:" << std::endl
