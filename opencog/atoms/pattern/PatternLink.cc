@@ -439,7 +439,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// for anyone giving alternative interpretations. Yuck.
 	else if (OR_LINK == t and 1 == hbody->get_arity())
 	{
-		// BUG - XXX FIXME Handle of OrLink is incorrect, here.
+		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
 		// See also FIXME above.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		unbundle_clauses_rec(hbody, connectives);
@@ -802,7 +802,11 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		{
 			if (SATISFACTION_LINK == sh->get_type()) continue;
 			for (const Handle& term : sh->getOutgoingSet())
+			{
+				if (is_constant(_variables.varset, term)) continue;
+
 				_fixed.emplace_back(term);
+			}
 		}
 
 		if (is_virtu)
