@@ -320,19 +320,19 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
                              const Handle& atom);
 
 /**
- * Returns true if the `clause` contains an atom of type `atom_type`.
- * ... but only if it is not quoted.  Quoted terms are constants (literals).
+ * Returns true if the `clause` contains an unquoted atom of type (or
+ * subtype of) `atom_type`.  Quoted terms are constants (literals).
  */
 bool contains_atomtype(const Handle& clause, Type atom_type,
                        Quotation quotation=Quotation());
 
 /**
- * Returns a count of the number of times that atom of type
- * `atom_type` appears in `clause`.
- * ... but only if it is not quoted.  Quoted terms are constants (literals).
+ * Returns a count of the number of times that an unquoted atom of
+ * type (or subtype of) `atom_type` appears in `clause`.  Quoted terms
+ * are constants (literals).
  */
 size_t contains_atomtype_count(const Handle& clause, Type atom_type,
-                       Quotation quotation=Quotation());
+                               Quotation quotation=Quotation());
 
 /**
  * Search for free (unscoped and unquoted) VariableNode in a tree.

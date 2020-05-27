@@ -3,7 +3,7 @@ import unittest
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
-from opencog.exec import evaluate_atom
+from opencog.execute import evaluate_atom
 from opencog.scheme_wrapper import scheme_eval
 
 import __main__

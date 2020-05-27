@@ -2,7 +2,7 @@ import unittest
 import os
 
 from opencog.atomspace import Atom, types
-from opencog.exec import execute_atom, evaluate_atom
+from opencog.execute import execute_atom, evaluate_atom
 
 from opencog.type_constructors import *
 

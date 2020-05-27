@@ -21,11 +21,15 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
-# SET(CYTHON_FLAGS "-2" "-f")
-# ELSE
-SET(CYTHON_FLAGS "-3" "-f")
-# ENDIF
+# Even though Python2 is deprecated, we still have users running
+# ROS Kinetic which requires Python2. So we still support Python2.
+# Use ${PYTHONLIBS_VERSION_STRING} instead of ${PYTHON_VERSION_STRING}
+IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
+	SET(CYTHON_FLAGS "-2" "-f" "-Wextra")
+ELSE ()
+	# SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+	SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
+ENDIF ()
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -144,16 +148,16 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
-############################## bindlink (exec module) #####################
+############################## execute module #####################
 
-CYTHON_ADD_MODULE_PYX(exec
+CYTHON_ADD_MODULE_PYX(execute
 	"atomspace.pxd"
 	opencog_atom_types
 )
 
 ADD_LIBRARY(exec_cython
 	"BindlinkStub.cc"
-	"exec.cpp"
+	"execute.cpp"
 )
 
 TARGET_LINK_LIBRARIES(exec_cython
@@ -164,7 +168,7 @@ TARGET_LINK_LIBRARIES(exec_cython
 
 SET_TARGET_PROPERTIES(exec_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME exec)
+	OUTPUT_NAME execute)
 
 ### install the modules ###
 INSTALL(TARGETS
@@ -178,6 +182,7 @@ INSTALL(TARGETS
 # install the legacy bindlink module
 INSTALL(FILES
 	"bindlink.py"
+	"exec.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)
