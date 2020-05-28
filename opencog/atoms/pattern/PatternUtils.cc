@@ -102,18 +102,13 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
 		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
-		     // TODO: should not the below be any VirtualLink?
-		     // Or contains any EvaluatableLink ??
-		     or contains_atomtype(clause, IDENTICAL_LINK)
-		     or contains_atomtype(clause, EQUAL_LINK)
-		     or contains_atomtype(clause, GREATER_THAN_LINK)
 		     // If it is an EvaluatableLink then is is not a
 		     // constant, unless it is a closed EvaluationLink over
 		     // a PredicateNode.
 		     or (nameserver().isA(ct, EVALUATABLE_LINK)
-		         and (0 == clause->get_arity()
-		              or
-		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+		         and (not (EVALUATION_LINK == ct)
+		              or 0 == clause->get_arity()
+		              or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
 
 	return constant;
 }
