@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
@@ -71,10 +72,21 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 	else if (evex->is_executable())
 	{
 		ValuePtr vp = evex->execute(as, silent);
-		if (nameserver().isA(vp->get_type(), TRUTH_VALUE))
-			tv = TruthValueCast(evex->execute(as, silent));
+		Type vpt = vp->get_type();
+		if (nameserver().isA(vpt, TRUTH_VALUE))
+			tv = TruthValueCast(vp);
 		else
-			tv = createSimpleTruthValue(vp);
+		if (nameserver().isA(vpt, FLOAT_VALUE))
+		{
+			if (2 == FloatValueCast(vp)->value().size())
+				tv = createSimpleTruthValue(vp);
+			else
+				tv = createCountTruthValue(vp);
+		}
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Expecting a FlotValue or TruthValue, got %s",
+				vp->to_string().c_str());
 	}
 	else
 		tv = evex->getTruthValue();
