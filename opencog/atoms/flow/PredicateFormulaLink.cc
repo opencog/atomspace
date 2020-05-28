@@ -39,6 +39,7 @@ using namespace opencog;
 /// For now, ignore this possibility.
 void PredicateFormulaLink::init(void)
 {
+	_variables.find_variables(_outgoing);
 }
 
 PredicateFormulaLink::PredicateFormulaLink(const HandleSeq&& oset, Type t)
