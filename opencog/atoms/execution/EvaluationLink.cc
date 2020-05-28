@@ -14,6 +14,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
+#include <opencog/atoms/flow/PredicateFormulaLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
@@ -641,71 +642,6 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	return false;
 }
 
-/// Evaluate a formula defined by a PREDICATE_FORMULA_LINK
-/// This always returns a SimpleTruthValue.
-static TruthValuePtr eval_formula(AtomSpace* as,
-                                  const Handle& predform,
-                                  const HandleSeq& cargs,
-                                  bool silent)
-{
-	// Collect up two floating point values.
-	std::vector<double> nums;
-	for (const Handle& h: predform->getOutgoingSet())
-	{
-		// An ordinary number.
-		if (NUMBER_NODE == h->get_type())
-		{
-			nums.push_back(NumberNodeCast(h)->get_value());
-			continue;
-		}
-
-		// In case the user wanted to wrap everything in a
-		// LambdaLink. I don't understand why this is needed,
-		// but it seems to make some people feel better, so
-		// we support it.
-		Handle flh(h);
-		if (LAMBDA_LINK == h->get_type())
-		{
-			// Set flh and fall through, where it is executed.
-			flh = LambdaLinkCast(h)->beta_reduce(cargs);
-		}
-
-		// At this point, we expect a FunctionLink of some kind.
-		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
-
-		// If the FunctionLink has free variables in it,
-		// reduce them with the provided arguments.
-		FunctionLinkPtr flp(FunctionLinkCast(flh));
-		const FreeVariables& fvars = flp->get_vars();
-		if (not fvars.empty())
-		{
-			flh = fvars.substitute_nocheck(flh, cargs);
-		}
-
-		// Expecting a FunctionLink without variables.
-		ValuePtr v(flh->execute(as, silent));
-		Type vtype = v->get_type();
-		if (vtype == NUMBER_NODE)
-		{
-			nums.push_back(NumberNodeCast(v)->get_value());
-			continue;
-		}
-
-		if (nameserver().isA(vtype, FLOAT_VALUE))
-		{
-			FloatValuePtr fv(FloatValueCast(v));
-			nums.push_back(fv->value()[0]);
-			continue;
-		}
-
-		// If it is neither NumberNode nor a FloatValue...
-		throw RuntimeException(TRACE_INFO, "Expecting a FunctionLink that returns NumberNode/FloatValue");
-	}
-
-	return createSimpleTruthValue(nums);
-}
-
 static TruthValuePtr reduce_formula(const Handle& pred,
                                     const HandleSeq& args)
 {
@@ -776,7 +712,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		}
 
 		if (PREDICATE_FORMULA_LINK == dtype)
-			return eval_formula(as, defn, cargs, silent);
+			return PredicateFormulaLinkCast(defn)->apply(as, cargs, silent);
 
 		if (DYNAMIC_FORMULA_LINK == dtype)
 			return reduce_formula(defn, cargs);
@@ -797,7 +733,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// Like a GPN, but the entire function is declared in the
 	// AtomSpace.
 	if (PREDICATE_FORMULA_LINK == pntype)
-		return eval_formula(as, pn, cargs, silent);
+		return PredicateFormulaLinkCast(pn)->apply(as, cargs, silent);
 
 	if (DYNAMIC_FORMULA_LINK == pntype)
 		return reduce_formula(pn, cargs);

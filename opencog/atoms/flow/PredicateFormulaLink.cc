@@ -21,6 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "PredicateFormulaLink.h"
 
@@ -56,6 +61,76 @@ PredicateFormulaLink::PredicateFormulaLink(const HandleSeq&& oset, Type t)
 			"Expecting two or three arguments, got %s", to_string().c_str());
 
 	init();
+}
+
+// ---------------------------------------------------------------
+
+/// Evaluate a formula defined by this atom.
+/// This returns a SimpleTruthValue, if there are two arguments,
+/// and a CountTruthVaue, if there are three.
+TruthValuePtr PredicateFormulaLink::apply(AtomSpace* as,
+                                          const HandleSeq& cargs,
+                                          bool silent)
+{
+	// Collect up two or three floating point values.
+	std::vector<double> nums;
+	for (const Handle& h: getOutgoingSet())
+	{
+		// An ordinary number.
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
+
+		// In case the user wanted to wrap everything in a
+		// LambdaLink. I don't understand why this is needed,
+		// but it seems to make some people feel better, so
+		// we support it.
+		Handle flh(h);
+		if (LAMBDA_LINK == h->get_type())
+		{
+			// Set flh and fall through, where it is executed.
+			flh = LambdaLinkCast(h)->beta_reduce(cargs);
+		}
+
+		// At this point, we expect a FunctionLink of some kind.
+		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
+			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+
+		// If the FunctionLink has free variables in it,
+		// reduce them with the provided arguments.
+		FunctionLinkPtr flp(FunctionLinkCast(flh));
+		const FreeVariables& fvars = flp->get_vars();
+		if (not fvars.empty())
+		{
+			flh = fvars.substitute_nocheck(flh, cargs);
+		}
+
+		// Expecting a FunctionLink without variables.
+		ValuePtr v(flh->execute(as, silent));
+		Type vtype = v->get_type();
+		if (vtype == NUMBER_NODE)
+		{
+			nums.push_back(NumberNodeCast(v)->get_value());
+			continue;
+		}
+
+		if (nameserver().isA(vtype, FLOAT_VALUE))
+		{
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value()[0]);
+			continue;
+		}
+
+		// If it is neither NumberNode nor a FloatValue...
+		throw RuntimeException(TRACE_INFO,
+			"Expecting a FunctionLink that returns NumberNode/FloatValue");
+	}
+
+	if (nums.size() == 2)
+		return createSimpleTruthValue(nums);
+	return createCountTruthValue(nums);
 }
 
 // ---------------------------------------------------------------

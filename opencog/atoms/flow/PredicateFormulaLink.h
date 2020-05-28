@@ -45,6 +45,9 @@ public:
 	PredicateFormulaLink(const PredicateFormulaLink &) = delete;
 	PredicateFormulaLink operator=(const PredicateFormulaLink &) = delete;
 
+	// Apply formula to arguments.
+	TruthValuePtr apply(AtomSpace*, const HandleSeq&, bool);
+
 	// Return a pointer to the computed truth value.
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
