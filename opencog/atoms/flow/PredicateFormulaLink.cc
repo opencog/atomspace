@@ -135,15 +135,46 @@ TruthValuePtr PredicateFormulaLink::apply(AtomSpace* as,
 
 // ---------------------------------------------------------------
 
-/// When evaluated, this will return the TruthValue
+/// A shortened, argument-free version of apply()
 TruthValuePtr PredicateFormulaLink::evaluate(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
-	if (1 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
+	std::vector<double> nums;
+	for (const Handle& h: getOutgoingSet())
+	{
+		if (NUMBER_NODE == h->get_type())
+		{
+			nums.push_back(NumberNodeCast(h)->get_value());
+			continue;
+		}
 
-	return getTruthValue();
+		if (not  h->is_executable())
+			throw SyntaxException(TRACE_INFO, "Expecting an executable Link");
+
+		ValuePtr v(h->execute(as, silent));
+		Type vtype = v->get_type();
+
+		if (NUMBER_NODE == vtype)
+		{
+			nums.push_back(NumberNodeCast(v)->get_value());
+			continue;
+		}
+
+		if (nameserver().isA(vtype, FLOAT_VALUE))
+		{
+			FloatValuePtr fv(FloatValueCast(v));
+			nums.push_back(fv->value().at(0));
+			continue;
+		}
+
+		throw RuntimeException(TRACE_INFO,
+			"Expecting a FunctionLink that returns NumberNode/FloatValue");
+	}
+	if (nums.size() == 2)
+		return createSimpleTruthValue(nums);
+	return createCountTruthValue(nums);
 }
+
+// ---------------------------------------------------------------
 
 DEFINE_LINK_FACTORY(PredicateFormulaLink, PREDICATE_FORMULA_LINK)
 
