@@ -626,7 +626,7 @@ EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
-SATISFACTION_LINK <- SATISFYING_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
+SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
