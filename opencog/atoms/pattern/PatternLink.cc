@@ -759,6 +759,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		bool is_virtu = false;
 		bool is_black = false;
 
+		// ----------
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.stopset.insert(SCOPE_LINK);
 		fgpn.search_set(clause);
@@ -775,6 +776,27 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		for (const Handle& sh : fgpn.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+		// ----------
+		// One might hope to fish out all EvaluatableLinks, and handle
+		// them in just one loop.  Unfortunately, doing this causes
+		// multiple unit tests to fail, and so instead, two special
+		// cases are broken out: PredicateFormula, below, and
+		// VirtualLink, further down.
+		//
+		// FindAtoms fpfl(EVALUATABLE_LINK, true);
+		FindAtoms fpfl(PREDICATE_FORMULA_LINK, true);
+		fpfl.search_set(clause);
+		for (const Handle& sh : fpfl.least_holders)
+		{
+			_pat.evaluatable_terms.insert(sh);
+			add_to_map(_pat.in_evaluatable, sh, sh);
+			if (is_virtual(sh))
+				is_virtu = true;
+		}
+		for (const Handle& sh : fpfl.holders)
+			_pat.evaluatable_holders.insert(sh);
+
+		// ----------
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
 		// are essentially a kind of EvaluationLink holding a GPN
 		FindAtoms fgtl(VIRTUAL_LINK, true);
@@ -802,11 +824,13 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			for (const Handle& term : sh->getOutgoingSet())
 			{
 				if (can_evaluate(term)) continue;
-				if (not any_unquoted_unscoped_in_tree(term, _variables.varset)) continue;
+				if (not any_unquoted_unscoped_in_tree(term, _variables.varset))
+					continue;
 				_fixed.emplace_back(term);
 			}
 		}
 
+		// ----------
 		if (is_virtu)
 			_virtual.emplace_back(clause);
 		else
