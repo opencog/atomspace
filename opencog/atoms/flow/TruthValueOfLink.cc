@@ -135,8 +135,48 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 	return createFloatValue(confids);
 }
 
+// =============================================================
+
+CountOfLink::CountOfLink(const HandleSeq&& oset, Type t)
+	: ValueOfLink(std::move(oset), t)
+{
+	if (not nameserver().isA(t, COUNT_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an CountOfLink, got %s", tname.c_str());
+	}
+}
+
+// ---------------------------------------------------------------
+
+/// When executed, this will return the counts of all of the
+/// atoms in the outgoing set.
+ValuePtr CountOfLink::execute(AtomSpace* as, bool silent)
+{
+	std::vector<double> counts;
+
+	for (const Handle& h : _outgoing)
+	{
+		// Cannot take the count of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
+		// We cannot know the TruthValue of the Atom unless we are
+		// working with the unique version that sits in the AtomSpace!
+		// We are always provided with a (scratch) atomspace with
+		// which to work.
+		Handle ah(as->add_atom(h));
+		counts.push_back(ah->getTruthValue()->get_count());
+	}
+
+	return createFloatValue(counts);
+}
+
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)
 DEFINE_LINK_FACTORY(StrengthOfLink, STRENGTH_OF_LINK)
 DEFINE_LINK_FACTORY(ConfidenceOfLink, CONFIDENCE_OF_LINK)
+DEFINE_LINK_FACTORY(CountOfLink, COUNT_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

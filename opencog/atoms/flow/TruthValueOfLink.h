@@ -112,6 +112,33 @@ static inline ConfidenceOfLinkPtr ConfidenceOfLinkCast(AtomPtr a)
 
 #define createConfidenceOfLink std::make_shared<ConfidenceOfLink>
 
+// ====================================================================
+
+/// The CountOfLink returns the count of a truth value on the
+/// indicated atom. (Count is the third of the sequence of floats).
+///
+class CountOfLink : public ValueOfLink
+{
+public:
+	CountOfLink(const HandleSeq&&, Type=COUNT_OF_LINK);
+
+	CountOfLink(const CountOfLink&) = delete;
+	CountOfLink& operator=(const CountOfLink&) = delete;
+
+	// Return a pointer to the extracted value.
+	virtual ValuePtr execute(AtomSpace*, bool);
+
+	static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<CountOfLink> CountOfLinkPtr;
+static inline CountOfLinkPtr CountOfLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<CountOfLink>(h); }
+static inline CountOfLinkPtr CountOfLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<CountOfLink>(a); }
+
+#define createCountOfLink std::make_shared<CountOfLink>
+
 /** @}*/
 }
 
