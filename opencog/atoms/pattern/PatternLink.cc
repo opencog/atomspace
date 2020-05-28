@@ -159,6 +159,10 @@ void PatternLink::init(void)
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
+
+#ifdef QDEBUG
+	logger().fine("Pattern: %s", to_long_string("").c_str());
+#endif
 }
 
 /* ================================================================= */
@@ -435,7 +439,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// for anyone giving alternative interpretations. Yuck.
 	else if (OR_LINK == t and 1 == hbody->get_arity())
 	{
-		// BUG - XXX FIXME Handle of OrLink is incorrect, here.
+		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
 		// See also FIXME above.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		unbundle_clauses_rec(hbody, connectives);
@@ -788,6 +792,24 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
+		// For each virtual link, look at it's members. If they
+		// are concrete terms, then add them to the _fixed set.
+		// For example, `(Equal (Var X) (List (Var A) (Var B)))`
+		// the `(List (Var A) (Var B))` must be implcitly present.
+		// That is, assuming the two sides are not virtual
+		// themselves... XXX FIXME. We could call `unbundle_clauses_rec`
+		// to do this, but it seems premature, as that step hasn't been
+		// started yet. This is a bit of a mess ...
+		for (const Handle& sh : fgtl.varset)
+		{
+			if (SATISFACTION_LINK == sh->get_type()) continue;
+			for (const Handle& term : sh->getOutgoingSet())
+			{
+				if (is_constant(_variables.varset, term)) continue;
+				_fixed.emplace_back(term);
+			}
+		}
+
 		if (is_virtu)
 			_virtual.emplace_back(clause);
 		else
@@ -943,9 +965,8 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 
 /// Make sure that every variable appears in some groundable clause.
 /// Variables have to be grounded before an evaluatable clause
-/// containing them can be evaluated. Add disjoint components for
-/// any variable that wasn't explicitly specified in a groundable
-/// clause.
+/// containing them can be evaluated. Throw an error if some variable
+/// wasn't explicitly specified in a groundable clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
                                        const HandleSetSeq& compvars)
 {
@@ -954,20 +975,12 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
-	// Is every variable in some component? If not, then create
-	// a new component holding only that variable. Implicitly,
-	// this new component becomes `(PresentLink (Variable "foo"))`.
-	// We don't explicitly create the PresentLink cause we don't
-	// need to; that would dirty up the atomspace, and it's already
-	// handled automatically.
+	// Is every variable in some component? If not, then it's an
+	// internal consistency error. Each one should be somewhere.
 	for (const Handle& v : vars)
 	{
-		auto it = vunion.find(v);
-		if (vunion.end() == it)
-		{
-			_components.push_back(HandleSeq({v}));
-			_component_vars.push_back(HandleSet({v}));
-		}
+		const auto& it = vunion.find(v);
+		OC_ASSERT(vunion.end() != it, "Internal Error.")
 	}
 }
 
@@ -1132,7 +1145,7 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 {
 	std::string indent_p = indent + oc_to_string_indent;
 	std::stringstream ss;
-	ss << to_string(indent);
+	ss << to_string(indent) << std::endl;
 	ss << indent << "_pat:" << std::endl
 	   << oc_to_string(_pat, indent_p) << std::endl;
 	ss << indent << "_fixed:" << std::endl

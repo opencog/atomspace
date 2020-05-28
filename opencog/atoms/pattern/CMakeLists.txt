@@ -18,6 +18,8 @@ ADD_LIBRARY (lambda
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(lambda opencog_atom_types)
 
+# TARGET_COMPILE_OPTIONS(lambda PRIVATE -DQDEBUG=1)
+
 TARGET_LINK_LIBRARIES(lambda
 	query-engine
 	atomcore
