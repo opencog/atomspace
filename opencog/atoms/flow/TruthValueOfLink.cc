@@ -87,20 +87,10 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 
 		// We cannot know the TruthValue of the Atom unless we are
 		// working with the unique version that sits in the AtomSpace!
-		Handle ah(as->get_atom(h));
-		if (ah)
-			strengths.push_back(ah->getTruthValue()->get_mean());
-		else
-		{
-			if (silent)
-				throw SilentException();
-
-			// If the user asked for a TV not in any atomspace,
-			// what should we do? I dunno, so I'm throwing an error.
-			throw InvalidParamException(TRACE_INFO,
-				"Asked for Strength of atom not in any atomspace: %s",
-				this->to_string().c_str());
-		}
+		// We are always provided with a (scratch) atomspace with
+		// which to work.
+		Handle ah(as->add_atom(h));
+		strengths.push_back(ah->getTruthValue()->get_mean());
 	}
 
 	return createFloatValue(strengths);
@@ -136,20 +126,10 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 
 		// We cannot know the TruthValue of the Atom unless we are
 		// working with the unique version that sits in the AtomSpace!
-		Handle ah(as->get_atom(h));
-		if (ah)
-			confids.push_back(ah->getTruthValue()->get_confidence());
-		else
-		{
-			if (silent)
-				throw SilentException();
-
-			// If the user asked for a TV not in any atomspace,
-			// what should we do? I dunno, so I'm throwing an error.
-			throw InvalidParamException(TRACE_INFO,
-				"Asked for Confidence of atom not in any atomspace: %s",
-				this->to_string().c_str());
-		}
+		// We are always provided with a (scratch) atomspace with
+		// which to work.
+		Handle ah(as->add_atom(h));
+		confids.push_back(ah->getTruthValue()->get_confidence());
 	}
 
 	return createFloatValue(confids);
