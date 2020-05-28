@@ -260,10 +260,9 @@ ANY_NODE <- NODE
 
 // Generic connector. Its a link, because if contains all of the details
 // and restrictions required to define the allowable conections that
-// can be made. It inherits from Evaluatable, so that the ability for
-// it to mate to something can be encoded in a TruthValue (typically
-// a crisp T/F for type specifications.)
-CONNECTOR <- EVALUATABLE_LINK
+// can be made. The ability for it to mate to something can be encoded
+// in a TruthValue (typically a crisp T/F for type specifications.)
+CONNECTOR <- ORDERED_LINK
 
 CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
 LINK_CLASS_NODE <- LEXICAL_NODE "LinkClass" // Connector class
@@ -604,7 +603,10 @@ ANCHOR_NODE <- NODE
 // for them to be declared as virtual (at least, as far as the pattern
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
-VIRTUAL_LINK <- EVALUATABLE_LINK
+//
+// In mathematics nomenclature, VirtualLinks are "relations": they are
+// terms that evaluate to crisp true/false values.
+VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
