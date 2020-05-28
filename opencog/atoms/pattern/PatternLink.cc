@@ -50,18 +50,18 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	// Make sure every variable appears in some clause.
-	HandleSeq all_clauses(_pat.unquoted_clauses);
-	all_clauses.insert(all_clauses.end(),
-	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
-	validate_variables(_variables.varset, all_clauses);
-
 	remove_constants(_variables.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
 	_fixed = _pat.quoted_clauses;
 	unbundle_virtual(_pat.unquoted_clauses);
 	_num_virts = _virtual.size();
+
+	// Make sure every variable appears in some clause.
+	HandleSeq all_clauses(_pat.unquoted_clauses);
+	all_clauses.insert(all_clauses.end(),
+	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
+	validate_variables(_variables.varset, all_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the DefaultPatternMatchCB, and so we assume
