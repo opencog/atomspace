@@ -665,6 +665,7 @@ VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
+COUNT_OF_LINK <- VALUE_OF_LINK
 
 // Opposite of the above; attach a value to an atom.
 SET_VALUE_LINK <- FUNCTION_LINK
@@ -709,7 +710,8 @@ RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the sum of vector components of a number/float-value.
 ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
-// Return arity of the wrapped link.
+// Return arity of the wrapped link. If it's a NumberNode
+// of a value, return the length of the underlying vector.
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
