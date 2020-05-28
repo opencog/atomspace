@@ -59,6 +59,7 @@ public:
 
 	const std::vector<ValuePtr>& value() const { update(); return _value; }
 	HandleSeq to_handle_seq(void) const;
+	size_t size() const { return _value.size(); }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
