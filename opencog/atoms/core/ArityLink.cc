@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
@@ -45,19 +48,50 @@ ArityLink::ArityLink(const HandleSeq&& oset, Type t)
 ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = 0;
-	for (const Handle& h : _outgoing)
+	for (Handle h : _outgoing)
 	{
 		if (h->is_executable())
 		{
 			ValuePtr pap(h->execute(as, silent));
-			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
+			Type ptype = pap->get_type();
 
-			// XXX TODO sum up length of values. (!?)
+			if (nameserver().isA(ptype, FLOAT_VALUE))
+			{
+				const std::vector<double>& dvec(FloatValueCast(h)->value());
+				ary += dvec.size();
+				continue;
+			}
+
+			if (nameserver().isA(ptype, STRING_VALUE))
+			{
+				const std::vector<std::string>& svec(StringValueCast(h)->value());
+				ary += svec.size();
+				continue;
+			}
+
+			if (nameserver().isA(ptype, LINK_VALUE))
+			{
+				const std::vector<ValuePtr>& pvec(LinkValueCast(h)->value());
+				ary += pvec.size();
+				continue;
+			}
+
+			if (not h->is_atom())
+				continue;
+
+			// Fall through
+			h = HandleCast(pap);
+		}
+
+		if (h->is_link())
+			ary += h->get_arity();
+		else if (NUMBER_NODE == h->get_type())
+		{
+			const std::vector<double>& dvec(NumberNodeCast(h)->value());
+			ary += dvec.size();
 		}
 		else
-		{
-			if (h->is_link()) ary += h->get_arity();
-		}
+			ary++;
 	}
 
 	return ValuePtr(createNumberNode(ary));

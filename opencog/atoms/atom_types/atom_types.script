@@ -712,6 +712,8 @@ ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return arity of the wrapped link. If it's a NumberNode
 // of a value, return the length of the underlying vector.
+// XXX FIXME .. did we mis-name this? Should it be SizeOfLink
+// or maybe LengthOfLink? (viz, the length of FloatValue...)
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
