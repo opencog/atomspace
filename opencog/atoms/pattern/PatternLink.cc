@@ -46,6 +46,7 @@ void PatternLink::common_init(void)
 	// skip doing it here.
 	if (0 < _pat.defined_terms.size())
 	{
+		_num_virts = 0;
 		_num_comps = 1;
 		return;
 	}
