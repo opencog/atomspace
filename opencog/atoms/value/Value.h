@@ -58,6 +58,8 @@ public:
 	virtual bool is_atom() const { return false; }
 	virtual bool is_node() const { return false; }
 	virtual bool is_link() const { return false; }
+	virtual bool is_unordered_link() const { return false; }
+	virtual size_t size() const { return 0; }
 
 	/** Basic predicate */
 	bool is_type(Type t, bool subclass = true) const

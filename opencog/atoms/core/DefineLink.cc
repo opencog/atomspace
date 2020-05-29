@@ -54,20 +54,14 @@ void DefineLink::init()
 				nameserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset, Type t)
-	: UniqueLink(oset, t)
+DefineLink::DefineLink(const HandleSeq&& oset, Type t)
+	: UniqueLink(std::move(oset), t)
 {
 	init();
 }
 
 DefineLink::DefineLink(const Handle& name, const Handle& defn)
 	: UniqueLink(HandleSeq({name, defn}), DEFINE_LINK)
-{
-	init();
-}
-
-DefineLink::DefineLink(const Link &l)
-	: UniqueLink(l)
 {
 	init();
 }

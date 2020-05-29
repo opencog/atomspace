@@ -1,6 +1,6 @@
-from atomspace cimport (cNameServer, nameserver, NOTYPE, string, Type,
-                        AtomSpace, PtrHolder)
+# from atomspace cimport cNameServer, nameserver, NOTYPE, Type
 from libc.string cimport strcmp
+from libcpp cimport string
 import sys
 
 
@@ -58,18 +58,20 @@ cdef generate_type_module():
 
 types = type('atom_types', (), generate_type_module())
 
-#This function is for refreshing new types
-#ex. When you import a cython module which include non-core atom types in C++
-#And you can refresh these new types by this function
-
+# Update/refresh list of types. This needs to be called whenever
+# additional atom types were declared in other atomspace modules.
+# i.e. when new types were added to the C++ nameserver.
 def get_refreshed_types():
     global types
     types = type('atom_types', (), generate_type_module())
     return types
 
-cdef create_python_value_from_c_value(cValuePtr& value):
-    type = value.get().get_type()
-    type_name = get_type_name(type)
+cdef create_python_value_from_c_value(const cValuePtr& value):
+    if value.get() == NULL:
+        return None
+
+    value_type = value.get().get_type()
+    type_name = get_type_name(value_type)
     ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
 
     thismodule = sys.modules[__name__]
@@ -78,12 +80,13 @@ cdef create_python_value_from_c_value(cValuePtr& value):
         return clazz(ptr_holder = ptr_holder)
 
     # For handling the children types of TruthValue.
-    if is_a(get_type(type_name), types.TruthValue):
+    if is_a(value_type, types.TruthValue):
         return TruthValue(ptr_holder = ptr_holder)
 
     # For handling the children types of Atom.
-    if is_a(get_type(type_name), types.Atom):
+    if is_a(value_type, types.Atom):
         return Atom(ptr_holder = ptr_holder)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
 
+# ========================== END OF FILE =========================

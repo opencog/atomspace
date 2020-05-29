@@ -30,8 +30,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
-#include <boost/range/algorithm.hpp>
-
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -39,7 +37,7 @@
 
 using namespace opencog;
 
-void Link::init(const HandleSeq& outgoingVector)
+void Link::init()
 {
     if (not nameserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
@@ -47,7 +45,11 @@ void Link::init(const HandleSeq& outgoingVector)
             _type, nameserver().getTypeName(_type).c_str());
     }
 
-    _outgoing = outgoingVector;
+    // Yes, people actually send us bad data.
+    for (const Handle& h: _outgoing)
+        if (nullptr == h)
+            throw InvalidParamException(TRACE_INFO,
+                "Link ctor: invalid outgoing set!");
 }
 
 Link::~Link()
@@ -64,12 +66,11 @@ std::string Link::to_short_string(const std::string& indent) const
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << nameserver().getTypeName(_type);
-    answer << " ";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
-        answer << h->to_short_string(more_indent);
+        answer << " " << h->to_short_string();
 
     answer << indent << ")";
 
@@ -91,9 +92,9 @@ std::string Link::to_string(const std::string& indent) const
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer += h->to_string(more_indent);
+        answer += h->to_string(more_indent) + "\n";
 
-    answer += indent + ") ; " + id_to_string() + "\n";
+    answer += indent + ") ; " + id_to_string();
 
     return answer;
 }
@@ -182,24 +183,21 @@ ContentHash Link::compute_hash() const
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }
 
 /// Place `this` into the incoming set of each outgoing atom.
 ///
 void Link::install()
 {
-	LinkPtr llc(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->insert_atom(llc);
+	Handle llc(get_handle());
+	for (Handle& h : _outgoing)
+		h->insert_atom(llc);
 }
 
 void Link::remove()
 {
-	LinkPtr lll(LinkCast(get_handle()));
-	size_t arity = get_arity();
-	for (size_t i = 0; i < arity; i++)
-		_outgoing[i]->remove_atom(lll);
+	Handle lll(get_handle());
+	for (Handle& h : _outgoing)
+		h->remove_atom(lll);
 }

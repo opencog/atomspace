@@ -2,66 +2,68 @@ from cpython cimport PyLong_FromLongLong
 from cpython.object cimport Py_LT, Py_EQ, Py_GT, Py_LE, Py_NE, Py_GE
 from libcpp.set cimport set as cpp_set
 
+# from atomspace cimport Atom
+
 # Atom wrapper object
 cdef class Atom(Value):
 
-    @staticmethod
-    cdef Atom createAtom(const cHandle& handle):
-        return Atom(PtrHolder.create(<shared_ptr[void]&>handle))
-
-    def __init__(self, ptr_holder):
-        super(Atom, self).__init__(ptr_holder)
+    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
         self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
-        # cache the results after first retrieval of
-        # immutable properties
         self._atom_type = None
         self._name = None
         self._outgoing = None
+    
+    @staticmethod
+    cdef Atom createAtom(const cHandle& handle):
+        return Atom(PtrHolder.create(<shared_ptr[void]&>handle))
 
     cdef cHandle get_c_handle(Atom self):
         """Return C++ shared_ptr from PtrHolder instance"""
         return <cHandle&>(self.ptr_holder.shared_ptr)
 
-    property atomspace:
-        def __get__(self):
-            cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
-            return AtomSpace_factory(a)
+    @property
+    def atomspace(self):
+        cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
+        return AtomSpace_factory(a)
 
-    property name:
-        def __get__(self):
-            cdef cAtom* atom_ptr
-            if self._name is None:
-                atom_ptr = self.handle.atom_ptr()
-                if atom_ptr == NULL:   # avoid null-pointer deref
-                    return None
-                if atom_ptr.is_node():
-                    self._name = atom_ptr.get_name().decode('UTF-8')
-                else:
-                    self._name = ""
-            return self._name
-
-    property tv:
-        def __get__(self):
-            cdef cAtom* atom_ptr = self.handle.atom_ptr()
-            cdef tv_ptr tvp
+    @property
+    def name(self):
+        cdef cAtom* atom_ptr
+        if self._name is None:
+            atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            tvp = atom_ptr.getTruthValue()
-            if (not tvp.get()):
-                raise AttributeError('cAtom returned NULL TruthValue pointer')
-            return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
+            if atom_ptr.is_node():
+                self._name = atom_ptr.get_name().decode('UTF-8')
+            else:
+                self._name = ""
+        return self._name
 
-        def __set__(self, truth_value):
-            try:
-                assert isinstance(truth_value, TruthValue)
-            except AssertionError:
-                raise TypeError("atom.tv property needs a TruthValue object")
-            cdef cAtom* atom_ptr = self.handle.atom_ptr()
-            if atom_ptr == NULL:   # avoid null-pointer deref
-                return
-            atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
+    @property
+    def tv(self):
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef tv_ptr tvp
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return None
+        tvp = atom_ptr.getTruthValue()
+        if (not tvp.get()):
+            raise AttributeError('cAtom returned NULL TruthValue pointer')
+        return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
+
+    @tv.setter
+    def tv(self, truth_value):
+        try:
+            assert isinstance(truth_value, TruthValue)
+        except AssertionError:
+            raise TypeError("atom.tv property needs a TruthValue object")
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return
+        atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
     def set_value(self, key, value):
+        if not isinstance(key, Atom):
+            raise TypeError("key should be an instance of Atom, got {0} instead".format(type(key)))
         self.get_c_handle().get().setValue(deref((<Atom>key).handle),
                                 (<Value>value).get_c_value_ptr())
 
@@ -88,30 +90,30 @@ cdef class Atom(Value):
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
         return convert_handle_seq_to_python_list(handle_vector)
 
-    property out:
-        def __get__(self):
-            if self._outgoing is None:
-                atom_ptr = self.handle.atom_ptr()
-                if atom_ptr == NULL:   # avoid null-pointer deref
-                    return None
-                if atom_ptr.is_link():
-                    self._outgoing = self.get_out()
-                else:
-                    self._outgoing = []
-            return self._outgoing
-
-    property arity:
-        def __get__(self):
-            return len(self.out)
-
-    property incoming:
-        def __get__(self):
-            cdef vector[cHandle] handle_vector
-            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+    @property
+    def out(self):
+        if self._outgoing is None:
+            atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            atom_ptr.getIncomingSet(back_inserter(handle_vector))
-            return convert_handle_seq_to_python_list(handle_vector)
+            if atom_ptr.is_link():
+                self._outgoing = self.get_out()
+            else:
+                self._outgoing = []
+        return self._outgoing
+
+    @property
+    def arity(self):
+        return len(self.out)
+
+    @property
+    def incoming(self):
+        cdef vector[cHandle] handle_vector
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return None
+        atom_ptr.getIncomingSet(back_inserter(handle_vector))
+        return convert_handle_seq_to_python_list(handle_vector)
 
     def incoming_by_type(self, Type type):
         cdef vector[cHandle] handle_vector
@@ -124,9 +126,6 @@ cdef class Atom(Value):
     def truth_value(self, mean, count):
         self.tv = createTruthValue(mean, count)
         return self
-
-    def handle_ptr(self):
-        return PyLong_FromVoidPtr(self.handle)
 
     def __richcmp__(self, other, int op):
         assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"

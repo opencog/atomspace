@@ -21,7 +21,7 @@
 	))
 
 (define wait
-	(Join
+	(ThreadJoin
 		(SequentialAnd
 			(True (Sleep (Number 1)))
 			(EvaluationLink
@@ -43,5 +43,5 @@
 
 ; throw exception
 (define wait-bad
-	(Join (SequentialAnd
+	(ThreadJoin (SequentialAnd
 		(EvaluationLink (GroundedPredicate "scm:insdfasdfascr") (List)))))

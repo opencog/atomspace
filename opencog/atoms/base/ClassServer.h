@@ -118,7 +118,8 @@ Handle CNAME::factory(const Handle& base)                         \
    /* If it's castable, nothing to do. */                         \
    if (CNAME##Cast(base)) return base;                            \
                                                                   \
-   Handle h(create##CNAME(base->getOutgoingSet(), base->get_type())); \
+   Handle h(create##CNAME(std::move(base->getOutgoingSet()),      \
+                          base->get_type()));                     \
    return h;                                                      \
 }                                                                 \
                                                                   \
@@ -134,7 +135,8 @@ static __attribute__ ((constructor)) void                         \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   Handle h(create##CNAME(base->get_type(), base->get_name()));   \
+   Handle h(create##CNAME(base->get_type(),                       \
+                          std::move(base->get_name())));          \
    return h;                                                      \
 }                                                                 \
                                                                   \

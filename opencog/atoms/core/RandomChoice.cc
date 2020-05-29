@@ -31,25 +31,12 @@ using namespace opencog;
 
 static MT19937RandGen randy(43);
 
-RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+RandomChoiceLink::RandomChoiceLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, RANDOM_CHOICE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an RandomChoiceLink, got %s", tname.c_str());
-	}
-}
-
-RandomChoiceLink::RandomChoiceLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, RANDOM_CHOICE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an RandomChoiceLink, got %s", tname.c_str());
 	}

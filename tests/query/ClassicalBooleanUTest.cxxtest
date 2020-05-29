@@ -1,0 +1,158 @@
+/*
+ * tests/query/ClassicalBooleanUTest.cxxtest
+ *
+ * Copyright (C) 2018 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class ClassicalBooleanUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	ClassicalBooleanUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(false);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	~ClassicalBooleanUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_double_clause(void);
+	void test_single_clause(void);
+};
+
+void ClassicalBooleanUTest::tearDown(void)
+{
+}
+
+void ClassicalBooleanUTest::setUp(void)
+{
+}
+
+/*
+ * Test positive double-clause boolean constructions.
+ * One positive cluase forces examination of entire universe;
+ * One negative clause rejects members of the universe.
+ */
+void ClassicalBooleanUTest::test_double_clause(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval->eval("(load-from-path \"tests/query/classical-boolean.scm\")");
+
+	Handle hans = eval->eval_h("(Set (Concept \"you\") (Concept \"her\"))");
+	printf("Expected this: %s\n", hans->to_string().c_str());
+
+	Handle hgnd = eval->eval_h("(cog-execute! double-a)");
+	printf("Found double-a: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-a bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! double-b)");
+	printf("Found double-b: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-b bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! double-c)");
+	printf("Found double-c: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-c bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! double-d)");
+	printf("Found double-d: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-d bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! double-e)");
+	printf("Found double-e: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-e bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! double-f)");
+	printf("Found double-f: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("double-f bad grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test negative single-clause boolean constructions.
+ * These have no positive clauses, and so should return the empty set.
+ * Unlike the above, the universe is never exampled.
+ */
+void ClassicalBooleanUTest::test_single_clause(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval->eval("(load-from-path \"tests/query/classical-boolean.scm\")");
+
+	Handle hans = eval->eval_h("(Set)");
+	printf("Expected this: %s\n", hans->to_string().c_str());
+
+	Handle hgnd = eval->eval_h("(cog-execute! single-a)");
+	printf("Found single-a: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-a bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-b)");
+	printf("Found single-b: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-b bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-c)");
+	printf("Found single-c: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-c bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-d)");
+	printf("Found single-d: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-d bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-e)");
+	printf("Found single-e: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-e bad grounding", hans == hgnd);
+
+	hgnd = eval->eval_h("(cog-execute! single-f)");
+	printf("Found single-f: %s\n", hgnd->to_string().c_str());
+	TSM_ASSERT("single-f bad grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

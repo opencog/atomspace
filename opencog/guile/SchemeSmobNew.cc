@@ -13,6 +13,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -150,7 +151,7 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 
 SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
-	if (nullptr == pa) return SCM_EOL;
+	if (nullptr == pa) return SCM_BOOL_F;
 
 	// Use new so that the smart pointer increments!
 	ValuePtr* pap = new ValuePtr(pa);
@@ -359,17 +360,41 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	Type t = verify_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
+	std::string name;
 	if (nameserver().isA(t, NUMBER_NODE)) {
+		std::vector<double> vec;
+		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
-			sname = scm_number_to_string(sname, _radix_ten);
+		{
+			slist = scm_cons(sname, kv_pairs);
+		}
+		else
+		if (scm_is_true(scm_list_p(sname)))
+		{
+			slist = sname;
+		}
+		if (not scm_is_null(slist))
+		{
+			while (scm_is_pair(slist))
+			{
+				SCM sval = SCM_CAR(slist);
+				if (scm_is_number(sval))
+					vec.push_back(scm_to_double(sval));
+				slist = SCM_CDR(slist);
+			}
+			name = NumberNode::vector_to_plain(vec);
+		}
 	}
 	else
 	// Allow symbols as well as strings for atom types.
 	if (nameserver().isA(t, TYPE_NODE) and scm_is_symbol(sname)) {
 		sname = scm_symbol_to_string(sname);
 	}
-	std::string name(verify_string (sname, "cog-new-node", 2,
-		"string name for the node"));
+
+	// Haven't set the string yet...
+	if (0 == name.size())
+		name = verify_string (sname, "cog-new-node", 2,
+			"string name for the node");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");
@@ -377,12 +402,12 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		Handle h(atomspace->add_node(t, name));
+		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h->setTruthValue(tv);
+			if (tv) h = atomspace->set_truthvalue(h, tv);
 		}
 
 		return handle_to_scm(h);
@@ -412,12 +437,12 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	Handle h(atomspace->get_handle(t, name));
+	Handle h(atomspace->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) atomspace->set_truthvalue(h, tv);
+	if (tv) h = atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -495,16 +520,16 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		Handle h(atomspace->add_link(t, outgoing_set));
+		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
 		// Fish out a truth value, if its there.
 		if (h)
 		{
 			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h->setTruthValue(tv);
+			if (tv) h = atomspace->set_truthvalue(h, tv);
 		}
 
-		return handle_to_scm (h);
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
@@ -530,12 +555,12 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
-	Handle h(atomspace->get_handle(t, outgoing_set));
+	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) atomspace->set_truthvalue(h, tv);
+	if (tv) h = atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

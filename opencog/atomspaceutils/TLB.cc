@@ -111,8 +111,15 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     {
         if (_handle_map.end() != pr) return pr->second;
 
-        // Not found; we need a new uuid.
-        uuid = _uuid_pool->get_uuid();
+        while (true)
+        {
+            // Not found; we need a new uuid.
+            uuid = _uuid_pool->get_uuid();
+
+            // Oh wait, is it being used already?
+            auto pr = _uuid_map.find(uuid);
+            if (_uuid_map.end() == pr) break;
+        }
     }
     else
     {

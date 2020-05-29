@@ -11,6 +11,7 @@ ADD_LIBRARY (atomcore
 	DeleteLink.cc
 	FindUtils.cc
 	FreeLink.cc
+	FreeVariables.cc
 	FunctionLink.cc
 	ImplicationScopeLink.cc
 	LambdaLink.cc
@@ -21,20 +22,20 @@ ADD_LIBRARY (atomcore
 	Quotation.cc
 	RandomChoice.cc
 	RandomNumber.cc
+	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
-	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
 	TypeUtils.cc
 	UniqueLink.cc
 	UnorderedLink.cc
-	ValueOfLink.cc
 	Variables.cc
 	VariableList.cc
+	VariableSet.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -57,6 +58,7 @@ INSTALL (FILES
 	DeleteLink.h
 	FindUtils.h
 	FreeLink.h
+	FreeVariables.h
 	FunctionLink.h
 	LambdaLink.h
 	NumberNode.h
@@ -66,19 +68,19 @@ INSTALL (FILES
 	Quotation.h
 	RandomChoice.h
 	RandomNumber.h
+	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
-	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
 	TypeUtils.h
 	UniqueLink.h
 	UnorderedLink.h
-	ValueOfLink.h
 	Variables.h
 	VariableList.h
+	VariableSet.h
 	DESTINATION "include/opencog/atoms/core"
 )

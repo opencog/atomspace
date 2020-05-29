@@ -33,8 +33,8 @@
 
 using namespace opencog;
 
-#define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define DO_LOG(STUFF) STUFF
 #else
 #define DO_LOG(STUFF)
@@ -155,7 +155,6 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();
 	_pattern_body = pat.body;
-	_globs = &pat.globby_terms;
 }
 
 /* ======================================================== */
@@ -247,7 +246,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat) and lpat->get_arity() != lsoln->get_arity())
+	if (not ptm->hasGlobbyVar() and lpat->get_arity() != lsoln->get_arity())
 		return false;
 
 	// If the link is a ScopeLink, we need to deal with the
@@ -318,14 +317,10 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	Handle hp(lpat);
 	if (_dynamic->find(hp) == _dynamic->end()) return true;
 
-	// We will find ourselves here whenever the link contains
-	// a GroundedPredicateNode. In this case, execute the
-	// node, and declare a match, or no match, depending
-	// one how the evaluation turned out.  Its "crisp logic"
-	// because we use a greater-than-half for the TV.
-	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd));
-	return tv->get_mean() >= 0.5;
+	// We will find ourselves here whenever the link contains a
+	// GroundedPredicateNode. In this case, execute the node, and
+	// declare a match, or no match, depending on the resulting TV.
+	return crisp_truth_from_tv(EvaluationLink::do_evaluate(_as, lgnd));
 }
 
 void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
@@ -350,7 +345,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 /// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
-                                           const HandleMap& term_gnds,
+                                           const GroundingMap& term_gnds,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
@@ -466,7 +461,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd,
-                                         const HandleMap& term_gnds)
+                                         const GroundingMap& term_gnds)
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
@@ -499,14 +494,10 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		_temp_aspace->clear();
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
-		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
+		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
 		              << std::endl << tvp->to_string() << std::endl;})
 
-		// XXX FIXME: we are making a crisp-logic go/no-go decision
-		// based on the TV strength. Perhaps something more subtle might be
-		// wanted, here.
-		bool relation_holds = tvp->get_mean() > 0.5;
-		return relation_holds;
+		return crisp_truth_from_tv(tvp);
 	}
 
 	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
@@ -524,7 +515,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
-                                                  const HandleMap& term_gnds)
+                                                  const GroundingMap& term_gnds)
 {
 	// If any grounding at all was found, reject it.
 	if (grnd)
@@ -548,7 +539,6 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 	{
 		// The instantiation above can throw an exception if the
 		// it is ill-formed. If so, assume the opt clause is absent.
-		_instor->reset_halt();
 		return true;
 	}
 
@@ -576,34 +566,45 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
  */
 bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
-                                                const HandleMap& term_gnds)
+                                                const GroundingMap& term_gnds)
 {
 	return grnd != nullptr;
 }
 
 /* ======================================================== */
 
-IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
+IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h, Type t)
 {
-	return h->getIncomingSet(_as);
+	return h->getIncomingSetByType(t, _as);
 }
 
 /* ======================================================== */
+// FIXME: the code below is festooned with various FIXME's, stating
+// that, basically, the evaluation of terms in the presence of
+// grounding atoms is a bit messed up, and not fully correctly, cleanly
+// done. So this needs a clean re-implementation, with proper
+// beta-reduction with the groundings, followed by proper evaluation.
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
-                                      const HandleMap& gnds)
+                                      const GroundingMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
 	// python for the actual evaluation. We don't want to put the
 	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is probably
-	// not very efficient, but will do for now...
+	// grounding might be insane.  So we put it here. This is not
+	// very efficient, but will do for now...
 
-	Handle gvirt;
+	ValuePtr vp;
 	try
 	{
-		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
+		// XXX FIXME. This is kind-of/mostly wrong. What we *really*
+		// want to do is to plug the grounds into the virt expression,
+		// then evaluate the virt expression, and see if it is true.
+		// So, Instantiator::instantiate() does this, but then it
+		// does too much; it also executes. Which is more than what
+		// is wanted.
+		vp = _instor->instantiate(virt, gnds, true);
 	}
 	catch (const SilentException& ex)
 	{
@@ -615,13 +616,24 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		// around the eval_sentence call in
 		// Satisfier::search_finished, because in case such virtual
 		// term is embdded in a NotLink returning false here is gonna
-		// validate the NotLink, which might not be desirable. The
-		// main reason it is here now is is order to easily access
-		// _instor to reset Instantiator::_halt and avoid falsely
-		// detecting infinite recursion.
-		_instor->reset_halt();
+		// validate the NotLink, which might not be desirable.
 		return false;
 	}
+
+	// Perhaps it already evaluated down to a truth-value.
+	if (not vp->is_atom())
+	{
+		TruthValuePtr tvp(TruthValueCast(vp));
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+		            "Expecting a TruthValue for an evaluatable link: %s\n",
+		            virt->to_short_string().c_str());
+
+		return crisp_truth_from_tv(tvp);
+	}
+
+	// Its an atom... now we have to evaluate it.
+	Handle gvirt(HandleCast(vp));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})
@@ -697,14 +709,10 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->to_short_string().c_str());
 
-	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
+	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
 	              << tvp->to_string() << std::endl;})
 
-	// XXX FIXME: we are making a crisp-logic go/no-go decision
-	// based on the TV strength. Perhaps something more subtle might be
-	// wanted, here.
-	bool relation_holds = tvp->get_mean() > 0.5;
-	return relation_holds;
+	return crisp_truth_from_tv(tvp);
 }
 
 /* ======================================================== */
@@ -717,7 +725,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * variables to values.
  */
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
-                                          const HandleMap& gnds)
+                                          const GroundingMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->to_short_string() << std::endl
@@ -818,28 +826,27 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 	// --------------------------------------------------------
 	// If we are here, then what we have is some atom that is not
-	// normally "truth-valued". We can do one of three things:
-	// a) Throw an exception and complain.
-	// b) Tell user that they must use the TruthValueOfLink, which
-	//   'returns' the TV of the atom that it wraps.
-	// c) Do the above, without inventing a new link type.
-	// The below implements choice (c): i.e. it gets the TV of this
-	// atom, and checks to see if it is greater than 0.5 or not.
+	// normally "truth-valued". We can do one of two things:
+	//
+	// a) Throw an exception and complain, and tell the user to say
+	//  `(GreaterThan (TruthValueOf X) (Number 0.5))`, to get a yes/no
+	//   decision.
+	// b) Just assume the user wanted the above, by default.
+	//
+	// Currently, the below implements choice (b): i.e. it gets the TV
+	// of this atom, and checks to see if it is greater than 0.5 or not.
+	// In the long run, we might want to switch to option (a) ... ?
 	//
 	// There are several minor issues: 1) we need to check the TV
 	// of the grounded atom, not the TV of the pattern, and 2) if
 	// the atom is executable, we need to execute it.
-	auto g = gnds.find(top);
+	const auto& g = gnds.find(top);
 	if (gnds.end() != g)
 	{
 		TruthValuePtr tvp(g->second->getTruthValue());
 		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->to_string() << std::endl;})
-		// XXX FIXME: we are making a crisp-logic go/no-go decision
-		// based on the TV strength. Perhaps something more subtle might be
-		// wanted, here.
-		bool relation_holds = tvp->get_mean() > 0.5;
-		return relation_holds;
+		return crisp_truth_from_tv(tvp);
 	}
 
 	// If it's not grounded, then perhaps its executable.

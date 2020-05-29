@@ -32,10 +32,12 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -105,9 +107,9 @@ FetchUTest::FetchUTest(void)
 
 	try {
 		// Get the database logins & etc from the config file.
-      dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-      username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-      passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
 
 		// use postgres preferentially, unless its missing.
 #ifdef HAVE_ODBC_STORAGE
@@ -148,7 +150,8 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage();
+	astore->open(uri);
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");

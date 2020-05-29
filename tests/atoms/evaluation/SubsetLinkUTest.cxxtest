@@ -1,0 +1,84 @@
+/*
+ * tests/atoms/SubsetLinkUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * Author: Linas Vepstas
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
+
+using namespace opencog;
+
+class SubsetLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	SubsetLinkUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+		logger().set_sync_flag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_subset();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Basic test
+void SubsetLinkUTest::test_subset()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = N(CONCEPT_NODE, "A");
+	Handle B = N(CONCEPT_NODE, "B");
+	Handle C = N(CONCEPT_NODE, "C");
+	Handle D = N(CONCEPT_NODE, "D");
+	Handle S = L(SET_LINK, A, B, C);
+
+	Handle AS = L(SUBSET_LINK, L(SET_LINK, A), S);
+	Handle ABS = L(SUBSET_LINK, L(SET_LINK, A, B), S);
+	Handle DS = L(SUBSET_LINK, L(SET_LINK, D), S);
+	Handle ADS = L(SUBSET_LINK, L(SET_LINK, A, D), S);
+
+	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AS);
+	printf("Got tvp=%s\n", tvp->to_string().c_str());
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	tvp = EvaluationLink::do_evaluate(&_as, ABS);
+	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+
+	tvp = EvaluationLink::do_evaluate(&_as, DS);
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	tvp = EvaluationLink::do_evaluate(&_as, ADS);
+	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

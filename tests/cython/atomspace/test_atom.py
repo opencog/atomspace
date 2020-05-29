@@ -1,11 +1,13 @@
 import unittest
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, Atom, TruthValue
+from opencog.atomspace import Atom
+from opencog.execute import execute_atom
+
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
 from time import sleep
 
@@ -13,11 +15,11 @@ class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        initialize_opencog(self.space)
+        push_default_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
-        del self.space
+        self.space = None
+        pop_default_atomspace()
 
     def test_get_value(self):
         atom = ConceptNode('foo')
@@ -47,8 +49,11 @@ class AtomTest(TestCase):
         self.assertIn(key, keys)
 
     def test_get_out(self):
-        atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
 
+        with self.assertRaises(TypeError):
+            atom = ListLink('list', ConceptNode('a'), ConceptNode('b'))
+
+        atom = ListLink(ConceptNode('a'), ConceptNode('b'))
         out = atom.out
 
         self.assertEqual(out, [ConceptNode('a'), ConceptNode('b')])
@@ -61,6 +66,43 @@ class AtomTest(TestCase):
         incoming = atom.incoming
 
         self.assertEqual(set(incoming), set([a, b]))
+
+    def test_invalid_key(self):
+        string_node = ConceptNode("String")
+        error_str = "key should be an instance of Atom, got {0} instead".format(str)
+        with self.assertRaisesRegex(TypeError, error_str):
+            string_node.set_value("bad key", StringValue("Hello, World!"))
+
+    def test_grounded_cond(self):
+        grounded_cond = CondLink(
+                    EvaluationLink (
+                        GroundedPredicateNode ("py:grounded_cond1"),
+                        ListLink ()),
+                    NumberNode('1'),
+                        EvaluationLink(
+                            GroundedPredicateNode("py:grounded_cond2"),
+                            ListLink()),
+                    NumberNode('2'))
+        result = execute_atom(self.space, grounded_cond)
+        baz = NumberNode("2")
+        print("got %s", result)
+        print("expected %s\n", baz)
+        self.assertTrue(result == baz)
+
+
+def grounded_cond1(*args):
+    print(args)
+    return TruthValue(0, 0)
+
+def grounded_cond2(*args):
+    print(args)
+    return TruthValue(1, 1)
+
+import __main__
+
+__main__.grounded_cond1 = grounded_cond1
+__main__.grounded_cond2 = grounded_cond2
+
 
 if __name__ == '__main__':
     unittest.main()

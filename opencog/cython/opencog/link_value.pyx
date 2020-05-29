@@ -9,9 +9,6 @@ def createLinkValue(arg):
 
 cdef class LinkValue(Value):
 
-    def __init__(self, ptr_holder):
-        super(LinkValue, self).__init__(ptr_holder)
-
     def to_list(self):
         return LinkValue.vector_of_values_to_list(
             &((<cLinkValue*>self.get_c_value_ptr().get()).value()))

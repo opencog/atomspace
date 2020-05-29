@@ -50,12 +50,14 @@ class TypedAtomLink : public UniqueLink
 protected:
 	void init();
 public:
-	TypedAtomLink(const HandleSeq&, Type=TYPED_ATOM_LINK);
+	TypedAtomLink(const HandleSeq&&, Type=TYPED_ATOM_LINK);
 	TypedAtomLink(const Handle& alias, const Handle& body);
 
-	TypedAtomLink(const Link &l);
-	Handle get_atom(void) const { return _outgoing[0]; }
-	Handle get_type(void) const { return _outgoing[1]; }
+	TypedAtomLink(const TypedAtomLink&) = delete;
+	TypedAtomLink& operator=(const TypedAtomLink&) = delete;
+
+	Handle get_atom(void) const { return _outgoing.at(0); }
+	Handle get_type(void) const { return _outgoing.at(1); }
 
 	/**
 	 * Given a Handle pointing to <atom> in

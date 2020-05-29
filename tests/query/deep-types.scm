@@ -1,4 +1,7 @@
 ;
+; deep-types.scm
+; Used for Unit test DeepTypesUTest based on example code.
+;
 ; A demonstration of using type signatures aka "deep types" during
 ; pattern matching.  Type signatures are a way of specifying the type
 ; of a hypergraph.  This can be used to restrict the search space during
@@ -9,6 +12,37 @@
 (use-modules (opencog exec))
 (use-modules (opencog type-utils))
 
+; =============================================================
+
+; The cog-value-is-type? function allows signatures to be
+; directly validated. Consider these examples:
+
+; Should evaluate to true.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+
+; We can define new types, too.
+(DefineLink
+   (DefinedType "My foo type")
+   (Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+
+; Should evaluate to true
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+
+; =============================================================
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))
 (Inheritance (Concept "bar") (Concept "bingo"))
@@ -93,31 +127,40 @@
 
 ; (cog-execute! predicate-search)
 ; =============================================================
+; A somewhat silly special case involving a constant
 
-; The cog-value-is-type? function allows signatures to be
-; directly validated. Consider these examples:
+(define constant-a
+	(Get
+		(TypedVariable (Variable "X") (Signature (Concept "A")))
+		(Present (Variable "X"))))
 
-; Should evaluate to true.
-;(cog-value-is-type?
-;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
-;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+; After Holiday in Berlin ...
+(define constant-zappa
+	(Get
+		(TypedVariable (Variable "X") (Signature (Concept "A")))
+		(Present
+			(Evaluation (Predicate "Aybe Sea")
+				(ListLink
+					(Variable "X") (Concept "B") (Concept "C"))))))
 
-; Should evaluate to false.
-;(cog-value-is-type?
-;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
-;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+; Above should find the below.
+(Evaluation (Predicate "Aybe Sea")
+	(ListLink (Concept "A") (Concept "B") (Concept "C")))
 
-; We can define new types, too.
-(DefineLink
-   (DefinedType "My foo type")
-   (Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+; (cog-execute! constant-zappa)
 
-; Should evaluate to true
-;(cog-value-is-type?
-;   (DefinedType "My foo type")
-;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+; =============================================================
+; Disconennted components with deep types.
 
-; Should evaluate to false.
-;(cog-value-is-type?
-;   (DefinedType "My foo type")
-;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+(define deep-disconnect
+   (Get
+      (VariableList
+         (TypedVariable (Variable "X") (Signature (Concept "A")))
+         (TypedVariable (Variable "Y") (Signature (Concept "B"))))
+      (And
+         (Present (Variable "X"))
+         (Present (Variable "Y")))))
+
+; (cog-execute! deep-disconnect)
+
+; =============================================================

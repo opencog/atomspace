@@ -30,23 +30,9 @@ void ImplicationScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
-ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq, Type t)
-	: ScopeLink(hseq, t)
+ImplicationScopeLink::ImplicationScopeLink(const HandleSeq&& hseq, Type t)
+	: ScopeLink(std::move(hseq), t)
 {
-	init();
-}
-
-ImplicationScopeLink::ImplicationScopeLink(const Link &l)
-	: ScopeLink(l)
-{
-	Type t = l.get_type();
-	if (not nameserver().isA(t, IMPLICATION_SCOPE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ImplicationScopeLink, got %s", tname.c_str());
-	}
-
 	init();
 }
 

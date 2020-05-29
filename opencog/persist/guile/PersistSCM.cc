@@ -21,10 +21,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _OPENCOG_PERSIST_SCM_H
+#define _OPENCOG_PERSIST_SCM_H
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog
+{
+/** \addtogroup grp_persist
+ *  @{
+ */
+
+class PersistSCM : public ModuleWrap
+{
+private:
+	void init(void);
+
+	Handle fetch_atom(Handle);
+	Handle fetch_incoming_set(Handle);
+	Handle fetch_incoming_by_type(Handle, Type);
+	Handle store_atom(Handle);
+	void load_type(Type);
+	void load_atomspace(void);
+	void store_atomspace(void);
+	void barrier(void);
+
+public:
+	PersistSCM(void);
+}; // class
+
+/** @}*/
+}  // namespace
+
+extern "C" {
+void opencog_persist_init(void);
+};
+
+#endif // _OPENCOG_PERSIST_SCM_H
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
-
-#include "PersistSCM.h"
 
 using namespace opencog;
 
@@ -81,19 +119,6 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
-// XXX FIXME -- it appear that this was never exposed in scheme,
-// and so there are no users anywhere for this, which means that
-// there are no users for `as->fetch_valuations()` either, which
-// means it can be removed.  It's not hard to implement in SQL,
-// but does pose an implementation difficulty for IPFS. Since this
-// appears to be unused, then it really should be eliminate.
-// ... someday. In a later pull req, I guess.
-void PersistSCM::fetch_valuations(Handle key, bool get_all_values)
-{
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-valuations");
-	as->fetch_valuations(key, get_all_values);
-}
-
 /**
  * Store the single atom to the backing store hanging off the
  * atom-space.
@@ -131,5 +156,5 @@ void PersistSCM::barrier(void)
 
 void opencog_persist_init(void)
 {
-   static PersistSCM patty;
+	static PersistSCM patty;
 }

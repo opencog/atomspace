@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -31,20 +17,14 @@ using namespace opencog;
 
 Handle PlusLink::zero;
 
-PlusLink::PlusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+PlusLink::PlusLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
 
 PlusLink::PlusLink(const Handle& a, const Handle& b)
     : ArithmeticLink({a, b}, PLUS_LINK)
-{
-	init();
-}
-
-PlusLink::PlusLink(const Link& l)
-    : ArithmeticLink(l)
 {
 	init();
 }
@@ -63,52 +43,42 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return get_value(as, silent, fi);
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+	// If adding zero, just drop the zero.
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
+		return vi;
+
+	// Are they numbers? If so, perform vector (pointwise) addition.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
 	{
-		double sum = get_double(vi) + get_double(vj);
-		return createNumberNode(sum);
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(plus(vi, vj, true));
+
+		return plus(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
 	}
 
-	// If adding zero, just drop the zero.
-	// Unless the other side is a StreamValue, in which case, we
-	// have to behave consistently with adding a non-zero number.
-	// Adding a number to a stream samples one value out of that stream.
-	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
-		return sample_stream(vj, vjtype);
-
-	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
-		return sample_stream(vi, vitype);
-
-	// Is either one a PlusLink? If so, then flatten.
-	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
+	// Is vi a PlusLink? If so, then flatten.
+	if (PLUS_LINK == vitype)
 	{
-		HandleSeq seq;
-		// flatten the left
-		if (PLUS_LINK == vitype)
-		{
-			for (const Handle& lhs: HandleCast(vi)->getOutgoingSet())
-				seq.push_back(lhs);
-		}
-		else
-		{
-			seq.push_back(HandleCast(vi));
-		}
+		HandleSeq seq = HandleCast(vi)->getOutgoingSet();
 
 		// flatten the right
 		if (PLUS_LINK == vjtype)
@@ -120,12 +90,34 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, PLUS_LINK));
-		PlusLinkPtr ap = PlusLinkCast(foo);
+		PlusLinkPtr ap = createPlusLink(std::move(seq));
 		return ap->delta_reduce(as, silent);
 	}
 
-	// Is fi identical to fj? If so, then replace by 2*fi
+	if (PLUS_LINK == vjtype)
+	{
+		// Paste on one at a time; this avoids what would otherwise
+		// be infinite recursion on `(Plus A B C)` where kons was
+		// unable to reduce `(Plus B C)`. So we instead try to do
+		// `(Plus (Plus A B) C)` which should work out...
+		ValuePtr vsum = vi;
+		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
+		{
+			if (PLUS_LINK == vsum->get_type())
+			{
+				HandleSeq vout(HandleCast(vsum)->getOutgoingSet());
+				vout.push_back(h);
+				vsum = createPlusLink(std::move(vout));
+			}
+			else
+			{
+				vsum = kons(as, silent, vsum, h);
+			}
+		}
+		return vsum;
+	}
+
+	// Is vi identical to vj? If so, then replace by 2*vi
 	Handle hvi(HandleCast(vi));
 	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
@@ -147,14 +139,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		Handle subtrahend(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == minuend->get_type())
 		{
-			double sum = get_double(vj) + get_double(minuend);
-			Handle hsum(createNumberNode(sum));
+			Handle hsum(createNumberNode(plus(vj, minuend)));
 			return createMinusLink(hsum, subtrahend);
 		}
 		if (NUMBER_NODE == subtrahend->get_type())
 		{
-			double diff = get_double(vj) - get_double(subtrahend);
-			Handle hdiff(createNumberNode(diff));
+			Handle hdiff(createNumberNode(
+				minus(vj, subtrahend)));
 			if (content_eq(hdiff, zero))
 				return minuend;
 			return createPlusLink(minuend, hdiff);
@@ -201,7 +192,7 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 				rest.push_back(jlpo[k]);
 
 			// a_plus is now (a+1) or (a+b) as described above.
-			Handle foo(createLink(rest, PLUS_LINK));
+			Handle foo(createLink(std::move(rest), PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			ValuePtr a_plus(ap->delta_reduce(as, silent));
 
@@ -216,13 +207,13 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
 		std::swap(vitype, vjtype);
 	}
 
-	// Scalar times vector
+	// vector ops...
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
-		return plus(get_double(vi), FloatValueCast(vj));
+		return plus(NumberNodeCast(vi), FloatValueCast(vj));
 	}
 
-	// Vector times vector
+	// Vector plus vector
 	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return plus(FloatValueCast(vi), FloatValueCast(vj));

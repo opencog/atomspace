@@ -27,6 +27,7 @@
  * Created by Linas Vepstas February 2008
  */
 
+#include <opencog/util/oc_assert.h>
 #include "FindUtils.h"
 
 namespace opencog {
@@ -235,10 +236,7 @@ bool is_free_in_tree(const Handle& tree, const Handle& atom)
 		// Plow through any quotes.
 		if (is_quoted_in_tree(tree, subtr)) return false;
 
-		// Halt recursion if the term is executable.
-		if (subtr->is_executable()) return true;
-
-		// Halt rescursion if scoped.
+		// Halt recursion if scoped.
 		if (nameserver().isA(subtr->get_type(), SCOPE_LINK))
 		{
 			ScopeLinkPtr stree(ScopeLinkCast(subtr));
@@ -328,6 +326,17 @@ unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
 	return count;
 }
 
+HandleSet unquoted_unscoped_in_tree(const Handle& tree,
+                                    const HandleSet& atoms)
+{
+	HandleSet rv;
+	for (const Handle& n: atoms)
+	{
+		if (is_unquoted_unscoped_in_tree(tree, n)) rv.insert(n);
+	}
+	return rv;
+}
+
 bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {
@@ -344,7 +353,8 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
 	return false;
 }
 
-bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation)
+bool contains_atomtype(const Handle& clause, Type atom_type,
+                       Quotation quotation)
 {
 	Type clause_type = clause->get_type();
 	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
@@ -361,12 +371,32 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 	return false;
 }
 
+size_t contains_atomtype_count(const Handle& clause, Type atom_type,
+                               Quotation quotation)
+{
+	size_t cnt = 0;
+
+	Type clause_type = clause->get_type();
+	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
+		cnt++;
+
+	quotation.update(clause_type);
+
+	if (not clause->is_link()) return 0;
+
+	for (const Handle& subclause: clause->getOutgoingSet())
+	{
+		cnt += contains_atomtype_count(subclause, atom_type, quotation);
+	}
+	return cnt;
+}
+
 HandleSet get_free_variables(const Handle& h, Quotation quotation)
 {
 	Type t = h->get_type();
 
 	// Base cases
-	if (t == VARIABLE_NODE and quotation.is_unquoted())
+	if ((t == VARIABLE_NODE or t == GLOB_NODE) and quotation.is_unquoted())
 		return {h};
 	if (h->is_node())
 		return {};
@@ -422,6 +452,17 @@ HandleSet get_all_uniq_atoms(const Handle& h)
 bool is_closed(const Handle& h, Quotation quotation)
 {
 	return get_free_variables(h, quotation).empty();
+}
+
+bool is_constant(const Handle& h, Quotation quotation)
+{
+	if (not is_closed(h, quotation)) return false;
+
+	if (contains_atomtype(h, TYPE_NODE, quotation)) return false;
+	if (contains_atomtype(h, TYPE_CHOICE, quotation)) return false;
+	if (contains_atomtype(h, TYPE_OUTPUT_LINK, quotation)) return false;
+
+	return true;
 }
 
 } // namespace opencog

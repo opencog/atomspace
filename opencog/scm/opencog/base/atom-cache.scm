@@ -24,6 +24,20 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 
+; Guile needs help computing the hash of an atom.
+; The catch-handler is for hash tables that accidentally retain
+; deleted Atoms. These are given a hash of zero; the resulting
+; atom-assoc will fail, thus behaving like an unmemoized Atom.
+; (Try it: create an atom, put it in the hash table, delete the
+; atom, try to access it. Kaboom! The catch avoids the kaboom.)
+(define (atom-hash ATOM SZ)
+	(catch #t
+		(lambda() (modulo (cog-handle ATOM) SZ))
+		(lambda (key . args) 0)))
+
+(define (atom-assoc ATOM ALIST)
+	(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
 ; ---------------------------------------------------------------------
 
 (define-public (make-afunc-cache AFUNC)
@@ -42,11 +56,6 @@
 "
 	; Define the local hash table we will use.
 	(define cache (make-hash-table))
-
-	; Guile needs help computing the hash of an atom.
-	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
-	(define (atom-assoc ATOM ALIST)
-		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
 
 	(lambda (ITEM)
 		(define val (hashx-ref atom-hash atom-assoc cache ITEM))
@@ -79,11 +88,6 @@
 "
    ; Define the local hash table we will use.
    (define cache (make-hash-table))
-
-   ; Guile needs help computing the hash of an atom.
-   (define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
-   (define (atom-assoc ATOM ALIST)
-      (find (lambda (pr) (equal? ATOM (car pr))) ALIST))
 
 	; Insert each atom into the hash table.
 	(for-each
@@ -124,9 +128,6 @@
      ((ConceptNode \"ABC\") (ConceptNode \"DEF\"))
 "
 	(define cache (make-hash-table))
-	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
-	(define (atom-assoc ATOM ALIST)
-		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
 
 	(lambda (ITEM)
 		(if ITEM
@@ -224,9 +225,6 @@
   much much faster, if either list is more than ten atoms long.
 "
 	(define cache (make-hash-table))
-	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
-	(define (atom-assoc ATOM ALIST)
-		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
 
 	(for-each (lambda (ITEM)
 		(hashx-set! atom-hash atom-assoc cache ITEM #f))

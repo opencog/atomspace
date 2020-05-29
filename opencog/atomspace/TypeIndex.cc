@@ -45,10 +45,12 @@ bool TypeIndex::contains_duplicate() const
 
 bool TypeIndex::contains_duplicate(const AtomSet& atoms) const
 {
+#if 0
 	for (AtomSet::const_iterator i = atoms.begin(); i != atoms.end(); ++i)
 		for (AtomSet::const_iterator j = std::next(i); j != atoms.end(); ++j)
 			if (**i == **j)
 				return true;
+#endif
 	return false;
 }
 
@@ -123,7 +125,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 Handle TypeIndex::iterator::operator*(void)
 {
 	if (s == send) return Handle::UNDEFINED;
-	return (*se)->get_handle();
+	return se->second;
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

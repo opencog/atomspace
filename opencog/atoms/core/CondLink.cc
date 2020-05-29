@@ -21,6 +21,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "CondLink.h"
 
@@ -66,10 +67,15 @@ void CondLink::init(void)
 			exps.push_back(_outgoing[i]);
 		}
 	}
+
+	// Hmm. Not sure what to do if no default was specified. For right
+	// now, it seems like creating a FalseLink is a good idea ...!?
+	if (nullptr == default_exp)
+		default_exp = createLink(FALSE_LINK);
 }
 
-CondLink::CondLink(const HandleSeq &oset, Type t)
-		: FunctionLink(oset, t)
+CondLink::CondLink(const HandleSeq &&oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, COND_LINK)) {
 		const std::string &tname = nameserver().getTypeName(t);
@@ -91,12 +97,19 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 		{
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
-			return exps[i];
+
+			// At this time, not every Atom type knows how to execute
+			// itself. So if the above didn't work, try again, forcing
+			// further reduction.
+			Instantiator inst(scratch);
+			return inst.execute(exps[i]);
 		}
 	}
+
 	if (default_exp->is_executable())
 		return default_exp->execute(scratch, silent);
-	return default_exp;
+	Instantiator inst(scratch);
+	return inst.execute(default_exp);
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)

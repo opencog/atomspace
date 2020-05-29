@@ -92,30 +92,32 @@ bool remove_constants(const HandleSet& vars, Pattern& pat)
 	return modified;
 }
 
-bool is_constant(const HandleSet& vars, const Handle& clause)
+bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
-	bool constant =
-		not (any_unquoted_unscoped_in_tree(clause, vars)
-		     or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-		     or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
-		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
-		     // TODO: should not the below be any VirtualLink?
-		     // Or contains any EvaluatableLink ??
-		     or contains_atomtype(clause, IDENTICAL_LINK)
-		     or contains_atomtype(clause, EQUAL_LINK)
-		     or contains_atomtype(clause, GREATER_THAN_LINK)
-		     // If it is an EvaluatableLink then is is not a
-		     // constant, unless it is a closed EvaluationLink over
-		     // a PredicateNode.
-		     or (nameserver().isA(ct, EVALUATABLE_LINK)
-		         and (0 == clause->get_arity()
-		              or
-		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+	bool evaluatable =
+		// If it is an EvaluatableLink, then is is evaluatable,
+		// unless it is a closed (variable-free) EvaluationLink
+		// over a PredicateNode.
+		(nameserver().isA(ct, EVALUATABLE_LINK)
+		   and (not (EVALUATION_LINK == ct)
+		      or 0 == clause->get_arity()
+		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))
 
-	return constant;
+		// XXX FIXME Are the below needed?
+		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+		or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+
+	return evaluatable;
+}
+
+bool is_constant(const HandleSet& vars, const Handle& clause)
+{
+	return
+		not any_unquoted_unscoped_in_tree(clause, vars)
+		and not can_evaluate(clause);
 }
 
 /* ======================================================== */
@@ -302,7 +304,7 @@ void get_bridged_components(const HandleSet& vars,
 	// The user might want to reject such bridges, but allow each
 	// opt individually, as long as they don't bridge. As of today,
 	// specifying this kind of pattern would take some hard work,
-	// (I'm not sure its even possible with toeay's API) and so it
+	// (I'm not sure its even possible with today's API) and so it
 	// seems very unlikely that any user would want this, and thus
 	// very unlikely that they'll hit this bug.
 }

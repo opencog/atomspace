@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/InitiateSearchCB.h>
@@ -55,6 +56,7 @@ class Satisfier :
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 
+		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		Handle _ground;
 		TruthValuePtr _result;
@@ -72,8 +74,8 @@ class Satisfier :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
@@ -95,13 +97,18 @@ class SatisfyingSet :
 	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
+	protected:
+		AtomSpace* _as;
+		DECLARE_PE_MUTEX;
+		HandleSeq _varseq;
+		HandleSet _satisfying_set;
+		QueueValuePtr _result_queue;
+
 	public:
 		SatisfyingSet(AtomSpace* as) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as),
-			max_results(SIZE_MAX) {}
+			_as(as), max_results(SIZE_MAX) {}
 
-		HandleSeq _varseq;
-		HandleSet _satisfying_set;
 		size_t max_results;
 
 		virtual void set_pattern(const Variables& vars,
@@ -117,8 +124,14 @@ class SatisfyingSet :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
+
+		virtual bool start_search(void);
+		virtual bool search_finished(bool);
+
+		virtual QueueValuePtr get_result_queue()
+		{ return _result_queue; }
 };
 
 }; // namespace opencog

@@ -35,6 +35,7 @@
 #include <string>
 #include <sstream>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -54,13 +55,15 @@ namespace opencog
 {
 
 //! UUID == Universally Unique Identifier
-typedef unsigned long UUID;
+typedef size_t UUID;
+
+//! ContentHash == 64-bit hash of an Atom.
 typedef size_t ContentHash;
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
 
-//! contains an unique identificator
+//! Pointer to an Atom, providing extra utility/convenience methods.
 class Handle : public AtomPtr
 {
 
@@ -78,13 +81,26 @@ public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
+    // Copy constructor
     explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
+
+    // Move constructor
+    explicit Handle(AtomPtr&& atom) : AtomPtr(atom) {}
+
     explicit Handle() {}
+
     ~Handle() {}
 
     ContentHash value(void) const;
 
+    // Copy assign operator
     inline Handle& operator=(const AtomPtr& a) {
+        this->AtomPtr::operator=(a);
+        return *this;
+    }
+
+    // Move assign operator
+    inline Handle& operator=(AtomPtr&& a) {
         this->AtomPtr::operator=(a);
         return *this;
     }
@@ -98,17 +114,18 @@ public:
         return get();
     }
 
-    // Allows expressions like "if(h)..." to work when h has a non-null pointer.
+    // Allows expressions like "if(h)..." to work
+    // when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
         if (get()) return true;
         return false;
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
-        return get() == 0x0;
+        return get() == nullptr;
     }
     inline bool operator!=(std::nullptr_t) const noexcept {
-        return get() != 0x0;
+        return get() != nullptr;
     }
     inline bool operator==(const Atom* ap) const noexcept {
         return get() == ap;
@@ -157,14 +174,6 @@ bool content_eq(const opencog::Handle& lh,
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
-struct handle_less
-{
-   bool operator()(const Handle& hl, const Handle& hr) const
-   {
-       return hl.operator<(hr);
-   }
-};
-
 //! a pair of Handles
 typedef std::pair<Handle, Handle> HandlePair;
 
@@ -193,8 +202,14 @@ typedef std::unordered_set<Handle> UnorderedHandleSet;
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
 
-//! an ordered map from Handle to Handle set
+//! a hash table. Usually has faster insertion.
+typedef std::unordered_map<Handle, Handle> UnorderedHandleMap;
+
+//! an ordered map from Handle to HandleSet
 typedef std::map<Handle, HandleSet> HandleMultimap;
+
+//! an ordered map from Handle to HandleSeq
+typedef std::map<Handle, HandleSeq> HandleSeqMap;
 
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
@@ -213,6 +228,18 @@ typedef Counter<Handle, double> HandleCounter;
 
 //! a map from handle to unsigned
 typedef Counter<Handle, unsigned> HandleUCounter;
+
+// A map of variables to thier groundings.  Everyone working with
+// groundings uses this type; changing the type here allows easy
+// comparisons of performance for these two mapping styles.
+// At this time (Dec 2019; gcc-8.3.0) there seems to be no difference
+// in performance in the pattern matcher as a result of using the
+// unordered aka std::_Hashtable variant vs the std::_Rb_tree variant.
+// (as measured with the `guile -l nano-en.scm` benchmark.)
+typedef HandleMap GroundingMap;
+// typedef UnorderedHandleMap GroundingMap;
+typedef std::vector<GroundingMap> GroundingMapSeq;
+typedef std::vector<GroundingMapSeq> GroundingMapSeqSeq;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
@@ -308,7 +335,11 @@ std::string oc_to_string(const HandleMap& hm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMap::value_type& hmv,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const UnorderedHandleMap& hm,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMultimap& hmm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleSeqMap& hsm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMapSeq& hms,
                          const std::string& indent=empty_string);
@@ -360,24 +391,9 @@ ostream& operator<<(ostream&, const opencog::HandleMap&);
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::UnorderedHandleMap&);
 
-#ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
-// The below used to work, but broke in gcc-4.7.2. The reason it
-// broke is that it fails to typedef result_type and argument_type,
-// which ... somehow used to work automagically?? It doesn't any more.
-// I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.
-
-template<>
-inline std::size_t
-std::hash<opencog::Handle>::operator()(const opencog::Handle& h) const
-{
-    return hash_value(h);
-}
-
-#else
-
-// This works for me, per note immediately above.
+// Hash, needed for std::unordered_map
 template<>
 struct hash<opencog::Handle>
 {
@@ -432,7 +448,42 @@ struct equal_to<opencog::HandlePair>
     }
 };
 
-#endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+template<>
+struct hash<opencog::HandleSeq>
+{
+    typedef std::size_t result_type;
+    typedef opencog::HandleSeq argument_type;
+    std::size_t
+    operator()(const opencog::HandleSeq& hseq) const noexcept
+    {
+        std::size_t hsh = 0;
+        for (const opencog::Handle& h : hseq) hsh += hash_value(h);
+        return hsh;
+    }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::HandleSeq>
+{
+    typedef bool result_type;
+    typedef opencog::HandleSeq first_argument;
+    typedef opencog::HandleSeq second_argument;
+    bool
+    operator()(const opencog::HandleSeq& lhs,
+               const opencog::HandleSeq& rhs) const noexcept
+    {
+        if (lhs == rhs) return true;
+        size_t len = lhs.size();
+        if (rhs.size() != len) return false;
+        std::equal_to<opencog::Handle> eq;
+        for (size_t i=0; i<len; i++)
+        {
+            if (not eq.operator()(lhs[i], rhs[i])) return false;
+        }
+        return true;
+    }
+};
 
 } // ~namespace std
 

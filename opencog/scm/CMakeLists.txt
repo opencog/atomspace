@@ -3,10 +3,6 @@
 
 ADD_GUILE_MODULE (FILES
 	opencog.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/"
-)
-
-ADD_GUILE_MODULE (FILES
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
 	opencog/base/core-docs.scm
@@ -16,18 +12,25 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/tv.scm
 	opencog/base/types.scm
 	opencog/base/utilities.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/base"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}"
+	DEPENDS opencog_atom_types
 )
 
+# Actually, each of these are distinct modules, and really
+# should be listed seperately, one module each. But, as it
+# happens, the ADD_GUILE_MODULE macro still does the right
+# thing for a mass listing like this, so .. OK. Whatever.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/logger.scm
 	opencog/randgen.scm
 	opencog/persist.scm
+	opencog/persist-file.scm
 	opencog/query.scm
 	opencog/test-runner.scm
 	opencog/type-utils.scm
+	opencog/uuid.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
@@ -41,12 +44,12 @@ IF (HAVE_GEARMAN)
 	)
 ENDIF (HAVE_GEARMAN)
 
-IF (PGSQL_FOUND OR ODBC_FOUND)
+IF (HAVE_SQL_STORAGE)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
 		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	)
-ENDIF (PGSQL_FOUND OR ODBC_FOUND)
+ENDIF (HAVE_SQL_STORAGE)
 
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES

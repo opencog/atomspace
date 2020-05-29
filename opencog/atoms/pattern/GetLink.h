@@ -22,24 +22,24 @@
 #ifndef _OPENCOG_GET_LINK_H
 #define _OPENCOG_GET_LINK_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/MeetLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class GetLink : public PatternLink
+class GetLink : public MeetLink
 {
 protected:
 	void init(void);
-	virtual HandleSet do_execute(AtomSpace*, bool silent);
 
 public:
-	GetLink(const HandleSeq&, Type=GET_LINK);
-	explicit GetLink(const Link &l);
+	GetLink(const HandleSeq&&, Type=GET_LINK);
 
-	virtual bool is_executable() const { return true; }
+	GetLink(const GetLink&) = delete;
+	GetLink operator=(const GetLink&) = delete;
+
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);

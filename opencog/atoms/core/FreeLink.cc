@@ -26,50 +26,26 @@
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq& oset, Type t)
-    : Link(oset, t)
+FreeLink::FreeLink(const HandleSeq&& oset, Type t)
+    : Link(std::move(oset), t)
 {
+	if (FREE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"FreeLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
-
-	unorder();
 
 	// Derived classes have thier own init routines.
 	if (FREE_LINK != t) return;
 	init();
 }
 
-FreeLink::FreeLink(const Link& l)
-    : Link(l)
-{
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, FREE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
-
-	unorder();
-
-	// Derived classes have thier own init routines.
-	if (FREE_LINK != tscope) return;
-	init();
-}
-
 /* ================================================================= */
-
-void FreeLink::unorder(void)
-{
-	if (not nameserver().isA(get_type(), UNORDERED_LINK)) return;
-
-	// Place into arbitrary, but deterministic order.
-	// We have to do this here,  because some links,
-	// e.g. EqualLink and IdenticalLink are unordered,
-	// but don't inherit from the C++ UnorderedLink class.
-	// So we hack around and do it here.
-	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
-}
 
 void FreeLink::init(void)
 {
-	_vars.find_variables(_outgoing);
+	_vars.find_variables(_outgoing, true);
 }
 
 DEFINE_LINK_FACTORY(FreeLink, FREE_LINK);

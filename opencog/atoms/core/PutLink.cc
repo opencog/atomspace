@@ -22,20 +22,15 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "DefineLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset, Type t)
-    : PrenexLink(oset, t)
-{
-	init();
-}
-
-PutLink::PutLink(const Link& l)
-    : PrenexLink(l)
+PutLink::PutLink(const HandleSeq&& oset, Type t)
+    : PrenexLink(std::move(oset), t)
 {
 	init();
 }
@@ -97,7 +92,13 @@ void PutLink::init(void)
 		_arguments = _outgoing[1];
 	}
 	else
+	{
+		// ScopeLink::extract_variables does not assign _vardecl and
+		// _body if variable declaration is unquoted. (Re)do it here.
+		_vardecl = _outgoing[0];
+		_body = _outgoing[1];
 		_arguments = _outgoing[2];
+	}
 
 	static_typecheck_arguments();
 }
@@ -153,10 +154,10 @@ void PutLink::static_typecheck_arguments(void)
 		}
 	}
 
-	size_t sz = _varlist.varseq.size();
+	size_t sz = _variables.varseq.size();
 	if (1 == sz)
 	{
-		if (not _varlist.is_type(valley)
+		if (not _variables.is_type(valley)
 		    and SET_LINK != vtype
 		    and PUT_LINK != vtype
 		    and not (nameserver().isA(vtype, SATISFYING_LINK)))
@@ -168,7 +169,7 @@ void PutLink::static_typecheck_arguments(void)
 			{
 				LambdaLinkPtr lam(LambdaLinkCast(valley));
 				const Handle& body = lam->get_body();
-				if (_varlist.is_type(body))
+				if (_variables.is_type(body))
 					return; // everything is OK.
 			}
 
@@ -188,7 +189,7 @@ void PutLink::static_typecheck_arguments(void)
 	{
 		// is_type() verifies that the arity of the vars
 		// and the arguments matches up.
-		if (not _varlist.is_type(valley->getOutgoingSet()))
+		if (not _variables.is_type(valley->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
@@ -231,7 +232,7 @@ void PutLink::static_typecheck_arguments(void)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected argument list!");
 
-			if (not _varlist.is_type(h->getOutgoingSet()))
+			if (not _variables.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink bad argument list!");
 		}
@@ -241,7 +242,7 @@ void PutLink::static_typecheck_arguments(void)
 	// If the arity is one, the arguments must obey type constraint.
 	for (const Handle& h : valley->getOutgoingSet())
 	{
-		if (not _varlist.is_type(h))
+		if (not _variables.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
 					"PutLink bad type!");
 	}
@@ -335,12 +336,23 @@ static inline Handle expand(const Handle& arg, bool silent)
 Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
-	Variables vars(_varlist);
+	Variables vars(_variables);
 	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 	Handle args(_arguments);
+	ValuePtr vargs(_arguments);
 
-	if (args->is_executable())
-		args = HandleCast(args->execute());
+	// There is no eager execution of arguments, before performing
+	// the reduction ... with one exception. If the argument is a
+	// MeetLink, we perform the search to find what to plug in.
+	if (nameserver().isA(_arguments->get_type(), MEET_LINK))
+	{
+		vargs = _arguments->execute();
+		if (nullptr == vargs)
+			throw SyntaxException(TRACE_INFO,
+			       "Execution must result in an Atom!");
+		if (vargs->is_atom())
+			args = HandleCast(vargs);
+	}
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
@@ -377,7 +389,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the arguments that we will plug into the body.
-	Type vtype = args->get_type();
+	Type vtype = vargs->get_type();
 	size_t nvars = vars.varseq.size();
 
 	// FunctionLinks behave like pointless lambdas; that is, one can
@@ -392,19 +404,28 @@ Handle PutLink::do_reduce(void) const
 	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
 	if (0 == nvars and nameserver().isA(btype, FUNCTION_LINK))
 	{
+		if (nameserver().isA(vtype, LINK_VALUE))
+		{
+			HandleSeq oset(bods->getOutgoingSet());
+			HandleSeq argl(LinkValueCast(vargs)->to_handle_seq());
+			for (const Handle& arg : argl)
+				oset.emplace_back(expand(arg, _silent));
+			return createLink(std::move(oset), btype);
+		}
+
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			for (const Handle& arg : args->getOutgoingSet())
 				oset.emplace_back(expand(arg, _silent));
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
 			oset.emplace_back(args);
-			return createLink(oset, btype);
+			return createLink(std::move(oset), btype);
 		}
 
 		// If the arguments are given in a set, then iterate over the set...
@@ -416,21 +437,26 @@ Handle PutLink::do_reduce(void) const
 				HandleSeq oset(bods->getOutgoingSet());
 				for (const Handle& arg : h->getOutgoingSet())
 					oset.emplace_back(expand(arg, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 			else
 			{
 				HandleSeq oset(bods->getOutgoingSet());
 				oset.emplace_back(expand(h, _silent));
-				bset.emplace_back(createLink(oset, btype));
+				bset.emplace_back(createLink(std::move(oset), btype));
 			}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If there is only one variable in the PutLink body...
 	if (1 == nvars)
 	{
+		if (nameserver().isA(vtype, LINK_VALUE))
+		{
+			return reddy(subs, LinkValueCast(vargs)->to_handle_seq());
+		}
+
 		if (SET_LINK != vtype)
 		{
 			return reddy(subs, {args});
@@ -448,13 +474,26 @@ Handle PutLink::do_reduce(void) const
 			}
 			catch (const TypeCheckException& ex) {}
 		}
-		return createLink(bset, SET_LINK);
+		return createLink(std::move(bset), SET_LINK);
 	}
 
 	// If we are here, then there are multiple variables in the body.
-	// See how many arguments there are.  If the arguments are in a
-	// ListLink, then assume that there is only a single set of
-	// arguments to plug in.
+
+	// If the arguments are in a LinkValue, then assume that there is
+	// only a single set of arguments to plug in. Same as LIST_LINK
+	// below.
+	if (nameserver().isA(vtype, LINK_VALUE))
+	{
+		HandleSeq argl(LinkValueCast(vargs)->to_handle_seq());
+
+		HandleSeq oset;
+		for (const Handle& h: argl)
+			oset.push_back(expand(h, _silent));
+		return reddy(subs, oset);
+	}
+
+	// If the arguments are in a ListLink, then assume that there is
+	// only a single set of arguments to plug in.
 	if (LIST_LINK == vtype)
 	{
 		HandleSeq oset;
@@ -468,9 +507,7 @@ Handle PutLink::do_reduce(void) const
 	// don't need any more checking. Just pass it through.
 	if (LAMBDA_LINK == vtype)
 	{
-		HandleSeq oset;
-		oset.emplace_back(args);
-		return reddy(subs, oset);
+		return reddy(subs, {args});
 	}
 
 	// If we are here, then there are multiple arguments.
@@ -494,7 +531,7 @@ Handle PutLink::do_reduce(void) const
 		}
 		catch (const TypeCheckException& ex) {}
 	}
-	return createLink(bset, SET_LINK);
+	return createLink(std::move(bset), SET_LINK);
 }
 
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)

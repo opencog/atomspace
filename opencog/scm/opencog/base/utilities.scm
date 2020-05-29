@@ -59,7 +59,8 @@
 ;
 
 (use-modules (srfi srfi-1))
-(use-modules (ice-9 threads))  ; needed for par-map par-for-each
+(use-modules (ice-9 optargs))  ; Needed for define*-public
+(use-modules (ice-9 threads))  ; Needed for par-map par-for-each
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
@@ -149,17 +150,21 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (extract-type atom-type)
+(define*-public (extract-type atom-type #:optional (ATOMSPACE (cog-atomspace)))
 "
-  extract-type -- extract all atoms of type 'atom-type'
+  extract-type ATOM-TYPE [ATOMSPACE] -- extract all atoms of type 'atom-type'
 
   If any atoms of that type have incoming links, those links will be
   extracted, and so on recursively.  This only removes the atoms from the
   atomspace, it does NOT remove it from the backingstore, if attached!
+
+  If the optional argument ATOMSPACE is provided, then the atoms are
+  extracted from it; otherwise the default atomspace is used.
 "
 	(cog-map-type
 		(lambda (x) (cog-extract-recursive x) #f)
 		atom-type
+		ATOMSPACE
 	)
 )
 
@@ -173,13 +178,16 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-report-counts)
+(define*-public (cog-report-counts #:optional (ATOMSPACE (cog-atomspace)))
 "
-  cog-report-counts -- Return an association list of counts
+  cog-report-counts [ATOMSPACE]-- Return an association list of counts
 
   Return an association list holding a report of the number of atoms
-  of each type currently in the atomspace. Counts are included only
+  of each type currently in the ATOMSPACE. Counts are included only
   for types with non-zero atom counts.
+
+  The argument ATOMSPACE is optional; if absent, the current atomspace
+  is used.
 
   See also:
      cog-count-atoms -- which counts atoms of a given type.
@@ -187,7 +195,7 @@
 "
 	(let ((tlist (cog-get-types)))
 		(define (rpt type)
-			(let ((cnt (cog-count-atoms type)))
+			(let ((cnt (cog-count-atoms type ATOMSPACE)))
 				(if (not (= 0 cnt))
 					(cons type cnt)
 					#f
@@ -199,10 +207,14 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (count-all)
+(define*-public (count-all #:optional (ATOMSPACE (cog-atomspace)))
 "
-  count-all -- Return the total number of atoms in the atomspace, it does not
-  count those in the backing store.
+  count-all [ATOMSPACE] -- Return the total number of atoms in ATOMSPACE
+
+  If the optional argument ATOMSPACE is not supplied, the current
+  atomspace is used.
+
+  This does NOT count atoms in the backing store!
 
   See also:
      cog-count-atoms -- which counts atoms of a given type.
@@ -214,24 +226,23 @@
 ; -----------------------------------------------------------------------
 (define-public (cog-get-atoms atom-type . subtypes)
 "
-
-  cog-get-atoms -- Return a list of all atoms of type 'atom-type', optionally
-                   if its subtypes as well.
-
-  Usage: (cog-get-atoms atom-type [subtypes])
+  cog-get-atoms TYPE [BOOL] -- Return list of all atoms of TYPE,
+                   including subtypes if BOOL is #t.
 
   Return a list of all atoms in the atomspace that are of type
-  'atom-type'. If the optional argument 'subtypes' is provided and set
-  to #t, then all atoms of subtypes of `atom-type` are returned as
-  well, otherwise only atoms of type `atom-type` are returned.
+  TYPE. If the optional argument BOOL is provided and set to #t,
+  then all atoms of the subtypes of TYPE are returned as
+  well.  Otherwise, only atoms of type TYPE are returned.
 
   Examples:
 
-  (display (cog-get-atoms 'ConceptNode))
+     (display (cog-get-atoms 'ConceptNode))
   will return and display all atoms of type 'ConceptNode
 
-  (display (cog-get-atoms 'Atom #t))
-  will return and display all atoms, including outgoing duplicates.
+     (display (cog-get-atoms 'Atom #t))
+  will return and display all atoms in the AtomSpace.
+
+  See also: cog-get-all-roots to get only the roots.
 "
 	(let ((lst '()))
 		(define (mklist atom)
@@ -246,7 +257,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (traverse-roots func)
+(define* (traverse-roots func ATOMSPACE)
 "
   traverse-roots -- Applies func to every root atom in the atomspace.
 
@@ -255,7 +266,7 @@
 "
 	; A list of the atomspace and all parents
 	(define atomspace-and-parents
-		(unfold null? identity cog-atomspace-env (cog-atomspace)))
+		(unfold null? identity cog-atomspace-env ATOMSPACE))
 
 	; Is the atom in any of the atomspaces?
 	(define (is-visible? atom)
@@ -266,34 +277,44 @@
 			(func h))
 		#f)
 
-	(for-each (lambda (ty) (cog-map-type apply-if-root ty)) (cog-get-types))
+	(for-each
+		(lambda (ty) (cog-map-type apply-if-root ty ATOMSPACE))
+		(cog-get-types))
 )
 ; -----------------------------------------------------------------------
-(define-public (cog-prt-atomspace)
+(define*-public (cog-prt-atomspace #:optional (ATOMSPACE (cog-atomspace)))
 "
-  cog-prt-atomspace -- Prints all atoms in the atomspace
+  cog-prt-atomspace [ATOMSPACE] -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically,
-  only those atoms that have no incoming set in the atomspace or its
-  ancestors, and thus are at the top of a tree.  All other atoms
-  (those which do have an incoming set) will appear somewhere
-  underneath these top-most atoms.
+  This will print all of the atoms in the (optional argument) ATOMSPACE,
+  or in the default atomspace, if the optional argument is absent.
+  It prints only those atoms that have no incoming set (in the
+  atomspace, or its ancestors), and thus are at the top of a tree.
+  All other atoms (those which do have an incoming set) will appear
+  somewhere underneath these top-most atoms.
+
+  This is equivalent to `(display (cog-get-all-roots))`.
 "
-	(traverse-roots display)
+	(traverse-roots display ATOMSPACE)
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-all-roots)
+(define*-public (cog-get-all-roots #:optional (ATOMSPACE (cog-atomspace)))
 "
-  cog-get-all-roots -- Return the list of all root atoms.
+  cog-get-all-roots [ATOMSPACE] -- Return the list of all root atoms.
 
-  cog-get-all-roots
-  Return the list of all root atoms, that is atoms with
-  no incoming set.
+  Return the list of all root atoms in the (optional argument) ATOMSPACE,
+  or in the default atomspace, if the optional argument is absent.
+  It returns only those atoms that have no incoming set (in the
+  atomspace, or its ancestors), and thus are at the top of a tree.
+  All other atoms (those which do have an incoming set) will appear
+  somewhere underneath these top-most atoms.
+
+  See also: cog-get-atoms, cog-get-root
 "
   (define roots '())
   (define (cons-roots x) (set! roots (cons x roots)))
-  (traverse-roots cons-roots)
+  (traverse-roots cons-roots ATOMSPACE)
   roots
 )
 
@@ -304,6 +325,11 @@
 
   Return all links that contain ATOM and are also roots. A root
   is any atom that has a null incoming set.
+
+  The opposite of this function is `cog-get-all-nodes`, which
+  returns the leaves under ATOM.
+
+  See also: cog-get-all-roots, cog-get-trunk
 "
 	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
@@ -316,8 +342,8 @@
 "
   cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 
-  Return all links that contain ATOM at some level.  Unlike cog-get-root,
-  these are not necessarily roots.
+  Return all links that contain ATOM at some level.  Unlike
+  `cog-get-root`, these are not necessarily roots.
 "
 	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
@@ -329,12 +355,13 @@
 ; -----------------------------------------------------------------------
 (define-public (cog-get-all-nodes LINK)
 "
-  cog-get-all-nodes -- Get all the nodes within `LINK` and its sublinks
+  cog-get-all-nodes ATOM -- Get all the nodes (leaves) under `ATOM`.
 
-  Get all the nodes (non-link atoms) within a hypergraph, and return as
+  Get all the nodes (leaves) within a hypergraph, and return as
   a list.
+
+  See also: cog-get-root, cog-get-trunk
 "
-	(define oset (cog-outgoing-set LINK))
 	(define (recursive-helper ATOM)
 		(if (cog-link? ATOM)
 			(cog-get-all-nodes ATOM)
@@ -342,7 +369,9 @@
 		)
 	)
 
-	(append-map recursive-helper oset)
+	(if (cog-node? LINK)
+		(list LINK)
+		(append-map recursive-helper (cog-outgoing-set LINK)))
 )
 
 ; -----------------------------------------------------------------------
@@ -360,9 +389,7 @@
 	(let ((plist (cog-outgoing-set pare)))
 		(if (equal? atom (car plist))
 			(cadr plist)
-			(car plist)
-		)
-	)
+			(car plist)))
 )
 
 ; -----------------------------------------------------------------------

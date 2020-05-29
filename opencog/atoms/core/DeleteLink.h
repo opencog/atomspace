@@ -46,9 +46,10 @@ protected:
 	void init(void);
 	void setAtomSpace(AtomSpace *);
 public:
-	DeleteLink(const HandleSeq&, Type=DELETE_LINK);
+	DeleteLink(const HandleSeq&&, Type=DELETE_LINK);
 
-	DeleteLink(const Link&);
+	DeleteLink(const DeleteLink&) = delete;
+	DeleteLink& operator=(const DeleteLink&) = delete;
 
 	static Handle factory(const Handle&);
 };

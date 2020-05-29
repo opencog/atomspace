@@ -34,8 +34,10 @@ class DualLink : public PatternLink
 protected:
 	void init(void);
 public:
-	DualLink(const HandleSeq&, Type=DUAL_LINK);
-	DualLink(const Link &l);
+	DualLink(const HandleSeq&&, Type=DUAL_LINK);
+
+	DualLink(const DualLink&) = delete;
+	DualLink& operator=(const DualLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

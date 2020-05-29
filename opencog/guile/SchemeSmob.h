@@ -130,12 +130,12 @@ private:
 	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
-	static SCM ss_map_type(SCM, SCM);
+	static SCM ss_map_type(SCM, SCM, SCM);
 	static SCM ss_get_types(void);
 	static SCM ss_get_type(SCM);
 	static SCM ss_get_subtypes(SCM);
 	static SCM ss_subtype_p(SCM, SCM);
-	static SCM ss_count(SCM);
+	static SCM ss_count(SCM, SCM);
 
 	// Truth values
 	static SCM ss_tv_get_mean(SCM);
@@ -155,6 +155,8 @@ private:
 	static SCM ss_as_mark_readonly(SCM);
 	static SCM ss_as_mark_readwrite(SCM);
 	static SCM ss_as_readonly_p(SCM);
+	static SCM ss_as_mark_cow(SCM, SCM);
+	static SCM ss_as_cow_p(SCM);
 	static SCM make_as(AtomSpace *);
 	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);

@@ -100,10 +100,12 @@ void ConstantClausesUTest::setUp()
  */
 void ConstantClausesUTest::test_constant_1()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, A, B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -111,10 +113,12 @@ void ConstantClausesUTest::test_constant_1()
  */
 void ConstantClausesUTest::test_constant_2()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, AB, C),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -122,10 +126,12 @@ void ConstantClausesUTest::test_constant_2()
  */
 void ConstantClausesUTest::test_constant_3()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, AB, A), C),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -134,10 +140,12 @@ void ConstantClausesUTest::test_constant_3()
  */
 void ConstantClausesUTest::test_evaluatable_1()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, IdAA, B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -150,6 +158,7 @@ void ConstantClausesUTest::test_evaluatable_2()
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -158,10 +167,12 @@ void ConstantClausesUTest::test_evaluatable_2()
  */
 void ConstantClausesUTest::test_evaluatable_3()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, IdAA, al(NOT_LINK, IdAA)), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -174,6 +185,7 @@ void ConstantClausesUTest::test_constant_evaluatable_1()
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -182,10 +194,12 @@ void ConstantClausesUTest::test_constant_evaluatable_1()
  */
 void ConstantClausesUTest::test_constant_evaluatable_2()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -195,10 +209,12 @@ void ConstantClausesUTest::test_constant_evaluatable_2()
  */
 void ConstantClausesUTest::test_constant_evaluatable_3()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /**
@@ -206,6 +222,7 @@ void ConstantClausesUTest::test_constant_evaluatable_3()
  */
 void ConstantClausesUTest::test_complex()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = eval.eval_h(
 		"(BindLink"
 		"  (VariableList"
@@ -371,10 +388,10 @@ void ConstantClausesUTest::test_complex()
 		"        (ConceptNode \"compound-A\")"
 		"      )"
 		"    )"
-		"    (TypedVariableLink"
+		"    (Present (TypedVariableLink"
 		"      (VariableNode \"$X\")"
 		"      (TypeNode \"ConceptNode\")"
-		"    )"
+		"    ))"
 		"  )"
 		"  (ConceptNode \"B\")"
 		")");
@@ -382,14 +399,19 @@ void ConstantClausesUTest::test_complex()
 	Handle expected = al(SET_LINK, B);
 
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /**
- * Constant clauses in a child atomspace are expected not to be accessible
- * from the parent atomspace (so the rewrite term should not be triggered).
+ * Constant clauses in a child atomspace would be expected not to be
+ * accessible from the parent atomspace, so the rewrite term would not
+ * be triggered, however constant clause are removed, regardless of
+ * whether they belong to the queried atomspace or not, thus, since
+ * empty is synonymous to true, the rewrite term is triggered.
  */
 void ConstantClausesUTest::test_constant_pattern()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	AtomSpace derived_as(&as);
 	Handle DA = derived_as.add_node(CONCEPT_NODE, "DA"),
 		DB = derived_as.add_node(CONCEPT_NODE, "DB"),
@@ -397,8 +419,9 @@ void ConstantClausesUTest::test_constant_pattern()
 		                         derived_as.add_link(INHERITANCE_LINK, DA, DB),
 		                         DB),
 		result = bindlink(&as, bl),
-		expected = al(SET_LINK);
+		expected = al(SET_LINK, DB);
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /**
@@ -407,6 +430,7 @@ void ConstantClausesUTest::test_constant_pattern()
  */
 void ConstantClausesUTest::test_mixed_clauses_1()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle mary = an(CONCEPT_NODE, "Mary"),
 		edward = an(CONCEPT_NODE, "Edward");
 
@@ -416,6 +440,7 @@ void ConstantClausesUTest::test_mixed_clauses_1()
 		expected = al(SET_LINK, edward, mary);
 
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /**
@@ -424,16 +449,27 @@ void ConstantClausesUTest::test_mixed_clauses_1()
  */
 void ConstantClausesUTest::test_mixed_clauses_2()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	eval.eval("(load-from-path \"blair-witch.scm\")");
 
-	Handle query = eval.eval_h("query"),
-		result = bindlink(&as, query),
-		expected = al(SET_LINK, A);
+	Handle query = eval.eval_h("find-something");
+	Handle result = bindlink(&as, query);
+	Handle expected = al(SET_LINK, A);
 
-	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "y result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	query = eval.eval_h("find-nothing"),
+	result = bindlink(&as, query),
+	expected = al(SET_LINK);
+
+	logger().debug() << "n result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /**
@@ -441,6 +477,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
  */
 void ConstantClausesUTest::test_mixed_clauses_3()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	eval.eval("(load-from-path \"constant-scope.scm\")");
 
 	Handle query = eval.eval_h("query"),
@@ -459,6 +496,7 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 	logger().debug() << "more_expected = " << oc_to_string(more_expected);
 
 	TS_ASSERT_EQUALS(results, more_expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 #undef al

@@ -28,8 +28,8 @@
 
 using namespace opencog;
 
-TimeLink::TimeLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+TimeLink::TimeLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, TIME_LINK))
@@ -42,19 +42,6 @@ TimeLink::TimeLink(const HandleSeq& oset, Type t)
 	if (0 < oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"TimeLink does not expect any arguments");
-}
-
-TimeLink::TimeLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, TIME_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an TimeLink, got %s", tname.c_str());
-	}
 }
 
 // ---------------------------------------------------------------

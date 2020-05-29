@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_NODE_H
 #define _OPENCOG_NODE_H
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 
@@ -45,7 +44,7 @@ class Node : public Atom
 protected:
     // properties
     std::string _name;
-    void init(const std::string&);
+    void init();
 
     virtual ContentHash compute_hash() const;
 
@@ -57,21 +56,14 @@ public:
      * @param Node name A reference to a std::string with the name of
      *                  the node.  Use empty string for unamed node.
      */
-    Node(Type t, const std::string& s)
-        : Atom(t)
+    Node(Type t, const std::string s)
+        : Atom(t), _name(std::move(s))
     {
-        init(s);
+        init();
     }
 
-    /**
-     * Copy constructor, does not copy atomspace membership,
-     * or any of the values/truthvalues.
-     */
-    Node(const Node &n)
-        : Atom(n.get_type())
-    {
-        init(n._name);
-    }
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
 
     virtual bool is_node() const { return true; }
     virtual bool is_link() const { return false; }
@@ -128,9 +120,8 @@ static inline NodePtr NodeCast(const AtomPtr& a)
 template< class... Args >
 Handle createNode( Args&&... args )
 {
-   // Do we need to say (std::forward<Args>(args)...) instead ???
-   NodePtr tmp(std::make_shared<Node>(args ...));
-   return classserver().factory(tmp->get_handle());
+   Handle tmp(std::make_shared<Node>(std::forward<Args>(args) ...));
+   return classserver().factory(tmp);
 }
 
 

@@ -27,12 +27,15 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+// TODO: some of what is here could be moved to Variables
 
 /**
  * Type checker.  Returns true if `value` is of type `type_spec`.
@@ -174,18 +177,9 @@ bool is_well_typed(Type t);
 bool is_well_typed(const TypeSet& ts);
 
 /**
- * Return shallow type intersection between lhs and rhs. Take into
- * account type inheritance as well.
+ * Generate a VariableSet of the free variables of a given atom h.
  */
-Type type_intersection(Type lhs, Type rhs);
-TypeSet type_intersection(Type lhs, const TypeSet& rhs);
-TypeSet type_intersection(const TypeSet& lhs,
-                          const TypeSet& rhs);
-
-/**
- * Generate a VariableList of the free variables of a given atom h.
- */
-VariableListPtr gen_varlist(const Handle& h);
+VariableSetPtr gen_variable_set(const Handle& h);
 
 /**
  * Generate a variable declaration of the free variables of a given atom h.
@@ -194,13 +188,8 @@ Handle gen_vardecl(const Handle& h);
 
 /**
  * Given an atom h and its variable declaration vardecl, turn the
- * vardecl into a VariableList if not already, and if undefined,
- * generate a VariableList of the free variables of h.
- */
-VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
-
-/**
- * Like above but return Variables instead.
+ * vardecl into a Variables object, and if undefined, generate a
+ * Variables object from the free variables of h.
  */
 Variables gen_variables(const Handle& h, const Handle& vardecl);
 
@@ -213,11 +202,12 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl);
  * Given a list variables or typed variables, return the
  * corresponding variable declaration.
  *
- * If varlist has only one member return a VariableNode or
- * TypedVariableLink. If varlist is empty, return an empty
- * VariableList.
+ * If varlist has only one element return a VariableNode or
+ * TypedVariableLink. If varlist is empty or has more than one
+ * element, return a VariableList if ordered is true, or a VariableSet
+ * if ordered is false.
  */
-Handle gen_vardecl(const HandleSeq& varlist);
+Handle gen_vardecl(const HandleSeq&& varlist, bool ordered=true);
 
 /** @}*/
 }

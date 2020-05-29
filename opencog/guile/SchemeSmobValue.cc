@@ -68,8 +68,13 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<double>
 SchemeSmob::scm_to_float_list (SCM svalue_list)
 {
-	std::vector<double> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<double> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -167,6 +172,17 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, dim);
 	}
 
+	if (nameserver().isA(t, FORMULA_STREAM))
+	{
+		if (!scm_is_pair(svalue_list))
+			scm_wrong_type_arg_msg("cog-new-value", 1,
+				svalue_list, "An Atom");
+
+		SCM svalue = SCM_CAR(svalue_list);
+		Handle h = verify_handle(svalue, "cog-new-value", 2);
+		return valueserver().create(t, h);
+	}
+
 	// Catch and handle generic FloatValues not named above.
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
@@ -175,14 +191,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);
 	}
 
-	if (STRING_VALUE == t)
+	if (nameserver().isA(t, STRING_VALUE))
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
@@ -362,7 +378,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, scm_from_string)
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		CPPL_TO_SCML(v, protom_to_scm)

@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -27,20 +13,14 @@
 
 using namespace opencog;
 
-DivideLink::DivideLink(const HandleSeq& oset, Type t)
-    : TimesLink(oset, t)
+DivideLink::DivideLink(const HandleSeq&& oset, Type t)
+    : TimesLink(std::move(oset), t)
 {
 	init();
 }
 
 DivideLink::DivideLink(const Handle& a, const Handle& b)
     : TimesLink({a, b}, DIVIDE_LINK)
-{
-	init();
-}
-
-DivideLink::DivideLink(const Link& l)
-    : TimesLink(l)
 {
 	init();
 }
@@ -58,11 +38,6 @@ void DivideLink::init(void)
 		_outgoing.insert(_outgoing.begin(), one);
 }
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 // No ExpLink or PowLink and so kons is very simple
 ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
                           const ValuePtr& fi, const ValuePtr& fj) const
@@ -74,16 +49,24 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 	ValuePtr vj(get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
-	// Are they numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+	// Are they numbers? If so, perform vector (pointwise) subtraction.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
 	{
-		double ratio = get_double(vi) / get_double(vj);
-		return Handle(createNumberNode(ratio));
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(divide(vi, vj, true));
+
+		return divide(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
 	}
 
 	// If vj is one, just drop it
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return sample_stream(vi, vitype);
+		return vi;
 
 	// Collapse (3 / (5 * x)) and (3 / (x * 5))
 	if (NUMBER_NODE == vitype and TIMES_LINK == vjtype)
@@ -92,14 +75,12 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 		Handle multiplicand(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == multiplier->get_type())
 		{
-			double quot = get_double(vi) / get_double(multiplier);
-			Handle hquot(createNumberNode(quot));
+			Handle hquot(createNumberNode(divide(vi, multiplier)));
 			return createDivideLink(hquot, multiplicand);
 		}
 		if (NUMBER_NODE == multiplicand->get_type())
 		{
-			double quot = get_double(vi) / get_double(multiplicand);
-			Handle hquot(createNumberNode(quot));
+			Handle hquot(createNumberNode(divide(vi, multiplicand)));
 			return createDivideLink(hquot, multiplier);
 		}
 	}
@@ -111,16 +92,14 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 		Handle multiplicand(HandleCast(vi)->getOutgoingAtom(1));
 		if (NUMBER_NODE == multiplier->get_type())
 		{
-			double quot = get_double(multiplier) / get_double(vj);
-			Handle hquot(createNumberNode(quot));
+			Handle hquot(createNumberNode(divide(multiplier, vj)));
 			if (content_eq(hquot, one))
 				return multiplicand;
 			return createTimesLink(multiplicand, hquot);
 		}
 		if (NUMBER_NODE == multiplicand->get_type())
 		{
-			double quot = get_double(multiplicand) / get_double(vj);
-			Handle hquot(createNumberNode(quot));
+			Handle hquot(createNumberNode(divide(multiplicand, vj)));
 			if (content_eq(hquot, one))
 				return multiplier;
 			return createTimesLink(multiplier, hquot);
@@ -129,29 +108,23 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
 
 	// ------------------------------------------------------------
 	// Values 
-	// Scalar divided by vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	try
 	{
-		return divide(get_double(vi), FloatValueCast(vj));
-	}
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(divide(vi, vj, true));
 
-	// Vector divided by scalar
-	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
-	{
-		return times(1.0/get_double(vj), FloatValueCast(vi));
+		return divide(vi, vj, true);
 	}
-
-	// Vector divided by vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	catch (const SilentException& ex)
 	{
-		return divide(FloatValueCast(vi), FloatValueCast(vj));
+		// If we are here, they were not simple numbers.
 	}
 
 	Handle hi(HandleCast(vi));
-	if (nullptr == hi) hi= HandleCast(fi);
+	if (nullptr == hi) hi = HandleCast(fi);
 
 	Handle hj(HandleCast(vj));
-	if (nullptr == hj) hj= HandleCast(fj);
+	if (nullptr == hj) hj = HandleCast(fj);
 
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.

@@ -33,7 +33,6 @@
 #include <opencog/atoms/pattern/PatternTerm.h> // for pattern context
 
 namespace opencog {
-class PatternMatchEngine;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -210,7 +209,7 @@ class PatternMatchCallback
 		 * grounding, and forces a backtrack.
 		 */
 		virtual bool evaluate_sentence(const Handle& eval,
-		                               const HandleMap& gnds) = 0;
+		                               const GroundingMap& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -230,7 +229,7 @@ class PatternMatchCallback
 		 */
 		virtual bool clause_match(const Handle& pattrn_link_h,
 		                          const Handle& grnd_link_h,
-		                          const HandleMap& term_gnds)
+		                          const GroundingMap& term_gnds)
 		{
 			// Reject templates grounded by themselves.
 			if (pattrn_link_h == grnd_link_h) return false;
@@ -253,7 +252,7 @@ class PatternMatchCallback
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
-		                                   const HandleMap& term_gnds) = 0;
+		                                   const GroundingMap& term_gnds) = 0;
 
 		/**
 		 * Called when the search for a top-level for-all clause
@@ -274,7 +273,7 @@ class PatternMatchCallback
 		 */
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
-		                                 const HandleMap& term_gnds) = 0;
+		                                 const GroundingMap& term_gnds) = 0;
 
 		/**
 		 * Called when a complete grounding for all clauses is found.
@@ -289,8 +288,8 @@ class PatternMatchCallback
 		 * the same result.  This can happen, for example, if there are
 		 * mutiple ways for the pattern to match up to the result.
 		 */
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln) = 0;
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.
@@ -301,9 +300,9 @@ class PatternMatchCallback
 		 * is smaller than the full incoming set (for example, by
 		 * returning only those atoms with a high av-sti).
 		 */
-		virtual IncomingSet get_incoming_set(const Handle& h)
+		virtual IncomingSet get_incoming_set(const Handle& h, Type t)
 		{
-			return h->getIncomingSet();
+			return h->getIncomingSetByType(t);
 		}
 
 		/**
@@ -325,7 +324,19 @@ class PatternMatchCallback
 		{ static const TypeSet _empty; return _empty; }
 
 		/**
-		 * Called to initiate the search. This callback is responsible
+		 * Called before when the search is started. This gives the system
+		 * a chance to perform neeeded intializations before the actual
+		 * search is started.  In principle, this callback is not really
+		 * needed, since the `perform_search()` callback "knows" that the
+		 * search is starting when it is called.  In practice,  the
+		 * implementation is much simpler if there is a distinct callback
+		 * to handle this situation.  Return `true` to abort the search
+		 * before it is even started, else return `false`.
+		 */
+		virtual bool start_search(void) { return false; }
+
+		/**
+		 * Called to perform the search. This callback is responsible
 		 * for performing the top-most, outer loop of the search. That is,
 		 * it gets to pick the starting points for the search, thereby
 		 * possibly limiting the breadth of the search.  It may also cull
@@ -337,15 +348,15 @@ class PatternMatchCallback
 		 * values on all the other callbacks; it summarizes (passes
 		 * through) the return values of all the others.
 		 */
-		virtual bool initiate_search(PatternMatchEngine *) = 0;
+		virtual bool perform_search(PatternMatchCallback&) = 0;
 
 		/**
-		 * Called when the search has completed. In principle, this is not
-		 * really needed, since the above callback "knows" when the search
-		 * is completed: its completed when the above returns. In practice,
-		 * the implementation is much simpler if we have a distinct
-		 * callback to handle this situation.  The argument, is the return
-		 * value from initiatate_search().
+		 * Called when the search has completed. In principle, this
+		 * callback is not really needed, since the `perform_search()`
+		 * callback "knows" when the search is completed: its completed when
+		 * it returns. In practice, the implementation is much simpler if
+		 * there is a distinct callback to announce completion.  The argument
+		 * is the return value from `perform_search()`.
 		 */
 		virtual bool search_finished(bool done) { return done; }
 
@@ -357,6 +368,16 @@ class PatternMatchCallback
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat) = 0;
 };
+
+// See notes in `InitiateSearchCB.cc` for an explanation of this.
+// #define USE_THREADED_PATTERN_ENGINE
+#ifdef USE_THREADED_PATTERN_ENGINE
+	#define DECLARE_PE_MUTEX std::mutex _mtx;
+	#define LOCK_PE_MUTEX std::lock_guard<std::mutex> lck(_mtx);
+#else
+	#define DECLARE_PE_MUTEX
+	#define LOCK_PE_MUTEX
+#endif // USE_THREADED_PATTERN_ENGINE
 
 } // namespace opencog
 

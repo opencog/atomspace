@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -34,7 +35,7 @@ using namespace opencog;
 class QuoteUTest: public CxxTest::TestSuite
 {
 private:
-    AtomSpace *as;
+    AtomSpace* as;
     SchemeEval* eval;
 
 public:
@@ -72,6 +73,8 @@ public:
     void test_numeric_greater(void);
     void test_crash(void);
     void test_exec_getlink(void);
+    void test_quote_self(void);
+    void test_quote_glob(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -328,6 +331,44 @@ void QuoteUTest::test_exec_getlink(void)
 
     Handle exe = eval->eval_h("(cog-execute! z-get)");
     TS_ASSERT_EQUALS(1, getarity(exe));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test for bug #2583
+void QuoteUTest::test_quote_self(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/query/quote-self.scm\")");
+
+    ValuePtr vp = eval->eval_v("(cog-execute! self-ground)");
+    TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+
+    HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+    TS_ASSERT_EQUALS(1, hs.size());
+
+    Handle ex = eval->eval_h("expect");
+    TS_ASSERT_EQUALS(ex, hs[0]);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test for bug #2583 (simpler version of above)
+void QuoteUTest::test_quote_glob(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/query/quote-glob.scm\")");
+
+    ValuePtr vp = eval->eval_v("(cog-execute! quote-glob)");
+    TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+
+    HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+    TS_ASSERT_EQUALS(1, hs.size());
+
+    Handle ex = eval->eval_h("expect");
+    TS_ASSERT_EQUALS(ex, hs[0]);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

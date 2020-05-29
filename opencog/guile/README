@@ -20,16 +20,14 @@ available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
-Nodes, Links, TruthValues, as well as ways to get
+Nodes, Links, Values and TruthValues, as well as ways to get
 properties (such as the names of Nodes, or the outgoing sets of Links).
-Although the core interface is documented below, it is important to notice
-that scheme makes "syntactic sugar" very easy to use.  Some default sugar
-is provided in order to make the creation of typed atoms extremely easy.
-Atom creation can be as simple as the following example:
 
+Atom creation can be as simple as the following example:
+```
    (ReferenceLink (stv 0.987 0.234)
        (ConceptNode "dog-instance-1") (WordNode "dog"))
-
+```
 which creates a link connnecting a concept node and a word node, having
 a simple truth value. Any valid node or link name can be used in this way.
 
@@ -37,9 +35,8 @@ A number of utilities and handy functions can be found in the directory
 ''opencog/scm''.  These can be loaded from the guile REPL by saying
 `(use-modules (opencog))`.
 
-Much of this README is reproduced at http://opencog.org/wiki/Scheme
-
-See that page for addtional information.
+An expaneded, improvied version of this README can be found on the wiki:
+http://opencog.org/wiki/Scheme
 
 == Running ==
 --------------
@@ -47,26 +44,23 @@ There are multiple ways to access the scheme bindings:
 
 * By directly running the guile REPL
 * By starting the cogserver, and telneting to port 17001
-* By starting the cogserver, and telneting to port 18001
 
 == On-line documentation ==
 ---------------------------
-Documentation for some (a small number, but growing) routines and
-utilities can be pulled up at the scheme shell prompt, by saying
-<tt>(display (procedure-documentation name-of-proc))</tt>.  Otherwise, you'll
-have to consult the individual scm files for more info.
+Documentation for all routines and utilities can be pulled up at the
+guile shell prompt, by saying <tt>,d name-of-proc</tt> or
+<tt>(display (procedure-documentation name-of-proc))</tt>.
 
 
 == Modules ==
 -------------
-Currently OpenCog's scheme functions are broken into four different
-scheme modules: (opencog), (opencog query), (opencog persist) and
-(opencog extension).  The contents of the query module, for example,
-can be listed with the following code:
-
+There are more than a few dozen different OpenCog modules. The main ones
+are `(opencog)` and `(opencog exec)`.  The contents of a module can be
+as follows:
+```
 (module-for-each (lambda (symbol value) (display symbol) (newline))
-(resolve-interface '(opencog query)))
-
+(resolve-interface '(opencog ...module...)))
+```
 
 == Core Functions ==
 --------------------
@@ -547,10 +541,6 @@ interface.
 
       Some of the currently-implemented primtives are:
 
-      Available when the [[pattern matcher]] module is loaded:
-      cog-bind handle       -- run pattern matcher on handle.
-                               handle must be a BindLink.
-
       Available when the PersistModule is loaded, and connected to a
       database:
       fetch-atom handle     -- fetch indicated atom from SQL/persistent
@@ -563,22 +553,6 @@ interface.
                                SQL/persistent storage.
       barrier               -- block until the SQL Atom write queues
                                are empty.
-
-      Word-sense disambiguation.  This command requires a considerable
-      amount of infrastructure to be set up:
-      do-wsd                -- run word-sense disambiguation
-
-
-= Flow control =
-The implementation uses a simple exception mechanism to allow scheme
-code to return to the opencog server from anywhere. To use this, simply
-throw 'cog-yield from anywhere.  The catch handler will promptly return
-to the cogserver.  This can be used with continuations to implement
-some simple multi-threading.
-
-      Example:
-         guile> (throw 'cog-yield "hello world")
-         (hello world)
 
 
 =Notes, examples, utilities=
@@ -607,6 +581,10 @@ in the atomspace.
       cnt
    )
 
+===Calling scheme from Atomese===
+The [[ExecutionOutputLink]], whem used with the
+[[GroundedSchemaNode]], allows scheme code to be invoked when the
+given ExecutionOutputLink is evaluated.  See that page for details.
 
 === Calling scheme from C++ ===
 Scheme code can be called from C++. The most common case is handled
@@ -642,31 +620,3 @@ and a pointer to a C++ object instance.  Unusual C++ signatures may require
 extending SchemePrimitive.h, but this should not be hard.
 
 The example program PrimitiveExample.cc shows how.
-
-===Calling scheme from Hypergraphs===
-The [[ExecutionOutputLink]], whem used with the
-[[GroundedSchemaNode]], allows scheme code to be invoked when the
-given ExecutionOutputLink is evaluated.  See that page for details.
-
-===Multi-threading===
-Guile is multi-threading-capable, and can be used with multiple threads
-just fine, with just a few caveats: it must be initialized in *each*
-thread in which it is to be used. The method SchemeEval::thread_init()
-initializes guile only in the *current* thread: therefore, one must
-call this method in every thread in which scheme is meant to be used.
-Note that OpenCog has a way of creating threads unexpectedly, in
-particular, in the server socket connection handling. Caveat Emptor.
-
-
-ToDo
-----
--- Possibly change cog-tv, cog-av to use values and let-values,
-	mostly because the alist interface is klunky.  But values/
-   let-values is clunky in a different kind of way, so what to do?
-
--- It would be nice to be able to use continuations; however, the
-   scm_with_guile() call has a continuation barrier in it.  I beleive
-   that this continuation barrier is far too pessimistic -- it can
-   make some fairly simple checks on the C stack in order to avoid
-   data corruption. However, guile needs to be fixed to change this
-   behaviour.

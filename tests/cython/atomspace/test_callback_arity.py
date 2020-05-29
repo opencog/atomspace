@@ -1,7 +1,9 @@
 import unittest
+
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
-from opencog.bindlink import execute_atom
+from opencog.execute import execute_atom
+
 import __main__
 
 

@@ -22,6 +22,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/core/VariableSet.h>
 
 #include "MapLink.h"
 
@@ -48,8 +49,8 @@ void MapLink::init(void)
 		const Handle& body = _outgoing[0];
 		FreeVariables fv;
 		fv.find_variables(body);
-		Handle decl(createVariableList(fv.varseq));
-		_pattern = createScopeLink(decl, body);
+		Handle decl(createVariableSet(std::move(fv.varseq)));
+		_pattern = createScopeLink(std::move(decl), body);
 	}
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
@@ -108,8 +109,8 @@ MapLink::MapLink(Type t, const Handle& body)
 	init();
 }
 
-MapLink::MapLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+MapLink::MapLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, MAP_LINK))
 	{
@@ -120,23 +121,6 @@ MapLink::MapLink(const HandleSeq& oset, Type t)
 
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
-	init();
-}
-
-MapLink::MapLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tmap = l.get_type();
-	if (not nameserver().isA(tmap, MAP_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tmap);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a MapLink, got %s", tname.c_str());
-	}
-
-	// Derived types have a different initialization sequence.
-	if (MAP_LINK != tmap) return;
 	init();
 }
 
@@ -160,7 +144,7 @@ MapLink::MapLink(const Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      HandleMap& valmap,
+                      GroundingMap& valmap,
                       Quotation quotation) const
 {
 	if (termpat == ground) return true;
@@ -307,7 +291,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(glob_seq, LIST_LINK));
+			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else
@@ -325,10 +309,10 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// Execute the ground, including consuming its quotation as part of
 	// the MapLink semantics
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.instantiate(cterm, HandleMap())));
+	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
 
 	// Extract values for variables.
-	HandleMap valmap;
+	GroundingMap valmap;
 	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
 
@@ -367,7 +351,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return createLink(valseq, LIST_LINK);
+		return createLink(std::move(valseq), LIST_LINK);
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;
@@ -390,11 +374,16 @@ ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
-		return createLink(remap, argtype);
+		return createLink(std::move(remap), argtype);
 	}
 
 	// Its a singleton. Just remap that.
-	return rewrite_one(valh, scratch);
+	Handle mone = rewrite_one(valh, scratch);
+	if (mone) return mone;
+
+	// Avoid returning null handle.  This is broken.
+	// I don't link MapLink much any more.
+	return createLink(SET_LINK);
 }
 
 DEFINE_LINK_FACTORY(MapLink, MAP_LINK)

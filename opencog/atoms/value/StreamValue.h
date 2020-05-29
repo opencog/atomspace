@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_STREAM_VALUE_H
 #define _OPENCOG_STREAM_VALUE_H
 
-#include <vector>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
@@ -35,7 +34,13 @@ namespace opencog
  */
 
 /**
- * StreamValues provide an example of streaming data.
+ * StreamValues provide a continuously-updating, dynamic stream of
+ * floating-point data. They are meant to hold any kind of
+ * rapidly-changing data encoded as floats, including video and
+ * audio feeds, or other kinds of high-bandwidth data.
+ *
+ * See also LinkStreamValue when the data is encoded as Atoms or
+ * as other (non-floating-point) Values.
  */
 class StreamValue
 	: public FloatValue
@@ -53,8 +58,6 @@ public:
 typedef std::shared_ptr<StreamValue> StreamValuePtr;
 static inline StreamValuePtr StreamValueCast(ValuePtr& a)
 	{ return std::dynamic_pointer_cast<StreamValue>(a); }
-
-
 
 /** @}*/
 } // namespace opencog

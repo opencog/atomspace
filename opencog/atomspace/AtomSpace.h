@@ -39,8 +39,8 @@ namespace opencog
 {
 const bool EMIT_DIAGNOSTICS = true;
 const bool DONT_EMIT_DIAGNOSTICS = false;
-const bool CHECK_TRUTH_VALUES = true;
-const bool DONT_CHECK_TRUTH_VALUES = false;
+const bool CHECK_VALUES = true;
+const bool DONT_CHECK_VALUES = false;
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -59,6 +59,7 @@ class AtomSpace
     friend class BackingStore;
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
+    friend class UuidSCM;            // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
@@ -80,6 +81,7 @@ class AtomSpace
     AtomTable& get_atomtable(void) { return _atom_table; }
 
     bool _read_only;
+    bool _copy_on_write;
 protected:
 
     /**
@@ -95,15 +97,29 @@ public:
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
-    // Transient atomspaces are lighter-weight, faster, but are missing
-    // some features. They are used during pattern matching, to hold
-    // temporary results.
+    /// Transient atomspaces are lighter-weight, faster, but are missing
+    /// some features. They are used during pattern matching, to hold
+    /// temporary results. The are always copy-on-write spaces.
     void ready_transient(AtomSpace* parent);
     void clear_transient();
 
+    /// Read-only (RO) atomspaces provide protection against update of the
+    /// AtomSpace contents. Atoms in a read-only atomspace canot be
+    /// deleted, nor can thier values (including truthvalues) be changed.
+    /// New atoms cannot be added to a read-only atomspace.
     void set_read_only(void);
     void set_read_write(void);
     bool get_read_only(void) { return _read_only; }
+
+    /// Copy-on-write (COW) atomspaces provide protection against the
+    /// update of the parent atomspace. When an atomspace is marked COW,
+    /// it behaves as if it is read-write, but the parent is read-only.
+    /// This is convenient for creating temporary atomspaces, wherein
+    /// updates will not trash the parent. Transient atomspaces are
+    /// always COW.
+    void set_copy_on_write(void) { _copy_on_write = true; }
+    void clear_copy_on_write(void) { _copy_on_write = false; }
+    bool get_copy_on_write(void) { return _copy_on_write; }
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
@@ -117,7 +133,7 @@ public:
      */
     static bool compare_atomspaces(const AtomSpace& first,
                                    const AtomSpace& second,
-                                   bool check_truth_values=CHECK_TRUTH_VALUES,
+                                   bool check_values=CHECK_VALUES,
                                    bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
@@ -139,12 +155,11 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then new truth value is ignored, and the existing atom is
-     * returned.
+     * then that is returned.
      */
-    Handle add_atom(const Handle&, bool async=false);
-    Handle add_atom(AtomPtr a, bool async=false)
-        { return add_atom(a->get_handle(), async); }
+    Handle add_atom(const Handle&);
+    Handle add_atom(const AtomPtr& a)
+        { return add_atom(a->get_handle()); }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -153,7 +168,10 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name="", bool async=false);
+    Handle add_node(Type, std::string&&);
+    Handle xadd_node(Type t, std::string str) {
+        return add_node(t, std::move(str));
+    }
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -163,7 +181,10 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing, bool async=false);
+    Handle add_link(Type, HandleSeq&&);
+    Handle xadd_link(Type t, HandleSeq seq) {
+        return add_link(t, std::move(seq));
+    }
 
     inline Handle add_link(Type t)
     {
@@ -302,18 +323,6 @@ public:
     Handle fetch_incoming_by_type(Handle, Type);
 
     /**
-     * Use the backing store to load all atoms that have a value
-     * set for the indicated key.  This is typically used to load
-     * up a slice of a dataset: viz, to avoid loading any other atoms.
-     *
-     * If the boolean flag is set to true, then all values on the
-     * atom are fetched; otherwise, only that one value is fetched.
-     * This can save a lot of RAM, if the atoms have a lot of misc.
-     * values attached to them.
-     */
-    void fetch_valuations(Handle, bool=false);
-
-    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
@@ -330,8 +339,8 @@ public:
      * the AtomSpace is not connected to a backend, there is no
      * difference between remove and extract.
      *
-     * The atom itself remains valid as long as there are Handles or
-     * AtomPtr's that reference it; the RAM associated with the atom is
+     * The atom itself remains valid as long as there are Handles
+     * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -350,8 +359,8 @@ public:
 
     /**
      * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles or AtomPtr's
-     * that reference it; it is deleted only when the last reference
+     * The atom remains valid as long as there are Handles that
+     * reference it; it is deleted only when the last reference
      * goes away.
      *
      * @param h The Handle of the atom to be removed.
@@ -389,9 +398,9 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle get_node(Type t, const std::string& name="");
-    inline Handle get_handle(Type t, const std::string& str) {
-        return get_node(t, str);
+    Handle get_node(Type, std::string&&) const;
+    inline Handle get_handle(Type t, std::string str) const {
+        return get_node(t, std::move(str));
     }
 
     /**
@@ -407,28 +416,33 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle get_link(Type t, const HandleSeq& outgoing);
-    inline Handle get_link(Type t, const Handle& ha) {
+    Handle get_link(Type, HandleSeq&&) const;
+    inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb) const {
         return get_link(t, {ha, hb});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc) const
+    {
         return get_link(t, {ha, hb, hc});
     }
-    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
+    Handle get_link(Type t, const Handle& ha, const Handle& hb,
+                    const Handle& hc, const Handle& hd) const
+    {
         return get_link(t, {ha, hb, hc, hd});
     }
-    Handle get_handle(Type t, const HandleSeq& outgoing) {
-        return get_link(t, outgoing);
+    Handle get_handle(Type t, HandleSeq outgoing) const {
+        return get_link(t, std::move(outgoing));
     }
-    Handle get_handle(Type t, const Handle& ha) {
+    Handle get_handle(Type t, const Handle& ha) const {
 	    return get_handle(t, HandleSeq({ha}));
     }
-    Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
+    Handle get_handle(Type t, const Handle& ha, const Handle& hb) const {
 	    return get_handle(t, HandleSeq({ha, hb}));
     }
+
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
@@ -537,7 +551,7 @@ public:
     {
         return _atom_table.atomAddedSignal();
     }
-    AtomPtrSignal& atomRemovedSignal()
+    AtomSignal& atomRemovedSignal()
     {
         return _atom_table.atomRemovedSignal();
     }

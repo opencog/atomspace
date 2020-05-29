@@ -61,7 +61,8 @@ using namespace opencog;
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _backing_store(nullptr),
-    _read_only(false)
+    _read_only(false),
+    _copy_on_write(transient)
 {
 }
 
@@ -71,6 +72,7 @@ AtomSpace::~AtomSpace()
 
 void AtomSpace::ready_transient(AtomSpace* parent)
 {
+    _copy_on_write = true;
     _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
 }
 
@@ -92,7 +94,7 @@ void AtomSpace::set_read_write(void)
 
 bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
                                    const AtomSpace& space_second,
-                                   bool check_truth_values,
+                                   bool check_values,
                                    bool emit_diagnostics)
 {
     // Compare sizes
@@ -148,12 +150,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (atom_first->is_node())
         {
             atom_second = table_second.getHandle(atom_first->get_type(),
-                        atom_first->get_name());
+                        std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
             atom_second =  table_second.getHandle(atom_first->get_type(),
-                        atom_first->getOutgoingSet());
+                        HandleSeq(atom_first->getOutgoingSet()));
         }
         else
         {
@@ -191,18 +193,43 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             return false;
         }
 
-        // Check the truth values...
-        if (check_truth_values)
+        // Check the values...
+        // TODO: this should probably be moved to a method on class Atom.
+        if (check_values)
         {
-            TruthValuePtr truth_first = atom_first->getTruthValue();
-            TruthValuePtr truth_second = atom_second->getTruthValue();
-            if (*truth_first != *truth_second)
+            HandleSet keys_first = atom_first->getKeys();
+            HandleSet keys_second = atom_second->getKeys();
+            if (keys_first.size() != keys_second.size())
             {
                 if (emit_diagnostics)
-                    std::cout << "compare_atomspaces - first truth " <<
-                            atom_first->to_string() << " != second truth " <<
-                            atom_second->to_string() << std::endl;
+                    std::cout << "compare_atomspaces - first keys size "
+                              << keys_first.size() << " != second keys size "
+                              << keys_second.size() << " for "
+                              << atom_first->to_short_string() << std::endl;
                 return false;
+            }
+
+            if (keys_first != keys_second)
+            {
+                if (emit_diagnostics)
+                    std::cout << "compare_atomspaces - key set mistmatch for "
+                              << atom_first->to_short_string() << std::endl;
+                return false;
+            }
+
+            for (const Handle& key: keys_first)
+            {
+                ValuePtr value_first = atom_first->getValue(key);
+                ValuePtr value_second = atom_second->getValue(key);
+                if (*value_first != *value_second)
+                {
+                    if (emit_diagnostics)
+                        std::cout << "compare_atomspaces - first value "
+                            << value_first->to_string() << " != second value "
+                            << value_second->to_string() << " for "
+                            << atom_first->to_short_string() << std::endl;
+                    return false;
+                }
             }
         }
 
@@ -231,7 +258,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
 
 bool AtomSpace::operator==(const AtomSpace& other) const
 {
-    return compare_atomspaces(*this, other, CHECK_TRUTH_VALUES,
+    return compare_atomspaces(*this, other, CHECK_VALUES,
             DONT_EMIT_DIAGNOSTICS);
 }
 
@@ -269,7 +296,7 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-Handle AtomSpace::add_atom(const Handle& h, bool async)
+Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
@@ -278,7 +305,7 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(h, async);
+        rh = _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
         // Atom deletion has not been implemented in the backing store
@@ -289,44 +316,41 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
     return rh;
 }
 
-Handle AtomSpace::add_node(Type t, const string& name,
-                           bool async)
+Handle AtomSpace::add_node(Type t, std::string&& name)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, name);
+    if (_read_only) return _atom_table.getHandle(t, std::move(name));
 
-    return _atom_table.add(createNode(t, name), async);
+    return _atom_table.add(createNode(t, std::move(name)));
 }
 
-Handle AtomSpace::get_node(Type t, const string& name)
+Handle AtomSpace::get_node(Type t, std::string&& name) const
 {
-    return _atom_table.getHandle(t, name);
+    return _atom_table.getHandle(t, std::move(name));
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
+Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, outgoing);
+    if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
-    Handle rh;
+    Handle h(createLink(std::move(outgoing), t));
     try {
-        rh = _atom_table.add(createLink(outgoing, t), async);
+        return _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
-        if (_backing_store) {
-           Handle h(createLink(outgoing, t));
+        if (_backing_store)
            _backing_store->removeAtom(h, false);
-        }
     }
-    return rh;
+    return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
-    return _atom_table.getHandle(t, outgoing);
+    return _atom_table.getHandle(t, std::move(outgoing));
 }
 
 void AtomSpace::store_atom(const Handle& h)
@@ -365,12 +389,12 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // If we found it, add it to the atomspace -- even when the
     // atomspace is marked read-only; the atomspace is acting as
     // a cache for the backingstore.
-    if (hv) return _atom_table.add(hv, false);
+    if (hv) return _atom_table.add(hv);
 
     // If it is not found, then it cannot be added.
     if (_read_only) return Handle::UNDEFINED;
 
-    return _atom_table.add(h, false);
+    return _atom_table.add(h);
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
@@ -387,8 +411,8 @@ Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
     if (not recursive) return h;
 
     IncomingSet vh(h->getIncomingSet());
-    for (const LinkPtr& lp : vh)
-        fetch_incoming_set(Handle(lp), true);
+    for (const Handle& lp : vh)
+        fetch_incoming_set(lp, true);
 
     return h;
 }
@@ -405,18 +429,6 @@ Handle AtomSpace::fetch_incoming_by_type(Handle h, Type t)
     _backing_store->getIncomingByType(_atom_table, h, t);
 
     return h;
-}
-
-void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    key = get_atom(key);
-    if (nullptr == key) return;
-
-    // Get everything from the backing store.
-    _backing_store->getValuations(_atom_table, key, get_all_values);
 }
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
@@ -448,12 +460,19 @@ Handle AtomSpace::set_value(const Handle& h,
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
-            Handle copy(_atom_table.add(h, false, true));
+            Handle copy(_atom_table.add(h, true));
             copy->setValue(key, value);
             return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setValue(key, value);
+            return h;
         }
     } else {
         h->setValue(key, value);
@@ -479,12 +498,19 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
-    if (nullptr == has or has->_read_only) {
-        if (has != this and not _read_only) {
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
-            Handle copy(_atom_table.add(h, false, true));
+            Handle copy(_atom_table.add(h, true));
             copy->setTruthValue(tvp);
             return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->setTruthValue(tvp);
+            return h;
         }
     } else {
         h->setTruthValue(tvp);
@@ -509,7 +535,7 @@ ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
 	    if (h->getIncomingSetSize() == 0)
-		    out << h->to_string() << endl;
+		    out << h->to_string() << std::endl;
     return out;
 }
 

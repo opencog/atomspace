@@ -30,14 +30,8 @@
 
 using namespace opencog;
 
-ArithmeticLink::ArithmeticLink(const HandleSeq& oset, Type t)
-    : FoldLink(oset, t)
-{
-	init();
-}
-
-ArithmeticLink::ArithmeticLink(const Link& l)
-    : FoldLink(l)
+ArithmeticLink::ArithmeticLink(const HandleSeq&& oset, Type t)
+    : FoldLink(std::move(oset), t)
 {
 	init();
 }
@@ -45,6 +39,10 @@ ArithmeticLink::ArithmeticLink(const Link& l)
 void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();
+	if (ARITHMETIC_LINK == tscope)
+		throw InvalidParamException(TRACE_INFO,
+			"ArithmeticLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
 
@@ -68,13 +66,14 @@ void ArithmeticLink::init(void)
 /// is (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
 ///
-/// This is certainly not an efficient, effective way to build a
-/// computer algebra system.  It works, its just barely good enough
+/// This is certainly NOT a simple, easy-to-maintain way to build a
+/// computer algebra system!  It works, its just barely good enough
 /// for single-variable arithmetic, but that's all.  For general
 /// reduction tasks, there are two choices:
 ///
-/// A) Convert atoms to some other CAS format, reduce that, and then
-///    convert back to atoms.
+/// A) Find some other library that does CAS, convert atoms to whatever
+///    format that library uses, reduce that, and then convert back to
+///    atoms.
 ///
 /// B) Implement reduction with the Rule Engine, together with a set
 ///    of reduction rules for arithmetic.
@@ -82,7 +81,7 @@ void ArithmeticLink::init(void)
 /// In some sense B) is better, but is likely to have poorer performance
 /// than A).  It also threatens to spiral out of control: We can add
 /// ever-more rules to the rule engine to reduce ever-more interesting
-/// algebraic expressions.
+/// algebraic expressions. CAS is actually hard.
 ///
 ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 {
@@ -101,6 +100,7 @@ ValuePtr ArithmeticLink::delta_reduce(AtomSpace* as, bool silent) const
 // ============================================================
 
 /// re-order the contents of an ArithmeticLink into "lexicographic" order.
+/// This provides a canonical order that helps guarantee reduction.
 ///
 /// The goal of the re-ordering is to simplify the reduction code,
 /// by placing atoms where they are easily found.  For now, this
@@ -152,12 +152,12 @@ Handle ArithmeticLink::reorder(void) const
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	return Handle(createLink(result, get_type()));
+	return Handle(createLink(std::move(result), get_type()));
 }
 
 // ===========================================================
 
-ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr) const
+ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
 	if (DEFINED_SCHEMA_NODE == vptr->get_type())
 	{

@@ -54,6 +54,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (PUT_LINK == t) continue;
 		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
+		if (GLOB_NODE == t) continue;
 		if (DEFINED_PREDICATE_NODE == t) continue;
 
 		// Allow conjunction, disjunction and negation of
@@ -90,6 +91,7 @@ bool check_numeric(const Handle& bool_atom)
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
 		if (VARIABLE_NODE == t) continue;
+		if (GLOB_NODE == t) continue;
 		if (NUMBER_NODE == t) continue;
 
 		// TODO - look up the schema, and make sure its numeric, also.

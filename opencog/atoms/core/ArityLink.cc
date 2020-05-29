@@ -21,31 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
 
 using namespace opencog;
 
-ArityLink::ArityLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+ArityLink::ArityLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, ARITY_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ArityLink, got %s", tname.c_str());
-	}
-}
-
-ArityLink::ArityLink(const Link &l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, ARITY_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ArityLink, got %s", tname.c_str());
 	}
@@ -60,17 +50,14 @@ ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
 	size_t ary = 0;
 	for (const Handle& h : _outgoing)
 	{
-		if (h->is_executable())
+		if (not h->is_executable())
 		{
-			ValuePtr pap(h->execute(as, silent));
-			if (pap->is_link()) ary += HandleCast(pap)->get_arity();
+			ary += h->size();
+			continue;
+		}
 
-			// XXX TODO sum up length of values. (!?)
-		}
-		else
-		{
-			if (h->is_link()) ary += h->get_arity();
-		}
+		const ValuePtr& pap(h->execute(as, silent));
+		ary += pap->size();
 	}
 
 	return ValuePtr(createNumberNode(ary));

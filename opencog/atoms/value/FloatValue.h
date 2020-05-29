@@ -57,11 +57,14 @@ public:
 	virtual ~FloatValue() {}
 
 	const std::vector<double>& value() const { update(); return _value; }
+	size_t size() const { return _value.size(); }
 
-	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent = "") const;
+	/** Returns a string representation of the value. */
+	virtual std::string to_string(const std::string& indent = "") const
+	{ return to_string(indent, _type); }
+	std::string to_string(const std::string& indent, Type) const;
 
-	/** Returns true if two atoms are equal.  */
+	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
 };
 
@@ -80,15 +83,71 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 }
 
 // Scalar multiplication and addition
-ValuePtr times(double, const FloatValuePtr&);
-ValuePtr plus(double, const FloatValuePtr&);
-ValuePtr divide(double, const FloatValuePtr&);
+std::vector<double> plus(double, const std::vector<double>&);
+std::vector<double> minus(double, const std::vector<double>&);
+std::vector<double> minus(const std::vector<double>&, double);
+std::vector<double> times(double, const std::vector<double>&);
+std::vector<double> divide(double, const std::vector<double>&);
 
-// Vector multiplication and addition
-ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
+inline
+ValuePtr plus(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(plus(f, fvp->value()));
+}
+inline
+ValuePtr minus(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(minus(f, fvp->value()));
+}
+inline
+ValuePtr minus(const FloatValuePtr& fvp, double f) {
+	return createFloatValue(minus(fvp->value(), f));
+}
+inline
+ValuePtr times(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(times(f, fvp->value()));
+}
+inline
+ValuePtr divide(double f, const FloatValuePtr& fvp) {
+	return createFloatValue(divide(f, fvp->value()));
+}
 
+
+std::vector<double> plus(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> minus(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> times(const std::vector<double>&, const std::vector<double>&);
+std::vector<double> divide(const std::vector<double>&, const std::vector<double>&);
+
+/// Vector multiplication and addition. When operating on an object
+/// times itself, take a sample first; this is needed to correctly
+/// handle streaming values, as they issue new values every time
+/// they are called. Failing to sample results in violations...
+inline
+ValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	if (fvpa != fvpb)
+		return createFloatValue(plus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(plus(sample, fvpb->value()));
+}
+inline
+ValuePtr minus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	if (fvpa != fvpb)
+		return createFloatValue(minus(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(minus(sample, fvpb->value()));
+}
+inline
+ValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	if (fvpa != fvpb)
+		return createFloatValue(times(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(times(sample, fvpb->value()));
+}
+inline
+ValuePtr divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb) {
+	if (fvpa != fvpb)
+		return createFloatValue(divide(fvpa->value(), fvpb->value()));
+	auto sample = fvpa->value();
+	return createFloatValue(divide(sample, fvpb->value()));
+}
 
 /** @}*/
 } // namespace opencog

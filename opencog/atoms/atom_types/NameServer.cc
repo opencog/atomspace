@@ -102,7 +102,7 @@ Type NameServer::declType(const Type parent, const std::string& name)
     // Check if a type with this name already exists. If it does, then
     // the second and subsequent calls are to be interpreted as defining
     // multiple inheritance for this type.  A real-life example is the
-    // GroundedSchemeNode, which inherits from several types.
+    // GroundedSchemaNode, which inherits from several types.
     Type type = getType(name);
     if (type != NOTYPE) {
         std::lock_guard<std::mutex> l(type_mutex);
@@ -166,6 +166,17 @@ Type NameServer::declType(const Type parent, const std::string& name)
     setParentRecursively(parent, type, maxd);
     if (_maxDepth < maxd) _maxDepth = maxd;
 
+    // Short-hand names ... without the trailing "Node", "Link" at the
+    // end.
+    size_t len = name.size();
+    if (4 < len and
+         ((std::string::npos != name.find("Node", len-4)) or
+          (std::string::npos != name.find("Link", len-4))))
+    {
+        std::string short_name = name.substr(0, len-4);
+        name2CodeMap[short_name] = type;
+    }
+
     // unlock mutex before sending signal which could call
     l.unlock();
 
@@ -179,10 +190,16 @@ void NameServer::setParentRecursively(Type parent, Type type, Type& maxd)
 {
     if (recursiveMap[parent][type]) return;
 
+    if (type <= parent)
+        throw InvalidParamException(TRACE_INFO,
+            "Improper type declararition; "
+            "parent (%d) must be smaller than child (%d).\n"
+            "(Partial orders must be strict!)\n", parent, type);
+
     bool incr = false;
     recursiveMap[parent][type] = true;
-    for (Type i = 0; i < nTypes; ++i) {
-        if ((recursiveMap[i][parent]) and (i != parent)) {
+    for (Type i = 0; i < parent; ++i) {
+        if (recursiveMap[i][parent]) {
             incr = true;
             setParentRecursively(i, type, maxd);
         }

@@ -60,16 +60,17 @@ void DualLink::init(void)
 	_pat.body = _body;
 
 	make_term_trees();
+
+	// Well, there won't be any variables, but we still need
+	// to have an empty-set-per-clause to not trigger asserts
+	// in the PatternMatcherEngine. (... I'm confused about this.
+	// I'm thinking that the pattern matcher should be smarter
+	// than this ... but for now, let this slide...)
+	get_clause_variables(_outgoing);
 }
 
-DualLink::DualLink(const HandleSeq& hseq, Type t)
-	: PatternLink(hseq, t)
-{
-	init();
-}
-
-DualLink::DualLink(const Link &l)
-	: PatternLink(l)
+DualLink::DualLink(const HandleSeq&& hseq, Type t)
+	: PatternLink(std::move(hseq), t)
 {
 	init();
 }
@@ -79,6 +80,21 @@ ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	Recognizer reco(as);
 	satisfy(reco);
+
+	// If there is an anchor, then attach results to the anchor.
+	// Otherwise, create a SetLink and return that.
+	// XXX FIXME ... at this time, there is no documented way of
+	// squeezing an AnchorLink into a DualLink.  So the below
+	// if-statement is never taken. Some additional design work
+	// is needed.
+	if (_variables._anchor and as)
+	{
+		for (const Handle& h : reco._rules)
+			as->add_link(MEMBER_LINK, h, _variables._anchor);
+
+		return _variables._anchor;
+	}
+
 	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }
 

@@ -17,3 +17,5 @@
 	(GetLink
 		(TypedVariable (Variable "$X1") (Type 'NumberNode)) 
 		(Equal (Plus (Variable "$X1") (Number 5)) (Number 11))))
+
+; (cog-execute! arithmetic-search)

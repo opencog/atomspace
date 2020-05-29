@@ -59,6 +59,7 @@ class DisconnectedUTest :  public CxxTest::TestSuite
 		void test_components(void);
 		void test_variables(void);
 		void test_cvariables(void);
+		void test_dancers(void);
 };
 
 /*
@@ -119,7 +120,9 @@ void DisconnectedUTest::test_components(void)
 }
 
 /*
- * Test several patterns carrying ill-formed variable declarations
+ * Test several patterns with missing grounding clauses.
+ * These used to be considered to be ill-formed, but now
+ * we allow them to create implicit grounding clauses.
  */
 void DisconnectedUTest::test_variables(void)
 {
@@ -127,54 +130,20 @@ void DisconnectedUTest::test_variables(void)
 
 	eval->eval("(load-from-path \"tests/query/disco-vars.scm\")");
 
-#if DO_NOT_TEST_THIS_IS_NOW_LEGAL
-	// We expect to catch an error here. ------------------------------
-	bool caught = false;
-	try
-	{
-		eval->eval_h("(B)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
-#endif
+	// We do NOT expect to catch an error here.
+	Handle h = eval->eval_h("(B)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
-	// We expect to catch an error here. ------------------------------
-	bool caught = false;
-	try
-	{
-		eval->eval_h("(Ba)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	h = eval->eval_h("(Ba)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
-	// We expect to catch an error here. ------------------------------
-	caught = false;
-	try
-	{
-		eval->eval_h("(Bu)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		logger().debug("Caught exception, just as expected: %s", ex.get_message());
-		caught = true;
-	}
-	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	h = eval->eval_h("(Bu)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Similar to above, except that the stuff is build up in C++ not in
+// Similar to above, except that the stuff is built up in C++ not in
 // scheme.  See bug #172.
 void DisconnectedUTest::test_cvariables(void)
 {
@@ -189,8 +158,7 @@ void DisconnectedUTest::test_cvariables(void)
 		Handle blv(createLink(VARIABLE_LIST, va, vb));
 		Handle blb(createLink(AND_LINK, va));
 		Handle blt(createLink(LIST_LINK, va));
-		HandleSeq bll = {blv, blb, blt};
-		Handle bl_final(createLink(bll, BIND_LINK));
+		Handle bl_final(createLink(BIND_LINK, blv, blb, blt));
 		as->add_atom(bl_final);
 	}
 	catch (const InvalidParamException& ex)
@@ -203,3 +171,34 @@ void DisconnectedUTest::test_cvariables(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+/*
+ * Test pattern with missing grounding clauses. It should not
+ * only be specifiable, but it should also obtain the correct
+ * (expceted) results.  See issue #2516 for details.
+ */
+void DisconnectedUTest::test_dancers(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/disco-dancers.scm\")");
+
+	// We do NOT expect to catch an error here.
+	Handle h = eval->eval_h("(get-dancers)");
+	TSM_ASSERT("Failed to create GetLink", Handle::UNDEFINED != h);
+
+	h = eval->eval_h("(cog-execute! (get-dancers))");
+
+	Handle a(createNode(CONCEPT_NODE, "alice"));
+	Handle b(createNode(CONCEPT_NODE, "bob"));
+	Handle ab(createLink(LIST_LINK, a, b));
+	Handle ba(createLink(LIST_LINK, b, a));
+	Handle both(createLink(SET_LINK, ab, ba));
+	Handle ans = as->add_atom(both);
+
+	// They should be identical.
+	TSM_ASSERT("Wrong result", *ans == *h);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+

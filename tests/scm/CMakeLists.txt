@@ -33,6 +33,8 @@ ADD_GUILE_TEST(SCMOpencogTestRunnerFail scm-opencog-test-runner-fail.scm)
 # of the test result by setting its properties.
 SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 
+ADD_GUILE_TEST(SCMLoadFile scm-load-file.scm)
+
 # Guile-python bridge requires python
 IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(SCMPython scm-python.scm)

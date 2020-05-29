@@ -21,7 +21,6 @@
 
 #include <string>
 
-#include <opencog/util/random.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -35,6 +34,13 @@ using namespace opencog;
 void RewriteLink::init(void)
 {
 	Type t = get_type();
+
+#if 0
+	// The unit tests create this directly, so this check bombs.
+	if (REWRITE_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"RewriteLinks are private and cannot be instantiated.");
+#endif
 	if (not nameserver().isA(t, REWRITE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
@@ -49,61 +55,11 @@ RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
-	: ScopeLink(oset, t), _silent(false)
+RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
+	: ScopeLink(std::move(oset), t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();
-}
-
-RewriteLink::RewriteLink(const Link &l)
-	: ScopeLink(l), _silent(false)
-{
-	if (skip_init(l.get_type())) return;
-	init();
-}
-
-/* ================================================================= */
-
-inline Handle append_rand_str(const Handle& var)
-{
-	std::string new_var_name = randstr(var->get_name() + "-");
-	return createNode(VARIABLE_NODE, new_var_name);
-}
-
-inline HandleSeq append_rand_str(const HandleSeq& vars)
-{
-	HandleSeq new_vars;
-	for (const Handle& h : vars)
-		new_vars.push_back(append_rand_str(h));
-	return new_vars;
-}
-
-Handle RewriteLink::alpha_convert() const
-{
-	HandleSeq vars = append_rand_str(_varlist.varseq);
-	return alpha_convert(vars);
-}
-
-Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
-{
-	// Perform alpha conversion
-	HandleSeq hs;
-	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
-
-	// Create the alpha converted scope link
-	return createLink(hs, get_type());
-}
-
-Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
-{
-	HandleSeq vars;
-	for (const Handle& var : _varlist.varseq) {
-		auto it = vsmap.find(var);
-		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
-	}
-	return alpha_convert(vars);
 }
 
 /* ================================================================= */
@@ -131,13 +87,13 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 		// in it. So we must not call createLink(), below.
 		Type t = get_type();
 		if (PUT_LINK == t or LAMBDA_LINK == t)
-			return hs[0];
+			return hs.at(0);
 	}
 
 	// Create the substituted scope.  I suspect that this is a bad
 	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
 	// and cause issues thhrought the code ... but ... whatever.
-	return createLink(hs, get_type());
+	return createLink(std::move(hs), get_type());
 }
 
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
@@ -273,7 +229,7 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 	{
 		OC_ASSERT(false, "Not implemented");
 	}
-	return createLink(oset, t);
+	return createLink(std::move(oset), t);
 }
 
 Handle RewriteLink::consume_quotations() const
@@ -297,7 +253,7 @@ Handle RewriteLink::consume_quotations() const
 		nouts.insert(nouts.begin(), vardecl);
 
 	// Recreate the scope
-	return createLink(nouts, get_type());
+	return createLink(std::move(nouts), get_type());
 }
 
 Handle RewriteLink::consume_quotations(const Handle& vardecl,
@@ -336,7 +292,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	{
 		// TODO: the following has no unit test!!! Yet it introduces a
 		// bug covered by RewriteLinkUTest::test_consume_quotations_4(),
-		// thus this code is disable till a unit test it created for it
+		// thus this code is disabled till a unit test it created for it
 		// and we understand what it fixes and how it fixes.
 		//
 		// // Make sure quotation is not removed around
@@ -481,7 +437,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
 	                                   quotation, needless_quotation,
 	                                   clause_root);
-	Handle ch = createLink(chs, h->get_type());
+	Handle ch = createLink(std::move(chs), h->get_type());
 	ch->copyValues(h);
 	return ch;
 }

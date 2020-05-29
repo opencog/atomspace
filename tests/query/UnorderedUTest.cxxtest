@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/guile/SchemeEval.h>
@@ -50,16 +36,25 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		UnorderedUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
+			// logger().set_level(Logger::FINE);
 			logger().set_print_to_stdout_flag(true);
 			logger().set_timestamp_flag(false);
+			logger().set_sync_flag(true);
 #include "test-types.cc"
 		}
 
 		~UnorderedUTest()
 		{
+			logger().info("Completed running UnorderedUTest");
+
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+			else
+			{
+				logger().info("UnorderedUTest failed!");
+				logger().flush();
+			}
 		}
 
 		void setUp(void);
@@ -68,7 +63,21 @@ class UnorderedUTest :  public CxxTest::TestSuite
 
 		void test_un1(void);
 		void test_un2(void);
+		void test_jswiergo(void);
+		void test_big_jswiergo(void);
 		void test_exhaust(void);
+		void test_embed(void);
+		void test_cube(void);
+		void test_quote(void);
+		void test_odometer(void);
+		void test_odo_below(void);
+		void test_odo_distinct(void);
+		void test_odo_indistinct(void);
+		void test_odo_layer(void);
+		void test_odo_couple(void);
+		void test_odo_equ_pred(void);
+		void test_odo_equal(void);
+		void test_odo_couplayer(void);
 };
 
 /*
@@ -109,9 +118,9 @@ void UnorderedUTest::setUp(void)
  * The trick is, of course, not to search too much, and not to search too
  * little.
  */
-#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 #define getarity(hand) hand->get_arity()
 
+// ================================================================
 void UnorderedUTest::test_un1(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -124,7 +133,7 @@ void UnorderedUTest::test_un1(void)
 	// Result should be a ListLink w/ two solutions
 	Handle result = bindlink(as, pair);
 
-	logger().debug("pair result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("pair result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ one solution. Well, actually, two
@@ -135,19 +144,20 @@ void UnorderedUTest::test_un1(void)
 	result = bindlink(as, disorder);
 	logger().debug() << "Disorder Result is this:\n" << result->to_string();
 
-	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("first result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ one solution. Well, actually, two as above.
 	result = bindlink(as, disordered);
 	logger().debug() << "DisorderED Result is this:\n" << result->to_string();
 
-	logger().debug("next result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("next result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ================================================================
 void UnorderedUTest::test_un2(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -158,12 +168,72 @@ void UnorderedUTest::test_un2(void)
 	// Result should be a ListLink w/ one solution
 	Handle result = bindlink(as, disor_more);
 
-	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("second result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ================================================================
+
+void UnorderedUTest::test_jswiergo(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
+
+	Handle result, expected;
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! tree-query1)");
+	expected = eval->eval_h("expect-q1");
+
+	logger().debug("jsw first result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! tree-query2)");
+	expected = eval->eval_h("expect-q2");
+
+	logger().debug("jsw second result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// More complicated variant of above.
+void UnorderedUTest::test_big_jswiergo(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
+
+	Handle result, expected;
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! big-tree-q1)");
+	expected = eval->eval_h("big-expect1");
+
+	logger().debug("jsw big first result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------
+	result = eval->eval_h("(cog-execute! big-tree-q2)");
+	expected = eval->eval_h("big-expect2");
+
+	logger().debug("jsw big second result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
 void UnorderedUTest::test_exhaust(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -181,50 +251,480 @@ void UnorderedUTest::test_exhaust(void)
 	// Result should be a ListLink w/ 60 solutions.
 	Handle result = bindlink(as, exhaust);
 
-	logger().debug("exhaustive result is %s\n", SchemeSmob::to_string(result).c_str());
+	// logger().debug("exhaustive result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 60, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 72 solutions
 	result = bindlink(as, exhaust2);
 
-	logger().debug("exhaust-2 result is %s\n", SchemeSmob::to_string(result).c_str());
+	// logger().debug("exhaust-2 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 12 solutions
 	result = bindlink(as, exhaust3);
 
-	logger().debug("exhaust-3 result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("exhaust-3 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
 	result = bindlink(as, exhaust4);
 
-	logger().debug("exhaust-4 result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("exhaust-4 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
 	result = bindlink(as, exhaust5);
 
-	logger().debug("exhaust-5 result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("exhaust-5 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 12 solutions
 	result = bindlink(as, exhaust_eq_12);
 
-	logger().debug("exhaust-eq-12 result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("exhaust-eq-12 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
 	result = bindlink(as, exhaust_eq_6);
 
-	logger().debug("exhaust-eq-6 result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("exhaust-eq-6 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+void UnorderedUTest::test_embed(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-embed.scm\")");
+	Handle expected = eval->eval_h("expect-embedded-set");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", expected);
+
+	// Result should be a SetLink w/ two solutions
+	Handle result = eval->eval_h("(cog-execute! embedded-set)");
+
+	logger().debug("embedded result is %s\n", result->to_string().c_str());
+	if (2 != getarity(result))
+		logger().info("Error: unexpected number of solutions\n");
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+void UnorderedUTest::test_cube(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-embed.scm\")");
+	Handle expected = eval->eval_h("expect-two-x-two");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", expected);
+
+	// Result should be a SetLink w/ four solutions
+	Handle result = eval->eval_h("(cog-execute! two-x-two)");
+
+	logger().debug("square result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------------------------------
+	// Again, but cubed.
+	expected = eval->eval_h("expect-cube");
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", expected);
+
+	// Result should be a SetLink w/ eight solutions
+	result = eval->eval_h("(cog-execute! cube)");
+
+	logger().debug("cube result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
+	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
+
+	// --------------------------------------------
+	// Again, but four-dimensional.
+
+	// Result should be a SetLink w/ sixteen solutions
+	result = eval->eval_h("(cog-execute! tesseract)");
+
+	// logger().debug("tesseract result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 16, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+// Infinite loop triggered by screwy handling of quoting during
+// grounding.  See #2357 and #2360 for details.
+void UnorderedUTest::test_quote(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
+
+	// Result should be a SetLink w/ one solutions
+	Handle result = eval->eval_h("(cog-execute! query)");
+
+	logger().debug("embedded result is %s\n", result->to_string().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::test_odometer(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odometer.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! odo-dim-one)");
+
+	logger().debug("D=1 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 6*6=36 solutions
+	result = eval->eval_h("(cog-execute! odo-dim-two)");
+
+	logger().debug("D=2 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6=216 solutions
+	result = eval->eval_h("(cog-execute! odo-dim-three)");
+
+	logger().debug("D=3 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! odo-dim-four)");
+
+	logger().debug("D=4 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::test_odo_below(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! below-dim-one)");
+
+	logger().debug("D=1 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 6*6=36 solutions
+	result = eval->eval_h("(cog-execute! below-dim-two)");
+
+	logger().debug("D=2 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6=216 solutions
+	result = eval->eval_h("(cog-execute! below-dim-three)");
+
+	logger().debug("D=3 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! below-dim-four)");
+
+	logger().debug("D=4 below arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::test_odo_distinct(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-distinct.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! distinct-dim-one)");
+
+	logger().debug("D=1 distinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 6*6=36 solutions
+	result = eval->eval_h("(cog-execute! distinct-dim-two)");
+
+	logger().debug("D=2 distinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6=216 solutions
+	result = eval->eval_h("(cog-execute! distinct-dim-three)");
+
+	logger().debug("D=3 distinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! distinct-dim-four)");
+
+	logger().debug("D=4 distinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+void UnorderedUTest::test_odo_indistinct(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-indistinct.scm\")");
+
+	// Result should be a SetLink w/ 3!=six solutions
+	Handle result = eval->eval_h("(cog-execute! indistinct-dim-one)");
+
+	logger().debug("D=1 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Again, but squared
+	// Result should be a SetLink w/ 2*6*6=72 solutions
+	result = eval->eval_h("(cog-execute! indistinct-dim-two)");
+
+	logger().debug("D=2 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
+	result = eval->eval_h("(cog-execute! indistinct-dim-three)");
+
+	logger().debug("D=3 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 6*6*6*6 *4! = 31104 solutions
+	result = eval->eval_h("(cog-execute! indistinct-dim-four)");
+
+	logger().debug("D=4 indistinct arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 31104, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Stacked odometers.
+// Currently fails
+void UnorderedUTest::test_odo_layer(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-layer.scm\")");
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 3!=6 solutions
+	Handle result = eval->eval_h("(cog-execute! layer-dim-one)");
+
+	logger().debug("D=1 layer arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2!*(3!* 3!) = 72 solutions
+	result = eval->eval_h("(cog-execute! layer-dim-two)");
+
+	logger().debug("D=2 layer arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 3!*(3!* 3! *3!) = 1296 solutions
+	result = eval->eval_h("(cog-execute! layer-dim-three)");
+
+	logger().debug("D=3 layer arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 4!*(3! * 3!* 3! *3!) = 31104 solutions
+	result = eval->eval_h("(cog-execute! layer-dim-four)");
+
+	logger().debug("D=4 odo arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 31104, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Coupled odometers. Currently failing.
+void UnorderedUTest::test_odo_couple(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-couple.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*2=4 solutions
+	result = eval->eval_h("(cog-execute! couple-dim-two)");
+
+	logger().debug("D=2 couple arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! couple-dim-three)");
+
+	logger().debug("D=3 couple arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! couple-dim-four)");
+
+	logger().debug("D=4 couple arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Coupled odometers. Currently failing.
+void UnorderedUTest::test_odo_equ_pred(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-equpr.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*2=4 solutions
+	result = eval->eval_h("(cog-execute! epr-dim-two)");
+
+	logger().debug("D=2 epr arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! epr-dim-three)");
+
+	logger().debug("D=3 epr arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! epr-dim-four)");
+
+	logger().debug("D=4 epr arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Coupled odometers. Currently failing.
+void UnorderedUTest::test_odo_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-equal.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-two)");
+
+	logger().debug("D=2 equ arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-three)");
+
+	logger().debug("D=3 equ arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*1*1*2=4 solutions
+	result = eval->eval_h("(cog-execute! equ-dim-four)");
+
+	logger().debug("D=4 equ arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Coupled odometers. Currently failing.
+void UnorderedUTest::test_odo_couplayer(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-odo-couplayer.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*(2*2)=8 solutions
+	result = eval->eval_h("(cog-execute! play-dim-two)");
+
+	logger().debug("D=2 play arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*(2*1*2)=8 solutions
+	result = eval->eval_h("(cog-execute! play-dim-three)");
+
+	logger().debug("D=3 play arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2*(2*1*1*2)=8 solutions
+	result = eval->eval_h("(cog-execute! play-dim-four)");
+
+	logger().debug("D=4 play arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -24,7 +24,7 @@
 #define _OPENCOG_FREE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/FreeVariables.h>
 
 namespace opencog
 {
@@ -42,13 +42,12 @@ class FreeLink : public Link
 {
 protected:
 	FreeVariables _vars;
-
-	void unorder(void);
 	void init(void);
 
 public:
-	FreeLink(const HandleSeq& oset, Type=FREE_LINK);
-	FreeLink(const Link& l);
+	FreeLink(const HandleSeq&&, Type=FREE_LINK);
+	FreeLink(const FreeLink&) = delete;
+	FreeLink& operator=(const FreeLink&) = delete;
 	virtual ~FreeLink() {}
 
 	const FreeVariables& get_vars() const

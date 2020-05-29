@@ -24,9 +24,9 @@
 #ifndef _OPENCOG_LINK_H
 #define _OPENCOG_LINK_H
 
+#include <functional>
 #include <string>
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 
@@ -50,7 +50,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&);
+    void init();
 
 protected:
     //! Array holding actual outgoing set of the link.
@@ -70,70 +70,44 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq& oset, Type t=LINK)
-        : Atom(t)
+    Link(const HandleSeq oset, Type t=LINK)
+        : Atom(t), _outgoing(std::move(oset))
     {
-        init(oset);
+        init();
     }
 
     Link(Type t)
         : Atom(t)
     {
-        HandleSeq oset;
-        init(oset);
+        init();
     }
 
 	Link(Type t, const Handle& h)
-        : Atom(t)
+        : Atom(t), _outgoing({h})
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(1);
-        oset[0] = h;
-        init(oset);
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb})
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(2);
-        oset[0] = ha;
-        oset[1] = hb;
-        init(oset);
+        init();
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc})
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(3);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        init(oset);
+        init();
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd)
-        : Atom(t)
+        : Atom(t), _outgoing({ha, hb, hc, hd})
     {
-        // reserve+assign is 2x faster than push_back()/emplace_back()
-        HandleSeq oset(4);
-        oset[0] = ha;
-        oset[1] = hb;
-        oset[2] = hc;
-        oset[3] = hd;
-        init(oset);
+        init();
     }
 
-    /**
-     * Copy constructor, does NOT copy atomspace membership,
-     * or any of the values or truth values.
-     */
-    Link(const Link &l)
-        : Atom(l.get_type())
-    {
-        init(l.getOutgoingSet());
-    }
+    Link(const Link&) = delete;
+    Link& operator=(const Link&) = delete;
 
     /**
      * Destructor for this class.
@@ -148,10 +122,7 @@ public:
     }
 
     virtual size_t size() const {
-        size_t size = 1;
-        for (const Handle&h : _outgoing)
-            size += h->size();
-        return size;
+        return _outgoing.size();
     }
 
     /**
@@ -173,12 +144,7 @@ public:
      */
     virtual Handle getOutgoingAtom(Arity pos) const
     {
-        // Checks for a valid position
-        if (pos < _outgoing.size()) {
-            return Handle(AtomCast(_outgoing[pos]));
-        } else {
-            throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
-        }
+        return _outgoing.at(pos);
     }
 
     //! Invoke the callback on each atom in the outgoing set of
@@ -237,6 +203,7 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
+typedef std::shared_ptr<Link> LinkPtr;
 static inline LinkPtr LinkCast(const Handle& h)
     { return std::dynamic_pointer_cast<Link>(h); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
@@ -245,12 +212,25 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
 template< class... Args >
 Handle createLink( Args&&... args )
 {
-	// Do we need to say (std::forward<Args>(args)...) instead ???
-	LinkPtr tmp(std::make_shared<Link>(args ...));
-	return classserver().factory(tmp->get_handle());
+	Handle tmp(std::make_shared<Link>(std::forward<Args>(args) ...));
+	return classserver().factory(tmp);
 }
 
 /** @}*/
 } // namespace opencog
+
+/// Overload std::less to perform a content-based compare of the
+/// LinkPtr's. Otherwise, it seems to just use the address returned
+/// by LinkPtr::get().
+namespace std {
+template<>
+struct less<opencog::LinkPtr>
+{
+    bool operator()(const opencog::LinkPtr& la, const opencog::LinkPtr& lb) const
+    {
+        return la->operator<(*lb);
+    }
+};
+}
 
 #endif // _OPENCOG_LINK_H

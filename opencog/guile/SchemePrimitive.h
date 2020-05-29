@@ -375,6 +375,10 @@ protected:
 	{
 		return scm_from_int(i);
 	}
+	SCM scm_from(size_t i)
+	{
+		return scm_from_size_t(i);
+	}
 	SCM scm_from(double d)
 	{
 		return scm_from_double(d);
@@ -452,7 +456,7 @@ protected:
 	virtual SCM invoke (SCM args)
 	{
 		super::cpp_invoke(args);
-		return SCM_EOL;
+		return SCM_UNSPECIFIED;
 	}
 };
 

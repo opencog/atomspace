@@ -37,8 +37,9 @@ namespace opencog
 class TimeLink : public FunctionLink
 {
 public:
-	TimeLink(const HandleSeq&, Type=TIME_LINK);
-	TimeLink(const Link&);
+	TimeLink(const HandleSeq&&, Type=TIME_LINK);
+	TimeLink(const TimeLink&) = delete;
+	TimeLink& operator=(const TimeLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);

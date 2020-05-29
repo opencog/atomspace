@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_TYPE_NODE_H
 #define _OPENCOG_TYPE_NODE_H
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -43,10 +44,10 @@ protected:
 
 public:
 	// Please do NOT use this constructor!
-	TypeNode(Type t, const std::string& s)
+	TypeNode(Type t, const std::string&& s)
 		// Convert to number and back to string to avoid miscompares.
-		: Node(t, s),
-		  _kind(nameserver().getType(s))
+		: Node(t, std::move(s)),
+		  _kind(nameserver().getType(_name))
 	{
 		// Perform strict checking only for TypeNode.  The
 		// DefinedTypeNode, which inherits from this class,
@@ -54,14 +55,14 @@ public:
 		// currently does not know about.
 		if (TYPE_NODE == t and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
-				"Not a valid typename: '%s'", s.c_str());
+				"Not a valid typename: '%s'", _name.c_str());
 	}
 
 public:
-	TypeNode(const std::string& s)
+	TypeNode(const std::string&& s)
 		// Convert to number and back to string to avoid miscompares.
-		: Node(TYPE_NODE, s),
-		  _kind(nameserver().getType(s))
+		: Node(TYPE_NODE, std::move(s)),
+		  _kind(nameserver().getType(_name))
 	{
 		if (NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
@@ -69,25 +70,12 @@ public:
 	}
 
 	TypeNode(Type t)
-		: Node(TYPE_NODE, nameserver().getTypeName(t)),
+		: Node(TYPE_NODE, std::string(nameserver().getTypeName(t))),
 		  _kind(t)
 	{}
 
-	TypeNode(Node &n)
-		: Node(n),
-		  _kind(nameserver().getType(n.get_name()))
-	{
-		OC_ASSERT(nameserver().isA(n.get_type(), TYPE_NODE),
-			"Bad TypeNode constructor!");
-
-		if (DEFINED_TYPE_NODE != _type and NOTYPE == _kind)
-			throw InvalidParamException(TRACE_INFO,
-				"Not a valid typename: '%s'", n.get_name().c_str());
-
-		if (DEFINED_TYPE_NODE == _type and NOTYPE != _kind)
-			throw InvalidParamException(TRACE_INFO,
-				"Redefinition of a built-in typename: '%s'", n.get_name().c_str());
-	}
+	TypeNode(TypeNode&) = delete;
+	TypeNode& operator=(const TypeNode&) = delete;
 
 	static void validate(const std::string& str)
 	{

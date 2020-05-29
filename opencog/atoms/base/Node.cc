@@ -21,17 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdio.h>
-
-#include <opencog/util/Logger.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Link.h>
 
 #include "Node.h"
 
 using namespace opencog;
 
-void Node::init(const std::string& cname)
+void Node::init()
 {
     if (not nameserver().isA(_type, NODE))
     {
@@ -39,7 +35,6 @@ void Node::init(const std::string& cname)
             "Node - Invalid node type '%d' %s.",
             _type, nameserver().getTypeName(_type).c_str());
     }
-    _name = cname;
 }
 
 /// Return a universally-unique string for each distinct node.
@@ -63,7 +58,7 @@ std::string Node::to_string(const std::string& indent) const
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->to_string();
 
-    answer += ") ; " + id_to_string() + "\n";
+    answer += ") ; " + id_to_string();
 
     return answer;
 }
@@ -109,6 +104,5 @@ ContentHash Node::compute_hash() const
 	hsh &= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-	return _content_hash;
+	return hsh;
 }

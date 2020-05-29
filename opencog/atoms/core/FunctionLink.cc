@@ -28,6 +28,9 @@ using namespace opencog;
 
 void FunctionLink::check_type(Type t)
 {
+	if (FUNCTION_LINK == t)
+		throw InvalidParamException(TRACE_INFO,
+			"FunctionLinks are private and cannot be instantiated.");
 	if (not nameserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 }
@@ -37,17 +40,10 @@ void FunctionLink::init(void)
 	FreeLink::init();
 }
 
-FunctionLink::FunctionLink(const HandleSeq& oset, Type t)
-    : FreeLink(oset, t)
+FunctionLink::FunctionLink(const HandleSeq&& oset, Type t)
+    : FreeLink(std::move(oset), t)
 {
 	check_type(t);
-	init();
-}
-
-FunctionLink::FunctionLink(const Link& l)
-    : FreeLink(l)
-{
-	check_type(l.get_type());
 	init();
 }
 

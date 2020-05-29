@@ -69,24 +69,9 @@ Handle DeleteLink::execute(AtomSpace * as) const
 }
 #endif
 
-DeleteLink::DeleteLink(const HandleSeq& oset, Type type)
-	: FreeLink(oset, type)
+DeleteLink::DeleteLink(const HandleSeq&& oset, Type type)
+	: FreeLink(std::move(oset), type)
 {
-	init();
-}
-
-DeleteLink::DeleteLink(const Link &l)
-	: FreeLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, DELETE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a DeleteLink, got %s", tname.c_str());
-	}
-
 	init();
 }
 

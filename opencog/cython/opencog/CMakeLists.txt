@@ -11,6 +11,9 @@ MESSAGE(STATUS "Setting python RPATH to ${PYTHON_DEST}")
 SET(CMAKE_SHARED_LINKER_FLAGS
 	"${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath -Wl,${PYTHON_DEST}")
 SET(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+SET(CMAKE_INSTALL_RPATH
+   "${CMAKE_INSTALL_PREFIX}/lib/opencog"
+   "${PYTHON_DEST}")
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -18,7 +21,15 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-2" "-f")
+# Even though Python2 is deprecated, we still have users running
+# ROS Kinetic which requires Python2. So we still support Python2.
+# Use ${PYTHONLIBS_VERSION_STRING} instead of ${PYTHON_VERSION_STRING}
+IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
+	SET(CYTHON_FLAGS "-2" "-f" "-Wextra")
+ELSE ()
+	# SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+	SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
+ENDIF ()
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -82,6 +93,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	value_types.pxd
 	DESTINATION "include/opencog/cython/opencog"
 )
 
@@ -121,6 +133,7 @@ TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
 	atomspace
 	type_constructors
+	executioncontext
 	${PYTHON_LIBRARIES}
 )
 
@@ -128,34 +141,41 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
-############################## bindlink #####################
+############################## execute module #####################
 
-CYTHON_ADD_MODULE_PYX(bindlink
+CYTHON_ADD_MODULE_PYX(execute
 	"atomspace.pxd"
 	opencog_atom_types
 )
 
-ADD_LIBRARY(bindlink_cython
-	BindlinkStub.cc
-	bindlink.cpp
+ADD_LIBRARY(exec_cython
+	"BindlinkStub.cc"
+	"execute.cpp"
 )
 
-TARGET_LINK_LIBRARIES(bindlink_cython
+TARGET_LINK_LIBRARIES(exec_cython
 	atomspace_cython
 	atomspace
 	${PYTHON_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
+SET_TARGET_PROPERTIES(exec_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME bindlink)
+	OUTPUT_NAME execute)
 
-INSTALL (TARGETS
+### install the modules ###
+INSTALL(TARGETS
 	atomspace_cython
-	bindlink_cython
+	exec_cython
 	logger_cython
 	type_constructors
 	utilities_cython
+	DESTINATION "${PYTHON_DEST}")
+
+# install the legacy bindlink module
+INSTALL(FILES
+	"bindlink.py"
+	"exec.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)

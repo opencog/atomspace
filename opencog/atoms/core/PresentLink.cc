@@ -56,8 +56,8 @@ void PresentLink::init(void)
 	_outgoing.swap(uniq);
 }
 
-PresentLink::PresentLink(const HandleSeq& oset, Type t)
-	: UnorderedLink(oset, t)
+PresentLink::PresentLink(const HandleSeq&& oset, Type t)
+	: UnorderedLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, PRESENT_LINK))
 	{
@@ -66,23 +66,6 @@ PresentLink::PresentLink(const HandleSeq& oset, Type t)
 			"Expecting an PresentLink, got %s", tname.c_str());
 	}
 
-	init();
-}
-
-PresentLink::PresentLink(const Link& l)
-	: UnorderedLink(l)
-{
-	// Type must be as expected
-	Type tscope = l.get_type();
-	if (not nameserver().isA(tscope, PRESENT_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an PresentLink, got %s", tname.c_str());
-	}
-
-	// We have to call init here, because the input link l might
-	// not have gone through a PresentLink constructor before.
 	init();
 }
 

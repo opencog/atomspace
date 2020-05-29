@@ -1,0 +1,104 @@
+/*
+ * tests/atoms/core/NumberNode.cxxtest
+ *
+ * Copyright (C) 2019 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class NumberNodeUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+
+public:
+	NumberNodeUTest()
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	~NumberNodeUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void test_number_equivalence();
+	void test_number_vector();
+};
+
+void NumberNodeUTest::test_number_equivalence()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle n1 = an(NUMBER_NODE, "42");
+	Handle n2 = an(NUMBER_NODE, "42.");
+	Handle n3 = an(NUMBER_NODE, "42.0");
+	Handle n4 = an(NUMBER_NODE, "42.00");
+	Handle n5 = an(NUMBER_NODE, "42.000");
+	Handle n6 = an(NUMBER_NODE, std::move(std::string(n1->get_name())));
+	TS_ASSERT_EQUALS(n1, n2);
+	TS_ASSERT_EQUALS(n1, n3);
+	TS_ASSERT_EQUALS(n1, n4);
+	TS_ASSERT_EQUALS(n1, n5);
+	TS_ASSERT_EQUALS(n1, n6);
+
+	Handle nn = an(NUMBER_NODE, "42.0000000000042");
+	TS_ASSERT_DIFFERS(n1, nn);
+
+	double ft = NumberNodeCast(n1)->get_value();
+	TS_ASSERT_LESS_THAN(ft-42.0, 1e-10);
+
+	Handle f1 = an(NUMBER_NODE, "31415.926");
+	Handle f2 = an(NUMBER_NODE, std::move(std::string(f1->get_name())));
+	TS_ASSERT_EQUALS(f1, f2);
+
+	ft = NumberNodeCast(f1)->get_value();
+	TS_ASSERT_LESS_THAN(ft-31415.926, 1e-10);
+
+	Handle f3 = an(NUMBER_NODE, std::to_string(ft));
+	TS_ASSERT_EQUALS(f1, f3);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void NumberNodeUTest::test_number_vector()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle n1 = an(NUMBER_NODE, "1.1 2.2 3.3");
+	Handle n2 = an(NUMBER_NODE, "1.1,2.2,3.3");
+	Handle n3 = an(NUMBER_NODE, "1.1, 2.2, 3.3");
+	Handle n4 = an(NUMBER_NODE, "1.1\t2.2\t3.3");
+	Handle n5 = an(NUMBER_NODE, "[1.1, 2.2, 3.3]");
+	Handle n6 = an(NUMBER_NODE, "#(1.1 2.2 3.3)");
+	TS_ASSERT_EQUALS(n1, n2);
+	TS_ASSERT_EQUALS(n1, n3);
+	TS_ASSERT_EQUALS(n1, n4);
+	TS_ASSERT_EQUALS(n1, n5);
+	TS_ASSERT_EQUALS(n1, n6);
+
+	std::vector<double> vec = NumberNodeCast(n1)->value();
+	TS_ASSERT_LESS_THAN(vec[0]-1.1, 1e-14);
+	TS_ASSERT_LESS_THAN(vec[1]-2.2, 1e-14);
+	TS_ASSERT_LESS_THAN(vec[2]-3.3, 1e-14);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

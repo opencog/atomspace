@@ -54,7 +54,9 @@
 
 	; Given a value, find the corresponding bin number.
 	; min and max are 0 and NBINS-1
-	(define (value->bin val)
+	(define (value->bin valu)
+		; Check for NaN's; can happen for MI of zero counts...
+		(define val (if (inf? valu) LOWER valu))
 		(define bino
 			(inexact->exact (floor (/ (- val LOWER) bin-width))))
 		(if (< 0 bino)

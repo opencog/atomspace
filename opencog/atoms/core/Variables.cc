@@ -1,9 +1,11 @@
 /*
- * Variables.cc
+ * atoms/core/Variables.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ *               2019 SingularityNET Foundation
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Authors: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ *          Nil Geisweiller <ngeiswei@gmail.com> Oct 2019
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,342 +23,382 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/Quotation.h>
+
+#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
-#include "ScopeLink.h"
+#include "VariableSet.h"
 #include "VariableList.h"
 #include "Variables.h"
 
 namespace opencog {
 
-struct VarScraper
-{
-	Quotation _quotation;
-	HandleSet _bound_vars;
-	void find_vars(HandleSeq&, HandleSet&, const HandleSeq&);
-};
-
 /* ================================================================= */
-//
-// The work-horse that does the actual heavy-lifting.
-// See the find_variables() method for the description of what
-// this does, and why.
-//
-// Note: the algo used here is nearly identical to that in
-// ScopeLink::term_hash() -- if you modify this, then modify that
-// one too.
-void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
-                           const HandleSeq& oset)
+
+Variables::Variables(bool ordered)
+	: _ordered(ordered)
 {
-	for (const Handle& h : oset)
-	{
-		Type t = h->get_type();
+}
 
-		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-		    _quotation.is_unquoted() and
-		    0 == varset.count(h) and
-		    0 == _bound_vars.count(h))
-		{
-			varseq.emplace_back(h);
-			varset.insert(h);
-		}
+Variables::Variables(const Handle& vardecl, bool ordered)
+	: _ordered(ordered)
+{
+	validate_vardecl(vardecl);
+	init_index();
+}
 
-		if (not h->is_link()) continue;
-
-		bool issco = _quotation.is_unquoted()
-			and nameserver().isA(t, SCOPE_LINK);
-		HandleSet bsave;
-		if (issco)
-		{
-			// Save the current set of bound variables...
-			bsave = _bound_vars;
-
-			// The ScopeLink ctor did the bound-variable extraction.
-			ScopeLinkPtr sco(ScopeLinkCast(h));
-			const Variables& vees = sco->get_variables();
-			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
-		}
-
-		// Save quotation on the stack before updating it for the
-		// recursive call
-		Quotation save_quotation(_quotation);
-		_quotation.update(t);
-
-		find_vars(varseq, varset, h->getOutgoingSet());
-
-		if (issco)
-			_bound_vars = bsave;
-
-		// Restore current state from the stack
-		_quotation = save_quotation;
-	}
+Variables::Variables(const HandleSeq& vardecls, bool ordered)
+	: _ordered(ordered)
+{
+	validate_vardecl(vardecls);
+	init_index();
 }
 
 /* ================================================================= */
-
-FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
-	: varseq(variables), varset(variables)
+/**
+ * Extract the variable type(s) from a TypedVariableLink
+ *
+ * The call is expecting htypelink to point to one of the two
+ * following structures:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeNode  "ConceptNode"
+ *
+ * or
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          TypeNode  "NumberNode"
+ *          TypeNode  "WordNode"
+ *
+ * or possibly types that are SignatureLink's or FuyzzyLink's or
+ * polymorphic combinations thereof: e.g. the following is valid:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          SignatureLink
+ *              InheritanceLink
+ *                 PredicateNode "foobar"
+ *                 TypeNode  "ListLink"
+ *          FuzzyLink
+ *              InheritanceLink
+ *                 ConceptNode "animal"
+ *                 ConceptNode "tiger"
+ *
+ * In either case, the variable itself is appended to "vset",
+ * and the list of allowed types are associated with the variable
+ * via the map "typemap".
+ */
+void Variables::get_vartype(const Handle& htypelink)
 {
-	unsigned i = 0;
-	for (const Handle& var : variables)
-		index.insert({var, i++});
-}
-
-bool FreeVariables::is_identical(const FreeVariables& other) const
-{
-	Arity ary = varseq.size();
-	if (ary != other.varseq.size()) return false;
-	for (Arity i=0; i< ary; i++)
+	const HandleSeq& oset = htypelink->getOutgoingSet();
+	if (2 != oset.size())
 	{
-		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i]))
-			return false;
-	}
-	return true;
-}
-
-bool FreeVariables::is_in_varset(const Handle& v) const
-{
-	return varset.end() != varset.find(v);
-}
-
-void FreeVariables::find_variables(const HandleSeq& oset)
-{
-	VarScraper vsc;
-	vsc.find_vars(varseq, varset, oset);
-
-	// Build the index from variable name, to its ordinal number.
-	size_t sz = varseq.size();
-	for (size_t i=0; i<sz; i++)
-		index.insert(std::pair<Handle, unsigned int>(varseq[i], i));
-}
-
-void FreeVariables::find_variables(const Handle& h)
-{
-	find_variables(HandleSeq{h});
-}
-
-HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
-{
-	HandleSeq arguments;
-	for (const Handle& var : varseq)
-	{
-		HandleMap::const_iterator it = varmap.find(var);
-		arguments.push_back(it == varmap.end() ? var : it->second);
-	}
-	return arguments;
-}
-
-void FreeVariables::erase(const Handle& var)
-{
-	// Remove from varset
-	varset.erase(var);
-
-	// Remove from index
-	index.erase(var);
-
-	// Remove from varseq and update all arguments in the subsequent
-	// index as they have changed.
-	auto it = std::find(varseq.begin(), varseq.end(), var);
-	if (it != varseq.end()) {
-		it = varseq.erase(it);
-		for (; it != varseq.end(); ++it)
-			index.find(*it)->second--;
-	}
-}
-
-/* ================================================================= */
-
-Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleSeq& args,
-                                         bool silent) const
-{
-	return substitute_scoped(term, args, silent, index, 0);
-}
-
-Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleMap& vm,
-                                         bool silent) const
-{
-	return substitute_scoped(term, make_sequence(vm), silent, index, 0);
-}
-
-bool FreeVariables::operator<(const FreeVariables& other) const
-{
-	return varseq < other.varseq;
-}
-
-std::size_t FreeVariables::size() const
-{
-	return varseq.size();
-}
-
-bool FreeVariables::empty() const
-{
-	return varseq.empty();
-}
-
-std::string FreeVariables::to_string(const std::string& indent) const
-{
-	std::stringstream ss;
-
-	// Varseq
-	ss << indent << "varseq:" << std::endl
-	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT);
-
-	// index
-	ss << indent << "index:" << std::endl
-	   << oc_to_string(index, indent + OC_TO_STRING_INDENT);
-
-	return ss.str();
-}
-
-/// Perform beta-reduction on the term.  This is more-or-less a purely
-/// syntactic beta-reduction, except for two "tiny" semantic parts:
-/// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
-/// variables are not reduced, and the semantics of scoping
-/// (alpha-conversion) is honored, so that any bound variables with the
-/// same name as the free variables are alpha-hidden in the region where
-/// the bound variable has scope.
-Handle FreeVariables::substitute_scoped(const Handle& term,
-                                        const HandleSeq& args,
-                                        bool silent,
-                                        const IndexMap& index_map,
-                                        Quotation quotation) const
-{
-	bool unquoted = quotation.is_unquoted();
-
-	// If we are not in a quote context, and `term` is a variable,
-	// then just return the corresponding argument.
-	if (unquoted)
-	{
-		IndexMap::const_iterator idx = index_map.find(term);
-		if (idx != index_map.end())
-			return args.at(idx->second);
+		throw InvalidParamException(TRACE_INFO,
+			"TypedVariableLink has wrong size, got %lu", oset.size());
 	}
 
-	// If its a node, and its not a variable, then it is a constant,
-	// and just return that.
-	if (not term->is_link()) return term;
+	Handle varname(oset[0]);
+	Handle vartype(oset[1]);
 
-	Type ty = term->get_type();
+	Type nt = varname->get_type();
+	Type t = vartype->get_type();
 
-	// Update for subsequent recursive calls of substitute_scoped
-	quotation.update(ty);
+	// Specifying how many atoms can be matched to a GlobNode, if any
+	HandleSeq intervals;
 
-	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
+	// If its a defined type, unbundle it.
+	if (DEFINED_TYPE_NODE == t)
 	{
-		// Perform alpha-conversion duck-n-cover.  We don't actually need
-		// to alpha-convert anything, if we happen to encounter a bound
-		// variable that happens to have the same name as a free variable.
-		// Instead, the bound variable simply "hides" the free variable
-		// for as long as the bound variable is in scope. We hide it by
-		// removing it from the index.
-		ScopeLinkPtr sco(ScopeLinkCast(term));
-		if (nullptr == sco)
-			sco = createScopeLink(term->getOutgoingSet());
+		vartype = DefineLink::get_definition(vartype);
+		t = vartype->get_type();
+	}
 
-		const Variables& vees = sco->get_variables();
-		bool alpha_hide = false;
-		for (const Handle& v : vees.varseq)
+	// For GlobNode, we can specify either the interval or the type, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   IntervalLink
+	//     NumberNode  2
+	//     NumberNode  3
+	//
+	// or both under a TypeSetLink, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   TypeSetLink
+	//     IntervalLink
+	//       NumberNode  2
+	//       NumberNode  3
+	//     TypeNode "ConceptNode"
+	if (GLOB_NODE == nt and TYPE_SET_LINK == t)
+	{
+		for (const Handle& h : vartype->getOutgoingSet())
 		{
-			IndexMap::const_iterator idx = index_map.find(v);
-			if (idx != index_map.end())
+			Type th = h->get_type();
+
+			if (INTERVAL_LINK == th)
+				intervals = h->getOutgoingSet();
+
+			else if (TYPE_NODE == th or
+			         TYPE_INH_NODE == th or
+			         TYPE_CO_INH_NODE == th)
 			{
-				alpha_hide = true;
-				break;
+				vartype = h;
+				t = th;
 			}
+
+			else throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in TypeSetLink\n"
+				"Expected IntervalLink and TypeNode, got %s",
+				h->to_string().c_str());
 		}
+	}
 
-		// Hiding is expensive, so perform it only if we really have to.
-		if (alpha_hide)
+	// The vartype is either a single type name, or a list of typenames.
+	if (TYPE_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		if (vt != ATOM)  // Atom type is same as untyped.
 		{
-			// Make a copy... this is what's computationally expensive.
-			IndexMap hidden_map = index_map;
+			TypeSet ts = {vt};
+			_simple_typemap.insert({varname, ts});
+		}
+	}
+	else if (TYPE_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		TypeSet ts = nameserver().getChildrenRecursive(vt);
+		_simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CO_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_kind();
+		TypeSet ts = nameserver().getParentsRecursive(vt);
+		_simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CHOICE == t)
+	{
+		TypeSet typeset;
+		HandleSet deepset;
+		HandleSet fuzzset;
 
-			// Remove the alpha-hidden variables.
-			for (const Handle& v : vees.varseq)
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		size_t tss = tset.size();
+		for (size_t i=0; i<tss; i++)
+		{
+			Handle ht(tset[i]);
+			Type var_type = ht->get_type();
+			if (TYPE_NODE == var_type)
 			{
-				IndexMap::const_iterator idx = hidden_map.find(v);
-				if (idx != hidden_map.end())
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt) typeset.insert(vt);
+			}
+			else if (TYPE_INH_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt)
 				{
-					hidden_map.erase(idx);
+					TypeSet ts = nameserver().getChildrenRecursive(vt);
+					typeset.insert(ts.begin(), ts.end());
 				}
 			}
-
-			// Also remove everything that is not a variable.
-			// The map will, in general, contain terms that
-			// contain alpha-hidden variables; those also have
-			// to go, or they will mess up the substitution.
-			for (auto it = hidden_map.begin(); it != hidden_map.end();)
+			else if (TYPE_CO_INH_NODE == var_type)
 			{
-				Type tt = it->first->get_type();
-				if (tt != VARIABLE_NODE and tt != GLOB_NODE)
+				Type vt = TypeNodeCast(ht)->get_kind();
+				if (ATOM != vt)
 				{
-					it = hidden_map.erase(it);
-				}
-				else
-				{
-					++it;
+					TypeSet ts = nameserver().getParentsRecursive(vt);
+					typeset.insert(ts.begin(), ts.end());
 				}
 			}
-
-
-			// If the hidden map is empty, then there is no more
-			// substitution to be done.
-			if (hidden_map.empty())
-				return term;
-
-			// Recursively fill out the subtrees. Same as below, but
-			// using the alpha-renamed variable index map.
-			HandleSeq oset;
-			for (const Handle& h : term->getOutgoingSet())
+			else if (SIGNATURE_LINK == var_type)
 			{
-				oset.emplace_back(substitute_scoped(h, args, silent,
-				                                    hidden_map, quotation));
+				const HandleSeq& sig = ht->getOutgoingSet();
+				if (1 != sig.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in SignatureLink\n"
+						"Expected arity==1, got %s", vartype->to_string().c_str());
+
+				deepset.insert(ht);
 			}
-			return createLink(oset, term->get_type());
+			else if (FUZZY_LINK == var_type)
+			{
+				const HandleSeq& fuz = ht->getOutgoingSet();
+				if (1 != fuz.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in FuzzyLink\n"
+						"Expected arity==1, got %s", vartype->to_string().c_str());
+
+				fuzzset.insert(ht);
+			}
+			else
+			{
+				throw InvalidParamException(TRACE_INFO,
+					"VariableChoice has unexpected content:\n"
+					"Expected TypeNode, got %s",
+					    nameserver().getTypeName(ht->get_type()).c_str());
+			}
+		}
+
+		if (0 < typeset.size())
+			_simple_typemap.insert({varname, typeset});
+		if (0 < deepset.size())
+			_deep_typemap.insert({varname, deepset});
+		if (0 < fuzzset.size())
+			_fuzzy_typemap.insert({varname, fuzzset});
+
+		// An empty disjunction corresponds to a bottom type.
+		if (tset.empty())
+			_simple_typemap.insert({varname, {NOTYPE}});
+
+		// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
+		if (1 == tset.size() and TYPE_CO_INH_NODE == tset[0]->get_type())
+		{
+			Type vt = TypeNodeCast(tset[0])->get_kind();
+			if (ATOM == vt)
+				_simple_typemap.insert({varname, {NOTYPE}});
 		}
 	}
-
-	// Recursively fill out the subtrees.
-	HandleSeq oset;
-	bool changed = false;
-	for (const Handle& h : term->getOutgoingSet())
+	else if (SIGNATURE_LINK == t)
 	{
-		// GlobNodes are matched with a list of one or more arguments.
-		// Those arguments need to be in-lined, stripping off the list
-		// that wraps them up.  See MapLinkUTest for examples.
-		if (GLOB_NODE == h->get_type())
-		{
-			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
-			if (glst->is_node())
-				return glst;
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in SignatureLink\n"
+				"Expected arity==1, got %s", vartype->to_string().c_str());
 
-			changed = true;
-			for (const Handle& gl : glst->getOutgoingSet())
-				oset.emplace_back(gl);
-		}
-		else
-		{
-			Handle sub(substitute_scoped(h, args, silent, index_map, quotation));
-			if (sub != h) changed = true;
-			oset.emplace_back(sub);
-		}
+		HandleSet ts;
+		ts.insert(vartype);
+		_deep_typemap.insert({varname, ts});
+	}
+	else if (FUZZY_LINK == t)
+	{
+		const HandleSeq& tset = vartype->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in FuzzyLink\n"
+				"Expected arity==1, got %s", vartype->to_string().c_str());
+
+		HandleSet ts;
+		ts.insert(vartype);
+		_fuzzy_typemap.insert({varname, ts});
+	}
+	else if (VARIABLE_NODE == t)
+	{
+		// This occurs when the variable type is a variable to be
+		// matched by the pattern matcher. There's nothing to do
+		// except not throwing an exception.
+	}
+	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
+	{
+		intervals = vartype->getOutgoingSet();
+	}
+	else
+	{
+		// Instead of throwing here, we could also assume that
+		// there is an implied SignatureLink, and just poke the
+		// contents into the _deep_typemap. On the other hand,
+		// it seems better to throw, so that beginers aren't
+		// thrown off the trail for what essentially becomes
+		// a silent error with unexpected effects...
+		throw SyntaxException(TRACE_INFO,
+			"Unexpected contents in TypedVariableLink\n"
+			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
+			nameserver().getTypeName(t).c_str());
 	}
 
-	// Return the original atom, if it was not modified.
-	if (not changed) return term;
-	return createLink(oset, term->get_type());
+	if (0 < intervals.size())
+	{
+		long lb = std::lround(NumberNodeCast(intervals[0])->get_value());
+		long ub = std::lround(NumberNodeCast(intervals[1])->get_value());
+		if (lb < 0) lb = 0;
+		if (ub < 0) ub = SIZE_MAX;
+
+		_glob_intervalmap.insert({varname, std::make_pair(lb, ub)});
+	}
+
+	varset.insert(varname);
+	varseq.emplace_back(varname);
 }
 
 /* ================================================================= */
+/**
+ * Validate variable declarations for syntax correctness.
+ *
+ * This will check to make sure that a set of variable declarations are
+ * of a reasonable form. Thus, for example, a structure similar to the
+ * below is expected.
+ *
+ *       VariableList
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *          TypedVariableLink
+ *             VariableNode "$var2"
+ *             TypeNode  "ConceptNode"
+ *          TypedVariableLink
+ *             VariableNode "$var3"
+ *             TypeChoice
+ *                 TypeNode  "PredicateNode"
+ *                 TypeNode  "GroundedPredicateNode"
+ *
+ * As a side-effect, the variables and type restrictions are unpacked.
+ */
+void Variables::validate_vardecl(const Handle& hdecls)
+{
+	// If no variable declaration then create the empty variables
+	if (not hdecls)
+		return;
+
+	// Expecting the declaration list to be either a single
+	// variable, a list or a set of variable declarations.
+	Type tdecls = hdecls->get_type();
+
+	// Order matters only if it is a list of variables
+	_ordered = VARIABLE_LIST == tdecls;
+
+	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
+	{
+		varset.insert(hdecls);
+		varseq.emplace_back(hdecls);
+	}
+	else if (TYPED_VARIABLE_LINK == tdecls)
+	{
+		get_vartype(hdecls);
+	}
+	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
+	{
+		// Extract the list of set of variables and make sure its as
+		// expected.
+		const HandleSeq& dset = hdecls->getOutgoingSet();
+		validate_vardecl(dset);
+	}
+	else if (UNQUOTE_LINK == tdecls)
+	{
+		// This indicates that the variable declaration is not in normal
+		// form (i.e. requires beta-reductions to be fully formed), thus
+		// variables inference is aborted for now.
+		return;
+	}
+	else
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"Expected a VariableList holding variable declarations");
+	}
+}
 
 bool Variables::is_well_typed() const
 {
@@ -380,6 +422,8 @@ bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
 	if (other.varseq.size() != sz) return false;
+
+	if (other._ordered != _ordered) return false;
 
 	// Side-by-side comparison
 	for (size_t i = 0; i < sz; i++)
@@ -486,10 +530,44 @@ bool Variables::is_type(const Handle& h) const
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	if (varset.end() == varset.find(var)) return false;
+
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
+	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
+
+	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
+
+	// If one is allowed in interval then there are two alternatives.
+	// one: val must satisfy type restriction.
+	// two: val must be list_link and its unique outgoing satisfies
+	//      type restriction.
+	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
+	    and is_type(tit, dit, fit, val))
+		return true;
+	else if (val->get_type() != LIST_LINK or
+	         not is_lower_bound(var, num_args) or
+	         not is_upper_bound(var, num_args))
+		// If the number of arguments is out of the allowed interval
+		// of the variable/glob or val is not List_link, return false.
+		return false;
+
+	// Every outgoing atom in list must satisfy type restriction of var.
+	for (size_t i = 0; i < num_args; i++)
+		if (!is_type(tit, dit, fit, val->getOutgoingAtom(i)))
+			return false;
+
+	return true;
+}
+
+bool Variables::is_type(VariableTypeMap::const_iterator tit,
+                        VariableDeepTypeMap::const_iterator dit,
+                        VariableDeepTypeMap::const_iterator fit,
+                        const Handle& val) const
+{
 	bool ret = true;
 
 	// Simple type restrictions?
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
 		const TypeSet &tchoice = tit->second;
@@ -504,8 +582,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Deep type restrictions?
-	VariableDeepTypeMap::const_iterator dit =
-		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
 		const HandleSet &sigset = dit->second;
@@ -517,18 +593,13 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	}
 
 	// Fuzzy deep type restrictions?
-	VariableDeepTypeMap::const_iterator fit =
-		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
 		// const HandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
+		                       "Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
-
-	// Maybe we don't know this variable?
-	if (varset.end() == varset.find(var)) return false;
 
 	// There appear to be no type restrictions...
 	return ret;
@@ -588,16 +659,7 @@ bool Variables::is_type(Type gtype) const
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default restriction is 1 or more,
-	// so return true as long as `n` is larger than 0.
-	if (_glob_intervalmap.end() == iit)
-		return (n > 0);
-
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n >= intervals.first);
 }
 
@@ -607,20 +669,30 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  * Returns true/false if the glob satisfies the upper bound
  * interval restriction.
  */
-bool Variables::is_upper_bound(const Handle& glob, size_t n) const
+bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
-	// Are there any interval restrictions?
-	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
-
-	// If there are no interval restrictions, the default
-	// restrictions apply. The default upper bound is
-	// "unbounded"; any number of matches are OK.
-	if (_glob_intervalmap.end() == iit)
-		return true;
-
-	// Negative upper bound means "unbounded" (infinity).
-	const std::pair<double, double>& intervals = iit->second;
+	const GlobInterval &intervals = get_interval(glob);
 	return (n <= intervals.second or intervals.second < 0);
+}
+
+static const GlobInterval& default_interval(Type t)
+{
+	static const GlobInterval var_def_interval =
+			GlobInterval(1, 1);
+	static const GlobInterval glob_def_interval =
+			GlobInterval(1, SIZE_MAX);
+	return t == GLOB_NODE ? glob_def_interval :
+			 var_def_interval;
+}
+
+const GlobInterval& Variables::get_interval(const Handle& var) const
+{
+	const auto interval = _glob_intervalmap.find(var);
+
+	if (interval == _glob_intervalmap.end())
+		return default_interval(var->get_type());
+
+	return interval->second;
 }
 
 /* ================================================================= */
@@ -728,23 +800,22 @@ void Variables::extend(const Variables& vset)
 {
 	for (const Handle& h : vset.varseq)
 	{
-		try
+		auto index_it = index.find(h);
+		if (index_it != index.end())
 		{
-			index.at(h);
-
 			// Merge the two typemaps, if needed.
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				const TypeSet& tms = vset._simple_typemap.at(h);
-				TypeSet mytypes =
-					type_intersection(_simple_typemap[h], tms);
-				_simple_typemap.erase(h);	 // is it safe to erase if
-                                             // h not in already?
-				_simple_typemap.insert({h, mytypes});
+				const TypeSet& tms = typemap_it->second;
+				auto tti = _simple_typemap.find(h);
+				if(tti != _simple_typemap.end())
+					tti->second = set_intersection(tti->second, tms);
+				else
+					_simple_typemap.insert({h, tms});
 			}
-			catch(const std::out_of_range&) {}
 		}
-		catch(const std::out_of_range&)
+		else
 		{
 			// Found a new variable! Insert it.
 			index.insert({h, varseq.size()});
@@ -752,13 +823,37 @@ void Variables::extend(const Variables& vset)
 			varset.insert(h);
 
 			// Install the type constraints, as well.
-			// The at() might throw...
-			try
+			auto typemap_it = vset._simple_typemap.find(h);
+			if (typemap_it != vset._simple_typemap.end())
 			{
-				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
+				_simple_typemap.insert({h, typemap_it->second});
 			}
-			catch(const std::out_of_range&) {}
 		}
+		// extend _glob_interval_map
+		extend_interval(h, vset);
+	}
+
+	// If either this or the other are ordered then the result is ordered
+	_ordered = _ordered or vset._ordered;
+}
+
+inline GlobInterval interval_intersection(const GlobInterval &lhs,
+                                          const GlobInterval &rhs)
+{
+	const auto lb = std::max(lhs.first, rhs.first);
+	const auto ub = std::min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
+}
+
+void Variables::extend_interval(const Handle &h, const Variables &vset)
+{
+	auto it = _glob_intervalmap.find(h);
+	auto is_in_gim = it != _glob_intervalmap.end();
+	const auto intersection = not is_in_gim ? vset.get_interval(h) :
+			interval_intersection(vset.get_interval(h), get_interval(h));
+	if (intersection != default_interval(h->get_type())) {
+		if (is_in_gim) it->second = intersection;
+		else _glob_intervalmap.insert({h, intersection});
 	}
 }
 
@@ -794,31 +889,64 @@ bool Variables::operator<(const Variables& other) const
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
+	HandleSeq types;
+
 	// Simple type info
 	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
 	{
-		HandleSeq types;
 		for (Type t : sit->second)
 			types.push_back(Handle(createTypeNode(t)));
-		Handle types_h = types.size() == 1 ? types[0]
-			: createLink(types, TYPE_CHOICE);
-		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
-	auto dit = _deep_typemap.find(var);
+	const auto& dit = _deep_typemap.find(var);
 	if (dit != _deep_typemap.end())
 	{
-		OC_ASSERT(false, "TODO: support deep type info");
+		for (const Handle& sig: dit->second)
+			types.push_back(sig);
 	}
 
-	auto fit = _fuzzy_typemap.find(var);
+	const auto& fit = _fuzzy_typemap.find(var);
 	if (fit != _fuzzy_typemap.end())
 	{
-		OC_ASSERT(false, "TODO: support fuzzy type info");
+		for (const Handle& fuz: fit->second)
+			types.push_back(fuz);
 	}
 
-	// TODO: _glob_intervalmap?
+	// Check if ill-typed a.k.a invalid type intersection.
+	if (types.empty() and sit != _simple_typemap.end())
+	{
+		const Handle ill_type = createLink(TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
+	}
+
+	const auto interval = get_interval(var);
+	if (interval != default_interval(var->get_type()))
+	{
+		Handle il = createLink(INTERVAL_LINK,
+		                       Handle(createNumberNode(interval.first)),
+		                       Handle(createNumberNode(interval.second)));
+
+		if (types.empty())
+			return createLink(TYPED_VARIABLE_LINK, alt, il);
+
+		HandleSeq tcs;
+		for (Handle tn : types)
+			tcs.push_back(createLink(TYPE_SET_LINK, il, tn));
+		return tcs.size() == 1 ?
+		       createLink(TYPED_VARIABLE_LINK, alt, tcs[0]) :
+		       createLink(TYPED_VARIABLE_LINK, alt,
+		                  createLink(tcs, TYPE_CHOICE));
+	}
+
+	// No/Default interval found
+	if (not types.empty())
+	{
+		Handle types_h = types.size() == 1 ?
+		                 types[0] :
+		                 createLink(std::move(types), TYPE_CHOICE);
+		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
+	}
 
 	// No type info
 	return alt;
@@ -826,15 +954,57 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 
 Handle Variables::get_vardecl() const
 {
-	HandleSeq vars;
+	HandleSeq vardecls;
 	for (const Handle& var : varseq)
-	{
-		vars.emplace_back(get_type_decl(var, var));
-	}
-	if (vars.size() == 1)
-		return vars[0];
+		vardecls.emplace_back(get_type_decl(var, var));
+	if (vardecls.size() == 1)
+		return vardecls[0];
 
-	return Handle(createVariableList(vars));
+	if (_ordered)
+		return Handle(createVariableList(std::move(vardecls)));
+
+	return Handle(createVariableSet(std::move(vardecls)));
+}
+
+void Variables::validate_vardecl(const HandleSeq& oset)
+{
+	for (const Handle& h: oset)
+	{
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+		{
+			varset.insert(h);
+			varseq.emplace_back(h);
+		}
+		else if (TYPED_VARIABLE_LINK == t)
+		{
+			get_vartype(h);
+		}
+		else if (ANCHOR_NODE == t)
+		{
+			_anchor = h;
+		}
+		else
+		{
+			throw InvalidParamException(TRACE_INFO,
+				"Expected a Variable or TypedVariable or Anchor, got: %s"
+				"\nVariableList is %s",
+					nameserver().getTypeName(t).c_str(),
+					to_string().c_str());
+		}
+	}
+}
+
+void Variables::find_variables(const Handle& body)
+{
+	FreeVariables::find_variables(body);
+	_ordered = false;
+}
+
+void Variables::find_variables(const HandleSeq& oset, bool ordered_link)
+{
+	FreeVariables::find_variables(oset, ordered_link);
+	_ordered = false;
 }
 
 std::string Variables::to_string(const std::string& indent) const
@@ -842,48 +1012,66 @@ std::string Variables::to_string(const std::string& indent) const
 	std::stringstream ss;
 
 	// FreeVariables
-	ss << FreeVariables::to_string(indent);
+	ss << FreeVariables::to_string(indent) << std::endl;
+
+	// Whether it is ordered
+	ss << indent << "_ordered = " << _ordered << std::endl;
 
 	// Simple typemap
 	std::string indent_p = indent + OC_TO_STRING_INDENT;
-	std::string indent_pp = indent_p + OC_TO_STRING_INDENT;
-	ss << indent << "_simple_typemap:" << std::endl;
-	ss << indent_p << "size = " << _simple_typemap.size() << std::endl;
-	unsigned i = 0;
-	for (const auto& v : _simple_typemap)
-	{
-		ss << indent_p << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent_pp)
-		   << indent_p << "types[" << i << "]:";
-		for (auto& t : v.second)
-			ss << " " << nameserver().getTypeName(t);
-		ss << std::endl;
-		i++;
-	}
+	ss << indent << "_simple_typemap:" << std::endl
+	   << oc_to_string(_simple_typemap, indent_p) << std::endl;
+
+	// Glob interval map
+	ss << indent << "_glob_intervalmap:" << std::endl
+	   << oc_to_string(_glob_intervalmap, indent_p) << std::endl;
+
+	// Deep typemap
+	ss << indent << "_deep_typemap:" << std::endl
+	   << oc_to_string(_deep_typemap, indent_p);
 
 	return ss.str();
-}
-
-std::string oc_to_string(const FreeVariables::IndexMap& imap,
-                         const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << imap.size() << std::endl;
-	for (const auto& el : imap) {
-		ss << indent << "index[" << el.second << "]: "
-		   << el.first->id_to_string() << std::endl;
-	}
-	return ss.str();
-}
-
-std::string oc_to_string(const FreeVariables& var, const std::string& indent)
-{
-	return var.to_string(indent);
 }
 
 std::string oc_to_string(const Variables& var, const std::string& indent)
 {
 	return var.to_string(indent);
+}
+
+std::string oc_to_string(const VariableTypeMap& vtm, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << vtm.size();
+	unsigned i = 0;
+	for (const auto& v : vtm)
+	{
+		ss << std::endl << indent << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "types[" << i << "]:";
+		for (auto& t : v.second)
+			ss << " " << nameserver().getTypeName(t);
+		i++;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const GlobIntervalMap& gim, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << gim.size();
+	unsigned i = 0;
+	for (const auto& v : gim)
+	{
+		ss << std::endl << indent << "glob[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "interval[" << i << "]: ";
+		double lo = v.second.first;
+		double up = v.second.second;
+		ss << ((0 <= lo and std::isfinite(lo)) ? "[" : "(") << lo << ", "
+		   << up << ((0 <= up and std::isfinite(up)) ? "]" : ")");
+		i++;
+	}
+	return ss.str();
 }
 
 } // ~namespace opencog

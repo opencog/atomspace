@@ -79,7 +79,7 @@ protected:
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
-	/// The graph components. Set by validate_clauses()
+	/// The graph components. Set by validate_clauses().
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.
 	/// The list of component_vars are the variables that appear
@@ -95,17 +95,18 @@ protected:
 
 	bool record_literal(const Handle&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
-	void unbundle_clauses_rec(const Handle&,
+	bool unbundle_clauses_rec(const Handle&,
 	                          const TypeSet&,
 	                          bool reverse=false);
 
 	void locate_defines(const HandleSeq& clauses);
-	void locate_globs(const HandleSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
 	bool is_virtual(const Handle&);
 	void unbundle_virtual(const HandleSeq& clauses);
+
+	void locate_cacheable(const HandleSeq& clauses);
 
 	bool add_dummies();
 
@@ -120,8 +121,11 @@ protected:
 	                          const HandleSetSeq&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, Handle,
+	void make_term_tree_recursive(const Handle&, const Handle&,
 	                              PatternTermPtr&);
+
+	void get_clause_variables(const HandleSeq&);
+	void get_clause_variables_recursive(const Handle&, HandleSet&);
 
 	void init(void);
 	void common_init(void);
@@ -135,17 +139,18 @@ protected:
 	}
 
 public:
-	PatternLink(const HandleSeq&, Type=PATTERN_LINK);
+	PatternLink(const HandleSeq&&, Type=PATTERN_LINK);
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
-	PatternLink(const Link&);
+
+	PatternLink(const PatternLink&) = delete;
+	PatternLink& operator=(const PatternLink&) = delete;
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).
 	PatternLink(const HandleSet& vars,
-	            const VariableTypeMap& typemap,
-	            const GlobIntervalMap& intervalmap,
+	            const Variables& varspec,
 	            const HandleSeq& component,
 	            const HandleSeq& optionals);
 
@@ -154,7 +159,7 @@ public:
 	            const HandleSeq&);
 
 	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
+	const Variables& get_variables(void) const { return _variables; }
 	const Pattern& get_pattern(void) const { return _pat; }
 
 	const HandleSeqSeq& get_components(void) const { return _components; }

@@ -19,7 +19,7 @@ clause.
 """
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.bindlink import satisfaction_link
+from opencog.exec import satisfaction_link
 from opencog.type_constructors import *
 from opencog.logger import Logger, log
 

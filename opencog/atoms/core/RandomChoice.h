@@ -62,8 +62,9 @@ namespace opencog
 class RandomChoiceLink : public FunctionLink
 {
 public:
-	RandomChoiceLink(const HandleSeq&, Type=RANDOM_CHOICE_LINK);
-	RandomChoiceLink(const Link &l);
+	RandomChoiceLink(const HandleSeq&&, Type=RANDOM_CHOICE_LINK);
+	RandomChoiceLink(const RandomChoiceLink&) = delete;
+	RandomChoiceLink& operator=(const RandomChoiceLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);

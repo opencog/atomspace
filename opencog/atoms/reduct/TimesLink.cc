@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -30,20 +16,14 @@ using namespace opencog;
 
 Handle TimesLink::one;
 
-TimesLink::TimesLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+TimesLink::TimesLink(const HandleSeq&& oset, Type t)
+    : ArithmeticLink(std::move(oset), t)
 {
 	init();
 }
 
 TimesLink::TimesLink(const Handle& a, const Handle& b)
     : ArithmeticLink({a,b}, TIMES_LINK)
-{
-	init();
-}
-
-TimesLink::TimesLink(const Link& l)
-    : ArithmeticLink(l)
 {
 	init();
 }
@@ -61,39 +41,26 @@ void TimesLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ValuePtr& pap)
-{
-	return NumberNodeCast(pap)->get_value();
-}
-
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
 ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
+	if (fj == knil)
+		return get_value(as, silent, fi);
+
 	// Try to yank out values, if possible.
 	ValuePtr vi(get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(fj);
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.
-	if (TIMES_LINK == vitype or TIMES_LINK == vjtype)
+	if (TIMES_LINK == vitype)
 	{
-		Handle hi(HandleCast(vi));
-		HandleSeq seq;
-		// flatten the left
-		if (TIMES_LINK == vitype)
-		{
-			for (const Handle& lhs: hi->getOutgoingSet())
-				seq.push_back(lhs);
-		}
-		else
-		{
-			seq.push_back(hi);
-		}
+		HandleSeq seq = HandleCast(vi)->getOutgoingSet();
 
 		// flatten the right
 		if (TIMES_LINK == vjtype)
@@ -105,23 +72,53 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		{
 			seq.push_back(HandleCast(vj));
 		}
-		Handle foo(createLink(seq, TIMES_LINK));
-		TimesLinkPtr ap = TimesLinkCast(foo);
+		TimesLinkPtr ap = createTimesLink(std::move(seq));
 		return ap->delta_reduce(as, silent);
 	}
 
-	// Are they both numbers?
-	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+	if (TIMES_LINK == vjtype)
 	{
-		double prod = get_double(vi) * get_double(vj);
-		return createNumberNode(prod);
+		// Paste on one at a time; this avoids what would otherwise
+		// be infinite recursion on `(Times A B C)` where kons was
+		// unable to reduce `(Times B C)`. So we instead try to do
+		// `(Times (Times A B) C)` which should work out...
+		ValuePtr vsum = vi;
+		for (const Handle& h : HandleCast(vj)->getOutgoingSet())
+		{
+			if (TIMES_LINK == vsum->get_type())
+			{
+				HandleSeq vout(HandleCast(vsum)->getOutgoingSet());
+				vout.push_back(h);
+				vsum = createTimesLink(std::move(vout));
+			}
+			else
+			{
+				vsum = kons(as, silent, vsum, h);
+			}
+		}
+		return vsum;
+	}
+
+	// Are they numbers? If so, perform vector (pointwise) subtraction.
+	// Always lower the strength: Number+Number->Number
+	// but FloatValue+Number->FloatValue
+	try
+	{
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(times(vi, vj, true));
+
+		return times(vi, vj, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// If we are here, they were not simple numbers.
 	}
 
 	// If either one is the unit, then just drop it.
 	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
-		return sample_stream(vj, vjtype);
+		return vj;
 	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
-		return sample_stream(vi, vitype);
+		return vi;
 
    if (nameserver().isA(vjtype, NUMBER_NODE))
    {
@@ -135,37 +132,28 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		Handle divisor(HandleCast(vj)->getOutgoingAtom(1));
 		if (NUMBER_NODE == dividend->get_type())
 		{
-			double prod = get_double(vi) * get_double(dividend);
-			Handle hprod(createNumberNode(prod));
+			Handle hprod(createNumberNode(times(vi, dividend)));
 			return createDivideLink(hprod, divisor);
 		}
 		if (NUMBER_NODE == divisor->get_type())
 		{
-			double quot = get_double(vi) / get_double(divisor);
-			Handle hquot(createNumberNode(quot));
+			Handle hquot(createNumberNode(divide(vi, divisor)));
 			if (content_eq(hquot, one))
 				return dividend;
 			return createTimesLink(hquot, dividend);
 		}
 	}
 
-	// Swap order, make things easier below.
-	if (nameserver().isA(vitype, FLOAT_VALUE))
+	try
 	{
-		std::swap(vi, vj);
-		std::swap(vitype, vjtype);
-	}
+		if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
+			return createNumberNode(times(vi, vj, true));
 
-	// Scalar times vector
-	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
-	{
-		return times(get_double(vi), FloatValueCast(vj));
+		return times(vi, vj, true);
 	}
-
-	// Vector times vector
-	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	catch (const SilentException& ex)
 	{
-		return times(FloatValueCast(vi), FloatValueCast(vj));
+		// If we are here, they were not simple numbers.
 	}
 
 	Handle hi(HandleCast(vi));

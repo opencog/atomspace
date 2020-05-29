@@ -28,10 +28,11 @@
 #include <sstream>
 
 #include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -60,7 +61,7 @@ namespace std {
 opencog::Type
 hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
 {
-    opencog::LinkPtr h(w.lock());
+    opencog::Handle h(w.lock());
     if (nullptr == h) return 0;
     return h->get_type();
 }
@@ -71,14 +72,16 @@ equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
 {
     opencog::Handle hl(lw.lock());
     opencog::Handle hr(rw.lock());
-    return hl == hr;
+    return hl == hr;  /* hang on, should this be content-compare??? */
 }
 
+#if 0
 // Overloading operator<< for Incoming Set
 ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
 {
     return out << opencog::oc_to_string(iset);
 }
+#endif
 
 } // namespace std
 
@@ -87,6 +90,10 @@ namespace opencog {
 Atom::~Atom()
 {
     _atom_space = nullptr;
+
+    // Disable for now. This assert has never tripped; there
+    // seems to be no point to checking it.
+#if 0
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
@@ -96,6 +103,7 @@ Atom::~Atom()
              "Atom deletion failure; incoming set not empty for %s h=%x",
              nameserver().getTypeName(_type).c_str(), get_hash());
     }
+#endif
     drop_incoming_set();
 }
 
@@ -197,18 +205,27 @@ void Atom::copyValues(const Handle& other)
     }
 }
 
+/**
+ * Return all of the Values on this Atom, formatted as a scheme
+ * association-list. It must have the SRFI-1 a-list format,
+ * as other code parses this, and expects it to be in this format.
+ * The format is `((key . value) (key2 . value2) ...)`
+ * It is expected that this method will execute relaitvely efficiently,
+ * as it is frequently used, e.g. in the DHT backend.
+ */
 std::string Atom::valuesToString() const
 {
-    std::string rv;
+    std::stringstream rv;
 
-    HandleSet keys(getKeys());
-    for (const Handle& k: keys)
+    rv << "(";
+    for (const Handle& k: getKeys())
     {
         ValuePtr p = getValue(k);
-        rv += "; key = " + k->to_string();
-        rv += "; val = " + p->to_string() + "\n";
+        rv << "(" << k->to_short_string()
+           << " . " << p->to_short_string() + ")";
     }
-    return rv;
+    rv << ")";
+    return rv.str();
 }
 
 // ==============================================================
@@ -290,12 +307,12 @@ void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
-    _incoming_set->_iset.clear();
+    // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
 
 /// Add an atom to the incoming set.
-void Atom::insert_atom(const LinkPtr& a)
+void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -316,7 +333,7 @@ void Atom::insert_atom(const LinkPtr& a)
 }
 
 /// Remove an atom from the incoming set.
-void Atom::remove_atom(const LinkPtr& a)
+void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -332,7 +349,7 @@ void Atom::remove_atom(const LinkPtr& a)
 /// Remove old, and add new, atomically, so that every user
 /// will see either one or the other, but not both/neither in
 /// the incoming set. This is used to manage the StateLink.
-void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
+void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -362,12 +379,27 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize() const
+size_t Atom::getIncomingSetSize(AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
+
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
+    if (as)
+    {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const auto& bucket : _incoming_set->_iset)
+        {
+            for (const WinkPtr& w : bucket.second)
+            {
+                Handle l(w.lock());
+                if (l and atab->in_environ(l)) cnt++;
+            }
+        }
+        return cnt;
+    }
+
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
@@ -391,7 +423,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                LinkPtr l(w.lock());
+                Handle l(w.lock());
                 if (l and atab->in_environ(l))
                     iset.emplace_back(l);
             }
@@ -406,36 +438,45 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            LinkPtr l(w.lock());
+            Handle l(w.lock());
             if (l) iset.emplace_back(l);
         }
     }
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type) const
+IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 {
-    IncomingSet result;
+    static IncomingSet empty_set;
+    if (nullptr == _incoming_set) return empty_set;
 
-    // The code below is mostly a cut-n-paste from the header file.
-    // The only difference is that it works with LinkPtr instead of
-    // Handle.  The primary issue is that casting from Handle back
-    // to LinkPtr is slowwwwwww.  So we avoid that, here.
-    if (nullptr == _incoming_set) return result;
+    // Lock to prevent updates of the set of atoms.
     std::lock_guard<std::mutex> lck(_mtx);
 
     const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return result;
+    if (bucket == _incoming_set->_iset.cend()) return empty_set;
+
+    IncomingSet result;
+    if (as) {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const WinkPtr& w : bucket->second)
+        {
+            Handle l(w.lock());
+            if (l and atab->in_environ(l))
+                result.emplace_back(l);
+        }
+        return result;
+    }
 
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr h(w.lock());
-        if (h) result.emplace_back(h);
+        Handle l(w.lock());
+        if (l) result.emplace_back(l);
     }
     return result;
 }
 
-size_t Atom::getIncomingSetSizeByType(Type type) const
+size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck(_mtx);
@@ -444,29 +485,50 @@ size_t Atom::getIncomingSetSizeByType(Type type) const
     if (bucket == _incoming_set->_iset.cend()) return 0;
 
     size_t cnt = 0;
+
+    if (as) {
+        const AtomTable *atab = &as->get_atomtable();
+        for (const WinkPtr& w : bucket->second)
+        {
+            Handle l(w.lock());
+            if (l and atab->in_environ(l)) cnt++;
+        }
+        return cnt;
+    }
+
     for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr h(w.lock());
-        if (h) cnt++;
+        Handle l(w.lock());
+        if (l) cnt++;
     }
     return cnt;
 }
 
 std::string Atom::id_to_string() const
 {
-    return
-        std::string("[") + std::to_string(get_hash()) + "]" +
-        std::string("[") + (_atom_space? std::to_string(_atom_space->_atom_table.get_uuid()) : std::string("-1")) + "]";
+    std::stringstream ss;
+    ss << "[" << std::hex << get_hash() << "][";
+    if (_atom_space) ss << _atom_space->_atom_table.get_uuid();
+    else ss << "-1";
+    ss << "]";
+    return ss.str();
 }
 
+#if 0
 std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << "size = " << iset.size() << std::endl;
+	ss << indent << "size = " << iset.size();
 	for (unsigned i = 0; i < iset.size(); i++)
-		ss << indent << "link[" << i << "]:" << std::endl
+		ss << std::endl << indent << "link[" << i << "]:" << std::endl
 		   << iset[i]->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
+}
+#endif
+
+std::string oc_to_string(const Atom& atom, const std::string& indent)
+{
+	return atom.to_string(indent);
 }
 
 } // ~namespace opencog

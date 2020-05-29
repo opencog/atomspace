@@ -22,13 +22,14 @@
  */
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/query/PatternMatchEngine.h>
 #include "Recognizer.h"
 
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG 1
-#ifdef DEBUG
+// #define QDEBUG 1
+#ifdef QDEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
 #define dbgprt(f, varargs...)
@@ -36,7 +37,7 @@ using namespace opencog;
 
 /* ======================================================== */
 
-bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
+bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 {
 	if (top->is_link())
 	{
@@ -46,13 +47,17 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		for (const Handle& h : top->getOutgoingSet())
 		{
 			_starter_term = top;
-			bool found = do_search(pme, h);
+			bool found = do_search(pmc, h);
 			if (found) return true;
 		}
 		return false;
 	}
 
-	IncomingSet iset = get_incoming_set(top);
+	PatternMatchEngine pme(pmc);
+	pme.set_pattern(*_vars, *_pattern);
+
+	// IncomingSet iset = get_incoming_set(top);
+	IncomingSet iset = top->getIncomingSet(_as);
 	size_t sz = iset.size();
 	for (size_t i = 0; i < sz; i++)
 	{
@@ -61,7 +66,7 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
 		       top->to_short_string().c_str(),
 		       h->to_short_string().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		bool found = pme.explore_neighborhood(_root, _starter_term, h);
 
 		// Terminate search if satisfied.
 		if (found) return true;
@@ -70,7 +75,7 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 	return false;
 }
 
-bool Recognizer::initiate_search(PatternMatchEngine* pme)
+bool Recognizer::perform_search(PatternMatchCallback& pmc)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -78,7 +83,7 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 	for (const Handle& h: clauses)
 	{
 		_root = h;
-		bool found = do_search(pme, h);
+		bool found = do_search(pmc, h);
 		if (found) return true;
 	}
 	return false;
@@ -229,12 +234,13 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	return true;
 }
 
-bool Recognizer::grounding(const HandleMap& var_soln,
-                           const HandleMap& term_soln)
+bool Recognizer::grounding(const GroundingMap& var_soln,
+                           const GroundingMap& term_soln)
 {
 	Handle rule = term_soln.at(_root);
 
 	if (rule != _root) {
+		LOCK_PE_MUTEX;
 		_rules.insert(rule);
 	}
 

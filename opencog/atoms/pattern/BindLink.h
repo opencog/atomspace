@@ -35,10 +35,12 @@ protected:
 	void init(void);
 
 public:
-	BindLink(const HandleSeq&, Type=BIND_LINK);
+	BindLink(const HandleSeq&&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	BindLink(const Handle& body, const Handle& rewrite);
-	explicit BindLink(const Link &l);
+
+	BindLink(const BindLink&) = delete;
+	BindLink& operator=(const BindLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

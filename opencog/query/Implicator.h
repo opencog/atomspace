@@ -29,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 
@@ -57,20 +58,25 @@ class Implicator :
 	protected:
 		AtomSpace* _as;
 
+		DECLARE_PE_MUTEX;
 		ValueSet _result_set;
-		void insert_result(const ValuePtr&);
+		QueueValuePtr _result_queue;
+		void insert_result(ValuePtr);
 
 	public:
-		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace*);
 		Instantiator inst;
-		Handle implicand;
+		HandleSeq implicand;
 		size_t max_results;
 
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &term_soln);
+		virtual bool grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln);
 
-		virtual const ValueSet& get_result_set() const
-		{ return _result_set; }
+		virtual bool start_search(void);
+		virtual bool search_finished(bool);
+
+		virtual QueueValuePtr get_result_queue()
+		{ return _result_queue; }
 };
 
 }; // namespace opencog

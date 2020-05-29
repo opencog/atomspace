@@ -1,0 +1,102 @@
+/*
+ * tests/atoms/core/TypeUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2019 SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class FindUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+	Handle X, Y, P, G1, G2;
+
+public:
+	FindUtilsUTest()
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	void setUp();
+
+	void test_filter_vardecl_1();
+	void test_filter_vardecl_2();
+	void test_filter_vardecl_3();
+};
+
+void FindUtilsUTest::setUp(void)
+{
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	P = an(PREDICATE_NODE, "P");
+	G1 = an(GLOB_NODE, "$G1");
+	G2 = an(GLOB_NODE, "$G2");
+}
+
+void FindUtilsUTest::test_filter_vardecl_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST, X, Y);
+	Handle body = al(IMPLICATION_LINK, X, P);
+
+	Handle result = filter_vardecl(vardecl, body);
+	Handle except = X;
+
+	TS_ASSERT_EQUALS(result, except);
+}
+
+void FindUtilsUTest::test_filter_vardecl_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_SET, X, Y);
+	Handle body = al(IMPLICATION_LINK, X, P);
+
+	Handle result = filter_vardecl(vardecl, body);
+	Handle except = X;
+
+	TS_ASSERT_EQUALS(result, except);
+}
+
+void FindUtilsUTest::test_filter_vardecl_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_SET, G1, G2);
+	Handle body = al(IMPLICATION_LINK, G1, P);
+
+	Handle result = filter_vardecl(vardecl, body);
+	Handle except = G1;
+
+	TS_ASSERT_EQUALS(result, except);
+}
+
+#undef al
+#undef an

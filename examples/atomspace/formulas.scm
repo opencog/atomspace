@@ -6,7 +6,7 @@
 ; arithmetic formulas can be stored in the atomspace.
 ;
 ; Because the AtomSpace holds descriptive, declarative knowledge, these
-; formulas can be maniuplated and edited. For example, an algebra system
+; formulas can be manipulated and edited. For example, an algebra system
 ; (implemented as a collection of rules) can work with the formulas.
 ;
 ; But also, these formulas can be explicitly evaluated. The arithmetic
@@ -15,6 +15,9 @@
 ; by computation, search, reasoning, algebra or learning), it can then
 ; be applied to (time-changing) Values. This example shows how formulas
 ; are used to modify TruthValues.
+;
+; The next example, `flows.scm`, shows how to attach such TV's to
+; arbitrary Atoms.
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -31,9 +34,9 @@
 	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 
 ; Create a SimpleTruthValue with a non-trivial formula:
-; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strenghts
+; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
 ; and cA, cB are confidence values. The PredicateFormulaLink assembles
-; two floating-point values, and create a SimpleTruthValue out of them.
+; two floating-point values, and creates a SimpleTruthValue out of them.
 ;
 (cog-evaluate!
 	(PredicateFormula
@@ -118,7 +121,7 @@
 				(ConfidenceOf (Variable "$VA"))
 				(ConfidenceOf (Variable "$VB")))))
 
-; Beta-reducation works as normal. The below will create an
+; Beta-reduction works as normal. The below will create an
 ; EvaluationLink with ConceptNode A and B in it, and will set the
 ; truth value according to the formula.
 (define the-put-result
@@ -142,7 +145,7 @@
 
 ; The scheme variable `the-put-result` contains a SetLink with the
 ; result in it. Lets unwrap it, so that `evelnk` is just the
-; EvaluationLink. And tehn we play a little trick.
+; EvaluationLink. And then we play a little trick.
 (define evelnk (cog-outgoing-atom the-put-result 0))
 
 ; Change the truth value on the two concept nodes ...

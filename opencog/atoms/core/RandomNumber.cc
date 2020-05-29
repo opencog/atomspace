@@ -48,14 +48,8 @@ void RandomNumberLink::init()
 			to_string().c_str());
 }
 
-RandomNumberLink::RandomNumberLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
-{
-	init();
-}
-
-RandomNumberLink::RandomNumberLink(const Link &l)
-	: FunctionLink(l)
+RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	init();
 }
@@ -151,7 +145,7 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 	for (size_t i=0; i< len; i++)
 		oset.push_back(get_ran(nmin[i], nmax[i]));
 
-	return ValuePtr(createLink(oset, SET_LINK));
+	return ValuePtr(createLink(std::move(oset), SET_LINK));
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);

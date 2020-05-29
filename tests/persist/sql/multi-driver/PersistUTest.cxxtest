@@ -159,7 +159,8 @@ void PersistUTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
     if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-    SQLAtomStorage* astore = new SQLAtomStorage(uri);
+    SQLAtomStorage* astore = new SQLAtomStorage();
+    astore->open(uri);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -261,7 +262,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     hvec.push_back(h4[idx]);
 
     // Note that SetLink is an unordered link.
-    hl[idx] = as->add_link(SET_LINK, hvec);
+    hl[idx] = as->add_link(SET_LINK, std::move(hvec));
     l[idx] = LinkCast(hl[idx]);
 
     hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);

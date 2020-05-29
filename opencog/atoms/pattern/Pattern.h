@@ -41,10 +41,10 @@ namespace opencog {
  *  @{
  */
 
-/// The Pattern struct defines a search pattern in a way that makes it
-/// easier and faster to work with in C++.  It implements the data that
-/// is shared between the various pattern-specification atoms and the
-/// pattern matcher.
+/// The Pattern struct contains a low-level analysis of a search pattern,
+/// in a format that will make a subsequent search run faster.  It is
+/// effectively a "compiled" version of the pattern. Patterns only need
+/// to be compiled once; the searches can be performed repeatedly.
 ///
 struct Pattern
 {
@@ -93,8 +93,8 @@ struct Pattern
 	/// grounded, they might be rejected (depending on the callback).
 	HandleSeq optionals;    // Optional clauses
 
-	/// The always (for-all) clauses have to always be the same way.
-	/// Any grounding failure at all invalidates all other groundings.
+	/// The always (for-all) clauses have to always be grounded the same
+	/// way. Any grounding failure at all invalidates all other groundings.
 	HandleSeq always;       // ForAll clauses
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
@@ -112,13 +112,19 @@ struct Pattern
 	/// or a DefineSchemaNode (DSN).
 	HandleSet defined_terms;    // The DPN/DSN itself.
 
-	/// Globby terms are terms that contain a GlobNode
-	HandleSet globby_terms;     // Smallest term that has a glob.
-	HandleSet globby_holders;   // holds something globby.
+	/// Clauses that can be grounded in only one way; thus the
+	/// result of that grounding can be cached, to avoid rechecking.
+	/// These clauses cannot contain evaluatable elements (as these
+	/// have context-dependent valuations), and can only contain one
+	/// variable (for lookup performance.)
+	HandleSet cacheable_clauses;
 
-	/// Terms that may be grounded in an imprecise way. Similar to a
-	/// GlobNode, but uses a different algorithm.
-	HandleSet fuzzy_terms;
+	/// As above, but clauses that hold two or more variables.
+	HandleSet cacheable_multi;
+
+	/// For each clause, the list of variables that appear in that clause.
+	/// Used in conjunction with the `cacheable_multi` above.
+	HandleSeqMap clause_variables;
 
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because

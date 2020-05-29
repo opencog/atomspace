@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -42,8 +43,10 @@ class LinkValue
 	: public Value
 {
 protected:
-	std::vector<ValuePtr> _value;
+	mutable std::vector<ValuePtr> _value;
+	virtual void update() const {}
 
+	LinkValue(Type t) : Value(t) {}
 public:
 	LinkValue(const ValueSeq& vlist)
 		: Value(LINK_VALUE), _value(vlist) {}
@@ -54,7 +57,9 @@ public:
 
 	virtual ~LinkValue() {}
 
-	const std::vector<ValuePtr>& value() const { return _value; }
+	const std::vector<ValuePtr>& value() const { update(); return _value; }
+	HandleSeq to_handle_seq(void) const;
+	size_t size() const { return _value.size(); }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
@@ -71,7 +76,6 @@ template<typename ... Type>
 static inline std::shared_ptr<LinkValue> createLinkValue(Type&&... args) {
 	return std::make_shared<LinkValue>(std::forward<Type>(args)...);
 }
-
 
 /** @}*/
 } // namespace opencog

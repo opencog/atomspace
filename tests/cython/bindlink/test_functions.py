@@ -1,18 +1,20 @@
-# 
+#
 # Test Functions
 
-from opencog.atomspace import types, Atom, TruthValue
+from opencog.atomspace import types, Atom
 from opencog.type_constructors import *
+
 
 def print_arguments(argOne, argTwo):
     print ("argOne = ", argOne)
     print ("argTwo = ", argTwo)
-    atom = ATOMSPACE.add_link(types.ListLink, [argOne, argTwo])
+    atomspace = argOne.atomspace
+    atom = atomspace.add_link(types.ListLink, [argOne, argTwo])
     print ("atom = ", atom)
     return atom
 
 def add_link(atom_one, atom_two):
-    link_atom = ATOMSPACE.add_link(types.ListLink, [atom_one, atom_two])
+    link_atom = atom_one.atomspace.add_link(types.ListLink, [atom_one, atom_two])
     return link_atom
 
 def bogus_tv(atom_one, atom_two):
@@ -59,3 +61,14 @@ def stop_go(atom):
         assert(false)
 
     return TruthValue(0,0)
+
+func_one_result = TruthValue (0,1) # false
+def func_one(v):
+    thing = ConceptNode("barleycorn")
+    thang = ListLink(thing, v)
+    thang.tv = func_one_result
+    return thang.tv
+
+
+def func_two(v):
+    return ListLink(ConceptNode("barleycorn"), v).tv

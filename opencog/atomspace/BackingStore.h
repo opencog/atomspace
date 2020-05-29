@@ -64,22 +64,19 @@ class BackingStore
 
 		/**
 		 * Put the entire incoming set of the indicated handle into
-		 * the atom table.
+		 * the atom table. All of the values attached to each of the
+		 * Atoms in the incoming set will be fetched and updated as
+		 * well.
 		 */
 		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
 
 		/**
 		 * Put all atoms of the given type in the incoming set of the
-		 * indicated handle into the atom table.
+		 * indicated handle into the atom table. All of the values
+		 * attached to each of the Atoms in the incoming set will be
+		 * fetched and updated as well.
 		 */
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
-
-		/**
-		 * Get all atoms which have a value set for the given key.
-		 * If the bool flag is set, then all values on those atom are
-		 * fetched; otherwise, only that particular key is updated.
-		 */
-		virtual void getValuations(AtomTable&, const Handle&, bool) = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.

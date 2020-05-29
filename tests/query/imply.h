@@ -1,4 +1,5 @@
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -20,24 +21,30 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	HandleSeq vars(fv.varset.begin(), fv.varset.end());
 
 	// Stuff the variables into a proper variable list.
-	Handle hvars(createLink(vars, VARIABLE_LIST));
+	Handle hvars(createLink(std::move(vars), VARIABLE_LIST));
 
 	HandleSeq oset = {hvars, hclauses, himplicand};
 
-	BindLinkPtr bl(createBindLink(oset));
+	BindLinkPtr bl(createBindLink(std::move(oset)));
 
 	// Now perform the search.
 	DefaultImplicator impl(as);
-	impl.implicand = himplicand;
+	impl.implicand.push_back(himplicand);
 
 	bl->satisfy(impl);
 
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	HandleSeq hlist;
-	for (const ValuePtr& v: impl.get_result_set())
-		hlist.push_back(HandleCast(v));
-	Handle gl = as->add_link(LIST_LINK,hlist);
+	QueueValuePtr qv(impl.get_result_queue());
+	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qv->wait_and_take_all());
+	while (not vals.empty())
+	{
+		hlist.push_back(HandleCast(vals.front()));
+		vals.pop();
+	}
+	Handle gl = as->add_link(LIST_LINK, std::move(hlist));
 	return gl;
 }
 

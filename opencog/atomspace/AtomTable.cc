@@ -69,25 +69,13 @@ using namespace opencog;
 static std::atomic<UUID> _id_pool(1);
 
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
-    _nameserver(nameserver()),
-    // Hmm. Right now async doesn't work anyway, so lets not create
-    // threads for it. It just makes using gdb that much harder.
-    // FIXME later. Actually, the async idea is not going to work as
-    // originally envisioned, anyway.  What we really need are
-    // consistent views of the atomtable.
-    // _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
-    _index_queue(this, &AtomTable::put_atom_into_index, 0)
+    _nameserver(nameserver())
 {
     _as = holder;
     _environ = parent;
     if (_environ) _environ->_num_nested++;
     _num_nested = 0;
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
-    _size = 0;
-    _num_nodes = 0;
-    _num_links = 0;
-    size_t ntypes = _nameserver.getNumberOfClasses();
-    _size_by_type.resize(ntypes);
     _transient = transient;
 
     // Connect signal to find out about type additions
@@ -142,32 +130,7 @@ void AtomTable::clear_transient()
 
 void AtomTable::clear_all_atoms()
 {
-    // Reset the size to zero.
-    _size = 0;
-    _num_nodes = 0;
-    _num_links = 0;
-
-    // Clear the by-type size cache.
-    Type total_types = _size_by_type.size();
-    for (Type type = ATOM; type < total_types; type++)
-        _size_by_type[type] = 0;
-
-    // Clear the type-index
-    if (not _transient) typeIndex.clear();
-
-    // Clear the atoms in the set.
-    for (auto& pr : _atom_store) {
-        Handle& atom_to_clear = pr.second;
-        atom_to_clear->_atom_space = nullptr;
-
-        // We installed the incoming set; we remove it too.
-        atom_to_clear->remove();
-    }
-
-    // Clear the atom store. This will delete all the atoms since
-    // this will be the last shared_ptr referecence, and set the
-    // size of the set to 0.
-    _atom_store.clear();
+    typeIndex.clear();
 }
 
 void AtomTable::clear()
@@ -176,36 +139,27 @@ void AtomTable::clear()
     clear_all_atoms();
 }
 
-Handle AtomTable::getHandle(Type t, const std::string& n) const
+Handle AtomTable::getHandle(Type t, const std::string&& n) const
 {
-    AtomPtr a(createNode(t,n));
-    return getHandle(a);
+    Handle h(createNode(t, std::move(n)));
+    return lookupHandle(h);
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
+Handle AtomTable::getHandle(Type t, const HandleSeq&& seq) const
 {
-    AtomPtr a(createLink(seq, t));
-    return getHandle(a);
+    Handle h(createLink(std::move(seq), t));
+    return lookupHandle(h);
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
-/// such an atom is in the table, it is returned, else the return
-/// is the bad handle.
-Handle AtomTable::lookupHandle(const AtomPtr& a) const
+/// such an atom is in the table, it is returned, else return nullptr.
+Handle AtomTable::lookupHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
-    ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    auto range = _atom_store.equal_range(ch);
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (*((AtomPtr) bkt->second) == *a) {
-            return bkt->second;
-        }
-    }
+    Handle h(typeIndex.findAtom(a));
+    if (h) return h;
 
     if (_environ)
         return _environ->lookupHandle(a);
@@ -215,18 +169,18 @@ Handle AtomTable::lookupHandle(const AtomPtr& a) const
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
 /// Otherwise, search for an equivalent atom that we might be holding.
-Handle AtomTable::getHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
     if (in_environ(a))
-        return a->get_handle();
+        return a;
 
     return lookupHandle(a);
 }
 
 #if 0
-static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
+static void prt_diag(Handle atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
     Logger::Level save = logger().getBackTraceLevel();
     logger().setBackTraceLevel(Logger::Level::NONE);
@@ -244,39 +198,17 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(AtomPtr atom, bool async, bool force)
+Handle AtomTable::add(const Handle& orig, bool force)
 {
     // Can be null, if its a Value
-    if (nullptr == atom) return Handle::UNDEFINED;
+    if (nullptr == orig) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
-    if (not force and in_environ(atom))
-        return atom->get_handle();
-
-    Handle orig(atom);
-
-    // Make a copy of the atom that the user gave us. Attempting
-    // to take over the memory management of whatever the user
-    // gives use is just asking for trouble. Its safer to keep our
-    // own private copy.
-    if (atom->is_link()) {
-        // Insert the outgoing set of this link.
-        HandleSeq closet;
-        // Reserving space improves emplace_back performance by 2x
-        closet.reserve(atom->get_arity());
-        for (const Handle& h : atom->getOutgoingSet()) {
-            // operator->() will be null if its a Value that is
-            // not an atom.
-            if (nullptr == h.operator->()) return Handle::UNDEFINED;
-            closet.emplace_back(add(h, async));
-        }
-        atom = createLink(closet, atom->get_type());
-    }
-    else
-        atom = createNode(*NodeCast(atom));
+    if (not force and in_environ(orig))
+        return orig;
 
     // Force computation of hash external to the locked section.
-    ContentHash hash = atom->get_hash();
+    orig->get_hash();
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
@@ -300,118 +232,91 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         }
     }
 
-    atom->copyValues(orig);
-    atom->install();
-    atom->keep_incoming_set();
-    atom->setAtomSpace(_as);
+    // Make a copy of the atom, if needed. Otherwise, use what we were
+    // given. Not making a copy saves a lot of time, especially by
+    // avoiding running the factories a second time. This is, however,
+    // potentially buggy, if the user is sneaky and hands us an Atom
+    // that should have gone through a factory, but did not.
+    Handle atom(orig);
+    if (atom->is_link()) {
+        bool need_copy = false;
+        if (atom->getAtomTable())
+            need_copy = true;
+        else
+            for (const Handle& h : atom->getOutgoingSet())
+                if (not in_environ(h)) { need_copy = true; break; }
 
-    _size++;
-    if (atom->is_node()) _num_nodes++;
-    if (atom->is_link()) _num_links++;
-    _size_by_type[atom->_type] ++;
-
-    Handle h(atom->get_handle());
-    _atom_store.insert({hash, h});
-
-#ifdef CHECK_ATOM_HASH_COLLISION
-    auto its = _atom_store.equal_range(atom->get_hash());
-    for (auto it = its.first; it != its.second; ++it) {
-        AtomPtr a = it->second;
-        if (atom != a) {
-            LAZY_LOG_WARN << "Hash collision between:" << std::endl
-                          << atom->to_string() << "and:" << std::endl
-                          << a->to_string();
-#ifdef HALT_ON_COLLISON
-            // This is an extreme yet convenient way to check whether
-            // a collision has occured.
-            logger().flush();
-            abort();
-#endif
+        if (need_copy) {
+            // Insert the outgoing set of this link.
+            HandleSeq closet;
+            // Reserving space improves emplace_back performance by 2x
+            closet.reserve(atom->get_arity());
+            for (const Handle& h : atom->getOutgoingSet()) {
+                // operator->() will be null if its a Value that is
+                // not an atom.
+                if (nullptr == h.operator->()) return Handle::UNDEFINED;
+                closet.emplace_back(add(h));
+            }
+            atom = createLink(std::move(closet), atom->get_type());
+        } else {
+            atom->unsetRemovalFlag();
         }
     }
-#endif
+    else if (atom->getAtomTable())
+    {
+        std::string name(atom->get_name());
+        atom = createNode(atom->get_type(), std::move(name));
+    }
 
-    if (not _transient and not async)
-        put_atom_into_index(atom);
+    if (atom != orig) atom->copyValues(orig);
+    atom->setAtomSpace(_as);
+    atom->install();
+    atom->keep_incoming_set();
 
-    // We can now unlock, since we are done.
-    lck.unlock();
+    typeIndex.insertAtom(atom);
 
-    // Update the indexes asynchronously
-    if (not _transient and async)
-        _index_queue.enqueue(atom);
-
-    DPRINTF("Atom added: %s\n", atom->to_string().c_str());
-    return h;
-}
-
-void AtomTable::put_atom_into_index(const AtomPtr& atom)
-{
-    if (_transient)
-        throw RuntimeException(TRACE_INFO,
-          "AtomTable - transient should not index atoms!");
-
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
-    Atom* pat = atom.operator->();
-    typeIndex.insertAtom(pat);
-
-    // We can now unlock, since we are done. In particular, the signals
-    // need to run unlocked, since they may result in more atom table
-    // additions.
+    // Unlock, because the signal needs to run unlocked.
     lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal.emit(atom->get_handle());
+    _addAtomSignal.emit(atom);
+
+    return atom;
 }
 
 void AtomTable::barrier()
 {
-    _index_queue.flush_queue();
 }
 
 size_t AtomTable::getSize() const
 {
-    // No one except the unit tests ever worries about the atom table
-    // size. This sanity check might be able to avoid unpleasant
-    // surprises.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    if (_size != _atom_store.size())
-        throw RuntimeException(TRACE_INFO,
-            "Internal Error: Inconsistent AtomTable hash size! %lu vs. %lu",
-            _size, _atom_store.size());
-
-    if (_size != typeIndex.size())
-        throw RuntimeException(TRACE_INFO,
-            "Internal Error: Inconsistent AtomTable typeIndex size! %lu vs. %lu",
-            _size, typeIndex.size());
-
-    return _size;
+    return getNumAtomsOfType(ATOM, true);
 }
 
 size_t AtomTable::getNumNodes() const
 {
-    return _num_nodes;
+    return getNumAtomsOfType(NODE, true);
 }
 
 size_t AtomTable::getNumLinks() const
 {
-    return _num_links;
+    return getNumAtomsOfType(LINK, true);
 }
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    size_t result = _size_by_type[type];
+    size_t result = typeIndex.size(type);
     if (subclass)
     {
         // Also count subclasses of this type, if need be.
-        Type ntypes = _size_by_type.size();
+        Type ntypes = _nameserver.getNumberOfClasses();
         for (Type t = ATOM; t<ntypes; t++)
         {
-            if (t != type and _nameserver.isA(type, t))
-                result += _size_by_type[t];
+            if (t != type and _nameserver.isA(t, type))
+                result += typeIndex.size(t);
         }
     }
 
@@ -440,23 +345,21 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
+HandleSet AtomTable::extract(Handle& handle, bool recursive)
 {
-    AtomPtrSet result;
+    HandleSet result;
 
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    AtomPtr atom(handle);
-    atom = getHandle(atom);
-    handle = atom;
+    handle = getHandle(handle);
 
-    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
+    if (nullptr == handle or handle->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    AtomTable* other = atom->getAtomTable();
+    AtomTable* other = handle->getAtomTable();
     if (other != this)
     {
         if (not in_environ(handle)) return result;
@@ -469,8 +372,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
-    if (atom->isMarkedForRemoval()) return result;
-    atom->markForRemoval();
+    if (handle->isMarkedForRemoval()) return result;
+    handle->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -500,7 +403,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             if (not his->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
                 if (other) {
-                    AtomPtrSet ex = other->extract(his, true);
+                    HandleSet ex = other->extract(his, true);
                     result.insert(ex.begin(), ex.end());
                 }
             }
@@ -531,44 +434,23 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // unlocking it once is not enough, because it can still be
     // recurisvely locked.
     // lck.unlock();
-    _removeAtomSignal.emit(atom);
+    _removeAtomSignal.emit(handle);
     // lck.lock();
 
-    // Decrements the size of the table
-    _size--;
-    if (atom->is_node()) _num_nodes--;
-    if (atom->is_link()) _num_links--;
-    _size_by_type[atom->_type] --;
+    typeIndex.removeAtom(handle);
 
-    auto range = _atom_store.equal_range(atom->get_hash());
-    auto bkt = range.first;
-    auto end = range.second;
-    for (; bkt != end; bkt++) {
-        if (handle == bkt->second) {
-            _atom_store.erase(bkt);
-            break;
-        }
-    }
+    // Remove handle from other incoming sets.
+    handle->remove();
 
-    Atom* pat = atom.operator->();
-    typeIndex.removeAtom(pat);
+    handle->setAtomSpace(nullptr);
 
-    // Remove atom from other incoming sets.
-    atom->remove();
-
-    atom->setAtomSpace(nullptr);
-
-    result.insert(atom);
+    result.insert(handle);
     return result;
 }
 
-// This is the resize callback, when a new type is dynamically added.
+/// This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    //resize all Type-based indexes
-    size_t new_size = _nameserver.getNumberOfClasses();
-    _size_by_type.resize(new_size);
     typeIndex.resize();
 }
-

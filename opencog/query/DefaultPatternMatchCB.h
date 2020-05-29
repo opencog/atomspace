@@ -30,14 +30,13 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
 /**
  * Callback mixin class, used to provide a default node and link
  * matching behaviour. This class is a pure virtual class, since
- * it does not implement either the `initiate_search()` method,
+ * it does not implement either the `perform_search()` method,
  * nor the `solution()` method.
  *
  * It provides is node and link matching, assuming the canonical
@@ -68,25 +67,25 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual void post_link_mismatch(const Handle&, const Handle&);
 
 		virtual bool clause_match(const Handle&, const Handle&,
-		                          const HandleMap&);
+		                          const GroundingMap&);
 
 		/** Called for AbsentLink */
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd,
-		                                   const HandleMap&);
+		                                   const GroundingMap&);
 
-		/** Called for AlawaysLink */
+		/** Called for AlwaysLink */
 		virtual bool always_clause_match(const Handle& pattrn,
 		                                 const Handle& grnd,
-		                                 const HandleMap&);
+		                                 const GroundingMap&);
 
-		virtual IncomingSet get_incoming_set(const Handle&);
+		virtual IncomingSet get_incoming_set(const Handle&, Type);
 
 		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
+		virtual bool evaluate_sentence(const Handle& pat, const GroundingMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
 		virtual const TypeSet& get_connectives(void)
@@ -94,21 +93,27 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 			return _connectives;
 		}
 
-		bool optionals_present(void) { return _optionals_present; }
-	protected:
+		// Remarks:
+		// 1) This could be made virtual, if someone wants to over-load.
+		// 2) End-users should stop depending on this, and should start
+		//    using `(GreaterThan (TruthValueOf X) (Number 0.5))` instead.
+		bool crisp_truth_from_tv(const TruthValuePtr& tvp)
+		{ return tvp->get_mean() >= 0.5; }
 
+		bool optionals_present(void) { return _optionals_present; }
+
+	protected:
 		NameServer& _nameserver;
 
 		const Variables* _vars = nullptr;
 		const HandleSet* _dynamic = nullptr;
 		bool _have_evaluatables = false;
-		const HandleSet* _globs = nullptr;
 
 		bool _have_variables;
 		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
-		                    const HandleMap&, const HandleSet&,
+		                    const GroundingMap&, const HandleSet&,
 		                    Quotation quotation=Quotation());
 
 		// Variables that should be ignored, because they are bound
@@ -132,8 +137,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;
-		bool eval_term(const Handle& pat, const HandleMap& gnds);
-		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
+		bool eval_term(const Handle& pat, const GroundingMap& gnds);
+		bool eval_sentence(const Handle& pat, const GroundingMap& gnds);
 
 		bool _optionals_present = false;
 		AtomSpace* _as;

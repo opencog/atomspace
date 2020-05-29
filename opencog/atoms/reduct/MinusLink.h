@@ -3,21 +3,7 @@
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #ifndef _OPENCOG_MINUS_LINK_H
@@ -32,7 +18,7 @@ namespace opencog
  */
 
 /**
- * The MinusLink implements the mathematical operation of "minus"
+ * The MinusLink implements the arithmetic operation of "minus"
  */
 class MinusLink : public PlusLink
 {
@@ -42,8 +28,10 @@ protected:
 	ValuePtr kons(AtomSpace*, bool, const ValuePtr&, const ValuePtr&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b);
-	MinusLink(const HandleSeq&, Type=MINUS_LINK);
-	MinusLink(const Link&);
+	MinusLink(const HandleSeq&&, Type=MINUS_LINK);
+
+	MinusLink(const MinusLink&) = delete;
+	MinusLink& operator=(const MinusLink&) = delete;
 
 	static Handle factory(const Handle&);
 };

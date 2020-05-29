@@ -1,6 +1,5 @@
 import unittest
 
-from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
 
@@ -48,7 +47,7 @@ class LinkValueTest(unittest.TestCase):
     def test_str(self):
         value = LinkValue([FloatValue(42), StringValue('foo')])
         self.assertEqual('(LinkValue\n    (FloatValue 42)\n    '
-                         '(StringValue "foo")\n)\n', str(value))
+                         '(StringValue "foo")\n)', str(value))
 
     def test_is_a(self):
         value = LinkValue([FloatValue(42), StringValue('foo')])
