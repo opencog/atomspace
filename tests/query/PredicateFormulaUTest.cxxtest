@@ -103,7 +103,6 @@ void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
 	hget = LinkValueCast(get)->to_handle_seq();
 	TSM_ASSERT_EQUALS("Expect list", hget, ans);
 
-#if 0
 	// ------------------
 	get = eval->eval_v("(cog-execute! qe3)");
 	printf("Got qe3: %s\n", get->to_string().c_str());
@@ -111,7 +110,6 @@ void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
 	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
 	hget = LinkValueCast(get)->to_handle_seq();
 	TSM_ASSERT_EQUALS("Expect list", hget, ans);
-#endif
 
 	// ------------------
 	get = eval->eval_v("(cog-execute! qe4)");

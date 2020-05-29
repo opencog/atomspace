@@ -335,11 +335,11 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (_num_comps <= 1)
+	if (jit->_num_comps <= 1)
 	{
 		debug_log();
 
-		pmcb.set_pattern(_variables, _pat);
+		pmcb.set_pattern(jit->_variables, jit->_pat);
 		bool found = pmcb.start_search();
 		if (found) return found;
 
@@ -369,12 +369,13 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
-		              "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
+		              "num comp=%zd num virts=%zd\n",
+		              jit->_num_comps, jit->_num_virts);
 		logger().fine("Virtuals are:");
 		size_t iii=0;
-		for (const Handle& v : _virtual)
+		for (const Handle& v : jit->_virtual)
 		{
-			logger().fine("Virtual clause %zu of %zu:", iii, _num_virts);
+			logger().fine("Virtual clause %zu of %zu:", iii, jit->_num_virts);
 			logger().fine(v->to_short_string());
 			iii++;
 		}
@@ -384,14 +385,14 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
 
-	for (size_t i = 0; i < _num_comps; i++)
+	for (size_t i = 0; i < jit->_num_comps; i++)
 	{
 #ifdef QDEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
-		              << " of " << _num_comps << ": ===========\n";
+		              << " of " << jit->_num_comps << ": ===========\n";
 #endif
 
-		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(jit->_component_patterns.at(i)));
 		const Pattern& pat(clp->get_pattern());
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
@@ -431,14 +432,14 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
-	              << " num virts=" << _virtual.size();
+	              << " num virts=" << jit->_virtual.size();
 #endif
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
-	pmcb.set_pattern(_variables, _pat);
+	pmcb.set_pattern(jit->_variables, jit->_pat);
 	bool done = pmcb.start_search();
 	if (done) return done;
-	done = recursive_virtual(pmcb, _virtual, _pat.optionals,
+	done = recursive_virtual(pmcb, jit->_virtual, jit->_pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 	done = pmcb.search_finished(done);
