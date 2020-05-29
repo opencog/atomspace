@@ -27,6 +27,19 @@
 
 using namespace opencog;
 
+// XXX why isn't this centralized somewhere?
+// Why am I writing this again, from scratch?
+static TruthValuePtr get_the_tv(AtomSpace* as, const Handle& h, bool silent)
+{
+	if (h->is_evaluatable())
+		return h->evaluate(as, silent);
+
+	if (h->get_type() == EVALUATION_LINK)
+		return EvaluationLink::do_evaluate(as, h, silent);
+
+	return h->getTruthValue();
+}
+
 TruthValueOfLink::TruthValueOfLink(const HandleSeq&& oset, Type t)
 	: ValueOfLink(std::move(oset), t)
 {
@@ -47,7 +60,7 @@ TruthValuePtr TruthValueOfLink::evaluate(AtomSpace* as, bool silent)
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	return EvaluationLink::do_evaluate(as, _outgoing[0], silent);
+	return get_the_tv(as, _outgoing[0], silent);
 }
 
 // =============================================================
@@ -78,8 +91,7 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
-		strengths.push_back(tvp->get_mean());
+		strengths.push_back(get_the_tv(as, h, silent)->get_mean());
 	}
 
 	return createFloatValue(strengths);
@@ -113,8 +125,7 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
-		confids.push_back(tvp->get_confidence());
+		confids.push_back(get_the_tv(as, h, silent)->get_confidence());
 	}
 
 	return createFloatValue(confids);
@@ -148,8 +159,7 @@ ValuePtr CountOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
-		counts.push_back(tvp->get_count());
+		counts.push_back(get_the_tv(as, h, silent)->get_count());
 	}
 
 	return createFloatValue(counts);
