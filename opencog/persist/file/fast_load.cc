@@ -190,21 +190,16 @@ static Handle recursive_parse(const std::string& s,
         "Got a Value, not supported: " + s);
 }
 
-/// load_file -- load the given file into the given AtomSpace.
-void opencog::load_file(std::string fname, AtomSpace& as)
-{
-    std::ifstream f(fname);
-    if (not f.is_open())
-       throw std::runtime_error("Cannot find file >>" + fname + "<<");
-
+static Handle parseStream(std::istream& in, AtomSpace& as){
+    Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
 
     std::string expr;
-    while (!f.eof())
+    while (!in.eof())
     {
         std::string line;
-        std::getline(f, line);
+        std::getline(in, line);
         line_cnt++;
         expr += line;
         while (true)
@@ -218,17 +213,37 @@ void opencog::load_file(std::string fname, AtomSpace& as)
             // Trim away comments at end of line
             if (0 < pcount)
             {
-                expr = expr.substr(l, r-l);
+                expr = expr.substr(l, r - l);
                 break;
             }
 
             // Nothing to do.
-            if (l == r) break;
+            if (l == r)
+                break;
 
             expr_cnt++;
-            as.add_atom(recursive_parse(expr, l, r, line_cnt));
-            expr = expr.substr(r+1);
+            h = as.add_atom(recursive_parse(expr, l, r, line_cnt));
+            expr = expr.substr(r + 1);
         }
     }
+
+    return h;
+}
+
+/// load_file -- load the given file into the given AtomSpace.
+void opencog::load_file(std::string fname, AtomSpace& as)
+{
+    std::ifstream f(fname);
+    if (not f.is_open())
+       throw std::runtime_error("Cannot find file >>" + fname + "<<");
+
+    parseStream(f, as);
+    
     f.close();
+}
+
+//Parse an Atomese string expression and return a Handle to the parsed atom
+Handle opencog::parseExpression(std::string expr, opencog::AtomSpace &as) {
+    std::istringstream sstream(expr);
+    return parseStream(sstream, as);
 }

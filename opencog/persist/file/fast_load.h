@@ -43,6 +43,8 @@
 
 namespace opencog {
     void load_file(std::string fname, opencog::AtomSpace& as);
+
+    opencog::Handle parseExpression(std::string expr, opencog::AtomSpace& as);
 }
 
 #endif // FAST_LOAD_H
