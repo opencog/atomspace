@@ -150,7 +150,7 @@ class PMCGroundings : public SatisfyMixin
  *
  * Return false if no solution is found, true otherwise.
  */
-static bool recursive_virtual(PatternMatchCallback& cb,
+bool SatisfyMixin::recursive_virtual(
             const HandleSeq& virtuals,
             const HandleSeq& optionals,
             const GroundingMap& var_gnds,
@@ -202,7 +202,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 			// in the Arg atoms. So, we ground the args, and pass that
 			// to the callback.
 
-			bool match = cb.evaluate_sentence(virt, var_gnds);
+			bool match = evaluate_sentence(virt, var_gnds);
 
 			if (not match) return false;
 		}
@@ -210,13 +210,13 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		Handle empty;
 		for (const Handle& opt: optionals)
 		{
-			bool match = cb.optional_clause_match(opt, empty, var_gnds);
+			bool match = optional_clause_match(opt, empty, var_gnds);
 			if (not match) return false;
 		}
 
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
-		return cb.grounding(var_gnds, term_gnds);
+		return grounding(var_gnds, term_gnds);
 	}
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
@@ -250,7 +250,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(cb, virtuals, optionals, rvg, rpg,
+		bool accept = recursive_virtual(virtuals, optionals, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -449,7 +449,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(*this, virts, pat.optionals,
+	done = recursive_virtual(virts, pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 	done = search_finished(done);

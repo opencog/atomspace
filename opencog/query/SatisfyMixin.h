@@ -31,6 +31,14 @@ namespace opencog {
 class SatisfyMixin:
 	public virtual PatternMatchCallback
 {
+	bool recursive_virtual(const HandleSeq& virtuals,
+	                       const HandleSeq& optionals,
+	                       const GroundingMap& var_gnds,
+	                       const GroundingMap& term_gnds,
+	                       // copies, NOT references!
+	                       GroundingMapSeqSeq comp_var_gnds,
+	                       GroundingMapSeqSeq comp_term_gnds);
+
 	public:
 		virtual bool satisfy(const PatternLinkPtr&);
 };
