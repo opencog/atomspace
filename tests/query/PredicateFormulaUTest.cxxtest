@@ -182,6 +182,7 @@ void PredicateFormulaUTest::test_reject(void)
 	// Set TV's from which computations will happen.
 	eval->eval_h("(Concept \"node1\" (stv 0.9 0.3))");
 	eval->eval_h("(Concept \"name1\" (stv 0.9 0.3))");
+	eval->eval_h("(List (Concept \"node1\") (Concept \"name1\") (stv 0.4 0.3))");
 
 	// We expect all tests to return the empty set.
 	do_predicate_test({});
