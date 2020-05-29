@@ -7,6 +7,7 @@ ADD_LIBRARY (lambda
 	DualLink.cc
 	GetLink.cc
 	MeetLink.cc
+	PatternJit.cc
 	PatternLink.cc
 	PatternTerm.cc
 	PatternUtils.cc

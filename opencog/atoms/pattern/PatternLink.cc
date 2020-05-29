@@ -1092,9 +1092,17 @@ void PatternLink::debug_log(void) const
 	if (not logger().is_fine_enabled())
 		return;
 
-	// Log the predicate ...
-	logger().fine("Pattern '%s' has following clauses:",
+	// Log the pattern ...
+	logger().fine("Pattern '%s' summary:",
 	              _pat.redex_name.c_str());
+	logger().fine("%lu mandatory clauses", _pat.mandatory.size());
+	logger().fine("%lu optionals clauses", _pat.optionals.size());
+	logger().fine("%lu always clauses", _pat.always.size());
+	logger().fine("%lu fixed clauses", _fixed.size());
+	logger().fine("%lu virtual clauses", _num_virts);
+	logger().fine("%lu components", _num_comps);
+	logger().fine("%lu variables\n", _variables.varset.size());
+
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)
 	{

@@ -131,6 +131,8 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+	PatternLinkPtr jit_analyze(void);
+
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -168,7 +170,7 @@ public:
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	bool satisfy(PatternMatchCallback&) const;
+	bool satisfy(PatternMatchCallback&);
 
 	void debug_log(void) const;
 
