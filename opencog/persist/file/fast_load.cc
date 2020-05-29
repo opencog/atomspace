@@ -23,19 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/AtomSpace.h>
-
 #include "fast_load.h"
 
 using namespace opencog;
