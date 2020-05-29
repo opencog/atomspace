@@ -131,6 +131,8 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+	PatternLinkPtr jit_analyze(void);
+
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
