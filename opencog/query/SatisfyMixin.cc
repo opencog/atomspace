@@ -323,8 +323,10 @@ static bool recursive_virtual(PatternMatchCallback& cb,
  * satisfied.  A future extension could allow the use of MatchOrLinks
  * to support multiple exclusive disjuncts. See the README for more info.
  */
-bool SatisfyMixin::satisfy(const PatternLinkPtr& jit)
+bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 {
+	PatternLinkPtr jit = form->jit_analyze();
+
 	const Variables& vars = jit->get_variables();
 	const Pattern& pat = jit->get_pattern();
 

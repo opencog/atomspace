@@ -130,8 +130,6 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-	PatternLinkPtr jit_analyze(void);
-
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -158,6 +156,9 @@ public:
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,
 	            const HandleSeq&);
+
+	// Runtime just-in-time analysis
+	PatternLinkPtr jit_analyze(void);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }
