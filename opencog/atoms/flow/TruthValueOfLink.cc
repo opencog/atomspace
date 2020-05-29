@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include "TruthValueOfLink.h"
 
 using namespace opencog;
@@ -46,15 +47,7 @@ TruthValuePtr TruthValueOfLink::evaluate(AtomSpace* as, bool silent)
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	// We cannot know the TruthValue of the Atom unless we are
-	// working with the unique version that sits in the AtomSpace!
-	// It can happen, during evaluation e.g. of a PutLink, that we
-	// are given an Atom that is not in any AtomSpace. In this case,
-	// `as` will be a scratch space; we can add the Atom there, and
-	// things will trickle out properly in the end.
-
-	Handle ah(as->add_atom(_outgoing[0]));
-	return ah->getTruthValue();
+	return EvaluationLink::do_evaluate(as, _outgoing[0], silent);
 }
 
 // =============================================================
@@ -85,12 +78,8 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		// We cannot know the TruthValue of the Atom unless we are
-		// working with the unique version that sits in the AtomSpace!
-		// We are always provided with a (scratch) atomspace with
-		// which to work.
-		Handle ah(as->add_atom(h));
-		strengths.push_back(ah->getTruthValue()->get_mean());
+		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
+		strengths.push_back(tvp->get_mean());
 	}
 
 	return createFloatValue(strengths);
@@ -124,12 +113,8 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		// We cannot know the TruthValue of the Atom unless we are
-		// working with the unique version that sits in the AtomSpace!
-		// We are always provided with a (scratch) atomspace with
-		// which to work.
-		Handle ah(as->add_atom(h));
-		confids.push_back(ah->getTruthValue()->get_confidence());
+		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
+		confids.push_back(tvp->get_confidence());
 	}
 
 	return createFloatValue(confids);
@@ -163,12 +148,8 @@ ValuePtr CountOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		// We cannot know the TruthValue of the Atom unless we are
-		// working with the unique version that sits in the AtomSpace!
-		// We are always provided with a (scratch) atomspace with
-		// which to work.
-		Handle ah(as->add_atom(h));
-		counts.push_back(ah->getTruthValue()->get_count());
+		const TruthValuePtr& tvp = EvaluationLink::do_evaluate(as, h, silent);
+		counts.push_back(tvp->get_count());
 	}
 
 	return createFloatValue(counts);
