@@ -27,6 +27,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/SatisfyMixin.h>
 
 using namespace opencog;
 
@@ -64,7 +65,10 @@ class PatternCrashUTest: public CxxTest::TestSuite
 		void test_empty_vars(void);
 };
 
-class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
+class PMCB :
+	public InitiateSearchCB,
+	public DefaultPatternMatchCB,
+	public SatisfyMixin
 {
 	public:
 		PMCB(AtomSpace* as) :
@@ -272,7 +276,7 @@ void PatternCrashUTest::test_one_thing(void)
 
 	logger().debug("Before Pattern Matching");
 
-	sl->satisfy(pmcb);
+	pmcb.satisfy(sl);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -291,8 +295,7 @@ void PatternCrashUTest::test_empty_vars(void)
 
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
 	PMCB pmcb(_as);
-
-	sl->satisfy(pmcb);
+	pmcb.satisfy(sl);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

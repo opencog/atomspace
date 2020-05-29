@@ -31,7 +31,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	DefaultImplicator impl(as);
 	impl.implicand.push_back(himplicand);
 
-	bl->satisfy(impl);
+	impl.satisfy(bl);
 
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -57,7 +57,7 @@ static inline void match(PatternMatchCallback& pmcb,
                          const HandleSeq &clauses)
 {
 	PatternLinkPtr slp(createPatternLink(vars, clauses));
-	slp->satisfy(pmcb);
+	pmcb.satisfy(slp);
 }
 
 static inline Handle bindlink(AtomSpace* as,
