@@ -24,7 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
-#include "DefaultImplicator.h"
+#include "Implicator.h"
 
 using namespace opencog;
 
