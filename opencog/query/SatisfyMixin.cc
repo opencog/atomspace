@@ -27,6 +27,7 @@
 
 #include <opencog/query/SatisfyMixin.h>
 #include <opencog/query/PatternMatchEngine.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 using namespace opencog;
 
@@ -410,9 +411,10 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& jit)
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			// XXX FIXME
-			// if (optionals_present()) return false;
-return false;
+			// XXX FIXME terrible hack.
+			DefaultPatternMatchCB* intu =
+				dynamic_cast<DefaultPatternMatchCB*>(this);
+			if (intu->optionals_present()) return false;
 		}
 		else
 		{
