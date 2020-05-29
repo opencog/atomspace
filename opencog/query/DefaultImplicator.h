@@ -27,7 +27,7 @@
 #include "DefaultPatternMatchCB.h"
 #include "Implicator.h"
 #include "InitiateSearchCB.h"
-#include "PatternMatchCallback.h"
+#include "SatisfyMixin.h"
 
 
 namespace opencog {
@@ -39,7 +39,8 @@ namespace opencog {
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB
+	public virtual DefaultPatternMatchCB,
+	public virtual SatisfyMixin
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) :
@@ -47,12 +48,12 @@ class DefaultImplicator:
 			InitiateSearchCB(asp),
 			DefaultPatternMatchCB(asp) {}
 
-	virtual void set_pattern(const Variables& vars,
-	                         const Pattern& pat)
-	{
-		InitiateSearchCB::set_pattern(vars, pat);
-		DefaultPatternMatchCB::set_pattern(vars, pat);
-	}
+			virtual void set_pattern(const Variables& vars,
+			                         const Pattern& pat)
+			{
+				InitiateSearchCB::set_pattern(vars, pat);
+				DefaultPatternMatchCB::set_pattern(vars, pat);
+			}
 };
 
 }; // namespace opencog

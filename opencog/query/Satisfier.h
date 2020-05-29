@@ -32,6 +32,7 @@
 
 #include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
 
@@ -48,7 +49,8 @@ namespace opencog {
 
 class Satisfier :
 	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB
+	public virtual DefaultPatternMatchCB,
+	public virtual SatisfyMixin
 {
 	public:
 		Satisfier(AtomSpace* as) :
@@ -95,7 +97,8 @@ class Satisfier :
 
 class SatisfyingSet :
 	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB
+	public virtual DefaultPatternMatchCB,
+	public virtual SatisfyMixin
 {
 	protected:
 		AtomSpace* _as;

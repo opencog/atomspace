@@ -37,7 +37,7 @@ using namespace opencog;
  */
 PatternLinkPtr PatternLink::jit_analyze(void)
 {
-	PatternLinkPtr jit = PatternLinkCast(HandleCast(shared_from_this()));
+	PatternLinkPtr jit = PatternLinkCast(get_handle());
 
 	// If there are no definitions, there is nothing to do.
 	if (0 == _pat.defined_terms.size()) return jit;

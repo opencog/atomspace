@@ -25,6 +25,7 @@
 #define _OPENCOG_RECOGNIZER_H
 
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
 
@@ -45,7 +46,8 @@ namespace opencog {
  * `I * you` and `I love *`.
  */
 class Recognizer :
-   public virtual DefaultPatternMatchCB
+   public virtual DefaultPatternMatchCB,
+	public virtual SatisfyMixin
 {
 	private:
 		bool match = false;

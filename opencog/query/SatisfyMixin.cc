@@ -1,5 +1,5 @@
 /*
- * PatternLinkRuntime.cc
+ * SatisfyMixin.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -23,12 +23,9 @@
 
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/pattern/BindLink.h>
-
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/SatisfyMixin.h>
 #include <opencog/query/PatternMatchEngine.h>
 
 using namespace opencog;
@@ -102,6 +99,7 @@ class PMCGroundings : public PatternMatchCallback
 		{
 			_cb.set_pattern(vars, pat);
 		}
+		bool satisfy(const PatternLinkPtr& plp) { return _cb.satisfy(plp); }
 
 		bool start_search(void)
 		{
@@ -325,30 +323,32 @@ static bool recursive_virtual(PatternMatchCallback& cb,
  * satisfied.  A future extension could allow the use of MatchOrLinks
  * to support multiple exclusive disjuncts. See the README for more info.
  */
-bool PatternLink::satisfy(PatternMatchCallback& pmcb)
+bool SatisfyMixin::satisfy(const PatternLinkPtr& jit)
 {
-	// Just-in-time (JIT) pattern analysis. We can't do this earlier,
-	// because the required definitions might not be present, or
-	// the definitions may have changed.
-	PatternLinkPtr jit = jit_analyze();
+	const Variables& vars = jit->get_variables();
+	const Pattern& pat = jit->get_pattern();
+
+	set_pattern(vars, pat);
+
+	const HandleSeqSeq& comps = jit->get_components();
+	size_t num_comps = comps.size();
 
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (jit->_num_comps <= 1)
+	if (num_comps <= 1)
 	{
-		debug_log();
+		jit->debug_log();
 
-		pmcb.set_pattern(jit->_variables, jit->_pat);
-		bool found = pmcb.start_search();
+		bool found = start_search();
 		if (found) return found;
 
-		found = pmcb.perform_search(pmcb);
+		found = perform_search(*this);
 
 #ifdef QDEBUG
 		logger().fine("================= Done with Search =================");
 #endif
-		found = pmcb.search_finished(found);
+		found = search_finished(found);
 
 		return found;
 	}
@@ -365,17 +365,20 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
+	const HandleSeq& virts = jit->get_virtual();
+	size_t num_virts = virts.size();
+
 #ifdef QDEBUG
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n",
-		              jit->_num_comps, jit->_num_virts);
+		              num_comps, num_virts);
 		logger().fine("Virtuals are:");
 		size_t iii=0;
-		for (const Handle& v : jit->_virtual)
+		for (const Handle& v : virts)
 		{
-			logger().fine("Virtual clause %zu of %zu:", iii, jit->_num_virts);
+			logger().fine("Virtual clause %zu of %zu:", iii, num_virts);
 			logger().fine(v->to_short_string());
 			iii++;
 		}
@@ -384,31 +387,32 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
+	const HandleSeq& comp_patterns = jit->get_component_patterns();
 
-	for (size_t i = 0; i < jit->_num_comps; i++)
+	for (size_t i = 0; i < num_comps; i++)
 	{
 #ifdef QDEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
-		              << " of " << jit->_num_comps << ": ===========\n";
+		              << " of " << num_comps << ": ===========\n";
 #endif
 
-		PatternLinkPtr clp(PatternLinkCast(jit->_component_patterns.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(comp_patterns.at(i)));
 		const Pattern& pat(clp->get_pattern());
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
 
 		// Pass through the callbacks, collect up answers.
-		PMCGroundings gcb(pmcb);
-		clp->satisfy(gcb);
+		PMCGroundings gcb(*this);
+		gcb.satisfy(clp);
 
 		// Special handling for disconnected pure optionals -- Returns false to
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			DefaultPatternMatchCB* dpmcb =
-				dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
-			if (dpmcb->optionals_present()) return false;
+			// XXX FIXME
+			// if (optionals_present()) return false;
+return false;
 		}
 		else
 		{
@@ -432,17 +436,16 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
-	              << " num virts=" << jit->_virtual.size();
+	              << " num virts=" << num_virts;
 #endif
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
-	pmcb.set_pattern(jit->_variables, jit->_pat);
-	bool done = pmcb.start_search();
+	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(pmcb, jit->_virtual, jit->_pat.optionals,
+	done = recursive_virtual(*this, virts, pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
-	done = pmcb.search_finished(done);
+	done = search_finished(done);
 	return done;
 }
 

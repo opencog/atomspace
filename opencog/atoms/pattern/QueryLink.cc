@@ -156,7 +156,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
 
-	this->PatternLink::satisfy(impl);
+	impl.satisfy(PatternLinkCast(get_handle()));
 
 	// If we got a non-empty answer, just return it.
 	QueueValuePtr qv(impl.get_result_queue());

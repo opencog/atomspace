@@ -5,9 +5,9 @@ ADD_LIBRARY(query-engine
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatchEngine.cc
-	PatternLinkRuntime.cc
 	Recognizer.cc
 	Satisfier.cc
+	SatisfyMixin.cc
 )
 
 # Optionally enable debug logging for the pattern matcher.

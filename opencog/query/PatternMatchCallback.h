@@ -28,8 +28,7 @@
 #include <set>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
-#include <opencog/atoms/pattern/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/pattern/PatternTerm.h> // for pattern context
 
 namespace opencog {
@@ -367,9 +366,15 @@ class PatternMatchCallback
 		 */
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat) = 0;
+
+		/**
+		 * You get to call this, to perform the actual earch.
+		 */
+		virtual bool satisfy(const PatternLinkPtr&) = 0;
 };
 
-// See notes in `InitiateSearchCB.cc` for an explanation of this.
+// See notes in `InitiateSearchCB.cc` for an explanation of the
+// threading code and its status.
 // #define USE_THREADED_PATTERN_ENGINE
 #ifdef USE_THREADED_PATTERN_ENGINE
 	#define DECLARE_PE_MUTEX std::mutex _mtx;

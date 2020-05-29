@@ -79,7 +79,7 @@ ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 	Recognizer reco(as);
-	satisfy(reco);
+	reco.satisfy(PatternLinkCast(get_handle()));
 
 	// If there is an anchor, then attach results to the anchor.
 	// Otherwise, create a SetLink and return that.
