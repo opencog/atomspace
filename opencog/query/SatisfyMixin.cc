@@ -37,7 +37,7 @@ using namespace opencog;
 /// A pass-through class, which wraps a regular callback, but captures
 /// all of the different possible groundings that result.  This class is
 /// used to piece together graphs out of multiple components.
-class PMCGroundings : public PatternMatchCallback
+class PMCGroundings : public SatisfyMixin
 {
 	private:
 		PatternMatchCallback& _cb;
@@ -100,7 +100,6 @@ class PMCGroundings : public PatternMatchCallback
 		{
 			_cb.set_pattern(vars, pat);
 		}
-		bool satisfy(const PatternLinkPtr& plp) { return _cb.satisfy(plp); }
 
 		bool start_search(void)
 		{
@@ -433,6 +432,10 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& jit)
 			comp_term_gnds.push_back(gcb._term_groundings);
 		}
 	}
+
+	// The pattern was clobbered by the individual component searches.
+	// We need to reset it.
+	set_pattern(vars, pat);
 
 	// And now, try grounding each of the virtual clauses.
 #ifdef QDEBUG
