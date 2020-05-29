@@ -66,9 +66,6 @@ protected:
 	const HandleSet* _dynamic;
 	bool _recursing;
 
-	PatternLinkPtr _pl;
-	void jit_analyze(void);
-
 	Handle _root;
 	Handle _starter_term;
 	HandleSeq _search_set;

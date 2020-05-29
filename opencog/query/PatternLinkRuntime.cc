@@ -325,8 +325,13 @@ static bool recursive_virtual(PatternMatchCallback& cb,
  * satisfied.  A future extension could allow the use of MatchOrLinks
  * to support multiple exclusive disjuncts. See the README for more info.
  */
-bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
+bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 {
+	// Just-in-time (JIT) pattern analysis. We can't do this earlier,
+	// because the required definitions might not be present, or
+	// the definitions may have changed.
+	PatternLinkPtr jit = jit_analyze();
+
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.

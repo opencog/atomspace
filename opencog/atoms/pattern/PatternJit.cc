@@ -39,6 +39,9 @@ PatternLinkPtr PatternLink::jit_analyze(void)
 {
 	PatternLinkPtr jit = PatternLinkCast(HandleCast(shared_from_this()));
 
+	// If there are no definitions, there is nothing to do.
+	if (0 == _pat.defined_terms.size()) return jit;
+
 	// Now is the time to look up the definitions!
 	// We loop here, so that all recursive definitions are expanded
 	// as well.  XXX Except that this is wrong, if any of the
