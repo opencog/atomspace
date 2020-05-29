@@ -57,6 +57,7 @@ public:
 	virtual ~FloatValue() {}
 
 	const std::vector<double>& value() const { update(); return _value; }
+	size_t size() const { return _value.size(); }
 
 	/** Returns a string representation of the value. */
 	virtual std::string to_string(const std::string& indent = "") const

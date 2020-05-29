@@ -251,13 +251,7 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual Arity get_arity() const {
-        throw RuntimeException(TRACE_INFO, "Not a link!");
-    }
-
-    // Return the size of an atom. 1 if a node, 1 + sizes of its
-    // outgoings if a link. It does not discount redundant atoms.
-    virtual size_t size() const = 0;
+    virtual Arity get_arity() const { return size(); }
 
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");

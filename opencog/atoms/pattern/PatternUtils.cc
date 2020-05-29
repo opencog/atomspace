@@ -92,25 +92,32 @@ bool remove_constants(const HandleSet& vars, Pattern& pat)
 	return modified;
 }
 
-bool is_constant(const HandleSet& vars, const Handle& clause)
+bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
-	bool constant =
-		not (any_unquoted_unscoped_in_tree(clause, vars)
-		     or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-		     or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
-		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
-		     // If it is an EvaluatableLink then is is not a
-		     // constant, unless it is a closed EvaluationLink over
-		     // a PredicateNode.
-		     or (nameserver().isA(ct, EVALUATABLE_LINK)
-		         and (not (EVALUATION_LINK == ct)
-		              or 0 == clause->get_arity()
-		              or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+	bool evaluatable =
+		// If it is an EvaluatableLink, then is is evaluatable,
+		// unless it is a closed (variable-free) EvaluationLink
+		// over a PredicateNode.
+		(nameserver().isA(ct, EVALUATABLE_LINK)
+		   and (not (EVALUATION_LINK == ct)
+		      or 0 == clause->get_arity()
+		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))
 
-	return constant;
+		// XXX FIXME Are the below needed?
+		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+		or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+
+	return evaluatable;
+}
+
+bool is_constant(const HandleSet& vars, const Handle& clause)
+{
+	return
+		not any_unquoted_unscoped_in_tree(clause, vars)
+		and not can_evaluate(clause);
 }
 
 /* ======================================================== */

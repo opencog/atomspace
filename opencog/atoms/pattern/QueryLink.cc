@@ -161,7 +161,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	// If we got a non-empty answer, just return it.
 	QueueValuePtr qv(impl.get_result_queue());
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	if (0 < qv->size())
+	if (0 < qv->concurrent_queue<ValuePtr>::size())
 		return qv;
 
 	// If we are here, then there were zero matches.

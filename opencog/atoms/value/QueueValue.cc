@@ -56,7 +56,7 @@ QueueValue::QueueValue(const ValueSeq& vseq)
 void QueueValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == size()) return;
+	if (is_closed() and 0 == concurrent_queue<ValuePtr>::size()) return;
 
 	// Reset, to start with.
 	_value.clear();
