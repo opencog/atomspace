@@ -61,7 +61,9 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
+	void do_predicate_test(HandleSeq);
 	void test_accept(void);
+	void test_reject(void);
 };
 
 void PredicateFormulaUTest::tearDown(void)
@@ -80,6 +82,68 @@ void PredicateFormulaUTest::setUp(void)
  * a predicate, acepting or rejecting whatever the formula is applied
  * to.
  */
+void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
+{
+	// We expect all tests to return this.
+	printf("Expecting: %s\n", oc_to_string(ans).c_str());
+
+	// ------------------
+	ValuePtr get = eval->eval_v("(cog-execute! qe1)");
+	printf("Got qe1: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	HandleSeq hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe2)");
+	printf("Got qe2: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe3)");
+	printf("Got qe3: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe4)");
+	printf("Got qe4: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe5)");
+	printf("Got qe5: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe6)");
+	printf("Got qe6: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe7)");
+	printf("Got qe7: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+}
+
 void PredicateFormulaUTest::test_accept(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -92,7 +156,6 @@ void PredicateFormulaUTest::test_accept(void)
 
 	// We expect all tests to return this.
 	Handle ans = eval->eval_h("ans");
-	printf("Expecting: %s\n", ans->to_string().c_str());
 
 	// ------------------
 	ValuePtr get = eval->eval_v("(cog-execute! q-basic)");
@@ -104,68 +167,24 @@ void PredicateFormulaUTest::test_accept(void)
 	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
 	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
 
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe1)");
-	printf("Got qe1: %s\n", get->to_string().c_str());
+	// Run the rest of the test.
+	do_predicate_test({ans});
 
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe2)");
-	printf("Got qe2: %s\n", get->to_string().c_str());
+void PredicateFormulaUTest::test_reject(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
+	eval->eval("(load-from-path \"tests/query/predicate-formula.scm\")");
 
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe3)");
-	printf("Got qe3: %s\n", get->to_string().c_str());
+	// Set TV's from which computations will happen.
+	eval->eval_h("(Concept \"node1\" (stv 0.9 0.3))");
+	eval->eval_h("(Concept \"name1\" (stv 0.9 0.3))");
 
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe4)");
-	printf("Got qe4: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe5)");
-	printf("Got qe5: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe6)");
-	printf("Got qe6: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe7)");
-	printf("Got qe7: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
-	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
+	// We expect all tests to return the empty set.
+	do_predicate_test({});
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
