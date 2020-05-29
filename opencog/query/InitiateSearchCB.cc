@@ -31,7 +31,6 @@
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
-#include "Substitutor.h"
 
 #ifdef USE_THREADED_PATTERN_ENGINE
 	// #include <algorithm>
@@ -57,7 +56,6 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_pattern = nullptr;
 	_dynamic = nullptr;
 	_recursing = false;
-	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -475,8 +473,6 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  */
 bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
 {
-	jit_analyze();
-
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
@@ -953,78 +949,6 @@ bool InitiateSearchCB::setup_no_search(void)
 }
 
 /* ======================================================== */
-/**
- * Just-In-Time analysis of patterns. Patterns we could not unpack
- * earlier, because the definitions for them might not have been
- * present, or may have changed since the pattern was initially created.
- */
-void InitiateSearchCB::jit_analyze(void)
-{
-	// If there are no definitions, there is nothing to do.
-	if (0 == _pattern->defined_terms.size())
-		return;
-
-	// Now is the time to look up the definitions!
-	// We loop here, so that all recursive definitions are expanded
-	// as well.  XXX Except that this is wrong, if any of the
-	// definitions are actually recursive. That is, this will be
-	// an infinite loop if a defintion is self-referencing; so
-	// really we need to expand, one level at a time, during
-	// evaluation, and only expand if really, really needed. (Which
-	// then brings up ideas like tail recursion, etc.)  Anyway, most
-	// of this code should probably be moved to PatternLink::jit_expand()
-	while (0 < _pattern->defined_terms.size())
-	{
-		Variables vset;
-		GroundingMap defnmap;
-		for (const Handle& name : _pattern->defined_terms)
-		{
-			Handle defn = DefineLink::get_definition(name);
-			if (not defn) continue;
-
-			// Extract the variables in the definition.
-			// Either they are given in a LambdaLink, or, if absent,
-			// we just hunt down and bind all of them.
-			if (_nameserver.isA(LAMBDA_LINK, defn->get_type()))
-			{
-				LambdaLinkPtr lam = LambdaLinkCast(defn);
-				vset.extend(lam->get_variables());
-				defn = lam->get_body();
-			}
-			else
-			{
-				Variables freevars;
-				freevars.find_variables(defn);
-				vset.extend(freevars);
-			}
-
-			defnmap.insert({name, defn});
-		}
-
-		// Rebuild the pattern, expanding all DefinedPredicateNodes
-		// to one level. Note that `newbody` is not being placed in
-		// any atomspace; but I think that is OK...
-		Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
-
-		// We need to let both the PME know about the new clauses
-		// and variables, and also let master callback class know,
-		// too, since we are just one mixin in the callback class;
-		// the other mixins need to be updated as well.
-		vset.extend(*_variables);
-
-		_pl = createPatternLink(vset, newbody);
-		_variables = &_pl->get_variables();
-		_pattern = &_pl->get_pattern();
-	}
-
-	_dynamic = &_pattern->evaluatable_terms;
-
-	set_pattern(*_variables, *_pattern);
-	DO_LOG({logger().fine("JIT expanded!");
-	_pl->debug_log();})
-}
-
-/* ======================================================== */
 
 /// search_loop() -- perform the actual pattern search
 ///
@@ -1156,9 +1080,6 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 	if (_dynamic)
 		ss << indent << "_dynamic:" << std::endl
 		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
-	if (_pl)
-		ss << indent << "_pl:" << std::endl
-		   << _pl->to_string(indent + oc_to_string_indent) << std::endl;
 	if (_root)
 		ss << indent << "_root:" << std::endl
 		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
