@@ -26,7 +26,7 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/InitiateSearchMixin.h>
 #include <opencog/query/SatisfyMixin.h>
 
 using namespace opencog;
@@ -66,18 +66,18 @@ class PatternCrashUTest: public CxxTest::TestSuite
 };
 
 class PMCB :
-	public InitiateSearchCB,
+	public InitiateSearchMixin,
 	public DefaultPatternMatchCB,
 	public SatisfyMixin
 {
 	public:
 		PMCB(AtomSpace* as) :
-			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
+			InitiateSearchMixin(as), DefaultPatternMatchCB(as) {}
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
-			InitiateSearchCB::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 

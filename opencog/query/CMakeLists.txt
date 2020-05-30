@@ -3,7 +3,7 @@
 ADD_LIBRARY(query-engine
 	DefaultPatternMatchCB.cc
 	Implicator.cc
-	InitiateSearchCB.cc
+	InitiateSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
 	Satisfier.cc
@@ -29,7 +29,7 @@ INSTALL (FILES
 	DefaultImplicator.h
 	DefaultPatternMatchCB.h
 	Implicator.h
-	InitiateSearchCB.h
+	InitiateSearchMixin.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h

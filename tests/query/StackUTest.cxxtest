@@ -21,7 +21,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/InitiateSearchMixin.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/SatisfyMixin.h>
 #include <opencog/util/Logger.h>
@@ -62,7 +62,7 @@ class StackUTest :  public CxxTest::TestSuite
 };
 
 class TestPMCB :
-	public InitiateSearchCB,
+	public InitiateSearchMixin,
 	public DefaultPatternMatchCB,
 	public SatisfyMixin
 {
@@ -71,13 +71,13 @@ class TestPMCB :
 	int scnt;
 	Handle anch;
 	TestPMCB(AtomSpace* as) :
-		InitiateSearchCB(as),
+		InitiateSearchMixin(as),
 		DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
 
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
 	{
-		InitiateSearchCB::set_pattern(vars, pat);
+		InitiateSearchMixin::set_pattern(vars, pat);
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 

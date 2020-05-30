@@ -26,7 +26,7 @@
 
 #include "DefaultPatternMatchCB.h"
 #include "Implicator.h"
-#include "InitiateSearchCB.h"
+#include "InitiateSearchMixin.h"
 #include "SatisfyMixin.h"
 
 
@@ -37,21 +37,21 @@ namespace opencog {
 // to handle different parts of the grounding process, and virtual
 // bases classes just minimizes the total boilerplate code needed.
 class DefaultImplicator:
-	public virtual Implicator,
-	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB,
-	public virtual SatisfyMixin
+	public Implicator,
+	public InitiateSearchMixin,
+	public DefaultPatternMatchCB,
+	public SatisfyMixin
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) :
 			Implicator(asp),
-			InitiateSearchCB(asp),
+			InitiateSearchMixin(asp),
 			DefaultPatternMatchCB(asp) {}
 
 			virtual void set_pattern(const Variables& vars,
 			                         const Pattern& pat)
 			{
-				InitiateSearchCB::set_pattern(vars, pat);
+				InitiateSearchMixin::set_pattern(vars, pat);
 				DefaultPatternMatchCB::set_pattern(vars, pat);
 			}
 };

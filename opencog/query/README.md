@@ -462,8 +462,8 @@ the [README-Algorithm](README-Algorithm.md) file.
    in the most efficient search. When there are no constant terms in
    any of the clauses, different techniques are used to pick a starting
    location.  The algorithms for picking the starting points are
-   provided in default callbacks, in `InitiateSearchCB`. These can be
-   overloaded for custom searches.
+   provided in default callbacks, in `InitiateSearchMixin`. These can
+   be overloaded for custom searches.
 
 7. Search begins with the clause containing the thinnest term. Search
    is performed upwards (i.e. following the edges in the incoming set).

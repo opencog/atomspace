@@ -373,7 +373,7 @@ class PatternMatchCallback
 		virtual bool satisfy(const PatternLinkPtr&) = 0;
 };
 
-// See notes in `InitiateSearchCB.cc` for an explanation of the
+// See notes in `InitiateSearchMixin.cc` for an explanation of the
 // threading code and its status.
 // #define USE_THREADED_PATTERN_ENGINE
 #ifdef USE_THREADED_PATTERN_ENGINE

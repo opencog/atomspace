@@ -30,7 +30,7 @@
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/InitiateSearchMixin.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/SatisfyMixin.h>
 
@@ -48,13 +48,13 @@ namespace opencog {
  */
 
 class Satisfier :
-	public virtual InitiateSearchCB,
+	public virtual InitiateSearchMixin,
 	public virtual DefaultPatternMatchCB,
 	public virtual SatisfyMixin
 {
 	public:
 		Satisfier(AtomSpace* as) :
-			InitiateSearchCB(as),
+			InitiateSearchMixin(as),
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 
@@ -67,7 +67,7 @@ class Satisfier :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			InitiateSearchCB::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
@@ -96,9 +96,9 @@ class Satisfier :
  */
 
 class SatisfyingSet :
-	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB,
-	public virtual SatisfyMixin
+	public InitiateSearchMixin,
+	public DefaultPatternMatchCB,
+	public SatisfyMixin
 {
 	protected:
 		AtomSpace* _as;
@@ -109,7 +109,7 @@ class SatisfyingSet :
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			InitiateSearchCB(as), DefaultPatternMatchCB(as),
+			InitiateSearchMixin(as), DefaultPatternMatchCB(as),
 			_as(as), max_results(SIZE_MAX) {}
 
 		size_t max_results;
@@ -118,7 +118,7 @@ class SatisfyingSet :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			InitiateSearchCB::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
