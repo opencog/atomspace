@@ -2188,9 +2188,10 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 	return glob;
 }
 
-/// Same as above, but with three boolean flags:  if not set, then only
-/// those clauses satsifying the criterion are considered, else all
-/// clauses are considered.
+/// Work-horse for `get_next_untried_clause`. Locates the actual clause
+/// to run next. Takes three boolean flags: When the boolean is not set,
+/// then only those clauses satsifying the criterion are considered,
+/// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
 bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
@@ -2253,8 +2254,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 		if (pursue_thickness > thinnest_joint) break;
 
-		auto root_list = _pat->connectivity_map.equal_range(pursue);
-
+		const auto& root_list = _pat->connectivity_map.equal_range(pursue);
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
 			const Handle& root = it->second;
@@ -2272,6 +2272,32 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 					joint = pursue;
 					unsolved = true;
 				}
+			}
+		}
+	}
+
+	// Some clauses have no variables in them, and so the above loops
+	// will not find them. Try these now. This means that the
+	// variable-free clauses run last. If the user wants to run them
+	// earlier, they can always use a SequentialAndLink.
+	if (not unsolved and search_virtual and
+		 (search_black or _pat->black.empty()))
+	{
+		for (const Handle& root : _pat->mandatory)
+		{
+			if (issued.end() != issued.find(root)) continue;
+
+			// Clauses with no variables are (by definition)
+			// evaluatable. So we don't check if they're evaluatable.
+			const HandleSeq& varseq = _pat->clause_variables.at(root);
+			if (0 == varseq.size())
+			{
+				unsolved_clause = root;
+				joint = root;
+				unsolved = true;
+				// Oh bother. Bit of a hack.
+				var_grounding[root] = root;
+				break;
 			}
 		}
 	}
