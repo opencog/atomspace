@@ -404,7 +404,13 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
 		const HandleSeq& oset = hbody->getOutgoingSet();
+
+		// De-duplicate repeated clauses in the search pattern.
+		HandleSet dedupe;
 		for (const Handle& ho : oset)
+			dedupe.insert(ho);
+
+		for (const Handle& ho : dedupe)
 		{
 			if (not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
