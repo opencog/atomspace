@@ -25,11 +25,14 @@
 
 #ifndef FAST_LOAD_H
 #define FAST_LOAD_H
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <string>
 
 namespace opencog {
-    void load_file(std::string fname, opencog::AtomSpace& as);
+    void load_file(const std::string& fname, opencog::AtomSpace& as);
+
+    opencog::Handle parseExpression(const std::string& expr, opencog::AtomSpace& as);
 }
 
 #endif // FAST_LOAD_H

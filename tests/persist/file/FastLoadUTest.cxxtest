@@ -1,0 +1,40 @@
+
+#include <opencog/persist/file/fast_load.h>
+
+using namespace opencog;
+
+class FastLoadUTest : public CxxTest::TestSuite
+{
+
+private:
+    AtomSpace _as;
+
+public:
+    FastLoadUTest()
+    {
+        logger().set_print_to_stdout_flag(true);
+    }
+
+    void setUp() {}
+
+	void tearDown() {}
+
+	void test_expr_parse();
+};
+
+// Test parseExpression
+void FastLoadUTest::test_expr_parse()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = R"((Evaluation (Predicate "is_a") (List (Concept "Earth") (Concept "Planet"))))";
+
+    Handle h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(5, _as.get_size());
+
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+
+}
