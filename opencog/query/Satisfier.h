@@ -48,9 +48,9 @@ namespace opencog {
  */
 
 class Satisfier :
-	public virtual InitiateSearchMixin,
-	public virtual TermMatchMixin,
-	public virtual SatisfyMixin
+	public InitiateSearchMixin,
+	public TermMatchMixin,
+	public SatisfyMixin
 {
 	public:
 		Satisfier(AtomSpace* as) :

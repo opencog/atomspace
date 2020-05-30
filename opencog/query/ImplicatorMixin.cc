@@ -1,5 +1,5 @@
 /*
- * Implicator.cc
+ * ImplicatorMixin.cc
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
  *
@@ -24,18 +24,18 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
-#include "Implicator.h"
+#include "ImplicatorMixin.h"
 
 using namespace opencog;
 
-Implicator::Implicator(AtomSpace* as)
+ImplicatorMixin::ImplicatorMixin(AtomSpace* as)
 	: _as(as), inst(as), max_results(SIZE_MAX)
 {
 }
 
 /**
  * This callback takes the reported grounding, runs it through the
- * instantiator, to create the implicand, and then records the result
+ * instantiatorMixin, to create the implicand, and then records the result
  * in the `result_set`. Repeated solutions are skipped. If the number
  * of unique results so far is less than `max_results`, it then returns
  * false, to search for more groundings.  (The engine will halt its
@@ -43,7 +43,7 @@ Implicator::Implicator(AtomSpace* as)
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool Implicator::grounding(const GroundingMap &var_soln,
+bool ImplicatorMixin::grounding(const GroundingMap &var_soln,
                            const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
@@ -70,7 +70,7 @@ bool Implicator::grounding(const GroundingMap &var_soln,
 	return (_result_set.size() >= max_results);
 }
 
-void Implicator::insert_result(ValuePtr v)
+void ImplicatorMixin::insert_result(ValuePtr v)
 {
 	if (nullptr == v) return;
 	if (_result_set.end() != _result_set.find(v)) return;
@@ -86,7 +86,7 @@ void Implicator::insert_result(ValuePtr v)
 	_result_queue->push(std::move(v));
 }
 
-bool Implicator::start_search(void)
+bool ImplicatorMixin::start_search(void)
 {
 	// *Every* search gets a brand new, fresh queue!
 	// This allows users to hang on to the old queue, holding
@@ -95,7 +95,7 @@ bool Implicator::start_search(void)
 	return false;
 }
 
-bool Implicator::search_finished(bool done)
+bool ImplicatorMixin::search_finished(bool done)
 {
 	_result_queue->close();
 	return done;

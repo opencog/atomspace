@@ -1,7 +1,7 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
-	Implicator.cc
+	ImplicatorMixin.cc
 	InitiateSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
@@ -28,7 +28,7 @@ INSTALL (TARGETS query-engine
 INSTALL (FILES
 	DefaultImplicator.h
 	TermMatchMixin.h
-	Implicator.h
+	ImplicatorMixin.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h

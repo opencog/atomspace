@@ -25,7 +25,7 @@
 #define _OPENCOG_DEFAULT_IMPLICATOR_H
 
 #include "TermMatchMixin.h"
-#include "Implicator.h"
+#include "ImplicatorMixin.h"
 #include "InitiateSearchMixin.h"
 #include "SatisfyMixin.h"
 
@@ -33,14 +33,14 @@
 namespace opencog {
 
 class DefaultImplicator:
-	public Implicator,
+	public ImplicatorMixin,
 	public InitiateSearchMixin,
 	public TermMatchMixin,
 	public SatisfyMixin
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) :
-			Implicator(asp),
+			ImplicatorMixin(asp),
 			InitiateSearchMixin(asp),
 			TermMatchMixin(asp) {}
 
