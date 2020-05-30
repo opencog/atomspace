@@ -23,6 +23,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+
 #include "fast_load.h"
 
 using namespace opencog;
@@ -190,7 +202,7 @@ static Handle recursive_parse(const std::string& s,
         "Got a Value, not supported: " + s);
 }
 
-static Handle parseStream(std::istream& in, AtomSpace& as){
+Handle parseStream(std::istream& in, AtomSpace& as){
     Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
@@ -243,7 +255,7 @@ void opencog::load_file(std::string fname, AtomSpace& as)
 }
 
 //Parse an Atomese string expression and return a Handle to the parsed atom
-Handle opencog::parseExpression(std::string expr, opencog::AtomSpace &as) {
+Handle opencog::parseExpression(const std::string& expr, opencog::AtomSpace &as) {
     std::istringstream sstream(expr);
     return parseStream(sstream, as);
 }

@@ -26,25 +26,13 @@
 #ifndef FAST_LOAD_H
 #define FAST_LOAD_H
 
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <string>
 
 namespace opencog {
     void load_file(std::string fname, opencog::AtomSpace& as);
 
-    opencog::Handle parseExpression(std::string expr, opencog::AtomSpace& as);
+    opencog::Handle parseExpression(const std::string& expr, opencog::AtomSpace& as);
 }
 
 #endif // FAST_LOAD_H

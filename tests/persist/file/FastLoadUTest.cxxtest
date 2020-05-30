@@ -36,4 +36,5 @@ void FastLoadUTest::test_expr_parse()
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);
+
 }
