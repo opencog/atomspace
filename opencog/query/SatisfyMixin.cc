@@ -27,7 +27,7 @@
 
 #include <opencog/query/SatisfyMixin.h>
 #include <opencog/query/PatternMatchEngine.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/TermMatchMixin.h>
 
 using namespace opencog;
 
@@ -368,9 +368,9 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// accept/reject determination.
 
 	const HandleSeq& virts = jit->get_virtual();
-	size_t num_virts = virts.size();
 
 #ifdef QDEBUG
+	size_t num_virts = virts.size();
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
@@ -413,8 +413,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		if (is_pure_optional)
 		{
 			// XXX FIXME terrible hack.
-			DefaultPatternMatchCB* intu =
-				dynamic_cast<DefaultPatternMatchCB*>(this);
+			TermMatchMixin* intu =
+				dynamic_cast<TermMatchMixin*>(this);
 			if (intu->optionals_present()) return false;
 		}
 		else

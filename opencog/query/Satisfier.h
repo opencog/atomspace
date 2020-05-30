@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/InitiateSearchMixin.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/TermMatchMixin.h>
 #include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
@@ -49,13 +49,13 @@ namespace opencog {
 
 class Satisfier :
 	public virtual InitiateSearchMixin,
-	public virtual DefaultPatternMatchCB,
+	public virtual TermMatchMixin,
 	public virtual SatisfyMixin
 {
 	public:
 		Satisfier(AtomSpace* as) :
 			InitiateSearchMixin(as),
-			DefaultPatternMatchCB(as),
+			TermMatchMixin(as),
 			_result(TruthValue::FALSE_TV()) {}
 
 		DECLARE_PE_MUTEX;
@@ -68,7 +68,7 @@ class Satisfier :
 		{
 			_varseq = vars.varseq;
 			InitiateSearchMixin::set_pattern(vars, pat);
-			DefaultPatternMatchCB::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 		// Return true if a satisfactory grounding has been
@@ -97,7 +97,7 @@ class Satisfier :
 
 class SatisfyingSet :
 	public InitiateSearchMixin,
-	public DefaultPatternMatchCB,
+	public TermMatchMixin,
 	public SatisfyMixin
 {
 	protected:
@@ -109,7 +109,7 @@ class SatisfyingSet :
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			InitiateSearchMixin(as), DefaultPatternMatchCB(as),
+			InitiateSearchMixin(as), TermMatchMixin(as),
 			_as(as), max_results(SIZE_MAX) {}
 
 		size_t max_results;
@@ -119,7 +119,7 @@ class SatisfyingSet :
 		{
 			_varseq = vars.varseq;
 			InitiateSearchMixin::set_pattern(vars, pat);
-			DefaultPatternMatchCB::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 		// Return true if a satisfactory grounding has been

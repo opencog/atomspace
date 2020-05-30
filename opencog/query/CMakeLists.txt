@@ -1,13 +1,13 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
-	DefaultPatternMatchCB.cc
 	Implicator.cc
 	InitiateSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
 	Satisfier.cc
 	SatisfyMixin.cc
+	TermMatchMixin.cc
 )
 
 # Optionally enable debug logging for the pattern matcher.
@@ -27,7 +27,7 @@ INSTALL (TARGETS query-engine
 
 INSTALL (FILES
 	DefaultImplicator.h
-	DefaultPatternMatchCB.h
+	TermMatchMixin.h
 	Implicator.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h

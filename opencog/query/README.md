@@ -450,8 +450,8 @@ the [README-Algorithm](README-Algorithm.md) file.
    callbacks that can accept or reject a Node or Link match, a callback
    that is called before a Link match is even started, a callback
    to accept or reject a single grounded clause, etc. See the file
-   `PatternMatchCallback.h` for details. The `DefaultPatternMatchCB`
-   provides a very reasonable set of default callbacks that work
+   `PatternMatchCallback.h` for details. The various `Mixin` classes
+   provide a very reasonable set of default callbacks that work
    in "the expected way"; there are a handful of other special-purpose
    callbacks to solve various problems.
 

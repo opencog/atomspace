@@ -178,8 +178,8 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	// Kripke frame: it holds everything we know "right now". The
 	// AbsentLink is a check for what we don't know, right now.
 	const Pattern& pat = this->get_pattern();
-	DefaultPatternMatchCB* intu =
-		dynamic_cast<DefaultPatternMatchCB*>(&impl);
+	TermMatchMixin* intu =
+		dynamic_cast<TermMatchMixin*>(&impl);
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{

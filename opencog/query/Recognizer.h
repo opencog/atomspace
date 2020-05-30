@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_RECOGNIZER_H
 #define _OPENCOG_RECOGNIZER_H
 
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/TermMatchMixin.h>
 #include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
@@ -46,8 +46,8 @@ namespace opencog {
  * `I * you` and `I love *`.
  */
 class Recognizer :
-   public virtual DefaultPatternMatchCB,
-	public virtual SatisfyMixin
+	public TermMatchMixin,
+	public SatisfyMixin
 {
 	private:
 		bool match = false;
@@ -66,7 +66,7 @@ class Recognizer :
 		HandleSet _rules;
 
 		Recognizer(AtomSpace* as) :
-		    DefaultPatternMatchCB(as),
+		    TermMatchMixin(as),
 		    _pattern(nullptr),
 		    _cnt(0)
 		{}
@@ -75,7 +75,7 @@ class Recognizer :
 		                         const Pattern& pat)
 		{
 			_pattern = &pat;
-			DefaultPatternMatchCB::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 		virtual bool perform_search(PatternMatchCallback&);

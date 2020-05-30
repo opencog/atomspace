@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_DEFAULT_IMPLICATOR_H
 #define _OPENCOG_DEFAULT_IMPLICATOR_H
 
-#include "DefaultPatternMatchCB.h"
+#include "TermMatchMixin.h"
 #include "Implicator.h"
 #include "InitiateSearchMixin.h"
 #include "SatisfyMixin.h"
@@ -32,27 +32,23 @@
 
 namespace opencog {
 
-// Flirting with diamond-pattern inheritance. We need to do this
-// because we want different helper classes (aka "mixin classes")
-// to handle different parts of the grounding process, and virtual
-// bases classes just minimizes the total boilerplate code needed.
 class DefaultImplicator:
 	public Implicator,
 	public InitiateSearchMixin,
-	public DefaultPatternMatchCB,
+	public TermMatchMixin,
 	public SatisfyMixin
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) :
 			Implicator(asp),
 			InitiateSearchMixin(asp),
-			DefaultPatternMatchCB(asp) {}
+			TermMatchMixin(asp) {}
 
 			virtual void set_pattern(const Variables& vars,
 			                         const Pattern& pat)
 			{
 				InitiateSearchMixin::set_pattern(vars, pat);
-				DefaultPatternMatchCB::set_pattern(vars, pat);
+				TermMatchMixin::set_pattern(vars, pat);
 			}
 };
 

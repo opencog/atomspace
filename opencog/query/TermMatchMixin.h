@@ -1,5 +1,5 @@
 /*
- * DefaultPatternMatchCB.h
+ * TermMatchMixin.h
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -51,11 +51,11 @@ namespace opencog {
  * conclusion of the search.  The default implicator performs
  * conversion; see the notes there for details.
  */
-class DefaultPatternMatchCB : public virtual PatternMatchCallback
+class TermMatchMixin : public virtual PatternMatchCallback
 {
 	public:
-		DefaultPatternMatchCB(AtomSpace*);
-		~DefaultPatternMatchCB();
+		TermMatchMixin(AtomSpace*);
+		~TermMatchMixin();
 		virtual void set_pattern(const Variables&, const Pattern&);
 
 		virtual bool node_match(const Handle&, const Handle&);
