@@ -87,8 +87,8 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an outgoing set size of at least two, got %d", sz);
 
-	// If the outgoing set size is two, then there are no variable
-	// declarations; extract all free variables.
+	// If the outgoing set size is two, then there are no
+	// variable declarations; extract all free variables.
 	if (2 == sz)
 	{
 		_body = oset[0];
@@ -97,15 +97,28 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
-	_vardecl = oset[0];
-	_body = oset[1];
-	for (size_t i=2; i < oset.size(); i++)
-		_implicand.push_back(oset[i]);
+	// Old-style declarations had variables in the first
+	// slot. If they are there, then respect that.
+	// Otherwise, the first slot holds the body.
+	size_t boff = 0;
+	Type vt = oset[0]->get_type();
+	if (VARIABLE_LIST == vt or
+	    TYPED_VARIABLE_LINK == vt or
+	    VARIABLE_NODE == vt or
+	    GLOB_NODE == vt)
+	{
+		_vardecl = oset[0];
+		init_scoped_variables(_vardecl);
+		boff = 1;
+	}
+	_body = oset[boff];
 
-	// Initialize _variables with the scoped variables
-	init_scoped_variables(_vardecl);
+	// Hunt for variables only if they were  not declared.
+	// Mixing both styles together breaks unit tests.
+	if (0 == boff) _variables.find_variables(_body);
+
+	for (size_t i=boff+1; i < oset.size(); i++)
+		_implicand.push_back(oset[i]);
 }
 
 /* ================================================================= */
