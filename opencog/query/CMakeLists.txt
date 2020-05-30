@@ -32,6 +32,7 @@ INSTALL (FILES
 	PatternMatchEngine.h
 	RewriteMixin.h
 	Satisfier.h
+	SatisfyMixin.h
 	TermMatchMixin.h
 	DESTINATION "include/opencog/query"
 )
