@@ -1,5 +1,5 @@
 /*
- * ImplicatorMixin.h
+ * RewriteMixin.h
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_IMPLICATOR_MIXIN_H
-#define _OPENCOG_IMPLICATOR_MIXIN_H
+#ifndef _OPENCOG_REWRITE_MIXIN_H
+#define _OPENCOG_REWRITE_MIXIN_H
 
 #include <vector>
 
@@ -36,7 +36,7 @@
 namespace opencog {
 
 /**
- * class ImplicatorMixin -- pattern matching callback for grounding implicands.
+ * class RewriteMixin -- pattern matching callback for grounding implicands.
  *
  * This class is meant to be used with the pattern matcher. When the
  * pattern matcher calls the callback, it will do so with a particular
@@ -52,7 +52,7 @@ namespace opencog {
  * Note that the callback may be called many times reporting the same
  * results. In that case the 'result_set' will contain unique solutions.
  */
-class ImplicatorMixin :
+class RewriteMixin :
 	public virtual PatternMatchCallback
 {
 	protected:
@@ -64,7 +64,7 @@ class ImplicatorMixin :
 		void insert_result(ValuePtr);
 
 	public:
-		ImplicatorMixin(AtomSpace*);
+		RewriteMixin(AtomSpace*);
 		Instantiator inst;
 		HandleSeq implicand;
 		size_t max_results;
@@ -81,4 +81,4 @@ class ImplicatorMixin :
 
 }; // namespace opencog
 
-#endif // _OPENCOG_IMPLICATOR_MIXIN_H
+#endif // _OPENCOG_REWRITE_MIXIN_H

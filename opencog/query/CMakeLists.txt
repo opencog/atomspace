@@ -1,10 +1,10 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
-	ImplicatorMixin.cc
 	InitiateSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
+	RewriteMixin.cc
 	Satisfier.cc
 	SatisfyMixin.cc
 	TermMatchMixin.cc
@@ -28,10 +28,10 @@ INSTALL (TARGETS query-engine
 INSTALL (FILES
 	DefaultImplicator.h
 	TermMatchMixin.h
-	ImplicatorMixin.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
+	RewriteMixin.h
 	Satisfier.h
 	DESTINATION "include/opencog/query"
 )
