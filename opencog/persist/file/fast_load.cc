@@ -243,7 +243,7 @@ Handle parseStream(std::istream& in, AtomSpace& as){
 }
 
 /// load_file -- load the given file into the given AtomSpace.
-void opencog::load_file(std::string fname, AtomSpace& as)
+void opencog::load_file(const std::string& fname, AtomSpace& as)
 {
     std::ifstream f(fname);
     if (not f.is_open())

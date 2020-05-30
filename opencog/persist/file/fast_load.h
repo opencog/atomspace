@@ -30,7 +30,7 @@
 #include <string>
 
 namespace opencog {
-    void load_file(std::string fname, opencog::AtomSpace& as);
+    void load_file(const std::string& fname, opencog::AtomSpace& as);
 
     opencog::Handle parseExpression(const std::string& expr, opencog::AtomSpace& as);
 }
