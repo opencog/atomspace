@@ -26,12 +26,12 @@ INSTALL (TARGETS query-engine
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	DefaultImplicator.h
-	TermMatchMixin.h
+	Implicator.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	RewriteMixin.h
 	Satisfier.h
+	TermMatchMixin.h
 	DESTINATION "include/opencog/query"
 )
