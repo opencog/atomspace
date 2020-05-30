@@ -25,7 +25,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/query/Implicator.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -138,9 +138,6 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
-	DefaultImplicator impl(as);
-	impl.implicand = this->get_implicand();
-
 	/*
 	 * The `do_conn_check` flag stands for "do connectivity check"; if the
 	 * flag is set, and the pattern is disconnected, then an error will be
@@ -156,6 +153,8 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
 
+	Implicator impl(as);
+	impl.implicand = this->get_implicand();
 	impl.satisfy(PatternLinkCast(get_handle()));
 
 	// If we got a non-empty answer, just return it.

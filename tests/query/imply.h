@@ -3,7 +3,7 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/query/Implicator.h>
 
 using namespace opencog;
 
@@ -28,7 +28,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	BindLinkPtr bl(createBindLink(std::move(oset)));
 
 	// Now perform the search.
-	DefaultImplicator impl(as);
+	Implicator impl(as);
 	impl.implicand.push_back(himplicand);
 
 	impl.satisfy(bl);

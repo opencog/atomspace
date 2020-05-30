@@ -1,5 +1,5 @@
 /*
- * DefaultImplicator.h
+ * Implicator.h
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
  *
@@ -21,27 +21,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DEFAULT_IMPLICATOR_H
-#define _OPENCOG_DEFAULT_IMPLICATOR_H
+#ifndef _OPENCOG_IMPLICATOR_H
+#define _OPENCOG_IMPLICATOR_H
 
-#include "TermMatchMixin.h"
-#include "RewriteMixin.h"
 #include "InitiateSearchMixin.h"
+#include "RewriteMixin.h"
 #include "SatisfyMixin.h"
-
+#include "TermMatchMixin.h"
 
 namespace opencog {
 
-class DefaultImplicator:
-	public RewriteMixin,
+class Implicator:
 	public InitiateSearchMixin,
+	public RewriteMixin,
 	public TermMatchMixin,
 	public SatisfyMixin
 {
 	public:
-		DefaultImplicator(AtomSpace* asp) :
-			RewriteMixin(asp),
+		Implicator(AtomSpace* asp) :
 			InitiateSearchMixin(asp),
+			RewriteMixin(asp),
 			TermMatchMixin(asp) {}
 
 			virtual void set_pattern(const Variables& vars,
@@ -54,4 +53,4 @@ class DefaultImplicator:
 
 }; // namespace opencog
 
-#endif // _OPENCOG_DEFAULT_IMPLICATOR_H
+#endif // _OPENCOG_IMPLICATOR_H
