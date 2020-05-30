@@ -1,5 +1,5 @@
 /*
- * Implicator.h
+ * SatisfyMixin.h
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
  *
@@ -21,36 +21,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_IMPLICATOR_H
-#define _OPENCOG_IMPLICATOR_H
+#ifndef _OPENCOG_SATISFY_MIXIN_H
+#define _OPENCOG_SATISFY_MIXIN_H
 
-#include "InitiateSearchMixin.h"
-#include "RewriteMixin.h"
-#include "SatisfyMixin.h"
-#include "TermMatchMixin.h"
+#include "PatternMatchCallback.h"
 
 namespace opencog {
 
-class Implicator:
-	public InitiateSearchMixin,
-	public RewriteMixin,
-	public TermMatchMixin,
-	public SatisfyMixin
+class SatisfyMixin:
+	public virtual PatternMatchCallback
 {
-	public:
-		Implicator(AtomSpace* asp) :
-			InitiateSearchMixin(asp),
-			RewriteMixin(asp),
-			TermMatchMixin(asp) {}
+	bool recursive_virtual(const HandleSeq& virtuals,
+	                       const HandleSeq& optionals,
+	                       const GroundingMap& var_gnds,
+	                       const GroundingMap& term_gnds,
+	                       // copies, NOT references!
+	                       GroundingMapSeqSeq comp_var_gnds,
+	                       GroundingMapSeqSeq comp_term_gnds);
 
-			virtual void set_pattern(const Variables& vars,
-			                         const Pattern& pat)
-			{
-				InitiateSearchMixin::set_pattern(vars, pat);
-				TermMatchMixin::set_pattern(vars, pat);
-			}
+	public:
+		virtual bool satisfy(const PatternLinkPtr&);
 };
 
 }; // namespace opencog
 
-#endif // _OPENCOG_IMPLICATOR_H
+#endif // _OPENCOG_SATISFY_MIXIN_H

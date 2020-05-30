@@ -1,5 +1,5 @@
 /*
- * InitiateSearchCB.cc
+ * InitiateSearchMixin.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -29,7 +29,7 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/FindUtils.h>
 
-#include "InitiateSearchCB.h"
+#include "InitiateSearchMixin.h"
 #include "PatternMatchEngine.h"
 
 #ifdef USE_THREADED_PATTERN_ENGINE
@@ -49,7 +49,7 @@ using namespace opencog;
 
 /* ======================================================== */
 
-InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
+InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
 	_variables = nullptr;
@@ -65,7 +65,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_as = as;
 }
 
-void InitiateSearchCB::set_pattern(const Variables& vars,
+void InitiateSearchMixin::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
 	_variables = &vars;
@@ -123,7 +123,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 //
 
 Handle
-InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
+InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
                                      Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
@@ -144,7 +144,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 }
 
 Handle
-InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
+InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
                                          Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
@@ -223,7 +223,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
  * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
  */
-Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
+Handle InitiateSearchMixin::find_thinnest(const HandleSeq& clauses,
                                        const HandleSet& evl,
                                        Handle& starter_term,
                                        Handle& bestclause)
@@ -289,7 +289,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * or if all clauses consist only of VariableNodes or GlobNodes, so
  * that there's nowhere to start the search.
  */
-bool InitiateSearchCB::setup_neighbor_search(void)
+bool InitiateSearchMixin::setup_neighbor_search(void)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
@@ -357,7 +357,7 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 
 /* ======================================================== */
 
-bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
+bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
@@ -471,8 +471,16 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
+bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 {
+	// Start with a clean slate. This might be called multiple
+	// times, for groundings of different components.
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	_curr_clause = Handle::UNDEFINED;
+	_search_set.clear();
+	_choices.clear();
+
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
@@ -521,7 +529,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
  * Find the rarest link type contained in the clause, or one
  * of its subclauses.
  */
-void InitiateSearchCB::find_rarest(const Handle& clause,
+void InitiateSearchMixin::find_rarest(const Handle& clause,
                                    Handle& rarest,
                                    size_t& count,
                                    Quotation quotation)
@@ -633,7 +641,7 @@ static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
  *
  * This is heavily used by the JoinLink mechanism.
  */
-bool InitiateSearchCB::setup_deep_type_search()
+bool InitiateSearchMixin::setup_deep_type_search()
 {
 	if (_variables->_deep_typemap.size() == 0)
 		return false;
@@ -720,7 +728,7 @@ bool InitiateSearchCB::setup_deep_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchCB::setup_link_type_search()
+bool InitiateSearchMixin::setup_link_type_search()
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -781,7 +789,7 @@ bool InitiateSearchCB::setup_link_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchCB::setup_variable_search(void)
+bool InitiateSearchMixin::setup_variable_search(void)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -943,7 +951,7 @@ bool InitiateSearchCB::setup_variable_search(void)
  * inefficient to use the pattern matcher for this, so if you want it
  * to run fast, re-work the below to not use the PME.
  */
-bool InitiateSearchCB::setup_no_search(void)
+bool InitiateSearchMixin::setup_no_search(void)
 {
 	return (0 == _variables->varset.size());
 }
@@ -956,7 +964,7 @@ bool InitiateSearchCB::setup_no_search(void)
 /// This assumes that a list of search starting points have been
 /// set up in the `_search_set`, as well as an approprite root
 /// clause and starting term.
-bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
+bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	// This is the main entry point into the CPU-cycle sucking part of
@@ -1068,7 +1076,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 
 /* ======================================================== */
 
-std::string InitiateSearchCB::to_string(const std::string& indent) const
+std::string InitiateSearchMixin::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	if (_variables)
@@ -1107,7 +1115,8 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-std::string oc_to_string(const InitiateSearchCB& iscb, const std::string& indent)
+std::string oc_to_string(const InitiateSearchMixin& iscb,
+                         const std::string& indent)
 {
 	return iscb.to_string(indent);
 }

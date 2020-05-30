@@ -13,7 +13,7 @@ unpack these links every time a pattern search is performed. It also
 verifies that the syntax is correct; that the links are well-formed.
 
 The SatisfactionLink and BindLink implicitly assume (have to assume)
-that they will run with the DefaultPatternMatchCB, or variants thereof.
+that they will run with the TermMatchMixin, or variants thereof.
 However, the current implementation does allow them to actually run
 with other callbacks as well, so weird stuff may happen due to this
 implicit assumption.

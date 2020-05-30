@@ -1,5 +1,5 @@
 /*
- * InitiateSearchCB.h
+ * InitiateSearchMixin.h
  *
  * Copyright (C) 2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -42,10 +42,10 @@ class AtomSpace;
  *
  * The *only* thing it provides is search initiation.
  */
-class InitiateSearchCB : public virtual PatternMatchCallback
+class InitiateSearchMixin : public virtual PatternMatchCallback
 {
 public:
-	InitiateSearchCB(AtomSpace*);
+	InitiateSearchMixin(AtomSpace*);
 
 	/**
 	 * Called to perform the actual search. This makes some default
@@ -101,7 +101,7 @@ protected:
 
 // Primarily for gdb debugging, see
 // https://wiki.opencog.org/w/Development_standards#Pretty_Print_OpenCog_Objects
-std::string oc_to_string(const InitiateSearchCB& iscb,
+std::string oc_to_string(const InitiateSearchMixin& iscb,
                          const std::string& indent=empty_string);
 
 } // namespace opencog

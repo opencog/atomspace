@@ -1,5 +1,5 @@
 /*
- * PatternLinkRuntime.cc
+ * SatisfyMixin.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -23,13 +23,11 @@
 
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/pattern/BindLink.h>
-
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/SatisfyMixin.h>
 #include <opencog/query/PatternMatchEngine.h>
+#include <opencog/query/TermMatchMixin.h>
 
 using namespace opencog;
 
@@ -39,7 +37,7 @@ using namespace opencog;
 /// A pass-through class, which wraps a regular callback, but captures
 /// all of the different possible groundings that result.  This class is
 /// used to piece together graphs out of multiple components.
-class PMCGroundings : public PatternMatchCallback
+class PMCGroundings : public SatisfyMixin
 {
 	private:
 		PatternMatchCallback& _cb;
@@ -152,7 +150,7 @@ class PMCGroundings : public PatternMatchCallback
  *
  * Return false if no solution is found, true otherwise.
  */
-static bool recursive_virtual(PatternMatchCallback& cb,
+bool SatisfyMixin::recursive_virtual(
             const HandleSeq& virtuals,
             const HandleSeq& optionals,
             const GroundingMap& var_gnds,
@@ -204,7 +202,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 			// in the Arg atoms. So, we ground the args, and pass that
 			// to the callback.
 
-			bool match = cb.evaluate_sentence(virt, var_gnds);
+			bool match = evaluate_sentence(virt, var_gnds);
 
 			if (not match) return false;
 		}
@@ -212,13 +210,13 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		Handle empty;
 		for (const Handle& opt: optionals)
 		{
-			bool match = cb.optional_clause_match(opt, empty, var_gnds);
+			bool match = optional_clause_match(opt, empty, var_gnds);
 			if (not match) return false;
 		}
 
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
-		return cb.grounding(var_gnds, term_gnds);
+		return grounding(var_gnds, term_gnds);
 	}
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
@@ -252,7 +250,7 @@ static bool recursive_virtual(PatternMatchCallback& cb,
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(cb, virtuals, optionals, rvg, rpg,
+		bool accept = recursive_virtual(virtuals, optionals, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -325,30 +323,34 @@ static bool recursive_virtual(PatternMatchCallback& cb,
  * satisfied.  A future extension could allow the use of MatchOrLinks
  * to support multiple exclusive disjuncts. See the README for more info.
  */
-bool PatternLink::satisfy(PatternMatchCallback& pmcb)
+bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 {
-	// Just-in-time (JIT) pattern analysis. We can't do this earlier,
-	// because the required definitions might not be present, or
-	// the definitions may have changed.
-	PatternLinkPtr jit = jit_analyze();
+	PatternLinkPtr jit = form->jit_analyze();
+
+	const Variables& vars = jit->get_variables();
+	const Pattern& pat = jit->get_pattern();
+
+	set_pattern(vars, pat);
+
+	const HandleSeqSeq& comps = jit->get_components();
+	size_t num_comps = comps.size();
 
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (jit->_num_comps <= 1)
+	if (num_comps <= 1)
 	{
-		debug_log();
+		jit->debug_log();
 
-		pmcb.set_pattern(jit->_variables, jit->_pat);
-		bool found = pmcb.start_search();
+		bool found = start_search();
 		if (found) return found;
 
-		found = pmcb.perform_search(pmcb);
+		found = perform_search(*this);
 
 #ifdef QDEBUG
 		logger().fine("================= Done with Search =================");
 #endif
-		found = pmcb.search_finished(found);
+		found = search_finished(found);
 
 		return found;
 	}
@@ -365,17 +367,20 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
+	const HandleSeq& virts = jit->get_virtual();
+
 #ifdef QDEBUG
+	size_t num_virts = virts.size();
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n",
-		              jit->_num_comps, jit->_num_virts);
+		              num_comps, num_virts);
 		logger().fine("Virtuals are:");
 		size_t iii=0;
-		for (const Handle& v : jit->_virtual)
+		for (const Handle& v : virts)
 		{
-			logger().fine("Virtual clause %zu of %zu:", iii, jit->_num_virts);
+			logger().fine("Virtual clause %zu of %zu:", iii, num_virts);
 			logger().fine(v->to_short_string());
 			iii++;
 		}
@@ -384,31 +389,33 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
+	const HandleSeq& comp_patterns = jit->get_component_patterns();
 
-	for (size_t i = 0; i < jit->_num_comps; i++)
+	for (size_t i = 0; i < num_comps; i++)
 	{
 #ifdef QDEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
-		              << " of " << jit->_num_comps << ": ===========\n";
+		              << " of " << num_comps << ": ===========\n";
 #endif
 
-		PatternLinkPtr clp(PatternLinkCast(jit->_component_patterns.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(comp_patterns.at(i)));
 		const Pattern& pat(clp->get_pattern());
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
 
 		// Pass through the callbacks, collect up answers.
-		PMCGroundings gcb(pmcb);
-		clp->satisfy(gcb);
+		PMCGroundings gcb(*this);
+		gcb.satisfy(clp);
 
 		// Special handling for disconnected pure optionals -- Returns false to
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			DefaultPatternMatchCB* dpmcb =
-				dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
-			if (dpmcb->optionals_present()) return false;
+			// XXX FIXME terrible hack.
+			TermMatchMixin* intu =
+				dynamic_cast<TermMatchMixin*>(this);
+			if (intu->optionals_present()) return false;
 		}
 		else
 		{
@@ -428,21 +435,24 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb)
 		}
 	}
 
+	// The pattern was clobbered by the individual component searches.
+	// We need to reset it.
+	set_pattern(vars, pat);
+
 	// And now, try grounding each of the virtual clauses.
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
-	              << " num virts=" << jit->_virtual.size();
+	              << " num virts=" << num_virts;
 #endif
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
-	pmcb.set_pattern(jit->_variables, jit->_pat);
-	bool done = pmcb.start_search();
+	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(pmcb, jit->_virtual, jit->_pat.optionals,
+	done = recursive_virtual(virts, pat.optionals,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
-	done = pmcb.search_finished(done);
+	done = search_finished(done);
 	return done;
 }
 

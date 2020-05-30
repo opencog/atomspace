@@ -28,7 +28,6 @@
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/PrenexLink.h>
 #include <opencog/atoms/pattern/Pattern.h>
-#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
@@ -131,8 +130,6 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-	PatternLinkPtr jit_analyze(void);
-
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -160,17 +157,20 @@ public:
 	PatternLink(const HandleSet&,
 	            const HandleSeq&);
 
+	// Runtime just-in-time analysis
+	PatternLinkPtr jit_analyze(void);
+
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _variables; }
 	const Pattern& get_pattern(void) const { return _pat; }
 
 	const HandleSeqSeq& get_components(void) const { return _components; }
+	const HandleSeq& get_component_patterns(void) const
+		{ return _component_patterns; }
 
 	// Return the list of fixed and virtual clauses we are holding.
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
-
-	bool satisfy(PatternMatchCallback&);
 
 	void debug_log(void) const;
 

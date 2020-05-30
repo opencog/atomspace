@@ -46,6 +46,7 @@ void PatternLink::common_init(void)
 	// skip doing it here.
 	if (0 < _pat.defined_terms.size())
 	{
+		_num_virts = 0;
 		_num_comps = 1;
 		return;
 	}
@@ -64,7 +65,7 @@ void PatternLink::common_init(void)
 	validate_variables(_variables.varset, all_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
-	// we are being run with the DefaultPatternMatchCB, and so we assume
+	// we are being run with the TermMatchMixin, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
 	// XXX FIXME; long-term, this should be replaced by a check to
@@ -380,7 +381,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
 ///
-/// This makes built-in assumptions about using the DefaultPatternMatchCB,
+/// This makes built-in assumptions about using the TermMatchMixin,
 /// which are not going to be true in general. However, the vast
 /// majority of users expect to be able to use the boolean operators
 /// in a naive, classical-logic manner, and so we cater to those users.
@@ -416,7 +417,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
 		// Just like in trace_connectives, assume we are working with
-		// the DefaultPatternMatchCB, which uses these. Some other
+		// the TermMatchMixin, which uses these. Some other
 		// yet-to-be-specified callback may want to use a different
 		// set of connectives...
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
@@ -435,7 +436,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 
 	// Sigh. Handle a top-level OrLink with a single member.
-	// This assumes the DefaultPatternMatchCB, so its broken
+	// This assumes the TermMatchMixin, so its broken
 	// for anyone giving alternative interpretations. Yuck.
 	else if (OR_LINK == t and 1 == hbody->get_arity())
 	{
@@ -451,7 +452,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 
 	// A single top-level clause that is a NotLink.
-	// This assumes the DefaultPatternMatchCB, so its broken
+	// This assumes the TermMatchMixin, so its broken
 	// for anyone giving alternative interpretations. Yuck.
 	else if (NOT_LINK == t)
 	{

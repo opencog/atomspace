@@ -50,7 +50,7 @@ TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 	Satisfier sater(as);
-	satisfy(sater);
+	sater.satisfy(PatternLinkCast(get_handle()));
 
 	// If there is an anchor, then attach results to the anchor.
 	if (_variables._anchor and as)

@@ -247,9 +247,9 @@ void ExecutionOutputUTest::test_varsub(void)
 	BindLinkPtr predicament(BindLinkCast(pred));
 
 	// Now perform the search.
-	DefaultImplicator simpl(&as);
+	Implicator simpl(&as);
 	simpl.implicand = situation->get_implicand();
-	situation->satisfy(simpl);
+	simpl.satisfy(situation);
 
 	// The result_list contains a list of the grounded expressions.
 	simpl.get_result_queue()->open();
@@ -258,9 +258,9 @@ void ExecutionOutputUTest::test_varsub(void)
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
 	// Now perform the search.
-	DefaultImplicator pimpl(&as);
+	Implicator pimpl(&as);
 	pimpl.implicand = predicament->get_implicand();
-	predicament->satisfy(pimpl);
+	pimpl.satisfy(predicament);
 
 	// The result_list contains a list of the grounded expressions.
 	pimpl.get_result_queue()->open();

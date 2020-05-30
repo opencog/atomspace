@@ -52,7 +52,7 @@ QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 
 	SatisfyingSet sater(as);
-	this->satisfy(sater);
+	sater.satisfy(PatternLinkCast(get_handle()));
 
 	return sater.get_result_queue();
 }
