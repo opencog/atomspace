@@ -473,6 +473,14 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
  */
 bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 {
+	// Start with a clean slate. This might be called multiple
+	// times, for groundings of different components.
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	_curr_clause = Handle::UNDEFINED;
+	_search_set.clear();
+	_choices.clear();
+
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
