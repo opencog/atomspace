@@ -466,11 +466,19 @@ static TruthValuePtr bool_to_tv(bool truf)
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-static bool crisp_eval_scratch(AtomSpace* as,
-                               const Handle& evelnk,
-                               AtomSpace* scratch,
-                               bool silent)
+static bool crispy_eval_scratch(AtomSpace* as,
+                                const Handle& evelnk,
+                                AtomSpace* scratch,
+                                bool silent);
+
+static bool crispy_maybe(AtomSpace* as,
+                         const Handle& evelnk,
+                         AtomSpace* scratch,
+                         bool silent,
+                         bool& failed)
 {
+	failed = false;
+
 	Type t = evelnk->get_type();
 
 	// Logical constants
@@ -500,14 +508,14 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	// Crisp-binary-valued Boolean Logical connectives
 	if (NOT_LINK == t)
 	{
-		return not crisp_eval_scratch(as,
+		return not crispy_eval_scratch(as,
 		      evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crisp_eval_scratch(as, h, scratch, silent);
+			bool tv = crispy_eval_scratch(as, h, scratch, silent);
 			if (not tv) return false;
 		}
 		return true;
@@ -516,7 +524,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crisp_eval_scratch(as, h, scratch, silent);
+			bool tv = crispy_eval_scratch(as, h, scratch, silent);
 			if (tv) return true;
 		}
 		return false;
@@ -536,7 +544,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crisp_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
 				if (not tv) return false;
 			}
 		} while (is_trec);
@@ -557,7 +565,7 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crisp_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
 				if (tv) return true;
 			}
 		} while (is_trec);
@@ -635,12 +643,27 @@ static bool crisp_eval_scratch(AtomSpace* as,
 		return false;
 	}
 
+	failed = true;
+	return false;
+}
+
+static bool crispy_eval_scratch(AtomSpace* as,
+                                const Handle& evelnk,
+                                AtomSpace* scratch,
+                                bool silent)
+{
+	bool failed;
+	bool tf = crispy_maybe(as, evelnk, scratch, silent, failed);
+	if (not failed)
+		return tf;
+
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
 
 	return false;
 }
+
 
 static TruthValuePtr reduce_formula(const Handle& pred,
                                     const HandleSeq& args)
@@ -867,7 +890,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 
 /// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a fuzzy or probabilistic truth value. See description
-/// for `crisp_eval_scratch()`, up above, for a general explanation.
+/// for `crispy_eval_scratch()`, up above, for a general explanation.
 /// This function handles miscellaneous Atoms that don't have a natural
 /// interpretation in terms of crisp truth values.
 ///
@@ -884,11 +907,13 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 /// or `lib:` for haskell.  This method will then invoke `func_name`
 /// on the provided ListLink of arguments.
 ///
-TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                                              const Handle& evelnk,
-                                              AtomSpace* scratch,
-                                              bool silent)
+static TruthValuePtr tv_eval_scratch(AtomSpace* as,
+                                     const Handle& evelnk,
+                                     AtomSpace* scratch,
+                                     bool silent,
+                                     bool& try_crispy)
 {
+	try_crispy = false;
 	Type t = evelnk->get_type();
 	if (EVALUATION_LINK == t)
 	{
@@ -931,7 +956,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
+		return EvaluationLink::do_eval_scratch(as,
+		                     evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -959,11 +985,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
-		return do_eval_scratch(as, red, scratch, silent);
+		return EvaluationLink::do_eval_scratch(as, red, scratch, silent);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_eval_scratch(as, DefineLink::get_definition(evelnk),
+		return EvaluationLink::do_eval_scratch(as,
+		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
 	else if (// Links that evaluate to themselves
@@ -1011,7 +1038,22 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return TruthValueCast(pap);
 	}
 
-	return bool_to_tv(crisp_eval_scratch(as, evelnk, scratch, silent));
+	try_crispy = true;
+	return nullptr;
+}
+
+TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
+                                              const Handle& evelnk,
+                                              AtomSpace* scratch,
+                                              bool silent)
+{
+	// Try the probabilistic ones first, then the crispy ones.
+	bool fail;
+	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch,
+	                                    silent, fail);
+	if (not fail) return tvp;
+
+	return bool_to_tv(crispy_eval_scratch(as, evelnk, scratch, silent));
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
@@ -1019,6 +1061,34 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           bool silent)
 {
 	return do_eval_scratch(as, evelnk, as, silent);
+}
+
+bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
+                                        const Handle& evelnk,
+                                        AtomSpace* scratch,
+                                        bool silent)
+{
+	// Try the crispy ones first, then the probabilistic ones.
+	bool fuzzy;
+	bool tf = crispy_maybe(as, evelnk, scratch, silent, fuzzy);
+	if (not fuzzy) return tf;
+
+	bool fail;
+	const TruthValuePtr& tvp = tv_eval_scratch(as, evelnk, scratch,
+	                                           silent, fail);
+	if (not fail)
+		return tvp->get_mean() >= 0.5;
+
+	throwSyntaxException(silent,
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		evelnk->to_string().c_str());
+}
+
+bool EvaluationLink::crisp_evaluate(AtomSpace* as,
+                                    const Handle& evelnk,
+                                    bool silent)
+{
+	return crisp_eval_scratch(as, evelnk, as, silent);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
