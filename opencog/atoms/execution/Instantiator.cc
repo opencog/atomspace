@@ -669,10 +669,17 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
-	if (not _as->in_environ(expr))
+	// Make sure that the atom is in an atomspace that is compatible
+	// with the execution environment. When it's not, then bizzare
+	// results happen (e.g. with searches, because the search cannot
+	// find atoms in the correct atomspace.) We do allow, for now,
+	// atoms with null atomspaces; if/when these need to be inserted
+	// somewhere, that will be done when needed, into the right place.
+	AtomSpace* exas = expr->getAtomSpace();
+	if (nullptr != exas and not _as->in_environ(expr))
 		throw RuntimeException(TRACE_INFO,
 			"Can't execute: current AtomSpace is %lu but atom is in AtomSpace %lu",
-			_as->get_uuid(), expr->getAtomSpace()->get_uuid());
+			_as->get_uuid(), exas->get_uuid());
 
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet, but the FunctionLinks all do seem to work.
