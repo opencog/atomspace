@@ -103,6 +103,7 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 	size_t boff = 0;
 	Type vt = oset[0]->get_type();
 	if (VARIABLE_LIST == vt or
+	    VARIABLE_SET == vt or
 	    TYPED_VARIABLE_LINK == vt or
 	    VARIABLE_NODE == vt or
 	    GLOB_NODE == vt)
