@@ -1665,28 +1665,33 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 /// This attempts to obtain a grounding for an embedded PresentLink
 /// That is, for a PresentLink that is not at the top-most level.
 /// At this time, we expect to encounter these only inside of
-/// ChoiceLinks and inside of evaluatable terms. Unlike the other
-/// `explore_*_branch` routines, this one never walks further up,
-/// it never calls `do_term_up()`; instead, it tries to verify that
-/// each of the terms of the PresentLink can be grounded, and if
-/// there is more than one way to do this, it tries out each of them.
+/// ChoiceLinks and inside of evaluatable terms.
+/// This tries to verify that each of the terms of the PresentLink
+/// can be grounded. The branch exploration consists of examining
+/// each differrent way in which tis can be accomplished.
 bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
                                                   const Handle& hg,
                                                   const Handle& clause_root)
 {
+	const Handle& hp = ptm->getHandle();
+
+	// reject self-grounds
+	if (hp == hg) return false;
+
 	DO_LOG({
-		const Handle& hp = ptm->getHandle();
 		logger().info() << "explore_present: "
 		                << hp->to_string() << std::endl
 		                << "to: " << hg->to_string() << std::endl;})
 
 	bool joins = tree_compare(ptm, hg, CALL_PRESENT);
+	DO_LOG({ logger().info() << "explore_present result=" << joins; })
 	if (not joins) return false;
 
 logger().info() << "duuude its a good compare!\n";
 	const PatternTermPtr& parent = ptm->getParent();
-	const PatternTermSeq& osp = ptm->getOutgoingSet();
-	if (1 == osp.size()) return true;
+	const PatternTermSeq& osp = parent->getOutgoingSet();
+	if (1 == osp.size())
+		return do_term_up(parent, hg, clause_root);
 
 logger().info() << "Not yet!\n";
 	return false;
@@ -1799,8 +1804,8 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// higher.
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
 	              << " " << ptm->getHandle()->to_string()
-	              << " of clause = " << clause_root->to_string()
-	              << " has ground, move upwards";})
+	              << "\nof clause = " << clause_root->to_string()
+	              << "\nhas ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
