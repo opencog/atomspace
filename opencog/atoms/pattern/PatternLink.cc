@@ -861,6 +861,11 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 /// correctly would require iterating again, and examining the
 /// contents of the left and right side of the EqualLink... ugh.
 ///
+/// XXX The situation here is also very dangerous: without any
+/// type onstraints, we risk searching atoms created in the scratch
+/// atomspace, resulting in infinite recursion and a blown stack.
+/// Not clear how to avoid that...
+///
 bool PatternLink::add_dummies()
 {
 	if (0 < _pat.quoted_clauses.size()) return false;
@@ -985,12 +990,24 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
-	// Is every variable in some component? If not, then it's an
-	// internal consistency error. Each one should be somewhere.
+	// Is every variable in some component? The user can give
+	// us mal-formed things like this:
+	//    (Bind (Evaluation (GroundedPredicate "scm: foo")
+	//               (List (Variable "X") (Variable "Y")))
+	//          (Concept "OK"))
+	// and we could add `(Variable "X") (Variable "Y")` with the
+	// `add_dummies()` method above. But if we did, it would be
+	// an info loop that blows out the stack, because X and Y
+	// are not constrained, and match everything, including the
+	// temorary terms created during search... so we do NOT
+	// `add_dummies()` this case. See issue #1420 for more.
 	for (const Handle& v : vars)
 	{
 		const auto& it = vunion.find(v);
-		OC_ASSERT(vunion.end() != it, "Internal Error.")
+		if (vunion.end() == it)
+			throw SyntaxException(TRACE_INFO,
+				"Poorly-formed query; a variable declaration for %s is needed!",
+				v->to_short_string().c_str());
 	}
 }
 
@@ -1071,7 +1088,7 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 		for (Handle h : comp) ss << std::endl << h->to_string();
 		cnt++;
 	}
-	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+	throw InvalidParamException(TRACE_INFO, "%s", ss.str().c_str());
 }
 
 /* ================================================================= */
