@@ -669,7 +669,6 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	TruthValuePtr tvp;
 	// The instantiator would have taken care of expanding out
 	// and executing any FunctionLinks and the like.  Just use
 	// the TV value on the resulting atom.
@@ -682,37 +681,38 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	    _nameserver.isA(vty, FUNCTION_LINK))
 	{
 		gvirt = _as->add_atom(gvirt);
-		tvp = gvirt->getTruthValue();
+		TruthValuePtr tvp = gvirt->getTruthValue();
+
+		// Avoid null-pointer dereference if user specified a bogus evaluation.
+		// i.e. an evaluation that failed to return a TV.
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+			        "Expecting a TruthValue for an evaluatable link: %s\n",
+			         gvirt->to_short_string().c_str());
+
+		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
+		                      << tvp->to_string() << std::endl;})
+
+		return crisp_truth_from_tv(tvp);
 	}
-	else
+
+	_temp_aspace->clear();
+	try
 	{
-		_temp_aspace->clear();
-		try
-		{
-			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
-		}
-		catch (const SilentException& ex)
-		{
-			// The do_evaluate()/do_eval_scratch() above can throw if
-			// it is given ungrounded expressions. It can be given
-			// ungrounded expressions if no grounding was found, and
-			// a final pass, run by the search_finished() callback,
-			// puts us here. So handle this case gracefully.
-			return false;
-		}
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
+		                      << crispy << std::endl;})
+		return crispy;
 	}
-
-	// Avoid null-pointer dereference if user specified a bogus evaluation.
-	// i.e. an evaluation that failed to return a TV.
-	if (nullptr == tvp)
-		throw InvalidParamException(TRACE_INFO,
-	            "Expecting a TruthValue for an evaluatable link: %s\n",
-	            gvirt->to_short_string().c_str());
-
-	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
-	              << tvp->to_string() << std::endl;})
-
-	return crisp_truth_from_tv(tvp);
+	catch (const SilentException& ex)
+	{
+		// The do_evaluate()/do_eval_scratch() above can throw if
+		// it is given ungrounded expressions. It can be given
+		// ungrounded expressions if no grounding was found, and
+		// a final pass, run by the search_finished() callback,
+		// puts us here. So handle this case gracefully.
+		return false;
+	}
 }
 
 /* ======================================================== */
