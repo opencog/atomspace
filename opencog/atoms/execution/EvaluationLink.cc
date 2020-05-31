@@ -1021,4 +1021,21 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	return do_eval_scratch(as, evelnk, as, silent);
 }
 
+bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
+                                        const Handle& evelnk,
+                                        AtomSpace* scratch,
+                                        bool silent)
+{
+	const TruthValuePtr& tvp = do_eval_scratch(as, evelnk, scratch, silent);
+	return tvp->get_mean() >= 0.5;
+}
+
+bool EvaluationLink::crisp_evaluate(AtomSpace* as,
+                                    const Handle& evelnk,
+                                    bool silent)
+{
+	const TruthValuePtr& tvp = do_eval_scratch(as, evelnk, as, silent);
+	return tvp->get_mean() >= 0.5;
+}
+
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
