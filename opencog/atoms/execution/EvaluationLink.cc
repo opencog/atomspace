@@ -469,8 +469,16 @@ static TruthValuePtr bool_to_tv(bool truf)
 static bool crispy_eval_scratch(AtomSpace* as,
                                 const Handle& evelnk,
                                 AtomSpace* scratch,
-                                bool silent)
+                                bool silent);
+
+static bool crispy_maybe(AtomSpace* as,
+                         const Handle& evelnk,
+                         AtomSpace* scratch,
+                         bool silent,
+                         bool& failed)
 {
+	failed = false;
+
 	Type t = evelnk->get_type();
 
 	// Logical constants
@@ -635,12 +643,27 @@ static bool crispy_eval_scratch(AtomSpace* as,
 		return false;
 	}
 
+	failed = true;
+	return false;
+}
+
+static bool crispy_eval_scratch(AtomSpace* as,
+                                const Handle& evelnk,
+                                AtomSpace* scratch,
+                                bool silent)
+{
+	bool failed;
+	bool tf = crispy_maybe(as, evelnk, scratch, silent, failed);
+	if (not failed)
+		return tf;
+
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
 
 	return false;
 }
+
 
 static TruthValuePtr reduce_formula(const Handle& pred,
                                     const HandleSeq& args)
@@ -1024,10 +1047,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               AtomSpace* scratch,
                                               bool silent)
 {
-	bool try_crispy;
+	// Try the probabilistic ones first, then the crispy ones.
+	bool fail;
 	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                    silent, try_crispy);
-	if (not try_crispy) return tvp;
+	                                    silent, fail);
+	if (not fail) return tvp;
 
 	return bool_to_tv(crispy_eval_scratch(as, evelnk, scratch, silent));
 }
@@ -1044,13 +1068,20 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
                                         AtomSpace* scratch,
                                         bool silent)
 {
-	bool try_crispy;
+	// Try the crispy ones first, then the probabilistic ones.
+	bool fuzzy;
+	bool tf = crispy_maybe(as, evelnk, scratch, silent, fuzzy);
+	if (not fuzzy) return tf;
+
+	bool fail;
 	const TruthValuePtr& tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                           silent, try_crispy);
-	if (not try_crispy)
+	                                           silent, fail);
+	if (not fail)
 		return tvp->get_mean() >= 0.5;
 
-	return crispy_eval_scratch(as, evelnk, scratch, silent);
+	throwSyntaxException(silent,
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		evelnk->to_string().c_str());
 }
 
 bool EvaluationLink::crisp_evaluate(AtomSpace* as,
