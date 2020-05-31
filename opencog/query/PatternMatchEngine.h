@@ -290,6 +290,8 @@ private:
 	                                const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
 	                             const Handle&);
+	bool explore_present_branches(const PatternTermPtr&, const Handle&,
+	                              const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,

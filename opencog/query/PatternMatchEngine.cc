@@ -257,9 +257,9 @@ bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	PatternTermSeq osp = ptm->getOutgoingSet();
-	DO_LOG({LAZY_LOG_FINE << "present_comp "; })
+	DO_LOG({LAZY_LOG_FINE << "present_compare"; })
 
-printf("duuude compare %s to %s\n", hp->to_string().c_str(),
+printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
 hg->to_string().c_str());
 	return tree_compare(osp[0], hg, CALL_PRESENT);
 
@@ -1662,6 +1662,36 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+/// This attempts to obtain a grounding for an embedded PresentLink
+/// That is, for a PresentLink that is not at the top-most level.
+/// At this time, we expect to encounter these only inside of
+/// ChoiceLinks and inside of evaluatable terms. Unlike the other
+/// `explore_*_branch` routines, this one never walks further up,
+/// it never calls `do_term_up()`; instead, it tries to verify that
+/// each of the terms of the PresentLink can be grounded, and if
+/// there is more than one way to do this, it tries out each of them.
+bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
+                                                  const Handle& hg,
+                                                  const Handle& clause_root)
+{
+	DO_LOG({
+		const Handle& hp = ptm->getHandle();
+		logger().info() << "explore_present: "
+		                << hp->to_string() << std::endl
+		                << "to: " << hg->to_string() << std::endl;})
+
+	bool joins = tree_compare(ptm, hg, CALL_PRESENT);
+	if (not joins) return false;
+
+logger().info() << "duuude its a good compare!\n";
+	const PatternTermPtr& parent = ptm->getParent();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	if (1 == osp.size()) return true;
+
+logger().info() << "Not yet!\n";
+	return false;
+}
+
 /// Check the proposed grounding hg for pattern term hp.
 ///
 /// As the name implies, this will explore only one single potential
@@ -1833,13 +1863,13 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 
 	PatternTermPtr parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
-
 	const Handle& hi = parent->getHandle();
 	Type hit = hi->get_type();
+
 	if (PRESENT_LINK == hit)
 	{
-printf("not yet\n");
-		return false;
+		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
+		return explore_present_branches(ptm, hg, clause_root);
 	}
 
 	// Do the simple case first, ChoiceLinks are harder.
