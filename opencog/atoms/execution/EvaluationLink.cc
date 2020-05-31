@@ -884,11 +884,13 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 /// or `lib:` for haskell.  This method will then invoke `func_name`
 /// on the provided ListLink of arguments.
 ///
-TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                                              const Handle& evelnk,
-                                              AtomSpace* scratch,
-                                              bool silent)
+static TruthValuePtr tv_eval_scratch(AtomSpace* as,
+                                     const Handle& evelnk,
+                                     AtomSpace* scratch,
+                                     bool silent,
+                                     bool& try_crispy)
 {
+	try_crispy = false;
 	Type t = evelnk->get_type();
 	if (EVALUATION_LINK == t)
 	{
@@ -931,7 +933,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
+		return EvaluationLink::do_eval_scratch(as,
+		                     evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -959,11 +962,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
-		return do_eval_scratch(as, red, scratch, silent);
+		return EvaluationLink::do_eval_scratch(as, red, scratch, silent);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_eval_scratch(as, DefineLink::get_definition(evelnk),
+		return EvaluationLink::do_eval_scratch(as,
+		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
 	else if (// Links that evaluate to themselves
@@ -1011,6 +1015,20 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return TruthValueCast(pap);
 	}
 
+	try_crispy = true;
+	return nullptr;
+}
+
+TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
+                                              const Handle& evelnk,
+                                              AtomSpace* scratch,
+                                              bool silent)
+{
+	bool try_crispy;
+	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch,
+	                                    silent, try_crispy);
+	if (not try_crispy) return tvp;
+
 	return bool_to_tv(crispy_eval_scratch(as, evelnk, scratch, silent));
 }
 
@@ -1026,16 +1044,20 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
                                         AtomSpace* scratch,
                                         bool silent)
 {
-	const TruthValuePtr& tvp = do_eval_scratch(as, evelnk, scratch, silent);
-	return tvp->get_mean() >= 0.5;
+	bool try_crispy;
+	const TruthValuePtr& tvp = tv_eval_scratch(as, evelnk, scratch,
+	                                           silent, try_crispy);
+	if (not try_crispy)
+		return tvp->get_mean() >= 0.5;
+
+	return crispy_eval_scratch(as, evelnk, scratch, silent);
 }
 
 bool EvaluationLink::crisp_evaluate(AtomSpace* as,
                                     const Handle& evelnk,
                                     bool silent)
 {
-	const TruthValuePtr& tvp = do_eval_scratch(as, evelnk, as, silent);
-	return tvp->get_mean() >= 0.5;
+	return crisp_eval_scratch(as, evelnk, as, silent);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
