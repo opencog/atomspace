@@ -320,7 +320,7 @@ bool TermMatchMixin::post_link_match(const Handle& lpat,
 	// We will find ourselves here whenever the link contains a
 	// GroundedPredicateNode. In this case, execute the node, and
 	// declare a match, or no match, depending on the resulting TV.
-	return crisp_truth_from_tv(EvaluationLink::do_evaluate(_as, lgnd));
+	return EvaluationLink::crisp_evaluate(_as, lgnd);
 }
 
 void TermMatchMixin::post_link_mismatch(const Handle& lpat,
@@ -492,12 +492,12 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace->clear();
-		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
 
-		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
-		              << std::endl << tvp->to_string() << std::endl;})
+		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
+		                      << crispy << std::endl;})
 
-		return crisp_truth_from_tv(tvp);
+		return crispy;
 	}
 
 	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
