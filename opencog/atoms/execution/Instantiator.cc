@@ -669,6 +669,11 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
+	if (not _as->in_environ(expr))
+		throw RuntimeException(TRACE_INFO,
+			"Can't execute: current AtomSpace is %lu but atom is in AtomSpace %lu",
+			_as->get_uuid(), expr->getAtomSpace()->get_uuid());
+
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet, but the FunctionLinks all do seem to work.
 	//
