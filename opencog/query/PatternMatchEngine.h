@@ -249,15 +249,17 @@ private:
 		CALL_ORDER,
 		CALL_GLOB,
 		CALL_UNORDER,
+		CALL_PRESENT,
 		CALL_CHOICE,
 		CALL_SOLN
-	} Caller;   // temporary scaffolding !???
+	} Caller;   // debug-print call-tracing.
 
 	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
 
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
 	bool node_compare(const Handle&, const Handle&);
+	bool present_compare(const PatternTermPtr&, const Handle&);
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);

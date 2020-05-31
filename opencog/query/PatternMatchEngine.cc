@@ -242,6 +242,39 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
+/// Compare the contents of a PresentLink in the pattern to the
+/// proposed grounding. The term `ptm` points at the PresentLink.
+///
+/// XXX FIXME: this is currently a weak stop-gap measure to handle
+/// the special case of PresentLink's embedded in ChoiceLinks.
+/// PresentLinks that are NOT in a ChoiceLink are handled by the
+/// do_next_clause() system, which assumes that PresentLinks happen
+/// only as top-level clauses. Someday, someone should merge these
+/// two mechanisms, so that this guy gets the sophistication of
+/// the get_next_untried_clause() mechanism.
+bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
+                                         const Handle& hg)
+{
+	const Handle& hp = ptm->getHandle();
+	PatternTermSeq osp = ptm->getOutgoingSet();
+	DO_LOG({LAZY_LOG_FINE << "present_comp "; })
+
+printf("duuude compare %s to %s\n", hp->to_string().c_str(),
+hg->to_string().c_str());
+	return tree_compare(osp[0], hg, CALL_PRESENT);
+
+/*
+	for (const PatternTermPtr& pto: osp)
+	{
+		bool match = tree_compare(pto, hg, CALL_PRESENT);
+		if (not match) return false;
+	}
+*/
+	return true;
+}
+
+/* ======================================================== */
+
 /// Compare a ChoiceLink in the pattern to the proposed grounding.
 /// The term `ptm` points at the ChoiceLink.
 ///
@@ -277,10 +310,15 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 		solution_push();
 		const PatternTermPtr& hop = osp[icurr];
 
-		DO_LOG({LAZY_LOG_FINE << "tree_comp or_link choice " << icurr
+		DO_LOG({LAZY_LOG_FINE << "tree_comp choice " << icurr
 		              << " of " << iend;})
 
-		bool match = tree_compare(hop, hg, CALL_CHOICE);
+		bool match;
+		if (PRESENT_LINK == hp->get_type())
+			match = present_compare(hop, hg);
+		else
+			match = tree_compare(hop, hg, CALL_CHOICE);
+
 		if (match)
 		{
 			// If we've found a grounding, lets see if the
@@ -1797,39 +1835,41 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 
 	const Handle& hi = parent->getHandle();
+	Type hit = hi->get_type();
+	if (PRESENT_LINK == hit)
+	{
+printf("not yet\n");
+		return false;
+	}
 
 	// Do the simple case first, ChoiceLinks are harder.
-	bool found = false;
-	if (CHOICE_LINK != hi->get_type())
+	if (CHOICE_LINK != hit)
 	{
-		if (explore_up_branches(ptm, hg, clause_root)) found = true;
+		bool found = explore_up_branches(ptm, hg, clause_root);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
+		return found;
 	}
-	else
+
 	if (hi == clause_root)
 	{
 		DO_LOG({logger().fine("Exploring ChoiceLink at root");})
-		if (clause_accept(clause_root, hg)) found = true;
-	}
-	else
-	{
-		// If we are here, we have an embedded ChoiceLink, i.e. a
-		// ChoiceLink that is not at the clause root. It's contained
-		// in some other link, and we have to get that link and
-		// perform comparisons on it. i.e. we have to "hop over"
-		// (hop up) past the ChoiceLink, before resuming the search.
-		// The easiest way to hop is to do it recursively... i.e.
-		// call ourselves again.
-		DO_LOG({logger().fine("Exploring ChoiceLink below root");})
-
-		OC_ASSERT(not have_choice(parent, hg),
-		          "Something is wrong with the ChoiceLink code");
-
-		_need_choice_push = true;
-		if (do_term_up(parent, hg, clause_root)) found = true;
+		return clause_accept(clause_root, hg);
 	}
 
-	return found;
+	// If we are here, we have an embedded ChoiceLink, i.e. a
+	// ChoiceLink that is not at the clause root. It's contained
+	// in some other link, and we have to get that link and
+	// perform comparisons on it. i.e. we have to "hop over"
+	// (hop up) past the ChoiceLink, before resuming the search.
+	// The easiest way to hop is to do it recursively... i.e.
+	// call ourselves again.
+	DO_LOG({logger().fine("Exploring ChoiceLink below root");})
+
+	OC_ASSERT(not have_choice(parent, hg),
+	          "Something is wrong with the ChoiceLink code");
+
+	_need_choice_push = true;
+	return do_term_up(parent, hg, clause_root);
 }
 
 /// This is called when we've navigated to the top of a clause,
