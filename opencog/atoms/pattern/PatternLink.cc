@@ -600,35 +600,17 @@ void PatternLink::get_clause_variables(const HandleSeq& clauses)
 {
 	for (const Handle& hcl : clauses)
 	{
-		HandleSet vset;
-		get_clause_variables_recursive(hcl, vset);
+		HandleSet vset = get_free_variables(hcl);
 
 		// Put them into a sequence; any fixed sequence will do.
 		HandleSeq vseq;
-		for (const Handle& v: vset) vseq.emplace_back(v);
+		for (const Handle& v: vset)
+		{
+			if (_variables.varset.end() != _variables.varset.find(v))
+				vseq.emplace_back(v);
+		}
+
 		_pat.clause_variables.insert({hcl, vseq});
-	}
-}
-
-/// Helper for above.
-void PatternLink::get_clause_variables_recursive(const Handle& h,
-                                                 HandleSet& vset)
-{
-	if (h->is_link())
-	{
-		for (const Handle& ho : h->getOutgoingSet())
-			get_clause_variables_recursive(ho, vset);
-		return;
-	}
-
-	Type t = h->get_type();
-	if (VARIABLE_NODE == t or GLOB_NODE == t)
-	{
-		// _variables hold the unquoted, bound vars. Use that.
-		// XXX FIXME, except that the var might be quoted, in this
-		// particular clause!!
-		if (_variables.varset.end() != _variables.varset.find(h))
-			vset.insert(h);
 	}
 }
 

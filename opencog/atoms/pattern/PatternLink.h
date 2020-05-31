@@ -124,7 +124,6 @@ protected:
 	                              PatternTermPtr&);
 
 	void get_clause_variables(const HandleSeq&);
-	void get_clause_variables_recursive(const Handle&, HandleSet&);
 
 	void init(void);
 	void common_init(void);

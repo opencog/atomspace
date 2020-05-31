@@ -151,10 +151,6 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * speeds up the discovery of the next ungrounded clause: it is
  * trivially just the very next clause in the connected set.  Of
  * course, users will typically never specify clauses in such order.
- *
- * XXX FIXME: It can happen that some clauses have no variables at all
- * in them.  These end up in their own component, which can be
- * extremely confusing.
  */
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
@@ -179,9 +175,14 @@ void get_connected_components(const HandleSet& vars,
 			for (size_t i = 0; i<nc; i++)
 			{
 				HandleSet& cur_vars(component_vars[i]);
-				// If clause cl is connected to this component, then add it
-				// to this component.
-				if (any_unquoted_in_tree(cl, cur_vars))
+				// If clause cl is connected to this component, then
+				// add it to this component. (Its connected if any of
+				// the `cur_vars` appear in the clause). Alternately,
+				// if the clause has NO variables, just jam it into the
+				// first component.
+				if (any_unquoted_in_tree(cl, cur_vars) or
+				    (not contains_atomtype(cl, VARIABLE_NODE) and
+				     not contains_atomtype(cl, GLOB_NODE)))
 				{
 					// Extend the component
 					components[i].emplace_back(cl);
