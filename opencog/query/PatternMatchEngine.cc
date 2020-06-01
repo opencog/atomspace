@@ -1250,7 +1250,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
 			found = explore_glob_branches(ptm, hg, clause);
-		else if(ptm->hasUnorderedLink())
+		else if (ptm->hasUnorderedLink())
 			found = explore_odometer(ptm, hg, clause);
 		else
 			found = explore_type_branches(ptm, hg, clause);
@@ -1662,6 +1662,21 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+/// Quick hack to find a variable in a pattern term. Needed immediately
+/// below. Recursively drill down till we find the desired variable.
+static PatternTermPtr find_variable_term(const PatternTermPtr& term,
+                                         const Handle& var)
+{
+	if (term->getHandle() == var) return term;
+	for (const PatternTermPtr& subterm: term->getOutgoingSet())
+	{
+		const PatternTermPtr& vterm = find_variable_term(subterm, var);
+		if (PatternTerm::UNDEFINED != vterm) return vterm;
+	}
+	return PatternTerm::UNDEFINED;
+}
+
+
 /// This attempts to obtain a grounding for an embedded PresentLink
 /// That is, for a PresentLink that is not at the top-most level.
 /// At this time, we expect to encounter these only inside of
@@ -1687,14 +1702,57 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	DO_LOG({ logger().info() << "explore_present result=" << joins; })
 	if (not joins) return false;
 
-logger().info() << "duuude its a good compare!\n";
 	const PatternTermPtr& parent = ptm->getParent();
 	const PatternTermSeq& osp = parent->getOutgoingSet();
 	if (1 == osp.size())
 		return do_term_up(parent, hg, clause_root);
 
-logger().info() << "Not yet!\n";
-	return false;
+	// Compare the other parts of the present link. They all have to
+	// match. Currently, this makes the simplifying assumption that
+	// all the other terms have the same variable in them, so that
+	// its enough to just have a dumb loop. To do better, we would
+	// need to:
+	// -- build a connectivity map, just like the one for clauses
+	// -- build a clause_variables struct, but just for this term
+	// -- generalize get_next_clause to use this map.
+	// XXX FIXME -- do the above.
+
+	// So, first, get a common shared variable. Assume that clause
+	// will point at the right thing.
+	const HandleSeq& varseq = _pat->clause_variables.at(clause_root);
+	if (0 == varseq.size())
+		throw RuntimeException(TRACE_INFO, "Expecting a variable!");
+	const Handle& jvar = varseq[0];
+	const Handle& jgnd = var_grounding.at(jvar);
+
+	// Loop over all the other terms in the PresentLink
+	for (const PatternTermPtr& pterm: osp)
+	{
+		if (pterm == ptm) continue;
+
+		// Get the joining variable.
+		const PatternTermPtr& joint = find_variable_term(pterm, jvar);
+		if (PatternTerm::UNDEFINED == joint)
+			throw RuntimeException(TRACE_INFO, "Variable not present!");
+
+		DO_LOG({
+			logger().info() << "maybe_present: "
+			                << pterm->getHandle()->to_string() << std::endl;})
+
+		// Explore from this joint.
+		bool found;
+		if (pterm->hasAnyGlobbyVar())
+			found = explore_glob_branches(joint, jgnd, clause_root);
+		else if (pterm->hasUnorderedLink())
+			found = explore_odometer(joint, jgnd, clause_root);
+		else
+			found = explore_type_branches(joint, jgnd, clause_root);
+
+		DO_LOG({ logger().info() << "maybe_present result=" << found; })
+		if (not found) return false;
+	}
+
+	return true;
 }
 
 /// Check the proposed grounding hg for pattern term hp.
