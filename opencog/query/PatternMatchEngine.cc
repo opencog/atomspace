@@ -1938,7 +1938,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const Handle& hi = parent->getHandle();
 	Type hit = hi->get_type();
 
-	if (PRESENT_LINK == hit)
+	if (PRESENT_LINK == hit and not parent->isQuoted())
 	{
 		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
 		return explore_present_branches(ptm, hg, clause_root);
