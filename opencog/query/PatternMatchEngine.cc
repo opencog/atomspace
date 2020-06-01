@@ -262,7 +262,7 @@ bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
 	const Handle& hp = ptm->getHandle();
-	PatternTermSeq osp = ptm->getOutgoingSet();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	logmsg("present_compare");
 
 printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
@@ -468,7 +468,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	const HandleSeq& osg = hg->getOutgoingSet();
-	PatternTermSeq osp = ptm->getOutgoingSet();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
 	bool has_glob = ptm->hasAnyGlobbyVar();
 
@@ -1298,7 +1298,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& clause)
 {
 	// Check if the pattern has globs in it.
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
@@ -1312,7 +1312,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 
 	// If the parent pattern term doesn't have any other bound
@@ -1440,7 +1440,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 	IncomingSet iset;
 	if (nullptr == hg->getAtomSpace())
@@ -1562,8 +1562,8 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 /// possibilities.  Upon exhaustion, it returns to the caller.
 ///
 bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
-                                               const Handle& hg,
-                                               const Handle& clause_root)
+                                                    const Handle& hg,
+                                                    const Handle& clause_root)
 {
 	do
 	{
@@ -1931,7 +1931,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		}
 	}
 
-	PatternTermPtr parent = ptm->getParent();
+	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 	const Handle& hi = parent->getHandle();
 	Type hit = hi->get_type();
