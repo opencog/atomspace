@@ -1690,7 +1690,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 
-	// reject self-grounds
+	// Reject self-grounds.
 	if (hp == hg) return false;
 
 	DO_LOG({
@@ -1716,6 +1716,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	// -- build a clause_variables struct, but just for this term
 	// -- generalize get_next_clause to use this map.
 	// XXX FIXME -- do the above.
+	issued_present.insert(hp);
 
 	// So, first, get a common shared variable. Assume that clause
 	// will point at the right thing.
@@ -1728,7 +1729,10 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	// Loop over all the other terms in the PresentLink
 	for (const PatternTermPtr& pterm: osp)
 	{
-		if (pterm == ptm) continue;
+		const Handle& hpt = pterm->getHandle();
+		if (issued_present.end() != issued_present.find(hpt))
+			continue;
+		issued_present.insert(hpt);
 
 		// Get the joining variable.
 		const PatternTermPtr& joint = find_variable_term(pterm, jvar);
@@ -1749,7 +1753,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 			found = explore_type_branches(joint, jgnd, clause_root);
 
 		DO_LOG({ logger().info() << "maybe_present result=" << found; })
-		if (not found) return false;
+		return found;
 	}
 
 	return true;
@@ -1942,6 +1946,10 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
 		return found;
 	}
+
+	// If we are here, then we have ChoiceLink.
+	// XXX temp hack to clear issued's .. this can't be right long run.
+	issued_present.clear();
 
 	if (hi == clause_root)
 	{
