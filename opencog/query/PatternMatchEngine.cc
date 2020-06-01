@@ -59,11 +59,6 @@ using namespace opencog;
 
 
 #ifdef QDEBUG
-static inline void log(const Handle& h)
-{
-	LAZY_LOG_FINE << h->to_short_string();
-}
-
 static inline void logmsg(const char * msg, const Handle& h)
 {
 	LAZY_LOG_FINE << msg << std::endl
@@ -71,9 +66,20 @@ static inline void logmsg(const char * msg, const Handle& h)
 	                  std::string("(invalid handle)") :
 	                  h->to_short_string());
 }
+
+static inline void logmsg(const char * msg, size_t n)
+{
+	LAZY_LOG_FINE << msg << " " << n;
+}
+
+static inline void logmsg(const char * msg)
+{
+	LAZY_LOG_FINE << msg;
+}
 #else
 static inline void logmsg(const char * msg, const Handle& h) {}
-static inline void log(const Handle& h) {}
+static inline void logmsg(const char * msg, size_t n) {}
+static inline void logmsg(const char * msg) {}
 #endif
 
 
@@ -130,7 +136,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// variadic.
 	if (hp->get_type() != GLOB_NODE)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
+		logmsg("Found grounding of variable:");
 		logmsg("$$ variable:", hp);
 		logmsg("$$ ground term:", hg);
 		var_grounding[hp] = hg;
@@ -162,7 +168,7 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 	bool match = _pmc.node_match(hp, hg);
 	if (match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Found matching nodes";})
+		logmsg("Found matching nodes");
 		logmsg("# pattern:", hp);
 		logmsg("# match:", hg);
 		if (hp != hg) var_grounding[hp] = hg;
@@ -221,7 +227,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 
 	depth --;
-	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
+	logmsg("ordered_compare match?=", match);
 
 	if (not match)
 	{
@@ -257,7 +263,7 @@ bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	PatternTermSeq osp = ptm->getOutgoingSet();
-	DO_LOG({LAZY_LOG_FINE << "present_compare"; })
+	logmsg("present_compare");
 
 printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
 hg->to_string().c_str());
@@ -854,7 +860,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
 
-		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
+		logmsg("Found grounding of glob:");
 		logmsg("$$ glob:", glob->getHandle());
 		logmsg("$$ ground term:", glp);
 	};
@@ -1183,7 +1189,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	bool match = _pmc.link_match(ptm, hg);
 	if (not match) return false;
 
-	DO_LOG({LAZY_LOG_FINE << "depth=" << depth;})
+	logmsg("depth=", depth);
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
 
@@ -1395,7 +1401,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			if (found) break;
 		}
 
-		DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+		logmsg("Found upward soln =", found);
 		return found;
 	}
 
@@ -1470,7 +1476,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 		if (found) break;
 	}
-	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+	logmsg("Found upward soln =", found);
 	return found;
 }
 
@@ -1693,13 +1699,11 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	// Reject self-grounds.
 	if (hp == hg) return false;
 
-	DO_LOG({
-		logger().info() << "explore_present: "
-		                << hp->to_string() << std::endl
-		                << "to: " << hg->to_string() << std::endl;})
+	logmsg("!! explore_present:", hp);
+	logmsg("!! presnet gnd:", hg);
 
 	bool joins = tree_compare(ptm, hg, CALL_PRESENT);
-	DO_LOG({ logger().info() << "explore_present result=" << joins; })
+	logmsg("!! explore_present result=", joins);
 	if (not joins) return false;
 
 	const PatternTermPtr& parent = ptm->getParent();
@@ -1739,9 +1743,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 		if (PatternTerm::UNDEFINED == joint)
 			throw RuntimeException(TRACE_INFO, "Variable not present!");
 
-		DO_LOG({
-			logger().info() << "maybe_present: "
-			                << pterm->getHandle()->to_string() << std::endl;})
+		logmsg("!! maybe_present:", pterm->getHandle());
 
 		// Explore from this joint.
 		bool found;
@@ -1752,11 +1754,11 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 		else
 			found = explore_type_branches(joint, jgnd, clause_root);
 
-		DO_LOG({ logger().info() << "maybe_present result=" << found; })
+		logmsg("!! maybe_present result=",  found);
 		return found;
 	}
 
-	DO_LOG({ logger().info() << "explore_present success!"; })
+	logmsg("!! explore_present success!");
 	return do_term_up(parent, hg, clause_root);
 }
 
@@ -3068,10 +3070,12 @@ void PatternMatchEngine::log_term(const HandleSet &vars,
                                   const HandleSeq &clauses)
 {
 	logger().fine("Clauses:");
-	for (Handle h : clauses) log(h);
+	for (Handle h : clauses)
+		LAZY_LOG_FINE << h->to_short_string();
 
 	logger().fine("Vars:");
-	for (Handle h : vars) log(h);
+	for (Handle h : vars)
+		LAZY_LOG_FINE << h->to_short_string();
 }
 #else
 
