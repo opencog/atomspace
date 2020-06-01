@@ -211,7 +211,9 @@ std::string PatternTerm::to_string() const { return to_string(" : "); }
 
 std::string PatternTerm::to_string(const std::string& indent) const
 {
-	if (not _handle) return "xxx";
+	// Term is null-terminated at thye top.
+	// Top term never has a handle in it.
+	if (not _handle) return "-";
 	std::string str = _parent->to_string();
 	str += indent + _handle->id_to_string();
 	return str;
