@@ -5,12 +5,14 @@
 ; to the variable-initiate-search, which failed because the variables
 ; were typed. (and was also wildly inefficient).
 
+(use-modules (opencog) (opencog exec))
 
 (EvaluationLink
    (PredicateNode "OpenPsi:Decrease")
    (ListLink
       (Node "OpenPsi: Energy-rule-xej90")
       (ConceptNode "OpenPsi:Energy")))
+
 (EvaluationLink
    (PredicateNode "OpenPsi:Increase")
    (ListLink

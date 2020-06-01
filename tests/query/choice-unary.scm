@@ -2,6 +2,7 @@
 ; Testing of ChoiceLink, where the ChoiceLink has just a single
 ; member in it. Thus, if behaves just like a single-member PresentLink.
 ;
+(use-modules (opencog) (opencog exec))
 
 (EvaluationLink (PredicateNode "door A") (ConceptNode "locked"))
 (EvaluationLink (PredicateNode "door A") (ConceptNode "closed"))

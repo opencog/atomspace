@@ -1,5 +1,6 @@
 ;
-; Basic unit testing for ChoiceLinks in the pattern matcher.
+; choice-constant.scm
+; ChoiceLink with no variables!!
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
