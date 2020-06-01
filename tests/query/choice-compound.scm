@@ -1,8 +1,8 @@
 ;
-; choice-present.scm
+; choice-compound.scm
 ;
-; ChoiceLink with PresentLink -- This tests that multiple mandatory
-; terms to be wrapped into a single alternative.
+; ChoiceLink with PresentLink -- This tests the choice of compounded
+; (multiple-mandatory) terms wrapped into a single alternative.
 ; Derived from issue https://github.com/opencog/atomspace/issues/2644
 
 (use-modules (opencog) (opencog exec))
