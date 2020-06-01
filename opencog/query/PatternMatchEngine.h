@@ -195,6 +195,13 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
+	// --------------------------------------------
+	// State that manages the next PresentLink subterm to be grounded.
+	// Similar to the next-clause, above, and someday should be unified
+	// with it.
+
+	IssuedSet issued_present;
+
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
 	bool is_clause_grounded(const Handle&) const;

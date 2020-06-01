@@ -1756,7 +1756,8 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 		return found;
 	}
 
-	return true;
+	DO_LOG({ logger().info() << "explore_present success!"; })
+	return do_term_up(parent, hg, clause_root);
 }
 
 /// Check the proposed grounding hg for pattern term hp.
