@@ -1755,10 +1755,12 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 			found = explore_type_branches(joint, jgnd, clause_root);
 
 		logmsg("!! maybe_present result=",  found);
+		if (not found) issued_present.clear();
 		return found;
 	}
 
 	logmsg("!! explore_present success!");
+	issued_present.clear();
 	return do_term_up(parent, hg, clause_root);
 }
 
@@ -1951,9 +1953,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	}
 
 	// If we are here, then we have ChoiceLink.
-	// XXX temp hack to clear issued's .. this can't be right long run.
-	issued_present.clear();
-
 	if (hi == clause_root)
 	{
 		DO_LOG({logger().fine("Exploring ChoiceLink at root");})
