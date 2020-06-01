@@ -207,13 +207,13 @@ void PatternTerm::addUnorderedLink()
 
 // ==============================================================
 
-std::string PatternTerm::to_string() const { return to_string(":"); }
+std::string PatternTerm::to_string() const { return to_string(" : "); }
 
 std::string PatternTerm::to_string(const std::string& indent) const
 {
-	if (not _handle) return "-";
+	if (not _handle) return "xxx";
 	std::string str = _parent->to_string();
-	str += indent + std::to_string(_handle.value());
+	str += indent + _handle->id_to_string();
 	return str;
 }
 

@@ -1460,7 +1460,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		                      << " for glob term=" << parent->to_string()
-		                      << " propose=" << iset[i].value();})
+		                      << " propose=" << iset[i]->id_to_string();})
 
 		// Before exploring the link branches, record the current
 		// _glob_state size.  The idea is, if the parent & iset[i] is a match,
@@ -1784,23 +1784,23 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
-	              << " for soln by " << hg.value();})
+	DO_LOG({LAZY_LOG_FINE << "ssss Checking term=" << ptm->to_string()
+	                      << " for soln by " << hg->id_to_string();})
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
-		              << ptm->to_string()
-		              << " its NOT solved by " << hg.value();})
+		DO_LOG({LAZY_LOG_FINE << "ssss NO solution for term="
+		                      << ptm->to_string()
+		                      << " its NOT solved by " << hg->id_to_string();})
 		solution_pop();
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Solved term=" << ptm->getHandle()->to_string()
-	              << " it is solved by " << hg->to_string()
-	              << ", will move up.";})
+	logmsg("ssss Solved term:", ptm->getHandle());
+	logmsg("ssss It is solved by:", hg);
+	logmsg("ssss will move up.");
 
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
@@ -1868,8 +1868,8 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
-	              << " " << ptm->getHandle()->to_string()
-	              << "\nof clause = " << clause_root->to_string()
+	              << "\n" << ptm->getHandle()->to_string()
+	              // << "\nof clause = " << clause_root->to_string()
 	              << "\nhas ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
