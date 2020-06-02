@@ -38,14 +38,14 @@
 	(Get
 		(TypedVariable (Variable "picker") (Type "Concept"))
 		(And
-		  (Present (Variable "picker"))
-		  (Absent 
+			(Present (Variable "picker"))
+			(Absent
 				(State
 					(List (Variable "picker") (Predicate "movement"))
 					(Concept "approaching")))
-		  (Choice
+			(Choice
 				(Present
-					(State 
+					(State
 						(List (Variable "picker") (Predicate "called robot"))
 						(Concept "true")))
 				(Present
@@ -58,13 +58,13 @@
 				(Present
 					(State
 						(List (Variable "picker") (Predicate "called robot"))
-					 	(Concept "false"))
+						(Concept "false"))
 					(State
 						(List (Variable "picker") (Predicate "has crate"))
 						(Concept "true"))
 					(State
 						(List (Variable "picker") (Predicate "crate is full"))
 						(Concept "true")))
-		  ))))
+			))))
 
 ; (cog-execute! who-needs-help?)
