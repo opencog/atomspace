@@ -15,7 +15,7 @@ namespace opencog {
 
 const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
 
-PatternTerm::PatternTerm()
+PatternTerm::PatternTerm(void)
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
@@ -60,12 +60,11 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	_quotation.update(t);
 }
 
-void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
+PatternTermPtr PatternTerm::addOutgoingTerm(const Handle& h)
 {
-	// The _parent should have been set correctly in the ctor
-	// but maybe we should move that to here.
-	OC_ASSERT(ptm->_parent.get() == this);
+	PatternTermPtr ptm(createPatternTerm(shared_from_this(), h));
 	_outgoing.push_back(ptm);
+	return ptm;
 }
 
 PatternTermSeq PatternTerm::getOutgoingSet() const

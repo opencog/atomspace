@@ -130,8 +130,7 @@ protected:
 public:
 	static const PatternTermPtr UNDEFINED;
 
-	PatternTerm();
-
+	PatternTerm(void);
 	PatternTerm(const PatternTermPtr& parent, const Handle& h);
 
 	const Handle& getHandle() const noexcept { return _handle; }
@@ -139,7 +138,7 @@ public:
 	PatternTermPtr getParent() const noexcept { return _parent; }
 	bool isDescendant(const PatternTermPtr&) const;
 
-	void addOutgoingTerm(const PatternTermPtr& ptm);
+	PatternTermPtr addOutgoingTerm(const Handle&);
 	PatternTermSeq getOutgoingSet() const;
 
 	Arity getArity() const { return _outgoing.size(); }

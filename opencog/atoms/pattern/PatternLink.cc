@@ -1017,16 +1017,19 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
+		root_term->makeLiteral();
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
+		root_term->makeLiteral();
 	}
 	for (const Handle& clause : _pat.always)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
+		root_term->makeLiteral();
 	}
 }
 
@@ -1034,11 +1037,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
                                            const Handle& term,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(createPatternTerm(parent, term));
+	PatternTermPtr ptm(parent->addOutgoingTerm(term));
 
 	// `h` is usually the same as `term`, unless there's quotation.
 	Handle h(ptm->getHandle());
-	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	// If the current node is a bound variable, store this as a
