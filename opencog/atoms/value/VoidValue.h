@@ -57,6 +57,9 @@ public:
 	}
 };
 
+static inline ValuePtr createFloatValue(void)
+	{ return VoidValue::INSTANCE; }
+
 /** @}*/
 } // namespace opencog
 
