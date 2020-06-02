@@ -209,7 +209,7 @@ void PatternTerm::addUnorderedLink()
 
 void PatternTerm::makeLiteral()
 {
-	if (not _is_literal) return;
+	if (_is_literal) return;
 
 	_is_literal = true;
 	for (PatternTermPtr& ptm : getOutgoingSet())
