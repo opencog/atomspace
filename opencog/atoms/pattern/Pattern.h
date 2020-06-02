@@ -82,7 +82,7 @@ struct Pattern
 
 	/// Clauses that are never virtual. Set by unbundle_clauses().
 	HandleSeq        literal_clauses;
-	/// Clauses that might be virtual. User never explicttly declared
+	/// Clauses that might be virtual. User never explictly declared
 	/// them one way or the other, so we will have to guess, based on
 	/// what's in them. Set by unbundle_clauses().
 	HandleSeq        undeclared_clauses;
