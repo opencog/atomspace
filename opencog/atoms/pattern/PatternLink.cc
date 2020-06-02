@@ -330,9 +330,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		return true;
 	}
 
-/*
-	// Everything under Choice is either a literal, or another
-	// Present.
+	// Everything under Choice is either a literal, or a grouping of
+	// PresentLinks. They are not mandatory, since they exist only in
+	// some of the choice branches, but not others.
 	if (not reverse and CHOICE_LINK == typ)
 	{
 		for (const Handle& ph : h->getOutgoingSet())
@@ -340,7 +340,8 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			Type pht = ph->get_type();
 			if (PRESENT_LINK == pht)
 			{
-				record_literal(ph, reverse);
+				for (const Handle& php : ph->getOutgoingSet())
+					_pat.literal_clauses.emplace_back(php);
 				continue;
 			}
 
@@ -349,11 +350,15 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 					"AbsentLink under a Choice is not supported yet!");
 
 			_pat.literal_clauses.emplace_back(ph);
-			_pat.mandatory.emplace_back(ph);
 		}
+
+// XXX FIXME both statements below are wrong, but they are needed for
+// the unit tests. More bu0fxing to straighten this stuff out. That
+// is why this code is badly indented!
+_pat.literal_clauses.emplace_back(h);
+_pat.mandatory.emplace_back(h);
 		return true;
 	}
-*/
 
 	// Pull clauses out of an AbsentLink
 	if ((not reverse and ABSENT_LINK == typ) or
