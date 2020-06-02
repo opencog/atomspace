@@ -27,6 +27,9 @@ std::string Pattern::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	bool first = true;
+
+	ss << indent << "Pattern: " << redex_name << std::endl;
+
 	if (not quoted_clauses.empty())
 	{
 		if (not first) ss << std::endl;
