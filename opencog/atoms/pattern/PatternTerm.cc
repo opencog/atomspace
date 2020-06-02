@@ -39,7 +39,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _has_any_unordered_link(false)
+	  _has_any_unordered_link(false),
+	  _is_literal(false)
 {
 	Type t = h->get_type();
 
@@ -61,6 +62,9 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 
 void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 {
+	// The _parent should have been set correctly in the ctor
+	// but maybe we should move that to here.
+	OC_ASSERT(ptm->_parent.get() == this);
 	_outgoing.push_back(ptm);
 }
 
@@ -218,7 +222,7 @@ void PatternTerm::makeLiteral()
 
 // ==============================================================
 
-std::string PatternTerm::to_string() const { return to_string(" : "); }
+std::string PatternTerm::to_string() const { return to_string(": "); }
 
 std::string PatternTerm::to_string(const std::string& indent) const
 {
