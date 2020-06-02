@@ -64,7 +64,7 @@ FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 TENSOR_TRUTH_VALUE          <- TRUTH_VALUE "TensorTruthValue"
-FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
+FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the atom hierarchy. Atoms are globally unique and persistent
@@ -263,10 +263,9 @@ ANY_NODE <- NODE
 
 // Generic connector. Its a link, because if contains all of the details
 // and restrictions required to define the allowable conections that
-// can be made. It inherits from Evaluatable, so that the ability for
-// it to mate to something can be encoded in a TruthValue (typically
-// a crisp T/F for type specifications.)
-CONNECTOR <- EVALUATABLE_LINK
+// can be made. The ability for it to mate to something can be encoded
+// in a TruthValue (typically a crisp T/F for type specifications.)
+CONNECTOR <- ORDERED_LINK
 
 CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
 LINK_CLASS_NODE <- LEXICAL_NODE "LinkClass" // Connector class
@@ -607,7 +606,10 @@ ANCHOR_NODE <- NODE
 // for them to be declared as virtual (at least, as far as the pattern
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
-VIRTUAL_LINK <- EVALUATABLE_LINK
+//
+// In mathematics nomenclature, VirtualLinks are "relations": they are
+// terms that evaluate to crisp true/false values.
+VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
@@ -627,7 +629,7 @@ EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
-SATISFACTION_LINK <- SATISFYING_LINK,CRISP_OUTPUT_LINK,VIRTUAL_LINK
+SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
@@ -671,6 +673,7 @@ VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK
+COUNT_OF_LINK <- VALUE_OF_LINK
 
 // Opposite of the above; attach a value to an atom.
 SET_VALUE_LINK <- FUNCTION_LINK
@@ -678,16 +681,20 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // Return a SimpleTruthValue when evaluated.
 // This is used to wrap any atom that returns a FloatValue; all this
-// does is to provide some formatting.  We don't really need to have
-// PredicateFormulaLink, because anything returning FloatValue is
-// enough. But during a transition period, this is handy to have.
+// does is to provide some formatting.  It is not strictly needed,
+// because any LambdaLink returning FloatValue is enough. But this is
+// handy to have while a transition is made to a more general setting.
 // Its handy because it looks a lot like a GROUNDED_PREDICATE_NODE,
 // except that the formula is in the Atomese, not scheme/python.
-PREDICATE_FORMULA_LINK <- EVALUATABLE_LINK
+//
+// Its a ScopeLink, because in general it will contain variables that
+// are scoped, bound. The Lambda provides the mechanism to access/sheild
+// the variables.
+PREDICATE_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
 // Return a FormulaTruthValue when evaluated.
 // Like the above, but the TV is not a constant, but the formula itself.
-DYNAMIC_FORMULA_LINK <- EVALUATABLE_LINK
+DYNAMIC_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
@@ -711,7 +718,10 @@ RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the sum of vector components of a number/float-value.
 ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
-// Return arity of the wrapped link.
+// Return arity of the wrapped link. If it's a NumberNode
+// of a value, return the length of the underlying vector.
+// XXX FIXME .. did we mis-name this? Should it be SizeOfLink
+// or maybe LengthOfLink? (viz, the length of FloatValue...)
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.

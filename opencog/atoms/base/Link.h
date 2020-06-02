@@ -122,10 +122,7 @@ public:
     }
 
     virtual size_t size() const {
-        size_t size = 1;
-        for (const Handle& h : _outgoing)
-            size += h->size();
-        return size;
+        return _outgoing.size();
     }
 
     /**

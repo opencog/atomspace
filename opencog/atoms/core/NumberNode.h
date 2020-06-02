@@ -74,7 +74,7 @@ public:
 		return vector_to_plain(to_vector(str));
 	}
 
-	size_t size(void) { return _value.size(); }
+	size_t size() const { return _value.size(); }
 	std::vector<double> value(void) { return _value; }
 	double get_value(void) { return _value[0]; }
 

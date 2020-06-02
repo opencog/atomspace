@@ -1,5 +1,5 @@
 /*
- * InitiateSearchCB.cc
+ * InitiateSearchMixin.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -29,9 +29,8 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/FindUtils.h>
 
-#include "InitiateSearchCB.h"
+#include "InitiateSearchMixin.h"
 #include "PatternMatchEngine.h"
-#include "Substitutor.h"
 
 #ifdef USE_THREADED_PATTERN_ENGINE
 	// #include <algorithm>
@@ -50,14 +49,13 @@ using namespace opencog;
 
 /* ======================================================== */
 
-InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
+InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
 	_variables = nullptr;
 	_pattern = nullptr;
 	_dynamic = nullptr;
 	_recursing = false;
-	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -67,7 +65,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_as = as;
 }
 
-void InitiateSearchCB::set_pattern(const Variables& vars,
+void InitiateSearchMixin::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
 	_variables = &vars;
@@ -125,7 +123,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 //
 
 Handle
-InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
+InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
                                      Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
@@ -146,7 +144,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 }
 
 Handle
-InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
+InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
                                          Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
@@ -225,7 +223,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
  * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
  */
-Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
+Handle InitiateSearchMixin::find_thinnest(const HandleSeq& clauses,
                                        const HandleSet& evl,
                                        Handle& starter_term,
                                        Handle& bestclause)
@@ -291,7 +289,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * or if all clauses consist only of VariableNodes or GlobNodes, so
  * that there's nowhere to start the search.
  */
-bool InitiateSearchCB::setup_neighbor_search(void)
+bool InitiateSearchMixin::setup_neighbor_search(void)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
@@ -359,7 +357,7 @@ bool InitiateSearchCB::setup_neighbor_search(void)
 
 /* ======================================================== */
 
-bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
+bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
@@ -473,9 +471,15 @@ bool InitiateSearchCB::choice_loop(PatternMatchCallback& pmc,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
+bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 {
-	jit_analyze();
+	// Start with a clean slate. This might be called multiple
+	// times, for groundings of different components.
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+	_curr_clause = Handle::UNDEFINED;
+	_search_set.clear();
+	_choices.clear();
 
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
@@ -525,7 +529,7 @@ bool InitiateSearchCB::perform_search(PatternMatchCallback& pmc)
  * Find the rarest link type contained in the clause, or one
  * of its subclauses.
  */
-void InitiateSearchCB::find_rarest(const Handle& clause,
+void InitiateSearchMixin::find_rarest(const Handle& clause,
                                    Handle& rarest,
                                    size_t& count,
                                    Quotation quotation)
@@ -637,7 +641,7 @@ static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
  *
  * This is heavily used by the JoinLink mechanism.
  */
-bool InitiateSearchCB::setup_deep_type_search()
+bool InitiateSearchMixin::setup_deep_type_search()
 {
 	if (_variables->_deep_typemap.size() == 0)
 		return false;
@@ -724,7 +728,7 @@ bool InitiateSearchCB::setup_deep_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchCB::setup_link_type_search()
+bool InitiateSearchMixin::setup_link_type_search()
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -785,7 +789,7 @@ bool InitiateSearchCB::setup_link_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchCB::setup_variable_search(void)
+bool InitiateSearchMixin::setup_variable_search(void)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
@@ -947,81 +951,9 @@ bool InitiateSearchCB::setup_variable_search(void)
  * inefficient to use the pattern matcher for this, so if you want it
  * to run fast, re-work the below to not use the PME.
  */
-bool InitiateSearchCB::setup_no_search(void)
+bool InitiateSearchMixin::setup_no_search(void)
 {
 	return (0 == _variables->varset.size());
-}
-
-/* ======================================================== */
-/**
- * Just-In-Time analysis of patterns. Patterns we could not unpack
- * earlier, because the definitions for them might not have been
- * present, or may have changed since the pattern was initially created.
- */
-void InitiateSearchCB::jit_analyze(void)
-{
-	// If there are no definitions, there is nothing to do.
-	if (0 == _pattern->defined_terms.size())
-		return;
-
-	// Now is the time to look up the definitions!
-	// We loop here, so that all recursive definitions are expanded
-	// as well.  XXX Except that this is wrong, if any of the
-	// definitions are actually recursive. That is, this will be
-	// an infinite loop if a defintion is self-referencing; so
-	// really we need to expand, one level at a time, during
-	// evaluation, and only expand if really, really needed. (Which
-	// then brings up ideas like tail recursion, etc.)  Anyway, most
-	// of this code should probably be moved to PatternLink::jit_expand()
-	while (0 < _pattern->defined_terms.size())
-	{
-		Variables vset;
-		GroundingMap defnmap;
-		for (const Handle& name : _pattern->defined_terms)
-		{
-			Handle defn = DefineLink::get_definition(name);
-			if (not defn) continue;
-
-			// Extract the variables in the definition.
-			// Either they are given in a LambdaLink, or, if absent,
-			// we just hunt down and bind all of them.
-			if (_nameserver.isA(LAMBDA_LINK, defn->get_type()))
-			{
-				LambdaLinkPtr lam = LambdaLinkCast(defn);
-				vset.extend(lam->get_variables());
-				defn = lam->get_body();
-			}
-			else
-			{
-				Variables freevars;
-				freevars.find_variables(defn);
-				vset.extend(freevars);
-			}
-
-			defnmap.insert({name, defn});
-		}
-
-		// Rebuild the pattern, expanding all DefinedPredicateNodes
-		// to one level. Note that `newbody` is not being placed in
-		// any atomspace; but I think that is OK...
-		Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
-
-		// We need to let both the PME know about the new clauses
-		// and variables, and also let master callback class know,
-		// too, since we are just one mixin in the callback class;
-		// the other mixins need to be updated as well.
-		vset.extend(*_variables);
-
-		_pl = createPatternLink(vset, newbody);
-		_variables = &_pl->get_variables();
-		_pattern = &_pl->get_pattern();
-	}
-
-	_dynamic = &_pattern->evaluatable_terms;
-
-	set_pattern(*_variables, *_pattern);
-	DO_LOG({logger().fine("JIT expanded!");
-	_pl->debug_log();})
 }
 
 /* ======================================================== */
@@ -1032,7 +964,7 @@ void InitiateSearchCB::jit_analyze(void)
 /// This assumes that a list of search starting points have been
 /// set up in the `_search_set`, as well as an approprite root
 /// clause and starting term.
-bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
+bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
                                    const std::string dbg_banner)
 {
 	// This is the main entry point into the CPU-cycle sucking part of
@@ -1144,7 +1076,7 @@ bool InitiateSearchCB::search_loop(PatternMatchCallback& pmc,
 
 /* ======================================================== */
 
-std::string InitiateSearchCB::to_string(const std::string& indent) const
+std::string InitiateSearchMixin::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	if (_variables)
@@ -1156,9 +1088,6 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 	if (_dynamic)
 		ss << indent << "_dynamic:" << std::endl
 		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
-	if (_pl)
-		ss << indent << "_pl:" << std::endl
-		   << _pl->to_string(indent + oc_to_string_indent) << std::endl;
 	if (_root)
 		ss << indent << "_root:" << std::endl
 		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
@@ -1186,7 +1115,8 @@ std::string InitiateSearchCB::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-std::string oc_to_string(const InitiateSearchCB& iscb, const std::string& indent)
+std::string oc_to_string(const InitiateSearchMixin& iscb,
+                         const std::string& indent)
 {
 	return iscb.to_string(indent);
 }

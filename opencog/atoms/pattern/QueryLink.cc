@@ -25,7 +25,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/query/Implicator.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -48,6 +48,10 @@ void QueryLink::init(void)
 	common_init();
 	setup_components();
 	_pat.redex_name = "anonymous QueryLink";
+
+#ifdef QDEBUG
+	logger().fine("Query: %s", to_long_string("").c_str());
+#endif
 }
 
 QueryLink::QueryLink(const Handle& vardecl,
@@ -83,8 +87,8 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an outgoing set size of at least two, got %d", sz);
 
-	// If the outgoing set size is two, then there are no variable
-	// declarations; extract all free variables.
+	// If the outgoing set size is two, then there are no
+	// variable declarations; extract all free variables.
 	if (2 == sz)
 	{
 		_body = oset[0];
@@ -93,15 +97,29 @@ void QueryLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
-	_vardecl = oset[0];
-	_body = oset[1];
-	for (size_t i=2; i < oset.size(); i++)
-		_implicand.push_back(oset[i]);
+	// Old-style declarations had variables in the first
+	// slot. If they are there, then respect that.
+	// Otherwise, the first slot holds the body.
+	size_t boff = 0;
+	Type vt = oset[0]->get_type();
+	if (VARIABLE_LIST == vt or
+	    VARIABLE_SET == vt or
+	    TYPED_VARIABLE_LINK == vt or
+	    VARIABLE_NODE == vt or
+	    GLOB_NODE == vt)
+	{
+		_vardecl = oset[0];
+		init_scoped_variables(_vardecl);
+		boff = 1;
+	}
+	_body = oset[boff];
 
-	// Initialize _variables with the scoped variables
-	init_scoped_variables(_vardecl);
+	// Hunt for variables only if they were  not declared.
+	// Mixing both styles together breaks unit tests.
+	if (0 == boff) _variables.find_variables(_body);
+
+	for (size_t i=boff+1; i < oset.size(); i++)
+		_implicand.push_back(oset[i]);
 }
 
 /* ================================================================= */
@@ -134,9 +152,6 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
-	DefaultImplicator impl(as);
-	impl.implicand = this->get_implicand();
-
 	/*
 	 * The `do_conn_check` flag stands for "do connectivity check"; if the
 	 * flag is set, and the pattern is disconnected, then an error will be
@@ -152,12 +167,14 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
 
-	this->PatternLink::satisfy(impl);
+	Implicator impl(as);
+	impl.implicand = this->get_implicand();
+	impl.satisfy(PatternLinkCast(get_handle()));
 
 	// If we got a non-empty answer, just return it.
 	QueueValuePtr qv(impl.get_result_queue());
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	if (0 < qv->size())
+	if (0 < qv->concurrent_queue<ValuePtr>::size())
 		return qv;
 
 	// If we are here, then there were zero matches.
@@ -174,8 +191,8 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	// Kripke frame: it holds everything we know "right now". The
 	// AbsentLink is a check for what we don't know, right now.
 	const Pattern& pat = this->get_pattern();
-	DefaultPatternMatchCB* intu =
-		dynamic_cast<DefaultPatternMatchCB*>(&impl);
+	TermMatchMixin* intu =
+		dynamic_cast<TermMatchMixin*>(&impl);
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{

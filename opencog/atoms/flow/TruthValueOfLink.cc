@@ -22,9 +22,22 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include "TruthValueOfLink.h"
 
 using namespace opencog;
+
+// XXX why isn't this centralized somewhere?
+// Why am I writing this again, from scratch?
+static TruthValuePtr get_the_tv(AtomSpace* as, const Handle& h, bool silent)
+{
+	if (h->is_evaluatable())
+		return h->evaluate(as, silent);
+
+	if (h->get_type() == EVALUATION_LINK)
+		return EvaluationLink::do_evaluate(as, h, silent);
+	return as->add_atom(h)->getTruthValue();
+}
 
 TruthValueOfLink::TruthValueOfLink(const HandleSeq&& oset, Type t)
 	: ValueOfLink(std::move(oset), t)
@@ -46,15 +59,7 @@ TruthValuePtr TruthValueOfLink::evaluate(AtomSpace* as, bool silent)
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	// We cannot know the TruthValue of the Atom unless we are
-	// working with the unique version that sits in the AtomSpace!
-	// It can happen, during evaluation e.g. of a PutLink, that we
-	// are given an Atom that is not in any AtomSpace. In this case,
-	// `as` will be a scratch space; we can add the Atom there, and
-	// things will trickle out properly in the end.
-
-	Handle ah(as->add_atom(_outgoing[0]));
-	return ah->getTruthValue();
+	return get_the_tv(as, _outgoing[0], silent);
 }
 
 // =============================================================
@@ -85,22 +90,7 @@ ValuePtr StrengthOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		// We cannot know the TruthValue of the Atom unless we are
-		// working with the unique version that sits in the AtomSpace!
-		Handle ah(as->get_atom(h));
-		if (ah)
-			strengths.push_back(ah->getTruthValue()->get_mean());
-		else
-		{
-			if (silent)
-				throw SilentException();
-
-			// If the user asked for a TV not in any atomspace,
-			// what should we do? I dunno, so I'm throwing an error.
-			throw InvalidParamException(TRACE_INFO,
-				"Asked for Strength of atom not in any atomspace: %s",
-				this->to_string().c_str());
-		}
+		strengths.push_back(get_the_tv(as, h, silent)->get_mean());
 	}
 
 	return createFloatValue(strengths);
@@ -134,29 +124,49 @@ ValuePtr ConfidenceOfLink::execute(AtomSpace* as, bool silent)
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 			return get_handle();
 
-		// We cannot know the TruthValue of the Atom unless we are
-		// working with the unique version that sits in the AtomSpace!
-		Handle ah(as->get_atom(h));
-		if (ah)
-			confids.push_back(ah->getTruthValue()->get_confidence());
-		else
-		{
-			if (silent)
-				throw SilentException();
-
-			// If the user asked for a TV not in any atomspace,
-			// what should we do? I dunno, so I'm throwing an error.
-			throw InvalidParamException(TRACE_INFO,
-				"Asked for Confidence of atom not in any atomspace: %s",
-				this->to_string().c_str());
-		}
+		confids.push_back(get_the_tv(as, h, silent)->get_confidence());
 	}
 
 	return createFloatValue(confids);
 }
 
+// =============================================================
+
+CountOfLink::CountOfLink(const HandleSeq&& oset, Type t)
+	: ValueOfLink(std::move(oset), t)
+{
+	if (not nameserver().isA(t, COUNT_OF_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an CountOfLink, got %s", tname.c_str());
+	}
+}
+
+// ---------------------------------------------------------------
+
+/// When executed, this will return the counts of all of the
+/// atoms in the outgoing set.
+ValuePtr CountOfLink::execute(AtomSpace* as, bool silent)
+{
+	std::vector<double> counts;
+
+	for (const Handle& h : _outgoing)
+	{
+		// Cannot take the count of an ungrounded variable.
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+			return get_handle();
+
+		counts.push_back(get_the_tv(as, h, silent)->get_count());
+	}
+
+	return createFloatValue(counts);
+}
+
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)
 DEFINE_LINK_FACTORY(StrengthOfLink, STRENGTH_OF_LINK)
 DEFINE_LINK_FACTORY(ConfidenceOfLink, CONFIDENCE_OF_LINK)
+DEFINE_LINK_FACTORY(CountOfLink, COUNT_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

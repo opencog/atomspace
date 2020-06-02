@@ -92,30 +92,32 @@ bool remove_constants(const HandleSet& vars, Pattern& pat)
 	return modified;
 }
 
-bool is_constant(const HandleSet& vars, const Handle& clause)
+bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
-	bool constant =
-		not (any_unquoted_unscoped_in_tree(clause, vars)
-		     or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-		     or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		     or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		     or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
-		     or contains_atomtype(clause, PREDICATE_FORMULA_LINK)
-		     // TODO: should not the below be any VirtualLink?
-		     // Or contains any EvaluatableLink ??
-		     or contains_atomtype(clause, IDENTICAL_LINK)
-		     or contains_atomtype(clause, EQUAL_LINK)
-		     or contains_atomtype(clause, GREATER_THAN_LINK)
-		     // If it is an EvaluatableLink then is is not a
-		     // constant, unless it is a closed EvaluationLink over
-		     // a PredicateNode.
-		     or (nameserver().isA(ct, EVALUATABLE_LINK)
-		         and (0 == clause->get_arity()
-		              or
-		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
+	bool evaluatable =
+		// If it is an EvaluatableLink, then is is evaluatable,
+		// unless it is a closed (variable-free) EvaluationLink
+		// over a PredicateNode.
+		(nameserver().isA(ct, EVALUATABLE_LINK)
+		   and (not (EVALUATION_LINK == ct)
+		      or 0 == clause->get_arity()
+		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))
 
-	return constant;
+		// XXX FIXME Are the below needed?
+		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+		or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+
+	return evaluatable;
+}
+
+bool is_constant(const HandleSet& vars, const Handle& clause)
+{
+	return
+		not any_unquoted_unscoped_in_tree(clause, vars)
+		and not can_evaluate(clause);
 }
 
 /* ======================================================== */
@@ -149,10 +151,6 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * speeds up the discovery of the next ungrounded clause: it is
  * trivially just the very next clause in the connected set.  Of
  * course, users will typically never specify clauses in such order.
- *
- * XXX FIXME: It can happen that some clauses have no variables at all
- * in them.  These end up in their own component, which can be
- * extremely confusing.
  */
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
@@ -177,9 +175,14 @@ void get_connected_components(const HandleSet& vars,
 			for (size_t i = 0; i<nc; i++)
 			{
 				HandleSet& cur_vars(component_vars[i]);
-				// If clause cl is connected to this component, then add it
-				// to this component.
-				if (any_unquoted_in_tree(cl, cur_vars))
+				// If clause cl is connected to this component, then
+				// add it to this component. (Its connected if any of
+				// the `cur_vars` appear in the clause). Alternately,
+				// if the clause has NO variables, just jam it into the
+				// first component.
+				if (any_unquoted_in_tree(cl, cur_vars) or
+				    (not contains_atomtype(cl, VARIABLE_NODE) and
+				     not contains_atomtype(cl, GLOB_NODE)))
 				{
 					// Extend the component
 					components[i].emplace_back(cl);

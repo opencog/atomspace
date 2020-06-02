@@ -21,8 +21,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/InitiateSearchCB.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/InitiateSearchMixin.h>
+#include <opencog/query/TermMatchMixin.h>
+#include <opencog/query/SatisfyMixin.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
@@ -61,33 +62,34 @@ class StackUTest :  public CxxTest::TestSuite
 };
 
 class TestPMCB :
-	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB
+	public InitiateSearchMixin,
+	public TermMatchMixin,
+	public SatisfyMixin
 {
 	public:
 	int lcnt;
 	int scnt;
 	Handle anch;
 	TestPMCB(AtomSpace* as) :
-		InitiateSearchCB(as),
-		DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
+		InitiateSearchMixin(as),
+		TermMatchMixin(as), lcnt(0), scnt(0) {}
 
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
 	{
-		InitiateSearchCB::set_pattern(vars, pat);
-		DefaultPatternMatchCB::set_pattern(vars, pat);
+		InitiateSearchMixin::set_pattern(vars, pat);
+		TermMatchMixin::set_pattern(vars, pat);
 	}
 
 	virtual bool clause_match(const Handle& pattrn,
 	                          const Handle& grnd,
 	                          const HandleMap& term_gnds)
 	{
-		// We need to call DefaultPatternMatchCB::clause_match
+		// We need to call TermMatchMixin::clause_match
 		// to handle the case of self-grounding, else the count
 		// in the unit test is off by one.  (This is the
 		// backwards-compat handling for the unit test.)
-		bool OK = DefaultPatternMatchCB::clause_match(pattrn, grnd, term_gnds);
+		bool OK = TermMatchMixin::clause_match(pattrn, grnd, term_gnds);
 		if (not OK) return false;
 
 		lcnt ++;

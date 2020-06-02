@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -39,12 +40,13 @@ class BuggyEqual :  public CxxTest::TestSuite
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
+			logger().set_timestamp_flag(false);
+			logger().set_sync_flag(true);
 
 			as = new AtomSpace();
 			eval = new SchemeEval(as);
 			eval->eval("(use-modules (opencog exec))");
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-
 		}
 
 		~BuggyEqual()
@@ -63,6 +65,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 		void test_bugeq(void);
 		void test_bugalt(void);
 		void test_arithmetic(void);
+		void test_unify(void);
 };
 
 void BuggyEqual::setUp(void)
@@ -125,6 +128,32 @@ void BuggyEqual::test_arithmetic(void)
 	double dsix = nn->get_value();
 	TS_ASSERT_LESS_THAN_EQUALS(5.99999, dsix);
 	TS_ASSERT_LESS_THAN_EQUALS(dsix, 6.00001);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Failed variable unification
+ */
+void BuggyEqual::test_unify(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/buggy-equal-unify.scm\")");
+
+	ValuePtr listl = eval->eval_v("(cog-execute! qunify)");
+	printf("Unify result:\n%s\n", listl->to_short_string().c_str());
+	TSM_ASSERT("Wrong return type!",
+		nameserver().isA(listl->get_type(), LINK_VALUE));
+	TSM_ASSERT_EQUALS("Wrong number of solutions!",
+		LinkValueCast(listl)->value().size(), 1);
+	// Handle gotu = HandleCast(LinkValueCast(listl)->value()[0]);
+	ValuePtr gotu = LinkValueCast(listl)->value()[0];
+
+	Handle expect = eval->eval_h("expected");
+	printf("Unify expect: %s\n", expect->to_short_string().c_str());
+
+	TSM_ASSERT_EQUALS("Bad unification!", expect, gotu);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

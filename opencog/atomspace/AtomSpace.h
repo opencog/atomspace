@@ -128,6 +128,10 @@ public:
         return nullptr;
     }
 
+    bool in_environ(const Handle& h) const {
+        return _atom_table.in_environ(h);
+    }
+
     /**
      * Compare atomspaces for equality. Useful during testing.
      */

@@ -21,7 +21,7 @@ INSTALL (TARGETS atomspace-cwrapper
 IF (HAVE_STACK)
     ADD_CUSTOM_TARGET(haskell-atomspace-lib ALL
         DEPENDS atomspace-cwrapper
-        COMMAND bash build.sh ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND sh build.sh ${CMAKE_CURRENT_BINARY_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Building Haskell bindings."
     )

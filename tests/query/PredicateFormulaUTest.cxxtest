@@ -1,0 +1,194 @@
+/*
+ * tests/query/PredicateFormulaUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class PredicateFormulaUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	PredicateFormulaUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+		eval->eval("(use-modules (opencog exec))");
+	}
+
+	~PredicateFormulaUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void do_predicate_test(HandleSeq);
+	void test_accept(void);
+	void test_reject(void);
+};
+
+void PredicateFormulaUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void PredicateFormulaUTest::setUp(void)
+{
+	as->clear();
+	// eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+}
+
+/*
+ * A PredicateFormulaLink embeded in a search query should act as a
+ * a predicate, acepting or rejecting whatever the formula is applied
+ * to.
+ */
+void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
+{
+	// We expect all tests to return this.
+	printf("Expecting: %s\n", oc_to_string(ans).c_str());
+
+	// ------------------
+	ValuePtr get = eval->eval_v("(cog-execute! qe1)");
+	printf("Got qe1: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	HandleSeq hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe2)");
+	printf("Got qe2: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe3)");
+	printf("Got qe3: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe4)");
+	printf("Got qe4: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe5)");
+	printf("Got qe5: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe6)");
+	printf("Got qe6: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe7)");
+	printf("Got qe7: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+}
+
+void PredicateFormulaUTest::test_accept(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/predicate-formula.scm\")");
+
+	// Set TV's from which computations will happen.
+	eval->eval_h("(Concept \"node1\" (stv 0.5 0.6))");
+	eval->eval_h("(Concept \"name1\" (stv 0.5 0.6))");
+
+	// We expect all tests to return this.
+	Handle ans = eval->eval_h("ans");
+
+	// ------------------
+	ValuePtr get = eval->eval_v("(cog-execute! q-basic)");
+	printf("Got basic: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	LinkValuePtr lget(LinkValueCast(get));
+	HandleSeq hget(lget->to_handle_seq());
+	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
+	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
+
+	// Run the rest of the test.
+	do_predicate_test({ans});
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void PredicateFormulaUTest::test_reject(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/predicate-formula.scm\")");
+
+	// Set TV's from which computations will happen.
+	eval->eval_h("(Concept \"node1\" (stv 0.9 0.3))");
+	eval->eval_h("(Concept \"name1\" (stv 0.9 0.3))");
+	eval->eval_h("(List (Concept \"node1\") (Concept \"name1\") (stv 0.4 0.3))");
+
+	// We expect all tests to return the empty set.
+	do_predicate_test({});
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

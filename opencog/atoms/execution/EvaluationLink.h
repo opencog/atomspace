@@ -38,6 +38,13 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
 
+	static bool crisp_evaluate(AtomSpace*, const Handle&,
+	                           bool silent=false);
+	static bool crisp_eval_scratch(AtomSpace* main,
+	                               const Handle&,
+	                               AtomSpace* scratch,
+	                               bool silent=false);
+
 	static Handle factory(const Handle&);
 };
 

@@ -450,8 +450,8 @@ the [README-Algorithm](README-Algorithm.md) file.
    callbacks that can accept or reject a Node or Link match, a callback
    that is called before a Link match is even started, a callback
    to accept or reject a single grounded clause, etc. See the file
-   `PatternMatchCallback.h` for details. The `DefaultPatternMatchCB`
-   provides a very reasonable set of default callbacks that work
+   `PatternMatchCallback.h` for details. The various `Mixin` classes
+   provide a very reasonable set of default callbacks that work
    in "the expected way"; there are a handful of other special-purpose
    callbacks to solve various problems.
 
@@ -462,8 +462,8 @@ the [README-Algorithm](README-Algorithm.md) file.
    in the most efficient search. When there are no constant terms in
    any of the clauses, different techniques are used to pick a starting
    location.  The algorithms for picking the starting points are
-   provided in default callbacks, in `InitiateSearchCB`. These can be
-   overloaded for custom searches.
+   provided in default callbacks, in `InitiateSearchMixin`. These can
+   be overloaded for custom searches.
 
 7. Search begins with the clause containing the thinnest term. Search
    is performed upwards (i.e. following the edges in the incoming set).

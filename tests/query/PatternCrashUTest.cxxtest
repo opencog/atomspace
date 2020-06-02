@@ -25,8 +25,9 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/TermMatchMixin.h>
+#include <opencog/query/InitiateSearchMixin.h>
+#include <opencog/query/SatisfyMixin.h>
 
 using namespace opencog;
 
@@ -64,17 +65,20 @@ class PatternCrashUTest: public CxxTest::TestSuite
 		void test_empty_vars(void);
 };
 
-class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
+class PMCB :
+	public InitiateSearchMixin,
+	public TermMatchMixin,
+	public SatisfyMixin
 {
 	public:
 		PMCB(AtomSpace* as) :
-			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
+			InitiateSearchMixin(as), TermMatchMixin(as) {}
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
-			InitiateSearchCB::set_pattern(vars, pat);
-			DefaultPatternMatchCB::set_pattern(vars, pat);
+			InitiateSearchMixin::set_pattern(vars, pat);
+			TermMatchMixin::set_pattern(vars, pat);
 		}
 
 		virtual bool grounding(const HandleMap &var_soln,
@@ -272,7 +276,7 @@ void PatternCrashUTest::test_one_thing(void)
 
 	logger().debug("Before Pattern Matching");
 
-	sl->satisfy(pmcb);
+	pmcb.satisfy(sl);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -291,8 +295,7 @@ void PatternCrashUTest::test_empty_vars(void)
 
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
 	PMCB pmcb(_as);
-
-	sl->satisfy(pmcb);
+	pmcb.satisfy(sl);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

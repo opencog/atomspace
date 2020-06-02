@@ -1,5 +1,5 @@
 /*
- * DefaultPatternMatchCB.cc
+ * TermMatchMixin.cc
  *
  * Copyright (C) 2008,2009,2014,2015 Linas Vepstas
  *
@@ -29,7 +29,7 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
-#include "DefaultPatternMatchCB.h"
+#include "TermMatchMixin.h"
 
 using namespace opencog;
 
@@ -53,10 +53,10 @@ const bool TRANSIENT_SPACE = true;
 const int MAX_CACHED_TRANSIENTS = 8;
 
 // Allocated storage for the transient atomspace cache static variables.
-std::mutex DefaultPatternMatchCB::s_transient_cache_mutex;
-std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
+std::mutex TermMatchMixin::s_transient_cache_mutex;
+std::vector<AtomSpace*> TermMatchMixin::s_transient_cache;
 
-AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
+AtomSpace* TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
 {
 	AtomSpace* transient_atomspace = nullptr;
 
@@ -86,7 +86,7 @@ AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 	return transient_atomspace;
 }
 
-void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
+void TermMatchMixin::release_transient_atomspace(AtomSpace* atomspace)
 {
 	bool atomspace_cached = false;
 
@@ -117,7 +117,7 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 
 /* ======================================================== */
 
-DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
+TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
 	_temp_aspace = grab_transient_atomspace(as);
@@ -134,7 +134,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_gnd_bound_vars = nullptr;
 }
 
-DefaultPatternMatchCB::~DefaultPatternMatchCB()
+TermMatchMixin::~TermMatchMixin()
 {
 	// If we have a transient atomspace, release it.
 	if (_temp_aspace)
@@ -147,7 +147,7 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	delete _instor;
 }
 
-void DefaultPatternMatchCB::set_pattern(const Variables& vars,
+void TermMatchMixin::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
 	_vars = &vars;
@@ -169,7 +169,7 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
  * Return true if the nodes match, else return false.
  * By default, the nodes must be identical.
  */
-bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
+bool TermMatchMixin::node_match(const Handle& npat_h,
                                        const Handle& nsoln_h)
 {
 	// If equality, then a match.
@@ -184,7 +184,7 @@ bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
  * is a possible grounding node from the atomspace.
  * Return true if the nodes match, else return false.
  */
-bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
+bool TermMatchMixin::variable_match(const Handle& npat_h,
                                            const Handle& nsoln_h)
 {
 	// If the ungrounded term is not of type VariableNode, then just
@@ -199,7 +199,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	return _vars->is_type(npat_h, nsoln_h);
 }
 
-bool DefaultPatternMatchCB::scope_match(const Handle& npat_h,
+bool TermMatchMixin::scope_match(const Handle& npat_h,
                                         const Handle& nsoln_h)
 {
 	// If there are scoped vars, then accept anything that is
@@ -227,7 +227,7 @@ bool DefaultPatternMatchCB::scope_match(const Handle& npat_h,
  * By default, the search continues if the link
  * arity and the link types match.
  */
-bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
+bool TermMatchMixin::link_match(const PatternTermPtr& ptm,
                                        const Handle& lsoln)
 {
 	const Handle& lpat = ptm->getHandle();
@@ -287,7 +287,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	return true;
 }
 
-bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
+bool TermMatchMixin::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
@@ -320,10 +320,10 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// We will find ourselves here whenever the link contains a
 	// GroundedPredicateNode. In this case, execute the node, and
 	// declare a match, or no match, depending on the resulting TV.
-	return crisp_truth_from_tv(EvaluationLink::do_evaluate(_as, lgnd));
+	return EvaluationLink::crisp_evaluate(_as, lgnd);
 }
 
-void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
+void TermMatchMixin::post_link_mismatch(const Handle& lpat,
                                                const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
@@ -343,7 +343,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 /// renamed (i.e. alpha-hidden) or not.  Additional complexities arise
 /// due to a need to handle QuoteLinks, and to handle ChoiceLinks and
 /// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
-bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
+bool TermMatchMixin::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
                                            const GroundingMap& term_gnds,
                                            const HandleSet& varset,
@@ -459,7 +459,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  * this by saying (NotLink (NotLink (VariableNode $x))), thus forcing
  * the "normal" path to evaluate_sentence(). So may as well do it here.
  */
-bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
+bool TermMatchMixin::clause_match(const Handle& ptrn,
                                          const Handle& grnd,
                                          const GroundingMap& term_gnds)
 {
@@ -492,12 +492,12 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace->clear();
-		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
 
-		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded tv"
-		              << std::endl << tvp->to_string() << std::endl;})
+		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
+		                      << crispy << std::endl;})
 
-		return crisp_truth_from_tv(tvp);
+		return crispy;
 	}
 
 	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
@@ -513,7 +513,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  *   If ground is found, return false;
  *   If no ground is found, return true.
  */
-bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
+bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd,
                                                   const GroundingMap& term_gnds)
 {
@@ -564,7 +564,7 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
  * the pattern, with AlwaysLink failing to be satisfied. Reject
  * this case, now and forever. (viz, this is stateful.)
  */
-bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
+bool TermMatchMixin::always_clause_match(const Handle& ptrn,
                                                 const Handle& grnd,
                                                 const GroundingMap& term_gnds)
 {
@@ -573,7 +573,7 @@ bool DefaultPatternMatchCB::always_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
-IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h, Type t)
+IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
 {
 	return h->getIncomingSetByType(t, _as);
 }
@@ -585,7 +585,7 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h, Type t)
 // done. So this needs a clean re-implementation, with proper
 // beta-reduction with the groundings, followed by proper evaluation.
 
-bool DefaultPatternMatchCB::eval_term(const Handle& virt,
+bool TermMatchMixin::eval_term(const Handle& virt,
                                       const GroundingMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
@@ -669,7 +669,6 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	TruthValuePtr tvp;
 	// The instantiator would have taken care of expanding out
 	// and executing any FunctionLinks and the like.  Just use
 	// the TV value on the resulting atom.
@@ -682,37 +681,38 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	    _nameserver.isA(vty, FUNCTION_LINK))
 	{
 		gvirt = _as->add_atom(gvirt);
-		tvp = gvirt->getTruthValue();
+		TruthValuePtr tvp = gvirt->getTruthValue();
+
+		// Avoid null-pointer dereference if user specified a bogus evaluation.
+		// i.e. an evaluation that failed to return a TV.
+		if (nullptr == tvp)
+			throw InvalidParamException(TRACE_INFO,
+			        "Expecting a TruthValue for an evaluatable link: %s\n",
+			         gvirt->to_short_string().c_str());
+
+		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
+		                      << tvp->to_string() << std::endl;})
+
+		return crisp_truth_from_tv(tvp);
 	}
-	else
+
+	_temp_aspace->clear();
+	try
 	{
-		_temp_aspace->clear();
-		try
-		{
-			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
-		}
-		catch (const SilentException& ex)
-		{
-			// The do_evaluate()/do_eval_scratch() above can throw if
-			// it is given ungrounded expressions. It can be given
-			// ungrounded expressions if no grounding was found, and
-			// a final pass, run by the search_finished() callback,
-			// puts us here. So handle this case gracefully.
-			return false;
-		}
+		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
+		                      << crispy << std::endl;})
+		return crispy;
 	}
-
-	// Avoid null-pointer dereference if user specified a bogus evaluation.
-	// i.e. an evaluation that failed to return a TV.
-	if (nullptr == tvp)
-		throw InvalidParamException(TRACE_INFO,
-	            "Expecting a TruthValue for an evaluatable link: %s\n",
-	            gvirt->to_short_string().c_str());
-
-	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
-	              << tvp->to_string() << std::endl;})
-
-	return crisp_truth_from_tv(tvp);
+	catch (const SilentException& ex)
+	{
+		// The do_evaluate()/do_eval_scratch() above can throw if
+		// it is given ungrounded expressions. It can be given
+		// ungrounded expressions if no grounding was found, and
+		// a final pass, run by the search_finished() callback,
+		// puts us here. So handle this case gracefully.
+		return false;
+	}
 }
 
 /* ======================================================== */
@@ -724,7 +724,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * the sentence (with variables), 'gnds' holds the bindings of
  * variables to values.
  */
-bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
+bool TermMatchMixin::eval_sentence(const Handle& top,
                                           const GroundingMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
