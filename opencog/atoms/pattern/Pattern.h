@@ -81,9 +81,11 @@ struct Pattern
 	Handle           body;
 
 	/// Clauses that are never virtual. Set by unbundle_clauses().
-	HandleSeq        quoted_clauses;
-	/// Clauses that might be virtual. Set by unbundle_clauses().
-	HandleSeq        unquoted_clauses;
+	HandleSeq        literal_clauses;
+	/// Clauses that might be virtual. User never explicttly declared
+	/// them one way or the other, so we will have to guess, based on
+	/// what's in them. Set by unbundle_clauses().
+	HandleSeq        undeclared_clauses;
 
 	/// The mandatory clauses must be grounded.
 	HandleSeq        mandatory;

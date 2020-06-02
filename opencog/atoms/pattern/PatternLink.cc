@@ -38,7 +38,7 @@ using namespace opencog;
 
 void PatternLink::common_init(void)
 {
-	locate_defines(_pat.unquoted_clauses);
+	locate_defines(_pat.undeclared_clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -54,14 +54,14 @@ void PatternLink::common_init(void)
 	remove_constants(_variables.varset, _pat);
 
 	// Locate the black-box and clear-box clauses.
-	_fixed = _pat.quoted_clauses;
-	unbundle_virtual(_pat.unquoted_clauses);
+	_fixed = _pat.literal_clauses;
+	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
 	// Make sure every variable appears in some clause.
-	HandleSeq all_clauses(_pat.unquoted_clauses);
+	HandleSeq all_clauses(_pat.undeclared_clauses);
 	all_clauses.insert(all_clauses.end(),
-	    _pat.quoted_clauses.begin(), _pat.quoted_clauses.end());
+	    _pat.literal_clauses.begin(), _pat.literal_clauses.end());
 	validate_variables(_variables.varset, all_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
@@ -82,7 +82,7 @@ void PatternLink::common_init(void)
 	// just work around this, but eventually XXX FIXME.
 	if (nullptr == _pat.body)
 	{
-		for (const Handle& term : _pat.unquoted_clauses)
+		for (const Handle& term : _pat.undeclared_clauses)
 			trace_connectives(connectives, term);
 	}
 	else
@@ -109,8 +109,8 @@ void PatternLink::common_init(void)
 
 	make_term_trees();
 
-	get_clause_variables(_pat.quoted_clauses);
-	get_clause_variables(_pat.unquoted_clauses);
+	get_clause_variables(_pat.literal_clauses);
+	get_clause_variables(_pat.undeclared_clauses);
 	get_clause_variables(_pat.mandatory);
 
 	// Find prunable terms.
@@ -270,7 +270,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_variables.varset = vars;
-	_pat.unquoted_clauses = clauses;
+	_pat.undeclared_clauses = clauses;
 	_pat.mandatory = clauses;
 	common_init();
 	setup_components();
@@ -324,7 +324,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
-			_pat.quoted_clauses.emplace_back(ph);
+			_pat.literal_clauses.emplace_back(ph);
 			_pat.mandatory.emplace_back(ph);
 		}
 		return true;
@@ -348,7 +348,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink under a Choice is not supported yet!");
 
-			_pat.quoted_clauses.emplace_back(ph);
+			_pat.literal_clauses.emplace_back(ph);
 			_pat.mandatory.emplace_back(ph);
 		}
 		return true;
@@ -368,7 +368,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 
 		const Handle& inv(h->getOutgoingAtom(0));
 		_pat.optionals.emplace_back(inv);
-		_pat.quoted_clauses.emplace_back(inv);
+		_pat.literal_clauses.emplace_back(inv);
 		return true;
 	}
 
@@ -383,7 +383,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		for (const Handle& ah: h->getOutgoingSet())
 		{
 			_pat.always.emplace_back(ah);
-			_pat.unquoted_clauses.emplace_back(ah);
+			_pat.undeclared_clauses.emplace_back(ah);
 		}
 		return true;
 	}
@@ -445,7 +445,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			if (not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
 			{
-				_pat.unquoted_clauses.emplace_back(ho);
+				_pat.undeclared_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
 			}
 		}
@@ -467,7 +467,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// running the sequential. So that's a bug.
 		unbundle_clauses_rec(hbody, connectives);
 
-		_pat.unquoted_clauses.emplace_back(hbody);
+		_pat.undeclared_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
 
@@ -482,7 +482,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		unbundle_clauses_rec(hbody, connectives);
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
-			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.undeclared_clauses.emplace_back(hbody);
 			_pat.mandatory.emplace_back(hbody);
 		}
 	}
@@ -496,14 +496,14 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
-			_pat.unquoted_clauses.emplace_back(hbody);
+			_pat.undeclared_clauses.emplace_back(hbody);
 			_pat.mandatory.emplace_back(hbody);
 		}
 	}
 	else
 	{
 		// There's just one single clause!
-		_pat.unquoted_clauses.emplace_back(hbody);
+		_pat.undeclared_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 	}
 }
@@ -553,7 +553,7 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		     0 < ho->get_arity() and
 		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
 		{
-			_pat.unquoted_clauses.emplace_back(ho);
+			_pat.undeclared_clauses.emplace_back(ho);
 			_pat.mandatory.emplace_back(ho);
 		}
 	}
@@ -898,13 +898,13 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 ///
 bool PatternLink::add_dummies()
 {
-	if (0 < _pat.quoted_clauses.size()) return false;
+	if (0 < _pat.literal_clauses.size()) return false;
 
 	// The below is almost but not quite the same as
 	// if (0 < _fixed.size()) return; because fixed can be
 	// non-zero, if the virtual term has only one variable
 	// in it.
-	for (const Handle& cl : _pat.unquoted_clauses)
+	for (const Handle& cl : _pat.undeclared_clauses)
 	{
 		// if (0 == _pat.evaluatable_holders.count(cl)) return;
 		if (0 == _pat.evaluatable_terms.count(cl)) return false;
