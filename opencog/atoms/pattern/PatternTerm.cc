@@ -25,7 +25,8 @@ PatternTerm::PatternTerm()
 	  _has_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _has_any_unordered_link(false)
+	  _has_any_unordered_link(false),
+	  _is_literal(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -197,12 +198,22 @@ void PatternTerm::addEvaluatable()
 
 void PatternTerm::addUnorderedLink()
 {
-	if (not _has_any_unordered_link)
-	{
-		_has_any_unordered_link = true;
-		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addUnorderedLink();
-	}
+	if (_has_any_unordered_link) return;
+
+	_has_any_unordered_link = true;
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->addUnorderedLink();
+}
+
+// ==============================================================
+
+void PatternTerm::makeLiteral()
+{
+	if (not _is_literal) return;
+
+	_is_literal = true;
+	for (PatternTermPtr& ptm : getOutgoingSet())
+		ptm->makeLiteral();
 }
 
 // ==============================================================

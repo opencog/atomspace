@@ -116,6 +116,13 @@ protected:
 	// have all possible permutations explored.
 	bool _has_any_unordered_link;
 
+	// True if quoted, or if it should be taken literally, and not
+	// evaluated or interpreted. Usually, this means that this term
+	// is underneath a PresentLink, an AbsentLink, a ChoiceLink, or
+	// a QuoteLink. This applies only to non-variables (as variables
+	// are still variables, unless they are quoted or scope-hidden.)
+	bool _is_literal;
+
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
 	void addAnyEvaluatable();
@@ -142,6 +149,9 @@ public:
 	Quotation& getQuotation() { return _quotation; };
 	const Quotation& getQuotation() const noexcept { return _quotation; }
 	bool isQuoted() const { return _quotation.is_quoted(); }
+
+	void makeLiteral();
+	bool isLiteral() const { return _is_literal; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
