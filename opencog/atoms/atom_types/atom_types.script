@@ -25,6 +25,7 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
+VOID_VALUE <- VALUE     // singleton value to return when nothing is returned
 
 // ===========================================================
 // A base class for time-varying floating-point values.
