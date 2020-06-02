@@ -1700,7 +1700,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	if (hp == hg) return false;
 
 	logmsg("!! explore_present:", hp);
-	logmsg("!! presnet gnd:", hg);
+	logmsg("!! present gnd:", hg);
 
 	bool joins = tree_compare(ptm, hg, CALL_PRESENT);
 	logmsg("!! explore_present result=", joins);
@@ -1938,14 +1938,14 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const Handle& hi = parent->getHandle();
 	Type hit = hi->get_type();
 
-	if (PRESENT_LINK == hit and not parent->isQuoted())
+	if (PRESENT_LINK == hit /* and not ptm->isLiteral()*/)
 	{
 		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
 		return explore_present_branches(ptm, hg, clause_root);
 	}
 
 	// Do the simple case first, ChoiceLinks are harder.
-	if (CHOICE_LINK != hit)
+	if (CHOICE_LINK != hit /* or parent->isLiteral() */)
 	{
 		bool found = explore_up_branches(ptm, hg, clause_root);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
