@@ -317,6 +317,7 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 bool PatternLink::record_literal(const Handle& h, bool reverse)
 {
 	Type typ = h->get_type();
+
 	// Pull clauses out of a PresentLink
 	if ((not reverse and PRESENT_LINK == typ) or
 	    (reverse and ABSENT_LINK == typ))
@@ -328,6 +329,31 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		}
 		return true;
 	}
+
+/*
+	// Everything under Choice is either a literal, or another
+	// Present.
+	if (not reverse and CHOICE_LINK == typ)
+	{
+		for (const Handle& ph : h->getOutgoingSet())
+		{
+			Type pht = ph->get_type();
+			if (PRESENT_LINK == pht)
+			{
+				record_literal(ph, reverse);
+				continue;
+			}
+
+			if (ABSENT_LINK == pht)
+				throw InvalidParamException(TRACE_INFO,
+					"AbsentLink under a Choice is not supported yet!");
+
+			_pat.quoted_clauses.emplace_back(ph);
+			_pat.mandatory.emplace_back(ph);
+		}
+		return true;
+	}
+*/
 
 	// Pull clauses out of an AbsentLink
 	if ((not reverse and ABSENT_LINK == typ) or
@@ -345,6 +371,10 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		_pat.quoted_clauses.emplace_back(inv);
 		return true;
 	}
+
+	if (reverse and CHOICE_LINK == typ)
+		throw InvalidParamException(TRACE_INFO,
+			"NotLink-ChoiceLink is not supported yet!");
 
 	// Pull clauses out of an AlwaysLink
 	if (not reverse and ALWAYS_LINK == typ)
@@ -478,12 +508,12 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
-/// Search for any PRESENT_LINK or ABSENT_LINK's that are recusively
-/// embedded inside some evaluatable clause.  Note these as literal,
-/// groundable clauses. `record_literal` does this.
+/// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
+/// recusively embedded inside some evaluatable clause.  Note these as
+/// literal, groundable clauses. `record_literal` does this.
 ///
-/// If there weren't any literal Present or Absent Links, (i.e. if
-/// `record_literal` didn't spot anything) then take some guesses.
+/// If there weren't any literal Present, Absent or Choice Links, (i.e.
+/// if `record_literal` didn't spot anything) then take some guesses.
 /// This guessing is slightly convoluted, but seems to make sense.
 /// So:
 /// * If a clause is not evaluatable, then assume `Present` was intended.
