@@ -12,72 +12,82 @@
 ;
 (set-procedure-property! cog-new-node 'documentation
 "
- cog-new-node NODE-TYPE NODE-NAME
-    Create a new node of type NODE-TYPE and name NODE-NAME.
+ cog-new-node NODE-TYPE NODE-NAME [ATOMSPACE] [TV]
+    Create a new Node of Type NODE-TYPE and name NODE-NAME.
+    Optionally, place it in ATOMSPACE and/or assign a TruthValue TV
+    to it.
 
-    Optionally, a truth value can follow the node name.
-
-    Throws errors if node-type is not a valid atom type for a node,
-    and if node-name is not a string.
+    Throws errors if NODE-TYPE is not a valid Atom Type for a Node,
+    and if NODE-NAME is not a string. Use (cog-get-types) to get a
+    list of the currently loaded atom types.
 
     Example:
         ; Create a new node, and prints its value:
-        guile> (cog-new-node 'ConceptNode \"some node name\")
+        guile> (cog-new-node 'Concept \"some node name\")
         (ConceptNode \"some node name\")
 
         ; Creates a new node, with a truth value:
-        guile> (cog-new-node 'ConceptNode \"another node\"
+        guile> (cog-new-node 'Concept \"another node\"
                       (cog-new-stv 0.8 0.9))
         (ConceptNode \"another node\" (stv 0.8 0.9))
+
+        ; Creates a new atomspace, and places the node there:
+        guile> (define spacex (cog-new-atomspace))
+        guile> (Concept \"foo\" spacex)
+        guile> (cog-prt-atomspace spacex)
 ")
 
 (set-procedure-property! cog-node 'documentation
 "
- cog-node NODE-TYPE NODE-NAME
-    Returns the node of type NODE-TYPE and name NODE-NAME, if it exists,
+ cog-node NODE-TYPE NODE-NAME [ATOMSPACE] [NEW-TV]
+    Returns the Node of Type NODE-TYPE and name NODE-NAME, if it exists,
     else returns null.
 
-    Optionally, a truth value can follow the node name. If the node
-    exists, then the truth value is modified.
+    If an optional ATOMSPACE is specified, then it is queried for the
+    node, instead of the current AtomSpace for this thread. If an
+    optional TruthValue NEW-TV is specified, and if the atom exists,
+    then the TruthValue is changed to NEW-TV.
 
-    Throws errors if node-type is not a valid atom type for a node,
-    and if node-name is not a string.
+    Throws errors if NODE-TYPE is not a valid atom type for a Node,
+    and if NODE-NAME is not a string. Use (cog-get-types) to get a
+    list of the currently loaded atom types.
 
     Example:
         ; Check to see if a node exists:
-        guile> (cog-node 'ConceptNode \"asdf\")
+        guile> (cog-node 'Concept \"asdf\")
         ()
 
         ; Verify that the return value is actually a true null:
-        guile> (null? (cog-node 'ConceptNode \"asdf\"))
+        guile> (null? (cog-node 'Concept \"asdf\"))
         #t
 
         ; Now, create the node, and see if it exists:
-        guile> (cog-new-node 'ConceptNode \"asdf\")
+        guile> (cog-new-node 'Concept \"asdf\")
         (ConceptNode \"asdf\")
-        guile> (null? (cog-node 'ConceptNode \"asdf\"))
+        guile> (null? (cog-node 'Concept \"asdf\"))
         #f
 
         ; Change the truth value of an existing node:
-        guile> (cog-node 'ConceptNode \"asdf\" (cog-new-stv 0.8 0.9))
+        guile> (cog-node 'Concept \"asdf\" (SimpleTruthValue 0.8 0.9))
         (ConceptNode \"asdf\" (stv 0.8 0.9))
 ")
 
 (set-procedure-property! cog-new-link 'documentation
 "
- cog-new-link LINK-TYPE ATOM-1 ... ATOM-N
-    Create a new link, of type LINK-TYPE, with the given atoms in the link.
+ cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE] [TV]
+    Create a new Link, of Type LINK-TYPE, holding the given Atoms.
+    Optionally, place it in ATOMSPACE and/or assign a TruthValue TV
+    to it.
 
-    Optionally, a truth value can be included in the list of atoms.
-
-    Throws errors if the link type is not a valid OpenCog link type,
-    or if any of the arguments after the link type are not atoms or
-    truth values.
+    Throws errors if LINK-TYPE is not a valid Link Type, or if any of
+    the arguments after the Link Type are not Atoms, TruthValues or
+    AtomSpaces. Use (cog-get-types) to get a list of the currently
+    loaded atom types.
 
     Example:
         ; Creates two nodes, and a new link:
-        guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-        guile> (define y (cog-new-node 'ConceptNode \"def\"))
+        guile> (define x (Concept \"abc\"))
+        guile> (define y (Concept \"def\"))
         guile> (cog-new-link 'Link x y)
         (Link
            (ConceptNode \"abc\")
@@ -85,25 +95,33 @@
         )
 
         ; Create a new link with a truth value:
-        guile> (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
+        guile> (cog-new-link 'Link x y (SimpleTruthValue 0.7 0.8))
         (Link (stv 0.7 0.8)
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
+
+        ; Creates a new atomspace, and places the link there:
+        guile> (define spacex (cog-new-atomspace))
+        guile> (cog-new-link 'Link x y spacex)
+        guile> (cog-prt-atomspace spacex)
 ")
 
 (set-procedure-property! cog-link 'documentation
 "
- cog-link LINK-TYPE ATOM-1 ... ATOM-N
-    Returns the link of the given type LINK-TYPE and list of atoms,
+ cog-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE] [NEW-TV]
+    Returns the Link of the given type LINK-TYPE and list of atoms,
     if it exists, else returns null.
 
-    Optionally, a truth value can be included in the list of atoms.
-    If the link exists, then the truth value is modified.
+    If an optional ATOMSPACE is specified, then it is queried for the
+    link, instead of the current AtomSpace for this thread. If an
+    optional TruthValue NEW-TV is specified, and if the atom exists,
+    then the TruthValue is changed to NEW-TV.
 
-    Throws errors if the link type is not a valid OpenCog link type,
-    or if any of the arguments after the link type are not atoms or
-    truth values.
+    Throws errors if LINK-TYPE is not a valid Link Type, or if any
+    of the arguments after the Link Type are not Atoms, TruthValues or
+    AtomSpaces. Use (cog-get-types) to get a list of the currently
+    loaded atom types.
 
     Example:
         ; Create two nodes:
@@ -138,11 +156,10 @@
 
 (set-procedure-property! cog-delete 'documentation
 "
- cog-delete ATOM
-    Remove the indicated ATOM from the AtomSpace, but only if it has no
-    incoming links. If it has incoming links, the remove fails.  If SQL
-    or other data storage is attached, the ATOM is also removed from
-    the storage.
+ cog-delete ATOM [ATOMSPACE]
+    Remove the indicated ATOM, but only if it has no incoming links.
+    If it has incoming links, the remove fails.  If SQL or other data
+    storage is attached, the ATOM is also removed from the storage.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
@@ -152,11 +169,15 @@
     Use cog-delete-recursive to force removal of this atom, together
     with any links that might be holding this atom.
 
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
+
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (define l (cog-new-link 'Link x y))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
+       guile> (define l (Link x y))
 
        ; Verify that there's an atom called x:
        guile> x
@@ -187,19 +208,23 @@
 
 (set-procedure-property! cog-delete-recursive 'documentation
 "
- cog-delete-recursive ATOM
-    Remove the indicated ATOM from the AtomSpace, and all atoms that
-    point at it.  If SQL or other data storage is attached, the ATOM is
-    also removed from the storage.
+ cog-delete-recursive ATOM [ATOMSPACE]
+    Remove the indicated ATOM, and all atoms that point at it.
+    If SQL or other data storage is attached, the ATOM is also removed
+    from the storage.
 
     Return #t on success, else return #f if not removed.
+
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
 ")
 
 (set-procedure-property! cog-extract 'documentation
 "
- cog-extract ATOM
-    Remove the indicated ATOM from the AtomSpace, but only if it has no
-    incoming links. If it has incoming links, the remove fails.
+ cog-extract ATOM [ATOMSPACE]
+    Remove the indicated ATOM, but only if it has no incoming links.
+    If it has incoming links, the remove fails.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
@@ -209,11 +234,15 @@
     Use cog-extract-recursive to force removal of this atom, together
     with any links that might be holding this atom.
 
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
+
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (define l (cog-new-link 'Link x y))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
+       guile> (define l (Link x y))
 
        ; Verify that there's an atom called x:
        guile> x
@@ -244,13 +273,17 @@
 
 (set-procedure-property! cog-extract-recursive 'documentation
 "
- cog-extract-recursive ATOM
-    Remove the indicated ATOM from the AtomSpace, and all atoms that
-    point at it.  Return #t on success, else return #f if not removed.
+ cog-extract-recursive ATOM [ATOMSPACE]
+    Remove the indicated ATOM, and all atoms that point at it.
+    Return #t on success, else return #f if not removed.
 
     The atom is NOT removed from SQL or other attached data storage.
     If you need to delete from storage, use cog-delete and
     cog-delete-recursive.
+
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
 ")
 
 (set-procedure-property! cog-atom? 'documentation
@@ -260,7 +293,7 @@
 
     Example:
        ; Define a node
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
+       guile> (define x (Concept \"abc\"))
        guile> (define y (+ 2 2))
        guile> (cog-atom? x)
        #t
@@ -278,8 +311,8 @@
 
     Example:
        ; Define a node and a link
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-link 'ListLink x))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (ListLink x))
        guile> (cog-node? x)
        #t
        guile> (cog-node? y)
@@ -296,8 +329,8 @@
 
     Example:
        ; Define a node and a link
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-link 'ListLink x))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (ListLink x))
        guile> (cog-link? x)
        #f
        guile> (cog-link? y)
@@ -312,7 +345,7 @@
 
     Example:
        ; Define a node
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
+       guile> (define x (Concept \"abc\"))
        guile> (cog-name x)
        \"abc\"
 ")
@@ -320,10 +353,11 @@
 (set-procedure-property! cog-number 'documentation
 "
  cog-number NUMBER-NODE
-    Return the floating point value of the NumberNode NUMBER-NODE.
-    If it is a NumberNode, then this is the same as saying
-        (string->number (cog-name NUMBER-NODE))
-    If it is not a NumberNode, then this will throw an exception.
+    Return the (list of) floating point values of NUMBER-NODE.
+    The NUMBER-NODE must be an Node of type NumberNode, else an
+    exception will be thrown.
+
+   This is the same as saying (string->number (cog-name NUMBER-NODE))
 
     Example:
        ; Define a node
@@ -339,10 +373,10 @@
 
     Example:
        ; Define a node
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
+       guile> (define x (Concept \"abc\"))
        guile> (cog-type x)
        ConceptNode
-       guile> (eq? 'ConceptNode (cog-type x))
+       guile> (eq? 'Concept (cog-type x))
        #t
 ")
 
@@ -352,10 +386,10 @@
     Return the arity of ATOM.
 
     Example:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
+       guile> (define x (Concept \"abc\"))
        guile> (cog-arity x)
        0
-       guile> (define l (cog-new-link 'Link x x x))
+       guile> (define l (Link x x x))
        guile> (cog-arity l)
        3
 ")
@@ -369,8 +403,8 @@
     See also: cog-incoming-size, cog-incoming-by-type
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (ConceptNode \"abc\"))
-       guile> (define y (ConceptNode \"def\"))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
        guile> (define l (Link x y))
 
        ; Get the incoming sets of nodes x and y (which is the link l):
@@ -412,8 +446,8 @@
 
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (ConceptNode \"abc\"))
-       guile> (define y (ConceptNode \"def\"))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
        guile> (Link x y)
 
        ; Get the size of the incoming set of nodes x and y:
@@ -435,8 +469,8 @@
 
     Example:
        ; Define two nodes and two links between them:
-       guile> (define x (ConceptNode \"abc\"))
-       guile> (define y (ConceptNode \"def\"))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
        guile> (ListLink x y)
        guile> (UnorderedLink x y)
 
@@ -466,8 +500,8 @@
 
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (ConceptNode \"abc\"))
-       guile> (define y (ConceptNode \"def\"))
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
        guile> (ListLink x y)
        guile> (UnorderedLink x y)
 
@@ -505,8 +539,9 @@
 "
  cog-handle ATOM
     Return the hash of ATOM. The hash is a 64-bit integer, computed
-    from the component parts of the atom (but not it's values), that
+    from the component parts of the Atom (but not it's Values), that
     can be used in hash tables or other algorithms that require a hash.
+    Links always have the high-bit set, and Nodes never do.
 
     Example:
        guile> (cog-handle (Concept \"abc\"))
@@ -538,7 +573,7 @@
   count set to CNT.
 
   Example usage:
-     (cog-inc-count! (ConceptNode \"Answer\") 42.0)
+     (cog-inc-count! (Concept \"Answer\") 42.0)
 
   See also: cog-inc-value! for a generic version
 ")
@@ -558,8 +593,8 @@
 
   Example usage:
      (cog-inc-value!
-         (ConceptNode \"Question\")
-         (PredicateNode \"Answer\")
+         (Concept \"Question\")
+         (Predicate \"Answer\")
          42.0  0)
 
   See also: cog-inc-count! for a version that increments the count TV.
@@ -596,8 +631,7 @@
     Example:
        ; Define a node
        guile> (define x
-                 (cog-new-node 'ConceptNode \"abc\"
-                    (cog-new-stv 0.2 0.5)))
+                 (Concept \"abc\" (SimpleTruthValue 0.2 0.5)))
        guile> (cog-tv x)
        (stv 0.2 0.5)
        guile> (cog-tv? (cog-tv x))
@@ -611,10 +645,10 @@
 
     Example:
        ; Define a node
-       guile> (define x (cog-new-node 'ConceptNode \"def\"))
+       guile> (define x (Concept \"def\"))
        guile> (cog-tv x)
-       (stv 0 0)
-       guile> (cog-set-tv! x (cog-new-stv 0.9 0.8))
+       (stv 1 0)
+       guile> (cog-set-tv! x (SimpleTruthValue 0.9 0.8))
        (ConceptNode \"def\" (stv 0.9 0.8))
        guile> (cog-tv x)
        (stv 0.9 0.8)
@@ -646,12 +680,11 @@
 
 (set-procedure-property! cog-new-value 'documentation
 "
- cog-new-value TYPE LIST
-    Create a new value of type TYPE, hold the LIST of strings, floats
-    or values.  The TYPE must be either 'StringValue, 'FloatValue
-    or 'LinkValue. The LIST must be an ordinary guile list, consisting
-    entirely of guile strings, guile numbers, or OpenCog values,
-    respectively, for each of the three types.
+ cog-new-value TYPE ARGS
+    Create a new Value of type TYPE, with additional ARGS. In many
+    cases, ARGS is list of strings, floats or values.  The TYPE must
+    be a valid Value type; use (cog-get-types) to get a list of the
+    currently loaded types.
 
     Example:
        guile> (cog-new-value 'FloatValue 1 2 3))
@@ -725,7 +758,7 @@
 (set-procedure-property! cog-value->list 'documentation
 "
  cog-value->list VALUE
-    Return a scheme list holding the values in the OpenCog VALUE.
+    Return a scheme list holding the values in the Atomese VALUE.
     If VALUE is a Link, this returns the outgoing set.
     If VALUE is a Node, this returns list containing the node name.
     If VALUE is a StringValue, FloatValue or LinkValue, this returns
@@ -764,7 +797,7 @@
 (set-procedure-property! cog-get-types 'documentation
 "
  cog-get-types
-    Return a list of all of the atom and value types in the system.
+    Return a list of all of the Atom and Value types in the system.
 
     Example:
         guile> (cog-get-types)
@@ -773,7 +806,9 @@
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
-    Return the integer value corresponding to an atom TYPE.
+    Return the integer value corresponding to an Atom TYPE.
+    This is unique for the current session, only; it is not universally
+    unique, and may change from one session to the next.
 
     Example:
         guile> (cog-type->int 'ListLink)
@@ -818,7 +853,7 @@
     the type Atom: they are all subtypes of Atom.
 
     The ATOMSPACE argument is optional; if absent, the default
-    AtomSpace is used.
+    AtomSpace for this thread is used.
 
     Example:
        ; define a function that prints the atoms:
@@ -834,11 +869,12 @@
 
   Return a count of the number of atoms of the given type `ATOM-TYPE`.
   If the optional argument `ATOMSPACE` is given, then a count is
-  returned for that AtomSpace; otherwise, the default AtomSpace is used.
+  returned for that AtomSpace; otherwise, the default AtomSpace for
+  this thread is used.
 
   Example usage:
-     (display (cog-count-atoms 'ConceptNode))
-  will display a count of all atoms of type 'ConceptNode
+     (display (cog-count-atoms 'Concept))
+  will display a count of all atoms of type 'Concept
 ")
 
 (set-procedure-property! cog-atomspace 'documentation
