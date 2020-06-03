@@ -794,13 +794,6 @@
        3.0
 ")
 
-(set-procedure-property! cog-as 'documentation
-"
- cog-as ATOM
-    Return the AtomSpace of the ATOM.  If the ATOM does not belong to
-    any AtomSpace, null is returned.
-")
-
 (set-procedure-property! cog-get-types 'documentation
 "
  cog-get-types
