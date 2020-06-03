@@ -770,6 +770,8 @@
     Example:
        guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
        (0.1 0.2 0.3)
+       guile> (cog-value->list (Number 1 2 3))
+       (1.0 2.0 3.0)
 ")
 
 (set-procedure-property! cog-value-ref 'documentation
@@ -788,6 +790,8 @@
     Example:
        guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
        0.3
+       guile> (cog-value-ref (Number 1 2 3) 2)
+       3.0
 ")
 
 (set-procedure-property! cog-as 'documentation
