@@ -631,7 +631,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-delete");
+	Handle h = verify_handle(satom, "cog-delete!");
 
 	// It can happen that the atom has already been deleted, but we're
 	// still holding on to a pointer to it.  This is rare... but possible.
@@ -642,7 +642,7 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete!");
 
 	// AtomSpace::removeAtom() returns true if atom was deleted,
 	// else returns false
@@ -665,10 +665,10 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-delete-recursive");
+	Handle h = verify_handle(satom, "cog-delete-recursive!");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive!");
 
 	bool rc = atomspace->remove_atom(h, true);
 
@@ -690,13 +690,13 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-extract");
+	Handle h = verify_handle(satom, "cog-extract!");
 
 	// The extract will fail/log warning if the incoming set isn't null.
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract!");
 
 	// AtomSpace::extract_atom() returns true if atom was extracted,
 	// else returns false
@@ -719,10 +719,10 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-extract-recursive");
+	Handle h = verify_handle(satom, "cog-extract-recursive!");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive!");
 
 	bool rc = atomspace->extract_atom(h, true);
 

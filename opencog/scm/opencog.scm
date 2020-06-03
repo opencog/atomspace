@@ -24,7 +24,8 @@
 ; when these are touched in the various scm files.
 (export
 cog-arity
-cog-as
+cog-atom
+cog-atom-new
 cog-atom?
 cog-atom-less?
 cog-atomspace
@@ -40,10 +41,10 @@ cog-atomspace-uuid
 cog-confidence
 cog-count
 cog-count-atoms
-cog-delete
-cog-delete-recursive
-cog-extract
-cog-extract-recursive
+cog-delete!
+cog-delete-recursive!
+cog-extract!
+cog-extract-recursive!
 cog-get-subtypes
 cog-get-types
 cog-handle
@@ -109,18 +110,23 @@ cog-value-ref
 		; Initialize a default atomspace, just to keep things sane...
 		(cog-set-atomspace! cog-initial-as)))
 
+; Renamed functions
+(define-public (cog-as ATOM) (cog-atomspace ATOM))
+(define-public (cog-delete ATOM) (cog-delete! ATOM))
+(define-public (cog-delete-recursive ATOM) (cog-delete-recursive! ATOM))
+(define-public (cog-extract ATOM) (cog-extract! ATOM))
+(define-public (cog-extract-recursive ATOM) (cog-extract-recursive! ATOM))
+
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
-; Some of these things could possibly be modules ...?
+; Some of these things could possibly be turned into modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
 ; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
 (include-from-path "opencog/base/core-docs.scm")
-
 (include-from-path "opencog/base/utilities.scm")
-
 (include-from-path "opencog/base/atom-cache.scm")
 (include-from-path "opencog/base/apply.scm")
 (include-from-path "opencog/base/tv.scm")
@@ -130,4 +136,3 @@ cog-value-ref
 
 ; Obsolete functions
 (define-public (cog-undefined-handle) "obsolete function" '())
-(define-public (cog-as ATOM) (cog-atomspace ATOM))

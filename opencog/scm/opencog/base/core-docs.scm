@@ -154,19 +154,19 @@
         )
 ")
 
-(set-procedure-property! cog-delete 'documentation
+(set-procedure-property! cog-delete! 'documentation
 "
- cog-delete ATOM [ATOMSPACE]
+ cog-delete! ATOM [ATOMSPACE]
     Remove the indicated ATOM, but only if it has no incoming links.
     If it has incoming links, the remove fails.  If SQL or other data
     storage is attached, the ATOM is also removed from the storage.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
-    Use cog-extract to remove from the AtomSpace only, leaving storage
+    Use cog-extract! to remove from the AtomSpace only, leaving storage
     unaffected.
 
-    Use cog-delete-recursive to force removal of this atom, together
+    Use cog-delete-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
@@ -185,12 +185,12 @@
 
        ; Try to delete x. This should fail, since there's a link
        ; containing x.
-       guile> (cog-delete x)
+       guile> (cog-delete! x)
        #f
 
        ; Delete x, and everything pointing to it. This should delete
        ; both x, and the link l.
-       guile> (cog-delete-recursive x)
+       guile> (cog-delete-recursive! x)
        #t
 
        ; Verify that the link l is gone:
@@ -206,9 +206,9 @@
        (ConceptNode \"def\")
 ")
 
-(set-procedure-property! cog-delete-recursive 'documentation
+(set-procedure-property! cog-delete-recursive! 'documentation
 "
- cog-delete-recursive ATOM [ATOMSPACE]
+ cog-delete-recursive! ATOM [ATOMSPACE]
     Remove the indicated ATOM, and all atoms that point at it.
     If SQL or other data storage is attached, the ATOM is also removed
     from the storage.
@@ -220,18 +220,18 @@
     current AtomSpace for this thread.
 ")
 
-(set-procedure-property! cog-extract 'documentation
+(set-procedure-property! cog-extract! 'documentation
 "
- cog-extract ATOM [ATOMSPACE]
+ cog-extract! ATOM [ATOMSPACE]
     Remove the indicated ATOM, but only if it has no incoming links.
     If it has incoming links, the remove fails.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
     This does NOT remove the atom from any attached storage (e.g. SQL
-    storage).  Use cog-delete to remove from atoms from storage.
+    storage).  Use cog-delete! to remove from atoms from storage.
 
-    Use cog-extract-recursive to force removal of this atom, together
+    Use cog-extract-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
@@ -250,12 +250,12 @@
 
        ; Try to extract x. This should fail, since there's a link
        ; containing x.
-       guile> (cog-extract x)
+       guile> (cog-extract! x)
        #f
 
        ; Delete x, and everything pointing to it. This should extract
        ; both x, and the link l.
-       guile> (cog-extract-recursive x)
+       guile> (cog-extract-recursive! x)
        #t
 
        ; Verify that the link l is gone:
@@ -271,15 +271,15 @@
        (ConceptNode \"def\")
 ")
 
-(set-procedure-property! cog-extract-recursive 'documentation
+(set-procedure-property! cog-extract-recursive! 'documentation
 "
- cog-extract-recursive ATOM [ATOMSPACE]
+ cog-extract-recursive! ATOM [ATOMSPACE]
     Remove the indicated ATOM, and all atoms that point at it.
     Return #t on success, else return #f if not removed.
 
     The atom is NOT removed from SQL or other attached data storage.
-    If you need to delete from storage, use cog-delete and
-    cog-delete-recursive.
+    If you need to delete from storage, use cog-delete! and
+    cog-delete-recursive!.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
     removed from that AtomSpace; otherwise, it is removed from the
