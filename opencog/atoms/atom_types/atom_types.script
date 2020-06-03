@@ -168,6 +168,7 @@ CONTEXT_LINK <- ORDERED_LINK
 // The ordered links SequentialAndLink, SequentialOrLink allow
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
 // sequential execution until the first failure or the first success.
+// See also CondLink below, which implements traditional conditional.
 //
 TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
@@ -176,6 +177,10 @@ OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+
+// ====================================================================
+// Pattern-engine links. These have a special meaning for the pattern
+// engine; they are used to specify what is searched for.
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
 // The ChoiceLink states that a choice must be made.  Like a restaurant
@@ -192,9 +197,11 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 // "disjoint union".)
 //
 // This is important for the pattern matcher; you use it to say
-// "match this graph or this graph or this graph".
-//
-CHOICE_LINK <- ORDERED_LINK
+// "match this graph or this graph or this graph". It is
+// crisp-true/false if any of the items on the meu are present.
+// Compare to RandomChoiceLink below, which randomly selects one
+// entry.
+CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -227,6 +234,7 @@ ABSENT_LINK <- PRESENT_LINK
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
 
+// ====================================================================
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  ThreadJoinLink launches multiple threads, and waits
@@ -483,8 +491,6 @@ DUAL_LINK <- SATISFYING_LINK
 // true or false (or has some other truth value) on those elements.
 EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
-EQUIVALENCE_LINK <- UNORDERED_LINK
-
 // ==============================================================
 // Types and type constructors. Variables and other atoms can be
 // given types.  The below describe the types.
@@ -649,11 +655,43 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // user-defined structures; users should use the LambdaLink for that.
 FUNCTION_LINK <- FREE_LINK
 
-// The ExecutionOutputLink is a specific kind of function: it must have
-// a GroundedSchemeNode as its first argument.  The other kinds of
-// FunctionLinks do not have this restriction: indeed, the actual
-// function they perform is implicit in the link type.
-EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+// --------------------
+// Arithmetic and number-valued functions
+
+// Basic arithmetic operators
+FOLD_LINK <- FUNCTION_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
+PLUS_LINK <- ARITHMETIC_LINK
+MINUS_LINK <- PLUS_LINK
+TIMES_LINK <- ARITHMETIC_LINK
+DIVIDE_LINK <- TIMES_LINK
+
+// Minimum and maxmimum of a set of numbers.
+MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Heaviside step function; same as GreaterThan, but works
+// for vectors, and returns numeric value.
+HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return uniformly distributed random number between two limits.
+RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return the sum of vector components of a number/float-value.
+ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return arity of the wrapped link. If it's a NumberNode
+// of a value, return the length of the underlying vector.
+// XXX FIXME .. did we mis-name this? Should it be SizeOfLink
+// or maybe LengthOfLink? (viz, the length of FloatValue...)
+ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return the current time.
+TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// --------------------
+// Truth-value manipulating functions. Some of these return numbers,
+// some of these return truth values.
 
 // Return the indicated value on the indicated atom.
 // XXX FIXME - Not all ValueOfLinks are actually numeric; but there
@@ -689,44 +727,23 @@ PREDICATE_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 // Like the above, but the TV is not a constant, but the formula itself.
 DYNAMIC_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
-// Basic arithmetic operators
-FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
-PLUS_LINK <- ARITHMETIC_LINK
-MINUS_LINK <- PLUS_LINK
-TIMES_LINK <- ARITHMETIC_LINK
-DIVIDE_LINK <- TIMES_LINK
+// --------------------
+// Other kinds of functions.
 
-// Minimum and maxmimum of a set of numbers.
-MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
-// Heaviside step function; same as GreaterThan, but works
-// for vectors, and returns numeric value.
-HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
-// Return uniformly distributed random number between two limits.
-RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
-// Return the sum of vector components of a number/float-value.
-ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
-// Return arity of the wrapped link. If it's a NumberNode
-// of a value, return the length of the underlying vector.
-// XXX FIXME .. did we mis-name this? Should it be SizeOfLink
-// or maybe LengthOfLink? (viz, the length of FloatValue...)
-ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+// The ExecutionOutputLink is a specific kind of function: it must have
+// a GroundedSchemeNode as its first argument.  The other kinds of
+// FunctionLinks do not have this restriction: indeed, the actual
+// function they perform is implicit in the link type.
+EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
-// XXX Broken polymorphism: the choice link can sometimes generate
-// numbers, and sometimes not. It depends ... so static type checking
-// is fairly broken, here, as currently implemented.
-RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+RANDOM_CHOICE_LINK <- FUNCTION_LINK
 
-// Return the current time.
-TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
-// Conditional based on crisp boolean value from TV.
+// Conditional if-then-else list. First term must evaluate to crisp
+// true/false. If true, then the second term is returned, else the
+// third term If there are more than three terms, this repeats: so
+// odd terms must evaluate to true/false, resulting in the return of
+// the first even term which followed the first true evaluation.
 COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
@@ -834,6 +851,15 @@ SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
 // Convert predicate into concept
 SATISFYING_SET_LINK <- LINK
 
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK
+INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+
+EQUIVALENCE_LINK <- UNORDERED_LINK
+INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+
 // Sugar forms of implication and equivalence links. See
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink
 // for more information
@@ -845,15 +871,7 @@ EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
 INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 
-// Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK
-INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-
-INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-
-// Generic association
+// Generic association. Mystery link. What does this do ???
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
 // Mystery link used by PLN

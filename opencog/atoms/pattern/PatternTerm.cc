@@ -15,7 +15,7 @@ namespace opencog {
 
 const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
 
-PatternTerm::PatternTerm()
+PatternTerm::PatternTerm(void)
 	: _handle(Handle::UNDEFINED),
 	  _quote(Handle::UNDEFINED),
 	  _parent(PatternTerm::UNDEFINED),
@@ -25,7 +25,8 @@ PatternTerm::PatternTerm()
 	  _has_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _has_any_unordered_link(false)
+	  _has_any_unordered_link(false),
+	  _is_literal(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -38,7 +39,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _has_any_unordered_link(false)
+	  _has_any_unordered_link(false),
+	  _is_literal(false)
 {
 	Type t = h->get_type();
 
@@ -58,9 +60,11 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	_quotation.update(t);
 }
 
-void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
+PatternTermPtr PatternTerm::addOutgoingTerm(const Handle& h)
 {
+	PatternTermPtr ptm(createPatternTerm(shared_from_this(), h));
 	_outgoing.push_back(ptm);
+	return ptm;
 }
 
 PatternTermSeq PatternTerm::getOutgoingSet() const
@@ -197,23 +201,35 @@ void PatternTerm::addEvaluatable()
 
 void PatternTerm::addUnorderedLink()
 {
-	if (not _has_any_unordered_link)
-	{
-		_has_any_unordered_link = true;
-		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addUnorderedLink();
-	}
+	if (_has_any_unordered_link) return;
+
+	_has_any_unordered_link = true;
+	if (_parent != PatternTerm::UNDEFINED)
+		_parent->addUnorderedLink();
 }
 
 // ==============================================================
 
-std::string PatternTerm::to_string() const { return to_string(":"); }
+void PatternTerm::makeLiteral()
+{
+	if (_is_literal) return;
+
+	_is_literal = true;
+	for (PatternTermPtr& ptm : getOutgoingSet())
+		ptm->makeLiteral();
+}
+
+// ==============================================================
+
+std::string PatternTerm::to_string() const { return to_string(": "); }
 
 std::string PatternTerm::to_string(const std::string& indent) const
 {
+	// Term is null-terminated at thye top.
+	// Top term never has a handle in it.
 	if (not _handle) return "-";
 	std::string str = _parent->to_string();
-	str += indent + std::to_string(_handle.value());
+	str += indent + _handle->id_to_string();
 	return str;
 }
 

@@ -74,17 +74,17 @@ bool remove_constants(const HandleSet& vars, Pattern& pat)
 
 		i = pat.mandatory.erase(i);
 
-		// Remove the clause from quoted_clauses.
-		auto qc = std::find(pat.quoted_clauses.begin(),
-		                   pat.quoted_clauses.end(), clause);
-		if (qc != pat.quoted_clauses.end())
-			pat.quoted_clauses.erase(qc);
+		// Remove the clause from literal_clauses.
+		auto qc = std::find(pat.literal_clauses.begin(),
+		                   pat.literal_clauses.end(), clause);
+		if (qc != pat.literal_clauses.end())
+			pat.literal_clauses.erase(qc);
 
-		// Remove the clause from unquoted_clauses.
-		auto uc = std::find(pat.unquoted_clauses.begin(),
-		                   pat.unquoted_clauses.end(), clause);
-		if (uc != pat.unquoted_clauses.end())
-			pat.unquoted_clauses.erase(uc);
+		// Remove the clause from undeclared_clauses.
+		auto uc = std::find(pat.undeclared_clauses.begin(),
+		                   pat.undeclared_clauses.end(), clause);
+		if (uc != pat.undeclared_clauses.end())
+			pat.undeclared_clauses.erase(uc);
 
 		modified = true;
 	}

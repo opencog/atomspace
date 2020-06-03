@@ -195,6 +195,13 @@ private:
 	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
+	// --------------------------------------------
+	// State that manages the next PresentLink subterm to be grounded.
+	// Similar to the next-clause, above, and someday should be unified
+	// with it.
+
+	IssuedSet issued_present;
+
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
 	bool is_clause_grounded(const Handle&) const;
@@ -249,15 +256,17 @@ private:
 		CALL_ORDER,
 		CALL_GLOB,
 		CALL_UNORDER,
+		CALL_PRESENT,
 		CALL_CHOICE,
 		CALL_SOLN
-	} Caller;   // temporary scaffolding !???
+	} Caller;   // debug-print call-tracing.
 
 	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
 
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
 	bool node_compare(const Handle&, const Handle&);
+	bool present_compare(const PatternTermPtr&, const Handle&);
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
@@ -288,6 +297,8 @@ private:
 	                                const Handle&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
 	                             const Handle&);
+	bool explore_present_branches(const PatternTermPtr&, const Handle&,
+	                              const Handle&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
 	                           const Handle&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,

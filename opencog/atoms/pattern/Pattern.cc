@@ -27,18 +27,21 @@ std::string Pattern::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	bool first = true;
-	if (not quoted_clauses.empty())
+
+	ss << indent << "Pattern: " << redex_name << std::endl;
+
+	if (not literal_clauses.empty())
 	{
 		if (not first) ss << std::endl;
-		ss << indent << "quoted clauses:" << std::endl
-		   << oc_to_string(quoted_clauses, indent + OC_TO_STRING_INDENT);
+		ss << indent << "literal clauses:" << std::endl
+		   << oc_to_string(literal_clauses, indent + OC_TO_STRING_INDENT);
 		 first = false;
 	}
-	if (not unquoted_clauses.empty())
+	if (not undeclared_clauses.empty())
 	{
 		if (not first) ss << std::endl;
-		ss << indent << "unquoted clauses:" << std::endl
-		   << oc_to_string(unquoted_clauses, indent + OC_TO_STRING_INDENT);
+		ss << indent << "undeclared clauses:" << std::endl
+		   << oc_to_string(undeclared_clauses, indent + OC_TO_STRING_INDENT);
 		first = false;
 	}
 	if (not mandatory.empty())

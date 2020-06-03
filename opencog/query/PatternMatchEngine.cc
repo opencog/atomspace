@@ -59,11 +59,6 @@ using namespace opencog;
 
 
 #ifdef QDEBUG
-static inline void log(const Handle& h)
-{
-	LAZY_LOG_FINE << h->to_short_string();
-}
-
 static inline void logmsg(const char * msg, const Handle& h)
 {
 	LAZY_LOG_FINE << msg << std::endl
@@ -71,9 +66,20 @@ static inline void logmsg(const char * msg, const Handle& h)
 	                  std::string("(invalid handle)") :
 	                  h->to_short_string());
 }
+
+static inline void logmsg(const char * msg, size_t n)
+{
+	LAZY_LOG_FINE << msg << " " << n;
+}
+
+static inline void logmsg(const char * msg)
+{
+	LAZY_LOG_FINE << msg;
+}
 #else
 static inline void logmsg(const char * msg, const Handle& h) {}
-static inline void log(const Handle& h) {}
+static inline void logmsg(const char * msg, size_t n) {}
+static inline void logmsg(const char * msg) {}
 #endif
 
 
@@ -130,7 +136,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// variadic.
 	if (hp->get_type() != GLOB_NODE)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
+		logmsg("Found grounding of variable:");
 		logmsg("$$ variable:", hp);
 		logmsg("$$ ground term:", hg);
 		var_grounding[hp] = hg;
@@ -162,7 +168,7 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 	bool match = _pmc.node_match(hp, hg);
 	if (match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Found matching nodes";})
+		logmsg("Found matching nodes");
 		logmsg("# pattern:", hp);
 		logmsg("# match:", hg);
 		if (hp != hg) var_grounding[hp] = hg;
@@ -221,7 +227,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 
 	depth --;
-	DO_LOG({LAZY_LOG_FINE << "ordered_compare match?=" << match;})
+	logmsg("ordered_compare match?=", match);
 
 	if (not match)
 	{
@@ -237,6 +243,39 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
 
+	return true;
+}
+
+/* ======================================================== */
+
+/// Compare the contents of a PresentLink in the pattern to the
+/// proposed grounding. The term `ptm` points at the PresentLink.
+///
+/// XXX FIXME: this is currently a weak stop-gap measure to handle
+/// the special case of PresentLink's embedded in ChoiceLinks.
+/// PresentLinks that are NOT in a ChoiceLink are handled by the
+/// do_next_clause() system, which assumes that PresentLinks happen
+/// only as top-level clauses. Someday, someone should merge these
+/// two mechanisms, so that this guy gets the sophistication of
+/// the get_next_untried_clause() mechanism.
+bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
+                                         const Handle& hg)
+{
+	const Handle& hp = ptm->getHandle();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	logmsg("present_compare");
+
+printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
+hg->to_string().c_str());
+	return tree_compare(osp[0], hg, CALL_PRESENT);
+
+/*
+	for (const PatternTermPtr& pto: osp)
+	{
+		bool match = tree_compare(pto, hg, CALL_PRESENT);
+		if (not match) return false;
+	}
+*/
 	return true;
 }
 
@@ -277,10 +316,15 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 		solution_push();
 		const PatternTermPtr& hop = osp[icurr];
 
-		DO_LOG({LAZY_LOG_FINE << "tree_comp or_link choice " << icurr
+		DO_LOG({LAZY_LOG_FINE << "tree_comp choice " << icurr
 		              << " of " << iend;})
 
-		bool match = tree_compare(hop, hg, CALL_CHOICE);
+		bool match;
+		if (PRESENT_LINK == hp->get_type())
+			match = present_compare(hop, hg);
+		else
+			match = tree_compare(hop, hg, CALL_CHOICE);
+
 		if (match)
 		{
 			// If we've found a grounding, lets see if the
@@ -424,7 +468,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	const HandleSeq& osg = hg->getOutgoingSet();
-	PatternTermSeq osp = ptm->getOutgoingSet();
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
 	bool has_glob = ptm->hasAnyGlobbyVar();
 
@@ -816,7 +860,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		Handle glp(createLink(std::move(glob_seq), LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
 
-		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
+		logmsg("Found grounding of glob:");
 		logmsg("$$ glob:", glob->getHandle());
 		logmsg("$$ ground term:", glp);
 	};
@@ -1145,7 +1189,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	bool match = _pmc.link_match(ptm, hg);
 	if (not match) return false;
 
-	DO_LOG({LAZY_LOG_FINE << "depth=" << depth;})
+	logmsg("depth=", depth);
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
 
@@ -1212,7 +1256,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
 			found = explore_glob_branches(ptm, hg, clause);
-		else if(ptm->hasUnorderedLink())
+		else if (ptm->hasUnorderedLink())
 			found = explore_odometer(ptm, hg, clause);
 		else
 			found = explore_type_branches(ptm, hg, clause);
@@ -1254,7 +1298,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& clause)
 {
 	// Check if the pattern has globs in it.
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 	return explore_upvar_branches(ptm, hg, clause);
@@ -1268,7 +1312,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& clause)
 {
 	// Move up the solution graph, looking for a match.
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 
 	// If the parent pattern term doesn't have any other bound
@@ -1357,7 +1401,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			if (found) break;
 		}
 
-		DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+		logmsg("Found upward soln =", found);
 		return found;
 	}
 
@@ -1396,7 +1440,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const Handle& clause_root)
 {
-	PatternTermPtr parent(ptm->getParent());
+	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 	IncomingSet iset;
 	if (nullptr == hg->getAtomSpace())
@@ -1416,7 +1460,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		                      << " for glob term=" << parent->to_string()
-		                      << " propose=" << iset[i].value();})
+		                      << " propose=" << iset[i]->id_to_string();})
 
 		// Before exploring the link branches, record the current
 		// _glob_state size.  The idea is, if the parent & iset[i] is a match,
@@ -1432,7 +1476,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 		if (found) break;
 	}
-	DO_LOG({LAZY_LOG_FINE << "Found upward soln = " << found;})
+	logmsg("Found upward soln =", found);
 	return found;
 }
 
@@ -1518,8 +1562,8 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 /// possibilities.  Upon exhaustion, it returns to the caller.
 ///
 bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
-                                               const Handle& hg,
-                                               const Handle& clause_root)
+                                                    const Handle& hg,
+                                                    const Handle& clause_root)
 {
 	do
 	{
@@ -1624,6 +1668,102 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+/// Quick hack to find a variable in a pattern term. Needed immediately
+/// below. Recursively drill down till we find the desired variable.
+static PatternTermPtr find_variable_term(const PatternTermPtr& term,
+                                         const Handle& var)
+{
+	if (term->getHandle() == var) return term;
+	for (const PatternTermPtr& subterm: term->getOutgoingSet())
+	{
+		const PatternTermPtr& vterm = find_variable_term(subterm, var);
+		if (PatternTerm::UNDEFINED != vterm) return vterm;
+	}
+	return PatternTerm::UNDEFINED;
+}
+
+
+/// This attempts to obtain a grounding for an embedded PresentLink
+/// That is, for a PresentLink that is not at the top-most level.
+/// At this time, we expect to encounter these only inside of
+/// ChoiceLinks and inside of evaluatable terms.
+/// This tries to verify that each of the terms of the PresentLink
+/// can be grounded. The branch exploration consists of examining
+/// each differrent way in which tis can be accomplished.
+bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
+                                                  const Handle& hg,
+                                                  const Handle& clause_root)
+{
+	const Handle& hp = ptm->getHandle();
+
+	// Reject self-grounds.
+	if (hp == hg) return false;
+
+	logmsg("!! explore_present:", hp);
+	logmsg("!! present gnd:", hg);
+
+	bool joins = tree_compare(ptm, hg, CALL_PRESENT);
+	logmsg("!! explore_present result=", joins);
+	if (not joins) return false;
+
+	const PatternTermPtr& parent = ptm->getParent();
+	const PatternTermSeq& osp = parent->getOutgoingSet();
+	if (1 == osp.size())
+		return do_term_up(parent, hg, clause_root);
+
+	// Compare the other parts of the present link. They all have to
+	// match. Currently, this makes the simplifying assumption that
+	// all the other terms have the same variable in them, so that
+	// its enough to just have a dumb loop. To do better, we would
+	// need to:
+	// -- build a connectivity map, just like the one for clauses
+	// -- build a clause_variables struct, but just for this term
+	// -- generalize get_next_clause to use this map.
+	// XXX FIXME -- do the above.
+	issued_present.insert(hp);
+
+	// So, first, get a common shared variable. Assume that clause
+	// will point at the right thing.
+	const HandleSeq& varseq = _pat->clause_variables.at(clause_root);
+	if (0 == varseq.size())
+		throw RuntimeException(TRACE_INFO, "Expecting a variable!");
+	const Handle& jvar = varseq[0];
+	const Handle& jgnd = var_grounding.at(jvar);
+
+	// Loop over all the other terms in the PresentLink
+	for (const PatternTermPtr& pterm: osp)
+	{
+		const Handle& hpt = pterm->getHandle();
+		if (issued_present.end() != issued_present.find(hpt))
+			continue;
+		issued_present.insert(hpt);
+
+		// Get the joining variable.
+		const PatternTermPtr& joint = find_variable_term(pterm, jvar);
+		if (PatternTerm::UNDEFINED == joint)
+			throw RuntimeException(TRACE_INFO, "Variable not present!");
+
+		logmsg("!! maybe_present:", pterm->getHandle());
+
+		// Explore from this joint.
+		bool found;
+		if (pterm->hasAnyGlobbyVar())
+			found = explore_glob_branches(joint, jgnd, clause_root);
+		else if (pterm->hasUnorderedLink())
+			found = explore_odometer(joint, jgnd, clause_root);
+		else
+			found = explore_type_branches(joint, jgnd, clause_root);
+
+		logmsg("!! maybe_present result=",  found);
+		if (not found) issued_present.clear();
+		return found;
+	}
+
+	logmsg("!! explore_present success!");
+	issued_present.clear();
+	return do_term_up(parent, hg, clause_root);
+}
+
 /// Check the proposed grounding hg for pattern term hp.
 ///
 /// As the name implies, this will explore only one single potential
@@ -1646,23 +1786,23 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	DO_LOG({LAZY_LOG_FINE << "Checking term=" << ptm->to_string()
-	              << " for soln by " << hg.value();})
+	DO_LOG({LAZY_LOG_FINE << "ssss Checking term=" << ptm->to_string()
+	                      << " for soln by " << hg->id_to_string();})
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "NO solution for term="
-		              << ptm->to_string()
-		              << " its NOT solved by " << hg.value();})
+		DO_LOG({LAZY_LOG_FINE << "ssss NO solution for term="
+		                      << ptm->to_string()
+		                      << " its NOT solved by " << hg->id_to_string();})
 		solution_pop();
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Solved term=" << ptm->getHandle()->to_string()
-	              << " it is solved by " << hg->to_string()
-	              << ", will move up.";})
+	logmsg("ssss Solved term:", ptm->getHandle());
+	logmsg("ssss It is solved by:", hg);
+	logmsg("ssss will move up.");
 
 	// Continue onwards to the rest of the pattern.
 	bool found = do_term_up(ptm, hg, clause_root);
@@ -1730,9 +1870,9 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
-	              << " " << ptm->getHandle()->to_string()
-	              << " of clause = " << clause_root->to_string()
-	              << " has ground, move upwards";})
+	              << "\n" << ptm->getHandle()->to_string()
+	              // << "\nof clause = " << clause_root->to_string()
+	              << "\nhas ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
@@ -1793,43 +1933,46 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		}
 	}
 
-	PatternTermPtr parent = ptm->getParent();
+	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
-
 	const Handle& hi = parent->getHandle();
+	Type hit = hi->get_type();
+
+	if (PRESENT_LINK == hit and not ptm->isLiteral())
+	{
+		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
+		return explore_present_branches(ptm, hg, clause_root);
+	}
 
 	// Do the simple case first, ChoiceLinks are harder.
-	bool found = false;
-	if (CHOICE_LINK != hi->get_type())
+	if (CHOICE_LINK != hit /* or parent->isLiteral() */)
 	{
-		if (explore_up_branches(ptm, hg, clause_root)) found = true;
+		bool found = explore_up_branches(ptm, hg, clause_root);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
+		return found;
 	}
-	else
+
+	// If we are here, then we have ChoiceLink.
 	if (hi == clause_root)
 	{
 		DO_LOG({logger().fine("Exploring ChoiceLink at root");})
-		if (clause_accept(clause_root, hg)) found = true;
-	}
-	else
-	{
-		// If we are here, we have an embedded ChoiceLink, i.e. a
-		// ChoiceLink that is not at the clause root. It's contained
-		// in some other link, and we have to get that link and
-		// perform comparisons on it. i.e. we have to "hop over"
-		// (hop up) past the ChoiceLink, before resuming the search.
-		// The easiest way to hop is to do it recursively... i.e.
-		// call ourselves again.
-		DO_LOG({logger().fine("Exploring ChoiceLink below root");})
-
-		OC_ASSERT(not have_choice(parent, hg),
-		          "Something is wrong with the ChoiceLink code");
-
-		_need_choice_push = true;
-		if (do_term_up(parent, hg, clause_root)) found = true;
+		return clause_accept(clause_root, hg);
 	}
 
-	return found;
+	// If we are here, we have an embedded ChoiceLink, i.e. a
+	// ChoiceLink that is not at the clause root. It's contained
+	// in some other link, and we have to get that link and
+	// perform comparisons on it. i.e. we have to "hop over"
+	// (hop up) past the ChoiceLink, before resuming the search.
+	// The easiest way to hop is to do it recursively... i.e.
+	// call ourselves again.
+	DO_LOG({logger().fine("Exploring ChoiceLink below root");})
+
+	OC_ASSERT(not have_choice(parent, hg),
+	          "Something is wrong with the ChoiceLink code");
+
+	_need_choice_push = true;
+	return do_term_up(parent, hg, clause_root);
 }
 
 /// This is called when we've navigated to the top of a clause,
@@ -2926,10 +3069,12 @@ void PatternMatchEngine::log_term(const HandleSet &vars,
                                   const HandleSeq &clauses)
 {
 	logger().fine("Clauses:");
-	for (Handle h : clauses) log(h);
+	for (Handle h : clauses)
+		LAZY_LOG_FINE << h->to_short_string();
 
 	logger().fine("Vars:");
-	for (Handle h : vars) log(h);
+	for (Handle h : vars)
+		LAZY_LOG_FINE << h->to_short_string();
 }
 #else
 
