@@ -25,7 +25,6 @@
 (export
 cog-arity
 cog-atom
-cog-atom-new
 cog-atom?
 cog-atom-less?
 cog-atomspace
@@ -60,6 +59,7 @@ cog-link?
 cog-map-type
 cog-mean
 cog-name
+cog-new-atom
 cog-new-atomspace
 cog-new-link
 cog-new-node
