@@ -101,7 +101,7 @@
 		; to really be sure that this is a part of the matrix; it's
 		; assumed that the pair-type is enough to achieve this.
 		(define (release-extract ITEM)
-			(for-each cog-extract (cog-incoming-by-type ITEM pair-type)))
+			(for-each cog-extract! (cog-incoming-by-type ITEM pair-type)))
 
 		;-------------------------------------------
 		; Explain what it is that I provide. This helps classes
