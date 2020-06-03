@@ -67,11 +67,15 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
-	// Make sure every variable appears in some mandatory clause.
-	HandleSeq all_clauses(_pat.undeclared_clauses);
-	all_clauses.insert(all_clauses.end(),
-	    _pat.literal_clauses.begin(), _pat.literal_clauses.end());
-	validate_variables(_variables.varset, all_clauses);
+	// Make sure every variable appears in some concrete
+	// (non-evaluatable) clause. This consists of non-evaluatable
+	// mandatory clauses and 'optionals' which must be absent.
+	// Otherwise, we risk not being able to evaluate a clause
+	// with some ungrounded variable.
+	HandleSeq concrete_clauses(_fixed);
+	concrete_clauses.insert(concrete_clauses.end(),
+		_pat.optionals.begin(), _pat.optionals.end());
+	validate_variables(_variables.varset, concrete_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the TermMatchMixin, and so we assume
@@ -123,7 +127,7 @@ void PatternLink::common_init(void)
 	get_clause_variables(_pat.mandatory);
 
 	// Find prunable terms.
-	locate_cacheable(all_clauses);
+	locate_cacheable(concrete_clauses);
 }
 
 
