@@ -129,5 +129,4 @@ cog-value-ref
 (include-from-path "opencog/base/debug-trace.scm")
 
 ; Obsolete functions
-(define-public (cog-atom X) "obsolete function" '())
 (define-public (cog-undefined-handle) "obsolete function" '())
