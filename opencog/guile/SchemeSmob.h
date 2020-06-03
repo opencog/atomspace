@@ -116,7 +116,6 @@ private:
 	static SCM ss_number(SCM);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
-	static SCM ss_as(SCM);
 	static SCM ss_tv(SCM);
 	static SCM ss_get_mean(SCM);
 	static SCM ss_get_confidence(SCM);
@@ -149,7 +148,7 @@ private:
 	// Atom Spaces
 	static SCM ss_new_as(SCM);
 	static SCM ss_as_p(SCM);
-	static SCM ss_get_as(void);
+	static SCM ss_as(SCM);
 	static SCM ss_set_as(SCM);
 	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);

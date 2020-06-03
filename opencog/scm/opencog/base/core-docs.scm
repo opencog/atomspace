@@ -886,8 +886,9 @@
 
 (set-procedure-property! cog-atomspace 'documentation
 "
- cog-atomspace
-     Return the current atomspace for this thread.
+ cog-atomspace [ATOM]
+   If the optional ATOM is specified, then return the AtomSpace of ATOM.
+   Otherwise, return the current atomspace for this thread.
 ")
 
 (set-procedure-property! cog-set-atomspace! 'documentation

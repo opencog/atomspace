@@ -291,7 +291,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
-	register_proc("cog-as",                1, 0, 0, C(ss_as));
+	register_proc("cog-atomspace",         0, 0, 1, C(ss_as));
 	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
 	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
@@ -306,7 +306,6 @@ void SchemeSmob::register_procs()
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
-	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));
 	register_proc("cog-atomspace-uuid",    0, 1, 0, C(ss_as_uuid));

@@ -130,3 +130,4 @@ cog-value-ref
 
 ; Obsolete functions
 (define-public (cog-undefined-handle) "obsolete function" '())
+(define-public (cog-as ATOM) (cog-atomspace ATOM))
