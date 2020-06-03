@@ -11,6 +11,13 @@ void ValueServer::addFactory(Type vtype, ValueFactory func,
         _factories[vtype].push_back(fr);
     else
         _factories[vtype] = {fr};
+
+    // Annoyingly-annoying special case for VoidValue.
+    if (args[0] == std::type_index(typeid(void)))
+    {
+       ProtoFactory fr = {func, std::vector<std::type_index>()};
+       _factories[vtype] = {fr};
+    }
 }
 
 void ValueServer::addCaster(Type vtype, ValueCaster func)
