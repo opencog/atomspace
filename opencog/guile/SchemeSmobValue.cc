@@ -205,6 +205,21 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
+	if (nameserver().isA(t, NODE))
+	{
+		SCM sname = SCM_CAR(svalue_list);
+		std::string name = verify_string(sname, "cog-new-value", 2);
+		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
+		return atomspace->add_node(t, std::move(name));
+	}
+
+	if (nameserver().isA(t, LINK))
+	{
+		HandleSeq oset = verify_handle_list(svalue_list, "cog-new-value", 2);
+		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
+		return atomspace->add_link(t, std::move(oset));
+	}
+
 	scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "value type");
 
 	return nullptr;

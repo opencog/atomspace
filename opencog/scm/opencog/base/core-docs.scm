@@ -699,6 +699,9 @@
            (ConceptNode \"foo\")
            (StringValue \"bar\")
        )
+
+       guile> (cog-new-value 'Concept \"foo\")
+       (ConceptNode \"foo\")
 ")
 
 (set-procedure-property! cog-keys 'documentation
