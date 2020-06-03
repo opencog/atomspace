@@ -53,12 +53,21 @@ void PatternLink::common_init(void)
 
 	remove_constants(_variables.varset, _pat);
 
+	// Compute the intersection of literal clauses, and mandatory
+	// clauses. This is the set of mandatory clauses that must be
+	// present in thier literal form.
+	for (const Handle& h : _pat.literal_clauses)
+	{
+		if (std::find(_pat.mandatory.begin(), _pat.mandatory.end(), h)
+			 != _pat.mandatory.end())
+		_fixed.push_back(h);
+	}
+
 	// Locate the black-box and clear-box clauses.
-	_fixed = _pat.literal_clauses;
 	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
-	// Make sure every variable appears in some clause.
+	// Make sure every variable appears in some mandatory clause.
 	HandleSeq all_clauses(_pat.undeclared_clauses);
 	all_clauses.insert(all_clauses.end(),
 	    _pat.literal_clauses.begin(), _pat.literal_clauses.end());
