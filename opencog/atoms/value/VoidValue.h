@@ -57,7 +57,7 @@ public:
 	}
 };
 
-static inline ValuePtr createFloatValue(void)
+static inline ValuePtr createVoidValue(void)
 	{ return VoidValue::INSTANCE; }
 
 /** @}*/
