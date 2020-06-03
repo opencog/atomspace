@@ -104,7 +104,7 @@ cog-value-ref
 
 (define-public cog-initial-as (cog-atomspace))
 (define-public my-as (cog-atomspace))
-(if (eq? cog-initial-as #f)
+(if (nil? cog-initial-as)
 	(begin
 		(set! cog-initial-as (cog-new-atomspace))
 		; Initialize a default atomspace, just to keep things sane...

@@ -339,14 +339,15 @@ SCM SchemeSmob::ss_as(SCM slist)
 {
 	// If no argument, then return the current AtomSpace.
 	if (scm_is_null(slist))
-		return make_as(ss_get_env_as("cog-atomspace"));
+	{
+		AtomSpace* as = ss_get_env_as("cog-atomspace");
+		return as ? make_as(as) : SCM_EOL;
+	}
 
 	SCM satom = scm_car(slist);
 	Handle h(verify_handle(satom, "cog-atomspace"));
 	AtomSpace* as = h->getAtomSpace();
-	if (nullptr == as) return SCM_EOL;
-
-	return make_as(as);
+	return as ? make_as(as) : SCM_EOL;
 }
 
 /* ============================================================== */
