@@ -1,6 +1,6 @@
 (define-module (opencog test-runner)
   #:use-module (srfi srfi-64)
-  #:re-export (test-begin test-assert test-end)
+  #:re-export (test-begin test-assert test-equal test-end)
   #:export (opencog-test-runner))
 
 (use-modules (opencog))
