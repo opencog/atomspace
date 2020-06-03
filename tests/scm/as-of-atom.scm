@@ -23,7 +23,7 @@
 (define auxiliary-A (Concept "A"))
 
 ;; Switch the atomspace where A is (which is auxiliary-as)
-(define pre-as (cog-set-atomspace! (cog-as auxiliary-A)))
+(define pre-as (cog-set-atomspace! (cog-atomspace auxiliary-A)))
 
 ;; Verify that the current atomspace, auxiliary-as and the prevous one
 ;; are all the same
