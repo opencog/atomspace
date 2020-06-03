@@ -205,8 +205,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
+	if (nameserver().isA(t, VOID_VALUE))
+	{
+		return valueserver().create(t);
+	}
+
 	if (nameserver().isA(t, NODE))
 	{
+		// XXX FIXME... at this time, nodes have a single name.
 		SCM sname = SCM_CAR(svalue_list);
 		std::string name = verify_string(sname, "cog-new-value", 2);
 		AtomSpace* atomspace = ss_get_env_as("cog-new-value");

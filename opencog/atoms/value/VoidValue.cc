@@ -21,7 +21,10 @@
  */
 
 #include <opencog/atoms/value/VoidValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
 const ValuePtr VoidValue::INSTANCE { new VoidValue() };
+
+DEFINE_VALUE_FACTORY(VOID_VALUE, createVoidValue, void)

@@ -57,6 +57,7 @@ public:
 	}
 };
 
+template<typename ... Type>
 static inline ValuePtr createVoidValue(void)
 	{ return VoidValue::INSTANCE; }
 
