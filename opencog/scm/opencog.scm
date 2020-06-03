@@ -30,7 +30,12 @@ cog-atom-less?
 cog-atomspace
 cog-atomspace?
 cog-atomspace-clear
+cog-atomspace-cow!
+cog-atomspace-cow?
 cog-atomspace-env
+cog-atomspace-readonly?
+cog-atomspace-ro!
+cog-atomspace-rw!
 cog-atomspace-uuid
 cog-confidence
 cog-count
