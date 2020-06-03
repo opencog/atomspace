@@ -10,6 +10,36 @@
 ;
 ;    guile> ,apropos cog
 ;
+(set-procedure-property! cog-new-atom 'documentation
+"
+ cog-new-atom ATOM [ATOMSPACE]
+    If the optional ATOMSPACE argument is provided, copy the existing
+    ATOM into ATOMSPACE; otherwise copy it into the current AtomSpace
+    for this thread.
+
+    Use (cog-atomspace ATOM) to examine the AtomSpace that the ATOM
+    us currently in.
+
+    Example:
+        ; Create a new Atom in the current AtomSpace.
+        guile> (define ca (Concept \"A\"))
+
+        ; What AtomSpace is it in?
+        guile> (cog-atomspace ca)
+
+        ; Create a new AtomSpace, and put an atom into it.
+        guile> (define spacex (cog-new-atomspace))
+        guile> (define xca (cog-new-atom ca spacex))
+        guile> (cog-atomspace xca)
+
+        ; Change the TV on it, just so that it is easier to spot.
+        guile> (cog-set-tv! xca (SimpleTruthValue 0.2 0.2))
+
+        ; Print AtomSpace contents
+        guile> (cog-prt-atomspace)
+        guile> (cog-prt-atomspace spacex)
+")
+
 (set-procedure-property! cog-new-node 'documentation
 "
  cog-new-node NODE-TYPE NODE-NAME [ATOMSPACE] [TV]
@@ -28,8 +58,8 @@
 
         ; Creates a new node, with a truth value:
         guile> (cog-new-node 'Concept \"another node\"
-                      (cog-new-stv 0.8 0.9))
-        (ConceptNode \"another node\" (stv 0.8 0.9))
+                      (SimpleTruthValue 0.8 0.9))
+        (ConceptNode \"another node\" (SimpleTruthValue 0.8 0.9))
 
         ; Creates a new atomspace, and places the node there:
         guile> (define spacex (cog-new-atomspace))
@@ -147,7 +177,7 @@
         )
 
         ; Change the truth value of an existing node:
-        guile> (cog-link 'Link x y (cog-new-stv 0.7 0.8))
+        guile> (cog-link 'Link x y (SimpleTruthValue 0.7 0.8))
         (Link (stv 0.7 0.8)
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
