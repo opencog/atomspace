@@ -1166,10 +1166,10 @@ void PatternLink::debug_log(void) const
 		for (const Handle& h : _pat.optionals)
 		{
 			std::stringstream ss;
-			ss << "Optional clause " << cl << ":";
-			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-				ss << " (evaluatable)";
-			ss << std::endl;
+			ss << "Optional clause " << cl << ":" << std::endl;
+			OC_ASSERT(_pat.evaluatable_holders.find(h) ==
+			          _pat.evaluatable_holders.end(),
+			          "Optional clauses cannot be evaluatable!");
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
