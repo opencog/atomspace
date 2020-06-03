@@ -244,8 +244,10 @@ void SchemeSmob::module_init(void*)
 void SchemeSmob::register_procs()
 {
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
+	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
+	register_proc("cog-atom",              1, 0, 1, C(ss_atom));
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-delete",            1, 0, 1, C(ss_delete));

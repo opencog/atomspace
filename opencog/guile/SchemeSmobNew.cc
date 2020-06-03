@@ -361,6 +361,54 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 
 /* ============================================================== */
 /**
+ * Copy an existing atom into a new atomspace.
+ */
+SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
+{
+	Handle h = verify_handle(satom, "cog-new-atom");
+
+	AtomSpace* atomspace = get_as_from_list(kv_pairs);
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-atom");
+
+	try
+	{
+		return handle_to_scm(atomspace->add_atom(h));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-atom", scm_cons(satom, kv_pairs));
+	}
+
+	scm_remember_upto_here_1(kv_pairs);
+	return SCM_EOL;
+}
+
+/**
+ * Return the indicated atom, if a version of it exists in this
+ * atomspace; else return nil if it does not exist.
+ */
+SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
+{
+	Handle h = verify_handle(satom, "cog-atom");
+
+	AtomSpace* atomspace = get_as_from_list(kv_pairs);
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-atom");
+
+	try
+	{
+		return handle_to_scm(atomspace->get_atom(h));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-atom", scm_cons(satom, kv_pairs));
+	}
+
+	scm_remember_upto_here_1(kv_pairs);
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/**
  * Create a new node, of named type stype, and string name sname
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)

@@ -81,9 +81,11 @@ private:
 
 	// Value, atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
+	static SCM ss_new_atom(SCM, SCM);
+	static SCM ss_atom(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
-	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_node(SCM, SCM, SCM);
+	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
 	static SCM ss_delete(SCM, SCM);
 	static SCM ss_delete_recursive(SCM, SCM);
