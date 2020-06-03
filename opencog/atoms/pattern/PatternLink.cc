@@ -1065,19 +1065,19 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
+		root_term->markLiteral();
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
+		root_term->markLiteral();
 	}
 	for (const Handle& clause : _pat.always)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
+		root_term->markLiteral();
 	}
 }
 
