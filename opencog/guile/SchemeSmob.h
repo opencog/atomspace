@@ -227,7 +227,6 @@ public:
 	// Utility printing functions
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
-	static std::string tv_to_string(const TruthValuePtr&);
 };
 
 /** @}*/
