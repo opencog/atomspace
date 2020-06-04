@@ -898,13 +898,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			break;
 		}
 
-		const Handle& ohp(osp[ip]->getHandle());
-		Type ptype = ohp->get_type();
-
-		if (GLOB_NODE == ptype)
+		if (osp[ip]->isGlobbyVar())
 		{
 			HandleSeq glob_seq;
 			const PatternTermPtr& glob(osp[ip]);
+			const Handle& ohp(glob->getHandle());
 
 			// A glob may appear more than once in the pattern,
 			// so check if that's the case. If we have already
@@ -1149,7 +1147,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if ((VARIABLE_NODE == tp or GLOB_NODE == tp) and not ptm->isQuoted())
+	if ((VARIABLE_NODE == tp or ptm->isGlobbyVar()) and not ptm->isQuoted())
 	{
 		if (_variables->varset.end() != _variables->varset.find(hp))
 			return variable_compare(hp, hg);
