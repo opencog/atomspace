@@ -51,6 +51,7 @@ std::string Node::to_short_string(const std::string& indent) const
         answer += " " + getTruthValue()->to_string();
 
     answer += ")";
+    return answer;
 }
 
 std::string Node::to_string(const std::string& indent) const
