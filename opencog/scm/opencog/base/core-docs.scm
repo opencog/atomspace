@@ -18,7 +18,7 @@
     for this thread.
 
     Use (cog-atomspace ATOM) to examine the AtomSpace that the ATOM
-    us currently in.
+    is currently in.
 
     Example:
         ; Create a new Atom in the current AtomSpace.
