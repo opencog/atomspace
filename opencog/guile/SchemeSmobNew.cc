@@ -34,36 +34,11 @@ std::string SchemeSmob::to_string(SCM node)
 	return "";
 }
 
-/**
- * Return a string holding the scheme representation of an atom.
- *
- * The input handle is represented in terms of a valid scheme
- * expression. Evaluating this expression should result in exactly
- * the same atom being created.
- *
- * This is NOT optimized for performance, as printing should not
- * be in any performance-critical paths ...
- *
- * This does NOT use the Atom::to_string() methods, because those
- * methods are not guaranteed to generate valid scheme.
- */
-std::string SchemeSmob::to_string(const Handle& h)
-{
-	return handle_to_string(h, 0);
-}
-
-std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
-{
-	if (nullptr == h) return "#<Invalid handle>";
-	return h->to_short_string();
-}
-
 std::string SchemeSmob::protom_to_string(SCM node)
 {
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// XXX FIXME; should not use pa->to_string() as the print method.
 	if (not pa->is_atom())
 		return pa->to_short_string();
 
@@ -81,9 +56,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);
+		return "#<Invalid handle>\n";
 	}
 
-	return handle_to_string(h, 0) + "\n";
+	return h->to_short_string() + "\n";
 }
 
 /* ============================================================== */

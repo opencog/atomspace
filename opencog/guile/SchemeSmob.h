@@ -172,7 +172,6 @@ private:
 	// Misc utilities
 	static std::string to_string(SCM);
 	static std::string protom_to_string(SCM);
-	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
@@ -225,7 +224,6 @@ public:
 public:
 
 	// Utility printing functions
-	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
 };
 
