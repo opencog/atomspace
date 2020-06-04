@@ -56,10 +56,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);
-		return "#<Invalid handle>\n";
+		return "#<Invalid handle>";
 	}
 
-	return h->to_short_string() + "\n";
+	return h->to_short_string();
 }
 
 /* ============================================================== */
