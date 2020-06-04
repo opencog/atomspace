@@ -106,6 +106,9 @@ protected:
 	// As above, but only one level deep.
 	bool _has_globby_var;
 
+	// As above, but zero levels deep. This is a glob.
+	bool _is_globby_var;
+
 	// As above, but for evaluatables.
 	bool _has_any_evaluatable;
 	bool _has_evaluatable;
@@ -176,8 +179,9 @@ public:
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
 
 	void addGlobbyVar();
-	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
+	bool isGlobbyVar() const noexcept { return _is_globby_var; }
 	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
+	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
 
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }

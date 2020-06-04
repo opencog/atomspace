@@ -23,6 +23,7 @@ PatternTerm::PatternTerm(void)
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
@@ -39,6 +40,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
@@ -170,7 +172,7 @@ void PatternTerm::addAnyGlobbyVar()
 
 void PatternTerm::addGlobbyVar()
 {
-	_has_globby_var = true;
+	_is_globby_var = true;
 
 	if (_parent != PatternTerm::UNDEFINED)
 		_parent->_has_globby_var = true;
