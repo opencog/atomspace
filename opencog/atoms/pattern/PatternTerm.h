@@ -97,6 +97,9 @@ protected:
 	// variables, but this flag will not be set.
 	bool _has_bound_var;
 
+	// As above, but zero terms deep. This one is the variable.
+	bool _is_bound_var;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an GlobNode. Trees without any GlobNodes can be searched in a
 	// straight-forward manner; those with them need to have all
@@ -177,11 +180,12 @@ public:
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
+	bool isBoundVariable() const noexcept { return _is_bound_var; }
 
 	void addGlobbyVar();
-	bool isGlobbyVar() const noexcept { return _is_globby_var; }
-	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
 	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
+	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
+	bool isGlobbyVar() const noexcept { return _is_globby_var; }
 
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }

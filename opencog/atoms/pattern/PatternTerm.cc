@@ -21,6 +21,7 @@ PatternTerm::PatternTerm(void)
 	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _is_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
 	  _is_globby_var(false),
@@ -38,6 +39,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _is_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
 	  _is_globby_var(false),
@@ -147,9 +149,11 @@ void PatternTerm::addAnyBoundVar()
 /// variable).
 void PatternTerm::addBoundVariable()
 {
+	if (isQuoted()) return;
+
 	// Mark just this term (the variable itself)
 	// and mark the term that holds us.
-	_has_bound_var = true;
+	_is_bound_var = true;
 	if (_parent != PatternTerm::UNDEFINED)
 			_parent->_has_bound_var = true;
 
@@ -162,8 +166,6 @@ void PatternTerm::addBoundVariable()
 
 void PatternTerm::addAnyGlobbyVar()
 {
-	if (isQuoted()) return;
-
 	if (not _has_any_globby_var)
 	{
 		_has_any_globby_var = true;
@@ -183,6 +185,7 @@ void PatternTerm::addGlobbyVar()
 
 	addAnyGlobbyVar();
 }
+
 
 // ==============================================================
 // Just like above, but for evaluatables.
