@@ -1123,11 +1123,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	{
 		ptm->addBoundVariable();
 
-		// It's globby, if it's explicitly a glob, or if it's a
-		// variable with a non-trivial matching interval.
-		if (GLOB_NODE == t or
-		    _variables._glob_intervalmap.end() !=
-		    _variables._glob_intervalmap.find(h))
+		// It's globby, if it is explicitly a GLOB_NODE, or if
+		// it has a non-trivial matching interval.
+		if (GLOB_NODE == t or _variables.is_globby(h))
 			ptm->addGlobbyVar();
 		return;
 	}
