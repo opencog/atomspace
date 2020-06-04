@@ -49,6 +49,7 @@ set(ATOMSPACE_LIBRARIES
 	clearbox
 	container
 	lambda
+	load_scm
 	persist
 	query-engine
 	execution
