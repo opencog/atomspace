@@ -1141,20 +1141,12 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO. Hmm. Should we do this at runtime,
-	// i.e. here, or at compile time, when creating the PattenLink?
+	// i.e. here, or at static-analysis time, when creating the PattenLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
-	// Handle hp is from the pattern clause, and it might be one
-	// of the bound variables. If so, then declare a match.
-	if ((VARIABLE_NODE == tp or ptm->isGlobbyVar()) and not ptm->isQuoted())
-	{
-		if (_variables->varset.end() != _variables->varset.find(hp))
-			return variable_compare(hp, hg);
-
-		// Report other variables that might be found.
-		return _pmc.scope_match(hp, hg);
-	}
+	if (ptm->isBoundVariable())
+		return variable_compare(hp, hg);
 
 	// If they're the same atom, then clearly they match.
 	//
@@ -1167,6 +1159,16 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// XXX FIXME ptm->hasAnyEvaluatable() is never-ever set...
 	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
+
+	// If this is some other rando variable that is not part of
+	// search pattern, i.e. if is is a scoped variable, then
+	// accept a match to any other alpha-equivalent variable.
+	// XXX FIXME - this is not very elegant. We should probably
+	// have a distinct `scoped_link_compare()` function to handle
+	// this. Right now, the scope_match() callback uses a rather
+	// screwy and indirect trick to check alpha conversion.
+	if (VARIABLE_NODE == tp and not ptm->isQuoted())
+		return _pmc.scope_match(hp, hg);
 
 	// If both are nodes, compare them as such.
 	if (hp->is_node() and hg->is_node())
