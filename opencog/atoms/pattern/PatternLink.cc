@@ -1065,7 +1065,6 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->markLiteral();
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
@@ -1114,6 +1113,39 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
 	}
+
+	// If a term is literal then the corresponding pattern term
+	// should be also. Marking should be easy, except due to a bug
+	// up above, both top-level PresentLinks and ChoiceLinks are
+	// being marked literal, when they aren't actually. Untangling
+	// that bug is a headache, so instead, we pile on the rubbish.
+	// XXX FIXME .. this is a hack to hide a hack.
+	if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
+	    != _pat.literal_clauses.end())
+   {
+		if (PRESENT_LINK == t)
+		{
+			for (PatternTermPtr& optm: ptm->getOutgoingSet())
+				optm->markLiteral();
+		}
+		else if (CHOICE_LINK == t)
+		{
+			for (PatternTermPtr& optm: ptm->getOutgoingSet())
+			{
+				const Handle& oh = optm->getHandle();
+				Type ot = oh->get_type();
+				if (PRESENT_LINK != ot)
+					optm->markLiteral();
+				else
+				{
+					for (PatternTermPtr& xptm: optm->getOutgoingSet())
+						xptm->markLiteral();
+				}
+			}
+		}
+		else
+			ptm->markLiteral();
+   }
 }
 
 /* ================================================================= */

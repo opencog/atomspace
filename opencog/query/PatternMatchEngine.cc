@@ -1166,6 +1166,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// evaluation may have side-effects (e.g. send a message) and
 	// (2) evaluation may depend on external state. These are
 	// typically used to implement behavior trees, e.g SequenceUTest
+	// XXX FIXME ptm->hasAnyEvaluatable() is never-ever set...
 	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
 
@@ -1718,7 +1719,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	// need to:
 	// -- build a connectivity map, just like the one for clauses
 	// -- build a clause_variables struct, but just for this term
-	// -- generalize get_next_clause to use this map.
+	// -- generalize get_next_untried_clause to use this map.
 	// XXX FIXME -- do the above.
 	issued_present.insert(hp);
 
@@ -1938,7 +1939,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const Handle& hi = parent->getHandle();
 	Type hit = hi->get_type();
 
-	if (PRESENT_LINK == hit and not ptm->isLiteral())
+	if (PRESENT_LINK == hit and not parent->isLiteral())
 	{
 		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
 		return explore_present_branches(ptm, hg, clause_root);
