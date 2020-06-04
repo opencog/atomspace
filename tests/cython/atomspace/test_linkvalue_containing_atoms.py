@@ -59,10 +59,9 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
         print(str(value))
         self.assertTrue(re.fullmatch(
             '\(LinkValue\n'
-            '    \(FloatValue 1\)\n'
-            '    \(StringValue "foo"\)\n'
-            '    \(ConceptNode "bar"\) ; \[[0-9a-fA-F]+\]\[[0-9a-fA-F]+\]\n'
-            '\)',
+            '  \(FloatValue 1\)\n'
+            '  \(StringValue "foo"\)\n'
+            '  \(ConceptNode "bar"\)\)',
             str(value)))
 
     def test_is_a(self):
