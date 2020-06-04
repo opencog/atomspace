@@ -345,9 +345,25 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 
 	// Everything under Choice is either a literal, or a grouping of
 	// PresentLinks. They are not mandatory, since they exist only in
-	// some of the choice branches, but not others.
+	// some of the choice branches, but not others. Unless there is
+	// only one branch, in which case they become mandatory.
 	if (not reverse and CHOICE_LINK == typ)
 	{
+		// If there is only one choice, then there is effectively no
+		// choice at all. Unwrap and discard.
+		if (1 == h->get_arity())
+		{
+			const Handle& ph = h->getOutgoingAtom(0);
+			Type pht = ph->get_type();
+			if (PRESENT_LINK == pht)
+			{
+				for (const Handle& php : ph->getOutgoingSet())
+					_pat.mandatory.emplace_back(php);
+			}
+			else
+				_pat.mandatory.emplace_back(ph);
+		}
+
 		for (const Handle& ph : h->getOutgoingSet())
 		{
 			Type pht = ph->get_type();
