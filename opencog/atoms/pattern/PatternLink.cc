@@ -345,9 +345,25 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 
 	// Everything under Choice is either a literal, or a grouping of
 	// PresentLinks. They are not mandatory, since they exist only in
-	// some of the choice branches, but not others.
+	// some of the choice branches, but not others. Unless there is
+	// only one branch, in which case they become mandatory.
 	if (not reverse and CHOICE_LINK == typ)
 	{
+		// If there is only one choice, then there is effectively no
+		// choice at all. Unwrap and discard.
+		if (1 == h->get_arity())
+		{
+			const Handle& ph = h->getOutgoingAtom(0);
+			Type pht = ph->get_type();
+			if (PRESENT_LINK == pht)
+			{
+				for (const Handle& php : ph->getOutgoingSet())
+					_pat.mandatory.emplace_back(php);
+			}
+			else
+				_pat.mandatory.emplace_back(ph);
+		}
+
 		for (const Handle& ph : h->getOutgoingSet())
 		{
 			Type pht = ph->get_type();
@@ -429,6 +445,13 @@ _pat.mandatory.emplace_back(h);
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
 ///
+/// XXX FIXME. This should be working with PatternTerms not Handles,
+/// because the same term may occur in different parts of the tree in
+/// different ways, and we incorrectly classify it as a result. The
+/// cause is that we are not really working with clauses here, we are
+/// extracting terms out of clauses. This fix requires a huge amount
+/// of restructuring, though...
+///
 /// This makes built-in assumptions about using the TermMatchMixin,
 /// which are not going to be true in general. However, the vast
 /// majority of users expect to be able to use the boolean operators
@@ -489,9 +512,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.mandatory.emplace_back(hbody);
 	}
 
-	// Sigh. Handle a top-level OrLink with a single member.
-	// This assumes the TermMatchMixin, so its broken
-	// for anyone giving alternative interpretations. Yuck.
+	// A top-level OrLink with a single member. Unwrap it.
+	// This interprets OrLink as a crisp boolean operator,
+	// preventing alternate interpretations for it.
 	else if (OR_LINK == t and 1 == hbody->get_arity())
 	{
 		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
@@ -506,8 +529,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 
 	// A single top-level clause that is a NotLink.
-	// This assumes the TermMatchMixin, so its broken
-	// for anyone giving alternative interpretations. Yuck.
+	// This interprets NotLink as a crisp boolean operator,
+	// preventing alternate interpretations for it.
 	else if (NOT_LINK == t)
 	{
 		// XXX FIXME Handle of OrLink is incorrect, here.
