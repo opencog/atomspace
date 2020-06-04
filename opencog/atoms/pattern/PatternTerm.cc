@@ -224,7 +224,7 @@ void PatternTerm::markLiteral()
 void PatternTerm::markPresent()
 {
 	// If its literal, its effectively quoted, so cannot be present.
-	if (_is_literal) return;
+	if (_is_literal or isQuoted()) return;
 
 	_is_present = true;
 
@@ -238,7 +238,7 @@ void PatternTerm::markPresent()
 void PatternTerm::markChoice()
 {
 	// If its literal, its effectively quoted, so cannot be a choice.
-	if (_is_literal) return;
+	if (_is_literal or isQuoted()) return;
 
 	_is_choice = true;
 
