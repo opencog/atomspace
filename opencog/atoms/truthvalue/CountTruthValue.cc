@@ -98,7 +98,7 @@ confidence_t CountTruthValue::get_confidence() const
 std::string CountTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
-    sprintf(buf, "(ctv %f %f %f)",
+    sprintf(buf, "(ctv %g %g %g)",
             static_cast<float>(get_mean()),
             static_cast<double>(get_confidence()),
             static_cast<float>(get_count()));

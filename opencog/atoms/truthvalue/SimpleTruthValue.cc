@@ -140,7 +140,7 @@ TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
 std::string SimpleTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
-    sprintf(buf, "(stv %f %f)",
+    sprintf(buf, "(stv %g %g)",
             static_cast<float>(get_mean()),
             static_cast<float>(get_confidence()));
     return buf;
