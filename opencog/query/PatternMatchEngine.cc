@@ -1946,7 +1946,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	}
 
 	// Do the simple case first, ChoiceLinks are harder.
-	if (CHOICE_LINK != hit /* or parent->isLiteral() */)
+	if (CHOICE_LINK != hit or parent->isQuoted())
 	{
 		bool found = explore_up_branches(ptm, hg, clause_root);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
