@@ -1122,7 +1122,13 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
-		if (GLOB_NODE == t) ptm->addGlobbyVar();
+
+		// It's globby, if it's explicitly a glob, or if it's a
+		// variable with a non-trivial matching interval.
+		if (GLOB_NODE == t or
+		    _variables._glob_intervalmap.end() !=
+		    _variables._glob_intervalmap.find(h))
+			ptm->addGlobbyVar();
 		return;
 	}
 
