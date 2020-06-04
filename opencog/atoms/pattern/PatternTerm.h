@@ -123,6 +123,19 @@ protected:
 	// are still variables, unless they are quoted or scope-hidden.)
 	bool _is_literal;
 
+	// True if this contains a set of subterms, all of which must be
+	// simultaneously present in the pattern. All of the sub-terms are
+	// necessarily literal. This corresponds to PRESENT_LINK in the
+	// default interpretation.
+	bool _is_present;
+
+	// True if this contains a set of subterms, one of which must be
+	// present in the pattern. All of the sub-terms are present, or
+	// are literal. This corresponds to CHOICE_LINK in the default
+	// interpretation; it can also be an OR_LINK when that OR_LINK
+	// is in a boolean evaluatable context.
+	bool _is_choice;
+
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
 	void addAnyEvaluatable();
@@ -151,6 +164,12 @@ public:
 
 	void markLiteral();
 	bool isLiteral() const { return _is_literal; }
+
+	void markPresent();
+	bool isPresent() const { return _is_present; }
+
+	void markChoice();
+	bool isChoice() const { return _is_choice; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
