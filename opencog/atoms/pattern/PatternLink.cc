@@ -445,6 +445,13 @@ _pat.mandatory.emplace_back(h);
 /// thus, not unpacked.  In the case of OrLinks, there is no flag to
 /// say that "these are disjoined", so again, that has to happen later.
 ///
+/// XXX FIXME. This should be working with PatternTerms not Handles,
+/// because the same term may occur in different parts of the tree in
+/// different ways, and we incorrectly classify it as a result. The
+/// cause is that we are not really working with clauses here, we are
+/// extracting terms out of clauses. This fix requires a huge amount
+/// of restructuring, though...
+///
 /// This makes built-in assumptions about using the TermMatchMixin,
 /// which are not going to be true in general. However, the vast
 /// majority of users expect to be able to use the boolean operators
