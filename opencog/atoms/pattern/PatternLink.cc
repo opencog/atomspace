@@ -1121,7 +1121,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// that bug is a headache, so instead, we pile on the rubbish.
 	// XXX FIXME .. this is a hack to hide a hack.
 	if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
-	    != _pat.literal_clauses.end())
+	    != _pat.literal_clauses.end()
+	    or
+	    _pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
    {
 		if (PRESENT_LINK == t)
 		{

@@ -68,7 +68,7 @@ public:
 	void test_unary(void);
 	void test_typed(void);
 	void test_constant(void);
-	void xtest_compound(void);
+	void test_compound(void);
 };
 
 void ChoiceLinkUTest::tearDown(void)
@@ -296,7 +296,7 @@ void ChoiceLinkUTest::test_constant(void)
 /*
  * ChoiceLink with PresentLink in it
  */
-void ChoiceLinkUTest::xtest_compound(void)
+void ChoiceLinkUTest::test_compound(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
