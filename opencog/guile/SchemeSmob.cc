@@ -251,6 +251,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-delete!",           1, 0, 1, C(ss_delete));
+	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
 	register_proc("cog-delete-recursive!", 1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
@@ -292,6 +293,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-atomspace",         0, 0, 1, C(ss_as));
+	register_proc("cog-as",                0, 0, 1, C(ss_as));
 	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
 	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
