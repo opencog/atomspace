@@ -63,7 +63,7 @@ Link::~Link()
 std::string Link::to_short_string(const std::string& indent) const
 {
     std::string answer = indent;
-    std::string more_indent = indent + "  ";
+    std::string more_indent = indent + "  "; // two spaces
 
     answer += "(" + nameserver().getTypeName(_type);
 
@@ -86,7 +86,7 @@ std::string Link::to_short_string(const std::string& indent) const
 std::string Link::to_string(const std::string& indent) const
 {
     std::string answer = indent;
-    std::string more_indent = indent + "  ";
+    std::string more_indent = indent + "  "; // two spaces
 
     answer += "(" + nameserver().getTypeName(_type);
 
