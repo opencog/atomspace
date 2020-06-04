@@ -162,6 +162,8 @@ void PatternTerm::addBoundVariable()
 
 void PatternTerm::addAnyGlobbyVar()
 {
+	if (isQuoted()) return;
+
 	if (not _has_any_globby_var)
 	{
 		_has_any_globby_var = true;
@@ -172,6 +174,8 @@ void PatternTerm::addAnyGlobbyVar()
 
 void PatternTerm::addGlobbyVar()
 {
+	if (isQuoted()) return;
+
 	_is_globby_var = true;
 
 	if (_parent != PatternTerm::UNDEFINED)
