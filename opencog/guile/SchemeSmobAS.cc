@@ -333,17 +333,21 @@ SCM SchemeSmob::ss_as_clear(SCM sas)
 /* ============================================================== */
 /**
  * Return the atomspace of an atom.
+ * If no atom, return the current atomspace.
  */
-SCM SchemeSmob::ss_as(SCM satom)
+SCM SchemeSmob::ss_as(SCM slist)
 {
-	Handle h(scm_to_handle(satom));
-	if (nullptr == h)
-		scm_wrong_type_arg_msg("cog-as", 1, satom, "opencog atom");
+	// If no argument, then return the current AtomSpace.
+	if (scm_is_null(slist))
+	{
+		AtomSpace* as = ss_get_env_as("cog-atomspace");
+		return as ? make_as(as) : SCM_EOL;
+	}
 
+	SCM satom = scm_car(slist);
+	Handle h(verify_handle(satom, "cog-atomspace"));
 	AtomSpace* as = h->getAtomSpace();
-	if (nullptr == as) return SCM_EOL;
-
-	return make_as(as);
+	return as ? make_as(as) : SCM_EOL;
 }
 
 /* ============================================================== */
@@ -351,11 +355,6 @@ SCM SchemeSmob::ss_as(SCM satom)
  * Return current atomspace for this dynamic state.
  */
 SCM SchemeSmob::atomspace_fluid;
-
-SCM SchemeSmob::ss_get_as (void)
-{
-	return scm_fluid_ref(atomspace_fluid);
-}
 
 /// The current atomspace for the current thread must not be deleted
 /// under any circumstances (even if guile thinks that there are no
@@ -424,7 +423,7 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 	if (!nas)
 		return SCM_BOOL_F;
 
-	SCM old_as = ss_get_as();
+	SCM old_as = scm_fluid_ref(atomspace_fluid);
 	as_ref_count(old_as, nas);
 
 	scm_fluid_set_x(atomspace_fluid, new_as);

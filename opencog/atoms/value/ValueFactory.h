@@ -25,7 +25,7 @@ class ValueServer
     friend ValueServer& valueserver();
 private:
     ValueServer() {}
-    
+
     struct ProtoFactory
     {
         ValueFactory func;
@@ -94,7 +94,7 @@ public:
             {
                 // First, find the list of factories for this type.
                 std::vector<ProtoFactory> func_vec = _factories.at(vtype);
-                
+
                 // Second, get a list of types expected
                 std::vector<std::type_index> expected_args =
                     to_list_of_type_indexes<ARG...>();
@@ -123,8 +123,15 @@ public:
         if (fptr)
             return (*fptr)(&arg...);
 
+        std::vector<std::type_index> expected_args =
+                        to_list_of_type_indexes<ARG...>();
+        std::string argnames;
+        for (auto t : expected_args)
+            argnames += std::string(t.name()) + " ";
+
         throw IndexErrorException(TRACE_INFO,
-            "No factory found for Value type %d and arguments.", vtype);
+            "No factory found for Value type %d and arguments %s.",
+            vtype, argnames.c_str());
     }
 };
 

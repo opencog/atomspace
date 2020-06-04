@@ -42,14 +42,6 @@ void Node::init()
 /// trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::stringstream nstrm;
-    nstrm << indent << "(" <<  nameserver().getTypeName(_type)
-        << " \"" << _name << "\")";
-    return nstrm.str();
-}
-
-std::string Node::to_string(const std::string& indent) const
-{
     std::string answer = indent;
     answer += "(" + nameserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
@@ -58,9 +50,13 @@ std::string Node::to_string(const std::string& indent) const
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->to_string();
 
-    answer += ") ; " + id_to_string();
-
+    answer += ")";
     return answer;
+}
+
+std::string Node::to_string(const std::string& indent) const
+{
+    return to_short_string(indent) + " ; " + id_to_string();
 }
 
 bool Node::operator==(const Atom& other) const

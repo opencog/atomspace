@@ -244,14 +244,17 @@ void SchemeSmob::module_init(void*)
 void SchemeSmob::register_procs()
 {
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
+	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
+	register_proc("cog-atom",              1, 0, 1, C(ss_atom));
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
+	register_proc("cog-delete!",           1, 0, 1, C(ss_delete));
 	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
-	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
-	register_proc("cog-extract",           1, 0, 1, C(ss_extract));
-	register_proc("cog-extract-recursive", 1, 0, 1, C(ss_extract_recursive));
+	register_proc("cog-delete-recursive!", 1, 0, 1, C(ss_delete_recursive));
+	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
+	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
 
 	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
@@ -289,7 +292,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
-	register_proc("cog-as",                1, 0, 0, C(ss_as));
+	register_proc("cog-atomspace",         0, 0, 1, C(ss_as));
+	register_proc("cog-as",                0, 0, 1, C(ss_as));
 	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
 	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
@@ -304,7 +308,6 @@ void SchemeSmob::register_procs()
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
-	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));
 	register_proc("cog-atomspace-uuid",    0, 1, 0, C(ss_as_uuid));

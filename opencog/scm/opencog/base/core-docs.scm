@@ -10,6 +10,36 @@
 ;
 ;    guile> ,apropos cog
 ;
+(set-procedure-property! cog-new-atom 'documentation
+"
+ cog-new-atom ATOM [ATOMSPACE]
+    If the optional ATOMSPACE argument is provided, copy the existing
+    ATOM into ATOMSPACE; otherwise copy it into the current AtomSpace
+    for this thread.
+
+    Use (cog-atomspace ATOM) to examine the AtomSpace that the ATOM
+    is currently in.
+
+    Example:
+        ; Create a new Atom in the current AtomSpace.
+        guile> (define ca (Concept \"A\"))
+
+        ; What AtomSpace is it in?
+        guile> (cog-atomspace ca)
+
+        ; Create a new AtomSpace, and put an atom into it.
+        guile> (define spacex (cog-new-atomspace))
+        guile> (define xca (cog-new-atom ca spacex))
+        guile> (cog-atomspace xca)
+
+        ; Change the TV on it, just so that it is easier to spot.
+        guile> (cog-set-tv! xca (SimpleTruthValue 0.2 0.2))
+
+        ; Print AtomSpace contents
+        guile> (cog-prt-atomspace)
+        guile> (cog-prt-atomspace spacex)
+")
+
 (set-procedure-property! cog-new-node 'documentation
 "
  cog-new-node NODE-TYPE NODE-NAME [ATOMSPACE] [TV]
@@ -28,8 +58,8 @@
 
         ; Creates a new node, with a truth value:
         guile> (cog-new-node 'Concept \"another node\"
-                      (cog-new-stv 0.8 0.9))
-        (ConceptNode \"another node\" (stv 0.8 0.9))
+                      (SimpleTruthValue 0.8 0.9))
+        (ConceptNode \"another node\" (SimpleTruthValue 0.8 0.9))
 
         ; Creates a new atomspace, and places the node there:
         guile> (define spacex (cog-new-atomspace))
@@ -147,26 +177,26 @@
         )
 
         ; Change the truth value of an existing node:
-        guile> (cog-link 'Link x y (cog-new-stv 0.7 0.8))
+        guile> (cog-link 'Link x y (SimpleTruthValue 0.7 0.8))
         (Link (stv 0.7 0.8)
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
 ")
 
-(set-procedure-property! cog-delete 'documentation
+(set-procedure-property! cog-delete! 'documentation
 "
- cog-delete ATOM [ATOMSPACE]
+ cog-delete! ATOM [ATOMSPACE]
     Remove the indicated ATOM, but only if it has no incoming links.
     If it has incoming links, the remove fails.  If SQL or other data
     storage is attached, the ATOM is also removed from the storage.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
-    Use cog-extract to remove from the AtomSpace only, leaving storage
+    Use cog-extract! to remove from the AtomSpace only, leaving storage
     unaffected.
 
-    Use cog-delete-recursive to force removal of this atom, together
+    Use cog-delete-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
@@ -185,12 +215,12 @@
 
        ; Try to delete x. This should fail, since there's a link
        ; containing x.
-       guile> (cog-delete x)
+       guile> (cog-delete! x)
        #f
 
        ; Delete x, and everything pointing to it. This should delete
        ; both x, and the link l.
-       guile> (cog-delete-recursive x)
+       guile> (cog-delete-recursive! x)
        #t
 
        ; Verify that the link l is gone:
@@ -206,9 +236,9 @@
        (ConceptNode \"def\")
 ")
 
-(set-procedure-property! cog-delete-recursive 'documentation
+(set-procedure-property! cog-delete-recursive! 'documentation
 "
- cog-delete-recursive ATOM [ATOMSPACE]
+ cog-delete-recursive! ATOM [ATOMSPACE]
     Remove the indicated ATOM, and all atoms that point at it.
     If SQL or other data storage is attached, the ATOM is also removed
     from the storage.
@@ -220,18 +250,18 @@
     current AtomSpace for this thread.
 ")
 
-(set-procedure-property! cog-extract 'documentation
+(set-procedure-property! cog-extract! 'documentation
 "
- cog-extract ATOM [ATOMSPACE]
+ cog-extract! ATOM [ATOMSPACE]
     Remove the indicated ATOM, but only if it has no incoming links.
     If it has incoming links, the remove fails.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
     This does NOT remove the atom from any attached storage (e.g. SQL
-    storage).  Use cog-delete to remove from atoms from storage.
+    storage).  Use cog-delete! to remove from atoms from storage.
 
-    Use cog-extract-recursive to force removal of this atom, together
+    Use cog-extract-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
@@ -250,12 +280,12 @@
 
        ; Try to extract x. This should fail, since there's a link
        ; containing x.
-       guile> (cog-extract x)
+       guile> (cog-extract! x)
        #f
 
        ; Delete x, and everything pointing to it. This should extract
        ; both x, and the link l.
-       guile> (cog-extract-recursive x)
+       guile> (cog-extract-recursive! x)
        #t
 
        ; Verify that the link l is gone:
@@ -271,15 +301,15 @@
        (ConceptNode \"def\")
 ")
 
-(set-procedure-property! cog-extract-recursive 'documentation
+(set-procedure-property! cog-extract-recursive! 'documentation
 "
- cog-extract-recursive ATOM [ATOMSPACE]
+ cog-extract-recursive! ATOM [ATOMSPACE]
     Remove the indicated ATOM, and all atoms that point at it.
     Return #t on success, else return #f if not removed.
 
     The atom is NOT removed from SQL or other attached data storage.
-    If you need to delete from storage, use cog-delete and
-    cog-delete-recursive.
+    If you need to delete from storage, use cog-delete! and
+    cog-delete-recursive!.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
     removed from that AtomSpace; otherwise, it is removed from the
@@ -699,6 +729,9 @@
            (ConceptNode \"foo\")
            (StringValue \"bar\")
        )
+
+       guile> (cog-new-value 'Concept \"foo\")
+       (ConceptNode \"foo\")
 ")
 
 (set-procedure-property! cog-keys 'documentation
@@ -767,6 +800,8 @@
     Example:
        guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
        (0.1 0.2 0.3)
+       guile> (cog-value->list (Number 1 2 3))
+       (1.0 2.0 3.0)
 ")
 
 (set-procedure-property! cog-value-ref 'documentation
@@ -785,13 +820,8 @@
     Example:
        guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
        0.3
-")
-
-(set-procedure-property! cog-as 'documentation
-"
- cog-as ATOM
-    Return the AtomSpace of the ATOM.  If the ATOM does not belong to
-    any AtomSpace, null is returned.
+       guile> (cog-value-ref (Number 1 2 3) 2)
+       3.0
 ")
 
 (set-procedure-property! cog-get-types 'documentation
@@ -879,8 +909,9 @@
 
 (set-procedure-property! cog-atomspace 'documentation
 "
- cog-atomspace
-     Return the current atomspace for this thread.
+ cog-atomspace [ATOM]
+   If the optional ATOM is specified, then return the AtomSpace of ATOM.
+   Otherwise, return the current atomspace for this thread.
 ")
 
 (set-procedure-property! cog-set-atomspace! 'documentation

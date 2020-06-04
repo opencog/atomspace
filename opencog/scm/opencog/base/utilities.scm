@@ -137,9 +137,9 @@
 	                         ; already have been extracted by an outer
 	                         ; recursive call
 		(if (cog-node? atom)
-			(cog-extract atom)
+			(cog-extract! atom)
 			(let* ((oset (cog-outgoing-set atom))
-					(flg (cog-extract atom))
+					(flg (cog-extract! atom))
 				)
 				(if flg ;; halt recursion if link was not extract-able
 					(for-each extract-hypergraph oset)
@@ -162,7 +162,7 @@
   extracted from it; otherwise the default atomspace is used.
 "
 	(cog-map-type
-		(lambda (x) (cog-extract-recursive x) #f)
+		(lambda (x) (cog-extract-recursive! x) #f)
 		atom-type
 		ATOMSPACE
 	)
@@ -1143,36 +1143,24 @@
 
 ; -----------------------------------------------------------------------
 
-(define-public (cog-cp AS LST)
+(define-public (cog-cp ATOMSPACE ATOM-LIST)
 "
-  cog-cp AS LST - Copy the atoms in LST to the given atomspace AS and
-  returns the list of copied atoms.
+  cog-cp ATOMSPACE ATOM-LIST - Copy the atoms in ATOM-LIST to ATOMSPACE.
+  Returns the list of copied atoms.
 "
-  (define initial-as (cog-atomspace))
-
-  ;; Switch to destination atomspace.
-  (cog-set-atomspace! AS)
-
-  (let* (;; The creation of a ListLink or any other link would result
-         ;; in the atoms being inserted in the current atomspace.
-         (LST-list (List LST))
-         (LST-cp (cog-outgoing-set LST-list)))
-    (cog-delete LST-list)
-    ;; Switch back to initial atomspace.
-    (cog-set-atomspace! initial-as)
-    ;; Return the copied list
-    LST-cp)
+	(map (lambda (AT) (cog-new-atom AT ATOMSPACE)) ATOM-LIST)
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-cp-all AS)
+(define-public (cog-cp-all ATOMSPACE)
 "
-  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS
-                  and returns the list of copied atoms on success.
+  cog-cp-all AS - Copy all atoms in the current atomspace for this
+     thread to ATOMSPACE.  Return the list of copied atoms.
 "
-  (cog-cp AS (apply append (map cog-get-atoms (cog-get-types))))
+  (cog-cp ATOMSPACE (cog-get-all-roots))
 )
 
+; -----------------------------------------------------------------------
 (define-public (cog-get-all-subtypes atom-type)
 "
  cog-get-all-subtypes TYPE

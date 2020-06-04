@@ -301,9 +301,9 @@
 					(TypedVariable uright (Type (symbol->string right-type))))
 				term (if LEF uleft uright))))
 			(define basis (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uleft)
-			(cog-extract-recursive uright)
+			(cog-extract! setlnk)
+			(cog-extract-recursive! uleft)
+			(cog-extract-recursive! uright)
 			basis)
 
 		; Return a list of all of the atoms that might ever appear on
@@ -499,9 +499,9 @@
 					(TypedVariable uright (Type (symbol->string right-type))))
 				term term)))
 			(define all-pairs (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uleft)
-			(cog-extract-recursive uright)
+			(cog-extract! setlnk)
+			(cog-extract-recursive! uleft)
+			(cog-extract-recursive! uright)
 			all-pairs)
 
 		;-------------------------------------------

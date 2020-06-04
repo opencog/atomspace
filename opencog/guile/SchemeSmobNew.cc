@@ -34,89 +34,15 @@ std::string SchemeSmob::to_string(SCM node)
 	return "";
 }
 
-/**
- * Return a string holding the scheme representation of an atom.
- *
- * The input handle is represented in terms of a valid scheme
- * expression. Evaluating this expression should result in exactly
- * the same atom being created.
- *
- * This is NOT optimized for performance, as printing should not
- * be in any performance-critical paths ...
- *
- * This does NOT use the Atom::to_string() methods, because those
- * methods are not guaranteed to generate valid scheme.
- */
-std::string SchemeSmob::to_string(const Handle& h)
-{
-	return handle_to_string(h, 0);
-}
-
-std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
-{
-	if (nullptr == h) return "#<Invalid handle>";
-
-	// Print a scheme expression, so that the output can be saved
-	// to file, and then restored, as needed.
-	std::string ret = "";
-	for (int i=0; i< indent; i++) ret += "   ";
-	if (h->is_node())
-	{
-		ret += "(";
-		ret += nameserver().getTypeName(h->get_type());
-		ret += " \"";
-		ret += h->get_name();
-		ret += "\"";
-
-		// Print the truth value only after the node name
-		TruthValuePtr tv(h->getTruthValue());
-		if (not tv->isDefaultTV()) {
-			ret += " ";
-			ret += tv_to_string (tv);
-		}
-		ret += ")";
-		return ret;
-	}
-
-	if (h->is_link())
-	{
-		ret += "(";
-		ret += nameserver().getTypeName(h->get_type());
-
-		// If there's a truth value, print it before the other atoms
-		TruthValuePtr tv(h->getTruthValue());
-		if (not tv->isDefaultTV()) {
-			ret += " ";
-			ret += tv_to_string(tv);
-		}
-
-		// Print the outgoing link set.
-		ret += "\n";
-		const HandleSeq& oset = h->getOutgoingSet();
-		unsigned int arity = oset.size();
-		for (unsigned int i=0; i<arity; i++)
-		{
-			//ret += " ";
-			ret += handle_to_string(oset[i], /*(0==i)?0:*/indent+1);
-			ret += "\n";
-			//if (i != arity-1) ret += "\n";
-		}
-		for (int i=0; i < indent; i++) ret += "   ";
-		ret += ")";
-		return ret;
-	}
-
-	return ret;
-}
-
 std::string SchemeSmob::protom_to_string(SCM node)
 {
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// XXX FIXME; should not use pa->to_string() as the print method.
+	// Need to have a newline printed; otherewise cog-value->list
+	// prints badly-formatted grunge.
 	if (not pa->is_atom())
-		return pa->to_string();
+		return pa->to_short_string() + "\n";
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
@@ -132,9 +58,12 @@ std::string SchemeSmob::protom_to_string(SCM node)
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);
+		return "#<Invalid handle>";
 	}
 
-	return handle_to_string(h, 0) + "\n";
+	// Need to have a newline printed; otherewise cog-value->list
+	// prints badly-formatted grunge.
+	return h->to_short_string() + "\n";
 }
 
 /* ============================================================== */
@@ -361,6 +290,54 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 
 /* ============================================================== */
 /**
+ * Copy an existing atom into a new atomspace.
+ */
+SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
+{
+	Handle h = verify_handle(satom, "cog-new-atom");
+
+	AtomSpace* atomspace = get_as_from_list(kv_pairs);
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-atom");
+
+	try
+	{
+		return handle_to_scm(atomspace->add_atom(h));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-atom", scm_cons(satom, kv_pairs));
+	}
+
+	scm_remember_upto_here_1(kv_pairs);
+	return SCM_EOL;
+}
+
+/**
+ * Return the indicated atom, if a version of it exists in this
+ * atomspace; else return nil if it does not exist.
+ */
+SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
+{
+	Handle h = verify_handle(satom, "cog-atom");
+
+	AtomSpace* atomspace = get_as_from_list(kv_pairs);
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-atom");
+
+	try
+	{
+		return handle_to_scm(atomspace->get_atom(h));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-atom", scm_cons(satom, kv_pairs));
+	}
+
+	scm_remember_upto_here_1(kv_pairs);
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/**
  * Create a new node, of named type stype, and string name sname
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
@@ -583,7 +560,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-delete");
+	Handle h = verify_handle(satom, "cog-delete!");
 
 	// It can happen that the atom has already been deleted, but we're
 	// still holding on to a pointer to it.  This is rare... but possible.
@@ -594,7 +571,7 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete!");
 
 	// AtomSpace::removeAtom() returns true if atom was deleted,
 	// else returns false
@@ -617,10 +594,10 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-delete-recursive");
+	Handle h = verify_handle(satom, "cog-delete-recursive!");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive!");
 
 	bool rc = atomspace->remove_atom(h, true);
 
@@ -642,13 +619,13 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-extract");
+	Handle h = verify_handle(satom, "cog-extract!");
 
 	// The extract will fail/log warning if the incoming set isn't null.
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract!");
 
 	// AtomSpace::extract_atom() returns true if atom was extracted,
 	// else returns false
@@ -671,10 +648,10 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-extract-recursive");
+	Handle h = verify_handle(satom, "cog-extract-recursive!");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive!");
 
 	bool rc = atomspace->extract_atom(h, true);
 

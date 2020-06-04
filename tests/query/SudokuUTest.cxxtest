@@ -21,7 +21,6 @@
  */
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/Logger.h>
 #include "imply.h"
 
@@ -97,12 +96,12 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
-	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+	logger().debug("puzzle is:\n%s\n", oc_to_string(puzzle).c_str());
 
 	// Solve the puzzle
 	// Handle puzzle_solution = bindlink(as, puzzle);
 	Handle puzzle_solution = eval->eval_h("(cog-execute! (x2-puzzle))");
-	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	logger().debug("puzzle solution is %s\n", oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -124,12 +123,12 @@ void SudokuPuzzle::xtest_2x2_any(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
-	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+	logger().debug("puzzle is:\n%s\n", oc_to_string(puzzle).c_str());
 
 	// Solve the puzzle. Expect 2 solutions, as there are no
 	// fixed cells here.
 	Handle puzzle_solution = bindlink(as, puzzle);
-	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	logger().debug("puzzle solution is %s\n", oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -149,12 +148,12 @@ void SudokuPuzzle::test_3x3_puzzle(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
-	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+	logger().debug("puzzle is:\n%s\n", oc_to_string(puzzle).c_str());
 
 	// Solve the puzzle
 	// Handle puzzle_solution = bindlink(as, puzzle);
 	Handle puzzle_solution = eval->eval_h("(cog-execute! (x3-puzzle))");
-	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	logger().debug("puzzle solution is %s\n", oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -176,7 +175,7 @@ void SudokuPuzzle::xxx_borken_test_puzzle(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
-	logger().debug("puzzle is:\n%s\n", SchemeSmob::to_string(puzzle).c_str());
+	logger().debug("puzzle is:\n%s\n", oc_to_string(puzzle).c_str());
 
 	// Solve the puzzle
 // XXX Right now this test simply does not work.  There's probably
@@ -184,7 +183,7 @@ void SudokuPuzzle::xxx_borken_test_puzzle(void)
 // exploration of the unordered links correctly.  Who knows.
 // A simpler but more extended test of unordered links is needed.
 	Handle puzzle_solution = bindlink(as, puzzle);
-	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	logger().debug("puzzle solution is %s\n", oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);

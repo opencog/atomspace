@@ -24,21 +24,26 @@
 ; when these are touched in the various scm files.
 (export
 cog-arity
-cog-as
+cog-atom
 cog-atom?
 cog-atom-less?
 cog-atomspace
 cog-atomspace?
 cog-atomspace-clear
+cog-atomspace-cow!
+cog-atomspace-cow?
 cog-atomspace-env
+cog-atomspace-readonly?
+cog-atomspace-ro!
+cog-atomspace-rw!
 cog-atomspace-uuid
 cog-confidence
 cog-count
 cog-count-atoms
-cog-delete
-cog-delete-recursive
-cog-extract
-cog-extract-recursive
+cog-delete!
+cog-delete-recursive!
+cog-extract!
+cog-extract-recursive!
 cog-get-subtypes
 cog-get-types
 cog-handle
@@ -54,6 +59,7 @@ cog-link?
 cog-map-type
 cog-mean
 cog-name
+cog-new-atom
 cog-new-atomspace
 cog-new-link
 cog-new-node
@@ -98,24 +104,31 @@ cog-value-ref
 
 (define-public cog-initial-as (cog-atomspace))
 (define-public my-as (cog-atomspace))
-(if (eq? cog-initial-as #f)
+(if (nil? cog-initial-as)
 	(begin
 		(set! cog-initial-as (cog-new-atomspace))
 		; Initialize a default atomspace, just to keep things sane...
 		(cog-set-atomspace! cog-initial-as)))
 
+; Renamed functions
+(define-public (cog-as ATOM) "See cog-atomspace" (cog-atomspace ATOM))
+(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
+(define-public (cog-delete-recursive ATOM)
+	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
+(define-public (cog-extract ATOM) "See cog-extract!" (cog-extract! ATOM))
+(define-public (cog-extract-recursive ATOM)
+	"See cog-extract-recursive!" (cog-extract-recursive! ATOM))
+
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
-; Some of these things could possibly be modules ...?
+; Some of these things could possibly be turned into modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
 ; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
 (include-from-path "opencog/base/core-docs.scm")
-
 (include-from-path "opencog/base/utilities.scm")
-
 (include-from-path "opencog/base/atom-cache.scm")
 (include-from-path "opencog/base/apply.scm")
 (include-from-path "opencog/base/tv.scm")
@@ -124,5 +137,4 @@ cog-value-ref
 (include-from-path "opencog/base/debug-trace.scm")
 
 ; Obsolete functions
-(define-public (cog-atom X) "obsolete function" '())
 (define-public (cog-undefined-handle) "obsolete function" '())

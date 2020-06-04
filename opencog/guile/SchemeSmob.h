@@ -81,9 +81,11 @@ private:
 
 	// Value, atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
+	static SCM ss_new_atom(SCM, SCM);
+	static SCM ss_atom(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
-	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_node(SCM, SCM, SCM);
+	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
 	static SCM ss_delete(SCM, SCM);
 	static SCM ss_delete_recursive(SCM, SCM);
@@ -114,7 +116,6 @@ private:
 	static SCM ss_number(SCM);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
-	static SCM ss_as(SCM);
 	static SCM ss_tv(SCM);
 	static SCM ss_get_mean(SCM);
 	static SCM ss_get_confidence(SCM);
@@ -147,7 +148,7 @@ private:
 	// Atom Spaces
 	static SCM ss_new_as(SCM);
 	static SCM ss_as_p(SCM);
-	static SCM ss_get_as(void);
+	static SCM ss_as(SCM);
 	static SCM ss_set_as(SCM);
 	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);
@@ -171,7 +172,6 @@ private:
 	// Misc utilities
 	static std::string to_string(SCM);
 	static std::string protom_to_string(SCM);
-	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
@@ -224,9 +224,7 @@ public:
 public:
 
 	// Utility printing functions
-	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
-	static std::string tv_to_string(const TruthValuePtr&);
 };
 
 /** @}*/

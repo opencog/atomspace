@@ -23,7 +23,7 @@
 (define auxiliary-A (Concept "A"))
 
 ;; Switch the atomspace where A is (which is auxiliary-as)
-(define pre-as (cog-set-atomspace! (cog-as auxiliary-A)))
+(define pre-as (cog-set-atomspace! (cog-atomspace auxiliary-A)))
 
 ;; Verify that the current atomspace, auxiliary-as and the prevous one
 ;; are all the same
@@ -63,7 +63,7 @@
 ;;
 ;; Very strangly if the line
 ;;
-;; (define pre-as (cog-set-atomspace! (cog-as auxiliary-A)))
+;; (define pre-as (cog-set-atomspace! (cog-atomspace auxiliary-A)))
 ;;
 ;; is replaced by
 ;;
@@ -72,4 +72,4 @@
 ;; which should be equivalent, then A is no longer invalid.
 
 ;; The atomspace of A should be the auxiliary atomspace
-(define A-as (cog-as A))
+(define A-as (cog-atomspace A))

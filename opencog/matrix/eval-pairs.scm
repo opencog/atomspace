@@ -163,11 +163,11 @@
 		; touched.
 		(define (delete-all-pairs)
 			(define start-time (current-time))
-			(for-each (lambda (PAIR) (cog-delete-recursive (gdr PAIR)))
+			(for-each (lambda (PAIR) (cog-delete-recursive! (gdr PAIR)))
 				(cog-incoming-set PRED-NODE))
-			(cog-delete PRED-NODE)
-			(cog-delete ANY-LEFT)
-			(cog-delete ANY-RIGHT)
+			(cog-delete! PRED-NODE)
+			(cog-delete! ANY-LEFT)
+			(cog-delete! ANY-RIGHT)
 			(format #t "Elapsed time to delete pairs: ~A secs\n"
 				(- (current-time) start-time))
 		)

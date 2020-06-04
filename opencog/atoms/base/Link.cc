@@ -62,25 +62,31 @@ Link::~Link()
 /// trailing newlines.
 std::string Link::to_short_string(const std::string& indent) const
 {
-    std::stringstream answer;
-    std::string more_indent = indent + "  ";
+    std::string answer = indent;
+    std::string more_indent = indent + "  "; // two spaces
 
-    answer << indent << "(" << nameserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
 
-    // Here the target string is made. If a target is a node, its name is
-    // concatenated. If it's a link, all its properties are concatenated.
+    // Print the TV only if its not the default.
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->to_string();
+
+    answer += "\n";
+    // Here, the outset string is made. If a target is a node,
+    // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer << " " << h->to_short_string();
+        answer += h->to_short_string(more_indent) + "\n";
 
-    answer << indent << ")";
-
-    return answer.str();
+    // Remove trailing newline before writing paren
+    answer.pop_back();
+    answer += ")";
+    return answer;
 }
 
 std::string Link::to_string(const std::string& indent) const
 {
     std::string answer = indent;
-    std::string more_indent = indent + "  ";
+    std::string more_indent = indent + "  "; // two spaces
 
     answer += "(" + nameserver().getTypeName(_type);
 
@@ -95,7 +101,6 @@ std::string Link::to_string(const std::string& indent) const
         answer += h->to_string(more_indent) + "\n";
 
     answer += indent + ") ; " + id_to_string();
-
     return answer;
 }
 

@@ -247,7 +247,7 @@ void BasicSCMUTest::test_extract(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create (Link AAA BBB)!", !eval_err);
 
-	eval->eval("(cog-extract-recursive x)");
+	eval->eval("(cog-extract-recursive! x)");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to extract atom AAA!", !eval_err);

@@ -22,7 +22,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/Logger.h>
 #include "imply.h"
 
@@ -99,7 +98,7 @@ void BuggyNot::test_bugnot(void)
 
 	// First, deduce if two seemingly different people are the same ...
 	Handle same = bindlink(as, same_rule);
-	logger().debug("Same-people list is %s\n", SchemeSmob::to_string(same).c_str());
+	logger().debug("Same-people list is %s\n", oc_to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
 	// Next, deduce that the same properties apply to each person.
@@ -111,7 +110,7 @@ void BuggyNot::test_bugnot(void)
 	// implication link. This was a rather distressing bug ... a very obvious
 	// but poor bug, and hadn't been noticed before. Alas.
 	Handle trans = bindlink(as, trans_rule);
-	logger().debug("Transitive list is %s\n", SchemeSmob::to_string(trans).c_str());
+	logger().debug("Transitive list is %s\n", oc_to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(trans));
 
 	logger().debug("END TEST: %s", __FUNCTION__);

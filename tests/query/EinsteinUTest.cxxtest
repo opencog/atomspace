@@ -22,7 +22,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/Logger.h>
 #include "imply.h"
 
@@ -108,7 +107,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	// (1,1) and (2,2), via predicates Nationality and KeepsPet.
 	Handle puzzle_solution = bindlink(as, puzzle_rules);
 	logger().debug("trivial puzzle solution is %s\n",
-	               SchemeSmob::to_string(puzzle_solution).c_str());
+	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4,
 	                  getarity(puzzle_solution));
 
@@ -147,7 +146,7 @@ void EinsteinPuzzle::test_trivial_keep(void)
 	// solutions get listed.
 	Handle puzzle_solution = bindlink(as, print_rule);
 	logger().debug("trivial puzzle keepers are %s\n",
-	               SchemeSmob::to_string(puzzle_solution).c_str());
+	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2,
 	                  getarity(puzzle_solution));
 
@@ -214,13 +213,13 @@ void EinsteinPuzzle::test_full(void)
 	// dunhill smoker(rule 12) == person7
 	Handle same = bindlink(as, same_rule);
 	logger().debug("After first same-rule\n%s\n",
-	               SchemeSmob::to_string(same).c_str());
+	               oc_to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(same));
 
 	// Next, propagate this knowledge transitively
 	Handle trans = bindlink(as, trans_rule);
 	logger().debug("After first transitive-rule\n%s\n",
-	               SchemeSmob::to_string(trans).c_str());
+	               oc_to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
 	// -----------
@@ -228,7 +227,7 @@ void EinsteinPuzzle::test_full(void)
 	// This combines facts 9+14: blue house has address 101. This is just a single result.
 	Handle faddr = bindlink(as, faddr_rule);
 	logger().debug("After first-address-rule\n%s\n",
-	               SchemeSmob::to_string(faddr).c_str());
+	               oc_to_string(faddr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
@@ -236,7 +235,7 @@ void EinsteinPuzzle::test_full(void)
 	// symmetrize rules 10, 12, 14, 15
 	Handle neigh = bindlink(as, nesym_rule);
 	logger().debug("After neighbor-symmetry-rule\n%s\n",
-	               SchemeSmob::to_string(neigh).c_str());
+	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
 
 	// Deduce new neighbors.
@@ -244,34 +243,34 @@ void EinsteinPuzzle::test_full(void)
 	// address 103 in it.
 	neigh = bindlink(as, neigh_rule);
 	logger().debug("After first neighbor-rule\n%s\n",
-	               SchemeSmob::to_string(neigh).c_str());
+	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// This symmetrizes the findings from the rule application immediately above.
 	neigh = bindlink(as, nesym_rule);
 	logger().debug("After second neighbor-symmetry-rule\n%s\n",
-	               SchemeSmob::to_string(neigh).c_str());
+	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// -----------
 	// If some attribute holds for a neighbor, it cannot hold for a person.
 	Handle nattr = bindlink(as, nattr_rule);
 	logger().debug("After first neighbor-not-attr rule\n%s\n",
-	               SchemeSmob::to_string(nattr).c_str());
+	               oc_to_string(nattr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 17, getarity(nattr));
 
 	// Next, propagate this knowledge transitively
 	Handle ntran = bindlink(as, ntran_rule);
 	logger().debug("After first transitive-not-rule\n%s\n",
-	               SchemeSmob::to_string(ntran).c_str());
+	               oc_to_string(ntran).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
 	// -----------
 	// Two distinct people cannot have a common attribute
 	Handle distc = bindlink(as, distc_rule);
 	logger().debug() << "After first distinct-attr rule\n"
-	                 << SchemeSmob::to_string(distc).c_str();
+	                 << oc_to_string(distc).c_str();
 
 	// XXX virtual link matcher does not yet do 'not' clauses ...
 	// TSM_ASSERT_EQUALS("wrong number of solutions found", 234, getarity(distc));
@@ -281,14 +280,14 @@ void EinsteinPuzzle::test_full(void)
 	// By-elimination rule
 	// If a person doesn't smoke/drink/live-in four items, they must do the fifth.
 	Handle elimi = bindlink(as, elimi_rule);
-	logger().debug() << "After elimination\n" << SchemeSmob::to_string(elimi);
+	logger().debug() << "After elimination\n" << oc_to_string(elimi);
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 29, getarity(elimi));
 
 	// -----------
 	// Print partial results.
 	Handle prt_stuff = eval->apply("print-results", Handle::UNDEFINED);
 	Handle stuff = bindlink(as, prt_stuff);
-	logger().debug() << "stuff\n" << SchemeSmob::to_string(stuff);
+	logger().debug() << "stuff\n" << oc_to_string(stuff);
 
 	// -----------
 	// Result should be a ListLink w/ five solutions
@@ -296,7 +295,7 @@ void EinsteinPuzzle::test_full(void)
 	// enough to solve the pouzzle.
 	Handle puzzle_solution = bindlink(as, solun_rule);
 	logger().debug("puzzle solution is\n%s\n",
-	               SchemeSmob::to_string(puzzle_solution).c_str());
+	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0,
 	                  getarity(puzzle_solution));
 

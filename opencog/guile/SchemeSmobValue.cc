@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -205,6 +206,27 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
+	if (nameserver().isA(t, VOID_VALUE))
+	{
+		return valueserver().create(t);
+	}
+
+	if (nameserver().isA(t, NODE))
+	{
+		// XXX FIXME... at this time, nodes have a single name.
+		SCM sname = SCM_CAR(svalue_list);
+		std::string name = verify_string(sname, "cog-new-value", 2);
+		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
+		return atomspace->add_node(t, std::move(name));
+	}
+
+	if (nameserver().isA(t, LINK))
+	{
+		HandleSeq oset = verify_handle_list(svalue_list, "cog-new-value", 2);
+		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
+		return atomspace->add_link(t, std::move(oset));
+	}
+
 	scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "value type");
 
 	return nullptr;
@@ -392,6 +414,11 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 
 	if (nameserver().isA(t, NODE))
 	{
+		if (nameserver().isA(t, NUMBER_NODE))
+		{
+			const std::vector<double>& v = NumberNodeCast(pa)->value();
+			CPPL_TO_SCML(v, scm_from_double)
+		}
 		const std::string& name = AtomCast(pa)->get_name();
 		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
 	}
@@ -431,8 +458,16 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 
 	if (nameserver().isA(t, NODE))
 	{
-		const std::string& name = AtomCast(pa)->get_name();
-		if (0 == index) return scm_from_string(name);
+		if (nameserver().isA(t, NUMBER_NODE))
+		{
+			const std::vector<double>& v = NumberNodeCast(pa)->value();
+			if (index < v.size()) return scm_from_double(v[index]);
+		}
+		else
+		{
+			const std::string& name = AtomCast(pa)->get_name();
+			if (0 == index) return scm_from_string(name);
+		}
 	}
 
 	SCM ilist = scm_cons(scm_from_int(index), SCM_EOL);
