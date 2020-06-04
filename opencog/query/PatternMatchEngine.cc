@@ -320,7 +320,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 		              << " of " << iend;})
 
 		bool match;
-		if (PRESENT_LINK == hp->get_type())
+		if (hop->isPresent())
 			match = present_compare(hop, hg);
 		else
 			match = tree_compare(hop, hg, CALL_CHOICE);
