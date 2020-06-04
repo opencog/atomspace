@@ -55,58 +55,7 @@ std::string SchemeSmob::to_string(const Handle& h)
 std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 {
 	if (nullptr == h) return "#<Invalid handle>";
-
-	// Print a scheme expression, so that the output can be saved
-	// to file, and then restored, as needed.
-	std::string ret = "";
-	for (int i=0; i< indent; i++) ret += "   ";
-	if (h->is_node())
-	{
-		ret += "(";
-		ret += nameserver().getTypeName(h->get_type());
-		ret += " \"";
-		ret += h->get_name();
-		ret += "\"";
-
-		// Print the truth value only after the node name
-		TruthValuePtr tv(h->getTruthValue());
-		if (not tv->isDefaultTV()) {
-			ret += " ";
-			ret += tv_to_string (tv);
-		}
-		ret += ")";
-		return ret;
-	}
-
-	if (h->is_link())
-	{
-		ret += "(";
-		ret += nameserver().getTypeName(h->get_type());
-
-		// If there's a truth value, print it before the other atoms
-		TruthValuePtr tv(h->getTruthValue());
-		if (not tv->isDefaultTV()) {
-			ret += " ";
-			ret += tv_to_string(tv);
-		}
-
-		// Print the outgoing link set.
-		ret += "\n";
-		const HandleSeq& oset = h->getOutgoingSet();
-		unsigned int arity = oset.size();
-		for (unsigned int i=0; i<arity; i++)
-		{
-			//ret += " ";
-			ret += handle_to_string(oset[i], /*(0==i)?0:*/indent+1);
-			ret += "\n";
-			//if (i != arity-1) ret += "\n";
-		}
-		for (int i=0; i < indent; i++) ret += "   ";
-		ret += ")";
-		return ret;
-	}
-
-	return ret;
+	return h->to_short_string();
 }
 
 std::string SchemeSmob::protom_to_string(SCM node)
@@ -116,7 +65,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 
 	// XXX FIXME; should not use pa->to_string() as the print method.
 	if (not pa->is_atom())
-		return pa->to_string();
+		return pa->to_short_string();
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
