@@ -39,8 +39,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
+	// Need to have a newline printed; otherewise cog-value->list
+	// prints badly-formatted grunge.
 	if (not pa->is_atom())
-		return pa->to_short_string();
+		return pa->to_short_string() + "\n";
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
@@ -59,7 +61,9 @@ std::string SchemeSmob::protom_to_string(SCM node)
 		return "#<Invalid handle>";
 	}
 
-	return h->to_short_string();
+	// Need to have a newline printed; otherewise cog-value->list
+	// prints badly-formatted grunge.
+	return h->to_short_string() + "\n";
 }
 
 /* ============================================================== */
