@@ -100,8 +100,6 @@ std::string Link::to_string(const std::string& indent) const
     for (const Handle& h : _outgoing)
         answer += h->to_string(more_indent) + "\n";
 
-    // Remove trailing newline before writing paren
-    answer.pop_back();
     answer += indent + ") ; " + id_to_string();
     return answer;
 }
