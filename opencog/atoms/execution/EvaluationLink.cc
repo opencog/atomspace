@@ -1082,6 +1082,8 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
+
+	return false; // make compiler stop complaining.
 }
 
 bool EvaluationLink::crisp_evaluate(AtomSpace* as,

@@ -210,13 +210,13 @@ void PatternTerm::addUnorderedLink()
 
 // ==============================================================
 
-void PatternTerm::makeLiteral()
+void PatternTerm::markLiteral()
 {
 	if (_is_literal) return;
 
 	_is_literal = true;
 	for (PatternTermPtr& ptm : getOutgoingSet())
-		ptm->makeLiteral();
+		ptm->markLiteral();
 }
 
 // ==============================================================

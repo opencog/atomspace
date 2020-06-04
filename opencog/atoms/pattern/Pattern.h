@@ -87,13 +87,15 @@ struct Pattern
 	/// what's in them. Set by unbundle_clauses().
 	HandleSeq        undeclared_clauses;
 
-	/// The mandatory clauses must be grounded.
+	/// The mandatory clauses must be satisfied. This includes both
+	/// literal clauses and virtual clauses.
 	HandleSeq        mandatory;
 
-	/// The optional clauses don't have to be grounded, but they might be.
-	/// This is where the absent clauses are held, so e.g. if these do get
-	/// grounded, they might be rejected (depending on the callback).
-	HandleSeq optionals;    // Optional clauses
+	/// The optional clauses must be ungroundable. They are always
+	/// literal, and are never evaluatable or virtual. XXX This member
+	/// is mis-named: in the current implementation, the optional
+	/// clauses must be literally absent. XXX FIXME rename this member.
+	HandleSeq optionals;
 
 	/// The always (for-all) clauses have to always be grounded the same
 	/// way. Any grounding failure at all invalidates all other groundings.

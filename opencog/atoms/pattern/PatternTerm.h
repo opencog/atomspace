@@ -149,7 +149,7 @@ public:
 	const Quotation& getQuotation() const noexcept { return _quotation; }
 	bool isQuoted() const { return _quotation.is_quoted(); }
 
-	void makeLiteral();
+	void markLiteral();
 	bool isLiteral() const { return _is_literal; }
 
 	void addBoundVariable();

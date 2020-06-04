@@ -53,16 +53,29 @@ void PatternLink::common_init(void)
 
 	remove_constants(_variables.varset, _pat);
 
+	// Compute the intersection of literal clauses, and mandatory
+	// clauses. This is the set of mandatory clauses that must be
+	// present in thier literal form.
+	for (const Handle& h : _pat.literal_clauses)
+	{
+		if (std::find(_pat.mandatory.begin(), _pat.mandatory.end(), h)
+			 != _pat.mandatory.end())
+		_fixed.push_back(h);
+	}
+
 	// Locate the black-box and clear-box clauses.
-	_fixed = _pat.literal_clauses;
 	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
-	// Make sure every variable appears in some clause.
-	HandleSeq all_clauses(_pat.undeclared_clauses);
-	all_clauses.insert(all_clauses.end(),
-	    _pat.literal_clauses.begin(), _pat.literal_clauses.end());
-	validate_variables(_variables.varset, all_clauses);
+	// Make sure every variable appears in some concrete
+	// (non-evaluatable) clause. This consists of non-evaluatable
+	// mandatory clauses and 'optionals' which must be absent.
+	// Otherwise, we risk not being able to evaluate a clause
+	// with some ungrounded variable.
+	HandleSeq concrete_clauses(_fixed);
+	concrete_clauses.insert(concrete_clauses.end(),
+		_pat.optionals.begin(), _pat.optionals.end());
+	validate_variables(_variables.varset, concrete_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the TermMatchMixin, and so we assume
@@ -114,7 +127,7 @@ void PatternLink::common_init(void)
 	get_clause_variables(_pat.mandatory);
 
 	// Find prunable terms.
-	locate_cacheable(all_clauses);
+	locate_cacheable(concrete_clauses);
 }
 
 
@@ -1052,19 +1065,18 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
+		root_term->markLiteral();
 	}
 	for (const Handle& clause : _pat.always)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		root_term->makeLiteral();
+		root_term->markLiteral();
 	}
 }
 
@@ -1101,6 +1113,41 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
 	}
+
+	// If a term is literal then the corresponding pattern term
+	// should be also. Marking should be easy, except due to a bug
+	// up above, both top-level PresentLinks and ChoiceLinks are
+	// being marked literal, when they aren't actually. Untangling
+	// that bug is a headache, so instead, we pile on the rubbish.
+	// XXX FIXME .. this is a hack to hide a hack.
+	if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
+	    != _pat.literal_clauses.end()
+	    or
+	    _pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
+   {
+		if (PRESENT_LINK == t)
+		{
+			for (PatternTermPtr& optm: ptm->getOutgoingSet())
+				optm->markLiteral();
+		}
+		else if (CHOICE_LINK == t)
+		{
+			for (PatternTermPtr& optm: ptm->getOutgoingSet())
+			{
+				const Handle& oh = optm->getHandle();
+				Type ot = oh->get_type();
+				if (PRESENT_LINK != ot)
+					optm->markLiteral();
+				else
+				{
+					for (PatternTermPtr& xptm: optm->getOutgoingSet())
+						xptm->markLiteral();
+				}
+			}
+		}
+		else
+			ptm->markLiteral();
+   }
 }
 
 /* ================================================================= */
@@ -1166,10 +1213,10 @@ void PatternLink::debug_log(void) const
 		for (const Handle& h : _pat.optionals)
 		{
 			std::stringstream ss;
-			ss << "Optional clause " << cl << ":";
-			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-				ss << " (evaluatable)";
-			ss << std::endl;
+			ss << "Optional clause " << cl << ":" << std::endl;
+			OC_ASSERT(_pat.evaluatable_holders.find(h) ==
+			          _pat.evaluatable_holders.end(),
+			          "Optional clauses cannot be evaluatable!");
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
