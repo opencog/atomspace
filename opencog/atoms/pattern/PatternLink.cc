@@ -1119,7 +1119,6 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// set this flag.
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
-	    and not ptm->getQuotation().is_quoted()
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
