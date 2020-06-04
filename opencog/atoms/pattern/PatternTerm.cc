@@ -26,7 +26,9 @@ PatternTerm::PatternTerm(void)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
-	  _is_literal(false)
+	  _is_literal(false),
+	  _is_present(false),
+	  _is_choice(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -40,7 +42,9 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
-	  _is_literal(false)
+	  _is_literal(false),
+	  _is_present(false),
+	  _is_choice(false)
 {
 	Type t = h->get_type();
 
