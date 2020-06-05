@@ -1210,17 +1210,18 @@ void PatternLink::debug_log(void) const
 	// Log the pattern ...
 	logger().fine("Pattern '%s' summary:",
 	              _pat.redex_name.c_str());
-	logger().fine("%lu mandatory clauses", _pat.mandatory.size());
-	logger().fine("%lu optionals clauses", _pat.optionals.size());
-	logger().fine("%lu always clauses", _pat.always.size());
+	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
+	logger().fine("%lu absent clauses", _pat.absents.size());
+	logger().fine("%lu always clauses", _pat.palways.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
 	logger().fine("%lu variables\n", _variables.varset.size());
 
 	int cl = 0;
-	for (const Handle& h : _pat.mandatory)
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
+		const Handle& h = ptm->getHandle();
 		std::stringstream ss;
 		ss << "Mandatory " << cl << ":";
 		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
@@ -1231,31 +1232,33 @@ void PatternLink::debug_log(void) const
 		cl++;
 	}
 
-	if (0 < _pat.optionals.size())
+	if (0 < _pat.absents.size())
 	{
-		logger().fine("Pattern has optional clauses:");
+		logger().fine("Pattern has must-be-absent clauses:");
 		cl = 0;
-		for (const Handle& h : _pat.optionals)
+		for (const PatternTermPtr& ptm : _pat.absents)
 		{
+			const Handle& h = ptm->getHandle();
 			std::stringstream ss;
 			ss << "Optional clause " << cl << ":" << std::endl;
 			OC_ASSERT(_pat.evaluatable_holders.find(h) ==
 			          _pat.evaluatable_holders.end(),
-			          "Optional clauses cannot be evaluatable!");
+			          "Absent clauses cannot be evaluatable!");
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
 		}
 	}
 	else
-		logger().fine("No optional clauses");
+		logger().fine("No must-be-absent clauses");
 
-	if (0 < _pat.always.size())
+	if (0 < _pat.palways.size())
 	{
 		logger().fine("Pattern has for-all clauses:");
 		cl = 0;
-		for (const Handle& h : _pat.always)
+		for (const PatternTermPtr& ptm : _pat.palways)
 		{
+			const Handle& h = ptm->getHandle();
 			std::stringstream ss;
 			ss << "Always clause " << cl << ":";
 			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
