@@ -1938,7 +1938,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 	const Handle& hi = parent->getHandle();
 
-	if (parent->isPresent())
+	if (parent->isPresent() and not parent->isLiteral())
 	{
 		OC_ASSERT(hi != clause_root, "Not expecting a Present term here!");
 		return explore_present_branches(ptm, hg, clause_root);
