@@ -358,12 +358,20 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			if (PRESENT_LINK == pht)
 			{
 				for (const Handle& php : ph->getOutgoingSet())
+				{
 					_pat.mandatory.emplace_back(php);
+					_pat.literal_clauses.emplace_back(php);
+				}
 			}
 			else
+			{
 				_pat.mandatory.emplace_back(ph);
+				_pat.literal_clauses.emplace_back(ph);
+			}
+			return true;
 		}
 
+		// More than just one alternative in the choice.
 		for (const Handle& ph : h->getOutgoingSet())
 		{
 			Type pht = ph->get_type();
