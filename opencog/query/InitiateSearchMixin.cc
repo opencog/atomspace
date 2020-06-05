@@ -66,7 +66,7 @@ InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 }
 
 void InitiateSearchMixin::set_pattern(const Variables& vars,
-                                   const Pattern& pat)
+                                      const Pattern& pat)
 {
 	_variables = &vars;
 	_pattern = &pat;
@@ -124,7 +124,7 @@ void InitiateSearchMixin::set_pattern(const Variables& vars,
 
 Handle
 InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
-                                     Handle& startrm, size_t& width)
+                                  Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
 	Type t = h->get_type();
@@ -145,7 +145,7 @@ InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
 
 Handle
 InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& startrm, size_t& width)
+                                            Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -224,9 +224,9 @@ InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchMixin::find_thinnest(const HandleSeq& clauses,
-                                       const HandleSet& evl,
-                                       Handle& starter_term,
-                                       Handle& bestclause)
+                                          const HandleSet& evl,
+                                          Handle& starter_term,
+                                          Handle& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
@@ -358,7 +358,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 /* ======================================================== */
 
 bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
-                                   const std::string dbg_banner)
+                                      const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
 	{
@@ -530,9 +530,9 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
  * of its subclauses.
  */
 void InitiateSearchMixin::find_rarest(const Handle& clause,
-                                   Handle& rarest,
-                                   size_t& count,
-                                   Quotation quotation)
+                                      Handle& rarest,
+                                      size_t& count,
+                                      Quotation quotation)
 {
 	Type t = clause->get_type();
 
@@ -965,7 +965,7 @@ bool InitiateSearchMixin::setup_no_search(void)
 /// set up in the `_search_set`, as well as an approprite root
 /// clause and starting term.
 bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
-                                   const std::string dbg_banner)
+                                      const std::string dbg_banner)
 {
 	// This is the main entry point into the CPU-cycle sucking part of
 	// the pattern search.  If `USE_THREADED_PATTERN_ENGINE` is defined,
