@@ -49,7 +49,7 @@ namespace opencog {
 struct Pattern
 {
 	/// Private, locally scoped typedefs, not used outside of this class.
-	typedef std::unordered_multimap<Handle, Handle> ConnectMap;
+	typedef std::unordered_multimap<Handle, PatternTermPtr> ConnectMap;
 
 	/// Each atom of the pattern may appear in several clauses. Moreover,
 	/// the same atom may be repeated in the same clause in several

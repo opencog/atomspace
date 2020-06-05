@@ -112,15 +112,15 @@ void PatternLink::common_init(void)
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
 
+	make_term_trees();
+
 	_num_comps = _components.size();
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
 	// grounding mechanism is not required for that case.
 	if (1 == _num_comps)
-	   make_connectivity_map(_pat.mandatory);
-
-	make_term_trees();
+	   make_connectivity_map();
 
 	get_clause_variables(_pat.literal_clauses);
 	get_clause_variables(_pat.undeclared_clauses);
@@ -262,10 +262,10 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_components.emplace_back(compo);
 	_num_comps = 1;
 
-	make_connectivity_map(_pat.mandatory);
+	make_term_trees();
+	make_connectivity_map();
 	_pat.redex_name = "Unpacked component of a virtual link";
 
-	make_term_trees();
 	get_clause_variables(_pat.mandatory);
 	get_clause_variables(_pat.optionals);
 }
@@ -1025,12 +1025,12 @@ void PatternLink::trace_connectives(const TypeSet& connectives,
  * This is used for only one purpose: to find the next unsolved
  * clause. Perhaps this could be simplified somehow ...
  */
-void PatternLink::make_connectivity_map(const HandleSeq& component)
+void PatternLink::make_connectivity_map(void)
 {
-	for (const Handle& h : _pat.mandatory)
-		make_map_recursive(h, h);
-	for (const Handle& h : _pat.optionals)
-		make_map_recursive(h, h);
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
+		make_map_recursive(ptm->getHandle(), ptm);
+	for (const PatternTermPtr& ptm : _pat.absents)
+		make_map_recursive(ptm->getHandle(), ptm);
 
 	// Save some minor amount of space by erasing those atoms that
 	// participate in only one clause. These atoms cannot be used
@@ -1046,14 +1046,15 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 	}
 }
 
-void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
+void PatternLink::make_map_recursive(const Handle& var,
+                                     const PatternTermPtr& root)
 {
-	_pat.connectivity_map.emplace(h, root);
+	_pat.connectivity_map.emplace(var, root);
 
-	if (h->is_link())
+	if (var->is_link())
 	{
-		for (const Handle& ho: h->getOutgoingSet())
-			make_map_recursive(root, ho);
+		for (const Handle& var: var->getOutgoingSet())
+			make_map_recursive(var, root);
 	}
 }
 

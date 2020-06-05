@@ -2105,7 +2105,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	}
 
 	Handle joiner = next_joint;
-	Handle curr_root = next_clause;
+	Handle curr_root = next_clause->getHandle();
 
 	logmsg("Next clause is", curr_root);
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
@@ -2145,7 +2145,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	       (false == clause_accepted) and
 	       (is_optional(curr_root)))
 	{
-		Handle undef(Handle::UNDEFINED);
+		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
 		if (not match) {
@@ -2157,7 +2157,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		clause_grounding[curr_root] = Handle::UNDEFINED;
 		get_next_untried_clause();
 		joiner = next_joint;
-		curr_root = next_clause;
+		curr_root = next_clause->getHandle();
 
 		if (nullptr == curr_root)
 		{
@@ -2249,14 +2249,14 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 	// Now loop over all for-all clauses.
 	// I think that all variables will be grounded at this point, right?
-	for (const Handle& root : _pat->always)
+	for (const PatternTermPtr& root : _pat->palways)
 	{
 		if (issued.end() != issued.find(root)) continue;
 		issued.insert(root);
 		next_clause = root;
 		for (const Handle &v : _variables->varset)
 		{
-			if (is_free_in_tree(root, v))
+			if (is_free_in_tree(root->getHandle(), v))
 			{
 				next_joint = v;
 				return;
@@ -2266,7 +2266,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
-	next_clause = Handle::UNDEFINED;
+	next_clause = PatternTerm::UNDEFINED;
 	next_joint = Handle::UNDEFINED;
 }
 
@@ -2291,17 +2291,18 @@ void PatternMatchEngine::get_next_untried_clause(void)
 // Danger: this assumes a suitable dataset, as otherwise, the cost
 // of this "optimization" can add un-necessarily to the overhead.
 //
-unsigned int PatternMatchEngine::thickness(const Handle& clause,
+unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
                                            const HandleSet& live)
 {
 	// If there are only zero or one ungrounded vars, then any clause
 	// will do. Blow this pop stand.
 	if (live.size() < 2) return 1;
 
+	const Handle& hclause = clause->getHandle();
 	unsigned int count = 0;
 	for (const Handle& v : live)
 	{
-		if (is_unquoted_in_tree(clause, v)) count++;
+		if (is_unquoted_in_tree(hclause, v)) count++;
 	}
 	return count;
 }
@@ -2324,7 +2325,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 	// the glob might appear in three clauses, with two of them
 	// grounded by a common term, and the third ungrounded
 	// with no common term.
-	auto clauses =  _pat->connectivity_map.equal_range(glob);
+	const auto& clauses =  _pat->connectivity_map.equal_range(glob);
 	auto clpr = clauses.first;
 	for (; clpr != clauses.second; clpr++)
 	{
@@ -2336,7 +2337,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 
 	// Typically, the glob appears only once in the clause, so
 	// there is only one PatternTerm. The loop really isn't needed.
-	HandlePair glbt({glob, clpr->second});
+	HandlePair glbt({glob, clpr->second->getHandle()});
 	const auto& ptms = _pat->connected_terms_map.find(glbt);
 	for (const PatternTermPtr& ptm : ptms->second)
 	{
@@ -2372,7 +2373,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// looking at the grounded vars, looking up the root, to see if
 	// the root is grounded.  If its not, start working on that.
 	Handle joint(Handle::UNDEFINED);
-	Handle unsolved_clause(Handle::UNDEFINED);
+	PatternTermPtr unsolved_clause(PatternTerm::UNDEFINED);
 	unsigned int thinnest_joint = UINT_MAX;
 	unsigned int thinnest_clause = UINT_MAX;
 	bool unsolved = false;
@@ -2425,7 +2426,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		const auto& root_list = _pat->connectivity_map.equal_range(pursue);
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
-			const Handle& root = it->second;
+			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
@@ -2451,20 +2452,21 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	if (not unsolved and search_virtual and
 		 (search_black or _pat->black.empty()))
 	{
-		for (const Handle& root : _pat->mandatory)
+		for (const PatternTermPtr& root : _pat->pmandatory)
 		{
 			if (issued.end() != issued.find(root)) continue;
 
 			// Clauses with no variables are (by definition)
 			// evaluatable. So we don't check if they're evaluatable.
-			const HandleSeq& varseq = _pat->clause_variables.at(root);
+			const Handle& hroot = root->getHandle();
+			const HandleSeq& varseq = _pat->clause_variables.at(hroot);
 			if (0 == varseq.size())
 			{
 				unsolved_clause = root;
-				joint = root;
+				joint = root->getHandle();
 				unsolved = true;
 				// Oh bother. Bit of a hack.
-				var_grounding[root] = root;
+				var_grounding[joint] = joint;
 				break;
 			}
 		}
@@ -2683,6 +2685,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                               const Handle& grnd)
 {
 	clause_stacks_clear();
+
 	bool halt = explore_redex(term, grnd, do_clause);
 	bool stop = report_forall();
 	return halt or stop;
@@ -2699,8 +2702,21 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 	// Cleanup
 	clear_current_state();
 
+// XXX FIXME temporary hack... this is wrong
+for (const PatternTermPtr& cl: _pat->pmandatory)
+{
+	if (cl->getHandle() == first_clause) issued.insert(cl);
+}
+for (const PatternTermPtr& cl: _pat->absents)
+{
+	if (cl->getHandle() == first_clause) issued.insert(cl);
+}
+for (const PatternTermPtr& cl: _pat->palways)
+{
+	if (cl->getHandle() == first_clause) issued.insert(cl);
+}
+
 	// Match the required clauses.
-	issued.insert(first_clause);
 	return explore_clause(term, grnd, first_clause);
 }
 

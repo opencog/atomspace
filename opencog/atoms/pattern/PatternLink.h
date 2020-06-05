@@ -126,8 +126,8 @@ protected:
 	                       const Handle& body,
 	                       Quotation quotation=Quotation());
 
-	void make_connectivity_map(const HandleSeq&);
-	void make_map_recursive(const Handle&, const Handle&);
+	void make_connectivity_map(void);
+	void make_map_recursive(const Handle&, const PatternTermPtr&);
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
 	                          const HandleSetSeq&);

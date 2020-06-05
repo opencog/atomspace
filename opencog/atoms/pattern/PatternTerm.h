@@ -194,6 +194,7 @@ public:
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
 	bool isUnorderedLink() const noexcept { return _handle->is_unordered_link(); }
+	bool isLink() const noexcept { return _handle->is_link(); }
 
 	bool operator==(const PatternTerm&);
 
