@@ -198,9 +198,13 @@ private:
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
 	// Similar to the next-clause, above, and someday should be unified
-	// with it.
+	// with it. (above should be converted to use PatternTerm).
 
-	IssuedSet issued_present;
+	bool next_untried_present(const PatternTermPtr&,
+	                          const Handle&,
+	                          PatternTermPtr&, PatternTermPtr&,
+	                          Handle&);
+	std::set<PatternTermPtr> issued_present;
 
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
