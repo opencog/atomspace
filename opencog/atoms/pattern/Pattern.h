@@ -90,16 +90,19 @@ struct Pattern
 	/// The mandatory clauses must be satisfied. This includes both
 	/// literal clauses and virtual clauses.
 	HandleSeq        mandatory;
+	PatternTermSeq   pmandatory;
 
 	/// The optional clauses must be ungroundable. They are always
 	/// literal, and are never evaluatable or virtual. XXX This member
 	/// is mis-named: in the current implementation, the optional
 	/// clauses must be literally absent. XXX FIXME rename this member.
-	HandleSeq optionals;
+	HandleSeq      optionals;
+	PatternTermSeq absents;
 
 	/// The always (for-all) clauses have to always be grounded the same
 	/// way. Any grounding failure at all invalidates all other groundings.
-	HandleSeq always;       // ForAll clauses
+	HandleSeq      always;       // ForAll clauses
+	PatternTermSeq palways;
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
