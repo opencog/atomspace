@@ -2095,7 +2095,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (nullptr == next_clause)
+	if (PatternTerm::UNDEFINED == next_clause)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
