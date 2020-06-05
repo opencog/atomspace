@@ -68,6 +68,7 @@ public:
 	void test_unary(void);
 	void test_typed(void);
 	void test_constant(void);
+	void test_present(void);
 	void test_compound(void);
 };
 
@@ -295,6 +296,24 @@ void ChoiceLinkUTest::test_constant(void)
 
 /*
  * ChoiceLink with PresentLink in it
+ */
+void ChoiceLinkUTest::test_present(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/choice-present.scm\")");
+	Handle result = eval->eval_h("(cog-execute! who-is-hungry?)");
+	Handle answer = eval->eval_h("expected");
+
+	printf("compound found:\n%s\n", result->to_string().c_str());
+	TS_ASSERT_EQUALS(1, getarity(result));
+	TS_ASSERT_EQUALS(result, answer);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ChoiceLink with multiple PresentLinks in it
  */
 void ChoiceLinkUTest::test_compound(void)
 {
