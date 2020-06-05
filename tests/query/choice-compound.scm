@@ -38,7 +38,8 @@
 	(Get
 		(TypedVariable (Variable "picker") (Type "Concept"))
 		(And
-			(Present (Variable "picker"))
+			;;; Not needed any more ...
+			;;; (Present (Variable "picker"))
 			(Absent
 				(State
 					(List (Variable "picker") (Predicate "movement"))

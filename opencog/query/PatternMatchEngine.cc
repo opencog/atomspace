@@ -1196,7 +1196,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or not hp->is_unordered_link())
+	if (2 > ptm->getArity() or not ptm->isUnorderedLink())
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1615,20 +1615,14 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	const Handle& hp = ptm->getHandle();
-	Type ptype = hp->get_type();
-
 	// Iterate over different possible choices.
-	if (CHOICE_LINK == ptype)
-	{
+	// XXX FIXME, this apparently is never called!?
+	if (ptm->isChoice())
 		return explore_choice_branches(ptm, hg, clause_root);
-	}
 
 	// Unordered links have permutations to explore.
-	if (hp->is_unordered_link())
-	{
+	if (ptm->isUnorderedLink())
 		return explore_unordered_branches(ptm, hg, clause_root);
-	}
 
 	return explore_single_branch(ptm, hg, clause_root);
 }
@@ -1683,14 +1677,67 @@ static PatternTermPtr find_variable_term(const PatternTermPtr& term,
 	return PatternTerm::UNDEFINED;
 }
 
+/// Find the next untried connectable term in the `parent` Present term.
+/// If there is no such term, returns false; otherwise, returns true,
+/// and the next term to explore is returned in `untried_term` and the
+/// joining variable in `joint`.  This does a brute-force search. This
+/// should be good enough for almost all use-cases I can imagine. The
+/// only way to get fancier would be to build some structures during
+/// static analysis:
+/// -- build a connectivity map, just like the one for clauses
+/// -- build a clause_variables struct, but just for this term
+/// -- search for the thinnest joint, just like `get_next_untried_clause`
+/// XXX FIXME -- do the above.
+///
+bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
+                                              const Handle& clause_root,
+                                              PatternTermPtr& untried_term,
+                                              PatternTermPtr& joint,
+                                              Handle& jgnd)
+{
+	// So, first, get a common shared variable. Assume that clause
+	// will point at the right thing.
+	const HandleSeq& varseq = _pat->clause_variables.at(clause_root);
+	if (0 == varseq.size())
+		throw RuntimeException(TRACE_INFO, "Expecting a variable!");
+
+	// Loop over all the terms in the Present term
+	for (const PatternTermPtr& pterm: parent->getOutgoingSet())
+	{
+		if (issued_present.end() != issued_present.find(pterm))
+			continue;
+
+		// Now look for a grounded variable
+		for (const Handle& jvar : varseq)
+		{
+			const auto& pr = var_grounding.find(jvar);
+			if (var_grounding.end() == pr) continue;
+
+			// Get the joining variable.
+			joint = find_variable_term(pterm, jvar);
+			if (nullptr == joint) continue;
+
+			jgnd = pr->second;
+			untried_term = pterm;
+			issued_present.insert(pterm);
+			return true;
+		}
+	}
+
+	// We expect all of the terms to have been joined together by now.
+	if (parent->getArity() != issued_present.size())
+		throw RuntimeException(TRACE_INFO, "Unable to join all terms!");
+
+	return false;
+}
 
 /// This attempts to obtain a grounding for an embedded Present terms.
 /// That is, for a Present term that is not at the top-most level.
-/// At this time, we expect to encounter these only inside of
-/// Choice terms and inside of evaluatable terms.
+/// At this time, we expect to encounter these only inside of Choice
+/// terms and inside of evaluatable terms.
 /// This tries to verify that each of the terms under the Present term
 /// can be grounded. The branch exploration consists of examining
-/// each differrent way in which this can be accomplished.
+/// each different way in which this can be accomplished.
 bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
                                                   const Handle& hg,
                                                   const Handle& clause_root)
@@ -1708,49 +1755,27 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	if (not joins) return false;
 
 	const PatternTermPtr& parent = ptm->getParent();
-	const PatternTermSeq& osp = parent->getOutgoingSet();
-	if (1 == osp.size())
+	if (1 == parent->getArity())
 		return do_term_up(parent, hg, clause_root);
 
-	// Compare the other parts of the present link. They all have to
-	// match. Currently, this makes the simplifying assumption that
-	// all the other terms have the same variable in them, so that
-	// its enough to just have a dumb loop. To do better, we would
-	// need to:
-	// -- build a connectivity map, just like the one for clauses
-	// -- build a clause_variables struct, but just for this term
-	// -- generalize get_next_untried_clause to use this map.
-	// XXX FIXME -- do the above.
-	issued_present.insert(hp);
+	// Compare the other parts of the present link.
+	// They all have to match.
+	issued_present.insert(ptm);
 
-	// So, first, get a common shared variable. Assume that clause
-	// will point at the right thing.
-	const HandleSeq& varseq = _pat->clause_variables.at(clause_root);
-	if (0 == varseq.size())
-		throw RuntimeException(TRACE_INFO, "Expecting a variable!");
-	const Handle& jvar = varseq[0];
-	const Handle& jgnd = var_grounding.at(jvar);
-
-	// Loop over all the other terms in the Present term
-	for (const PatternTermPtr& pterm: osp)
+	PatternTermPtr joint;
+	PatternTermPtr next_term;
+	Handle jgnd;
+	bool have_more = next_untried_present(parent, clause_root,
+	                                      next_term, joint, jgnd);
+	if (have_more)
 	{
-		const Handle& hpt = pterm->getHandle();
-		if (issued_present.end() != issued_present.find(hpt))
-			continue;
-		issued_present.insert(hpt);
-
-		// Get the joining variable.
-		const PatternTermPtr& joint = find_variable_term(pterm, jvar);
-		if (PatternTerm::UNDEFINED == joint)
-			throw RuntimeException(TRACE_INFO, "Variable not present!");
-
-		logmsg("!! maybe_present:", pterm->getHandle());
+		logmsg("!! maybe_present:", next_term->getHandle());
 
 		// Explore from this joint.
 		bool found;
-		if (pterm->hasAnyGlobbyVar())
+		if (next_term->hasAnyGlobbyVar())
 			found = explore_glob_branches(joint, jgnd, clause_root);
-		else if (pterm->hasUnorderedLink())
+		else if (next_term->hasUnorderedLink())
 			found = explore_odometer(joint, jgnd, clause_root);
 		else
 			found = explore_type_branches(joint, jgnd, clause_root);
