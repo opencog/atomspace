@@ -654,7 +654,7 @@ bool Variables::is_type(Type gtype) const
 /**
  * Interval checker.
  *
- * Returns true/false if the glob satisfies the lower bound
+ * Returns true if the glob satisfies the lower bound
  * interval restriction.
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
@@ -666,13 +666,25 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 /**
  * Interval checker.
  *
- * Returns true/false if the glob satisfies the upper bound
+ * Returns true if the glob satisfies the upper bound
  * interval restriction.
  */
 bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
 	const GlobInterval &intervals = get_interval(glob);
 	return (n <= intervals.second or intervals.second < 0);
+}
+
+/**
+ * Interval checker.
+ *
+ * Returns true if the glob can match a variable number of items.
+ * i.e. if it is NOT an ordinary variable.
+ */
+bool Variables::is_globby(const Handle &glob) const
+{
+	const GlobInterval &intervals = get_interval(glob);
+	return (1 != intervals.first or 1 != intervals.second);
 }
 
 static const GlobInterval& default_interval(Type t)
@@ -687,7 +699,7 @@ static const GlobInterval& default_interval(Type t)
 
 const GlobInterval& Variables::get_interval(const Handle& var) const
 {
-	const auto interval = _glob_intervalmap.find(var);
+	const auto& interval = _glob_intervalmap.find(var);
 
 	if (interval == _glob_intervalmap.end())
 		return default_interval(var->get_type());

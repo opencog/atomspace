@@ -146,6 +146,10 @@ struct Variables : public FreeVariables,
 	// Return false otherwise.
 	bool is_upper_bound(const Handle& glob, size_t n) const;
 
+	// Return true if the variable is has a range other than
+	// (1,1) i.e. if it can match more than one thing.
+	bool is_globby(const Handle& glob) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated arguments `args` substituted
 	// for the variables. The `args` must pass the typecheck, else an

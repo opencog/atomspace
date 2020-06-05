@@ -97,6 +97,9 @@ protected:
 	// variables, but this flag will not be set.
 	bool _has_bound_var;
 
+	// As above, but zero terms deep. This one is the variable.
+	bool _is_bound_var;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an GlobNode. Trees without any GlobNodes can be searched in a
 	// straight-forward manner; those with them need to have all
@@ -105,6 +108,9 @@ protected:
 
 	// As above, but only one level deep.
 	bool _has_globby_var;
+
+	// As above, but zero levels deep. This is a glob.
+	bool _is_globby_var;
 
 	// As above, but for evaluatables.
 	bool _has_any_evaluatable;
@@ -122,6 +128,19 @@ protected:
 	// a QuoteLink. This applies only to non-variables (as variables
 	// are still variables, unless they are quoted or scope-hidden.)
 	bool _is_literal;
+
+	// True if this contains a set of subterms, all of which must be
+	// simultaneously present in the pattern. All of the sub-terms are
+	// necessarily literal. This corresponds to PRESENT_LINK in the
+	// default interpretation.
+	bool _is_present;
+
+	// True if this contains a set of subterms, one of which must be
+	// present in the pattern. All of the sub-terms are present, or
+	// are literal. This corresponds to CHOICE_LINK in the default
+	// interpretation; it can also be an OR_LINK when that OR_LINK
+	// is in a boolean evaluatable context.
+	bool _is_choice;
 
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
@@ -152,13 +171,21 @@ public:
 	void markLiteral();
 	bool isLiteral() const { return _is_literal; }
 
+	void markPresent();
+	bool isPresent() const { return _is_present; }
+
+	void markChoice();
+	bool isChoice() const { return _is_choice; }
+
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
+	bool isBoundVariable() const noexcept { return _is_bound_var; }
 
 	void addGlobbyVar();
 	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
 	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
+	bool isGlobbyVar() const noexcept { return _is_globby_var; }
 
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }

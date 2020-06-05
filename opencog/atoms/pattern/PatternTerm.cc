@@ -21,12 +21,16 @@ PatternTerm::PatternTerm(void)
 	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _is_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
-	  _is_literal(false)
+	  _is_literal(false),
+	  _is_present(false),
+	  _is_choice(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -35,12 +39,16 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false),
 	  _has_bound_var(false),
+	  _is_bound_var(false),
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
+	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _has_any_unordered_link(false),
-	  _is_literal(false)
+	  _is_literal(false),
+	  _is_present(false),
+	  _is_choice(false)
 {
 	Type t = h->get_type();
 
@@ -141,9 +149,11 @@ void PatternTerm::addAnyBoundVar()
 /// variable).
 void PatternTerm::addBoundVariable()
 {
+	if (isQuoted()) return;
+
 	// Mark just this term (the variable itself)
 	// and mark the term that holds us.
-	_has_bound_var = true;
+	_is_bound_var = true;
 	if (_parent != PatternTerm::UNDEFINED)
 			_parent->_has_bound_var = true;
 
@@ -166,13 +176,16 @@ void PatternTerm::addAnyGlobbyVar()
 
 void PatternTerm::addGlobbyVar()
 {
-	_has_globby_var = true;
+	if (isQuoted()) return;
+
+	_is_globby_var = true;
 
 	if (_parent != PatternTerm::UNDEFINED)
 		_parent->_has_globby_var = true;
 
 	addAnyGlobbyVar();
 }
+
 
 // ==============================================================
 // Just like above, but for evaluatables.
@@ -217,6 +230,36 @@ void PatternTerm::markLiteral()
 	_is_literal = true;
 	for (PatternTermPtr& ptm : getOutgoingSet())
 		ptm->markLiteral();
+}
+
+// ==============================================================
+
+void PatternTerm::markPresent()
+{
+	// If its literal, its effectively quoted, so cannot be present.
+	if (_is_literal or isQuoted()) return;
+
+	_is_present = true;
+
+	// By definition, everything underneath is literal
+	for (PatternTermPtr& ptm : getOutgoingSet())
+		ptm->markLiteral();
+}
+
+// ==============================================================
+
+void PatternTerm::markChoice()
+{
+	// If its literal, its effectively quoted, so cannot be a choice.
+	if (_is_literal or isQuoted()) return;
+
+	_is_choice = true;
+
+	// By definition, everything underneath is present, or literal
+	for (PatternTermPtr& ptm : getOutgoingSet())
+	{
+		if (not ptm->isPresent()) ptm->markLiteral();
+	}
 }
 
 // ==============================================================

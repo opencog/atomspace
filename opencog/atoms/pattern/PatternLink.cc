@@ -1119,11 +1119,14 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// set this flag.
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
-	    and not ptm->getQuotation().is_quoted()
 	    and _variables.varset.end() != _variables.varset.find(h))
 	{
 		ptm->addBoundVariable();
-		if (GLOB_NODE == t) ptm->addGlobbyVar();
+
+		// It's globby, if it is explicitly a GLOB_NODE, or if
+		// it has a non-trivial matching interval.
+		if (GLOB_NODE == t or _variables.is_globby(h))
+			ptm->addGlobbyVar();
 		return;
 	}
 
@@ -1138,36 +1141,23 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	}
 
 	// If a term is literal then the corresponding pattern term
-	// should be also. Marking should be easy, except due to a bug
-	// up above, both top-level PresentLinks and ChoiceLinks are
-	// being marked literal, when they aren't actually. Untangling
-	// that bug is a headache, so instead, we pile on the rubbish.
-	// XXX FIXME .. this is a hack to hide a hack.
+	// should be also. We should be creating PatternTerms earlier ...
 	if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
 	    != _pat.literal_clauses.end()
 	    or
 	    _pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
    {
-		if (PRESENT_LINK == t)
-		{
-			for (PatternTermPtr& optm: ptm->getOutgoingSet())
-				optm->markLiteral();
-		}
-		else if (CHOICE_LINK == t)
+		if (CHOICE_LINK == t)
 		{
 			for (PatternTermPtr& optm: ptm->getOutgoingSet())
 			{
-				const Handle& oh = optm->getHandle();
-				Type ot = oh->get_type();
-				if (PRESENT_LINK != ot)
-					optm->markLiteral();
-				else
-				{
-					for (PatternTermPtr& xptm: optm->getOutgoingSet())
-						xptm->markLiteral();
-				}
+				if (PRESENT_LINK == optm->getHandle()->get_type())
+					optm->markPresent();
 			}
+			ptm->markChoice();
 		}
+		else if (PRESENT_LINK == t)
+			ptm->markPresent();
 		else
 			ptm->markLiteral();
    }

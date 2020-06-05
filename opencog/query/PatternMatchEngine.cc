@@ -248,13 +248,13 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
-/// Compare the contents of a PresentLink in the pattern to the
-/// proposed grounding. The term `ptm` points at the PresentLink.
+/// Compare the contents of a Present term in the pattern to the
+/// proposed grounding. The term `ptm` points at the Present term.
 ///
 /// XXX FIXME: this is currently a weak stop-gap measure to handle
-/// the special case of PresentLink's embedded in ChoiceLinks.
-/// PresentLinks that are NOT in a ChoiceLink are handled by the
-/// do_next_clause() system, which assumes that PresentLinks happen
+/// the special case of Present terms embedded in Choice terms.
+/// Present terms that are NOT in a Choice are handled by the
+/// do_next_clause() system, which assumes that Present terms happen
 /// only as top-level clauses. Someday, someone should merge these
 /// two mechanisms, so that this guy gets the sophistication of
 /// the get_next_untried_clause() mechanism.
@@ -281,12 +281,12 @@ hg->to_string().c_str());
 
 /* ======================================================== */
 
-/// Compare a ChoiceLink in the pattern to the proposed grounding.
-/// The term `ptm` points at the ChoiceLink.
+/// Compare a Choice term in the pattern to the proposed grounding.
+/// The term `ptm` points at the Choice term.
 ///
-/// CHOICE_LINK's are multiple-choice links. As long as we can
-/// can match one of the sub-expressions of the ChoiceLink, then
-/// the ChoiceLink as a whole can be considered to be grounded.
+/// Choice terms are multiple-choice links. As long as we can
+/// can match one of the sub-expressions of the Choice term, then
+/// the Choice term as a whole can be considered to be grounded.
 ///
 bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
                                         const Handle& hg)
@@ -320,7 +320,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 		              << " of " << iend;})
 
 		bool match;
-		if (PRESENT_LINK == hp->get_type())
+		if (hop->isPresent())
 			match = present_compare(hop, hg);
 		else
 			match = tree_compare(hop, hg, CALL_CHOICE);
@@ -898,13 +898,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			break;
 		}
 
-		const Handle& ohp(osp[ip]->getHandle());
-		Type ptype = ohp->get_type();
-
-		if (GLOB_NODE == ptype)
+		if (osp[ip]->isGlobbyVar())
 		{
 			HandleSeq glob_seq;
 			const PatternTermPtr& glob(osp[ip]);
+			const Handle& ohp(glob->getHandle());
 
 			// A glob may appear more than once in the pattern,
 			// so check if that's the case. If we have already
@@ -1143,20 +1141,12 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO. Hmm. Should we do this at runtime,
-	// i.e. here, or at compile time, when creating the PattenLink?
+	// i.e. here, or at static-analysis time, when creating the PattenLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
-	// Handle hp is from the pattern clause, and it might be one
-	// of the bound variables. If so, then declare a match.
-	if ((VARIABLE_NODE == tp or GLOB_NODE == tp) and not ptm->isQuoted())
-	{
-		if (_variables->varset.end() != _variables->varset.find(hp))
-			return variable_compare(hp, hg);
-
-		// Report other variables that might be found.
-		return _pmc.scope_match(hp, hg);
-	}
+	if (ptm->isBoundVariable())
+		return variable_compare(hp, hg);
 
 	// If they're the same atom, then clearly they match.
 	//
@@ -1170,17 +1160,27 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
 
+	// If this is some other rando variable that is not part of
+	// search pattern, i.e. if is is a scoped variable, then
+	// accept a match to any other alpha-equivalent variable.
+	// XXX FIXME - this is not very elegant. We should probably
+	// have a distinct `scoped_link_compare()` function to handle
+	// this. Right now, the scope_match() callback uses a rather
+	// screwy and indirect trick to check alpha conversion.
+	if (VARIABLE_NODE == tp and not ptm->isQuoted())
+		return _pmc.scope_match(hp, hg);
+
 	// If both are nodes, compare them as such.
 	if (hp->is_node() and hg->is_node())
 		return node_compare(hp, hg);
 
-	// CHOICE_LINK's are multiple-choice links. As long as we can
-	// can match one of the sub-expressions of the ChoiceLink, then
-	// the ChoiceLink as a whole can be considered to be grounded.
+	// Choice terms are multiple-choice links. As long as we can
+	// can match one of the sub-expressions of the Choice, then
+	// the Choice term as a whole can be considered to be grounded.
 	// Note, we must do this before the fuzzy_match below, because
 	// hg might be a node (i.e. we compare a choice of nodes to one
 	// node).
-	if (CHOICE_LINK == tp)
+	if (ptm->isChoice())
 		return choice_compare(ptm, hg);
 
 	// If they're not both links, then it is clearly a mismatch.
@@ -1225,8 +1225,8 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * This is the reason why we use PatternTerm pointers instead of atom Handles
  * while traversing the pattern tree.
  *
- * Next, suppose our joining atom repeats in several sub-branches of a single
- * ChoiceLink. For example:
+ * Next, suppose our joining atom repeats in several sub-branches of a
+ * single ChoiceLink. For example:
  *
  * ChoiceLink
  *   UnorderedLink
@@ -1634,7 +1634,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 }
 
 /// See explore_unordered_branches() for a general explanation.
-/// This method handles the ChoiceLink branch alternatives only.
+/// This method handles the Choice term branch alternatives only.
 /// This method is never called, currently.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
@@ -1684,13 +1684,13 @@ static PatternTermPtr find_variable_term(const PatternTermPtr& term,
 }
 
 
-/// This attempts to obtain a grounding for an embedded PresentLink
-/// That is, for a PresentLink that is not at the top-most level.
+/// This attempts to obtain a grounding for an embedded Present terms.
+/// That is, for a Present term that is not at the top-most level.
 /// At this time, we expect to encounter these only inside of
-/// ChoiceLinks and inside of evaluatable terms.
-/// This tries to verify that each of the terms of the PresentLink
+/// Choice terms and inside of evaluatable terms.
+/// This tries to verify that each of the terms under the Present term
 /// can be grounded. The branch exploration consists of examining
-/// each differrent way in which tis can be accomplished.
+/// each differrent way in which this can be accomplished.
 bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
                                                   const Handle& hg,
                                                   const Handle& clause_root)
@@ -1731,7 +1731,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	const Handle& jvar = varseq[0];
 	const Handle& jgnd = var_grounding.at(jvar);
 
-	// Loop over all the other terms in the PresentLink
+	// Loop over all the other terms in the Present term
 	for (const PatternTermPtr& pterm: osp)
 	{
 		const Handle& hpt = pterm->getHandle();
@@ -1835,9 +1835,9 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 ///    we don't want to go to the immediate parent, we want to go to
 ///    the larger evaluatable term, and offer that up as the thing to
 ///    match (i.e. to evaluate, to invoke callbacks, etc.)
-///  * The parent is a ChoiceLink. In this case, the ChoiceLink
+///  * The parent is a Choice term. In this case, the Choice term
 ///    itself cannot be directly matched, as is; only its children can
-///    be. So in this case, we fetch the ChoiceLink's parent, instead.
+///    be. So in this case, we fetch the Choice terms's parent, instead.
 ///  * Some crazy combination of the above.
 ///
 /// If it weren't for these complications, this method would be small
@@ -1937,40 +1937,39 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 	const Handle& hi = parent->getHandle();
-	Type hit = hi->get_type();
 
-	if (PRESENT_LINK == hit and not parent->isLiteral())
+	if (parent->isPresent() and not parent->isLiteral())
 	{
-		OC_ASSERT(hi != clause_root, "Not expecting a PresentLink here!");
+		OC_ASSERT(hi != clause_root, "Not expecting a Present term here!");
 		return explore_present_branches(ptm, hg, clause_root);
 	}
 
-	// Do the simple case first, ChoiceLinks are harder.
-	if (CHOICE_LINK != hit or parent->isQuoted())
+	// Do the simple case first, Choice terms are harder.
+	if (not parent->isChoice())
 	{
 		bool found = explore_up_branches(ptm, hg, clause_root);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
 		return found;
 	}
 
-	// If we are here, then we have ChoiceLink.
+	// If we are here, then we have Choice term.
 	if (hi == clause_root)
 	{
-		DO_LOG({logger().fine("Exploring ChoiceLink at root");})
+		DO_LOG({logger().fine("Exploring Choice term at root");})
 		return clause_accept(clause_root, hg);
 	}
 
-	// If we are here, we have an embedded ChoiceLink, i.e. a
-	// ChoiceLink that is not at the clause root. It's contained
+	// If we are here, then we have an embedded Choice term, e.g.
+	// a ChoiceLink that is not at the clause root. It's contained
 	// in some other link, and we have to get that link and
 	// perform comparisons on it. i.e. we have to "hop over"
-	// (hop up) past the ChoiceLink, before resuming the search.
+	// (hop up) past the Choice term, before resuming the search.
 	// The easiest way to hop is to do it recursively... i.e.
 	// call ourselves again.
-	DO_LOG({logger().fine("Exploring ChoiceLink below root");})
+	DO_LOG({logger().fine("Exploring Choice term below root");})
 
 	OC_ASSERT(not have_choice(parent, hg),
-	          "Something is wrong with the ChoiceLink code");
+	          "Something is wrong with the Choice code");
 
 	_need_choice_push = true;
 	return do_term_up(parent, hg, clause_root);
@@ -2917,7 +2916,7 @@ void PatternMatchEngine::clear_current_state(void)
 
 	depth = 0;
 
-	// ChoiceLink state
+	// Choice state
 	_choice_state.clear();
 	_need_choice_push = false;
 	_choose_next = true;
