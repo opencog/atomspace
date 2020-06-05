@@ -1097,21 +1097,21 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
-		_pat.pmandatory = root_term->getOutgoingSet();
+		_pat.pmandatory.push_back(root_term->getOutgoingTerm(0));
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 		root_term->markLiteral();
-		_pat.absents = root_term->getOutgoingSet();
+		_pat.absents.push_back(root_term->getOutgoingTerm(0));
 	}
 	for (const Handle& clause : _pat.always)
 	{
 		PatternTermPtr root_term(createPatternTerm());
 		make_term_tree_recursive(clause, clause, root_term);
 		root_term->markLiteral();
-		_pat.palways = root_term->getOutgoingSet();
+		_pat.palways.push_back(root_term->getOutgoingTerm(0));
 	}
 }
 
