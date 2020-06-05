@@ -1196,7 +1196,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or not hp->is_unordered_link())
+	if (2 > ptm->getArity() or not ptm->isUnorderedLink())
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1615,20 +1615,14 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
-	const Handle& hp = ptm->getHandle();
-	Type ptype = hp->get_type();
-
 	// Iterate over different possible choices.
-	if (CHOICE_LINK == ptype)
-	{
+	// XXX FIXME, this apparently is never called!?
+	if (ptm->isChoice())
 		return explore_choice_branches(ptm, hg, clause_root);
-	}
 
 	// Unordered links have permutations to explore.
-	if (hp->is_unordered_link())
-	{
+	if (ptm->isUnorderedLink())
 		return explore_unordered_branches(ptm, hg, clause_root);
-	}
 
 	return explore_single_branch(ptm, hg, clause_root);
 }
