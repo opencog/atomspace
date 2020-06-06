@@ -1247,21 +1247,16 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
-	// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
-	// clause is trashed inside this loop, unless an explicit pointer
-	// copy is made for the duration. I guess something about reference
-	// counting gets damaged.
-	PatternTermPtr xclause = clause;
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
-			found = explore_glob_branches(ptm, hg, xclause);
+			found = explore_glob_branches(ptm, hg, clause);
 		else if (ptm->hasUnorderedLink())
-			found = explore_odometer(ptm, hg, xclause);
+			found = explore_odometer(ptm, hg, clause);
 		else
-			found = explore_type_branches(ptm, hg, xclause);
+			found = explore_type_branches(ptm, hg, clause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1392,11 +1387,6 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// directly upwards.
 	if (not ptm->hasUnorderedLink())
 	{
-		// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
-		// `clause` is trashed inside this loop, unless an explicit pointer
-		// copy is made for the duration. I guess something about reference
-		// counting gets damaged.
-		PatternTermPtr xclause = clause;
 		bool found = false;
 		for (size_t i = 0; i < sz; i++)
 		{
@@ -1404,7 +1394,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			                      << " at term=" << parent->to_string()
 			                      << " propose=" << iset[i]->to_string();})
 
-			found = explore_type_branches(parent, iset[i], xclause);
+			found = explore_type_branches(parent, iset[i], clause);
 			if (found) break;
 		}
 
@@ -2113,13 +2103,16 @@ bool PatternMatchEngine::do_next_clause(void)
 		return found;
 	}
 
+	// Keep the joint and the clause on the C++ stack, becuase both
+	// `next_joint` and `next_clause` get trashed during recursion!
 	Handle joiner = next_joint;
+	PatternTermPtr do_clause = next_clause;
 
-	logmsg("Next clause is", next_clause->getHandle());
+	logmsg("Next clause is", do_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_optional(next_clause)? "optional" : "required");})
+		              << (is_optional(do_clause)? "optional" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_evaluatable(next_clause)?
+		              << (is_evaluatable(do_clause)?
 		                  "dynamically evaluatable" : "non-dynamic");
 	logmsg("Joining variable is", joiner);
 	logmsg("Joining grounding is", var_grounding[joiner]); })
@@ -2136,7 +2129,8 @@ bool PatternMatchEngine::do_next_clause(void)
 	Handle hgnd(var_grounding[joiner]);
 	OC_ASSERT(nullptr != hgnd,
 	         "Error: joining handle has not been grounded yet!");
-	bool found = explore_clause(joiner, hgnd, next_clause);
+
+	bool found = explore_clause(joiner, hgnd, do_clause);
 
 	// If we are here, and found is false, then we've exhausted all
 	// of the search possibilities for the current clause. If this
@@ -2174,14 +2168,17 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
-			logmsg("Next optional clause is", next_clause->getHandle());
+			// Place a copy on stack, so its not trashed during recursion.
+			joiner = next_joint;
+			do_clause = next_clause;
+			logmsg("Next optional clause is", do_clause->getHandle());
 
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
 			clause_accepted = false;
-			Handle hgnd = var_grounding[next_joint];
-			found = explore_term_branches(next_joint, hgnd, next_clause);
+			Handle hgnd = var_grounding[joiner];
+			found = explore_term_branches(joiner, hgnd, do_clause);
 		}
 	}
 
