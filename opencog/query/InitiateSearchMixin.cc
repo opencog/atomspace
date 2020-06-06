@@ -534,13 +534,12 @@ void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
                                       size_t& count,
                                       Quotation quotation)
 {
-	Type t = clause->getHandle()->get_type();
-
-	// Base case
-	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
-
 	if (not clause->isLink()) return;
 
+	// Ignore ChoiceLinks, we cannot start inside of one.
+	if (not clause->isQuoted() and clause->isChoice()) return;
+
+	Type t = clause->getHandle()->get_type();
 	if (not quotation.consumable(t))
 	{
 		size_t num = (size_t) _as->get_num_atoms_of_type(t);
