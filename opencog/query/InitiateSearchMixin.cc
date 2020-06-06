@@ -370,7 +370,7 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_string());})
 		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
-		              <<  _root->to_string();})
+		              <<  _root->getHandle()->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -1087,7 +1087,7 @@ std::string InitiateSearchMixin::to_string(const std::string& indent) const
 		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
 	if (_root)
 		ss << indent << "_root:" << std::endl
-		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
+		   << _root->getHandle()->to_string(indent + oc_to_string_indent) << std::endl;
 	if (_starter_term)
 		ss << indent << "_starter_term:" << std::endl
 		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;
