@@ -122,8 +122,6 @@ void PatternLink::common_init(void)
 	if (1 == _num_comps)
 	   make_connectivity_map();
 
-	// get_clause_variables(_pat.literal_clauses);
-	// get_clause_variables(_pat.undeclared_clauses);
 	get_clause_variables(_pat.pmandatory);
 	get_clause_variables(_pat.absents);
 	get_clause_variables(_pat.palways);
