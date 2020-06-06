@@ -77,8 +77,6 @@ private:
 	bool is_black(const PatternTermPtr& ptm) {
 		return (_pat->black.count(ptm->getHandle()) != 0); }
 
-	bool term_is_a_clause(const PatternTermPtr&, const PatternTermPtr&);
-
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
 	// above, that are being searched.

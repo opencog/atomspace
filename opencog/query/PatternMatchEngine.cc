@@ -705,20 +705,6 @@ take_next_step:
 	return false;
 }
 
-
-/// Detect if the PatternTermPtr is a clause, so that we know
-/// that it is time to stop moving upwards. When quotations are
-/// being used, we  may have already moved past the top of the
-/// clause!! ... which seems strange to me, but that is how
-/// quotations work.
-bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
-                                          const PatternTermPtr& clause)
-{
-	return ptm == clause
-		or (clause->isQuoted()
-		    and ptm == clause->getOutgoingTerm(0));
-}
-
 /// Return the saved unordered-link permutation for this
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
@@ -1896,7 +1882,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	if (term_is_a_clause(ptm, clause))
+	if (ptm == clause)
 		return clause_accept(clause, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
