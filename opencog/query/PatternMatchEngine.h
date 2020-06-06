@@ -57,20 +57,25 @@ private:
 		// return (_pat->optionals.count(h) != 0); }
 		const HandleSeq& o(_pat->optionals);
 		return o.end() != std::find(o.begin(), o.end(), h); }
+	bool is_optional(const PatternTermPtr& ptm) {
+		return is_optional(ptm->getHandle());
+	}
 
 	bool is_always(const Handle& h) {
 		const HandleSeq& o(_pat->always);
 		return o.end() != std::find(o.begin(), o.end(), h); }
+	bool is_always(const PatternTermPtr& ptm) {
+		return is_always(ptm->getHandle());
+	}
 
-	// If you have a PatternTerm in hand, its probably faster
-	// to call ptm->hasAnyEvaluatable() instead of this.
+	// XXX FIXME, change to call ptm->hasAnyEvaluatable().
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
+	bool is_evaluatable(const PatternTermPtr& ptm) {
+		return (_pat->evaluatable_holders.count(ptm->getHandle()) != 0); }
 
-	bool is_black(const Handle& h) {
-		return (_pat->black.count(h) != 0); }
-
-	bool term_is_a_clause(const PatternTermPtr&, const Handle&);
+	bool is_black(const PatternTermPtr& ptm) {
+		return (_pat->black.count(ptm->getHandle()) != 0); }
 
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
@@ -188,27 +193,27 @@ private:
 	void get_next_untried_clause(void);
 	Handle get_glob_embedding(const Handle&);
 	bool get_next_thinnest_clause(bool, bool, bool);
-	unsigned int thickness(const Handle&, const HandleSet&);
-	Handle next_clause;
+	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
+	PatternTermPtr next_clause;
 	Handle next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
-	typedef HandleSet IssuedSet;
+	typedef std::set<PatternTermPtr> IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
 	// Similar to the next-clause, above, and someday should be unified
-	// with it. (above should be converted to use PatternTerm).
+	// with it.
 
 	bool next_untried_present(const PatternTermPtr&,
-	                          const Handle&,
+	                          const PatternTermPtr&,
 	                          PatternTermPtr&, PatternTermPtr&,
 	                          Handle&);
-	std::set<PatternTermPtr> issued_present;
+	IssuedSet issued_present;
 
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
-	bool is_clause_grounded(const Handle&) const;
+	bool is_clause_grounded(const PatternTermPtr&) const;
 	HandleSeq clause_grounding_key(const Handle&,
 	                               const HandleSeq&) const;
 
@@ -279,35 +284,36 @@ private:
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
-	bool explore_redex(const Handle&, const Handle&, const Handle&);
-	bool explore_clause(const Handle&, const Handle&, const Handle&);
-	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
-	bool explore_clause_evaluatable(const Handle&, const Handle&, const Handle&);
+	bool explore_clause(const Handle&, const Handle&, const PatternTermPtr&);
+	bool explore_clause_direct(const Handle&, const Handle&,
+	                           const PatternTermPtr&);
+	bool explore_clause_evaluatable(const Handle&, const Handle&,
+	                                const PatternTermPtr&);
 	bool explore_term_branches(const Handle&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                         const PatternTermPtr&);
 	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                            const PatternTermPtr&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                             const PatternTermPtr&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool explore_odometer(const PatternTermPtr&, const Handle&,
-	                      const Handle&);
+	                      const PatternTermPtr&);
 	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
-	                                const Handle&);
+	                                const PatternTermPtr&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
-	                             const Handle&);
+	                             const PatternTermPtr&);
 	bool explore_present_branches(const PatternTermPtr&, const Handle&,
-	                              const Handle&);
+	                              const PatternTermPtr&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,
-	                const Handle&);
-	bool clause_accept(const Handle&, const Handle&);
+	                const PatternTermPtr&);
+	bool clause_accept(const PatternTermPtr&, const Handle&);
 
 public:
 	PatternMatchEngine(PatternMatchCallback&);
@@ -315,7 +321,8 @@ public:
 
 	// Examine the locally connected neighborhood for possible
 	// matches.
-	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
+	bool explore_neighborhood(const Handle&, const Handle&,
+	                          const PatternTermPtr&);
 
 	// Evaluate constant evaluatable and ground it via the
 	// PatternMatchCallback. It is assumed that all clauses are

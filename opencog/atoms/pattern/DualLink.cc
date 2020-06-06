@@ -63,10 +63,10 @@ void DualLink::init(void)
 
 	// Well, there won't be any variables, but we still need
 	// to have an empty-set-per-clause to not trigger asserts
-	// in the PatternMatcherEngine. (... I'm confused about this.
-	// I'm thinking that the pattern matcher should be smarter
-	// than this ... but for now, let this slide...)
-	get_clause_variables(_outgoing);
+	// in the PatternMatcherEngine. We could make the engine
+	// smarter, at the cost of slowing down others. So we
+	// won't do that. We'll just hack it up here.
+	get_clause_variables(_pat.pmandatory);
 }
 
 DualLink::DualLink(const HandleSeq&& hseq, Type t)

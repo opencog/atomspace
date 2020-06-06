@@ -57,16 +57,16 @@ InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_dynamic = nullptr;
 	_recursing = false;
 
-	_root = Handle::UNDEFINED;
+	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 
-	_curr_clause = Handle::UNDEFINED;
+	_curr_clause = PatternTerm::UNDEFINED;
 	_choices.clear();
 	_as = as;
 }
 
 void InitiateSearchMixin::set_pattern(const Variables& vars,
-                                   const Pattern& pat)
+                                      const Pattern& pat)
 {
 	_variables = &vars;
 	_pattern = &pat;
@@ -124,7 +124,7 @@ void InitiateSearchMixin::set_pattern(const Variables& vars,
 
 Handle
 InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
-                                     Handle& startrm, size_t& width)
+                                  Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
 	Type t = h->get_type();
@@ -145,7 +145,7 @@ InitiateSearchMixin::find_starter(const Handle& h, size_t& depth,
 
 Handle
 InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& startrm, size_t& width)
+                                            Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -223,35 +223,35 @@ InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
  * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
  */
-Handle InitiateSearchMixin::find_thinnest(const HandleSeq& clauses,
-                                       const HandleSet& evl,
-                                       Handle& starter_term,
-                                       Handle& bestclause)
+Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
+                                          const HandleSet& evl,
+                                          Handle& starter_term,
+                                          PatternTermPtr& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
-	bestclause = Handle::UNDEFINED;
+	bestclause = PatternTerm::UNDEFINED;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
 	_choices.clear();
 
-	for (const Handle& h: clauses)
+	for (const PatternTermPtr& ptm: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (0 < evl.count(h)) continue;
+		if (0 < evl.count(ptm->getHandle())) continue;
 
-		_curr_clause = h;
+		_curr_clause = ptm;
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
 		Handle term(Handle::UNDEFINED);
-		Handle start(find_starter(h, depth, term, width));
+		Handle start(find_starter(ptm->getHandle(), depth, term, width));
 		if (start
 		    and (width < thinnest
 		         or (width == thinnest and depth > deepest)))
 		{
 			thinnest = width;
 			deepest = depth;
-			bestclause = h;
+			bestclause = ptm;
 			best_start = start;
 			starter_term = term;
 		}
@@ -293,7 +293,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 {
 	// If there are no non-constant clauses, abort; will use
 	// no_search() instead.
-	if (_pattern->mandatory.empty() and _pattern->optionals.empty())
+	if (_pattern->pmandatory.empty() and _pattern->absents.empty())
 		return false;
 
 	// Sometimes, the number of mandatory clauses can be zero...
@@ -302,17 +302,17 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
 	bool try_optionals = true;
-	for (const Handle& m : _pattern->mandatory)
+	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (0 == _pattern->evaluatable_holders.count(m))
+		if (0 == _pattern->evaluatable_holders.count(m->getHandle()))
 		{
 			try_optionals = false;
 			break;
 		}
 	}
 
-	const HandleSeq& clauses =
-		try_optionals ?  _pattern->optionals :  _pattern->mandatory;
+	const PatternTermSeq& clauses =
+		try_optionals ?  _pattern->absents :  _pattern->pmandatory;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -326,7 +326,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 	// Note also: the user is allowed to specify patterns that have
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
-	Handle bestclause;
+	PatternTermPtr bestclause;
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
@@ -358,7 +358,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 /* ======================================================== */
 
 bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
-                                   const std::string dbg_banner)
+                                      const std::string dbg_banner)
 {
 	for (const Choice& ch : _choices)
 	{
@@ -370,7 +370,7 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_string());})
 		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
-		              <<  _root->to_string();})
+		              <<  _root->getHandle()->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -475,9 +475,9 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 {
 	// Start with a clean slate. This might be called multiple
 	// times, for groundings of different components.
-	_root = Handle::UNDEFINED;
+	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	_curr_clause = Handle::UNDEFINED;
+	_curr_clause = PatternTerm::UNDEFINED;
 	_search_set.clear();
 	_choices.clear();
 
@@ -529,34 +529,33 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
  * Find the rarest link type contained in the clause, or one
  * of its subclauses.
  */
-void InitiateSearchMixin::find_rarest(const Handle& clause,
-                                   Handle& rarest,
-                                   size_t& count,
-                                   Quotation quotation)
+void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
+                                      Handle& rarest,
+                                      size_t& count,
+                                      Quotation quotation)
 {
-	Type t = clause->get_type();
+	if (not clause->isLink()) return;
 
-	// Base case
-	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
+	// Ignore ChoiceLinks, we cannot start inside of one.
+	if (not clause->isQuoted() and clause->isChoice()) return;
 
-	if (not clause->is_link()) return;
-
+	Type t = clause->getHandle()->get_type();
 	if (not quotation.consumable(t))
 	{
 		size_t num = (size_t) _as->get_num_atoms_of_type(t);
 		if (num < count)
 		{
 			count = num;
-			rarest = clause;
+			rarest = clause->getHandle();
 		}
 	}
 
 	// Recursive case
 	quotation.update(t);
 
-	const HandleSeq& oset = clause->getOutgoingSet();
-	for (const Handle& h : oset)
-		find_rarest(h, rarest, count, quotation);
+	const PatternTermSeq& oset = clause->getOutgoingSet();
+	for (const PatternTermPtr& ptm : oset)
+		find_rarest(ptm, rarest, count, quotation);
 }
 
 /* ======================================================== */
@@ -619,18 +618,15 @@ static Type find_plain_type(const Handle& h)
 // dont have a map for this; the _pattern->connectivity_map
 // is non-empty only when a var is in two (or more) clauses.
 // So we brute-force search in this loop.
-static Handle root_of_term(const Handle& term, const HandleSeq& clauses)
+static PatternTermPtr root_of_term(const Handle& term,
+                                   const PatternTermSeq& clauses)
 {
-	Handle root;
-	for (const Handle& clause: clauses)
+	for (const PatternTermPtr& clause: clauses)
 	{
-		if (is_free_in_tree(clause, term))
-		{
-			root = clause;
-			break;
-		}
+		if (is_free_in_tree(clause->getHandle(), term))
+			return clause;
 	}
-	return root;
+	return PatternTerm::UNDEFINED;
 }
 
 /**
@@ -648,7 +644,7 @@ bool InitiateSearchMixin::setup_deep_type_search()
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 
-	_root = Handle::UNDEFINED;
+	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	_choices.clear();
 	_search_set.clear();
@@ -658,8 +654,8 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = dit.first;
-		Handle root = root_of_term (var, _pattern->mandatory);
-		if (nullptr == root) continue;
+		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
 			 << "Examine deep-type " << oc_to_string(dit.second);})
@@ -692,8 +688,8 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = dit.first;
-		Handle root = root_of_term (var, _pattern->mandatory);
-		if (nullptr == root) continue;
+		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
 			 << "Re-examine deep-type " << oc_to_string(dit.second);})
@@ -730,17 +726,17 @@ bool InitiateSearchMixin::setup_deep_type_search()
  */
 bool InitiateSearchMixin::setup_link_type_search()
 {
-	const HandleSeq& clauses = _pattern->mandatory;
+	const PatternTermSeq& clauses = _pattern->pmandatory;
 
-	_root = Handle::UNDEFINED;
+	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
 
-	for (const Handle& cl: clauses)
+	for (const PatternTermPtr& cl: clauses)
 	{
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
-		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
+		if (0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
 		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
@@ -755,11 +751,11 @@ bool InitiateSearchMixin::setup_link_type_search()
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
-	if (nullptr == _root)
+	if (PatternTerm::UNDEFINED == _root)
 		return false;
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	                      << _root->to_string();})
+	                      << _root->getHandle()->to_string();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
 	                      << _starter_term->to_string();})
 
@@ -791,15 +787,15 @@ bool InitiateSearchMixin::setup_link_type_search()
  */
 bool InitiateSearchMixin::setup_variable_search(void)
 {
-	const HandleSeq& clauses = _pattern->mandatory;
+	const PatternTermSeq& clauses = _pattern->pmandatory;
 
 	// Some search patterns simply do not have any groundable
 	// clauses in them. This is one common reason why a variable-
 	// based search is being performed.
 	bool all_clauses_are_evaluatable = true;
-	for (const Handle& cl : clauses)
+	for (const PatternTermPtr& cl : clauses)
 	{
-		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
+		if (0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
 		all_clauses_are_evaluatable = false;
 		break;
 	}
@@ -809,7 +805,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 	TypeSet ptypes;
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
-	_root = Handle::UNDEFINED;
+	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	bool empty = false;
 	for (const Handle& var: _variables->varset)
@@ -833,19 +829,19 @@ bool InitiateSearchMixin::setup_variable_search(void)
 		if (0 == num) empty = true;
 		if (0 < num and num < count)
 		{
-			for (const Handle& cl : clauses)
+			for (const PatternTermPtr& cl : clauses)
 			{
 				// Evaluatables don't exist in the atomspace, in general.
 				// Therefore, we cannot start a search with them. Unless
 				// they are all evaluatable, in which case we pick a clause
 				// that has a variable with the narrowest type-membership.
 				if (not all_clauses_are_evaluatable and
-				    0 < _pattern->evaluatable_holders.count(cl)) continue;
+				    0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
 
-				if (cl == var)
+				if (cl->getHandle() == var)
 				{
 					_root = cl;
-					_starter_term = cl;
+					_starter_term = cl->getHandle();
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of " << count;})
@@ -853,7 +849,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 				}
 
 				FindAtoms fa(var);
-				fa.search_set(cl);
+				fa.search_set(cl->getHandle());
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
@@ -871,7 +867,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 	}
 
 	// There were no type restrictions!
-	if (nullptr == _root)
+	if (PatternTerm::UNDEFINED == _root)
 	{
 		if (empty) return false;
 
@@ -883,8 +879,8 @@ bool InitiateSearchMixin::setup_variable_search(void)
 		logger().warn("No type restrictions! Your code has a bug in it!");
 		for (const Handle& var: _variables->varset)
 			logger().warn("Offending variable=%s\n", var->to_string().c_str());
-		for (const Handle& cl : clauses)
-			logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
+		for (const PatternTermPtr& cl : clauses)
+			logger().warn("Offending clauses=%s\n", cl->getHandle()->to_string().c_str());
 
 		// Terrible, terrible hack for detecting infinite loops.
 		// When the world is ready for us, we should instead just
@@ -909,17 +905,18 @@ bool InitiateSearchMixin::setup_variable_search(void)
 		// (And (Present (Variable "$x")) (Evaluation ...))
 		// We should start the search on the PresentLink, and allow
 		// the EvaluationLinks to be evaluated later.
-		for (const Handle& m : _pattern->mandatory)
+		for (const PatternTermPtr& m : _pattern->pmandatory)
 		{
-			if (0 == _pattern->evaluatable_holders.count(m))
+			if (0 == _pattern->evaluatable_holders.count(m->getHandle()))
 			{
-				_root = _starter_term = m;
+				_root = m;
+				_starter_term = m->getHandle();
 				break;
 			}
 		}
 
 		// Fail-safe, in case they are all evaluatable.
-		if (nullptr == _root)
+		if (PatternTerm::UNDEFINED == _root)
 		{
 			_root = clauses[0];
 			auto some_var = _variables->varset.begin();
@@ -965,7 +962,7 @@ bool InitiateSearchMixin::setup_no_search(void)
 /// set up in the `_search_set`, as well as an approprite root
 /// clause and starting term.
 bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
-                                   const std::string dbg_banner)
+                                      const std::string dbg_banner)
 {
 	// This is the main entry point into the CPU-cycle sucking part of
 	// the pattern search.  If `USE_THREADED_PATTERN_ENGINE` is defined,
@@ -1002,7 +999,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			DO_LOG({LAZY_LOG_FINE << dbg_banner
 			             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 			             << h->to_string();})
-			bool found = pme.explore_neighborhood(_root, _starter_term, h);
+			bool found = pme.explore_neighborhood(_starter_term, h, _root);
 			if (found) return true;
 		}
 
@@ -1034,7 +1031,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
-			if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
+			if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 		});
 
 	_recursing = false;
@@ -1065,7 +1062,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
 		             << h->to_string();})
-		if (pme.explore_neighborhood(_root, _starter_term, h)) nfnd++;
+		if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 	}
 	_recursing = false;
 	return 0 < nfnd;
@@ -1090,7 +1087,7 @@ std::string InitiateSearchMixin::to_string(const std::string& indent) const
 		   << oc_to_string(*_dynamic, indent + oc_to_string_indent) << std::endl;
 	if (_root)
 		ss << indent << "_root:" << std::endl
-		   << _root->to_string(indent + oc_to_string_indent) << std::endl;
+		   << _root->getHandle()->to_string(indent + oc_to_string_indent) << std::endl;
 	if (_starter_term)
 		ss << indent << "_starter_term:" << std::endl
 		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;

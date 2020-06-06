@@ -261,12 +261,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
-	const Handle& hp = ptm->getHandle();
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	logmsg("present_compare");
 
-printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
-hg->to_string().c_str());
+	throw RuntimeException(TRACE_INFO,
+		"Unexpecteed call to unimplemented function!!");
+
 	return tree_compare(osp[0], hg, CALL_PRESENT);
 
 /*
@@ -705,20 +705,6 @@ take_next_step:
 	return false;
 }
 
-
-/// Detect if the PatternTermPtr is a clause, so that we know
-/// that it is time to stop moving upwards. When quotations are
-/// being used, we  may have already moved past the top of the
-/// clause!! ... which seems strange to me, but that is how
-/// quotations work.
-bool PatternMatchEngine::term_is_a_clause(const PatternTermPtr& ptm,
-                                          const Handle& clause)
-{
-	return ptm->getHandle() == clause
-		or (Quotation::is_quotation_type(clause->get_type())
-		    and ptm->getHandle() == clause->getOutgoingAtom(0));
-}
-
 /// Return the saved unordered-link permutation for this
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
@@ -1141,7 +1127,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO. Hmm. Should we do this at runtime,
-	// i.e. here, or at static-analysis time, when creating the PattenLink?
+	// i.e. here, or at static-analysis time, when creating the PatternLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
@@ -1244,23 +1230,28 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
-                                               const Handle& clause)
+                                               const PatternTermPtr& clause)
 {
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
+	// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
+	// clause is trashed inside this loop, unless an explicit pointer
+	// copy is made for the duration. I guess something about reference
+	// counting gets damaged.
+	PatternTermPtr xclause = clause;
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
-			found = explore_glob_branches(ptm, hg, clause);
+			found = explore_glob_branches(ptm, hg, xclause);
 		else if (ptm->hasUnorderedLink())
-			found = explore_odometer(ptm, hg, clause);
+			found = explore_odometer(ptm, hg, xclause);
 		else
-			found = explore_type_branches(ptm, hg, clause);
+			found = explore_type_branches(ptm, hg, xclause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1296,7 +1287,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 ///
 bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
-                                             const Handle& clause)
+                                             const PatternTermPtr& clause)
 {
 	// Check if the pattern has globs in it.
 	const PatternTermPtr& parent(ptm->getParent());
@@ -1310,7 +1301,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 /// set, and nothing more.
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& hg,
-                                                const Handle& clause)
+                                                const PatternTermPtr& clause)
 {
 	// Move up the solution graph, looking for a match.
 	const PatternTermPtr& parent(ptm->getParent());
@@ -1391,6 +1382,11 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// directly upwards.
 	if (not ptm->hasUnorderedLink())
 	{
+		// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
+		// `clause` is trashed inside this loop, unless an explicit pointer
+		// copy is made for the duration. I guess something about reference
+		// counting gets damaged.
+		PatternTermPtr xclause = clause;
 		bool found = false;
 		for (size_t i = 0; i < sz; i++)
 		{
@@ -1398,7 +1394,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			                      << " at term=" << parent->to_string()
 			                      << " propose=" << iset[i]->to_string();})
 
-			found = explore_type_branches(parent, iset[i], clause);
+			found = explore_type_branches(parent, iset[i], xclause);
 			if (found) break;
 		}
 
@@ -1439,7 +1435,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 /// grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
-                                                 const Handle& clause_root)
+                                                 const PatternTermPtr& clause)
 {
 	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
@@ -1470,7 +1466,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 		// different way (e.g. backtracking from another branchpoint).
 		auto saved_glob_state = _glob_state;
 
-		found = explore_glob_branches(parent, iset[i], clause_root);
+		found = explore_glob_branches(parent, iset[i], clause);
 
 		// Restore the saved state, for the next go-around.
 		_glob_state = saved_glob_state;
@@ -1488,7 +1484,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 /// grounding glob nodes are explored.
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
-                                               const Handle& clause_root)
+                                               const PatternTermPtr& clause)
 {
 	// Check if the pattern has globs in it,
 	OC_ASSERT(ptm->hasAnyGlobbyVar(),
@@ -1510,8 +1506,8 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 		// It's not clear if the odometer can play nice with
 		// globby terms. Anyway, no unit test mixes these two.
 		// So, for now, we ignore it.
-		// if (explore_odometer(ptm, hg, clause_root))
-		if (explore_type_branches(ptm, hg, clause_root))
+		// if (explore_odometer(ptm, hg, clause))
+		if (explore_type_branches(ptm, hg, clause))
 			return true;
 		DO_LOG({logger().fine("Globby clause not grounded; try again");})
 	}
@@ -1527,9 +1523,9 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 // So this tries to advance all of them.
 bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
                                           const Handle& hg,
-                                          const Handle& clause_root)
+                                          const PatternTermPtr& clause)
 {
-	bool found = explore_type_branches(ptm, hg, clause_root);
+	bool found = explore_type_branches(ptm, hg, clause);
 	if (found)
 		return true;
 
@@ -1541,7 +1537,7 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 
 		DO_LOG({LAZY_LOG_FINE << "ODO STEP unordered beneath term: "
 		                      << ptm->to_string();})
-		if (explore_type_branches(ptm, hg, clause_root))
+		if (explore_type_branches(ptm, hg, clause))
 			return true;
 	}
 	return false;
@@ -1564,12 +1560,12 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 ///
 bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                     const Handle& hg,
-                                                    const Handle& clause_root)
+                                                    const PatternTermPtr& clause)
 {
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
-		if (explore_single_branch(ptm, hg, clause_root))
+		if (explore_single_branch(ptm, hg, clause))
 			return true;
 
 		DO_LOG({logger().fine("Step to next permutation");})
@@ -1613,18 +1609,18 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// pattern was grounded.
 bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
-                                               const Handle& clause_root)
+                                               const PatternTermPtr& clause)
 {
 	// Iterate over different possible choices.
 	// XXX FIXME, this apparently is never called!?
 	if (ptm->isChoice())
-		return explore_choice_branches(ptm, hg, clause_root);
+		return explore_choice_branches(ptm, hg, clause);
 
 	// Unordered links have permutations to explore.
 	if (ptm->isUnorderedLink())
-		return explore_unordered_branches(ptm, hg, clause_root);
+		return explore_unordered_branches(ptm, hg, clause);
 
-	return explore_single_branch(ptm, hg, clause_root);
+	return explore_single_branch(ptm, hg, clause);
 }
 
 /// See explore_unordered_branches() for a general explanation.
@@ -1632,7 +1628,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 /// This method is never called, currently.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
-                                                 const Handle& clause_root)
+                                                 const PatternTermPtr& clause)
 {
 	throw RuntimeException(TRACE_INFO,
 		"Maybe this works but its not tested!! Find out!");
@@ -1644,7 +1640,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		// However, currently, no test case trips this up. so .. OK.
 		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_single_branch(ptm, hg, clause_root);
+		bool match = explore_single_branch(ptm, hg, clause);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
@@ -1690,14 +1686,14 @@ static PatternTermPtr find_variable_term(const PatternTermPtr& term,
 /// XXX FIXME -- do the above.
 ///
 bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
-                                              const Handle& clause_root,
+                                              const PatternTermPtr& clause,
                                               PatternTermPtr& untried_term,
                                               PatternTermPtr& joint,
                                               Handle& jgnd)
 {
 	// So, first, get a common shared variable. Assume that clause
 	// will point at the right thing.
-	const HandleSeq& varseq = _pat->clause_variables.at(clause_root);
+	const HandleSeq& varseq = _pat->clause_variables.at(clause);
 	if (0 == varseq.size())
 		throw RuntimeException(TRACE_INFO, "Expecting a variable!");
 
@@ -1740,7 +1736,7 @@ bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
 /// each different way in which this can be accomplished.
 bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
                                                   const Handle& hg,
-                                                  const Handle& clause_root)
+                                                  const PatternTermPtr& clause)
 {
 	const Handle& hp = ptm->getHandle();
 
@@ -1756,7 +1752,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 
 	const PatternTermPtr& parent = ptm->getParent();
 	if (1 == parent->getArity())
-		return do_term_up(parent, hg, clause_root);
+		return do_term_up(parent, hg, clause);
 
 	// Compare the other parts of the present link.
 	// They all have to match.
@@ -1765,7 +1761,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	PatternTermPtr joint;
 	PatternTermPtr next_term;
 	Handle jgnd;
-	bool have_more = next_untried_present(parent, clause_root,
+	bool have_more = next_untried_present(parent, clause,
 	                                      next_term, joint, jgnd);
 	if (have_more)
 	{
@@ -1774,11 +1770,11 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 		// Explore from this joint.
 		bool found;
 		if (next_term->hasAnyGlobbyVar())
-			found = explore_glob_branches(joint, jgnd, clause_root);
+			found = explore_glob_branches(joint, jgnd, clause);
 		else if (next_term->hasUnorderedLink())
-			found = explore_odometer(joint, jgnd, clause_root);
+			found = explore_odometer(joint, jgnd, clause);
 		else
-			found = explore_type_branches(joint, jgnd, clause_root);
+			found = explore_type_branches(joint, jgnd, clause);
 
 		logmsg("!! maybe_present result=",  found);
 		if (not found) issued_present.clear();
@@ -1787,7 +1783,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 
 	logmsg("!! explore_present success!");
 	issued_present.clear();
-	return do_term_up(parent, hg, clause_root);
+	return do_term_up(parent, hg, clause);
 }
 
 /// Check the proposed grounding hg for pattern term hp.
@@ -1808,7 +1804,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 ///
 bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
                                                const Handle& hg,
-                                               const Handle& clause_root)
+                                               const PatternTermPtr& clause)
 {
 	solution_push();
 
@@ -1831,7 +1827,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	logmsg("ssss will move up.");
 
 	// Continue onwards to the rest of the pattern.
-	bool found = do_term_up(ptm, hg, clause_root);
+	bool found = do_term_up(ptm, hg, clause);
 
 	solution_pop();
 	return found;
@@ -1878,7 +1874,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 ///
 bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
                                     const Handle& hg,
-                                    const Handle& clause_root)
+                                    const PatternTermPtr& clause)
 {
 	depth = 1;
 
@@ -1886,9 +1882,8 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	const Handle& hp = ptm->getHandle();
-	if (term_is_a_clause(ptm, clause_root))
-		return clause_accept(clause_root, hg);
+	if (ptm == clause)
+		return clause_accept(clause, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
 	// There are two ways to move upwards: for a normal term, we just
@@ -1897,9 +1892,10 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// higher.
 	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string()
 	              << "\n" << ptm->getHandle()->to_string()
-	              // << "\nof clause = " << clause_root->to_string()
+	              // << "\nof clause = " << clause->getHandle()->to_string()
 	              << "\nhas ground, move upwards";})
 
+	const Handle& hp = ptm->getHandle();
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
 		// If we are here, there are four possibilities:
@@ -1937,7 +1933,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		auto evra = _pat->in_evaluatable.equal_range(hp);
 		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
-			if (not is_unquoted_in_tree(clause_root, evit->second))
+			if (not is_unquoted_in_tree(clause->getHandle(), evit->second))
 				continue;
 
 			logmsg("Term inside evaluatable, move up to it's top:",
@@ -1950,10 +1946,10 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 			// the evaluation for the callback.
 // XXX TODO count the number of ungrounded vars !!! (make sure its zero)
 
-			bool found = _pmc.evaluate_sentence(clause_root, var_grounding);
+			bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
 			DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
 			if (found)
-				return clause_accept(clause_root, hg);
+				return clause_accept(clause, hg);
 
 			return false;
 		}
@@ -1961,27 +1957,26 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 
 	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
-	const Handle& hi = parent->getHandle();
 
 	if (parent->isPresent() and not parent->isLiteral())
 	{
-		OC_ASSERT(hi != clause_root, "Not expecting a Present term here!");
-		return explore_present_branches(ptm, hg, clause_root);
+		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
+		return explore_present_branches(ptm, hg, clause);
 	}
 
 	// Do the simple case first, Choice terms are harder.
 	if (not parent->isChoice())
 	{
-		bool found = explore_up_branches(ptm, hg, clause_root);
+		bool found = explore_up_branches(ptm, hg, clause);
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
 		return found;
 	}
 
 	// If we are here, then we have Choice term.
-	if (hi == clause_root)
+	if (parent == clause)
 	{
 		DO_LOG({logger().fine("Exploring Choice term at root");})
-		return clause_accept(clause_root, hg);
+		return clause_accept(clause, hg);
 	}
 
 	// If we are here, then we have an embedded Choice term, e.g.
@@ -1997,7 +1992,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	          "Something is wrong with the Choice code");
 
 	_need_choice_push = true;
-	return do_term_up(parent, hg, clause_root);
+	return do_term_up(parent, hg, clause);
 }
 
 /// This is called when we've navigated to the top of a clause,
@@ -2005,21 +2000,25 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 /// However, let the callbacks have the final say on whether to
 /// proceed onwards, or to backtrack.
 ///
-bool PatternMatchEngine::clause_accept(const Handle& clause_root,
+bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
                                        const Handle& hg)
 {
+	// We have to unwrap one more level of quotation before we are done.
+	Handle clause_root = clause->getHandle();
+	if (clause->getQuote()) clause_root = clause->getQuote();
+
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (is_optional(clause_root))
+	if (is_optional(clause))
 	{
 		clause_accepted = true;
 		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
-	if (is_always(clause_root))
+	if (is_always(clause))
 	{
 		_did_check_forall = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
@@ -2033,7 +2032,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	}
 	if (not match) return false;
 
-	if (not is_evaluatable(clause_root))
+	if (not is_evaluatable(clause))
 	{
 		clause_grounding[clause_root] = hg;
 
@@ -2049,7 +2048,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 		// Cache the result, so that it can be reused.
 		// See commentary on `explore_clause()` for more info.
 		HandleSeq key;
-		const HandleSeq& clvars(_pat->clause_variables.at(clause_root));
+		const HandleSeq& clvars(_pat->clause_variables.at(clause));
 		size_t cvsz = clvars.size();
 
 		// Clause contains just a single variable
@@ -2095,7 +2094,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (nullptr == next_clause)
+	if (PatternTerm::UNDEFINED == next_clause)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
@@ -2105,13 +2104,12 @@ bool PatternMatchEngine::do_next_clause(void)
 	}
 
 	Handle joiner = next_joint;
-	Handle curr_root = next_clause;
 
-	logmsg("Next clause is", curr_root);
+	logmsg("Next clause is", next_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_optional(curr_root)? "optional" : "required");})
+		              << (is_optional(next_clause)? "optional" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_evaluatable(curr_root)?
+		              << (is_evaluatable(next_clause)?
 		                  "dynamically evaluatable" : "non-dynamic");
 	logmsg("Joining variable is", joiner);
 	logmsg("Joining grounding is", var_grounding[joiner]); })
@@ -2128,7 +2126,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	Handle hgnd(var_grounding[joiner]);
 	OC_ASSERT(nullptr != hgnd,
 	         "Error: joining handle has not been grounded yet!");
-	bool found = explore_clause(joiner, hgnd, curr_root);
+	bool found = explore_clause(joiner, hgnd, next_clause);
 
 	// If we are here, and found is false, then we've exhausted all
 	// of the search possibilities for the current clause. If this
@@ -2143,9 +2141,10 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (is_optional(curr_root)))
+	       (is_optional(next_clause)))
 	{
-		Handle undef(Handle::UNDEFINED);
+		Handle curr_root = next_clause->getHandle();
+		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
 		if (not match) {
@@ -2156,10 +2155,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
 		get_next_untried_clause();
-		joiner = next_joint;
-		curr_root = next_clause;
 
-		if (nullptr == curr_root)
+		if (PatternTerm::UNDEFINED == next_clause)
 		{
 			DO_LOG({logger().fine("==================== FINITO BANDITO!");
 			log_solution(var_grounding, clause_grounding);})
@@ -2167,14 +2164,14 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
-			DO_LOG({logmsg("Next optional clause is", curr_root);})
+			logmsg("Next optional clause is", next_clause->getHandle());
 
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
 			clause_accepted = false;
-			Handle hgnd = var_grounding[joiner];
-			found = explore_term_branches(joiner, hgnd, curr_root);
+			Handle hgnd = var_grounding[next_joint];
+			found = explore_term_branches(next_joint, hgnd, next_clause);
 		}
 	}
 
@@ -2249,14 +2246,14 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 	// Now loop over all for-all clauses.
 	// I think that all variables will be grounded at this point, right?
-	for (const Handle& root : _pat->always)
+	for (const PatternTermPtr& root : _pat->palways)
 	{
 		if (issued.end() != issued.find(root)) continue;
 		issued.insert(root);
 		next_clause = root;
 		for (const Handle &v : _variables->varset)
 		{
-			if (is_free_in_tree(root, v))
+			if (is_free_in_tree(root->getHandle(), v))
 			{
 				next_joint = v;
 				return;
@@ -2266,7 +2263,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
-	next_clause = Handle::UNDEFINED;
+	next_clause = PatternTerm::UNDEFINED;
 	next_joint = Handle::UNDEFINED;
 }
 
@@ -2291,17 +2288,18 @@ void PatternMatchEngine::get_next_untried_clause(void)
 // Danger: this assumes a suitable dataset, as otherwise, the cost
 // of this "optimization" can add un-necessarily to the overhead.
 //
-unsigned int PatternMatchEngine::thickness(const Handle& clause,
+unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
                                            const HandleSet& live)
 {
 	// If there are only zero or one ungrounded vars, then any clause
 	// will do. Blow this pop stand.
 	if (live.size() < 2) return 1;
 
+	const Handle& hclause = clause->getHandle();
 	unsigned int count = 0;
 	for (const Handle& v : live)
 	{
-		if (is_unquoted_in_tree(clause, v)) count++;
+		if (is_unquoted_in_tree(hclause, v)) count++;
 	}
 	return count;
 }
@@ -2324,7 +2322,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 	// the glob might appear in three clauses, with two of them
 	// grounded by a common term, and the third ungrounded
 	// with no common term.
-	auto clauses =  _pat->connectivity_map.equal_range(glob);
+	const auto& clauses =  _pat->connectivity_map.equal_range(glob);
 	auto clpr = clauses.first;
 	for (; clpr != clauses.second; clpr++)
 	{
@@ -2336,7 +2334,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 
 	// Typically, the glob appears only once in the clause, so
 	// there is only one PatternTerm. The loop really isn't needed.
-	HandlePair glbt({glob, clpr->second});
+	std::pair<Handle, PatternTermPtr> glbt({glob, clpr->second});
 	const auto& ptms = _pat->connected_terms_map.find(glbt);
 	for (const PatternTermPtr& ptm : ptms->second)
 	{
@@ -2372,7 +2370,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// looking at the grounded vars, looking up the root, to see if
 	// the root is grounded.  If its not, start working on that.
 	Handle joint(Handle::UNDEFINED);
-	Handle unsolved_clause(Handle::UNDEFINED);
+	PatternTermPtr unsolved_clause(PatternTerm::UNDEFINED);
 	unsigned int thinnest_joint = UINT_MAX;
 	unsigned int thinnest_clause = UINT_MAX;
 	bool unsolved = false;
@@ -2415,7 +2413,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// with smallest size of its incoming set. If there are many such
 	// atoms we choose one from clauses with minimal number of ungrounded
 	// yet variables.
-	for (auto tckvar : thick_vars)
+	for (const auto& tckvar : thick_vars)
 	{
 		std::size_t pursue_thickness = tckvar.first;
 		const Handle& pursue = tckvar.second;
@@ -2425,7 +2423,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		const auto& root_list = _pat->connectivity_map.equal_range(pursue);
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
-			const Handle& root = it->second;
+			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
@@ -2451,7 +2449,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	if (not unsolved and search_virtual and
 		 (search_black or _pat->black.empty()))
 	{
-		for (const Handle& root : _pat->mandatory)
+		for (const PatternTermPtr& root : _pat->pmandatory)
 		{
 			if (issued.end() != issued.find(root)) continue;
 
@@ -2461,10 +2459,10 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 			if (0 == varseq.size())
 			{
 				unsolved_clause = root;
-				joint = root;
+				joint = root->getHandle();
 				unsolved = true;
 				// Oh bother. Bit of a hack.
-				var_grounding[root] = root;
+				var_grounding[joint] = joint;
 				break;
 			}
 		}
@@ -2678,36 +2676,23 @@ bool PatternMatchEngine::report_forall(void)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
-                                              const Handle& term,
-                                              const Handle& grnd)
+bool PatternMatchEngine::explore_neighborhood(const Handle& term,
+                                              const Handle& grnd,
+                                              const PatternTermPtr& clause)
 {
 	clause_stacks_clear();
-	bool halt = explore_redex(term, grnd, do_clause);
+	clear_current_state();
+	issued.insert(clause);
+
+	bool halt = explore_clause(term, grnd, clause);
 	bool stop = report_forall();
 	return halt or stop;
-}
-
-/**
- * Same as above, obviously; we just pick up the graph context
- * where we last left it.
- */
-bool PatternMatchEngine::explore_redex(const Handle& term,
-                                       const Handle& grnd,
-                                       const Handle& first_clause)
-{
-	// Cleanup
-	clear_current_state();
-
-	// Match the required clauses.
-	issued.insert(first_clause);
-	return explore_clause(term, grnd, first_clause);
 }
 
 /// Has every variable in the clause been fully grounded already?
 /// If so, then we can deal with this clause directly, without
 /// having to perform any further searches.
-bool PatternMatchEngine::is_clause_grounded(const Handle& clause) const
+bool PatternMatchEngine::is_clause_grounded(const PatternTermPtr& clause) const
 {
 	const auto& it = _pat->clause_variables.find(clause);
 	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
@@ -2752,7 +2737,7 @@ HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
  */
 bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& grnd,
-                                               const Handle& clause)
+                                               const PatternTermPtr& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
 	DO_LOG({logger().fine("Clause is matchable; start matching it");})
@@ -2765,7 +2750,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 		// We need to record failures for the AlwaysLink
 		Handle empty;
 		_forall_state = _forall_state and
-			_pmc.always_clause_match(clause, empty, var_grounding);
+			_pmc.always_clause_match(clause->getHandle(), empty, var_grounding);
 	}
 
 	return found;
@@ -2773,7 +2758,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 
 bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
                                                     const Handle& grnd,
-                                                    const Handle& clause)
+                                                    const PatternTermPtr& clause)
 {
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
 
@@ -2788,7 +2773,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 	// All variables in the clause had better be grounded!
 	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
 
-	bool found = _pmc.evaluate_sentence(clause, var_grounding);
+	bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
 	{
@@ -2799,7 +2784,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 		// We need to record failures for the AlwaysLink
 		Handle empty;
 		_forall_state = _forall_state and
-			_pmc.always_clause_match(clause, empty, var_grounding);
+			_pmc.always_clause_match(clause->getHandle(), empty, var_grounding);
 	}
 
 	return false;
@@ -2863,24 +2848,25 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
-                                        const Handle& clause)
+                                        const PatternTermPtr& pclause)
 {
 	// Evaluatable clauses are not cacheable.
-	if (is_evaluatable(clause))
-		return explore_clause_evaluatable(term, grnd, clause);
+	if (is_evaluatable(pclause))
+		return explore_clause_evaluatable(term, grnd, pclause);
 
 	// Build the cache lookup key
 	HandleSeq key;
 
 	// Single-variable cache. Due to the way we are called, `term`
 	// is the variable in the clause, and `grnd` is it's grounding.
+	const Handle& clause = pclause->getHandle();
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 		key = HandleSeq({clause, grnd});
 
 	// Multi-variable cache.
 	if (_pat->cacheable_multi.find(clause) != _pat->cacheable_multi.end())
 	{
-		const HandleSeq& varseq = _pat->clause_variables.at(clause);
+		const HandleSeq& varseq = _pat->clause_variables.at(pclause);
 		key = clause_grounding_key(clause, varseq);
 	}
 
@@ -2898,13 +2884,13 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		if (nac != _nack_cache.end())
 			return false;
 
-		bool okay = explore_clause_direct(term, grnd, clause);
+		bool okay = explore_clause_direct(term, grnd, pclause);
 		if (not okay)
 			_nack_cache.insert(key);
 		return okay;
 	}
 
-	return explore_clause_direct(term, grnd, clause);
+	return explore_clause_direct(term, grnd, pclause);
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,

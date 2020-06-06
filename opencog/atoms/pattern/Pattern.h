@@ -49,7 +49,7 @@ namespace opencog {
 struct Pattern
 {
 	/// Private, locally scoped typedefs, not used outside of this class.
-	typedef std::unordered_multimap<Handle, Handle> ConnectMap;
+	typedef std::unordered_multimap<Handle, PatternTermPtr> ConnectMap;
 
 	/// Each atom of the pattern may appear in several clauses. Moreover,
 	/// the same atom may be repeated in the same clause in several
@@ -69,8 +69,8 @@ struct Pattern
 	/// with a PatternTerm.  Each PatternTerm corresponds to a unique
 	/// position in the pattern. Thus, for each Atom, and each clause,
 	/// there is at least one, and maybe more PatternTerms. This
-	/// collection of PattternTerms is stored in a PatternTermSeq.
-	typedef HandlePair AtomInClausePair;  // first is atom
+	/// collection of PatternTerms is stored in a PatternTermSeq.
+	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
 	// -------------------------------------------
@@ -90,16 +90,19 @@ struct Pattern
 	/// The mandatory clauses must be satisfied. This includes both
 	/// literal clauses and virtual clauses.
 	HandleSeq        mandatory;
+	PatternTermSeq   pmandatory;
 
 	/// The optional clauses must be ungroundable. They are always
 	/// literal, and are never evaluatable or virtual. XXX This member
 	/// is mis-named: in the current implementation, the optional
 	/// clauses must be literally absent. XXX FIXME rename this member.
-	HandleSeq optionals;
+	HandleSeq      optionals;
+	PatternTermSeq absents;
 
 	/// The always (for-all) clauses have to always be grounded the same
 	/// way. Any grounding failure at all invalidates all other groundings.
-	HandleSeq always;       // ForAll clauses
+	HandleSeq      always;       // ForAll clauses
+	PatternTermSeq palways;
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
@@ -128,7 +131,7 @@ struct Pattern
 
 	/// For each clause, the list of variables that appear in that clause.
 	/// Used in conjunction with the `cacheable_multi` above.
-	HandleSeqMap clause_variables;
+	std::map<PatternTermPtr, HandleSeq> clause_variables;
 
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because

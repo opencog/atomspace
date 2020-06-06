@@ -126,17 +126,17 @@ protected:
 	                       const Handle& body,
 	                       Quotation quotation=Quotation());
 
-	void make_connectivity_map(const HandleSeq&);
-	void make_map_recursive(const Handle&, const Handle&);
+	void make_connectivity_map(void);
+	void make_map_recursive(const Handle&, const PatternTermPtr&);
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
 	                          const HandleSetSeq&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, const Handle&,
+	void make_term_tree_recursive(const PatternTermPtr&,
 	                              PatternTermPtr&);
 
-	void get_clause_variables(const HandleSeq&);
+	void get_clause_variables(const PatternTermSeq&);
 
 	void init(void);
 	void common_init(void);
