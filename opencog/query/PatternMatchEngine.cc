@@ -1227,6 +1227,16 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * when the first match is found. XXX This may need to be refactored.
  * For now, we iterate over all pattern terms associated with a given
  * atom handle.
+ *
+ * XXX FIXME I think this exploration is not needed, unless one has
+ * Choice terms.  I think most of the above explanation is wrong.
+ * So, basically, we can get some performance improvements by skipping
+ * this, in all cases, unless `term` is insicde of a Choice.
+ *
+ * Actually, could probably save CPU time by working with the term
+ * that is highest in the clause; that way, a single tree-compare
+ * either suceeds or fails, and we don't have to do a long crawl up
+ * the tree.
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
