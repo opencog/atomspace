@@ -77,7 +77,7 @@ private:
 	bool is_black(const PatternTermPtr& ptm) {
 		return (_pat->black.count(ptm->getHandle()) != 0); }
 
-	bool term_is_a_clause(const PatternTermPtr&, const Handle&);
+	bool term_is_a_clause(const PatternTermPtr&, const PatternTermPtr&);
 
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
@@ -208,14 +208,14 @@ private:
 	// with it.
 
 	bool next_untried_present(const PatternTermPtr&,
-	                          const Handle&,
+	                          const PatternTermPtr&,
 	                          PatternTermPtr&, PatternTermPtr&,
 	                          Handle&);
 	IssuedSet issued_present;
 
 	// -------------------------------------------
 	// Methods that help avoid pointless searches
-	bool is_clause_grounded(const Handle&) const;
+	bool is_clause_grounded(const PatternTermPtr&) const;
 	HandleSeq clause_grounding_key(const Handle&,
 	                               const HandleSeq&) const;
 
@@ -289,32 +289,33 @@ private:
 	bool explore_clause(const Handle&, const Handle&, const PatternTermPtr&);
 	bool explore_clause_direct(const Handle&, const Handle&,
 	                           const PatternTermPtr&);
-	bool explore_clause_evaluatable(const Handle&, const Handle&, const Handle&);
+	bool explore_clause_evaluatable(const Handle&, const Handle&,
+	                                const PatternTermPtr&);
 	bool explore_term_branches(const Handle&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                         const PatternTermPtr&);
 	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                            const PatternTermPtr&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
-	                         const Handle&);
+	                             const PatternTermPtr&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool explore_odometer(const PatternTermPtr&, const Handle&,
-	                      const Handle&);
+	                      const PatternTermPtr&);
 	bool explore_unordered_branches(const PatternTermPtr&, const Handle&,
-	                                const Handle&);
+	                                const PatternTermPtr&);
 	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
-	                             const Handle&);
+	                             const PatternTermPtr&);
 	bool explore_present_branches(const PatternTermPtr&, const Handle&,
-	                              const Handle&);
+	                              const PatternTermPtr&);
 	bool explore_single_branch(const PatternTermPtr&, const Handle&,
-	                           const Handle&);
+	                           const PatternTermPtr&);
 	bool do_term_up(const PatternTermPtr&, const Handle&,
-	                const Handle&);
-	bool clause_accept(const Handle&, const Handle&);
+	                const PatternTermPtr&);
+	bool clause_accept(const PatternTermPtr&, const Handle&);
 
 public:
 	PatternMatchEngine(PatternMatchCallback&);

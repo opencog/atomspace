@@ -66,7 +66,7 @@ void DualLink::init(void)
 	// in the PatternMatcherEngine. (... I'm confused about this.
 	// I'm thinking that the pattern matcher should be smarter
 	// than this ... but for now, let this slide...)
-	get_clause_variables(_outgoing);
+	// get_clause_variables(_outgoing);
 }
 
 DualLink::DualLink(const HandleSeq&& hseq, Type t)

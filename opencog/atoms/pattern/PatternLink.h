@@ -136,7 +136,7 @@ protected:
 	void make_term_tree_recursive(const PatternTermPtr&,
 	                              PatternTermPtr&);
 
-	void get_clause_variables(const HandleSeq&);
+	void get_clause_variables(const PatternTermSeq&);
 
 	void init(void);
 	void common_init(void);

@@ -122,9 +122,11 @@ void PatternLink::common_init(void)
 	if (1 == _num_comps)
 	   make_connectivity_map();
 
-	get_clause_variables(_pat.literal_clauses);
-	get_clause_variables(_pat.undeclared_clauses);
-	get_clause_variables(_pat.mandatory);
+	// get_clause_variables(_pat.literal_clauses);
+	// get_clause_variables(_pat.undeclared_clauses);
+	get_clause_variables(_pat.pmandatory);
+	get_clause_variables(_pat.absents);
+	get_clause_variables(_pat.palways);
 
 	// Find prunable terms.
 	locate_cacheable(concrete_clauses);
@@ -266,8 +268,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 	make_connectivity_map();
 	_pat.redex_name = "Unpacked component of a virtual link";
 
-	get_clause_variables(_pat.mandatory);
-	get_clause_variables(_pat.optionals);
+	get_clause_variables(_pat.pmandatory);
+	get_clause_variables(_pat.absents);
 }
 
 /* ================================================================= */
@@ -675,10 +677,11 @@ void PatternLink::locate_cacheable(const HandleSeq& clauses)
 /// get_clause_variables -- for every clause, record the variables in it.
 /// This is used at runtime, to determine if the clause has been fully
 /// grounded (or not).
-void PatternLink::get_clause_variables(const HandleSeq& clauses)
+void PatternLink::get_clause_variables(const PatternTermSeq& clauses)
 {
-	for (const Handle& hcl : clauses)
+	for (const PatternTermPtr& ptm : clauses)
 	{
+		const Handle& hcl = ptm->getHandle();
 		HandleSet vset = get_free_variables(hcl);
 
 		// Put them into a sequence; any fixed sequence will do.
@@ -689,7 +692,7 @@ void PatternLink::get_clause_variables(const HandleSeq& clauses)
 				vseq.emplace_back(v);
 		}
 
-		_pat.clause_variables.insert({hcl, vseq});
+		_pat.clause_variables.insert({ptm, vseq});
 	}
 }
 

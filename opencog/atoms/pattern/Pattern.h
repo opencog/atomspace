@@ -131,7 +131,7 @@ struct Pattern
 
 	/// For each clause, the list of variables that appear in that clause.
 	/// Used in conjunction with the `cacheable_multi` above.
-	HandleSeqMap clause_variables;
+	std::map<PatternTermPtr, HandleSeq> clause_variables;
 
 	/// Maps; the value is the largest (evaluatable or executable)
 	/// term containing the variable. Its a multimap, because
