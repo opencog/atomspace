@@ -1141,7 +1141,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO. Hmm. Should we do this at runtime,
-	// i.e. here, or at static-analysis time, when creating the PattenLink?
+	// i.e. here, or at static-analysis time, when creating the PatternLink?
 	if (DEFINED_SCHEMA_NODE == tp)
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
@@ -1244,8 +1244,9 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
-                                               const Handle& clause)
+                                               const PatternTermPtr& pclause)
 {
+	const Handle& clause = pclause->getHandle();
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause});
@@ -2105,13 +2106,12 @@ bool PatternMatchEngine::do_next_clause(void)
 	}
 
 	Handle joiner = next_joint;
-	Handle curr_root = next_clause->getHandle();
 
-	logmsg("Next clause is", curr_root);
+	logmsg("Next clause is", next_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_optional(curr_root)? "optional" : "required");})
+		              << (is_optional(next_clause)? "optional" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_evaluatable(curr_root)?
+		              << (is_evaluatable(next_clause)?
 		                  "dynamically evaluatable" : "non-dynamic");
 	logmsg("Joining variable is", joiner);
 	logmsg("Joining grounding is", var_grounding[joiner]); })
@@ -2128,7 +2128,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	Handle hgnd(var_grounding[joiner]);
 	OC_ASSERT(nullptr != hgnd,
 	         "Error: joining handle has not been grounded yet!");
-	bool found = explore_clause(joiner, hgnd, curr_root);
+	bool found = explore_clause(joiner, hgnd, next_clause);
 
 	// If we are here, and found is false, then we've exhausted all
 	// of the search possibilities for the current clause. If this
@@ -2143,8 +2143,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (is_optional(curr_root)))
+	       (is_optional(next_clause)))
 	{
+		Handle curr_root = next_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		DO_LOG({logger().fine("Exhausted search for optional clause, cb=%d", match);})
@@ -2156,10 +2157,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
 		get_next_untried_clause();
-		joiner = next_joint;
-		curr_root = next_clause->getHandle();
 
-		if (nullptr == curr_root)
+		if (PatternTerm::UNDEFINED == next_clause)
 		{
 			DO_LOG({logger().fine("==================== FINITO BANDITO!");
 			log_solution(var_grounding, clause_grounding);})
@@ -2167,14 +2166,14 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
-			DO_LOG({logmsg("Next optional clause is", curr_root);})
+			logmsg("Next optional clause is", next_clause->getHandle());
 
 			// Now see if this optional clause has any solutions,
 			// or not. If it does, we'll recurse. If it does not,
 			// we'll loop around back to here again.
 			clause_accepted = false;
-			Handle hgnd = var_grounding[joiner];
-			found = explore_term_branches(joiner, hgnd, curr_root);
+			Handle hgnd = var_grounding[next_joint];
+			found = explore_term_branches(next_joint, hgnd, next_clause);
 		}
 	}
 
@@ -2688,7 +2687,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 	clear_current_state();
 	issued.insert(clause);
 
-	bool halt = explore_clause(term, grnd, clause->getHandle());
+	bool halt = explore_clause(term, grnd, clause);
 	bool stop = report_forall();
 	return halt or stop;
 }
@@ -2741,7 +2740,7 @@ HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
  */
 bool PatternMatchEngine::explore_clause_direct(const Handle& term,
                                                const Handle& grnd,
-                                               const Handle& clause)
+                                               const PatternTermPtr& clause)
 {
 	// If we are looking for a pattern to match, then ... look for it.
 	DO_LOG({logger().fine("Clause is matchable; start matching it");})
@@ -2754,7 +2753,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 		// We need to record failures for the AlwaysLink
 		Handle empty;
 		_forall_state = _forall_state and
-			_pmc.always_clause_match(clause, empty, var_grounding);
+			_pmc.always_clause_match(clause->getHandle(), empty, var_grounding);
 	}
 
 	return found;
@@ -2852,17 +2851,18 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const Handle& grnd,
-                                        const Handle& clause)
+                                        const PatternTermPtr& pclause)
 {
 	// Evaluatable clauses are not cacheable.
-	if (is_evaluatable(clause))
-		return explore_clause_evaluatable(term, grnd, clause);
+	if (is_evaluatable(pclause))
+		return explore_clause_evaluatable(term, grnd, pclause->getHandle());
 
 	// Build the cache lookup key
 	HandleSeq key;
 
 	// Single-variable cache. Due to the way we are called, `term`
 	// is the variable in the clause, and `grnd` is it's grounding.
+	const Handle& clause = pclause->getHandle();
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 		key = HandleSeq({clause, grnd});
 
@@ -2887,13 +2887,13 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		if (nac != _nack_cache.end())
 			return false;
 
-		bool okay = explore_clause_direct(term, grnd, clause);
+		bool okay = explore_clause_direct(term, grnd, pclause);
 		if (not okay)
 			_nack_cache.insert(key);
 		return okay;
 	}
 
-	return explore_clause_direct(term, grnd, clause);
+	return explore_clause_direct(term, grnd, pclause);
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
