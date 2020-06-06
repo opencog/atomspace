@@ -69,8 +69,8 @@ struct Pattern
 	/// with a PatternTerm.  Each PatternTerm corresponds to a unique
 	/// position in the pattern. Thus, for each Atom, and each clause,
 	/// there is at least one, and maybe more PatternTerms. This
-	/// collection of PattternTerms is stored in a PatternTermSeq.
-	typedef HandlePair AtomInClausePair;  // first is atom
+	/// collection of PatternTerms is stored in a PatternTermSeq.
+	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
 	// -------------------------------------------

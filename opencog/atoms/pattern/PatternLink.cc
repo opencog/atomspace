@@ -1095,32 +1095,34 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr root_term(createPatternTerm());
-		make_term_tree_recursive(clause, clause, root_term);
-		_pat.pmandatory.push_back(root_term->getOutgoingTerm(0));
+		PatternTermPtr top_term(createPatternTerm());
+		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
+		make_term_tree_recursive(root_term, root_term);
+		_pat.pmandatory.push_back(root_term);
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
-		PatternTermPtr root_term(createPatternTerm());
-		make_term_tree_recursive(clause, clause, root_term);
+		PatternTermPtr top_term(createPatternTerm());
+		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
+		root_term->addOutgoingTerm(clause);
+		make_term_tree_recursive(root_term, root_term);
 		root_term->markLiteral();
-		_pat.absents.push_back(root_term->getOutgoingTerm(0));
+		_pat.absents.push_back(root_term);
 	}
 	for (const Handle& clause : _pat.always)
 	{
-		PatternTermPtr root_term(createPatternTerm());
-		make_term_tree_recursive(clause, clause, root_term);
+		PatternTermPtr top_term(createPatternTerm());
+		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
+		root_term->addOutgoingTerm(clause);
+		make_term_tree_recursive(root_term, root_term);
 		root_term->markLiteral();
-		_pat.palways.push_back(root_term->getOutgoingTerm(0));
+		_pat.palways.push_back(root_term);
 	}
 }
 
-void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           const Handle& term,
-                                           PatternTermPtr& parent)
+void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
+                                           PatternTermPtr& ptm)
 {
-	PatternTermPtr ptm(parent->addOutgoingTerm(term));
-
 	// `h` is usually the same as `term`, unless there's quotation.
 	Handle h(ptm->getHandle());
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
@@ -1149,7 +1151,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
-			make_term_tree_recursive(root, ho, ptm);
+		{
+			PatternTermPtr po(ptm->addOutgoingTerm(ho));
+			make_term_tree_recursive(root, po);
+		}
 	}
 
 	// If a term is literal then the corresponding pattern term

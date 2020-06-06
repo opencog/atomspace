@@ -1246,12 +1246,12 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
                                                const PatternTermPtr& pclause)
 {
-	const Handle& clause = pclause->getHandle();
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
-	auto pl = _pat->connected_terms_map.find({term, clause});
+	auto pl = _pat->connected_terms_map.find({term, pclause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
+	const Handle& clause = pclause->getHandle();
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
@@ -2336,7 +2336,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 
 	// Typically, the glob appears only once in the clause, so
 	// there is only one PatternTerm. The loop really isn't needed.
-	HandlePair glbt({glob, clpr->second->getHandle()});
+	std::pair<Handle, PatternTermPtr> glbt({glob, clpr->second});
 	const auto& ptms = _pat->connected_terms_map.find(glbt);
 	for (const PatternTermPtr& ptm : ptms->second)
 	{

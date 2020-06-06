@@ -133,7 +133,7 @@ protected:
 	                          const HandleSetSeq&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, const Handle&,
+	void make_term_tree_recursive(const PatternTermPtr&,
 	                              PatternTermPtr&);
 
 	void get_clause_variables(const HandleSeq&);
