@@ -1107,7 +1107,6 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr top_term(createPatternTerm());
 		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
-		root_term->addOutgoingTerm(clause);
 		make_term_tree_recursive(root_term, root_term);
 		root_term->markLiteral();
 		_pat.absents.push_back(root_term);
@@ -1116,7 +1115,6 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr top_term(createPatternTerm());
 		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
-		root_term->addOutgoingTerm(clause);
 		make_term_tree_recursive(root_term, root_term);
 		root_term->markLiteral();
 		_pat.palways.push_back(root_term);
