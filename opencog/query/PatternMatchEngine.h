@@ -286,7 +286,6 @@ private:
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
-	bool explore_redex(const Handle&, const Handle&, const Handle&);
 	bool explore_clause(const Handle&, const Handle&, const Handle&);
 	bool explore_clause_direct(const Handle&, const Handle&, const Handle&);
 	bool explore_clause_evaluatable(const Handle&, const Handle&, const Handle&);
@@ -322,7 +321,8 @@ public:
 
 	// Examine the locally connected neighborhood for possible
 	// matches.
-	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
+	bool explore_neighborhood(const Handle&, const Handle&,
+	                          const PatternTermPtr&);
 
 	// Evaluate constant evaluatable and ground it via the
 	// PatternMatchCallback. It is assumed that all clauses are

@@ -66,7 +66,7 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
 		       top->to_short_string().c_str(),
 		       h->to_short_string().c_str());
-		bool found = pme.explore_neighborhood(_root, _starter_term, h);
+		bool found = pme.explore_neighborhood(_starter_term, h, _root);
 
 		// Terminate search if satisfied.
 		if (found) return true;
@@ -77,13 +77,13 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 
 bool Recognizer::perform_search(PatternMatchCallback& pmc)
 {
-	const HandleSeq& clauses = _pattern->mandatory;
+	const PatternTermSeq& clauses = _pattern->pmandatory;
 
 	_cnt = 0;
-	for (const Handle& h: clauses)
+	for (const PatternTermPtr& ptm: clauses)
 	{
-		_root = h;
-		bool found = do_search(pmc, h);
+		_root = ptm;
+		bool found = do_search(pmc, ptm->getHandle());
 		if (found) return true;
 	}
 	return false;
@@ -237,9 +237,10 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 bool Recognizer::grounding(const GroundingMap& var_soln,
                            const GroundingMap& term_soln)
 {
-	Handle rule = term_soln.at(_root);
+	const Handle& hroot = _root->getHandle();
+	const Handle& rule = term_soln.at(hroot);
 
-	if (rule != _root) {
+	if (rule != hroot) {
 		LOCK_PE_MUTEX;
 		_rules.insert(rule);
 	}

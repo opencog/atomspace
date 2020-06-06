@@ -66,27 +66,27 @@ protected:
 	const HandleSet* _dynamic;
 	bool _recursing;
 
-	Handle _root;
+	PatternTermPtr _root;
 	Handle _starter_term;
 	HandleSeq _search_set;
 
 	struct Choice
 	{
-		Handle clause;
+		PatternTermPtr clause;
 		Handle start_term;
 		HandleSeq search_set;
 	};
-	Handle _curr_clause;
+	PatternTermPtr _curr_clause;
 	std::vector<Choice> _choices;
 
 	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
 	                                      size_t&);
-	virtual Handle find_thinnest(const HandleSeq&,
+	virtual Handle find_thinnest(const PatternTermSeq&,
 	                             const HandleSet&,
-	                             Handle&, Handle&);
-	virtual void find_rarest(const Handle&, Handle&, size_t&,
-	                         Quotation quotation=Quotation());
+	                             Handle&, PatternTermPtr&);
+	virtual void find_rarest(const PatternTermPtr&, Handle&,
+	                         size_t&, Quotation quotation=Quotation());
 
 	bool setup_neighbor_search(void);
 	bool setup_no_search(void);

@@ -2680,44 +2680,17 @@ bool PatternMatchEngine::report_forall(void)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
-                                              const Handle& term,
-                                              const Handle& grnd)
+bool PatternMatchEngine::explore_neighborhood(const Handle& term,
+                                              const Handle& grnd,
+                                              const PatternTermPtr& clause)
 {
 	clause_stacks_clear();
+	clear_current_state();
+	issued.insert(clause);
 
-	bool halt = explore_redex(term, grnd, do_clause);
+	bool halt = explore_clause(term, grnd, clause->getHandle());
 	bool stop = report_forall();
 	return halt or stop;
-}
-
-/**
- * Same as above, obviously; we just pick up the graph context
- * where we last left it.
- */
-bool PatternMatchEngine::explore_redex(const Handle& term,
-                                       const Handle& grnd,
-                                       const Handle& first_clause)
-{
-	// Cleanup
-	clear_current_state();
-
-// XXX FIXME temporary hack... this is wrong
-for (const PatternTermPtr& cl: _pat->pmandatory)
-{
-	if (cl->getHandle() == first_clause) issued.insert(cl);
-}
-for (const PatternTermPtr& cl: _pat->absents)
-{
-	if (cl->getHandle() == first_clause) issued.insert(cl);
-}
-for (const PatternTermPtr& cl: _pat->palways)
-{
-	if (cl->getHandle() == first_clause) issued.insert(cl);
-}
-
-	// Match the required clauses.
-	return explore_clause(term, grnd, first_clause);
 }
 
 /// Has every variable in the clause been fully grounded already?
