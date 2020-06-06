@@ -261,9 +261,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
-	const Handle& hp = ptm->getHandle();
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	logmsg("present_compare");
+
+	throw RuntimeException(TRACE_INFO,
+		"Unexpecteed call to unimplemented function!!");
 
 	return tree_compare(osp[0], hg, CALL_PRESENT);
 
