@@ -1244,11 +1244,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
-                                               const PatternTermPtr& pclause)
+                                               const PatternTermPtr& clause)
 {
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
-	auto pl = _pat->connected_terms_map.find({term, pclause});
+	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
 	for (const PatternTermPtr &ptm : pl->second)
@@ -1256,11 +1256,11 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
-			found = explore_glob_branches(ptm, hg, pclause);
+			found = explore_glob_branches(ptm, hg, clause);
 		else if (ptm->hasUnorderedLink())
-			found = explore_odometer(ptm, hg, pclause);
+			found = explore_odometer(ptm, hg, clause);
 		else
-			found = explore_type_branches(ptm, hg, pclause);
+			found = explore_type_branches(ptm, hg, clause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1391,6 +1391,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// directly upwards.
 	if (not ptm->hasUnorderedLink())
 	{
+		// XXX FIXME. My compiler has a bug in it: `clause` is trashed
+		// in the loop below. Using xclause here to force a reference
+		// fixes the bug.
+		PatternTermPtr xclause = clause;
 		bool found = false;
 		for (size_t i = 0; i < sz; i++)
 		{
@@ -1398,7 +1402,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			                      << " at term=" << parent->to_string()
 			                      << " propose=" << iset[i]->to_string();})
 
-			found = explore_type_branches(parent, iset[i], clause);
+			found = explore_type_branches(parent, iset[i], xclause);
 			if (found) break;
 		}
 
@@ -1886,7 +1890,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	const Handle& hp = ptm->getHandle();
 	if (term_is_a_clause(ptm, clause))
 		return clause_accept(clause, hg);
 
@@ -1900,6 +1903,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	              // << "\nof clause = " << clause->getHandle()->to_string()
 	              << "\nhas ground, move upwards";})
 
+	const Handle& hp = ptm->getHandle();
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
 		// If we are here, there are four possibilities:
