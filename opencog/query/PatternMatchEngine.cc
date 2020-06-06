@@ -2017,7 +2017,9 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
                                        const Handle& hg)
 {
-	const Handle& clause_root = clause->getHandle();
+	// We have to unwrap one more level of quotation before we are done.
+	Handle clause_root = clause->getHandle();
+	if (clause->getQuote()) clause_root = clause->getQuote();
 
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
@@ -2425,7 +2427,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// with smallest size of its incoming set. If there are many such
 	// atoms we choose one from clauses with minimal number of ungrounded
 	// yet variables.
-	for (auto tckvar : thick_vars)
+	for (const auto& tckvar : thick_vars)
 	{
 		std::size_t pursue_thickness = tckvar.first;
 		const Handle& pursue = tckvar.second;
