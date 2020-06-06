@@ -265,8 +265,6 @@ bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	logmsg("present_compare");
 
-printf("duuude alohha %s\ntooooo %s\n", hp->to_string().c_str(),
-hg->to_string().c_str());
 	return tree_compare(osp[0], hg, CALL_PRESENT);
 
 /*
@@ -1251,16 +1249,21 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	auto pl = _pat->connected_terms_map.find({term, clause});
 	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
+	// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
+	// clause is trashed inside this loop, unless an explicit pointer
+	// copy is made for the duration. I guess something about reference
+	// counting gets damaged.
+	PatternTermPtr xclause = clause;
 	for (const PatternTermPtr &ptm : pl->second)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Begin exploring term: " << ptm->to_string();})
 		bool found;
 		if (ptm->hasAnyGlobbyVar())
-			found = explore_glob_branches(ptm, hg, clause);
+			found = explore_glob_branches(ptm, hg, xclause);
 		else if (ptm->hasUnorderedLink())
-			found = explore_odometer(ptm, hg, clause);
+			found = explore_odometer(ptm, hg, xclause);
 		else
-			found = explore_type_branches(ptm, hg, clause);
+			found = explore_type_branches(ptm, hg, xclause);
 
 		DO_LOG({LAZY_LOG_FINE << "Finished exploring term: "
 		                      << ptm->to_string()
@@ -1391,9 +1394,10 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// directly upwards.
 	if (not ptm->hasUnorderedLink())
 	{
-		// XXX FIXME. My compiler has a bug in it: `clause` is trashed
-		// in the loop below. Using xclause here to force a reference
-		// fixes the bug.
+		// GCC Bug work-around. So gcc (Debian 8.3.0-6) 8.3.0 has a bug where
+		// `clause` is trashed inside this loop, unless an explicit pointer
+		// copy is made for the duration. I guess something about reference
+		// counting gets damaged.
 		PatternTermPtr xclause = clause;
 		bool found = false;
 		for (size_t i = 0; i < sz; i++)
