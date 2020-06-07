@@ -23,6 +23,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	clearbox
 	container
 	lambda
+	grounded
 	execution
 	atomflow
 	atomcore
