@@ -39,6 +39,17 @@ GroundedSchemaNode::GroundedSchemaNode(std::string s)
 {
 }
 
+GroundedSchemaNode::GroundedSchemaNode(Type t, std::string s)
+	: GroundedProcedureNode(t, std::move(s))
+{
+	if (not nameserver().isA(t, GROUNDED_SCHEMA_NODE))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a GroundedProcedureNode, got %s", tname.c_str());
+	}
+}
+
 /// execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "cargs" to be a ListLink unless there is only one argument

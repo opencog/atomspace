@@ -18,9 +18,10 @@ ADD_LIBRARY (execution
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
-	atombase
-	atomcore
+	grounded
 	clearbox
+	atomcore
+	atombase
 )
 
 IF (HAVE_CYTHON)
