@@ -16,7 +16,7 @@ or, if installed:
 export PYTHONPATH=/usr/local/lib/python3/dist-packages/opencog:${PYTHON}
 
 For example:
-export PYTHONPATH=build/opencog/cython
+export PYTHONPATH=build/opencog/cython PROJECT_SOURCE_DIR=.
 
 Then from atomspace root source dir execute:
 
