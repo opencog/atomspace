@@ -43,7 +43,7 @@ public:
 	GroundedPredicateNode(const GroundedPredicateNode&) = delete;
 	GroundedPredicateNode& operator=(const GroundedPredicateNode&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const HandleSeq&, bool silent=false);
+	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 
 	static Handle factory(const Handle&);
 };

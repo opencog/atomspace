@@ -43,7 +43,7 @@ public:
 	GroundedSchemaNode(const GroundedSchemaNode&) = delete;
 	GroundedSchemaNode& operator=(const GroundedSchemaNode&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const HandleSeq&, bool silent=false);
+	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 
 	static Handle factory(const Handle&);
 };

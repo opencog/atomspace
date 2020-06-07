@@ -25,10 +25,10 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include "DLScheme.h"
+#include "../grounded/DLScheme.h"
 #include "Force.h"
 #include "EvaluationLink.h"
-#include "LibraryManager.h"
+#include "../grounded/LibraryManager.h"
 
 using namespace opencog;
 

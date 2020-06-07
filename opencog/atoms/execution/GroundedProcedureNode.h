@@ -43,7 +43,7 @@ public:
 	GroundedProcedureNode(const GroundedProcedureNode&) = delete;
 	GroundedProcedureNode& operator=(const GroundedProcedureNode&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const HandleSeq&, bool silent=false) = 0;
+	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false) = 0;
 };
 
 typedef std::shared_ptr<GroundedProcedureNode> GroundedProcedureNodePtr;

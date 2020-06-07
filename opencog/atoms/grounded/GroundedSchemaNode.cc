@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/execution/GroundedSchemaNode.cc
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2009, 2013, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
  * All Rights Reserved
  *
@@ -22,11 +22,15 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/execution/Force.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/GroundedSchemaNode.h>
+#include "DLScheme.h"
+#include "LibraryManager.h"
+
 
 using namespace opencog;
 
@@ -34,3 +38,104 @@ GroundedSchemaNode::GroundedSchemaNode(std::string s)
 	: GroundedProcedureNode(GROUNDED_SCHEMA_NODE, std::move(s))
 {
 }
+
+/// execute -- execute the SchemaNode of the ExecutionOutputLink
+///
+/// Expects "cargs" to be a ListLink unless there is only one argument
+/// Executes the GroundedSchemaNode, supplying cargs as arguments
+///
+ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
+                                     const Handle& cargs,
+                                     bool silent)
+{
+	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
+	              << "with arguments: " << oc_to_string(cargs);
+
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args = force_execute(as, cargs, silent);
+
+	// Get the schema name.
+	const std::string& schema = get_name();
+
+	// Extract the language, library and function
+	std::string lang, lib, fun;
+	LibraryManager::parse_schema(schema, lang, lib, fun);
+
+	ValuePtr result;
+
+	// At this point, we only run scheme, python schemas and functions from
+	// libraries loaded at runtime.
+	if (lang == "scm")
+	{
+		SchemeEval* applier = get_evaluator_for_scheme(as);
+		result = applier->apply_v(fun, args);
+
+		// Exceptions were already caught, before leaving guile mode,
+		// so we can't rethrow.  Just throw a new exception.
+		if (applier->eval_error())
+			throw RuntimeException(TRACE_INFO,
+			         "Failed evaluation; see logfile for stack trace.");
+	}
+	else if (lang == "py")
+	{
+#ifdef HAVE_CYTHON
+		// Get a reference to the python evaluator.
+		PythonEval &applier = PythonEval::instance();
+		result = applier.apply_v(as, fun, args);
+#else
+		throw RuntimeException(TRACE_INFO,
+		                       "Cannot evaluate python GroundedSchemaNode!");
+#endif /* HAVE_CYTHON */
+	}
+	// Used by the Haskel and C++ bindings; can be used with any language
+	else if (lang == "lib")
+	{
+		void* sym = LibraryManager::getFunc(lib,fun);
+
+		// Convert the void* pointer to the correct function type.
+		Handle* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
+
+		// Execute the function
+		Handle* res = func(as, &args);
+		if(res != NULL)
+		{
+			result = *res;
+			free(res);
+		}
+	}
+	else
+	{
+		// Unkown proceedure type
+		throw RuntimeException(TRACE_INFO,
+		                       "Cannot evaluate unknown Schema %s",
+		                       to_short_string().c_str());
+	}
+
+	// Check for a not-uncommon user-error.  If the user-defined
+	// code returns nothing, then a null-pointer-dereference is
+	// likely, a bit later down the line, leading to a crash.
+	// So head this off at the pass.
+	if (nullptr == result)
+	{
+		// If silent is true, return a simpler and non-logged
+		// exception, which may, in some contexts, will be
+		// considerably faster than a RuntimeException.
+		if (silent)
+			throw NotEvaluatableException();
+
+		throw RuntimeException(TRACE_INFO,
+		                       "Invalid return value from schema %s\nArgs: %s",
+		                       to_short_string().c_str(),
+		                       cargs->to_string().c_str());
+	}
+
+	LAZY_LOG_FINE << "Result: " << result->to_string();
+	return result;
+}
+
+DEFINE_NODE_FACTORY(GroundedSchemaNode, GROUNDED_SCHEMA_NODE)

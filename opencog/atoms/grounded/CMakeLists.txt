@@ -7,10 +7,10 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (grounded
-	# DLScheme.cc
+	DLScheme.cc
 	# GroundedPredicateNode.cc
 	GroundedSchemaNode.cc
-	# LibraryManager.cc
+	LibraryManager.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -32,6 +32,6 @@ INSTALL (TARGETS grounded
 INSTALL (FILES
 	GroundedPredicateNode.h
 	GroundedSchemaNode.h
-	# LibraryManager.h
+	LibraryManager.h
 	DESTINATION "include/opencog/atoms/grounded"
 )
