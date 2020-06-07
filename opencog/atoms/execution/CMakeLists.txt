@@ -7,7 +7,6 @@ ADD_LIBRARY (execution
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
-	MapLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -30,12 +29,5 @@ INSTALL (FILES
 	Force.h
 	GroundedProcedureNode.h
 	Instantiator.h
-	DESTINATION "include/opencog/atoms/execution"
-)
-
-# This does not belong, but cannot be fixed until the Python bindings
-# are fixed, first.
-INSTALL (FILES
-	MapLink.h
 	DESTINATION "include/opencog/atoms/execution"
 )

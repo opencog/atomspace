@@ -15,6 +15,7 @@ ADD_LIBRARY (atomcore
 	FunctionLink.cc
 	ImplicationScopeLink.cc
 	LambdaLink.cc
+	MapLink.cc
 	NumberNode.cc
 	PrenexLink.cc
 	PresentLink.cc
@@ -61,6 +62,7 @@ INSTALL (FILES
 	FreeVariables.h
 	FunctionLink.h
 	LambdaLink.h
+	MapLink.h
 	NumberNode.h
 	PrenexLink.h
 	PresentLink.h
