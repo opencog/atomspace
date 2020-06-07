@@ -26,8 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
 #include "GroundedProcedureNode.h"
