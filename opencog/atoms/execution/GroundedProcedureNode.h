@@ -39,7 +39,7 @@ class GroundedProcedureNode : public Node
 {
 public:
 	GroundedProcedureNode(Type t, const std::string s)
-		: Node(t, std::move(s)));
+		: Node(t, std::move(s)) {}
 	GroundedProcedureNode(const GroundedProcedureNode&) = delete;
 	GroundedProcedureNode& operator=(const GroundedProcedureNode&) = delete;
 
@@ -51,8 +51,6 @@ static inline GroundedProcedureNodePtr GroundedProcedureNodeCast(const Handle& h
    { AtomPtr a(h); return std::dynamic_pointer_cast<GroundedProcedureNode>(a); }
 static inline GroundedProcedureNodePtr GroundedProcedureNodeCast(AtomPtr a)
    { return std::dynamic_pointer_cast<GroundedProcedureNode>(a); }
-
-#define createGroundedProcedureNode std::make_shared<GroundedProcedureNode>
 
 /** @}*/
 }
