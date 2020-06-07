@@ -7,13 +7,11 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
-	DLScheme.cc
 	Force.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
 	MapLink.cc
-	LibraryManager.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -47,6 +45,5 @@ INSTALL (FILES
 # are fixed, first.
 INSTALL (FILES
 	MapLink.h
-	LibraryManager.h
 	DESTINATION "include/opencog/atoms/execution"
 )
