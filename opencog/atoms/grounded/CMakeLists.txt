@@ -11,6 +11,7 @@ ADD_LIBRARY (grounded
 	GroundedPredicateNode.cc
 	GroundedSchemaNode.cc
 	LibraryManager.cc
+	SCMRunner.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

@@ -46,6 +46,7 @@ public:
 	GroundedPredicateNode(const std::string);
 	GroundedPredicateNode(const GroundedPredicateNode&) = delete;
 	GroundedPredicateNode& operator=(const GroundedPredicateNode&) = delete;
+	virtual ~GroundedPredicateNode();
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 

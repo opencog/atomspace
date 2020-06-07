@@ -31,9 +31,9 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
-#include "DLScheme.h"
 #include "LibraryManager.h"
 #include "Runner.h"
+#include "SCMRunner.h"
 
 
 using namespace opencog;
@@ -56,9 +56,26 @@ GroundedPredicateNode::GroundedPredicateNode(Type t, std::string s)
 	init();
 }
 
+GroundedPredicateNode::~GroundedPredicateNode()
+{
+	if (_runner) delete _runner;
+}
+
 void GroundedPredicateNode::init()
 {
 	_runner = nullptr;
+
+	// Get the schema name.
+	const std::string& schema = get_name();
+
+	// At this point, we only run scheme and python schemas.
+	if (0 == schema.compare(0, 4, "scm:", 4))
+	{
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+	}
 }
 
 // ----------------------------------------------------------
@@ -174,6 +191,9 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
+	if (_runner)
+		return _runner->execute(as, args, silent);
+
 	// Get the schema name.
 	const std::string& schema = get_name();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
@@ -200,23 +220,6 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 			}
 		}
 		return CastToValue(TruthValue::TRUE_TV());
-	}
-
-	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0, 4, "scm:", 4))
-	{
-#ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		SchemeEval* applier = get_evaluator_for_scheme(as);
-		return applier->apply_v(schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have scheme support in it; "
-			"Cannot evaluate scheme GroundedPredicateNode!");
-#endif /* HAVE_GUILE */
 	}
 
 	if (0 == schema.compare(0, 3, "py:", 3))

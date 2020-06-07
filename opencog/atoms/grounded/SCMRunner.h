@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/grounded/Runner.h
+ * opencog/atoms/grounded/SCMRunner.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -21,33 +21,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_RUNNER_H
-#define _OPENCOG_RUNNER_H
+#ifndef _OPENCOG_SCM_RUNNER_H
+#define _OPENCOG_SCM_RUNNER_H
 
-#include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <string>
 
-namespace opencog {
+namespace opencog
+{
 /** \addtogroup grp_atomspace
  *  @{
  */
+#include <opencog/atoms/grounded/Runner.h>
 
-class AtomSpace;
-
-/// Virtual base class for all grounded nodes.
-class Runner
+/// Base class for executing guile code.
+class SCMRunner : public Runner
 {
-public:
-	Runner(const std::string);
-	Runner(const Runner&) = delete;
-	Runner& operator=(const Runner&) = delete;
-	virtual ~Runner() {}
+	std::string _fname;
 
-	virtual TruthValuePtr evaluate(AtomSpace*, const Handle&, bool=false) = 0;
-	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false) = 0;
+public:
+	SCMRunner(const std::string);
+	SCMRunner(const SCMRunner&) = delete;
+	SCMRunner& operator=(const SCMRunner&) = delete;
+
+	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false);
+	virtual TruthValuePtr evaluate(AtomSpace*as, const Handle& args, bool silent)
+	{ return TruthValueCast(execute(as, args, silent)); }
 };
 
 /** @}*/
 }
 
-#endif // _OPENCOG_RUNNER_H
+#endif // _OPENCOG_SCM_RUNNER_H
