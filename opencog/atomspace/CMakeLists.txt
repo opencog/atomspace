@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	${NO_AS_NEEDED}
 	clearbox
 	container
-	lambda
+	pattern
 	grounded
 	execution
 	atomflow

@@ -13,7 +13,7 @@ set_property(TARGET execution
 
 set_property(TARGET query-engine
 	APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-	lambda
+	pattern
 	atomspace
 )
 
@@ -32,7 +32,7 @@ set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_container_LIBRARY container)
 set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_grounded_LIBRARY grounded)
-set(ATOMSPACE_lambda_LIBRARY lambda)
+set(ATOMSPACE_pattern_LIBRARY pattern)
 set(ATOMSPACE_load_scm_LIBRARY load_scm)
 set(ATOMSPACE_persist_LIBRARY persist)
 set(ATOMSPACE_smob_LIBRARY smob)
@@ -49,7 +49,7 @@ set(ATOMSPACE_LIBRARIES
 	truthvalue
 	clearbox
 	container
-	lambda
+	pattern
 	load_scm
 	persist
 	query-engine

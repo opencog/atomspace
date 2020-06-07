@@ -11,7 +11,7 @@ LINK_DIRECTORIES (
 )
 
 LINK_LIBRARIES (
-	lambda
+	pattern
 	clearbox
 	execution
 	atomspace
