@@ -42,16 +42,6 @@ INSTALL (FILES
 	DESTINATION "include/opencog/atoms/execution"
 )
 
-IF (HAVE_GUILE)
-	ADD_LIBRARY (exec ExecSCM.cc)
-	TARGET_LINK_LIBRARIES(exec execution smob)
-	ADD_GUILE_EXTENSION(SCM_CONFIG exec "opencog-ext-path-exec")
-	
-	INSTALL (TARGETS exec
-		EXPORT AtomSpaceTargets
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ENDIF (HAVE_GUILE)
-
 # This does not belong, but cannot be fixed until the Python bindings
 # are fixed, first.
 INSTALL (FILES
