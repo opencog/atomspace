@@ -35,9 +35,10 @@ INSTALL (TARGETS execution
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	Force.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
+	Force.h
+	GroundedProcedureNode.h
 	Instantiator.h
 	DESTINATION "include/opencog/atoms/execution"
 )
