@@ -8,7 +8,7 @@ ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (grounded
 	DLScheme.cc
-	# GroundedPredicateNode.cc
+	GroundedPredicateNode.cc
 	GroundedSchemaNode.cc
 	LibraryManager.cc
 )

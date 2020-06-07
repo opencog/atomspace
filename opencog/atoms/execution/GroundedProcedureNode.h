@@ -42,6 +42,7 @@ public:
 		: Node(t, std::move(s)) {}
 	GroundedProcedureNode(const GroundedProcedureNode&) = delete;
 	GroundedProcedureNode& operator=(const GroundedProcedureNode&) = delete;
+	virtual ~GroundedProcedureNode() {};
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false) = 0;
 };
