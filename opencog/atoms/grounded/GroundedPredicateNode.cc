@@ -203,7 +203,7 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 		while (' ' == schema[pos]) pos++;
 
 		SchemeEval* applier = get_evaluator_for_scheme(as);
-		return CastToValue(applier->apply_tv(schema.substr(pos), args));
+		return applier->apply_v(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
 			"This binary does not have scheme support in it; "
