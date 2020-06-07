@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedPredicateNode.cc
+ * opencog/atoms/grounded/GroundedPredicateNode.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -33,6 +33,7 @@
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
 #include "DLScheme.h"
 #include "LibraryManager.h"
+#include "Runner.h"
 
 
 using namespace opencog;
@@ -40,6 +41,7 @@ using namespace opencog;
 GroundedPredicateNode::GroundedPredicateNode(std::string s)
 	: GroundedProcedureNode(GROUNDED_PREDICATE_NODE, std::move(s))
 {
+	init();
 }
 
 GroundedPredicateNode::GroundedPredicateNode(Type t, std::string s)
@@ -51,6 +53,12 @@ GroundedPredicateNode::GroundedPredicateNode(Type t, std::string s)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a GroundedProcedureNode, got %s", tname.c_str());
 	}
+	init();
+}
+
+void GroundedPredicateNode::init()
+{
+	_runner = nullptr;
 }
 
 // ----------------------------------------------------------

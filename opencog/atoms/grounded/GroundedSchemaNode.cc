@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedSchemaNode.cc
+ * opencog/atoms/grounded/GroundedSchemaNode.cc
  *
  * Copyright (C) 2009, 2013, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -30,6 +30,7 @@
 #include <opencog/atoms/grounded/GroundedSchemaNode.h>
 #include "DLScheme.h"
 #include "LibraryManager.h"
+#include "Runner.h"
 
 
 using namespace opencog;
@@ -37,6 +38,7 @@ using namespace opencog;
 GroundedSchemaNode::GroundedSchemaNode(std::string s)
 	: GroundedProcedureNode(GROUNDED_SCHEMA_NODE, std::move(s))
 {
+	init();
 }
 
 GroundedSchemaNode::GroundedSchemaNode(Type t, std::string s)
@@ -48,6 +50,12 @@ GroundedSchemaNode::GroundedSchemaNode(Type t, std::string s)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a GroundedProcedureNode, got %s", tname.c_str());
 	}
+	init();
+}
+
+void GroundedSchemaNode::init()
+{
+	_runner = nullptr;
 }
 
 /// execute -- execute the SchemaNode of the ExecutionOutputLink
