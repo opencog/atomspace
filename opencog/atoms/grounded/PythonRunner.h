@@ -1,11 +1,9 @@
 /*
- * opencog/atoms/atom_types/types.h
+ * opencog/atoms/grounded/PythonRunner.h
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2020 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,14 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * basic type definitions.
- */
+#ifndef _OPENCOG_PYTHON_RUNNER_H
+#define _OPENCOG_PYTHON_RUNNER_H
 
-#ifndef _OPENCOG_TYPES_H
-#define _OPENCOG_TYPES_H
-
-#include <set>
+#include <string>
+#include <opencog/atoms/grounded/Runner.h>
+#include <opencog/cython/PythonEval.h>
 
 namespace opencog
 {
@@ -38,13 +34,22 @@ namespace opencog
  *  @{
  */
 
-//! type of Atoms, represented as short integer (16 bits)
-typedef unsigned short Type;
+/// Base class for executing Python code.
+class PythonRunner : public Runner
+{
+	std::string _fname;
+	PythonEval &applier;
 
-//! Set of atom types
-typedef std::set<Type> TypeSet;
+public:
+	PythonRunner(const std::string);
+	PythonRunner(const PythonRunner&) = delete;
+	PythonRunner& operator=(const PythonRunner&) = delete;
+
+	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false);
+	virtual ValuePtr evaluate(AtomSpace*, const Handle&, bool=false);
+};
 
 /** @}*/
-} // namespace opencog
+}
 
-#endif // _OPENCOG_TYPES_H
+#endif // _OPENCOG_PYTHON_RUNNER_H

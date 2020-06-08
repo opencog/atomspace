@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedPredicateNode.cc
+ * opencog/atoms/grounded/GroundedPredicateNode.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -27,12 +27,11 @@
 #include <opencog/atoms/execution/Force.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
-#include "DLScheme.h"
-#include "LibraryManager.h"
+#include "LibraryRunner.h"
+#include "PythonRunner.h"
+#include "SCMRunner.h"
 
 
 using namespace opencog;
@@ -40,6 +39,7 @@ using namespace opencog;
 GroundedPredicateNode::GroundedPredicateNode(std::string s)
 	: GroundedProcedureNode(GROUNDED_PREDICATE_NODE, std::move(s))
 {
+	init();
 }
 
 GroundedPredicateNode::GroundedPredicateNode(Type t, std::string s)
@@ -50,6 +50,51 @@ GroundedPredicateNode::GroundedPredicateNode(Type t, std::string s)
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a GroundedProcedureNode, got %s", tname.c_str());
+	}
+	init();
+}
+
+GroundedPredicateNode::~GroundedPredicateNode()
+{
+	if (_runner) delete _runner;
+}
+
+void GroundedPredicateNode::init()
+{
+	_runner = nullptr;
+
+	// Get the schema name.
+	const std::string& schema = get_name();
+
+	// At this point, we only run scheme and python schemas.
+	if (0 == schema.compare(0, 4, "scm:", 4))
+	{
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
+	if (0 == schema.compare(0, 3, "py:", 3))
+	{
+#ifdef HAVE_CYTHON
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
+		_runner = new PythonRunner(schema.substr(pos));
+#else
+		throw RuntimeException(TRACE_INFO,
+			"This binary does not have python support in it; "
+			"Cannot evaluate python GroundedPredicateNode!");
+#endif /* HAVE_CYTHON */
+		return;
+	}
+
+	if (0 == schema.compare(0, 4, "lib:", 4))
+	{
+		_runner = new LibraryRunner(schema);
+		return;
 	}
 }
 
@@ -159,6 +204,11 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
                                         const Handle& cargs,
                                         bool silent)
 {
+	if (_runner) return _runner->evaluate(as, cargs, silent);
+
+	// XXX FIXME -- can we get rid of the stuff from here on down?
+	// Does anybody actually use any of this?
+
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
 	// to do lazy execution correctly. Right now, forcing is the policy.
@@ -192,72 +242,6 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 			}
 		}
 		return CastToValue(TruthValue::TRUE_TV());
-	}
-
-	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0, 4, "scm:", 4))
-	{
-#ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		SchemeEval* applier = get_evaluator_for_scheme(as);
-		return applier->apply_v(schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have scheme support in it; "
-			"Cannot evaluate scheme GroundedPredicateNode!");
-#endif /* HAVE_GUILE */
-	}
-
-	if (0 == schema.compare(0, 3, "py:", 3))
-	{
-#ifdef HAVE_CYTHON
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
-
-		// Be sure to specify the atomspace in which to work!
-		PythonEval &applier = PythonEval::instance();
-		return CastToValue(applier.apply_tv(as, schema.substr(pos), args));
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have python support in it; "
-			"Cannot evaluate python GroundedPredicateNode!");
-#endif /* HAVE_CYTHON */
-	}
-
-	// Generic shared-library foreign-function interface.
-	// Currently used only by the Haskell bindings.
-	//
-	// Extract the language, library and function from schema
-	std::string lang, lib, fun;
-	LibraryManager::parse_schema(schema, lang, lib, fun);
-	if (lang == "lib")
-	{
-		void* sym = LibraryManager::getFunc(lib,fun);
-
-		// Convert the void* pointer to the correct function type.
-		TruthValuePtr* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Evaluate the predicate
-		TruthValuePtr* res = func(as, &args);
-		TruthValuePtr result;
-		if(res != NULL)
-		{
-			result = *res;
-			free(res);
-		}
-
-		if (nullptr == result)
-			throwSyntaxException(silent,
-			        "Invalid return value from predicate %s\nArgs: %s",
-			        to_short_string().c_str(),
-			        oc_to_string(cargs).c_str());
-
-		return CastToValue(result);
 	}
 
 	// Unkown proceedure type.

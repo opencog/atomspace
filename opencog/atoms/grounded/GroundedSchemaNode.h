@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedSchemaNode.h
+ * opencog/atoms/grounded/GroundedSchemaNode.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -33,15 +33,20 @@ namespace opencog
  */
 
 class AtomSpace;
+class Runner;
 
 /// Virtual base class for all grounded nodes.
 class GroundedSchemaNode : public GroundedProcedureNode
 {
+	Runner* _runner;
+	void init();
+
 public:
 	GroundedSchemaNode(Type, const std::string);
 	GroundedSchemaNode(const std::string);
 	GroundedSchemaNode(const GroundedSchemaNode&) = delete;
 	GroundedSchemaNode& operator=(const GroundedSchemaNode&) = delete;
+	virtual ~GroundedSchemaNode();
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 

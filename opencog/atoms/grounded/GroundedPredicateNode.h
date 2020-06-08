@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/GroundedPredicateNode.h
+ * opencog/atoms/grounded/GroundedPredicateNode.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -33,15 +33,20 @@ namespace opencog
  */
 
 class AtomSpace;
+class Runner;
 
 /// Execute scheme, python or other things.
 class GroundedPredicateNode : public GroundedProcedureNode
 {
+	void init();
+	Runner* _runner;
+
 public:
 	GroundedPredicateNode(Type, const std::string);
 	GroundedPredicateNode(const std::string);
 	GroundedPredicateNode(const GroundedPredicateNode&) = delete;
 	GroundedPredicateNode& operator=(const GroundedPredicateNode&) = delete;
+	virtual ~GroundedPredicateNode();
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 
