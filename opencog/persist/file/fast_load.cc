@@ -127,7 +127,7 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
     l++;
     size_t p = l;
     if (typeNode)
-        for (; p < r and (s[p] != '(' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+        for (; p < r and (s[p] != '(' or s[p] != ' '); p++);
     else
         for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
     r = p;
@@ -194,13 +194,14 @@ static Handle recursive_parse(const std::string& s,
         l1 = l;
         r1 = r;
         size_t l2;
-
-        if (stype == "Type")
+        if (namer.isA(atype, TYPE_NODE)) {
             get_node_name(s, l1, r1, line_cnt, true);
-        else {
+            l2 = r1;
+        } else {
             get_node_name(s, l1, r1, line_cnt);
             l2 = r1 + 1;
         }
+
         const std::string name = s.substr(l1, r1-l1);
         Handle h(createNode(atype, std::move(name)));
 
