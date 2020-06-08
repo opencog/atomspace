@@ -77,6 +77,27 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
+	// Convert the void* pointer to the correct function type.
+	Handle* (*func)(AtomSpace*, Handle*);
+	func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
+
+	ValuePtr result;
+
+	// Execute the function
+	Handle* res = func(as, &args);
+	if (nullptr != res)
+	{
+		result = *res;
+		free(res);
+	}
+
+	if (nullptr == result)
+		throwSyntaxException(silent,
+	        "Invalid return value from grounded schema %s\nArgs: %s",
+		        _fname.c_str(),
+		        cargs->to_short_string().c_str());
+
+	return result;
 }
 
 ValuePtr LibraryRunner::evaluate(AtomSpace* as,
@@ -97,7 +118,7 @@ ValuePtr LibraryRunner::evaluate(AtomSpace* as,
 	// Evaluate the predicate
 	TruthValuePtr* res = func(as, &args);
 	TruthValuePtr result;
-	if(res != NULL)
+	if (nullptr != res)
 	{
 		result = *res;
 		free(res);
@@ -105,7 +126,7 @@ ValuePtr LibraryRunner::evaluate(AtomSpace* as,
 
 	if (nullptr == result)
 		throwSyntaxException(silent,
-	        "Invalid return value from predicate %s\nArgs: %s",
+	        "Invalid return value from grounded predicate %s\nArgs: %s",
 		        _fname.c_str(),
 		        cargs->to_short_string().c_str());
 
