@@ -105,14 +105,14 @@ void PatternLink::common_init(void)
 
 	add_dummies();
 
+	make_term_trees();
+
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
 
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
-
-	make_term_trees();
 
 	_num_comps = _components.size();
 
@@ -256,13 +256,14 @@ PatternLink::PatternLink(const HandleSet& vars,
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
+	make_term_trees();
+
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
 	_components.emplace_back(compo);
 	_num_comps = 1;
 
-	make_term_trees();
 	make_connectivity_map();
 	_pat.redex_name = "Unpacked component of a virtual link";
 
@@ -942,7 +943,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 /// contents of the left and right side of the EqualLink... ugh.
 ///
 /// XXX The situation here is also very dangerous: without any
-/// type onstraints, we risk searching atoms created in the scratch
+/// type constraints, we risk searching atoms created in the scratch
 /// atomspace, resulting in infinite recursion and a blown stack.
 /// Not clear how to avoid that...
 ///
@@ -1096,27 +1097,29 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr top_term(createPatternTerm());
-		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
-		make_term_tree_recursive(root_term, root_term);
+		PatternTermPtr root_term(make_term_tree(clause));
 		_pat.pmandatory.push_back(root_term);
 	}
 	for (const Handle& clause : _pat.optionals)
 	{
-		PatternTermPtr top_term(createPatternTerm());
-		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
-		make_term_tree_recursive(root_term, root_term);
+		PatternTermPtr root_term(make_term_tree(clause));
 		root_term->markLiteral();
 		_pat.absents.push_back(root_term);
 	}
 	for (const Handle& clause : _pat.always)
 	{
-		PatternTermPtr top_term(createPatternTerm());
-		PatternTermPtr root_term(top_term->addOutgoingTerm(clause));
-		make_term_tree_recursive(root_term, root_term);
+		PatternTermPtr root_term(make_term_tree(clause));
 		root_term->markLiteral();
 		_pat.palways.push_back(root_term);
 	}
+}
+
+PatternTermPtr PatternLink::make_term_tree(const Handle& term)
+{
+	PatternTermPtr top_term(createPatternTerm());
+	PatternTermPtr root_term(top_term->addOutgoingTerm(term));
+	make_term_tree_recursive(root_term, root_term);
+	return root_term;
 }
 
 void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
