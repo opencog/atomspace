@@ -29,7 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
-#include "LibraryManager.h"
+#include "LibraryRunner.h"
 #include "PythonRunner.h"
 #include "SCMRunner.h"
 
@@ -83,12 +83,17 @@ void GroundedPredicateNode::init()
 		size_t pos = 3;
 		while (' ' == schema[pos]) pos++;
 		_runner = new PythonRunner(schema.substr(pos));
-
 #else
 		throw RuntimeException(TRACE_INFO,
 			"This binary does not have python support in it; "
 			"Cannot evaluate python GroundedPredicateNode!");
 #endif /* HAVE_CYTHON */
+		return;
+	}
+
+	if (0 == schema.compare(0, 4, "lib:", 4))
+	{
+		_runner = new LibraryRunner(schema);
 		return;
 	}
 }
@@ -234,38 +239,6 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 			}
 		}
 		return CastToValue(TruthValue::TRUE_TV());
-	}
-
-	// Generic shared-library foreign-function interface.
-	// Currently used only by the Haskell bindings.
-	//
-	// Extract the language, library and function from schema
-	std::string lang, lib, fun;
-	LibraryManager::parse_schema(schema, lang, lib, fun);
-	if (lang == "lib")
-	{
-		void* sym = LibraryManager::getFunc(lib,fun);
-
-		// Convert the void* pointer to the correct function type.
-		TruthValuePtr* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Evaluate the predicate
-		TruthValuePtr* res = func(as, &args);
-		TruthValuePtr result;
-		if(res != NULL)
-		{
-			result = *res;
-			free(res);
-		}
-
-		if (nullptr == result)
-			throwSyntaxException(silent,
-			        "Invalid return value from predicate %s\nArgs: %s",
-			        to_short_string().c_str(),
-			        oc_to_string(cargs).c_str());
-
-		return CastToValue(result);
 	}
 
 	// Unkown proceedure type.

@@ -7,6 +7,7 @@ ADD_LIBRARY (grounded
 	GroundedPredicateNode.cc
 	GroundedSchemaNode.cc
 	LibraryManager.cc
+	LibraryRunner.cc
 	SCMRunner.cc
 )
 
