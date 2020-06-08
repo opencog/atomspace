@@ -106,21 +106,30 @@ static void get_typename(const std::string& s, size_t& l, size_t& r,
 // The string is considered to start *after* the first quote, and ends
 // just before the last quote. In this case, escaped quotes \" are
 // ignored (are considered to be part of the string).
+//If the node is a Type node, then l points at the first non-whitespace character of the type name
+//r points to the next opening parenthesis
 static void get_node_name(const std::string& s, size_t& l, size_t& r,
-                          size_t line_cnt)
+                          size_t line_cnt, bool typeNode = false)
 {
     // Advance past whitespace.
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
     // Tell caller to throw, if the syntax is bad.
-    if (s[l] != '"')
+    if (typeNode && s[l] != '\'')
+        throw std::runtime_error(
+                "Syntax error at line " + std::to_string(line_cnt) +
+                " Unexpected node type name: >>" + s.substr(l, r-l+1) + "<< in " + s);
+    else if (!typeNode && s[l] != '"')
         throw std::runtime_error(
             "Syntax error at line " + std::to_string(line_cnt) +
             " Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
 
     l++;
     size_t p = l;
-    for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+    if (typeNode)
+        for (; p < r and (s[p] != '(' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+    else
+        for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
     r = p;
 }
 
@@ -184,12 +193,18 @@ static Handle recursive_parse(const std::string& s,
     {
         l1 = l;
         r1 = r;
-        get_node_name(s, l1, r1, line_cnt);
+        size_t l2;
+
+        if (stype == "Type")
+            get_node_name(s, l1, r1, line_cnt, true);
+        else {
+            get_node_name(s, l1, r1, line_cnt);
+            l2 = r1 + 1;
+        }
         const std::string name = s.substr(l1, r1-l1);
         Handle h(createNode(atype, std::move(name)));
 
         // There might be an stv in the content. Handle it.
-        size_t l2 = r1+1;
         size_t r2 = r;
         get_next_expr(s, l2, r2, line_cnt);
         if (l2 < r2)
