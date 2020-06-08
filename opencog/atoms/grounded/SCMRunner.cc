@@ -25,7 +25,6 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Force.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
@@ -38,6 +37,16 @@ using namespace opencog;
 SCMRunner::SCMRunner(std::string s)
 	: _fname(s)
 {
+}
+
+static void throwSyntaxException(bool silent, const char* message...)
+{
+	if (silent)
+		throw NotEvaluatableException();
+	va_list args;
+	va_start(args, message);
+	throw SyntaxException(TRACE_INFO, message, args);
+	va_end(args);
 }
 
 // ----------------------------------------------------------
@@ -64,5 +73,15 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	Handle args(force_execute(as, cargs, silent));
 
 	SchemeEval* applier = get_evaluator_for_scheme(as);
-	return applier->apply_v(_fname, args);
+	ValuePtr vp = applier->apply_v(_fname, args);
+
+	// Hmmm... well, a bad scheme function can end up returning a
+	// null pointer. We can convert this to a VoidValue... or we
+	// can throw an exception. Currently, unit test and code expect
+	// a throw.
+	if (nullptr == vp)
+		throwSyntaxException(TRACE_INFO,
+			"Failed call to the scheme function %s", _fname.c_str());
+
+	return vp;
 }
