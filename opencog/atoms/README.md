@@ -46,14 +46,21 @@ Listed in order of dependency:
 
  * `flow` -- Atoms that move (get/set) Values from/to Atoms.
 
- * `pattern` -- Atoms involved with pattern matching: `BindLink`,
-   `GetLink`, `DualLink`, `SatisfactionLink`, `SatisfactionSetLink`.
-   These are al quite complicated, and cache various pre-compiled
+ * `pattern` -- Atoms involved with searching for pattern: `QueryLink`,
+   `MeetLink`, `DualLink`, `SatisfactionLink`, `SatisfactionSetLink`.
+   These are all quite complicated, and cache various pre-compiled
    parts of the pattern.
 
- * `execution` -- "black-box" executable/evaluatable links, e.g.
-   `ExecutionOutputLink`, `EvaluationLink`, `GroundedPredicateNode`,
-   etc.  These interact with the scheme, python and haskell evaluators.
+ * `container` -- Simpilar to the pattern queries, but these look
+   "upwards" instead of "downwards". Thus, `JoinLink` is here
+   (contrasted to `MeetLink` above)
+
+ * `execution` -- miscellaneous executable/evaluatable atoms. Much of
+   the code here should probably migrate to per-atom-type C++ classes.
+
+ * `grounded` -- "black-box" executable/evaluatable nodes, that is,
+   `GroundedPredicateNode` and `GroundedSchemaNode`.  These interact
+    with the scheme, python and haskell evaluators.
 
  * `reduct` -- inspired by comboreduct, these are "clearbox" links:
    `PlusLink`, `TimesLink`, etc. They not only represent arithmetic
