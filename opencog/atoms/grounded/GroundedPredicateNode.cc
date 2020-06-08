@@ -184,15 +184,14 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
                                         const Handle& cargs,
                                         bool silent)
 {
+	if (_runner) return _runner->evaluate(as, cargs, silent);
+
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
-
-	if (_runner)
-		return _runner->evaluate(as, args, silent);
 
 	// Get the schema name.
 	const std::string& schema = get_name();
