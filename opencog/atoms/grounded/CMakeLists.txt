@@ -2,10 +2,6 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-IF (HAVE_CYTHON)
-	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-ENDIF (HAVE_CYTHON)
-
 ADD_LIBRARY (grounded
 	DLScheme.cc
 	GroundedPredicateNode.cc
@@ -13,6 +9,13 @@ ADD_LIBRARY (grounded
 	LibraryManager.cc
 	SCMRunner.cc
 )
+
+IF (HAVE_CYTHON)
+	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+	TARGET_SOURCES(grounded PRIVATE PythonRunner.cc)
+	TARGET_LINK_LIBRARIES(grounded PythonEval)
+	TARGET_LINK_LIBRARIES(grounded ${PYTHON_LIBRARIES})
+ENDIF (HAVE_CYTHON)
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(grounded opencog_atom_types)

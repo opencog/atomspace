@@ -36,7 +36,7 @@
 using namespace opencog;
 
 PythonRunner::PythonRunner(std::string s)
-	: _fname(s)
+	: _fname(s), applier(PythonEval::instance())
 {
 }
 
@@ -56,4 +56,28 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
                                const Handle& cargs,
                                bool silent)
 {
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args(force_execute(as, cargs, silent));
+
+	// Be sure to specify the atomspace in which to work!
+	return CastToValue(applier.apply_tv(as, _fname, args));
+}
+
+ValuePtr PythonRunner::evaluate(AtomSpace* as,
+                                const Handle& cargs,
+                                bool silent)
+{
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args(force_execute(as, cargs, silent));
+
+	// Be sure to specify the atomspace in which to work!
+	return CastToValue(applier.apply_tv(as, _fname, args));
 }

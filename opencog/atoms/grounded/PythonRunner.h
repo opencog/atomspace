@@ -26,6 +26,7 @@
 
 #include <string>
 #include <opencog/atoms/grounded/Runner.h>
+#include <opencog/cython/PythonEval.h>
 
 namespace opencog
 {
@@ -37,6 +38,7 @@ namespace opencog
 class PythonRunner : public Runner
 {
 	std::string _fname;
+	PythonEval &applier;
 
 public:
 	PythonRunner(const std::string);
@@ -44,7 +46,7 @@ public:
 	PythonRunner& operator=(const PythonRunner&) = delete;
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false);
-	virtual TruthValuePtr evaluate(AtomSpace*, const Handle&, bool=false);
+	virtual ValuePtr evaluate(AtomSpace*, const Handle&, bool=false);
 };
 
 /** @}*/

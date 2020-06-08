@@ -27,12 +27,10 @@
 #include <opencog/atoms/execution/Force.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
 #include "LibraryManager.h"
-#include "Runner.h"
+#include "PythonRunner.h"
 #include "SCMRunner.h"
 
 
@@ -75,6 +73,23 @@ void GroundedPredicateNode::init()
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
+	if (0 == schema.compare(0, 3, "py:", 3))
+	{
+#ifdef HAVE_CYTHON
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
+		_runner = new PythonRunner(schema.substr(pos));
+
+#else
+		throw RuntimeException(TRACE_INFO,
+			"This binary does not have python support in it; "
+			"Cannot evaluate python GroundedPredicateNode!");
+#endif /* HAVE_CYTHON */
+		return;
 	}
 }
 
@@ -219,23 +234,6 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 			}
 		}
 		return CastToValue(TruthValue::TRUE_TV());
-	}
-
-	if (0 == schema.compare(0, 3, "py:", 3))
-	{
-#ifdef HAVE_CYTHON
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
-
-		// Be sure to specify the atomspace in which to work!
-		PythonEval &applier = PythonEval::instance();
-		return CastToValue(applier.apply_tv(as, schema.substr(pos), args));
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have python support in it; "
-			"Cannot evaluate python GroundedPredicateNode!");
-#endif /* HAVE_CYTHON */
 	}
 
 	// Generic shared-library foreign-function interface.
