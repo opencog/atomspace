@@ -25,13 +25,13 @@
 #define _OPENCOG_SCM_RUNNER_H
 
 #include <string>
+#include <opencog/atoms/grounded/Runner.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-#include <opencog/atoms/grounded/Runner.h>
 
 /// Base class for executing guile code.
 class SCMRunner : public Runner

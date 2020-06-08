@@ -38,7 +38,7 @@ class AtomSpace;
 class Runner
 {
 public:
-	Runner(const std::string);
+	Runner(void) {}
 	Runner(const Runner&) = delete;
 	Runner& operator=(const Runner&) = delete;
 	virtual ~Runner() {}
