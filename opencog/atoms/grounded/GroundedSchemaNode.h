@@ -46,6 +46,7 @@ public:
 	GroundedSchemaNode(const std::string);
 	GroundedSchemaNode(const GroundedSchemaNode&) = delete;
 	GroundedSchemaNode& operator=(const GroundedSchemaNode&) = delete;
+	virtual ~GroundedSchemaNode();
 
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false);
 

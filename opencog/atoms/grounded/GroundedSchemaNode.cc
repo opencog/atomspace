@@ -70,6 +70,11 @@ void GroundedSchemaNode::init()
 	}
 }
 
+GroundedSchemaNode::~GroundedSchemaNode()
+{
+	if (_runner) delete _runner;
+}
+
 /// execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "cargs" to be a ListLink unless there is only one argument
