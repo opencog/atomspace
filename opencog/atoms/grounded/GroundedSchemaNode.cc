@@ -22,11 +22,10 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/execution/Force.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/grounded/GroundedSchemaNode.h>
-#include "LibraryManager.h"
+#include "LibraryRunner.h"
 #include "PythonRunner.h"
 #include "SCMRunner.h"
 
@@ -81,6 +80,12 @@ void GroundedSchemaNode::init()
 #endif /* HAVE_CYTHON */
 		return;
 	}
+
+	if (0 == schema.compare(0, 4, "lib:", 4))
+	{
+		_runner = new LibraryRunner(schema);
+		return;
+	}
 }
 
 GroundedSchemaNode::~GroundedSchemaNode()
@@ -102,67 +107,10 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 
 	if (_runner) return _runner->execute(as, cargs, silent);
 
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs, silent);
-
-	// Get the schema name.
-	const std::string& schema = get_name();
-
-	// Extract the language, library and function
-	std::string lang, lib, fun;
-	LibraryManager::parse_schema(schema, lang, lib, fun);
-
-	ValuePtr result;
-
-	// Used by the Haskel and C++ bindings; can be used with any language
-	if (lang == "lib")
-	{
-		void* sym = LibraryManager::getFunc(lib,fun);
-
-		// Convert the void* pointer to the correct function type.
-		Handle* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Execute the function
-		Handle* res = func(as, &args);
-		if(res != NULL)
-		{
-			result = *res;
-			free(res);
-		}
-	}
-	else
-	{
-		// Unkown proceedure type
-		throw RuntimeException(TRACE_INFO,
-		                       "Cannot evaluate unknown Schema %s",
-		                       to_short_string().c_str());
-	}
-
-	// Check for a not-uncommon user-error.  If the user-defined
-	// code returns nothing, then a null-pointer-dereference is
-	// likely, a bit later down the line, leading to a crash.
-	// So head this off at the pass.
-	if (nullptr == result)
-	{
-		// If silent is true, return a simpler and non-logged
-		// exception, which may, in some contexts, will be
-		// considerably faster than a RuntimeException.
-		if (silent)
-			throw NotEvaluatableException();
-
-		throw RuntimeException(TRACE_INFO,
-		                       "Invalid return value from schema %s\nArgs: %s",
-		                       to_short_string().c_str(),
-		                       cargs->to_string().c_str());
-	}
-
-	LAZY_LOG_FINE << "Result: " << result->to_string();
-	return result;
+	// Unkown proceedure type
+	throw RuntimeException(TRACE_INFO,
+	                       "Cannot evaluate unknown Schema %s",
+	                       to_short_string().c_str());
 }
 
 DEFINE_NODE_FACTORY(GroundedSchemaNode, GROUNDED_SCHEMA_NODE)

@@ -34,7 +34,7 @@ namespace opencog
  *  @{
  */
 
-/// Base class for executing guile code.
+/// Base class for executing Python code.
 class PythonRunner : public Runner
 {
 	std::string _fname;
