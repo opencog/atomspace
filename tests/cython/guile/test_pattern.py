@@ -73,7 +73,7 @@ class SchemeTest(TestCase):
         self.assertTrue(status)
         status = scheme_eval(self.space, '(gc-stats)')
         self.assertTrue(status)
-        print("Finish garbage-coolection-test\n")
+        print("Finish garbage-collection-test\n")
 
     # Run some basic evaluation tests
     def test_d_eval(self):

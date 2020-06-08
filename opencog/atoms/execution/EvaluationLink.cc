@@ -12,6 +12,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/PredicateFormulaLink.h>
@@ -22,13 +23,9 @@
 #include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
-#include "DLScheme.h"
 #include "Force.h"
 #include "EvaluationLink.h"
-#include "LibraryManager.h"
 
 using namespace opencog;
 
@@ -93,7 +90,7 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 /// know that they might be sending non-evaluatable atoms here, and
 /// don't want to garbage up the log files with bogus errors.
 ///
-void throwSyntaxException(bool silent, const char* message...)
+static void throwSyntaxException(bool silent, const char* message...)
 {
 	if (silent)
 		throw NotEvaluatableException();
@@ -770,122 +767,18 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
-	// The remaining code below handles GROUNDED_PREDICATE_NODE
 	// Throw a silent exception; this is called in some try..catch blocks.
-	if (GROUNDED_PREDICATE_NODE != pntype)
+	if (GROUNDED_PREDICATE_NODE == pntype)
 	{
-		if (silent)
-			throw NotEvaluatableException();
-		throw SyntaxException(TRACE_INFO,
+		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
+		Handle args(createLink(std::move(cargs), LIST_LINK));
+		return TruthValueCast(gpn->execute(as, args, silent));
+	}
+
+	if (silent)
+		throw NotEvaluatableException();
+	throw SyntaxException(TRACE_INFO,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
-	}
-
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle lh(createLink(std::move(cargs), LIST_LINK));
-	Handle args(force_execute(as, lh, silent));
-
-	// Get the schema name.
-	const std::string& schema = pn->get_name();
-	// printf ("Grounded schema name: %s\n", schema.c_str());
-
-	// A very special-case C++ comparison.
-	// This compares two NumberNodes, by their numeric value.
-	// Hard-coded in C++ for speed. (well, and for convenience ...)
-	if (0 == schema.compare("c++:greater"))
-	{
-		return bool_to_tv(greater(as, args, silent));
-	}
-
-	// A very special-case C++ comparison.
-	// This compares a set of atoms, verifying that they are all different.
-	// Hard-coded in C++ for speed. (well, and for convenience ...)
-	if (0 == schema.compare("c++:exclusive"))
-	{
-		Arity sz = args->get_arity();
-		for (Arity i=0; i<sz-1; i++) {
-			Handle h1(args->getOutgoingAtom(i));
-			for (Arity j=i+1; j<sz; j++) {
-				Handle h2(args->getOutgoingAtom(j));
-				if (h1 == h2) return TruthValue::FALSE_TV();
-			}
-		}
-		return TruthValue::TRUE_TV();
-	}
-
-	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0, 4, "scm:", 4))
-	{
-#ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		SchemeEval* applier = get_evaluator_for_scheme(as);
-		return applier->apply_tv(schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have scheme support in it; "
-			"Cannot evaluate scheme GroundedPredicateNode!");
-#endif /* HAVE_GUILE */
-	}
-
-	if (0 == schema.compare(0, 3, "py:", 3))
-	{
-#ifdef HAVE_CYTHON
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
-
-		// Be sure to specify the atomspace in which to work!
-		PythonEval &applier = PythonEval::instance();
-		return applier.apply_tv(as, schema.substr(pos), args);
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have python support in it; "
-			"Cannot evaluate python GroundedPredicateNode!");
-#endif /* HAVE_CYTHON */
-	}
-
-	// Generic shared-library foreign-function interface.
-	// Currently used only by the Haskell bindings.
-	//
-	// Extract the language, library and function from schema
-	std::string lang, lib, fun;
-	LibraryManager::parse_schema(schema, lang, lib, fun);
-	if (lang == "lib")
-	{
-		void* sym = LibraryManager::getFunc(lib,fun);
-
-		// Convert the void* pointer to the correct function type.
-		TruthValuePtr* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Evaluate the predicate
-		TruthValuePtr* res = func(as, &args);
-		TruthValuePtr result;
-		if(res != NULL)
-		{
-			result = *res;
-			free(res);
-		}
-
-		if (nullptr == result)
-			throwSyntaxException(silent,
-			        "Invalid return value from predicate %s\nArgs: %s",
-			        pn->to_string().c_str(),
-			        oc_to_string(cargs).c_str());
-
-		return result;
-	}
-
-	// Unkown proceedure type.
-	throw RuntimeException(TRACE_INFO,
-	     "Cannot evaluate unknown GroundedPredicateNode: %s",
-	      schema.c_str());
 }
 
 /// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully

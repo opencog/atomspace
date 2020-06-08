@@ -35,6 +35,8 @@ ADD_LIBRARY(PythonEval
 ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	pattern
+	execution
 	atomflow
 	atombase
 	executioncontext

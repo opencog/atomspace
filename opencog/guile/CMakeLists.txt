@@ -31,7 +31,7 @@ TARGET_LINK_LIBRARIES(smob
 	${NO_AS_NEEDED}
 	clearbox
 	container
-	lambda
+	pattern
 	execution
 	atomflow
 	atomcore

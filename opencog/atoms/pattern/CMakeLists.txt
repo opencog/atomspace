@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (lambda
+ADD_LIBRARY (pattern
 	BindLink.cc
 	DualLink.cc
 	GetLink.cc
@@ -17,18 +17,18 @@ ADD_LIBRARY (lambda
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(lambda opencog_atom_types)
+ADD_DEPENDENCIES(pattern opencog_atom_types)
 
-# TARGET_COMPILE_OPTIONS(lambda PRIVATE -DQDEBUG=1)
+# TARGET_COMPILE_OPTIONS(pattern PRIVATE -DQDEBUG=1)
 
-TARGET_LINK_LIBRARIES(lambda
+TARGET_LINK_LIBRARIES(pattern
 	query-engine
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
+INSTALL (TARGETS pattern EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
