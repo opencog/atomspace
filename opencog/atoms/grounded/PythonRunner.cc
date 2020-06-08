@@ -22,16 +22,13 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Force.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/PythonRunner.h>
-#include "DLScheme.h"
 
 using namespace opencog;
 
@@ -63,8 +60,7 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
-	// Be sure to specify the atomspace in which to work!
-	return CastToValue(applier.apply_tv(as, _fname, args));
+	return applier.apply_v(as, _fname, args);
 }
 
 ValuePtr PythonRunner::evaluate(AtomSpace* as,
@@ -78,6 +74,5 @@ ValuePtr PythonRunner::evaluate(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
-	// Be sure to specify the atomspace in which to work!
 	return CastToValue(applier.apply_tv(as, _fname, args));
 }

@@ -24,14 +24,11 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/execution/Force.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/atoms/grounded/GroundedSchemaNode.h>
 #include "LibraryManager.h"
-#include "Runner.h"
+#include "PythonRunner.h"
 #include "SCMRunner.h"
-
 
 using namespace opencog;
 
@@ -67,6 +64,22 @@ void GroundedSchemaNode::init()
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
+	// At this point, we only run scheme, python schemas and functions from
+	// libraries loaded at runtime.
+	if (0 == schema.compare(0, 3, "py:", 3))
+	{
+#ifdef HAVE_CYTHON
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
+		_runner = new PythonRunner(schema.substr(pos));
+#else
+		throw RuntimeException(TRACE_INFO,
+		                       "Cannot evaluate python GroundedSchemaNode!");
+#endif /* HAVE_CYTHON */
+		return;
 	}
 }
 
@@ -105,21 +118,8 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 
 	ValuePtr result;
 
-	// At this point, we only run scheme, python schemas and functions from
-	// libraries loaded at runtime.
-	if (lang == "py")
-	{
-#ifdef HAVE_CYTHON
-		// Get a reference to the python evaluator.
-		PythonEval &applier = PythonEval::instance();
-		result = applier.apply_v(as, fun, args);
-#else
-		throw RuntimeException(TRACE_INFO,
-		                       "Cannot evaluate python GroundedSchemaNode!");
-#endif /* HAVE_CYTHON */
-	}
 	// Used by the Haskel and C++ bindings; can be used with any language
-	else if (lang == "lib")
+	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);
 
