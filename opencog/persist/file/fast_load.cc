@@ -106,20 +106,23 @@ static void get_typename(const std::string& s, size_t& l, size_t& r,
 // The string is considered to start *after* the first quote, and ends
 // just before the last quote. In this case, escaped quotes \" are
 // ignored (are considered to be part of the string).
-//If the node is a Type node, then l points at the first non-whitespace character of the type name
-//r points to the next opening parenthesis
+//
+// If the node is a Type node, then `l` points at the first
+// non-whitespace character of the type name and `r` points to the next
+// opening parenthesis.
 static void get_node_name(const std::string& s, size_t& l, size_t& r,
                           size_t line_cnt, bool typeNode = false)
 {
     // Advance past whitespace.
     while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 
-    // Tell caller to throw, if the syntax is bad.
-    if (typeNode && s[l] != '\'')
+    // Scheme strings start and end with double-quote.
+    // Scheme symbols start with single-quote.
+    if (typeNode and s[l] != '\'')
         throw std::runtime_error(
                 "Syntax error at line " + std::to_string(line_cnt) +
-                " Unexpected node type name: >>" + s.substr(l, r-l+1) + "<< in " + s);
-    else if (!typeNode && s[l] != '"')
+                " Unexpected type name: >>" + s.substr(l, r-l+1) + "<< in " + s);
+    else if (not typeNode and s[l] != '"')
         throw std::runtime_error(
             "Syntax error at line " + std::to_string(line_cnt) +
             " Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
@@ -127,7 +130,7 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
     l++;
     size_t p = l;
     if (typeNode)
-        for (; p < r and (s[p] != '(' or s[p] != ' '); p++);
+        for (; p < r and (s[p] != '(' or s[p] != ' ' or s[p] != '\t' or s[p] != '\n'); p++);
     else
         for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
     r = p;
@@ -199,7 +202,7 @@ static Handle recursive_parse(const std::string& s,
             l2 = r1;
         } else {
             get_node_name(s, l1, r1, line_cnt);
-            l2 = r1 + 1;
+            l2 = r1 + 1;   // step past trailing quote.
         }
 
         const std::string name = s.substr(l1, r1-l1);
@@ -218,7 +221,8 @@ static Handle recursive_parse(const std::string& s,
         "Got a Value, not supported: " + s);
 }
 
-Handle parseStream(std::istream& in, AtomSpace& as){
+Handle parseStream(std::istream& in, AtomSpace& as)
+{
     Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
@@ -270,8 +274,9 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
     f.close();
 }
 
-//Parse an Atomese string expression and return a Handle to the parsed atom
-Handle opencog::parseExpression(const std::string& expr, opencog::AtomSpace &as) {
+// Parse an Atomese string expression and return a Handle to the parsed atom
+Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
+{
     std::istringstream sstream(expr);
     return parseStream(sstream, as);
 }
