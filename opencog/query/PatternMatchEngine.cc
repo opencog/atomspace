@@ -1711,7 +1711,7 @@ bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
 
 			// Get the joining variable.
 			joint = find_variable_term(pterm, jvar);
-			if (nullptr == joint) continue;
+			if (PatternTerm::UNDEFINED == joint) continue;
 
 			jgnd = pr->second;
 			untried_term = pterm;
