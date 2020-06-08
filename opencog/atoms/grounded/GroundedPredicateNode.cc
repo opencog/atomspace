@@ -206,6 +206,9 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 {
 	if (_runner) return _runner->evaluate(as, cargs, silent);
 
+	// XXX FIXME -- can we get rid of the stuff from here on down?
+	// Does anybody actually use any of this?
+
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
 	// to do lazy execution correctly. Right now, forcing is the policy.
