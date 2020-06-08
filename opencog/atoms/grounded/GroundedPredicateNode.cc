@@ -192,7 +192,7 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 	Handle args(force_execute(as, cargs, silent));
 
 	if (_runner)
-		return _runner->execute(as, args, silent);
+		return _runner->evaluate(as, args, silent);
 
 	// Get the schema name.
 	const std::string& schema = get_name();

@@ -25,7 +25,6 @@
 #define _OPENCOG_RUNNER_H
 
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_atomspace
@@ -43,7 +42,7 @@ public:
 	Runner& operator=(const Runner&) = delete;
 	virtual ~Runner() {}
 
-	virtual TruthValuePtr evaluate(AtomSpace*, const Handle&, bool=false) = 0;
+	virtual ValuePtr evaluate(AtomSpace*, const Handle&, bool=false) = 0;
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false) = 0;
 };
 
