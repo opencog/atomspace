@@ -135,6 +135,11 @@ protected:
 	// default interpretation.
 	bool _is_present;
 
+	// True if this is a term that must be absent in a given grounding.
+	// This corresponds to the ABSENT_LINK in the default interpretation,
+	// and is effectively the same thing as NOT_LINK(PRESENT_LINK).
+	bool _is_absent;
+
 	// True if this contains a set of subterms, one of which must be
 	// present in the pattern. All of the sub-terms are present, or
 	// are literal. This corresponds to CHOICE_LINK in the default
@@ -144,7 +149,8 @@ protected:
 
 	// True if this is a term that must be present in every successful
 	// patten grounding. There are no groundings at all, unless this
-	// term is in each and every one of them.
+	// term is in each and every one of them. This corresponds to
+	// the ALWAYS_LINK in the default interpretation.
 	bool _is_always;
 
 	void addAnyBoundVar();
@@ -178,6 +184,9 @@ public:
 
 	void markPresent();
 	bool isPresent() const { return _is_present; }
+
+	void markAbsent();
+	bool isAbsent() const { return _is_absent; }
 
 	void markChoice();
 	bool isChoice() const { return _is_choice; }

@@ -30,6 +30,7 @@ PatternTerm::PatternTerm(void)
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
+	  _is_absent(false),
 	  _is_choice(false),
 	  _is_always(false)
 {}
@@ -49,6 +50,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
+	  _is_absent(false),
 	  _is_choice(false),
 	  _is_always(false)
 {
@@ -246,6 +248,16 @@ void PatternTerm::markPresent()
 	// By definition, everything underneath is literal
 	for (PatternTermPtr& ptm : getOutgoingSet())
 		ptm->markLiteral();
+}
+
+// ==============================================================
+
+void PatternTerm::markAbsent()
+{
+	// If quoted, it cannot be interpreted as absent.
+	if (isQuoted()) return;
+
+	_is_absent = true;
 }
 
 // ==============================================================
