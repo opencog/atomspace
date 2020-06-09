@@ -69,12 +69,12 @@ void PatternLink::common_init(void)
 
 	// Make sure every variable appears in some concrete
 	// (non-evaluatable) clause. This consists of non-evaluatable
-	// mandatory clauses and 'optionals' which must be absent.
+	// mandatory clauses and clauses which must be absent.
 	// Otherwise, we risk not being able to evaluate a clause
 	// with some ungrounded variable.
 	HandleSeq concrete_clauses(_fixed);
-	concrete_clauses.insert(concrete_clauses.end(),
-		_pat.optionals.begin(), _pat.optionals.end());
+	for (const PatternTermPtr& ptm : _pat.absents)
+		concrete_clauses.emplace_back(ptm->getHandle());
 	validate_variables(_variables.varset, concrete_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
