@@ -51,8 +51,6 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	remove_constants(_variables.varset, _pat);
-
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in thier literal form.
@@ -526,15 +524,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		for (const Handle& ho : dedupe)
 		{
-			if (not record_literal(ho) and
+			if (not is_constant(_variables.varset, ho) and
+			    not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
 			{
 				_pat.undeclared_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
 
-				// This fails ConstantClausesUTest, ImplicationUTest
-				// PatternTermPtr term(make_term_tree(ho));
-				// _pat.pmandatory.push_back(term);
+				PatternTermPtr term(make_term_tree(ho));
+				_pat.pmandatory.push_back(term);
 			}
 		}
 	}
@@ -596,8 +594,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			_pat.pmandatory.push_back(term);
 		}
 	}
-	else if (TRUE_LINK == t or FALSE_LINK == t
-	         or not is_constant(_variables.varset, hbody))
+	else if (not is_constant(_variables.varset, hbody))
 	{
 		// There's just one single clause!
 		_pat.undeclared_clauses.emplace_back(hbody);

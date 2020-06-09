@@ -27,75 +27,12 @@ using namespace opencog;
 
 namespace opencog {
 
-/**
- * Remove constant clauses from the list of clauses. Every clause
- * should contain at least one variable, or it should be evaluatable.
- * If does not, or is not, remove the clause from the list of clauses.
- *
- * The core idea is that pattern matching against a constant expression
- * "doesn't make sense" -- the constant expression will always match to
- * itself and is thus "trivial".  In principle, the programmer should
- * never include constants in the list of clauses ... but, due to
- * programmer error, this can happen, and will lead to failures during
- * pattern matching. Thus, the routine below can be used to clean up
- * the pattern-matcher input.
- *
- * Terms that contain GroundedSchema or GroundedPredicate nodes can
- * have side-effects, and are thus are not constants, even if they
- * don't contain any variables. They must be kept around, and must be
- * evaluated during the pattern search.  The definitions of
- * DefinedPredicate or DefinedSchema nodes cannot be accessed until
- * runtime evaluation/execution, so these too must be kept.
- *
- * The match for EvaluatableLink's is meant to solve the problem of
- * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
- * (SatisfactionLink (AndLink (FalseLink))), with the first returning
- * TRUE_TV, and the second returning FALSE_TV. Removing these 'constant'
- * terms would alter the result of the evaluation, potentially even
- * leaving an empty (undefined) AndLink. So we cannot really remove
- * them.
- *
- * Returns true if the list of clauses was modified, else returns false.
- */
-bool remove_constants(const HandleSet& vars, Pattern& pat)
-{
-	bool modified = false;
-
-	// Caution: this loop modifies the clauses list!
-	HandleSeq::iterator i;
-	for (i = pat.mandatory.begin(); i != pat.mandatory.end();)
-	{
-		Handle clause(*i);
-
-		if (not is_constant(vars, clause))
-		{
-			++i; continue;
-		}
-
-		i = pat.mandatory.erase(i);
-
-		// Remove the clause from literal_clauses.
-		auto qc = std::find(pat.literal_clauses.begin(),
-		                   pat.literal_clauses.end(), clause);
-		if (qc != pat.literal_clauses.end())
-			pat.literal_clauses.erase(qc);
-
-		// Remove the clause from undeclared_clauses.
-		auto uc = std::find(pat.undeclared_clauses.begin(),
-		                   pat.undeclared_clauses.end(), clause);
-		if (uc != pat.undeclared_clauses.end())
-			pat.undeclared_clauses.erase(uc);
-
-		modified = true;
-	}
-
-	return modified;
-}
-
 bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
 	bool evaluatable =
+		TRUE_LINK == ct or FALSE_LINK == ct or
+
 		// If it is an EvaluatableLink, then is is evaluatable,
 		// unless it is a closed (variable-free) EvaluationLink
 		// over a PredicateNode.

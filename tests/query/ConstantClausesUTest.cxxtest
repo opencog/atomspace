@@ -154,6 +154,7 @@ void ConstantClausesUTest::test_evaluatable_1()
  */
 void ConstantClausesUTest::test_evaluatable_2()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(NOT_LINK, IdAA), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
@@ -181,9 +182,12 @@ void ConstantClausesUTest::test_evaluatable_3()
  */
 void ConstantClausesUTest::test_constant_evaluatable_1()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK, B);
+	printf("  Found : %s\n", result->to_string().c_str());
+	printf("Expected: %s\n", expected->to_string().c_str());
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

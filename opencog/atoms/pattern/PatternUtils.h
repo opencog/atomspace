@@ -36,11 +36,6 @@
 
 namespace opencog {
 
-
-// Make sure that variables can be found in the clauses.
-// See C file for description
-bool remove_constants(const HandleSet& vars, Pattern& pat);
-
 // Return true iff the clause is evaluatable.
 bool can_evaluate(const Handle& clause);
 
