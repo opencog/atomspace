@@ -292,7 +292,11 @@ PatternLink::PatternLink(const HandleSet& vars,
 {
 	_variables.varset = vars;
 	_pat.undeclared_clauses = clauses;
-	_pat.mandatory = clauses;
+	for (const Handle& clause : clauses)
+	{
+		PatternTermPtr root_term(make_term_tree(clause));
+		_pat.pmandatory.push_back(root_term);
+	}
 	common_init();
 	setup_components();
 }
