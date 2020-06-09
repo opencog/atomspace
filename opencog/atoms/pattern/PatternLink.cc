@@ -654,7 +654,6 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
 		{
 			_pat.undeclared_clauses.emplace_back(ho);
-			_pat.mandatory.emplace_back(ho);
 
 			PatternTermPtr term(make_term_tree(ho));
 			_pat.pmandatory.push_back(term);
@@ -1214,10 +1213,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 
 	// If a term is literal then the corresponding pattern term
 	// should be also. We should be creating PatternTerms earlier ...
-	if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
-	    != _pat.literal_clauses.end()
-	    or
-	    _pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
+	if (_pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
    {
 		if (CHOICE_LINK == t)
 		{
