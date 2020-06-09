@@ -54,10 +54,10 @@ void PatternLink::common_init(void)
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in thier literal form.
-	for (const Handle& h : _pat.literal_clauses)
+	for (const Handle& h : _pat.mandatory)
 	{
-		if (std::find(_pat.mandatory.begin(), _pat.mandatory.end(), h)
-			 != _pat.mandatory.end())
+		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
+			 != _pat.literal_clauses.end())
 		_fixed.push_back(h);
 	}
 
