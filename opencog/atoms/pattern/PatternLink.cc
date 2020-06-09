@@ -529,7 +529,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
 		// See also FIXME above.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
-		unbundle_clauses_rec(hbody, connectives);
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
 			_pat.undeclared_clauses.emplace_back(hbody);
