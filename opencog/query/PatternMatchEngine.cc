@@ -2224,7 +2224,7 @@ bool PatternMatchEngine::do_next_clause(void)
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// no virtuals, no black boxes, no optionals.
+	// no virtuals, no black boxes, no absents.
 	if (get_next_thinnest_clause(false, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
@@ -2237,8 +2237,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	// Try again, this time, considering the optional clauses.
-	if (not _pat->optionals.empty())
+	// Try again, this time, considering the absent clauses.
+	if (not _pat->absents.empty())
 	{
 		if (get_next_thinnest_clause(false, false, true)) return;
 		if (not _pat->evaluatable_holders.empty())
@@ -2369,7 +2369,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 /// Return true if we found the next ungrounded clause.
 bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
                                                   bool search_black,
-                                                  bool search_optionals)
+                                                  bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -2434,7 +2434,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
-			        and (search_optionals or not root->isAbsent()))
+			        and (search_absents or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
 				if (root_thickness < thinnest_clause)
