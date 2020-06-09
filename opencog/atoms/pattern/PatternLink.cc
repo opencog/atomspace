@@ -245,7 +245,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 		{
 			return is_atom_in_tree(abs->getHandle(), h);
 		};
-		auto it = std::find_if(absts.begin(), absts.end(), h_is_in);
+		const auto& it = std::find_if(absts.begin(), absts.end(), h_is_in);
 		if (it != absts.end())
 		{
 			// Clone the PatternTerm. We can't use the old one.
@@ -257,6 +257,9 @@ PatternLink::PatternLink(const HandleSet& vars,
 		else
 		{
 			_pat.mandatory.emplace_back(h);
+
+			// PatternTermPtr term(make_term_tree(h));
+			// _pat.pmandatory.push_back(term);
 		}
 	}
 	locate_defines(compo);
@@ -347,6 +350,10 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 		{
 			_pat.literal_clauses.emplace_back(ph);
 			_pat.mandatory.emplace_back(ph);
+
+			PatternTermPtr term(make_term_tree(ph));
+			term->markLiteral();
+			_pat.pmandatory.push_back(term);
 		}
 		return true;
 	}
@@ -369,12 +376,20 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 				{
 					_pat.mandatory.emplace_back(php);
 					_pat.literal_clauses.emplace_back(php);
+
+					PatternTermPtr term(make_term_tree(php));
+					term->markLiteral();
+					_pat.pmandatory.push_back(term);
 				}
 			}
 			else
 			{
 				_pat.mandatory.emplace_back(ph);
 				_pat.literal_clauses.emplace_back(ph);
+
+				PatternTermPtr term(make_term_tree(ph));
+				term->markLiteral();
+				_pat.pmandatory.push_back(term);
 			}
 			return true;
 		}
@@ -1110,8 +1125,17 @@ void PatternLink::make_term_trees()
 {
 	for (const Handle& clause : _pat.mandatory)
 	{
-		PatternTermPtr root_term(make_term_tree(clause));
-		_pat.pmandatory.push_back(root_term);
+		auto done_already = [&](const PatternTermPtr& pman)
+		{
+			return pman->getHandle() == clause;
+		};
+		auto it = std::find_if(_pat.pmandatory.begin(),
+		            _pat.pmandatory.end(), done_already);
+		if (_pat.pmandatory.end() == it)
+		{
+			PatternTermPtr root_term(make_term_tree(clause));
+			_pat.pmandatory.push_back(root_term);
+		}
 	}
 }
 
