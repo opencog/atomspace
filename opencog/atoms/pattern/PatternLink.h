@@ -164,7 +164,7 @@ public:
 	PatternLink(const HandleSet& vars,
 	            const Variables& varspec,
 	            const HandleSeq& component,
-	            const HandleSeq& optionals);
+	            const PatternTermSeq& absents);
 
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,

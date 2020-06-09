@@ -144,7 +144,7 @@ void PatternLink::setup_components(void)
 		Handle h(createPatternLink(_component_vars[i],
 		                           _variables,
 		                           _components[i],
-		                           _pat.optionals));
+		                           _pat.absents));
 		_component_patterns.emplace_back(h);
 	}
 }
@@ -205,7 +205,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 PatternLink::PatternLink(const HandleSet& vars,
                          const Variables& varspec,
                          const HandleSeq& compo,
-                         const HandleSeq& opts)
+                         const PatternTermSeq& absts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	// First, lets deal with the vars. We have discarded the original
@@ -241,12 +241,15 @@ PatternLink::PatternLink(const HandleSet& vars,
 	// the mandatory clauses; we have to reconstruct the optionals.
 	for (const Handle& h : compo)
 	{
-		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
-		auto it = std::find_if(opts.begin(), opts.end(), h_is_in);
-		if (it != opts.end())
+		auto h_is_in = [&](const PatternTermPtr& abs)
 		{
-			_pat.optionals.emplace_back(*it);
-			PatternTermPtr term(make_term_tree(*it));
+			return is_atom_in_tree(abs->getHandle(), h);
+		};
+		auto it = std::find_if(absts.begin(), absts.end(), h_is_in);
+		if (it != absts.end())
+		{
+			// Clone the PatternTerm. We can't use the old one.
+			PatternTermPtr term(make_term_tree((*it)->getHandle()));
 			term->markLiteral();
 			term->markAbsent();
 			_pat.absents.push_back(term);
