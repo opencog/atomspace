@@ -268,8 +268,8 @@ void PatternTerm::markChoice()
 
 void PatternTerm::markAlways()
 {
-	// If its literal, its effectively quoted, so cannot be always.
-	if (_is_literal or isQuoted()) return;
+	// If its quoted, it cannot be always.
+	if (isQuoted()) return;
 
 	_is_always = true;
 }
