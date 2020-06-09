@@ -124,7 +124,7 @@ void PatternLink::common_init(void)
 
 	get_clause_variables(_pat.pmandatory);
 	get_clause_variables(_pat.absents);
-	get_clause_variables(_pat.palways);
+	get_clause_variables(_pat.always);
 
 	// Find prunable terms.
 	locate_cacheable(concrete_clauses);
@@ -425,7 +425,10 @@ _pat.mandatory.emplace_back(h);
 	{
 		for (const Handle& ah: h->getOutgoingSet())
 		{
-			_pat.always.emplace_back(ah);
+			PatternTermPtr term(make_term_tree(ah));
+			term->markLiteral();
+			term->markAlways();
+			_pat.always.push_back(term);
 			_pat.undeclared_clauses.emplace_back(ah);
 		}
 		return true;
@@ -1105,12 +1108,6 @@ void PatternLink::make_term_trees()
 		root_term->markLiteral();
 		_pat.absents.push_back(root_term);
 	}
-	for (const Handle& clause : _pat.always)
-	{
-		PatternTermPtr root_term(make_term_tree(clause));
-		root_term->markLiteral();
-		_pat.palways.push_back(root_term);
-	}
 }
 
 PatternTermPtr PatternLink::make_term_tree(const Handle& term)
@@ -1218,7 +1215,7 @@ void PatternLink::debug_log(void) const
 	              _pat.redex_name.c_str());
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
 	logger().fine("%lu absent clauses", _pat.absents.size());
-	logger().fine("%lu always clauses", _pat.palways.size());
+	logger().fine("%lu always clauses", _pat.always.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
@@ -1258,11 +1255,11 @@ void PatternLink::debug_log(void) const
 	else
 		logger().fine("No must-be-absent clauses");
 
-	if (0 < _pat.palways.size())
+	if (0 < _pat.always.size())
 	{
 		logger().fine("Pattern has for-all clauses:");
 		cl = 0;
-		for (const PatternTermPtr& ptm : _pat.palways)
+		for (const PatternTermPtr& ptm : _pat.always)
 		{
 			const Handle& h = ptm->getHandle();
 			std::stringstream ss;

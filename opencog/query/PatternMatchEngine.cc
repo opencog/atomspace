@@ -2018,7 +2018,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
-	if (is_always(clause))
+	if (clause->isAlways())
 	{
 		_did_check_forall = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
@@ -2252,8 +2252,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// Now loop over all for-all clauses.
-	// I think that all variables will be grounded at this point, right?
-	for (const PatternTermPtr& root : _pat->palways)
+	// All variables must neccessarily be grounded at this point.
+	for (const PatternTermPtr& root : _pat->always)
 	{
 		if (issued.end() != issued.find(root)) continue;
 		issued.insert(root);
@@ -2752,7 +2752,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	_did_check_forall = false;
 	bool found = explore_term_branches(term, grnd, clause);
 
-	if (not _did_check_forall and is_always(clause))
+	if (not _did_check_forall and clause->isAlways())
 	{
 		// We need to record failures for the AlwaysLink
 		Handle empty;
@@ -2786,7 +2786,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 	{
 		return clause_accept(clause, grnd);
 	}
-	else if (is_always(clause))
+	else if (clause->isAlways())
 	{
 		// We need to record failures for the AlwaysLink
 		Handle empty;

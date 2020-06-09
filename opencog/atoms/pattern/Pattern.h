@@ -101,8 +101,7 @@ struct Pattern
 
 	/// The always (for-all) clauses have to always be grounded the same
 	/// way. Any grounding failure at all invalidates all other groundings.
-	HandleSeq      always;       // ForAll clauses
-	PatternTermSeq palways;
+	PatternTermSeq always;
 
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means

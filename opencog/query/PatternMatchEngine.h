@@ -61,13 +61,6 @@ private:
 		return is_optional(ptm->getHandle());
 	}
 
-	bool is_always(const Handle& h) {
-		const HandleSeq& o(_pat->always);
-		return o.end() != std::find(o.begin(), o.end(), h); }
-	bool is_always(const PatternTermPtr& ptm) {
-		return is_always(ptm->getHandle());
-	}
-
 	// XXX FIXME, change to call ptm->hasAnyEvaluatable().
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }
