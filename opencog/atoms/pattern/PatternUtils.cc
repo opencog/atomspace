@@ -224,48 +224,26 @@ void get_connected_components(const HandleSet& vars,
 	}
 }
 
-// Unfortunately for us, the list of clauses that we were given
-// includes the optionals. It might be nice if this was fixed
-// upstream, but that seems to be hard. XXX FIXME. So, here,
-// we brute-force remove them.
-static HandleSeq get_nonopts(const HandleSeq& clauses,
-                             const HandleSeq& opts)
-{
-	HandleSeq nonopts;
-	for (const Handle& h: clauses)
-	{
-		bool is_opt = false;
-		for (const Handle& opt: opts)
-		{
-			if (h == opt) { is_opt = true; break; }
-		}
-		if (not is_opt) nonopts.emplace_back(h);
-	}
-	return nonopts;
-}
-
 void get_bridged_components(const HandleSet& vars,
-                            const HandleSeq& clauses,
+                            const HandleSeq& nonopts,
                             const HandleSeq& opts,
                             HandleSeqSeq& components,
                             HandleSetSeq& component_vars)
 {
 	if (0 == opts.size())
 	{
-		get_connected_components(vars, clauses, components, component_vars);
+		get_connected_components(vars, nonopts, components, component_vars);
 		return;
 	}
 
-	// Some optionals bridge across components; others simply
-	// connect to some of them. We need to figure out which is which.
-
-	HandleSeq nonopts(get_nonopts(clauses, opts));
 	if (0 == nonopts.size())
 	{
 		get_connected_components(vars, opts, components, component_vars);
 		return;
 	}
 
+	// Some optionals bridge across components; others simply
+	// connect to some of them. We need to figure out which is which.
 	get_connected_components(vars, nonopts, components, component_vars);
 
 	// Now try to attach opts.
