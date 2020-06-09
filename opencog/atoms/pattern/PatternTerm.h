@@ -142,6 +142,11 @@ protected:
 	// is in a boolean evaluatable context.
 	bool _is_choice;
 
+	// True if this is a term that must be present in every successful
+	// patten grounding. There are no groundings at all, unless this
+	// term is in each and every one of them.
+	bool _is_always;
+
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
 	void addAnyEvaluatable();
@@ -176,6 +181,9 @@ public:
 
 	void markChoice();
 	bool isChoice() const { return _is_choice; }
+
+	void markAlways();
+	bool isAlways() const { return _is_always; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }

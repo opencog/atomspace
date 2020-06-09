@@ -30,7 +30,8 @@ PatternTerm::PatternTerm(void)
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
-	  _is_choice(false)
+	  _is_choice(false),
+	  _is_always(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -48,7 +49,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
-	  _is_choice(false)
+	  _is_choice(false),
+	  _is_always(false)
 {
 	Type t = h->get_type();
 
@@ -260,6 +262,16 @@ void PatternTerm::markChoice()
 	{
 		if (not ptm->isPresent()) ptm->markLiteral();
 	}
+}
+
+// ==============================================================
+
+void PatternTerm::markAlways()
+{
+	// If its literal, its effectively quoted, so cannot be always.
+	if (_is_literal or isQuoted()) return;
+
+	_is_always = true;
 }
 
 // ==============================================================
