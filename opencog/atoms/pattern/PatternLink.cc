@@ -256,15 +256,14 @@ PatternLink::PatternLink(const HandleSet& vars,
 		{
 			_pat.mandatory.emplace_back(h);
 
-			// PatternTermPtr term(make_term_tree(h));
-			// _pat.pmandatory.push_back(term);
+			PatternTermPtr term(make_term_tree(h));
+			_pat.pmandatory.push_back(term);
 		}
 	}
 	locate_defines(compo);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_pat.mandatory);
-	make_term_trees();
 
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
