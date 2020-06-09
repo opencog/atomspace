@@ -596,15 +596,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			_pat.pmandatory.push_back(term);
 		}
 	}
-	else
+	else if (TRUE_LINK == t or FALSE_LINK == t
+	         or not is_constant(_variables.varset, hbody))
 	{
 		// There's just one single clause!
 		_pat.undeclared_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
 
-		// This fails ConstantClausesUTest
-		// PatternTermPtr term(make_term_tree(hbody));
-		// _pat.pmandatory.push_back(term);
+		PatternTermPtr term(make_term_tree(hbody));
+		_pat.pmandatory.push_back(term);
 	}
 }
 
