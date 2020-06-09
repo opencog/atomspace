@@ -246,6 +246,10 @@ PatternLink::PatternLink(const HandleSet& vars,
 		if (it != opts.end())
 		{
 			_pat.optionals.emplace_back(*it);
+			PatternTermPtr term(make_term_tree(*it));
+			term->markLiteral();
+			term->markAbsent();
+			_pat.absents.push_back(term);
 		}
 		else
 		{
@@ -412,6 +416,10 @@ _pat.mandatory.emplace_back(h);
 		const Handle& inv(h->getOutgoingAtom(0));
 		_pat.optionals.emplace_back(inv);
 		_pat.literal_clauses.emplace_back(inv);
+		PatternTermPtr term(make_term_tree(inv));
+		term->markLiteral();
+		term->markAbsent();
+		_pat.absents.push_back(term);
 		return true;
 	}
 
@@ -1101,13 +1109,6 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(make_term_tree(clause));
 		_pat.pmandatory.push_back(root_term);
-	}
-	for (const Handle& clause : _pat.optionals)
-	{
-		PatternTermPtr root_term(make_term_tree(clause));
-		root_term->markLiteral();
-		root_term->markAbsent();
-		_pat.absents.push_back(root_term);
 	}
 }
 
