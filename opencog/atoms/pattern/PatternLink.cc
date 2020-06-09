@@ -655,6 +655,9 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		{
 			_pat.undeclared_clauses.emplace_back(ho);
 			_pat.mandatory.emplace_back(ho);
+
+			PatternTermPtr term(make_term_tree(ho));
+			_pat.pmandatory.push_back(term);
 		}
 	}
 	return recorded;
@@ -1028,6 +1031,9 @@ bool PatternLink::add_dummies()
 				{
 					_pat.mandatory.emplace_back(v);
 					_fixed.emplace_back(v);
+
+					PatternTermPtr term(make_term_tree(v));
+					_pat.pmandatory.push_back(term);
 				}
 			}
 		}
