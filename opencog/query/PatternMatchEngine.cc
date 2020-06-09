@@ -2011,7 +2011,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (is_optional(clause))
+	if (clause->isAbsent())
 	{
 		clause_accepted = true;
 		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
@@ -2110,7 +2110,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	logmsg("Next clause is", do_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_optional(do_clause)? "optional" : "required");})
+		              << (do_clause->isAbsent()? "absent" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (is_evaluatable(do_clause)?
 		                  "dynamically evaluatable" : "non-dynamic");
@@ -2145,7 +2145,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (is_optional(next_clause)))
+	       (next_clause->isAbsent()))
 	{
 		Handle curr_root = next_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
@@ -2434,7 +2434,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
-			        and (search_optionals or not is_optional(root)))
+			        and (search_optionals or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
 				if (root_thickness < thinnest_clause)

@@ -53,14 +53,6 @@ private:
 	const Variables* _variables;
 	const Pattern* _pat;
 
-	bool is_optional(const Handle& h) {
-		// return (_pat->optionals.count(h) != 0); }
-		const HandleSeq& o(_pat->optionals);
-		return o.end() != std::find(o.begin(), o.end(), h); }
-	bool is_optional(const PatternTermPtr& ptm) {
-		return is_optional(ptm->getHandle());
-	}
-
 	// XXX FIXME, change to call ptm->hasAnyEvaluatable().
 	bool is_evaluatable(const Handle& h) {
 		return (_pat->evaluatable_holders.count(h) != 0); }

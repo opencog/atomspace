@@ -1106,6 +1106,7 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(make_term_tree(clause));
 		root_term->markLiteral();
+		root_term->markAbsent();
 		_pat.absents.push_back(root_term);
 	}
 }
