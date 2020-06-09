@@ -417,6 +417,11 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 // is why this code is badly indented!
 _pat.literal_clauses.emplace_back(h);
 _pat.mandatory.emplace_back(h);
+
+// Doing the below wrecks ChoiceLinkUTest
+//PatternTermPtr term(make_term_tree(h));
+//term->markLiteral();
+//_pat.pmandatory.push_back(term);
 		return true;
 	}
 
@@ -526,6 +531,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				_pat.undeclared_clauses.emplace_back(ho);
 				_pat.mandatory.emplace_back(ho);
+
+				// This fails ConstantClausesUTest, ImplicationUTest
+				// PatternTermPtr term(make_term_tree(ho));
+				// _pat.pmandatory.push_back(term);
 			}
 		}
 	}
@@ -548,6 +557,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		_pat.undeclared_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
+
+		PatternTermPtr term(make_term_tree(hbody));
+		_pat.pmandatory.push_back(term);
 	}
 
 	// A top-level OrLink with a single member. Unwrap it.
@@ -562,6 +574,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		{
 			_pat.undeclared_clauses.emplace_back(hbody);
 			_pat.mandatory.emplace_back(hbody);
+
+			PatternTermPtr term(make_term_tree(hbody));
+			_pat.pmandatory.push_back(term);
 		}
 	}
 
@@ -576,6 +591,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		{
 			_pat.undeclared_clauses.emplace_back(hbody);
 			_pat.mandatory.emplace_back(hbody);
+
+			PatternTermPtr term(make_term_tree(hbody));
+			_pat.pmandatory.push_back(term);
 		}
 	}
 	else
@@ -583,6 +601,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// There's just one single clause!
 		_pat.undeclared_clauses.emplace_back(hbody);
 		_pat.mandatory.emplace_back(hbody);
+
+		// This fails ConstantClausesUTest
+		// PatternTermPtr term(make_term_tree(hbody));
+		// _pat.pmandatory.push_back(term);
 	}
 }
 
