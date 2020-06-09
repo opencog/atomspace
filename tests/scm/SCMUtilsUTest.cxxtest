@@ -147,6 +147,24 @@ void SCMUtilsUTest::test_utils(void)
 	TSM_ASSERT("Error setting up for cog-get-link", Handle::UNDEFINED != ref);
 	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);
 
+	// Test cog-get-atoms -----------------------------
+	Handle cpts = evaluator->eval_h("cpts");
+	CHKERR;
+	Handle cpts_n_subtypes = evaluator->eval_h("cpts-n-subtypes");
+	CHKERR;
+	Handle nodes_n_subtypes = evaluator->eval_h("nodes-n-subtypes");
+	CHKERR;
+	Handle x_cpts = evaluator->eval_h("x-cpts");
+	CHKERR;
+	Handle x_cpts_n_subtypes = evaluator->eval_h("x-cpts-n-subtypes");
+	CHKERR;
+	Handle x_nodes_n_subtypes = evaluator->eval_h("x-nodes-n-subtypes");
+	CHKERR;
+
+	TS_ASSERT_EQUALS(cpts, x_cpts);
+	TS_ASSERT_EQUALS(cpts_n_subtypes, x_cpts_n_subtypes);
+	TS_ASSERT_EQUALS(nodes_n_subtypes, x_nodes_n_subtypes);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

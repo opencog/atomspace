@@ -250,7 +250,8 @@
 			#f
 		)
 		(if (and (not (null? subtypes)) (eq? (car subtypes) #t))
-			(for-each (lambda (x) (cog-map-type mklist x)) (cog-get-all-subtypes atom-type))
+			(for-each (lambda (x) (cog-map-type mklist x))
+				(cons atom-type (cog-get-all-subtypes atom-type)))
 			(cog-map-type mklist atom-type))
 		lst
 	)
