@@ -54,11 +54,12 @@ void PatternLink::common_init(void)
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in thier literal form.
-	for (const Handle& h : _pat.mandatory)
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
-		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(), h)
+		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(),
+		              ptm->getHandle())
 			 != _pat.literal_clauses.end())
-		_fixed.push_back(h);
+		_fixed.push_back(ptm->getHandle());
 	}
 
 	// Locate the black-box and clear-box clauses.
