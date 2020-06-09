@@ -103,8 +103,6 @@ void PatternLink::common_init(void)
 
 	add_dummies();
 
-	make_term_trees();
-
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
 	                       _components, _component_vars);
@@ -419,10 +417,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 _pat.literal_clauses.emplace_back(h);
 _pat.mandatory.emplace_back(h);
 
-// Doing the below wrecks ChoiceLinkUTest
-//PatternTermPtr term(make_term_tree(h));
-//term->markLiteral();
-//_pat.pmandatory.push_back(term);
+PatternTermPtr term(make_term_tree(h));
+term->markChoice();
+_pat.pmandatory.push_back(term);
 		return true;
 	}
 
@@ -1145,24 +1142,6 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 			throw SyntaxException(TRACE_INFO,
 				"Poorly-formed query; a variable declaration for %s is needed!",
 				v->to_short_string().c_str());
-	}
-}
-
-void PatternLink::make_term_trees()
-{
-	for (const Handle& clause : _pat.mandatory)
-	{
-		auto done_already = [&](const PatternTermPtr& pman)
-		{
-			return pman->getHandle() == clause;
-		};
-		auto it = std::find_if(_pat.pmandatory.begin(),
-		            _pat.pmandatory.end(), done_already);
-		if (_pat.pmandatory.end() == it)
-		{
-			PatternTermPtr root_term(make_term_tree(clause));
-			_pat.pmandatory.push_back(root_term);
-		}
 	}
 }
 
