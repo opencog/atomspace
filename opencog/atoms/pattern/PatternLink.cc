@@ -1182,6 +1182,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if (nameserver().isA(t, UNORDERED_LINK))
 		ptm->addUnorderedLink();
 
+	if (can_evaluate(h)) ptm->addEvaluatable();
+
 	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
@@ -1192,8 +1194,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	}
 
 	// If a term is literal then the corresponding pattern term
-	// should be also. We should be creating PatternTerms earlier ...
-	if (_pat.evaluatable_holders.find(h) == _pat.evaluatable_holders.end())
+	// should be also.
+	if (not ptm->hasEvaluatable())
    {
 		if (CHOICE_LINK == t)
 		{
