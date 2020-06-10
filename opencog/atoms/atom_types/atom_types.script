@@ -842,8 +842,8 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 //
 // XXX These are currently not implemented (viz they don't actually
 // work as virtual links).
-FORALL_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
+FORALL_LINK <- SCOPE_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK
 
 // Concept constructor
 SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
