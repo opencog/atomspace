@@ -53,12 +53,6 @@ private:
 	const Variables* _variables;
 	const Pattern* _pat;
 
-	// XXX FIXME, change to call ptm->hasAnyEvaluatable().
-	bool is_evaluatable(const Handle& h) {
-		return (_pat->evaluatable_holders.count(h) != 0); }
-	bool is_evaluatable(const PatternTermPtr& ptm) {
-		return (_pat->evaluatable_holders.count(ptm->getHandle()) != 0); }
-
 	bool is_black(const PatternTermPtr& ptm) {
 		return (_pat->black.count(ptm->getHandle()) != 0); }
 

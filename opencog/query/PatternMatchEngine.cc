@@ -2032,7 +2032,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 	}
 	if (not match) return false;
 
-	if (not is_evaluatable(clause))
+	if (not clause->hasAnyEvaluatable())
 	{
 		clause_grounding[clause_root] = hg;
 
@@ -2112,7 +2112,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
 		              << (do_clause->isAbsent()? "absent" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_evaluatable(do_clause)?
+		              << (do_clause->hasAnyEvaluatable()?
 		                  "dynamically evaluatable" : "non-dynamic");
 	logmsg("Joining variable is", joiner);
 	logmsg("Joining grounding is", var_grounding[joiner]); })
@@ -2432,7 +2432,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		{
 			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
-			        and (search_virtual or not is_evaluatable(root))
+			        and (search_virtual or not root->hasAnyEvaluatable())
 			        and (search_black or not is_black(root))
 			        and (search_absents or not root->isAbsent()))
 			{
@@ -2858,7 +2858,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const PatternTermPtr& pclause)
 {
 	// Evaluatable clauses are not cacheable.
-	if (is_evaluatable(pclause))
+	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
 
 	// Build the cache lookup key
