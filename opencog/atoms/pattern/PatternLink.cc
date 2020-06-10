@@ -1134,13 +1134,24 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	Handle h(ptm->getHandle());
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
+	// Recurse down to the tips, first.
+	if (h->is_link())
+	{
+		for (const Handle& ho: h->getOutgoingSet())
+		{
+			PatternTermPtr po(ptm->addOutgoingTerm(ho));
+			make_term_tree_recursive(root, po);
+		}
+	}
+
 	// If the current node is a bound variable, store this as a
 	// bool flag, recursively, up into the parent tree, for later use.
 	// The addBoundVariable() method walks upwards into the parent to
 	// set this flag.
 	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
-	    and _variables.varset.end() != _variables.varset.find(h))
+	    and _variables.varset.end() != _variables.varset.find(h)
+	    and not ptm->isQuoted())
 	{
 		ptm->addBoundVariable();
 
@@ -1163,35 +1174,29 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	    and can_evaluate(h))
 	{
 		ptm->addEvaluatable();
-	}
-
-	if (h->is_link())
-	{
-		for (const Handle& ho: h->getOutgoingSet())
-		{
-			PatternTermPtr po(ptm->addOutgoingTerm(ho));
-			make_term_tree_recursive(root, po);
-		}
+		return;
 	}
 
 	// If a term is literal then the corresponding pattern term
 	// should be also.
-	if (not ptm->hasEvaluatable())
-   {
-		if (CHOICE_LINK == t)
+	if (CHOICE_LINK == t)
+	{
+		for (PatternTermPtr& optm: ptm->getOutgoingSet())
 		{
-			for (PatternTermPtr& optm: ptm->getOutgoingSet())
-			{
-				if (PRESENT_LINK == optm->getHandle()->get_type())
-					optm->markPresent();
-			}
-			ptm->markChoice();
+			if (PRESENT_LINK == optm->getHandle()->get_type())
+				optm->markPresent();
 		}
-		else if (PRESENT_LINK == t)
-			ptm->markPresent();
-		else
-			ptm->markLiteral();
-   }
+		ptm->markChoice();
+		return;
+	}
+
+	if (PRESENT_LINK == t)
+	{
+		ptm->markPresent();
+		return;
+	}
+
+	ptm->markLiteral();
 }
 
 /* ================================================================= */
