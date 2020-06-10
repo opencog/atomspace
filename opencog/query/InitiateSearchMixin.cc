@@ -495,7 +495,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
-		return pme.explore_constant_evaluatables(_pattern->mandatory);
+		return pme.explore_constant_evaluatables(_pattern->pmandatory);
 	}
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})

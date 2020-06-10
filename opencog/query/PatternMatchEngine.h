@@ -312,7 +312,7 @@ public:
 	// Evaluate constant evaluatable and ground it via the
 	// PatternMatchCallback. It is assumed that all clauses are
 	// connected by an AndLink.
-	bool explore_constant_evaluatables(const HandleSeq& clauses);
+	bool explore_constant_evaluatables(const PatternTermSeq& clauses);
 
 	// Handy-dandy utilities
 	static void print_solution(const GroundingMap &vars,

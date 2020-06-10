@@ -2956,12 +2956,14 @@ void PatternMatchEngine::clear_current_state(void)
 	issued.clear();
 }
 
-bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
+bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)
 {
 	bool found = true;
-	for (const Handle& clause : clauses) {
-		if (is_in(clause, _pat->evaluatable_holders)) {
-			found = _pmc.evaluate_sentence(clause, GroundingMap());
+	for (const PatternTermPtr& clause : clauses)
+	{
+		if (clause->hasAnyEvaluatable())
+		{
+			found = _pmc.evaluate_sentence(clause->getHandle(), GroundingMap());
 			if (not found)
 				break;
 		}
