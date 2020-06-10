@@ -1233,8 +1233,7 @@ void PatternLink::debug_log(void) const
 		const Handle& h = ptm->getHandle();
 		std::stringstream ss;
 		ss << "Mandatory " << cl << ":";
-		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-			ss << " (evaluatable)";
+		if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";
 		ss << std::endl;
 		ss << h->to_short_string();
 		logger().fine() << ss.str();
@@ -1250,9 +1249,6 @@ void PatternLink::debug_log(void) const
 			const Handle& h = ptm->getHandle();
 			std::stringstream ss;
 			ss << "Optional clause " << cl << ":" << std::endl;
-			OC_ASSERT(_pat.evaluatable_holders.find(h) ==
-			          _pat.evaluatable_holders.end(),
-			          "Absent clauses cannot be evaluatable!");
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
@@ -1270,8 +1266,7 @@ void PatternLink::debug_log(void) const
 			const Handle& h = ptm->getHandle();
 			std::stringstream ss;
 			ss << "Always clause " << cl << ":";
-			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-				ss << " (evaluatable)";
+			if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";
 			ss << std::endl;
 			ss << h->to_short_string();
 			logger().fine() << ss.str();
