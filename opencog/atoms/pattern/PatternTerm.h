@@ -167,6 +167,11 @@ public:
 
 	PatternTermPtr getParent() const noexcept { return _parent; }
 	bool isDescendant(const PatternTermPtr&) const;
+	PatternTermPtr getRoot() noexcept {
+		PatternTermPtr root = shared_from_this();
+		while (root->_parent->_handle) root = _parent;
+		return root;
+	}
 
 	PatternTermPtr addOutgoingTerm(const Handle&);
 	PatternTermSeq getOutgoingSet() const;
