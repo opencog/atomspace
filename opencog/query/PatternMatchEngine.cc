@@ -2220,7 +2220,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (get_next_thinnest_clause(false, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
-	if (not _pat->evaluatable_holders.empty())
+	if (_pat->have_evaluatable_holders)
 	{
 		if (get_next_thinnest_clause(true, false, false)) return;
 		if (not _pat->black.empty())
@@ -2233,7 +2233,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (not _pat->absents.empty())
 	{
 		if (get_next_thinnest_clause(false, false, true)) return;
-		if (not _pat->evaluatable_holders.empty())
+		if (_pat->have_evaluatable_holders)
 		{
 			if (get_next_thinnest_clause(true, false, true)) return;
 			if (not _pat->black.empty())
