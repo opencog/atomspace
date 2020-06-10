@@ -27,6 +27,13 @@ using namespace opencog;
 
 namespace opencog {
 
+bool is_black_box(const Handle& clause)
+{
+	return
+		contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+}
+
 bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
@@ -44,8 +51,7 @@ bool can_evaluate(const Handle& clause)
 		// XXX FIXME Are the below needed?
 		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
 		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+		or is_black_box(clause);
 
 	return evaluatable;
 }
