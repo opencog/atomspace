@@ -120,7 +120,7 @@ protected:
 
 	void locate_cacheable(const HandleSeq& clauses);
 
-	bool add_dummies();
+	void add_dummies(void);
 
 	void trace_connectives(const TypeSet&,
 	                       const Handle& body,

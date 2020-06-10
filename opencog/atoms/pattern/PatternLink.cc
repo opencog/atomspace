@@ -972,7 +972,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 /// atomspace, resulting in infinite recursion and a blown stack.
 /// Not clear how to avoid that...
 ///
-bool PatternLink::add_dummies()
+void PatternLink::add_dummies()
 {
 	// The below is almost but not quite the same as
 	// if (0 < _fixed.size()) return; because fixed can be
@@ -981,7 +981,7 @@ bool PatternLink::add_dummies()
 	for (const Handle& cl : _pat.undeclared_clauses)
 	{
 		// if (0 == _pat.evaluatable_holders.count(cl)) return;
-		if (0 == _pat.evaluatable_terms.count(cl)) return false;
+		if (0 == _pat.evaluatable_terms.count(cl)) return;
 	}
 
 	for (const Handle& t : _pat.evaluatable_terms)
@@ -1008,8 +1008,6 @@ bool PatternLink::add_dummies()
 			}
 		}
 	}
-
-	return true;
 }
 
 /* ================================================================= */
