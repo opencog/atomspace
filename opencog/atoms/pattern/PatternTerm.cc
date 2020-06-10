@@ -141,7 +141,7 @@ void PatternTerm::addAnyBoundVar()
 	if (not _has_any_bound_var)
 	{
 		_has_any_bound_var = true;
-		if (_parent != PatternTerm::UNDEFINED)
+		if (_parent->_handle)
 			_parent->addAnyBoundVar();
 	}
 }
@@ -158,7 +158,7 @@ void PatternTerm::addBoundVariable()
 	// Mark just this term (the variable itself)
 	// and mark the term that holds us.
 	_is_bound_var = true;
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 			_parent->_has_bound_var = true;
 
 	// Mark recursively, all the way to the root.
@@ -173,7 +173,7 @@ void PatternTerm::addAnyGlobbyVar()
 	if (not _has_any_globby_var)
 	{
 		_has_any_globby_var = true;
-		if (_parent != PatternTerm::UNDEFINED)
+		if (_parent->_handle)
 			_parent->addAnyGlobbyVar();
 	}
 }
@@ -184,7 +184,7 @@ void PatternTerm::addGlobbyVar()
 
 	_is_globby_var = true;
 
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->_has_globby_var = true;
 
 	addAnyGlobbyVar();
@@ -196,19 +196,18 @@ void PatternTerm::addGlobbyVar()
 
 void PatternTerm::addAnyEvaluatable()
 {
-	if (not _has_any_evaluatable)
-	{
-		_has_any_evaluatable = true;
-		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addAnyEvaluatable();
-	}
+	if (_has_any_evaluatable) return;
+
+	_has_any_evaluatable = true;
+	if (_parent->_handle)
+		_parent->addAnyEvaluatable();
 }
 
 void PatternTerm::addEvaluatable()
 {
 	_has_evaluatable = true;
 
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->_has_evaluatable = true;
 
 	addAnyEvaluatable();
@@ -221,7 +220,7 @@ void PatternTerm::addUnorderedLink()
 	if (_has_any_unordered_link) return;
 
 	_has_any_unordered_link = true;
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->addUnorderedLink();
 }
 
@@ -232,6 +231,8 @@ void PatternTerm::markLiteral()
 	if (_is_literal) return;
 
 	_is_literal = true;
+	_has_evaluatable = false;
+	_has_any_evaluatable = false;
 	for (PatternTermPtr& ptm : getOutgoingSet())
 		ptm->markLiteral();
 }
