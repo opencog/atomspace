@@ -1921,14 +1921,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		//    is too harsh. It may be in the middle of some function that
 		//    expects a boolean value as an argument. But I don't know of
 		//    any, just right now.
-		//
-		// Anyway, all of this talk abbout booleans is emphasizing the
-		// point that, someday, we need to replace this crisp logic with
-		// probabalistic logic of some sort.
-		//
-		// By the way, if we are here, then `hp` is surely a variable;
-		// or, at least, it is, if we are working in the canonical
-		// interpretation.
 
 		auto evra = _pat->in_evaluatable.equal_range(hp);
 		for (auto evit = evra.first; evit != evra.second; evit++)
