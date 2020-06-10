@@ -433,7 +433,6 @@ _pat.pmandatory.push_back(term);
 		for (const Handle& ah: h->getOutgoingSet())
 		{
 			PatternTermPtr term(make_term_tree(ah));
-			term->markLiteral();
 			term->markAlways();
 			_pat.always.push_back(term);
 			_pat.undeclared_clauses.emplace_back(ah);
