@@ -193,7 +193,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	const Pattern& pat = this->get_pattern();
 	TermMatchMixin* intu =
 		dynamic_cast<TermMatchMixin*>(&impl);
-	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
+	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
 		qv->open();
