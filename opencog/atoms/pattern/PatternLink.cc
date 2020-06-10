@@ -346,7 +346,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
-			_pat.literal_clauses.emplace_back(ph);
 			_pat.mandatory.emplace_back(ph);
 
 			PatternTermPtr term(make_term_tree(ph));
@@ -373,7 +372,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 				for (const Handle& php : ph->getOutgoingSet())
 				{
 					_pat.mandatory.emplace_back(php);
-					_pat.literal_clauses.emplace_back(php);
 
 					PatternTermPtr term(make_term_tree(php));
 					term->markLiteral();
@@ -383,7 +381,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			else
 			{
 				_pat.mandatory.emplace_back(ph);
-				_pat.literal_clauses.emplace_back(ph);
 
 				PatternTermPtr term(make_term_tree(ph));
 				term->markLiteral();
@@ -392,28 +389,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			return true;
 		}
 
-		// More than just one alternative in the choice.
-		for (const Handle& ph : h->getOutgoingSet())
-		{
-			Type pht = ph->get_type();
-			if (PRESENT_LINK == pht)
-			{
-				for (const Handle& php : ph->getOutgoingSet())
-					_pat.literal_clauses.emplace_back(php);
-				continue;
-			}
-
-			if (ABSENT_LINK == pht)
-				throw InvalidParamException(TRACE_INFO,
-					"AbsentLink under a Choice is not supported yet!");
-
-			_pat.literal_clauses.emplace_back(ph);
-		}
-
 // XXX FIXME both statements below are wrong, but they are needed for
 // the unit tests. More bu0fxing to straighten this stuff out. That
 // is why this code is badly indented!
-_pat.literal_clauses.emplace_back(h);
 _pat.mandatory.emplace_back(h);
 
 PatternTermPtr term(make_term_tree(h));
@@ -435,7 +413,6 @@ _pat.pmandatory.push_back(term);
 
 		const Handle& inv(h->getOutgoingAtom(0));
 		_pat.optionals.emplace_back(inv);
-		_pat.literal_clauses.emplace_back(inv);
 		PatternTermPtr term(make_term_tree(inv));
 		term->markLiteral();
 		term->markAbsent();
@@ -997,8 +974,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 ///
 bool PatternLink::add_dummies()
 {
-	if (0 < _pat.literal_clauses.size()) return false;
-
 	// The below is almost but not quite the same as
 	// if (0 < _fixed.size()) return; because fixed can be
 	// non-zero, if the virtual term has only one variable

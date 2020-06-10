@@ -30,13 +30,6 @@ std::string Pattern::to_string(const std::string& indent) const
 
 	ss << indent << "Pattern: " << redex_name << std::endl;
 
-	if (not literal_clauses.empty())
-	{
-		if (not first) ss << std::endl;
-		ss << indent << "literal clauses:" << std::endl
-		   << oc_to_string(literal_clauses, indent + OC_TO_STRING_INDENT);
-		 first = false;
-	}
 	if (not undeclared_clauses.empty())
 	{
 		if (not first) ss << std::endl;
