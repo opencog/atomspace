@@ -1156,7 +1156,15 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if (nameserver().isA(t, UNORDERED_LINK))
 		ptm->addUnorderedLink();
 
-	if (can_evaluate(h)) ptm->addEvaluatable();
+	// If the parent isn't evaluatable, it makes no sense to
+	// mark the child evaluatable. The problem here is that
+	// users insert stray AndLinks into random places.
+	const PatternTermPtr& parent = ptm->getParent();
+	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
+	    and can_evaluate(h))
+	{
+		ptm->addEvaluatable();
+	}
 
 	if (h->is_link())
 	{

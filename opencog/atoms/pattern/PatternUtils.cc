@@ -30,16 +30,13 @@ namespace opencog {
 bool is_black_box(const Handle& clause)
 {
 	return
-		contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+		contains_atomtype(clause, GROUNDED_PREDICATE_NODE);
 }
 
 bool can_evaluate(const Handle& clause)
 {
 	Type ct = clause->get_type();
 	bool evaluatable =
-		TRUE_LINK == ct or FALSE_LINK == ct or
-
 		// If it is an EvaluatableLink, then is is evaluatable,
 		// unless it is one of the pattern-matching links, or
 		// if it is a non-gpn EvaluationLink (i.e. a plain
