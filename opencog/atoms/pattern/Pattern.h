@@ -110,7 +110,7 @@ struct Pattern
 	/// Evaluatable terms are those that hold a GroundedPredicateNode
 	/// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
 	HandleSet evaluatable_terms;   // smallest term that is evaluatable
-	HandleSet evaluatable_holders; // holds something evaluatable.
+	bool have_evaluatable_holders;
 
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).

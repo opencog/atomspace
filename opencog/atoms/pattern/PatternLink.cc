@@ -58,7 +58,6 @@ void PatternLink::common_init(void)
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the TermMatchMixin, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
-	// Tweak the evaluatable_holders to reflect this.
 	// XXX FIXME; long-term, this should be replaced by a check to
 	// see if a link inherits from EvaluatableLink. However, this can
 	// only be done after all existing BindLinks have been converted to
@@ -148,6 +147,7 @@ void PatternLink::setup_components(void)
 
 void PatternLink::init(void)
 {
+	_pat.have_evaluatable_holders = false;
 	_pat.redex_name = "anonymous PatternLink";
 	ScopeLink::extract_variables(_outgoing);
 
@@ -189,6 +189,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 
 	_variables = vars;
 	_body = body;
+	_pat.have_evaluatable_holders = false;
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
@@ -205,6 +206,8 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const PatternTermSeq& absts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
+	_pat.have_evaluatable_holders = false;
+
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
 	// never have the substitute aka beta-redex aka putlink method
@@ -289,6 +292,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
+	_pat.have_evaluatable_holders = false;
 	_variables.varset = vars;
 	_pat.undeclared_clauses = clauses;
 	for (const Handle& clause : clauses)
@@ -870,8 +874,8 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 				is_black = true;
 			}
 		}
-		for (const Handle& sh : fgpn.holders)
-			_pat.evaluatable_holders.insert(sh);
+		if (0 < fgpn.holders.size())
+			_pat.have_evaluatable_holders = true;
 
 		// ----------
 		// One might hope to fish out all EvaluatableLinks, and handle
@@ -890,8 +894,8 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			if (is_virtual(sh))
 				is_virtu = true;
 		}
-		for (const Handle& sh : fpfl.holders)
-			_pat.evaluatable_holders.insert(sh);
+		if (0 < fpfl.holders.size())
+			_pat.have_evaluatable_holders = true;
 
 		// ----------
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
@@ -902,14 +906,12 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)
 		{
+			_pat.have_evaluatable_holders = true;
 			_pat.evaluatable_terms.insert(sh);
-			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
 
 			if (is_virtual(sh)) is_virtu = true;
 		}
-		for (const Handle& sh : fgtl.holders)
-			_pat.evaluatable_holders.insert(sh);
 
 		// For each virtual link, look at it's members. If they
 		// are concrete terms, then add them to the _fixed set.
@@ -982,7 +984,6 @@ void PatternLink::add_dummies()
 	// in it.
 	for (const Handle& cl : _pat.undeclared_clauses)
 	{
-		// if (0 == _pat.evaluatable_holders.count(cl)) return;
 		if (0 == _pat.evaluatable_terms.count(cl)) return;
 	}
 
@@ -1034,7 +1035,7 @@ void PatternLink::trace_connectives(const TypeSet& connectives,
 	if (quotation.is_quoted()) return;
 	if (connectives.find(t) == connectives.end()) return;
 
-	_pat.evaluatable_holders.insert(term);
+	_pat.have_evaluatable_holders = true;
 	add_to_map(_pat.in_evaluatable, term, term);
 	for (const Handle& pred: term->getOutgoingSet())
 	{
