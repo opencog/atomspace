@@ -1166,17 +1166,6 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if (nameserver().isA(t, UNORDERED_LINK))
 		ptm->addUnorderedLink();
 
-	// If the parent isn't evaluatable, it makes no sense to
-	// mark the child evaluatable. The problem here is that
-	// users insert stray AndLinks into random places.
-	const PatternTermPtr& parent = ptm->getParent();
-	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
-	    and can_evaluate(h))
-	{
-		ptm->addEvaluatable();
-		return;
-	}
-
 	// If a term is literal then the corresponding pattern term
 	// should be also.
 	if (CHOICE_LINK == t)
@@ -1193,6 +1182,30 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if (PRESENT_LINK == t)
 	{
 		ptm->markPresent();
+		return;
+	}
+
+	// If the parent isn't evaluatable, it makes no sense to
+	// mark the child evaluatable. The problem here is that
+	// users insert stray AndLinks into random places.
+	const PatternTermPtr& parent = ptm->getParent();
+	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
+	    and can_evaluate(h))
+	{
+		// If its an AndLink, make sure that all of the children are
+		// evaluatable. The problem is .. users insert AndLinks into
+		// random places...
+		if (AND_LINK == t)
+		{
+			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
+				if (not can_evaluate(ptc->getHandle()))
+				{
+					ptm->markLiteral();
+					return;
+				}
+		}
+
+		ptm->addEvaluatable();
 		return;
 	}
 
