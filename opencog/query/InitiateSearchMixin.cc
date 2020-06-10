@@ -303,7 +303,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (0 == _pattern->evaluatable_holders.count(m->getHandle()))
+		if (not m->hasAnyEvaluatable())
 		{
 			try_optionals = false;
 			break;
@@ -734,7 +734,7 @@ bool InitiateSearchMixin::setup_link_type_search()
 	{
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
-		if (0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
+		if (cl->hasAnyEvaluatable()) continue;
 		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)

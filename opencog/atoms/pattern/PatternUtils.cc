@@ -52,7 +52,8 @@ bool can_evaluate(const Handle& clause)
 		   and not (CHOICE_LINK == ct)
 		   and (not (EVALUATION_LINK == ct)
 		      or 0 == clause->get_arity()
-		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))
+		      or (clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE
+		      and clause->getOutgoingAtom(0)->get_type() != VARIABLE_NODE)))
 
 		// XXX FIXME Are the below needed?
 		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
