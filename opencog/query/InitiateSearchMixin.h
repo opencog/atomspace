@@ -83,7 +83,6 @@ protected:
 	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
 	                                      size_t&);
 	virtual Handle find_thinnest(const PatternTermSeq&,
-	                             const HandleSet&,
 	                             Handle&, PatternTermPtr&);
 	virtual void find_rarest(const PatternTermPtr&, Handle&,
 	                         size_t&, Quotation quotation=Quotation());

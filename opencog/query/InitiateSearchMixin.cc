@@ -224,7 +224,6 @@ InitiateSearchMixin::find_starter_recursive(const Handle& h, size_t& depth,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
-                                          const HandleSet& evl,
                                           Handle& starter_term,
                                           PatternTermPtr& bestclause)
 {
@@ -238,7 +237,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 	for (const PatternTermPtr& ptm: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (0 < evl.count(ptm->getHandle())) continue;
+		if (ptm->hasAnyEvaluatable()) continue;
 
 		_curr_clause = ptm;
 		size_t depth = 0;
@@ -327,8 +326,7 @@ bool InitiateSearchMixin::setup_neighbor_search(void)
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	PatternTermPtr bestclause;
-	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
-	                                  _starter_term, bestclause);
+	Handle best_start = find_thinnest(clauses, _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if:
 	// 1) all of the clauses contain nothing but variables,
@@ -795,7 +793,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 	bool all_clauses_are_evaluatable = true;
 	for (const PatternTermPtr& cl : clauses)
 	{
-		if (0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
+		if (cl->hasAnyEvaluatable()) continue;
 		all_clauses_are_evaluatable = false;
 		break;
 	}
@@ -836,7 +834,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 				// they are all evaluatable, in which case we pick a clause
 				// that has a variable with the narrowest type-membership.
 				if (not all_clauses_are_evaluatable and
-				    0 < _pattern->evaluatable_holders.count(cl->getHandle())) continue;
+				    cl->hasAnyEvaluatable()) continue;
 
 				if (cl->getHandle() == var)
 				{
@@ -907,7 +905,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 		// the EvaluationLinks to be evaluated later.
 		for (const PatternTermPtr& m : _pattern->pmandatory)
 		{
-			if (0 == _pattern->evaluatable_holders.count(m->getHandle()))
+			if (not m->hasAnyEvaluatable())
 			{
 				_root = m;
 				_starter_term = m->getHandle();
