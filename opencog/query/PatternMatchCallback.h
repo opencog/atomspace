@@ -162,30 +162,18 @@ class PatternMatchCallback
 		 *
 		 * An 'evaluatable term' is any pattern term (term occuring in the
 		 * search pattern, either a node or link) that was  previously
-		 * declared as 'evaluatable', by the 'set_evaluatable_terms()'
-		 * callback below.  Thus, for example, the canonical, default
-		 * convention is that evaluatable terms are any terms that
-		 * contain a GPN -- a 'GroundedPredicateNode', and therefore
-		 * requires running code that lies outside of the pattern matcher
-		 * (typically scheme or python code).  In general, though,
-		 * evaluatable terms don't have to be of this sort -- they can
-		 * be any part of the search pattern that was previously
-		 * specified by the  'set_evaluatable_terms()' callback.
+		 * declared as 'evaluatable'.  The canonical, default convention
+		 * is that evaluatable terms are any terms that contain a GPN --
+		 * a 'GroundedPredicateNode', or are assorted relations, such
+		 * as EqualLink, GreaterThanLink, etc.  Evaluatables may also be
+		 * "connectives"; in the default canonical interpretation, these
+		 * are AndLink, OrLink, NotLink, SequentialAnd and SequentialOr.
 		 *
-		 * Connectives are any link types that were declared by the
-		 * 'get_connectives()' callback, below. Connectives are those
-		 * link types that are are able to combine evaluatable terms.
-		 * For example, the canonical, default connectives are logic
-		 * connectives: AndLink, OrLink, NotLink. They don't have to
-		 * be these, but, that is what they would be if emulating a
-		 * logic that uses the classical boolean logic values of
-		 * true/false.
-		 *
-		 * For another example, they might be SetUnion, SetIntersectionLink,
-		 * and SetComplimentLink if emulating a logic that uses probability
-		 * values for truth values (so, e.g. SetUnionLink would connect
-		 * the probability of A or B, i.e. it would compute P(A or B)
-		 * SetIntersectionLink would compute P(A and B), and so on.
+		 * The canonical interpretation is compiled in PatternLink. That
+		 * is, PatternLink performs a static analysis of the pattern, and
+		 * marks each term in the pattern as being evaluatable, or not.
+		 * Other pattern compilers are free to choose other conventions;
+		 * the pattern engine does not care.
 		 *
 		 * Unlike the other callbacks, this takes arguments in slightly
 		 * different form.  Here, 'eval' is the evaluatable term, and
