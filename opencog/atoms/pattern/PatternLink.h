@@ -118,7 +118,7 @@ protected:
 	bool is_virtual(const Handle&);
 	void unbundle_virtual(const HandleSeq& clauses);
 
-	void locate_cacheable(const HandleSeq& clauses);
+	void locate_cacheable(const PatternTermSeq& clauses);
 
 	void add_dummies(void);
 

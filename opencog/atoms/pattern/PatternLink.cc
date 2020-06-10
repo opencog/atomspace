@@ -122,7 +122,9 @@ void PatternLink::common_init(void)
 	get_clause_variables(_pat.always);
 
 	// Find prunable terms.
-	locate_cacheable(concrete_clauses);
+	locate_cacheable(_pat.pmandatory);
+	locate_cacheable(_pat.absents);
+	locate_cacheable(_pat.always);
 }
 
 
@@ -668,13 +670,14 @@ void PatternLink::locate_defines(const HandleSeq& clauses)
  *
  * This is kind-of the opposite of `is_virtual()`.
  */
-void PatternLink::locate_cacheable(const HandleSeq& clauses)
+void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 {
-	for (const Handle& claw: clauses)
+	for (const PatternTermPtr& ptm: clauses)
 	{
-		// Skip over anything unsuitable.
-		if (_pat.evaluatable_holders.find(claw) !=
-		    _pat.evaluatable_holders.end()) continue;
+		if (not ptm->isLiteral() and not ptm->isPresent() and
+		    not ptm->isChoice() and not ptm->isAbsent()) continue;
+
+		const Handle& claw = ptm->getHandle();
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
 		{
