@@ -151,10 +151,6 @@ void TermMatchMixin::set_pattern(const Variables& vars,
                                  const Pattern& pat)
 {
 	_vars = &vars;
-	_dynamic = &pat.evaluatable_terms;
-	_have_evaluatables = ! _dynamic->empty();
-	_have_variables = ! vars.varseq.empty();
-	_pattern_body = pat.body;
 }
 
 /* ======================================================== */
@@ -297,11 +293,7 @@ bool TermMatchMixin::post_link_match(const Handle& lpat,
 		_gnd_bound_vars = nullptr;
 	}
 
-	// The if (STATE_LINK) below is a temp hack until we get a nicer
-	// solution, viz, get around to implementing executable terms in
-	// the search pattern. So: an executable term is anything that
-	// should be executed before the match is made... in this case,
-	// the StateLink has a single, unique closed-term value (or possibly
+	// The StateLink has a single, unique closed-term value (or possibly
 	// no value at all), and the check below discards all matches that
 	// aren't closed form, i.e. all StateLinks with a variable as state.
 	//
@@ -309,18 +301,9 @@ bool TermMatchMixin::post_link_match(const Handle& lpat,
 	// between the time that the search was started, and the time that
 	// we arrive here...
 	if (STATE_LINK == pattype)
-	{
 		return StateLinkCast(lgnd)->is_closed();
-	}
 
-	if (not _have_evaluatables) return true;
-	Handle hp(lpat);
-	if (_dynamic->find(hp) == _dynamic->end()) return true;
-
-	// We will find ourselves here whenever the link contains a
-	// GroundedPredicateNode. In this case, execute the node, and
-	// declare a match, or no match, depending on the resulting TV.
-	return EvaluationLink::crisp_evaluate(_as, lgnd);
+	return true;
 }
 
 void TermMatchMixin::post_link_mismatch(const Handle& lpat,

@@ -52,6 +52,9 @@ class Satisfier :
 	public TermMatchMixin,
 	public SatisfyMixin
 {
+		Handle _pattern_body;
+		bool _have_variables;
+
 	public:
 		Satisfier(AtomSpace* as) :
 			InitiateSearchMixin(as),
@@ -69,6 +72,8 @@ class Satisfier :
 			_varseq = vars.varseq;
 			InitiateSearchMixin::set_pattern(vars, pat);
 			TermMatchMixin::set_pattern(vars, pat);
+			_have_variables = not vars.varseq.empty();
+			_pattern_body = pat.body;
 		}
 
 		// Return true if a satisfactory grounding has been
