@@ -41,9 +41,15 @@ bool can_evaluate(const Handle& clause)
 		TRUE_LINK == ct or FALSE_LINK == ct or
 
 		// If it is an EvaluatableLink, then is is evaluatable,
+		// unless it is one of the pattern-matching links, or
+		// if it is a non-gpn EvaluationLink (i.e. a plain
+		// old PredicateNode style EvaluationLink).
 		// unless it is a closed (variable-free) EvaluationLink
 		// over a PredicateNode.
 		(nameserver().isA(ct, EVALUATABLE_LINK)
+		   and not (PRESENT_LINK == ct)
+		   and not (ABSENT_LINK == ct)
+		   and not (CHOICE_LINK == ct)
 		   and (not (EVALUATION_LINK == ct)
 		      or 0 == clause->get_arity()
 		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))

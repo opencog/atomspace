@@ -61,3 +61,5 @@
 	(MaximalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
 		(Present (Concept "B"))))
+
+; (cog-execute! max-const-ap)
