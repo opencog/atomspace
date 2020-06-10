@@ -51,30 +51,9 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	// Compute the intersection of literal clauses, and mandatory
-	// clauses. This is the set of mandatory clauses that must be
-	// present in thier literal form.
-	for (const PatternTermPtr& ptm : _pat.pmandatory)
-	{
-		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(),
-		              ptm->getHandle())
-			 != _pat.literal_clauses.end())
-		_fixed.push_back(ptm->getHandle());
-	}
-
 	// Locate the black-box and clear-box clauses.
 	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
-
-	// Make sure every variable appears in some concrete
-	// (non-evaluatable) clause. This consists of non-evaluatable
-	// mandatory clauses and clauses which must be absent.
-	// Otherwise, we risk not being able to evaluate a clause
-	// with some ungrounded variable.
-	HandleSeq concrete_clauses(_fixed);
-	for (const PatternTermPtr& ptm : _pat.absents)
-		concrete_clauses.emplace_back(ptm->getHandle());
-	validate_variables(_variables.varset, concrete_clauses);
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the TermMatchMixin, and so we assume
@@ -103,6 +82,27 @@ void PatternLink::common_init(void)
 	}
 
 	add_dummies();
+
+	// Compute the intersection of literal clauses, and mandatory
+	// clauses. This is the set of mandatory clauses that must be
+	// present in thier literal form.
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
+	{
+		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(),
+		              ptm->getHandle())
+			 != _pat.literal_clauses.end())
+		_fixed.push_back(ptm->getHandle());
+	}
+
+	// Make sure every variable appears in some concrete
+	// (non-evaluatable) clause. This consists of non-evaluatable
+	// mandatory clauses and clauses which must be absent.
+	// Otherwise, we risk not being able to evaluate a clause
+	// with some ungrounded variable.
+	HandleSeq concrete_clauses(_fixed);
+	for (const PatternTermPtr& ptm : _pat.absents)
+		concrete_clauses.emplace_back(ptm->getHandle());
+	validate_variables(_variables.varset, concrete_clauses);
 
 	// Split the non-virtual clauses into connected components
 	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
