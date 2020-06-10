@@ -88,10 +88,8 @@ void PatternLink::common_init(void)
 	// present in thier literal form.
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
-		if (std::find(_pat.literal_clauses.begin(), _pat.literal_clauses.end(),
-		              ptm->getHandle())
-			 != _pat.literal_clauses.end())
-		_fixed.push_back(ptm->getHandle());
+		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
+			_fixed.push_back(ptm->getHandle());
 	}
 
 	// Make sure every variable appears in some concrete
