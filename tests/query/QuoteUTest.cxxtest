@@ -75,6 +75,7 @@ public:
     void test_exec_getlink(void);
     void test_quote_self(void);
     void test_quote_glob(void);
+    void test_quote_scope(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -362,6 +363,25 @@ void QuoteUTest::test_quote_glob(void)
     eval->eval("(load-from-path \"tests/query/quote-glob.scm\")");
 
     ValuePtr vp = eval->eval_v("(cog-execute! quote-glob)");
+    TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+
+    HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+    TS_ASSERT_EQUALS(1, hs.size());
+
+    Handle ex = eval->eval_h("expect");
+    TS_ASSERT_EQUALS(ex, hs[0]);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// URE meta-pattern
+void QuoteUTest::test_quote_scope(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/query/quote-scope.scm\")");
+
+    ValuePtr vp = eval->eval_v("(cog-execute! quote-scope)");
     TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
 
     HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
