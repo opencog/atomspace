@@ -73,7 +73,7 @@ struct Pattern
 	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
-	Pattern() : have_evaluatables(false), have_black_boxes(false) {}
+	Pattern() : have_evaluatables(false), have_virtuals(false) {}
 
 	// -------------------------------------------
 	/// The current set of clauses (beta redex context) being grounded.
@@ -108,11 +108,11 @@ struct Pattern
 	HandleSet evaluatable_terms;   // smallest term that is evaluatable
 	bool have_evaluatables;
 
-	/// Black-box clauses. These are clauses that contain GPN's. These
-	/// have to drop into scheme or python to get evaluated, which means
-	/// that they will be slow.  So, we leave these for last, so that the
-	/// faster clauses can run first, and rule out un-needed evaluations.
-	bool have_black_boxes;
+	/// Evaluatables with two or more variables, bridging across
+	/// different pattern components. In principle, these exist only
+	/// if the pattern has two or more components; in practice, there
+	// may be skew due to imperfect code ... XXX FIXME.
+	bool have_virtuals;
 
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).

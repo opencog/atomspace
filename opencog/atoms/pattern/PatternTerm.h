@@ -115,7 +115,10 @@ protected:
 	// As above, but for evaluatables.
 	bool _has_any_evaluatable;
 	bool _has_evaluatable;
-	bool _is_black_box;
+
+	// An evaluatable term, with two or more variables in it.
+	// In general, these bridge across components.
+	bool _is_virtual;
 
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
@@ -214,8 +217,8 @@ public:
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }
 	bool hasEvaluatable() const noexcept { return _has_evaluatable; }
 
-	void markBlackBox();
-	bool isBlackBox() const noexcept { return _is_black_box; }
+	void markVirtual();
+	bool isVirtual() const noexcept { return _is_virtual; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }

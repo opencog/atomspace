@@ -840,9 +840,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		{
 			_pat.evaluatable_terms.insert(sh);
 			if (is_virtual(sh))
-			{
 				is_virtu = true;
-			}
 		}
 
 		// ----------
@@ -893,9 +891,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		}
 
 		// ----------
-		if (is_virtu)
-			_virtual.emplace_back(clause);
-		else
+		if (not is_virtu)
 			_fixed.emplace_back(clause);
 	}
 }
@@ -1138,10 +1134,11 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		_pat.have_evaluatables = true;
 		ptm->addEvaluatable();
 
-		if (is_black_box(h) and is_virtual(h))
+		if (is_virtual(h))
 		{
-			_pat.have_black_boxes = true;
-			ptm->markBlackBox();
+			_virtual.emplace_back(h);
+			_pat.have_virtuals = true;
+			ptm->markVirtual();
 		}
 
 		return;

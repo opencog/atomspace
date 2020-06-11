@@ -27,7 +27,7 @@ PatternTerm::PatternTerm(void)
 	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _is_black_box(false),
+	  _is_virtual(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
@@ -48,7 +48,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
-	  _is_black_box(false),
+	  _is_virtual(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
@@ -217,12 +217,12 @@ void PatternTerm::addEvaluatable()
 
 // ==============================================================
 
-void PatternTerm::markBlackBox()
+void PatternTerm::markVirtual()
 {
 	// If quoted, it cannot be evaluated.
 	if (isQuoted()) return;
 
-	_is_black_box = true;
+	_is_virtual = true;
 }
 
 // ==============================================================

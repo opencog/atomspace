@@ -2186,7 +2186,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (_pat->have_evaluatables)
 	{
 		if (get_next_thinnest_clause(true, false, false)) return;
-		if (_pat->have_black_boxes)
+		if (_pat->have_virtuals)
 		{
 			if (get_next_thinnest_clause(true, true, false)) return;
 		}
@@ -2199,7 +2199,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (_pat->have_evaluatables)
 		{
 			if (get_next_thinnest_clause(true, false, true)) return;
-			if (_pat->have_black_boxes)
+			if (_pat->have_virtuals)
 			{
 				if (get_next_thinnest_clause(true, true, true)) return;
 			}
@@ -2322,8 +2322,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 /// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
-                                                  bool search_black,
+bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
+                                                  bool search_virtual,
                                                   bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
@@ -2387,8 +2387,8 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		{
 			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
-			        and (search_virtual or not root->hasAnyEvaluatable())
-			        and (search_black or not root->isBlackBox())
+			        and (search_eval or not root->hasAnyEvaluatable())
+			        and (search_virtual or not root->isVirtual())
 			        and (search_absents or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
@@ -2408,8 +2408,8 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// will not find them. Try these now. This means that the
 	// variable-free clauses run last. If the user wants to run them
 	// earlier, they can always use a SequentialAndLink.
-	if (not unsolved and search_virtual and
-		 (search_black or not _pat->have_black_boxes))
+	if (not unsolved and search_eval and
+		 (search_virtual or not _pat->have_virtuals))
 	{
 		for (const PatternTermPtr& root : _pat->pmandatory)
 		{
