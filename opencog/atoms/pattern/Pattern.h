@@ -130,12 +130,6 @@ struct Pattern
 	/// Used in conjunction with the `cacheable_multi` above.
 	std::map<PatternTermPtr, HandleSeq> clause_variables;
 
-	/// Maps; the value is the largest (evaluatable or executable)
-	/// term containing the variable. Its a multimap, because
-	/// a variable may appear in several different evaluatables.
-	std::unordered_multimap<Handle,Handle> in_evaluatable;
-	std::unordered_multimap<Handle,Handle> in_executable;
-
 	/// Any given atom may appear in one or more clauses. Given an atom,
 	/// the connectivy map tells you what clauses it appears in. It
 	/// captures how the clauses are connected to one-another, so that,

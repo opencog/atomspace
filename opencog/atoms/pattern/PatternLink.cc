@@ -67,19 +67,6 @@ void PatternLink::common_init(void)
 	                     OR_LINK, SEQUENTIAL_OR_LINK,
 	                     NOT_LINK, TRUE_LINK, FALSE_LINK});
 
-	// Icky. Yuck. Some pre-historic API's do not set the pattern body.
-	// These appear only in the unit tests, never in real code. For now,
-	// just work around this, but eventually XXX FIXME.
-	if (nullptr == _pat.body)
-	{
-		for (const Handle& term : _pat.undeclared_clauses)
-			trace_connectives(connectives, term);
-	}
-	else
-	{
-		trace_connectives(connectives, _pat.body);
-	}
-
 	add_dummies();
 
 	// Compute the intersection of literal clauses, and mandatory
@@ -519,7 +506,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
-		// Just like in trace_connectives, assume we are working with
+		// Assume we are working with
 		// the TermMatchMixin, which uses these. Some other
 		// yet-to-be-specified callback may want to use a different
 		// set of connectives...
@@ -751,16 +738,6 @@ void PatternLink::validate_variables(HandleSet& vars,
 
 /* ================================================================= */
 
-/* utility -- every variable in the key term will get the value. */
-static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
-                       const Handle& key, const Handle& value)
-{
-	if (key->get_type() == VARIABLE_NODE) map.insert({key, value});
-	if (not key->is_link()) return;
-	const HandleSeq& oset = key->getOutgoingSet();
-	for (const Handle& ho : oset) add_to_map(map, ho, value);
-}
-
 /// is_virtual -- check to see if a clause is virtual.
 ///
 /// A clause is virtual if it has two or more unquoted, unscoped
@@ -867,7 +844,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		for (const Handle& sh : fgpn.least_holders)
 		{
 			_pat.evaluatable_terms.insert(sh);
-			add_to_map(_pat.in_evaluatable, sh, sh);
 			if (is_virtual(sh))
 			{
 				is_virtu = true;
@@ -890,7 +866,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		for (const Handle& sh : fpfl.least_holders)
 		{
 			_pat.evaluatable_terms.insert(sh);
-			add_to_map(_pat.in_evaluatable, sh, sh);
 			if (is_virtual(sh))
 				is_virtu = true;
 		}
@@ -908,7 +883,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		{
 			_pat.have_evaluatable_holders = true;
 			_pat.evaluatable_terms.insert(sh);
-			add_to_map(_pat.in_evaluatable, sh, sh);
 
 			if (is_virtual(sh)) is_virtu = true;
 		}
@@ -1010,37 +984,6 @@ void PatternLink::add_dummies()
 				}
 			}
 		}
-	}
-}
-
-/* ================================================================= */
-
-/// Starting from the main body, trace down through the tree of (logical)
-/// connectives.  If a term appears under a (logic) connective, and there
-/// is a path of connectives all the way to the top, then we have to
-/// assume the term is evaluatable, as the whole point of connectives
-/// to to connect evaluatable terms.  Thus, for example, for a clause
-/// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
-/// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable. Tracing halts as soon as something that isn't a
-/// connective is encountered.
-void PatternLink::trace_connectives(const TypeSet& connectives,
-                                    const Handle& term,
-                                    Quotation quotation)
-{
-	Type t = term->get_type();
-
-	quotation.update(t);
-
-	if (quotation.is_quoted()) return;
-	if (connectives.find(t) == connectives.end()) return;
-
-	_pat.have_evaluatable_holders = true;
-	add_to_map(_pat.in_evaluatable, term, term);
-	for (const Handle& pred: term->getOutgoingSet())
-	{
-		if (pred->is_link())
-			trace_connectives(connectives, pred, quotation);
 	}
 }
 
