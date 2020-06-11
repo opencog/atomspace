@@ -76,6 +76,14 @@ void PatternLink::common_init(void)
 			_fixed.push_back(ptm->getHandle());
 	}
 
+	HandleSeq opts;
+	for (const PatternTermPtr& ptm : _pat.absents)
+		opts.emplace_back(ptm->getHandle());
+
+	// Split the non-virtual clauses into connected components
+	get_bridged_components(_variables.varset, _fixed, opts,
+	                       _components, _component_vars);
+
 	// Make sure every variable appears in some concrete
 	// (non-evaluatable) clause. This consists of non-evaluatable
 	// mandatory clauses and clauses which must be absent.
@@ -85,10 +93,6 @@ void PatternLink::common_init(void)
 	for (const PatternTermPtr& ptm : _pat.absents)
 		concrete_clauses.emplace_back(ptm->getHandle());
 	validate_variables(_variables.varset, concrete_clauses);
-
-	// Split the non-virtual clauses into connected components
-	get_bridged_components(_variables.varset, _fixed, _pat.optionals,
-	                       _components, _component_vars);
 
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
@@ -386,7 +390,6 @@ _pat.pmandatory.push_back(term);
 				"AbsentLink can have an arity of one only!");
 
 		const Handle& inv(h->getOutgoingAtom(0));
-		_pat.optionals.emplace_back(inv);
 		PatternTermPtr term(make_term_tree(inv));
 		term->markLiteral();
 		term->markAbsent();
