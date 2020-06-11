@@ -51,11 +51,9 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	// Locate the clear-box clauses.
-	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
-	// unbundle_virtual does not handle connectives. Here, we assume that
+	// Here, we assume that
 	// we are being run with the TermMatchMixin, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// XXX FIXME; long-term, this should be replaced by a check to
@@ -739,6 +737,17 @@ void PatternLink::validate_variables(HandleSet& vars,
 /// To add support, we would have to split executable clauses into
 /// component graphs, the same way we currently split VirtualLinks.
 ///
+
+static bool is_relational_link(const Handle& h)
+{
+	Type t = h->get_type();
+
+	if (nameserver().isA(t, VIRTUAL_LINK)
+	    and not (SATISFACTION_LINK == t))
+		return true;
+	return false;
+}
+
 bool PatternLink::is_virtual(const Handle& clause)
 {
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
@@ -764,79 +773,6 @@ bool PatternLink::is_virtual(const Handle& clause)
 	}
 
 	return true;
-}
-
-/// Sort out the list of clauses into four classes:
-/// virtual, evaluatable, executable and concrete.
-///
-/// A term is "evalutable" if it contains a GroundedPredicateNode,
-/// or if it inherits from VirtualLink (such as the GreaterThanLink).
-/// Such terms need evaluation at grounding time, to determine
-/// their truth values.
-///
-/// A term may also be evaluatable if consists of connectives (such as
-/// AndLink, OrLink, NotLink) used to join together evaluatable terms.
-/// Normally, the above search for GPN's and VirtualLinks should be
-/// enough, except when an entire term is a variable.  Thus, for
-/// example, a term such as (NotLink (VariableNode $x)) needs to be
-/// evaluated at grounding-time, even though it does not currently
-/// contain a GPN or a VirtualLink: the grounding might contain it;
-/// We don't know yet.  However, there's a gotcha: we don't yet know
-/// what the connectives are. The actual connectives depend on the
-/// callback; the default callback uses AndLink, OrLink, NotLink, but
-/// other callbacks may pick something else.  Thus, we cannot do this
-/// here. By contrast, GetLink, SatisfactionLink and BindLink
-/// explicitly assume the default callback, so they do the additional
-/// unbundling there.
-///
-/// A term is "executable" if it is an ExecutionOutputLink
-/// or if it inherits from one (such as PlusLink, TimesLink).
-/// Such terms need execution at grounding time, to determine
-/// their actual form.  Note that executable terms may frequently
-/// occur underneath evaluatable terms, e.g. if something is greater
-/// than the sum of two other things.
-///
-/// A clause is "virtual" if it has an evaluatable term inside of it,
-/// and that term has two or more variables in it. Such virtual
-/// clauses not only require evaluation, but an evaluation must be
-/// performed for each different variable grounding.  Virtual clauses
-/// get a very different (and more complex) treatment from the pattern
-/// matcher.
-///
-/// Virtual clauses are hard for the pattern matcher in two different
-/// ways: first, any variables in them must be grounded before they can
-/// be evaluated, and that grounding has to occur *before* evaluation.
-/// Thus, non-virtual clasues must be grounded first. Another problem
-/// arises when a virtual clause has two or more variables in it, and
-/// those variables are grounded by different disconnected graph
-/// components; the combinatoric explosion has to be handled...
-///
-void PatternLink::unbundle_virtual(const HandleSeq& clauses)
-{
-	for (const Handle& clause: clauses)
-	{
-		// ----------
-		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
-		// are essentially a kind of EvaluationLink holding a GPN
-		FindAtoms fgtl(VIRTUAL_LINK, true);
-		fgtl.search_set(clause);
-
-		// For each virtual link, look at it's members. If they
-		// are concrete terms, then add them to the _fixed set.
-		// For example, `(Equal (Var X) (List (Var A) (Var B)))`
-		// the `(List (Var A) (Var B))` must be implcitly present.
-		for (const Handle& sh : fgtl.varset)
-		{
-			if (SATISFACTION_LINK == sh->get_type()) continue;
-			for (const Handle& term : sh->getOutgoingSet())
-			{
-				if (can_evaluate(term)) continue;
-				if (not any_unquoted_unscoped_in_tree(term, _variables.varset))
-					continue;
-				_fixed.emplace_back(term);
-			}
-		}
-	}
 }
 
 /* ================================================================= */
@@ -987,16 +923,6 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	Handle h(ptm->getHandle());
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
-	// Recurse down to the tips, first.
-	if (h->is_link())
-	{
-		for (const Handle& ho: h->getOutgoingSet())
-		{
-			PatternTermPtr po(ptm->addOutgoingTerm(ho));
-			make_term_tree_recursive(root, po);
-		}
-	}
-
 	// If the current node is a bound variable, store this as a
 	// bool flag, recursively, up into the parent tree, for later use.
 	// The addBoundVariable() method walks upwards into the parent to
@@ -1019,6 +945,52 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if (nameserver().isA(t, UNORDERED_LINK))
 		ptm->addUnorderedLink();
 
+	// If the parent isn't evaluatable, it makes no sense to
+	// mark the child evaluatable. The problem here is that
+	// users insert stray AndLinks into random places.
+	const PatternTermPtr& parent = ptm->getParent();
+	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
+	    and not ptm->isQuoted() and can_evaluate(h))
+	{
+		// If its an AndLink, make sure that all of the children are
+		// evaluatable. The problem is .. users insert AndLinks into
+		// random places...
+		bool is_ev = true;
+		if (AND_LINK == t)
+		{
+			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
+				if (not can_evaluate(ptc->getHandle()))
+				{
+					is_ev = false;
+					break;
+				}
+		}
+
+		if (is_ev)
+		{
+			_pat.have_evaluatables = true;
+			ptm->addEvaluatable();
+
+			if ((parent->getHandle() == nullptr or not parent->isVirtual())
+			     and is_virtual(h))
+			{
+				_virtual.emplace_back(h);
+				_pat.have_virtuals = true;
+				ptm->markVirtual();
+			}
+		}
+	}
+
+	// Recurse down to the tips. ... after the evaluatable markup below.
+	if (h->is_link())
+	{
+		for (const Handle& ho: h->getOutgoingSet())
+		{
+			PatternTermPtr po(ptm->addOutgoingTerm(ho));
+			make_term_tree_recursive(root, po);
+		}
+	}
+
 	// If a term is literal then the corresponding pattern term
 	// should be also.
 	if (CHOICE_LINK == t)
@@ -1038,12 +1010,10 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		return;
 	}
 
-	// If the parent isn't evaluatable, it makes no sense to
-	// mark the child evaluatable. The problem here is that
-	// users insert stray AndLinks into random places.
-	const PatternTermPtr& parent = ptm->getParent();
+	// Second pass for evaluatables - this time to mark the left-overs
+	// as literals. We need to do this AFTER recursion, not before.
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
-	    and can_evaluate(h))
+	    and not ptm->isQuoted() and can_evaluate(h))
 	{
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
@@ -1056,16 +1026,6 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 					ptm->markLiteral();
 					return;
 				}
-		}
-
-		_pat.have_evaluatables = true;
-		ptm->addEvaluatable();
-
-		if (is_virtual(h))
-		{
-			_virtual.emplace_back(h);
-			_pat.have_virtuals = true;
-			ptm->markVirtual();
 		}
 
 		add_dummies(ptm);

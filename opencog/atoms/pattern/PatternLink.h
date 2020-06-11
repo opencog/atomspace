@@ -116,7 +116,6 @@ protected:
 	                        const HandleSeq& clauses);
 
 	bool is_virtual(const Handle&);
-	void unbundle_virtual(const HandleSeq& clauses);
 
 	void locate_cacheable(const PatternTermSeq& clauses);
 
