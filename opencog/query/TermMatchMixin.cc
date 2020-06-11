@@ -770,9 +770,9 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 	{
 		// If *any* clause in the AbsentLink has been grounded, then
 		// return false.  That is, AbsentLink behaves like an AndLink
-		// for term-absence.  Note that this conflicts with
-		// PatternLink::extract_optionals(), which insists on an arity
-		// of one. Viz "must all be absent"? or "if any are absent"?
+		// for term-absence.  Note that this conflicts with static
+		// analysis in PatternLink, which insists on an arity of one.
+		// Viz "must all be absent"? or "if any are absent"?
 		//
 		// AbsentLink is same as NotLink PresentLink.
 		for (const Handle& h : oset)

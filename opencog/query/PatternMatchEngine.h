@@ -168,7 +168,7 @@ private:
 	bool clause_accepted;
 	void get_next_untried_clause(void);
 	Handle get_glob_embedding(const Handle&);
-	bool get_next_thinnest_clause(bool, bool, bool);
+	bool get_next_thinnest_clause(bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
 	PatternTermPtr next_clause;
 	Handle next_joint;

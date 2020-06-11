@@ -73,7 +73,7 @@ struct Pattern
 	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
-	Pattern() : have_evaluatables(false), have_virtuals(false) {}
+	Pattern() : have_evaluatables(false) {}
 
 	// -------------------------------------------
 	/// The current set of clauses (beta redex context) being grounded.
@@ -86,11 +86,9 @@ struct Pattern
 	/// literal clauses and virtual clauses.
 	PatternTermSeq   pmandatory;
 
-	/// The optional clauses must be ungroundable. They are always
-	/// literal, and are never evaluatable or virtual. XXX This member
-	/// is mis-named: in the current implementation, the optional
-	/// clauses must be literally absent. XXX FIXME rename this member.
-	HandleSeq      optionals;
+	/// The absent clauses must be ungroundable; they must literally
+	/// be absent. They are always literal, and are never evaluatable
+	/// or virtual.
 	PatternTermSeq absents;
 
 	/// The always (for-all) clauses have to always be grounded the same
@@ -101,12 +99,6 @@ struct Pattern
 	/// find out if they hold true. For example, GreaterThanLink,
 	/// and anything with a GroundedPredicateNode (GPN) in them.
 	bool have_evaluatables;
-
-	/// Evaluatables with two or more variables, bridging across
-	/// different pattern components. In principle, these exist only
-	/// if the pattern has two or more components; in practice, there
-	// may be skew due to imperfect code ... XXX FIXME.
-	bool have_virtuals;
 
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).

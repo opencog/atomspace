@@ -2180,29 +2180,21 @@ void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(false, false, false)) return;
+	if (get_next_thinnest_clause(false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (_pat->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(true, false, false)) return;
-		if (_pat->have_virtuals)
-		{
-			if (get_next_thinnest_clause(true, true, false)) return;
-		}
+		if (get_next_thinnest_clause(true, false)) return;
 	}
 
 	// Try again, this time, considering the absent clauses.
 	if (not _pat->absents.empty())
 	{
-		if (get_next_thinnest_clause(false, false, true)) return;
+		if (get_next_thinnest_clause(false, true)) return;
 		if (_pat->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(true, false, true)) return;
-			if (_pat->have_virtuals)
-			{
-				if (get_next_thinnest_clause(true, true, true)) return;
-			}
+			if (get_next_thinnest_clause(true, true)) return;
 		}
 	}
 
@@ -2323,7 +2315,6 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 ///
 /// Return true if we found the next ungrounded clause.
 bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
-                                                  bool search_virtual,
                                                   bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
@@ -2388,7 +2379,6 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
 			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
 			        and (search_eval or not root->hasAnyEvaluatable())
-			        and (search_virtual or not root->isVirtual())
 			        and (search_absents or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
@@ -2408,8 +2398,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
 	// will not find them. Try these now. This means that the
 	// variable-free clauses run last. If the user wants to run them
 	// earlier, they can always use a SequentialAndLink.
-	if (not unsolved and search_eval and
-		 (search_virtual or not _pat->have_virtuals))
+	if (not unsolved and search_eval)
 	{
 		for (const PatternTermPtr& root : _pat->pmandatory)
 		{

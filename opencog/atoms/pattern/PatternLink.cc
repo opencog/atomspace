@@ -733,17 +733,6 @@ void PatternLink::validate_variables(HandleSet& vars,
 /// To add support, we would have to split executable clauses into
 /// component graphs, the same way we currently split VirtualLinks.
 ///
-
-static bool is_relational_link(const Handle& h)
-{
-	Type t = h->get_type();
-
-	if (nameserver().isA(t, VIRTUAL_LINK)
-	    and not (SATISFACTION_LINK == t))
-		return true;
-	return false;
-}
-
 bool PatternLink::is_virtual(const Handle& clause)
 {
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
@@ -967,11 +956,15 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			_pat.have_evaluatables = true;
 			ptm->addEvaluatable();
 
+			// XXX FIXME -- this is wrong. What we really want is to
+			// identify those clauses that bridge across multiple
+			// components... not everything here does so. The
+			// get_bridged_components() should be modified to
+			// identify the bridging cluases...
 			if ((parent->getHandle() == nullptr or not parent->isVirtual())
 			     and is_virtual(h))
 			{
 				_virtual.emplace_back(h);
-				_pat.have_virtuals = true;
 				ptm->markVirtual();
 			}
 		}

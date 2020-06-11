@@ -30,13 +30,8 @@ std::string Pattern::to_string(const std::string& indent) const
 
 	ss << indent << "Pattern: " << redex_name << std::endl;
 
-	if (not optionals.empty())
-	{
-		if (not first) ss << std::endl;
-		ss << indent << "optionals:" << std::endl
-		   << oc_to_string(optionals, indent + OC_TO_STRING_INDENT);
-		first = false;
-	}
+	// FIXME Add printing here.
+
 	return ss.str();
 }
 
