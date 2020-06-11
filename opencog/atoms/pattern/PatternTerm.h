@@ -115,6 +115,7 @@ protected:
 	// As above, but for evaluatables.
 	bool _has_any_evaluatable;
 	bool _has_evaluatable;
+	bool _is_black_box;
 
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
@@ -212,6 +213,9 @@ public:
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }
 	bool hasEvaluatable() const noexcept { return _has_evaluatable; }
+
+	void markBlackBox();
+	bool isBlackBox() const noexcept { return _is_black_box; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
