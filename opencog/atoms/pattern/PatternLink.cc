@@ -67,8 +67,6 @@ void PatternLink::common_init(void)
 	                     OR_LINK, SEQUENTIAL_OR_LINK,
 	                     NOT_LINK, TRUE_LINK, FALSE_LINK});
 
-	add_dummies();
-
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in thier literal form.
@@ -932,39 +930,31 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 /// atomspace, resulting in infinite recursion and a blown stack.
 /// Not clear how to avoid that...
 ///
-void PatternLink::add_dummies()
+
+void PatternLink::add_dummies(const PatternTermPtr& ptm)
 {
-	// The below is almost but not quite the same as
-	// if (0 < _fixed.size()) return; because fixed can be
-	// non-zero, if the virtual term has only one variable
-	// in it.
-	for (const Handle& cl : _pat.undeclared_clauses)
+	const Handle& h = ptm->getHandle();
+	Type t = h->get_type();
+
+	if (EQUAL_LINK != t and
+	    GREATER_THAN_LINK != t and
+	    IDENTICAL_LINK != t)
 	{
-		if (0 == _pat.evaluatable_terms.count(cl)) return;
+		return;
 	}
 
-	for (const Handle& t : _pat.evaluatable_terms)
+	const Handle& left = h->getOutgoingAtom(0);
+	const Handle& right = h->getOutgoingAtom(1);
+
+	for (const Handle& v : _variables.varset)
 	{
-		Type tt = t->get_type();
-		if (EQUAL_LINK == tt or
-		    GREATER_THAN_LINK == tt or
-		    IDENTICAL_LINK == tt)
+		if (is_free_in_tree(left, v) or
+		    is_free_in_tree(right, v))
 		{
-			const Handle& left = t->getOutgoingAtom(0);
-			const Handle& right = t->getOutgoingAtom(1);
+			_pat.mandatory.emplace_back(v);
+			_fixed.emplace_back(v);
 
-			for (const Handle& v : _variables.varset)
-			{
-				if (is_free_in_tree(left, v) or
-				    is_free_in_tree(right, v))
-				{
-					_pat.mandatory.emplace_back(v);
-					_fixed.emplace_back(v);
-
-					PatternTermPtr term(make_term_tree(v));
-					_pat.pmandatory.push_back(term);
-				}
-			}
+			_pat.pmandatory.push_back(ptm);
 		}
 	}
 }
@@ -1141,6 +1131,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			ptm->markVirtual();
 		}
 
+		add_dummies(ptm);
 		return;
 	}
 

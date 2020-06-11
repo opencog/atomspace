@@ -120,7 +120,7 @@ protected:
 
 	void locate_cacheable(const PatternTermSeq& clauses);
 
-	void add_dummies(void);
+	void add_dummies(const PatternTermPtr&);
 
 	void make_connectivity_map(void);
 	void make_map_recursive(const Handle&, const PatternTermPtr&);
