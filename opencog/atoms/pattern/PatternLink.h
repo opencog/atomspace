@@ -111,7 +111,7 @@ protected:
 	                          const TypeSet&,
 	                          bool reverse=false);
 
-	void locate_defines(const HandleSeq& clauses);
+	void locate_defines(const PatternTermSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 

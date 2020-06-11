@@ -38,7 +38,9 @@ using namespace opencog;
 
 void PatternLink::common_init(void)
 {
-	locate_defines(_pat.undeclared_clauses);
+	locate_defines(_pat.pmandatory);
+	locate_defines(_pat.absents);
+	locate_defines(_pat.always);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -240,7 +242,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_pat.pmandatory.push_back(term);
 		}
 	}
-	locate_defines(compo);
+	locate_defines(_pat.pmandatory);
+	locate_defines(_pat.absents);
 
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
@@ -268,7 +271,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_variables.varset = vars;
-	_pat.undeclared_clauses = clauses;
 	for (const Handle& clause : clauses)
 	{
 		PatternTermPtr root_term(make_term_tree(clause));
@@ -474,8 +476,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			    not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
 			{
-				_pat.undeclared_clauses.emplace_back(ho);
-
 				PatternTermPtr term(make_term_tree(ho));
 				_pat.pmandatory.push_back(term);
 
@@ -529,8 +529,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
-			_pat.undeclared_clauses.emplace_back(hbody);
-
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
 
@@ -542,8 +540,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	else if (not is_constant(_variables.varset, hbody))
 	{
 		// There's just one single clause!
-		_pat.undeclared_clauses.emplace_back(hbody);
-
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
 
@@ -597,8 +593,6 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		     0 < ho->get_arity() and
 		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
 		{
-			_pat.undeclared_clauses.emplace_back(ho);
-
 			PatternTermPtr term(make_term_tree(ho));
 			_pat.pmandatory.push_back(term);
 		}
@@ -608,18 +602,17 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 
 /* ================================================================= */
 
-void PatternLink::locate_defines(const HandleSeq& clauses)
+void PatternLink::locate_defines(const PatternTermSeq& clauses)
 {
-	for (const Handle& clause: clauses)
+	for (const PatternTermPtr& ptm: clauses)
 	{
+		const Handle& clause = ptm->getHandle();
 		FindAtoms fdpn(DEFINED_PREDICATE_NODE, DEFINED_SCHEMA_NODE, true);
 		fdpn.stopset.insert(SCOPE_LINK);
 		fdpn.search_set(clause);
 
 		for (const Handle& sh : fdpn.varset)
-		{
 			_pat.defined_terms.insert(sh);
-		}
 	}
 }
 

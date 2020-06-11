@@ -82,11 +82,6 @@ struct Pattern
 	/// The original body containing the link (if any).
 	Handle           body;
 
-	/// Clauses that might be virtual. User never explictly declared
-	/// them one way or the other, so we will have to guess, based on
-	/// what's in them. Set by unbundle_clauses().
-	HandleSeq        undeclared_clauses;
-
 	/// The mandatory clauses must be satisfied. This includes both
 	/// literal clauses and virtual clauses.
 	PatternTermSeq   pmandatory;
