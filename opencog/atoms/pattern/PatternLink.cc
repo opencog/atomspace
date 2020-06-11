@@ -893,7 +893,6 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 			continue;
 
 		_fixed.emplace_back(sh);
-		_pat.pmandatory.push_back(ptm);
 	}
 }
 
