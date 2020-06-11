@@ -836,9 +836,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
-			_pat.evaluatable_terms.insert(sh);
-			if (is_virtual(sh))
-				is_virtu = true;
+			if (is_virtual(sh)) is_virtu = true;
 		}
 
 		// ----------
@@ -853,9 +851,7 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		fpfl.search_set(clause);
 		for (const Handle& sh : fpfl.least_holders)
 		{
-			_pat.evaluatable_terms.insert(sh);
-			if (is_virtual(sh))
-				is_virtu = true;
+			if (is_virtual(sh)) is_virtu = true;
 		}
 
 		// ----------
@@ -867,8 +863,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)
 		{
-			_pat.evaluatable_terms.insert(sh);
-
 			if (is_virtual(sh)) is_virtu = true;
 		}
 

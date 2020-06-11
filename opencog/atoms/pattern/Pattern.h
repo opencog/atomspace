@@ -103,9 +103,9 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
-	/// Evaluatable terms are those that hold a GroundedPredicateNode
-	/// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
-	HandleSet evaluatable_terms;   // smallest term that is evaluatable
+	/// Evaluatable terms are those that need to be evalutated to
+	/// find out if they hold true. For example, GreaterThanLink,
+	/// and anything with a GroundedPredicateNode (GPN) in them.
 	bool have_evaluatables;
 
 	/// Evaluatables with two or more variables, bridging across
