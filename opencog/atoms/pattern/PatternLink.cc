@@ -912,25 +912,19 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 	const Handle& h = ptm->getHandle();
 	Type t = h->get_type();
 
-	if (EQUAL_LINK != t and
-	    GREATER_THAN_LINK != t and
-	    IDENTICAL_LINK != t)
-	{
+	if (not nameserver().isA(VIRTUAL_LINK, t)
+	    or SATISFACTION_LINK == t)
 		return;
-	}
 
-	const Handle& left = h->getOutgoingAtom(0);
-	const Handle& right = h->getOutgoingAtom(1);
-
-	for (const Handle& v : _variables.varset)
+	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
 	{
-		if (is_free_in_tree(left, v) or
-		    is_free_in_tree(right, v))
-		{
-			_fixed.emplace_back(v);
+		const Handle& sh = sub->getHandle();
+		if (can_evaluate(sh)) continue;
+		if (not any_unquoted_unscoped_in_tree(sh, _variables.varset))
+			continue;
 
-			_pat.pmandatory.push_back(ptm);
-		}
+		_fixed.emplace_back(sh);
+		_pat.pmandatory.push_back(ptm);
 	}
 }
 
