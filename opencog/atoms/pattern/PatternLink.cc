@@ -407,7 +407,6 @@ _pat.pmandatory.push_back(term);
 			PatternTermPtr term(make_term_tree(ah));
 			term->markAlways();
 			_pat.always.push_back(term);
-			_pat.undeclared_clauses.emplace_back(ah);
 		}
 		return true;
 	}
@@ -501,8 +500,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// running the sequential. So that's a bug.
 		unbundle_clauses_rec(hbody, connectives);
 
-		_pat.undeclared_clauses.emplace_back(hbody);
-
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
 	}
@@ -517,8 +514,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
-			_pat.undeclared_clauses.emplace_back(hbody);
-
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
 		}
