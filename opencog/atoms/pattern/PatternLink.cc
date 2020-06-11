@@ -850,8 +850,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 				is_black = true;
 			}
 		}
-		if (0 < fgpn.holders.size())
-			_pat.have_evaluatable_holders = true;
 
 		// ----------
 		// One might hope to fish out all EvaluatableLinks, and handle
@@ -869,8 +867,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			if (is_virtual(sh))
 				is_virtu = true;
 		}
-		if (0 < fpfl.holders.size())
-			_pat.have_evaluatable_holders = true;
 
 		// ----------
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
@@ -881,7 +877,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)
 		{
-			_pat.have_evaluatable_holders = true;
 			_pat.evaluatable_terms.insert(sh);
 
 			if (is_virtual(sh)) is_virtu = true;
@@ -1149,6 +1144,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 				}
 		}
 
+		_pat.have_evaluatable_holders = true;
 		ptm->addEvaluatable();
 		return;
 	}
