@@ -53,9 +53,6 @@ private:
 	const Variables* _variables;
 	const Pattern* _pat;
 
-	bool is_black(const PatternTermPtr& ptm) {
-		return (_pat->black.count(ptm->getHandle()) != 0); }
-
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
 	// above, that are being searched.

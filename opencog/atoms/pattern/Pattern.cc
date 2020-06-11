@@ -51,13 +51,6 @@ std::string Pattern::to_string(const std::string& indent) const
 		   << oc_to_string(optionals, indent + OC_TO_STRING_INDENT);
 		first = false;
 	}
-	if (not black.empty())
-	{
-		if (not first) ss << std::endl;
-		ss << indent << "black:" << std::endl
-		   << oc_to_string(black, indent + OC_TO_STRING_INDENT);
-		first = false;
-	}
 	if (not evaluatable_terms.empty())
 	{
 		if (not first) ss << std::endl;

@@ -51,7 +51,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	// Locate the black-box and clear-box clauses.
+	// Locate the clear-box clauses.
 	unbundle_virtual(_pat.undeclared_clauses);
 	_num_virts = _virtual.size();
 
@@ -134,7 +134,6 @@ void PatternLink::setup_components(void)
 
 void PatternLink::init(void)
 {
-	_pat.have_evaluatable_holders = false;
 	_pat.redex_name = "anonymous PatternLink";
 	ScopeLink::extract_variables(_outgoing);
 
@@ -176,7 +175,6 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 
 	_variables = vars;
 	_body = body;
-	_pat.have_evaluatable_holders = false;
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
@@ -193,7 +191,6 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const PatternTermSeq& absts)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
-	_pat.have_evaluatable_holders = false;
 
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -279,7 +276,6 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
-	_pat.have_evaluatable_holders = false;
 	_variables.varset = vars;
 	_pat.undeclared_clauses = clauses;
 	for (const Handle& clause : clauses)
@@ -835,7 +831,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 	for (const Handle& clause: clauses)
 	{
 		bool is_virtu = false;
-		bool is_black = false;
 
 		// ----------
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
@@ -847,7 +842,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			if (is_virtual(sh))
 			{
 				is_virtu = true;
-				is_black = true;
 			}
 		}
 
@@ -903,9 +897,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 			_virtual.emplace_back(clause);
 		else
 			_fixed.emplace_back(clause);
-
-		if (is_black)
-			_pat.black.insert(clause);
 	}
 }
 
@@ -1144,8 +1135,15 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 				}
 		}
 
-		_pat.have_evaluatable_holders = true;
+		_pat.have_evaluatables = true;
 		ptm->addEvaluatable();
+
+		if (is_black_box(h) and is_virtual(h))
+		{
+			_pat.have_black_boxes = true;
+			ptm->markBlackBox();
+		}
+
 		return;
 	}
 

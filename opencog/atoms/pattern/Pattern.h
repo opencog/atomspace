@@ -73,6 +73,8 @@ struct Pattern
 	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
+	Pattern() : have_evaluatables(false), have_black_boxes(false) {}
+
 	// -------------------------------------------
 	/// The current set of clauses (beta redex context) being grounded.
 	std::string redex_name;  // for debugging only!
@@ -101,16 +103,16 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
+	/// Evaluatable terms are those that hold a GroundedPredicateNode
+	/// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
+	HandleSet evaluatable_terms;   // smallest term that is evaluatable
+	bool have_evaluatables;
+
 	/// Black-box clauses. These are clauses that contain GPN's. These
 	/// have to drop into scheme or python to get evaluated, which means
 	/// that they will be slow.  So, we leave these for last, so that the
 	/// faster clauses can run first, and rule out un-needed evaluations.
-	HandleSet black;       // Black-box clauses
-
-	/// Evaluatable terms are those that hold a GroundedPredicateNode
-	/// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
-	HandleSet evaluatable_terms;   // smallest term that is evaluatable
-	bool have_evaluatable_holders;
+	bool have_black_boxes;
 
 	/// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	/// or a DefineSchemaNode (DSN).
