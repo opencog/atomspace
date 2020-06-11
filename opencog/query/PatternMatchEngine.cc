@@ -1895,56 +1895,19 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	              // << "\nof clause = " << clause->getHandle()->to_string()
 	              << "\nhas ground, move upwards";})
 
-	const Handle& hp = ptm->getHandle();
-	if (0 < _pat->in_evaluatable.count(hp))
+	if (ptm->hasAnyEvaluatable())
 	{
-		// If we are here, there are four possibilities:
-		// 1) `hp` is not in any evaluatable that lies between it and
-		//    the clause root.  In this case, we need to fall through
-		//    to the bottom.
-		// 2) The evaluatable is the clause root. We evaluate it, and
-		//    consider the clause satisfied if the evaluation returns
-		//    true. In that case, we continue to the next clause, else we
-		//    backtrack.
-		// 3) The evaluatable is in the middle of a clause, in which case,
-		//    it's parent must be a logical connective: an AndLink, an
-		//    OrLink or a NotLink. In this case, we have to loop over
-		//    all of the evaluatables within this clause, and connect
-		//    them as appropriate. The structure may be non-trivial, so
-		//    that presents a challange.  However, it must be logical
-		//    connectives all the way up to the root of the clause, so the
-		//    easiest thing to do is simply to start at the top, and
-		//    recurse downwards.  Ergo, this is much like case 2): the
-		//    evaluation either suceeds or fails; we proceed or backtrack.
-		// 4) The evaluatable is in the middle of something else. We don't
-		//    know what that means, so we throw an error. Actually, this
-		//    is too harsh. It may be in the middle of some function that
-		//    expects a boolean value as an argument. But I don't know of
-		//    any, just right now.
+		// XXX TODO make sure that all variables in the clause have
+		// been grounded!  If they're not, something is badly wrong!
+		logmsg("Term inside evaluatable, move up to it's top:",
+			       clause->getHandle());
 
-		auto evra = _pat->in_evaluatable.equal_range(hp);
-		for (auto evit = evra.first; evit != evra.second; evit++)
-		{
-			if (not is_unquoted_in_tree(clause->getHandle(), evit->second))
-				continue;
+		bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
+		DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
+		if (found)
+			return clause_accept(clause, hg);
 
-			logmsg("Term inside evaluatable, move up to it's top:",
-			       evit->second);
-
-			// All of the variables occurring in the term should have
-			// grounded by now. If not, then its virtual term, and we
-			// shouldn't even be here (we can't just backtrack, and
-			// try again later).  So validate the grounding, but leave
-			// the evaluation for the callback.
-// XXX TODO count the number of ungrounded vars !!! (make sure its zero)
-
-			bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
-			DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
-			if (found)
-				return clause_accept(clause, hg);
-
-			return false;
-		}
+		return false;
 	}
 
 	const PatternTermPtr& parent = ptm->getParent();
