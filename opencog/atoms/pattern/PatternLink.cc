@@ -480,6 +480,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 				PatternTermPtr term(make_term_tree(ho));
 				_pat.pmandatory.push_back(term);
+
+				if (not term->isVirtual())
+					_fixed.emplace_back(ho);
 			}
 		}
 	}
@@ -524,7 +527,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// preventing alternate interpretations for it.
 	else if (NOT_LINK == t)
 	{
-		// XXX FIXME Handle of OrLink is incorrect, here.
+		// XXX FIXME Handling of OrLink is incorrect, here.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
@@ -532,6 +535,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
+
+			// if (not term->hasAnyEvaluatable())
+			if (not term->isVirtual())
+				_fixed.emplace_back(hbody);
 		}
 	}
 	else if (not is_constant(_variables.varset, hbody))
@@ -541,6 +548,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
+
+		if (not term->isVirtual())
+			_fixed.emplace_back(hbody);
 	}
 }
 
@@ -805,43 +815,11 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
-		bool is_virtu = false;
-
-		// ----------
-		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
-		fgpn.stopset.insert(SCOPE_LINK);
-		fgpn.search_set(clause);
-		for (const Handle& sh : fgpn.least_holders)
-		{
-			if (is_virtual(sh)) is_virtu = true;
-		}
-
-		// ----------
-		// One might hope to fish out all EvaluatableLinks, and handle
-		// them in just one loop.  Unfortunately, doing this causes
-		// multiple unit tests to fail, and so instead, two special
-		// cases are broken out: PredicateFormula, below, and
-		// VirtualLink, further down.
-		//
-		// FindAtoms fpfl(EVALUATABLE_LINK, true);
-		FindAtoms fpfl(PREDICATE_FORMULA_LINK, true);
-		fpfl.search_set(clause);
-		for (const Handle& sh : fpfl.least_holders)
-		{
-			if (is_virtual(sh)) is_virtu = true;
-		}
-
 		// ----------
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
 		// are essentially a kind of EvaluationLink holding a GPN
 		FindAtoms fgtl(VIRTUAL_LINK, true);
 		fgtl.search_set(clause);
-		// Unlike the above, its varset, not least_holders...
-		// because its a link...
-		for (const Handle& sh : fgtl.varset)
-		{
-			if (is_virtual(sh)) is_virtu = true;
-		}
 
 		// For each virtual link, look at it's members. If they
 		// are concrete terms, then add them to the _fixed set.
@@ -858,10 +836,6 @@ void PatternLink::unbundle_virtual(const HandleSeq& clauses)
 				_fixed.emplace_back(term);
 			}
 		}
-
-		// ----------
-		if (not is_virtu)
-			_fixed.emplace_back(clause);
 	}
 }
 
