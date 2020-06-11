@@ -881,7 +881,7 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 	const Handle& h = ptm->getHandle();
 	Type t = h->get_type();
 
-	if (not nameserver().isA(VIRTUAL_LINK, t)
+	if (not nameserver().isA(t, VIRTUAL_LINK)
 	    or SATISFACTION_LINK == t)
 		return;
 
