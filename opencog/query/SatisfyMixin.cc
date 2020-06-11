@@ -401,7 +401,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		PatternLinkPtr clp(PatternLinkCast(comp_patterns.at(i)));
 		const Pattern& pat(clp->get_pattern());
 		bool is_pure_absent = false;
-		if (pat.mandatory.size() == 0 and pat.absents.size() > 0)
+		if (pat.pmandatory.size() == 0 and pat.absents.size() > 0)
 			is_pure_absent = true;
 
 		// Pass through the callbacks, collect up answers.

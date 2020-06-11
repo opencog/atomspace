@@ -238,16 +238,11 @@ PatternLink::PatternLink(const HandleSet& vars,
 		}
 		else
 		{
-			_pat.mandatory.emplace_back(h);
-
 			PatternTermPtr term(make_term_tree(h));
 			_pat.pmandatory.push_back(term);
 		}
 	}
 	locate_defines(compo);
-
-	// The rest is easy: the evaluatables and the connection map
-	unbundle_virtual(_pat.mandatory);
 
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
@@ -333,8 +328,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
-			_pat.mandatory.emplace_back(ph);
-
 			PatternTermPtr term(make_term_tree(ph));
 			term->markLiteral();
 			_pat.pmandatory.push_back(term);
@@ -358,8 +351,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			{
 				for (const Handle& php : ph->getOutgoingSet())
 				{
-					_pat.mandatory.emplace_back(php);
-
 					PatternTermPtr term(make_term_tree(php));
 					term->markLiteral();
 					_pat.pmandatory.push_back(term);
@@ -367,8 +358,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			}
 			else
 			{
-				_pat.mandatory.emplace_back(ph);
-
 				PatternTermPtr term(make_term_tree(ph));
 				term->markLiteral();
 				_pat.pmandatory.push_back(term);
@@ -379,8 +368,6 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 // XXX FIXME both statements below are wrong, but they are needed for
 // the unit tests. More bu0fxing to straighten this stuff out. That
 // is why this code is badly indented!
-_pat.mandatory.emplace_back(h);
-
 PatternTermPtr term(make_term_tree(h));
 term->markChoice();
 _pat.pmandatory.push_back(term);
@@ -491,7 +478,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			    not unbundle_clauses_rec(ho, connectives))
 			{
 				_pat.undeclared_clauses.emplace_back(ho);
-				_pat.mandatory.emplace_back(ho);
 
 				PatternTermPtr term(make_term_tree(ho));
 				_pat.pmandatory.push_back(term);
@@ -516,7 +502,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		unbundle_clauses_rec(hbody, connectives);
 
 		_pat.undeclared_clauses.emplace_back(hbody);
-		_pat.mandatory.emplace_back(hbody);
 
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
@@ -533,7 +518,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
 			_pat.undeclared_clauses.emplace_back(hbody);
-			_pat.mandatory.emplace_back(hbody);
 
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
@@ -550,7 +534,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
 			_pat.undeclared_clauses.emplace_back(hbody);
-			_pat.mandatory.emplace_back(hbody);
 
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
@@ -560,7 +543,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	{
 		// There's just one single clause!
 		_pat.undeclared_clauses.emplace_back(hbody);
-		_pat.mandatory.emplace_back(hbody);
 
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
@@ -945,7 +927,6 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 		if (is_free_in_tree(left, v) or
 		    is_free_in_tree(right, v))
 		{
-			_pat.mandatory.emplace_back(v);
 			_fixed.emplace_back(v);
 
 			_pat.pmandatory.push_back(ptm);

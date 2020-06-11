@@ -37,13 +37,6 @@ std::string Pattern::to_string(const std::string& indent) const
 		   << oc_to_string(undeclared_clauses, indent + OC_TO_STRING_INDENT);
 		first = false;
 	}
-	if (not mandatory.empty())
-	{
-		if (not first) ss << std::endl;
-		ss << indent << "mandatory:" << std::endl
-		   << oc_to_string(mandatory, indent + OC_TO_STRING_INDENT);
-		first = false;
-	}
 	if (not optionals.empty())
 	{
 		if (not first) ss << std::endl;

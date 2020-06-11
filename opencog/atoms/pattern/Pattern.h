@@ -89,7 +89,6 @@ struct Pattern
 
 	/// The mandatory clauses must be satisfied. This includes both
 	/// literal clauses and virtual clauses.
-	HandleSeq        mandatory;
 	PatternTermSeq   pmandatory;
 
 	/// The optional clauses must be ungroundable. They are always
