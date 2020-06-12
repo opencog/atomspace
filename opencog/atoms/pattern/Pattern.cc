@@ -30,7 +30,12 @@ std::string Pattern::to_string(const std::string& indent) const
 
 	ss << indent << "Pattern: " << redex_name << std::endl;
 
-	// FIXME Add printing here.
+	if (body)
+		ss << indent << "PatternLink body: " << body->to_string() << std::endl;
+	else
+		ss << indent << "No pattern body" << std::endl;
+
+	// FIXME Add more printing here.
 
 	return ss.str();
 }
