@@ -751,8 +751,10 @@ bool InitiateSearchMixin::setup_link_type_search()
 	if (PatternTerm::UNDEFINED == _root)
 		return false;
 
-	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	                      << _root->getHandle()->to_string();})
+	DO_LOG({const Handle& s =
+		_root->isQuoted() ? _root->getQuote() : _root->getHandle();
+		LAZY_LOG_FINE << "Start clause is: " << std::endl
+		              << s->to_string();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
 	                      << _starter_term->to_string();})
 

@@ -2634,6 +2634,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 	clause_stacks_clear();
 	clear_current_state();
 	issued.insert(clause);
+	_nack_cache.clear();
 
 	bool halt = explore_clause(term, grnd, clause);
 	bool stop = report_forall();
