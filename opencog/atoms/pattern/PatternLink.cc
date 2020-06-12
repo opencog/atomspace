@@ -930,8 +930,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		bool is_ev = true;
 		if (AND_LINK == t)
 		{
-			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
-				if (not can_evaluate(ptc->getHandle()))
+			for (const Handle& ho : h->getOutgoingSet())
+				if (not can_evaluate(ho))
 				{
 					is_ev = false;
 					break;
@@ -997,7 +997,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		if (AND_LINK == t)
 		{
 			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
-				if (not can_evaluate(ptc->getHandle()))
+				if (ptc->isQuoted() or not can_evaluate(ptc->getHandle()))
 				{
 					ptm->markLiteral();
 					return;
