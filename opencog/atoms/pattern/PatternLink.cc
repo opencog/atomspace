@@ -55,18 +55,6 @@ void PatternLink::common_init(void)
 
 	_num_virts = _virtual.size();
 
-	// Here, we assume that
-	// we are being run with the TermMatchMixin, and so we assume
-	// that the logical connectives are AndLink, OrLink and NotLink.
-	// XXX FIXME; long-term, this should be replaced by a check to
-	// see if a link inherits from EvaluatableLink. However, this can
-	// only be done after all existing BindLinks have been converted to
-	// use PresentLink... so this might not be practical to fix, for a
-	// while.
-	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                     OR_LINK, SEQUENTIAL_OR_LINK,
-	                     NOT_LINK, TRUE_LINK, FALSE_LINK});
-
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in thier literal form.
@@ -75,14 +63,6 @@ void PatternLink::common_init(void)
 		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
 			_fixed.push_back(ptm->getHandle());
 	}
-
-	HandleSeq opts;
-	for (const PatternTermPtr& ptm : _pat.absents)
-		opts.emplace_back(ptm->getHandle());
-
-	// Split the non-virtual clauses into connected components
-	get_bridged_components(_variables.varset, _fixed, opts,
-	                       _components, _component_vars);
 
 	// Make sure every variable appears in some concrete
 	// (non-evaluatable) clause. This consists of non-evaluatable
@@ -93,6 +73,14 @@ void PatternLink::common_init(void)
 	for (const PatternTermPtr& ptm : _pat.absents)
 		concrete_clauses.emplace_back(ptm->getHandle());
 	validate_variables(_variables.varset, concrete_clauses);
+
+	HandleSeq opts;
+	for (const PatternTermPtr& ptm : _pat.absents)
+		opts.emplace_back(ptm->getHandle());
+
+	// Split the non-virtual clauses into connected components
+	get_bridged_components(_variables.varset, _fixed, opts,
+	                       _components, _component_vars);
 
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
