@@ -52,8 +52,8 @@ void get_connected_components(const HandleSet& vars,
                               HandleSetSeq& compvars);
 
 void get_bridged_components(const HandleSet& vars,
-                            const HandleSeq& clauses,
-                            const HandleSeq& opts,
+                            const PatternTermSeq& clauses,
+                            const PatternTermSeq& opts,
                             HandleSeqSeq& compset,
                             HandleSetSeq& compvars);
 

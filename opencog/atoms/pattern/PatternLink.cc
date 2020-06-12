@@ -61,7 +61,7 @@ void PatternLink::common_init(void)
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
 		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
-			_fixed.push_back(ptm->getHandle());
+			_fixed.push_back(ptm);
 	}
 
 	// Make sure every variable appears in some concrete
@@ -69,17 +69,15 @@ void PatternLink::common_init(void)
 	// mandatory clauses and clauses which must be absent.
 	// Otherwise, we risk not being able to evaluate a clause
 	// with some ungrounded variable.
-	HandleSeq concrete_clauses(_fixed);
+	HandleSeq concrete_clauses;
+	for (const PatternTermPtr& ptm : _fixed)
+		concrete_clauses.emplace_back(ptm->getHandle());
 	for (const PatternTermPtr& ptm : _pat.absents)
 		concrete_clauses.emplace_back(ptm->getHandle());
 	validate_variables(_variables.varset, concrete_clauses);
 
-	HandleSeq opts;
-	for (const PatternTermPtr& ptm : _pat.absents)
-		opts.emplace_back(ptm->getHandle());
-
 	// Split the non-virtual clauses into connected components
-	get_bridged_components(_variables.varset, _fixed, opts,
+	get_bridged_components(_variables.varset, _fixed, _pat.absents,
 	                       _components, _component_vars);
 
 	// Make sure every variable is in some component.
@@ -471,7 +469,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				_pat.pmandatory.push_back(term);
 
 				if (not term->isVirtual())
-					_fixed.emplace_back(ho);
+					_fixed.emplace_back(term);
 			}
 		}
 	}
@@ -525,7 +523,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 			// if (not term->hasAnyEvaluatable())
 			if (not term->isVirtual())
-				_fixed.emplace_back(hbody);
+				_fixed.emplace_back(term);
 		}
 	}
 	else if (not is_constant(_variables.varset, hbody))
@@ -535,7 +533,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		_pat.pmandatory.push_back(term);
 
 		if (not term->isVirtual())
-			_fixed.emplace_back(hbody);
+			_fixed.emplace_back(term);
 	}
 }
 
@@ -801,7 +799,7 @@ void PatternLink::add_dummies(const PatternTermPtr& ptm)
 		if (not any_unquoted_unscoped_in_tree(sh, _variables.varset))
 			continue;
 
-		_fixed.emplace_back(sh);
+		_fixed.emplace_back(sub);
 	}
 }
 
@@ -1127,8 +1125,8 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 	ss << to_string(indent) << std::endl;
 	ss << indent << "_pat:" << std::endl
 	   << oc_to_string(_pat, indent_p) << std::endl;
-	ss << indent << "_fixed:" << std::endl
-	   << oc_to_string(_fixed, indent_p) << std::endl;
+	// ss << indent << "_fixed:" << std::endl
+	//   << oc_to_string(_fixed, indent_p) << std::endl;
 	ss << indent << "_num_virts = " << _num_virts << std::endl;
 	ss << indent << "_virtual:" << std::endl
 	   << oc_to_string(_virtual, indent_p) << std::endl;

@@ -172,11 +172,21 @@ void get_connected_components(const HandleSet& vars,
 }
 
 void get_bridged_components(const HandleSet& vars,
-                            const HandleSeq& nonopts,
-                            const HandleSeq& opts,
+                            const PatternTermSeq& prsnts,
+                            const PatternTermSeq& absnts,
                             HandleSeqSeq& components,
                             HandleSetSeq& component_vars)
 {
+	HandleSeq nonopts;
+	for (const PatternTermPtr& ptm: prsnts)
+		nonopts.emplace_back(ptm->getHandle());
+		// nonopts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+
+	HandleSeq opts;
+	for (const PatternTermPtr& ptm: absnts)
+		opts.emplace_back(ptm->getHandle());
+		// opts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+
 	if (0 == opts.size())
 	{
 		get_connected_components(vars, nonopts, components, component_vars);

@@ -94,7 +94,7 @@ protected:
 	/// by determining if the virtual clasues that tie them together
 	/// are true or not.
 	///
-	HandleSeq _fixed;
+	PatternTermSeq _fixed;
 	size_t _num_virts;
 	HandleSeq _virtual;
 
