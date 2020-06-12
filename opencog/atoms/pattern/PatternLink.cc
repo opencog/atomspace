@@ -71,7 +71,8 @@ void PatternLink::common_init(void)
 	// with some ungrounded variable.
 	HandleSeq concrete_clauses;
 	for (const PatternTermPtr& ptm : _fixed)
-		concrete_clauses.emplace_back(ptm->getHandle());
+		concrete_clauses.emplace_back(
+			ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
 	for (const PatternTermPtr& ptm : _pat.absents)
 		concrete_clauses.emplace_back(ptm->getHandle());
 	validate_variables(_variables.varset, concrete_clauses);
@@ -1056,7 +1057,8 @@ void PatternLink::debug_log(void) const
 	int cl = 0;
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
-		const Handle& h = ptm->getHandle();
+		const Handle& h =
+			ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
 		std::stringstream ss;
 		ss << "Mandatory " << cl << ":";
 		if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";
@@ -1072,7 +1074,8 @@ void PatternLink::debug_log(void) const
 		cl = 0;
 		for (const PatternTermPtr& ptm : _pat.absents)
 		{
-			const Handle& h = ptm->getHandle();
+			const Handle& h =
+				ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
 			std::stringstream ss;
 			ss << "Optional clause " << cl << ":" << std::endl;
 			ss << h->to_short_string();
@@ -1089,7 +1092,8 @@ void PatternLink::debug_log(void) const
 		cl = 0;
 		for (const PatternTermPtr& ptm : _pat.always)
 		{
-			const Handle& h = ptm->getHandle();
+			const Handle& h =
+				ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
 			std::stringstream ss;
 			ss << "Always clause " << cl << ":";
 			if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";

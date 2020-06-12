@@ -179,13 +179,11 @@ void get_bridged_components(const HandleSet& vars,
 {
 	HandleSeq nonopts;
 	for (const PatternTermPtr& ptm: prsnts)
-		nonopts.emplace_back(ptm->getHandle());
-		// nonopts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		nonopts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
 
 	HandleSeq opts;
 	for (const PatternTermPtr& ptm: absnts)
-		opts.emplace_back(ptm->getHandle());
-		// opts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		opts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
 
 	if (0 == opts.size())
 	{
