@@ -12,7 +12,7 @@
 
 (define quote-scope
 	(Meet
-		(VariableSet
+		(VariableList
 			(Variable "$P")
 			(Variable "$Q")
 			(TypedVariable
@@ -24,6 +24,8 @@
 					(Unquote (Variable "$TyVs"))
 					(Unquote (Variable "$P"))
 					(Unquote (Variable "$Q")))))))
+
+; (cog-execute! quote-scope)
 
 (define expect
 	(List
