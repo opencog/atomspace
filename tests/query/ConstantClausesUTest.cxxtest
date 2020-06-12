@@ -74,6 +74,7 @@ public:
 	void test_mixed_clauses_1();
 	void test_mixed_clauses_2();
 	void test_mixed_clauses_3();
+	void test_constant_present();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -500,6 +501,21 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 	logger().debug() << "more_expected = " << oc_to_string(more_expected);
 
 	TS_ASSERT_EQUALS(results, more_expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ConstantClausesUTest::test_constant_present()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval.eval("(load-from-path \"constant-present.scm\")");
+
+	Handle results = eval.eval_h("(cog-execute! query)");
+	Handle expected = eval.eval_h("expected");
+
+	logger().debug() << " results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

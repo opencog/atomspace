@@ -319,6 +319,8 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 	{
 		for (const Handle& ph : h->getOutgoingSet())
 		{
+			if (is_constant(_variables.varset, ph)) continue;
+
 			PatternTermPtr term(make_term_tree(ph));
 			term->markLiteral();
 			_pat.pmandatory.push_back(term);
@@ -342,12 +344,13 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			{
 				for (const Handle& php : ph->getOutgoingSet())
 				{
+					if (is_constant(_variables.varset, php)) continue;
 					PatternTermPtr term(make_term_tree(php));
 					term->markLiteral();
 					_pat.pmandatory.push_back(term);
 				}
 			}
-			else
+			else if (not is_constant(_variables.varset, ph))
 			{
 				PatternTermPtr term(make_term_tree(ph));
 				term->markLiteral();
@@ -377,6 +380,8 @@ _pat.pmandatory.push_back(term);
 				"AbsentLink can have an arity of one only!");
 
 		const Handle& inv(h->getOutgoingAtom(0));
+		if (is_constant(_variables.varset, inv)) return true;
+
 		PatternTermPtr term(make_term_tree(inv));
 		term->markLiteral();
 		term->markAbsent();
@@ -394,6 +399,7 @@ _pat.pmandatory.push_back(term);
 	{
 		for (const Handle& ah: h->getOutgoingSet())
 		{
+			if (is_constant(_variables.varset, ah)) continue;
 			PatternTermPtr term(make_term_tree(ah));
 			term->markAlways();
 			_pat.always.push_back(term);
