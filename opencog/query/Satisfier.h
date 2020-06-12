@@ -52,6 +52,7 @@ class Satisfier :
 	public TermMatchMixin,
 	public SatisfyMixin
 {
+	public: // Arghhh. OpenPsi accesses these directly...
 		Handle _pattern_body;
 		bool _have_variables;
 
