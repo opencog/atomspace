@@ -175,7 +175,7 @@ public:
 	const HandleSeq& get_component_patterns(void) const
 		{ return _component_patterns; }
 
-	// Return the list of fixed and virtual clauses we are holding.
+	// Return the list virtual clauses we are holding.
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
 	void debug_log(void) const;
