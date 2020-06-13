@@ -1060,57 +1060,34 @@ void PatternLink::debug_log(void) const
 	logger().fine("%lu components", _num_comps);
 	logger().fine("%lu variables\n", _variables.varset.size());
 
-	int cl = 0;
+	int num = 0;
+	std::string str;
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
-		const Handle& h =
-			ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
-		std::stringstream ss;
-		ss << "Mandatory " << cl << ":";
-		if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";
-		ss << std::endl;
-		ss << h->to_short_string();
-		logger().fine() << ss.str();
-		cl++;
+		str += "Mandatory " + std::to_string(num) + ":";
+		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
+		str += "\n";
+		str += ptm->to_full_string();
+		num++;
 	}
 
-	if (0 < _pat.absents.size())
+	for (const PatternTermPtr& ptm : _pat.absents)
 	{
-		logger().fine("Pattern has must-be-absent clauses:");
-		cl = 0;
-		for (const PatternTermPtr& ptm : _pat.absents)
-		{
-			const Handle& h =
-				ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
-			std::stringstream ss;
-			ss << "Optional clause " << cl << ":" << std::endl;
-			ss << h->to_short_string();
-			logger().fine() << ss.str();
-			cl++;
-		}
+		str += "Absent clause " + std::to_string(num) + ":\n";
+		str + ptm->to_full_string();
+		num++;
 	}
-	else
-		logger().fine("No must-be-absent clauses");
 
-	if (0 < _pat.always.size())
+	for (const PatternTermPtr& ptm : _pat.always)
 	{
-		logger().fine("Pattern has for-all clauses:");
-		cl = 0;
-		for (const PatternTermPtr& ptm : _pat.always)
-		{
-			const Handle& h =
-				ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle();
-			std::stringstream ss;
-			ss << "Always clause " << cl << ":";
-			if (ptm->hasAnyEvaluatable()) ss << " (evaluatable)";
-			ss << std::endl;
-			ss << h->to_short_string();
-			logger().fine() << ss.str();
-			cl++;
-		}
+		str += "Always clause " + std::to_string(num) + ":";
+		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
+		str += "\n";
+		str += ptm->to_full_string();
+		num++;
 	}
-	else
-		logger().fine("No always clauses");
+
+	logger().fine() << str;
 
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _variables.varset)

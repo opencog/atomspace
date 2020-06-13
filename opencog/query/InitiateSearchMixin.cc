@@ -366,8 +366,8 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
 		                  "UNDEFINED" : _starter_term->to_short_string());})
-		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
-		              <<  _root->getQuote()->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is:\n"
+		              <<  _root->to_full_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
