@@ -231,6 +231,8 @@ public:
 	// See http://stackoverflow.com/questions/16734783 for explanation.
 	std::string to_string() const;
 	std::string to_string(const std::string& indent) const;
+	std::string to_short_string() const;
+	std::string to_short_string(const std::string& indent) const;
 };
 
 #define createPatternTerm std::make_shared<PatternTerm>

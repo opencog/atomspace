@@ -301,15 +301,46 @@ void PatternTerm::markAlways()
 
 // ==============================================================
 
-std::string PatternTerm::to_string() const { return to_string(": "); }
+std::string PatternTerm::to_short_string() const { return to_string(": "); }
+
+std::string PatternTerm::to_short_string(const std::string& sep) const
+{
+	// Term is null-terminated at the top.
+	// Top term never has a handle in it.
+	if (not _handle) return "-";
+	std::string str = _parent->to_short_string(sep);
+	str += sep + _handle->id_to_string();
+	return str;
+}
+
+std::string PatternTerm::to_string() const { return to_string(""); }
 
 std::string PatternTerm::to_string(const std::string& indent) const
 {
-	// Term is null-terminated at thye top.
+	// Term is null-terminated at the top.
 	// Top term never has a handle in it.
-	if (not _handle) return "-";
-	std::string str = _parent->to_string();
-	str += indent + _handle->id_to_string();
+	if (not _handle) return "\n";
+	std::string str = _parent->to_string(indent + "   ");
+	str += indent;
+	const Handle& h = isQuoted() ? getQuote() : getHandle();
+	str += nameserver().getTypeName(h->get_type()) + " : ";
+	if (isQuoted()) str += "Q: ";
+	if (_has_any_bound_var) str += "HABV: ";
+	if (_has_bound_var) str += "HBV: ";
+	if (_is_bound_var) str += "BV: ";
+	if (_has_any_globby_var) str += "HAGV: ";
+	if (_has_globby_var) str += "HGV: ";
+	if (_is_globby_var) str += "GV: ";
+	if (_has_any_evaluatable) str += "EE: ";
+	if (_has_evaluatable) str += "E: ";
+	if (_is_virtual) str += "V: ";
+	if (_has_any_unordered_link) str += "U: ";
+	if (_is_literal) str += "L: ";
+	if (_is_present) str += "P: ";
+	if (_is_absent) str += "A: ";
+	if (_is_choice) str += "C: ";
+	if (_is_always) str += "AW: ";
+	str += _handle->id_to_string() + "\n";
 	return str;
 }
 
