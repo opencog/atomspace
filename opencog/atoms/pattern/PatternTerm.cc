@@ -380,9 +380,22 @@ std::string oc_to_string(const PatternTerm& pt, const std::string& indent)
 	return pt.to_string(indent);
 }
 
-std::string oc_to_string(const PatternTermPtr& pt_ptr, const std::string& indent)
+std::string oc_to_string(const PatternTermPtr& ptr, const std::string& indent)
 {
-	return pt_ptr->to_string();
+	return ptr->to_string();
+}
+
+std::string oc_to_string(const PatternTermSeq& pts, const std::string& indent)
+{
+	std::string str;
+	size_t i=0;
+	for (const PatternTermPtr& ptm : pts)
+	{
+		str += indent + "term[" + std::to_string(i) + "]:\n";
+		str += ptm->to_full_string(indent + "  ") + "\n";
+		i++;
+	}
+	return str;
 }
 
 } // ~namespace opencog

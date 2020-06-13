@@ -247,6 +247,8 @@ std::string oc_to_string(const PatternTerm& pt,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const PatternTermPtr& pt,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const PatternTermSeq& pt,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 
