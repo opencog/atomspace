@@ -313,17 +313,9 @@ std::string PatternTerm::to_short_string(const std::string& sep) const
 	return str;
 }
 
-std::string PatternTerm::to_string() const { return to_string(""); }
-
-std::string PatternTerm::to_string(const std::string& indent) const
+std::string PatternTerm::flag_string() const
 {
-	// Term is null-terminated at the top.
-	// Top term never has a handle in it.
-	if (not _handle) return "\n";
-	std::string str = _parent->to_string(indent + "   ");
-	str += indent;
-	const Handle& h = isQuoted() ? getQuote() : getHandle();
-	str += nameserver().getTypeName(h->get_type()) + " : ";
+	std::string str;
 	if (isQuoted()) str += "Q: ";
 	if (_has_any_bound_var) str += "HABV: ";
 	if (_has_bound_var) str += "HBV: ";
@@ -340,7 +332,46 @@ std::string PatternTerm::to_string(const std::string& indent) const
 	if (_is_absent) str += "A: ";
 	if (_is_choice) str += "C: ";
 	if (_is_always) str += "AW: ";
-	str += _handle->id_to_string() + "\n";
+	str += _handle->id_to_string();
+	return str;
+}
+
+std::string PatternTerm::to_string() const { return to_string(""); }
+
+std::string PatternTerm::to_string(const std::string& indent) const
+{
+	// Term is null-terminated at the top.
+	// Top term never has a handle in it.
+	if (not _handle) return "\n";
+	std::string str = _parent->to_string(indent + "   ");
+	str += indent;
+	str += nameserver().getTypeName(getQuote()->get_type()) + " : ";
+	str += flag_string() + "\n";
+	return str;
+}
+
+std::string PatternTerm::to_full_string() const { return to_full_string(""); }
+
+std::string PatternTerm::to_full_string(const std::string& indent) const
+{
+	if (getQuote()->is_node())
+	{
+		std::string str = getQuote()->to_short_string(indent);
+		str += "\t; " + flag_string() + "\n";
+		return str;
+	}
+
+	std::string str = indent;
+	std::string more_indent = indent + "  "; // two spaces
+	str += "(" + nameserver().getTypeName(getQuote()->get_type());
+	str += "\t\t; " + flag_string() + "\n";
+	for (const PatternTermPtr& ptm: getOutgoingSet())
+	{
+		if (str.back() == ')') str += "\n";
+		str += ptm->to_full_string(more_indent);
+	}
+	if (str.back() != ')') str += indent;
+	str += ")";
 	return str;
 }
 

@@ -234,6 +234,9 @@ public:
 	std::string to_string(const std::string& indent) const;
 	std::string to_short_string() const;
 	std::string to_short_string(const std::string& indent) const;
+	std::string to_full_string() const;
+	std::string to_full_string(const std::string& indent) const;
+	std::string flag_string() const;
 };
 
 #define createPatternTerm std::make_shared<PatternTerm>
