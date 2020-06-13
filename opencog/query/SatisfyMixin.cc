@@ -152,7 +152,7 @@ class PMCGroundings : public SatisfyMixin
  */
 bool SatisfyMixin::recursive_virtual(
             const HandleSeq& virtuals,
-            const HandleSeq& optionals,
+            const PatternTermSeq& absents,
             const GroundingMap& var_gnds,
             const GroundingMap& term_gnds,
             // copies, NOT references!
@@ -208,9 +208,9 @@ bool SatisfyMixin::recursive_virtual(
 		}
 
 		Handle empty;
-		for (const Handle& opt: optionals)
+		for (const PatternTermPtr& opt: absents)
 		{
-			bool match = optional_clause_match(opt, empty, var_gnds);
+			bool match = optional_clause_match(opt->getHandle(), empty, var_gnds);
 			if (not match) return false;
 		}
 
@@ -250,7 +250,7 @@ bool SatisfyMixin::recursive_virtual(
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(virtuals, optionals, rvg, rpg,
+		bool accept = recursive_virtual(virtuals, absents, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -400,17 +400,18 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 
 		PatternLinkPtr clp(PatternLinkCast(comp_patterns.at(i)));
 		const Pattern& pat(clp->get_pattern());
-		bool is_pure_optional = false;
-		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
-			is_pure_optional = true;
+		bool is_pure_absent = false;
+		if (pat.pmandatory.size() == 0 and pat.absents.size() > 0)
+			is_pure_absent = true;
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(*this);
 		gcb.satisfy(clp);
 
-		// Special handling for disconnected pure optionals -- Returns false to
-		// end the search if this disconnected pure optional is found
-		if (is_pure_optional)
+		// Special handling for disconnected pure absents --
+		// Returns false to end the search if this disconnected
+		// pure absent is found.
+		if (is_pure_absent)
 		{
 			// XXX FIXME terrible hack.
 			TermMatchMixin* intu =
@@ -449,7 +450,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(virts, pat.optionals,
+	done = recursive_virtual(virts, pat.absents,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 	done = search_finished(done);

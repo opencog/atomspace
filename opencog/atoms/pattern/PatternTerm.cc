@@ -27,10 +27,13 @@ PatternTerm::PatternTerm(void)
 	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
+	  _is_virtual(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
-	  _is_choice(false)
+	  _is_absent(false),
+	  _is_choice(false),
+	  _is_always(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -45,10 +48,13 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_globby_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
+	  _is_virtual(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
-	  _is_choice(false)
+	  _is_absent(false),
+	  _is_choice(false),
+	  _is_always(false)
 {
 	Type t = h->get_type();
 
@@ -137,7 +143,7 @@ void PatternTerm::addAnyBoundVar()
 	if (not _has_any_bound_var)
 	{
 		_has_any_bound_var = true;
-		if (_parent != PatternTerm::UNDEFINED)
+		if (_parent->_handle)
 			_parent->addAnyBoundVar();
 	}
 }
@@ -154,7 +160,7 @@ void PatternTerm::addBoundVariable()
 	// Mark just this term (the variable itself)
 	// and mark the term that holds us.
 	_is_bound_var = true;
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 			_parent->_has_bound_var = true;
 
 	// Mark recursively, all the way to the root.
@@ -169,7 +175,7 @@ void PatternTerm::addAnyGlobbyVar()
 	if (not _has_any_globby_var)
 	{
 		_has_any_globby_var = true;
-		if (_parent != PatternTerm::UNDEFINED)
+		if (_parent->_handle)
 			_parent->addAnyGlobbyVar();
 	}
 }
@@ -180,7 +186,7 @@ void PatternTerm::addGlobbyVar()
 
 	_is_globby_var = true;
 
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->_has_globby_var = true;
 
 	addAnyGlobbyVar();
@@ -192,22 +198,31 @@ void PatternTerm::addGlobbyVar()
 
 void PatternTerm::addAnyEvaluatable()
 {
-	if (not _has_any_evaluatable)
-	{
-		_has_any_evaluatable = true;
-		if (_parent != PatternTerm::UNDEFINED)
-			_parent->addAnyEvaluatable();
-	}
+	if (_has_any_evaluatable) return;
+
+	_has_any_evaluatable = true;
+	if (_parent->_handle)
+		_parent->addAnyEvaluatable();
 }
 
 void PatternTerm::addEvaluatable()
 {
 	_has_evaluatable = true;
 
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->_has_evaluatable = true;
 
 	addAnyEvaluatable();
+}
+
+// ==============================================================
+
+void PatternTerm::markVirtual()
+{
+	// If quoted, it cannot be evaluated.
+	if (isQuoted()) return;
+
+	_is_virtual = true;
 }
 
 // ==============================================================
@@ -217,7 +232,7 @@ void PatternTerm::addUnorderedLink()
 	if (_has_any_unordered_link) return;
 
 	_has_any_unordered_link = true;
-	if (_parent != PatternTerm::UNDEFINED)
+	if (_parent->_handle)
 		_parent->addUnorderedLink();
 }
 
@@ -228,6 +243,8 @@ void PatternTerm::markLiteral()
 	if (_is_literal) return;
 
 	_is_literal = true;
+	_has_evaluatable = false;
+	_has_any_evaluatable = false;
 	for (PatternTermPtr& ptm : getOutgoingSet())
 		ptm->markLiteral();
 }
@@ -248,6 +265,16 @@ void PatternTerm::markPresent()
 
 // ==============================================================
 
+void PatternTerm::markAbsent()
+{
+	// If quoted, it cannot be interpreted as absent.
+	if (isQuoted()) return;
+
+	_is_absent = true;
+}
+
+// ==============================================================
+
 void PatternTerm::markChoice()
 {
 	// If its literal, its effectively quoted, so cannot be a choice.
@@ -260,6 +287,16 @@ void PatternTerm::markChoice()
 	{
 		if (not ptm->isPresent()) ptm->markLiteral();
 	}
+}
+
+// ==============================================================
+
+void PatternTerm::markAlways()
+{
+	// If its quoted, it cannot be always.
+	if (isQuoted()) return;
+
+	_is_always = true;
 }
 
 // ==============================================================

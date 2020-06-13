@@ -53,30 +53,6 @@ private:
 	const Variables* _variables;
 	const Pattern* _pat;
 
-	bool is_optional(const Handle& h) {
-		// return (_pat->optionals.count(h) != 0); }
-		const HandleSeq& o(_pat->optionals);
-		return o.end() != std::find(o.begin(), o.end(), h); }
-	bool is_optional(const PatternTermPtr& ptm) {
-		return is_optional(ptm->getHandle());
-	}
-
-	bool is_always(const Handle& h) {
-		const HandleSeq& o(_pat->always);
-		return o.end() != std::find(o.begin(), o.end(), h); }
-	bool is_always(const PatternTermPtr& ptm) {
-		return is_always(ptm->getHandle());
-	}
-
-	// XXX FIXME, change to call ptm->hasAnyEvaluatable().
-	bool is_evaluatable(const Handle& h) {
-		return (_pat->evaluatable_holders.count(h) != 0); }
-	bool is_evaluatable(const PatternTermPtr& ptm) {
-		return (_pat->evaluatable_holders.count(ptm->getHandle()) != 0); }
-
-	bool is_black(const PatternTermPtr& ptm) {
-		return (_pat->black.count(ptm->getHandle()) != 0); }
-
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
 	// above, that are being searched.
@@ -192,7 +168,7 @@ private:
 	bool clause_accepted;
 	void get_next_untried_clause(void);
 	Handle get_glob_embedding(const Handle&);
-	bool get_next_thinnest_clause(bool, bool, bool);
+	bool get_next_thinnest_clause(bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
 	PatternTermPtr next_clause;
 	Handle next_joint;
@@ -327,7 +303,7 @@ public:
 	// Evaluate constant evaluatable and ground it via the
 	// PatternMatchCallback. It is assumed that all clauses are
 	// connected by an AndLink.
-	bool explore_constant_evaluatables(const HandleSeq& clauses);
+	bool explore_constant_evaluatables(const PatternTermSeq& clauses);
 
 	// Handy-dandy utilities
 	static void print_solution(const GroundingMap &vars,

@@ -196,6 +196,9 @@ void DisconnectedUTest::test_dancers(void)
 	Handle both(createLink(SET_LINK, ab, ba));
 	Handle ans = as->add_atom(both);
 
+	printf("Expected: %s\n", ans->to_string().c_str());
+	printf("     Got: %s\n",   h->to_string().c_str());
+
 	// They should be identical.
 	TSM_ASSERT("Wrong result", *ans == *h);
 

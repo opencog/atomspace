@@ -824,14 +824,8 @@ SIMILARITY_LINK <- UNORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
-// Logical quantifiers (adjoints to pullbacks of relations)
-// These are ill-defined, at the moment: do they return truth
-// values, or sets of atoms? Do they express a predicate, or a subset?
-// Should these inherit from ReWriteLink or PrenexLink instead ???
-// I think PLN uses these; otherwise they are not yet properly defined.
-//
-// Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
-// is scoped!)
+// Logical quantifiers (adjoints to pullbacks of relations). Both are
+// scoped.
 //
 // Exists == left adjoint to the pullback functor of a relation.
 //           Note that PRESENT_LINK below is the unscoped variant
@@ -840,10 +834,21 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 //           Note that ALWAYS_LINK below is the unscoped variant
 //           of this, used in the pattern matcher.
 //
-// XXX These are currently not implemented (viz they don't actually
-// work as virtual links).
-FORALL_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK "ForAllLink"
+// ExistsLink is currently defined to return a crisp true/false value,
+// when it is evaluated. It works outside of the pattern engine...
+//
+// These are currently a poorly-defined and a messy hash. They could be
+// defined to return (crisp) truth values, or to return satsifying sets.
+//
+// -- PLN uses ForAllLink, but fails to quote it qhen giving it to the
+//    pattern engine. A unit test fails, if we make it actually
+//    evaluatable.
+//
+// -- Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
+//    is scoped.)
+//
 EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
+FORALL_LINK <- SCOPE_LINK "ForAllLink"
 
 // Concept constructor
 SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK

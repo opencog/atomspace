@@ -1895,64 +1895,19 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	              // << "\nof clause = " << clause->getHandle()->to_string()
 	              << "\nhas ground, move upwards";})
 
-	const Handle& hp = ptm->getHandle();
-	if (0 < _pat->in_evaluatable.count(hp))
+	if (ptm->hasAnyEvaluatable())
 	{
-		// If we are here, there are four possibilities:
-		// 1) `hp` is not in any evaluatable that lies between it and
-		//    the clause root.  In this case, we need to fall through
-		//    to the bottom.
-		// 2) The evaluatable is the clause root. We evaluate it, and
-		//    consider the clause satisfied if the evaluation returns
-		//    true. In that case, we continue to the next clause, else we
-		//    backtrack.
-		// 3) The evaluatable is in the middle of a clause, in which case,
-		//    it's parent must be a logical connective: an AndLink, an
-		//    OrLink or a NotLink. In this case, we have to loop over
-		//    all of the evaluatables within this clause, and connect
-		//    them as appropriate. The structure may be non-trivial, so
-		//    that presents a challange.  However, it must be logical
-		//    connectives all the way up to the root of the clause, so the
-		//    easiest thing to do is simply to start at the top, and
-		//    recurse downwards.  Ergo, this is much like case 2): the
-		//    evaluation either suceeds or fails; we proceed or backtrack.
-		// 4) The evaluatable is in the middle of something else. We don't
-		//    know what that means, so we throw an error. Actually, this
-		//    is too harsh. It may be in the middle of some function that
-		//    expects a boolean value as an argument. But I don't know of
-		//    any, just right now.
-		//
-		// Anyway, all of this talk abbout booleans is emphasizing the
-		// point that, someday, we need to replace this crisp logic with
-		// probabalistic logic of some sort.
-		//
-		// By the way, if we are here, then `hp` is surely a variable;
-		// or, at least, it is, if we are working in the canonical
-		// interpretation.
+		// XXX TODO make sure that all variables in the clause have
+		// been grounded!  If they're not, something is badly wrong!
+		logmsg("Term inside evaluatable, move up to it's top:",
+			       clause->getHandle());
 
-		auto evra = _pat->in_evaluatable.equal_range(hp);
-		for (auto evit = evra.first; evit != evra.second; evit++)
-		{
-			if (not is_unquoted_in_tree(clause->getHandle(), evit->second))
-				continue;
+		bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
+		DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
+		if (found)
+			return clause_accept(clause, hg);
 
-			logmsg("Term inside evaluatable, move up to it's top:",
-			       evit->second);
-
-			// All of the variables occurring in the term should have
-			// grounded by now. If not, then its virtual term, and we
-			// shouldn't even be here (we can't just backtrack, and
-			// try again later).  So validate the grounding, but leave
-			// the evaluation for the callback.
-// XXX TODO count the number of ungrounded vars !!! (make sure its zero)
-
-			bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
-			DO_LOG({logger().fine("After evaluating clause, found = %d", found);})
-			if (found)
-				return clause_accept(clause, hg);
-
-			return false;
-		}
+		return false;
 	}
 
 	const PatternTermPtr& parent = ptm->getParent();
@@ -2011,14 +1966,14 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (is_optional(clause))
+	if (clause->isAbsent())
 	{
 		clause_accepted = true;
 		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
 		DO_LOG({logger().fine("optional clause match callback match=%d", match);})
 	}
 	else
-	if (is_always(clause))
+	if (clause->isAlways())
 	{
 		_did_check_forall = true;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
@@ -2032,7 +1987,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 	}
 	if (not match) return false;
 
-	if (not is_evaluatable(clause))
+	if (not clause->hasAnyEvaluatable())
 	{
 		clause_grounding[clause_root] = hg;
 
@@ -2110,9 +2065,9 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	logmsg("Next clause is", do_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_optional(do_clause)? "optional" : "required");})
+		              << (do_clause->isAbsent()? "absent" : "required");})
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (is_evaluatable(do_clause)?
+		              << (do_clause->hasAnyEvaluatable()?
 		                  "dynamically evaluatable" : "non-dynamic");
 	logmsg("Joining variable is", joiner);
 	logmsg("Joining grounding is", var_grounding[joiner]); })
@@ -2145,7 +2100,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (is_optional(next_clause)))
+	       (next_clause->isAbsent()))
 	{
 		Handle curr_root = next_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
@@ -2224,36 +2179,28 @@ bool PatternMatchEngine::do_next_clause(void)
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// no virtuals, no black boxes, no optionals.
-	if (get_next_thinnest_clause(false, false, false)) return;
+	// no virtuals, no black boxes, no absents.
+	if (get_next_thinnest_clause(false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
-	if (not _pat->evaluatable_holders.empty())
+	if (_pat->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(true, false, false)) return;
-		if (not _pat->black.empty())
-		{
-			if (get_next_thinnest_clause(true, true, false)) return;
-		}
+		if (get_next_thinnest_clause(true, false)) return;
 	}
 
-	// Try again, this time, considering the optional clauses.
-	if (not _pat->optionals.empty())
+	// Try again, this time, considering the absent clauses.
+	if (not _pat->absents.empty())
 	{
-		if (get_next_thinnest_clause(false, false, true)) return;
-		if (not _pat->evaluatable_holders.empty())
+		if (get_next_thinnest_clause(false, true)) return;
+		if (_pat->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(true, false, true)) return;
-			if (not _pat->black.empty())
-			{
-				if (get_next_thinnest_clause(true, true, true)) return;
-			}
+			if (get_next_thinnest_clause(true, true)) return;
 		}
 	}
 
 	// Now loop over all for-all clauses.
-	// I think that all variables will be grounded at this point, right?
-	for (const PatternTermPtr& root : _pat->palways)
+	// All variables must neccessarily be grounded at this point.
+	for (const PatternTermPtr& root : _pat->always)
 	{
 		if (issued.end() != issued.find(root)) continue;
 		issued.insert(root);
@@ -2367,9 +2314,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 /// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
-                                                  bool search_black,
-                                                  bool search_optionals)
+bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
+                                                  bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -2432,9 +2378,8 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		{
 			const PatternTermPtr& root = it->second;
 			if ((issued.end() == issued.find(root))
-			        and (search_virtual or not is_evaluatable(root))
-			        and (search_black or not is_black(root))
-			        and (search_optionals or not is_optional(root)))
+			        and (search_eval or not root->hasAnyEvaluatable())
+			        and (search_absents or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
 				if (root_thickness < thinnest_clause)
@@ -2453,8 +2398,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	// will not find them. Try these now. This means that the
 	// variable-free clauses run last. If the user wants to run them
 	// earlier, they can always use a SequentialAndLink.
-	if (not unsolved and search_virtual and
-		 (search_black or _pat->black.empty()))
+	if (not unsolved and search_eval)
 	{
 		for (const PatternTermPtr& root : _pat->pmandatory)
 		{
@@ -2690,6 +2634,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 	clause_stacks_clear();
 	clear_current_state();
 	issued.insert(clause);
+	_nack_cache.clear();
 
 	bool halt = explore_clause(term, grnd, clause);
 	bool stop = report_forall();
@@ -2752,7 +2697,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	_did_check_forall = false;
 	bool found = explore_term_branches(term, grnd, clause);
 
-	if (not _did_check_forall and is_always(clause))
+	if (not _did_check_forall and clause->isAlways())
 	{
 		// We need to record failures for the AlwaysLink
 		Handle empty;
@@ -2786,7 +2731,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 	{
 		return clause_accept(clause, grnd);
 	}
-	else if (is_always(clause))
+	else if (clause->isAlways())
 	{
 		// We need to record failures for the AlwaysLink
 		Handle empty;
@@ -2858,7 +2803,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
                                         const PatternTermPtr& pclause)
 {
 	// Evaluatable clauses are not cacheable.
-	if (is_evaluatable(pclause))
+	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
 
 	// Build the cache lookup key
@@ -2956,12 +2901,14 @@ void PatternMatchEngine::clear_current_state(void)
 	issued.clear();
 }
 
-bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
+bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)
 {
 	bool found = true;
-	for (const Handle& clause : clauses) {
-		if (is_in(clause, _pat->evaluatable_holders)) {
-			found = _pmc.evaluate_sentence(clause, GroundingMap());
+	for (const PatternTermPtr& clause : clauses)
+	{
+		if (clause->hasAnyEvaluatable())
+		{
+			found = _pmc.evaluate_sentence(clause->getHandle(), GroundingMap());
 			if (not found)
 				break;
 		}

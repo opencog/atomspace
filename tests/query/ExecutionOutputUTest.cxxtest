@@ -253,6 +253,11 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	// The result_list contains a list of the grounded expressions.
 	simpl.get_result_queue()->open();
+
+	// If it's empty, it will hang ...
+	TSM_ASSERT_EQUALS("no results returned",
+		false, simpl.get_result_queue()->is_empty());
+
 	Handle res = HandleCast(simpl.get_result_queue()->value_pop());
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);

@@ -116,6 +116,10 @@ protected:
 	bool _has_any_evaluatable;
 	bool _has_evaluatable;
 
+	// An evaluatable term, with two or more variables in it.
+	// In general, these bridge across components.
+	bool _is_virtual;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
 	// searched in a straight-forward manner; those with them need to
@@ -135,12 +139,23 @@ protected:
 	// default interpretation.
 	bool _is_present;
 
+	// True if this is a term that must be absent in a given grounding.
+	// This corresponds to the ABSENT_LINK in the default interpretation,
+	// and is effectively the same thing as NOT_LINK(PRESENT_LINK).
+	bool _is_absent;
+
 	// True if this contains a set of subterms, one of which must be
 	// present in the pattern. All of the sub-terms are present, or
 	// are literal. This corresponds to CHOICE_LINK in the default
 	// interpretation; it can also be an OR_LINK when that OR_LINK
 	// is in a boolean evaluatable context.
 	bool _is_choice;
+
+	// True if this is a term that must be present in every successful
+	// patten grounding. There are no groundings at all, unless this
+	// term is in each and every one of them. This corresponds to
+	// the ALWAYS_LINK in the default interpretation.
+	bool _is_always;
 
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
@@ -156,6 +171,11 @@ public:
 
 	PatternTermPtr getParent() const noexcept { return _parent; }
 	bool isDescendant(const PatternTermPtr&) const;
+	PatternTermPtr getRoot() noexcept {
+		PatternTermPtr root = shared_from_this();
+		while (root->_parent->_handle) root = _parent;
+		return root;
+	}
 
 	PatternTermPtr addOutgoingTerm(const Handle&);
 	PatternTermSeq getOutgoingSet() const;
@@ -174,8 +194,14 @@ public:
 	void markPresent();
 	bool isPresent() const { return _is_present; }
 
+	void markAbsent();
+	bool isAbsent() const { return _is_absent; }
+
 	void markChoice();
 	bool isChoice() const { return _is_choice; }
+
+	void markAlways();
+	bool isAlways() const { return _is_always; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
@@ -190,6 +216,9 @@ public:
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }
 	bool hasEvaluatable() const noexcept { return _has_evaluatable; }
+
+	void markVirtual();
+	bool isVirtual() const noexcept { return _is_virtual; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }

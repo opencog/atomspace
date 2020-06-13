@@ -89,6 +89,8 @@
               (VariableNode "$body")))))))
 )
 
+; (cog-execute! gl)
+
 (define expect
   (SetLink
     (ListLink

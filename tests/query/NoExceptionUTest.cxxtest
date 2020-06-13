@@ -65,6 +65,7 @@ public:
 	void tearDown();
 
 	void test_exception();
+	void test_bad_analysis();
 };
 
 /*
@@ -83,15 +84,14 @@ void NoExceptionUTest::tearDown(void)
 	as->clear();
 }
 
-// See no-exception.scm for comments. It's not clear though we want
-// that so it is disabled for now.
+// See no-exception.scm for comments.
 void NoExceptionUTest::test_exception()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string result = eval->eval("(load-from-path \"tests/query/no-exception.scm\")");
 	std::cout << "result = " << result;
-	
+
 	Handle bl = eval->eval_h("bl");
 	std::cout << "bl = " << oc_to_string(bl);
 
@@ -100,6 +100,19 @@ void NoExceptionUTest::test_exception()
 
 	// We expect NOT to catch an error.
 	TS_ASSERT_THROWS_NOTHING(bindlink(as, bl));
-	
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Pattern matcher mis-understood some EvlautationLinks.
+void NoExceptionUTest::test_bad_analysis()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/no-exception-analysis.scm\")");
+
+	// We expect NOT to catch an error.
+	TS_ASSERT_THROWS_NOTHING(eval->eval_h("(meet)"));
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

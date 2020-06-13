@@ -106,11 +106,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		NameServer& _nameserver;
 
 		const Variables* _vars = nullptr;
-		const HandleSet* _dynamic = nullptr;
-		bool _have_evaluatables = false;
-
-		bool _have_variables;
-		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
 		                    const GroundingMap&, const HandleSet&,

@@ -27,69 +27,10 @@ using namespace opencog;
 
 namespace opencog {
 
-/**
- * Remove constant clauses from the list of clauses. Every clause
- * should contain at least one variable, or it should be evaluatable.
- * If does not, or is not, remove the clause from the list of clauses.
- *
- * The core idea is that pattern matching against a constant expression
- * "doesn't make sense" -- the constant expression will always match to
- * itself and is thus "trivial".  In principle, the programmer should
- * never include constants in the list of clauses ... but, due to
- * programmer error, this can happen, and will lead to failures during
- * pattern matching. Thus, the routine below can be used to clean up
- * the pattern-matcher input.
- *
- * Terms that contain GroundedSchema or GroundedPredicate nodes can
- * have side-effects, and are thus are not constants, even if they
- * don't contain any variables. They must be kept around, and must be
- * evaluated during the pattern search.  The definitions of
- * DefinedPredicate or DefinedSchema nodes cannot be accessed until
- * runtime evaluation/execution, so these too must be kept.
- *
- * The match for EvaluatableLink's is meant to solve the problem of
- * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
- * (SatisfactionLink (AndLink (FalseLink))), with the first returning
- * TRUE_TV, and the second returning FALSE_TV. Removing these 'constant'
- * terms would alter the result of the evaluation, potentially even
- * leaving an empty (undefined) AndLink. So we cannot really remove
- * them.
- *
- * Returns true if the list of clauses was modified, else returns false.
- */
-bool remove_constants(const HandleSet& vars, Pattern& pat)
+bool is_black_box(const Handle& clause)
 {
-	bool modified = false;
-
-	// Caution: this loop modifies the clauses list!
-	HandleSeq::iterator i;
-	for (i = pat.mandatory.begin(); i != pat.mandatory.end();)
-	{
-		Handle clause(*i);
-
-		if (not is_constant(vars, clause))
-		{
-			++i; continue;
-		}
-
-		i = pat.mandatory.erase(i);
-
-		// Remove the clause from literal_clauses.
-		auto qc = std::find(pat.literal_clauses.begin(),
-		                   pat.literal_clauses.end(), clause);
-		if (qc != pat.literal_clauses.end())
-			pat.literal_clauses.erase(qc);
-
-		// Remove the clause from undeclared_clauses.
-		auto uc = std::find(pat.undeclared_clauses.begin(),
-		                   pat.undeclared_clauses.end(), clause);
-		if (uc != pat.undeclared_clauses.end())
-			pat.undeclared_clauses.erase(uc);
-
-		modified = true;
-	}
-
-	return modified;
+	return
+		contains_atomtype(clause, GROUNDED_PREDICATE_NODE);
 }
 
 bool can_evaluate(const Handle& clause)
@@ -97,18 +38,24 @@ bool can_evaluate(const Handle& clause)
 	Type ct = clause->get_type();
 	bool evaluatable =
 		// If it is an EvaluatableLink, then is is evaluatable,
+		// unless it is one of the pattern-matching links, or
+		// if it is a non-gpn EvaluationLink (i.e. a plain
+		// old PredicateNode style EvaluationLink).
 		// unless it is a closed (variable-free) EvaluationLink
 		// over a PredicateNode.
 		(nameserver().isA(ct, EVALUATABLE_LINK)
+		   and not (PRESENT_LINK == ct)
+		   and not (ABSENT_LINK == ct)
+		   and not (CHOICE_LINK == ct)
 		   and (not (EVALUATION_LINK == ct)
 		      or 0 == clause->get_arity()
-		      or clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE))
+		      or nameserver().isA(clause->getOutgoingAtom(0)->get_type(),
+		                          EVALUATABLE_LINK)))
 
 		// XXX FIXME Are the below needed?
 		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
 		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		or contains_atomtype(clause, GROUNDED_SCHEMA_NODE);
+		or is_black_box(clause);
 
 	return evaluatable;
 }
@@ -224,48 +171,34 @@ void get_connected_components(const HandleSet& vars,
 	}
 }
 
-// Unfortunately for us, the list of clauses that we were given
-// includes the optionals. It might be nice if this was fixed
-// upstream, but that seems to be hard. XXX FIXME. So, here,
-// we brute-force remove them.
-static HandleSeq get_nonopts(const HandleSeq& clauses,
-                             const HandleSeq& opts)
-{
-	HandleSeq nonopts;
-	for (const Handle& h: clauses)
-	{
-		bool is_opt = false;
-		for (const Handle& opt: opts)
-		{
-			if (h == opt) { is_opt = true; break; }
-		}
-		if (not is_opt) nonopts.emplace_back(h);
-	}
-	return nonopts;
-}
-
 void get_bridged_components(const HandleSet& vars,
-                            const HandleSeq& clauses,
-                            const HandleSeq& opts,
+                            const PatternTermSeq& prsnts,
+                            const PatternTermSeq& absnts,
                             HandleSeqSeq& components,
                             HandleSetSeq& component_vars)
 {
+	HandleSeq nonopts;
+	for (const PatternTermPtr& ptm: prsnts)
+		nonopts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+
+	HandleSeq opts;
+	for (const PatternTermPtr& ptm: absnts)
+		opts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+
 	if (0 == opts.size())
 	{
-		get_connected_components(vars, clauses, components, component_vars);
+		get_connected_components(vars, nonopts, components, component_vars);
 		return;
 	}
 
-	// Some optionals bridge across components; others simply
-	// connect to some of them. We need to figure out which is which.
-
-	HandleSeq nonopts(get_nonopts(clauses, opts));
 	if (0 == nonopts.size())
 	{
 		get_connected_components(vars, opts, components, component_vars);
 		return;
 	}
 
+	// Some optionals bridge across components; others simply
+	// connect to some of them. We need to figure out which is which.
 	get_connected_components(vars, nonopts, components, component_vars);
 
 	// Now try to attach opts.

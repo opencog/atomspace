@@ -63,7 +63,6 @@ protected:
 
 	const Variables* _variables;
 	const Pattern* _pattern;
-	const HandleSet* _dynamic;
 	bool _recursing;
 
 	PatternTermPtr _root;
@@ -79,11 +78,11 @@ protected:
 	PatternTermPtr _curr_clause;
 	std::vector<Choice> _choices;
 
-	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
-	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
-	                                      size_t&);
+	virtual Handle find_starter(const PatternTermPtr&,
+	                            size_t&, Handle&, size_t&);
+	virtual Handle find_starter_recursive(const PatternTermPtr&,
+	                                      size_t&, Handle&, size_t&);
 	virtual Handle find_thinnest(const PatternTermSeq&,
-	                             const HandleSet&,
 	                             Handle&, PatternTermPtr&);
 	virtual void find_rarest(const PatternTermPtr&, Handle&,
 	                         size_t&, Quotation quotation=Quotation());

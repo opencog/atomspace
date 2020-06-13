@@ -32,7 +32,7 @@ class SatisfyMixin:
 	public virtual PatternMatchCallback
 {
 	bool recursive_virtual(const HandleSeq& virtuals,
-	                       const HandleSeq& optionals,
+	                       const PatternTermSeq& absents,
 	                       const GroundingMap& var_gnds,
 	                       const GroundingMap& term_gnds,
 	                       // copies, NOT references!

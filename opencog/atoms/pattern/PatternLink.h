@@ -94,7 +94,7 @@ protected:
 	/// by determining if the virtual clasues that tie them together
 	/// are true or not.
 	///
-	HandleSeq _fixed;
+	PatternTermSeq _fixed;
 	size_t _num_virts;
 	HandleSeq _virtual;
 
@@ -111,20 +111,15 @@ protected:
 	                          const TypeSet&,
 	                          bool reverse=false);
 
-	void locate_defines(const HandleSeq& clauses);
+	void locate_defines(const PatternTermSeq& clauses);
 	void validate_variables(HandleSet& vars,
 	                        const HandleSeq& clauses);
 
 	bool is_virtual(const Handle&);
-	void unbundle_virtual(const HandleSeq& clauses);
 
-	void locate_cacheable(const HandleSeq& clauses);
+	void locate_cacheable(const PatternTermSeq& clauses);
 
-	bool add_dummies();
-
-	void trace_connectives(const TypeSet&,
-	                       const Handle& body,
-	                       Quotation quotation=Quotation());
+	void add_dummies(const PatternTermPtr&);
 
 	void make_connectivity_map(void);
 	void make_map_recursive(const Handle&, const PatternTermPtr&);
@@ -132,7 +127,7 @@ protected:
 	void check_satisfiability(const HandleSet&,
 	                          const HandleSetSeq&);
 
-	void make_term_trees();
+	PatternTermPtr make_term_tree(const Handle&);
 	void make_term_tree_recursive(const PatternTermPtr&,
 	                              PatternTermPtr&);
 
@@ -163,7 +158,7 @@ public:
 	PatternLink(const HandleSet& vars,
 	            const Variables& varspec,
 	            const HandleSeq& component,
-	            const HandleSeq& optionals);
+	            const PatternTermSeq& absents);
 
 	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const HandleSet&,
@@ -180,8 +175,7 @@ public:
 	const HandleSeq& get_component_patterns(void) const
 		{ return _component_patterns; }
 
-	// Return the list of fixed and virtual clauses we are holding.
-	const HandleSeq& get_fixed(void) const { return _fixed; }
+	// Return the list virtual clauses we are holding.
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
 	void debug_log(void) const;
