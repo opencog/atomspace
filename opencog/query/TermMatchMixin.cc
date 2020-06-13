@@ -367,7 +367,8 @@ bool TermMatchMixin::is_self_ground(const Handle& ptrn,
 		for (const Handle& ch: pset)
 		{
 			const auto pr = term_gnds.find(ch);
-			if (pr != term_gnds.end() or CHOICE_LINK == ch->get_type())
+			Type cht = ch->get_type();
+			if (pr != term_gnds.end() or CHOICE_LINK == cht)
 			{
 				if (is_self_ground(ch, grnd, term_gnds, varset, quotation))
 					return true;
@@ -714,10 +715,9 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 	              << top->to_short_string() << std::endl
 	              << "grounds=" << gnds << std::endl;})
 
-	if (top->get_type() == VARIABLE_NODE)
-	{
+	Type term_type = top->get_type();
+	if (VARIABLE_NODE == term_type)
 		return eval_term(top, gnds);
-	}
 
 	if (not top->is_link())
 		throw InvalidParamException(TRACE_INFO,
@@ -726,7 +726,6 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 
 	const HandleSeq& oset = top->getOutgoingSet();
 
-	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
 	{
 		for (const Handle& h : oset)
@@ -799,6 +798,9 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 		// determined.  Did those higher layers actually explore all
 		// possibilities?  And if they failed to do so, can we even do
 		// anything about that here? Seems like we can't do anything...
+		//
+		// XXX FIXME: worse: this cannot possibly be right when
+		// the ChoiceLink contains presentLinks.
 		for (const Handle& h : oset)
 		{
 			if (gnds.end() == gnds.find(h)) continue;
