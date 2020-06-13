@@ -365,9 +365,9 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 
 		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
-		                  "UNDEFINED" : _starter_term->to_string());})
+		                  "UNDEFINED" : _starter_term->to_short_string());})
 		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is: "
-		              <<  _root->getHandle()->to_string();})
+		              <<  _root->getQuote()->to_string();})
 
 		bool found = search_loop(pmc, dbg_banner);
 		// Terminate search if satisfied.
@@ -996,8 +996,9 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		for (const Handle& h : _search_set)
 		{
 			DO_LOG({LAZY_LOG_FINE << dbg_banner
-			             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
-			             << h->to_string();})
+			             << "\n       Loop candidate ("
+			             << ++i << "/" << hsz << "):\n"
+			             << h->to_short_string("       ");})
 			bool found = pme.explore_neighborhood(_starter_term, h, _root);
 			if (found) return true;
 		}

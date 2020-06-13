@@ -183,7 +183,8 @@ public:
 	Arity getArity() const { return _outgoing.size(); }
 	PatternTermPtr getOutgoingTerm(Arity pos) const;
 
-	const Handle& getQuote() const noexcept { return _quote; }
+	const Handle& getQuote() const noexcept {
+		return isQuoted() ?  _quote : _handle; }
 	Quotation& getQuotation() { return _quotation; };
 	const Quotation& getQuotation() const noexcept { return _quotation; }
 	bool isQuoted() const { return _quotation.is_quoted(); }
