@@ -243,7 +243,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 
 	depth --;
-	logmsg("ordered_compare match?=", match);
+	logmsg("ordered_compare match?:", match);
 
 	if (not match)
 	{
@@ -1192,7 +1192,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	bool match = _pmc.link_match(ptm, hg);
 	if (not match) return false;
 
-	logmsg("tree depth=", depth);
+	logmsg("tree depth:", depth);
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
 
@@ -1821,15 +1821,15 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	logmsg("ssss Checking term=", ptm);
-	logmsg("ssss For soln by", hg);
+	logmsg("ssss Checking term:", ptm);
+	logmsg("ssss For soln by:", hg);
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		logmsg("ssss NO solution for term=", ptm);
-		logmsg("ssss NOT solved by by", hg);
+		logmsg("ssss NO solution for term:", ptm);
+		logmsg("ssss NOT solved by:", hg);
 		solution_pop();
 		return false;
 	}
@@ -3027,11 +3027,11 @@ void PatternMatchEngine::log_solution(
 		if (not m->second)
 		{
 			Handle mf(m->first);
-			logmsg("Ungrounded clause", mf);
+			logmsg("Ungrounded (absent) clause", mf);
 			continue;
 		}
-		std::string str = m->second->to_short_string();
-		logger().fine("%d.   %s", i, str.c_str());
+		std::string str = m->second->to_short_string("       ");
+		logger().fine("Clause %d:\n%s", i, str.c_str());
 	}
 }
 

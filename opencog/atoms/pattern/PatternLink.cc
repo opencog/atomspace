@@ -1061,32 +1061,33 @@ void PatternLink::debug_log(void) const
 	logger().fine("%lu variables\n", _variables.varset.size());
 
 	int num = 0;
-	std::string str;
+	std::string str = "\n";
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
-		str += "Mandatory " + std::to_string(num) + ":";
+		str += "================ Mandatory clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
-		str += ptm->to_full_string();
+		str += ptm->to_full_string() + "\n\n";
 		num++;
 	}
 
 	for (const PatternTermPtr& ptm : _pat.absents)
 	{
-		str += "Absent clause " + std::to_string(num) + ":\n";
-		str + ptm->to_full_string();
+		str += "================ Absent clause " + std::to_string(num) + ":\n";
+		str += ptm->to_full_string() + "\n\n";
 		num++;
 	}
 
 	for (const PatternTermPtr& ptm : _pat.always)
 	{
-		str += "Always clause " + std::to_string(num) + ":";
+		str += "================ Always clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
-		str += ptm->to_full_string();
+		str += ptm->to_full_string() + "\n\n";
 		num++;
 	}
 
+	str.pop_back();
 	logger().fine() << str;
 
 	// Print out the bound variables in the predicate.

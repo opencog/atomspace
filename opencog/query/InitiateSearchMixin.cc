@@ -363,9 +363,9 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 		_starter_term = ch.start_term;
 		_search_set = ch.search_set;
 
-		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is: "
-		              << (_starter_term == (Atom*) nullptr ?
-		                  "UNDEFINED" : _starter_term->to_short_string());})
+		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is:\n"
+		              << (_starter_term == (Atom*) nullptr ? "UNDEFINED" :
+		                  _starter_term->to_short_string("       "));})
 		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is:\n"
 		              <<  _root->to_full_string();})
 
@@ -751,12 +751,10 @@ bool InitiateSearchMixin::setup_link_type_search()
 	if (PatternTerm::UNDEFINED == _root)
 		return false;
 
-	DO_LOG({const Handle& s =
-		_root->isQuoted() ? _root->getQuote() : _root->getHandle();
-		LAZY_LOG_FINE << "Start clause is: " << std::endl
-		              << s->to_string();})
-	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
-	                      << _starter_term->to_string();})
+	DO_LOG({LAZY_LOG_FINE << "Start clause is:\n"
+		                   << _root->to_full_string();})
+	DO_LOG({LAZY_LOG_FINE << "Start term is:\n"
+	                      << _starter_term->to_short_string();})
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->get_type();
@@ -809,7 +807,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 	bool empty = false;
 	for (const Handle& var: _variables->varset)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_short_string();})
 
 		const auto& tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
@@ -822,7 +820,7 @@ bool InitiateSearchMixin::setup_variable_search(void)
 		for (Type t : typeset)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
-		DO_LOG({LAZY_LOG_FINE << var->to_string() << " has "
+		DO_LOG({LAZY_LOG_FINE << var->to_short_string() << " has "
 		                      << num << " atoms in the atomspace";})
 
 		if (0 == num) empty = true;
@@ -1060,8 +1058,9 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 
 		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
-		             << "\nLoop candidate (" << ++i << "/" << hsz << "):\n"
-		             << h->to_string();})
+		             << "\n       Loop candidate ("
+		             << ++i << "/" << hsz << "):\n"
+		             << h->to_short_string("       ");})
 		if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 	}
 	_recursing = false;
