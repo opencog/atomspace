@@ -473,7 +473,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		return;
 	}
 
-	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
+	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t or
+	    OR_LINK == t)
 	{
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
@@ -488,20 +489,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
-		return;
-	}
-
-	// A top-level OrLink with a single member. Unwrap it.
-	// This interprets OrLink as a crisp boolean operator,
-	// preventing alternate interpretations for it.
-	if (OR_LINK == t and 1 == hbody->get_arity())
-	{
-		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
-		if (not unbundle_clauses_rec(hbody, connectives))
-		{
-			PatternTermPtr term(make_term_tree(hbody));
-			_pat.pmandatory.push_back(term);
-		}
 		return;
 	}
 
