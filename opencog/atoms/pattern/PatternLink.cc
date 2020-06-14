@@ -572,16 +572,6 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 		if (unbundle_clauses_rec(ho, connectives, reverse)) continue;
 
 		recorded = false;
-		Type ot = ho->get_type();
-		if ((not (ot == VARIABLE_NODE) and
-		     not nameserver().isA(ot, EVALUATABLE_LINK)) or
-		    (ot == EVALUATION_LINK and
-		     0 < ho->get_arity() and
-		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
-		{
-			PatternTermPtr term(make_term_tree(ho));
-			_pat.pmandatory.push_back(term);
-		}
 	}
 	return recorded;
 }
