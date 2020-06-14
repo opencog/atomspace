@@ -423,26 +423,19 @@ _pat.pmandatory.push_back(term);
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
 /// single clause. Other link types, such as OrLink and SequentialAnd,
-/// are treated here as single clauses; unpacking them here would lead
-/// to confusion in the pattern matcher.  This is partly because, after
-/// unpacking, clauses can be grounded in an arbitrary order; thus,
-/// SequentialAnd's must be grounded and evaluated sequentially, and
-/// thus, not unpacked.  In the case of OrLinks, there is no flag to
-/// say that "these are disjoined", so again, that has to happen later.
+/// are treated as single clauses; unpacking them here would lead to
+/// confusion in the pattern matcher.  This is because the AndLink is
+/// an unordered set, and clauses can be grounded in an arbitrary order;
+/// whereas SequentialAnd's must be grounded and evaluated sequentially.
 ///
-/// XXX FIXME. This should be working with PatternTerms not Handles,
-/// because the same term may occur in different parts of the tree in
-/// different ways, and we incorrectly classify it as a result. The
-/// cause is that we are not really working with clauses here, we are
-/// extracting terms out of clauses. This fix requires a huge amount
-/// of restructuring, though...
-///
-/// This makes built-in assumptions about using the TermMatchMixin,
-/// which are not going to be true in general. However, the vast
-/// majority of users expect to be able to use the boolean operators
-/// in a naive, classical-logic manner, and so we cater to those users.
-/// More sophisticated users are SOL and will have to come here and fix
-/// things when bugs appear. Sorry.
+/// The overall process makes built-in assumptions about using the
+/// TermMatchMixin, which gives the boolean operators thier classical
+/// logic interpretation. In principle, other interpretations are
+/// possible (e.g. linear logic, or any number of the modal logics),
+/// but these are not currently supported in this code base. Supporting
+/// probably requires a "LinearLogicPatternLink" which will borrow much
+/// of the code below, but not all, and work with a LinearTermMixin
+/// callback class to complete the matchig process.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
@@ -456,7 +449,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (AND_LINK == t)
 	{
-		// XXX FIXME Handle of OrLink is incorrect, here.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
 		const HandleSeq& oset = hbody->getOutgoingSet();
@@ -482,10 +474,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
-		// Assume we are working with
-		// the TermMatchMixin, which uses these. Some other
-		// yet-to-be-specified callback may want to use a different
-		// set of connectives...
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 
