@@ -474,7 +474,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t or
-	    OR_LINK == t)
+	    OR_LINK == t or NOT_LINK == t)
 	{
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
@@ -485,20 +485,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// the PresentLink is reached. Whereas the current design
 		// of the clause-walking will run the PresentLink before
 		// running the sequential. So that's a bug.
-		unbundle_clauses_rec(hbody, connectives);
-
-		PatternTermPtr term(make_term_tree(hbody));
-		_pat.pmandatory.push_back(term);
-		return;
-	}
-
-	// A single top-level clause that is a NotLink.
-	// This interprets NotLink as a crisp boolean operator,
-	// preventing alternate interpretations for it.
-	if (NOT_LINK == t)
-	{
-		// XXX FIXME Handling of OrLink is incorrect, here.
-		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
 			PatternTermPtr term(make_term_tree(hbody));
