@@ -438,15 +438,10 @@ _pat.pmandatory.push_back(term);
 /// callback class to complete the matchig process.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
-	Type t = hbody->get_type();
-
-	// Start by fishing out the PresentLink's, and adding them to the
-	// list of clauses to be grounded.
 	_pat.body = hbody;
-	if (record_literal(hbody))
-		return;
 
-	if (AND_LINK == t)
+	// A collection of clauses, all of which must be satisfied.
+	if (AND_LINK == hbody->get_type())
 	{
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
@@ -472,6 +467,11 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		}
 		return;
 	}
+
+	// Fish out the PresentLink's, and add them to the
+	// list of clauses to be grounded.
+	if (record_literal(hbody))
+		return;
 
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
