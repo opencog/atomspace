@@ -444,10 +444,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// list of clauses to be grounded.
 	_pat.body = hbody;
 	if (record_literal(hbody))
-	{
-		/* no-op */
-	}
-	else if (AND_LINK == t)
+		return;
+
+	if (AND_LINK == t)
 	{
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
@@ -471,8 +470,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 					_fixed.emplace_back(term);
 			}
 		}
+		return;
 	}
-	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
+
+	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
 		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
@@ -487,27 +488,27 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
+		return;
 	}
 
 	// A top-level OrLink with a single member. Unwrap it.
 	// This interprets OrLink as a crisp boolean operator,
 	// preventing alternate interpretations for it.
-	else if (OR_LINK == t and 1 == hbody->get_arity())
+	if (OR_LINK == t and 1 == hbody->get_arity())
 	{
-		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
-		// See also FIXME above.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 		if (not unbundle_clauses_rec(hbody, connectives))
 		{
 			PatternTermPtr term(make_term_tree(hbody));
 			_pat.pmandatory.push_back(term);
 		}
+		return;
 	}
 
 	// A single top-level clause that is a NotLink.
 	// This interprets NotLink as a crisp boolean operator,
 	// preventing alternate interpretations for it.
-	else if (NOT_LINK == t)
+	if (NOT_LINK == t)
 	{
 		// XXX FIXME Handling of OrLink is incorrect, here.
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
@@ -520,8 +521,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			if (not term->isVirtual())
 				_fixed.emplace_back(term);
 		}
+		return;
 	}
-	else if (not is_constant(_variables.varset, hbody))
+
+	if (not is_constant(_variables.varset, hbody))
 	{
 		// There's just one single clause!
 		PatternTermPtr term(make_term_tree(hbody));
