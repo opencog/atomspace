@@ -906,6 +906,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 		{
+			if ((PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t)
+			    and is_constant(_variables.varset, ho)) continue;
 			PatternTermPtr po(ptm->addOutgoingTerm(ho));
 			make_term_tree_recursive(root, po);
 		}
