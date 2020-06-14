@@ -473,33 +473,18 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		return;
 	}
 
-	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t or
-	    OR_LINK == t or NOT_LINK == t)
+	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
+
+	// BUG - XXX FIXME. This extracts PresentLink's from the
+	// Sequentials. This is not really correct, because the
+	// evaluation of the sequential might terminate *before*
+	// the PresentLink is reached. Whereas the current design
+	// of the clause-walking will run the PresentLink before
+	// running the sequential. So that's a bug.
+	if (not unbundle_clauses_rec(hbody, connectives) and
+	    not is_constant(_variables.varset, hbody))
 	{
-		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-
-		// BUG - XXX FIXME. This extracts PresentLink's from the
-		// Sequentials. This is not really correct, because the
-		// evaluation of the sequential might terminate *before*
-		// the PresentLink is reached. Whereas the current design
-		// of the clause-walking will run the PresentLink before
-		// running the sequential. So that's a bug.
-		if (not unbundle_clauses_rec(hbody, connectives))
-		{
-			PatternTermPtr term(make_term_tree(hbody));
-			_pat.pmandatory.push_back(term);
-
-			// if (not term->hasAnyEvaluatable())
-			if (not term->isVirtual())
-				_fixed.emplace_back(term);
-		}
-		return;
-	}
-
-	if (not is_constant(_variables.varset, hbody))
-	{
-		// There's just one single clause!
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
 
