@@ -569,12 +569,11 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 	for (const Handle& ho : bdy->getOutgoingSet())
 	{
 		if (record_literal(ho, reverse)) continue;
+		if (unbundle_clauses_rec(ho, connectives, reverse)) continue;
 
-		bool did_rec = unbundle_clauses_rec(ho, connectives, reverse);
-		recorded = recorded and did_rec;
+		recorded = false;
 		Type ot = ho->get_type();
-		if ((not did_rec and
-		     not (ot == VARIABLE_NODE) and
+		if ((not (ot == VARIABLE_NODE) and
 		     not nameserver().isA(ot, EVALUATABLE_LINK)) or
 		    (ot == EVALUATION_LINK and
 		     0 < ho->get_arity() and
