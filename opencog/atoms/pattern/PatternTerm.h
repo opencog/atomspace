@@ -183,7 +183,8 @@ public:
 	Arity getArity() const { return _outgoing.size(); }
 	PatternTermPtr getOutgoingTerm(Arity pos) const;
 
-	const Handle& getQuote() const noexcept { return _quote; }
+	const Handle& getQuote() const noexcept {
+		return isQuoted() ?  _quote : _handle; }
 	Quotation& getQuotation() { return _quotation; };
 	const Quotation& getQuotation() const noexcept { return _quotation; }
 	bool isQuoted() const { return _quotation.is_quoted(); }
@@ -231,6 +232,11 @@ public:
 	// See http://stackoverflow.com/questions/16734783 for explanation.
 	std::string to_string() const;
 	std::string to_string(const std::string& indent) const;
+	std::string to_short_string() const;
+	std::string to_short_string(const std::string& indent) const;
+	std::string to_full_string() const;
+	std::string to_full_string(const std::string& indent) const;
+	std::string flag_string() const;
 };
 
 #define createPatternTerm std::make_shared<PatternTerm>
@@ -240,6 +246,8 @@ public:
 std::string oc_to_string(const PatternTerm& pt,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const PatternTermPtr& pt,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PatternTermSeq& pt,
                          const std::string& indent=empty_string);
 
 } // namespace opencog
