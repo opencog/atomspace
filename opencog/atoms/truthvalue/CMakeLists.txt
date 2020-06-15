@@ -12,6 +12,11 @@ ADD_LIBRARY (truthvalue
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(truthvalue opencog_atom_types)
 
+SET_PROPERTY(TARGET truthvalue
+	APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+	execution
+)
+
 TARGET_LINK_LIBRARIES(truthvalue
 	value
 	${COGUTIL_LIBRARY}
