@@ -217,6 +217,9 @@ jobs:
       - run:
           name: Build tests
           command: cd build && make tests
+      - run:
+          name: Run tests
+          command: cd build && make test
 #
 # Disable, until https://github.com/opencog/cogserver/issues/5
 # is fixed. The failing ShellUTest makes circleci report false
