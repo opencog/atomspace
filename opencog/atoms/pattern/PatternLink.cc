@@ -438,16 +438,10 @@ _pat.pmandatory.push_back(term);
 /// callback class to complete the matchig process.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
-	Type t = hbody->get_type();
-
-	// Start by fishing out the PresentLink's, and adding them to the
-	// list of clauses to be grounded.
 	_pat.body = hbody;
-	if (record_literal(hbody))
-	{
-		/* no-op */
-	}
-	else if (AND_LINK == t)
+
+	// A collection of clauses, all of which must be satisfied.
+	if (AND_LINK == hbody->get_type())
 	{
 		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
 
@@ -471,59 +465,26 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 					_fixed.emplace_back(term);
 			}
 		}
-	}
-	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
-	{
-		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-		                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-
-		// BUG - XXX FIXME. This extracts PresentLink's from the
-		// Sequentials. This is not really correct, because the
-		// evaluation of the sequential might terminate *before*
-		// the PresentLink is reached. Whereas the current design
-		// of the clause-walking will run the PresentLink before
-		// running the sequential. So that's a bug.
-		unbundle_clauses_rec(hbody, connectives);
-
-		PatternTermPtr term(make_term_tree(hbody));
-		_pat.pmandatory.push_back(term);
+		return;
 	}
 
-	// A top-level OrLink with a single member. Unwrap it.
-	// This interprets OrLink as a crisp boolean operator,
-	// preventing alternate interpretations for it.
-	else if (OR_LINK == t and 1 == hbody->get_arity())
-	{
-		// BUG - XXX FIXME Handling of OrLink is incorrect, here.
-		// See also FIXME above.
-		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
-		if (not unbundle_clauses_rec(hbody, connectives))
-		{
-			PatternTermPtr term(make_term_tree(hbody));
-			_pat.pmandatory.push_back(term);
-		}
-	}
+	// Fish out the PresentLink's, and add them to the
+	// list of clauses to be grounded.
+	if (record_literal(hbody))
+		return;
 
-	// A single top-level clause that is a NotLink.
-	// This interprets NotLink as a crisp boolean operator,
-	// preventing alternate interpretations for it.
-	else if (NOT_LINK == t)
-	{
-		// XXX FIXME Handling of OrLink is incorrect, here.
-		TypeSet connectives({AND_LINK, OR_LINK, NOT_LINK});
-		if (not unbundle_clauses_rec(hbody, connectives))
-		{
-			PatternTermPtr term(make_term_tree(hbody));
-			_pat.pmandatory.push_back(term);
+	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 
-			// if (not term->hasAnyEvaluatable())
-			if (not term->isVirtual())
-				_fixed.emplace_back(term);
-		}
-	}
-	else if (not is_constant(_variables.varset, hbody))
+	// BUG - XXX FIXME. This extracts PresentLink's from the
+	// Sequentials. This is not really correct, because the
+	// evaluation of the sequential might terminate *before*
+	// the PresentLink is reached. Whereas the current design
+	// of the clause-walking will run the PresentLink before
+	// running the sequential. So that's a bug.
+	if (not unbundle_clauses_rec(hbody, connectives) and
+	    not is_constant(_variables.varset, hbody))
 	{
-		// There's just one single clause!
 		PatternTermPtr term(make_term_tree(hbody));
 		_pat.pmandatory.push_back(term);
 
@@ -566,20 +527,9 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 	for (const Handle& ho : bdy->getOutgoingSet())
 	{
 		if (record_literal(ho, reverse)) continue;
+		if (unbundle_clauses_rec(ho, connectives, reverse)) continue;
 
-		bool did_rec = unbundle_clauses_rec(ho, connectives, reverse);
-		recorded = recorded and did_rec;
-		Type ot = ho->get_type();
-		if ((not did_rec and
-		     not (ot == VARIABLE_NODE) and
-		     not nameserver().isA(ot, EVALUATABLE_LINK)) or
-		    (ot == EVALUATION_LINK and
-		     0 < ho->get_arity() and
-		     ho->getOutgoingAtom(0)->get_type() == PREDICATE_NODE))
-		{
-			PatternTermPtr term(make_term_tree(ho));
-			_pat.pmandatory.push_back(term);
-		}
+		recorded = false;
 	}
 	return recorded;
 }
@@ -956,6 +906,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 		{
+			if ((PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t)
+			    and is_constant(_variables.varset, ho)) continue;
 			PatternTermPtr po(ptm->addOutgoingTerm(ho));
 			make_term_tree_recursive(root, po);
 		}
