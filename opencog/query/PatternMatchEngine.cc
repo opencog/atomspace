@@ -1150,15 +1150,13 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (ptm->isBoundVariable())
 		return variable_compare(hp, hg);
 
-	// If they're the same atom, then clearly they match.
-	//
-	// If the pattern contains atoms that are evaluatable i.e. GPN's
-	// then we must fall through, and let the tree comp mechanism
-	// find and evaluate them. That's for two reasons: (1) because
-	// evaluation may have side-effects (e.g. send a message) and
-	// (2) evaluation may depend on external state. These are
-	// typically used to implement behavior trees, e.g SequenceUTest
-	// XXX FIXME ptm->hasAnyEvaluatable() is never-ever set...
+	// If they're the same atom, then clearly they match....
+	// if it doesn't contain variables, and if it isn't evaluatable.
+	// -- If it contains variables, then these need to be grounded.
+	//    This check will be applied later, at the clause level.
+	// -- If it contains black-box evaluatables e.g. GPN's, then the
+	//    evaluation may have side-effects (e.g. send a message) or
+	//    it might depend on external state (e.g. SequenceUTest).
 	if ((hp == hg) and not ptm->hasAnyEvaluatable())
 		return self_compare(ptm);
 
@@ -1968,8 +1966,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
                                        const Handle& hg)
 {
 	// We have to unwrap one more level of quotation before we are done.
-	Handle clause_root = clause->getHandle();
-	if (clause->getQuote()) clause_root = clause->getQuote();
+	Handle clause_root = clause->getQuote();
 
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
@@ -1985,6 +1982,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 	if (clause->isAlways())
 	{
 		_did_check_forall = true;
+		if (hg == clause_root) return false;
 		match = _pmc.always_clause_match(clause_root, hg, var_grounding);
 		_forall_state = _forall_state and match;
 		logmsg("For-all clause match callback match=", match);
@@ -2223,6 +2221,14 @@ void PatternMatchEngine::get_next_untried_clause(void)
 			}
 		}
 		throw RuntimeException(TRACE_INFO, "BUG! Somethings wrong!!");
+	}
+
+	// Make sure all clauses have been grounded.
+	for (const PatternTermPtr& root : _pat->pmandatory)
+	{
+		if (issued.end() == issued.find(root))
+			throw RuntimeException(TRACE_INFO,
+				"BUG! Still have ungrounded clauses!!");
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
