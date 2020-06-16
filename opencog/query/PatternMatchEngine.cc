@@ -1567,10 +1567,14 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
 {
-	// Iterate over different possible choices.
-	// XXX FIXME, this apparently is never called!?
-	if (ptm->isChoice())
-		return explore_choice_branches(ptm, hg, clause);
+	// Iterate over different possible choices. At this time, this will
+	// never happen, because the selection of start-terms and joining
+	// terms never selects a term that is embeded inside a Choice. That
+	// is, we never start with a term underneath a Choice, move up,
+	// discover that we are in a Choice, and then have to explore the
+	// other choices. And that's OK, because this avoids complexity.
+	// if (ptm->isChoice())
+	//	return explore_choice_branches(ptm, hg, clause);
 
 	// Unordered links have permutations to explore.
 	if (ptm->isUnorderedLink())
@@ -1581,7 +1585,10 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 
 /// See explore_unordered_branches() for a general explanation.
 /// This method handles the Choice term branch alternatives only.
-/// This method is never called, currently.
+/// This method is never called, currently; see notes above. It's
+/// never called because we never get a start-term or a join-term
+/// that lies inside of a Choice, and therefore, never have to
+/// explore the alternatives.
 bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
