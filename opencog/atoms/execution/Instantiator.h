@@ -33,11 +33,16 @@
  * Given an ungrounded expression (i.e. an expression containing variables)
  * and a map between variables and ground terms, it will create a new
  * expression, with the ground terms substituted for the variables.
+ * The final result will be placed in the provided AtomSpace.
  *
  * This also implements generic execution: any executable links are
  * executed as the variable substitution is performed.  In particular,
  * execution is implemented as instantiation, with an empty variable
  * map.
+ *
+ * See also: `Replacement::replace_nocheck()`, which is similar, except
+ * except that no execution is performed, and the result is not placed
+ * into any AtomSpace.
  */
 namespace opencog {
 

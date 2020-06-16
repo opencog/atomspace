@@ -36,13 +36,22 @@ namespace opencog
  */
 
 /// Given a tree, replace one Atom by another in that tree, respecting
-/// quotation (QuoteLink) and scoping (ScopeLink).
+/// quotation (QuoteLink) and scoping (ScopeLink). The newly-created
+/// tree is NOT inserted into any AtomSpace. No type-checking is
+/// performed; other than quotation and scoping, if a given Atom appears
+/// in the original tree, it will be replaced.
+///
+/// See also `class Instantiator`, which does a similar replacement,
+/// except that it also executes any executable links that it encounters
+/// along the way, and places the results into an AtomSpace.
 struct Replacement
 {
 	typedef std::map<Handle, unsigned int> IndexMap;
 
 	/// Walk the tree given in the first argument, and replace
 	/// any atoms that occur in the map by thier mapped value.
+	/// It has the name "nocheck" because no type-checking is
+	/// performed before replacement.
 	static Handle replace_nocheck(const Handle&, const HandleMap&);
 
 protected:
