@@ -1205,77 +1205,22 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
-/*
- * The input pattern may contain many repeated sub-patterns. For example:
- *
- * ImplicationLink
- *   UnorderedLink
- *     VariableNode "$x"
- *     ConceptNode "this one"
- *   UnorderedLink
- *     VariableNode "$x"
- *     ConceptNode "this one"
- *
- * Suppose that we start searching the clause from VariableNode "$x" that
- * occures twice in the pattern under UnorderedLink. While we traverse
- * the pattern recursively we need to keep current state of permutations
- * of UnorderedLinks. We do not know which permutation will match. It may
- * be a different permutation for each occurence of UnorderedLink-s.
- * Thus, we need to keep permutation states for each term pointer separately.
- * This is the reason why we use PatternTerm pointers instead of atom Handles
- * while traversing the pattern tree.
- *
- * Next, suppose our joining atom repeats in several sub-branches of a
- * single ChoiceLink. For example:
- *
- * ChoiceLink
- *   UnorderedLink
- *     VariableNode "$x"
- *     ConceptNode "this one"
- *   UnorderedLink
- *     VariableNode "$x"
- *     ConceptNode "this one"
- *
- * We start pattern exploration for each occurence of joining atom. This
- * is required, due to the pruning done in explore_choice_branches()
- * when the first match is found. XXX This may need to be refactored.
- * For now, we iterate over all pattern terms associated with a given
- * atom handle.
- *
- * XXX FIXME I think this exploration is not needed, unless one has
- * Choice terms.  I think most of the above explanation is wrong.
- * So, basically, we can get some performance improvements by skipping
- * this, in all cases, unless `term` is insicde of a Choice.
- *
- * Actually, could probably save CPU time by working with the term
- * that is highest in the clause; that way, a single tree-compare
- * either suceeds or fails, and we don't have to do a long crawl up
- * the tree.
- */
-bool PatternMatchEngine::explore_term_branches(const Handle& term,
+/* ... just search ...  */
+bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
 {
-	// The given term may appear in the clause in more than one place.
-	// Each distinct location should be explored separately.
-	auto pl = _pat->connected_terms_map.find({term, clause});
-	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
+	logmsg("Begin exploring term:", term);
+	bool found;
+	if (term->hasAnyGlobbyVar())
+		found = explore_glob_branches(term, hg, clause);
+	else if (term->hasUnorderedLink())
+		found = explore_odometer(term, hg, clause);
+	else
+		found = explore_type_branches(term, hg, clause);
 
-	for (const PatternTermPtr &ptm : pl->second)
-	{
-		logmsg("Begin exploring term:", ptm);
-		bool found;
-		if (ptm->hasAnyGlobbyVar())
-			found = explore_glob_branches(ptm, hg, clause);
-		else if (ptm->hasUnorderedLink())
-			found = explore_odometer(ptm, hg, clause);
-		else
-			found = explore_type_branches(ptm, hg, clause);
-
-		logmsg("Finished exploring term:", ptm, found);
-		if (found) return true;
-	}
-	return false;
+	logmsg("Finished exploring term:", term, found);
+	return found;
 }
 
 /// explore_up_branches -- look for groundings for the given term.
@@ -2140,7 +2085,9 @@ bool PatternMatchEngine::do_next_clause(void)
 			// we'll loop around back to here again.
 			clause_accepted = false;
 			Handle hgnd = var_grounding[joiner];
-			found = explore_term_branches(joiner, hgnd, do_clause);
+
+			auto pl = _pat->connected_terms_map.find({joiner, do_clause});
+			found = explore_term_branches(pl->second[0], hgnd, do_clause);
 		}
 	}
 
@@ -2319,6 +2266,7 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 		if ((var_grounding.end() != var_grounding.find(embed)) and
 		    (1 < _pat->connectivity_map.count(embed)))
 			return embed;
+break;
 	}
 	return glob;
 }
@@ -2709,7 +2657,9 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	logmsg("Clause is matchable; start matching it");
 
 	_did_check_forall = false;
-	bool found = explore_term_branches(term, grnd, clause);
+
+	auto pl = _pat->connected_terms_map.find({term, clause});
+	bool found = explore_term_branches(pl->second[0], grnd, clause);
 
 	if (not _did_check_forall and clause->isAlways())
 	{
