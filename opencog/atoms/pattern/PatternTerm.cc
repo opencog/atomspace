@@ -389,6 +389,7 @@ std::string oc_to_string(const PatternTermSeq& pts, const std::string& indent)
 {
 	std::string str;
 	size_t i=0;
+	str += "PatternTermSeq has " + std::to_string(pts.size()) + " terms\n";
 	for (const PatternTermPtr& ptm : pts)
 	{
 		str += indent + "term[" + std::to_string(i) + "]:\n";
