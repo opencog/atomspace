@@ -17,6 +17,11 @@ set_property(TARGET query-engine
 	atomspace
 )
 
+set_property(TARGET truthvalue
+	APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+	execution
+)
+
 # These names are used in various projects e.g. opencog, as-moses, etc.
 # XXX FIXME ... they probably should not be! It would be best if the all
 # of the libs were specified i.e. LINK_LIBRARIES(${ATOMSPACE_LIBRARIES})
