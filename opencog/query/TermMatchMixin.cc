@@ -705,7 +705,14 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 		// clause is present" is implemented by ChoiceLink.
 		for (const Handle& h : oset)
 		{
-			if (gnds.end() == gnds.find(h)) return false;
+			// Maybe the pattern engine did not deliver us a fully
+			// grounded pattern, but it can still be found in the
+			// atomspace.  Ground it, and find out.
+			if (gnds.end() == gnds.find(h))
+			{
+				Handle gpres = Replacement::replace_nocheck(h, gnds);
+				if (nullptr == _as->get_atom(gpres)) return false;
+			}
 		}
 		return true;
 	}
