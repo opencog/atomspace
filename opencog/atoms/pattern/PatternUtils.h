@@ -39,7 +39,13 @@ namespace opencog {
 // Return true iff the clause is evaluatable.
 bool can_evaluate(const Handle& clause);
 
-// Return true iff the clause is constant.
+// Return true iff the clause is constant. That is iff
+//
+// 1. clause is not evaluatable
+//
+// 2. and none of its free variables are in vars, as only the
+//    variables in vars should be interpreted as variables, the others
+//    should be interpreted as constants.
 bool is_constant(const HandleSet& vars, const Handle& clause);
 
 // Return true iff the clause is a "black box" evaluatable.

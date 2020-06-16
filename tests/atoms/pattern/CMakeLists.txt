@@ -6,3 +6,4 @@ LINK_LIBRARIES(
 
 ADD_CXXTEST(BindLinkUTest)
 ADD_CXXTEST(SatisfactionLinkUTest)
+ADD_CXXTEST(PatternUtilsUTest)
