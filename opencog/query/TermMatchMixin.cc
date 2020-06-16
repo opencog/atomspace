@@ -25,6 +25,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
@@ -517,7 +518,8 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
 	Handle gopt;
 	try
 	{
-		gopt = HandleCast(_instor->instantiate(ptrn, term_gnds, true));
+		// gopt = HandleCast(_instor->instantiate(ptrn, term_gnds, true));
+		gopt = Replacement::replace_nocheck(ptrn, term_gnds);
 	}
 	catch (const SilentException& ex)
 	{
@@ -571,7 +573,7 @@ IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
 // beta-reduction with the groundings, followed by proper evaluation.
 
 bool TermMatchMixin::eval_term(const Handle& virt,
-                                      const GroundingMap& gnds)
+                               const GroundingMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
@@ -589,7 +591,8 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 		// So, Instantiator::instantiate() does this, but then it
 		// does too much; it also executes. Which is more than what
 		// is wanted.
-		vp = _instor->instantiate(virt, gnds, true);
+		// vp = _instor->instantiate(virt, gnds, true);
+		vp = Replacement::replace_nocheck(virt, gnds);
 	}
 	catch (const SilentException& ex)
 	{
