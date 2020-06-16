@@ -41,6 +41,10 @@ namespace opencog
 /// performed; other than quotation and scoping, if a given Atom appears
 /// in the original tree, it will be replaced.
 ///
+/// See also `Variables::substitute()` which performs a replacement,
+/// but performs type-checking before doing so. (It just calls this
+/// class to do the actual work, if type-checks pass.)
+///
 /// See also `class Instantiator`, which does a similar replacement,
 /// except that it also executes any executable links that it encounters
 /// along the way, and places the results into an AtomSpace.
