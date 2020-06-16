@@ -1724,13 +1724,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 		logmsg("!! maybe_present:", next_term->getHandle());
 
 		// Explore from this joint.
-		bool found;
-		if (next_term->hasAnyGlobbyVar())
-			found = explore_glob_branches(joint, jgnd, clause);
-		else if (next_term->hasUnorderedLink())
-			found = explore_odometer(joint, jgnd, clause);
-		else
-			found = explore_type_branches(joint, jgnd, clause);
+		bool found = explore_term_branches(joint, jgnd, clause);
 
 		logmsg("!! maybe_present result=",  found);
 		if (not found) issued_present.clear();
