@@ -92,8 +92,9 @@ bool Quotation::operator==(const Quotation& quotation) const
 std::string Quotation::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	ss << indent << "{level = " << _quotation_level
-	   << ", local = " << _local_quote << "}" << std::endl;
+	ss << indent
+	   << "{level = " << _quotation_level
+	   << ", local = " << _local_quote << "}";
 	return ss.str();
 }
 
