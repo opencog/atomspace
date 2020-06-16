@@ -543,7 +543,7 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
  * used by the pattern matcher.) The AlwaysLink must always be
  * satsifed, every time it is called, from the begining of the
  * search to the end.  The AlwaysLinks is satsified whenever
- * ptrn==grnd, and otherwise, if fails. That is, if ptrn==nullptr
+ * grnd != null, and otherwise, if fails. That is, if grnd==nullptr
  * then there is some grounding of (all of) the other clauses of
  * the pattern, with AlwaysLink failing to be satisfied. Reject
  * this case, now and forever. (viz, this is stateful.)
@@ -553,6 +553,7 @@ bool TermMatchMixin::always_clause_match(const Handle& ptrn,
                                          const GroundingMap& term_gnds)
 {
 	return grnd != nullptr;
+		// and not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
 }
 
 /* ======================================================== */

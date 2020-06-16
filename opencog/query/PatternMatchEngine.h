@@ -265,7 +265,7 @@ private:
 	                           const PatternTermPtr&);
 	bool explore_clause_evaluatable(const Handle&, const Handle&,
 	                                const PatternTermPtr&);
-	bool explore_term_branches(const Handle&, const Handle&,
+	bool explore_term_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
 	                         const PatternTermPtr&);
