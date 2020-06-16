@@ -2242,26 +2242,23 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 	// Glob is not in any ungrounded clauses.
 	if (clpr == clauses.second) return glob;
 
-	// Typically, the glob appears only once in the clause, so
-	// there is only one PatternTerm. The loop really isn't needed.
 	std::pair<Handle, PatternTermPtr> glbt({glob, clpr->second});
 	const auto& ptms = _pat->connected_terms_map.find(glbt);
-	for (const PatternTermPtr& ptm : ptms->second)
-	{
-		// Here, ptm is the glob itself. It will almost surely
-		// be in some term. The test for nullptr will surely never
-		// trigger.
-		const PatternTermPtr& parent = ptm->getParent();
-		if (nullptr == parent) return glob;
+	const PatternTermPtr& ptm = ptms->second[0];
 
-		// If this term appears in more than one clause, then it
-		// can be used as a pivot.
-		const Handle& embed = parent->getHandle();
-		if ((var_grounding.end() != var_grounding.find(embed)) and
-		    (1 < _pat->connectivity_map.count(embed)))
-			return embed;
-break;
-	}
+	// Here, ptm is the glob itself. It will almost surely
+	// be in some term. The test for nullptr will surely never
+	// trigger.
+	const PatternTermPtr& parent = ptm->getParent();
+	if (nullptr == parent) return glob;
+
+	// If this term appears in more than one clause, then it
+	// can be used as a pivot.
+	const Handle& embed = parent->getHandle();
+	if ((var_grounding.end() != var_grounding.find(embed)) and
+	    (1 < _pat->connectivity_map.count(embed)))
+		return embed;
+
 	return glob;
 }
 
