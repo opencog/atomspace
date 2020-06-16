@@ -727,11 +727,13 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 		// AbsentLink is same as NotLink PresentLink.
 		for (const Handle& h : oset)
 		{
-			// If no grounding, that's good, try the next one.
-			if (gnds.end() == gnds.find(h)) continue;
-
-			// If we are here, a grounding was found; that's bad.
-			return false;
+			// If pattern engine gave us no grounding, that's good,
+			// although we double-check to relly make sure...
+			if (gnds.end() == gnds.find(h))
+			{
+				Handle gpres = Replacement::replace_nocheck(h, gnds);
+				if (nullptr != _as->get_atom(gpres)) return false;
+			}
 		}
 		return true;
 	}
