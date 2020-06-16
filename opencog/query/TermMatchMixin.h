@@ -27,7 +27,6 @@
 
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -119,7 +118,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace* _temp_aspace;
-		Instantiator* _instor;
 
 		// The transient atomspace cache. The goal here is to
 		// avoid the overhead of constantly creating/deleting

@@ -25,9 +25,9 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 #include "TermMatchMixin.h"
 
@@ -121,7 +121,6 @@ TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
 	_temp_aspace = grab_transient_atomspace(as);
-	_instor = new Instantiator(_temp_aspace);
 
 	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(SEQUENTIAL_OR_LINK);
@@ -142,9 +141,6 @@ TermMatchMixin::~TermMatchMixin()
 		release_transient_atomspace(_temp_aspace);
 		_temp_aspace = nullptr;
 	}
-
-	// Delete the instantiator.
-	delete _instor;
 }
 
 void TermMatchMixin::set_pattern(const Variables& vars,
@@ -514,17 +510,7 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
 	// might be bridging across two disconnected components;
 	// some of the component combinations may have a grounding,
 	// while others do not.  So we have to check.
-	Handle gopt;
-	try
-	{
-		gopt = HandleCast(_instor->instantiate(ptrn, term_gnds, true));
-	}
-	catch (const SilentException& ex)
-	{
-		// The instantiation above can throw an exception if the
-		// it is ill-formed. If so, assume the opt clause is absent.
-		return true;
-	}
+	Handle gopt = Replacement::replace_nocheck(ptrn, term_gnds);
 
 	// If the result is a self-match, we don't mind.
 	// Its only bad if something else got built.
@@ -564,61 +550,18 @@ IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
 }
 
 /* ======================================================== */
-// FIXME: the code below is festooned with various FIXME's, stating
-// that, basically, the evaluation of terms in the presence of
-// grounding atoms is a bit messed up, and not fully correctly, cleanly
-// done. So this needs a clean re-implementation, with proper
-// beta-reduction with the groundings, followed by proper evaluation.
 
+/// Evaluation of the link requires working with an atomspace of
+/// some sort, so that the atoms can be communicated to scheme
+/// or python for the actual evaluation. We don't want to put
+/// the proposed grounding into the "real" atomspace, because
+/// the grounding might be insane.  So we put it here. This is
+/// not very efficient, but will do for now...
+///
 bool TermMatchMixin::eval_term(const Handle& virt,
-                                      const GroundingMap& gnds)
+                               const GroundingMap& gnds)
 {
-	// Evaluation of the link requires working with an atomspace
-	// of some sort, so that the atoms can be communicated to scheme or
-	// python for the actual evaluation. We don't want to put the
-	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is not
-	// very efficient, but will do for now...
-
-	ValuePtr vp;
-	try
-	{
-		// XXX FIXME. This is kind-of/mostly wrong. What we *really*
-		// want to do is to plug the grounds into the virt expression,
-		// then evaluate the virt expression, and see if it is true.
-		// So, Instantiator::instantiate() does this, but then it
-		// does too much; it also executes. Which is more than what
-		// is wanted.
-		vp = _instor->instantiate(virt, gnds, true);
-	}
-	catch (const SilentException& ex)
-	{
-		// The evaluation above can throw an exception if the
-		// instantiation turns out to be ill-formed. If so assume it
-		// has failed.
-		//
-		// TODO: it would probably be preferable to put this try/catch
-		// around the eval_sentence call in
-		// Satisfier::search_finished, because in case such virtual
-		// term is embdded in a NotLink returning false here is gonna
-		// validate the NotLink, which might not be desirable.
-		return false;
-	}
-
-	// Perhaps it already evaluated down to a truth-value.
-	if (not vp->is_atom())
-	{
-		TruthValuePtr tvp(TruthValueCast(vp));
-		if (nullptr == tvp)
-			throw InvalidParamException(TRACE_INFO,
-		            "Expecting a TruthValue for an evaluatable link: %s\n",
-		            virt->to_short_string().c_str());
-
-		return crisp_truth_from_tv(tvp);
-	}
-
-	// Its an atom... now we have to evaluate it.
-	Handle gvirt(HandleCast(vp));
+	Handle gvirt(Replacement::replace_nocheck(virt, gnds));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})
