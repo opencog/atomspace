@@ -25,6 +25,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/PresentLink.h>
 #include <opencog/atoms/core/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -699,43 +700,11 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 	}
 	else if (PRESENT_LINK == term_type)
 	{
-		// If *every* clause in the PresentLink has been grounded,
-		// then return true.  That is, PresentLink behaves like an
-		// AndLink for term-presence.  The other behavior "if some
-		// clause is present" is implemented by ChoiceLink.
-		for (const Handle& h : oset)
-		{
-			// Maybe the pattern engine did not deliver us a fully
-			// grounded pattern, but it can still be found in the
-			// atomspace.  Ground it, and find out.
-			if (gnds.end() == gnds.find(h))
-			{
-				Handle gpres = Replacement::replace_nocheck(h, gnds);
-				if (nullptr == _as->get_atom(gpres)) return false;
-			}
-		}
-		return true;
+		return PresentLink::is_present(_as, top, gnds);
 	}
 	else if (ABSENT_LINK == term_type)
 	{
-		// If *any* clause in the AbsentLink has been grounded, then
-		// return false.  That is, AbsentLink behaves like an AndLink
-		// for term-absence.  Note that this conflicts with static
-		// analysis in PatternLink, which insists on an arity of one.
-		// Viz "must all be absent"? or "if any are absent"?
-		//
-		// AbsentLink is same as NotLink PresentLink.
-		for (const Handle& h : oset)
-		{
-			// If pattern engine gave us no grounding, that's good,
-			// although we double-check to relly make sure...
-			if (gnds.end() == gnds.find(h))
-			{
-				Handle gpres = Replacement::replace_nocheck(h, gnds);
-				if (nullptr != _as->get_atom(gpres)) return false;
-			}
-		}
-		return true;
+		return PresentLink::is_absent(_as, top, gnds);
 	}
 	else if (CHOICE_LINK == term_type)
 	{

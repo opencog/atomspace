@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/mt19937ar.h>
-
-#include "PresentLink.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/PresentLink.h>
+#include <opencog/atoms/core/Replacement.h>
 
 using namespace opencog;
 
@@ -67,6 +67,47 @@ PresentLink::PresentLink(const HandleSeq&& oset, Type t)
 	}
 
 	init();
+}
+
+// ---------------------------------------------------------------
+
+// If *every* clause in the PresentLink has been grounded,
+// then return true.  That is, PresentLink behaves like an
+// AndLink for term-presence.  The other behavior "if some
+// clause is present" is implemented by ChoiceLink.
+bool PresentLink::is_present(AtomSpace* as, const Handle& preslnk,
+                             const HandleMap& gnds)
+{
+	const HandleSeq& oset = preslnk->getOutgoingSet();
+	for (const Handle& h : oset)
+	{
+		// Maybe the grounding map does not provide us a fully
+		// grounded pattern, but ther term can still be found in
+		// the atomspace.  Ground it, and find out.
+		if (gnds.end() == gnds.find(h))
+		{
+			Handle gpres = Replacement::replace_nocheck(h, gnds);
+			if (nullptr == as->get_atom(gpres)) return false;
+		}
+	}
+	return true;
+}
+
+// If *any* clause in the AbsentLink has been grounded, then
+// return false.  That is, AbsentLink behaves like an AndLink
+// for term-absence.
+bool PresentLink::is_absent(AtomSpace* as, const Handle& abslnk,
+                            const HandleMap& gnds)
+{
+	const HandleSeq& oset = abslnk->getOutgoingSet();
+	for (const Handle& h : oset)
+	{
+		if (gnds.end() != gnds.find(h)) return false;
+
+		Handle gpres = Replacement::replace_nocheck(h, gnds);
+		if (nullptr != as->get_atom(gpres)) return false;
+	}
+	return true;
 }
 
 // ---------------------------------------------------------------

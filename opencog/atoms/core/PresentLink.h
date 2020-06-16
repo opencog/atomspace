@@ -65,6 +65,9 @@ public:
 	PresentLink(const PresentLink &) = delete;
 	PresentLink& operator=(const PresentLink &) = delete;
 
+	static bool is_present(AtomSpace*, const Handle&, const HandleMap&);
+	static bool is_absent(AtomSpace*, const Handle&, const HandleMap&);
+
 	static Handle factory(const Handle&);
 };
 
