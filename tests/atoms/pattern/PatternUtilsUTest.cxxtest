@@ -1,0 +1,134 @@
+/*
+ * tests/atoms/pattern/PatternUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2020 SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define an _as.add_node
+#define al _as.add_link
+
+// Test various functions in PatternUtils.h
+//
+class PatternUtilsUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+	Handle A, B, X, Y;
+
+public:
+	PatternUtilsUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::INFO);
+		logger().set_timestamp_flag(false);
+	}
+
+	void setUp()
+	{
+		A = an(CONCEPT_NODE, "A");
+		B = an(CONCEPT_NODE, "B");
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+	}
+
+	void tearDown()
+	{
+		_as.clear();
+	}
+
+	void test_is_constant_1();
+	void test_is_constant_2();
+	void test_is_constant_3();
+	void test_is_constant_4();
+	void test_is_constant_5();
+};
+
+/**
+ * Test is_constant on a constant inheritance link
+ */
+void PatternUtilsUTest::test_is_constant_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle InhAB = al(INHERITANCE_LINK, A, B);
+
+	TS_ASSERT(is_constant({}, InhAB));
+}
+
+/**
+ * Test is_constant on an inheritance link with variables treated as
+ * constants.
+ */
+void PatternUtilsUTest::test_is_constant_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y);
+
+	TS_ASSERT(is_constant({}, InhXY));
+}
+
+/**
+ * Test is_constant on an inheritance link with variables not treated as
+ * constants.
+ */
+void PatternUtilsUTest::test_is_constant_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y);
+
+	TS_ASSERT(not is_constant({X, Y}, InhXY));
+}
+
+/**
+ * Test is_constant on an evaluatable link with constants
+ */
+void PatternUtilsUTest::test_is_constant_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle IdAB = al(IDENTICAL_LINK, A, B);
+
+	TS_ASSERT(not is_constant({}, IdAB));
+}
+
+/**
+ * Test is_constant on an evaluatable link with variables
+ */
+void PatternUtilsUTest::test_is_constant_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle IdXY = al(IDENTICAL_LINK, X, Y);
+
+	TS_ASSERT(not is_constant({X, Y}, IdXY));
+}
+
