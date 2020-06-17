@@ -115,7 +115,7 @@ TypedVariableLink::TypedVariableLink(const Handle& name, const Handle& defn)
  */
 void TypedVariableLink::analyze()
 {
-	Handle varname(_outgoing[0]);
+	const Handle& varname(_outgoing[0]);
 	Handle vartype(_outgoing[1]);
 
 	Type nt = varname->get_type();
@@ -298,6 +298,39 @@ void TypedVariableLink::analyze()
 
 		_glob_interval = std::make_pair(lb, ub);
 	}
+}
+
+/* ================================================================= */
+
+/// Return true if the other TypedVariable is equal to this one,
+/// up to alpha-conversion. This returns `true` if the other
+/// TypedVariable has the same type restrictions, even though it
+/// might have a different variable name. That is, return `true`
+/// if the two variables are alpha-convertable.
+///
+/// The compare is a semantic compare, not a syntactic compare. That
+/// is, the actual type restrictions are compared, and NOT the Atom
+/// used to specify the restriction.
+///
+bool TypedVariableLink::is_equal(const TypedVariableLink& other) const
+{
+	// If one is a GlobNode, and the other a VariableNode,
+	// then its a mismatch.
+	if (get_variable()->get_type() != other.get_variable()->get_type())
+		return false;
+
+	// If typed, types must match.
+	if (get_simple_typeset() != other.get_simple_typeset())
+		return false;
+
+	if (get_deep_typeset() != other.get_deep_typeset())
+		return false;
+
+	if (get_glob_interval() != other.get_glob_interval())
+		return false;
+
+	// If we got to here, everything must be OK.
+	return true;
 }
 
 /* ================================================================= */
