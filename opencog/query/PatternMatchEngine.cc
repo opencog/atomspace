@@ -1573,8 +1573,8 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	// is, we never start with a term underneath a Choice, move up,
 	// discover that we are in a Choice, and then have to explore the
 	// other choices. And that's OK, because this avoids complexity.
-	// if (ptm->isChoice())
-	//	return explore_choice_branches(ptm, hg, clause);
+	if (ptm->isChoice())
+		return explore_choice_branches(ptm, hg, clause);
 
 	// Unordered links have permutations to explore.
 	if (ptm->isUnorderedLink())
