@@ -301,6 +301,14 @@ void TypedVariableLink::analyze()
 }
 
 /* ================================================================= */
+/// Return true if the type is completely unconstrained.
+
+bool TypedVariableLink::is_untyped(void) const
+{
+	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size();
+}
+
+/* ================================================================= */
 
 /// Return true if the other TypedVariable is equal to this one,
 /// up to alpha-conversion. This returns `true` if the other

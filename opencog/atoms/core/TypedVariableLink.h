@@ -77,6 +77,7 @@ public:
 	static constexpr std::pair<size_t, size_t> default_interval =
 		std::make_pair(1, SIZE_MAX);
 
+	bool is_untyped(void) const;
 	bool is_equal(const TypedVariableLink&) const;
 	static Handle factory(const Handle&);
 };

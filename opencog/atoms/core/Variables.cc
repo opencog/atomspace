@@ -208,11 +208,15 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 	auto sime = _typemap.find(vme);
 	auto soth = other._typemap.find(voth);
 	if (sime == _typemap.end() and
-	    soth != other._typemap.end()) return false;
+	    soth != other._typemap.end() and
+	    not soth->second->is_untyped()) return false;
 
 	if (sime != _typemap.end())
 	{
+		if (soth == other._typemap.end() and
+		    sime->second->is_untyped()) return true;
 		if (soth == other._typemap.end()) return false;
+
 		if (not sime->second->is_equal(*soth->second)) return false;
 	}
 
