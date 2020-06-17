@@ -48,17 +48,21 @@ void TypedVariableLink::init()
 		throw SyntaxException(TRACE_INFO,
 			"Sorry, we expect type names to be variables!");
 
+	// Allow VARIABLE_NODE, although this is a bug in the URE,
+	// which should be using a SignatureLink for this case. XXX FIXME.
 	Type dtype = _outgoing[1]->get_type();
 	if (not nameserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
 	    TYPE_SET_LINK != dtype and
+	    VARIABLE_NODE != dtype and // XXX FIXME this is wrong; URE-bug
 	    SIGNATURE_LINK != dtype and
 	    INTERVAL_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting type defintion, got %s",
-				nameserver().getTypeName(dtype).c_str());
+			"Expecting type defintion, got %s in\n%s",
+				nameserver().getTypeName(dtype).c_str(),
+				to_short_string().c_str());
 
 	analyze();
 }
@@ -266,9 +270,10 @@ void TypedVariableLink::analyze()
 	}
 	else if (VARIABLE_NODE == t)
 	{
-		// This occurs when the variable type is a variable to be
-		// matched by the pattern matcher. There's nothing to do
-		// except not throwing an exception.
+		// This is a work-around to a URE bug. The URE should be
+		// using a SignatureLink, but its not. As a result, it
+		// gets undefined behavior and incorect results. Too bad.
+		// For now, just avoid throwing an exception. XXX FIXME.
 	}
 	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
 	{
