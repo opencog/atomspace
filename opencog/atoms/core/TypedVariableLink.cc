@@ -330,6 +330,29 @@ bool TypedVariableLink::is_untyped(void) const
 
 /* ================================================================= */
 
+/// Return true if the glob can match a variable number of items.
+/// i.e. if it is NOT an ordinary variable.
+bool TypedVariableLink::is_globby(void) const
+{
+	return (1 != _glob_interval.first or 1 != _glob_interval.second);
+}
+
+/// Returns true if the glob satisfies the lower bound
+/// interval restriction.
+bool TypedVariableLink::is_lower_bound(size_t n) const
+{
+	return n >= _glob_interval.first;
+}
+
+/// Returns true if the glob satisfies the upper bound
+/// interval restriction.
+bool TypedVariableLink::is_upper_bound(size_t n) const
+{
+	return n <= _glob_interval.second or _glob_interval.second < 0;
+}
+
+/* ================================================================= */
+
 /// Return true if the other TypedVariable is equal to this one,
 /// up to alpha-conversion. This returns `true` if the other
 /// TypedVariable has the same type restrictions, even though it

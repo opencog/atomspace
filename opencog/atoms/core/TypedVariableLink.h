@@ -76,6 +76,10 @@ public:
 	// The default interval for glob matching.
 	const std::pair<size_t, size_t> default_interval(void) const;
 
+	bool is_globby(void) const;
+	bool is_lower_bound(size_t) const;
+	bool is_upper_bound(size_t) const;
+
 	bool is_untyped(void) const;
 	bool is_equal(const TypedVariableLink&) const;
 	static Handle factory(const Handle&);
