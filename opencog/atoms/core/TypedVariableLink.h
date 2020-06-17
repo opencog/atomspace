@@ -52,7 +52,12 @@ namespace opencog
 class TypedVariableLink : public Link
 {
 protected:
+	TypeSet _simple_typeset;
+	HandleSet _deep_typeset;
+	std::pair<size_t, size_t> _glob_interval;
+
 	void init();
+	void analyze();
 public:
 	TypedVariableLink(const HandleSeq&&, Type=TYPED_VARIABLE_LINK);
 	TypedVariableLink(const Handle& alias, const Handle& body);
