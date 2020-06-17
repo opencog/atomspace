@@ -72,6 +72,18 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (QUOTE_LINK == t) continue;
 		if (UNQUOTE_LINK == t) continue;
 
+		// Negation, conjunction or disjunction over Implication,
+		// Equivalence, Inheritance, Similarity and their subtypes is
+		// currently required by PLN for higher order reasoning. We may
+		// want to forbid it in the future by maybe introducing a
+		// specialized operator to explicitely map the higher order into
+		// the lower order but as of today it is required.
+		if (h->is_type(INHERITANCE_LINK) or
+		    h->is_type(SIMILARITY_LINK) or
+		    h->is_type(IMPLICATION_LINK) or
+		    h->is_type(EQUIVALENCE_LINK))
+			continue;
+
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
 	}
 	return true;
