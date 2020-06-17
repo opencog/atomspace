@@ -359,12 +359,9 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 			return true;
 		}
 
-// XXX FIXME both statements below are wrong, but they are needed for
-// the unit tests. More bu0fxing to straighten this stuff out. That
-// is why this code is badly indented!
-PatternTermPtr term(make_term_tree(h));
-term->markChoice();
-_pat.pmandatory.push_back(term);
+		PatternTermPtr term(make_term_tree(h));
+		term->markChoice();
+		_pat.pmandatory.push_back(term);
 		return true;
 	}
 
