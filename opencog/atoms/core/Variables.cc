@@ -87,10 +87,8 @@ void Variables::get_vartype(const Handle& htypelink)
 	if (0 < hs.size())
 		_deep_typemap.insert({varname, hs});
 
-	static const std::pair<size_t, size_t>
-		default_interval(std::make_pair(0, SIZE_MAX));
 	const std::pair<size_t, size_t>& gi = tvlp->get_glob_interval();
-	if (default_interval != gi)
+	if (TypedVariableLink::default_interval != gi)
 		_glob_intervalmap.insert({varname, gi});
 
 	varset.insert(varname);

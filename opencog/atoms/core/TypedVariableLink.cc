@@ -60,7 +60,7 @@ void TypedVariableLink::init()
 			"Expecting type defintion, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
-	_glob_interval = std::make_pair(0, SIZE_MAX);
+	_glob_interval = default_interval;
 	analyze();
 }
 
@@ -122,7 +122,7 @@ void TypedVariableLink::analyze()
 	Type t = vartype->get_type();
 
 	// Specifying how many atoms can be matched to a GlobNode, if any
-	HandleSeq intervals;
+	HandleSeq interval;
 
 	// If its a defined type, unbundle it.
 	if (DEFINED_TYPE_NODE == t)
@@ -155,7 +155,7 @@ void TypedVariableLink::analyze()
 			Type th = h->get_type();
 
 			if (INTERVAL_LINK == th)
-				intervals = h->getOutgoingSet();
+				interval = h->getOutgoingSet();
 
 			else if (TYPE_NODE == th or
 			         TYPE_INH_NODE == th or
@@ -273,7 +273,7 @@ void TypedVariableLink::analyze()
 	}
 	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
 	{
-		intervals = vartype->getOutgoingSet();
+		interval = vartype->getOutgoingSet();
 	}
 	else
 	{
@@ -289,10 +289,10 @@ void TypedVariableLink::analyze()
 			nameserver().getTypeName(t).c_str());
 	}
 
-	if (0 < intervals.size())
+	if (0 < interval.size())
 	{
-		long lb = std::lround(NumberNodeCast(intervals[0])->get_value());
-		long ub = std::lround(NumberNodeCast(intervals[1])->get_value());
+		long lb = std::lround(NumberNodeCast(interval[0])->get_value());
+		long ub = std::lround(NumberNodeCast(interval[1])->get_value());
 		if (lb < 0) lb = 0;
 		if (ub < 0) ub = SIZE_MAX;
 

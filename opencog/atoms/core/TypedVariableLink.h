@@ -73,6 +73,10 @@ public:
 	std::pair<size_t, size_t> get_glob_interval(void) const
 		{ return _glob_interval; }
 
+	// The default interval for glob matching.
+	static constexpr std::pair<size_t, size_t> default_interval =
+		std::make_pair(1, SIZE_MAX);
+
 	static Handle factory(const Handle&);
 };
 
