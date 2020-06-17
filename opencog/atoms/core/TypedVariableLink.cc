@@ -60,6 +60,7 @@ void TypedVariableLink::init()
 			"Expecting type defintion, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
+	_glob_interval = std::make_pair(0, SIZE_MAX);
 	analyze();
 }
 

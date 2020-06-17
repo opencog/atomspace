@@ -32,6 +32,7 @@
 
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/core/TypedVariableLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
@@ -65,271 +66,32 @@ Variables::Variables(const HandleSeq& vardecls, bool ordered)
 /* ================================================================= */
 /**
  * Extract the variable type(s) from a TypedVariableLink
- *
- * The call is expecting htypelink to point to one of the two
- * following structures:
- *
- *    TypedVariableLink
- *       VariableNode "$some_var_name"
- *       TypeNode  "ConceptNode"
- *
- * or
- *
- *    TypedVariableLink
- *       VariableNode "$some_var_name"
- *       TypeChoice
- *          TypeNode  "ConceptNode"
- *          TypeNode  "NumberNode"
- *          TypeNode  "WordNode"
- *
- * or possibly types that are SignatureLink's or FuyzzyLink's or
- * polymorphic combinations thereof: e.g. the following is valid:
- *
- *    TypedVariableLink
- *       VariableNode "$some_var_name"
- *       TypeChoice
- *          TypeNode  "ConceptNode"
- *          SignatureLink
- *              InheritanceLink
- *                 PredicateNode "foobar"
- *                 TypeNode  "ListLink"
- *          FuzzyLink
- *              InheritanceLink
- *                 ConceptNode "animal"
- *                 ConceptNode "tiger"
- *
- * In either case, the variable itself is appended to "vset",
- * and the list of allowed types are associated with the variable
- * via the map "typemap".
  */
 void Variables::get_vartype(const Handle& htypelink)
 {
-	const HandleSeq& oset = htypelink->getOutgoingSet();
-	if (2 != oset.size())
+	if (TYPED_VARIABLE_LINK != htypelink->get_type())
 	{
 		throw InvalidParamException(TRACE_INFO,
-			"TypedVariableLink has wrong size, got %lu", oset.size());
+			"Expecting TypedVariableLink, got %s",
+			htypelink->to_short_string().c_str());
 	}
+	TypedVariableLinkPtr tvlp(TypedVariableLinkCast(htypelink));
 
-	Handle varname(oset[0]);
-	Handle vartype(oset[1]);
+	Handle varname(tvlp->get_variable());
 
-	Type nt = varname->get_type();
-	Type t = vartype->get_type();
-
-	// Specifying how many atoms can be matched to a GlobNode, if any
-	HandleSeq intervals;
-
-	// If its a defined type, unbundle it.
-	if (DEFINED_TYPE_NODE == t)
-	{
-		vartype = DefineLink::get_definition(vartype);
-		t = vartype->get_type();
-	}
-
-	// For GlobNode, we can specify either the interval or the type, e.g.
-	//
-	// TypedVariableLink
-	//   GlobNode  "$foo"
-	//   IntervalLink
-	//     NumberNode  2
-	//     NumberNode  3
-	//
-	// or both under a TypeSetLink, e.g.
-	//
-	// TypedVariableLink
-	//   GlobNode  "$foo"
-	//   TypeSetLink
-	//     IntervalLink
-	//       NumberNode  2
-	//       NumberNode  3
-	//     TypeNode "ConceptNode"
-	if (GLOB_NODE == nt and TYPE_SET_LINK == t)
-	{
-		for (const Handle& h : vartype->getOutgoingSet())
-		{
-			Type th = h->get_type();
-
-			if (INTERVAL_LINK == th)
-				intervals = h->getOutgoingSet();
-
-			else if (TYPE_NODE == th or
-			         TYPE_INH_NODE == th or
-			         TYPE_CO_INH_NODE == th)
-			{
-				vartype = h;
-				t = th;
-			}
-
-			else throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in TypeSetLink\n"
-				"Expected IntervalLink and TypeNode, got %s",
-				h->to_string().c_str());
-		}
-	}
-
-	// The vartype is either a single type name, or a list of typenames.
-	if (TYPE_NODE == t)
-	{
-		Type vt = TypeNodeCast(vartype)->get_kind();
-		if (vt != ATOM)  // Atom type is same as untyped.
-		{
-			TypeSet ts = {vt};
-			_simple_typemap.insert({varname, ts});
-		}
-	}
-	else if (TYPE_INH_NODE == t)
-	{
-		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts = nameserver().getChildrenRecursive(vt);
+	const TypeSet& ts = tvlp->get_simple_typeset();
+	if (0 < ts.size())
 		_simple_typemap.insert({varname, ts});
-	}
-	else if (TYPE_CO_INH_NODE == t)
-	{
-		Type vt = TypeNodeCast(vartype)->get_kind();
-		TypeSet ts = nameserver().getParentsRecursive(vt);
-		_simple_typemap.insert({varname, ts});
-	}
-	else if (TYPE_CHOICE == t)
-	{
-		TypeSet typeset;
-		HandleSet deepset;
-		HandleSet fuzzset;
 
-		const HandleSeq& tset = vartype->getOutgoingSet();
-		size_t tss = tset.size();
-		for (size_t i=0; i<tss; i++)
-		{
-			Handle ht(tset[i]);
-			Type var_type = ht->get_type();
-			if (TYPE_NODE == var_type)
-			{
-				Type vt = TypeNodeCast(ht)->get_kind();
-				if (ATOM != vt) typeset.insert(vt);
-			}
-			else if (TYPE_INH_NODE == var_type)
-			{
-				Type vt = TypeNodeCast(ht)->get_kind();
-				if (ATOM != vt)
-				{
-					TypeSet ts = nameserver().getChildrenRecursive(vt);
-					typeset.insert(ts.begin(), ts.end());
-				}
-			}
-			else if (TYPE_CO_INH_NODE == var_type)
-			{
-				Type vt = TypeNodeCast(ht)->get_kind();
-				if (ATOM != vt)
-				{
-					TypeSet ts = nameserver().getParentsRecursive(vt);
-					typeset.insert(ts.begin(), ts.end());
-				}
-			}
-			else if (SIGNATURE_LINK == var_type)
-			{
-				const HandleSeq& sig = ht->getOutgoingSet();
-				if (1 != sig.size())
-					throw SyntaxException(TRACE_INFO,
-						"Unexpected contents in SignatureLink\n"
-						"Expected arity==1, got %s", vartype->to_string().c_str());
+	const HandleSet& hs = tvlp->get_deep_typeset();
+	if (0 < hs.size())
+		_deep_typemap.insert({varname, hs});
 
-				deepset.insert(ht);
-			}
-			else if (FUZZY_LINK == var_type)
-			{
-				const HandleSeq& fuz = ht->getOutgoingSet();
-				if (1 != fuz.size())
-					throw SyntaxException(TRACE_INFO,
-						"Unexpected contents in FuzzyLink\n"
-						"Expected arity==1, got %s", vartype->to_string().c_str());
-
-				fuzzset.insert(ht);
-			}
-			else
-			{
-				throw InvalidParamException(TRACE_INFO,
-					"VariableChoice has unexpected content:\n"
-					"Expected TypeNode, got %s",
-					    nameserver().getTypeName(ht->get_type()).c_str());
-			}
-		}
-
-		if (0 < typeset.size())
-			_simple_typemap.insert({varname, typeset});
-		if (0 < deepset.size())
-			_deep_typemap.insert({varname, deepset});
-		if (0 < fuzzset.size())
-			_fuzzy_typemap.insert({varname, fuzzset});
-
-		// An empty disjunction corresponds to a bottom type.
-		if (tset.empty())
-			_simple_typemap.insert({varname, {NOTYPE}});
-
-		// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
-		if (1 == tset.size() and TYPE_CO_INH_NODE == tset[0]->get_type())
-		{
-			Type vt = TypeNodeCast(tset[0])->get_kind();
-			if (ATOM == vt)
-				_simple_typemap.insert({varname, {NOTYPE}});
-		}
-	}
-	else if (SIGNATURE_LINK == t)
-	{
-		const HandleSeq& tset = vartype->getOutgoingSet();
-		if (1 != tset.size())
-			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in SignatureLink\n"
-				"Expected arity==1, got %s", vartype->to_string().c_str());
-
-		HandleSet ts;
-		ts.insert(vartype);
-		_deep_typemap.insert({varname, ts});
-	}
-	else if (FUZZY_LINK == t)
-	{
-		const HandleSeq& tset = vartype->getOutgoingSet();
-		if (1 != tset.size())
-			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in FuzzyLink\n"
-				"Expected arity==1, got %s", vartype->to_string().c_str());
-
-		HandleSet ts;
-		ts.insert(vartype);
-		_fuzzy_typemap.insert({varname, ts});
-	}
-	else if (VARIABLE_NODE == t)
-	{
-		// This occurs when the variable type is a variable to be
-		// matched by the pattern matcher. There's nothing to do
-		// except not throwing an exception.
-	}
-	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
-	{
-		intervals = vartype->getOutgoingSet();
-	}
-	else
-	{
-		// Instead of throwing here, we could also assume that
-		// there is an implied SignatureLink, and just poke the
-		// contents into the _deep_typemap. On the other hand,
-		// it seems better to throw, so that beginers aren't
-		// thrown off the trail for what essentially becomes
-		// a silent error with unexpected effects...
-		throw SyntaxException(TRACE_INFO,
-			"Unexpected contents in TypedVariableLink\n"
-			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
-			nameserver().getTypeName(t).c_str());
-	}
-
-	if (0 < intervals.size())
-	{
-		long lb = std::lround(NumberNodeCast(intervals[0])->get_value());
-		long ub = std::lround(NumberNodeCast(intervals[1])->get_value());
-		if (lb < 0) lb = 0;
-		if (ub < 0) ub = SIZE_MAX;
-
-		_glob_intervalmap.insert({varname, std::make_pair(lb, ub)});
-	}
+	static const std::pair<size_t, size_t>
+		default_interval(std::make_pair(0, SIZE_MAX));
+	const std::pair<size_t, size_t>& gi = tvlp->get_glob_interval();
+	if (default_interval != gi)
+		_glob_intervalmap.insert({varname, gi});
 
 	varset.insert(varname);
 	varseq.emplace_back(varname);

@@ -68,6 +68,11 @@ public:
 	Handle get_variable(void) const { return _outgoing.at(0); }
 	Handle get_type(void) const { return _outgoing.at(1); }
 
+	TypeSet get_simple_typeset(void) const { return _simple_typeset; }
+	HandleSet get_deep_typeset(void) const { return _deep_typeset; }
+	std::pair<size_t, size_t> get_glob_interval(void) const
+		{ return _glob_interval; }
+
 	static Handle factory(const Handle&);
 };
 
