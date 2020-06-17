@@ -205,39 +205,15 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 	if (vme->get_type() != voth->get_type()) return false;
 
 	// If typed, types must match.
-	auto sime = _simple_typemap.find(vme);
-	auto soth = other._simple_typemap.find(voth);
-	if (sime == _simple_typemap.end() and
-	    soth != other._simple_typemap.end()) return false;
+	auto sime = _typemap.find(vme);
+	auto soth = other._typemap.find(voth);
+	if (sime == _typemap.end() and
+	    soth != other._typemap.end()) return false;
 
-	if (sime != _simple_typemap.end())
+	if (sime != _typemap.end())
 	{
-		if (soth == other._simple_typemap.end()) return false;
-		if (sime->second != soth->second) return false;
-	}
-
-	// If typed, types must match.
-	auto dime = _deep_typemap.find(vme);
-	auto doth = other._deep_typemap.find(voth);
-	if (dime == _deep_typemap.end() and
-	    doth != other._deep_typemap.end()) return false;
-
-	if (dime != _deep_typemap.end())
-	{
-		if (doth == other._deep_typemap.end()) return false;
-		if (dime->second != doth->second) return false;
-	}
-
-	// If intervals specified, intervals must match.
-	auto iime = _glob_intervalmap.find(vme);
-	auto ioth = other._glob_intervalmap.find(voth);
-	if (iime == _glob_intervalmap.end() and
-	    ioth != other._glob_intervalmap.end()) return false;
-
-	if (iime != _glob_intervalmap.end())
-	{
-		if (ioth == other._glob_intervalmap.end()) return false;
-		if (iime->second != ioth->second) return false;
+		if (soth == other._typemap.end()) return false;
+		if (not sime->second->is_equal(*soth->second)) return false;
 	}
 
 	// If we got to here, everything must be OK.
