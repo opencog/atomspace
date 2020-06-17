@@ -60,7 +60,6 @@ void TypedVariableLink::init()
 			"Expecting type defintion, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
-	_glob_interval = default_interval;
 	analyze();
 }
 
@@ -298,14 +297,35 @@ void TypedVariableLink::analyze()
 
 		_glob_interval = std::make_pair(lb, ub);
 	}
+	else
+		_glob_interval = default_interval();
+}
+
+const std::pair<size_t, size_t>
+TypedVariableLink::default_interval(void) const
+{
+	if (_outgoing[0]->get_type() == VARIABLE_NODE)
+		return std::make_pair(1, 1);
+	return std::make_pair(1, SIZE_MAX);
 }
 
 /* ================================================================= */
-/// Return true if the type is completely unconstrained.
 
+/// Return true if the type is completely unconstrained.
+/// The can happen in various ways, e.g. if the user wrote
+///    (TypedVariable (Variable "x") (Type 'Atom))
+/// or
+///    (TypedVariable (Variable "x") (TypeChoice (Type 'Atom)))
+/// or specified TypeInh/TypeCoInh that intersected/unioned to Atom.
+///
+/// XXX This is not quite true, since, in principle, we can have types
+/// that specify Values ... however, for backwards compatibility, we
+/// enforce this; it is checked in AlphaConvertUTest.
+///
 bool TypedVariableLink::is_untyped(void) const
 {
-	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size();
+	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size()
+		and default_interval() == _glob_interval;
 }
 
 /* ================================================================= */

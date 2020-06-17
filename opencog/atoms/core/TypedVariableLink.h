@@ -74,8 +74,7 @@ public:
 		{ return _glob_interval; }
 
 	// The default interval for glob matching.
-	static constexpr std::pair<size_t, size_t> default_interval =
-		std::make_pair(1, SIZE_MAX);
+	const std::pair<size_t, size_t> default_interval(void) const;
 
 	bool is_untyped(void) const;
 	bool is_equal(const TypedVariableLink&) const;
