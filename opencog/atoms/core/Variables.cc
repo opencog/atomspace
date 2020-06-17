@@ -273,7 +273,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 
 	VariableSimpleTypeMap::const_iterator tit = _simple_typemap.find(var);
 	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
-	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
 
 	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
 
@@ -282,7 +281,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	// two: val must be list_link and its unique outgoing satisfies
 	//      type restriction.
 	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
-	    and is_type(tit, dit, fit, val))
+	    and is_type(tit, dit, val))
 		return true;
 	else if (val->get_type() != LIST_LINK or
 	         not is_lower_bound(var, num_args) or
@@ -293,7 +292,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 
 	// Every outgoing atom in list must satisfy type restriction of var.
 	for (size_t i = 0; i < num_args; i++)
-		if (!is_type(tit, dit, fit, val->getOutgoingAtom(i)))
+		if (!is_type(tit, dit, val->getOutgoingAtom(i)))
 			return false;
 
 	return true;
@@ -301,7 +300,6 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 
 bool Variables::is_type(VariableSimpleTypeMap::const_iterator tit,
                         VariableDeepTypeMap::const_iterator dit,
-                        VariableDeepTypeMap::const_iterator fit,
                         const Handle& val) const
 {
 	bool ret = true;
@@ -328,15 +326,6 @@ bool Variables::is_type(VariableSimpleTypeMap::const_iterator tit,
 		{
 			if (value_is_type(sig, val)) return true;
 		}
-		ret = false;
-	}
-
-	// Fuzzy deep type restrictions?
-	if (_fuzzy_typemap.end() != fit)
-	{
-		// const HandleSet &fuzzset = dit->second;
-		throw RuntimeException(TRACE_INFO,
-		                       "Not implemented! TODO XXX FIXME");
 		ret = false;
 	}
 
@@ -611,9 +600,9 @@ void Variables::extend_interval(const Handle &h, const Variables &vset)
 void Variables::erase(const Handle& var)
 {
 	// Remove from the type maps
+	_typemap.erase(var);
 	_simple_typemap.erase(var);
 	_deep_typemap.erase(var);
-	_fuzzy_typemap.erase(var);
 
 	// Remove from the interval map
 	_glob_intervalmap.erase(var);
@@ -629,11 +618,9 @@ bool Variables::operator==(const Variables& other) const
 
 bool Variables::operator<(const Variables& other) const
 {
-	return (FreeVariables::operator<(other))
-		or ((_simple_typemap == other._simple_typemap
-		     and _deep_typemap < other._deep_typemap)
-		    or (_deep_typemap == other._deep_typemap
-		        and _fuzzy_typemap < other._fuzzy_typemap));
+	return FreeVariables::operator<(other)
+		or (_simple_typemap == other._simple_typemap
+		     and _deep_typemap < other._deep_typemap);
 }
 
 /// Look up the type declaration for `var`, but create the actual
@@ -655,13 +642,6 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 	{
 		for (const Handle& sig: dit->second)
 			types.push_back(sig);
-	}
-
-	const auto& fit = _fuzzy_typemap.find(var);
-	if (fit != _fuzzy_typemap.end())
-	{
-		for (const Handle& fuz: fit->second)
-			types.push_back(fuz);
 	}
 
 	// Check if ill-typed a.k.a invalid type intersection.
