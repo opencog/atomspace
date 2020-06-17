@@ -67,7 +67,7 @@ Variables::Variables(const HandleSeq& vardecls, bool ordered)
 /**
  * Extract the variable type(s) from a TypedVariableLink
  */
-void Variables::get_vartype(const Handle& htypelink)
+void Variables::unpack_vartype(const Handle& htypelink)
 {
 	if (TYPED_VARIABLE_LINK != htypelink->get_type())
 	{
@@ -75,9 +75,10 @@ void Variables::get_vartype(const Handle& htypelink)
 			"Expecting TypedVariableLink, got %s",
 			htypelink->to_short_string().c_str());
 	}
-	TypedVariableLinkPtr tvlp(TypedVariableLinkCast(htypelink));
 
-	Handle varname(tvlp->get_variable());
+	TypedVariableLinkPtr tvlp(TypedVariableLinkCast(htypelink));
+	const Handle& varname(tvlp->get_variable());
+	_typemap.insert({varname, tvlp});
 
 	const TypeSet& ts = tvlp->get_simple_typeset();
 	if (0 < ts.size())
@@ -137,7 +138,7 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
-		get_vartype(hdecls);
+		unpack_vartype(hdecls);
 	}
 	else if (VARIABLE_LIST == tdecls or VARIABLE_SET == tdecls)
 	{
@@ -227,8 +228,6 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 		if (dime->second != doth->second) return false;
 	}
 
-	// XXX TODO fuzzy?
-
 	// If intervals specified, intervals must match.
 	auto iime = _glob_intervalmap.find(vme);
 	auto ioth = other._glob_intervalmap.find(voth);
@@ -292,7 +291,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 {
 	if (varset.end() == varset.find(var)) return false;
 
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableSimpleTypeMap::const_iterator tit = _simple_typemap.find(var);
 	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
 	VariableDeepTypeMap::const_iterator fit = _fuzzy_typemap.find(var);
 
@@ -320,7 +319,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	return true;
 }
 
-bool Variables::is_type(VariableTypeMap::const_iterator tit,
+bool Variables::is_type(VariableSimpleTypeMap::const_iterator tit,
                         VariableDeepTypeMap::const_iterator dit,
                         VariableDeepTypeMap::const_iterator fit,
                         const Handle& val) const
@@ -401,7 +400,7 @@ bool Variables::is_type(Type gtype) const
 
 	// Are there any type restrictions?
 	const Handle& var = varseq[0];
-	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
+	VariableSimpleTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() == tit) return true;
 	const TypeSet &tchoice = tit->second;
 
@@ -750,7 +749,7 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		}
 		else if (TYPED_VARIABLE_LINK == t)
 		{
-			get_vartype(h);
+			unpack_vartype(h);
 		}
 		else if (ANCHOR_NODE == t)
 		{
@@ -810,7 +809,8 @@ std::string oc_to_string(const Variables& var, const std::string& indent)
 	return var.to_string(indent);
 }
 
-std::string oc_to_string(const VariableTypeMap& vtm, const std::string& indent)
+std::string oc_to_string(const VariableSimpleTypeMap& vtm,
+                         const std::string& indent)
 {
 	std::stringstream ss;
 	ss << indent << "size = " << vtm.size();
