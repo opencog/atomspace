@@ -30,6 +30,7 @@ ADD_LIBRARY (atomcore
 	StateLink.cc
 	TimeLink.cc
 	TypedAtomLink.cc
+	TypedVariableLink.cc
 	TypeNode.cc
 	TypeUtils.cc
 	UniqueLink.cc
@@ -77,6 +78,7 @@ INSTALL (FILES
 	StateLink.h
 	TimeLink.h
 	TypedAtomLink.h
+	TypedVariableLink.h
 	TypeNode.h
 	TypeUtils.h
 	UniqueLink.h

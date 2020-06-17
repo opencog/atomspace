@@ -1,9 +1,9 @@
 /*
- * opencog/atoms/core/TypedAtomLink.cc
+ * opencog/atoms/core/TypedVariableLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2020 Linas Vepstas
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  May 2015
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  June 2020
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,11 +23,11 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
-#include "TypedAtomLink.h"
+#include "TypedVariableLink.h"
 
 using namespace opencog;
 
-void TypedAtomLink::init()
+void TypedVariableLink::init()
 {
 	// Must have atom and type specification.
 	if (2 != _outgoing.size())
@@ -35,15 +35,14 @@ void TypedAtomLink::init()
 			"Expecting atom and type specification; got %s",
 			to_string().c_str());
 
-	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init(false);
-
-	// Type-check.
+	// Type-check. This is ... kind of a pointless restriction,
+	// except that pretty much everything else expects variables
+	// in this location.
 	Type stype = _outgoing[0]->get_type();
-	if (VARIABLE_NODE == stype or
-	    GLOB_NODE == stype)
+	if (VARIABLE_NODE != stype and
+	    GLOB_NODE != stype)
 		throw SyntaxException(TRACE_INFO,
-			"You are not allowed to globally type a variable");
+			"Sorry, we expect type names to be variables!");
 
 	Type dtype = _outgoing[1]->get_type();
 	if (not nameserver().isA(dtype, TYPE_NODE) and
@@ -54,32 +53,20 @@ void TypedAtomLink::init()
 		throw SyntaxException(TRACE_INFO,
 			"Expecting type defintion, got %s",
 				nameserver().getTypeName(dtype).c_str());
-
 }
 
-TypedAtomLink::TypedAtomLink(const HandleSeq&& oset, Type t)
-	: UniqueLink(std::move(oset), t)
+TypedVariableLink::TypedVariableLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
-	: UniqueLink({name, defn}, TYPED_ATOM_LINK)
+TypedVariableLink::TypedVariableLink(const Handle& name, const Handle& defn)
+	: Link({name, defn}, TYPED_VARIABLE_LINK)
 {
 	init();
 }
 
-/**
- * Get the type description associated with the alias.
- * This will be the second atom of some TypedAtomLink, where
- * `atom` is the first.
- */
-Handle TypedAtomLink::get_type(const Handle& atom)
-{
-	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
-	return uniq->getOutgoingAtom(1);
-}
-
-DEFINE_LINK_FACTORY(TypedAtomLink, TYPED_ATOM_LINK);
+DEFINE_LINK_FACTORY(TypedVariableLink, TYPED_VARIABLE_LINK);
 
 /* ===================== END OF FILE ===================== */
