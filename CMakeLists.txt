@@ -432,7 +432,7 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 ## Debian specific configurations
 SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
-	"python-dev (>= 2.7.5)"
+	"python3-dev (>= 3.6.7)"
 	"libzmq3-dev (>= 4.0.4)"
 	"libboost-filesystem-dev (>= ${MIN_BOOST})"
 	"libboost-system-dev (>= ${MIN_BOOST})"
