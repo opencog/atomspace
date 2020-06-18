@@ -474,26 +474,13 @@ void Variables::extend(const Variables& vset)
 {
 	for (const Handle& h : vset.varseq)
 	{
-		auto index_it = index.find(h);
-		if (index_it != index.end())
-		{
-			auto typemap_it = vset._typemap.find(h);
-			if (typemap_it != vset._typemap.end())
-				unpack_vartype(HandleCast(typemap_it->second));
-		}
+		auto typemap_it = vset._typemap.find(h);
+		if (typemap_it != vset._typemap.end())
+			unpack_vartype(HandleCast(typemap_it->second));
 		else
 		{
-			// Found a new variable! Insert it.
-			index.insert({h, varseq.size()});
-
-			auto typemap_it = vset._typemap.find(h);
-			if (typemap_it != vset._typemap.end())
-				unpack_vartype(HandleCast(typemap_it->second));
-			else
-			{
-				varseq.emplace_back(h);
-				varset.insert(h);
-			}
+			varseq.emplace_back(h);
+			varset.insert(h);
 		}
 	}
 
