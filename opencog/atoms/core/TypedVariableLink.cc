@@ -307,8 +307,7 @@ void TypedVariableLink::analyze()
 		_glob_interval = default_interval();
 }
 
-const std::pair<size_t, size_t>
-TypedVariableLink::default_interval(void) const
+const GlobInterval TypedVariableLink::default_interval(void) const
 {
 	if (_outgoing[0]->get_type() == VARIABLE_NODE)
 		return std::make_pair(1, 1);
