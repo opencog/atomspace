@@ -809,9 +809,9 @@ bool InitiateSearchMixin::setup_variable_search(void)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_short_string();})
 
-		const auto& tit = _variables->_simple_typemap.find(var);
-		if (_variables->_simple_typemap.end() == tit) continue;
-		const TypeSet& typeset = tit->second;
+		const auto& tit = _variables->_typemap.find(var);
+		if (_variables->_typemap.end() == tit) continue;
+		const TypeSet& typeset = tit->second->get_simple_typeset();
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
 		                      << typeset.size();})
 

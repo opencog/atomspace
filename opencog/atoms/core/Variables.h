@@ -91,6 +91,7 @@ struct Variables : public FreeVariables,
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);
 	void validate_vardecl(const HandleSeq&);
+	void unpack_vartype(const Handle&);
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
@@ -205,7 +206,6 @@ protected:
 	             VariableDeepTypeMap::const_iterator,
 	             const Handle&) const;
 #endif
-	void unpack_vartype(const Handle&);
 
 	void extend_interval(const Handle &h, const Variables &vset);
 };
