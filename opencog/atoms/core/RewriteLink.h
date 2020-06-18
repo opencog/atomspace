@@ -222,21 +222,6 @@ public:
 	 *   (And (Concept "A") (Variable "$X")))
 	 */
 	Handle consume_quotations() const;
-	static Handle consume_quotations(const Handle& vardecl, const Handle& h,
-	                                 /* Remember if h is the clause
-	                                  * root of a pattern. This is
-	                                  * necessary because AndLink and
-	                                  * such have different semantics
-	                                  * when they are at the root of
-	                                  * the body as they become logical
-	                                  * connectors for the pattern
-	                                  * matcher. */
-	                                 bool clause_root);
-	static Handle consume_quotations(const Variables& variables, const Handle& h,
-	                                 bool clause_root);
-	static Handle consume_quotations(const Variables& variables, const Handle& h,
-	                                 Quotation quotation,
-	                                 bool clause_root);
 	static Handle consume_quotations(const Variables& variables, const Handle& h,
 	                                 // TODO: we probably want to
 	                                 // move quotation,

@@ -167,8 +167,11 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
                                     const HandleMap& vm) const
 {
+	Variables vars(nvardecl);
 	Handle nbody = get_variables().substitute(body, vm, _silent);
-	nbody = consume_quotations(nvardecl, nbody, true);
+	bool needless_quotation = true;
+	nbody = consume_quotations(vars, nbody, Quotation(),
+	                           needless_quotation, true);
 	return nbody;
 }
 
@@ -240,7 +243,9 @@ Handle RewriteLink::consume_quotations() const
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
 	{
 		bool clause_root = (i == (get_vardecl() ? 1 : 0));
-		Handle nbody = consume_quotations(variables, getOutgoingAtom(i), clause_root);
+		bool needless_quotation = true;
+		Handle nbody = consume_quotations(variables, getOutgoingAtom(i),
+		                Quotation(), needless_quotation, clause_root);
 		nouts.push_back(nbody);
 		// If the new body has terms with free variables but no
 		// vardecl it means that some quotations are missing. Rather
@@ -254,32 +259,6 @@ Handle RewriteLink::consume_quotations() const
 
 	// Recreate the scope
 	return createLink(std::move(nouts), get_type());
-}
-
-Handle RewriteLink::consume_quotations(const Handle& vardecl,
-                                       const Handle& h,
-                                       bool clause_root)
-{
-	Variables vars(vardecl);
-	bool needless_quotation = true;
-	return consume_quotations(vars, h, Quotation(), needless_quotation, clause_root);
-}
-
-Handle RewriteLink::consume_quotations(const Variables& variables,
-                                       const Handle& h,
-                                       bool clause_root)
-{
-	bool needless_quotation = true;
-	return consume_quotations(variables, h, Quotation(), needless_quotation, clause_root);
-}
-
-Handle RewriteLink::consume_quotations(const Variables& variables,
-                                       const Handle& h,
-                                       Quotation quotation,
-                                       bool clause_root)
-{
-	bool needless_quotation = true;
-	return consume_quotations(variables, h, quotation, needless_quotation, clause_root);
 }
 
 Handle RewriteLink::consume_quotations(const Variables& variables,

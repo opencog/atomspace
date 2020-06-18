@@ -208,8 +208,11 @@ void RewriteLinkUTest::test_consume_quotations_2()
 	// Remove the UnquoteLink wrapping gpn as it is useless, and even
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
-	Handle result = RewriteLink::consume_quotations(vardecl, ill_quoted, false),
-		expected = _eval.eval_h("well-quoted");
+	Variables vars(vardecl);
+	bool needless_quotation = true;
+	Handle result = RewriteLink::consume_quotations(vars, ill_quoted,
+	                Quotation(), needless_quotation, false);
+	Handle expected = _eval.eval_h("well-quoted");
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -231,8 +234,11 @@ void RewriteLinkUTest::test_consume_quotations_3()
 	// Remove the UnquoteLink wrapping gpn as it is useless, and even
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
-	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
-		expected = _eval.eval_h("consumed-quoted-clauses");
+	Variables vars(vardecl);
+	bool needless_quotation = true;
+	Handle result = RewriteLink::consume_quotations(vars, quoted_clauses,
+	               Quotation(), needless_quotation, true);
+	Handle expected = _eval.eval_h("consumed-quoted-clauses");
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -254,8 +260,11 @@ void RewriteLinkUTest::test_consume_quotations_4()
 	// Remove the UnquoteLink wrapping gpn as it is useless, and even
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
-	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
-		expected = _eval.eval_h("consumed-quoted-grounded-predicate-argument");
+	Variables vars(vardecl);
+	bool needless_quotation = true;
+	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses,
+	                Quotation(), needless_quotation, true);
+	Handle expected = _eval.eval_h("consumed-quoted-grounded-predicate-argument");
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -277,8 +286,11 @@ void RewriteLinkUTest::test_consume_quotations_5()
 	// LocalQuoteLink should not be removed because NotLink is
 	// interpreted as a logical connector by the pattern matcher in
 	// that context.
-	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clause, true),
-		expected = quoted_clause;
+	Variables vars(vardecl);
+	bool needless_quotation = true;
+	Handle result = RewriteLink::consume_quotations(vars, quoted_clause,
+	                Quotation(), needless_quotation, true);
+	Handle expected = quoted_clause;
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
