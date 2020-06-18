@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/algorithm/string.hpp>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
@@ -524,8 +522,8 @@ void MultiAtomSpace::test_pm_scm(void)
 	evaluator->eval("(use-modules (opencog exec))");
 
 	std::string rs = evaluator->eval("(load-from-path \"tests/scm/pm.scm\")");
-	boost::trim(rs);
-	std::cout << "rs = " << rs << std::endl;
+	rs.erase(rs.find_last_not_of(" \n\r\t") + 1);
+	std::cout << "rs = >>" << rs << "<<" << std::endl;
 
 	TSM_ASSERT("Crashed while working on the new atomspace", rs.empty());
 
