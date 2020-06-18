@@ -360,6 +360,12 @@ bool TypedVariableLink::is_upper_bound(size_t n) const
 /* ================================================================= */
 
 /// Returns true if `h` satisfies the type restrictions.
+bool TypedVariableLink::is_type(Type t) const
+{
+	return _simple_typeset.end() != _simple_typeset.find(t);
+}
+
+/// Returns true if `h` satisfies the type restrictions.
 bool TypedVariableLink::is_type(const Handle& h) const
 {
 	// If the type is not globby, then the Atom must satisfy

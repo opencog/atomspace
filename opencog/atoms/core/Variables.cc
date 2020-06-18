@@ -120,6 +120,9 @@ void Variables::unpack_vartype(const Handle& htypelink)
  */
 void Variables::validate_vardecl(const Handle& hdecls)
 {
+	// XXX FIXME URE calls us with broken handle!!
+	if (nullptr == hdecls) return;
+
 	// Expecting the declaration list to be either a single
 	// variable, a list or a set of variable declarations.
 	Type tdecls = hdecls->get_type();
@@ -279,7 +282,24 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	return tit->second->is_type(val);
 }
 
-/* ================================================================= */
+/**
+ * Return true if we contain just a single variable, and this one
+ * variable is of type gtype (or is untyped). A typical use is that
+ * gtype==VARIABLE_LIST.
+ */
+bool Variables::is_type(Type gtype) const
+{
+	if (1 != varseq.size()) return false;
+
+	// Are there any type restrictions?
+	const Handle& var = varseq[0];
+	VariableTypeMap::const_iterator tit = _typemap.find(var);
+	if (_typemap.end() == tit) return true;
+
+	// There are type restrictions; do they match?
+	return tit->second->is_type(gtype);
+}
+
 /**
  * Simple type checker.
  *
@@ -304,27 +324,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	return true;
 }
 
-/**
- * Return true if we contain just a single variable, and this one
- * variable is of type gtype (or is untyped). A typical use is that
- * gtype==VARIABLE_LIST.
- */
-bool Variables::is_type(Type gtype) const
-{
-	if (1 != varseq.size()) return false;
-
-	// Are there any type restrictions?
-	const Handle& var = varseq[0];
-	VariableSimpleTypeMap::const_iterator tit = _simple_typemap.find(var);
-	if (_simple_typemap.end() == tit) return true;
-	const TypeSet &tchoice = tit->second;
-
-	// There are type restrictions; do they match?
-	TypeSet::const_iterator allow = tchoice.find(gtype);
-	if (allow != tchoice.end()) return true;
-	return false;
-}
-
+/* ================================================================= */
 /**
  * Interval checker.
  *

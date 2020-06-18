@@ -83,6 +83,7 @@ public:
 	bool is_upper_bound(size_t) const;
 
 	bool is_type(const Handle&) const;
+	bool is_type(Type) const;
 
 	bool is_untyped(void) const;
 	bool is_equal(const TypedVariableLink&) const;
