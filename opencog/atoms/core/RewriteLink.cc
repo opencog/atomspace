@@ -260,14 +260,17 @@ Handle RewriteLink::consume_quotations(const Handle& vardecl,
                                        const Handle& h,
                                        bool clause_root)
 {
-	return consume_quotations(gen_variables(h, vardecl), h, clause_root);
+	Variables vars(vardecl);
+	bool needless_quotation = true;
+	return consume_quotations(vars, h, Quotation(), needless_quotation, clause_root);
 }
 
 Handle RewriteLink::consume_quotations(const Variables& variables,
                                        const Handle& h,
                                        bool clause_root)
 {
-	return consume_quotations(variables, h, Quotation(), clause_root);
+	bool needless_quotation = true;
+	return consume_quotations(variables, h, Quotation(), needless_quotation, clause_root);
 }
 
 Handle RewriteLink::consume_quotations(const Variables& variables,
