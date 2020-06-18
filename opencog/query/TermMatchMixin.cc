@@ -264,7 +264,7 @@ bool TermMatchMixin::link_match(const PatternTermPtr& ptm,
 		// (as is done in the ForwardChainerUTest, see bug #934)
 		// Alternately, a single variable can match an entire
 		// VariableList (per bug #2070).
-		if (*_pat_bound_vars != *_gnd_bound_vars
+		if (not (*_pat_bound_vars == *_gnd_bound_vars)
 		      and not _pat_bound_vars->is_type(VARIABLE_LIST)
 		      and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
 		{

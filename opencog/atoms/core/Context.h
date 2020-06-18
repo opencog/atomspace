@@ -28,8 +28,6 @@
 #include <list>
 #include <string>
 
-#include <boost/operators.hpp>
-
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
@@ -54,7 +52,7 @@ namespace opencog
  *
  * This notion of context is distinct and unrelated to ContextLink.
  */
-struct Context : public boost::totally_ordered<Context>
+struct Context
 {
 	typedef std::list<Variables> VariablesStack;
 
