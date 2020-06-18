@@ -120,10 +120,6 @@ void Variables::unpack_vartype(const Handle& htypelink)
  */
 void Variables::validate_vardecl(const Handle& hdecls)
 {
-	// If no variable declaration then create the empty variables
-	if (not hdecls)
-		return;
-
 	// Expecting the declaration list to be either a single
 	// variable, a list or a set of variable declarations.
 	Type tdecls = hdecls->get_type();
@@ -153,6 +149,10 @@ void Variables::validate_vardecl(const Handle& hdecls)
 		// form (i.e. requires beta-reductions to be fully formed), thus
 		// variables inference is aborted for now.
 		return;
+	}
+	else if (ANCHOR_NODE == tdecls)
+	{
+		_anchor = hdecls;
 	}
 	else
 	{
@@ -489,6 +489,12 @@ void Variables::extend(const Variables& vset)
 		auto index_it = index.find(h);
 		if (index_it != index.end())
 		{
+#if 0
+			auto typemap_it = vset._typemap.find(h);
+			if (typemap_it != vset._typemap.end())
+				unpack_vartype(HandleCast(typemap_it->second));
+#endif
+
 			// Merge the two typemaps, if needed.
 			auto stypemap_it = vset._simple_typemap.find(h);
 			if (stypemap_it != vset._simple_typemap.end())
@@ -505,14 +511,14 @@ void Variables::extend(const Variables& vset)
 		{
 			// Found a new variable! Insert it.
 			index.insert({h, varseq.size()});
-			varseq.emplace_back(h);
-			varset.insert(h);
 
-			// Install the type constraints, as well.
-			auto typemap_it = vset._simple_typemap.find(h);
-			if (typemap_it != vset._simple_typemap.end())
+			auto typemap_it = vset._typemap.find(h);
+			if (typemap_it != vset._typemap.end())
+				unpack_vartype(HandleCast(typemap_it->second));
+			else
 			{
-				_simple_typemap.insert({h, typemap_it->second});
+				varseq.emplace_back(h);
+				varset.insert(h);
 			}
 		}
 		// extend _glob_interval_map
