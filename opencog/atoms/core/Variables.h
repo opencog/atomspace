@@ -198,6 +198,15 @@ struct Variables : public FreeVariables,
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
+
+#define BOGUS_TYPE_CHECKING
+#ifdef BOGUS_TYPE_CHECKING
+	// XXX FIXME .. this is needed by the URE Unifier ...
+	// This code should be copied there.
+	bool is_type(VariableSimpleTypeMap::const_iterator,
+	             VariableDeepTypeMap::const_iterator,
+	             const Handle&) const;
+#endif
 	void unpack_vartype(const Handle&);
 
 	void extend_interval(const Handle &h, const Variables &vset);
