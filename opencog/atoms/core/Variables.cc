@@ -31,9 +31,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypedVariableLink.h>
-#include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
 #include "VariableSet.h"
@@ -523,14 +521,21 @@ Handle Variables::get_vardecl() const
 {
 	HandleSeq vardecls;
 	for (const Handle& var : varseq)
-		vardecls.emplace_back(get_type_decl(var, var));
+	{
+		const auto& tit = _typemap.find(var);
+		if (_typemap.end() == tit)
+			vardecls.emplace_back(var);
+		else
+			vardecls.emplace_back(tit->second);
+	}
+
 	if (vardecls.size() == 1)
 		return vardecls[0];
 
 	if (_ordered)
-		return Handle(createVariableList(std::move(vardecls)));
+		return HandleCast(createVariableList(std::move(vardecls)));
 
-	return Handle(createVariableSet(std::move(vardecls)));
+	return HandleCast(createVariableSet(std::move(vardecls)));
 }
 
 void Variables::validate_vardecl(const HandleSeq& oset)
