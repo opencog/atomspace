@@ -433,9 +433,7 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
 	"python3-dev (>= 3.6.7)"
-	"libzmq3-dev (>= 4.0.4)"
 	"libboost-filesystem-dev (>= ${MIN_BOOST})"
-	"libboost-system-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
 	"libpq-dev (>=9.3.24)"
