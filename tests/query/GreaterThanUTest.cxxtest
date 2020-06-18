@@ -105,6 +105,8 @@ void GreaterThanUTest::test_numeric_greater(void)
 	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
 	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
 	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Same test as above, but using a scheme func for the compares
@@ -128,7 +130,10 @@ void GreaterThanUTest::test_scm_greater(void)
 	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
 	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
 	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
 // Same test as above, but using the built-in GreaterThanLink
 void GreaterThanUTest::test_builtin_greater(void)
 {
@@ -150,4 +155,6 @@ void GreaterThanUTest::test_builtin_greater(void)
 	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
 	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
 	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -32,6 +32,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/FreeVariables.h>
+#include <opencog/atoms/core/TypedVariableLink.h>
 
 namespace opencog
 {
@@ -39,7 +40,8 @@ namespace opencog
  *  @{
  */
 
-typedef std::map<Handle, TypeSet> VariableTypeMap;
+typedef std::map<Handle, TypedVariableLinkPtr> VariableTypeMap;
+typedef std::map<Handle, TypeSet> VariableSimpleTypeMap;
 typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
 typedef std::pair<size_t, size_t> GlobInterval;
 typedef std::map<Handle, GlobInterval> GlobIntervalMap;
@@ -70,15 +72,14 @@ struct Variables : public FreeVariables,
 
 	/// Unbundled variables and type restrictions for them.
 
+	/// _typemap holds back-ponters to TypedVariableLinkPtrs
 	/// _simple_typemap is the (possibly empty) list of restrictions
 	/// on the variable types. It holds a disjunction of class Type.
 	/// _deep_typemap holds complex or "deep" type definitions, such
 	/// as those defined by SignatureLink.
-	/// _fuzzy_typemap holds approximate of "fuzzy" type definitions,
-	/// those which only need to be approximately matched.
-	VariableTypeMap _simple_typemap;
+	VariableTypeMap _typemap;
+	VariableSimpleTypeMap _simple_typemap;
 	VariableDeepTypeMap _deep_typemap;
-	VariableDeepTypeMap _fuzzy_typemap;
 
 	/// To restrict how many atoms should be matched for each of the
 	/// GlobNodes in the pattern.
@@ -87,12 +88,10 @@ struct Variables : public FreeVariables,
 	/// Anchor, if present, else undefined.
 	Handle _anchor;
 
-	// See VariableList.cc for comments
-	void get_vartype(const Handle&);
-
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);
 	void validate_vardecl(const HandleSeq&);
+	void unpack_vartype(const Handle&);
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
@@ -198,10 +197,15 @@ struct Variables : public FreeVariables,
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
-	bool is_type(VariableTypeMap::const_iterator,
-			VariableDeepTypeMap::const_iterator,
-			VariableDeepTypeMap::const_iterator,
-			const Handle&) const;
+
+#define BOGUS_TYPE_CHECKING
+#ifdef BOGUS_TYPE_CHECKING
+	// XXX FIXME .. this is needed by the URE Unifier ...
+	// This code should be copied there.
+	bool is_type(VariableSimpleTypeMap::const_iterator,
+	             VariableDeepTypeMap::const_iterator,
+	             const Handle&) const;
+#endif
 
 	void extend_interval(const Handle &h, const Variables &vset);
 };
@@ -211,7 +215,7 @@ protected:
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const VariableTypeMap& vtm,
+std::string oc_to_string(const VariableSimpleTypeMap& vtm,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const GlobIntervalMap& gim,
                          const std::string& indent=empty_string);

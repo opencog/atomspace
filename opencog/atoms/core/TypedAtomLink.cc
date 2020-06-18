@@ -1,5 +1,5 @@
 /*
- * TypedAtomLink.cc
+ * opencog/atoms/core/TypedAtomLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *

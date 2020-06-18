@@ -320,20 +320,35 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 	// typemaps will depend on the variable names. So must be
 	// abelian. That is, we must use addition.
 	ContentHash vth = 0;
-	for (const auto& pr : _variables._simple_typemap)
+#if 0
+	for (const auto& pr : _variables._typemap)
 	{
-		for (Type t : pr.second) vth += t;
+		// Why doesn't this very simple source of entropy work ??
+		vth += pr.second->get_hash();
+	}
+#endif
+
+	// Work really really hard to generate collionless hashes,
+	// based on the variable typing.
+	for (const auto& pr : _variables._typemap)
+	{
+		for (Type t : pr.second->get_simple_typeset())
+			vth += t;
 	}
 	fnv1a_hash(hsh, vth);
 
-	for (const auto& pr : _variables._deep_typemap)
+	for (const auto& pr : _variables._typemap)
 	{
-		for (const Handle& th : pr.second) vth += th->get_hash();
+		for (const Handle& th : pr.second->get_deep_typeset())
+			vth += th->get_hash();
 	}
 	fnv1a_hash(hsh, vth);
 
-	for(const auto& pr: _variables._glob_intervalmap){
-		vth += pr.first->get_hash();
+	for (const auto& pr : _variables._typemap)
+	{
+		if (pr.second->get_glob_interval() !=
+		    pr.second->default_interval())
+			vth += pr.second->get_variable()->get_hash();
 	}
 	fnv1a_hash(hsh, vth);
 

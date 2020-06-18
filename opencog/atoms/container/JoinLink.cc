@@ -182,14 +182,15 @@ void JoinLink::setup_top_clauses(void)
 	for (const Handle& var : _variables.varseq)
 	{
 		// If its anywhere, its in the simple typemap.
-		const auto& styp = _variables._simple_typemap.find(var);
-		if (_variables._simple_typemap.end() == styp) continue;
+		const auto& vtyp = _variables._typemap.find(var);
+		if (_variables._typemap.end() == vtyp) continue;
 
 		// If it's specified, its a plain single type.
-		if (styp->second.size() != 1) continue;
+		const TypeSet& tset = vtyp->second->get_simple_typeset();
+		if (tset.size() != 1) continue;
 
 		// Its got to be JoinLink, or a derived type.
-		Type vt = *(styp->second.begin());
+		Type vt = *(tset.begin());
 		if (nameserver().isA(vt, JOIN_LINK))
 		{
 			_top_var = var;
