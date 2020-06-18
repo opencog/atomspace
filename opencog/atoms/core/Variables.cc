@@ -264,73 +264,19 @@ bool Variables::is_type(const Handle& h) const
 /**
  * Type checker.
  *
- * Returns true/false if we are holding the variable `var`, and if
+ * Returns true if we are holding the variable `var`, and if
  * the `val` satisfies the type restrictions that apply to `var`.
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	// If not holding, then fail.
 	if (varset.end() == varset.find(var)) return false;
 
-	VariableSimpleTypeMap::const_iterator tit = _simple_typemap.find(var);
-	VariableDeepTypeMap::const_iterator dit = _deep_typemap.find(var);
+	// If no type restrictions, then success.
+	VariableTypeMap::const_iterator tit = _typemap.find(var);
+	if (_typemap.end() == tit) return true;
 
-	const Arity num_args = val->get_type() != LIST_LINK ? 1 : val->get_arity();
-
-	// If one is allowed in interval then there are two alternatives.
-	// one: val must satisfy type restriction.
-	// two: val must be list_link and its unique outgoing satisfies
-	//      type restriction.
-	if (is_lower_bound(var, 1) and is_upper_bound(var, 1)
-	    and is_type(tit, dit, val))
-		return true;
-	else if (val->get_type() != LIST_LINK or
-	         not is_lower_bound(var, num_args) or
-	         not is_upper_bound(var, num_args))
-		// If the number of arguments is out of the allowed interval
-		// of the variable/glob or val is not List_link, return false.
-		return false;
-
-	// Every outgoing atom in list must satisfy type restriction of var.
-	for (size_t i = 0; i < num_args; i++)
-		if (!is_type(tit, dit, val->getOutgoingAtom(i)))
-			return false;
-
-	return true;
-}
-
-bool Variables::is_type(VariableSimpleTypeMap::const_iterator tit,
-                        VariableDeepTypeMap::const_iterator dit,
-                        const Handle& val) const
-{
-	bool ret = true;
-
-	// Simple type restrictions?
-	if (_simple_typemap.end() != tit)
-	{
-		const TypeSet &tchoice = tit->second;
-		Type htype = val->get_type();
-		TypeSet::const_iterator allow = tchoice.find(htype);
-
-		// If the argument has the simple type, then we are good to go;
-		// we are done.  Else, fall through, and see if one of the
-		// others accept the match.
-		if (allow != tchoice.end()) return true;
-		ret = false;
-	}
-
-	// Deep type restrictions?
-	if (_deep_typemap.end() != dit)
-	{
-		const HandleSet &sigset = dit->second;
-		for (const Handle& sig : sigset)
-		{
-			if (value_is_type(sig, val)) return true;
-		}
-		ret = false;
-	}
-
-	// There appear to be no type restrictions...
-	return ret;
+	return tit->second->is_type(val);
 }
 
 /* ================================================================= */
@@ -544,10 +490,10 @@ void Variables::extend(const Variables& vset)
 		if (index_it != index.end())
 		{
 			// Merge the two typemaps, if needed.
-			auto typemap_it = vset._simple_typemap.find(h);
-			if (typemap_it != vset._simple_typemap.end())
+			auto stypemap_it = vset._simple_typemap.find(h);
+			if (stypemap_it != vset._simple_typemap.end())
 			{
-				const TypeSet& tms = typemap_it->second;
+				const TypeSet& tms = stypemap_it->second;
 				auto tti = _simple_typemap.find(h);
 				if(tti != _simple_typemap.end())
 					tti->second = set_intersection(tti->second, tms);

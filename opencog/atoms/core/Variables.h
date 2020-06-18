@@ -200,10 +200,6 @@ struct Variables : public FreeVariables,
 protected:
 	void unpack_vartype(const Handle&);
 
-	bool is_type(VariableSimpleTypeMap::const_iterator,
-			VariableDeepTypeMap::const_iterator,
-			const Handle&) const;
-
 	void extend_interval(const Handle &h, const Variables &vset);
 };
 
