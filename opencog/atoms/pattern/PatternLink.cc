@@ -191,23 +191,9 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_variables.varseq.clear();
 	for (const Handle& v : vars)
 	{
-		_variables.varseq.emplace_back(v);
-
-		auto it = varspec._simple_typemap.find(v);
-		if (it != varspec._simple_typemap.end())
-			_variables._simple_typemap.insert(*it);
-
-		auto dit = varspec._deep_typemap.find(v);
-		if (dit != varspec._deep_typemap.end())
-			_variables._deep_typemap.insert(*dit);
-
-		auto fit = varspec._fuzzy_typemap.find(v);
-		if (fit != varspec._fuzzy_typemap.end())
-			_variables._fuzzy_typemap.insert(*fit);
-
-		auto imit = varspec._glob_intervalmap.find(v);
-		if (imit != varspec._glob_intervalmap.end())
-			_variables._glob_intervalmap.insert(*imit);
+		auto it = varspec._typemap.find(v);
+		if (it != varspec._typemap.end())
+			_variables.unpack_vartype(HandleCast(it->second));
 	}
 
 	// Next, the body... there's no `_body` for lambda. The compo is

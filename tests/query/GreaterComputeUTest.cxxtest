@@ -97,4 +97,6 @@ void GreaterComputeUTest::test_computation(void)
     "         (NumberNode 1000))))");
 
     TS_ASSERT_EQUALS(crash_b, expected);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
