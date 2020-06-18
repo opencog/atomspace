@@ -77,11 +77,9 @@ struct Variables : public FreeVariables,
 	/// on the variable types. It holds a disjunction of class Type.
 	/// _deep_typemap holds complex or "deep" type definitions, such
 	/// as those defined by SignatureLink.
-	/// _fuzzy_typemap is obsolete and does nothing.
 	VariableTypeMap _typemap;
 	VariableSimpleTypeMap _simple_typemap;
 	VariableDeepTypeMap _deep_typemap;
-	VariableDeepTypeMap _fuzzy_typemap;
 
 	/// To restrict how many atoms should be matched for each of the
 	/// GlobNodes in the pattern.
