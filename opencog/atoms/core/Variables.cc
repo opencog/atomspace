@@ -80,18 +80,6 @@ void Variables::unpack_vartype(const Handle& htypelink)
 	const Handle& varname(tvlp->get_variable());
 	_typemap.insert({varname, tvlp});
 
-	const TypeSet& ts = tvlp->get_simple_typeset();
-	if (0 < ts.size())
-		_simple_typemap.insert({varname, ts});
-
-	const HandleSet& hs = tvlp->get_deep_typeset();
-	if (0 < hs.size())
-		_deep_typemap.insert({varname, hs});
-
-	const std::pair<size_t, size_t>& gi = tvlp->get_glob_interval();
-	if (tvlp->default_interval() != gi)
-		_glob_intervalmap.insert({varname, gi});
-
 	varset.insert(varname);
 	varseq.emplace_back(varname);
 }
@@ -166,8 +154,8 @@ void Variables::validate_vardecl(const Handle& hdecls)
 
 bool Variables::is_well_typed() const
 {
-	for (const auto& vt : _simple_typemap)
-		if (not opencog::is_well_typed(vt.second))
+	for (const auto& vt : _typemap)
+		if (not opencog::is_well_typed(vt.second->get_simple_typeset()))
 			return false;
 	return true;
 }
@@ -371,14 +359,14 @@ static const GlobInterval& default_interval(Type t)
 			 var_def_interval;
 }
 
-const GlobInterval& Variables::get_interval(const Handle& var) const
+const GlobInterval Variables::get_interval(const Handle& var) const
 {
-	const auto& interval = _glob_intervalmap.find(var);
+	const auto& decl = _typemap.find(var);
 
-	if (interval == _glob_intervalmap.end())
+	if (decl == _typemap.end())
 		return default_interval(var->get_type());
 
-	return interval->second;
+	return decl->second->get_glob_interval();
 }
 
 /* ================================================================= */
@@ -541,11 +529,6 @@ void Variables::erase(const Handle& var)
 {
 	// Remove from the type maps
 	_typemap.erase(var);
-	_simple_typemap.erase(var);
-	_deep_typemap.erase(var);
-
-	// Remove from the interval map
-	_glob_intervalmap.erase(var);
 
 	// Remove FreeVariables
 	FreeVariables::erase(var);
@@ -559,68 +542,18 @@ bool Variables::operator==(const Variables& other) const
 bool Variables::operator<(const Variables& other) const
 {
 	return FreeVariables::operator<(other)
-		or (_simple_typemap == other._simple_typemap
-		     and _deep_typemap < other._deep_typemap);
+		or _typemap < other._typemap;
 }
 
 /// Look up the type declaration for `var`, but create the actual
 /// declaration for `alt`.  This is an alpha-renaming.
 Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
-	HandleSeq types;
+	// Get the type info
+	const auto& tit = _typemap.find(var);
+	if (_typemap.end() == tit) return alt;
 
-	// Simple type info
-	const auto& sit = _simple_typemap.find(var);
-	if (sit != _simple_typemap.end())
-	{
-		for (Type t : sit->second)
-			types.push_back(Handle(createTypeNode(t)));
-	}
-
-	const auto& dit = _deep_typemap.find(var);
-	if (dit != _deep_typemap.end())
-	{
-		for (const Handle& sig: dit->second)
-			types.push_back(sig);
-	}
-
-	// Check if ill-typed a.k.a invalid type intersection.
-	if (types.empty() and sit != _simple_typemap.end())
-	{
-		const Handle ill_type = createLink(TYPE_CHOICE);
-		return createLink(TYPED_VARIABLE_LINK, alt, ill_type);
-	}
-
-	const auto interval = get_interval(var);
-	if (interval != default_interval(var->get_type()))
-	{
-		Handle il = createLink(INTERVAL_LINK,
-		                       Handle(createNumberNode(interval.first)),
-		                       Handle(createNumberNode(interval.second)));
-
-		if (types.empty())
-			return createLink(TYPED_VARIABLE_LINK, alt, il);
-
-		HandleSeq tcs;
-		for (Handle tn : types)
-			tcs.push_back(createLink(TYPE_SET_LINK, il, tn));
-		return tcs.size() == 1 ?
-		       createLink(TYPED_VARIABLE_LINK, alt, tcs[0]) :
-		       createLink(TYPED_VARIABLE_LINK, alt,
-		                  createLink(tcs, TYPE_CHOICE));
-	}
-
-	// No/Default interval found
-	if (not types.empty())
-	{
-		Handle types_h = types.size() == 1 ?
-		                 types[0] :
-		                 createLink(std::move(types), TYPE_CHOICE);
-		return createLink(TYPED_VARIABLE_LINK, alt, types_h);
-	}
-
-	// No type info
-	return alt;
+	return HandleCast(createTypedVariableLink(alt, tit->second->get_type()));
 }
 
 Handle Variables::get_vardecl() const
@@ -688,18 +621,11 @@ std::string Variables::to_string(const std::string& indent) const
 	// Whether it is ordered
 	ss << indent << "_ordered = " << _ordered << std::endl;
 
-	// Simple typemap
-	std::string indent_p = indent + OC_TO_STRING_INDENT;
-	ss << indent << "_simple_typemap:" << std::endl
-	   << oc_to_string(_simple_typemap, indent_p) << std::endl;
-
-	// Glob interval map
-	ss << indent << "_glob_intervalmap:" << std::endl
-	   << oc_to_string(_glob_intervalmap, indent_p) << std::endl;
-
-	// Deep typemap
-	ss << indent << "_deep_typemap:" << std::endl
-	   << oc_to_string(_deep_typemap, indent_p);
+#if 0
+	// Typemap
+	ss << indent << "_typemap:" << std::endl
+	   << oc_to_string(_typemap, indent_p);
+#endif
 
 	return ss.str();
 }
@@ -707,43 +633,6 @@ std::string Variables::to_string(const std::string& indent) const
 std::string oc_to_string(const Variables& var, const std::string& indent)
 {
 	return var.to_string(indent);
-}
-
-std::string oc_to_string(const VariableSimpleTypeMap& vtm,
-                         const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << vtm.size();
-	unsigned i = 0;
-	for (const auto& v : vtm)
-	{
-		ss << std::endl << indent << "variable[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
-		   << indent << "types[" << i << "]:";
-		for (auto& t : v.second)
-			ss << " " << nameserver().getTypeName(t);
-		i++;
-	}
-	return ss.str();
-}
-
-std::string oc_to_string(const GlobIntervalMap& gim, const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << gim.size();
-	unsigned i = 0;
-	for (const auto& v : gim)
-	{
-		ss << std::endl << indent << "glob[" << i << "]:" << std::endl
-		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT) << std::endl
-		   << indent << "interval[" << i << "]: ";
-		double lo = v.second.first;
-		double up = v.second.second;
-		ss << ((0 <= lo and std::isfinite(lo)) ? "[" : "(") << lo << ", "
-		   << up << ((0 <= up and std::isfinite(up)) ? "]" : ")");
-		i++;
-	}
-	return ss.str();
 }
 
 } // ~namespace opencog
