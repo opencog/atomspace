@@ -387,12 +387,10 @@ bool TypedVariableLink::is_type(const Handle& h) const
 /// Perform typecheck, ignoring possible globbiness.
 bool TypedVariableLink::is_nonglob_type(const Handle& h) const
 {
-	Type htype = h->get_type();
-
 	// If the argument has the simple type, then we are good to go;
 	// we are done.  Else, fall through, and see if one of the
 	// others accept the match.
-	if (_simple_typeset.find(htype) != _simple_typeset.end())
+	if (_simple_typeset.find(h->get_type()) != _simple_typeset.end())
 		return true;
 
 	// Deep type restrictions?
@@ -401,8 +399,8 @@ bool TypedVariableLink::is_nonglob_type(const Handle& h) const
 		if (value_is_type(sig, h)) return true;
 	}
 
-	// There appear to be no type restrictions...
-	return false;
+	// True, only if there were no type restrictions...
+	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size();
 }
 
 /* ================================================================= */
