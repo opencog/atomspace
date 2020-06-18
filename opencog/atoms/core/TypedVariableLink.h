@@ -58,6 +58,8 @@ protected:
 
 	void init();
 	void analyze();
+	bool is_nonglob_type(const Handle&) const;
+
 public:
 	TypedVariableLink(const HandleSeq&&, Type=TYPED_VARIABLE_LINK);
 	TypedVariableLink(const Handle& alias, const Handle& body);
@@ -79,6 +81,8 @@ public:
 	bool is_globby(void) const;
 	bool is_lower_bound(size_t) const;
 	bool is_upper_bound(size_t) const;
+
+	bool is_type(const Handle&) const;
 
 	bool is_untyped(void) const;
 	bool is_equal(const TypedVariableLink&) const;

@@ -26,6 +26,7 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/core/TypeUtils.h>
 
 #include "TypedVariableLink.h"
 
@@ -354,6 +355,54 @@ bool TypedVariableLink::is_lower_bound(size_t n) const
 bool TypedVariableLink::is_upper_bound(size_t n) const
 {
 	return n <= _glob_interval.second or _glob_interval.second < 0;
+}
+
+/* ================================================================= */
+
+/// Returns true if `h` satisfies the type restrictions.
+bool TypedVariableLink::is_type(const Handle& h) const
+{
+	// If the type is not globby, then the Atom must satisfy
+	// type restrictions directly.
+	if (not is_globby() and is_nonglob_type(h))
+		return true;
+
+	// If it's globby, then we expect a List.
+	if (LIST_LINK != h->get_type()) return false;
+
+	// The list must be of the allowed size...
+	const Arity num_args = h->get_arity();
+	if (not is_lower_bound(num_args)) return false;
+	if (not is_upper_bound(num_args)) return false;
+
+	// Every outgoing atom in list must satisfy type restriction of var.
+	for (const Handle& oh : h->getOutgoingSet())
+	{
+		if (not is_nonglob_type(oh)) return false;
+	}
+
+	return true;
+}
+
+/// Perform typecheck, ignoring possible globbiness.
+bool TypedVariableLink::is_nonglob_type(const Handle& h) const
+{
+	Type htype = h->get_type();
+
+	// If the argument has the simple type, then we are good to go;
+	// we are done.  Else, fall through, and see if one of the
+	// others accept the match.
+	if (_simple_typeset.find(htype) != _simple_typeset.end())
+		return true;
+
+	// Deep type restrictions?
+	for (const Handle& sig : _deep_typeset)
+	{
+		if (value_is_type(sig, h)) return true;
+	}
+
+	// There appear to be no type restrictions...
+	return false;
 }
 
 /* ================================================================= */
