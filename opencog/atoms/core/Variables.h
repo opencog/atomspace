@@ -181,10 +181,6 @@ struct Variables : public FreeVariables,
 
 	// Useful for debugging
 	std::string to_string(const std::string& indent=empty_string) const;
-
-protected:
-
-	void extend_interval(const Handle &h, const Variables &vset);
 };
 
 // Debugging helpers see

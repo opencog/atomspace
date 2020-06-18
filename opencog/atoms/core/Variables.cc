@@ -495,35 +495,11 @@ void Variables::extend(const Variables& vset)
 				varset.insert(h);
 			}
 		}
-		// extend _glob_interval_map
-		// extend_interval(h, vset);
 	}
 
 	// If either this or the other are ordered then the result is ordered
 	_ordered = _ordered or vset._ordered;
 }
-
-#ifdef BOGUS_TYPE_CHECKING
-inline GlobInterval interval_intersection(const GlobInterval &lhs,
-                                          const GlobInterval &rhs)
-{
-	const auto lb = std::max(lhs.first, rhs.first);
-	const auto ub = std::min(lhs.second, rhs.second);
-	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
-}
-
-void Variables::extend_interval(const Handle &h, const Variables &vset)
-{
-	auto it = _glob_intervalmap.find(h);
-	auto is_in_gim = it != _glob_intervalmap.end();
-	const auto intersection = not is_in_gim ? vset.get_interval(h) :
-			interval_intersection(vset.get_interval(h), get_interval(h));
-	if (intersection != default_interval(h->get_type())) {
-		if (is_in_gim) it->second = intersection;
-		else _glob_intervalmap.insert({h, intersection});
-	}
-}
-#endif // BOGUS_TYPE_CHECKING
 
 void Variables::erase(const Handle& var)
 {
