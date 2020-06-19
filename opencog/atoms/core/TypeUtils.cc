@@ -38,7 +38,7 @@ namespace opencog {
 
 /* ================================================================= */
 /**
- * Type checker.  Returns true if `val` is of type `deep`.
+ * Type checker.  Returns true if `val` is of type `spec`.
  */
 bool value_is_type(const Handle& spec, const ValuePtr& val)
 {
@@ -86,11 +86,6 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 			if (value_is_type(choice, val)) return true;
 		}
 		return false;
-	}
-	else if (FUZZY_LINK == dpt)
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
 	}
 
 	// If it is not a link, then it is a type-constant,
@@ -204,7 +199,7 @@ static bool type_match_rec(const Handle& left_,
 		rtype = right->get_type();
 	}
 
-	// Exact matchees are always good.
+	// Exact matches are always good.
 	if (left == right) return true;
 
 	// If left is a core type, right must be that type

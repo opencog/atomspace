@@ -35,8 +35,6 @@ namespace opencog
  *  @{
  */
 
-// TODO: some of what is here could be moved to Variables
-
 /**
  * Type checker.  Returns true if `value` is of type `type_spec`.
  * More precisely, returns true if `value` will fit into the type
@@ -82,7 +80,6 @@ bool value_is_type(const Handle& type_spec, const ValuePtr& value);
  *
  * Any type specification is valid: SignatureLinks, etc work too.
  */
-
 bool type_match(const Handle&, const ValuePtr&);
 
 /**
@@ -113,11 +110,13 @@ bool type_match(const Handle&, const ValuePtr&);
 ValuePtr type_compose(const Handle&, const ValuePtr&);
 
 /**
- * Given a variable declaration (VariableList) and a pattern body,
- * filter out all variables in the declaration that are not present in
- * the pattern body.
+ * Given a variable declaration (`VariableList`) and a pattern body,
+ * remove all variables in the declaration that are not present in
+ * the pattern body, and return the smaller (minimal) `VariableList`.
+ * (That is, return the list of only those variables that appear in
+ * the body).
  *
- * For instance filter_vardecl applied to
+ * For instance, `filter_vardecl()` applied to
  *
  * var_decl
  * =
@@ -143,15 +142,15 @@ ValuePtr type_compose(const Handle&, const ValuePtr&);
  *
  * Special cases:
  *
- * 1. The VariableListLink is discarded if the resulting variable
+ * 1. The `VariableList` is discarded if the resulting variable
  *    declaration contains only one variable.
  *
  * 2. If nothing is left after filtering it returns Handle::UNDEFINED
  *
  * 3. If vardecl is Handle::UNDEFINED, then return Handle::UNDEFINED
  *
- * Also, the resulting variable declaration will not be added to any
- * AtomSpace, it's up to the user to possibly do it.
+ * The resulting variable declaration will not be added to any
+ * AtomSpace, it's up to the user to do that.
  */
 Handle filter_vardecl(const Handle& vardecl, const Handle& body);
 
