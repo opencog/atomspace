@@ -26,7 +26,6 @@
 #define _OPENCOG_QUOTATION_H
 
 #include <string>
-#include <boost/operators.hpp>
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -41,7 +40,7 @@ namespace opencog
 /**
  * Quotation data and methods. See http://wiki.opencog.org/w/QuoteLink.
  */
-class Quotation : public boost::totally_ordered<Quotation>
+class Quotation
 {
 	int _quotation_level;
 	bool _local_quote;

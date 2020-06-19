@@ -26,8 +26,6 @@
 #include <map>
 #include <set>
 
-#include <boost/operators.hpp>
-
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
@@ -51,8 +49,7 @@ typedef std::map<Handle, TypedVariableLinkPtr> VariableTypeMap;
 /// scoped, bound variables; in particular, it is heavily used by the
 /// pattern matcher.
 ///
-struct Variables : public FreeVariables,
-                   public boost::totally_ordered<Variables>
+struct Variables : public FreeVariables
 {
 	// CTors. The ordered flag indicates whether we care about the
 	// order of the variables. It is false by default and only enabled
