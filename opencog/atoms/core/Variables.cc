@@ -82,7 +82,6 @@ void Variables::unpack_vartype(const Handle& htypelink)
 	varseq.emplace_back(varname);
 }
 
-/* ================================================================= */
 /**
  * Validate variable declarations for syntax correctness.
  *
@@ -150,67 +149,47 @@ void Variables::validate_vardecl(const Handle& hdecls)
 	}
 }
 
-bool Variables::is_well_typed() const
+void Variables::validate_vardecl(const HandleSeq& oset)
 {
-	for (const auto& vt : _typemap)
-		if (not opencog::is_well_typed(vt.second->get_simple_typeset()))
-			return false;
-	return true;
+	for (const Handle& h: oset)
+	{
+		Type t = h->get_type();
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
+		{
+			varset.insert(h);
+			varseq.emplace_back(h);
+		}
+		else if (TYPED_VARIABLE_LINK == t)
+		{
+			unpack_vartype(h);
+		}
+		else if (ANCHOR_NODE == t)
+		{
+			_anchor = h;
+		}
+		else
+		{
+			throw InvalidParamException(TRACE_INFO,
+				"Expected a Variable or TypedVariable or Anchor, got: %s"
+				"\nVariableList is %s",
+					nameserver().getTypeName(t).c_str(),
+					to_string().c_str());
+		}
+	}
 }
 
 /* ================================================================= */
 
-/// Return true if the other Variables struct is equal to this one,
-/// up to alpha-conversion. That is, same number of variables, same
-/// type restrictions, but possibly different variable names.
-///
-/// This should give exactly the same answer as performing the tests
-///    this->is_type(other->varseq) and other->is_type(this->varseq)
-/// That is, the variables in this instance should have the same type
-/// restrictions as the variables in the other class.
-bool Variables::is_equal(const Variables& other) const
+void Variables::find_variables(const Handle& body)
 {
-	size_t sz = varseq.size();
-	if (other.varseq.size() != sz) return false;
-
-	if (other._ordered != _ordered) return false;
-
-	// Side-by-side comparison
-	for (size_t i = 0; i < sz; i++)
-	{
-		if (not is_equal(other, i))
-			return false;
-	}
-	return true;
+	FreeVariables::find_variables(body);
+	_ordered = false;
 }
 
-bool Variables::is_equal(const Variables& other, size_t index) const
+void Variables::find_variables(const HandleSeq& oset, bool ordered_link)
 {
-	const Handle& vme(varseq[index]);
-	const Handle& voth(other.varseq[index]);
-
-	// If one is a GlobNode, and the other a VariableNode,
-	// then its a mismatch.
-	if (vme->get_type() != voth->get_type()) return false;
-
-	// If typed, types must match.
-	auto sime = _typemap.find(vme);
-	auto soth = other._typemap.find(voth);
-	if (sime == _typemap.end() and
-	    soth != other._typemap.end() and
-	    not soth->second->is_untyped()) return false;
-
-	if (sime != _typemap.end())
-	{
-		if (soth == other._typemap.end() and
-		    sime->second->is_untyped()) return true;
-		if (soth == other._typemap.end()) return false;
-
-		if (not sime->second->is_equal(*soth->second)) return false;
-	}
-
-	// If we got to here, everything must be OK.
-	return true;
+	FreeVariables::find_variables(oset, ordered_link);
+	_ordered = false;
 }
 
 /* ================================================================= */
@@ -229,6 +208,14 @@ bool Variables::is_alpha_convertible(const Handle& var,
 	return other.index.end() != idx
 		and varseq.at(idx->second) == var
 		and (not check_type or is_equal(other, idx->second));
+}
+
+bool Variables::is_well_typed() const
+{
+	for (const auto& vt : _typemap)
+		if (not opencog::is_well_typed(vt.second->get_simple_typeset()))
+			return false;
+	return true;
 }
 
 /* ================================================================= */
@@ -486,6 +473,8 @@ void Variables::extend(const Variables& vset)
 	_ordered = _ordered or vset._ordered;
 }
 
+/* ================================================================= */
+
 void Variables::erase(const Handle& var)
 {
 	// Remove from the type maps
@@ -493,6 +482,61 @@ void Variables::erase(const Handle& var)
 
 	// Remove FreeVariables
 	FreeVariables::erase(var);
+}
+
+/* ================================================================= */
+
+/// Return true if the other Variables struct is equal to this one,
+/// up to alpha-conversion. That is, same number of variables, same
+/// type restrictions, but possibly different variable names.
+///
+/// This should give exactly the same answer as performing the tests
+///    this->is_type(other->varseq) and other->is_type(this->varseq)
+/// That is, the variables in this instance should have the same type
+/// restrictions as the variables in the other class.
+bool Variables::is_equal(const Variables& other) const
+{
+	size_t sz = varseq.size();
+	if (other.varseq.size() != sz) return false;
+
+	if (other._ordered != _ordered) return false;
+
+	// Side-by-side comparison
+	for (size_t i = 0; i < sz; i++)
+	{
+		if (not is_equal(other, i))
+			return false;
+	}
+	return true;
+}
+
+bool Variables::is_equal(const Variables& other, size_t index) const
+{
+	const Handle& vme(varseq[index]);
+	const Handle& voth(other.varseq[index]);
+
+	// If one is a GlobNode, and the other a VariableNode,
+	// then its a mismatch.
+	if (vme->get_type() != voth->get_type()) return false;
+
+	// If typed, types must match.
+	auto sime = _typemap.find(vme);
+	auto soth = other._typemap.find(voth);
+	if (sime == _typemap.end() and
+	    soth != other._typemap.end() and
+	    not soth->second->is_untyped()) return false;
+
+	if (sime != _typemap.end())
+	{
+		if (soth == other._typemap.end() and
+		    sime->second->is_untyped()) return true;
+		if (soth == other._typemap.end()) return false;
+
+		if (not sime->second->is_equal(*soth->second)) return false;
+	}
+
+	// If we got to here, everything must be OK.
+	return true;
 }
 
 bool Variables::operator==(const Variables& other) const
@@ -505,6 +549,8 @@ bool Variables::operator<(const Variables& other) const
 	return FreeVariables::operator<(other)
 		or _typemap < other._typemap;
 }
+
+/* ================================================================= */
 
 /// Look up the type declaration for `var`, but create the actual
 /// declaration for `alt`.  This is an alpha-renaming.
@@ -538,46 +584,7 @@ Handle Variables::get_vardecl() const
 	return HandleCast(createVariableSet(std::move(vardecls)));
 }
 
-void Variables::validate_vardecl(const HandleSeq& oset)
-{
-	for (const Handle& h: oset)
-	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE == t or GLOB_NODE == t)
-		{
-			varset.insert(h);
-			varseq.emplace_back(h);
-		}
-		else if (TYPED_VARIABLE_LINK == t)
-		{
-			unpack_vartype(h);
-		}
-		else if (ANCHOR_NODE == t)
-		{
-			_anchor = h;
-		}
-		else
-		{
-			throw InvalidParamException(TRACE_INFO,
-				"Expected a Variable or TypedVariable or Anchor, got: %s"
-				"\nVariableList is %s",
-					nameserver().getTypeName(t).c_str(),
-					to_string().c_str());
-		}
-	}
-}
-
-void Variables::find_variables(const Handle& body)
-{
-	FreeVariables::find_variables(body);
-	_ordered = false;
-}
-
-void Variables::find_variables(const HandleSeq& oset, bool ordered_link)
-{
-	FreeVariables::find_variables(oset, ordered_link);
-	_ordered = false;
-}
+/* ================================================================= */
 
 std::string Variables::to_string(const std::string& indent) const
 {
