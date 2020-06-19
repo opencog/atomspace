@@ -17,10 +17,14 @@
 // https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
 
+// Supertype, equivalent to the top type of type theory. Every specific
+// type inherits from this type. See
+// https://en.wikipedia.org/wiki/Top_type
+VALUE
+
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with atoms.
 // Think of them as decorations that can be hung on an atom.
-VALUE
 VOID_VALUE <- VALUE     // singleton value holding nothing at all.
 FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE   // vector of strings
