@@ -636,7 +636,7 @@ static PatternTermPtr root_of_term(const Handle& term,
  */
 bool InitiateSearchMixin::setup_deep_type_search()
 {
-	if (_variables->_deep_typemap.size() == 0)
+	if (_variables->_typemap.size() == 0)
 		return false;
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
@@ -646,20 +646,23 @@ bool InitiateSearchMixin::setup_deep_type_search()
 	_choices.clear();
 	_search_set.clear();
 
-	for (const auto& dit: _variables->_deep_typemap)
+	for (const auto& tit: _variables->_typemap)
 	{
+		HandleSet dtypes = tit.second->get_deep_typeset();
+		if (0 == dtypes.size()) continue;
+
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
-		const Handle& var = dit.first;
+		const Handle& var = tit.first;
 		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
-			 << "Examine deep-type " << oc_to_string(dit.second);})
+			 << "Examine deep-type " << oc_to_string(dtypes);})
 
 		// Find something suitable in the type specification.
 		DepthMap starts;
-		for (const Handle& sig: dit.second)
+		for (const Handle& sig: dtypes)
 			find_deep_constants(sig, starts, 0);
 
 		// Subtract one from the depth -- this uwraps the top-most
@@ -680,20 +683,24 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		if (0 < _search_set.size()) return true;
 	}
 
-	for (const auto& dit: _variables->_deep_typemap)
+	// Do it again...
+	for (const auto& tit: _variables->_typemap)
 	{
+		HandleSet dtypes = tit.second->get_deep_typeset();
+		if (0 == dtypes.size()) continue;
+
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
-		const Handle& var = dit.first;
+		const Handle& var = tit.first;
 		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
-			 << "Re-examine deep-type " << oc_to_string(dit.second);})
+			 << "Re-examine deep-type " << oc_to_string(dtypes);})
 
 		// Find the first link type that is not a type
 		Type t = NOTYPE;
-		for (const Handle& sig: dit.second)
+		for (const Handle& sig: dtypes)
 		{
 			t = find_plain_type(sig);
 			if (NOTYPE != t) break;

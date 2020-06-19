@@ -354,40 +354,6 @@ bool is_well_typed(const TypeSet& ts)
 	return true;
 }
 
-VariableSetPtr gen_variable_set(const Handle& h)
-{
-	HandleSet vars = get_free_variables(h);
-	return createVariableSet(HandleSeq(vars.begin(), vars.end()));
-}
-
-Handle gen_vardecl(const Handle& h)
-{
-	return Handle(gen_variable_set(h));
-}
-
-Variables gen_variables(const Handle& h, const Handle& vardecl)
-{
-	if (vardecl)
-		return Variables(vardecl);
-	return gen_variable_set(h)->get_variables();
-}
-
-Handle gen_vardecl(const Handle& h, const Handle& vardecl)
-{
-	if (not vardecl)
-		return gen_vardecl(h);
-	return vardecl;
-}
-
-Handle gen_vardecl(const HandleSeq&& varlist, bool ordered)
-{
-	if (1 == varlist.size())
-		return varlist[0];
-	else
-		return ordered ? Handle(createVariableList(std::move(varlist)))
-			: Handle(createVariableSet(std::move(varlist)));
-}
-
 } // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

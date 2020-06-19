@@ -31,6 +31,11 @@ namespace opencog
  *  @{
  */
 
+typedef std::map<Handle, TypeSet> VariableSimpleTypeMap;
+typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
+typedef std::pair<size_t, size_t> GlobInterval;
+typedef std::map<Handle, GlobInterval> GlobIntervalMap;
+
 /// The TypedVariableLink is used to attach a name to a type description;
 /// the "name" is usually a VariableNode. Note that this is backwards
 /// from the usual idea of attaching a type specification to a variable:
@@ -54,7 +59,7 @@ class TypedVariableLink : public Link
 protected:
 	TypeSet _simple_typeset;
 	HandleSet _deep_typeset;
-	std::pair<size_t, size_t> _glob_interval;
+	GlobInterval _glob_interval;
 
 	void init();
 	void analyze();
@@ -72,11 +77,11 @@ public:
 
 	TypeSet get_simple_typeset(void) const { return _simple_typeset; }
 	HandleSet get_deep_typeset(void) const { return _deep_typeset; }
-	std::pair<size_t, size_t> get_glob_interval(void) const
+	GlobInterval get_glob_interval(void) const
 		{ return _glob_interval; }
 
 	// The default interval for glob matching.
-	const std::pair<size_t, size_t> default_interval(void) const;
+	const GlobInterval default_interval(void) const;
 
 	bool is_globby(void) const;
 	bool is_lower_bound(size_t) const;
