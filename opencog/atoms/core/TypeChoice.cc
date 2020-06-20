@@ -64,7 +64,8 @@ void TypeChoice::init(bool glob)
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
-	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size() and
+	    default_interval(glob) == _glob_interval)
 	{
 		_simple_typeset.insert({NOTYPE});
 		_is_untyped = false;
@@ -255,8 +256,7 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 ///
 bool TypeChoice::is_untyped(bool glob) const
 {
-	return _is_untyped and
-		_glob_interval == default_interval(glob);
+	return _is_untyped and _glob_interval == default_interval(glob);
 }
 
 /* ================================================================= */
@@ -331,7 +331,7 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 	}
 
 	// True, only if there were no type restrictions...
-	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size();
+	return _is_untyped;
 }
 
 /* ================================================================= */
