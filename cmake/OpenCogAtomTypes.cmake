@@ -193,7 +193,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "TypeSet")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeSetLink, ${TYPE})\n")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeIntersection, ${TYPE})\n")
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "Arity")
