@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
+#include <opencog/atoms/base/hash.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -317,6 +318,30 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 
 /* ================================================================= */
 
+/// A specialized hashing function, designed so that all equivalent
+/// type specifications get exactly the same hash.  To acheive this,
+/// the normalized type specifications are used, rather than the raw
+/// user-specified types. (The static analysis is "normalizing").
+
+ContentHash TypeChoice::compute_hash() const
+{
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, get_type());
+
+	for (Type t : _simple_typeset)
+		fnv1a_hash(hsh, t);
+
+	for (const Handle& th : _deep_typeset)
+		fnv1a_hash(hsh, th->get_hash());
+
+	fnv1a_hash(hsh, _glob_interval.first);
+	fnv1a_hash(hsh, _glob_interval.second);
+
+	return hsh;
+}
+
+/* ================================================================= */
+
 /// Return true if the other TypeChoice is equal to this one
 ///
 /// The compare is a semantic compare, not a syntactic compare. That
@@ -325,6 +350,9 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 ///
 bool TypeChoice::is_equal(const TypeChoice& other) const
 {
+	// If the hashes are not equal, they can't possibly be equivalent.
+	if (get_hash() != other.get_hash()) return false;
+
 	// If typed, types must match.
 	if (get_simple_typeset() != other.get_simple_typeset())
 		return false;

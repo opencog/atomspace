@@ -53,6 +53,7 @@ protected:
 	GlobInterval make_interval(const HandleSeq&);
 	bool is_nonglob_type(const Handle&) const;
 
+	ContentHash compute_hash() const;
 public:
 	TypeChoice(const HandleSeq&&, Type=TYPE_CHOICE, bool=false);
 
@@ -76,6 +77,7 @@ public:
 
 	bool is_untyped(bool) const;
 	bool is_equal(const TypeChoice&) const;
+
 	static Handle factory(const Handle&);
 };
 
