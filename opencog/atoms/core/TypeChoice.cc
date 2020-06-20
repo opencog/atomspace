@@ -109,6 +109,7 @@ GlobInterval TypeChoice::make_interval(const HandleSeq& ivl)
  */
 void TypeChoice::analyze(Handle anontype)
 {
+	_is_untyped = false;
 	Type t = anontype->get_type();
 
 	// If its a defined type, unbundle it.
