@@ -61,17 +61,4 @@ public:
 				.find("Invalid Atom syntax:") == 0)
 		);
 	}
-
-	void test_type_cannot_contain_non_type()
-	{
-		TS_ASSERT_THROWS_ASSERT(
-			lnk(TYPE_INTERSECTION_LINK,
-				node(CONCEPT_NODE, "test")
-			),
-			const SyntaxException& e,
-			TS_ASSERT(std::string(e.get_message())
-				.find("Invalid Atom syntax:") == 0)
-		);
-	}
-
 };
