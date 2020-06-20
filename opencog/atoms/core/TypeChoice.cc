@@ -34,21 +34,32 @@ using namespace opencog;
 
 void TypeChoice::init(bool glob)
 {
+	_glob_interval = default_interval(glob);
+
 	// An empty disjunction corresponds to a bottom type.
 	if (_outgoing.empty())
+	{
 		_simple_typeset.insert({NOTYPE});
+		return;
+	}
 
 	// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
+	// .. as is (TypeChoice (TypCoInh 'Value))
 	if (1 == _outgoing.size() and TYPE_CO_INH_NODE == _outgoing[0]->get_type())
 	{
 		Type vt = TypeNodeCast(_outgoing[0])->get_kind();
-		if (ATOM == vt)
+		if (ATOM == vt or VALUE == vt)
 			_simple_typeset.insert({NOTYPE});
+		return;
 	}
 
-	_glob_interval = default_interval(glob);
 	for (const Handle& h : _outgoing)
 		analyze(h);
+
+	// And again... recursion in TypeCHoice can still leave us empty.
+	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
+	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+		_simple_typeset.insert({NOTYPE});
 }
 
 TypeChoice::TypeChoice(const HandleSeq&& oset, Type t, bool glob)
