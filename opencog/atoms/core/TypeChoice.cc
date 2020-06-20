@@ -233,12 +233,18 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 ///    (TypedVariable (Variable "x") (Type 'Value))
 /// or
 ///    (TypedVariable (Variable "x") (TypeChoice (Type 'Value)))
-/// or specified TypeInh/TypeCoInh that intersected/unioned to Value.
+/// or specified TypeInh that unioned to Value.
+///
+/// For backwards compatibility, (TypeChoice (Type 'Atom)) is also
+/// considered to be untyped.
 ///
 bool TypeChoice::is_untyped(bool glob) const
 {
-	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size()
-		and default_interval(glob) == _glob_interval;
+	return 0 == _deep_typeset.size() and
+		 default_interval(glob) == _glob_interval and
+	    1 == _simple_typeset.size() and
+	    (ATOM == *_simple_typeset.begin() or
+	     VALUE == *_simple_typeset.begin());
 }
 
 /* ================================================================= */
