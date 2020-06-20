@@ -35,14 +35,13 @@ using namespace opencog;
 
 void TypeChoice::init(bool glob)
 {
-	_is_untyped = true;
+	_is_untyped = false;
 	_glob_interval = default_interval(glob);
 
 	// An empty disjunction corresponds to a bottom type.
 	if (_outgoing.empty())
 	{
 		_simple_typeset.insert({NOTYPE});
-		_is_untyped = false;
 		return;
 	}
 
@@ -54,7 +53,6 @@ void TypeChoice::init(bool glob)
 		if (ATOM == vt or VALUE == vt)
 		{
 			_simple_typeset.insert({NOTYPE});
-			_is_untyped = false;
 			return;
 		}
 	}
@@ -64,11 +62,10 @@ void TypeChoice::init(bool glob)
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
-	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size() and
-	    default_interval(glob) == _glob_interval)
+	if (not is_untyped(glob) and
+	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
 	{
 		_simple_typeset.insert({NOTYPE});
-		_is_untyped = false;
 	}
 }
 
@@ -126,16 +123,14 @@ void TypeChoice::analyze(Handle anontype)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
 		if (ATOM != vt and VALUE != vt)
-		{
-			_is_untyped = false;
 			_simple_typeset.insert(vt);
-		}
+		else if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+			_is_untyped = true;
 		return;
 	}
 
 	if (TYPE_INH_NODE == t)
 	{
-		_is_untyped = false;
 		Type vt = TypeNodeCast(anontype)->get_kind();
 		const TypeSet& ts = nameserver().getChildrenRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
@@ -204,7 +199,6 @@ void TypeChoice::analyze(Handle anontype)
 				"Unexpected contents in SignatureLink\n"
 				"Expected arity==1, got %s", anontype->to_string().c_str());
 
-		_is_untyped = false;
 		_deep_typeset.insert(anontype);
 		return;
 	}
@@ -222,14 +216,12 @@ void TypeChoice::analyze(Handle anontype)
 		// using a SignatureLink, but its not. As a result, it
 		// gets undefined behavior and incorect results. Too bad.
 		// For now, just avoid throwing an exception. XXX FIXME.
-		_is_untyped = false;
 		return;
 	}
 
 	// We need to assume that what we got is a type constant.
 	// The wiki page for SignatureLink is rife with them, and
 	// several unit tests use them explcitly.
-	_is_untyped = false;
 	_deep_typeset.insert(anontype);
 }
 
