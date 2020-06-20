@@ -55,7 +55,7 @@ void TypedVariableLink::init()
 	if (not nameserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
-	    TYPE_SET_LINK != dtype and
+	    TYPE_INTERSECTION_LINK != dtype and
 	    VARIABLE_NODE != dtype and // XXX FIXME this is wrong; URE-bug
 	    SIGNATURE_LINK != dtype and
 	    INTERVAL_LINK != dtype and

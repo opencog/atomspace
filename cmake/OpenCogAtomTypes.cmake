@@ -185,19 +185,19 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # Special case...
         IF (ISNODE STREQUAL "NODE" AND
             SHORT_NAME STREQUAL "Type")
-            FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(TypeNode, TYPE_NODE)\n")
+            FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(TypeNode, ${TYPE})\n")
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "Type")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, TYPE_LINK)\n")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, ${TYPE})\n")
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "TypeSet")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeSetLink, TYPE_SET_LINK)\n")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeSetLink, ${TYPE})\n")
         ENDIF ()
         IF (ISLINK STREQUAL "LINK" AND
             SHORT_NAME STREQUAL "Arity")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ARITY_LINK)\n")
+            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ${TYPE})\n")
         ENDIF ()
 
         # Print out the scheme definitions

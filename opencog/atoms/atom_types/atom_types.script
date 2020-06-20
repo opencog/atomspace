@@ -528,6 +528,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // causes DeepTypeUTest to fail. ... Forcing use of Signature is "more
 // correct", but clunkier to the user, so we don't force it.
 // TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
+// See https://en.wikipedia.org/wiki/Union_type
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a set-intersection of all of the type
@@ -536,7 +537,8 @@ TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 // specifying a compound of the IntervalLink and a simple type, which
 // is used heavily to specify GlobNode types. Inherits from TypeChoice,
 // because the C++ class needs to hold all the same members.
-TYPE_SET_LINK <- TYPE_CHOICE
+// See https://en.wikipedia.org/wiki/Intersection_type
+TYPE_INTERSECTION_LINK <- TYPE_CHOICE "TypeSetLink"
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd

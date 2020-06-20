@@ -39,7 +39,13 @@ typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
 /// is to hold complex type defintions, and to provide operations
-/// on them, such as intersection, union, filtering and type validation.
+/// on them, such as type-intersection, type-union, filtering and
+/// type validation.
+///
+/// This class implements type-untion, so that
+///   `(TypeChoice (TypeChoice stuff) (TypeChoice other-stuff))`
+/// computes the union of the two. To get type-intersection, use
+///   `(TypeSet (TypeChoice stuff) (TypeChoice other-stuff))`
 ///
 class TypeChoice : public Link
 {

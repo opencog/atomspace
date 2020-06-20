@@ -161,7 +161,7 @@ void TypeChoice::analyze(Handle anontype)
 	//
 	// XXX THIS IS BUGGY! The TypeSet is not being chandled correctly..
 	// We need to have a TypeSetLink c++ class to do this right.
-	if (TYPE_SET_LINK == t)
+	if (TYPE_INTERSECTION_LINK == t)
 	{
 		for (const Handle& h : anontype->getOutgoingSet())
 		{
