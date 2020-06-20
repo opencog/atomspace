@@ -149,21 +149,19 @@ void TypeChoice::analyze(Handle anontype)
 	//     TypeNode "ConceptNode"
 	//
 	// XXX THIS IS BUGGY! The TypeSet is not being chandled correctly..
+	// We need to have a TypeSetLink c++ class to do this right.
 	if (TYPE_SET_LINK == t)
 	{
 		for (const Handle& h : anontype->getOutgoingSet())
 		{
 			Type th = h->get_type();
 
-			if (INTERVAL_LINK == th)
-				_glob_interval = make_interval(h->getOutgoingSet());
-
-			else if (TYPE_NODE == th or
-			         TYPE_INH_NODE == th or
-			         TYPE_CO_INH_NODE == th)
+			if (INTERVAL_LINK == th or
+			    TYPE_NODE == th or
+			    TYPE_INH_NODE == th or
+			    TYPE_CO_INH_NODE == th)
 			{
-				anontype = h;
-				t = th;
+				analyze(h);
 			}
 
 			else throw SyntaxException(TRACE_INFO,
