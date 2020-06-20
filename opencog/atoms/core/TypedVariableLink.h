@@ -24,17 +24,13 @@
 #define _OPENCOG_TYPED_VARIABLE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/TypeChoice.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-typedef std::map<Handle, TypeSet> VariableSimpleTypeMap;
-typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
-typedef std::pair<size_t, size_t> GlobInterval;
-typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 
 /// The TypedVariableLink is used to attach a name to a type description;
 /// the "name" is usually a VariableNode. Note that this is backwards
@@ -57,13 +53,8 @@ typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 class TypedVariableLink : public Link
 {
 protected:
-	TypeSet _simple_typeset;
-	HandleSet _deep_typeset;
-	GlobInterval _glob_interval;
-
 	void init();
-	void analyze();
-	bool is_nonglob_type(const Handle&) const;
+	TypeChoicePtr _typech;
 
 public:
 	TypedVariableLink(const HandleSeq&&, Type=TYPED_VARIABLE_LINK);
@@ -73,24 +64,34 @@ public:
 	TypedVariableLink& operator=(const TypedVariableLink&) = delete;
 
 	Handle get_variable(void) const { return _outgoing.at(0); }
-	Handle get_type(void) const { return _outgoing.at(1); }
+	TypeChoicePtr get_typedecl(void) const { return _typech; }
 
-	TypeSet get_simple_typeset(void) const { return _simple_typeset; }
-	HandleSet get_deep_typeset(void) const { return _deep_typeset; }
-	GlobInterval get_glob_interval(void) const
-		{ return _glob_interval; }
+#if 1
+	TypeSet get_simple_typeset(void) const
+		{ return _typech->get_simple_typeset(); }
+	HandleSet get_deep_typeset(void) const
+		{ return _typech->get_deep_typeset(); }
+	GlobInterval get_glob_interval(void) const 
+		{ return _typech->get_glob_interval(); }
+
+	bool is_globby(void) const
+		{ return _typech->is_globby(); }
+	bool is_lower_bound(size_t n) const
+		{ return _typech->is_lower_bound(n); }
+	bool is_upper_bound(size_t n) const
+		{ return _typech->is_upper_bound(n); }
+
+	bool is_type(const Handle& h) const
+		{ return _typech->is_type(h); }
+	bool is_type(Type t) const
+		{ return _typech->is_type(t); }
+#endif
 
 	// The default interval for glob matching.
 	const GlobInterval default_interval(void) const;
 
-	bool is_globby(void) const;
-	bool is_lower_bound(size_t) const;
-	bool is_upper_bound(size_t) const;
-
-	bool is_type(const Handle&) const;
-	bool is_type(Type) const;
-
 	bool is_untyped(void) const;
+
 	bool is_equal(const TypedVariableLink&) const;
 	static Handle factory(const Handle&);
 };
