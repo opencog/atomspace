@@ -199,16 +199,10 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
-	// Instead of throwing here, we could also assume that
-	// there is an implied SignatureLink, and just poke the
-	// contents into the _deep_typeset. On the other hand,
-	// it seems better to throw, so that beginers aren't
-	// thrown off the trail for what essentially becomes
-	// a silent error with unexpected effects...
-	throw SyntaxException(TRACE_INFO,
-		"Unexpected contents in TypeChoice\n"
-		"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
-		nameserver().getTypeName(t).c_str());
+	// We need to assume that what we got is a type constant.
+	// The wiki page for SignatureLink is rife with them, and
+	// several unit tests use them explcitly.
+	_deep_typeset.insert(anontype);
 }
 
 const GlobInterval TypeChoice::default_interval(bool glob)
