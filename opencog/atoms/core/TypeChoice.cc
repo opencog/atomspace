@@ -152,7 +152,6 @@ void TypeChoice::analyze(Handle anontype)
 
 	if (INTERVAL_LINK == t)
 	{
-		_is_untyped = false;
 		_glob_interval = make_interval(anontype->getOutgoingSet());
 		return;
 	}
@@ -256,7 +255,8 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 ///
 bool TypeChoice::is_untyped(bool glob) const
 {
-	return _is_untyped;
+	return _is_untyped and
+		_glob_interval == default_interval(glob);
 }
 
 /* ================================================================= */
