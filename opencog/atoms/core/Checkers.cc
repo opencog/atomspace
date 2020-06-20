@@ -81,7 +81,8 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (h->is_type(INHERITANCE_LINK) or
 		    h->is_type(SIMILARITY_LINK) or
 		    h->is_type(IMPLICATION_LINK) or
-		    h->is_type(EQUIVALENCE_LINK))
+		    h->is_type(EQUIVALENCE_LINK) or
+		    h->is_type(MEMBER_LINK))
 			continue;
 
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
