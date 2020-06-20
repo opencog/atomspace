@@ -321,7 +321,13 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 	// abelian. That is, we must use addition.
 	ContentHash vth = 0;
 	for (const auto& pr : _variables._typemap)
-		vth += pr.second->get_hash();
+	{
+		// Semantic equivalance: an untyped variable is
+		// equivalent to a typed variable of type "ATOM".
+		if (pr.second->is_untyped()) continue;
+
+		vth += pr.second->get_typedecl()->get_hash();
+	}
 	fnv1a_hash(hsh, vth);
 
 	// As to not mix together VariableList and VariableSet
