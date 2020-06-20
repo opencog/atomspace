@@ -35,6 +35,7 @@ using namespace opencog;
 
 void TypeChoice::init(bool glob)
 {
+	_is_untyped = true;
 	_glob_interval = default_interval(glob);
 
 	// An empty disjunction corresponds to a bottom type.
@@ -118,12 +119,17 @@ void TypeChoice::analyze(Handle anontype)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
-		_simple_typeset.insert(vt);
+		if (ATOM != vt and VALUE != vt)
+		{
+			_is_untyped = false;
+			_simple_typeset.insert(vt);
+		}
 		return;
 	}
 
 	if (TYPE_INH_NODE == t)
 	{
+		_is_untyped = false;
 		Type vt = TypeNodeCast(anontype)->get_kind();
 		const TypeSet& ts = nameserver().getChildrenRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
@@ -133,6 +139,7 @@ void TypeChoice::analyze(Handle anontype)
 	if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
+		if (ATOM == vt or VALUE == vt) return;
 		const TypeSet& ts = nameserver().getParentsRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
 		return;
@@ -140,6 +147,7 @@ void TypeChoice::analyze(Handle anontype)
 
 	if (INTERVAL_LINK == t)
 	{
+		_is_untyped = false;
 		_glob_interval = make_interval(anontype->getOutgoingSet());
 		return;
 	}
@@ -191,6 +199,7 @@ void TypeChoice::analyze(Handle anontype)
 				"Unexpected contents in SignatureLink\n"
 				"Expected arity==1, got %s", anontype->to_string().c_str());
 
+		_is_untyped = false;
 		_deep_typeset.insert(anontype);
 		return;
 	}
@@ -208,12 +217,14 @@ void TypeChoice::analyze(Handle anontype)
 		// using a SignatureLink, but its not. As a result, it
 		// gets undefined behavior and incorect results. Too bad.
 		// For now, just avoid throwing an exception. XXX FIXME.
+		_is_untyped = false;
 		return;
 	}
 
 	// We need to assume that what we got is a type constant.
 	// The wiki page for SignatureLink is rife with them, and
 	// several unit tests use them explcitly.
+	_is_untyped = false;
 	_deep_typeset.insert(anontype);
 }
 
@@ -240,11 +251,7 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 ///
 bool TypeChoice::is_untyped(bool glob) const
 {
-	return 0 == _deep_typeset.size() and
-		 default_interval(glob) == _glob_interval and
-	    1 == _simple_typeset.size() and
-	    (ATOM == *_simple_typeset.begin() or
-	     VALUE == *_simple_typeset.begin());
+	return _is_untyped;
 }
 
 /* ================================================================= */

@@ -47,6 +47,7 @@ protected:
 	TypeSet _simple_typeset;
 	HandleSet _deep_typeset;
 	GlobInterval _glob_interval;
+	bool _is_untyped;
 
 	void init(bool);
 	void analyze(Handle);
