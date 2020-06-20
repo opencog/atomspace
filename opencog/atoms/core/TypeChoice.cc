@@ -42,6 +42,7 @@ void TypeChoice::init(bool glob)
 	if (_outgoing.empty())
 	{
 		_simple_typeset.insert({NOTYPE});
+		_is_untyped = false;
 		return;
 	}
 
@@ -53,6 +54,7 @@ void TypeChoice::init(bool glob)
 		if (ATOM == vt or VALUE == vt)
 		{
 			_simple_typeset.insert({NOTYPE});
+			_is_untyped = false;
 			return;
 		}
 	}
@@ -63,7 +65,10 @@ void TypeChoice::init(bool glob)
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
 	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	{
 		_simple_typeset.insert({NOTYPE});
+		_is_untyped = false;
+	}
 }
 
 TypeChoice::TypeChoice(const HandleSeq&& oset, Type t, bool glob)
