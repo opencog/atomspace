@@ -49,14 +49,16 @@ void TypeChoice::init(bool glob)
 	{
 		Type vt = TypeNodeCast(_outgoing[0])->get_kind();
 		if (ATOM == vt or VALUE == vt)
+		{
 			_simple_typeset.insert({NOTYPE});
-		return;
+			return;
+		}
 	}
 
 	for (const Handle& h : _outgoing)
 		analyze(h);
 
-	// And again... recursion in TypeCHoice can still leave us empty.
+	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
 	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
 		_simple_typeset.insert({NOTYPE});
@@ -115,9 +117,7 @@ void TypeChoice::analyze(Handle anontype)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
-		if (vt != ATOM)  // Atom type is same as untyped.
-			_simple_typeset.insert(vt);
-
+		_simple_typeset.insert(vt);
 		return;
 	}
 
