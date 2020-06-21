@@ -248,7 +248,9 @@ Type NameServer::getType(const std::string& typeName) const
 const std::string& NameServer::getTypeName(Type type) const
 {
     static std::string nullString = "*** Unknown Type! ***";
+    static std::string bottomString = "*** Bottom Type! ***";
 
+    if (NOTYPE == type) return bottomString;
     if (nTypes <= type) return nullString;
 
     std::lock_guard<std::mutex> l(type_mutex);

@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
+#include <opencog/atoms/base/hash.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -34,6 +35,7 @@ using namespace opencog;
 
 void TypeChoice::init(bool glob)
 {
+	_is_untyped = false;
 	_glob_interval = default_interval(glob);
 
 	// An empty disjunction corresponds to a bottom type.
@@ -49,17 +51,27 @@ void TypeChoice::init(bool glob)
 	{
 		Type vt = TypeNodeCast(_outgoing[0])->get_kind();
 		if (ATOM == vt or VALUE == vt)
+		{
 			_simple_typeset.insert({NOTYPE});
-		return;
+			return;
+		}
 	}
 
 	for (const Handle& h : _outgoing)
 		analyze(h);
 
-	// And again... recursion in TypeCHoice can still leave us empty.
+	if (default_interval(glob) != _glob_interval  and
+	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+		_is_untyped = true;
+
+	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
-	if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	if (not _is_untyped and
+	    default_interval(glob) == _glob_interval and
+	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	{
 		_simple_typeset.insert({NOTYPE});
+	}
 }
 
 TypeChoice::TypeChoice(const HandleSeq&& oset, Type t, bool glob)
@@ -102,6 +114,7 @@ GlobInterval TypeChoice::make_interval(const HandleSeq& ivl)
  */
 void TypeChoice::analyze(Handle anontype)
 {
+	_is_untyped = false;
 	Type t = anontype->get_type();
 
 	// If its a defined type, unbundle it.
@@ -115,9 +128,10 @@ void TypeChoice::analyze(Handle anontype)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
-		if (vt != ATOM)  // Atom type is same as untyped.
+		if (ATOM != vt and VALUE != vt)
 			_simple_typeset.insert(vt);
-
+		else if (0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+			_is_untyped = true;
 		return;
 	}
 
@@ -132,6 +146,7 @@ void TypeChoice::analyze(Handle anontype)
 	if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
+		if (ATOM == vt or VALUE == vt) return;
 		const TypeSet& ts = nameserver().getParentsRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
 		return;
@@ -232,12 +247,14 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 ///    (TypedVariable (Variable "x") (Type 'Value))
 /// or
 ///    (TypedVariable (Variable "x") (TypeChoice (Type 'Value)))
-/// or specified TypeInh/TypeCoInh that intersected/unioned to Value.
+/// or specified TypeInh that unioned to Value.
+///
+/// For backwards compatibility, (TypeChoice (Type 'Atom)) is also
+/// considered to be untyped.
 ///
 bool TypeChoice::is_untyped(bool glob) const
 {
-	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size()
-		and default_interval(glob) == _glob_interval;
+	return _is_untyped and _glob_interval == default_interval(glob);
 }
 
 /* ================================================================= */
@@ -268,7 +285,7 @@ bool TypeChoice::is_upper_bound(size_t n) const
 /// Returns true if `h` satisfies the type restrictions.
 bool TypeChoice::is_type(Type t) const
 {
-	return _simple_typeset.end() != _simple_typeset.find(t);
+	return _is_untyped or _simple_typeset.end() != _simple_typeset.find(t);
 }
 
 /// Returns true if `h` satisfies the type restrictions.
@@ -312,7 +329,31 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 	}
 
 	// True, only if there were no type restrictions...
-	return 0 == _simple_typeset.size() and 0 == _deep_typeset.size();
+	return _is_untyped;
+}
+
+/* ================================================================= */
+
+/// A specialized hashing function, designed so that all equivalent
+/// type specifications get exactly the same hash.  To acheive this,
+/// the normalized type specifications are used, rather than the raw
+/// user-specified types. (The static analysis is "normalizing").
+
+ContentHash TypeChoice::compute_hash() const
+{
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, get_type());
+
+	for (Type t : _simple_typeset)
+		fnv1a_hash(hsh, t);
+
+	for (const Handle& th : _deep_typeset)
+		fnv1a_hash(hsh, th->get_hash());
+
+	fnv1a_hash(hsh, _glob_interval.first);
+	fnv1a_hash(hsh, _glob_interval.second);
+
+	return hsh;
 }
 
 /* ================================================================= */
@@ -325,6 +366,9 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 ///
 bool TypeChoice::is_equal(const TypeChoice& other) const
 {
+	// If the hashes are not equal, they can't possibly be equivalent.
+	if (get_hash() != other.get_hash()) return false;
+
 	// If typed, types must match.
 	if (get_simple_typeset() != other.get_simple_typeset())
 		return false;

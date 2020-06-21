@@ -112,18 +112,8 @@ bool TypedVariableLink::is_equal(const TypedVariableLink& other) const
 	if (get_variable()->get_type() != other.get_variable()->get_type())
 		return false;
 
-	// If typed, types must match.
-	if (get_simple_typeset() != other.get_simple_typeset())
-		return false;
-
-	if (get_deep_typeset() != other.get_deep_typeset())
-		return false;
-
-	if (get_glob_interval() != other.get_glob_interval())
-		return false;
-
-	// If we got to here, everything must be OK.
-	return true;
+	// Type constraints must match.
+	return _typech->is_equal(*other._typech);
 }
 
 /* ================================================================= */
