@@ -53,6 +53,17 @@ TypeIntersectionLink::TypeIntersectionLink(const HandleSeq&& oset, Type t, bool 
 }
 
 /* ================================================================= */
+
+// Compute the intersection of two glob intervals.
+// Currently, zero is the same as empty-set.
+static inline GlobInterval intersect(const GlobInterval& lhs,
+                                     const GlobInterval& rhs)
+{
+	const auto lb = std::max(lhs.first, rhs.first);
+	const auto ub = std::min(lhs.second, rhs.second);
+	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
+}
+
 /**
  * Perform static analysis on a TypeIntersectionLink
  *
@@ -118,21 +129,10 @@ void TypeIntersectionLink::analyze(Handle anontype)
 		return;
 	}
 
-#if 0
 	if (INTERVAL_LINK == t)
 	{
-		_glob_interval = make_interval(anontype->getOutgoingSet());
-		return;
-	}
-
-	if (SIGNATURE_LINK == t)
-	{
-		if (1 != anontype->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in SignatureLink\n"
-				"Expected arity==1, got %s", anontype->to_string().c_str());
-
-		_deep_typeset.insert(anontype);
+		GlobInterval ivl = make_interval(anontype->getOutgoingSet());
+		_glob_interval = intersect(_glob_interval, ivl);
 		return;
 	}
 
@@ -143,12 +143,15 @@ void TypeIntersectionLink::analyze(Handle anontype)
 		return;
 	}
 
-	if (VARIABLE_NODE == t)
+#if 0
+	if (SIGNATURE_LINK == t)
 	{
-		// This is a work-around to a URE bug. The URE should be
-		// using a SignatureLink, but its not. As a result, it
-		// gets undefined behavior and incorect results. Too bad.
-		// For now, just avoid throwing an exception. XXX FIXME.
+		if (1 != anontype->get_arity())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in SignatureLink\n"
+				"Expected arity==1, got %s", anontype->to_string().c_str());
+
+		_deep_typeset.insert(anontype);
 		return;
 	}
 
