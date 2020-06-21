@@ -60,6 +60,10 @@ void TypeChoice::init(bool glob)
 	for (const Handle& h : _outgoing)
 		analyze(h);
 
+	if (default_interval(glob) != _glob_interval  and
+	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+		_is_untyped = true;
+
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
 	if (not is_untyped(glob) and
@@ -280,7 +284,7 @@ bool TypeChoice::is_upper_bound(size_t n) const
 /// Returns true if `h` satisfies the type restrictions.
 bool TypeChoice::is_type(Type t) const
 {
-	return _simple_typeset.end() != _simple_typeset.find(t);
+	return _is_untyped or _simple_typeset.end() != _simple_typeset.find(t);
 }
 
 /// Returns true if `h` satisfies the type restrictions.
