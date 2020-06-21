@@ -538,7 +538,7 @@ TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 // is used heavily to specify GlobNode types. Inherits from TypeChoice,
 // because the C++ class needs to hold all the same members.
 // See https://en.wikipedia.org/wiki/Intersection_type
-TYPE_INTERSECTION_LINK <- TYPE_CHOICE "TypeSetLink"
+TYPE_INTERSECTION_LINK <- TYPE_CHOICE
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd

@@ -122,6 +122,9 @@ cog-value-ref
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")
 
+(define-public TypeSet TypeIntersectionLink)
+(define-public TypeSetLink TypeIntersectionLink)
+
 ; Load other grunge too.
 ; Some of these things could possibly be turned into modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
