@@ -42,10 +42,10 @@ typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 /// on them, such as type-intersection, type-union, filtering and
 /// type validation.
 ///
-/// This class implements type-untion, so that
+/// This class implements type-union, so that
 ///   `(TypeChoice (TypeChoice stuff) (TypeChoice other-stuff))`
 /// computes the union of the two. To get type-intersection, use
-///   `(TypeSet (TypeChoice stuff) (TypeChoice other-stuff))`
+///   `(TypeIntersection (TypeChoice stuff) (TypeChoice other-stuff))`
 ///
 class TypeChoice : public Link
 {
@@ -56,7 +56,9 @@ protected:
 	bool _is_untyped;
 
 	void init(bool);
+	bool pre_analyze(bool);
 	void analyze(Handle);
+	void post_analyze(bool);
 	GlobInterval make_interval(const HandleSeq&);
 	bool is_nonglob_type(const Handle&) const;
 

@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-void TypeChoice::init(bool glob)
+bool TypeChoice::pre_analyze(bool glob)
 {
 	_is_untyped = false;
 	_glob_interval = default_interval(glob);
@@ -42,7 +42,7 @@ void TypeChoice::init(bool glob)
 	if (_outgoing.empty())
 	{
 		_simple_typeset.insert({NOTYPE});
-		return;
+		return true;
 	}
 
 	// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
@@ -53,13 +53,15 @@ void TypeChoice::init(bool glob)
 		if (ATOM == vt or VALUE == vt)
 		{
 			_simple_typeset.insert({NOTYPE});
-			return;
+			return true;
 		}
 	}
 
-	for (const Handle& h : _outgoing)
-		analyze(h);
+	return false;
+}
 
+void TypeChoice::post_analyze(bool glob)
+{
 	if (default_interval(glob) != _glob_interval  and
 	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
 		_is_untyped = true;
@@ -74,9 +76,21 @@ void TypeChoice::init(bool glob)
 	}
 }
 
+void TypeChoice::init(bool glob)
+{
+	if (pre_analyze(glob)) return;
+
+	for (const Handle& h : _outgoing)
+		analyze(h);
+	post_analyze(glob);
+}
+
 TypeChoice::TypeChoice(const HandleSeq&& oset, Type t, bool glob)
 	: Link(std::move(oset), t)
 {
+	// Derived classes initialize in a different way.
+	if (TYPE_CHOICE != t) return;
+
 	init(glob);
 }
 
@@ -124,7 +138,7 @@ void TypeChoice::analyze(Handle anontype)
 		t = anontype->get_type();
 	}
 
-	// The anontype is either a single type name, or a list of typenames.
+	// The a single type name.
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
@@ -135,6 +149,7 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
+	// This type, or children.
 	if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
@@ -143,6 +158,7 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
+	// This type, or parents.
 	if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
