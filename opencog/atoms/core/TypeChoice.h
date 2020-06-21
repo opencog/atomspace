@@ -31,10 +31,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::map<Handle, TypeSet> VariableSimpleTypeMap;
-typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
 typedef std::pair<size_t, size_t> GlobInterval;
-typedef std::map<Handle, GlobInterval> GlobIntervalMap;
 
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
