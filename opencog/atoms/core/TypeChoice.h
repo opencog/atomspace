@@ -32,6 +32,9 @@ namespace opencog
  */
 
 typedef std::pair<size_t, size_t> GlobInterval;
+class TypeChoice;
+typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
+typedef std::set<TypeChoicePtr> TypeChoiceSet;
 
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
@@ -49,6 +52,7 @@ class TypeChoice : public Link
 protected:
 	TypeSet _simple_typeset;
 	HandleSet _deep_typeset;
+	TypeChoiceSet _sect_typeset;
 	GlobInterval _glob_interval;
 	bool _is_untyped;
 

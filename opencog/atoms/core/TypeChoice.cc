@@ -190,43 +190,9 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
-	// For GlobNode, we can specify either the interval or the type, e.g.
-	//
-	// TypeChoice
-	//   IntervalLink
-	//     NumberNode  2
-	//     NumberNode  3
-	//
-	// or both under a TypeSetLink, e.g.
-	//
-	// TypeChoice
-	//   TypeSetLink
-	//     IntervalLink
-	//       NumberNode  2
-	//       NumberNode  3
-	//     TypeNode "ConceptNode"
-	//
-	// XXX THIS IS BUGGY! The TypeSet is not being chandled correctly..
-	// We need to have a TypeSetLink c++ class to do this right.
 	if (TYPE_INTERSECTION_LINK == t)
 	{
-		for (const Handle& h : anontype->getOutgoingSet())
-		{
-			Type th = h->get_type();
-
-			if (INTERVAL_LINK == th or
-			    TYPE_NODE == th or
-			    TYPE_INH_NODE == th or
-			    TYPE_CO_INH_NODE == th)
-			{
-				analyze(h);
-			}
-
-			else throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in TypeSetLink\n"
-				"Expected IntervalLink and TypeNode, got %s",
-				h->to_string().c_str());
-		}
+		_sect_typeset.insert(TypeChoiceCast(anontype));
 		return;
 	}
 
@@ -327,6 +293,11 @@ bool TypeChoice::is_type(const ValuePtr& vp) const
 	// type restrictions directly.
 	if (not is_globby() and is_nonglob_type(vp))
 		return true;
+
+	// Perhaps it can satisfy one of the intersection types...
+	// Either as a glob, or just plainly.
+	for (const TypeChoicePtr& isect : _sect_typeset)
+		if (isect->is_type(vp)) return true;
 
 	// If it's globby, then we expect a List.
 	if (LIST_LINK != vp->get_type()) return false;
