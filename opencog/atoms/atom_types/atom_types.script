@@ -17,10 +17,14 @@
 // https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
 
+// Supertype, equivalent to the top type of type theory. Every specific
+// type inherits from this type. See
+// https://en.wikipedia.org/wiki/Top_type
+VALUE
+
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with atoms.
 // Think of them as decorations that can be hung on an atom.
-VALUE
 VOID_VALUE <- VALUE     // singleton value holding nothing at all.
 FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE   // vector of strings
@@ -138,7 +142,7 @@ NUMERIC_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
-TYPE_LINK <- LINK
+TYPE_INPUT_LINK <- LINK
 
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_LINK <- LINK
@@ -515,7 +519,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // Note that the empty type choice corresponds to the bottom type.
 // see, https://wiki.opencog.org/w/TypeChoice#Bottom_type
 //
-// This "should" inherit from TYPE_LINK. However, it is currently valid
+// This "should" inherit from TYPE_INPUT_LINK. However, it is currently valid
 // to write `(TypeChoice (Type 'ConceptNode) (Predicate "foo"))` and the
 // `(Predicate "foo")` causes the type checker to fail. Maybe the spec
 // should be changed to only allow
@@ -523,7 +527,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // such a "constant" type is wanted. I dunno. Not sure. Changing this
 // causes DeepTypeUTest to fail. ... I think forcing use of Signature
 // seems "more correct" ... XXX FIXME. maybe?
-// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
+// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type definitions
@@ -531,7 +535,7 @@ TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 // the IntervalLink, so specify the length of a list or the size of a
 // set.  This, in turn, is mostly useful only for regex matching using
 // the GlobNode.
-TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
+TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd

@@ -80,9 +80,9 @@ void JoinLink::validate(void)
 		if (clause->is_evaluatable()) continue;
 		if (nameserver().isA(t, EVALUATABLE_LINK)) continue;
 
-		// Tye type nodes get applied to the container.
+		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
 		// Variable decls are allowed only in the first location.
@@ -111,7 +111,7 @@ void JoinLink::setup_meet(void)
 		Type t = clause->get_type();
 		if (REPLACEMENT_LINK == t) continue;
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
 		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
 
 		// If variable declarations are missing, then
@@ -239,9 +239,9 @@ void JoinLink::setup_top_types(void)
 		const Handle& clause(_outgoing[i]);
 		Type t = clause->get_type();
 
-		// Tye type nodes get applied to the container.
+		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE) or
-		    nameserver().isA(t, TYPE_LINK) or
+		    nameserver().isA(t, TYPE_INPUT_LINK) or
 		    nameserver().isA(t, TYPE_OUTPUT_LINK))
 		{
 			_top_types.push_back(clause);

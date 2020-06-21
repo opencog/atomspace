@@ -560,7 +560,8 @@ Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 	const auto& tit = _typemap.find(var);
 	if (_typemap.end() == tit) return alt;
 
-	return HandleCast(createTypedVariableLink(alt, tit->second->get_type()));
+	return HandleCast(createTypedVariableLink(alt,
+		HandleCast(tit->second->get_typedecl())));
 }
 
 Handle Variables::get_vardecl() const

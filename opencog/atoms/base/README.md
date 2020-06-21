@@ -25,7 +25,7 @@ following types, declared in the
 [`atom_types.script`](../atom_types/atom_types.script) file:
 
 * `EVALUATABLE_LINK`, `BOOLEAN_LINK`, `NUMERIC_LINK`,
-  `NUMERIC_OUTPUT_LINK`, `TYPE_LINK`, `TYPE_OUTPUT_LINK`
+  `NUMERIC_OUTPUT_LINK`, `TYPE_INPUT_LINK`, `TYPE_OUTPUT_LINK`
 
 See the `atom_types.script` file for documentation (near lines 65-107)
 and examples (in the lines that follow). These six link types cause

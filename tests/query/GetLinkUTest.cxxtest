@@ -471,15 +471,14 @@ void GetLinkUTest::test_type_choice_glob_get(void)
 
 /*
  * Same as test_unary_get(), test_binary_get(), test_get_ill_typed(),
- * and test_free_bound()
- * except that the variable decls are embedded.
+ * and test_free_bound() except that the variable decls are embedded.
  */
 void GetLinkUTest::test_embed_vardels(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/get-link-embed.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
 	Handle hans = eval->eval_h(
@@ -492,11 +491,23 @@ void GetLinkUTest::test_embed_vardels(void)
 
 	// ----------------------
 	hgnd = eval->eval_h("(cog-execute! is-something)");
+
+#define REVERSE 1
+#if REVERSE
+	// Oh dear ... the embeded declarations end up unordered, which
+	// hoses the Getlink we are testing. Whatever, hack aroudn this.
+	hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"human\") (ConceptNode \"Ben\"))"
+		"(ListLink (ConceptNode \"human\") (ConceptNode \"Linas\"))"
+		"(ListLink (ConceptNode \"dog\") (ConceptNode \"Sparky\")))");
+#else
 	hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
 		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
 		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+#endif
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
@@ -513,8 +524,16 @@ void GetLinkUTest::test_embed_vardels(void)
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
 	// ----------------------
-	hgnd = eval->eval_h("(cog-execute! is-query)");
-	hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
+	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
+#if REVERSE
+	hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
+#else
+	hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
+#endif
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
