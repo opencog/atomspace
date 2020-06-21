@@ -321,16 +321,17 @@ bool TypeChoice::is_type(Type t) const
 }
 
 /// Returns true if `h` satisfies the type restrictions.
-bool TypeChoice::is_type(const Handle& h) const
+bool TypeChoice::is_type(const ValuePtr& vp) const
 {
 	// If the type is not globby, then the Atom must satisfy
 	// type restrictions directly.
-	if (not is_globby() and is_nonglob_type(h))
+	if (not is_globby() and is_nonglob_type(vp))
 		return true;
 
 	// If it's globby, then we expect a List.
-	if (LIST_LINK != h->get_type()) return false;
+	if (LIST_LINK != vp->get_type()) return false;
 
+	const Handle& h(HandleCast(vp));
 	// The list must be of the allowed size...
 	const Arity num_args = h->get_arity();
 	if (not is_lower_bound(num_args)) return false;
@@ -338,27 +339,23 @@ bool TypeChoice::is_type(const Handle& h) const
 
 	// Every outgoing atom in list must satisfy type restriction of var.
 	for (const Handle& oh : h->getOutgoingSet())
-	{
 		if (not is_nonglob_type(oh)) return false;
-	}
 
 	return true;
 }
 
 /// Perform typecheck, ignoring possible globbiness.
-bool TypeChoice::is_nonglob_type(const Handle& h) const
+bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 {
 	// If the argument has the simple type, then we are good to go;
 	// we are done.  Else, fall through, and see if one of the
 	// others accept the match.
-	if (_simple_typeset.find(h->get_type()) != _simple_typeset.end())
+	if (_simple_typeset.find(vp->get_type()) != _simple_typeset.end())
 		return true;
 
 	// Deep type restrictions?
 	for (const Handle& sig : _deep_typeset)
-	{
-		if (value_is_type(sig, h)) return true;
-	}
+		if (value_is_type(sig, vp)) return true;
 
 	// True, only if there were no type restrictions...
 	return _is_untyped;

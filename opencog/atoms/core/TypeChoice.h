@@ -60,7 +60,7 @@ protected:
 	void analyze(Handle);
 	void post_analyze(bool);
 	GlobInterval make_interval(const HandleSeq&);
-	bool is_nonglob_type(const Handle&) const;
+	bool is_nonglob_type(const ValuePtr&) const;
 
 	ContentHash compute_hash() const;
 public:
@@ -81,7 +81,7 @@ public:
 	bool is_lower_bound(size_t) const;
 	bool is_upper_bound(size_t) const;
 
-	bool is_type(const Handle&) const;
+	bool is_type(const ValuePtr&) const;
 	bool is_type(Type) const;
 
 	bool is_untyped(bool) const;
