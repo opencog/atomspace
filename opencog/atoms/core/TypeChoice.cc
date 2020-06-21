@@ -66,7 +66,8 @@ void TypeChoice::init(bool glob)
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
-	if (not is_untyped(glob) and
+	if (not _is_untyped and
+	    default_interval(glob) == _glob_interval and
 	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
 	{
 		_simple_typeset.insert({NOTYPE});
