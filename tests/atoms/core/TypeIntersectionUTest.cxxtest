@@ -1,0 +1,264 @@
+/*
+ * tests/atoms/core/TypeIntersectionUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <opencog/atoms/atom_types/atom_names.h>
+
+using namespace opencog;
+
+#define aa _as.add_atom
+#define al _as.add_link
+#define an _as.add_node
+
+class TypeIntersectionUTest : public CxxTest::TestSuite
+{
+private:
+	Handle A, B, W, X, Y, Z, G1, G2, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
+
+	AtomSpace _as;
+
+public:
+	TypeIntersectionUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
+		logger().set_print_to_stdout_flag(true);
+
+		A = an(CONCEPT_NODE, "A");
+		B = an(CONCEPT_NODE, "B");
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		Z = an(VARIABLE_NODE, "$Z");
+		W = an(VARIABLE_NODE, "$W");
+		G1 = an(GLOB_NODE, "$G1");
+		G2 = an(GLOB_NODE, "$G2");
+		NT = an(TYPE_NODE, "Node");
+		PNT = an(TYPE_NODE, "PredicateNode");
+		CNT = an(TYPE_NODE, "ConceptNode");
+		NTI = an(TYPE_INH_NODE, "Node");
+		DPTCI = an(TYPE_CO_INH_NODE, "DefinedPredicateNode");
+		LLT = an(TYPE_NODE, "ListLink");
+		LTI = an(TYPE_INH_NODE, "Link");
+	}
+
+	void test_extend_1();
+#if 0
+	//void test_extend_2();
+	//void test_extend_3();
+	//void test_extend_4();
+	//void test_extend_5();
+	//void test_extend_6();
+#endif
+};
+
+void TypeIntersectionUTest::test_extend_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = aa(TypeIntersection(PNT, TypeChoice(PNT)));
+	Handle expect = aa(TypeIntersection(PNT));
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#if 0
+void TypeIntersectionUTest::test_extend_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		vardecl1 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, NT),
+		              al(TYPED_VARIABLE_LINK, Y, CNT)),
+		vardecl2 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, PNT),
+		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+		expect = al(VARIABLE_LIST,
+		            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE)),
+		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	UniVars v1(vardecl1), v2(vardecl2);
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, NTI),
+			              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	UniVars v1(vardecl1), v2(vardecl2);
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LLT, NTI)),
+			              al(TYPED_VARIABLE_LINK, Y, NT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LTI, CNT)),
+			              al(TYPED_VARIABLE_LINK, Y, DPTCI)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, CNT, LLT)),
+			            al(TYPED_VARIABLE_LINK, Y, NT));
+
+	UniVars v1(vardecl1), v2(vardecl2);
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          NTI)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          PNT))),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, G1,
+			                 al(TYPE_INTERSECTION_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "-1")),
+			                    PNT)),
+			              al(TYPED_VARIABLE_LINK, G2,
+			                 al(TYPE_INTERSECTION_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "3")),
+			                    PNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, G1,
+			               al(TYPE_INTERSECTION_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)),
+			            al(TYPED_VARIABLE_LINK, G2,
+			               al(TYPE_INTERSECTION_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)));
+
+	UniVars v1(vardecl1), v2(vardecl2);
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                     al(TYPED_VARIABLE_LINK, X, NTI),
+	                     al(TYPED_VARIABLE_LINK, G2, PNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, G2, PNT)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, G2, PNT));
+
+	UniVars v1(vardecl1), v2(vardecl2);
+
+	v1.extend(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+#endif
