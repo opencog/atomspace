@@ -87,6 +87,14 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 		}
 		return false;
 	}
+	else if (TYPE_INTERSECTION_LINK == dpt)
+	{
+		for (const Handle& choice : deep->getOutgoingSet())
+		{
+			if (not value_is_type(choice, val)) return false;
+		}
+		return true;
+	}
 
 	// If it is not a link, then it is a type-constant,
 	// and thus must match perfectly.
