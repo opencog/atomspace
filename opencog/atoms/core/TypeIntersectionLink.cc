@@ -39,6 +39,7 @@ void TypeIntersectionLink::init(bool glob)
 	// Start by adding all types...
 	const TypeSet& ts = nameserver().getChildrenRecursive(VALUE);
 	_simple_typeset.insert(ts.begin(), ts.end());
+	_glob_interval = GlobInterval{0, SIZE_MAX};
 
 	for (const Handle& h : _outgoing)
 		analyze(h);
