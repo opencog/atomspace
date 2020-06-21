@@ -80,8 +80,14 @@ void TypeChoice::init(bool glob)
 {
 	if (pre_analyze(glob)) return;
 
+	_glob_interval = GlobInterval({INT_MAX, 0});
+
 	for (const Handle& h : _outgoing)
 		analyze(h);
+
+	if (GlobInterval({INT_MAX, 0}) == _glob_interval)
+		_glob_interval = default_interval(glob);
+
 	post_analyze(glob);
 }
 
@@ -105,6 +111,15 @@ GlobInterval TypeChoice::make_interval(const HandleSeq& ivl)
 	if (ub < 0) ub = SIZE_MAX;
 
 	return std::make_pair(lb, ub);
+}
+
+// Compute the union of two glob intervals.
+static inline GlobInterval extend(const GlobInterval& lhs,
+                                  const GlobInterval& rhs)
+{
+	const auto lb = std::min(lhs.first, rhs.first);
+	const auto ub = std::max(lhs.second, rhs.second);
+	return GlobInterval{lb, ub};
 }
 
 /* ================================================================= */
@@ -170,7 +185,8 @@ void TypeChoice::analyze(Handle anontype)
 
 	if (INTERVAL_LINK == t)
 	{
-		_glob_interval = make_interval(anontype->getOutgoingSet());
+		GlobInterval ivl = make_interval(anontype->getOutgoingSet());
+		_glob_interval = extend(ivl, _glob_interval);
 		return;
 	}
 
