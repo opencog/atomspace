@@ -350,4 +350,6 @@ class TypeTest(TestCase):
     def test_get_type_name(self):
         self.assertEqual(get_type_name(types.Node), "Node")
         self.assertEqual(get_type_name(2231), "")
-        self.assertEqual(get_type_name(types.NO_TYPE), "")
+        # XXX FIXME is testing the name of the bottom type
+        # a sane thing to do?
+        self.assertEqual(get_type_name(types.NO_TYPE), "*** Bottom Type! ***")
