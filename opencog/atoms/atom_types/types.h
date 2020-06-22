@@ -44,6 +44,9 @@ typedef unsigned short Type;
 //! Set of atom types
 typedef std::set<Type> TypeSet;
 
+// Backwards compat. Arghh!
+extern opencog::Type TYPE_SET_LINK;
+
 /** @}*/
 } // namespace opencog
 

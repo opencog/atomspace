@@ -21,6 +21,9 @@ static __attribute__ ((constructor)) void init(void)
 	#include INHERITANCE_FILE2
 	#endif
 	opencog::nameserver().endTypeDecls();
+
+	// Backwards compat. Argh...
+	opencog::TYPE_SET_LINK = opencog::TYPE_INTERSECTION_LINK;
 }
 
 static __attribute__ ((destructor)) void fini(void)
