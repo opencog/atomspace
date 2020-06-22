@@ -71,7 +71,6 @@ public:
 	void test_extend_4a();
 	void test_extend_5();
 	void test_extend_5a();
-	//void test_extend_6();
 };
 
 void TypeIntersectionUTest::test_extend_1()
@@ -126,8 +125,8 @@ void TypeIntersectionUTest::test_extend_3()
 	Handle result = al(TYPE_INTERSECTION_LINK, PNT, NTI);
 	Handle expect = al(TYPE_INTERSECTION_LINK, PNT);
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -144,8 +143,8 @@ void TypeIntersectionUTest::test_extend_4()
 
 	Handle expect = al(TYPE_INTERSECTION_LINK, al(TYPE_CHOICE, CNT, LLT));
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -159,8 +158,8 @@ void TypeIntersectionUTest::test_extend_4a()
 	Handle result = al(TYPE_INTERSECTION_LINK, NT, DPTCI);
 	Handle expect = al(TYPE_INTERSECTION_LINK, NT);
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -189,8 +188,8 @@ void TypeIntersectionUTest::test_extend_5()
 			                  an(NUMBER_NODE, "2")),
 			               PNT);
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -219,40 +218,10 @@ void TypeIntersectionUTest::test_extend_5a()
 	                      an(NUMBER_NODE, "2")),
 	                   PNT);
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
-
-#if 0
-void TypeIntersectionUTest::test_extend_6()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle vardecl1 = al(VARIABLE_LIST,
-	                     al(TYPED_VARIABLE_LINK, X, NTI),
-	                     al(TYPED_VARIABLE_LINK, G2, PNT)),
-			vardecl2 = al(VARIABLE_LIST,
-			              al(TYPED_VARIABLE_LINK, X, PNT),
-			              al(TYPED_VARIABLE_LINK, G2, PNT)),
-			expect = al(VARIABLE_LIST,
-			            al(TYPED_VARIABLE_LINK, X, PNT),
-			            al(TYPED_VARIABLE_LINK, G2, PNT));
-
-	UniVars v1(vardecl1), v2(vardecl2);
-
-	v1.extend(v2);
-
-	Handle result = _as.add_atom(v1.get_vardecl());
-
-	logger().debug() << "expect = " << oc_to_string(expect);
-	logger().debug() << "result = " << oc_to_string(result);
-
-	TS_ASSERT_EQUALS(result, expect);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-#endif
