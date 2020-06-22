@@ -63,6 +63,8 @@ public:
 		LTI = an(TYPE_INH_NODE, "Link");
 	}
 
+	void test_direct();
+
 	void test_extend_1();
 	void test_extend_2();
 	void test_extend_2a();
@@ -72,6 +74,27 @@ public:
 	void test_extend_5();
 	void test_extend_5a();
 };
+
+// Test representation, directly.
+void TypeIntersectionUTest::test_direct()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+			               al(INTERVAL_LINK,
+			                  an(NUMBER_NODE, "0"),
+			                  an(NUMBER_NODE, "-1")),
+			               CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TypeChoicePtr tcp = TypeChoiceCast(result);
+	GlobInterval gi = tcp->get_glob_interval();
+	TS_ASSERT_EQUALS(gi.first, 0);
+	TS_ASSERT_EQUALS(gi.second, SIZE_MAX);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 void TypeIntersectionUTest::test_extend_1()
 {

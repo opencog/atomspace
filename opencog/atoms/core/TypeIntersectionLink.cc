@@ -40,11 +40,12 @@ void TypeIntersectionLink::init(bool glob)
 	const TypeSet& ts = nameserver().getChildrenRecursive(VALUE);
 	_simple_typeset.insert(ts.begin(), ts.end());
 	_glob_interval = GlobInterval{0, SIZE_MAX};
+	bool touched = false;
 
 	for (const Handle& h : _outgoing)
-		analyze(h);
+		analyze(h, touched);
 
-	if (GlobInterval{0, SIZE_MAX} == _glob_interval)
+	if (not touched)
 		_glob_interval = default_interval(glob);
 
 	post_analyze(glob);
@@ -83,7 +84,7 @@ static inline GlobInterval intersect(const GlobInterval& lhs,
  * means that the ConceptNode can be matched only two or three times, in
  * a glob match.
  */
-void TypeIntersectionLink::analyze(Handle anontype)
+void TypeIntersectionLink::analyze(Handle anontype, bool& touched)
 {
 	_is_untyped = false;
 	Type t = anontype->get_type();
@@ -135,6 +136,7 @@ void TypeIntersectionLink::analyze(Handle anontype)
 
 	if (INTERVAL_LINK == t)
 	{
+		touched = true;
 		GlobInterval ivl = make_interval(anontype->getOutgoingSet());
 		_glob_interval = intersect(_glob_interval, ivl);
 		return;
@@ -159,27 +161,13 @@ void TypeIntersectionLink::analyze(Handle anontype)
 			throw RuntimeException(TRACE_INFO,
 				"Intersection fo deep types not implemented!");
 
+		touched = true;
 		_glob_interval = intersect(_glob_interval, tcp->get_glob_interval());
 		return;
 	}
 
-#if 0
-	if (SIGNATURE_LINK == t)
-	{
-		if (1 != anontype->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in SignatureLink\n"
-				"Expected arity==1, got %s", anontype->to_string().c_str());
-
-		_deep_typeset.insert(anontype);
-		return;
-	}
-
-	// We need to assume that what we got is a type constant.
-	// The wiki page for SignatureLink is rife with them, and
-	// several unit tests use them explcitly.
-	_deep_typeset.insert(anontype);
-#endif
+	throw RuntimeException(TRACE_INFO,
+		"Intersection of signatures or type constants not implemented!");
 }
 
 /* ================================================================= */

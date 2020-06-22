@@ -46,7 +46,7 @@ class TypeIntersectionLink : public TypeChoice
 {
 protected:
 	void init(bool);
-	void analyze(Handle);
+	void analyze(Handle, bool&);
 public:
 	TypeIntersectionLink(const HandleSeq&&, Type=TYPE_INTERSECTION_LINK, bool=false);
 
