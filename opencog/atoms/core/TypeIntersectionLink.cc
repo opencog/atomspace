@@ -149,8 +149,16 @@ void TypeIntersectionLink::analyze(Handle anontype)
 			return;
 		}
 
-		for (const Handle& h : anontype->getOutgoingSet())
-			analyze(h);
+		TypeChoicePtr tcp(TypeChoiceCast(anontype));
+		const TypeSet& ts = tcp->get_simple_typeset();
+		_simple_typeset = set_intersection(_simple_typeset, ts);
+
+		if (tcp->get_deep_typeset().size() == 0)
+			_deep_typeset.clear();
+		else if (0 < _deep_typeset.size())
+			throw RuntimeException(TRACE_INFO,
+				"Intersection fo deep types not implemented!");
+
 		return;
 	}
 
