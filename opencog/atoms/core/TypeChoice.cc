@@ -342,7 +342,9 @@ bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 ContentHash TypeChoice::compute_hash() const
 {
 	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
-	fnv1a_hash(hsh, get_type());
+
+	// This, and all inherited types muse use the same type...
+	fnv1a_hash(hsh, TYPE_CHOICE);
 
 	for (Type t : _simple_typeset)
 		fnv1a_hash(hsh, t);
@@ -387,7 +389,6 @@ bool TypeChoice::operator==(const Atom& other) const
 {
 	if (this == &other) return true;
 	if (get_hash() != other.get_hash()) return false;
-	if (other.get_type() != _type) return false;
 	return is_equal(*TypeChoiceCast(other.get_handle()));
 }
 
