@@ -68,6 +68,7 @@ public:
 	void test_extend_1();
 	void test_extend_2();
 	void test_extend_2a();
+	void test_extend_2b();
 	void test_extend_3();
 	void test_extend_4();
 	void test_extend_4a();
@@ -132,6 +133,21 @@ void TypeIntersectionUTest::test_extend_2a()
 
 	Handle result = al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT));
 	Handle expect = al(TYPE_INTERSECTION_LINK, CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2b()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT));
+	Handle expect = al(TYPE_CHOICE, CNT);
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
