@@ -89,6 +89,8 @@ public:
 	bool is_equal(const TypeChoice&) const;
 	bool operator==(const Atom&) const;
 
+	std::string to_string(const std::string& indent) const;
+
 	static Handle factory(const Handle&);
 };
 
