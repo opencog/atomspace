@@ -140,7 +140,7 @@ void TypeIntersectionLink::analyze(Handle anontype)
 		return;
 	}
 
-	if (TYPE_CHOICE == t)
+	if (nameserver().isA(t, TYPE_CHOICE))
 	{
 		// Oh no! Empty set!
 		if (anontype->get_arity() == 0)
@@ -159,6 +159,7 @@ void TypeIntersectionLink::analyze(Handle anontype)
 			throw RuntimeException(TRACE_INFO,
 				"Intersection fo deep types not implemented!");
 
+		_glob_interval = intersect(_glob_interval, tcp->get_glob_interval());
 		return;
 	}
 
