@@ -383,6 +383,14 @@ bool TypeChoice::is_equal(const TypeChoice& other) const
 	return true;
 }
 
+bool TypeChoice::operator==(const Atom& other) const
+{
+	if (this == &other) return true;
+	if (get_hash() != other.get_hash()) return false;
+	if (other.get_type() != _type) return false;
+	return is_equal(*TypeChoiceCast(other.get_handle()));
+}
+
 /* ================================================================= */
 
 DEFINE_LINK_FACTORY(TypeChoice, TYPE_CHOICE);

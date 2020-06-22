@@ -87,6 +87,7 @@ public:
 
 	bool is_untyped(bool) const;
 	bool is_equal(const TypeChoice&) const;
+	bool operator==(const Atom&) const;
 
 	static Handle factory(const Handle&);
 };

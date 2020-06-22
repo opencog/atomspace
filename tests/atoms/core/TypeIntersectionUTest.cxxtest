@@ -24,7 +24,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/atom_types/atom_names.h>
+#include <opencog/atoms/core/TypeChoice.h>
 
 using namespace opencog;
 
@@ -77,8 +77,8 @@ void TypeIntersectionUTest::test_extend_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = aa(TypeIntersection(PNT, TypeChoice(PNT)));
-	Handle expect = aa(TypeIntersection(PNT));
+	Handle result = al(TYPE_INTERSECTION_LINK, PNT, al(TYPE_CHOICE, PNT));
+	Handle expect = al(TYPE_INTERSECTION_LINK, PNT);
 
 	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
