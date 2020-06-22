@@ -93,6 +93,8 @@ public:
 	bool is_untyped(void) const;
 
 	bool is_equal(const TypedVariableLink&) const;
+	bool operator==(const Atom&) const;
+
 	static Handle factory(const Handle&);
 };
 

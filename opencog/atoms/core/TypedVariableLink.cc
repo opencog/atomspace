@@ -116,6 +116,14 @@ bool TypedVariableLink::is_equal(const TypedVariableLink& other) const
 	return _typech->is_equal(*other._typech);
 }
 
+bool TypedVariableLink::operator==(const Atom& other) const
+{
+	if (this == &other) return true;
+	if (get_hash() != other.get_hash()) return false;
+	if (other.get_type() != _type) return false;
+	return is_equal(*TypedVariableLinkCast(other.get_handle()));
+}
+
 /* ================================================================= */
 
 DEFINE_LINK_FACTORY(TypedVariableLink, TYPED_VARIABLE_LINK);
