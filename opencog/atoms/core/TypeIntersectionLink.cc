@@ -44,6 +44,9 @@ void TypeIntersectionLink::init(bool glob)
 	for (const Handle& h : _outgoing)
 		analyze(h);
 
+	if (GlobInterval{0, SIZE_MAX} == _glob_interval)
+		_glob_interval = default_interval(glob);
+
 	post_analyze(glob);
 }
 
