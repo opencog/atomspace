@@ -69,7 +69,8 @@ public:
 	void test_extend_3();
 	void test_extend_4();
 	void test_extend_4a();
-	//void test_extend_5();
+	void test_extend_5();
+	void test_extend_5a();
 	//void test_extend_6();
 };
 
@@ -166,56 +167,27 @@ void TypeIntersectionUTest::test_extend_4a()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-#if 0
 void TypeIntersectionUTest::test_extend_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle vardecl1 = al(VARIABLE_LIST,
-	                    al(TYPED_VARIABLE_LINK, G1,
-	                       al(TYPE_INTERSECTION_LINK,
-	                          al(INTERVAL_LINK,
-	                             an(NUMBER_NODE, "0"),
-	                             an(NUMBER_NODE, "2")),
-	                          NTI)),
-	                    al(TYPED_VARIABLE_LINK, G2,
-	                       al(TYPE_INTERSECTION_LINK,
-	                          al(INTERVAL_LINK,
-	                             an(NUMBER_NODE, "0"),
-	                             an(NUMBER_NODE, "2")),
-	                          PNT))),
-			vardecl2 = al(VARIABLE_LIST,
-			              al(TYPED_VARIABLE_LINK, G1,
-			                 al(TYPE_INTERSECTION_LINK,
-			                    al(INTERVAL_LINK,
-			                       an(NUMBER_NODE, "1"),
-			                       an(NUMBER_NODE, "-1")),
-			                    PNT)),
-			              al(TYPED_VARIABLE_LINK, G2,
-			                 al(TYPE_INTERSECTION_LINK,
-			                    al(INTERVAL_LINK,
-			                       an(NUMBER_NODE, "1"),
-			                       an(NUMBER_NODE, "3")),
-			                    PNT))),
-			expect = al(VARIABLE_LIST,
-			            al(TYPED_VARIABLE_LINK, G1,
-			               al(TYPE_INTERSECTION_LINK,
-			                  al(INTERVAL_LINK,
-			                     an(NUMBER_NODE, "1"),
-			                     an(NUMBER_NODE, "2")),
-			                  PNT)),
-			            al(TYPED_VARIABLE_LINK, G2,
-			               al(TYPE_INTERSECTION_LINK,
-			                  al(INTERVAL_LINK,
-			                     an(NUMBER_NODE, "1"),
-			                     an(NUMBER_NODE, "2")),
-			                  PNT)));
+	Handle result = al(TYPE_INTERSECTION_LINK,
+	                    al(TYPE_INTERSECTION_LINK,
+	                       al(INTERVAL_LINK,
+	                          an(NUMBER_NODE, "0"),
+	                          an(NUMBER_NODE, "2")),
+	                       NTI),
+			              al(TYPE_INTERSECTION_LINK,
+			                 al(INTERVAL_LINK,
+			                    an(NUMBER_NODE, "1"),
+			                    an(NUMBER_NODE, "-1")),
+			                 PNT));
 
-	UniVars v1(vardecl1), v2(vardecl2);
-
-	v1.extend(v2);
-
-	Handle result = _as.add_atom(v1.get_vardecl());
+	Handle expect = al(TYPE_INTERSECTION_LINK,
+			               al(INTERVAL_LINK,
+			                  an(NUMBER_NODE, "1"),
+			                  an(NUMBER_NODE, "2")),
+			               PNT);
 
 	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
@@ -225,6 +197,37 @@ void TypeIntersectionUTest::test_extend_5()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void TypeIntersectionUTest::test_extend_5a()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+	                   al(TYPE_INTERSECTION_LINK,
+	                      al(INTERVAL_LINK,
+	                         an(NUMBER_NODE, "0"),
+	                         an(NUMBER_NODE, "2")),
+	                      PNT),
+	                   al(TYPE_INTERSECTION_LINK,
+	                      al(INTERVAL_LINK,
+	                         an(NUMBER_NODE, "1"),
+	                         an(NUMBER_NODE, "3")),
+	                      PNT));
+
+	Handle expect = al(TYPE_INTERSECTION_LINK,
+	                   al(INTERVAL_LINK,
+	                      an(NUMBER_NODE, "1"),
+	                      an(NUMBER_NODE, "2")),
+	                   PNT);
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#if 0
 void TypeIntersectionUTest::test_extend_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
