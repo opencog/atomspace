@@ -64,13 +64,11 @@ public:
 	}
 
 	void test_extend_1();
-#if 0
-	//void test_extend_2();
+	void test_extend_2();
 	//void test_extend_3();
 	//void test_extend_4();
 	//void test_extend_5();
 	//void test_extend_6();
-#endif
 };
 
 void TypeIntersectionUTest::test_extend_1()
@@ -80,8 +78,31 @@ void TypeIntersectionUTest::test_extend_1()
 	Handle result = al(TYPE_INTERSECTION_LINK, PNT, al(TYPE_CHOICE, PNT));
 	Handle expect = al(TYPE_INTERSECTION_LINK, PNT);
 
-	logger().debug() << "expect = " << oc_to_string(expect);
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, NT, PNT);
+	Handle expect = al(TYPE_INTERSECTION_LINK, al(TYPE_CHOICE));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	result = al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT));
+	expect = al(TYPE_INTERSECTION_LINK, CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -89,35 +110,6 @@ void TypeIntersectionUTest::test_extend_1()
 }
 
 #if 0
-void TypeIntersectionUTest::test_extend_2()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle
-		vardecl1 = al(VARIABLE_LIST,
-		              al(TYPED_VARIABLE_LINK, X, NT),
-		              al(TYPED_VARIABLE_LINK, Y, CNT)),
-		vardecl2 = al(VARIABLE_LIST,
-		              al(TYPED_VARIABLE_LINK, X, PNT),
-		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
-		expect = al(VARIABLE_LIST,
-		            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE)),
-		            al(TYPED_VARIABLE_LINK, Y, CNT));
-
-	UniVars v1(vardecl1), v2(vardecl2);
-
-	v1.extend(v2);
-
-	Handle result = _as.add_atom(v1.get_vardecl());
-
-	logger().debug() << "expect = " << oc_to_string(expect);
-	logger().debug() << "result = " << oc_to_string(result);
-
-	TS_ASSERT_EQUALS(result, expect);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
 void TypeIntersectionUTest::test_extend_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
