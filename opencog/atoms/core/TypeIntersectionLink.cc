@@ -142,6 +142,13 @@ void TypeIntersectionLink::analyze(Handle anontype)
 
 	if (TYPE_CHOICE == t)
 	{
+		// Oh no! Empty set!
+		if (anontype->get_arity() == 0)
+		{
+			_simple_typeset.clear();
+			return;
+		}
+
 		for (const Handle& h : anontype->getOutgoingSet())
 			analyze(h);
 		return;
