@@ -22,11 +22,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/base/hash.h>
 
 #include "TypedVariableLink.h"
 
@@ -94,6 +90,27 @@ const GlobInterval TypedVariableLink::default_interval() const
 }
 
 /* ================================================================= */
+
+/// A specialized hashing function, designed so that all equivalent
+/// type specifications get exactly the same hash.  To acheive this,
+/// the normalized type specifications are used, rather than the raw
+/// user-specified types. (The static analysis is "normalizing").
+
+ContentHash TypedVariableLink::compute_hash() const
+{
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, get_type());
+
+	fnv1a_hash(hsh, get_variable());
+	fnv1a_hash(hsh, get_typedecl());
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	return hsh;
+}
 
 /// Return true if the other TypedVariable is equal to this one,
 /// up to alpha-conversion. This returns `true` if the other

@@ -56,6 +56,7 @@ protected:
 	void init();
 	TypeChoicePtr _typech;
 
+	ContentHash compute_hash() const;
 public:
 	TypedVariableLink(const HandleSeq&&, Type=TYPED_VARIABLE_LINK);
 	TypedVariableLink(const Handle& alias, const Handle& body);
