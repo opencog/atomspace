@@ -152,7 +152,14 @@ void TypeIntersectionUTest::test_extend_2b()
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(result, expect);
+	// Handle compare will fail because they are different atom types.
+	// TS_ASSERT_EQUALS(result, expect);
+
+	TypeChoicePtr tcpr(TypeChoiceCast(result));
+	TypeChoicePtr tcpe(TypeChoiceCast(expect));
+
+	TS_ASSERT(*tcpr == *tcpe);
+	TS_ASSERT(*tcpe == *tcpr);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
