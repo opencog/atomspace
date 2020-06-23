@@ -62,11 +62,30 @@ bool TypeChoice::pre_analyze(bool glob)
 
 void TypeChoice::post_analyze(bool glob)
 {
+	// Was the result completely untyped? No type restrictions
+	// whatsoever?
 	if (default_interval(glob) != _glob_interval and
 	    0 == _simple_typeset.size() and
 	    0 == _deep_typeset.size()  and
 	    0 == _sect_typeset.size())
 		_is_untyped = true;
+
+	// Is this a wrapper around a single TypeIntersction?
+	// If so, then it is equivalent to the TypeIntersction.
+	// Just copy it into place, here.
+	if (not _is_untyped and
+	    default_interval(glob) == _glob_interval and
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    1 == _sect_typeset.size())
+	{
+		TypeChoicePtr tcp = *_sect_typeset.begin();
+		_simple_typeset = tcp->get_simple_typeset();
+		_deep_typeset = tcp->get_deep_typeset();
+		_sect_typeset = tcp->_sect_typeset;
+		_glob_interval = tcp->get_glob_interval();
+		return;
+	}
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
@@ -355,6 +374,9 @@ ContentHash TypeChoice::compute_hash() const
 
 	for (const Handle& th : _deep_typeset)
 		fnv1a_hash(hsh, th->get_hash());
+
+	for (const TypeChoicePtr& tcp : _sect_typeset)
+		fnv1a_hash(hsh, tcp->get_hash());
 
 	fnv1a_hash(hsh, _glob_interval.first);
 	fnv1a_hash(hsh, _glob_interval.second);
