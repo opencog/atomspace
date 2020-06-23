@@ -101,8 +101,8 @@ ContentHash TypedVariableLink::compute_hash() const
 	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
 	fnv1a_hash(hsh, get_type());
 
-	fnv1a_hash(hsh, get_variable());
-	fnv1a_hash(hsh, get_typedecl());
+	fnv1a_hash(hsh, get_variable()->get_hash());
+	fnv1a_hash(hsh, get_typedecl()->get_hash());
 
 	// Links will always have the MSB set.
 	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
