@@ -402,14 +402,17 @@ std::string TypeChoice::to_string(const std::string& indent) const
 {
 	std::string str = Link::to_string(indent);
 
-	str += "\n" + indent;
-	str += "; simple: " + oc_to_string(_simple_typeset);
-	str += "\n" + indent;
-	str += "; deep: " + oc_to_string(_deep_typeset);
-	str += "\n" + indent;
-	str += "; intersect: " + oc_to_string(_sect_typeset);
-	str += "\n" + indent;
-	str += "; interval: [" + std::to_string(_glob_interval.first)
+	std::string escind = indent + "; ";
+	std::string morind = escind + OC_TO_STRING_INDENT;
+
+	str += "\n" + escind;
+	str += "simple:\n" + oc_to_string(_simple_typeset, morind);
+	str += "\n" + escind ;
+	str += "deep:\n" + oc_to_string(_deep_typeset, morind);
+	str += "\n" + escind;
+	str += "intersect:\n" + oc_to_string(_sect_typeset, morind);
+	str += "\n" + escind;
+	str += "interval: [" + std::to_string(_glob_interval.first)
 		+ ", " + std::to_string((long int) _glob_interval.second) + "]";
 
 	return str;
