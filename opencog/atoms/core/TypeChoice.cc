@@ -359,6 +359,11 @@ ContentHash TypeChoice::compute_hash() const
 	fnv1a_hash(hsh, _glob_interval.first);
 	fnv1a_hash(hsh, _glob_interval.second);
 
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	return hsh;
 }
 
