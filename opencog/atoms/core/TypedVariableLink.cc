@@ -126,6 +126,18 @@ bool TypedVariableLink::operator==(const Atom& other) const
 
 /* ================================================================= */
 
+std::string TypedVariableLink::to_string(const std::string& indent) const
+{
+	std::string str = Link::to_string(indent);
+
+	str += "\n" + indent;
+	str += "; _typech:\n" + _typech->to_string(indent + ";");
+
+	return str;
+}
+
+/* ================================================================= */
+
 DEFINE_LINK_FACTORY(TypedVariableLink, TYPED_VARIABLE_LINK);
 
 /* ===================== END OF FILE ===================== */
