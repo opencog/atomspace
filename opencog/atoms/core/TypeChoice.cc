@@ -62,15 +62,19 @@ bool TypeChoice::pre_analyze(bool glob)
 
 void TypeChoice::post_analyze(bool glob)
 {
-	if (default_interval(glob) != _glob_interval  and
-	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	if (default_interval(glob) != _glob_interval and
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    0 == _sect_typeset.size())
 		_is_untyped = true;
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
 	if (not _is_untyped and
 	    default_interval(glob) == _glob_interval and
-	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    0 == _sect_typeset.size())
 	{
 		_simple_typeset.insert({NOTYPE});
 	}
@@ -403,10 +407,27 @@ std::string TypeChoice::to_string(const std::string& indent) const
 	str += "\n" + indent;
 	str += "; deep: " + oc_to_string(_deep_typeset);
 	str += "\n" + indent;
+	str += "; intersect: " + oc_to_string(_sect_typeset);
+	str += "\n" + indent;
 	str += "; interval: [" + std::to_string(_glob_interval.first)
 		+ ", " + std::to_string((long int) _glob_interval.second) + "]";
 
 	return str;
+}
+
+std::string opencog::oc_to_string(const TypeChoiceSet& hset, const std::string& indent)
+{
+	// Cut-n-paste of oc_to_string(const HandleSet& hset)
+	std::stringstream ss;
+	ss << indent << "size = " << hset.size();
+	size_t i = 0;
+	for (const TypeChoicePtr& tcp : hset)
+	{
+		ss << std::endl << indent << "atom[" << i << "]:" << std::endl
+			<< tcp->to_string(indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
 }
 
 /* ================================================================= */

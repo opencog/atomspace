@@ -103,6 +103,9 @@ static inline TypeChoicePtr TypeChoiceCast(AtomPtr a)
 
 #define createTypeChoice std::make_shared<TypeChoice>
 
+std::string oc_to_string(const TypeChoiceSet&,
+                         const std::string& indent=empty_string);
+
 /** @}*/
 }
 
