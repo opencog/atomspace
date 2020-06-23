@@ -31,28 +31,37 @@ namespace opencog
  *  @{
  */
 
-typedef std::map<Handle, TypeSet> VariableSimpleTypeMap;
-typedef std::map<Handle, HandleSet> VariableDeepTypeMap;
 typedef std::pair<size_t, size_t> GlobInterval;
-typedef std::map<Handle, GlobInterval> GlobIntervalMap;
+class TypeChoice;
+typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
+typedef std::set<TypeChoicePtr> TypeChoiceSet;
 
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
 /// is to hold complex type defintions, and to provide operations
-/// on them, such as intersection, union, filtering and type validation.
+/// on them, such as type-intersection, type-union, filtering and
+/// type validation.
+///
+/// This class implements type-union, so that
+///   `(TypeChoice (TypeChoice stuff) (TypeChoice other-stuff))`
+/// computes the union of the two. To get type-intersection, use
+///   `(TypeIntersection (TypeChoice stuff) (TypeChoice other-stuff))`
 ///
 class TypeChoice : public Link
 {
 protected:
 	TypeSet _simple_typeset;
 	HandleSet _deep_typeset;
+	TypeChoiceSet _sect_typeset;
 	GlobInterval _glob_interval;
 	bool _is_untyped;
 
 	void init(bool);
+	bool pre_analyze(bool);
 	void analyze(Handle);
+	void post_analyze(bool);
 	GlobInterval make_interval(const HandleSeq&);
-	bool is_nonglob_type(const Handle&) const;
+	bool is_nonglob_type(const ValuePtr&) const;
 
 	ContentHash compute_hash() const;
 public:
@@ -73,11 +82,15 @@ public:
 	bool is_lower_bound(size_t) const;
 	bool is_upper_bound(size_t) const;
 
-	bool is_type(const Handle&) const;
+	bool is_type(const ValuePtr&) const;
 	bool is_type(Type) const;
 
 	bool is_untyped(bool) const;
 	bool is_equal(const TypeChoice&) const;
+	bool operator==(const Atom&) const;
+
+	std::string to_string(const std::string& indent) const;
+	using Atom::to_string;
 
 	static Handle factory(const Handle&);
 };
@@ -89,6 +102,9 @@ static inline TypeChoicePtr TypeChoiceCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TypeChoice>(a); }
 
 #define createTypeChoice std::make_shared<TypeChoice>
+
+std::string oc_to_string(const TypeChoiceSet&,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 }

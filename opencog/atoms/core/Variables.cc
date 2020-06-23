@@ -597,13 +597,27 @@ std::string Variables::to_string(const std::string& indent) const
 	// Whether it is ordered
 	ss << indent << "_ordered = " << _ordered << std::endl;
 
-#if 0
 	// Typemap
 	ss << indent << "_typemap:" << std::endl
-	   << oc_to_string(_typemap, indent_p);
-#endif
+	   << oc_to_string(_typemap, indent);
 
 	return ss.str();
+}
+
+std::string oc_to_string(const VariableTypeMap& hmap, const std::string& indent)
+{
+	// Cut-n-paste of oc_to_string(const HandleMap& hmap)
+   std::stringstream ss;
+   ss << indent << "size = " << hmap.size();
+   int i = 0;
+   for (const auto& p : hmap) {
+      ss << std::endl << indent << "key[" << i << "]:" << std::endl
+         << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
+         << indent << "value[" << i << "]:" << std::endl
+         << p.second->to_string(indent + OC_TO_STRING_INDENT);
+      i++;
+   }
+   return ss.str();
 }
 
 std::string oc_to_string(const Variables& var, const std::string& indent)

@@ -25,6 +25,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
+#include <opencog/atoms/core/TypeChoice.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/VariableList.h>
@@ -79,13 +80,9 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(deeptype, valtype);
 	}
-	else if (TYPE_CHOICE == dpt)
+	else if (nameserver().isA(dpt, TYPE_CHOICE))
 	{
-		for (const Handle& choice : deep->getOutgoingSet())
-		{
-			if (value_is_type(choice, val)) return true;
-		}
-		return false;
+		return TypeChoiceCast(deep)->is_type(val);
 	}
 
 	// If it is not a link, then it is a type-constant,

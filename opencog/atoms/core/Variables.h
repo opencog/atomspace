@@ -185,7 +185,9 @@ struct Variables : public FreeVariables
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Variables& var,
+std::string oc_to_string(const VariableTypeMap&,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Variables&,
                          const std::string& indent=empty_string);
 
 /** @}*/

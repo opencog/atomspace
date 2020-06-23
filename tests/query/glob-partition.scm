@@ -1,6 +1,10 @@
 ;
+; glob-partition.scm
+;
 ; Reported in issue #1825
 ;
+(use-modules (opencog) (opencog exec))
+
 (define partition
 
 (BindLink

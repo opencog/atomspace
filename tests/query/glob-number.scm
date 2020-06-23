@@ -1,4 +1,6 @@
 ;
+; glob-number.scm
+;
 ; Test arithmetic links with globs
 ;
 (use-modules (opencog) (opencog exec))

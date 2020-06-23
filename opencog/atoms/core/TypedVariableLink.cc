@@ -22,11 +22,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/base/hash.h>
 
 #include "TypedVariableLink.h"
 
@@ -55,7 +51,7 @@ void TypedVariableLink::init()
 	if (not nameserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
-	    TYPE_SET_LINK != dtype and
+	    TYPE_INTERSECTION_LINK != dtype and
 	    VARIABLE_NODE != dtype and // XXX FIXME this is wrong; URE-bug
 	    SIGNATURE_LINK != dtype and
 	    INTERVAL_LINK != dtype and
@@ -95,6 +91,27 @@ const GlobInterval TypedVariableLink::default_interval() const
 
 /* ================================================================= */
 
+/// A specialized hashing function, designed so that all equivalent
+/// type specifications get exactly the same hash.  To acheive this,
+/// the normalized type specifications are used, rather than the raw
+/// user-specified types. (The static analysis is "normalizing").
+
+ContentHash TypedVariableLink::compute_hash() const
+{
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, get_type());
+
+	fnv1a_hash(hsh, get_variable()->get_hash());
+	fnv1a_hash(hsh, get_typedecl()->get_hash());
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	return hsh;
+}
+
 /// Return true if the other TypedVariable is equal to this one,
 /// up to alpha-conversion. This returns `true` if the other
 /// TypedVariable has the same type restrictions, even though it
@@ -114,6 +131,27 @@ bool TypedVariableLink::is_equal(const TypedVariableLink& other) const
 
 	// Type constraints must match.
 	return _typech->is_equal(*other._typech);
+}
+
+bool TypedVariableLink::operator==(const Atom& other) const
+{
+	if (this == &other) return true;
+	if (get_hash() != other.get_hash()) return false;
+	if (other.get_type() != _type) return false;
+	return is_equal(*TypedVariableLinkCast(other.get_handle()));
+}
+
+/* ================================================================= */
+
+std::string TypedVariableLink::to_string(const std::string& indent) const
+{
+	std::string str = Link::to_string(indent);
+
+	str += "\n" + indent;
+	str += "; _typech:\n";
+	str += _typech->to_string(indent + ";" + OC_TO_STRING_INDENT);
+
+	return str;
 }
 
 /* ================================================================= */

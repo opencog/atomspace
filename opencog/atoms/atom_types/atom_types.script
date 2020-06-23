@@ -525,17 +525,20 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // should be changed to only allow
 // `(TypeChoice (Type 'ConceptNode) (Signature (Predicate "foo")))` if
 // such a "constant" type is wanted. I dunno. Not sure. Changing this
-// causes DeepTypeUTest to fail. ... I think forcing use of Signature
-// seems "more correct" ... XXX FIXME. maybe?
+// causes DeepTypeUTest to fail. ... Forcing use of Signature is "more
+// correct", but clunkier to the user, so we don't force it.
 // TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
+// See https://en.wikipedia.org/wiki/Union_type
 TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
-// Type constructor. Forces a boolean-and of all of the type definitions
-// (signatures) that it contains.  Mostly useful only when used with
-// the IntervalLink, so specify the length of a list or the size of a
-// set.  This, in turn, is mostly useful only for regex matching using
-// the GlobNode.
-TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
+// Type constructor. Forces a set-intersection of all of the type
+// definitions (signatures) that it contains. Useful for computing
+// type intersections during type unification. Also heavily used for
+// specifying a compound of the IntervalLink and a simple type, which
+// is used heavily to specify GlobNode types. Inherits from TypeChoice,
+// because the C++ class needs to hold all the same members.
+// See https://en.wikipedia.org/wiki/Intersection_type
+TYPE_INTERSECTION_LINK <- TYPE_CHOICE
 
 // Function-type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd

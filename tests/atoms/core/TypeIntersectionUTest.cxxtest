@@ -1,0 +1,290 @@
+/*
+ * tests/atoms/core/TypeIntersectionUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include <opencog/atoms/core/TypeChoice.h>
+
+using namespace opencog;
+
+#define aa _as.add_atom
+#define al _as.add_link
+#define an _as.add_node
+
+class TypeIntersectionUTest : public CxxTest::TestSuite
+{
+private:
+	Handle A, B, W, X, Y, Z, G1, G2, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
+
+	AtomSpace _as;
+
+public:
+	TypeIntersectionUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
+		logger().set_print_to_stdout_flag(true);
+
+		A = an(CONCEPT_NODE, "A");
+		B = an(CONCEPT_NODE, "B");
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		Z = an(VARIABLE_NODE, "$Z");
+		W = an(VARIABLE_NODE, "$W");
+		G1 = an(GLOB_NODE, "$G1");
+		G2 = an(GLOB_NODE, "$G2");
+		NT = an(TYPE_NODE, "Node");
+		PNT = an(TYPE_NODE, "PredicateNode");
+		CNT = an(TYPE_NODE, "ConceptNode");
+		NTI = an(TYPE_INH_NODE, "Node");
+		DPTCI = an(TYPE_CO_INH_NODE, "DefinedPredicateNode");
+		LLT = an(TYPE_NODE, "ListLink");
+		LTI = an(TYPE_INH_NODE, "Link");
+	}
+
+	void test_direct();
+
+	void test_extend_1();
+	void test_extend_2();
+	void test_extend_2a();
+	void test_extend_2b();
+	void test_extend_2c();
+	void test_extend_3();
+	void test_extend_4();
+	void test_extend_4a();
+	void test_extend_5();
+	void test_extend_5a();
+};
+
+// Test representation, directly.
+void TypeIntersectionUTest::test_direct()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+			               al(INTERVAL_LINK,
+			                  an(NUMBER_NODE, "0"),
+			                  an(NUMBER_NODE, "-1")),
+			               CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TypeChoicePtr tcp = TypeChoiceCast(result);
+	GlobInterval gi = tcp->get_glob_interval();
+	TS_ASSERT_EQUALS(gi.first, 0);
+	TS_ASSERT_EQUALS(gi.second, SIZE_MAX);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, PNT, al(TYPE_CHOICE, PNT));
+	Handle expect = al(TYPE_INTERSECTION_LINK, PNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, NT, PNT);
+	Handle expect = al(TYPE_INTERSECTION_LINK, al(TYPE_CHOICE));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2a()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT));
+	Handle expect = al(TYPE_INTERSECTION_LINK, CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2b()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT));
+	Handle expect = al(TYPE_CHOICE, CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	// Handle compare will fail because they are different atom types.
+	// TS_ASSERT_EQUALS(result, expect);
+
+	TypeChoicePtr tcpr(TypeChoiceCast(result));
+	TypeChoicePtr tcpe(TypeChoiceCast(expect));
+
+	TS_ASSERT(*tcpr == *tcpe);
+	TS_ASSERT(*tcpe == *tcpr);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_2c()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+   Handle result = al(TYPED_VARIABLE_LINK, Y,
+	          al(TYPE_INTERSECTION_LINK, CNT, al(TYPE_CHOICE, PNT, CNT)));
+   Handle expect = al(TYPED_VARIABLE_LINK, Y, CNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, PNT, NTI);
+	Handle expect = al(TYPE_INTERSECTION_LINK, PNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+		al(TYPE_CHOICE, LLT, NTI),
+		al(TYPE_CHOICE, LTI, CNT));
+
+	Handle expect = al(TYPE_INTERSECTION_LINK, al(TYPE_CHOICE, CNT, LLT));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_4a()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK, NT, DPTCI);
+	Handle expect = al(TYPE_INTERSECTION_LINK, NT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+	                    al(TYPE_INTERSECTION_LINK,
+	                       al(INTERVAL_LINK,
+	                          an(NUMBER_NODE, "0"),
+	                          an(NUMBER_NODE, "2")),
+	                       NTI),
+			              al(TYPE_INTERSECTION_LINK,
+			                 al(INTERVAL_LINK,
+			                    an(NUMBER_NODE, "1"),
+			                    an(NUMBER_NODE, "-1")),
+			                 PNT));
+
+	Handle expect = al(TYPE_INTERSECTION_LINK,
+			               al(INTERVAL_LINK,
+			                  an(NUMBER_NODE, "1"),
+			                  an(NUMBER_NODE, "2")),
+			               PNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void TypeIntersectionUTest::test_extend_5a()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = al(TYPE_INTERSECTION_LINK,
+	                   al(TYPE_INTERSECTION_LINK,
+	                      al(INTERVAL_LINK,
+	                         an(NUMBER_NODE, "0"),
+	                         an(NUMBER_NODE, "2")),
+	                      PNT),
+	                   al(TYPE_INTERSECTION_LINK,
+	                      al(INTERVAL_LINK,
+	                         an(NUMBER_NODE, "1"),
+	                         an(NUMBER_NODE, "3")),
+	                      PNT));
+
+	Handle expect = al(TYPE_INTERSECTION_LINK,
+	                   al(INTERVAL_LINK,
+	                      an(NUMBER_NODE, "1"),
+	                      an(NUMBER_NODE, "2")),
+	                   PNT);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

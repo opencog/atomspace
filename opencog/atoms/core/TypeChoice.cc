@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-void TypeChoice::init(bool glob)
+bool TypeChoice::pre_analyze(bool glob)
 {
 	_is_untyped = false;
 	_glob_interval = default_interval(glob);
@@ -42,7 +42,7 @@ void TypeChoice::init(bool glob)
 	if (_outgoing.empty())
 	{
 		_simple_typeset.insert({NOTYPE});
-		return;
+		return true;
 	}
 
 	// Check for (TypeChoice (TypCoInh 'Atom)) which is also bottom.
@@ -53,30 +53,73 @@ void TypeChoice::init(bool glob)
 		if (ATOM == vt or VALUE == vt)
 		{
 			_simple_typeset.insert({NOTYPE});
-			return;
+			return true;
 		}
 	}
 
-	for (const Handle& h : _outgoing)
-		analyze(h);
+	return false;
+}
 
-	if (default_interval(glob) != _glob_interval  and
-	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+void TypeChoice::post_analyze(bool glob)
+{
+	// Was the result completely untyped? No type restrictions
+	// whatsoever?
+	if (default_interval(glob) != _glob_interval and
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    0 == _sect_typeset.size())
 		_is_untyped = true;
+
+	// Is this a wrapper around a single TypeIntersction?
+	// If so, then it is equivalent to the TypeIntersction.
+	// Just copy it into place, here.
+	if (not _is_untyped and
+	    default_interval(glob) == _glob_interval and
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    1 == _sect_typeset.size())
+	{
+		TypeChoicePtr tcp = *_sect_typeset.begin();
+		_simple_typeset = tcp->get_simple_typeset();
+		_deep_typeset = tcp->get_deep_typeset();
+		_sect_typeset = tcp->_sect_typeset;
+		_glob_interval = tcp->get_glob_interval();
+		return;
+	}
 
 	// And again... recursion in TypeChoice can still leave us empty.
 	// e.g. (TypeChoice (TypeChoice (TypeChoice)))
 	if (not _is_untyped and
 	    default_interval(glob) == _glob_interval and
-	    0 == _simple_typeset.size() and 0 == _deep_typeset.size())
+	    0 == _simple_typeset.size() and
+	    0 == _deep_typeset.size()  and
+	    0 == _sect_typeset.size())
 	{
 		_simple_typeset.insert({NOTYPE});
 	}
 }
 
+void TypeChoice::init(bool glob)
+{
+	if (pre_analyze(glob)) return;
+
+	_glob_interval = GlobInterval({INT_MAX, 0});
+
+	for (const Handle& h : _outgoing)
+		analyze(h);
+
+	if (GlobInterval({INT_MAX, 0}) == _glob_interval)
+		_glob_interval = default_interval(glob);
+
+	post_analyze(glob);
+}
+
 TypeChoice::TypeChoice(const HandleSeq&& oset, Type t, bool glob)
 	: Link(std::move(oset), t)
 {
+	// Derived classes initialize in a different way.
+	if (TYPE_CHOICE != t) return;
+
 	init(glob);
 }
 
@@ -91,6 +134,15 @@ GlobInterval TypeChoice::make_interval(const HandleSeq& ivl)
 	if (ub < 0) ub = SIZE_MAX;
 
 	return std::make_pair(lb, ub);
+}
+
+// Compute the union of two glob intervals.
+static inline GlobInterval extend(const GlobInterval& lhs,
+                                  const GlobInterval& rhs)
+{
+	const auto lb = std::min(lhs.first, rhs.first);
+	const auto ub = std::max(lhs.second, rhs.second);
+	return GlobInterval{lb, ub};
 }
 
 /* ================================================================= */
@@ -124,7 +176,7 @@ void TypeChoice::analyze(Handle anontype)
 		t = anontype->get_type();
 	}
 
-	// The anontype is either a single type name, or a list of typenames.
+	// The a single type name.
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
@@ -135,6 +187,7 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
+	// This type, or children.
 	if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
@@ -143,6 +196,7 @@ void TypeChoice::analyze(Handle anontype)
 		return;
 	}
 
+	// This type, or parents.
 	if (TYPE_CO_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
@@ -154,47 +208,14 @@ void TypeChoice::analyze(Handle anontype)
 
 	if (INTERVAL_LINK == t)
 	{
-		_glob_interval = make_interval(anontype->getOutgoingSet());
+		GlobInterval ivl = make_interval(anontype->getOutgoingSet());
+		_glob_interval = extend(ivl, _glob_interval);
 		return;
 	}
 
-	// For GlobNode, we can specify either the interval or the type, e.g.
-	//
-	// TypeChoice
-	//   IntervalLink
-	//     NumberNode  2
-	//     NumberNode  3
-	//
-	// or both under a TypeSetLink, e.g.
-	//
-	// TypeChoice
-	//   TypeSetLink
-	//     IntervalLink
-	//       NumberNode  2
-	//       NumberNode  3
-	//     TypeNode "ConceptNode"
-	//
-	// XXX THIS IS BUGGY! The TypeSet is not being chandled correctly..
-	// We need to have a TypeSetLink c++ class to do this right.
-	if (TYPE_SET_LINK == t)
+	if (TYPE_INTERSECTION_LINK == t)
 	{
-		for (const Handle& h : anontype->getOutgoingSet())
-		{
-			Type th = h->get_type();
-
-			if (INTERVAL_LINK == th or
-			    TYPE_NODE == th or
-			    TYPE_INH_NODE == th or
-			    TYPE_CO_INH_NODE == th)
-			{
-				analyze(h);
-			}
-
-			else throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in TypeSetLink\n"
-				"Expected IntervalLink and TypeNode, got %s",
-				h->to_string().c_str());
-		}
+		_sect_typeset.insert(TypeChoiceCast(anontype));
 		return;
 	}
 
@@ -289,16 +310,22 @@ bool TypeChoice::is_type(Type t) const
 }
 
 /// Returns true if `h` satisfies the type restrictions.
-bool TypeChoice::is_type(const Handle& h) const
+bool TypeChoice::is_type(const ValuePtr& vp) const
 {
 	// If the type is not globby, then the Atom must satisfy
 	// type restrictions directly.
-	if (not is_globby() and is_nonglob_type(h))
+	if (not is_globby() and is_nonglob_type(vp))
 		return true;
 
-	// If it's globby, then we expect a List.
-	if (LIST_LINK != h->get_type()) return false;
+	// Perhaps it can satisfy one of the intersection types...
+	// Either as a glob, or just plainly.
+	for (const TypeChoicePtr& isect : _sect_typeset)
+		if (isect->is_type(vp)) return true;
 
+	// If it's globby, then we expect a List.
+	if (LIST_LINK != vp->get_type()) return false;
+
+	const Handle& h(HandleCast(vp));
 	// The list must be of the allowed size...
 	const Arity num_args = h->get_arity();
 	if (not is_lower_bound(num_args)) return false;
@@ -306,27 +333,23 @@ bool TypeChoice::is_type(const Handle& h) const
 
 	// Every outgoing atom in list must satisfy type restriction of var.
 	for (const Handle& oh : h->getOutgoingSet())
-	{
 		if (not is_nonglob_type(oh)) return false;
-	}
 
 	return true;
 }
 
 /// Perform typecheck, ignoring possible globbiness.
-bool TypeChoice::is_nonglob_type(const Handle& h) const
+bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 {
 	// If the argument has the simple type, then we are good to go;
 	// we are done.  Else, fall through, and see if one of the
 	// others accept the match.
-	if (_simple_typeset.find(h->get_type()) != _simple_typeset.end())
+	if (_simple_typeset.find(vp->get_type()) != _simple_typeset.end())
 		return true;
 
 	// Deep type restrictions?
 	for (const Handle& sig : _deep_typeset)
-	{
-		if (value_is_type(sig, h)) return true;
-	}
+		if (value_is_type(sig, vp)) return true;
 
 	// True, only if there were no type restrictions...
 	return _is_untyped;
@@ -342,7 +365,9 @@ bool TypeChoice::is_nonglob_type(const Handle& h) const
 ContentHash TypeChoice::compute_hash() const
 {
 	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
-	fnv1a_hash(hsh, get_type());
+
+	// This, and all inherited types muse use the same type...
+	fnv1a_hash(hsh, TYPE_CHOICE);
 
 	for (Type t : _simple_typeset)
 		fnv1a_hash(hsh, t);
@@ -350,9 +375,17 @@ ContentHash TypeChoice::compute_hash() const
 	for (const Handle& th : _deep_typeset)
 		fnv1a_hash(hsh, th->get_hash());
 
+	for (const TypeChoicePtr& tcp : _sect_typeset)
+		fnv1a_hash(hsh, tcp->get_hash());
+
 	fnv1a_hash(hsh, _glob_interval.first);
 	fnv1a_hash(hsh, _glob_interval.second);
 
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	return hsh;
 }
 
@@ -381,6 +414,50 @@ bool TypeChoice::is_equal(const TypeChoice& other) const
 
 	// If we got to here, everything must be OK.
 	return true;
+}
+
+bool TypeChoice::operator==(const Atom& other) const
+{
+	if (this == &other) return true;
+	if (get_hash() != other.get_hash()) return false;
+	return is_equal(*TypeChoiceCast(other.get_handle()));
+}
+
+/* ================================================================= */
+
+std::string TypeChoice::to_string(const std::string& indent) const
+{
+	std::string str = Link::to_string(indent);
+
+	std::string escind = indent + "; ";
+	std::string morind = escind + OC_TO_STRING_INDENT;
+
+	str += "\n" + escind;
+	str += "simple:\n" + oc_to_string(_simple_typeset, morind);
+	str += "\n" + escind ;
+	str += "deep:\n" + oc_to_string(_deep_typeset, morind);
+	str += "\n" + escind;
+	str += "intersect:\n" + oc_to_string(_sect_typeset, morind);
+	str += "\n" + escind;
+	str += "interval: [" + std::to_string(_glob_interval.first)
+		+ ", " + std::to_string((long int) _glob_interval.second) + "]";
+
+	return str;
+}
+
+std::string opencog::oc_to_string(const TypeChoiceSet& hset, const std::string& indent)
+{
+	// Cut-n-paste of oc_to_string(const HandleSet& hset)
+	std::stringstream ss;
+	ss << indent << "size = " << hset.size();
+	size_t i = 0;
+	for (const TypeChoicePtr& tcp : hset)
+	{
+		ss << std::endl << indent << "atom[" << i << "]:" << std::endl
+			<< tcp->to_string(indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
 }
 
 /* ================================================================= */

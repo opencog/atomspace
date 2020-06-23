@@ -56,6 +56,7 @@ protected:
 	void init();
 	TypeChoicePtr _typech;
 
+	ContentHash compute_hash() const;
 public:
 	TypedVariableLink(const HandleSeq&&, Type=TYPED_VARIABLE_LINK);
 	TypedVariableLink(const Handle& alias, const Handle& body);
@@ -93,6 +94,11 @@ public:
 	bool is_untyped(void) const;
 
 	bool is_equal(const TypedVariableLink&) const;
+	bool operator==(const Atom&) const;
+
+	std::string to_string(const std::string& indent) const;
+	using Atom::to_string;
+
 	static Handle factory(const Handle&);
 };
 

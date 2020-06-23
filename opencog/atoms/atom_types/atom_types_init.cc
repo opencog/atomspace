@@ -22,6 +22,9 @@
 
 #include "opencog/atoms/atom_types/atom_types.definitions"
 
+// Backwards-compat. Argh...
+opencog::Type opencog::TYPE_SET_LINK;
+
 #define INHERITANCE_FILE "opencog/atoms/atom_types/atom_types.inheritance"
 #define INITNAME base_types_init
 
