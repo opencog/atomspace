@@ -186,9 +186,9 @@ struct Variables : public FreeVariables
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(const VariableTypeMap&,
-                         const std::string& empty_string);
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const Variables&,
-                         const std::string& empty_string);
+                         const std::string& indent=empty_string);
 
 /** @}*/
 }
