@@ -63,6 +63,13 @@ public:
 		LTI = an(TYPE_INH_NODE, "Link");
 	}
 
+	void test_extend_intersect_1();
+	void test_extend_intersect_2();
+	void test_extend_intersect_3();
+	void test_extend_intersect_4();
+	void test_extend_intersect_5();
+	void test_extend_intersect_6();
+
 	void test_find_variables_ordered_1();
 	void test_find_variables_ordered_2();
 	void test_find_variables_ordered_3();
@@ -91,6 +98,206 @@ public:
 
 	void test_substitute_nocheck_scope();
 };
+
+void VariablesUTest::test_extend_intersect_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		vardecl1 = X,
+		vardecl2 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, PNT),
+		              al(TYPED_VARIABLE_LINK, Y, CNT)),
+		expect = al(VARIABLE_LIST,
+		            al(TYPED_VARIABLE_LINK, X, PNT),
+		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_extend_intersect_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		vardecl1 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, NT),
+		              al(TYPED_VARIABLE_LINK, Y, CNT)),
+		vardecl2 = al(VARIABLE_LIST,
+		              al(TYPED_VARIABLE_LINK, X, PNT),
+		              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+		expect = al(VARIABLE_LIST,
+		            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE)),
+		            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_extend_intersect_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, NTI),
+			              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, Y, CNT));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_extend_intersect_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LLT, NTI)),
+			              al(TYPED_VARIABLE_LINK, Y, NT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, LTI, CNT)),
+			              al(TYPED_VARIABLE_LINK, Y, DPTCI)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, al(TYPE_CHOICE, CNT, LLT)),
+			            al(TYPED_VARIABLE_LINK, Y, NT));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_extend_intersect_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          NTI)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "0"),
+	                             an(NUMBER_NODE, "2")),
+	                          PNT))),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, G1,
+			                 al(TYPE_INTERSECTION_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "-1")),
+			                    PNT)),
+			              al(TYPED_VARIABLE_LINK, G2,
+			                 al(TYPE_INTERSECTION_LINK,
+			                    al(INTERVAL_LINK,
+			                       an(NUMBER_NODE, "1"),
+			                       an(NUMBER_NODE, "3")),
+			                    PNT))),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, G1,
+			               al(TYPE_INTERSECTION_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)),
+			            al(TYPED_VARIABLE_LINK, G2,
+			               al(TYPE_INTERSECTION_LINK,
+			                  al(INTERVAL_LINK,
+			                     an(NUMBER_NODE, "1"),
+			                     an(NUMBER_NODE, "2")),
+			                  PNT)));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_extend_intersect_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl1 = al(VARIABLE_LIST,
+	                     al(TYPED_VARIABLE_LINK, X, NTI),
+	                     al(TYPED_VARIABLE_LINK, G2, PNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, G2, PNT)),
+			expect = al(VARIABLE_LIST,
+			            al(TYPED_VARIABLE_LINK, X, PNT),
+			            al(TYPED_VARIABLE_LINK, G2, PNT));
+
+	Variables v1(vardecl1), v2(vardecl2);
+
+	v1.extend_intersect(v2);
+
+	Handle result = _as.add_atom(v1.get_vardecl());
+
+	logger().debug() << "expect = " << oc_to_string(expect);
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 void VariablesUTest::test_find_variables_ordered_1()
 {
