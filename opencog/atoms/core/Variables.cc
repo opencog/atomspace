@@ -599,7 +599,7 @@ std::string Variables::to_string(const std::string& indent) const
 
 	// Typemap
 	ss << indent << "_typemap:" << std::endl
-	   << oc_to_string(_typemap, indent);
+	   << oc_to_string(_typemap, indent + OC_TO_STRING_INDENT);
 
 	return ss.str();
 }
