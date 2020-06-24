@@ -521,7 +521,20 @@ Most tests (just not the database tests) can be run in parallel:
     make -j4 test ARGS=-j4
 ```
 The database tests *will* fail if run in parallel: they will step on
-one-another.
+one-another, since they all set and clear the same database tables.
+
+Specific subsets of the unit tests can be run:
+```
+    make test_atomese
+    make test_atomspace
+    make test_guile
+    make test_join
+    make test_matrix
+    make test_persist_sql
+    make test_python
+    make test_query
+    make test_sheaf
+```
 
 ### Install
 

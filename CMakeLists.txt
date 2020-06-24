@@ -356,27 +356,60 @@ IF (CXXTEST_FOUND)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+
+	ADD_CUSTOM_TARGET(test_atomese
+		DEPENDS tests
+		WORKING_DIRECTORY tests/atoms
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Atomese tests..."
+	)
+	ADD_CUSTOM_TARGET(test_atomspace
+		DEPENDS tests
+		WORKING_DIRECTORY tests/atomspace
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Atomspace tests..."
+	)
+	ADD_CUSTOM_TARGET(test_guile
+		DEPENDS tests
+		WORKING_DIRECTORY tests/scm
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Guile and Python-bridge tests..."
+	)
+	ADD_CUSTOM_TARGET(test_join
+		DEPENDS tests
+		DEPENDS tests/atoms/container
+		WORKING_DIRECTORY tests/atoms/container
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Pattern Container tests..."
+	)
+	ADD_CUSTOM_TARGET(test_matrix
+		DEPENDS tests
+		WORKING_DIRECTORY tests/matrix
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Sparse Matrix tests..."
+	)
+	ADD_CUSTOM_TARGET(test_persist_sql
+		DEPENDS tests
+		WORKING_DIRECTORY tests/persist/sql
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running SQL Persistance tests..."
+	)
 	ADD_CUSTOM_TARGET(test_python
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
-	ADD_CUSTOM_TARGET(test_guile
-		WORKING_DIRECTORY tests/scm
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Guile and Python-bridge tests..."
-	)
 	ADD_CUSTOM_TARGET(test_query
-		DEPENDS tests/query
+		DEPENDS tests
 		WORKING_DIRECTORY tests/query
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running pattern matcher tests..."
+		COMMENT "Running Pattern Engine tests..."
 	)
-	ADD_CUSTOM_TARGET(test_join
-		DEPENDS tests/atoms/container
-		WORKING_DIRECTORY tests/atoms/container
+	ADD_CUSTOM_TARGET(test_sheaf
+		DEPENDS tests
+		WORKING_DIRECTORY tests/sheaf
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running container tests..."
+		COMMENT "Running parser tests..."
 	)
 ENDIF (CXXTEST_FOUND)
 
