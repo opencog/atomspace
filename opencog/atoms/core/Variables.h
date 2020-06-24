@@ -148,8 +148,9 @@ struct Variables : public FreeVariables
 	                  bool silent=false) const;
 
 	// Extend this by adding in the given variables. If either this or
-	// the other are ordered, then the result is ordered
+	// the other are ordered, then the result is ordered.
 	void extend(const Variables&);
+	void extend_intersect(const Variables&);
 
 	// Erase the given variable, if exist
 	void erase(const Handle&);

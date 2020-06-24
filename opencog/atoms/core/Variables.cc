@@ -32,6 +32,7 @@
 
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/TypedVariableLink.h>
+#include <opencog/atoms/core/TypeIntersectionLink.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
 #include "VariableSet.h"
@@ -452,7 +453,7 @@ Handle Variables::substitute(const Handle& func,
  *
  * That is, merge the given variables into this set.
  *
- * If a variable is both in *this and vset then its type intersection
+ * If a variable is both in *this and vset then its type union
  * is assigned to it.
  */
 void Variables::extend(const Variables& vset)
@@ -466,6 +467,64 @@ void Variables::extend(const Variables& vset)
 		{
 			varseq.emplace_back(h);
 			varset.insert(h);
+		}
+	}
+
+	// If either this or the other are ordered then the result is ordered
+	_ordered = _ordered or vset._ordered;
+}
+
+/**
+ * Extend a set of variables.
+ *
+ * That is, merge the given variables into this set.
+ *
+ * If a variable is both in *this and vset then its type intersection
+ * is assigned to it.
+ */
+void Variables::extend_intersect(const Variables& vset)
+{
+	for (const Handle& h : vset.varseq)
+	{
+		auto index_it = index.find(h);
+		if (index_it != index.end())
+		{
+			// Merge the two typemaps, if needed.
+			auto vit = vset._typemap.find(h);
+			if (vit != vset._typemap.end())
+			{
+				auto tit = _typemap.find(h);
+				if (tit != _typemap.end())
+				{
+					Handle isect = HandleCast(
+						createTypeIntersectionLink(HandleSeq{
+							HandleCast(tit->second->get_typedecl()),
+							HandleCast(vit->second->get_typedecl())}));
+					TypedVariableLinkPtr tvp =
+						createTypedVariableLink(h, isect);
+					_typemap[h] = tvp;
+				}
+				else
+				{
+					_typemap.insert({h, vit->second});
+				}
+			}
+		}
+		else
+		{
+			// Found a new variable! Insert it.
+			index.insert({h, varseq.size()});
+
+			auto typemap_it = vset._typemap.find(h);
+			if (typemap_it != vset._typemap.end())
+			{
+				unpack_vartype(HandleCast(typemap_it->second));
+			}
+			else
+			{
+				varseq.emplace_back(h);
+				varset.insert(h);
+			}
 		}
 	}
 
