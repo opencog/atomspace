@@ -202,7 +202,7 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 //
 // This is important for the pattern matcher; you use it to say
 // "match this graph or this graph or this graph". It is
-// crisp-true/false if any of the items on the meu are present.
+// crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
 CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
@@ -278,9 +278,10 @@ ANY_NODE <- NODE
 CONNECTOR <- ORDERED_LINK
 
 CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
-LINK_CLASS_NODE <- LEXICAL_NODE "LinkClass" // Connector class
-CONNECTOR_SEQ <- ORDERED_LINK       // Sequence of connectors
-CONNECTOR_SET <- UNORDERED_LINK     // Unordered set of connectors
+BOND_NODE <- LEXICAL_NODE "Bond"    // A connection type name.
+CONNECTOR_SEQ <- ORDERED_LINK       // Conjoined sequence of connectors
+CONNECTOR_SET <- UNORDERED_LINK     // Unordered conjunction of connectors
+CONNECTOR_CHOICE <- CHOICE_LINK     // Disjoined set of connectors
 SECTION <- ORDERED_LINK             // Sheaf section, connector set
 
 // ====================================================================
@@ -308,10 +309,8 @@ VARIABLE_LIST <- CONNECTOR_SEQ
 VARIABLE_SET <- CONNECTOR_SET
 
 // A non-greedy globbing variable; matches one or more atoms in a
-// sequence.  XXX TODO - this could be changed to a link, so that
-// it resembles a FUZZY_LINK more closely?  FuzzyLink implements
-// the same idea, but in a more general fashion...
-// https://wiki.opencog.org/w/GlobNode for more.
+// sequence. All this really does is to name a variable, such that
+// the default type cnstructor for it will accept multiple matches.
 GLOB_NODE <- VARIABLE_NODE
 
 // Everything under a QuoteLink is interpreted literally. Variable
@@ -504,7 +503,7 @@ EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 // because compound types are Atoms, and this is a Node, not a Link,
 // and so it cannot hold any atoms. Use DefinedTypeNode for compound
 // types. Its a LexicalNode, whose lexis consists of Atom types.
-TYPE_NODE <- LEXICAL_NODE
+TYPE_NODE <- BOND_NODE
 
 // Non-strict versions of above. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
@@ -553,13 +552,6 @@ ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
 // type specification, below. It is a Connector, as it specifies
 // only one connectable thing at a time.
 SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
-
-// The FuzzyLink is a kind of type specification that can be imprecise.
-// It is used to specify a pattern that is then matched only
-// approximately by the pattern matcher, to find "similar" graphs.
-// See also GlobNode, which performs a more narrow kind of matching.
-// (viz. bunch-in-a-row globbing)
-FUZZY_LINK <- SIGNATURE_LINK
 
 // A type binder: it binds a type to a VariableNode. Always arity-2,
 // the first position must be a VariableNode, the second must be a type.
