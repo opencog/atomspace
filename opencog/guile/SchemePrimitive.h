@@ -393,6 +393,8 @@ protected:
 	}
 	SCM scm_from(const HandleSeq& hs)
 	{
+	    if(hs.empty()) return SCM_EOL;
+
 		SCM rc;
 		HandleSeq::const_iterator it = hs.begin();
 		if (it != hs.end())
