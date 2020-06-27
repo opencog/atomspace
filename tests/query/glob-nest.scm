@@ -38,7 +38,7 @@
 	(Bind (VariableList
 		(TypedVariable (Variable "$point") (Type 'ConceptNode))
 		(TypedVariable (Glob "$set")
-			(TypeSet (Type 'ConceptNode)
+			(TypeIntersection (Type 'ConceptNode)
 				(IntervalLink (Number 1) (Number 1))))
 		(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
 		(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))

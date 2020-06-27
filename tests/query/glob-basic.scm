@@ -137,13 +137,13 @@
 			(Concept "also"))))
 
 ; -----------------------------------------------------------------
-; Globs can have both type and interval restrictions by using TypeSetLink
+; Globs can have both type and interval restrictions by using TypeIntersectionLink
 ; type == ConceptNode and interval == zero to infinity
 
 (define love-typeset-glob
 	(BindLink
 		(TypedVariable (Glob "$star")
-			(TypeSetLink (IntervalLink (Number 0) (Number -1)) (Type "ConceptNode")))
+			(TypeIntersectionLink (IntervalLink (Number 0) (Number -1)) (Type "ConceptNode")))
 		(ListLink
 			(Concept "I")
 			(Concept "love")
@@ -163,7 +163,7 @@
 		(VariableList
 			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
 			(TypedVariable (Glob "$y")
-				(TypeSetLink (Type "ConceptNode") (IntervalLink (Number 1) (Number 1))))
+				(TypeIntersectionLink (Type "ConceptNode") (IntervalLink (Number 1) (Number 1))))
 			(TypedVariable (Glob "$z") (IntervalLink (Number 0) (Number -1))))
 		(ListLink
 			(Glob "$x")
@@ -185,7 +185,7 @@
 		(VariableList
 			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
 			(TypedVariable (Glob "$y")
-				(TypeSet (Type "ConceptNode") (IntervalLink (Number 1) (Number -1))))
+				(TypeIntersection (Type "ConceptNode") (IntervalLink (Number 1) (Number -1))))
 			(TypedVariable (Glob "$z") (IntervalLink (Number 0) (Number -1))))
 		(ListLink
 			(Glob "$x")
@@ -217,7 +217,7 @@
 (define greedy
 	(Bind
 		(TypedVariable (Glob "$x")
-			(TypeSet (Type "ConceptNode")
+			(TypeIntersection (Type "ConceptNode")
 				(IntervalLink (Number 1) (Number -1))))
 		(ListLink
 			(Glob "$x")
@@ -274,13 +274,13 @@
 	(Bind
 		(VariableList
 			(TypedVariable (Glob "$x")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1))))
 			(TypedVariable (Glob "$y")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 1) (Number 1))))
 			(TypedVariable (Glob "$z")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1)))))
 		(And
 			(List (Glob "$x") (Glob "$y") (Glob "$z"))
@@ -294,13 +294,13 @@
 	(Bind
 		(VariableList
 			(TypedVariable (Glob "$x")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1))))
 			(TypedVariable (Glob "$y")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 1) (Number -1))))
 			(TypedVariable (Glob "$z")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1)))))
 		(And
 			(List (Glob "$x") (Glob "$y") (Glob "$z"))
@@ -315,13 +315,13 @@
 	(Bind
 		(VariableList
 			(TypedVariable (Glob "$x")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1))))
 			(TypedVariable (Glob "$y")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 1) (Number -1))))
 			(TypedVariable (Glob "$z")
-				(TypeSet (Type "ConceptNode")
+				(TypeIntersection (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1)))))
 		(And
 			(Evaluation (Predicate "Some Seq")

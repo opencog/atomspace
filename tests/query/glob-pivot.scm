@@ -22,7 +22,7 @@
 	(GetLink
 		(TypedVariableLink
 			(GlobNode "$G")
-			(TypeSetLink
+			(TypeIntersectionLink
 				(TypeNode "ConceptNode")
 				(IntervalLink
 					(NumberNode 1)
