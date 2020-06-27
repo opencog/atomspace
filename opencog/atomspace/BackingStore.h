@@ -38,8 +38,7 @@ namespace opencog
  * This class provides a simple, generic interface for dynamically
  * storing/retreiving atoms from disk or other remote location or
  * process. This class focuses on "on-demand" atom retreival,
- * rather than on bulk-save/restore (although perhaps that should
- * be provided as well.)
+ * rather than on bulk-save/restore.
  */
 class BackingStore
 {
@@ -63,44 +62,47 @@ class BackingStore
 		virtual Handle getNode(Type, const char *) = 0;
 
 		/**
-		 * Put the entire incoming set of the indicated handle into
-		 * the atom table. All of the values attached to each of the
-		 * Atoms in the incoming set will be fetched and updated as
-		 * well.
+		 * Fetch the entire incoming set of the indicated Atom,
+		 * and put them into the AtomTable. All of the values attached
+		 * to each of the Atoms in the incoming set will be fetched
+		 * and the local copies will be updated.
 		 */
 		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
 
 		/**
-		 * Put all atoms of the given type in the incoming set of the
-		 * indicated handle into the atom table. All of the values
-		 * attached to each of the Atoms in the incoming set will be
-		 * fetched and updated as well.
+		 * Fetch all Atoms of the given Type in the incoming set of
+		 * the indicated Atom, and put them into the AtomTable. All of
+		 * the values attached to each of the Atoms in the incoming set
+		 * will be fetched as well, and the local copies updated.
 		 */
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
-		 * Recursively store the atom and anything in it's outgoing set.
-		 * If the atom is already in storage, this will update it's
-		 * truth value, etc. If the `synchronous` flag is set, this
-		 * method will not return until the atom has actually been stored.
-		 * (Not all backends will respect this flag.)
+		 * Recursively store the Atom and anything in it's outgoing set.
+		 * If the Atom is already in storage, this will store or update
+       * the associated Values (TrutheValue, etc) in storage.
+		 * If the `synchronous` flag is set, this method will not return
+		 * until the atom has actually been stored. (Not all backends will
+		 * respect this flag.)
 		 */
 		virtual void storeAtom(const Handle&, bool synchronous = false) = 0;
 
 		/**
-		 * Remove the indicated atom from the backing store.
-		 * If the recursive flag is set, then incoming set of the atom
+		 * Remove the indicated Atom from the backing store.
+		 * If the recursive flag is set, then incoming set of the Atom
 		 * will also be removed.  If the recursive flag is not set, and
-		 * the atom has a non-empty incoming set, then the atom will not
-		 * be reomved.
+		 * the Atom has a non-empty incoming set, then the Atom will not
+		 * be removed.
 		 */
 		virtual void removeAtom(const Handle&, bool recursive) = 0;
 
 		/**
-		 * Load *all* atoms of the given type, but only if they are not
-		 * already in the AtomTable.  (This avoids truth value merges
-		 * between truth values stored in the backend, and truth values
-		 * in the atomspace.)
+		 * Fetch *all* Atoms of the given type, and place them into the
+		 * AtomTable. If a given Atom does not yet exist locally, then
+		 * all of the Values will also be fetched, and copied locally.
+		 * If a given Atom DOES exist locally, then NONE of the local
+		 * Values are updated! (This avoidsthe need to make complex
+		 * decisions about how to merge conflicting Values).
 		 */
 		virtual void loadType(AtomTable&, Type) = 0;
 
