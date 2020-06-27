@@ -66,12 +66,6 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
 	SET(BUILD_SHARED_LIBS ON)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 
-##Check whether the platform is Mac OS. This fixes cython
-IF(APPLE)
-	ADD_DEFINITIONS(-DON_APPLE)
-	SET(ON_APPLE 1)
-ENDIF(APPLE)
-
 # ===============================================================
 # Check for existance of various required, optional packages.
 # Listed in alphabetical order, more or less.
