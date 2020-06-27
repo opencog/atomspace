@@ -393,14 +393,13 @@ protected:
 	}
 	SCM scm_from(const HandleSeq& hs)
 	{
-		SCM rc;
-		HandleSeq::const_iterator it = hs.begin();
-		if (it != hs.end())
-			rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
-		++it;
-		for ( ; it != hs.end(); ++it)
+		SCM rc = SCM_EOL;
+
+		// reverse iteration to preserve order when doing cons
+		for (HandleSeq::const_reverse_iterator rit = hs.rbegin();
+		     rit != hs.rend(); ++rit)
 		{
-			rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
+			rc = scm_cons(SchemeSmob::handle_to_scm(*rit), rc);
 		}
 		return rc;
 	}
