@@ -1323,7 +1323,6 @@ compositional
  sticking out of it.
  Furthermore, it should be clear that the order in which pieces are assembled
  is immaterial: one obtains the same figure, no matter what the sequence.
- 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1450,8 +1449,8 @@ algebraic topology
 Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
  is when the X's are joined together such that there is no boundary).
  Connectors, once connected, serve no further purpose, and are discarded.
- What mattered was the link that was made.
- In this sense, the links are the fusion of connectors.
+ What mattered was the bond that was made.
+ In this sense, the bonds are the fusion of connectors.
 \begin_inset Foot
 status open
 
@@ -1587,7 +1586,7 @@ structuralist
 \end_inset
 
 , not post-structuralist.
- The links are relational, in the end.
+ The bonds are relational, in the end.
  There is always still a predicate: either an edge exists, or it doesn't.
  To every graph there is a corresponding adjacency matrix, populated with
  zeroes and ones.
@@ -1697,6 +1696,325 @@ well-foundedness
 
  itself.
  Restricted compositionality is more powerful and more general.
+\end_layout
+
+\begin_layout Section*
+AtomSpace
+\end_layout
+
+\begin_layout Standard
+The AtomSpace is a graph database intended to provide generic support for
+ knowledge representation, logical inference, and symbolic AI reasoning.
+ It provides a large variety of operators for constructing terms and defining
+ relations, as well as a fairly comprehensive type system for assigning
+ types to variables and working with signatures of functions and terms.
+ In this sense, it incorporates many features that are commonly accepted
+ in quotidian computer science.
+ There is some question about how the existing AtomSpace implementation
+ should inter-operate with the idea of connectors and bonds.
+ The goal of this section is to review the existing type system, and how
+ it can interface with a connector-and-bond system.
+\end_layout
+
+\begin_layout Subsection*
+The Atomese Type System
+\end_layout
+
+\begin_layout Standard
+The existing Atomese type system is an extensible system of types usually
+ defined at compile time.
+ Although new types can be added at run-time, it is usually useful to have
+ a coresponding object-oriented class definition for each type, so that
+ the types can 
+\begin_inset Quotes eld
+\end_inset
+
+do things
+\begin_inset Quotes erd
+\end_inset
+
+ (be evaulatable, perform numeric operations, perform i/o operations, etc.)
+ As a result, the type hierarchy is somewhat limited and fairly rigid.
+ Although there are more than 100 different types in use in the current
+ system, only a handful of these are relevant to the current discussion.
+ A quick sketch of these is given below.
+\end_layout
+
+\begin_layout Standard
+The core concept underlying Atomese is the 
+\noun on
+Atom
+\noun default
+: a globally-unique immutable structure which can be referenced and can
+ be used as an anchor for mutable, varying 
+\noun on
+Value
+\noun default
+s.
+ All 
+\noun on
+Atom
+\noun default
+s derive from two basic types: the 
+\noun on
+Node
+\noun default
+ and the 
+\noun on
+Link
+\noun default
+.
+ The 
+\noun on
+Node
+\noun default
+ is simply a (UTF-8) string.
+ All 
+\noun on
+Node
+\noun default
+s having the same string name are in fact the same 
+\noun on
+Node
+\noun default
+.
+ Very crudely, one can think of 
+\noun on
+Node
+\noun default
+s as named vertexes of a graph.
+ The 
+\noun on
+Link
+\noun default
+ corresponds to a hyper-edge: a 
+\noun on
+Link
+\noun default
+ can contain zero, one, two or more 
+\noun on
+Atom
+\noun default
+s; it is a possibly-empty list of 
+\noun on
+Atom
+\noun default
+s.
+ 
+\noun on
+Link
+\noun default
+s to not have any other properties; in particular, they have no string name.
+ Thus, crudely, one may think of a 
+\noun on
+Link
+\noun default
+ containing exactly two 
+\noun on
+Node
+\noun default
+s as an ordinary graph edge.
+ Like 
+\noun on
+Node
+\noun default
+s, 
+\noun on
+Link
+\noun default
+s are globally unique: there can only ever be one 
+\noun on
+Link
+\noun default
+ containing a given list of 
+\noun on
+Atom
+\noun default
+s.
+ It is very convenient to think of a 
+\noun on
+Link
+\noun default
+ as a vertex internal to a tree; the 
+\noun on
+Node
+\noun default
+s are the leafs of the tree.
+ The trees are necessarily acyclic, and finite; it is not possible to construct
+ a 
+\noun on
+Link
+\noun default
+ that contains itself.
+\end_layout
+
+\begin_layout Standard
+The AtomSpace is a container for 
+\noun on
+Atom
+\noun default
+s.
+ As each 
+\noun on
+Atom
+\noun default
+ is effectively a tree, one can think of it as a forest-of-trees.
+ However, since each 
+\noun on
+Atom
+\noun default
+ is globally unique (within an AtomSpace), a more accurate conceptual visualizat
+ion is that of a rhizome or woolen felt, as differrent trees typically share
+ the same branches.
+ In the following, s-expressions will be used to write down trees.
+\end_layout
+
+\begin_layout Subsubsection*
+VariableNode
+\end_layout
+
+\begin_layout Standard
+Declares the name of a variable.
+ For example, 
+\family typewriter
+(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+x
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+.
+\end_layout
+
+\begin_layout Subsubsection*
+TypedVariableLink
+\end_layout
+
+\begin_layout Standard
+Associates a type declaration with a variable.
+ For example, 
+\family typewriter
+(TypedVariable (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+x
+\begin_inset Quotes erd
+\end_inset
+
+) (Type 
+\begin_inset Quotes eld
+\end_inset
+
+ConceptNode
+\begin_inset Quotes erd
+\end_inset
+
+))
+\family default
+.
+ This states that the the variable is necessarily of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\noun on
+Concept
+\noun default
+
+\begin_inset Quotes erd
+\end_inset
+
+, with 
+\noun on
+ConceptNode
+\noun default
+ being one of the many predefined types in the sytem.
+ The 
+\noun on
+TypeNode
+\noun default
+ is just a 
+\noun on
+Node
+\noun default
+ whose string name must be the string representation of a simple type.
+\end_layout
+
+\begin_layout Subsubsection*
+SignatureLink
+\end_layout
+
+\begin_layout Standard
+A mechanism to declare or construct a compound or complex type.
+ For example, 
+\family typewriter
+(Signature (EvaluationLink (PredicateNode 
+\begin_inset Quotes eld
+\end_inset
+
+foo
+\begin_inset Quotes erd
+\end_inset
+
+) (ListLink (Type 
+\begin_inset Quotes eld
+\end_inset
+
+Concept
+\begin_inset Quotes erd
+\end_inset
+
+) (Type 
+\begin_inset Quotes eld
+\end_inset
+
+Concept
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\family default
+ constructs a type consisting of two 
+\noun on
+Concept
+\noun default
+s, and given a fixed label of 
+\begin_inset Quotes eld
+\end_inset
+
+foo
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The specific meaning of 
+\noun on
+EvaluationLink
+\noun default
+, 
+\noun on
+ListLink
+\noun default
+ and 
+\noun on
+PredicateNode
+\noun default
+ are of no particular concern here, they're merely examples of some of the
+ predefined types in the Atomese system.
+\end_layout
+
+\begin_layout Subsubsection*
+Other type constructors
+\end_layout
+
+\begin_layout Standard
+The system contains several other type constructors, including those for
+ type union and type intersection.
 \end_layout
 
 \begin_layout Section*
