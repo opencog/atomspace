@@ -1267,7 +1267,7 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     // Capture whatever python prints to stdout
     // What used to be stdout will now go to the pipe.
     int pipefd[2];
-    int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+    int rc = pipe(pipefd);
     OC_ASSERT(0 == rc, "pipe creation failure");
     int stdout_backup = dup(fileno(stdout));
     OC_ASSERT(0 < stdout_backup, "stdout dup failure");
