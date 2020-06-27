@@ -80,7 +80,7 @@ class BackingStore
 		/**
 		 * Recursively store the Atom and anything in it's outgoing set.
 		 * If the Atom is already in storage, this will store or update
-       * the associated Values (TrutheValue, etc) in storage.
+		 * the associated Values (TrutheValue, etc) in storage.
 		 * If the `synchronous` flag is set, this method will not return
 		 * until the atom has actually been stored. (Not all backends will
 		 * respect this flag.)
