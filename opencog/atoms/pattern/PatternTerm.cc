@@ -117,6 +117,7 @@ PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
 bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
 {
 	if (PatternTerm::UNDEFINED == _parent) return false;
+	if (_parent == ptm) return true;
 	if (*_parent == *ptm) return true;
 	return _parent->isDescendant(ptm);
 }
