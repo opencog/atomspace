@@ -815,6 +815,12 @@ PatternTermPtr PatternLink::make_term_tree(const Handle& term)
 	return root_term;
 }
 
+// Temporary helper function (under construction)
+static inline bool can_eval_or_present(const Handle& h)
+{
+	return can_evaluate(h) or PRESENT_LINK == h->get_type();
+}
+
 void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
                                            PatternTermPtr& ptm)
 {
@@ -858,7 +864,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		if (AND_LINK == t)
 		{
 			for (const Handle& ho : h->getOutgoingSet())
-				if (not can_evaluate(ho))
+				if (not can_eval_or_present(ho))
 				{
 					is_ev = false;
 					break;
@@ -926,7 +932,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		if (AND_LINK == t)
 		{
 			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
-				if (ptc->isQuoted() or not can_evaluate(ptc->getHandle()))
+				if (ptc->isQuoted() or not can_eval_or_present(ptc->getHandle()))
 				{
 					ptm->markLiteral();
 					return;
