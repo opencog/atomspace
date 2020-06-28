@@ -1,0 +1,98 @@
+/*
+ * tests/query/NestedClauseUTest.cxxtest
+ *
+ * Copyright (C) 2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define an _as.add_node
+#define al _as.add_link
+
+class NestedClauseUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	NestedClauseUTest() : _eval(&_as)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	~NestedClauseUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_nested_and();
+};
+
+void NestedClauseUTest::tearDown()
+{
+	_as.clear();
+}
+
+void NestedClauseUTest::setUp()
+{
+}
+
+/**
+ * Test sucessful decomposition of clauses.
+ */
+void NestedClauseUTest::test_nested_and()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_eval.eval("(load-from-path \"tests/query/nested-and.scm\")");
+
+	std::string boo = _eval.eval("did-call");
+	logger().debug() << "Start: " << boo;
+	TS_ASSERT_EQUALS(boo, "#f\n");
+
+	Handle results = _eval.eval_h("(cog-execute! nestand)");
+	Handle expected = _eval.eval_h("(Set (Concept \"battery\"))");
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
+
+	boo = _eval.eval("did-call");
+	logger().debug() << "End: " << boo;
+	TS_ASSERT_EQUALS(boo, "#t\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef an
+#undef al

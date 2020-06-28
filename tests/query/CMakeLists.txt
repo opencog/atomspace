@@ -63,6 +63,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(GetStateUTest)
 	ADD_CXXTEST(ClassicalBooleanUTest)
 	ADD_CXXTEST(DeepTypeUTest)
+	ADD_CXXTEST(TypeChoiceUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
@@ -86,10 +87,11 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(PresentUTest)
 	ADD_CXXTEST(AlwaysUTest)
 	ADD_CXXTEST(ScopeUTest)
-	ADD_CXXTEST(NestedPutUTest)
+	ADD_CXXTEST(IllPutUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
-	ADD_CXXTEST(TypeChoiceUTest)
+
+	ADD_CXXTEST(NestedClauseUTest)
 
 	ADD_CXXTEST(NoExceptionUTest)
 
@@ -103,5 +105,5 @@ ADD_CUSTOM_TARGET (qtest
 	DEPENDS tests
 	WORKING_DIRECTORY .
 	COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-	COMMENT "Running pattern-matcher tests..."
+	COMMENT "Running pattern-engine tests..."
 )
