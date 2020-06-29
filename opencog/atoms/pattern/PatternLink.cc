@@ -326,21 +326,23 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		// choice at all. Unwrap and discard.
 		if (1 == h->get_arity())
 		{
+			const PatternTermPtr& term(clause->getOutgoingTerm(0));
 			const Handle& ph = h->getOutgoingAtom(0);
 			Type pht = ph->get_type();
 			if (PRESENT_LINK == pht)
 			{
-				for (const Handle& php : ph->getOutgoingSet())
+				for (const PatternTermPtr& sptm : term->getOutgoingSet())
 				{
+					const Handle& php = sptm->getHandle();
 					if (is_constant(_variables.varset, php)) continue;
-					PatternTermPtr term(make_term_tree(php));
-					term->markLiteral();
-					_pat.pmandatory.push_back(term);
+					pin_term(sptm);
+					sptm->markLiteral();
+					_pat.pmandatory.push_back(sptm);
 				}
 			}
 			else if (not is_constant(_variables.varset, ph))
 			{
-				PatternTermPtr term(make_term_tree(ph));
+				pin_term(term);
 				term->markLiteral();
 				_pat.pmandatory.push_back(term);
 			}
@@ -366,7 +368,8 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		const Handle& inv(h->getOutgoingAtom(0));
 		if (is_constant(_variables.varset, inv)) return true;
 
-		PatternTermPtr term(make_term_tree(inv));
+		const PatternTermPtr& term(clause->getOutgoingTerm(0));
+		pin_term(term);
 		term->markLiteral();
 		term->markAbsent();
 		_pat.absents.push_back(term);
