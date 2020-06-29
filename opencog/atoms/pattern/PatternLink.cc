@@ -304,11 +304,12 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	if ((not reverse and PRESENT_LINK == typ) or
 	    (reverse and ABSENT_LINK == typ))
 	{
-		for (const Handle& ph : h->getOutgoingSet())
+		for (const PatternTermPtr& term : clause->getOutgoingSet())
 		{
+			const Handle& ph = term->getHandle();
 			if (is_constant(_variables.varset, ph)) continue;
 
-			PatternTermPtr term(make_term_tree(ph));
+			pin_term(term);
 			term->markLiteral();
 			_pat.pmandatory.push_back(term);
 		}
