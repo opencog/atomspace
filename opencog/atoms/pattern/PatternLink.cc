@@ -380,10 +380,11 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	if (not reverse and ALWAYS_LINK == typ)
 	    // or (reverse and NEVER_LINK == typ))
 	{
-		for (const Handle& ah: h->getOutgoingSet())
+		for (PatternTermPtr term: clause->getOutgoingSet())
 		{
+			const Handle& ah = term->getQuote();
 			if (is_constant(_variables.varset, ah)) continue;
-			PatternTermPtr term(make_term_tree(ah));
+			pin_term(term);
 			term->markAlways();
 			_pat.always.push_back(term);
 		}
@@ -820,6 +821,20 @@ PatternTermPtr PatternLink::make_term_tree(const Handle& term)
 static inline bool can_eval_or_present(const Handle& h)
 {
 	return can_evaluate(h) or PRESENT_LINK == h->get_type();
+}
+
+void PatternLink::pin_term(const PatternTermPtr& ptm)
+{
+	pin_term_recursive(ptm, ptm);
+}
+
+void PatternLink::pin_term_recursive(const PatternTermPtr& ptm,
+                                     const PatternTermPtr& root)
+{
+	Handle h(ptm->getHandle());
+	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
+	for (const PatternTermPtr& stm : ptm->getOutgoingSet())
+		pin_term_recursive(stm, root);
 }
 
 void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,

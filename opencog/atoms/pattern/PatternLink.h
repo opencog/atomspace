@@ -105,6 +105,14 @@ protected:
 	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
+	PatternTermPtr make_term_tree(const Handle&);
+	void make_term_tree_recursive(const PatternTermPtr&,
+	                              PatternTermPtr&);
+
+	void pin_term(const PatternTermPtr&);
+	void pin_term_recursive(const PatternTermPtr&,
+	                        const PatternTermPtr&);
+
 	bool record_literal(const PatternTermPtr&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
 	bool unbundle_clauses_rec(const PatternTermPtr&,
@@ -126,10 +134,6 @@ protected:
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
 	                          const HandleSetSeq&);
-
-	PatternTermPtr make_term_tree(const Handle&);
-	void make_term_tree_recursive(const PatternTermPtr&,
-	                              PatternTermPtr&);
 
 	void get_clause_variables(const PatternTermSeq&);
 
