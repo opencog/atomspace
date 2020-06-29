@@ -418,7 +418,7 @@ bool PatternLink::record_literal(const Handle& h, bool reverse)
 /// but these are not currently supported in this code base. Supporting
 /// probably requires a "LinearLogicPatternLink" which will borrow much
 /// of the code below, but not all, and work with a LinearTermMixin
-/// callback class to complete the matchig process.
+/// callback class to complete the matching process.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	_pat.body = hbody;
@@ -437,15 +437,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 		for (const Handle& ho : dedupe)
 		{
+			PatternTermPtr clause(make_term_tree(ho));
 			if (not is_constant(_variables.varset, ho) and
 			    not record_literal(ho) and
 			    not unbundle_clauses_rec(ho, connectives))
 			{
-				PatternTermPtr term(make_term_tree(ho));
-				_pat.pmandatory.push_back(term);
+				_pat.pmandatory.push_back(clause);
 
-				if (not term->isVirtual())
-					_fixed.emplace_back(term);
+				if (not clause->isVirtual())
+					_fixed.emplace_back(clause);
 			}
 		}
 		return;
@@ -465,14 +465,14 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// the PresentLink is reached. Whereas the current design
 	// of the clause-walking will run the PresentLink before
 	// running the sequential. So that's a bug.
+	PatternTermPtr clause(make_term_tree(hbody));
 	if (not unbundle_clauses_rec(hbody, connectives) and
 	    not is_constant(_variables.varset, hbody))
 	{
-		PatternTermPtr term(make_term_tree(hbody));
-		_pat.pmandatory.push_back(term);
+		_pat.pmandatory.push_back(clause);
 
-		if (not term->isVirtual())
-			_fixed.emplace_back(term);
+		if (not clause->isVirtual())
+			_fixed.emplace_back(clause);
 	}
 }
 
