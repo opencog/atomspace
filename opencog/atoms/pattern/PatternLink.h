@@ -107,7 +107,7 @@ protected:
 
 	bool record_literal(const Handle&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
-	bool unbundle_clauses_rec(const Handle&,
+	bool unbundle_clauses_rec(const PatternTermPtr&,
 	                          const TypeSet&,
 	                          bool reverse=false);
 

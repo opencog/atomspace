@@ -440,7 +440,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			PatternTermPtr clause(make_term_tree(ho));
 			if (not is_constant(_variables.varset, ho) and
 			    not record_literal(ho) and
-			    not unbundle_clauses_rec(ho, connectives))
+			    not unbundle_clauses_rec(clause, connectives))
 			{
 				_pat.pmandatory.push_back(clause);
 
@@ -466,7 +466,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// of the clause-walking will run the PresentLink before
 	// running the sequential. So that's a bug.
 	PatternTermPtr clause(make_term_tree(hbody));
-	if (not unbundle_clauses_rec(hbody, connectives) and
+	if (not unbundle_clauses_rec(clause, connectives) and
 	    not is_constant(_variables.varset, hbody))
 	{
 		_pat.pmandatory.push_back(clause);
@@ -495,10 +495,11 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 ///   as the predicate) are evaluatable, and cannot be treated as
 ///   Present.
 ///
-bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
+bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
                                        const TypeSet& connectives,
                                        bool reverse)
 {
+	const Handle& bdy = term->getHandle();
 	Type t = bdy->get_type();
 
 	if (connectives.find(t) == connectives.end())
@@ -507,10 +508,11 @@ bool PatternLink::unbundle_clauses_rec(const Handle& bdy,
 	if (NOT_LINK == t) reverse = not reverse;
 
 	bool recorded = true;
-	for (const Handle& ho : bdy->getOutgoingSet())
+	for (const PatternTermPtr& pto : term->getOutgoingSet())
 	{
+		const Handle& ho = pto->getHandle();
 		if (record_literal(ho, reverse)) continue;
-		if (unbundle_clauses_rec(ho, connectives, reverse)) continue;
+		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
 
 		recorded = false;
 	}
