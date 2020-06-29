@@ -105,7 +105,7 @@ protected:
 	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
-	bool record_literal(const Handle&, bool reverse=false);
+	bool record_literal(const PatternTermPtr&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
 	bool unbundle_clauses_rec(const PatternTermPtr&,
 	                          const TypeSet&,

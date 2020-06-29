@@ -295,8 +295,9 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
 /// but are taken as a request to search for and ground these terms in
 /// the form they are given, in their literal form, without evaluation.
-bool PatternLink::record_literal(const Handle& h, bool reverse)
+bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 {
+	const Handle& h = clause->getHandle();
 	Type typ = h->get_type();
 
 	// Pull clauses out of a PresentLink
@@ -439,7 +440,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		{
 			PatternTermPtr clause(make_term_tree(ho));
 			if (not is_constant(_variables.varset, ho) and
-			    not record_literal(ho) and
+			    not record_literal(clause) and
 			    not unbundle_clauses_rec(clause, connectives))
 			{
 				_pat.pmandatory.push_back(clause);
@@ -453,7 +454,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 	// Fish out the PresentLink's, and add them to the
 	// list of clauses to be grounded.
-	if (record_literal(hbody))
+	PatternTermPtr clause(make_term_tree(hbody));
+	if (record_literal(clause))
 		return;
 
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
@@ -465,7 +467,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// the PresentLink is reached. Whereas the current design
 	// of the clause-walking will run the PresentLink before
 	// running the sequential. So that's a bug.
-	PatternTermPtr clause(make_term_tree(hbody));
 	if (not unbundle_clauses_rec(clause, connectives) and
 	    not is_constant(_variables.varset, hbody))
 	{
@@ -510,8 +511,7 @@ bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
 	bool recorded = true;
 	for (const PatternTermPtr& pto : term->getOutgoingSet())
 	{
-		const Handle& ho = pto->getHandle();
-		if (record_literal(ho, reverse)) continue;
+		if (record_literal(pto, reverse)) continue;
 		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
 
 		recorded = false;
