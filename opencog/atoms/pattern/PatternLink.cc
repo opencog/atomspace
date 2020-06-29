@@ -346,9 +346,8 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			return true;
 		}
 
-		PatternTermPtr term(make_term_tree(h));
-		term->markChoice();
-		_pat.pmandatory.push_back(term);
+		clause->markChoice();
+		_pat.pmandatory.push_back(clause);
 		return true;
 	}
 
