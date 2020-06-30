@@ -88,7 +88,7 @@ struct Pattern
 
 	/// The absent clauses must be ungroundable; they must literally
 	/// be absent. They are always literal, and are never evaluatable
-	/// or virtual.
+	/// or virtual. These are the "negative literals".
 	PatternTermSeq absents;
 
 	/// The always (for-all) clauses have to always be grounded the same

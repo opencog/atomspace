@@ -29,11 +29,14 @@ std::string Pattern::to_string(const std::string& indent) const
 	ss << indent << "Pattern: " << redex_name << std::endl;
 
 	if (body)
-		ss << indent << "PatternLink body: " << body->to_string() << std::endl;
+		ss << indent << "PatternLink with body"
+		   << body->to_short_string() << std::endl;
 	else
 		ss << indent << "No pattern body" << std::endl;
 
-	// FIXME Add more printing here.
+	ss << indent << "pmandatory:\n" << oc_to_string(pmandatory) << std::endl;
+	ss << indent << "absents:\n" << oc_to_string(absents) << std::endl;
+	ss << indent << "always:\n" << oc_to_string(always) << std::endl;
 
 	return ss.str();
 }
