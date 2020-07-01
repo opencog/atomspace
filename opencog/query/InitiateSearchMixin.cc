@@ -259,6 +259,27 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 }
 
 /* ======================================================== */
+
+const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
+{
+	// Sometimes, the number of mandatory clauses can be zero...
+	// or they might all be evaluatable.  In this case, its OK to
+	// start searching with an optional clause. But if there ARE
+	// mandatories, we must NOT start search on an optional, since,
+	// after all, it might be absent!
+	bool try_optionals = true;
+	for (const PatternTermPtr& m : _pattern->pmandatory)
+	{
+		if (not m->hasAnyEvaluatable())
+		{
+			try_optionals = false;
+			break;
+		}
+	}
+
+	return try_optionals ?  _pattern->absents :  _pattern->pmandatory;
+}
+
 /**
  * Given a set of clauses, create a list of starting points for a
  * search. This set of starting points is called a `neighborhood`;
@@ -287,30 +308,10 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
  * or if all clauses consist only of VariableNodes or GlobNodes, so
  * that there's nowhere to start the search.
  */
-bool InitiateSearchMixin::setup_neighbor_search(void)
+bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 {
-	// If there are no non-constant clauses, abort; will use
-	// no_search() instead.
-	if (_pattern->pmandatory.empty() and _pattern->absents.empty())
-		return false;
-
-	// Sometimes, the number of mandatory clauses can be zero...
-	// or they might all be evaluatable.  In this case, its OK to
-	// start searching with an optional clause. But if there ARE
-	// mandatories, we must NOT start search on an optional, since,
-	// after all, it might be absent!
-	bool try_optionals = true;
-	for (const PatternTermPtr& m : _pattern->pmandatory)
-	{
-		if (not m->hasAnyEvaluatable())
-		{
-			try_optionals = false;
-			break;
-		}
-	}
-
-	const PatternTermSeq& clauses =
-		try_optionals ?  _pattern->absents :  _pattern->pmandatory;
+	// If there are no clauses, abort; will use no_search() instead.
+	if (clauses.empty()) return false;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -504,7 +505,8 @@ bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc)
 bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
 {
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
-	if (setup_neighbor_search())
+	const PatternTermSeq& clauses = get_clause_list();
+	if (setup_neighbor_search(clauses))
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
