@@ -65,7 +65,7 @@ void DualLink::init(void)
 	// in the PatternMatcherEngine. We could make the engine
 	// smarter, at the cost of slowing down others. So we
 	// won't do that. We'll just hack it up here.
-	get_clause_variables(_pat.pmandatory);
+	clauses_get_variables(_pat.pmandatory);
 }
 
 DualLink::DualLink(const HandleSeq&& hseq, Type t)

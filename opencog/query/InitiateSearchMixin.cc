@@ -259,9 +259,30 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 }
 
 /* ======================================================== */
+
+const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
+{
+	// Sometimes, the number of mandatory clauses can be zero...
+	// or they might all be evaluatable.  In this case, its OK to
+	// start searching with an optional clause. But if there ARE
+	// mandatories, we must NOT start search on an optional, since,
+	// after all, it might be absent!
+	bool try_optionals = true;
+	for (const PatternTermPtr& m : _pattern->pmandatory)
+	{
+		if (not m->hasAnyEvaluatable())
+		{
+			try_optionals = false;
+			break;
+		}
+	}
+
+	return try_optionals ?  _pattern->absents :  _pattern->pmandatory;
+}
+
 /**
  * Given a set of clauses, create a list of starting points for a
- * search. This set of starting points is called a `neghborhood`;
+ * search. This set of starting points is called a `neighborhood`;
  * it is defined as all of the atoms that can be reached from a
  * given (non-variable) atom, by following either it's incoming or
  * its outgoing set.
@@ -287,30 +308,10 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
  * or if all clauses consist only of VariableNodes or GlobNodes, so
  * that there's nowhere to start the search.
  */
-bool InitiateSearchMixin::setup_neighbor_search(void)
+bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 {
-	// If there are no non-constant clauses, abort; will use
-	// no_search() instead.
-	if (_pattern->pmandatory.empty() and _pattern->absents.empty())
-		return false;
-
-	// Sometimes, the number of mandatory clauses can be zero...
-	// or they might all be evaluatable.  In this case, its OK to
-	// start searching with an optional clause. But if there ARE
-	// mandatories, we must NOT start search on an optional, since,
-	// after all, it might be absent!
-	bool try_optionals = true;
-	for (const PatternTermPtr& m : _pattern->pmandatory)
-	{
-		if (not m->hasAnyEvaluatable())
-		{
-			try_optionals = false;
-			break;
-		}
-	}
-
-	const PatternTermSeq& clauses =
-		try_optionals ?  _pattern->absents :  _pattern->pmandatory;
+	// If there are no clauses, abort; will use no_search() instead.
+	if (clauses.empty()) return false;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -478,8 +479,72 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	_search_set.clear();
 	_choices.clear();
 
+	// Fallback to the legacy mode.
+	if (1 != _pattern->pmandatory.size())
+		return legacy_search(pmc);
+
+	// If there's nothing to disjoin, then conjoin.
+	const PatternTermPtr& clause = _pattern->pmandatory[0];
+	Type t = clause->getHandle()->get_type();
+	if (not (OR_LINK == t or CHOICE_LINK == t))
+		return legacy_search(pmc);
+
+	return disjoin_search(pmc, clause->getOutgoingSet());
+}
+
+bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc,
+                                         const PatternTermSeq& clauses)
+{
+return legacy_search(pmc);
+	// There are multiple parts.
+	// We want to try each one as a stand-alone search.
+	bool found = false;
+	for (const PatternTermPtr& term : clauses)
+	{
+		_root = PatternTerm::UNDEFINED;
+		_starter_term = Handle::UNDEFINED;
+		_curr_clause = PatternTerm::UNDEFINED;
+		_search_set.clear();
+		_choices.clear();
+
+		found |= conjoin_search(pmc, {term});
+	}
+	return found;
+}
+
+bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc,
+                                         const PatternTermSeq& clauses)
+{
+	DO_LOG({logger().fine("------- Enter conjoin_search -------");})
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
-	if (setup_neighbor_search())
+	if (setup_neighbor_search(clauses))
+		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses ... !?
+	DO_LOG({logger().fine("Cannot use node-neighbor search, use deep-type search");})
+	if (setup_deep_type_search(clauses))
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses consist entirely of
+	// variables! Which can happen (there is a unit test for this,
+	// the LoopUTest), and so instead, we search based on the link
+	// types that occur in the atomspace.
+	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
+	if (setup_link_type_search(clauses))
+		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
+
+	return false;
+}
+
+bool InitiateSearchMixin::legacy_search(PatternMatchCallback& pmc)
+{
+	const PatternTermSeq& clauses = get_clause_list();
+
+	DO_LOG({logger().fine("------- Enter legacy_search -------");})
+	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
+	if (setup_neighbor_search(clauses))
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
 	// If we are here, then we could not find a clause at which to
@@ -496,7 +561,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	}
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
-	if (setup_deep_type_search())
+	if (setup_deep_type_search(clauses))
 		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
@@ -505,7 +570,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
-	if (setup_link_type_search())
+	if (setup_link_type_search(clauses))
 		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
@@ -515,7 +580,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
-	if (setup_variable_search())
+	if (setup_variable_search(_pattern->pmandatory))
 		return search_loop(pmc, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 
 	return false;
@@ -634,7 +699,7 @@ static PatternTermPtr root_of_term(const Handle& term,
  *
  * This is heavily used by the JoinLink mechanism.
  */
-bool InitiateSearchMixin::setup_deep_type_search()
+bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 {
 	if (_variables->_typemap.size() == 0)
 		return false;
@@ -654,7 +719,7 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = tit.first;
-		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		PatternTermPtr root = root_of_term (var, clauses);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
@@ -692,7 +757,7 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = tit.first;
-		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		PatternTermPtr root = root_of_term (var, clauses);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
@@ -728,10 +793,8 @@ bool InitiateSearchMixin::setup_deep_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchMixin::setup_link_type_search()
+bool InitiateSearchMixin::setup_link_type_search(const PatternTermSeq& clauses)
 {
-	const PatternTermSeq& clauses = _pattern->pmandatory;
-
 	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
@@ -789,10 +852,8 @@ bool InitiateSearchMixin::setup_link_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchMixin::setup_variable_search(void)
+bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 {
-	const PatternTermSeq& clauses = _pattern->pmandatory;
-
 	// Some search patterns simply do not have any groundable
 	// clauses in them. This is one common reason why a variable-
 	// based search is being performed.

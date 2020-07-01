@@ -92,9 +92,9 @@ void PatternLink::common_init(void)
 	if (1 == _num_comps)
 	   make_connectivity_map();
 
-	get_clause_variables(_pat.pmandatory);
-	get_clause_variables(_pat.absents);
-	get_clause_variables(_pat.always);
+	clauses_get_variables(_pat.pmandatory);
+	clauses_get_variables(_pat.absents);
+	clauses_get_variables(_pat.always);
 
 	// Find prunable terms.
 	locate_cacheable(_pat.pmandatory);
@@ -231,8 +231,8 @@ PatternLink::PatternLink(const HandleSet& vars,
 	make_connectivity_map();
 	_pat.redex_name = "Unpacked component of a virtual link";
 
-	get_clause_variables(_pat.pmandatory);
-	get_clause_variables(_pat.absents);
+	clauses_get_variables(_pat.pmandatory);
+	clauses_get_variables(_pat.absents);
 }
 
 /* ================================================================= */
@@ -347,6 +347,13 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 				_pat.pmandatory.push_back(term);
 			}
 			return true;
+		}
+
+		// Each of the choices must be findable by the pattern engine.
+		for (const PatternTermPtr& term : clause->getOutgoingSet())
+		{
+			pin_term(term);
+			get_clause_variables(term);
 		}
 
 		clause->markChoice();
@@ -586,26 +593,30 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 
 /* ================================================================= */
 
-/// get_clause_variables -- for every clause, record the variables in it.
+/// get_clause_variables -- Make note of the variables in this term.
 /// This is used at runtime, to determine if the clause has been fully
 /// grounded (or not).
-void PatternLink::get_clause_variables(const PatternTermSeq& clauses)
+void PatternLink::get_clause_variables(const PatternTermPtr& ptm)
+{
+	const Handle& hcl = ptm->getHandle();
+	HandleSet vset = get_free_variables(hcl);
+
+	// Put them into a sequence; any fixed sequence will do.
+	HandleSeq vseq;
+	for (const Handle& v: vset)
+	{
+		if (_variables.varset.end() != _variables.varset.find(v))
+			vseq.emplace_back(v);
+	}
+
+	_pat.clause_variables.insert({ptm, vseq});
+}
+
+/// get_clause_variables -- for every clause, record the variables in it.
+void PatternLink::clauses_get_variables(const PatternTermSeq& clauses)
 {
 	for (const PatternTermPtr& ptm : clauses)
-	{
-		const Handle& hcl = ptm->getHandle();
-		HandleSet vset = get_free_variables(hcl);
-
-		// Put them into a sequence; any fixed sequence will do.
-		HandleSeq vseq;
-		for (const Handle& v: vset)
-		{
-			if (_variables.varset.end() != _variables.varset.find(v))
-				vseq.emplace_back(v);
-		}
-
-		_pat.clause_variables.insert({ptm, vseq});
-	}
+		get_clause_variables(ptm);
 }
 
 /* ================================================================= */

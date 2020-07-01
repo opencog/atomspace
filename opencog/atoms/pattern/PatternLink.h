@@ -135,7 +135,8 @@ protected:
 	void check_satisfiability(const HandleSet&,
 	                          const HandleSetSeq&);
 
-	void get_clause_variables(const PatternTermSeq&);
+	void get_clause_variables(const PatternTermPtr&);
+	void clauses_get_variables(const PatternTermSeq&);
 
 	void init(void);
 	void common_init(void);

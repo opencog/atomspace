@@ -87,12 +87,17 @@ protected:
 	virtual void find_rarest(const PatternTermPtr&, Handle&,
 	                         size_t&, Quotation quotation=Quotation());
 
-	bool setup_neighbor_search(void);
-	bool setup_no_search(void);
-	bool setup_deep_type_search(void);
-	bool setup_link_type_search(void);
-	bool setup_variable_search(void);
+	const PatternTermSeq& get_clause_list(void);
 
+	bool setup_neighbor_search(const PatternTermSeq&);
+	bool setup_no_search(void);
+	bool setup_deep_type_search(const PatternTermSeq&);
+	bool setup_link_type_search(const PatternTermSeq&);
+	bool setup_variable_search(const PatternTermSeq&);
+
+	bool disjoin_search(PatternMatchCallback&, const PatternTermSeq&);
+	bool conjoin_search(PatternMatchCallback&, const PatternTermSeq&);
+	bool legacy_search(PatternMatchCallback&);
 	bool choice_loop(PatternMatchCallback&, const std::string);
 	bool search_loop(PatternMatchCallback&, const std::string);
 	AtomSpace *_as;
