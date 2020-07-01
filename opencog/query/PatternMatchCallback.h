@@ -348,6 +348,12 @@ class PatternMatchCallback
 		virtual bool search_finished(bool done) { return done; }
 
 		/**
+		 * Called to obtain the next clause to explore.
+		 * Returns false if there are no more; else returns true.
+		 */
+		virtual bool get_next_clause(PatternTermPtr& clause, Handle& joint) = 0;
+
+		/**
 		 * Called before search initiation, to indicate the pattern
 		 * that will be searched for, and the variables to be grounded
 		 * during the search.

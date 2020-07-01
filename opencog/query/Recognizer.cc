@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/query/PatternMatchEngine.h>
 #include "Recognizer.h"
@@ -87,6 +89,11 @@ bool Recognizer::perform_search(PatternMatchCallback& pmc)
 		if (found) return true;
 	}
 	return false;
+}
+
+bool Recognizer::get_next_clause(PatternTermPtr& clause, Handle& joint)
+{
+	OC_ASSERT(false, "Ohhhh noooo!");
 }
 
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)

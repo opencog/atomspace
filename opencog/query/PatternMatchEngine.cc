@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>

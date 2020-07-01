@@ -55,6 +55,10 @@ public:
 	virtual void set_pattern(const Variables&, const Pattern&);
 	virtual bool perform_search(PatternMatchCallback&);
 
+	virtual void push(void);
+	virtual void pop(void);
+	virtual bool get_next_clause(PatternTermPtr&, Handle&);
+
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
@@ -68,6 +72,10 @@ protected:
 	PatternTermPtr _root;
 	Handle _starter_term;
 	HandleSeq _search_set;
+
+	typedef std::set<PatternTermPtr> IssuedSet;
+	IssuedSet _issued;     // stacked on _issued_stack
+	std::stack<IssuedSet> _issued_stack;
 
 	struct Choice
 	{

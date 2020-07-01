@@ -78,12 +78,13 @@ class Recognizer :
 			TermMatchMixin::set_pattern(vars, pat);
 		}
 
-		virtual bool perform_search(PatternMatchCallback&);
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
+		virtual bool perform_search(PatternMatchCallback&);
+		virtual bool get_next_clause(PatternTermPtr&, Handle&);
 };
 
 } // namespace opencog

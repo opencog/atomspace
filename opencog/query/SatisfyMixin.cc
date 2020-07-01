@@ -95,6 +95,10 @@ class PMCGroundings : public SatisfyMixin
 		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
+		bool get_next_clause(PatternTermPtr& clause, Handle& joint)
+		{
+			return _cb.get_next_clause(clause, joint);
+		}
 		void set_pattern(const Variables& vars,
 		                 const Pattern& pat)
 		{

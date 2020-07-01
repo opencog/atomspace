@@ -2,6 +2,7 @@
 # Build the query-engine library
 ADD_LIBRARY(query-engine
 	InitiateSearchMixin.cc
+	NextSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
 	RewriteMixin.cc
