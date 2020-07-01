@@ -483,6 +483,21 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 
 bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc)
 {
+	// Fallback to the legacy mode.
+	if (1 != _pattern->pmandatory.size())
+		return conjoin_search(pmc);
+
+	// If there's nothing to disjoin, then conjoin.
+	const PatternTermPtr& clause = _pattern->pmandatory[0];
+	Type t = clause->getHandle()->get_type();
+	if (not (OR_LINK == t or CHOICE_LINK == t))
+		return conjoin_search(pmc);
+
+	// There are multiple parts.
+	// We want to try each one as a stand-alone search.
+	for (const PatternTermPtr& term : clause->getOutgoingSet())
+	{
+	}
 	return conjoin_search(pmc);
 }
 
