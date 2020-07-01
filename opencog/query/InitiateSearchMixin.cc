@@ -523,7 +523,7 @@ bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
 	}
 
 	DO_LOG({logger().fine("Cannot use no-var search, use deep-type search");})
-	if (setup_deep_type_search())
+	if (setup_deep_type_search(clauses))
 		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
 
 	// If we are here, then we could not find a clause at which to
@@ -532,7 +532,7 @@ bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
 	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
-	if (setup_link_type_search())
+	if (setup_link_type_search(clauses))
 		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
 
 	// The URE Reasoning case: if we found nothing, then there are no
@@ -542,7 +542,7 @@ bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
 	// and that's all. We deal with this in the variable_search()
 	// method.
 	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
-	if (setup_variable_search())
+	if (setup_variable_search(_pattern->pmandatory))
 		return search_loop(pmc, "zzzzzzzzzzz variable_search zzzzzzzzzzz");
 
 	return false;
@@ -661,7 +661,7 @@ static PatternTermPtr root_of_term(const Handle& term,
  *
  * This is heavily used by the JoinLink mechanism.
  */
-bool InitiateSearchMixin::setup_deep_type_search()
+bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 {
 	if (_variables->_typemap.size() == 0)
 		return false;
@@ -681,7 +681,7 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = tit.first;
-		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		PatternTermPtr root = root_of_term (var, clauses);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
@@ -719,7 +719,7 @@ bool InitiateSearchMixin::setup_deep_type_search()
 		// What clause is the variable in? If its not in a mandatory
 		// term, then things are confusing ...
 		const Handle& var = tit.first;
-		PatternTermPtr root = root_of_term (var, _pattern->pmandatory);
+		PatternTermPtr root = root_of_term (var, clauses);
 		if (PatternTerm::UNDEFINED == root) continue;
 
 		DO_LOG({LAZY_LOG_FINE
@@ -755,10 +755,8 @@ bool InitiateSearchMixin::setup_deep_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchMixin::setup_link_type_search()
+bool InitiateSearchMixin::setup_link_type_search(const PatternTermSeq& clauses)
 {
-	const PatternTermSeq& clauses = _pattern->pmandatory;
-
 	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
@@ -816,10 +814,8 @@ bool InitiateSearchMixin::setup_link_type_search()
  * method returns true. If it cannot find any starting points, this
  * returns false.
  */
-bool InitiateSearchMixin::setup_variable_search(void)
+bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 {
-	const PatternTermSeq& clauses = _pattern->pmandatory;
-
 	// Some search patterns simply do not have any groundable
 	// clauses in them. This is one common reason why a variable-
 	// based search is being performed.

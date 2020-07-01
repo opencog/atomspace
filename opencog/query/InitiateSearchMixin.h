@@ -91,9 +91,9 @@ protected:
 
 	bool setup_neighbor_search(const PatternTermSeq&);
 	bool setup_no_search(void);
-	bool setup_deep_type_search(void);
-	bool setup_link_type_search(void);
-	bool setup_variable_search(void);
+	bool setup_deep_type_search(const PatternTermSeq&);
+	bool setup_link_type_search(const PatternTermSeq&);
+	bool setup_variable_search(const PatternTermSeq&);
 
 	bool disjoin_search(PatternMatchCallback&);
 	bool conjoin_search(PatternMatchCallback&);
