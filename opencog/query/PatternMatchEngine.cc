@@ -2000,11 +2000,11 @@ bool PatternMatchEngine::do_next_clause(void)
 	Handle joiner;
 
 	clause_stacks_push();
-	get_next_untried_clause(_issued, do_clause, joiner);
+	bool have_more = _pmc.get_next_clause(var_grounding, do_clause, joiner);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (PatternTerm::UNDEFINED == do_clause)
+	if (not have_more)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		logmsg("==================== FINITO! accepted=", found);
@@ -2032,9 +2032,12 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	clause_accepted = false;
 	Handle hgnd(var_grounding[joiner]);
-	OC_ASSERT(nullptr != hgnd,
-	         "Error: joining handle has not been grounded yet!");
-
+	if (nullptr == hgnd)
+	{
+		// Hack for clauses with no variables...
+		var_grounding[joiner] = joiner;
+		hgnd = joiner;
+	}
 	bool found = explore_clause(joiner, hgnd, do_clause);
 
 	// If we are here, and found is false, then we've exhausted all
@@ -2063,9 +2066,9 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		get_next_untried_clause(_issued, do_clause, joiner);
+		have_more = _pmc.get_next_clause(var_grounding, do_clause, joiner);
 
-		if (PatternTerm::UNDEFINED == do_clause)
+		if (not have_more)
 		{
 			logmsg("==================== FINITO BANDITO!");
 			DO_LOG({log_solution(var_grounding, clause_grounding);})
@@ -2117,7 +2120,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	var_solutn_stack.push(var_grounding);
 	_clause_solutn_stack.push(clause_grounding);
 
-	_issued_stack.push(_issued);
 	choice_stack.push(_choice_state);
 
 	perm_push();
@@ -2149,7 +2151,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	// The grounding stacks are handled differently.
 	POPSTK(_clause_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(_issued_stack, _issued);
 
 	POPSTK(choice_stack, _choice_state);
 
@@ -2173,14 +2174,12 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	// Currently, only GlobUTest fails when this is uncommented.
 	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
-	OC_ASSERT(0 == _issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == _perm_stack.size());
 	OC_ASSERT(0 == _perm_stepper_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while (!_issued_stack.empty()) _issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!_perm_stack.empty()) _perm_stack.pop();
 	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
@@ -2288,7 +2287,6 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 {
 	clause_stacks_clear();
 	clear_current_state();
-	_issued.insert(clause);
 	_nack_cache.clear();
 
 	bool halt = explore_clause(term, grnd, clause);
@@ -2554,8 +2552,6 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// GlobNode state
 	_glob_state.clear();
-
-	_issued.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)

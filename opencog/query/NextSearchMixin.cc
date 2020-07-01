@@ -50,12 +50,6 @@ void InitiateSearchMixin::pop(void)
 	_issued_stack.pop();
 }
 
-bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
-                                          Handle& joint)
-{
-	OC_ASSERT(false, "Oh nooooo!");
-}
-
 /**
  * Search for the next untried, (thus ungrounded, unsolved) clause.
  *
@@ -87,36 +81,44 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
  *
  * Thus, we use a helper function to broaden the search in each case.
  */
-void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued,
-                                                 PatternTermPtr& next_clause,
-                                                 Handle& next_joint)
+bool InitiateSearchMixin::get_next_clause(const GroundingMap& var_grounding,
+                                          PatternTermPtr& clause,
+                                          Handle& joint)
+{
+	get_next_untried_clause(var_grounding, clause, joint);
+	return joint != nullptr;
+}
+
+void InitiateSearchMixin::get_next_untried_clause(const GroundingMap& var_grounding,
+                                                  PatternTermPtr& next_clause,
+                                                  Handle& next_joint)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(issued, next_clause, next_joint, false, false)) return;
+	if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
-	if (_pat->have_evaluatables)
+	if (_pattern->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(issued, next_clause, next_joint, true, false)) return;
+		if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, true, false)) return;
 	}
 
 	// Try again, this time, considering the absent clauses.
-	if (not _pat->absents.empty())
+	if (not _pattern->absents.empty())
 	{
-		if (get_next_thinnest_clause(issued, next_clause, next_joint, false, true)) return;
-		if (_pat->have_evaluatables)
+		if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, false, true)) return;
+		if (_pattern->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(issued, next_clause, next_joint, true, true)) return;
+			if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, true, true)) return;
 		}
 	}
 
 	// Now loop over all for-all clauses.
 	// All variables must neccessarily be grounded at this point.
-	for (const PatternTermPtr& root : _pat->always)
+	for (const PatternTermPtr& root : _pattern->always)
 	{
-		if (issued.end() != issued.find(root)) continue;
-		issued.insert(root);
+		if (_issued.end() != _issued.find(root)) continue;
+		_issued.insert(root);
 		next_clause = root;
 		for (const Handle &v : _variables->varset)
 		{
@@ -130,9 +132,9 @@ void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued,
 	}
 
 	// Make sure all clauses have been grounded.
-	for (const PatternTermPtr& root : _pat->pmandatory)
+	for (const PatternTermPtr& root : _pattern->pmandatory)
 	{
-		if (issued.end() == issued.find(root))
+		if (_issued.end() == _issued.find(root))
 			throw RuntimeException(TRACE_INFO,
 				"BUG! Still have ungrounded clauses!!");
 	}
@@ -163,8 +165,8 @@ void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued,
 // Danger: this assumes a suitable dataset, as otherwise, the cost
 // of this "optimization" can add un-necessarily to the overhead.
 //
-unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
-                                           const HandleSet& live)
+unsigned int InitiateSearchMixin::thickness(const PatternTermPtr& clause,
+                                            const HandleSet& live)
 {
 	// If there are only zero or one ungrounded vars, then any clause
 	// will do. Blow this pop stand.
@@ -187,29 +189,29 @@ unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
 /// return it, so that it is used as the pivot point to the next
 /// ungrounded clause.  If there is no such term, then just  return the
 /// glob.
-Handle PatternMatchEngine::get_glob_embedding(IssuedSet& issued,
-                                              const Handle& glob)
+Handle InitiateSearchMixin::get_glob_embedding(const GroundingMap& var_grounding,
+                                               const Handle& glob)
 {
 	// If the glob is in only one clause, there is no connectivity map.
-	if (0 == _pat->connectivity_map.count(glob)) return glob;
+	if (0 == _pattern->connectivity_map.count(glob)) return glob;
 
 	// Find some clause, any clause at all, containg the glob,
 	// that has not been grounded so far. We need to do this because
 	// the glob might appear in three clauses, with two of them
 	// grounded by a common term, and the third ungrounded
 	// with no common term.
-	const auto& clauses =  _pat->connectivity_map.equal_range(glob);
+	const auto& clauses =  _pattern->connectivity_map.equal_range(glob);
 	auto clpr = clauses.first;
 	for (; clpr != clauses.second; clpr++)
 	{
-		if (issued.end() == issued.find(clpr->second)) break;
+		if (_issued.end() == _issued.find(clpr->second)) break;
 	}
 
 	// Glob is not in any ungrounded clauses.
 	if (clpr == clauses.second) return glob;
 
 	std::pair<Handle, PatternTermPtr> glbt({glob, clpr->second});
-	const auto& ptms = _pat->connected_terms_map.find(glbt);
+	const auto& ptms = _pattern->connected_terms_map.find(glbt);
 	const PatternTermPtr& ptm = ptms->second[0];
 
 	// Here, ptm is the glob itself. It will almost surely
@@ -222,7 +224,7 @@ Handle PatternMatchEngine::get_glob_embedding(IssuedSet& issued,
 	// can be used as a pivot.
 	const Handle& embed = parent->getHandle();
 	if ((var_grounding.end() != var_grounding.find(embed)) and
-	    (1 < _pat->connectivity_map.count(embed)))
+	    (1 < _pattern->connectivity_map.count(embed)))
 		return embed;
 
 	return glob;
@@ -234,11 +236,11 @@ Handle PatternMatchEngine::get_glob_embedding(IssuedSet& issued,
 /// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
-                                                  PatternTermPtr& next_clause,
-                                                  Handle& next_joint,
-                                                  bool search_eval,
-                                                  bool search_absents)
+bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_grounding,
+                                                   PatternTermPtr& next_clause,
+                                                   Handle& next_joint,
+                                                   bool search_eval,
+                                                   bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -268,8 +270,8 @@ bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
 			// that term as the joiner.
 			if (GLOB_NODE == v->get_type())
 			{
-				Handle embed = get_glob_embedding(issued, v);
-				const Handle& tg = var_grounding[embed];
+				Handle embed = get_glob_embedding(var_grounding, v);
+				const Handle& tg = var_grounding.find(embed)->second;
 				std::size_t incoming_set_size = tg->getIncomingSetSize();
 				thick_vars.insert(std::make_pair(incoming_set_size, embed));
 			}
@@ -296,11 +298,11 @@ bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
 
 		if (pursue_thickness > thinnest_joint) break;
 
-		const auto& root_list = _pat->connectivity_map.equal_range(pursue);
+		const auto& root_list = _pattern->connectivity_map.equal_range(pursue);
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
 			const PatternTermPtr& root = it->second;
-			if ((issued.end() == issued.find(root))
+			if ((_issued.end() == _issued.find(root))
 			        and (search_eval or not root->hasAnyEvaluatable())
 			        and (search_absents or not root->isAbsent()))
 			{
@@ -323,20 +325,18 @@ bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
 	// earlier, they can always use a SequentialAndLink.
 	if (not unsolved and search_eval)
 	{
-		for (const PatternTermPtr& root : _pat->pmandatory)
+		for (const PatternTermPtr& root : _pattern->pmandatory)
 		{
-			if (issued.end() != issued.find(root)) continue;
+			if (_issued.end() != _issued.find(root)) continue;
 
 			// Clauses with no variables are (by definition)
 			// evaluatable. So we don't check if they're evaluatable.
-			const HandleSeq& varseq = _pat->clause_variables.at(root);
+			const HandleSeq& varseq = _pattern->clause_variables.at(root);
 			if (0 == varseq.size())
 			{
 				unsolved_clause = root;
 				joint = root->getHandle();
 				unsolved = true;
-				// Oh bother. Bit of a hack.
-				var_grounding[joint] = joint;
 				break;
 			}
 		}
@@ -353,7 +353,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
 
 		if (unsolved_clause)
 		{
-			issued.insert(unsolved_clause);
+			_issued.insert(unsolved_clause);
 			return true;
 		}
 	}
@@ -361,7 +361,4 @@ bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
 	return false;
 }
 
-/* ======================================================== */
-
-/* ===================== END OF FILE ===================== */
 /* ===================== END OF FILE ===================== */

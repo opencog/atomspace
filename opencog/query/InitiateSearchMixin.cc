@@ -1065,6 +1065,8 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			             << "\n       Loop candidate ("
 			             << ++i << "/" << hsz << "):\n"
 			             << h->to_short_string("       ");})
+			while (0 < _issued_stack.size()) _issued_stack.pop();
+			_issued.insert(_root);
 			bool found = pme.explore_neighborhood(_starter_term, h, _root);
 			if (found) return true;
 		}
@@ -1097,6 +1099,8 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
+			_issued_stack.clear();
+			_issued.insert(_root);
 			if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 		});
 
@@ -1129,6 +1133,9 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		             << "\n       Loop candidate ("
 		             << ++i << "/" << hsz << "):\n"
 		             << h->to_short_string("       ");})
+
+		_issued_stack.clear();
+		_issued.insert(_root);
 		if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 	}
 	_recursing = false;

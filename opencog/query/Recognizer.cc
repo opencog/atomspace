@@ -91,9 +91,10 @@ bool Recognizer::perform_search(PatternMatchCallback& pmc)
 	return false;
 }
 
-bool Recognizer::get_next_clause(PatternTermPtr& clause, Handle& joint)
+bool Recognizer::get_next_clause(const GroundingMap& var_grounding,
+                                 PatternTermPtr& clause, Handle& joint)
 {
-	OC_ASSERT(false, "Ohhhh noooo!");
+	return false;
 }
 
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)

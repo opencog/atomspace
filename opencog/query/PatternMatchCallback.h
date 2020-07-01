@@ -325,10 +325,10 @@ class PatternMatchCallback
 		/**
 		 * Called when the search has completed. In principle, this
 		 * callback is not really needed, since the `perform_search()`
-		 * callback "knows" when the search is completed: its completed when
-		 * it returns. In practice, the implementation is much simpler if
-		 * there is a distinct callback to announce completion.  The argument
-		 * is the return value from `perform_search()`.
+		 * callback "knows" when the search is completed: its completed
+		 * when it returns. In practice, the implementation is much
+		 * simpler if there is a distinct callback to announce completion.
+		 * The argument is the return value from `perform_search()`.
 		 */
 		virtual bool search_finished(bool done) { return done; }
 
@@ -336,7 +336,9 @@ class PatternMatchCallback
 		 * Called to obtain the next clause to explore.
 		 * Returns false if there are no more; else returns true.
 		 */
-		virtual bool get_next_clause(PatternTermPtr& clause, Handle& joint) = 0;
+		virtual bool get_next_clause(const GroundingMap& var_grounding,
+		                             PatternTermPtr& clause,
+		                             Handle& joint) = 0;
 
 		/**
 		 * Called after a top-level clause (tree) has been fully

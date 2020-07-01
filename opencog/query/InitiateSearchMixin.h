@@ -57,7 +57,8 @@ public:
 
 	virtual void push(void);
 	virtual void pop(void);
-	virtual bool get_next_clause(PatternTermPtr&, Handle&);
+	virtual bool get_next_clause(const GroundingMap&,
+	                             PatternTermPtr&, Handle&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -72,10 +73,6 @@ protected:
 	PatternTermPtr _root;
 	Handle _starter_term;
 	HandleSeq _search_set;
-
-	typedef std::set<PatternTermPtr> IssuedSet;
-	IssuedSet _issued;     // stacked on _issued_stack
-	std::stack<IssuedSet> _issued_stack;
 
 	struct Choice
 	{
@@ -108,6 +105,20 @@ protected:
 	bool legacy_search(PatternMatchCallback&);
 	bool choice_loop(PatternMatchCallback&, const std::string);
 	bool search_loop(PatternMatchCallback&, const std::string);
+
+	// --------------------------------------------
+	// Methods and state that select the next clause to be grounded.
+	typedef std::set<PatternTermPtr> IssuedSet;
+
+	// Set of clauses for which a grounding is currently being attempted.
+	IssuedSet _issued;     // stacked on _issued_stack
+	std::stack<IssuedSet> _issued_stack;
+
+	void get_next_untried_clause(const GroundingMap&, PatternTermPtr&, Handle&);
+	Handle get_glob_embedding(const GroundingMap&, const Handle&);
+	bool get_next_thinnest_clause(const GroundingMap&, PatternTermPtr&, Handle&, bool, bool);
+	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
+
 	AtomSpace *_as;
 };
 
