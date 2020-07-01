@@ -1997,12 +1997,16 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 /// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
+	// Keep the next joint and the next clause on the C++ stack.
+	PatternTermPtr do_clause;
+	Handle joiner;
+
 	clause_stacks_push();
-	get_next_untried_clause(_issued, _next_clause, _next_joint);
+	get_next_untried_clause(_issued, do_clause, joiner);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (PatternTerm::UNDEFINED == _next_clause)
+	if (PatternTerm::UNDEFINED == do_clause)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		logmsg("==================== FINITO! accepted=", found);
@@ -2010,11 +2014,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		clause_stacks_pop();
 		return found;
 	}
-
-	// Keep the joint and the clause on the C++ stack, becuase both
-	// `next_joint` and `next_clause` get trashed during recursion!
-	Handle joiner = _next_joint;
-	PatternTermPtr do_clause = _next_clause;
 
 	logmsg("Next clause is", do_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
@@ -2053,9 +2052,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (_next_clause->isAbsent()))
+	       (do_clause->isAbsent()))
 	{
-		Handle curr_root = _next_clause->getHandle();
+		Handle curr_root = do_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		logmsg("Exhausted search for optional clause, cb=", match);
@@ -2066,9 +2065,9 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		get_next_untried_clause(_issued, _next_clause, _next_joint);
+		get_next_untried_clause(_issued, do_clause, joiner);
 
-		if (PatternTerm::UNDEFINED == _next_clause)
+		if (PatternTerm::UNDEFINED == do_clause)
 		{
 			logmsg("==================== FINITO BANDITO!");
 			DO_LOG({log_solution(var_grounding, clause_grounding);})
@@ -2076,9 +2075,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 		else
 		{
-			// Place a copy on stack, so its not trashed during recursion.
-			joiner = _next_joint;
-			do_clause = _next_clause;
 			logmsg("Next optional clause is", do_clause->getHandle());
 
 			// Now see if this optional clause has any solutions,

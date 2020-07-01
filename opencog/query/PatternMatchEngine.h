@@ -171,8 +171,7 @@ private:
 	Handle get_glob_embedding(IssuedSet&, const Handle&);
 	bool get_next_thinnest_clause(IssuedSet&, PatternTermPtr&, Handle&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
-	PatternTermPtr _next_clause;
-	Handle _next_joint;
+
 	// Set of clauses for which a grounding is currently being attempted.
 	IssuedSet _issued;     // stacked on issued_stack
 
