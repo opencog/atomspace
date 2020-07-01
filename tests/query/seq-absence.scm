@@ -55,6 +55,7 @@
 
 (define and-absence
 	(SatisfactionLink
+		(TypedVariable (VariableNode "$x") (Type 'Concept))
 		(SequentialAndLink
 			(AbsentLink (EvaluationLink (PredicateNode "visible")
 					(ListLink (VariableNode "$x"))))

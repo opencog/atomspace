@@ -189,6 +189,12 @@
   The bin-counts are printed in a tab-separated-value format, with the
   first column holding the bin number, the second holding the center of
   the bin, and the third holding the count for that bin.
+
+  Example usage:
+    (define bins ...)
+    (let ((outport (open-file \"/tmp/foo.dat\" \"w\")))
+        (print-bincounts-tsv bins outport)
+        (close outport))
 "
 	(define centers (first cent-bins))
 	(define bins (second cent-bins))
