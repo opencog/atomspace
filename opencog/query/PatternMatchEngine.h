@@ -167,12 +167,12 @@ private:
 
 	bool do_next_clause(void);
 	bool clause_accepted;
-	void get_next_untried_clause(IssuedSet&);
+	void get_next_untried_clause(IssuedSet&, PatternTermPtr&, Handle&);
 	Handle get_glob_embedding(IssuedSet&, const Handle&);
-	bool get_next_thinnest_clause(IssuedSet&, bool, bool);
+	bool get_next_thinnest_clause(IssuedSet&, PatternTermPtr&, Handle&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
-	PatternTermPtr next_clause;
-	Handle next_joint;
+	PatternTermPtr _next_clause;
+	Handle _next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
 	IssuedSet _issued;     // stacked on issued_stack
 

@@ -1998,11 +1998,11 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
-	get_next_untried_clause(_issued);
+	get_next_untried_clause(_issued, _next_clause, _next_joint);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (PatternTerm::UNDEFINED == next_clause)
+	if (PatternTerm::UNDEFINED == _next_clause)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		logmsg("==================== FINITO! accepted=", found);
@@ -2013,8 +2013,8 @@ bool PatternMatchEngine::do_next_clause(void)
 
 	// Keep the joint and the clause on the C++ stack, becuase both
 	// `next_joint` and `next_clause` get trashed during recursion!
-	Handle joiner = next_joint;
-	PatternTermPtr do_clause = next_clause;
+	Handle joiner = _next_joint;
+	PatternTermPtr do_clause = _next_clause;
 
 	logmsg("Next clause is", do_clause->getHandle());
 	DO_LOG({LAZY_LOG_FINE << "This clause is "
@@ -2053,9 +2053,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (next_clause->isAbsent()))
+	       (_next_clause->isAbsent()))
 	{
-		Handle curr_root = next_clause->getHandle();
+		Handle curr_root = _next_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		logmsg("Exhausted search for optional clause, cb=", match);
@@ -2066,9 +2066,9 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		get_next_untried_clause(_issued);
+		get_next_untried_clause(_issued, _next_clause, _next_joint);
 
-		if (PatternTerm::UNDEFINED == next_clause)
+		if (PatternTerm::UNDEFINED == _next_clause)
 		{
 			logmsg("==================== FINITO BANDITO!");
 			DO_LOG({log_solution(var_grounding, clause_grounding);})
@@ -2077,8 +2077,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		else
 		{
 			// Place a copy on stack, so its not trashed during recursion.
-			joiner = next_joint;
-			do_clause = next_clause;
+			joiner = _next_joint;
+			do_clause = _next_clause;
 			logmsg("Next optional clause is", do_clause->getHandle());
 
 			// Now see if this optional clause has any solutions,
@@ -2131,25 +2131,27 @@ bool PatternMatchEngine::do_next_clause(void)
  *
  * Thus, we use a helper function to broaden the search in each case.
  */
-void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued)
+void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued,
+                                                 PatternTermPtr& next_clause,
+                                                 Handle& next_joint)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(issued, false, false)) return;
+	if (get_next_thinnest_clause(issued, next_clause, next_joint, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (_pat->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(issued, true, false)) return;
+		if (get_next_thinnest_clause(issued, next_clause, next_joint, true, false)) return;
 	}
 
 	// Try again, this time, considering the absent clauses.
 	if (not _pat->absents.empty())
 	{
-		if (get_next_thinnest_clause(issued, false, true)) return;
+		if (get_next_thinnest_clause(issued, next_clause, next_joint, false, true)) return;
 		if (_pat->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(issued, true, true)) return;
+			if (get_next_thinnest_clause(issued, next_clause, next_joint, true, true)) return;
 		}
 	}
 
@@ -2277,6 +2279,8 @@ Handle PatternMatchEngine::get_glob_embedding(IssuedSet& issued,
 ///
 /// Return true if we found the next ungrounded clause.
 bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
+                                                  PatternTermPtr& next_clause,
+                                                  Handle& next_joint,
                                                   bool search_eval,
                                                   bool search_absents)
 {
