@@ -1998,7 +1998,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
-	get_next_untried_clause();
+	get_next_untried_clause(_issued);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
@@ -2066,7 +2066,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		get_next_untried_clause();
+		get_next_untried_clause(_issued);
 
 		if (PatternTerm::UNDEFINED == next_clause)
 		{
@@ -2131,25 +2131,25 @@ bool PatternMatchEngine::do_next_clause(void)
  *
  * Thus, we use a helper function to broaden the search in each case.
  */
-void PatternMatchEngine::get_next_untried_clause(void)
+void PatternMatchEngine::get_next_untried_clause(IssuedSet& issued)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(false, false)) return;
+	if (get_next_thinnest_clause(issued, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (_pat->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(true, false)) return;
+		if (get_next_thinnest_clause(issued, true, false)) return;
 	}
 
 	// Try again, this time, considering the absent clauses.
 	if (not _pat->absents.empty())
 	{
-		if (get_next_thinnest_clause(false, true)) return;
+		if (get_next_thinnest_clause(issued, false, true)) return;
 		if (_pat->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(true, true)) return;
+			if (get_next_thinnest_clause(issued, true, true)) return;
 		}
 	}
 
@@ -2229,7 +2229,8 @@ unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
 /// return it, so that it is used as the pivot point to the next
 /// ungrounded clause.  If there is no such term, then just  return the
 /// glob.
-Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
+Handle PatternMatchEngine::get_glob_embedding(IssuedSet& issued,
+                                              const Handle& glob)
 {
 	// If the glob is in only one clause, there is no connectivity map.
 	if (0 == _pat->connectivity_map.count(glob)) return glob;
@@ -2275,7 +2276,8 @@ Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
 /// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
+bool PatternMatchEngine::get_next_thinnest_clause(IssuedSet& issued,
+                                                  bool search_eval,
                                                   bool search_absents)
 {
 	// Search for an as-yet ungrounded clause. Search for required
@@ -2306,7 +2308,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
 			// that term as the joiner.
 			if (GLOB_NODE == v->get_type())
 			{
-				Handle embed = get_glob_embedding(v);
+				Handle embed = get_glob_embedding(issued, v);
 				const Handle& tg = var_grounding[embed];
 				std::size_t incoming_set_size = tg->getIncomingSetSize();
 				thick_vars.insert(std::make_pair(incoming_set_size, embed));
@@ -2422,7 +2424,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	var_solutn_stack.push(var_grounding);
 	_clause_solutn_stack.push(clause_grounding);
 
-	issued_stack.push(issued);
+	_issued_stack.push(_issued);
 	choice_stack.push(_choice_state);
 
 	perm_push();
@@ -2454,7 +2456,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	// The grounding stacks are handled differently.
 	POPSTK(_clause_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(issued_stack, issued);
+	POPSTK(_issued_stack, _issued);
 
 	POPSTK(choice_stack, _choice_state);
 
@@ -2478,14 +2480,14 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	// Currently, only GlobUTest fails when this is uncommented.
 	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
-	OC_ASSERT(0 == issued_stack.size());
+	OC_ASSERT(0 == _issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == _perm_stack.size());
 	OC_ASSERT(0 == _perm_stepper_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while (!issued_stack.empty()) issued_stack.pop();
+	while (!_issued_stack.empty()) _issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!_perm_stack.empty()) _perm_stack.pop();
 	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
@@ -2593,7 +2595,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 {
 	clause_stacks_clear();
 	clear_current_state();
-	issued.insert(clause);
+	_issued.insert(clause);
 	_nack_cache.clear();
 
 	bool halt = explore_clause(term, grnd, clause);
@@ -2860,7 +2862,7 @@ void PatternMatchEngine::clear_current_state(void)
 	// GlobNode state
 	_glob_state.clear();
 
-	issued.clear();
+	_issued.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)

@@ -163,18 +163,18 @@ private:
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
+	typedef std::set<PatternTermPtr> IssuedSet;
 
 	bool do_next_clause(void);
 	bool clause_accepted;
-	void get_next_untried_clause(void);
-	Handle get_glob_embedding(const Handle&);
-	bool get_next_thinnest_clause(bool, bool);
+	void get_next_untried_clause(IssuedSet&);
+	Handle get_glob_embedding(IssuedSet&, const Handle&);
+	bool get_next_thinnest_clause(IssuedSet&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
 	PatternTermPtr next_clause;
 	Handle next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
-	typedef std::set<PatternTermPtr> IssuedSet;
-	IssuedSet issued;     // stacked on issued_stack
+	IssuedSet _issued;     // stacked on issued_stack
 
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
@@ -211,7 +211,7 @@ private:
 	std::stack<GroundingMap> var_solutn_stack;
 	std::stack<GroundingMap> _clause_solutn_stack;
 
-	std::stack<IssuedSet> issued_stack;
+	std::stack<IssuedSet> _issued_stack;
 	std::stack<ChoiceState> choice_stack;
 
 	// push, pop and clear these states.
