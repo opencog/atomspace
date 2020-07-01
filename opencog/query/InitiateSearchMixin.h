@@ -93,6 +93,8 @@ protected:
 	bool setup_link_type_search(void);
 	bool setup_variable_search(void);
 
+	bool disjoin_search(PatternMatchCallback&);
+	bool conjoin_search(PatternMatchCallback&);
 	bool choice_loop(PatternMatchCallback&, const std::string);
 	bool search_loop(PatternMatchCallback&, const std::string);
 	AtomSpace *_as;

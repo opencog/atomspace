@@ -261,7 +261,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 /* ======================================================== */
 /**
  * Given a set of clauses, create a list of starting points for a
- * search. This set of starting points is called a `neghborhood`;
+ * search. This set of starting points is called a `neighborhood`;
  * it is defined as all of the atoms that can be reached from a
  * given (non-variable) atom, by following either it's incoming or
  * its outgoing set.
@@ -478,6 +478,16 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	_search_set.clear();
 	_choices.clear();
 
+	return disjoin_search(pmc);
+}
+
+bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc)
+{
+	return conjoin_search(pmc);
+}
+
+bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
+{
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search())
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
