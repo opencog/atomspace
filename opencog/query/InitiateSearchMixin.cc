@@ -495,12 +495,21 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc,
                                          const PatternTermSeq& clauses)
 {
+return legacy_search(pmc);
 	// There are multiple parts.
 	// We want to try each one as a stand-alone search.
+	bool found = false;
 	for (const PatternTermPtr& term : clauses)
 	{
+		_root = PatternTerm::UNDEFINED;
+		_starter_term = Handle::UNDEFINED;
+		_curr_clause = PatternTerm::UNDEFINED;
+		_search_set.clear();
+		_choices.clear();
+
+		found |= conjoin_search(pmc, {term});
 	}
-	return legacy_search(pmc);
+	return found;
 }
 
 bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc,
