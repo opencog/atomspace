@@ -349,6 +349,10 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			return true;
 		}
 
+		// Each of teh choices must be findable by the pattern engine.
+		for (const PatternTermPtr& term : clause->getOutgoingSet())
+			pin_term(term);
+
 		clause->markChoice();
 		_pat.pmandatory.push_back(clause);
 		return true;
