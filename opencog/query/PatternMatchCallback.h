@@ -292,21 +292,6 @@ class PatternMatchCallback
 			return h->getIncomingSetByType(t);
 		}
 
-		/**
-		 * Called after a top-level clause (tree) has been fully
-		 * grounded. This gives the callee the opportunity to save
-		 * state onto a stack, if needed.
-		 */
-		virtual void push(void) {}
-
-		/**
-		 * Called prior to starting a back-track, retreating from the
-		 * most recently grounded top-level clause (tree). This
-		 * gives the callee the opportunity to maintain state with a
-		 * stack, if needed.
-		 */
-		virtual void pop(void) {}
-
 		virtual const TypeSet& get_connectives(void)
 		{ static const TypeSet _empty; return _empty; }
 
@@ -352,6 +337,21 @@ class PatternMatchCallback
 		 * Returns false if there are no more; else returns true.
 		 */
 		virtual bool get_next_clause(PatternTermPtr& clause, Handle& joint) = 0;
+
+		/**
+		 * Called after a top-level clause (tree) has been fully
+		 * grounded. This gives the callee the opportunity to save
+		 * state onto a stack, if needed.
+		 */
+		virtual void push(void) {}
+
+		/**
+		 * Called prior to starting a back-track, retreating from the
+		 * most recently grounded top-level clause (tree). This
+		 * gives the callee the opportunity to maintain state with a
+		 * stack, if needed.
+		 */
+		virtual void pop(void) {}
 
 		/**
 		 * Called before search initiation, to indicate the pattern
