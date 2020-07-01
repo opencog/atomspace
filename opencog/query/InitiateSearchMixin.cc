@@ -479,33 +479,62 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	_search_set.clear();
 	_choices.clear();
 
-	return disjoin_search(pmc);
-}
-
-bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc)
-{
 	// Fallback to the legacy mode.
 	if (1 != _pattern->pmandatory.size())
-		return conjoin_search(pmc);
+		return legacy_search(pmc);
 
 	// If there's nothing to disjoin, then conjoin.
 	const PatternTermPtr& clause = _pattern->pmandatory[0];
 	Type t = clause->getHandle()->get_type();
 	if (not (OR_LINK == t or CHOICE_LINK == t))
-		return conjoin_search(pmc);
+		return legacy_search(pmc);
 
-	// There are multiple parts.
-	// We want to try each one as a stand-alone search.
-	for (const PatternTermPtr& term : clause->getOutgoingSet())
-	{
-	}
-	return conjoin_search(pmc);
+	return disjoin_search(pmc, clause->getOutgoingSet());
 }
 
-bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc)
+bool InitiateSearchMixin::disjoin_search(PatternMatchCallback& pmc,
+                                         const PatternTermSeq& clauses)
 {
+	// There are multiple parts.
+	// We want to try each one as a stand-alone search.
+	for (const PatternTermPtr& term : clauses)
+	{
+	}
+	return legacy_search(pmc);
+}
+
+bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc,
+                                         const PatternTermSeq& clauses)
+{
+	DO_LOG({logger().fine("------- Enter conjoin_search -------");})
 	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
+	if (setup_neighbor_search(clauses))
+		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses ... !?
+	DO_LOG({logger().fine("Cannot use node-neighbor search, use deep-type search");})
+	if (setup_deep_type_search(clauses))
+		return search_loop(pmc, "dddddddddd deep_type_search ddddddddd");
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses consist entirely of
+	// variables! Which can happen (there is a unit test for this,
+	// the LoopUTest), and so instead, we search based on the link
+	// types that occur in the atomspace.
+	DO_LOG({logger().fine("Cannot use deep-type search, use link-type search");})
+	if (setup_link_type_search(clauses))
+		return search_loop(pmc, "yyyyyyyyyy link_type_search yyyyyyyyyy");
+
+	return false;
+}
+
+bool InitiateSearchMixin::legacy_search(PatternMatchCallback& pmc)
+{
 	const PatternTermSeq& clauses = get_clause_list();
+
+	DO_LOG({logger().fine("------- Enter legacy_search -------");})
+	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	if (setup_neighbor_search(clauses))
 		return choice_loop(pmc, "xxxxxxxxxx neighbor_search xxxxxxxxxx");
 
