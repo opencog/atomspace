@@ -85,13 +85,22 @@ bool InitiateSearchMixin::get_next_clause(const GroundingMap& var_grounding,
                                           PatternTermPtr& clause,
                                           Handle& joint)
 {
-	_next_choices.clear();
-	get_next_untried(var_grounding);
+	if (0 < _next_choices.size())
+	{
+		const Choice& ch(_next_choices.back());
+		clause = ch.clause;
+		joint = ch.start_term;
+		_next_choices.pop_back();
+		return true;
+	}
 
+	get_next_untried(var_grounding);
 	if (0 == _next_choices.size()) return false;
 
-	clause = _next_choices[0].clause;
-	joint = _next_choices[0].start_term;
+	const Choice& ch(_next_choices.back());
+	clause = ch.clause;
+	joint = ch.start_term;
+	_next_choices.pop_back();
 	return true;
 }
 
