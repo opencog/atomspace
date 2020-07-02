@@ -2034,6 +2034,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// (is shared in common) between the previous (solved) clause,
 		// and this clause.
 
+		clause_stacks_push();
 		clause_accepted = false;
 		Handle hgnd(var_grounding[joiner]);
 		if (nullptr == hgnd)
@@ -2043,6 +2044,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			hgnd = joiner;
 		}
 		found |= explore_clause(joiner, hgnd, do_clause);
+		clause_stacks_pop();
 
 		if (not _pmc.get_next_clause(do_clause, joiner)) break;
 	}
