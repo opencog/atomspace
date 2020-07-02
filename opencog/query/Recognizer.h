@@ -84,7 +84,8 @@ class Recognizer :
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
 		virtual bool perform_search(PatternMatchCallback&);
-		virtual bool get_next_clause(const GroundingMap&, PatternTermPtr&, Handle&);
+		virtual void next_connections(const GroundingMap&);
+		virtual bool get_next_clause(PatternTermPtr&, Handle&);
 };
 
 } // namespace opencog

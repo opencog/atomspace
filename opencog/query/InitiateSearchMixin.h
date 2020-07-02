@@ -57,8 +57,8 @@ public:
 
 	virtual void push(void);
 	virtual void pop(void);
-	virtual bool get_next_clause(const GroundingMap&,
-	                             PatternTermPtr&, Handle&);
+	virtual void next_connections(const GroundingMap&);
+	virtual bool get_next_clause(PatternTermPtr&, Handle&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -115,7 +115,6 @@ protected:
 	std::stack<IssuedSet> _issued_stack;
 
 	std::vector<Choice> _next_choices;
-	void get_next_untried(const GroundingMap&);
 	Handle get_glob_embedding(const GroundingMap&, const Handle&);
 	bool get_next_thinnest_clause(const GroundingMap&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);

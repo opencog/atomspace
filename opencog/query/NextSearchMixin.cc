@@ -81,20 +81,9 @@ void InitiateSearchMixin::pop(void)
  *
  * Thus, we use a helper function to broaden the search in each case.
  */
-bool InitiateSearchMixin::get_next_clause(const GroundingMap& var_grounding,
-                                          PatternTermPtr& clause,
+bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
                                           Handle& joint)
 {
-	if (0 < _next_choices.size())
-	{
-		const Choice& ch(_next_choices.back());
-		clause = ch.clause;
-		joint = ch.start_term;
-		_next_choices.pop_back();
-		return true;
-	}
-
-	get_next_untried(var_grounding);
 	if (0 == _next_choices.size()) return false;
 
 	const Choice& ch(_next_choices.back());
@@ -104,7 +93,7 @@ bool InitiateSearchMixin::get_next_clause(const GroundingMap& var_grounding,
 	return true;
 }
 
-void InitiateSearchMixin::get_next_untried(const GroundingMap& var_grounding)
+void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.

@@ -91,8 +91,11 @@ bool Recognizer::perform_search(PatternMatchCallback& pmc)
 	return false;
 }
 
-bool Recognizer::get_next_clause(const GroundingMap& var_grounding,
-                                 PatternTermPtr& clause, Handle& joint)
+void Recognizer::next_connections(const GroundingMap& var_grounding)
+{
+}
+
+bool Recognizer::get_next_clause(PatternTermPtr& clause, Handle& joint)
 {
 	return false;
 }

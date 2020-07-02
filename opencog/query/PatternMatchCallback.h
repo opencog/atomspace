@@ -333,11 +333,20 @@ class PatternMatchCallback
 		virtual bool search_finished(bool done) { return done; }
 
 		/**
-		 * Called to obtain the next clause to explore.
-		 * Returns false if there are no more; else returns true.
+		 * A pair of functions that are called to obtain the set of
+		 * clauses to explore next. These are clauses that contain
+		 * ungrounded variables, for which a grounding must be found.
+		 * The set is a disjunctive set (a choice set) -- it is enough
+		 * to ground any one of out of the set.
+		 *
+		 * The first function, `next_connections()` is called with the
+		 * current groundings at this time. Immediately afterwards,
+		 * `get_next_clause()` is called to obtain one of the choices.
+		 * It is then called repeatedly to get the next choice. It should
+		 * return false if there are no more; else return true.
 		 */
-		virtual bool get_next_clause(const GroundingMap& var_grounding,
-		                             PatternTermPtr& clause,
+		virtual void next_connections(const GroundingMap& var_grounding) = 0;
+		virtual bool get_next_clause(PatternTermPtr& clause,
 		                             Handle& joint) = 0;
 
 		/**

@@ -1285,7 +1285,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// If we arrive here, with `ptm` being the ListLink, and the `hg`
 	// being the grounding of the ListLink, then we should be able to
 	// immediately jump to the EvaluationLink, without any further ado.
-	// Specifically, there is no need to search the incoming set of `hg`
+	// Specifically, there is no need to search the incoming set of `hg`;
 	// just build up the EvaluationLink and offer it as the ground.
 	if (not ptm->hasUnorderedLink())
 	{
@@ -2000,7 +2000,8 @@ bool PatternMatchEngine::do_next_clause(void)
 	Handle joiner;
 
 	clause_stacks_push();
-	bool have_more = _pmc.get_next_clause(var_grounding, do_clause, joiner);
+	_pmc.next_connections(var_grounding);
+	bool have_more = _pmc.get_next_clause(do_clause, joiner);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
@@ -2065,7 +2066,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		}
 
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		have_more = _pmc.get_next_clause(var_grounding, do_clause, joiner);
+		_pmc.next_connections(var_grounding);
+		have_more = _pmc.get_next_clause(do_clause, joiner);
 		if (not have_more)
 		{
 			logmsg("==================== FINITO BANDITO!");
