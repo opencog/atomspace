@@ -312,8 +312,8 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		{
 			const PatternTermPtr& root = it->second;
 			if ((_issued.end() == _issued.find(root))
-			        and (search_eval or not root->hasAnyEvaluatable())
-			        and (search_absents or not root->isAbsent()))
+			     and (search_eval or not root->hasAnyEvaluatable())
+			     and (search_absents or not root->isAbsent()))
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
 				if (root_thickness < thinnest_clause)
@@ -359,10 +359,23 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		// to find the top of the ungrounded clause.
 		if (unsolved_clause)
 		{
-			Choice ch;
-			ch.clause = unsolved_clause;
-			ch.start_term = joint;
-			_next_choices.emplace_back(ch);
+			if (unsolved_clause->isChoice())
+			{
+				for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
+				{
+					Choice ch;
+					ch.clause = alt;
+					ch.start_term = joint;
+					_next_choices.emplace_back(ch);
+				}
+			}
+			else
+			{
+				Choice ch;
+				ch.clause = unsolved_clause;
+				ch.start_term = joint;
+				_next_choices.emplace_back(ch);
+			}
 
 			_issued.insert(unsolved_clause);
 			return true;
