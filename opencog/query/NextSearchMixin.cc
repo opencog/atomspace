@@ -85,31 +85,35 @@ bool InitiateSearchMixin::get_next_clause(const GroundingMap& var_grounding,
                                           PatternTermPtr& clause,
                                           Handle& joint)
 {
-	get_next_untried_clause(var_grounding, clause, joint);
-	return joint != nullptr;
+	_next_choices.clear();
+	get_next_untried(var_grounding);
+
+	if (0 == _next_choices.size()) return false;
+
+	clause = _next_choices[0].clause;
+	joint = _next_choices[0].start_term;
+	return true;
 }
 
-void InitiateSearchMixin::get_next_untried_clause(const GroundingMap& var_grounding,
-                                                  PatternTermPtr& next_clause,
-                                                  Handle& next_joint)
+void InitiateSearchMixin::get_next_untried(const GroundingMap& var_grounding)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, false, false)) return;
+	if (get_next_thinnest_clause(var_grounding, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (_pattern->have_evaluatables)
 	{
-		if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, true, false)) return;
+		if (get_next_thinnest_clause(var_grounding, true, false)) return;
 	}
 
 	// Try again, this time, considering the absent clauses.
 	if (not _pattern->absents.empty())
 	{
-		if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, false, true)) return;
+		if (get_next_thinnest_clause(var_grounding, false, true)) return;
 		if (_pattern->have_evaluatables)
 		{
-			if (get_next_thinnest_clause(var_grounding, next_clause, next_joint, true, true)) return;
+			if (get_next_thinnest_clause(var_grounding, true, true)) return;
 		}
 	}
 
@@ -119,12 +123,14 @@ void InitiateSearchMixin::get_next_untried_clause(const GroundingMap& var_ground
 	{
 		if (_issued.end() != _issued.find(root)) continue;
 		_issued.insert(root);
-		next_clause = root;
 		for (const Handle &v : _variables->varset)
 		{
 			if (is_free_in_tree(root->getHandle(), v))
 			{
-				next_joint = v;
+				Choice ch;
+				ch.clause = root;
+				ch.start_term = v;
+				_next_choices.emplace_back(ch);
 				return;
 			}
 		}
@@ -138,10 +144,6 @@ void InitiateSearchMixin::get_next_untried_clause(const GroundingMap& var_ground
 			throw RuntimeException(TRACE_INFO,
 				"BUG! Still have ungrounded clauses!!");
 	}
-
-	// If we are here, there are no more unsolved clauses to consider.
-	next_clause = PatternTerm::UNDEFINED;
-	next_joint = Handle::UNDEFINED;
 }
 
 // Count the number of ungrounded variables in a clause.
@@ -237,8 +239,6 @@ Handle InitiateSearchMixin::get_glob_embedding(const GroundingMap& var_grounding
 ///
 /// Return true if we found the next ungrounded clause.
 bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_grounding,
-                                                   PatternTermPtr& next_clause,
-                                                   Handle& next_joint,
                                                    bool search_eval,
                                                    bool search_absents)
 {
@@ -348,11 +348,13 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		// clauses. One of the clauses has been grounded, another
 		// has not.  We want to now traverse upwards from this node,
 		// to find the top of the ungrounded clause.
-		next_clause = unsolved_clause;
-		next_joint = joint;
-
 		if (unsolved_clause)
 		{
+			Choice ch;
+			ch.clause = unsolved_clause;
+			ch.start_term = joint;
+			_next_choices.emplace_back(ch);
+
 			_issued.insert(unsolved_clause);
 			return true;
 		}

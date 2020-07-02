@@ -114,9 +114,10 @@ protected:
 	IssuedSet _issued;     // stacked on _issued_stack
 	std::stack<IssuedSet> _issued_stack;
 
-	void get_next_untried_clause(const GroundingMap&, PatternTermPtr&, Handle&);
+	std::vector<Choice> _next_choices;
+	void get_next_untried(const GroundingMap&);
 	Handle get_glob_embedding(const GroundingMap&, const Handle&);
-	bool get_next_thinnest_clause(const GroundingMap&, PatternTermPtr&, Handle&, bool, bool);
+	bool get_next_thinnest_clause(const GroundingMap&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
 
 	AtomSpace *_as;

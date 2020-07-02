@@ -2064,29 +2064,27 @@ bool PatternMatchEngine::do_next_clause(void)
 			return false;
 		}
 
-		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
 		have_more = _pmc.get_next_clause(var_grounding, do_clause, joiner);
-
 		if (not have_more)
 		{
 			logmsg("==================== FINITO BANDITO!");
 			DO_LOG({log_solution(var_grounding, clause_grounding);})
 			found = report_grounding(var_grounding, clause_grounding);
+			clause_stacks_pop();
+			return found;
 		}
-		else
-		{
-			logmsg("Next optional clause is", do_clause->getHandle());
 
-			// Now see if this optional clause has any solutions,
-			// or not. If it does, we'll recurse. If it does not,
-			// we'll loop around back to here again.
-			clause_accepted = false;
-			Handle hgnd = var_grounding[joiner];
+		logmsg("Next optional clause is", do_clause->getHandle());
 
-			auto pl = _pat->connected_terms_map.find({joiner, do_clause});
-			found = explore_term_branches(pl->second[0], hgnd, do_clause);
-		}
+		// Now see if this optional clause has any solutions,
+		// or not. If it does, we'll recurse. If it does not,
+		// we'll loop around back to here again.
+		clause_accepted = false;
+		Handle hgnd = var_grounding[joiner];
+
+		auto pl = _pat->connected_terms_map.find({joiner, do_clause});
+		found = explore_term_branches(pl->second[0], hgnd, do_clause);
 	}
 
 	// If we failed to find anything at this level, we need to
