@@ -253,6 +253,11 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 			best_start = start;
 			starter_term = term;
 		}
+
+		// If we encountered choices, then we have enumerated all of them.
+		// So we are good to go. XXX FIXME -- we could try again, to find
+		// some thinner set of choices. Later, some other time.
+		if (0 < _choices.size()) break;
 	}
 
 	return best_start;
