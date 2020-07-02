@@ -339,10 +339,11 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 			const HandleSeq& varseq = _pattern->clause_variables.at(root);
 			if (0 == varseq.size())
 			{
-				unsolved_clause = root;
-				joint = root->getHandle();
-				unsolved = true;
-				break;
+				Choice ch;
+				ch.clause = root;
+				ch.start_term = root->getHandle();
+				_next_choices.emplace_back(ch);
+				return true;
 			}
 		}
 	}
