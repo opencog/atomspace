@@ -81,7 +81,7 @@ protected:
 		HandleSeq search_set;
 	};
 	PatternTermPtr _curr_clause;
-	std::vector<Choice> _choices;
+	std::vector<Choice> _start_choices;
 
 	virtual Handle find_starter(const PatternTermPtr&,
 	                            size_t&, Handle&, size_t&);

@@ -60,7 +60,7 @@ InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_starter_term = Handle::UNDEFINED;
 
 	_curr_clause = PatternTerm::UNDEFINED;
-	_choices.clear();
+	_start_choices.clear();
 	_as = as;
 }
 
@@ -198,7 +198,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 				ch.clause = _curr_clause;
 				ch.start_term = sbr;
 				ch.search_set = get_incoming_set(s, sbr->get_type());
-				_choices.push_back(ch);
+				_start_choices.push_back(ch);
 			}
 			else
 			if (brwid < thinnest
@@ -231,7 +231,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 	bestclause = PatternTerm::UNDEFINED;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
-	_choices.clear();
+	_start_choices.clear();
 
 	for (const PatternTermPtr& ptm: clauses)
 	{
@@ -257,7 +257,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 		// If we encountered choices, then we have enumerated all of them.
 		// So we are good to go. XXX FIXME -- we could try again, to find
 		// some thinner set of choices. Later, some other time.
-		if (0 < _choices.size()) break;
+		if (0 < _start_choices.size()) break;
 	}
 
 	return best_start;
@@ -338,18 +338,18 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 	// 2) all of the clauses are evaluatable(!),
 	// Somewhat unusual, but it can happen.  For this, we need
 	// some other, alternative search strategy.
-	if (nullptr == best_start and 0 == _choices.size())
+	if (nullptr == best_start and 0 == _start_choices.size())
 		return false;
 
 	// If only a single choice, fake it for the choice_loop.
-	if (0 == _choices.size())
+	if (0 == _start_choices.size())
 	{
 		Choice ch;
 		ch.clause = bestclause;
 		ch.start_term = _starter_term;
 		// XXX ?? Why incoming set ???
 		ch.search_set = get_incoming_set(best_start, _starter_term->get_type());
-		_choices.push_back(ch);
+		_start_choices.push_back(ch);
 	}
 	else
 	{
@@ -363,7 +363,7 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
                                       const std::string dbg_banner)
 {
-	for (const Choice& ch : _choices)
+	for (const Choice& ch : _start_choices)
 	{
 		_root = ch.clause;
 		_starter_term = ch.start_term;
@@ -482,7 +482,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	_starter_term = Handle::UNDEFINED;
 	_curr_clause = PatternTerm::UNDEFINED;
 	_search_set.clear();
-	_choices.clear();
+	_start_choices.clear();
 
 	// Fallback to the legacy mode.
 	if (1 != _pattern->pmandatory.size())
@@ -510,7 +510,7 @@ return legacy_search(pmc);
 		_starter_term = Handle::UNDEFINED;
 		_curr_clause = PatternTerm::UNDEFINED;
 		_search_set.clear();
-		_choices.clear();
+		_start_choices.clear();
 
 		found |= conjoin_search(pmc, {term});
 	}
@@ -713,7 +713,7 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 
 	_root = PatternTerm::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	_choices.clear();
+	_start_choices.clear();
 	_search_set.clear();
 
 	for (const auto& tit: _variables->_typemap)
@@ -1172,14 +1172,14 @@ std::string InitiateSearchMixin::to_string(const std::string& indent) const
 		ss << indent << "_starter_term:" << std::endl
 		   << _starter_term->to_string(indent + oc_to_string_indent) << std::endl;
 	ss << indent << "_curr_clause = " << _curr_clause << std::endl;
-	if (not _choices.empty()) {
+	if (not _start_choices.empty()) {
 		std::string indent_p = indent  + oc_to_string_indent;
 		std::string indent_pp = indent_p  + oc_to_string_indent;
 		std::string indent_ppp = indent_pp  + oc_to_string_indent;
-		ss << indent << "_choices:" << std::endl;
-		ss << indent_p << "size = " << _choices.size() << std::endl;
+		ss << indent << "_start_choices:" << std::endl;
+		ss << indent_p << "size = " << _start_choices.size() << std::endl;
 		unsigned i = 0;
-		for (const Choice& ch : _choices) {
+		for (const Choice& ch : _start_choices) {
 			ss << indent_p << "choice[" << i << "]:" << std::endl
 			   << indent_pp << "clause = " << ch.clause << std::endl;
 			ss << indent_pp << "start_term:" << std::endl
