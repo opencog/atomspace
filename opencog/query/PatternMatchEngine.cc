@@ -2014,32 +2014,38 @@ bool PatternMatchEngine::do_next_clause(void)
 		return found;
 	}
 
-	logmsg("Next clause is", do_clause->getHandle());
-	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (do_clause->isAbsent()? "absent" : "required");})
-	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (do_clause->hasAnyEvaluatable()?
-		                  "dynamically evaluatable" : "non-dynamic");
-	logmsg("Joining variable is", joiner);
-	logmsg("Joining grounding is", var_grounding[joiner]); })
-
-	// Start solving the next unsolved clause. Note: this is a
-	// recursive call, and not a loop. Recursion is halted when
-	// the next unsolved clause has no grounding.
-	//
-	// We continue our search at the variable/glob that "joins"
-	// (is shared in common) between the previous (solved) clause,
-	// and this clause.
-
-	clause_accepted = false;
-	Handle hgnd(var_grounding[joiner]);
-	if (nullptr == hgnd)
+	bool found = false;
+	while (true)
 	{
-		// Hack for clauses with no variables...
-		var_grounding[joiner] = joiner;
-		hgnd = joiner;
+		logmsg("Next clause is", do_clause->getHandle());
+		DO_LOG({LAZY_LOG_FINE << "This clause is "
+			              << (do_clause->isAbsent()? "absent" : "required");})
+		DO_LOG({LAZY_LOG_FINE << "This clause is "
+			              << (do_clause->hasAnyEvaluatable()?
+			                  "dynamically evaluatable" : "non-dynamic");
+		logmsg("Joining variable is", joiner);
+		logmsg("Joining grounding is", var_grounding[joiner]); })
+
+		// Start solving the next unsolved clause. Note: this is a
+		// recursive call, and not a loop. Recursion is halted when
+		// the next unsolved clause has no grounding.
+		//
+		// We continue our search at the variable/glob that "joins"
+		// (is shared in common) between the previous (solved) clause,
+		// and this clause.
+
+		clause_accepted = false;
+		Handle hgnd(var_grounding[joiner]);
+		if (nullptr == hgnd)
+		{
+			// Hack for clauses with no variables...
+			var_grounding[joiner] = joiner;
+			hgnd = joiner;
+		}
+		found |= explore_clause(joiner, hgnd, do_clause);
+
+		if (not _pmc.get_next_clause(do_clause, joiner)) break;
 	}
-	bool found = explore_clause(joiner, hgnd, do_clause);
 
 	// If we are here, and found is false, then we've exhausted all
 	// of the search possibilities for the current clause. If this
