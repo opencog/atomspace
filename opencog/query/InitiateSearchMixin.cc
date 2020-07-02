@@ -1064,14 +1064,15 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
 
+		while (0 < _issued_stack.size()) _issued_stack.pop();
+		_issued.clear();
+		_issued.insert(_root);
 		for (const Handle& h : _search_set)
 		{
 			DO_LOG({LAZY_LOG_FINE << dbg_banner
 			             << "\n       Loop candidate ("
 			             << ++i << "/" << hsz << "):\n"
 			             << h->to_short_string("       ");})
-			while (0 < _issued_stack.size()) _issued_stack.pop();
-			_issued.insert(_root);
 			bool found = pme.explore_neighborhood(_starter_term, h, _root);
 			if (found) return true;
 		}
@@ -1094,6 +1095,10 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 	// Parallel loop. This requires linking to -ltbb to work.
 	_recursing = true;
 
+	_issued_stack.clear();
+	_issued.clear();
+	_issued.insert(_root);
+
 	std::atomic<size_t> nfnd = 0;
 	std::for_each(
 		std::execution::par_unseq,
@@ -1104,8 +1109,6 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
 
-			_issued_stack.clear();
-			_issued.insert(_root);
 			if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 		});
 
@@ -1120,6 +1123,9 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 #ifdef OMP_PM_PARALLEL
 	// Parallel loop. This requies OpenMP to work.
 	_recursing = true;
+	_issued_stack.clear();
+	_issued.clear();
+	_issued.insert(_root);
 
 #ifdef QDEBUG
 	size_t i = 0;
@@ -1139,8 +1145,6 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		             << ++i << "/" << hsz << "):\n"
 		             << h->to_short_string("       ");})
 
-		_issued_stack.clear();
-		_issued.insert(_root);
 		if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 	}
 	_recursing = false;
