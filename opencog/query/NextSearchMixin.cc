@@ -90,6 +90,8 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
 	clause = ch.clause;
 	joint = ch.start_term;
 	_next_choices.pop_back();
+
+	_issued.insert(clause);
 	return true;
 }
 
@@ -120,7 +122,6 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	for (const PatternTermPtr& root : _pattern->always)
 	{
 		if (_issued.end() != _issued.find(root)) continue;
-		_issued.insert(root);
 		for (const Handle &v : _variables->varset)
 		{
 			if (is_free_in_tree(root->getHandle(), v))
@@ -365,8 +366,6 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 				ch.start_term = joint;
 				_next_choices.emplace_back(ch);
 			}
-
-			_issued.insert(unsolved_clause);
 			return true;
 		}
 	}
