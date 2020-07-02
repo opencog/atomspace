@@ -347,8 +347,10 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		}
 	}
 
+	// Did not find anything.
 	if (not unsolved or nullptr == unsolved_clause) return false;
 
+	// Return what we found.
 	if (unsolved_clause->isChoice())
 	{
 		for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
@@ -358,6 +360,9 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 			ch.start_term = joint;
 			_next_choices.emplace_back(ch);
 		}
+
+		// Special case.
+		_issued.insert(unsolved_clause);
 	}
 	else
 	{
