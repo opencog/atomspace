@@ -231,12 +231,18 @@ Handle InitiateSearchMixin::get_glob_embedding(const GroundingMap& var_grounding
 	return glob;
 }
 
-/// Work-horse for `get_next_untried_clause`. Locates the actual clause
-/// to run next. Takes three boolean flags: When the boolean is not set,
+/// Work-horse for `next_connections`. Locates the actual clause
+/// to run next. Takes two boolean flags: When the boolean is not set,
 /// then only those clauses satsifying the criterion are considered,
 /// else all clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
+///
+/// Terminology:
+/// Joint is a (variable) node that's shared between several clauses,
+/// where one of the clauses has been grounded, and another has not.
+/// Traversal continues upwards from this node, searching for the top
+/// of the ungrounded clause.
 bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_grounding,
                                                    bool search_eval,
                                                    bool search_absents)
@@ -341,36 +347,26 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		}
 	}
 
-	if (unsolved)
+	if (not unsolved or nullptr == unsolved_clause) return false;
+
+	if (unsolved_clause->isChoice())
 	{
-		// Joint is a (variable) node that's shared between several
-		// clauses. One of the clauses has been grounded, another
-		// has not.  We want to now traverse upwards from this node,
-		// to find the top of the ungrounded clause.
-		if (unsolved_clause)
+		for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
 		{
-			if (unsolved_clause->isChoice())
-			{
-				for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
-				{
-					Choice ch;
-					ch.clause = alt;
-					ch.start_term = joint;
-					_next_choices.emplace_back(ch);
-				}
-			}
-			else
-			{
-				Choice ch;
-				ch.clause = unsolved_clause;
-				ch.start_term = joint;
-				_next_choices.emplace_back(ch);
-			}
-			return true;
+			Choice ch;
+			ch.clause = alt;
+			ch.start_term = joint;
+			_next_choices.emplace_back(ch);
 		}
 	}
-
-	return false;
+	else
+	{
+		Choice ch;
+		ch.clause = unsolved_clause;
+		ch.start_term = joint;
+		_next_choices.emplace_back(ch);
+	}
+	return true;
 }
 
 /* ===================== END OF FILE ===================== */
