@@ -2289,7 +2289,7 @@ bool PatternMatchEngine::report_forall(void)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::explore_neighborhood(const Handle& term,
+bool PatternMatchEngine::explore_neighborhood(const PatternTermPtr& term,
                                               const Handle& grnd,
                                               const PatternTermPtr& clause)
 {
@@ -2297,8 +2297,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 	clear_current_state();
 	_nack_cache.clear();
 
-	auto pl = _pat->connected_terms_map.find({term, clause});
-	bool halt = explore_clause(pl->second[0], grnd, clause);
+	bool halt = explore_clause(term, grnd, clause);
 	bool stop = report_forall();
 	return halt or stop;
 }

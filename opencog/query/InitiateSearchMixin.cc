@@ -1098,8 +1098,8 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			DO_LOG({LAZY_LOG_FINE << dbg_banner
 			             << "\n       Loop candidate ("
 			             << ++i << "/" << hsz << "):\n"
-			             << h->to_short_string("       ");})
-			bool found = pme.explore_neighborhood(_starter_term->getHandle(),
+			             << h->to_string("       ");})
+			bool found = pme.explore_neighborhood(_starter_term,
 			                                      h, _root);
 			if (found) return true;
 		}

@@ -288,7 +288,7 @@ public:
 
 	// Examine the locally connected neighborhood for possible
 	// matches.
-	bool explore_neighborhood(const Handle&, const Handle&,
+	bool explore_neighborhood(const PatternTermPtr&, const Handle&,
 	                          const PatternTermPtr&);
 
 	// Evaluate constant evaluatable and ground it via the
