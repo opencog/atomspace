@@ -271,7 +271,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 /// do_next_clause() system, which assumes that Present terms happen
 /// only as top-level clauses. Someday, someone should merge these
 /// two mechanisms, so that this guy gets the sophistication of
-/// the get_next_untried_clause() mechanism.
+/// the get_next_clause() mechanism.
 bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
@@ -1643,7 +1643,7 @@ static PatternTermPtr find_variable_term(const PatternTermPtr& term,
 /// static analysis:
 /// -- build a connectivity map, just like the one for clauses
 /// -- build a clause_variables struct, but just for this term
-/// -- search for the thinnest joint, just like `get_next_untried_clause`
+/// -- search for the thinnest joint, just like `get_next_clause`
 /// XXX FIXME -- do the above.
 ///
 bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
@@ -1997,7 +1997,7 @@ bool PatternMatchEngine::do_next_clause(void)
 {
 	// Keep the next joint and the next clause on the C++ stack.
 	PatternTermPtr do_clause;
-	Handle joiner;
+	PatternTermPtr joiner;
 
 	clause_stacks_push();
 	_pmc.next_connections(var_grounding);
@@ -2023,8 +2023,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		DO_LOG({LAZY_LOG_FINE << "This clause is "
 			              << (do_clause->hasAnyEvaluatable()?
 			                  "dynamically evaluatable" : "non-dynamic");
-		logmsg("Joining variable is", joiner);
-		logmsg("Joining grounding is", var_grounding[joiner]); })
+		logmsg("Joining variable is", joiner->getHandle());
+		logmsg("Joining grounding is", var_grounding[joiner->getHandle()]); })
 
 		// Start solving the next unsolved clause. Note: this is a
 		// recursive call, and not a loop. Recursion is halted when
@@ -2036,14 +2036,15 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		clause_stacks_push();
 		clause_accepted = false;
-		Handle hgnd(var_grounding[joiner]);
+		Handle hgnd(var_grounding[joiner->getHandle()]);
 		if (nullptr == hgnd)
 		{
 			// Hack for clauses with no variables...
-			var_grounding[joiner] = joiner;
-			hgnd = joiner;
+			const Handle& j(joiner->getHandle());
+			var_grounding[j] = j;
+			hgnd = j;
 		}
-		found |= explore_clause(joiner, hgnd, do_clause);
+		found |= explore_clause(joiner->getHandle(), hgnd, do_clause);
 		clause_stacks_pop();
 
 		if (not _pmc.get_next_clause(do_clause, joiner)) break;
@@ -2091,10 +2092,9 @@ bool PatternMatchEngine::do_next_clause(void)
 		// or not. If it does, we'll recurse. If it does not,
 		// we'll loop around back to here again.
 		clause_accepted = false;
-		Handle hgnd = var_grounding[joiner];
+		Handle hgnd = var_grounding[joiner->getHandle()];
 
-		auto pl = _pat->connected_terms_map.find({joiner, do_clause});
-		found = explore_term_branches(pl->second[0], hgnd, do_clause);
+		found = explore_term_branches(joiner, hgnd, do_clause);
 	}
 
 	// If we failed to find anything at this level, we need to

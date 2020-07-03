@@ -95,7 +95,7 @@ void Recognizer::next_connections(const GroundingMap& var_grounding)
 {
 }
 
-bool Recognizer::get_next_clause(PatternTermPtr& clause, Handle& joint)
+bool Recognizer::get_next_clause(PatternTermPtr& clause, PatternTermPtr& joint)
 {
 	return false;
 }

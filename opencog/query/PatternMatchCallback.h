@@ -347,7 +347,7 @@ class PatternMatchCallback
 		 */
 		virtual void next_connections(const GroundingMap& var_grounding) = 0;
 		virtual bool get_next_clause(PatternTermPtr& clause,
-		                             Handle& joint) = 0;
+		                             PatternTermPtr& joint) = 0;
 
 		/**
 		 * Called after a top-level clause (tree) has been fully

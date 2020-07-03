@@ -82,13 +82,13 @@ void InitiateSearchMixin::pop(void)
  * Thus, we use a helper function to broaden the search in each case.
  */
 bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
-                                          Handle& joint)
+                                          PatternTermPtr& joint)
 {
 	if (0 == _next_choices.size()) return false;
 
 	const Choice& ch(_next_choices.back());
 	clause = ch.clause;
-	joint = ch.start_term->getQuote();
+	joint = ch.start_term;
 	_next_choices.pop_back();
 
 	_issued.insert(clause);

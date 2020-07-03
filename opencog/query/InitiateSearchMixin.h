@@ -58,7 +58,7 @@ public:
 	virtual void push(void);
 	virtual void pop(void);
 	virtual void next_connections(const GroundingMap&);
-	virtual bool get_next_clause(PatternTermPtr&, Handle&);
+	virtual bool get_next_clause(PatternTermPtr&, PatternTermPtr&);
 
 	std::string to_string(const std::string& indent=empty_string) const;
 

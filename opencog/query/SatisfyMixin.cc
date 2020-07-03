@@ -100,7 +100,7 @@ class PMCGroundings : public SatisfyMixin
 		{
 			_cb.next_connections(var_grounding);
 		}
-		bool get_next_clause(PatternTermPtr& clause, Handle& joint)
+		bool get_next_clause(PatternTermPtr& clause, PatternTermPtr& joint)
 		{
 			return _cb.get_next_clause(clause, joint);
 		}
