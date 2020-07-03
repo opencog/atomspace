@@ -57,7 +57,7 @@ InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_recursing = false;
 
 	_root = PatternTerm::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
+	_starter_term = PatternTerm::UNDEFINED;
 
 	_curr_clause = PatternTerm::UNDEFINED;
 	_start_choices.clear();
@@ -123,7 +123,7 @@ void InitiateSearchMixin::set_pattern(const Variables& vars,
 Handle
 InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
                                   size_t& depth,
-                                  Handle& startrm, size_t& width)
+                                  PatternTermPtr& startrm, size_t& width)
 {
 	const Handle& h = ptm->getHandle();
 	// If its a node, then we are done.
@@ -133,7 +133,7 @@ InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 		{
 			width = h->getIncomingSetSize();
-			startrm = h; // XXX wtf ???
+			startrm = ptm;
 			return h;
 		}
 		return Handle::UNDEFINED;
@@ -146,7 +146,8 @@ InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
 Handle
 InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
                                             size_t& depth,
-                                            Handle& startrm, size_t& width)
+                                            PatternTermPtr& startrm,
+                                            size_t& width)
 {
 	const Handle& h = ptm->getHandle();
 
@@ -183,8 +184,8 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 		// The start-term is a term that contains the starting atom...
 		// but it cannot be a ChoiceLink; it must be above or below
 		// any choice link.
-		Handle sbr(startrm);
-		if (CHOICE_LINK != t) sbr = h;
+		PatternTermPtr sbr(startrm);
+		if (CHOICE_LINK != t) sbr = ptm;
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
@@ -197,7 +198,7 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 				Choice ch;
 				ch.clause = _curr_clause;
 				ch.start_term = sbr;
-				ch.search_set = get_incoming_set(s, sbr->get_type());
+				ch.search_set = get_incoming_set(s, sbr->getQuote()->get_type());
 				_start_choices.push_back(ch);
 			}
 			else
@@ -223,14 +224,14 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
-                                          Handle& starter_term,
+                                          PatternTermPtr& starter_term,
                                           PatternTermPtr& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
 	bestclause = PatternTerm::UNDEFINED;
 	Handle best_start(Handle::UNDEFINED);
-	starter_term = Handle::UNDEFINED;
+	starter_term = PatternTerm::UNDEFINED;
 	_start_choices.clear();
 
 	for (const PatternTermPtr& ptm: clauses)
@@ -241,7 +242,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 		_curr_clause = ptm;
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
-		Handle term(Handle::UNDEFINED);
+		PatternTermPtr term(PatternTerm::UNDEFINED);
 		Handle start(find_starter(ptm, depth, term, width));
 		if (start
 		    and (width < thinnest
@@ -348,7 +349,8 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 		ch.clause = bestclause;
 		ch.start_term = _starter_term;
 		// XXX ?? Why incoming set ???
-		ch.search_set = get_incoming_set(best_start, _starter_term->get_type());
+		ch.search_set = get_incoming_set(best_start,
+		                              _starter_term->getQuote()->get_type());
 		_start_choices.push_back(ch);
 	}
 	else
@@ -370,8 +372,7 @@ bool InitiateSearchMixin::choice_loop(PatternMatchCallback& pmc,
 		_search_set = ch.search_set;
 
 		DO_LOG({LAZY_LOG_FINE << "Choice loop start term is:\n"
-		              << (_starter_term == (Atom*) nullptr ? "UNDEFINED" :
-		                  _starter_term->to_short_string("       "));})
+		              << (_starter_term->to_short_string("       "));})
 		DO_LOG({LAZY_LOG_FINE << "Choice loop root clause is:\n"
 		              <<  _root->to_full_string();})
 
@@ -479,7 +480,7 @@ bool InitiateSearchMixin::perform_search(PatternMatchCallback& pmc)
 	// Start with a clean slate. This might be called multiple
 	// times, for groundings of different components.
 	_root = PatternTerm::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
+	_starter_term = PatternTerm::UNDEFINED;
 	_curr_clause = PatternTerm::UNDEFINED;
 	_search_set.clear();
 	_start_choices.clear();
@@ -507,7 +508,7 @@ return legacy_search(pmc);
 	for (const PatternTermPtr& term : clauses)
 	{
 		_root = PatternTerm::UNDEFINED;
-		_starter_term = Handle::UNDEFINED;
+		_starter_term = PatternTerm::UNDEFINED;
 		_curr_clause = PatternTerm::UNDEFINED;
 		_search_set.clear();
 		_start_choices.clear();
@@ -597,7 +598,7 @@ bool InitiateSearchMixin::legacy_search(PatternMatchCallback& pmc)
  * of its subclauses.
  */
 void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
-                                      Handle& rarest,
+                                      PatternTermPtr& rarest,
                                       size_t& count,
                                       Quotation quotation)
 {
@@ -613,7 +614,7 @@ void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
 		if (num < count)
 		{
 			count = num;
-			rarest = clause->getHandle();
+			rarest = clause;
 		}
 	}
 
@@ -696,6 +697,31 @@ static PatternTermPtr root_of_term(const Handle& term,
 	return PatternTerm::UNDEFINED;
 }
 
+// We need to know the term corresponding to the given Handle.
+// It must be some term underneath the root. If it shows up several
+// times, then just take the first occurance...
+PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
+                                     const PatternTermPtr& root)
+{
+	if (h == root->getQuote()) return root;
+	// if (h == root->getHandle()) return root;
+
+	// Pseudo-but-not-really-breadth-first search.
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+	{
+		if (h == ptm->getQuote()) return ptm;
+		// if (h == ptm->getHandle()) return ptm;
+	}
+
+	// If we are here, then recurse.
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+	{
+		PatternTermPtr term = term_of_handle(h, ptm);
+		if (PatternTerm::UNDEFINED != term) return term;
+	}
+	return PatternTerm::UNDEFINED;
+}
+
 /**
  * Deep types can/should behave a lot like neighbor-search. So try that
  * next, and use it if possible. Same general idea as the neighbor
@@ -712,7 +738,7 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 
 	_root = PatternTerm::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
+	_starter_term = PatternTerm::UNDEFINED;
 	_start_choices.clear();
 	_search_set.clear();
 
@@ -745,7 +771,7 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 		for (const Handle& hs : start_set) start_list.emplace_back(hs);
 
 		_root = root;
-		_starter_term = var;
+		_starter_term = term_of_handle(var, root);
 		_search_set = start_list;
 
 		// We only need enough startng points to get started;
@@ -778,7 +804,7 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 		if (NOTYPE == t) continue;
 
 		_root = root;
-		_starter_term = var;
+		_starter_term = term_of_handle(var, root);
 		_as->get_handles_by_type(_search_set, t);
 		if (0 < _search_set.size()) return true;
 	}
@@ -801,7 +827,7 @@ bool InitiateSearchMixin::setup_deep_type_search(const PatternTermSeq& clauses)
 bool InitiateSearchMixin::setup_link_type_search(const PatternTermSeq& clauses)
 {
 	_root = PatternTerm::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
+	_starter_term = PatternTerm::UNDEFINED;
 	size_t count = SIZE_MAX;
 
 	for (const PatternTermPtr& cl: clauses)
@@ -832,7 +858,7 @@ bool InitiateSearchMixin::setup_link_type_search(const PatternTermSeq& clauses)
 	                      << _starter_term->to_short_string();})
 
 	// Get type of the rarest link
-	Type ptype = _starter_term->get_type();
+	Type ptype = _starter_term->getHandle()->get_type();
 
 	_as->get_handles_by_type(_search_set, ptype);
 	return true;
@@ -876,7 +902,7 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 	_root = PatternTerm::UNDEFINED;
-	_starter_term = Handle::UNDEFINED;
+	_starter_term = PatternTerm::UNDEFINED;
 	bool empty = false;
 	for (const Handle& var: _variables->varset)
 	{
@@ -911,7 +937,7 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 				if (cl->getHandle() == var)
 				{
 					_root = cl;
-					_starter_term = cl->getHandle();
+					_starter_term = cl;
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of " << count;})
@@ -923,9 +949,9 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
-					_starter_term = *fa.least_holders.begin();
+					_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
 					if (all_clauses_are_evaluatable)
-						_starter_term = var;
+						_starter_term = term_of_handle(var, cl);
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of "
@@ -980,7 +1006,7 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 			if (not m->hasAnyEvaluatable())
 			{
 				_root = m;
-				_starter_term = m->getHandle();
+				_starter_term = m;
 				break;
 			}
 		}
@@ -993,7 +1019,7 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 			if (some_var == _variables->varset.end())
 				throw FatalErrorException(TRACE_INFO,
 					"Internal Error: There were no variables!");
-			_starter_term = *some_var;
+			_starter_term = term_of_handle(*some_var, _root);
 		}
 	}
 
@@ -1073,7 +1099,8 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 			             << "\n       Loop candidate ("
 			             << ++i << "/" << hsz << "):\n"
 			             << h->to_short_string("       ");})
-			bool found = pme.explore_neighborhood(_starter_term, h, _root);
+			bool found = pme.explore_neighborhood(_starter_term->getHandle(),
+			                                      h, _root);
 			if (found) return true;
 		}
 

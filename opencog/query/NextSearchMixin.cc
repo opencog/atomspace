@@ -88,7 +88,7 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
 
 	const Choice& ch(_next_choices.back());
 	clause = ch.clause;
-	joint = ch.start_term;
+	joint = ch.start_term->getQuote();
 	_next_choices.pop_back();
 
 	_issued.insert(clause);
@@ -128,7 +128,7 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 			{
 				Choice ch;
 				ch.clause = root;
-				ch.start_term = v;
+				ch.start_term = term_of_handle(v, root);
 				_next_choices.emplace_back(ch);
 				return;
 			}
@@ -341,7 +341,7 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 			{
 				Choice ch;
 				ch.clause = root;
-				ch.start_term = root->getHandle();
+				ch.start_term = root;
 				_next_choices.emplace_back(ch);
 				return true;
 			}
@@ -357,8 +357,8 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		for (const PatternTermPtr& alt : unsolved_clause->getOutgoingSet())
 		{
 			Choice ch;
-			ch.clause = alt;
-			ch.start_term = joint;
+			ch.clause = unsolved_clause;
+			ch.start_term = term_of_handle(joint, alt);
 			_next_choices.emplace_back(ch);
 		}
 
@@ -369,7 +369,7 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	{
 		Choice ch;
 		ch.clause = unsolved_clause;
-		ch.start_term = joint;
+		ch.start_term = term_of_handle(joint, unsolved_clause);
 		_next_choices.emplace_back(ch);
 	}
 	return true;
