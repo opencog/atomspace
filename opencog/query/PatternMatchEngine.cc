@@ -2048,6 +2048,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		clause_stacks_pop();
 
 		if (not _pmc.get_next_clause(do_clause, joiner)) break;
+		logmsg("This was a multiple-choice clause; looping around.");
 	}
 
 	// If we are here, and found is false, then we've exhausted all

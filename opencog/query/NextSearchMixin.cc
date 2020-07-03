@@ -84,7 +84,15 @@ void InitiateSearchMixin::pop(void)
 bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
                                           PatternTermPtr& joint)
 {
-	if (0 == _next_choices.size()) return false;
+	if (0 == _next_choices.size())
+	{
+		if (0 < _choice_stack.size())
+		{
+			_next_choices = _choice_stack.top();
+			_choice_stack.pop();
+		}
+		return false;
+	}
 
 	const Choice& ch(_next_choices.back());
 	clause = ch.clause;
@@ -97,6 +105,9 @@ bool InitiateSearchMixin::get_next_clause(PatternTermPtr& clause,
 
 void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 {
+	_choice_stack.push(_next_choices);
+	_next_choices.clear();
+
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no absents.
 	if (get_next_thinnest_clause(var_grounding, false, false)) return;
@@ -247,17 +258,6 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
                                                    bool search_eval,
                                                    bool search_absents)
 {
-	// Search for an as-yet ungrounded clause. Search for required
-	// clauses first; then, only if none of those are left, move on
-	// to the optional clauses.  We can find ungrounded clauses by
-	// looking at the grounded vars, looking up the root, to see if
-	// the root is grounded.  If its not, start working on that.
-	Handle joint(Handle::UNDEFINED);
-	PatternTermPtr unsolved_clause(PatternTerm::UNDEFINED);
-	unsigned int thinnest_joint = UINT_MAX;
-	unsigned int thinnest_clause = UINT_MAX;
-	bool unsolved = false;
-
 	// Make a list of the as-yet ungrounded variables.
 	HandleSet ungrounded_vars;
 
@@ -288,6 +288,17 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		}
 		else ungrounded_vars.insert(v);
 	}
+
+	// Search for an as-yet ungrounded clause. Search for required
+	// clauses first; then, only if none of those are left, move on
+	// to the optional clauses.  We can find ungrounded clauses by
+	// looking at the grounded vars, looking up the root, to see if
+	// the root is grounded.  If its not, start working on that.
+	Handle joint(Handle::UNDEFINED);
+	PatternTermPtr unsolved_clause(PatternTerm::UNDEFINED);
+	unsigned int thinnest_joint = UINT_MAX;
+	unsigned int thinnest_clause = UINT_MAX;
+	bool unsolved = false;
 
 	// We are looking for a joining atom, one that is shared in common
 	// with the a fully grounded clause, and an as-yet ungrounded clause.
@@ -349,7 +360,7 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	}
 
 	// Did not find anything.
-	if (not unsolved or nullptr == unsolved_clause) return false;
+	if (not unsolved or PatternTerm::UNDEFINED == unsolved_clause) return false;
 
 	// Return what we found.
 	if (unsolved_clause->isChoice())

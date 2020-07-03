@@ -116,7 +116,10 @@ protected:
 	IssuedSet _issued;     // stacked on _issued_stack
 	std::stack<IssuedSet> _issued_stack;
 
-	std::vector<Choice> _next_choices;
+	typedef std::vector<Choice> ChoiceList;
+	ChoiceList _next_choices;
+	std::stack<ChoiceList> _choice_stack;
+
 	Handle get_glob_embedding(const GroundingMap&, const Handle&);
 	bool get_next_thinnest_clause(const GroundingMap&, bool, bool);
 	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
