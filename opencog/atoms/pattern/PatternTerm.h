@@ -68,6 +68,7 @@ typedef std::shared_ptr<PatternTerm> PatternTermPtr;
 typedef std::weak_ptr<PatternTerm> PatternTermWPtr;
 typedef std::vector<PatternTermPtr> PatternTermSeq;
 typedef std::vector<PatternTermWPtr> PatternTermWSeq;
+typedef std::set<PatternTermPtr> PatternTermSet;
 
 class PatternTerm
 	: public std::enable_shared_from_this<PatternTerm>
@@ -248,6 +249,8 @@ std::string oc_to_string(const PatternTerm& pt,
 std::string oc_to_string(const PatternTermPtr& pt,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const PatternTermSeq& pt,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PatternTermSet& pt,
                          const std::string& indent=empty_string);
 
 } // namespace opencog
