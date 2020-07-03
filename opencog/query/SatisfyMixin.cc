@@ -90,13 +90,21 @@ class PMCGroundings : public SatisfyMixin
 		{
 			return _cb.always_clause_match(pattrn, grnd, term_gnds);
 		}
-		IncomingSet get_incoming_set(const Handle& h, Type t) {
+		IncomingSet get_incoming_set(const Handle& h, Type t)
+		{
 			return _cb.get_incoming_set(h, t);
 		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
-		void set_pattern(const Variables& vars,
-		                 const Pattern& pat)
+		void next_connections(const GroundingMap& var_grounding)
+		{
+			_cb.next_connections(var_grounding);
+		}
+		bool get_next_clause(PatternTermPtr& clause, PatternTermPtr& joint)
+		{
+			return _cb.get_next_clause(clause, joint);
+		}
+		void set_pattern(const Variables& vars, const Pattern& pat)
 		{
 			_cb.set_pattern(vars, pat);
 		}

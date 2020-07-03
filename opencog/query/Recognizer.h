@@ -57,7 +57,7 @@ class Recognizer :
 
 		DECLARE_PE_MUTEX;
 		PatternTermPtr _root;
-		Handle _starter_term;
+		PatternTermPtr _starter_term;
 		size_t _cnt;
 		bool do_search(PatternMatchCallback&, const Handle&);
 		bool loose_match(const Handle&, const Handle&);
@@ -78,12 +78,14 @@ class Recognizer :
 			TermMatchMixin::set_pattern(vars, pat);
 		}
 
-		virtual bool perform_search(PatternMatchCallback&);
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln);
+		virtual bool perform_search(PatternMatchCallback&);
+		virtual void next_connections(const GroundingMap&);
+		virtual bool get_next_clause(PatternTermPtr&, PatternTermPtr&);
 };
 
 } // namespace opencog

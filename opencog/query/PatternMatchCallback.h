@@ -292,21 +292,6 @@ class PatternMatchCallback
 			return h->getIncomingSetByType(t);
 		}
 
-		/**
-		 * Called after a top-level clause (tree) has been fully
-		 * grounded. This gives the callee the opportunity to save
-		 * state onto a stack, if needed.
-		 */
-		virtual void push(void) {}
-
-		/**
-		 * Called prior to starting a back-track, retreating from the
-		 * most recently grounded top-level clause (tree). This
-		 * gives the callee the opportunity to maintain state with a
-		 * stack, if needed.
-		 */
-		virtual void pop(void) {}
-
 		virtual const TypeSet& get_connectives(void)
 		{ static const TypeSet _empty; return _empty; }
 
@@ -340,12 +325,44 @@ class PatternMatchCallback
 		/**
 		 * Called when the search has completed. In principle, this
 		 * callback is not really needed, since the `perform_search()`
-		 * callback "knows" when the search is completed: its completed when
-		 * it returns. In practice, the implementation is much simpler if
-		 * there is a distinct callback to announce completion.  The argument
-		 * is the return value from `perform_search()`.
+		 * callback "knows" when the search is completed: its completed
+		 * when it returns. In practice, the implementation is much
+		 * simpler if there is a distinct callback to announce completion.
+		 * The argument is the return value from `perform_search()`.
 		 */
 		virtual bool search_finished(bool done) { return done; }
+
+		/**
+		 * A pair of functions that are called to obtain the set of
+		 * clauses to explore next. These are clauses that contain
+		 * ungrounded variables, for which a grounding must be found.
+		 * The set is a disjunctive set (a choice set) -- it is enough
+		 * to ground any one of out of the set.
+		 *
+		 * The first function, `next_connections()` is called with the
+		 * current groundings at this time. Immediately afterwards,
+		 * `get_next_clause()` is called to obtain one of the choices.
+		 * It is then called repeatedly to get the next choice. It should
+		 * return false if there are no more; else return true.
+		 */
+		virtual void next_connections(const GroundingMap& var_grounding) = 0;
+		virtual bool get_next_clause(PatternTermPtr& clause,
+		                             PatternTermPtr& joint) = 0;
+
+		/**
+		 * Called after a top-level clause (tree) has been fully
+		 * grounded. This gives the callee the opportunity to save
+		 * state onto a stack, if needed.
+		 */
+		virtual void push(void) {}
+
+		/**
+		 * Called prior to starting a back-track, retreating from the
+		 * most recently grounded top-level clause (tree). This
+		 * gives the callee the opportunity to maintain state with a
+		 * stack, if needed.
+		 */
+		virtual void pop(void) {}
 
 		/**
 		 * Called before search initiation, to indicate the pattern

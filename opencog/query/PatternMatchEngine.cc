@@ -21,13 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -273,7 +271,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 /// do_next_clause() system, which assumes that Present terms happen
 /// only as top-level clauses. Someday, someone should merge these
 /// two mechanisms, so that this guy gets the sophistication of
-/// the get_next_untried_clause() mechanism.
+/// the get_next_clause() mechanism.
 bool PatternMatchEngine::present_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
@@ -1287,7 +1285,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// If we arrive here, with `ptm` being the ListLink, and the `hg`
 	// being the grounding of the ListLink, then we should be able to
 	// immediately jump to the EvaluationLink, without any further ado.
-	// Specifically, there is no need to search the incoming set of `hg`
+	// Specifically, there is no need to search the incoming set of `hg`;
 	// just build up the EvaluationLink and offer it as the ground.
 	if (not ptm->hasUnorderedLink())
 	{
@@ -1645,7 +1643,7 @@ static PatternTermPtr find_variable_term(const PatternTermPtr& term,
 /// static analysis:
 /// -- build a connectivity map, just like the one for clauses
 /// -- build a clause_variables struct, but just for this term
-/// -- search for the thinnest joint, just like `get_next_untried_clause`
+/// -- search for the thinnest joint, just like `get_next_clause`
 /// XXX FIXME -- do the above.
 ///
 bool PatternMatchEngine::next_untried_present(const PatternTermPtr& parent,
@@ -1997,12 +1995,17 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
 /// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
+	// Keep the next joint and the next clause on the C++ stack.
+	PatternTermPtr do_clause;
+	PatternTermPtr joiner;
+
 	clause_stacks_push();
-	get_next_untried_clause();
+	_pmc.next_connections(var_grounding);
+	bool have_more = _pmc.get_next_clause(do_clause, joiner);
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
-	if (PatternTerm::UNDEFINED == next_clause)
+	if (not have_more)
 	{
 		bool found = report_grounding(var_grounding, clause_grounding);
 		logmsg("==================== FINITO! accepted=", found);
@@ -2011,34 +2014,42 @@ bool PatternMatchEngine::do_next_clause(void)
 		return found;
 	}
 
-	// Keep the joint and the clause on the C++ stack, becuase both
-	// `next_joint` and `next_clause` get trashed during recursion!
-	Handle joiner = next_joint;
-	PatternTermPtr do_clause = next_clause;
+	bool found = false;
+	while (true)
+	{
+		logmsg("Next clause is", do_clause->getHandle());
+		DO_LOG({LAZY_LOG_FINE << "This clause is "
+			              << (do_clause->isAbsent()? "absent" : "required");})
+		DO_LOG({LAZY_LOG_FINE << "This clause is "
+			              << (do_clause->hasAnyEvaluatable()?
+			                  "dynamically evaluatable" : "non-dynamic");
+		logmsg("Joining variable is", joiner->getHandle());
+		logmsg("Joining grounding is", var_grounding[joiner->getHandle()]); })
 
-	logmsg("Next clause is", do_clause->getHandle());
-	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (do_clause->isAbsent()? "absent" : "required");})
-	DO_LOG({LAZY_LOG_FINE << "This clause is "
-		              << (do_clause->hasAnyEvaluatable()?
-		                  "dynamically evaluatable" : "non-dynamic");
-	logmsg("Joining variable is", joiner);
-	logmsg("Joining grounding is", var_grounding[joiner]); })
+		// Start solving the next unsolved clause. Note: this is a
+		// recursive call, and not a loop. Recursion is halted when
+		// the next unsolved clause has no grounding.
+		//
+		// We continue our search at the variable/glob that "joins"
+		// (is shared in common) between the previous (solved) clause,
+		// and this clause.
 
-	// Start solving the next unsolved clause. Note: this is a
-	// recursive call, and not a loop. Recursion is halted when
-	// the next unsolved clause has no grounding.
-	//
-	// We continue our search at the variable/glob that "joins"
-	// (is shared in common) between the previous (solved) clause,
-	// and this clause.
+		clause_stacks_push();
+		clause_accepted = false;
+		Handle hgnd(var_grounding[joiner->getHandle()]);
+		if (nullptr == hgnd)
+		{
+			// Hack for clauses with no variables...
+			const Handle& j(joiner->getHandle());
+			var_grounding[j] = j;
+			hgnd = j;
+		}
+		found |= explore_clause(joiner, hgnd, do_clause);
+		clause_stacks_pop();
 
-	clause_accepted = false;
-	Handle hgnd(var_grounding[joiner]);
-	OC_ASSERT(nullptr != hgnd,
-	         "Error: joining handle has not been grounded yet!");
-
-	bool found = explore_clause(joiner, hgnd, do_clause);
+		if (not _pmc.get_next_clause(do_clause, joiner)) break;
+		logmsg("This was a multiple-choice clause; looping around.");
+	}
 
 	// If we are here, and found is false, then we've exhausted all
 	// of the search possibilities for the current clause. If this
@@ -2053,9 +2064,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	// clauses that don't have matches.
 	while ((false == found) and
 	       (false == clause_accepted) and
-	       (next_clause->isAbsent()))
+	       (do_clause->isAbsent()))
 	{
-		Handle curr_root = next_clause->getHandle();
+		Handle curr_root = do_clause->getHandle();
 		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		logmsg("Exhausted search for optional clause, cb=", match);
@@ -2064,32 +2075,27 @@ bool PatternMatchEngine::do_next_clause(void)
 			return false;
 		}
 
-		// XXX Maybe should push n pop here? No, maybe not ...
 		clause_grounding[curr_root] = Handle::UNDEFINED;
-		get_next_untried_clause();
-
-		if (PatternTerm::UNDEFINED == next_clause)
+		_pmc.next_connections(var_grounding);
+		have_more = _pmc.get_next_clause(do_clause, joiner);
+		if (not have_more)
 		{
 			logmsg("==================== FINITO BANDITO!");
 			DO_LOG({log_solution(var_grounding, clause_grounding);})
 			found = report_grounding(var_grounding, clause_grounding);
+			clause_stacks_pop();
+			return found;
 		}
-		else
-		{
-			// Place a copy on stack, so its not trashed during recursion.
-			joiner = next_joint;
-			do_clause = next_clause;
-			logmsg("Next optional clause is", do_clause->getHandle());
 
-			// Now see if this optional clause has any solutions,
-			// or not. If it does, we'll recurse. If it does not,
-			// we'll loop around back to here again.
-			clause_accepted = false;
-			Handle hgnd = var_grounding[joiner];
+		logmsg("Next optional clause is", do_clause->getHandle());
 
-			auto pl = _pat->connected_terms_map.find({joiner, do_clause});
-			found = explore_term_branches(pl->second[0], hgnd, do_clause);
-		}
+		// Now see if this optional clause has any solutions,
+		// or not. If it does, we'll recurse. If it does not,
+		// we'll loop around back to here again.
+		clause_accepted = false;
+		Handle hgnd = var_grounding[joiner->getHandle()];
+
+		found = explore_term_branches(joiner, hgnd, do_clause);
 	}
 
 	// If we failed to find anything at this level, we need to
@@ -2098,305 +2104,6 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_pop();
 
 	return found;
-}
-
-/**
- * Search for the next untried, (thus ungrounded, unsolved) clause.
- *
- * The "issued" set contains those clauses which are currently in play,
- * i.e. those for which a grounding is currently being explored. Both
- * grounded, and as-yet-ungrounded clauses may be in this set.  The
- * sole reason of this set is to avoid infinite recursion, i.e. of
- * re-identifying the same clause over and over as unsolved.
- *
- * The words "solved" and "grounded" are used as synonyms through out
- * the code.
- *
- * Additional complications are introduced by the presence of
- * evaluatable terms, black-box terms, and optional clauses. An
- * evaluatable term is any term that needs to be evaluated to determine
- * if it matches: such terms typically do not exist in the atomspace;
- * they are "virtual", and "exist" only when the evaluation returns
- * "true". Thus, these can only be grounded after all other possible
- * clauses are grounded; thus these are saved for last.  It is always
- * possible to save these for last, because earlier stages have
- * guaranteed that all of the non-virtual clauses are connected.
- * Anyway, evaluatables come in two forms: those that can be evaluated
- * quickly, and those that require a "black-box" evaluation of some
- * scheme or python code. Of the two, we save "black-box" for last.
- *
- * Then, after grounding all of the mandatory clauses (virtual or not),
- * we look for optional clauses, if any. Again, these might be virtual,
- * and they might be black...
- *
- * Thus, we use a helper function to broaden the search in each case.
- */
-void PatternMatchEngine::get_next_untried_clause(void)
-{
-	// First, try to ground all the mandatory clauses, only.
-	// no virtuals, no black boxes, no absents.
-	if (get_next_thinnest_clause(false, false)) return;
-
-	// Don't bother looking for evaluatables if they are not there.
-	if (_pat->have_evaluatables)
-	{
-		if (get_next_thinnest_clause(true, false)) return;
-	}
-
-	// Try again, this time, considering the absent clauses.
-	if (not _pat->absents.empty())
-	{
-		if (get_next_thinnest_clause(false, true)) return;
-		if (_pat->have_evaluatables)
-		{
-			if (get_next_thinnest_clause(true, true)) return;
-		}
-	}
-
-	// Now loop over all for-all clauses.
-	// All variables must neccessarily be grounded at this point.
-	for (const PatternTermPtr& root : _pat->always)
-	{
-		if (issued.end() != issued.find(root)) continue;
-		issued.insert(root);
-		next_clause = root;
-		for (const Handle &v : _variables->varset)
-		{
-			if (is_free_in_tree(root->getHandle(), v))
-			{
-				next_joint = v;
-				return;
-			}
-		}
-		throw RuntimeException(TRACE_INFO, "BUG! Somethings wrong!!");
-	}
-
-	// Make sure all clauses have been grounded.
-	for (const PatternTermPtr& root : _pat->pmandatory)
-	{
-		if (issued.end() == issued.find(root))
-			throw RuntimeException(TRACE_INFO,
-				"BUG! Still have ungrounded clauses!!");
-	}
-
-	// If we are here, there are no more unsolved clauses to consider.
-	next_clause = PatternTerm::UNDEFINED;
-	next_joint = Handle::UNDEFINED;
-}
-
-// Count the number of ungrounded variables in a clause.
-//
-// This is used to search for the "thinnest" ungrounded clause:
-// the one with the fewest ungrounded variables in it. Thus, if
-// there is just one variable that needs to be grounded, then this
-// can be done in a direct fashion; it resembles the concept of
-// "unit propagation" in the DPLL algorithm.
-//
-// XXX TODO ... Rather than counting the number of variables, we
-// should instead look for one with the smallest incoming set.
-// That is because the very next thing that we do will be to
-// iterate over the incoming set of "pursue" ... so it could be
-// a huge pay-off to minimize this.
-//
-// If there are two ungrounded variables in a clause, then the
-// "thickness" is the *product* of the sizes of the two incoming
-// sets. Thus, the fewer ungrounded variables, the better.
-//
-// Danger: this assumes a suitable dataset, as otherwise, the cost
-// of this "optimization" can add un-necessarily to the overhead.
-//
-unsigned int PatternMatchEngine::thickness(const PatternTermPtr& clause,
-                                           const HandleSet& live)
-{
-	// If there are only zero or one ungrounded vars, then any clause
-	// will do. Blow this pop stand.
-	if (live.size() < 2) return 1;
-
-	const Handle& hclause = clause->getHandle();
-	unsigned int count = 0;
-	for (const Handle& v : live)
-	{
-		if (is_unquoted_in_tree(hclause, v)) count++;
-	}
-	return count;
-}
-
-/// get_glob_embedding() -- given glob node, return term that it grounds.
-///
-/// If a GlobNode has a grounding, then there is always some
-/// corresponding term which contains that grounded GlobNode and is
-/// grounded. If that term appears in two (or more) clauses, then
-/// return it, so that it is used as the pivot point to the next
-/// ungrounded clause.  If there is no such term, then just  return the
-/// glob.
-Handle PatternMatchEngine::get_glob_embedding(const Handle& glob)
-{
-	// If the glob is in only one clause, there is no connectivity map.
-	if (0 == _pat->connectivity_map.count(glob)) return glob;
-
-	// Find some clause, any clause at all, containg the glob,
-	// that has not been grounded so far. We need to do this because
-	// the glob might appear in three clauses, with two of them
-	// grounded by a common term, and the third ungrounded
-	// with no common term.
-	const auto& clauses =  _pat->connectivity_map.equal_range(glob);
-	auto clpr = clauses.first;
-	for (; clpr != clauses.second; clpr++)
-	{
-		if (issued.end() == issued.find(clpr->second)) break;
-	}
-
-	// Glob is not in any ungrounded clauses.
-	if (clpr == clauses.second) return glob;
-
-	std::pair<Handle, PatternTermPtr> glbt({glob, clpr->second});
-	const auto& ptms = _pat->connected_terms_map.find(glbt);
-	const PatternTermPtr& ptm = ptms->second[0];
-
-	// Here, ptm is the glob itself. It will almost surely
-	// be in some term. The test for nullptr will surely never
-	// trigger.
-	const PatternTermPtr& parent = ptm->getParent();
-	if (nullptr == parent) return glob;
-
-	// If this term appears in more than one clause, then it
-	// can be used as a pivot.
-	const Handle& embed = parent->getHandle();
-	if ((var_grounding.end() != var_grounding.find(embed)) and
-	    (1 < _pat->connectivity_map.count(embed)))
-		return embed;
-
-	return glob;
-}
-
-/// Work-horse for `get_next_untried_clause`. Locates the actual clause
-/// to run next. Takes three boolean flags: When the boolean is not set,
-/// then only those clauses satsifying the criterion are considered,
-/// else all clauses are considered.
-///
-/// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_thinnest_clause(bool search_eval,
-                                                  bool search_absents)
-{
-	// Search for an as-yet ungrounded clause. Search for required
-	// clauses first; then, only if none of those are left, move on
-	// to the optional clauses.  We can find ungrounded clauses by
-	// looking at the grounded vars, looking up the root, to see if
-	// the root is grounded.  If its not, start working on that.
-	Handle joint(Handle::UNDEFINED);
-	PatternTermPtr unsolved_clause(PatternTerm::UNDEFINED);
-	unsigned int thinnest_joint = UINT_MAX;
-	unsigned int thinnest_clause = UINT_MAX;
-	bool unsolved = false;
-
-	// Make a list of the as-yet ungrounded variables.
-	HandleSet ungrounded_vars;
-
-	// Grounded variables ordered by the size of their grounding incoming set
-	std::multimap<std::size_t, Handle> thick_vars;
-
-	for (const Handle &v : _variables->varset)
-	{
-		const auto& gnd = var_grounding.find(v);
-		if (gnd != var_grounding.end())
-		{
-			// We cannot use GlobNode's directly as joiners, because
-			// we don't know how they fit. Instead, we have to fish
-			// out a term that contains a grounded glob, and use
-			// that term as the joiner.
-			if (GLOB_NODE == v->get_type())
-			{
-				Handle embed = get_glob_embedding(v);
-				const Handle& tg = var_grounding[embed];
-				std::size_t incoming_set_size = tg->getIncomingSetSize();
-				thick_vars.insert(std::make_pair(incoming_set_size, embed));
-			}
-			else
-			{
-				std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
-				thick_vars.insert(std::make_pair(incoming_set_size, v));
-			}
-		}
-		else ungrounded_vars.insert(v);
-	}
-
-	// We are looking for a joining atom, one that is shared in common
-	// with the a fully grounded clause, and an as-yet ungrounded clause.
-	// The joint is called "pursue", and the unsolved clause that it
-	// joins will become our next untried clause. We choose joining atom
-	// with smallest size of its incoming set. If there are many such
-	// atoms we choose one from clauses with minimal number of ungrounded
-	// yet variables.
-	for (const auto& tckvar : thick_vars)
-	{
-		std::size_t pursue_thickness = tckvar.first;
-		const Handle& pursue = tckvar.second;
-
-		if (pursue_thickness > thinnest_joint) break;
-
-		const auto& root_list = _pat->connectivity_map.equal_range(pursue);
-		for (auto it = root_list.first; it != root_list.second; it++)
-		{
-			const PatternTermPtr& root = it->second;
-			if ((issued.end() == issued.find(root))
-			        and (search_eval or not root->hasAnyEvaluatable())
-			        and (search_absents or not root->isAbsent()))
-			{
-				unsigned int root_thickness = thickness(root, ungrounded_vars);
-				if (root_thickness < thinnest_clause)
-				{
-					thinnest_clause = root_thickness;
-					thinnest_joint = pursue_thickness;
-					unsolved_clause = root;
-					joint = pursue;
-					unsolved = true;
-				}
-			}
-		}
-	}
-
-	// Some clauses have no variables in them, and so the above loops
-	// will not find them. Try these now. This means that the
-	// variable-free clauses run last. If the user wants to run them
-	// earlier, they can always use a SequentialAndLink.
-	if (not unsolved and search_eval)
-	{
-		for (const PatternTermPtr& root : _pat->pmandatory)
-		{
-			if (issued.end() != issued.find(root)) continue;
-
-			// Clauses with no variables are (by definition)
-			// evaluatable. So we don't check if they're evaluatable.
-			const HandleSeq& varseq = _pat->clause_variables.at(root);
-			if (0 == varseq.size())
-			{
-				unsolved_clause = root;
-				joint = root->getHandle();
-				unsolved = true;
-				// Oh bother. Bit of a hack.
-				var_grounding[joint] = joint;
-				break;
-			}
-		}
-	}
-
-	if (unsolved)
-	{
-		// Joint is a (variable) node that's shared between several
-		// clauses. One of the clauses has been grounded, another
-		// has not.  We want to now traverse upwards from this node,
-		// to find the top of the ungrounded clause.
-		next_clause = unsolved_clause;
-		next_joint = joint;
-
-		if (unsolved_clause)
-		{
-			issued.insert(unsolved_clause);
-			return true;
-		}
-	}
-
-	return false;
 }
 
 /* ======================================================== */
@@ -2422,7 +2129,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	var_solutn_stack.push(var_grounding);
 	_clause_solutn_stack.push(clause_grounding);
 
-	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
 
 	perm_push();
@@ -2454,7 +2160,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	// The grounding stacks are handled differently.
 	POPSTK(_clause_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(issued_stack, issued);
 
 	POPSTK(choice_stack, _choice_state);
 
@@ -2478,14 +2183,12 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	// Currently, only GlobUTest fails when this is uncommented.
 	OC_ASSERT(0 == _clause_solutn_stack.size());
 	OC_ASSERT(0 == var_solutn_stack.size());
-	OC_ASSERT(0 == issued_stack.size());
 	OC_ASSERT(0 == choice_stack.size());
 	OC_ASSERT(0 == _perm_stack.size());
 	OC_ASSERT(0 == _perm_stepper_stack.size());
 #else
 	while (!_clause_solutn_stack.empty()) _clause_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 	while (!_perm_stack.empty()) _perm_stack.pop();
 	while (!_perm_stepper_stack.empty()) _perm_stepper_stack.pop();
@@ -2587,13 +2290,12 @@ bool PatternMatchEngine::report_forall(void)
  * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::explore_neighborhood(const Handle& term,
+bool PatternMatchEngine::explore_neighborhood(const PatternTermPtr& term,
                                               const Handle& grnd,
                                               const PatternTermPtr& clause)
 {
 	clause_stacks_clear();
 	clear_current_state();
-	issued.insert(clause);
 	_nack_cache.clear();
 
 	bool halt = explore_clause(term, grnd, clause);
@@ -2647,7 +2349,7 @@ HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
  *
  * Returns true if there was a match, else returns false to reject it.
  */
-bool PatternMatchEngine::explore_clause_direct(const Handle& term,
+bool PatternMatchEngine::explore_clause_direct(const PatternTermPtr& term,
                                                const Handle& grnd,
                                                const PatternTermPtr& clause)
 {
@@ -2655,9 +2357,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	logmsg("Clause is matchable; start matching it");
 
 	_did_check_forall = false;
-
-	auto pl = _pat->connected_terms_map.find({term, clause});
-	bool found = explore_term_branches(pl->second[0], grnd, clause);
+	bool found = explore_term_branches(term, grnd, clause);
 
 	if (not _did_check_forall and clause->isAlways())
 	{
@@ -2670,7 +2370,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	return found;
 }
 
-bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
+bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
                                                     const Handle& grnd,
                                                     const PatternTermPtr& clause)
 {
@@ -2680,9 +2380,8 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 	// giant variable, matching almost anything. Keep these folks
 	// happy, and record the suggested grounding. There's nowhere
 	// else to do this, so we do it here.
-	Type tt = term->get_type();
-	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
-		var_grounding[term] = grnd;
+	if (term->isBoundVariable() or term->isGlobbyVar())
+		var_grounding[term->getHandle()] = grnd;
 
 	// All variables in the clause had better be grounded!
 	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
@@ -2760,13 +2459,19 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
  * and would become effective only for large, complex searches, of
  * which I haven't seen any good examples of, yet.
  */
-bool PatternMatchEngine::explore_clause(const Handle& term,
+bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
                                         const Handle& grnd,
                                         const PatternTermPtr& pclause)
 {
 	// Evaluatable clauses are not cacheable.
 	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
+
+	// Multiple-choice clauses are not cacheable in the current design.
+	// This is because the cache is at the wrong level; the choices are
+	// explored in a loop above the cache, instead of below it.
+	if (pclause->isChoice())
+		return explore_clause_direct(term, grnd, pclause);
 
 	// Build the cache lookup key
 	HandleSeq key;
@@ -2784,27 +2489,26 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		key = clause_grounding_key(clause, varseq);
 	}
 
-	if (0 < key.size())
+	// No key, nothing to look up.
+	if (0 == key.size())
+		return explore_clause_direct(term, grnd, pclause);
+
+	const auto& cac = _gnd_cache.find(key);
+	if (cac != _gnd_cache.end())
 	{
-		const auto& cac = _gnd_cache.find(key);
-		if (cac != _gnd_cache.end())
-		{
-			var_grounding[clause] = cac->second;
-			return do_next_clause();
-		}
-
-		// Do we have a negative cache? If so, it will always fail.
-		const auto& nac = _nack_cache.find(key);
-		if (nac != _nack_cache.end())
-			return false;
-
-		bool okay = explore_clause_direct(term, grnd, pclause);
-		if (not okay)
-			_nack_cache.insert(key);
-		return okay;
+		var_grounding[clause] = cac->second;
+		return do_next_clause();
 	}
 
-	return explore_clause_direct(term, grnd, pclause);
+	// Do we have a negative cache? If so, it will always fail.
+	const auto& nac = _nack_cache.find(key);
+	if (nac != _nack_cache.end())
+			return false;
+
+	bool okay = explore_clause_direct(term, grnd, pclause);
+	if (not okay)
+		_nack_cache.insert(key);
+	return okay;
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
@@ -2859,8 +2563,6 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// GlobNode state
 	_glob_state.clear();
-
-	issued.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)

@@ -163,28 +163,19 @@ private:
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
-
 	bool do_next_clause(void);
 	bool clause_accepted;
-	void get_next_untried_clause(void);
-	Handle get_glob_embedding(const Handle&);
-	bool get_next_thinnest_clause(bool, bool);
-	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
-	PatternTermPtr next_clause;
-	Handle next_joint;
-	// Set of clauses for which a grounding is currently being attempted.
-	typedef std::set<PatternTermPtr> IssuedSet;
-	IssuedSet issued;     // stacked on issued_stack
 
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
 	// Similar to the next-clause, above, and someday should be unified
-	// with it.
+	// with it. XXX Needs to move to the Mixin class... XX FIXME.
 
 	bool next_untried_present(const PatternTermPtr&,
 	                          const PatternTermPtr&,
 	                          PatternTermPtr&, PatternTermPtr&,
 	                          Handle&);
+	typedef std::set<PatternTermPtr> IssuedSet;
 	IssuedSet issued_present;
 
 	// -------------------------------------------
@@ -211,7 +202,6 @@ private:
 	std::stack<GroundingMap> var_solutn_stack;
 	std::stack<GroundingMap> _clause_solutn_stack;
 
-	std::stack<IssuedSet> issued_stack;
 	std::stack<ChoiceState> choice_stack;
 
 	// push, pop and clear these states.
@@ -260,10 +250,11 @@ private:
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions
-	bool explore_clause(const Handle&, const Handle&, const PatternTermPtr&);
-	bool explore_clause_direct(const Handle&, const Handle&,
+	bool explore_clause(const PatternTermPtr&, const Handle&,
+	                    const PatternTermPtr&);
+	bool explore_clause_direct(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
-	bool explore_clause_evaluatable(const Handle&, const Handle&,
+	bool explore_clause_evaluatable(const PatternTermPtr&, const Handle&,
 	                                const PatternTermPtr&);
 	bool explore_term_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
@@ -297,7 +288,7 @@ public:
 
 	// Examine the locally connected neighborhood for possible
 	// matches.
-	bool explore_neighborhood(const Handle&, const Handle&,
+	bool explore_neighborhood(const PatternTermPtr&, const Handle&,
 	                          const PatternTermPtr&);
 
 	// Evaluate constant evaluatable and ground it via the

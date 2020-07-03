@@ -55,6 +55,11 @@ public:
 	virtual void set_pattern(const Variables&, const Pattern&);
 	virtual bool perform_search(PatternMatchCallback&);
 
+	virtual void push(void);
+	virtual void pop(void);
+	virtual void next_connections(const GroundingMap&);
+	virtual bool get_next_clause(PatternTermPtr&, PatternTermPtr&);
+
 	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
@@ -66,25 +71,25 @@ protected:
 	bool _recursing;
 
 	PatternTermPtr _root;
-	Handle _starter_term;
+	PatternTermPtr _starter_term;
 	HandleSeq _search_set;
 
 	struct Choice
 	{
 		PatternTermPtr clause;
-		Handle start_term;
+		PatternTermPtr start_term;
 		HandleSeq search_set;
 	};
 	PatternTermPtr _curr_clause;
-	std::vector<Choice> _choices;
+	std::vector<Choice> _start_choices;
 
 	virtual Handle find_starter(const PatternTermPtr&,
-	                            size_t&, Handle&, size_t&);
+	                            size_t&, PatternTermPtr&, size_t&);
 	virtual Handle find_starter_recursive(const PatternTermPtr&,
-	                                      size_t&, Handle&, size_t&);
+	                                      size_t&, PatternTermPtr&, size_t&);
 	virtual Handle find_thinnest(const PatternTermSeq&,
-	                             Handle&, PatternTermPtr&);
-	virtual void find_rarest(const PatternTermPtr&, Handle&,
+	                             PatternTermPtr&, PatternTermPtr&);
+	virtual void find_rarest(const PatternTermPtr&, PatternTermPtr&,
 	                         size_t&, Quotation quotation=Quotation());
 
 	const PatternTermSeq& get_clause_list(void);
@@ -100,6 +105,25 @@ protected:
 	bool legacy_search(PatternMatchCallback&);
 	bool choice_loop(PatternMatchCallback&, const std::string);
 	bool search_loop(PatternMatchCallback&, const std::string);
+
+	static PatternTermPtr term_of_handle(const Handle&, const PatternTermPtr&);
+
+	// --------------------------------------------
+	// Methods and state that select the next clause to be grounded.
+	typedef std::set<PatternTermPtr> IssuedSet;
+
+	// Set of clauses for which a grounding is currently being attempted.
+	IssuedSet _issued;     // stacked on _issued_stack
+	std::stack<IssuedSet> _issued_stack;
+
+	typedef std::vector<Choice> ChoiceList;
+	ChoiceList _next_choices;
+	std::stack<ChoiceList> _choice_stack;
+
+	Handle get_glob_embedding(const GroundingMap&, const Handle&);
+	bool get_next_thinnest_clause(const GroundingMap&, bool, bool);
+	unsigned int thickness(const PatternTermPtr&, const HandleSet&);
+
 	AtomSpace *_as;
 };
 

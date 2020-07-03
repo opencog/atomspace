@@ -400,4 +400,18 @@ std::string oc_to_string(const PatternTermSeq& pts, const std::string& indent)
 	return str;
 }
 
+std::string oc_to_string(const PatternTermSet& pts, const std::string& indent)
+{
+	std::string str;
+	size_t i=0;
+	str += "PatternTermSet has " + std::to_string(pts.size()) + " terms\n";
+	for (const PatternTermPtr& ptm : pts)
+	{
+		str += indent + "term[" + std::to_string(i) + "]:\n";
+		str += ptm->to_full_string(indent + "  ") + "\n";
+		i++;
+	}
+	return str;
+}
+
 } // ~namespace opencog

@@ -37,6 +37,7 @@ public:
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
@@ -233,7 +234,8 @@ void ChoiceLinkUTest::test_double_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-double.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (double))");
+	Handle items = eval->eval_h("(cog-execute! double)");
+	logger().debug("double-or found %s", items->to_short_string().c_str());
 
 	TS_ASSERT_EQUALS(3, getarity(items));
 
@@ -251,12 +253,12 @@ void ChoiceLinkUTest::test_unary(void)
 
 	Handle doors = eval->eval_h("(cog-execute! (get-a))");
 
-	printf("unary door-a found:\n%s\n", doors->to_string().c_str());
+	printf("unary door-a found:\n%s\n", doors->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(doors));
 
 	doors = eval->eval_h("(cog-execute! (get-bc))");
 
-	printf("unary door-bc found:\n%s\n", doors->to_string().c_str());
+	printf("unary door-bc found:\n%s\n", doors->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(doors));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -272,7 +274,7 @@ void ChoiceLinkUTest::test_typed(void)
 	eval->eval("(load-from-path \"tests/query/choice-typed.scm\")");
 	Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
 
-	printf("typed get-nodes found:\n%s\n", rules->to_string().c_str());
+	printf("typed get-nodes found:\n%s\n", rules->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(rules));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -288,7 +290,7 @@ void ChoiceLinkUTest::test_constant(void)
 	eval->eval("(load-from-path \"tests/query/choice-constant.scm\")");
 	Handle result = eval->eval_h("(cog-execute! query)");
 
-	printf("constant found:\n%s\n", result->to_string().c_str());
+	printf("constant found:\n%s\n", result->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -305,7 +307,7 @@ void ChoiceLinkUTest::test_present(void)
 	Handle result = eval->eval_h("(cog-execute! who-is-hungry?)");
 	Handle answer = eval->eval_h("expected");
 
-	printf("compound found:\n%s\n", result->to_string().c_str());
+	printf("compound found:\n%s\n", result->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(result));
 	TS_ASSERT_EQUALS(result, answer);
 
@@ -323,7 +325,7 @@ void ChoiceLinkUTest::test_compound(void)
 	Handle result = eval->eval_h("(cog-execute! who-needs-help?)");
 	Handle answer = eval->eval_h("answer");
 
-	printf("compound found:\n%s\n", result->to_string().c_str());
+	printf("compound found:\n%s\n", result->to_short_string().c_str());
 	TS_ASSERT_EQUALS(3, getarity(result));
 	TS_ASSERT_EQUALS(result, answer);
 
