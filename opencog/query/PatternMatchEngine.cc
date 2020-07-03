@@ -2044,7 +2044,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			var_grounding[j] = j;
 			hgnd = j;
 		}
-		found |= explore_clause(joiner->getHandle(), hgnd, do_clause);
+		found |= explore_clause(joiner, hgnd, do_clause);
 		clause_stacks_pop();
 
 		if (not _pmc.get_next_clause(do_clause, joiner)) break;
@@ -2297,7 +2297,8 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& term,
 	clear_current_state();
 	_nack_cache.clear();
 
-	bool halt = explore_clause(term, grnd, clause);
+	auto pl = _pat->connected_terms_map.find({term, clause});
+	bool halt = explore_clause(pl->second[0], grnd, clause);
 	bool stop = report_forall();
 	return halt or stop;
 }
@@ -2348,7 +2349,7 @@ HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
  *
  * Returns true if there was a match, else returns false to reject it.
  */
-bool PatternMatchEngine::explore_clause_direct(const Handle& term,
+bool PatternMatchEngine::explore_clause_direct(const PatternTermPtr& term,
                                                const Handle& grnd,
                                                const PatternTermPtr& clause)
 {
@@ -2356,9 +2357,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	logmsg("Clause is matchable; start matching it");
 
 	_did_check_forall = false;
-
-	auto pl = _pat->connected_terms_map.find({term, clause});
-	bool found = explore_term_branches(pl->second[0], grnd, clause);
+	bool found = explore_term_branches(term, grnd, clause);
 
 	if (not _did_check_forall and clause->isAlways())
 	{
@@ -2371,7 +2370,7 @@ bool PatternMatchEngine::explore_clause_direct(const Handle& term,
 	return found;
 }
 
-bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
+bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
                                                     const Handle& grnd,
                                                     const PatternTermPtr& clause)
 {
@@ -2381,9 +2380,8 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
 	// giant variable, matching almost anything. Keep these folks
 	// happy, and record the suggested grounding. There's nowhere
 	// else to do this, so we do it here.
-	Type tt = term->get_type();
-	if (VARIABLE_NODE == tt or GLOB_NODE == tt)
-		var_grounding[term] = grnd;
+	if (term->isBoundVariable() or term->isGlobbyVar())
+		var_grounding[term->getHandle()] = grnd;
 
 	// All variables in the clause had better be grounded!
 	OC_ASSERT(is_clause_grounded(clause), "Internal error!");
@@ -2461,7 +2459,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const Handle& term,
  * and would become effective only for large, complex searches, of
  * which I haven't seen any good examples of, yet.
  */
-bool PatternMatchEngine::explore_clause(const Handle& term,
+bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
                                         const Handle& grnd,
                                         const PatternTermPtr& pclause)
 {
