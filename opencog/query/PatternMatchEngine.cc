@@ -2482,27 +2482,25 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		key = clause_grounding_key(clause, varseq);
 	}
 
-	if (0 < key.size())
+	if (0 == key.size())
+		return explore_clause_direct(term, grnd, pclause);
+
+	const auto& cac = _gnd_cache.find(key);
+	if (cac != _gnd_cache.end())
 	{
-		const auto& cac = _gnd_cache.find(key);
-		if (cac != _gnd_cache.end())
-		{
-			var_grounding[clause] = cac->second;
-			return do_next_clause();
-		}
-
-		// Do we have a negative cache? If so, it will always fail.
-		const auto& nac = _nack_cache.find(key);
-		if (nac != _nack_cache.end())
-			return false;
-
-		bool okay = explore_clause_direct(term, grnd, pclause);
-		if (not okay)
-			_nack_cache.insert(key);
-		return okay;
+		var_grounding[clause] = cac->second;
+		return do_next_clause();
 	}
 
-	return explore_clause_direct(term, grnd, pclause);
+	// Do we have a negative cache? If so, it will always fail.
+	const auto& nac = _nack_cache.find(key);
+	if (nac != _nack_cache.end())
+			return false;
+
+	bool okay = explore_clause_direct(term, grnd, pclause);
+	if (not okay)
+		_nack_cache.insert(key);
+	return okay;
 }
 
 void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
