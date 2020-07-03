@@ -2466,6 +2466,12 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
 
+	// Multiple-choice clauses are not cacheable in the current design.
+	// This is because the cache is at the wrong level; the choices are
+	// explored in a loop above the cache, instead of below it.
+	if (pclause->isChoice())
+		return explore_clause_direct(term, grnd, pclause);
+
 	// Build the cache lookup key
 	HandleSeq key;
 
@@ -2482,6 +2488,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		key = clause_grounding_key(clause, varseq);
 	}
 
+	// No key, nothing to look up.
 	if (0 == key.size())
 		return explore_clause_direct(term, grnd, pclause);
 
