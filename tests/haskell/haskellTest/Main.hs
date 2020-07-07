@@ -45,7 +45,7 @@ evaluationTest = do
     let atom = Link "EvaluationLink"
                 [Node "GroundedPredicateNode" ("lib: " ++ curdir ++
                     "/libopencoglib-0.1.0.0.so\\somePredicate") noTv
-                ,Link "ListLink" [Node "ConceptNode" "test" noTv] (SimpleTV 0.5 0.5)
+                ,Link "ListLink" [Node "ConceptNode" "test" (SimpleTV 0.5 0.5)] noTv
                 ] noTv
         prog = insert atom >> evaluate atom
     res <- runOnNewAtomSpace prog
