@@ -20,4 +20,5 @@ foreign export ccall "somePredicate"
 c_pred = exportPredicate somePredicate
 
 somePredicate :: Atom -> TruthVal
-somePredicate (Link _ [Node _ _ tv] _) = tv
+somePredicate (Link "ListLink" [(Node _ _ tv)] _) = tv
+somePredicate (Link "ListLink" [(Link _ _ tv)] _) = tv
