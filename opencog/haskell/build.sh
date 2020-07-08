@@ -1,15 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 BIN_DIR=$1
 
 ghcver="$(stack --allow-different-user ghc -- --version)"
 
-if [[ "$ghcver" == *8.0.2* ]]
-then
-    echo "Correct GHC version installed."
-else
-    echo "Wrong GHC version installed. Running stack setup."
-    stack setup --allow-different-user
-fi
+case "$ghcver" in
+    *"8.0.2"*)
+            echo "Correct GHC version installed."
+            ;;
+    *)
+	    echo "Wrong GHC version installed. Running stack setup."
+	    stack setup --allow-different-user
+	    ;;
+esac
 
 if [ "$(id -u)" -ne 0 ];
 then
