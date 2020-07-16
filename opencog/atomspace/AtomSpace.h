@@ -37,11 +37,6 @@ class BasicSaveUTest;
 
 namespace opencog
 {
-const bool EMIT_DIAGNOSTICS = true;
-const bool DONT_EMIT_DIAGNOSTICS = false;
-const bool CHECK_VALUES = true;
-const bool DONT_CHECK_VALUES = false;
-
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -65,6 +60,12 @@ class AtomSpace
     friend class ::AtomSpaceUTest;
     friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
 
+    // Debug tools
+    static const bool EMIT_DIAGNOSTICS = true;
+    static const bool DONT_EMIT_DIAGNOSTICS = false;
+    static const bool CHECK_VALUES = true;
+    static const bool DONT_CHECK_VALUES = false;
+
     /**
      * Drop copy constructor and equals operator to
      * prevent accidental copying of large objects.
@@ -73,6 +74,7 @@ class AtomSpace
     AtomSpace(const AtomSpace&) = delete;
 
     AtomTable _atom_table;
+
     /**
      * Used to fetch atoms from disk.
      */
