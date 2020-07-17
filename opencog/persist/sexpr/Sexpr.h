@@ -1,6 +1,6 @@
 /*
- * SexprDecode.h
- * Fast Decoding of Atomese in s-expression format.
+ * Sexpr.h
+ * Encoding and Decoding of Atomese in s-expression format.
  *
  * Copyright (C) 2020 Linas Vepstas
  *
@@ -32,7 +32,7 @@ namespace opencog
  *  @{
  */
 
-class SexprDecode
+class Sexpr
 {
 public:
 	/// Decode the s-expression containing an atom, starting at

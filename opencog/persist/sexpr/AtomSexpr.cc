@@ -32,7 +32,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include "SexprDecode.h"
+#include "Sexpr.h"
 
 using namespace opencog;
 
@@ -41,8 +41,8 @@ using namespace opencog;
 /// and `r` points at the matching close-paren.  Returns parenthesis
 /// count. If zero, the parens match. If non-zero, then `r` points
 /// at the first non-valid character in the string (e.g. comment char).
-int SexprDecode::get_next_expr(const std::string& s, size_t& l, size_t& r,
-                               size_t line_cnt)
+int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
+                         size_t line_cnt)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
@@ -158,8 +158,8 @@ static NameServer& namer = nameserver();
 /// as a hint for the end of the expression. The `line_count` is an
 /// optional argument for printing file line-numbers, in case of error.
 ///
-Handle SexprDecode::decode_atom(const std::string& s,
-                                size_t l, size_t r, size_t line_cnt)
+Handle Sexpr::decode_atom(const std::string& s,
+                          size_t l, size_t r, size_t line_cnt)
 {
 	size_t l1 = l, r1 = r;
 	get_typename(s, l1, r1, line_cnt);
