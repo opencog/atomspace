@@ -327,6 +327,42 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	}
 }
 
+// alist is an association-list of key-value pairs.
+SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
+{
+	AtomSpace* as = ss_get_env_as("cog-set-values!");
+
+	Handle atom(verify_handle(satom, "cog-set-values!", 1));
+	if (not scm_is_true(scm_list_p(alist)))
+		scm_wrong_type_arg_msg("cog-set-values!", 2, alist, "list of key-value pairs");
+
+	Handle oldh = atom;
+	SCM kvpli = alist;
+	while (scm_is_pair(kvpli))
+	{
+		SCM kvp = SCM_CAR(kvpli);
+
+		Handle key(scm_to_handle(SCM_CAR(kvp)));
+		ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
+
+		// Atomspace may be read-only. Respect that.
+		try
+		{
+			atom = as->set_value(atom, key, pa);
+		}
+		catch (const std::exception& ex)
+		{
+			throw_exception(ex, "cog-set-values!", satom);
+		}
+		kvpli = SCM_CDR(kvpli);
+	}
+
+	// Atomspace may have given us a new atom...
+	if (oldh == atom) return satom;
+
+	return handle_to_scm(atom);
+}
+
 SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 {
 	Handle atom(verify_handle(satom, "cog-value", 1));
