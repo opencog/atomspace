@@ -1,6 +1,6 @@
 
+# Generic S-expression decoding.
 ADD_LIBRARY (sexpr
-	fast_load
 	AtomSexpr
 	ValueSexpr
 )
@@ -16,17 +16,29 @@ INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-# For backwards compat, the file-specific code goes into it's own
-# directory.
-INSTALL (FILES
-	fast_load.h
-	DESTINATION "include/opencog/persist/file"
-)
-
-# Generic S-expression code.
 INSTALL (FILES
 	SexprDecode.h
 	DESTINATION "include/opencog/persist/sexpr"
+)
+
+# -------------------------------
+# File-specific code.
+
+ADD_LIBRARY (load_scm
+	fast_load
+)
+
+TARGET_LINK_LIBRARIES(load_scm
+	sexpr
+)
+
+INSTALL (TARGETS load_scm EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	fast_load.h
+	DESTINATION "include/opencog/persist/file"
 )
 
 # -------------------------------
