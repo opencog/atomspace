@@ -1,6 +1,6 @@
 /*
  * fast_load.cc
- * fast load of Atomese in s-expression format.
+ * Fast load of Atomese in s-expression format.
  *
  * Copyright (C) 2020 Alexey Potapov, Anatoly Belikov
  *
