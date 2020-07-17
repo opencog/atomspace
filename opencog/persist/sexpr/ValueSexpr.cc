@@ -210,8 +210,8 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 
 /* ================================================================== */
 
-/// Get all of the values on an Atom and print them as an association
-/// list.
+/// Get all of the values on an Atom and print them as an
+/// association list.
 std::string Sexpr::encode_atom_values(const Handle& h)
 {
 	std::stringstream rv;
@@ -220,8 +220,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
-		rv << "(" << k->to_short_string()
-			<< " . " << encode_value(p) + ")";
+		rv << "(cons " << k->to_short_string() << encode_value(p) + ")";
 	}
 	rv << ")";
 	return rv.str();
