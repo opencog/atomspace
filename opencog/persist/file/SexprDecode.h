@@ -35,22 +35,32 @@ namespace opencog
 class SexprDecode
 {
 public:
+	/// Decode the s-expression containing an atom, starting at
+	/// location `pos`. Return the Atom, and upate `pos` to point
+	/// just past the end of the trailing parenthesis.
+	static Handle decode_atom(const std::string& s, size_t& pos)
+	{
+		size_t start = pos;
+		size_t end = s.length() - pos;
+		get_next_expr(s, start, end, 0);
+		pos = end;
+		return decode_atom(s, start, end, 0);
+	}
+
+	static Handle decode_atom(const std::string& s) {
+		size_t junk = 0;	
+		return decode_atom(s, junk);
+	}
+
+	static ValuePtr decode_value(std::string&, size_t&);
+	static void decode_alist(Handle&, std::string&);
+
+	// API more suitable to very long, file-driven I/O.
 	static int get_next_expr(const std::string&,
                             size_t& l, size_t& r, size_t line_cnt);
 	static Handle decode_atom(const std::string& s,
                              size_t l, size_t r, size_t line_cnt);
 
-	static Handle decodeAtom(std::string& s) {
-		size_t junk = 0;	
-		return decode_atom(s, junk);
-	}
-
-	static Handle decode_atom(std::string& s, size_t& pos) {
-		size_t junk = s.length() - pos;
-		return decode_atom(s, pos, junk, 0);
-	}
-	static ValuePtr decode_value(std::string&, size_t&);
-	static void decode_alist(Handle&, std::string&);
 };
 
 /** @}*/
