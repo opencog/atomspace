@@ -794,6 +794,26 @@
                  (FloatValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
+
+    See also: cog-set-values! ATOM ALIST - set multiple values.
+")
+
+(set-procedure-property! cog-set-values! 'documentation
+"
+ cog-set-values! ATOM ALIST
+    Set multiple values on ATOM from the key-value pairs in ALIST.
+    The ALIST must be an association list, of the form of
+    ((key1 . value1) (key2 . value2) ...)
+
+    Example:
+       guile> (cog-set-values!
+                 (Concept \"abc\")
+                 (list
+                    (cons (Predicate \"key1\") (FloatValue 1 2 3))
+                    (cons (Predicate \"key2\") (FloatValue 4 5 6))))
+       guile> (cog-keys->alist (Concept \"abc\"))
+
+    See also: cog-set-value! ATOM KEY VALUE - set a single value
 ")
 
 (set-procedure-property! cog-value? 'documentation

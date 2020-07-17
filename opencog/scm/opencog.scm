@@ -74,6 +74,7 @@ cog-outgoing-set
 cog-set-atomspace!
 cog-set-tv!
 cog-set-value!
+cog-set-values!
 cog-subtype?
 cog-tv
 cog-tv-confidence

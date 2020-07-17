@@ -271,6 +271,7 @@ void SchemeSmob::register_procs()
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
+	register_proc("cog-set-values!",       2, 0, 0, C(ss_set_values));
 
 	// TV property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
