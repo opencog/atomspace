@@ -48,7 +48,7 @@ public:
 	}
 
 	static Handle decode_atom(const std::string& s) {
-		size_t junk = 0;	
+		size_t junk = 0;
 		return decode_atom(s, junk);
 	}
 
@@ -61,6 +61,8 @@ public:
 	static Handle decode_atom(const std::string& s,
                              size_t l, size_t r, size_t line_cnt);
 
+
+	static std::string encode_value(const ValuePtr&);
 };
 
 /** @}*/
