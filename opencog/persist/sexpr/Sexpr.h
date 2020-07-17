@@ -62,6 +62,9 @@ public:
                              size_t l, size_t r, size_t line_cnt);
 
 
+	static std::string encode_atom(const Handle& h) {
+		return h->to_short_string();
+	}
 	static std::string encode_value(const ValuePtr&);
 	static std::string encode_atom_values(const Handle&);
 };
