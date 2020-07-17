@@ -40,6 +40,7 @@ set(ATOMSPACE_grounded_LIBRARY grounded)
 set(ATOMSPACE_pattern_LIBRARY pattern)
 set(ATOMSPACE_load_scm_LIBRARY load_scm)
 set(ATOMSPACE_persist_LIBRARY persist)
+set(ATOMSPACE_sexpr_LIBRARY sexpr)
 set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
 set(ATOMSPACE_value_LIBRARY value)
@@ -60,6 +61,7 @@ set(ATOMSPACE_LIBRARIES
 	query-engine
 	execution
 	grounded
+	sexpr
 	smob
 	atomspace
 )

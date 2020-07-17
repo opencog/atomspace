@@ -11,15 +11,17 @@ Local subdirectories include:
 
 * guile    -- The scheme module for the generic peristance API.
               It provides open, close, load and store primitives that
-              work for any of the I/O back-ends.
+              work for any of the I/O back-ends, including those not
+              in this repo (there are at least three others.)
 
 * gearman  -- Experimental support for distributed operation, using
               GearMan.
 
-* load_scm -- Fast load of Atomese from files in s-expression format.
+* sexpr    -- Decode Atomese from s-expression UTF-8 strings.
+              Includes a file-read utility.
 
 * sql      -- Postgres, for now. Works well for most uses -- with caveats.
-              Mostly, it's slow.
+              Mostly, it's slow, running at approx 3K Atoms/sec.
 
 The gearman and sql systems support networked, peer-to-peer communications
 between AtomSpaces.

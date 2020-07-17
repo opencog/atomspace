@@ -1,13 +1,35 @@
 
+# Generic S-expression decoding.
+ADD_LIBRARY (sexpr
+	AtomSexpr
+	ValueSexpr
+)
+
+ADD_DEPENDENCIES(sexpr opencog_atom_types)
+
+TARGET_LINK_LIBRARIES(sexpr
+	atombase
+	${COGUTIL_LIBRARY}
+)
+
+INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	Sexpr.h
+	DESTINATION "include/opencog/persist/sexpr"
+)
+
+# -------------------------------
+# File-specific code.
+
 ADD_LIBRARY (load_scm
 	fast_load
 )
 
-ADD_DEPENDENCIES(load_scm opencog_atom_types)
-
 TARGET_LINK_LIBRARIES(load_scm
-	atombase
-	${COGUTIL_LIBRARY}
+	sexpr
 )
 
 INSTALL (TARGETS load_scm EXPORT AtomSpaceTargets
@@ -26,7 +48,7 @@ ADD_LIBRARY (persist-file
 )
 
 TARGET_LINK_LIBRARIES(persist-file
-	load_scm
+	sexpr
 	atomspace
 	smob
 )

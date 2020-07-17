@@ -1,5 +1,7 @@
 
-#include <opencog/persist/file/fast_load.h>
+// Installed into opencog/persist/file/fast_load.h
+// but this wants the source location, not the install.
+#include "opencog/persist/sexpr/fast_load.h"
 
 using namespace opencog;
 
