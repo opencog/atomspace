@@ -14,6 +14,8 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
+#include "SexprDecode.h"
+
 using namespace opencog;
 
 /* ================================================================== */
@@ -26,7 +28,7 @@ using namespace opencog;
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
  */
-ValuePtr decodeStrValue(std::string& stv, size_t& pos)
+ValuePtr SexprDecode::decode_value(std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
@@ -54,7 +56,7 @@ ValuePtr decodeStrValue(std::string& stv, size_t& pos)
 				throw SyntaxException(TRACE_INFO,
 					"Malformed LinkValue: %s", stv.substr(pos).c_str());
 
-			vv.push_back(decodeStrValue(stv, vos));
+			vv.push_back(decode_value(stv, vos));
 			done = stv.find(')', epos+1);
 			vos = stv.find('(', epos+1);
 		}
@@ -157,7 +159,7 @@ ValuePtr decodeStrValue(std::string& stv, size_t& pos)
  * ((KEY . VALUE)(KEY2 . VALUE2)...)
  * Store the results as values on the atom.
  */
-void DHTAtomStorage::decodeAlist(Handle& atom, std::string& alist)
+void SexprDecode::decode_alist(Handle& atom, std::string& alist)
 {
 	// Skip over opening paren
 	size_t pos = 1;
@@ -166,10 +168,10 @@ void DHTAtomStorage::decodeAlist(Handle& atom, std::string& alist)
 	while (std::string::npos != pos and pos < totlen)
 	{
 		++pos;  // over first paren of pair
-		Handle key(decodeStrAtom(alist, pos));
+		Handle key(decode_atom(alist, pos));
 		pos = alist.find(" . ", pos);
 		pos += 3;
-		ValuePtr val(decodeStrValue(alist, pos));
+		ValuePtr val(decode_value(alist, pos));
 		atom->setValue(key, val);
 		pos = alist.find('(', pos);
 	}

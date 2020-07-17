@@ -1,6 +1,6 @@
 /*
- * fast_load.cc
- * Fast load of Atomese in s-expression format.
+ * AtomSexpr.cc
+ * Decode Atomese written in s-expression format.
  *
  * Copyright (C) 2020 Alexey Potapov, Anatoly Belikov
  *
@@ -32,17 +32,17 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
-#include "fast_load.h"
+#include "SexprDecode.h"
 
 using namespace opencog;
 
-// Extract s-expression. Given a string `s`, update the `l` and `r`
-// values so that `l` points at the next open-parenthsis (left paren)
-// and `r` points at the matching close-paren.  Returns parenthesis
-// count. If zero, the parens match. If non-zero, then `r` points
-// at the first non-valid character in the string (e.g. comment char).
-static int get_next_expr(const std::string& s, size_t& l, size_t& r,
-                         size_t line_cnt)
+/// Extract s-expression. Given a string `s`, update the `l` and `r`
+/// values so that `l` points at the next open-parenthsis (left paren)
+/// and `r` points at the matching close-paren.  Returns parenthesis
+/// count. If zero, the parens match. If non-zero, then `r` points
+/// at the first non-valid character in the string (e.g. comment char).
+int SexprDecode::get_next_expr(const std::string& s, size_t& l, size_t& r,
+                               size_t line_cnt)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
@@ -76,9 +76,9 @@ static int get_next_expr(const std::string& s, size_t& l, size_t& r,
 	return count;
 }
 
-// Extracts link or node type. Given the string `s`, this updates
-// the `l` and `r` values such that `l` points at the first
-// non-whitespace character of the name, and `r` points at the last.
+/// Extracts link or node type. Given the string `s`, this updates
+/// the `l` and `r` values such that `l` points at the first
+/// non-whitespace character of the name, and `r` points at the last.
 static void get_typename(const std::string& s, size_t& l, size_t& r,
                          size_t line_cnt)
 {
@@ -97,16 +97,16 @@ static void get_typename(const std::string& s, size_t& l, size_t& r,
 	r = p;
 }
 
-// Extracts Node name-string. Given the string `s`, this updates
-// the `l` and `r` values such that `l` points at the first
-// non-whitespace character of the name, and `r` points at the last.
-// The string is considered to start *after* the first quote, and ends
-// just before the last quote. In this case, escaped quotes \" are
-// ignored (are considered to be part of the string).
-//
-// If the node is a Type node, then `l` points at the first
-// non-whitespace character of the type name and `r` points to the next
-// opening parenthesis.
+/// Extracts Node name-string. Given the string `s`, this updates
+/// the `l` and `r` values such that `l` points at the first
+/// non-whitespace character of the name, and `r` points at the last.
+/// The string is considered to start *after* the first quote, and ends
+/// just before the last quote. In this case, escaped quotes \" are
+/// ignored (are considered to be part of the string).
+///
+/// If the node is a Type node, then `l` points at the first
+/// non-whitespace character of the type name and `r` points to the next
+/// opening parenthesis.
 static void get_node_name(const std::string& s, size_t& l, size_t& r,
                           size_t line_cnt, bool typeNode = false)
 {
@@ -133,7 +133,7 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
 	r = p;
 }
 
-// Extract SimpleTruthValue and return that, else throw an error.
+/// Extract SimpleTruthValue and return that, else throw an error.
 static TruthValuePtr get_stv(const std::string& s,
                              size_t l, size_t r, size_t line_cnt)
 {
@@ -158,8 +158,8 @@ static NameServer& namer = nameserver();
 /// as a hint for the end of the expression. The `line_count` is an
 /// optional argument for printing file line-numbers, in case of error.
 ///
-Handle SexprEval::decodeAtom(const std::string& s,
-                             size_t l, size_t r, size_t line_cnt)
+Handle SexprDecode::decode_atom(const std::string& s,
+                                size_t l, size_t r, size_t line_cnt)
 {
 	size_t l1 = l, r1 = r;
 	get_typename(s, l1, r1, line_cnt);
@@ -186,7 +186,7 @@ Handle SexprEval::decodeAtom(const std::string& s,
 			if ('s' == s[l1+1])
 				tvp = get_stv(s, l1, r1, line_cnt);
 			else
-				outgoing.push_back(recursive_parse(s, l1, r1, line_cnt));
+				outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
 
 			l = r1 + 1;
 		} while (l < r);

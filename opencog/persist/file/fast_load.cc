@@ -54,7 +54,7 @@ Handle parseStream(std::istream& in, AtomSpace& as)
             size_t r = expr.length();
 
             // Zippy the Pinhead says: Are we having fun yet?
-            int pcount = get_next_expr(expr, l, r, line_cnt);
+            int pcount = SexprDecode::get_next_expr(expr, l, r, line_cnt);
 
             // Trim away comments at end of line
             if (0 < pcount)
@@ -68,7 +68,7 @@ Handle parseStream(std::istream& in, AtomSpace& as)
                 break;
 
             expr_cnt++;
-            h = as.add_atom(SexprDecode::decodeAtom(expr, l, r, line_cnt));
+            h = as.add_atom(SexprDecode::decode_atom(expr, l, r, line_cnt));
             expr = expr.substr(r + 1);
         }
     }

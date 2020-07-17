@@ -35,17 +35,23 @@ namespace opencog
 class SexprDecode
 {
 public:
-	static Handle decodeAtom(const std::string& s,
-                            size_t l, size_t r, size_t line_cnt=0);
+	static int get_next_expr(const std::string&,
+                            size_t& l, size_t& r, size_t line_cnt);
+	static Handle decode_atom(const std::string& s,
+                             size_t l, size_t r, size_t line_cnt);
 
 	static Handle decodeAtom(std::string& s) {
 		size_t junk = 0;	
-		return decodeAtom(s, junk);
+		return decode_atom(s, junk);
 	}
 
-	static Handle decodeAtom(std::string&, size_t&)
-	static ValuePtr decodeValue(std::string&, size_t&);
-	static void decodeAlist(Handle&, std::string&);
+	static Handle decode_atom(std::string& s, size_t& pos) {
+		size_t junk = s.length() - pos;
+		return decode_atom(s, pos, junk, 0);
+	}
+	static ValuePtr decode_value(std::string&, size_t&);
+	static void decode_alist(Handle&, std::string&);
+};
 
 /** @}*/
 } // namespace opencog
