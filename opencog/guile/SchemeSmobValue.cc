@@ -343,7 +343,7 @@ SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 		SCM kvp = SCM_CAR(kvpli);
 
 		Handle key(scm_to_handle(SCM_CAR(kvp)));
-		ValuePtr pa(scm_to_protom(SCM_CADR(kvp)));
+		ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
 
 		// Atomspace may be read-only. Respect that.
 		try
