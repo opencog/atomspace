@@ -216,7 +216,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 {
 	std::stringstream rv;
 
-	rv << "(";
+	rv << "(list ";
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
