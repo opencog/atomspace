@@ -1,6 +1,8 @@
 
 ADD_LIBRARY (load_scm
 	fast_load
+	AtomSexpr
+	ValueSexpr
 )
 
 ADD_DEPENDENCIES(load_scm opencog_atom_types)
@@ -17,6 +19,11 @@ INSTALL (TARGETS load_scm EXPORT AtomSpaceTargets
 INSTALL (FILES
 	fast_load.h
 	DESTINATION "include/opencog/persist/file"
+)
+
+INSTALL (FILES
+	SexprDecode.h
+	DESTINATION "include/opencog/persist/sexpr"
 )
 
 # -------------------------------

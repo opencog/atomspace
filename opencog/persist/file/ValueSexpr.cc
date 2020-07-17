@@ -14,8 +14,6 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#include "DHTAtomStorage.h"
-
 using namespace opencog;
 
 /* ================================================================== */
@@ -28,7 +26,7 @@ using namespace opencog;
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
  */
-ValuePtr DHTAtomStorage::decodeStrValue(std::string& stv, size_t& pos)
+ValuePtr decodeStrValue(std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
