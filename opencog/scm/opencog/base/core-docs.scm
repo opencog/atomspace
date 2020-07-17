@@ -786,7 +786,9 @@
 "
  cog-set-value! ATOM KEY VALUE
     Set the value of KEY for ATOM to VALUE. Both ATOM and KEY must be
-    atoms.
+    atoms. The VALUE can be any Atomese Value, or #f or the empty list.
+    If it is #f or the empty list '(), then the KEY is removed from
+    the atom.
 
     Example:
        guile> (cog-set-value!
@@ -794,6 +796,11 @@
                  (FloatValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
+
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\") #f)
+       guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
+       #f
 
     See also: cog-set-values! ATOM ALIST - set multiple values.
 ")
@@ -811,6 +818,16 @@
                  (list
                     (cons (Predicate \"key1\") (FloatValue 1 2 3))
                     (cons (Predicate \"key2\") (FloatValue 4 5 6))))
+       guile> (cog-keys->alist (Concept \"abc\"))
+
+    Keys can also be removed, by setting the value to #f or to '()
+
+    Example:
+       guile> (cog-set-values!
+                 (Concept \"abc\")
+                 (list
+                    (cons (Predicate \"key1\") #f)
+                    (cons (Predicate \"key2\") #f)))
        guile> (cog-keys->alist (Concept \"abc\"))
 
     See also: cog-set-value! ATOM KEY VALUE - set a single value
