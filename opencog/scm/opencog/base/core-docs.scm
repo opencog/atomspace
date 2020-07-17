@@ -746,6 +746,26 @@
                  (Concept \"abc\") (Predicate \"key\")
                  (FloatValue 1 2 3))
        guile> (cog-keys (Concept \"abc\"))
+
+    See also:
+       cog-keys->alist ATOM - return association list of keys+values
+       cog-value ATOM KEY - return a value for the given KEY
+")
+
+(set-procedure-property! cog-keys->alist 'documentation
+"
+ cog-keys->alist ATOM
+    Return an association list of all key-value pairs attached to ATOM.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-keys->alist (Concept \"abc\"))
+
+    See also:
+       cog-keys ATOM - return list of all keys on ATOM
+       cog-value ATOM KEY - return a value for the given KEY
 ")
 
 (set-procedure-property! cog-value 'documentation

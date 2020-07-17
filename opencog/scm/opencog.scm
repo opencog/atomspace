@@ -54,6 +54,7 @@ cog-incoming-size
 cog-incoming-size-by-type
 cog-inc-value!
 cog-keys
+cog-keys->alist
 cog-link
 cog-link?
 cog-map-type
