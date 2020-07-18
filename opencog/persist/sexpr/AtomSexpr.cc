@@ -37,7 +37,7 @@
 using namespace opencog;
 
 /// Extract s-expression. Given a string `s`, update the `l` and `r`
-/// values so that `l` points at the next open-parenthsis (left paren)
+/// values so that `l` points at the next open-parenthesis (left paren)
 /// and `r` points at the matching close-paren.  Returns parenthesis
 /// count. If zero, the parens match. If non-zero, then `r` points
 /// at the first non-valid character in the string (e.g. comment char).

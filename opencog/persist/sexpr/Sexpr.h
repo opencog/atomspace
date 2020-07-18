@@ -41,7 +41,7 @@ public:
 	static Handle decode_atom(const std::string& s, size_t& pos)
 	{
 		size_t start = pos;
-		size_t end = s.length() - pos;
+		size_t end = s.length();
 		get_next_expr(s, start, end, 0);
 		pos = end;
 		return decode_atom(s, start, end, 0);
