@@ -208,6 +208,7 @@ public:
      * Returns the set of atoms of a given type, but only if they have
      * and empty outgoing set. This holds the AtomTable lock for a
      * longer period of time, but wastes less RAM when getting big sets.
+     * As a net result, it might run faster, maybe.
      *
      * @param The desired type.
      * @param Whether type subclasses should be considered.
