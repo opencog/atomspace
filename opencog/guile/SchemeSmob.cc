@@ -243,6 +243,8 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
+	register_proc("cog-set-server-mode!",  1, 0, 0, C(ss_set_server_mode));
+
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));

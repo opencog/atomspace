@@ -1099,6 +1099,15 @@
          cog-atomspace-readonly?,
 ")
 
+(set-procedure-property! cog-set-server-mode! 'documentation
+"
+ cog-set-server-mode! BOOL
+     If BOOL is #t, then some server-freindly options are enabled,
+     including the high-precision printing of TruthValues. Otherwise,
+     human-friendly shell-evaluator style is used. The default is
+     false. Returns the previous setting.
+")
+
 ;set-procedure-property! cog-yield 'documentation
 ;"
 ; cog-yield
