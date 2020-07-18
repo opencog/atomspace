@@ -52,6 +52,7 @@ private:
 		COG_EXTEND      // callbacks into C++ code.
 	};
 
+	static bool server_mode;
 	static std::atomic_flag is_inited;
 	static void module_init(void*);
 	static void register_procs();
@@ -63,6 +64,7 @@ private:
 
 	// Initialization functions
 	static void init_smob_type(void);
+	static SCM ss_set_server_mode(SCM);
 
 	static int print_misc(SCM, SCM, scm_print_state *);
 	static SCM equalp_misc(SCM, SCM);
@@ -215,6 +217,7 @@ private:
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);
+
 	SchemeSmob();
 public:
 	// This makes init publicly visible; needed for the guile module.
