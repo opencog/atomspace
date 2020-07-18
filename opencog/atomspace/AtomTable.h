@@ -205,6 +205,36 @@ public:
     }
 
     /**
+     * Returns the set of atoms of a given type, but only if they have
+     * and empty outgoing set. This holds the AtomTable lock for a
+     * longer period of time, but wastes less RAM when getting big sets.
+     * As a net result, it might run faster, maybe.
+     *
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @return The set of atoms of a given type (subclasses optionally).
+     */
+    void
+    getRootSetByType(HandleSet& hset,
+                     Type type,
+                     bool subclass=false,
+                     bool parent=true) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        auto tit = typeIndex.begin(type, subclass);
+        auto tend = typeIndex.end();
+        while (tit != tend) {
+            if (0 == (*tit)->getIncomingSetSize())
+                 hset.insert(*tit);
+            tit++;
+        }
+        // If an atom is already in the set, it will hide any duplicate
+        // atom in the parent.
+        if (parent and _environ)
+            _environ->getRootSetByType(hset, type, subclass, parent);
+    }
+
+    /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
      * @param The desired type.

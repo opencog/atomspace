@@ -480,6 +480,30 @@ public:
     }
 
     /**
+     * Gets a set of handles that matches with the given type,
+     * but ONLY if they have an empty incoming set! This might
+     * spend more time under the atomtable lock, but should use
+     * less RAM when getting large sets, and thus might be faster.
+     *
+     * @param hset the HandleSet into which to insert handles.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * Example of call to this method, which would return all ConceptNodes
+     * in the AtomSpace:
+     * @code
+     *         HandleSet atoms;
+     *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
+     * @endcode
+     */
+    void get_rootset_by_type(HandleSet& hset,
+                             Type type,
+                             bool subclass=false) const
+    {
+        return _atom_table.getRootSetByType(hset, type, subclass);
+    }
+
+    /**
      * Gets a sequence of handles that matches with the given type
      * (subclasses optionally).
      * Caution: this is slower than using get_handleset_by_type() to
