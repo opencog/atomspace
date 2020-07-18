@@ -188,8 +188,8 @@
 "
  cog-delete! ATOM [ATOMSPACE]
     Remove the indicated ATOM, but only if it has no incoming links.
-    If it has incoming links, the remove fails.  If SQL or other data
-    storage is attached, the ATOM is also removed from the storage.
+    If it has incoming links, the remove fails.  If storage is attached,
+    the ATOM is also removed from the storage.
 
     Returns #t if the atom was removed, else returns #f if not removed.
 

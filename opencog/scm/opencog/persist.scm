@@ -20,8 +20,8 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 "
  fetch-atom ATOM
 
-    Fetch all of the values on the indicated ATOM from SQL/persistent
-    storage. This updates (clobbers) all of the values in the atomspace,
+    Fetch all of the values on the indicated ATOM from storage.
+    This updates (clobbers) all of the values in the atomspace,
     and replaces them with the ones fetched from the database.
 ")
 
@@ -29,7 +29,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 "
  fetch-incoming-set ATOM
 
-    Fetch the incoming set of the ATOM from SQL storage. The fetch is
+    Fetch the incoming set of the ATOM from storage. The fetch is
     NOT recursive.  See `load-referers` for a recursive fetch.
 
     See also `fetch-incoming-by-type`.
@@ -48,56 +48,70 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 "
  store-atom ATOM
 
-    Store indicated ATOM, and all of its associated keys and values, to
-    SQL/persistent storage. This updates (clobbers) the values
-    previously stored in the database, replacing them by the values in
-    the atomspace.
+    Store indicated ATOM, and all of its associated keys and values,
+    to storage. This updates (clobbers) the values previously held
+    in storage, replacing them by the values in the atomspace.
+
+    See also: fetch-atom
 ")
 
 (set-procedure-property! load-atoms-of-type 'documentation
 "
  load-atoms-of-type TYPE
 
-    Fetch atoms of the given TYPE from SQL/persistent storage. This
-    fetches the atoms, and all the associated values attached to them.
+    Fetch atoms of the given TYPE from storage. This fetches the
+    atoms, and all the associated values attached to them.
 ")
 
 (set-procedure-property! barrier 'documentation
 "
  barrier
 
-    Block (do not return to the caller) until the SQL Atom write queues
+    Block (do not return to the caller) until the storage write queues
     are empty. Just because the atomspace write queues are empty, it
     does not mean that the data was actually written to disk. It merely
-    means that the atomspace, as a client of the database, has given
-    them to the database.
+    means that the atomspace, as a client of the storage server, has
+    given them to the server.
 ")
 
 (set-procedure-property! load-atomspace 'documentation
 "
- load-atomspace - load all atoms in the database.
+ load-atomspace - load all atoms from storage.
 
-    This will cause ALL of the atoms in the open database to be loaded
-    into the atomspace. This can be a very time-consuming operation.
-    In normal operation, it is rarely necessary to load all atoms;
-    atoms can always be fetched and stored one at a time, on demand.
+    This will cause ALL of the atoms in the open storage server to be
+    loaded into the current AtomSpace. This can be a very time-consuming
+    operation.  In normal operation, it is rarely necessary to load all
+    atoms; there are several ways to fetch subsets of atoms, or even one
+    at a time, when needed.
+
+    See also:
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    fetch-incoming-set ATOM -- fetch the entire incoming set of ATOM.
+    fetch-incoming-by-type ATOM TYPE -- get a sbset of the incoming set.
+    load-referers ATOM -- get every graph that contains ATOM
+    load-atoms-of-type TYPE -- load only atoms of type TYPE
 ")
 
 (set-procedure-property! store-atomspace 'documentation
 "
- store-atomspace - Store all atoms in the atomspace to the database.
+ store-atomspace - Store all atoms in the AtomSpace to storage.
 
-    This will dump the ENTIRE contents of the atomspace to the databse.
-    Depending on the size of the database, this can potentially take a
-    lot of time.  During normal operation, a bulk-save is rarely
-    required, as individual atoms can always be stored, one at a time.
+    This will dump the ENTIRE contents of the current AtomSpace to the
+    the currently-open storage.  Depending on the size of the AtomSpace,
+    this may take a lot of time.  During normal operation, a bulk-save
+    is rarely required, as individual atoms can always be stored, one
+    at a time.
+
+    See also:
+    store-atom ATOM -- store one ATOM and all of the values on it.
+    store-referers ATOM -- store all graphs that contain ATOM
 ")
 
 ;
 ; --------------------------------------------------------------------
 (define-public (store-referers ATOM)
 "
- store-referers ATOM -- Store to SQL all hypergraphs that contain ATOM
+ store-referers ATOM -- Store all hypergraphs that contain ATOM
 
    This stores all hypergraphs that the ATOM participates in.
    It does this by recursively exploring the incoming set of the atom.
@@ -118,7 +132,7 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 ; --------------------------------------------------------------------
 (define-public (load-referers atom)
 "
- load-referers ATOM -- Load from SQL all hypergraphs that contain ATOM
+ load-referers ATOM -- Load (from storage) all graphs that contain ATOM.
 
    This loads all hypergraphs that the given ATOM participates in.
    It does this by recursively exploring the incoming set of the atom.
