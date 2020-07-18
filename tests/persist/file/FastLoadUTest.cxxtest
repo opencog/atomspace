@@ -20,8 +20,8 @@ public:
     void tearDown() {}
 
     void test_expr_parse();
-
     void test_pattern_parse();
+    void test_dense_parse();
 };
 
 // Test parseExpression
@@ -34,11 +34,9 @@ void FastLoadUTest::test_expr_parse()
     Handle h = parseExpression(in, _as);
 
     TS_ASSERT_EQUALS(5, _as.get_size());
-
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);
-
 }
 
 void FastLoadUTest::test_pattern_parse()
@@ -51,12 +49,25 @@ void FastLoadUTest::test_pattern_parse()
                      "           (Evaluation (Predicate \"test\")\n"
                      "              (List (Variable \"$a\") (Concept \"A\"))))";
 
+    _as.clear();
     Handle h = parseExpression(in, _as);
 
-    //The atomspace size is 14 because this test adds additional 9 atoms
-    TS_ASSERT_EQUALS(14, _as.get_size());
-
+    // This test adds 9 atoms.
+    TS_ASSERT_EQUALS(9, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FastLoadUTest::test_dense_parse()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = R"#((SetLink (NumberNode "4.1415930000000003")(SchemaNode "? EE-ee-wow third ? wheel")(SchemaNode "EE-ee-wow fromNode")(SchemaNode "EE-ee-wow toNode")) (SetLink (NumberNode "0.141593")(SchemaNode "? AA-aa-wow third ?  wheel")(SchemaNode "AA-aa-wow fromNode")(SchemaNode "AA-aa-wow toNode")) (SetLink (SchemaNode "CC-cc-wow toNode")(SchemaNode "? CC-cc-wow third ?  wheel")(SchemaNode "CC-cc-wow fromNode")(NumberNode "2.1415929999999999")) (SetLink (SchemaNode "BB-bb-wow toNode")(SchemaNode "BB-bb-wow fromNode")(SchemaNode "? BB-bb-wow third ? wheel")(NumberNode "1.1415930000000001")) (SetLink (SchemaNode "DD-dd-wow fromNode")(SchemaNode "DD-dd-wow toNode")(NumberNode "3.1415929999999999")(SchemaNode "? DD-dd-wow third ? wheel")) (PredicateNode "*-TruthValueKey-*"))#";
+
+    _as.clear();
+    parseExpression(in, _as);
+    TS_ASSERT_EQUALS(26, _as.get_size());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
