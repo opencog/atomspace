@@ -39,27 +39,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
+	// Need to have a newline printed; otherewise
+	// cog-value->list prints badly-formatted grunge.
 	if (not pa->is_atom())
-	{
-		if (server_mode)
-		{
-			// Print high-precision simple truth values.
-			if (nameserver().isA(pa->get_type(), FLOAT_VALUE))
-			{
-				// The FloatValue to_string() print prints out a
-				// high-precision form of the value, as compared
-				// to SimpleTruthValue, which only prints 6 digits
-				// and breaks distributed-storage unit tests.
-				FloatValuePtr fv(FloatValueCast(pa));
-				return fv->FloatValue::to_string();
-			}
-			return pa->to_short_string();
-		}
-
-		// Need to have a newline printed; otherewise
-		// cog-value->list prints badly-formatted grunge.
 		return pa->to_short_string() + "\n";
-	}
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
