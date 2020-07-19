@@ -296,6 +296,12 @@ public:
     /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);
 
+    /// Return true if the set of values on this atom isn't empty.
+    bool haveValues() const {
+        // I think its safe to call empty() without holding a lock...!?
+        return not _values.empty();
+    }
+
     /// Print all of the key-value pairs.
     std::string valuesToString() const;
 

@@ -15,6 +15,7 @@ ADD_LIBRARY (smob
 	SchemeSmobAS.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
+	SchemeSmobPrint.cc
 	SchemeSmobTV.cc
 	SchemeSmobValue.cc
 	SchemeSmobLogger.cc

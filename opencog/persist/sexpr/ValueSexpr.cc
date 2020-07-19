@@ -194,6 +194,35 @@ void Sexpr::decode_alist(Handle& atom, std::string& alist)
 
 /* ================================================================== */
 
+static std::string prt_node(const Handle& h)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type())
+		+ " \"" + h->get_name() + "\")";
+	return txt;
+}
+
+static std::string prt_atom(const Handle&);
+
+static std::string prt_link(const Handle& h)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += prt_atom(ho);
+	txt += ")";
+	return txt;
+}
+
+static std::string prt_atom(const Handle& h)
+{
+	if (h->is_node()) return prt_node(h);
+	return prt_link(h);
+}
+
+std::string Sexpr::encode_atom(const Handle& h)
+{
+	return prt_atom(h);
+}
+
 /// Convert value (or Atom) into a string.
 std::string Sexpr::encode_value(const ValuePtr& v)
 {
@@ -205,7 +234,9 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 		FloatValuePtr fv(FloatValueCast(v));
 		return fv->FloatValue::to_string();
 	}
-	return v->to_short_string();
+	if (not v->is_atom())
+		return v->to_short_string();
+	return prt_atom(HandleCast(v));
 }
 
 /* ================================================================== */
@@ -220,7 +251,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
-		rv << "(cons " << k->to_short_string() << encode_value(p) + ")";
+		rv << "(cons " << prt_atom(k) << encode_value(p) + ")";
 	}
 	rv << ")";
 	return rv.str();

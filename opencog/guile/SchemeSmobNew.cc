@@ -18,18 +18,6 @@
 
 using namespace opencog;
 
-/// If server_mode is true, then do things that a server would want;
-/// otherwise, behave in a human-friendly interactive way.  Currently,
-/// server-mode enables printing of 16-decimal-place truth values.
-bool SchemeSmob::server_mode = false;
-
-SCM SchemeSmob::ss_set_server_mode(SCM boo)
-{
-	bool old_mode = server_mode;
-	server_mode = (SCM_BOOL_F != boo);
-	return old_mode ? SCM_BOOL_T : SCM_BOOL_F;
-}
-
 /* ============================================================== */
 /**
  * Return a string holding the scheme representation of an opencog object.
@@ -51,27 +39,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
+	// Need to have a newline printed; otherewise
+	// cog-value->list prints badly-formatted grunge.
 	if (not pa->is_atom())
-	{
-		if (server_mode)
-		{
-			// Print high-precision simple truth values.
-			if (nameserver().isA(pa->get_type(), FLOAT_VALUE))
-			{
-				// The FloatValue to_string() print prints out a
-				// high-precision form of the value, as compared
-				// to SimpleTruthValue, which only prints 6 digits
-				// and breaks distributed-storage unit tests.
-				FloatValuePtr fv(FloatValueCast(pa));
-				return fv->FloatValue::to_string();
-			}
-			return pa->to_short_string();
-		}
-
-		// Need to have a newline printed; otherewise
-		// cog-value->list prints badly-formatted grunge.
 		return pa->to_short_string() + "\n";
-	}
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
