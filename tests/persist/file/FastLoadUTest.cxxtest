@@ -2,6 +2,7 @@
 // Installed into opencog/persist/file/fast_load.h
 // but this wants the source location, not the install.
 #include "opencog/persist/sexpr/fast_load.h"
+#include "opencog/persist/sexpr/Sexpr.h"
 
 using namespace opencog;
 
@@ -22,6 +23,7 @@ public:
     void test_expr_parse();
     void test_pattern_parse();
     void test_dense_parse();
+    void test_dense_loop();
 };
 
 // Test parseExpression
@@ -68,6 +70,38 @@ void FastLoadUTest::test_dense_parse()
     _as.clear();
     parseExpression(in, _as);
     TS_ASSERT_EQUALS(26, _as.get_size());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FastLoadUTest::test_dense_loop()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string expr = R"#(((SetLink (NumberNode "4.1415930000000003")(SchemaNode "? EE-ee-wow third ? wheel")(SchemaNode "EE-ee-wow fromNode")(SchemaNode "EE-ee-wow toNode")) (SetLink (NumberNode "0.141593")(SchemaNode "? AA-aa-wow third ?  wheel")(SchemaNode "AA-aa-wow fromNode")(SchemaNode "AA-aa-wow toNode")) (SetLink (SchemaNode "CC-cc-wow toNode")(SchemaNode "? CC-cc-wow third ?  wheel")(SchemaNode "CC-cc-wow fromNode")(NumberNode "2.1415929999999999")) (SetLink (SchemaNode "BB-bb-wow toNode")(SchemaNode "BB-bb-wow fromNode")(SchemaNode "? BB-bb-wow third ? wheel")(NumberNode "1.1415930000000001")) (SetLink (SchemaNode "DD-dd-wow fromNode")(SchemaNode "DD-dd-wow toNode")(NumberNode "3.1415929999999999")(SchemaNode "? DD-dd-wow third ? wheel")) (PredicateNode "*-TruthValueKey-*")))#";
+
+    int expect[] = {146, 137, 147, 146, 146, 34};
+
+    _as.clear();
+    size_t l = expr.find('(') + 1; // skip the first paren.
+    size_t end = expr.rfind(')');  // trim tailing paren.
+    size_t r = end;
+    int nex = 0;
+    while (true)
+    {
+        int pcnt = Sexpr::get_next_expr(expr, l, r, 0);
+        if (l == r) break;
+        if (0 < pcnt) break;
+        std::string subex = expr.substr(l,r-l);
+
+        TS_ASSERT_EQUALS(subex.length(), expect[nex]);
+
+        // advance to next.
+        l = r+1;
+        r = end;
+        nex++;
+    }
+    TS_ASSERT_EQUALS(6, nex);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
