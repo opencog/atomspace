@@ -1,0 +1,115 @@
+/*
+ * tests/atoms/flow/StreamValueOf.cxxtest
+ *
+ * Copyright (C) 2018, 2020 Linas Vepstas
+ * All Rights Reserved
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/atoms/flow/StreamValueOfLink.h>
+#include <opencog/atoms/reduct/PlusLink.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/RandomStream.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class StreamValueOf : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	
+public:
+	StreamValueOf(void);
+
+	void setUp(void);
+	void check(void);
+
+	void test_float_stream();
+	void test_link_stream();
+};
+
+StreamValueOf::StreamValueOf(void)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	// Hack to force library to load to work around linking bug.
+	createPlusLink(HandleSeq());
+}
+
+void StreamValueOf::setUp(void)
+{
+}
+
+// ====================================================================
+// Make sure StreamValueOf actually samples.
+void StreamValueOf::test_float_stream()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle atom = an(CONCEPT_NODE, "some atom");
+	Handle key = an(PREDICATE_NODE, "my key");
+
+	ValuePtr value = createRandomStream(3);
+	atom->setValue(key, value);
+
+	Handle valof = al(STREAM_VALUE_OF_LINK, atom, key);
+
+	double sum = 0.0;
+	for (int i=0; i<20; i++)
+	{
+		ValuePtr vp = valof->execute();
+		TS_ASSERT(nameserver().isA(vp->get_type(), FLOAT_VALUE));
+		FloatValuePtr fvp = FloatValueCast(vp);
+		TS_ASSERT_EQUALS(3, fvp->size());
+
+		sum += fvp->value()[0];
+	}
+	TS_ASSERT(0.1 < sum);
+	TS_ASSERT(sum < 20);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure FloatValues work.
+void StreamValueOf::test_link_stream()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle atom = an(CONCEPT_NODE, "some atom");
+	Handle key = an(PREDICATE_NODE, "my key");
+
+	ValuePtr value = createQueueValue(ValueSeq{
+		an(CONCEPT_NODE, "Anna One"),
+		an(CONCEPT_NODE, "Anna Two"),
+		an(CONCEPT_NODE, "Anna"),
+		createFloatValue(std::vector<double>{1, 2, 3, 4}),
+		an(CONCEPT_NODE, "D7 chord")});
+	atom->setValue(key, value);
+
+	Handle valof = al(STREAM_VALUE_OF_LINK, atom, key);
+
+	ValuePtr vp = valof->execute();
+	TS_ASSERT(nameserver().isA(vp->get_type(), LINK_VALUE));
+	LinkValuePtr lvp = LinkValueCast(vp);
+	const std::vector<ValuePtr>& seq = lvp->value();
+
+	TS_ASSERT_EQUALS(seq.size(), 5);
+	TS_ASSERT(nameserver().isA(seq[0]->get_type(), CONCEPT_NODE));
+	TS_ASSERT(nameserver().isA(seq[1]->get_type(), CONCEPT_NODE));
+	TS_ASSERT(nameserver().isA(seq[2]->get_type(), CONCEPT_NODE));
+	TS_ASSERT(nameserver().isA(seq[3]->get_type(), FLOAT_VALUE));
+	TS_ASSERT(nameserver().isA(seq[4]->get_type(), CONCEPT_NODE));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
