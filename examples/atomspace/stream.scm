@@ -38,10 +38,26 @@
 (define b (Concept "other atom"))
 (cog-set-value! b k (RandomStream 24))
 
+; There are two ways to work with this stream in Atomese.
+; First, one can get the stream, as it is. Executing the ValueOf link
+; just returns the RandomStream itself:
+(cog-execute! (ValueOf b k))
+
+; Second, we can draw a sample from it. In this case, the StreamValueOf
+; will draw a sample from the stream. Samples drawn from RandomStream
+; are always FloatValues (by definition), and are 24 floats long
+; (because it was created to be of length 24, above).
+(cog-execute! (StreamValueOf b k))
+
+; Each sample is different:
+(cog-execute! (StreamValueOf b k))
+(cog-execute! (StreamValueOf b k))
+(cog-execute! (StreamValueOf b k))
+
 ; Every call, the stream generates 24 numbers between 0 and 1.
 ; Add 6 to get a number between 6 and 7.
 ; Then multiply by 2, to get a number between 12 and 14.
-(define tymb (Times (Number 2) (Plus (ValueOf b k) (Number 6)) ))
+(define tymb (Times (Number 2) (Plus (StreamValueOf b k) (Number 6)) ))
 (cog-execute! tymb)
 (cog-execute! tymb)
 (cog-execute! tymb)
