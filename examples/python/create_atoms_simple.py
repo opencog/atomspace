@@ -26,8 +26,8 @@ C = ConceptNode('Comestible', TV)
 
 # Add three inhertance links, asserting that apples are berries
 # and that berries are edible.
-AB = InheritanceLink(A, B, TV)
-BC = InheritanceLink(B, C, TV)
+AB = InheritanceLink(A, B, tv=TV)
+BC = InheritanceLink(B, C, tv=TV)
 AC = InheritanceLink(A, C)
 
 
