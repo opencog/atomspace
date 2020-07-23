@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "StreamValueOfLink.h"
 #include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 using namespace opencog;
 
@@ -70,20 +71,26 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
-	if (not nameserver().isA(stream->get_type(), STREAM_VALUE))
+	if (nameserver().isA(stream->get_type(), STREAM_VALUE))
 	{
-		if (silent)
-			throw SilentException();
-
-		throw InvalidParamException(TRACE_INFO,
-		   "Expecting a stream at key %s on atom %s, got %s",
-		   ak->to_string().c_str(), ah->to_string().c_str(),
-		   stream->to_string().c_str());
+		// Sample a value out of the stream.
+		FloatValuePtr fvp = FloatValueCast(stream);
+		return createFloatValue(fvp->value());
 	}
 
-	// Sample a value out of the stream.
-	FloatValuePtr fvp = FloatValueCast(stream);
-	return createFloatValue(fvp->value());
+	if (nameserver().isA(stream->get_type(), LINK_STREAM_VALUE))
+	{
+		LinkValuePtr lvp = LinkValueCast(stream);
+      return createLinkValue(lvp->value());
+	}
+
+	if (silent)
+		throw SilentException();
+
+	throw InvalidParamException(TRACE_INFO,
+	   "Expecting a stream at key %s on atom %s, got %s",
+	   ak->to_string().c_str(), ah->to_string().c_str(),
+	   stream->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(StreamValueOfLink, STREAM_VALUE_OF_LINK)
