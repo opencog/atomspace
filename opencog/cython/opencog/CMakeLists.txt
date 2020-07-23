@@ -176,37 +176,38 @@ INSTALL(TARGETS
 INSTALL(FILES
 	"bindlink.py"
 	"exec.py"
+	"scheme_wrapper.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 
-	CYTHON_ADD_MODULE_PYX(scheme_wrapper
+	CYTHON_ADD_MODULE_PYX(scheme
 		"load-file.h"
 		"PyScheme.h"
 		"atomspace.pxd"
 		opencog_atom_types
 	)
 
-	ADD_LIBRARY(scheme_wrapper
+	ADD_LIBRARY(scheme
 		load-file
 		PyScheme
-		scheme_wrapper.cpp
+		scheme.cpp
 	)
 
-	TARGET_LINK_LIBRARIES(scheme_wrapper
+	TARGET_LINK_LIBRARIES(scheme
 		atomspace_cython
 		atomspace
 		smob
 		${PYTHON_LIBRARIES}
 	)
 
-	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
+	SET_TARGET_PROPERTIES(scheme PROPERTIES
 		PREFIX ""
-		OUTPUT_NAME scheme_wrapper)
+		OUTPUT_NAME scheme)
 
 	INSTALL (TARGETS
-		scheme_wrapper
+		scheme
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 

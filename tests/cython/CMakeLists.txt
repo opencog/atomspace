@@ -79,7 +79,7 @@ IF (HAVE_NOSETESTS)
 	ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
 		${CMAKE_SOURCE_DIR}/tests/cython/guile/)
 	SET_PROPERTY(TEST CythonGuile
-		PROPERTY DEPENDS atomspace_cython scheme_wrapper)
+		PROPERTY DEPENDS atomspace_cython scheme)
 	SET_PROPERTY(TEST CythonGuile
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
