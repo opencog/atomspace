@@ -700,6 +700,7 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // numeric.  We need this try..catch because sometimes there just isn't
 // a value -- i.e. ValueOfLink can return a null pointer.
 VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+STREAM_VALUE_OF_LINK <- VALUE_OF_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- VALUE_OF_LINK

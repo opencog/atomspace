@@ -6,6 +6,7 @@ ADD_LIBRARY (atomflow
 	PredicateFormulaLink.cc
 	SetTVLink.cc
 	SetValueLink.cc
+	StreamValueOfLink.cc
 	TruthValueOfLink.cc
 	ValueOfLink.cc
 )
@@ -27,6 +28,7 @@ INSTALL (FILES
 	PredicateFormulaLink.h
 	SetTVLink.h
 	SetValueLink.h
+	StreamValueOfLink.h
 	TruthValueOfLink.h
 	ValueOfLink.h
 	DESTINATION "include/opencog/atoms/flow"

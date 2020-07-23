@@ -5,6 +5,7 @@ LINK_LIBRARIES(
 )
 
 ADD_CXXTEST(ValueOfUTest)
+ADD_CXXTEST(StreamValueOfUTest)
 
 ADD_CXXTEST(FormulaUTest)
 TARGET_LINK_LIBRARIES(FormulaUTest execution smob)

@@ -220,10 +220,8 @@
 (cog-value foo akey)
 
 ; Verify that it really is a vector, and that it changes with each
-; access.
-(cog-value->list (cog-value foo akey))
-(cog-value->list (cog-value foo akey))
-(cog-value->list (cog-value foo akey))
+; access. The StreamValueOfLink will sample from the RandomStream.
+(cog-execute! (StreamValueOf foo akey))
 
 ; Apply a formula to that stream, to get a different stream.
 (define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
@@ -231,9 +229,9 @@
 ; Place it on an atom, take a look at it, and make sure that it works.
 (cog-set-value! bar bkey fstream)
 (cog-value bar bkey)
-(cog-value->list (cog-value bar bkey))
-(cog-value->list (cog-value bar bkey))
-(cog-value->list (cog-value bar bkey))
+(cog-execute! (StreamValueOf bar bkey))
+(cog-execute! (StreamValueOf bar bkey))
+(cog-execute! (StreamValueOf bar bkey))
 
 ; TODO: At this time, there is no DynamicSchema that would be the
 ; generalized analog of DynamicFormula demonstrated above.  This
