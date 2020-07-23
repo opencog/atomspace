@@ -45,19 +45,19 @@ red = 0
 def stop_go(atom):
 
     if atom == ConceptNode("green light"):
-        print "Got a green light..."
+        print("Got a green light...")
         global green
         green += 1
         return TruthValue(1,1)
 
     elif atom == ConceptNode("red light"):
-        print "Got a red light!"
+        print("Got a red light!")
         global red
         red += 1
         return TruthValue(0,1)
 
     else:
-        print "Oh No!! Car wreck!"
+        print("Oh No!! Car wreck!")
         assert(false)
 
     return TruthValue(0,0)
@@ -98,5 +98,5 @@ satisfaction_handle = SatisfactionLink(
 # Perform the actual satisfiability search.
 result = execute_atom(atomspace, satisfaction_handle)
 
-print "Number of green lights:",  green
-print "Number of red lights:",  red
+print("Number of green lights:",  green)
+print("Number of red lights:",  red)

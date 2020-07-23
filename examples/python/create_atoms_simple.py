@@ -31,4 +31,4 @@ BC = InheritanceLink(B, C, tv=TV)
 AC = InheritanceLink(A, C)
 
 
-print "The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom)
+print("The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom))

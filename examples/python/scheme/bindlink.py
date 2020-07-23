@@ -51,4 +51,4 @@ scheme_eval(atomspace, scheme_query)
 
 # Run the above pattern and print the result
 result = scheme_eval_h(atomspace, '(cog-execute! find-animals)')
-print ("The result of pattern matching is:\n\n" + str(result))
+print("The result of pattern matching is:\n\n" + str(result))
