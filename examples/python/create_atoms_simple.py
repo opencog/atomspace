@@ -14,7 +14,7 @@ from opencog.type_constructors import *
 a = AtomSpace()
 
 # Tell the type constructors which atomspace to use.
-set_type_ctor_atomspace(a)
+set_default_atomspace(a)
 
 # Create a truth value asserting true and mostly confident.
 TV = TruthValue(1, 0.8)

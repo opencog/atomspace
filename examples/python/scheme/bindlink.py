@@ -47,7 +47,7 @@ scheme_query = \
       )
     )
     '''
-scheme_eval_h(atomspace, scheme_query)
+scheme_eval(atomspace, scheme_query)
 
 # Run the above pattern and print the result
 result = scheme_eval_h(atomspace, '(cog-execute! find-animals)')

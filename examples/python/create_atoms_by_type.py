@@ -7,7 +7,8 @@ Simple example of how to create atoms in the AtomSpace.
 See also create_atomspace_simple.py for an alternate interface.
 """
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom
+from opencog.atomspace import AtomSpace, Atom
+from opencog.type_constructors import TruthValue
 from opencog.atomspace import types
 
 a = AtomSpace()

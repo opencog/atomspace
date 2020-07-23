@@ -19,7 +19,7 @@ clause.
 """
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.exec import satisfaction_link
+from opencog.exec import execute_atom
 from opencog.type_constructors import *
 from opencog.logger import Logger, log
 
@@ -96,7 +96,7 @@ satisfaction_handle = SatisfactionLink(
 )
 
 # Perform the actual satisfiability search.
-result = satisfaction_link(atomspace, satisfaction_handle)
+result = execute_atom(atomspace, satisfaction_handle)
 
 print "Number of green lights:",  green
 print "Number of red lights:",  red
