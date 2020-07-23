@@ -55,7 +55,7 @@
 ; have finished. The longest running thread takes five seconds, so
 ; sit back and relax and watch the pretty messages appear.
 (define wait
-	(Join
+	(ThreadJoin
 		(SequentialAnd
 			(True (Sleep (Number 1)))
 			(Evaluation
