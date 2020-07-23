@@ -1,6 +1,7 @@
 
 Correlation/Covariance Matrix Analysis Tools
 ============================================
+[See also: key ideas presentation](docs/AtomSpace.pdf).
 
 In this project, there's a generic theme of "pairs of things" that
 are statistically related. These can be pairs of words, they can be

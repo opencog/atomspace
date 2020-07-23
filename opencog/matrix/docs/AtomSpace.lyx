@@ -1,0 +1,2289 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass beamer
+\begin_preamble
+\usetheme{Darmstadt}
+%\usetheme{Frankfurt}
+% or ...
+
+\setbeamercovered{transparent}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "palatino" "default"
+\font_sans "lmss" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This file is for Zoom talk at OpenCogCon
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+Thinking About the AtomSpace
+\end_layout
+
+\begin_layout Subtitle
+Knowledge Representation with Graphs
+\end_layout
+
+\begin_layout Author
+Linas
+\begin_inset space ~
+\end_inset
+
+Vepstas
+\end_layout
+
+\begin_layout Date
+(Virtual) OpenCogCon 2020
+\end_layout
+
+\begin_layout Institute
+15-16 July 2020
+\end_layout
+
+\begin_layout Section*
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+The following causes the table of contents to be shown at the beginning
+ of every subsection.
+ Delete this, if you do not want it.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+AtBeginSubsection[]{
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+frame<beamer>{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    %
+\backslash
+frametitle{Outline}   
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+tableofcontents[currentsection,currentsubsection] 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+
+\family roman
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Topics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+
+\family roman
+New Features and New Ideas
+\end_layout
+
+\begin_layout Frame
+\begin_inset space \hspace{}
+\length 65col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename cloud-matrix.eps
+	lyxscale 40
+	width 20line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\family roman
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Matrix API
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Representing Extremely Sparse Data
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+A common task in data science
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+A matrix: 
+\begin_inset Formula $M=M_{ij}=P(x,y)=P\left(A|B\right)=$
+\end_inset
+
+
+\begin_inset Graphics
+	filename cloud-matrix.eps
+	lyxscale 20
+	width 5line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+For example: conditional probabilities, marginal probabilities...
+\end_layout
+
+\begin_layout Itemize
+When 
+\begin_inset Formula $i,j,x,y,A,B$
+\end_inset
+
+ are words, genes, protiens...
+\end_layout
+
+\begin_layout Itemize
+Extremely sparse data
+\end_layout
+
+\begin_layout Itemize
+Out of 100K 
+\begin_inset Formula $\times$
+\end_inset
+
+100K there are maybe 10M pairs!
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+OpenCog 
+\begin_inset Quotes eld
+\end_inset
+
+Classic
+\begin_inset Quotes erd
+\end_inset
+
+ Style
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+Symbolic Relational Algebra
+\end_layout
+
+\begin_layout Frame
+Knowledge representation with Atoms
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Genomics
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+EvaluationLink
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+Predicate 
+\begin_inset Quotes eld
+\end_inset
+
+up-regulates
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+List
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+Gene 
+\begin_inset Quotes eld
+\end_inset
+
+FLNC
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+Gene 
+\begin_inset Quotes eld
+\end_inset
+
+MAP2K4
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $M_{ij}=P(x,y)=R_{upregulates}\left(FLNC,MAP2K4\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+But where are the numbers?
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Key-Value Store per Atom
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+Declarative expressions
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Setting Values by declaring them! ...
+ with Atoms!
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+SetValueLink
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+EvaluationLink
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+Predicate 
+\begin_inset Quotes eld
+\end_inset
+
+up-regulates
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+List
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+Gene 
+\begin_inset Quotes eld
+\end_inset
+
+FLNC
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+Gene 
+\begin_inset Quotes eld
+\end_inset
+
+MAP2K4
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\emph on
+ <some key> <some value>
+\end_layout
+
+\end_deeper
+\begin_layout Block
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Matrix Subsystem
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+Scheme: 
+\family typewriter
+(use-modules (opencog matrix))
+\family default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Object-oriented API to matricies in the AtomSpace
+\end_layout
+
+\begin_layout Itemize
+Generic programming: 
+\begin_inset Quotes eld
+\end_inset
+
+parametric polymorphism
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+(define (my-genomics-object)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(define (get-left-type) 'Gene)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(define (get-right-type) 'Gene)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(define (get-pair-type) 'EvaluationLink)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(define (get-count PAIR)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(cog-value PAIR (Predicate 
+\begin_inset Quotes eld
+\end_inset
+
+some-key
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\begin_layout Block
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Matrix Toolkit
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Frequencies, marginal probabilities
+\end_layout
+
+\begin_layout Itemize
+Mutual Information
+\end_layout
+
+\begin_layout Itemize
+Similarity: e.g.
+ cosine similarity
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\ell_{p}$
+\end_inset
+
+-norms (
+\begin_inset Quotes eld
+\end_inset
+
+manhattan distance
+\begin_inset Quotes erd
+\end_inset
+
+, etc.)
+\end_layout
+
+\begin_layout Itemize
+Data filters and data cuts!
+\end_layout
+
+\begin_layout Standard
+Someone:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\family default
+PLEASE DO THIS: Port to Gnu R or to SciPy(?)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+
+\family roman
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Topics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+
+\family roman
+New Features and New Ideas
+\end_layout
+
+\begin_layout Frame
+\begin_inset space \hspace{}
+\length 65col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename cloud-matrix.eps
+	lyxscale 40
+	width 20line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\family roman
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Value Flows
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Values are Mutable
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family typewriter
+(FloatValue 1 2 3)
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+(SimpleTruthValue 0.99 0.6)
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+(StringValue 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+c
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+(LinkValue (StringValue 
+\begin_inset Quotes eld
+\end_inset
+
+answer
+\begin_inset Quotes erd
+\end_inset
+
+) (FloatValue 42))
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+StreamValue
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family typewriter
+RandomStream
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+QueueValue
+\begin_inset space \qquad{}
+\end_inset
+
+
+\family default
+;;; aka FIFO, buffer
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+FormulaStream
+\begin_inset space \qquad{}
+\end_inset
+
+
+\family default
+;;; stream transducer
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Values can be manipulated...
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+...
+ with Atoms!
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Cop
+\family typewriter
+ying Values
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\family typewriter
+(SetValue (Concept "foo") (Predicate "some key")
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(ValueOf (Concept "bar") (Predicate "other key")))
+\end_layout
+
+\end_deeper
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Itemize
+Declarative Knowledge!
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Texbook relations: dog is-a animal, dog has-a tail
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Declare the movement of values
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Copying, arithmetic, formulas...
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Formulas
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+Values can be transformed
+\end_layout
+
+\begin_layout Frame
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Triangle Numbers
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+(
+\family typewriter
+Lambda
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(Variable "$X")
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(Divide
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Times (Variable "$X")
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Plus (Variable "$X") (Number 1)))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Number 2))))
+\end_layout
+
+\begin_layout Itemize
+Verbose!
+\end_layout
+
+\begin_layout Itemize
+But Declarative!
+\end_layout
+
+\begin_layout Itemize
+Searchable!
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Connectors and Bonds
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Topics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+New Features and New Ideas
+\end_layout
+
+\begin_layout Frame
+\begin_inset space \hspace{}
+\length 65col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename cloud-matrix.eps
+	lyxscale 40
+	width 20line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Connectors and Bonds
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Terms and variables
+\end_layout
+
+\begin_layout Itemize
+A term: 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ or an 
+\begin_inset Formula $n$
+\end_inset
+
+-ary function symbol: 
+\begin_inset Formula $f\left(x_{1},x_{2},\cdots,x_{n}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A variable: 
+\begin_inset Formula $x$
+\end_inset
+
+ or maybe more: 
+\begin_inset Formula $x,y,z,\cdots$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A number: 42 ..
+ or a string 
+\begin_inset Quotes eld
+\end_inset
+
+foobar
+\begin_inset Quotes erd
+\end_inset
+
+ ...
+ or ...
+\end_layout
+
+\begin_layout Itemize
+Plug it in: 
+\begin_inset Formula $f\left(x\right):42\mapsto f\left(42\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Call function 
+\begin_inset Formula $f$
+\end_inset
+
+ with argument of 42
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Plug it in!
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Graphics
+	filename puzzle.png
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Agnostic connections
+\end_layout
+
+\begin_layout Itemize
+Which one is the function?
+\end_layout
+
+\begin_layout Itemize
+Which one is the argument?
+\end_layout
+
+\begin_layout Itemize
+Who called who?
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Generic Connectors
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Generic connectors (aka 
+\begin_inset Quotes eld
+\end_inset
+
+tensors
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula $M_{ijk...}$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename seed.png
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Generic bonds (aka 
+\begin_inset Quotes eld
+\end_inset
+
+tensor contraction
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula $v^{\mu}g_{\mu\nu}dx^{\nu}$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename seeds-two.png
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Connectors and Bonds in Atomese
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+An 
+\begin_inset Formula $n$
+\end_inset
+
+-ary function symbol: 
+\begin_inset Formula $f\left(x_{1},x_{2},\cdots,x_{n}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+(Section
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(Concept 
+\begin_inset Quotes eld
+\end_inset
+
+function f
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorSeq
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+num var
+\begin_inset Quotes erd
+\end_inset
+
+) (Label 
+\begin_inset Quotes eld
+\end_inset
+
+x1
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+num var
+\begin_inset Quotes erd
+\end_inset
+
+) (Label 
+\begin_inset Quotes eld
+\end_inset
+
+x2
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+...
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+num var
+\begin_inset Quotes erd
+\end_inset
+
+) (Label 
+\begin_inset Quotes eld
+\end_inset
+
+xn
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Natural Language
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Linguistics: SUBJECT threw an OBJECT
+\end_layout
+
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Block
+(Section
+\end_layout
+
+\begin_layout Block
+\begin_inset space \qquad{}
+\end_inset
+
+(Word 
+\begin_inset Quotes eld
+\end_inset
+
+throw
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Block
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorSeq
+\end_layout
+
+\begin_layout Block
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+SUBJECT
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnectorDir 
+\begin_inset Quotes eld
+\end_inset
+
+left
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+OBJECT
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnectorDir 
+\begin_inset Quotes eld
+\end_inset
+
+right
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\begin_layout Standard
+This is what Link Grammar is!
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Chemistry
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Krebs cycle (Citric acid cycle)
+\end_layout
+
+\end_deeper
+\begin_layout Frame
+\begin_inset Graphics
+	filename phosphorylation.svg
+	lyxscale 50
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+(Section
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(Concept 
+\begin_inset Quotes eld
+\end_inset
+
+Phosphorylation
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorSeq
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+R-OPO3
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Concept 
+\begin_inset Quotes eld
+\end_inset
+
+ADP
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+...
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+R-OH
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Theorem Proving
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Natural Deduction - Judgements and Propositions
+\end_layout
+
+\end_deeper
+\begin_layout Frame
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Rule of inference: 
+\begin_inset Formula $\frac{A\mbox{ prop}\qquad B\mbox{ prop}}{(A\wedge B)\mbox{ prop}}\ \wedge_{F}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Frame
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+(Section
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(Label 
+\begin_inset Quotes eld
+\end_inset
+
+Rule of Introduction A and B
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorSeq
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+Prop
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+Prop
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(Connector (Type 
+\begin_inset Quotes eld
+\end_inset
+
+Prop
+\begin_inset Quotes erd
+\end_inset
+
+) (ConnDir 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Connectors and Bonds: Why?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Because Computer Science!
+\end_layout
+
+\begin_layout Itemize
+Parsing and Grammar and Syntax and Language
+\end_layout
+
+\begin_layout Itemize
+Generation of graphs (sentences, languages ...)
+\end_layout
+
+\begin_layout Itemize
+...with weighted probabilities (Bayesian, PLN, ...)
+\end_layout
+
+\begin_layout Itemize
+...with constraints (constraint satisfaction)
+\end_layout
+
+\begin_layout Itemize
+Satisfiability Modulo Theories
+\end_layout
+
+\begin_layout Itemize
+Logical Inference and Deduction (...probabilistic....)
+\end_layout
+
+\begin_layout Itemize
+Tensor algebras and deformations 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Take-aways
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\color red
+Sparse data
+\color inherit
+ is rampant in real life
+\color none
+.
+\end_layout
+
+\begin_layout Itemize
+
+\color red
+Graphical representations
+\color inherit
+ are natural
+\color none
+.
+\end_layout
+
+\begin_layout Itemize
+Jigsaw puzzle pieces are actually ...
+ 
+\color red
+tensors
+\color inherit
+!
+\end_layout
+
+\begin_layout Itemize
+
+\color red
+Parsing
+\color inherit
+ == assembling jigsaw puzzle pieces!
+\end_layout
+
+\begin_layout Itemize
+
+\color red
+Values flow
+\color inherit
+ along graph edges
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip0pt plus.5fill
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Projects
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nascant generation of graphs: https://github.com/opencog/generate
+\end_layout
+
+\begin_layout Itemize
+Learning graph components: https://github.com/opencog/learn
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_body
+\end_document

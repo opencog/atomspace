@@ -1,0 +1,146 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: /home/linas/src/fractal/paper/cogathon-2020/matrix.dia
+%%Creator: Dia v0.97+git
+%%CreationDate: Tue Jul 14 22:10:07 2020
+%%For: linas
+%%Orientation: Portrait
+%%Magnification: 1.0000
+%%BoundingBox: 0 0 208 182
+%%BeginSetup
+%%EndSetup
+%%EndComments
+%%BeginProlog
+[ /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright
+/parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E
+/F /G /H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W /X /Y
+/Z /bracketleft /backslash /bracketright /asciicircum /underscore /quoteleft /a /b /c
+/d /e /f /g /h /i /j /k /l /m
+/n /o /p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright
+/ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior
+/acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf
+/threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde
+/Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex
+/Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring
+/ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave
+/uacute /ucircumflex /udieresis /yacute /thorn /ydieresis] /isolatin1encoding exch def
+/cp {closepath} bind def
+/c {curveto} bind def
+/f {fill} bind def
+/a {arc} bind def
+/ef {eofill} bind def
+/ex {exch} bind def
+/gr {grestore} bind def
+/gs {gsave} bind def
+/sa {save} bind def
+/rs {restore} bind def
+/l {lineto} bind def
+/m {moveto} bind def
+/rm {rmoveto} bind def
+/n {newpath} bind def
+/s {stroke} bind def
+/sh {show} bind def
+/slc {setlinecap} bind def
+/slj {setlinejoin} bind def
+/slw {setlinewidth} bind def
+/srgb {setrgbcolor} bind def
+/rot {rotate} bind def
+/sc {scale} bind def
+/sd {setdash} bind def
+/ff {findfont} bind def
+/sf {setfont} bind def
+/scf {scalefont} bind def
+/sw {stringwidth pop} bind def
+/tr {translate} bind def
+
+/ellipsedict 8 dict def
+ellipsedict /mtrx matrix put
+/ellipse
+{ ellipsedict begin
+   /endangle exch def
+   /startangle exch def
+   /yrad exch def
+   /xrad exch def
+   /y exch def
+   /x exch def   /savematrix mtrx currentmatrix def
+   x y tr xrad yrad sc
+   0 0 1 startangle endangle arc
+   savematrix setmatrix
+   end
+} def
+
+/mergeprocs {
+dup length
+3 -1 roll
+dup
+length
+dup
+5 1 roll
+3 -1 roll
+add
+array cvx
+dup
+3 -1 roll
+0 exch
+putinterval
+dup
+4 2 roll
+putinterval
+} bind def
+/dpi_x 300 def
+/dpi_y 300 def
+/conicto {
+    /to_y exch def
+    /to_x exch def
+    /conic_cntrl_y exch def
+    /conic_cntrl_x exch def
+    currentpoint
+    /p0_y exch def
+    /p0_x exch def
+    /p1_x p0_x conic_cntrl_x p0_x sub 2 3 div mul add def
+    /p1_y p0_y conic_cntrl_y p0_y sub 2 3 div mul add def
+    /p2_x p1_x to_x p0_x sub 1 3 div mul add def
+    /p2_y p1_y to_y p0_y sub 1 3 div mul add def
+    p1_x p1_y p2_x p2_y to_x to_y curveto
+} bind def
+/start_ol { gsave 1.1 dpi_x div dup scale} bind def
+/end_ol { closepath fill grestore } bind def
+28.346000 -28.346000 scale
+-3.981313 -11.201246 translate
+%%EndProlog
+
+
+0.300000 slw
+[] 0 sd
+0 slc
+0.000000 0.000000 0.000000 srgb
+n 8.000000 11.000000 m 11.000000 5.000000 l s
+0.300000 slw
+[] 0 sd
+0 slj
+0 slc
+n 11.000000 5.000000 m 11.111803 5.055902 11.167705 5.223607 11.111803 5.335410 c 11.055902 5.447214 10.888197 5.503115 10.776393 5.447214 c 10.664590 5.391312 10.608688 5.223607 10.664590 5.111803 c 10.720492 5.000000 10.888197 4.944098 11.000000 5.000000 c ef
+n 11.000000 5.000000 m 11.111803 5.055902 11.167705 5.223607 11.111803 5.335410 c 11.055902 5.447214 10.888197 5.503115 10.776393 5.447214 c 10.664590 5.391312 10.608688 5.223607 10.664590 5.111803 c 10.720492 5.000000 10.888197 4.944098 11.000000 5.000000 c s
+0.300000 slw
+[] 0 sd
+0 slc
+n 8.000000 11.000000 m 5.000000 5.000000 l s
+0.300000 slw
+[] 0 sd
+0 slj
+0 slc
+n 5.000000 5.000000 m 5.111803 4.944098 5.279508 5.000000 5.335410 5.111803 c 5.391312 5.223607 5.335410 5.391312 5.223607 5.447214 c 5.111803 5.503115 4.944098 5.447214 4.888197 5.335410 c 4.832295 5.223607 4.888197 5.055902 5.000000 5.000000 c ef
+n 5.000000 5.000000 m 5.111803 4.944098 5.279508 5.000000 5.335410 5.111803 c 5.391312 5.223607 5.335410 5.391312 5.223607 5.447214 c 5.111803 5.503115 4.944098 5.447214 4.888197 5.335410 c 4.832295 5.223607 4.888197 5.055902 5.000000 5.000000 c s
+showpage
