@@ -3,7 +3,7 @@ from unittest import TestCase
 from opencog.atomspace import AtomSpace, Atom
 from opencog.type_constructors import TruthValue
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
+from opencog.scheme import scheme_eval, scheme_eval_h
 import os
 
 

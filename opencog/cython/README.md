@@ -3,8 +3,7 @@ Python bindings for OpenCog
 
 ## Requirements ##
 
-* Python 2.7 - these bindings may work with earlier versions, but they
-  have not been tested at all.
+* Python 2.7 - although Python3 is recommended.
 * Cython 0.14 or later. http://www.cython.org/
 * Nosetests - for running unit tests.
 
@@ -23,7 +22,7 @@ Currently the package structure looks like this:
 ```
     opencog.atomspace
     opencog.atomspace.types
-    opencog.scheme_wrapper
+    opencog.scheme
 ```
 ## Tutorial ##
 

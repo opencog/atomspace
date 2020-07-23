@@ -1,7 +1,7 @@
 """
 Scheme wrapper for Python
 
-Before using the scheme_wrapper, you will need to import any atom type
+Before using the scheme, you will need to import any atom type
 definitions that you require. For a detailed example of how to use this
 functionality, see:
 
