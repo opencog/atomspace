@@ -242,7 +242,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDIF (ISNODE STREQUAL "NODE")
             IF (ISLINK STREQUAL "LINK")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args, tv=None):\n")
-                FILE(APPEND "${PYTHON_FILE}" "    return add_link(types.${TYPE_NAME}, args, tv)\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return add_link(types.${TYPE_NAME}, args, tv=tv)\n")
             ENDIF (ISLINK STREQUAL "LINK")
         ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
