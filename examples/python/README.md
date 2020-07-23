@@ -4,13 +4,6 @@ It is assumed Python 3 is the default version on your system. If you
 use Python 2 you will have to modify the commands and scripts
 accordingly.
 
-* To run these examples, you might first need to set the `PYTHONPATH` to the
-  atomspace python install directory, after installing atomspace. Tun the
-  following command from your shell,
-  ```
-      export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages/
-  ```
-
 * From the python prompt, the following should list the opencog python modules
   ```
       help('opencog')
