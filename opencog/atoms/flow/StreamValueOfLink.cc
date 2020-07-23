@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "StreamValueOfLink.h"
+#include <opencog/atoms/value/FloatValue.h>
 
 using namespace opencog;
 
@@ -69,7 +70,7 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
-	if (not nameserver().isA(STREAM_VALUE, stream->get_type()))
+	if (not nameserver().isA(stream->get_type(), STREAM_VALUE))
 	{
 		if (silent)
 			throw SilentException();
@@ -80,8 +81,9 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		   stream->to_string().c_str());
 	}
 
-return stream;
-	// if (pap) return pap;
+	// Sample a value out of the stream.
+	FloatValuePtr fvp = FloatValueCast(stream);
+	return createFloatValue(fvp->value());
 }
 
 DEFINE_LINK_FACTORY(StreamValueOfLink, STREAM_VALUE_OF_LINK)
