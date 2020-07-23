@@ -52,6 +52,10 @@ class AtomSpaceTest(TestCase):
         a3 = Node("test_w_tv").truth_value(0.5, 0.8)
         self.assertEquals(self.space.size(), 3)
 
+        # Test alternative way of adding with a truthvalue
+        a4 = Node("test_w_tv_alt", tv=TruthValue(0.5, 0.8))
+        self.assertEquals(self.space.size(), 4)
+
     def test_add_link(self):
         n1 = Node("test1")
         n2 = Node("test2")
@@ -64,6 +68,10 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3).truth_value(0.5, 0.8)
         self.assertTrue(l3 is not None)
+
+        n4 = Node("test4")
+        l4 = Link(n1, n4, tv=TruthValue(0.5, 0.8))
+        self.assertTrue(l4 is not None)
 
         # Should fail when adding an intentionally bad type
         caught = False
