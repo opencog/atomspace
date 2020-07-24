@@ -14,7 +14,7 @@ from opencog.type_constructors import *
 a = AtomSpace()
 
 # Tell the type constructors which atomspace to use.
-set_type_ctor_atomspace(a)
+set_default_atomspace(a)
 
 # Create a truth value asserting true and mostly confident.
 TV = TruthValue(1, 0.8)
@@ -26,9 +26,9 @@ C = ConceptNode('Comestible', TV)
 
 # Add three inhertance links, asserting that apples are berries
 # and that berries are edible.
-AB = InheritanceLink(A, B, TV)
-BC = InheritanceLink(B, C, TV)
+AB = InheritanceLink(A, B, tv=TV)
+BC = InheritanceLink(B, C, tv=TV)
 AC = InheritanceLink(A, C)
 
 
-print "The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom)
+print("The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom))

@@ -1,11 +1,8 @@
 # Python Examples
 
-* To run these examples, you must first set the `PYTHONPATH` to the
-  atomspace python install directory, after installing atomspace. Tun the
-  following command from your shell,
-  ```
-      export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages/
-  ```
+It is assumed Python 3 is the default version on your system. If you
+use Python 2 you will have to modify the commands and scripts
+accordingly.
 
 * From the python prompt, the following should list the opencog python modules
   ```
@@ -16,17 +13,18 @@
   For example,
   ```
       import opencog.atomspace
-      print dir(opencog.atomspace)
+      print(dir(opencog.atomspace))
   ```
+
 * You can run the examples from your shell. For example,
   ```
       python create_atoms_by_type.py
   ```
   
 ## create_atoms_by_type.py, create_atoms_simple.py
-Simple examples of how to create atoms in an atomspace.
-These demonstrate two different ways in which the API can be used;
-one creates atoms according to their types, the other creates them
+Simple examples of how to create atoms in an atomspace.  These
+demonstrate two different ways in which the API can be used; one
+creates atoms according to their types, the other creates them
 directly.
 
 ## stop_go.py

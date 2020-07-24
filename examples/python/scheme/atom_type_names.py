@@ -15,12 +15,12 @@ atomspace = AtomSpace()
 atom = atomspace.add(types.ConceptNode, "Frog #1")
 
 # To get one type name
-print get_type_name(3) + '\n'
+print(get_type_name(3) + '\n')
 
 # To get one atom's type name
-print get_type_name(atom.type) + '\n'
+print(get_type_name(atom.type) + '\n')
 
 # Get a list of all possible type names and numbers
-for key, value in sorted(types.__dict__.iteritems()):
+for key, value in sorted(types.__dict__.items()):
     if '__' not in key:
-        print key, value
+        print(key, value)
