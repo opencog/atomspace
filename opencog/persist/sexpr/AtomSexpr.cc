@@ -107,7 +107,7 @@ static void get_typename(const std::string& s, size_t& l, size_t& r,
 /// If the node is a Type node, then `l` points at the first
 /// non-whitespace character of the type name and `r` points to the next
 /// opening parenthesis.
-static void get_node_name(const std::string& s, size_t& l, size_t& r,
+static bool get_node_name(const std::string& s, size_t& l, size_t& r,
                           size_t line_cnt, bool typeNode = false)
 {
 	// Advance past whitespace.
@@ -115,10 +115,9 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
 
 	// Scheme strings start and end with double-quote.
 	// Scheme symbols start with single-quote.
-	if (typeNode and s[l] != '\'')
-		throw std::runtime_error(
-				"Syntax error at line " + std::to_string(line_cnt) +
-				" Unexpected type name: >>" + s.substr(l, r-l+1) + "<< in " + s);
+	bool scm_symbol = false;
+	if (typeNode and s[l] == '\'')
+		scm_symbol = true;
 	else if (not typeNode and s[l] != '"')
 		throw std::runtime_error(
 			"Syntax error at line " + std::to_string(line_cnt) +
@@ -126,11 +125,13 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
 
 	l++;
 	size_t p = l;
-	if (typeNode)
+	if (scm_symbol)
 		for (; p < r and (s[p] != '(' or s[p] != ' ' or s[p] != '\t' or s[p] != '\n'); p++);
 	else
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 	r = p;
+
+    return scm_symbol;
 }
 
 /// Extract SimpleTruthValue and return that, else throw an error.
@@ -202,8 +203,10 @@ Handle Sexpr::decode_atom(const std::string& s,
 		r1 = r;
 		size_t l2;
 		if (namer.isA(atype, TYPE_NODE)) {
-			get_node_name(s, l1, r1, line_cnt, true);
-			l2 = r1;
+			if(get_node_name(s, l1, r1, line_cnt, true))
+			    l2 = r1;
+			else
+			    l2 = r1 + 1;
 		} else {
 			get_node_name(s, l1, r1, line_cnt);
 			l2 = r1 + 1;   // step past trailing quote.
