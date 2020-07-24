@@ -43,7 +43,7 @@ using namespace opencog;
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
  */
-ValuePtr Sexpr::decode_value(std::string& stv, size_t& pos)
+ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
@@ -174,7 +174,7 @@ ValuePtr Sexpr::decode_value(std::string& stv, size_t& pos)
  * ((KEY . VALUE)(KEY2 . VALUE2)...)
  * Store the results as values on the atom.
  */
-void Sexpr::decode_alist(Handle& atom, std::string& alist)
+void Sexpr::decode_alist(Handle& atom, const std::string& alist)
 {
 	// Skip over opening paren
 	size_t pos = 1;

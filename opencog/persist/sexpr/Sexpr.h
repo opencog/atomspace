@@ -52,8 +52,8 @@ public:
 		return decode_atom(s, junk);
 	}
 
-	static ValuePtr decode_value(std::string&, size_t&);
-	static void decode_alist(Handle&, std::string&);
+	static ValuePtr decode_value(const std::string&, size_t&);
+	static void decode_alist(Handle&, const std::string&);
 
 	// API more suitable to very long, file-driven I/O.
 	static int get_next_expr(const std::string&,
