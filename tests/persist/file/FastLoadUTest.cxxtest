@@ -45,16 +45,28 @@ void FastLoadUTest::test_pattern_parse()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-    std::string in = "(Get\n"
+    std::string input_sym = "(Get\n"
                      "           (VariableList\n"
                      "              (TypedVariable (Variable \"$a\") (Type 'Concept)))\n"
                      "           (Evaluation (Predicate \"test\")\n"
                      "              (List (Variable \"$a\") (Concept \"A\"))))";
 
+    std::string input_not_sym = "(Get\n"
+                                "           (VariableList\n"
+                                "              (TypedVariable (Variable \"$a\") (Type \"Concept\")))\n"
+                                "           (Evaluation (Predicate \"test\")\n"
+                                "              (List (Variable \"$a\") (Concept \"A\"))))";
+
     _as.clear();
-    Handle h = parseExpression(in, _as);
+    Handle h = parseExpression(input_sym, _as);
 
     // This test adds 9 atoms.
+    TS_ASSERT_EQUALS(9, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    _as.clear();
+
+    h = parseExpression(input_not_sym, _as);
     TS_ASSERT_EQUALS(9, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
