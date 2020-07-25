@@ -107,7 +107,7 @@ static void get_typename(const std::string& s, size_t& l, size_t& r,
 /// If the node is a Type node, then `l` points at the first
 /// non-whitespace character of the type name and `r` points to the next
 /// opening parenthesis.
-static bool get_node_name(const std::string& s, size_t& l, size_t& r,
+static void get_node_name(const std::string& s, size_t& l, size_t& r,
                           size_t line_cnt, bool typeNode = false)
 {
 	// Advance past whitespace.
@@ -130,8 +130,6 @@ static bool get_node_name(const std::string& s, size_t& l, size_t& r,
 	else
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 	r = p;
-
-    return scm_symbol;
 }
 
 /// Extract SimpleTruthValue and return that, else throw an error.
@@ -202,15 +200,9 @@ Handle Sexpr::decode_atom(const std::string& s,
 		l1 = l;
 		r1 = r;
 		size_t l2;
-		if (namer.isA(atype, TYPE_NODE)) {
-			if(get_node_name(s, l1, r1, line_cnt, true))
-			    l2 = r1;
-			else
-			    l2 = r1 + 1;
-		} else {
-			get_node_name(s, l1, r1, line_cnt);
-			l2 = r1 + 1;   // step past trailing quote.
-		}
+		get_node_name(s, l1, r1, line_cnt, namer.isA(atype, TYPE_NODE));
+		l2 = r1;
+		if ('"' == s[l2]) l2++; // step past trailing quote.
 
 		const std::string name = s.substr(l1, r1-l1);
 		Handle h(createNode(atype, std::move(name)));
