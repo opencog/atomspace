@@ -33,3 +33,11 @@ The current design assumes that Grounded nodes can have side effects,
 and thus, need to be run every time that they are encountered.  This
 is a poor choice for good performance; a side-effect-free node would
 be useful, and a monad when the side effects are needed.
+
+TODO
+----
+There should be a DLPython.cc just like DLScheme.cc that will
+dynamically load the needed Python libraries. This could/should
+avoid assorted linking problems down-stream with Boost libraries,
+and other linking hassles, whenever Python is enabled. Might be a
+good to re-write Python to just not use Boost in the first place.
