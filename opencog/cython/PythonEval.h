@@ -215,6 +215,11 @@ void global_python_initialize();
  */
 void global_python_finalize();
 
+extern "C" {
+   // For shared-library loading
+   opencog::PythonEval* get_python_evaluator(opencog::AtomSpace*);
+};
+
 } /* namespace opencog */
 
 #endif /* HAVE_CYTHON */

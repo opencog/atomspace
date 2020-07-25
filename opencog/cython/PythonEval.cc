@@ -1440,4 +1440,13 @@ void PythonEval::interrupt(void)
     logger().warn("[PythonEval] interrupt not implemented!\n");
 }
 
+extern "C" {
+// Thin wrapper for easy dlopen/dlsym dynamic loading
+opencog::PythonEval* get_python_evaluator(opencog::AtomSpace* as)
+{
+   return &opencog::PythonEval::instance();
+}
+
+};
+
 // =========== END OF FILE =========
