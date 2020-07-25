@@ -167,7 +167,7 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
-        ValuePtr apply_v(AtomSpace * as, const std::string& func,
+        virtual ValuePtr apply_v(AtomSpace * as, const std::string& func,
                          Handle varargs);
 
         /**
