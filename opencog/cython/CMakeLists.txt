@@ -39,6 +39,7 @@ TARGET_LINK_LIBRARIES(PythonEval
 	execution
 	atomflow
 	atombase
+	atomspace
 	executioncontext
  	load_scm
 	${PYTHON_LIBRARIES}
