@@ -29,8 +29,8 @@ using namespace opencog;
 
 PythonEval* opencog::get_evaluator_for_python(AtomSpace* as)
 {
-	typedef PythonEval* (*SEGetter)(AtomSpace*);
-	static SEGetter getter = nullptr;
+	typedef PythonEval* (*PEGetter)(AtomSpace*);
+	static PEGetter getter = nullptr;
 	if (getter) return getter(as);
 
 	static std::mutex mtx;
@@ -50,8 +50,8 @@ PythonEval* opencog::get_evaluator_for_python(AtomSpace* as)
 			"Unable to dynamically load Python evaluator: %s",
 			dlerror());
 
-	// static SEGetter getter = std::reinterpret_cast<SEGetter>(getev);
-	getter = (SEGetter) getev;
+	// static PEGetter getter = std::reinterpret_cast<PEGetter>(getev);
+	getter = (PEGetter) getev;
 
 	return getter(as);
 }
