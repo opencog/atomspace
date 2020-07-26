@@ -13,9 +13,8 @@ ADD_LIBRARY (grounded
 
 IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+	TARGET_SOURCES(grounded PRIVATE DLPython.cc)
 	TARGET_SOURCES(grounded PRIVATE PythonRunner.cc)
-	TARGET_LINK_LIBRARIES(grounded PythonEval)
-	TARGET_LINK_LIBRARIES(grounded ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
 # Without this, parallel make will race and crap up the generated files.
@@ -24,11 +23,6 @@ ADD_DEPENDENCIES(grounded opencog_atom_types)
 TARGET_LINK_LIBRARIES(grounded
 	atombase
 )
-
-IF (HAVE_CYTHON)
-	TARGET_LINK_LIBRARIES(grounded PythonEval)
-	TARGET_LINK_LIBRARIES(grounded ${PYTHON_LIBRARIES})
-ENDIF (HAVE_CYTHON)
 
 INSTALL (TARGETS grounded
 	EXPORT AtomSpaceTargets

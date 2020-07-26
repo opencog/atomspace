@@ -8,6 +8,8 @@ ADD_LIBRARY (sexpr
 ADD_DEPENDENCIES(sexpr opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(sexpr
+	atomspace
+	execution
 	atombase
 	${COGUTIL_LIBRARY}
 )
@@ -48,6 +50,7 @@ ADD_LIBRARY (persist-file
 )
 
 TARGET_LINK_LIBRARIES(persist-file
+	load_scm
 	sexpr
 	atomspace
 	smob

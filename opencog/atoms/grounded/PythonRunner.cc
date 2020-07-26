@@ -28,12 +28,13 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 
+#include <opencog/atoms/grounded/DLPython.h>
 #include <opencog/atoms/grounded/PythonRunner.h>
 
 using namespace opencog;
 
 PythonRunner::PythonRunner(std::string s)
-	: _fname(s), applier(PythonEval::instance())
+	: _fname(s)
 {
 }
 
@@ -60,7 +61,9 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
-	return applier.apply_v(as, _fname, args);
+	PythonEval* applier = get_evaluator_for_python(as);
+
+	return applier->apply_v(as, _fname, args);
 }
 
 ValuePtr PythonRunner::evaluate(AtomSpace* as,
@@ -74,5 +77,7 @@ ValuePtr PythonRunner::evaluate(AtomSpace* as,
 	// functions smart enough to do lazy evaluation.
 	Handle args(force_execute(as, cargs, silent));
 
-	return CastToValue(applier.apply_tv(as, _fname, args));
+	PythonEval* applier = get_evaluator_for_python(as);
+
+	return CastToValue(applier->apply_tv(as, _fname, args));
 }

@@ -167,7 +167,7 @@ class PythonEval : public GenericEval
          * Calls the Python function passed in `func`, passing it
          * the `varargs` as an argument, and returning a Handle.
          */
-        ValuePtr apply_v(AtomSpace * as, const std::string& func,
+        virtual ValuePtr apply_v(AtomSpace * as, const std::string& func,
                          Handle varargs);
 
         /**
@@ -214,6 +214,11 @@ void global_python_initialize();
  * Finalize Python. Call to cleanup memory used by Python interpreters.
  */
 void global_python_finalize();
+
+extern "C" {
+   // For shared-library loading
+   opencog::PythonEval* get_python_evaluator(opencog::AtomSpace*);
+};
 
 } /* namespace opencog */
 
