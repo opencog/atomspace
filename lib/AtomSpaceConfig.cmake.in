@@ -86,15 +86,6 @@ IF (persist-sql)
 	ADD_DEFINITIONS(-DHAVE_PERSIST_SQL)
 ENDIF (persist-sql)
 
-# zmqatoms is optional
-IF (zmqatoms)
-	set(ATOMSPACE_zmqatoms_LIBRARY zmqatoms)
-	SET(ATOMSPACE_LIBRARIES
-	    ${ATOMSPACE_LIBRARIES}
-	    ${ATOMSPACE_zmqatoms_LIBRARY}
-	)
-ENDIF (zmqatoms)
-
 set(ATOMSPACE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_VERSION "@SEMANTIC_VERSION@")
