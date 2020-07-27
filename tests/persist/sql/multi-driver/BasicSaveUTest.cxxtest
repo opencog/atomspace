@@ -273,6 +273,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     // Store the atom ...
     store->storeAtom(h, true);
+    store->barrier();
 
     // Fetch it back ...
     std::string nam = id + "someNode";
@@ -292,6 +293,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     Handle l(createLink(hvec, LIST_LINK));
     store->storeAtom(l->get_handle(), true);
+    store->barrier();
 
     Handle hl = store->getLink(LIST_LINK, hvec);
     atomCompare(l, hl, "Single link save-restore");
@@ -429,6 +431,7 @@ void BasicSaveUTest::do_test_fresh_atom(void)
     Handle le(createLink(HandleSeq(), LIST_LINK));
     le->setTruthValue(SimpleTruthValue::createTV(0.1, 0.9));
     store->storeAtom(le, true);
+    store->barrier();
 
     // Now get them back.  Get empty after full.
     Handle hf(store->getLink(LIST_LINK, {ha, hb}));
@@ -480,6 +483,7 @@ void BasicSaveUTest::do_test_table()
     AtomTable *table2 = new AtomTable();
 
     store->loadAtomSpace(*table2);
+    store->barrier();
     // table2->print();
 
     idx = 0;

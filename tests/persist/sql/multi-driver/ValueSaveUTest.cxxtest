@@ -510,6 +510,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	// --------------------
 	// Fetch by type. This is what we are testing.
 	as->fetch_all_atoms_of_type(CONCEPT_NODE);
+	as->barrier();
 
 	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
@@ -670,6 +671,7 @@ void ValueSaveUTest::do_test_link_by_type()
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
 	as->fetch_all_atoms_of_type(LIST_LINK);
+	as->barrier();
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
@@ -882,6 +884,7 @@ void ValueSaveUTest::do_test_incoming()
 	as->fetch_incoming_set(gat, false);
 	as->fetch_incoming_set(gal, false);
 	as->fetch_incoming_set(gav, false);
+	as->barrier();
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
