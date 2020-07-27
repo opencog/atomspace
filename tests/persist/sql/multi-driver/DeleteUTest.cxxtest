@@ -439,7 +439,9 @@ void DeleteUTest::extract_links(int idx, AtomSpace *as)
 void DeleteUTest::delete_links(int idx, AtomSpace *as)
 {
 	as->remove_atom(hl3[idx]);
+	as->barrier();
 	as->remove_atom(hl2[idx]);
+	as->barrier();
 	as->remove_atom(hl[idx]);
 	as->barrier();
 }
