@@ -342,6 +342,7 @@ void DeleteUTest::fetch_space(int idx, AtomSpace *space)
     AtomPtr alb3 = createLink(hv3, hl3[idx]->get_type());
     Handle hlb3(alb3->get_handle());
     space->fetch_atom(hlb3);
+    space->barrier();
 }
 
 void DeleteUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
@@ -425,7 +426,7 @@ void DeleteUTest::check_empty(int idx, AtomSpace *space)
     TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
 }
 
-// This removes from atomspace, but not from the DB.
+// This removes from atomspace, but not from storage.
 void DeleteUTest::extract_links(int idx, AtomSpace *as)
 {
 	as->extract_atom(hl3[idx]);
@@ -433,25 +434,28 @@ void DeleteUTest::extract_links(int idx, AtomSpace *as)
 	as->extract_atom(hl[idx]);
 }
 
-// This should delete all the links from the database.
+// This should delete all the links from storage (and also
+// the AtomSpace)
 void DeleteUTest::delete_links(int idx, AtomSpace *as)
 {
 	as->remove_atom(hl3[idx]);
 	as->remove_atom(hl2[idx]);
 	as->remove_atom(hl[idx]);
+	as->barrier();
 }
 
 // This removes all the links, and one node, from atomspace,
-// but not from the DB.
+// but not from storage.
 void DeleteUTest::extract_nodes(int idx, AtomSpace *as)
 {
 	as->extract_atom(h1[idx], true);
 }
 
-// This should delete all the links and one node from the database.
+// This should delete all the links and one node from storage.
 void DeleteUTest::delete_nodes(int idx, AtomSpace *as)
 {
 	as->remove_atom(h3[idx], true);
+	as->barrier();
 }
 
 // ============================================================
@@ -508,7 +512,7 @@ void DeleteUTest::do_test_remove(void)
     for (i=0; i<idx; i++)
         check_space(i, _as, "verify-add");
 
-    /* Push all atoms out to the SQL DB */
+    /* Push all atoms out to storage */
     _as->store_atomspace();
 
     printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx);
