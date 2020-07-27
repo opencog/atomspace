@@ -29,6 +29,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <time.h>
 #include <atomic>
 #include <cstdio>
 #include <thread>
@@ -380,6 +381,7 @@ void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     as->store_atom(hl[idx]);
     as->store_atom(hl2[idx]);
     as->store_atom(hl3[idx]);
+    as->barrier();
 
     // printf("Added for idx=%d\n", idx);
     fflush(stdout);
@@ -422,6 +424,7 @@ void MultiUserUTest::fetch_space(int idx, AtomSpace *space)
     AtomPtr alb3 = createLink(hv3, hl3[idx]->get_type());
     Handle hlb3(alb3->get_handle());
     space->fetch_atom(hlb3);
+    space->barrier();
 }
 
 void MultiUserUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
@@ -494,8 +497,18 @@ void MultiUserUTest::run_user_test(int thread_id)
 
 	nstarted.fetch_add(1);
 
+	time_t start = time(0);
+
 	// Spin, until they are all started.
-	while (n_threads != nstarted.fetch_add(0)) std::this_thread::yield();
+	while (n_threads != nstarted.fetch_add(0))
+	{
+		usleep (50000);
+		time_t end = time(0);
+		if (10 < end - start) break;
+		std::this_thread::yield();
+	}
+	time_t end = time(0);
+	TSM_ASSERT("Took too long to connect", end - start < 10);
 
 	add_atoms(thread_id);
 	_pm[thread_id]->do_close(); // this will force a flush.
