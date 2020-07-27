@@ -237,6 +237,7 @@ void FetchUTest::test_stuff(void)
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
+	eval->eval("(barrier)");
 
 	// The above should NOT update the TV of (Concept "AAA")
 	TruthValuePtr tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
@@ -247,6 +248,7 @@ void FetchUTest::test_stuff(void)
 	// If we fetch the TV explicitly, then we should get the
 	// value from the database.
 	eval->eval(R"((fetch-atom (Concept "AAA")))");
+	eval->eval("(barrier)");
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
 	TS_ASSERT((*tv) == (*etv));
@@ -268,6 +270,7 @@ void FetchUTest::test_stuff(void)
 
 	// AAA should have been updated, as above.
 	eval->eval(R"((fetch-atom (Concept "AAA")))");
+	eval->eval("(barrier)");
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	etv = SimpleTruthValue::createTV(0.3, 0.33);
 	TS_ASSERT((*tv) == (*etv));
@@ -276,6 +279,7 @@ void FetchUTest::test_stuff(void)
 
 	// BBB should have been clobbered.
 	eval->eval(R"((fetch-atom (Concept "BBB")))");
+	eval->eval("(barrier)");
 	tv = eval->eval_tv(R"((cog-tv (Concept "BBB")))");
 	TS_ASSERT((*tv) == (*dtv));
 	printf("Expecting %s\n", dtv->to_string().c_str());
@@ -309,6 +313,7 @@ void FetchUTest::test_readonly(void)
 	// Despite the AtomSpace being readonly, we should still be
 	// able to load atoms from the database.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
+	eval->eval("(barrier)");
 	std::string prt = eval->eval("(cog-prt-atomspace)");
 	printf("Atomspace contents:\n%s\n", prt.c_str());
 	Handle a = eval->eval_h(R"((Concept "AAA"))");
@@ -344,6 +349,7 @@ void FetchUTest::test_readonly(void)
 
 	// And re-load them again.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
+	eval->eval("(barrier)");
 	TS_ASSERT(2 == _as->get_size());
 
 	TS_ASSERT(true == _as->get_read_only());
