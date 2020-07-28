@@ -1105,7 +1105,14 @@ static void return_to_pool(SchemeEval* ev)
 {
 	ev->clear_pending();
 	std::lock_guard<std::mutex> lock(pool_mtx);
-	pool.push(ev);
+
+	// try..catch is needed during library exit; the stack may
+	// already be gone. So just ignore the resulting exception.
+	// This should only happen during finalization.
+	try {
+		pool.push(ev);
+	}
+	catch (const concurrent_stack<SchemeEval*>::Canceled&) {}
 }
 
 /// Return evaluator, for this thread and atomspace combination.
