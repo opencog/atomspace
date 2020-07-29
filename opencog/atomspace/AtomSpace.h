@@ -376,9 +376,9 @@ public:
      * Any Values hanging off those Atoms are not transfered from the
      * remote server to the local AtomSpace.
      */
-    void fetch_query(const Handle& query, const Handle& key,
-                     const Handle& metadata_key = Handle::UNDEFINED,
-                     bool fresh = false);
+    ValuePtr fetch_query(const Handle& query, const Handle& key,
+                         const Handle& metadata_key = Handle::UNDEFINED,
+                         bool fresh = false);
 
     /**
      * Recursively store the atom to the backing store.

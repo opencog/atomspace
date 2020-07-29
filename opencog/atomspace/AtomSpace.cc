@@ -464,8 +464,8 @@ Handle AtomSpace::fetch_incoming_by_type(const Handle& h, Type t)
     return lh;
 }
 
-void AtomSpace::fetch_query(const Handle& query, const Handle& key,
-                            const Handle& metadata, bool fresh)
+ValuePtr AtomSpace::fetch_query(const Handle& query, const Handle& key,
+                                const Handle& metadata, bool fresh)
 {
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -475,15 +475,15 @@ void AtomSpace::fetch_query(const Handle& query, const Handle& key,
     // to just assume  that they are. Could save a few CPU cycles,
     // here, by trading efficiency for safety.
     Handle lkey = _atom_table.add(key);
-    Handle lh = _atom_table.add(h);
+    Handle lq = _atom_table.add(query);
     Handle lmeta = metadata;
     if (Handle::UNDEFINED != lmeta) lmeta = _atom_table.add(lmeta);
 
-    ValuePtr vp = _backing_store->runQuery(h, key, metadata, fresh);
+    ValuePtr vp = _backing_store->runQuery(lq, lkey, lmeta, fresh);
 
     // Update the value, even when the atomspace is marked read-only;
     // the atomspace is acting as a cache for the backingstore.
-    lh->setValue(lkey, vp);
+    lq->setValue(lkey, vp);
 
     return vp;
 }
