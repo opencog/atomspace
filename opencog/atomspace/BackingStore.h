@@ -120,7 +120,7 @@ class BackingStore
 		 * Store the value located at `key` on `atom` to the remote
 		 * server. If the `atom` does not yet exist on the remote
 		 * server, it is created there.  This method is more granular
-		 * than `StoreAtom` above, as it works with nonly one value,
+		 * than `StoreAtom` above, as it works with only one value,
 		 * instead of all of them.
 		 *
 		 * Note that Values can be deleted merely by having a null
@@ -132,10 +132,10 @@ class BackingStore
 		}
 
 		/**
-		 * Load the value located at `key` on `atom` from the remote
-		 * server into the local atomspace. If the remote server does
-		 * not have a value at `key`, then the local value (if any)
-		 * will be deleted.
+		 * Fetch the Value located at `key` on `atom` from the remote
+		 * server, and attach it to `key` on this `atom`.  If the remote
+		 * server does not have a value at `key`, then the local value
+		 * at `key` (if any) will be deleted.
 		 *
 		 * This method is more granular than getNode/getLink, as it
 		 * operates only on one particular key.
@@ -153,7 +153,19 @@ class BackingStore
 		 * Because MeetLinks and QueryLinks can be cpu-intensive, not
 		 * all backends will honor this request. (JoinLinks will be
 		 * honored, in general; they can be thought of as a generalized
-		 * incoming set, and are much faster to process.)
+		 * incoming set, and are much faster to process.) Backends are
+		 * free to return previously-cached results for the search,
+		 * rather than running a fresh search. If the flag `fresh` is
+		 * set to `true`, then the server may interpret this as a
+		 * request to perform a fresh search.  It is not required to
+		 * honor this request.
+		 *
+		 * If the `metadata_key` is provided, then metadata about the
+		 * search is returned. This may include a time-stamp indicating
+		 * when the search was last performed. If the search was refused,
+		 * a value indicating that will be returned.  The metadata is
+		 * intended to allow the receiver (i.e the user of this local
+		 * AtomSpace) what to do next.
 		 *
 		 * Note that the remote server may periodically purge search
 		 * results to save on storage usage. This is why the search
@@ -162,8 +174,22 @@ class BackingStore
 		 * Only the Atoms that were the result of the search are returned.
 		 * Any Values hanging off those Atoms are not transfered from the
 		 * remote server to the local AtomSpace.
+		 *
+		 * FYI Design Note: in principle, I suppose that we could have
+		 * this method run any atom that has an `execute()` method on
+		 * it. At this time, this is not allowed, for somewhat vague
+		 * and arbitrary reasons: (1) we do not want to DDOS the remove
+		 * server with heavy CPU processing demands (you can use the
+		 * cogserver directly, if you want to do that). We also want to
+		 * limit the amount of complexity that the remote server must
+		 * provide. For example, theres a slim chance that traditional
+		 * SQL ang GraphQL server might be able to support some of the
+		 * simpler queries.  If you want full-function hypergraph query,
+		 * just use the CogServer directly.
 		 */
-		virtual void runQuery(const Handle& query, const Handle& key)
+		virtual void runQuery(const Handle& query, const Handle& key,
+		                      Handle metadata_key = Handle::UNDEFINED,
+		                      bool fresh=false);
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
 		}
