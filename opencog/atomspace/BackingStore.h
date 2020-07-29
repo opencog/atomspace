@@ -1,9 +1,9 @@
 /*
  * opencog/atomspace/BackingStore.h
  *
- * Implements an interface class for storage providers.
+ * Implements an interface class for client-server communitcations.
  *
- * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -35,10 +35,15 @@ namespace opencog
  */
 
 /**
- * This class provides a simple, generic interface for dynamically
- * storing/retreiving atoms from disk or other remote location or
- * process. This class focuses on "on-demand" atom retreival,
- * rather than on bulk-save/restore.
+ * This class provides a simple, generic interface for communicating
+ * Atoms and Values between the local and a remote server (often, a
+ * storage or "persistance" server. The general model is that the local
+ * AtomSpace is not persistant (its in RAM, it disappears when the
+ * process exits), while the remote server may be persistant (if it is
+ * for example, and SQL server).
+ *
+ * This class focuses on "on-demand" atom retreival, rather than on
+ * bulk-save/restore.
  */
 class BackingStore
 {
@@ -101,27 +106,38 @@ class BackingStore
 		 * AtomTable. If a given Atom does not yet exist locally, then
 		 * all of the Values will also be fetched, and copied locally.
 		 * If a given Atom DOES exist locally, then NONE of the local
-		 * Values are updated! (This avoidsthe need to make complex
+		 * Values are updated! (This avoids the need to make complex
 		 * decisions about how to merge conflicting Values).
 		 */
 		virtual void loadType(AtomTable&, Type) = 0;
 
 		/**
-		 * Load *all* atoms.
+		 * Load *all* atoms from the remote server into this (local)
+		 * AtomTable.
 		 */
 		virtual void loadAtomSpace(AtomTable&) = 0;
 
 		/**
-		 * Store *all* atoms.
+		 * Store *all* atoms from this (local) AtomTable to the remote
+		 * server.
 		 */
 		virtual void storeAtomSpace(const AtomTable&) = 0;
 
 		/**
 		 * Read-write synchronization barrier.
+		 *
 		 * All writes will be completed before this routine returns.
 		 * This allows the backend to implement asynchronous writes,
-		 * while still providing some control to those who need it.
-		 * (Mostly the unit tests, at this time.)
+		 * while still providing some local control.
+		 *
+		 * Note that the callbacks above are NOT synchronizing:
+		 * the requested Atoms or Values might not show up until
+		 * after the callbacks return! (This depends on the
+		 * particular backend). The request operations above *will*
+		 * be completed by the time that the barrier returns.
+		 * Thus, this call may block for long periods of time,
+		 * depending on how much data was buffered up, and how slow
+		 * the network is.
 		 */
 		virtual void barrier() = 0;
 
