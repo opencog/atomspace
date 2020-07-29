@@ -5,6 +5,8 @@
 
 (define-module (opencog persist))
 
+(use-modules (ice-9 optargs)) ; for define*-public
+
 (use-modules (opencog))
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
@@ -160,7 +162,8 @@
 
 ;
 ; --------------------------------------------------------------------
-(define-public (fetch-query QUERY KEY METADATA FRESH)
+(define*-public (fetch-query QUERY KEY
+	#:optional (METADATA '()) (FRESH #f))
 "
  fetch-query QUERY KEY [METADATA [FRESH]]
 
@@ -222,7 +225,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (load-referers atom)
+(define-public (load-referers ATOM)
 "
  load-referers ATOM -- Load (from storage) all graphs that contain ATOM.
 
@@ -234,16 +237,16 @@
      `fetch-query` to perform a generalized query for holders of an Atom.
      `store-referers` to store all referers.
 "
-	(if (not (null? atom))
+	(if (not (null? ATOM))
 		; The fetch-incoming-set function for this is defined to perform
 		; a recursive fetch.
 		; We do an extra recursion here, in case we were passed a list.
 		(begin
-			(if (pair? atom)
-				(for-each load-referers atom)
-				(fetch-incoming-set atom)
+			(if (pair? ATOM)
+				(for-each load-referers ATOM)
+				(fetch-incoming-set ATOM)
 			)
-			(for-each load-referers (cog-incoming-set atom))
+			(for-each load-referers (cog-incoming-set ATOM))
 		)
 	)
 )
