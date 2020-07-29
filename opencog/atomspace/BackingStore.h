@@ -178,18 +178,18 @@ class BackingStore
 		 * FYI Design Note: in principle, I suppose that we could have
 		 * this method run any atom that has an `execute()` method on
 		 * it. At this time, this is not allowed, for somewhat vague
-		 * and arbitrary reasons: (1) we do not want to DDOS the remove
+		 * and arbitrary reasons: (1) we do not want to DDOS the remote
 		 * server with heavy CPU processing demands (you can use the
-		 * cogserver directly, if you want to do that). We also want to
-		 * limit the amount of complexity that the remote server must
-		 * provide. For example, theres a slim chance that traditional
-		 * SQL ang GraphQL server might be able to support some of the
+		 * CogServer directly, if you want to do that). We also want to
+		 * limit the amount of complexity that the server implementation
+		 * must provide. For example, there's a slim chance that traditional
+		 * SQL and GraphQL servers might be able to support some of the
 		 * simpler queries.  If you want full-function hypergraph query,
 		 * just use the CogServer directly.
 		 */
 		virtual void runQuery(const Handle& query, const Handle& key,
-		                      Handle metadata_key = Handle::UNDEFINED,
-		                      bool fresh=false);
+		                      const Handle& metadata_key = Handle::UNDEFINED,
+		                      bool fresh=false)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
 		}
