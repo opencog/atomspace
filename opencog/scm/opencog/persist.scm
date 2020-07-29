@@ -10,8 +10,18 @@
 (load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
 
 ; This avoids complaints, when the docs are set, below.
-(export fetch-atom fetch-incoming-set fetch-incoming-by-type
-store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
+(export
+	fetch-atom
+	fetch-value
+	fetch-incoming-set
+	fetch-incoming-by-type
+	fetch-query
+	store-atom
+	store-value
+	load-atoms-of-type
+	barrier
+	load-atomspace
+	store-atomspace)
 
 ;; -----------------------------------------------------
 ;;
@@ -20,9 +30,26 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
 "
  fetch-atom ATOM
 
-    Fetch all of the values on the indicated ATOM from storage.
+    Fetch all of the Values on the indicated ATOM from storage.
     This updates (clobbers) all of the values in the atomspace,
-    and replaces them with the ones fetched from the database.
+    and replaces them with the ones fetched from storage.
+
+    See also:
+       `fetch-value` to get only one Value.
+       `store-atom` to store all Values.
+")
+
+(set-procedure-property! fetch-value 'documentation
+"
+ fetch-value ATOM KEY
+
+    Fetch from storage the Value located at KEY on ATOM.
+    This updates (clobbers) any current Value stored at KEY,
+    replacing it with the one fetched from storage.
+
+    See also:
+       `fetch-atom` to get all Values.
+       `store-value` to store only one Value.
 ")
 
 (set-procedure-property! fetch-incoming-set 'documentation
@@ -52,7 +79,22 @@ store-atom load-atoms-of-type barrier load-atomspace store-atomspace)
     to storage. This updates (clobbers) the values previously held
     in storage, replacing them by the values in the atomspace.
 
-    See also: fetch-atom
+    See also:
+       `store-value` to store just one Value.
+       `fetch-atom` to fetch all Values on an Atom.
+")
+
+(set-procedure-property! store-value 'documentation
+"
+ store-value ATOM KEY
+
+    Store the Value located at KEY on ATOM. This updates (clobbers)
+    the Value previously held in storage, replacing it by the Value
+    in the atomspace.
+
+    See also:
+       `store-atom` to store all values on an Atom.
+       `fetch-value` to fetch just one Value.
 ")
 
 (set-procedure-property! load-atoms-of-type 'documentation
