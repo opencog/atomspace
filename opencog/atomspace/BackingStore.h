@@ -24,8 +24,7 @@
 #ifndef _OPENCOG_BACKING_STORE_H
 #define _OPENCOG_BACKING_STORE_H
 
-#include <set>
-
+#include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/Atom.h>
 
 namespace opencog
@@ -55,6 +54,9 @@ class BackingStore
 		 * if it exists; else return nullptr. The returned atom
 		 * will have all values attached to it, that the backing
 		 * store knows about.
+		 *
+		 * See also `loadValue()` below, which can fetch just one
+		 * single value.
 		 */
 		virtual Handle getLink(Type, const HandleSeq&) = 0;
 
@@ -63,6 +65,9 @@ class BackingStore
 		 * exists; else return nullptr. The returned atom will have
 		 * all values attached to it, that the backing store knows
 		 * about.
+		 *
+		 * See also `loadValue()` below, which can fetch just one
+		 * single value.
 		 */
 		virtual Handle getNode(Type, const char *) = 0;
 
@@ -71,6 +76,10 @@ class BackingStore
 		 * and put them into the AtomTable. All of the values attached
 		 * to each of the Atoms in the incoming set will be fetched
 		 * and the local copies will be updated.
+		 *
+		 * See also `runQuery()` below. A JoinLink can be thought of
+		 * as a generalized incoming set which can be tailored to
+		 * more precise needs.
 		 */
 		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
 
@@ -79,6 +88,10 @@ class BackingStore
 		 * the indicated Atom, and put them into the AtomTable. All of
 		 * the values attached to each of the Atoms in the incoming set
 		 * will be fetched as well, and the local copies updated.
+		 *
+		 * See also `runQuery()` below. A JoinLink can be thought of
+		 * as a generalized incoming set which can be tailored to
+		 * more precise needs.
 		 */
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
@@ -89,6 +102,8 @@ class BackingStore
 		 * If the `synchronous` flag is set, this method will not return
 		 * until the atom has actually been stored. (Not all backends will
 		 * respect this flag.)
+		 *
+		 * See also: `storeValue()` below.
 		 */
 		virtual void storeAtom(const Handle&, bool synchronous = false) = 0;
 
@@ -100,6 +115,58 @@ class BackingStore
 		 * be removed.
 		 */
 		virtual void removeAtom(const Handle&, bool recursive) = 0;
+
+		/**
+		 * Store the value located at `key` on `atom` to the remote
+		 * server. If the `atom` does not yet exist on the remote
+		 * server, it is created there.  This method is more granular
+		 * than `StoreAtom` above, as it works with nonly one value,
+		 * instead of all of them.
+		 *
+		 * Note that Values can be deleted merely by having a null
+		 * value hanging on that key.
+		 */
+		virtual void storeValue(const Handle& atom, const Handle& key)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
+		 * Load the value located at `key` on `atom` from the remote
+		 * server into the local atomspace. If the remote server does
+		 * not have a value at `key`, then the local value (if any)
+		 * will be deleted.
+		 *
+		 * This method is more granular than getNode/getLink, as it
+		 * operates only on one particular key.
+		 */
+		virtual void loadValue(const Handle& atom, const Handle& key)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
+		 * Run the `query` on the remote server, and place the query
+		 * results onto the `key`, both locally, and remotely.
+		 * The `query` must be either a JoinLink, MeetLink or QueryLink.
+		 *
+		 * Because MeetLinks and QueryLinks can be cpu-intensive, not
+		 * all backends will honor this request. (JoinLinks will be
+		 * honored, in general; they can be thought of as a generalized
+		 * incoming set, and are much faster to process.)
+		 *
+		 * Note that the remote server may periodically purge search
+		 * results to save on storage usage. This is why the search
+		 * results are returned and placed in the local space.
+		 *
+		 * Only the Atoms that were the result of the search are returned.
+		 * Any Values hanging off those Atoms are not transfered from the
+		 * remote server to the local AtomSpace.
+		 */
+		virtual void runQuery(const Handle& query, const Handle& key)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
 
 		/**
 		 * Fetch *all* Atoms of the given type, and place them into the
