@@ -145,9 +145,14 @@ class BackingStore
 		}
 
 		/**
-		 * Run the `query` on the remote server, and place the query
-		 * results onto the `key`, both locally, and remotely.
+		 * Run the `query` on the remote server, and return the results.
 		 * The `query` must be either a JoinLink, MeetLink or QueryLink.
+		 *
+		 * It is intended that remote servers will usually cache the
+		 * query results at `key`, and so future requests for the same
+		 * query may return the cached value, instead of running a fresh
+		 * query. This is not mandatory: remote servers do not have to
+		 * cache, nor do they have to perform the search.
 		 *
 		 * Because MeetLinks and QueryLinks can be cpu-intensive, not
 		 * all backends will honor this request. (JoinLinks will be
@@ -171,8 +176,8 @@ class BackingStore
 		 * results are returned and placed in the local space.
 		 *
 		 * Only the Atoms that were the result of the search are returned.
-		 * Any Values hanging off those Atoms are not transfered from the
-		 * remote server to the local AtomSpace.
+		 * Any Values hanging off those Atoms are not transferred from
+		 * the remote server to the local AtomSpace.
 		 *
 		 * FYI Design Note: in principle, I suppose that we could have
 		 * this method run any atom that has an `execute()` method on
@@ -186,11 +191,12 @@ class BackingStore
 		 * simpler queries.  If you want full-function hypergraph query,
 		 * just use the CogServer directly.
 		 */
-		virtual void runQuery(const Handle& query, const Handle& key,
-		                      const Handle& metadata_key = Handle::UNDEFINED,
-		                      bool fresh=false)
+		virtual ValuePtr runQuery(const Handle& query, const Handle& key,
+		                          const Handle& metadata_key = Handle::UNDEFINED,
+		                          bool fresh=false)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
+			return nullptr;
 		}
 
 		/**

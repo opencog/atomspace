@@ -333,7 +333,7 @@ public:
      * See also `fetch_query` which can be used with a JoinLink to
      * obtain a custom-tailored incoming set.
      */
-    Handle fetch_incoming_set(Handle, bool=false);
+    Handle fetch_incoming_set(const Handle&, bool=false);
 
     /**
      * Use the backing store to load the incoming set of the
@@ -344,7 +344,7 @@ public:
      * See also `fetch_query` which can be used with a JoinLink to
      * obtain a custom-tailored incoming set.
      */
-    Handle fetch_incoming_by_type(Handle, Type);
+    Handle fetch_incoming_by_type(const Handle&, Type);
 
     /**
      * Run the `query` on the remote server, and place the query
