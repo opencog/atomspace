@@ -133,16 +133,15 @@ class BackingStore
 
 		/**
 		 * Fetch the Value located at `key` on `atom` from the remote
-		 * server, and attach it to `key` on this `atom`.  If the remote
-		 * server does not have a value at `key`, then the local value
-		 * at `key` (if any) will be deleted.
+		 * server.
 		 *
 		 * This method is more granular than getNode/getLink, as it
 		 * operates only on one particular key.
 		 */
-		virtual void loadValue(const Handle& atom, const Handle& key)
+		virtual ValuePtr loadValue(const Handle& atom, const Handle& key)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
+			return nullptr;
 		}
 
 		/**

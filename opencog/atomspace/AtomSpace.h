@@ -292,7 +292,7 @@ public:
      * This method is more granular than `fetch_atom()`, as it
      * operates only on one particular key.
      */
-    void fetch_value(const Handle& atom, const Handle& key);
+    ValuePtr fetch_value(const Handle& atom, const Handle& key);
 
     /**
      * Use the backing store to load all atoms of the given atom type.

@@ -358,6 +358,17 @@ void AtomSpace::store_atom(const Handle& h)
     _backing_store->storeAtom(h);
 }
 
+void AtomSpace::store_value(const Handle& h, const Handle& key)
+{
+    if (nullptr == _backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    if (_read_only)
+        throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
+    _backing_store->storeValue(h, key);
+}
+
 Handle AtomSpace::fetch_atom(const Handle& h)
 {
     if (nullptr == _backing_store)
@@ -389,6 +400,21 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     if (_read_only) return Handle::UNDEFINED;
 
     return _atom_table.add(h);
+}
+
+ValuePtr AtomSpace::fetch_value(const Handle& h, const Handle& key)
+{
+    if (nullptr == _backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    ValuePtr vp = _backing_store->loadValue(h, key);
+
+    // Update the value, even when the atomspace is marked read-only;
+    // the atomspace is acting as a cache for the backingstore.
+    h->setValue(key, vp);
+
+    _atom_table.add(h);
+    return vp;
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
