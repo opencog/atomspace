@@ -201,7 +201,6 @@ protected:
 // V_II   -- SQLPersistSCM:do_set_hilo
 // V_S    -- cogutil logger setters
 //        -- SQLPersistSCM::do_open()
-//        -- ZMQPersistSCM::do_open()
 // V_V    -- SQLPersistSCM::do_close(), do_load(), do_store()
 //        -- WordSenseProcessor::run_wsd()
 //
