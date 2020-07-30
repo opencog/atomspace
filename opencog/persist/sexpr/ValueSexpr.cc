@@ -21,13 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Valuation.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "Sexpr.h"
 
@@ -51,13 +46,13 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	size_t totlen = stv.size();
 
 	// What kind of value is it?
-	size_t vos = stv.find(' ', ++pos);
+	size_t vos = stv.find_first_of(" \n\t", ++pos);
 	Type vtype = nameserver().getType(stv.substr(pos, vos));
 	if (NOTYPE == vtype)
 		throw SyntaxException(TRACE_INFO, "Unknown Value %s",
 			stv.substr(pos).c_str());
 
-	if (vtype == LINK_VALUE)
+	if (nameserver().isA(vtype, LINK_VALUE))
 	{
 		std::vector<ValuePtr> vv;
 		vos = stv.find('(', vos);
@@ -87,10 +82,10 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			throw SyntaxException(TRACE_INFO,
 				"Malformed LinkValue: %s", stv.substr(pos).c_str());
 		pos = done + 1;
-		return createLinkValue(vv);
+		return valueserver().create(vtype, vv);
 	}
 
-	if (vtype == FLOAT_VALUE)
+	if (nameserver().isA(vtype, FLOAT_VALUE))
 	{
 		std::vector<double> fv;
 		while (vos < totlen and stv[vos] != ')')
@@ -100,43 +95,12 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			vos += epos;
 		}
 		pos = vos + 1;
-		return createFloatValue(fv);
-	}
 
-	if (vtype == SIMPLE_TRUTH_VALUE)
-	{
-		size_t elen;
-		double strength = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double confidence = stod(stv.substr(vos), &elen);
-		vos += elen;
-		vos = stv.find(')', vos);
-		if (std::string::npos == vos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed SimpleTruthValue: %s", stv.substr(pos).c_str());
-		pos = vos + 1;
-		return ValueCast(createSimpleTruthValue(strength, confidence));
-	}
-
-	if (vtype == COUNT_TRUTH_VALUE)
-	{
-		size_t elen;
-		double strength = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double confidence = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double count = stod(stv.substr(vos), &elen);
-		vos += elen;
-		vos = stv.find(')', vos);
-		if (std::string::npos == vos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed CountTruthValue: %s", stv.substr(pos).c_str());
-		pos = vos + 1;
-		return ValueCast(createCountTruthValue(strength, confidence, count));
+		return valueserver().create(vtype, fv);
 	}
 
 	// XXX FIXME this mishandles escaped quotes
-	if (vtype == STRING_VALUE)
+	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		std::vector<std::string> sv;
 		size_t epos = stv.find(')', vos+1);
@@ -152,11 +116,11 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			vos = evos+1;
 		}
 		pos = epos + 1;
-		return createStringValue(sv);
+		return valueserver().create(vtype, sv);
 	}
 
-	throw SyntaxException(TRACE_INFO, "Unknown Value %s",
-		stv.substr(pos).c_str());
+	throw SyntaxException(TRACE_INFO, "Unsupported decode of Value %s",
+		stv.substr(pos, vos).c_str());
 }
 
 /* ================================================================== */
