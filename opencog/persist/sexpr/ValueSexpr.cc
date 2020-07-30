@@ -33,10 +33,14 @@ using namespace opencog;
 /**
  * Return a Value correspnding to the input string.
  * It is assumed the input string is encoded as a scheme string.
- * For example, `(FloatValue 1 2 3 4)`
+ * For example, `(FloatValue 1 2 3 4)` or more complex things:
+ * `(LinkValue (Concept "a") (FloatValue 1 2 3))`
  *
  * The `pos` should point at the open-paren of the value-string.
  * Upon return, `pos` is updated to point at the matching closing paren.
+ *
+ * It is currently assumed that there is no whitespace between the
+ * open-paren, and the string encoding the value.
  *
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.

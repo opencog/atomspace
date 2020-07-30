@@ -158,5 +158,11 @@ void FastLoadUTest::test_value()
     TS_ASSERT_EQUALS(lks[0]->get_type(), PREDICATE_NODE);
     TS_ASSERT_EQUALS(lks[1]->get_type(), LIST_LINK);
 
+    Handle lk = HandleCast(lks[1]);
+    TS_ASSERT_EQUALS(2, lk->get_arity());
+    HandleSeq oset = lk->getOutgoingSet();
+    TS_ASSERT_EQUALS(oset[0]->get_type(), CONCEPT_NODE);
+    TS_ASSERT_EQUALS(oset[1]->get_type(), CONCEPT_NODE);
+
     logger().info("END TEST: %s", __FUNCTION__);
 }
