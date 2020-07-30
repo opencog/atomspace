@@ -40,9 +40,12 @@ private:
 	void init(void);
 
 	Handle fetch_atom(Handle);
+	ValuePtr fetch_value(Handle, Handle);
 	Handle fetch_incoming_set(Handle);
 	Handle fetch_incoming_by_type(Handle, Type);
+	ValuePtr fetch_query(Handle, Handle, Handle, bool);
 	Handle store_atom(Handle);
+	void store_value(Handle, Handle);
 	void load_type(Type);
 	void load_atomspace(void);
 	void store_atomspace(void);
@@ -79,12 +82,18 @@ void PersistSCM::init(void)
 {
 	define_scheme_primitive("fetch-atom",
 	             &PersistSCM::fetch_atom, this, "persist");
+	define_scheme_primitive("fetch-value",
+	             &PersistSCM::fetch_value, this, "persist");
 	define_scheme_primitive("fetch-incoming-set",
 	             &PersistSCM::fetch_incoming_set, this, "persist");
 	define_scheme_primitive("fetch-incoming-by-type",
 	             &PersistSCM::fetch_incoming_by_type, this, "persist");
+	define_scheme_primitive("fetch-query-internal",
+	             &PersistSCM::fetch_query, this, "persist");
 	define_scheme_primitive("store-atom",
 	             &PersistSCM::store_atom, this, "persist");
+	define_scheme_primitive("store-value",
+	             &PersistSCM::store_value, this, "persist");
 	define_scheme_primitive("load-atoms-of-type",
 	             &PersistSCM::load_type, this, "persist");
 	define_scheme_primitive("load-atomspace",
@@ -104,6 +113,13 @@ Handle PersistSCM::fetch_atom(Handle h)
 	return h;
 }
 
+ValuePtr PersistSCM::fetch_value(Handle h, Handle key)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-value");
+	ValuePtr vp = as->fetch_value(h, key);
+	return vp;
+}
+
 Handle PersistSCM::fetch_incoming_set(Handle h)
 {
 	// The "false" flag here means that the fetch is NOT recursive.
@@ -119,6 +135,14 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
+ValuePtr PersistSCM::fetch_query(Handle query, Handle key,
+                                 Handle meta, bool fresh)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-query");
+	ValuePtr vp = as->fetch_query(query, key, meta, fresh);
+	return vp;
+}
+
 /**
  * Store the single atom to the backing store hanging off the
  * atom-space.
@@ -128,6 +152,12 @@ Handle PersistSCM::store_atom(Handle h)
 	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atom");
 	as->store_atom(h);
 	return h;
+}
+
+void PersistSCM::store_value(Handle h, Handle key)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("store-value");
+	as->store_value(h, key);
 }
 
 void PersistSCM::load_type(Type t)

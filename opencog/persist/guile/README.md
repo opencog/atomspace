@@ -13,16 +13,23 @@ The provided functions are:
 
 * `fetch-atom ATOM` --
       Get the current Values (including TruthValues) on `ATOM`.
+* `fetch-value ATOM KEY` --
+      Get the current Value on `ATOM` at `KEY`.
 * `fetch-incoming-set ATOM` --
       Get all of the Atoms that contain `ATOM`.
 * `fetch-incoming-by-type ATOM TYPE` --
       Get all Atoms of type TYPE that contain `ATOM`.
+* `fetch-query QUERY KEY META FRESH` --
+      Perform the `QUERY`, place results at `KEY` and metadata at `META`.
+      An earlier cached query may be returned unless `FRESH` is true.
 * `load-atoms-of-type TYPE` --
       Get all Atoms of type TYPE.
 * `load-atomspace` --
       Get all Atoms (in the peristant store).
 * `store-atom ATOM` --
-      Put the `ATOM` into the persistant store.
+      Put the `ATOM` and all attached Values into the persistant store.
+* `store-value ATOM KEY` --
+      Put the Value located at `KEY` on `ATOM` into the persistant store.
 * `store-atomspace` --
       Put all of the Atoms into the persistant store.
 * `barrier` --
