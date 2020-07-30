@@ -37,12 +37,18 @@ namespace opencog
  * This class provides a simple, generic interface for communicating
  * Atoms and Values between the local and a remote server (often, a
  * storage or "persistance" server. The general model is that the local
- * AtomSpace is not persistant (its in RAM, it disappears when the
+ * AtomSpace is not persistant (it's in RAM, it disappears when the
  * process exits), while the remote server may be persistant (if it is
- * for example, and SQL server).
+ * backed to a file or other long-term storage.).
  *
  * This class focuses on "on-demand" atom retreival, rather than on
  * bulk-save/restore.
+ *
+ * Most methods return `void`, so that they can run asynchronously.
+ * That is, there is no requirement that these methods have completed
+ * when they return. The only requirement is that all methods called
+ * before a call to `barrier()` must have completed by the time that
+ * `barrier()` returns.
  */
 class BackingStore
 {
@@ -133,19 +139,19 @@ class BackingStore
 
 		/**
 		 * Fetch the Value located at `key` on `atom` from the remote
-		 * server.
+		 * server, and place it on `key` on `atom` in this AtomSpace.
 		 *
 		 * This method is more granular than getNode/getLink, as it
 		 * operates only on one particular key.
 		 */
-		virtual ValuePtr loadValue(const Handle& atom, const Handle& key)
+		virtual void loadValue(const Handle& atom, const Handle& key)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
-			return nullptr;
 		}
 
 		/**
-		 * Run the `query` on the remote server, and return the results.
+		 * Run the `query` on the remote server, and place the results
+		 * at `key` on the Atom `query`, both locally, and remotely.
 		 * The `query` must be either a JoinLink, MeetLink or QueryLink.
 		 *
 		 * It is intended that remote servers will usually cache the
@@ -191,12 +197,11 @@ class BackingStore
 		 * simpler queries.  If you want full-function hypergraph query,
 		 * just use the CogServer directly.
 		 */
-		virtual ValuePtr runQuery(const Handle& query, const Handle& key,
-		                          const Handle& metadata_key = Handle::UNDEFINED,
-		                          bool fresh=false)
+		virtual void runQuery(const Handle& query, const Handle& key,
+		                      const Handle& metadata_key = Handle::UNDEFINED,
+		                      bool fresh=false)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
-			return nullptr;
 		}
 
 		/**

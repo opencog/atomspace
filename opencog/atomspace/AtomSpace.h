@@ -291,7 +291,7 @@ public:
      * This method is more granular than `fetch_atom()`, as it
      * operates only on one particular key.
      */
-    ValuePtr fetch_value(const Handle& atom, const Handle& key);
+    Handle fetch_value(const Handle& atom, const Handle& key);
 
     /**
      * Use the backing store to load all atoms of the given atom type.
@@ -375,9 +375,9 @@ public:
      * Any Values hanging off those Atoms are not transfered from the
      * remote server to the local AtomSpace.
      */
-    ValuePtr fetch_query(const Handle& query, const Handle& key,
-                         const Handle& metadata_key = Handle::UNDEFINED,
-                         bool fresh = false);
+    Handle fetch_query(const Handle& query, const Handle& key,
+                       const Handle& metadata_key = Handle::UNDEFINED,
+                       bool fresh = false);
 
     /**
      * Recursively store the atom to the backing store.
