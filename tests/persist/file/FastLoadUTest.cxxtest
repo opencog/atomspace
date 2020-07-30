@@ -145,7 +145,8 @@ void FastLoadUTest::test_value()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-    std::string in = R"((LinkValue\n(Predicate "is_a")(List (Concept "Earth") (Concept "Planet"))))";
+    std::string in = "(LinkValue\n(Predicate \"is_a\")(List "
+          "(Concept \"Earth\")\t (Concept \"Planet\")))";
 
     size_t pos = 0;
     ValuePtr vp = Sexpr::decode_value(in, pos);

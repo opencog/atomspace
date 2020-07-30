@@ -51,10 +51,10 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		throw SyntaxException(TRACE_INFO, "Badly formatted Value %s",
 			stv.substr(pos).c_str());
 
-	Type vtype = nameserver().getType(stv.substr(pos, vos-1));
+	Type vtype = nameserver().getType(stv.substr(pos, vos-pos));
 	if (NOTYPE == vtype)
 		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
-			stv.substr(pos, vos-1).c_str());
+			stv.substr(pos, vos-pos).c_str());
 
 	if (nameserver().isA(vtype, LINK_VALUE))
 	{
@@ -124,7 +124,7 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	}
 
 	throw SyntaxException(TRACE_INFO, "Unsupported decode of Value %s",
-		stv.substr(pos, vos).c_str());
+		stv.substr(pos, vos-pos).c_str());
 }
 
 /* ================================================================== */
