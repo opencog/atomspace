@@ -36,7 +36,7 @@ class Sexpr
 {
 public:
 	/// Decode the s-expression containing an atom, starting at
-	/// location `pos`. Return the Atom, and upate `pos` to point
+	/// location `pos`. Return the Atom, and update `pos` to point
 	/// just past the end of the trailing parenthesis.
 	static Handle decode_atom(const std::string& s, size_t& pos)
 	{

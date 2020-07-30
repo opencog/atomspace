@@ -46,6 +46,7 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	size_t totlen = stv.size();
 
 	// What kind of value is it?
+	// Increment pos by one to point just after the open-paren.
 	size_t vos = stv.find_first_of(" \n\t", ++pos);
 	if (std::string::npos == vos)
 		throw SyntaxException(TRACE_INFO, "Badly formatted Value %s",
@@ -55,6 +56,12 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	if (NOTYPE == vtype)
 		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
 			stv.substr(pos, vos-pos).c_str());
+
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// Decrement pos by one to point at the open-paren.
+		return decode_atom(stv, --pos);
+	}
 
 	if (nameserver().isA(vtype, LINK_VALUE))
 	{
