@@ -47,10 +47,14 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 	// What kind of value is it?
 	size_t vos = stv.find_first_of(" \n\t", ++pos);
-	Type vtype = nameserver().getType(stv.substr(pos, vos));
-	if (NOTYPE == vtype)
-		throw SyntaxException(TRACE_INFO, "Unknown Value %s",
+	if (std::string::npos == vos)
+		throw SyntaxException(TRACE_INFO, "Badly formatted Value %s",
 			stv.substr(pos).c_str());
+
+	Type vtype = nameserver().getType(stv.substr(pos, vos-1));
+	if (NOTYPE == vtype)
+		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
+			stv.substr(pos, vos-1).c_str());
 
 	if (nameserver().isA(vtype, LINK_VALUE))
 	{
