@@ -43,10 +43,6 @@ using namespace opencog;
  * The `pos` should point at the open-paren of the value-string.
  * Upon return, `pos` is updated to point at the matching closing paren.
  *
- * XXX FIXME! This is borken for any Value that is not one of the
- * top-four. It needs to be re-written to consult the nameserver
- * to find the atom-type, and then decode based on the atom-type.
- *
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
  */
@@ -54,10 +50,15 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
-#define LV "(LinkValue"
-	if (0 == stv.compare(pos, sizeof(LV)-1, LV))
+	// What kind of value is it?
+	size_t vos = stv.find(' ', ++pos);
+	Type vtype = nameserver().getType(stv.substr(pos, vos));
+	if (NOTYPE == vtype)
+		throw SyntaxException(TRACE_INFO, "Unknown Value %s",
+			stv.substr(pos).c_str());
+
+	if (vtype == LINK_VALUE)
 	{
-		size_t vos = pos + sizeof(LV)-1;
 		std::vector<ValuePtr> vv;
 		vos = stv.find('(', vos);
 		size_t epos = vos;
@@ -89,10 +90,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return createLinkValue(vv);
 	}
 
-#define FV "(FloatValue"
-	if (0 == stv.compare(pos, sizeof(FV)-1, FV))
+	if (vtype == FLOAT_VALUE)
 	{
-		size_t vos = pos + sizeof(FV)-1;
 		std::vector<double> fv;
 		while (vos < totlen and stv[vos] != ')')
 		{
@@ -104,16 +103,7 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return createFloatValue(fv);
 	}
 
-#define TVL "(SimpleTruthValue "
-#define TVS "(stv "
-	size_t vos = std::string::npos;
-	if (0 == stv.compare(pos, sizeof(TVL)-1, TVL))
-		vos = pos + sizeof(TVL) - 1;
-	else
-	if (0 == stv.compare(pos, sizeof(TVS)-1, TVS))
-		vos = pos + sizeof(TVS) - 1;
-
-	if (std::string::npos != vos)
+	if (vtype == SIMPLE_TRUTH_VALUE)
 	{
 		size_t elen;
 		double strength = stod(stv.substr(vos), &elen);
@@ -128,10 +118,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return ValueCast(createSimpleTruthValue(strength, confidence));
 	}
 
-#define CTV "(CountTruthValue "
-	if (0 == stv.compare(pos, sizeof(CTV)-1, CTV))
+	if (vtype == COUNT_TRUTH_VALUE)
 	{
-		size_t vos = pos + sizeof(CTV) - 1;
 		size_t elen;
 		double strength = stod(stv.substr(vos), &elen);
 		vos += elen;
@@ -148,10 +136,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	}
 
 	// XXX FIXME this mishandles escaped quotes
-#define SV "(StringValue"
-	if (0 == stv.compare(pos, sizeof(SV)-1, SV))
+	if (vtype == STRING_VALUE)
 	{
-		size_t vos = pos + sizeof(SV) - 1;
 		std::vector<std::string> sv;
 		size_t epos = stv.find(')', vos+1);
 		if (std::string::npos == epos)
