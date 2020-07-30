@@ -465,8 +465,14 @@ Handle AtomSpace::fetch_query(const Handle& query, const Handle& key,
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
+    // At this time, we restrict queries to be ... queries.
+    Type qt = query->get_type();
+    if (not nameserver().isA(qt, JOIN_LINK) and
+        not nameserver().isA(qt, PATTERN_LINK))
+        throw RuntimeException(TRACE_INFO, "Not a Join or Meet!");
+
     // Make sure we are working with Atoms in this Atomspace.
-    // Not clear if we really have to do this, or if its enough
+    // Not clear if we really have to do this, or if it's enough
     // to just assume  that they are. Could save a few CPU cycles,
     // here, by trading efficiency for safety.
     Handle lkey = _atom_table.add(key);
