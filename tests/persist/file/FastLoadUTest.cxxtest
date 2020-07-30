@@ -47,6 +47,7 @@ public:
     void test_dense_parse();
     void test_dense_loop();
     void test_value();
+    void test_value_mix();
 };
 
 // Test parseExpression
@@ -163,6 +164,32 @@ void FastLoadUTest::test_value()
     HandleSeq oset = lk->getOutgoingSet();
     TS_ASSERT_EQUALS(oset[0]->get_type(), CONCEPT_NODE);
     TS_ASSERT_EQUALS(oset[1]->get_type(), CONCEPT_NODE);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FastLoadUTest::test_value_mix()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = "(LinkValue\n(Type 'Number)"
+          "(FloatValue 1596144865))";
+
+    size_t pos = 0;
+    ValuePtr vp = Sexpr::decode_value(in, pos);
+
+    TS_ASSERT_EQUALS(vp->get_type(), LINK_VALUE);
+
+    const std::vector<ValuePtr>& lks = LinkValueCast(vp)->value();
+    TS_ASSERT_EQUALS(2, lks.size());
+    TS_ASSERT_EQUALS(lks[0]->get_type(), TYPE_NODE);
+    TS_ASSERT_EQUALS(lks[1]->get_type(), FLOAT_VALUE);
+
+    Handle lk = HandleCast(lks[0]);
+    TS_ASSERT_EQUALS("Number", lk->get_name());
+
+    FloatValuePtr fvp = FloatValueCast(lks[1]);
+    TS_ASSERT_EQUALS(fvp->value().size(), 1);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
