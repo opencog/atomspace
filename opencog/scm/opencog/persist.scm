@@ -200,7 +200,9 @@
      `fetch-incoming-set` to fetch the incoing set of an Atom.
      `load-referers` to fetch all graphs containing an Atom.
 "
-   (fetch-query-internal QUERY KEY METADATA FRESH)
+	(if (nil? METADATA)
+		(fetch-query-2args QUERY KEY)
+		(fetch-query-4args QUERY KEY METADATA FRESH))
 )
 
 ; --------------------------------------------------------------------

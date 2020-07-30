@@ -43,7 +43,8 @@ private:
 	Handle fetch_value(Handle, Handle);
 	Handle fetch_incoming_set(Handle);
 	Handle fetch_incoming_by_type(Handle, Type);
-	Handle fetch_query(Handle, Handle, Handle, bool);
+	Handle fetch_query2(Handle, Handle);
+	Handle fetch_query4(Handle, Handle, Handle, bool);
 	Handle store_atom(Handle);
 	void store_value(Handle, Handle);
 	void load_type(Type);
@@ -88,8 +89,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::fetch_incoming_set, this, "persist");
 	define_scheme_primitive("fetch-incoming-by-type",
 	             &PersistSCM::fetch_incoming_by_type, this, "persist");
-	define_scheme_primitive("fetch-query-internal",
-	             &PersistSCM::fetch_query, this, "persist");
+	define_scheme_primitive("fetch-query-2args",
+	             &PersistSCM::fetch_query2, this, "persist");
+	define_scheme_primitive("fetch-query-4args",
+	             &PersistSCM::fetch_query4, this, "persist");
 	define_scheme_primitive("store-atom",
 	             &PersistSCM::store_atom, this, "persist");
 	define_scheme_primitive("store-value",
@@ -131,8 +134,14 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return as->fetch_incoming_by_type(h, t);
 }
 
-Handle PersistSCM::fetch_query(Handle query, Handle key,
-                               Handle meta, bool fresh)
+Handle PersistSCM::fetch_query2(Handle query, Handle key)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-query");
+	return as->fetch_query(query, key, Handle::UNDEFINED, false);
+}
+
+Handle PersistSCM::fetch_query4(Handle query, Handle key,
+                                Handle meta, bool fresh)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-query");
 	return as->fetch_query(query, key, meta, fresh);
