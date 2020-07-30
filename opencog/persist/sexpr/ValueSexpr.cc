@@ -40,6 +40,13 @@ using namespace opencog;
  * It is assumed the input string is encoded as a scheme string.
  * For example, `(FloatValue 1 2 3 4)`
  *
+ * The `pos` should point at the open-paren of the value-string.
+ * Upon return, `pos` is updated to point at the matching closing paren.
+ *
+ * XXX FIXME! This is borken for any Value that is not one of the
+ * top-four. It needs to be re-written to consult the nameserver
+ * to find the atom-type, and then decode based on the atom-type.
+ *
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
  */
