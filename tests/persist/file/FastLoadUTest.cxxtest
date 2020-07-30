@@ -48,6 +48,7 @@ public:
     void test_dense_loop();
     void test_value();
     void test_value_mix();
+    void test_null_value();
 };
 
 // Test parseExpression
@@ -190,6 +191,32 @@ void FastLoadUTest::test_value_mix()
 
     FloatValuePtr fvp = FloatValueCast(lks[1]);
     TS_ASSERT_EQUALS(fvp->value().size(), 1);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void FastLoadUTest::test_null_value()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = "#f)) (Concept \"foo\")";
+
+    // No exceptions should be thrown, there should be no errors.
+    size_t pos = 0;
+    ValuePtr vp = Sexpr::decode_value(in, pos);
+
+    TS_ASSERT_EQUALS(vp, nullptr);
+    TS_ASSERT_EQUALS(pos, 2);
+
+    // -------------
+    in = "#f";
+
+    // No exceptions should be thrown, there should be no errors.
+    pos = 0;
+    vp = Sexpr::decode_value(in, pos);
+
+    TS_ASSERT_EQUALS(vp, nullptr);
+    TS_ASSERT_EQUALS(pos, 2);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
