@@ -21,13 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Valuation.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include "Sexpr.h"
 
@@ -38,14 +33,14 @@ using namespace opencog;
 /**
  * Return a Value correspnding to the input string.
  * It is assumed the input string is encoded as a scheme string.
- * For example, `(FloatValue 1 2 3 4)`
+ * For example, `(FloatValue 1 2 3 4)` or more complex things:
+ * `(LinkValue (Concept "a") (FloatValue 1 2 3))`
  *
  * The `pos` should point at the open-paren of the value-string.
  * Upon return, `pos` is updated to point at the matching closing paren.
  *
- * XXX FIXME! This is borken for any Value that is not one of the
- * top-four. It needs to be re-written to consult the nameserver
- * to find the atom-type, and then decode based on the atom-type.
+ * It is currently assumed that there is no whitespace between the
+ * open-paren, and the string encoding the value.
  *
  * XXX FIXME This needs to be fuzzed; it is very likely to crash
  * and/or contain bugs if it is given strings of unexpected formats.
@@ -54,10 +49,26 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
-#define LV "(LinkValue"
-	if (0 == stv.compare(pos, sizeof(LV)-1, LV))
+	// What kind of value is it?
+	// Increment pos by one to point just after the open-paren.
+	size_t vos = stv.find_first_of(" \n\t", ++pos);
+	if (std::string::npos == vos)
+		throw SyntaxException(TRACE_INFO, "Badly formatted Value %s",
+			stv.substr(pos).c_str());
+
+	Type vtype = nameserver().getType(stv.substr(pos, vos-pos));
+	if (NOTYPE == vtype)
+		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
+			stv.substr(pos, vos-pos).c_str());
+
+	if (nameserver().isA(vtype, ATOM))
 	{
-		size_t vos = pos + sizeof(LV)-1;
+		// Decrement pos by one to point at the open-paren.
+		return decode_atom(stv, --pos);
+	}
+
+	if (nameserver().isA(vtype, LINK_VALUE))
+	{
 		std::vector<ValuePtr> vv;
 		vos = stv.find('(', vos);
 		size_t epos = vos;
@@ -86,13 +97,11 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			throw SyntaxException(TRACE_INFO,
 				"Malformed LinkValue: %s", stv.substr(pos).c_str());
 		pos = done + 1;
-		return createLinkValue(vv);
+		return valueserver().create(vtype, vv);
 	}
 
-#define FV "(FloatValue"
-	if (0 == stv.compare(pos, sizeof(FV)-1, FV))
+	if (nameserver().isA(vtype, FLOAT_VALUE))
 	{
-		size_t vos = pos + sizeof(FV)-1;
 		std::vector<double> fv;
 		while (vos < totlen and stv[vos] != ')')
 		{
@@ -101,57 +110,13 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			vos += epos;
 		}
 		pos = vos + 1;
-		return createFloatValue(fv);
-	}
 
-#define TVL "(SimpleTruthValue "
-#define TVS "(stv "
-	size_t vos = std::string::npos;
-	if (0 == stv.compare(pos, sizeof(TVL)-1, TVL))
-		vos = pos + sizeof(TVL) - 1;
-	else
-	if (0 == stv.compare(pos, sizeof(TVS)-1, TVS))
-		vos = pos + sizeof(TVS) - 1;
-
-	if (std::string::npos != vos)
-	{
-		size_t elen;
-		double strength = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double confidence = stod(stv.substr(vos), &elen);
-		vos += elen;
-		vos = stv.find(')', vos);
-		if (std::string::npos == vos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed SimpleTruthValue: %s", stv.substr(pos).c_str());
-		pos = vos + 1;
-		return ValueCast(createSimpleTruthValue(strength, confidence));
-	}
-
-#define CTV "(CountTruthValue "
-	if (0 == stv.compare(pos, sizeof(CTV)-1, CTV))
-	{
-		size_t vos = pos + sizeof(CTV) - 1;
-		size_t elen;
-		double strength = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double confidence = stod(stv.substr(vos), &elen);
-		vos += elen;
-		double count = stod(stv.substr(vos), &elen);
-		vos += elen;
-		vos = stv.find(')', vos);
-		if (std::string::npos == vos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed CountTruthValue: %s", stv.substr(pos).c_str());
-		pos = vos + 1;
-		return ValueCast(createCountTruthValue(strength, confidence, count));
+		return valueserver().create(vtype, fv);
 	}
 
 	// XXX FIXME this mishandles escaped quotes
-#define SV "(StringValue"
-	if (0 == stv.compare(pos, sizeof(SV)-1, SV))
+	if (nameserver().isA(vtype, STRING_VALUE))
 	{
-		size_t vos = pos + sizeof(SV) - 1;
 		std::vector<std::string> sv;
 		size_t epos = stv.find(')', vos+1);
 		if (std::string::npos == epos)
@@ -166,11 +131,11 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			vos = evos+1;
 		}
 		pos = epos + 1;
-		return createStringValue(sv);
+		return valueserver().create(vtype, sv);
 	}
 
-	throw SyntaxException(TRACE_INFO, "Unknown Value %s",
-		stv.substr(pos).c_str());
+	throw SyntaxException(TRACE_INFO, "Unsupported decode of Value %s",
+		stv.substr(pos, vos-pos).c_str());
 }
 
 /* ================================================================== */
