@@ -49,6 +49,20 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
+	// Special-case: Both #f and '() are used to denote "no value".
+	// This is commonly used to erase keys from atoms. So handle this
+	// first.
+	if (0 == stv.compare(pos, 2, "#f"))
+	{
+		pos += 2;
+		return nullptr;
+	}
+	if (0 == stv.compare(pos, 3, "'()"))
+	{
+		pos += 3;
+		return nullptr;
+	}
+
 	// What kind of value is it?
 	// Increment pos by one to point just after the open-paren.
 	size_t vos = stv.find_first_of(" \n\t", ++pos);
@@ -198,6 +212,9 @@ std::string Sexpr::encode_atom(const Handle& h)
 /// Convert value (or Atom) into a string.
 std::string Sexpr::encode_value(const ValuePtr& v)
 {
+	// Empty values are used to erase keys from atoms.
+	if (nullptr == v) return " #f";
+
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{
 		// The FloatValue to_string() print prints out a high-precision
