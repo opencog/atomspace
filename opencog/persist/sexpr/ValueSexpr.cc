@@ -22,7 +22,8 @@
  */
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/ValueFactory.h>
-#include <opencog/atoms/base/Valuation.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
 
@@ -162,6 +163,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
  */
 void Sexpr::decode_alist(Handle& atom, const std::string& alist)
 {
+	AtomSpace* as = atom->getAtomSpace();
+
 	// Skip over opening paren
 	size_t pos = 1;
 	size_t totlen = alist.size();
@@ -173,6 +176,12 @@ void Sexpr::decode_alist(Handle& atom, const std::string& alist)
 		pos = alist.find(" . ", pos);
 		pos += 3;
 		ValuePtr val(decode_value(alist, pos));
+		if (as)
+		{
+			// Make sure all atoms have found a nice home.
+			key = as->add_atom(key);
+			val = add_atoms(as, val);
+		}
 		atom->setValue(key, val);
 		pos = alist.find('(', pos);
 	}
@@ -244,6 +253,27 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	}
 	rv << ")";
 	return rv.str();
+}
+
+/* ================================================================== */
+
+/// Make sure that any Atoms appearing buried in the value have found
+/// a nice home to live in.
+ValuePtr Sexpr::add_atoms(AtomSpace* as, const ValuePtr& vptr)
+{
+	Type t = vptr->get_type();
+	if (nameserver().isA(t, ATOM))
+		return as->add_atom(HandleCast(vptr));
+
+	if (nameserver().isA(t, LINK_VALUE))
+	{
+		std::vector<ValuePtr> vvec;
+		for (const ValuePtr& v : LinkValueCast(vptr)->value())
+			vvec.push_back(add_atoms(as, v));
+
+		return valueserver().create(t, vvec);
+	}
+	return vptr;
 }
 
 /* ============================= END OF FILE ================= */

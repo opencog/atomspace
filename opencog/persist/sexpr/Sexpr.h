@@ -61,7 +61,10 @@ public:
 	static Handle decode_atom(const std::string& s,
                              size_t l, size_t r, size_t line_cnt);
 
+	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
 
+	// -------------------------------------------
+	// Encoding functions
 	static std::string encode_atom(const Handle&);
 	static std::string encode_value(const ValuePtr&);
 	static std::string encode_atom_values(const Handle&);
