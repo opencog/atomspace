@@ -149,14 +149,15 @@ std::string Commands::interpret_command(AtomSpace* as,
 			HandleSeq outgoing;
 			size_t l = nos+1;
 			size_t r = cmd.size();
-			do {
+			while (l < r and ')' != cmd[l])
+			{
 				size_t l1 = l;
 				size_t r1 = r;
 				Sexpr::get_next_expr(cmd, l1, r1, 0);
 				if (l1 == r1) break;
 				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
 				l = r1 + 1;
-			} while (l < r and ')' != cmd[l]);
+			}
 			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()\n";
