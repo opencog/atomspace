@@ -45,11 +45,21 @@ SexprEval::~SexprEval()
  */
 void SexprEval::eval_expr(const std::string &expr)
 {
+	try {
+		_answer = Commands::interpret_command(_atomspace, expr);
+	}
+	catch (const StandardException& ex)
+	{
+		_error_string = ex.what();
+		_caught_error = true;
+	}
 }
 
 std::string SexprEval::poll_result()
 {
-	return _answer;
+	std::string ret;
+	ret.swap(_answer);
+	return ret;
 }
 
 
@@ -65,7 +75,8 @@ void SexprEval::begin_eval()
  */
 void SexprEval::interrupt(void)
 {
-	throw IOException(TRACE_INFO, "Caught interrupt!");
+	_caught_error = true;
+	_error_string = "Caught interrupt!";
 }
 
 SexprEval* SexprEval::get_evaluator(AtomSpace* as)
