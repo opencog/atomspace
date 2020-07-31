@@ -63,6 +63,7 @@ public:
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
+	virtual std::string to_short_string(const std::string& indent = "") const;
 
 	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const Value&) const;
