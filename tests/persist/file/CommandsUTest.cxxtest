@@ -22,6 +22,9 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include "opencog/persist/sexpr/Commands.h"
 
@@ -47,6 +50,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_set_tv();
 		void test_set_value();
 		void test_set_values();
+		void test_get_values();
 };
 
 // Test cog-node
@@ -175,6 +179,30 @@ void CommandsUTest::test_set_values()
 	vp = h->getValue(key);
 	TS_ASSERT(nullptr != vp);
 	TS_ASSERT_EQUALS(STRING_VALUE, vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-keys->alist
+void CommandsUTest::test_get_values()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = as->add_node(CONCEPT_NODE, "a");
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle fiz = as->add_node(PREDICATE_NODE, "fiz");
+	Handle buz = as->add_node(PREDICATE_NODE, "buz");
+
+	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
+	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
+	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
+
+	std::string in = "(cog-keys->alist (Concept \"a\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT(140 < out.size());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -105,9 +105,21 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incom == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-keys->alist
+	// (cog-keys->alist (Concept "foo"))
 	if (keys == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		h = as->add_atom(h);
+		std::string alist = "(";
+		for (const Handle& key : h->getKeys())
+		{
+			alist += "(" + Sexpr::encode_atom(key) + " . ";
+			alist += Sexpr::encode_value(h->getValue(key)) + ")";
+		}
+		alist += ")\n";
+		return alist;
+	}
 
 	// (cog-node 'Concept "foobar")
 	// (cog-link 'ListLink (Atom) (Atom) (Atom))
