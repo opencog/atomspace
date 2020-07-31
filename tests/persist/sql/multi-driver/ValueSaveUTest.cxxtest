@@ -512,6 +512,17 @@ void ValueSaveUTest::do_test_load_by_type()
 	as->fetch_all_atoms_of_type(CONCEPT_NODE);
 	as->barrier();
 
+	// Six: 4 ConceptNodes, the PredicateNode "*-TruthValueKey-*"
+	// and PredicateNode "some pred key" -- the two preds show up
+	// when the attached values are fetched.
+	TSM_ASSERT_EQUALS("Wrong number of Atoms fetched!", as->get_size(), 6);
+
+	printf("Got %lu Atoms\n", as->get_size());
+	HandleSet hset;
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h : hset)
+		printf("%s\n", h->to_string().c_str());
+
 	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
 	Handle gat = as->add_node(CONCEPT_NODE, "string node");
