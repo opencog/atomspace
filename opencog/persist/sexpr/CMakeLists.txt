@@ -19,6 +19,7 @@ INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	Commands.h
 	Sexpr.h
 	DESTINATION "include/opencog/persist/sexpr"
 )
