@@ -206,23 +206,22 @@ class BackingStore
 
 		/**
 		 * Fetch *all* Atoms of the given type, and place them into the
-		 * AtomTable. If a given Atom does not yet exist locally, then
-		 * all of the Values will also be fetched, and copied locally.
-		 * If a given Atom DOES exist locally, then NONE of the local
-		 * Values are updated! (This avoids the need to make complex
-		 * decisions about how to merge conflicting Values).
+		 * AtomTable. All of the associated Values are also be fetched,
+		 * and clobber any earlier values that might be present on
+		 * existing Atoms. Values on the outgoing set of Type are NOT
+		 * fetched!
 		 */
 		virtual void loadType(AtomTable&, Type) = 0;
 
 		/**
 		 * Load *all* atoms from the remote server into this (local)
-		 * AtomTable.
+		 * AtomTable. Also load all Values attached to the Atoms.
 		 */
 		virtual void loadAtomSpace(AtomTable&) = 0;
 
 		/**
 		 * Store *all* atoms from this (local) AtomTable to the remote
-		 * server.
+		 * server. This stores all Values as well.
 		 */
 		virtual void storeAtomSpace(const AtomTable&) = 0;
 
