@@ -46,6 +46,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_link();
 		void test_set_tv();
 		void test_set_value();
+		void test_set_values();
 };
 
 // Test cog-node
@@ -137,6 +138,43 @@ void CommandsUTest::test_set_value()
 	ValuePtr vp = h->getValue(key);
 	TS_ASSERT(nullptr != vp);
 	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-values!
+void CommandsUTest::test_set_values()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = "(cog-set-values! (Concept \"a\") (list "
+		"(cons (Predicate \"key\") (stv 0.6 0.8))"
+		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"
+		"(cons (Predicate \"buz\") (StringValue \"gee\" \"golly\"))))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(4, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+
+	key = as->add_node(PREDICATE_NODE, "fiz");
+	vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(FLOAT_VALUE, vp->get_type());
+
+	key = as->add_node(PREDICATE_NODE, "buz");
+	vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(STRING_VALUE, vp->get_type());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -53,7 +53,12 @@ public:
 	}
 
 	static ValuePtr decode_value(const std::string&, size_t&);
-	static void decode_alist(Handle&, const std::string&);
+	static void decode_slist(Handle&, const std::string&, size_t&);
+	static void decode_alist(Handle&, const std::string&, size_t&);
+	static void decode_alist(Handle& h, const std::string& s) {
+		size_t junk = 0;
+		decode_alist(h, s, junk);
+	}
 
 	// API more suitable to very long, file-driven I/O.
 	static int get_next_expr(const std::string&,

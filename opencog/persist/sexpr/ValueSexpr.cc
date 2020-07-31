@@ -172,12 +172,18 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
  * ((KEY . VALUE)(KEY2 . VALUE2)...)
  * Store the results as values on the atom.
  */
-void Sexpr::decode_alist(Handle& atom, const std::string& alist)
+void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
 {
 	AtomSpace* as = atom->getAtomSpace();
 
+	pos = alist.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos) return;
+	if ('(' != alist[pos])
+		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
+			alist.substr(pos).c_str());
+
 	// Skip over opening paren
-	size_t pos = 1;
+	pos++;
 	size_t totlen = alist.size();
 	pos = alist.find('(', pos);
 	while (std::string::npos != pos and pos < totlen)
@@ -195,6 +201,45 @@ void Sexpr::decode_alist(Handle& atom, const std::string& alist)
 		}
 		atom->setValue(key, val);
 		pos = alist.find('(', pos);
+	}
+}
+
+/* ================================================================== */
+
+/**
+ * Decode a Valuation association list.
+ * This list has the format
+ * (list (cons KEY VALUE)(cons KEY2 VALUE2)...)
+ * Store the results as values on the atom.
+ */
+void Sexpr::decode_slist(Handle& atom, const std::string& alist, size_t& pos)
+{
+	AtomSpace* as = atom->getAtomSpace();
+
+	pos = alist.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos) return;
+	if (alist.compare(pos, 5, "(list"))
+		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
+			alist.substr(pos).c_str());
+
+	size_t totlen = alist.size();
+	pos = alist.find("(cons ", pos);
+	while (std::string::npos != pos and pos < totlen)
+	{
+		pos += 5;
+		pos = alist.find_first_not_of(" \n\t", pos);
+		Handle key(decode_atom(alist, pos));
+		pos++;
+		pos = alist.find_first_not_of(" \n\t", pos);
+		ValuePtr val(decode_value(alist, pos));
+		if (as)
+		{
+			// Make sure all atoms have found a nice home.
+			key = as->add_atom(key);
+			val = add_atoms(as, val);
+		}
+		atom->setValue(key, val);
+		pos = alist.find("(cons ", pos);
 	}
 }
 

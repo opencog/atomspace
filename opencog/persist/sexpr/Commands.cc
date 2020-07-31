@@ -74,7 +74,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
-	//    cog-atomspace-clear
+	// (cog-atomspace-clear)
 	if (clear == act)
 	{
 		as->clear();
@@ -166,9 +166,17 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "()\n";
 	}
 
-	//    cog-set-values!
+	// (cog-set-values! (Concpet "foo")
+	//     (list (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as->add_atom(h);
+		pos++; // skip past close-paren
+		Sexpr::decode_slist(h, cmd, pos);
+		return "()\n";
+	}
 
 	// (cog-set-tv! (Concept "foo") (stv 1 0))
 	if (settv == act)
