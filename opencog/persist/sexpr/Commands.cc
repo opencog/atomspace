@@ -125,16 +125,24 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incty == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-incoming-set
+	// (cog-incoming-set (Concept "foo"))
 	if (incom == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		std::string alist = "(";
+		for (const Handle& hi : h->getIncomingSet())
+			alist += Sexpr::encode_atom(hi);
+
+		alist += ")\n";
+		return alist;
+	}
 
 	// (cog-keys->alist (Concept "foo"))
 	if (keys == act)
 	{
 		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos);
-		h = as->add_atom(h);
+		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
 		std::string alist = "(";
 		for (const Handle& key : h->getKeys())
 		{
