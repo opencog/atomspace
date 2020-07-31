@@ -183,8 +183,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (svals == act)
 	{
 		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos);
-		as->add_atom(h);
+		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
 		pos++; // skip past close-paren
 		Sexpr::decode_slist(h, cmd, pos);
 		return "()\n";
