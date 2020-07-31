@@ -53,23 +53,32 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
-	
+
 	// Find the command and dispatch
-	size_t pos = cmd.find_first_of(" \n\t", 1);
-	if (std::string::npos == pos)
-		throw SyntaxException(TRACE_INFO, "Not a command %s",
+	size_t pos = cmd.find_first_not_of(" \n\t");
+	if (std::string::npos == pos) return "";
+
+	// Ignore comments
+	if (';' == cmd[pos]) return "";
+
+	if ('(' != cmd[pos])
+		throw SyntaxException(TRACE_INFO, "Badly formed command: %s",
 			cmd.c_str());
 
-	size_t end = cmd.size();
+	pos ++; // Skip over the open-paren
 
-	size_t act = std::hash<std::string>{}(cmd.substr(1, pos-1));
-	pos++;
+	size_t epos = cmd.find_first_of(" \n\t", pos);
+	if (std::string::npos == epos)
+		throw SyntaxException(TRACE_INFO, "Not a command: %s",
+			cmd.c_str());
+
+	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
 	//    cog-atomspace-clear
 	if (clear == act)
 	{
 		as->clear();
-		return "#t";
+		return "#t\n";
 	}
 
 	//    cog-execute-cache!
@@ -104,6 +113,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// (cog-link 'ListLink (Atom) (Atom) (Atom))
 	if (node == act or link == act)
 	{
+		pos = epos + 1;
 		size_t nos = cmd.find_first_of(" \n\t", pos);
 		size_t sos = nos;
 		if ('\'' == cmd[pos]) pos++;
@@ -126,7 +136,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		{
 			HandleSeq outgoing;
 			size_t l = nos+1;
-			size_t r = end;
+			size_t r = cmd.size();
 			do {
 				size_t l1 = l;
 				size_t r1 = r;
@@ -137,26 +147,42 @@ std::string Commands::interpret_command(AtomSpace* as,
 			} while (l < r and ')' != cmd[l]);
 			h = as->get_link(t, std::move(outgoing));
 		}
-		if (nullptr == h) return "()";
+		if (nullptr == h) return "()\n";
 		return Sexpr::encode_atom(h);
 	}
 
-	//    cog-set-value!
+	// (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
 	if (stval == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle atom = Sexpr::decode_atom(cmd, pos);
+		atom = as->add_atom(atom);
+		Handle key = Sexpr::decode_atom(cmd, ++pos);
+		key = as->add_atom(key);
+		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+		if (vp)
+			vp = Sexpr::add_atoms(as, vp);
+		atom->setValue(key, vp);
+		return "()\n";
+	}
 
 	//    cog-set-values!
 	if (svals == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-set-tv!
+	// (cog-set-tv! (Concept "foo") (stv 1 0))
 	if (settv == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as->add_atom(h);
+		return "()\n";
+	}
 
 	//    cog-value
 	if (value == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
-		cmd.substr(1, pos-1).c_str());
+		cmd.substr(pos, epos-pos).c_str());
 }

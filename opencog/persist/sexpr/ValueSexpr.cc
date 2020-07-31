@@ -50,6 +50,9 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
 
+	// Skip past whitespace
+	pos = stv.find_first_not_of(" \n\t", pos);
+
 	// Special-case: Both #f and '() are used to denote "no value".
 	// This is commonly used to erase keys from atoms. So handle this
 	// first.
@@ -73,8 +76,16 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 	Type vtype = nameserver().getType(stv.substr(pos, vos-pos));
 	if (NOTYPE == vtype)
+	{
+		if (0 == stv.compare(pos, 3, "stv"))
+			vtype = SIMPLE_TRUTH_VALUE;
+		else
+		if (0 == stv.compare(pos, 3, "ctv"))
+			vtype = COUNT_TRUTH_VALUE;
+		else
 		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
 			stv.substr(pos, vos-pos).c_str());
+	}
 
 	if (nameserver().isA(vtype, ATOM))
 	{

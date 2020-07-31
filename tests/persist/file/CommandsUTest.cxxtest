@@ -44,6 +44,8 @@ class CommandsUTest : public CxxTest::TestSuite
 
 		void test_node();
 		void test_link();
+		void test_set_tv();
+		void test_set_value();
 };
 
 // Test cog-node
@@ -57,7 +59,7 @@ void CommandsUTest::test_node()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("()\n"));
 
 	as->add_node(CONCEPT_NODE, "foo");
 	out = Commands::interpret_command(as, in);
@@ -82,7 +84,7 @@ void CommandsUTest::test_link()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("()\n"));
 
 	as->add_link(LIST_LINK, ca, cb);
 
@@ -91,6 +93,50 @@ void CommandsUTest::test_link()
 	TS_ASSERT_EQUALS(3, as->get_size());
 	TS_ASSERT(0 == out.compare(
 		"(ListLink (ConceptNode \"a\")(ConceptNode \"b\"))"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-tv!
+void CommandsUTest::test_set_tv()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((cog-set-tv! (Concept "a") (stv 1 0)))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(1, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-value!
+void CommandsUTest::test_set_value()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in =
+		R"((cog-set-value! (Concept "a") (Predicate "key") (stv 0.6 0.8)))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
