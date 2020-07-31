@@ -24,6 +24,7 @@
 #define _OPENCOG_SEXPR_EVAL_H
 
 #include <string>
+#include <opencog/eval/GenericEval.h>
 
 /**
  * The SexprEval class implements a very simple API for s-exprssion
@@ -37,17 +38,24 @@ namespace opencog {
  *  @{
  */
 
+class AtomSpace;
 class SexprEval : public GenericEval
 {
+	private:
+		AtomSpace* _atomspace;
+		std::string _answer;
+
+		SexprEval(AtomSpace*);
 	public:
-		SexprEval(void) : GenericEval() {}
-		virtual ~SexprEval() {}
+		virtual ~SexprEval();
 
 		virtual void begin_eval(void);
 		virtual void eval_expr(const std::string&);
 		virtual std::string poll_result(void);
 
 		virtual void interrupt(void);
+
+		static SexprEval* get_evaluator(AtomSpace*);
 };
 
 /** @}*/
