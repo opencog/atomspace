@@ -39,7 +39,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pent the paren, post-pend the space.)
-	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear");
+	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
 	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
