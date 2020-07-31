@@ -93,9 +93,33 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (recur == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-get-atoms
+	// (cog-get-atoms 'Node #t)
 	if (gtatm == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		size_t nos = cmd.find_first_of(") \n\t", pos);
+		size_t sos = nos;
+		if ('\'' == cmd[pos]) pos++;
+		if ('"' == cmd[pos]) { pos++; sos--; }
+
+		Type t = nameserver().getType(cmd.substr(pos, sos-pos));
+		if (NOTYPE == t)
+			throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
+				cmd.substr(pos, sos-pos).c_str());
+
+		pos = cmd.find_first_not_of(") \n\t", nos);
+		bool get_subtypes = false;
+		if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
+			get_subtypes = true;
+
+		std::string rv = "(";
+		HandleSet hset;
+		as->get_handleset_by_type(hset, t, get_subtypes);
+		for (const Handle& h: hset)
+			rv += Sexpr::encode_atom(h);
+		rv += ")";
+		return rv;
+	}
 
 	//    cog-incoming-by-type
 	if (incty == act)
