@@ -1,0 +1,68 @@
+/*
+ * CommandsUTest.cxxtest
+ *
+ * Copyright (c) 2020 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include "opencog/persist/sexpr/Commands.h"
+
+using namespace opencog;
+
+class CommandsUTest : public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* as;
+
+	public:
+		CommandsUTest()
+		{
+			logger().set_print_to_stdout_flag(true);
+			as = new AtomSpace();
+		}
+
+		void setUp() { as->clear(); }
+		void tearDown() {}
+
+		void test_node();
+};
+
+// Test parseExpression
+void CommandsUTest::test_node()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((cog-node 'Concept "foo"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+ 
+	TS_ASSERT_EQUALS(0, as->get_size());
+	TS_ASSERT(0 == out.compare("()"));
+
+	as->add_node(CONCEPT_NODE, "foo");
+	out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(1, as->get_size());
+	TS_ASSERT(0 == out.compare("(ConceptNode \"foo\")"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

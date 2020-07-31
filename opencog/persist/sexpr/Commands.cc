@@ -26,6 +26,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "Commands.h"
 #include "Sexpr.h"
@@ -55,11 +56,15 @@ std::string Commands::interpret_command(AtomSpace* as,
 		throw SyntaxException(TRACE_INFO, "Not a command %s",
 			cmd.c_str());
 
-	size_t act = std::hash<std::string>{}(cmd.substr(1, pos));
+	size_t act = std::hash<std::string>{}(cmd.substr(1, pos-1));
+	pos++;
 
 	//    cog-atomspace-clear
 	if (clear == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		as->clear();
+		return "#t";
+	}
 
 	//    cog-execute-cache!
 	if (cache == act)
@@ -89,13 +94,30 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (keys == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-link
-	if (link == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	// (cog-node 'Concept "foobar")
+	// (cog-link 'ListLink (Atom) (Atom) (Atom))
+	if (node == act or link == act)
+	{
+		size_t nos = cmd.find_first_of(" \n\t", pos);
+		size_t sos = nos;
+		if ('\'' == cmd[pos]) pos++;
+		if ('"' == cmd[pos]) { pos++; sos--; }
 
-	//    cog-node
-	if (node == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+		Type t = nameserver().getType(cmd.substr(pos, sos-pos));
+		if (NOTYPE == t)
+			throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
+				cmd.substr(pos, sos-pos).c_str());
+
+		Handle h;
+		if (node == act)
+		{
+			pos = cmd.find('"', nos+1) + 1;
+			nos = cmd.find('"', pos);
+			h = as->get_node(t, cmd.substr(pos, nos-pos));
+		}
+		if (nullptr == h) return "()";
+		return Sexpr::encode_atom(h);
+	}
 
 	//    cog-set-value!
 	if (stval == act)
