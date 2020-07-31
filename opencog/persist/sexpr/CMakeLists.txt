@@ -2,6 +2,7 @@
 # Generic S-expression decoding.
 ADD_LIBRARY (sexpr
 	AtomSexpr
+	Commands
 	ValueSexpr
 )
 

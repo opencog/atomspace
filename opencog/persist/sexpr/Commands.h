@@ -62,7 +62,7 @@ public:
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
-	static std::string interpret_command(const std::string&);
+	static std::string interpret_command(AtomSpace*, const std::string&);
 };
 
 /** @}*/
