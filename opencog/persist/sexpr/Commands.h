@@ -24,13 +24,14 @@
 #define _COMMANDS_H
 
 #include <string>
-#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
 /** \addtogroup grp_persist
  *  @{
  */
+
+class AtomSpace;
 
 class Commands
 {
