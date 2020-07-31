@@ -36,6 +36,9 @@ using namespace opencog;
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
+	// Fast dispatch. There should be zero hash collisions
+	// here. If there are, we are in trouble. (Well, if there
+	// are collisions, pre-pent the paren, post-pend the space.)
 	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear");
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
@@ -51,10 +54,13 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
 	
+	// Find the command and dispatch
 	size_t pos = cmd.find_first_of(" \n\t", 1);
 	if (std::string::npos == pos)
 		throw SyntaxException(TRACE_INFO, "Not a command %s",
 			cmd.c_str());
+
+	size_t end = cmd.size();
 
 	size_t act = std::hash<std::string>{}(cmd.substr(1, pos-1));
 	pos++;
@@ -114,6 +120,22 @@ std::string Commands::interpret_command(AtomSpace* as,
 			pos = cmd.find('"', nos+1) + 1;
 			nos = cmd.find('"', pos);
 			h = as->get_node(t, cmd.substr(pos, nos-pos));
+		}
+		else
+		if (link == act)
+		{
+			HandleSeq outgoing;
+			size_t l = nos+1;
+			size_t r = end;
+			do {
+				size_t l1 = l;
+				size_t r1 = r;
+				Sexpr::get_next_expr(cmd, l1, r1, 0);
+				if (l1 == r1) break;
+				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
+				l = r1 + 1;
+			} while (l < r and ')' != cmd[l]);
+			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()";
 		return Sexpr::encode_atom(h);

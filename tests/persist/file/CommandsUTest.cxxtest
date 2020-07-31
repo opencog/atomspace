@@ -43,9 +43,10 @@ class CommandsUTest : public CxxTest::TestSuite
 		void tearDown() {}
 
 		void test_node();
+		void test_link();
 };
 
-// Test parseExpression
+// Test cog-node
 void CommandsUTest::test_node()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -54,7 +55,7 @@ void CommandsUTest::test_node()
 
 	std::string out = Commands::interpret_command(as, in);
 	printf("Got %s\n", out.c_str());
- 
+
 	TS_ASSERT_EQUALS(0, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
 
@@ -63,6 +64,33 @@ void CommandsUTest::test_node()
 	printf("Got >>%s<<\n", out.c_str());
 	TS_ASSERT_EQUALS(1, as->get_size());
 	TS_ASSERT(0 == out.compare("(ConceptNode \"foo\")"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-link
+void CommandsUTest::test_link()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle ca = as->add_node(CONCEPT_NODE, "a");
+	Handle cb = as->add_node(CONCEPT_NODE, "b");
+
+	std::string in = R"((cog-link 'List (Concept "a") (Concept "b")))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT(0 == out.compare("()"));
+
+	as->add_link(LIST_LINK, ca, cb);
+
+	out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(3, as->get_size());
+	TS_ASSERT(0 == out.compare(
+		"(ListLink (ConceptNode \"a\")(ConceptNode \"b\"))"));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
