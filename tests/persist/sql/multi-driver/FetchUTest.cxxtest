@@ -342,20 +342,20 @@ void FetchUTest::test_readonly(void)
 	TS_ASSERT((*tv) == (*etv));
 
 	// Should be possible to extract, even though its read-only
-	TS_ASSERT(2 == _as->get_size());
+	TS_ASSERT(3 == _as->get_size());
 	eval->eval(R"((cog-extract! (Concept "AAA")))");
 	eval->eval(R"((cog-extract! (Concept "BBB")))");
-	TS_ASSERT(0 == _as->get_size());
+	TS_ASSERT(1 == _as->get_size());
 
 	// And re-load them again.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
 	eval->eval("(barrier)");
-	TS_ASSERT(2 == _as->get_size());
+	TS_ASSERT(3 == _as->get_size());
 
 	TS_ASSERT(true == _as->get_read_only());
 	Handle d = _as->add_node(CONCEPT_NODE, "barfoo");
 	TS_ASSERT(d == nullptr);
-	TS_ASSERT(2 == _as->get_size());
+	TS_ASSERT(3 == _as->get_size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
