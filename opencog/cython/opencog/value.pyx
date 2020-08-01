@@ -66,6 +66,8 @@ cdef class Value:
         return self.get_c_value_ptr().get().to_short_string().decode('UTF-8')
 
     def __str__(self):
+        if self.is_atom():
+           return self.short_string()
         return self.long_string()
 
     def __repr__(self):
