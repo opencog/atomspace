@@ -109,17 +109,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (gtatm == act)
 	{
 		pos = epos + 1;
-		size_t nos = cmd.find_first_of(") \n\t", pos);
-		size_t sos = nos;
-		if ('\'' == cmd[pos]) pos++;
-		if ('"' == cmd[pos]) { pos++; sos--; }
+		Type t = Sexpr::decode_type(cmd, pos);
 
-		Type t = nameserver().getType(cmd.substr(pos, sos-pos));
-		if (NOTYPE == t)
-			throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
-				cmd.substr(pos, sos-pos).c_str());
-
-		pos = cmd.find_first_not_of(") \n\t", nos);
+		pos = cmd.find_first_not_of(") \n\t", pos);
 		bool get_subtypes = false;
 		if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
 			get_subtypes = true;
@@ -133,9 +125,20 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return rv;
 	}
 
-	//    cog-incoming-by-type
+	// (cog-incoming-by-type (Concept "foo") 'ListLink)
 	if (incty == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Type t = Sexpr::decode_type(cmd, pos);
+
+		std::string alist = "(";
+		for (const Handle& hi : h->getIncomingSetByType(t))
+			alist += Sexpr::encode_atom(hi);
+
+		alist += ")\n";
+		return alist;
+	}
 
 	// (cog-incoming-set (Concept "foo"))
 	if (incom == act)
@@ -170,28 +173,20 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (node == act or link == act)
 	{
 		pos = epos + 1;
-		size_t nos = cmd.find_first_of(" \n\t", pos);
-		size_t sos = nos;
-		if ('\'' == cmd[pos]) pos++;
-		if ('"' == cmd[pos]) { pos++; sos--; }
-
-		Type t = nameserver().getType(cmd.substr(pos, sos-pos));
-		if (NOTYPE == t)
-			throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
-				cmd.substr(pos, sos-pos).c_str());
+		Type t = Sexpr::decode_type(cmd, pos);
 
 		Handle h;
 		if (node == act)
 		{
-			pos = cmd.find('"', nos+1) + 1;
-			nos = cmd.find('"', pos);
+			pos = cmd.find('"', pos+1) + 1;
+			size_t nos = cmd.find('"', pos);
 			h = as->get_node(t, cmd.substr(pos, nos-pos));
 		}
 		else
 		if (link == act)
 		{
 			HandleSeq outgoing;
-			size_t l = nos+1;
+			size_t l = pos+1;
 			size_t r = cmd.size();
 			while (l < r and ')' != cmd[l])
 			{

@@ -30,9 +30,41 @@
 using namespace opencog;
 
 /* ================================================================== */
+/**
+ * Look for a type name, either of the form "ConceptNode" (wwith quotes)
+ * or 'ConceptNode (symbol) starting at location `pos` in `tna`.
+ * Return the type and update `pos` to point after the typename.
+ */
+Type Sexpr::decode_type(const std::string& tna, size_t& pos)
+{
+	// Advance past whitespace.
+	pos = tna.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad Type >>%s<<",
+			tna.substr(pos).c_str());
+
+	// Advance to next whitespace.
+	size_t nos = tna.find_first_of(") \n\t", pos);
+	if (std::string::npos == nos)
+		nos = tna.size();
+
+	size_t sos = nos;
+	if ('\'' == tna[pos]) pos++;
+	if ('"' == tna[pos]) { pos++; sos--; }
+
+	Type t = nameserver().getType(tna.substr(pos, sos-pos));
+	if (NOTYPE == t)
+		throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
+			tna.substr(pos, sos-pos).c_str());
+
+	pos = nos;
+	return t;
+}
+
+/* ================================================================== */
 
 /**
- * Return a Value correspnding to the input string.
+ * Return a Value corresponding to the input string.
  * It is assumed the input string is encoded as a scheme string.
  * For example, `(FloatValue 1 2 3 4)` or more complex things:
  * `(LinkValue (Concept "a") (FloatValue 1 2 3))`
