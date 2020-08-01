@@ -25,6 +25,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 
 #include "opencog/persist/sexpr/Commands.h"
 
@@ -187,6 +188,7 @@ void CommandsUTest::test_set_values()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string in = "(cog-set-values! (Concept \"a\") (list "
+		"(cons (Predicate \"*-TruthValueKey-*\") (stv 0.3 0.5))"
 		"(cons (Predicate \"key\") (stv 0.6 0.8))"
 		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"
 		"(cons (Predicate \"buz\") (StringValue \"gee\" \"golly\"))))";
@@ -194,11 +196,19 @@ void CommandsUTest::test_set_values()
 	std::string out = Commands::interpret_command(as, in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(4, as->get_size());
+	TS_ASSERT_EQUALS(5, as->get_size());
 	TS_ASSERT(0 == out.compare("()\n"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
+
+	TruthValuePtr tvp = h->getTruthValue();
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
+	double mean = tvp->get_mean();
+	double conf = tvp->get_confidence();
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
+	TS_ASSERT(0.2999 < mean and mean < 0.3001);
+	TS_ASSERT(0.4999 < conf and conf < 0.5001);
 
 	Handle key = as->add_node(PREDICATE_NODE, "key");
 	ValuePtr vp = h->getValue(key);
@@ -230,15 +240,17 @@ void CommandsUTest::test_get_values()
 
 	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
 	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
-	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
+	h->setValue(buz, ValueCast(createCountTruthValue(0.3, 0.4, 42)));
+	h->setTruthValue(createSimpleTruthValue(0.1, 0.9));
 
 	std::string in = "(cog-keys->alist (Concept \"a\"))";
 
 	std::string out = Commands::interpret_command(as, in);
-	printf("Got %s\n", out.c_str());
+	printf("Got %lu %s\n", out.size(), out.c_str());
 
 	TS_ASSERT(0 == out.compare(0, 17, "(((PredicateNode "));
-	TS_ASSERT(140 < out.size());
+	TS_ASSERT(std::string::npos != out.find("SimpleTruthValue"));
+	TS_ASSERT(210 < out.size());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
