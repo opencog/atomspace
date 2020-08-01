@@ -1,0 +1,334 @@
+/*
+ * CommandsUTest.cxxtest
+ *
+ * Copyright (c) 2020 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+
+#include "opencog/persist/sexpr/Commands.h"
+
+using namespace opencog;
+
+class CommandsUTest : public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* as;
+
+	public:
+		CommandsUTest()
+		{
+			logger().set_print_to_stdout_flag(true);
+			as = new AtomSpace();
+		}
+
+		void setUp() { as->clear(); }
+		void tearDown() {}
+
+		void test_node();
+		void test_link();
+		void test_set_tv();
+		void test_set_value();
+		void test_get_value();
+		void test_set_values();
+		void test_get_values();
+		void test_extract();
+		void test_execute();
+};
+
+// Test cog-node
+void CommandsUTest::test_node()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((cog-node 'Concept "foo"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(0, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	as->add_node(CONCEPT_NODE, "foo");
+	out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(1, as->get_size());
+	TS_ASSERT(0 == out.compare("(ConceptNode \"foo\")"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-link
+void CommandsUTest::test_link()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle ca = as->add_node(CONCEPT_NODE, "a");
+	Handle cb = as->add_node(CONCEPT_NODE, "b");
+
+	std::string in = R"((cog-link 'List (Concept "a") (Concept "b")))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	as->add_link(LIST_LINK, ca, cb);
+
+	out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(3, as->get_size());
+	TS_ASSERT(0 == out.compare(
+		"(ListLink (ConceptNode \"a\")(ConceptNode \"b\"))"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-tv!
+void CommandsUTest::test_set_tv()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((cog-set-tv! (Concept "a") (stv 1 0)))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(1, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	// ------------
+	h = as->add_node(CONCEPT_NODE, "b");
+	as->set_truthvalue(h, createSimpleTruthValue(0.5, 0.5));
+
+	// Clobber the TV on B back to Default
+	in = R"((cog-set-tv! (Concept "b") (stv 1 0)))";
+	out = Commands::interpret_command(as, in);
+
+	TruthValuePtr tv = h->getTruthValue();
+	printf("new TV is %s\n", tv->to_string().c_str());
+	TS_ASSERT(*tv == *TruthValue::DEFAULT_TV());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-value!
+void CommandsUTest::test_set_value()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in =
+		R"((cog-set-value! (Concept "a") (Predicate "key") (stv 0.6 0.8)))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-value
+void CommandsUTest::test_get_value()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = as->add_node(CONCEPT_NODE, "a");
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle fiz = as->add_node(PREDICATE_NODE, "fiz");
+	Handle buz = as->add_node(PREDICATE_NODE, "buz");
+
+	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
+	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
+	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
+
+	std::string in = "(cog-value (Concept \"a\") (Predicate \"key\"))";
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare(0, 12, "(FloatValue "));
+
+	in = "(cog-value (Concept \"a\") (Predicate \"fiz\"))";
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("(StringValue \"a\" \"b\")"));
+
+	in = "(cog-value (Concept \"a\") (Predicate \"buz\"))";
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare(0, 18, "(SimpleTruthValue "));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-values!
+void CommandsUTest::test_set_values()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = "(cog-set-values! (Concept \"a\") (list "
+		"(cons (Predicate \"*-TruthValueKey-*\") (stv 0.3 0.5))"
+		"(cons (Predicate \"key\") (stv 0.6 0.8))"
+		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"
+		"(cons (Predicate \"buz\") (StringValue \"gee\" \"golly\"))))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(5, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	TruthValuePtr tvp = h->getTruthValue();
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
+	double mean = tvp->get_mean();
+	double conf = tvp->get_confidence();
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, tvp->get_type());
+	TS_ASSERT(0.2999 < mean and mean < 0.3001);
+	TS_ASSERT(0.4999 < conf and conf < 0.5001);
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+
+	key = as->add_node(PREDICATE_NODE, "fiz");
+	vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(FLOAT_VALUE, vp->get_type());
+
+	key = as->add_node(PREDICATE_NODE, "buz");
+	vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(STRING_VALUE, vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-keys->alist
+void CommandsUTest::test_get_values()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = as->add_node(CONCEPT_NODE, "a");
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle fiz = as->add_node(PREDICATE_NODE, "fiz");
+	Handle buz = as->add_node(PREDICATE_NODE, "buz");
+
+	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
+	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
+	h->setValue(buz, ValueCast(createCountTruthValue(0.3, 0.4, 42)));
+	h->setTruthValue(createSimpleTruthValue(0.1, 0.9));
+
+	std::string in = "(cog-keys->alist (Concept \"a\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %lu %s\n", out.size(), out.c_str());
+
+	TS_ASSERT(0 == out.compare(0, 17, "(((PredicateNode "));
+	TS_ASSERT(std::string::npos != out.find("SimpleTruthValue"));
+	TS_ASSERT(210 < out.size());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-extract!
+void CommandsUTest::test_extract()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle a = as->add_node(CONCEPT_NODE, "a");
+	Handle l = as->add_link(LIST_LINK, a);
+
+	std::string in = "(cog-extract! (Concept \"a\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("#f\n"));
+
+	Handle ax = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(a == ax);
+
+	in = "(cog-extract-recursive! (Concept \"a\"))";
+
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("#t\n"));
+
+	ax = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr == ax);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-execute-cache!
+void CommandsUTest::test_execute()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Populate teh AtomSpace
+	Handle a = as->add_node(CONCEPT_NODE, "a");
+	Handle b = as->add_node(CONCEPT_NODE, "b");
+	Handle l = as->add_link(LIST_LINK, a, b);
+
+	// Run this query
+	std::string in =
+	"(cog-execute-cache! "
+		"(Meet (Variable \"x\")"
+		"(Present (List (Variable \"x\") (Concept \"b\"))))"
+		"(Predicate \"key\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT(0 == out.compare("(QueueValue  (ConceptNode \"a\"))"));
+
+	// Verify that the result was placed onto the key.
+#define an as->add_node
+#define al as->add_link
+	Handle q = al(MEET_LINK, an(VARIABLE_NODE, "x"),
+		al(PRESENT_LINK,
+			al(LIST_LINK, an(VARIABLE_NODE, "x"), an(CONCEPT_NODE, "b"))));
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = q->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	printf("Got %s\n", vp->to_short_string().c_str());
+	TS_ASSERT(QUEUE_VALUE == vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

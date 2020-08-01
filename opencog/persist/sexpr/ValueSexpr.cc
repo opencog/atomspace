@@ -30,9 +30,41 @@
 using namespace opencog;
 
 /* ================================================================== */
+/**
+ * Look for a type name, either of the form "ConceptNode" (wwith quotes)
+ * or 'ConceptNode (symbol) starting at location `pos` in `tna`.
+ * Return the type and update `pos` to point after the typename.
+ */
+Type Sexpr::decode_type(const std::string& tna, size_t& pos)
+{
+	// Advance past whitespace.
+	pos = tna.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos)
+		throw SyntaxException(TRACE_INFO, "Bad Type >>%s<<",
+			tna.substr(pos).c_str());
+
+	// Advance to next whitespace.
+	size_t nos = tna.find_first_of(") \n\t", pos);
+	if (std::string::npos == nos)
+		nos = tna.size();
+
+	size_t sos = nos;
+	if ('\'' == tna[pos]) pos++;
+	if ('"' == tna[pos]) { pos++; sos--; }
+
+	Type t = nameserver().getType(tna.substr(pos, sos-pos));
+	if (NOTYPE == t)
+		throw SyntaxException(TRACE_INFO, "Unknown Type >>%s<<",
+			tna.substr(pos, sos-pos).c_str());
+
+	pos = nos;
+	return t;
+}
+
+/* ================================================================== */
 
 /**
- * Return a Value correspnding to the input string.
+ * Return a Value corresponding to the input string.
  * It is assumed the input string is encoded as a scheme string.
  * For example, `(FloatValue 1 2 3 4)` or more complex things:
  * `(LinkValue (Concept "a") (FloatValue 1 2 3))`
@@ -49,6 +81,9 @@ using namespace opencog;
 ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 {
 	size_t totlen = stv.size();
+
+	// Skip past whitespace
+	pos = stv.find_first_not_of(" \n\t", pos);
 
 	// Special-case: Both #f and '() are used to denote "no value".
 	// This is commonly used to erase keys from atoms. So handle this
@@ -73,8 +108,16 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 	Type vtype = nameserver().getType(stv.substr(pos, vos-pos));
 	if (NOTYPE == vtype)
+	{
+		if (0 == stv.compare(pos, 3, "stv"))
+			vtype = SIMPLE_TRUTH_VALUE;
+		else
+		if (0 == stv.compare(pos, 3, "ctv"))
+			vtype = COUNT_TRUTH_VALUE;
+		else
 		throw SyntaxException(TRACE_INFO, "Unknown Value >>%s<<",
 			stv.substr(pos, vos-pos).c_str());
+	}
 
 	if (nameserver().isA(vtype, ATOM))
 	{
@@ -161,29 +204,78 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
  * ((KEY . VALUE)(KEY2 . VALUE2)...)
  * Store the results as values on the atom.
  */
-void Sexpr::decode_alist(Handle& atom, const std::string& alist)
+void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
 {
 	AtomSpace* as = atom->getAtomSpace();
 
+	pos = alist.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos) return;
+	if ('(' != alist[pos])
+		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
+			alist.substr(pos).c_str());
+
 	// Skip over opening paren
-	size_t pos = 1;
+	pos++;
 	size_t totlen = alist.size();
 	pos = alist.find('(', pos);
 	while (std::string::npos != pos and pos < totlen)
 	{
 		++pos;  // over first paren of pair
 		Handle key(decode_atom(alist, pos));
+
 		pos = alist.find(" . ", pos);
 		pos += 3;
 		ValuePtr val(decode_value(alist, pos));
+
+		// Make sure all atoms have found a nice home.
 		if (as)
 		{
-			// Make sure all atoms have found a nice home.
-			key = as->add_atom(key);
+			Handle hkey = as->add_atom(key);
+			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
 		}
 		atom->setValue(key, val);
 		pos = alist.find('(', pos);
+	}
+}
+
+/* ================================================================== */
+
+/**
+ * Decode a Valuation association list.
+ * This list has the format
+ * (list (cons KEY VALUE)(cons KEY2 VALUE2)...)
+ * Store the results as values on the atom.
+ */
+void Sexpr::decode_slist(Handle& atom, const std::string& alist, size_t& pos)
+{
+	AtomSpace* as = atom->getAtomSpace();
+
+	pos = alist.find_first_not_of(" \n\t", pos);
+	if (std::string::npos == pos) return;
+	if (alist.compare(pos, 5, "(list"))
+		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
+			alist.substr(pos).c_str());
+
+	size_t totlen = alist.size();
+	pos = alist.find("(cons ", pos);
+	while (std::string::npos != pos and pos < totlen)
+	{
+		pos += 5;
+		pos = alist.find_first_not_of(" \n\t", pos);
+		Handle key(decode_atom(alist, pos));
+		pos++;
+		pos = alist.find_first_not_of(" \n\t", pos);
+		ValuePtr val(decode_value(alist, pos));
+		if (as)
+		{
+			// Make sure all atoms have found a nice home.
+			Handle hkey = as->add_atom(key);
+			if (hkey) key = hkey; // might be null, if `as` is read-only
+			val = add_atoms(as, val);
+		}
+		atom->setValue(key, val);
+		pos = alist.find("(cons ", pos);
 	}
 }
 
@@ -263,7 +355,11 @@ ValuePtr Sexpr::add_atoms(AtomSpace* as, const ValuePtr& vptr)
 {
 	Type t = vptr->get_type();
 	if (nameserver().isA(t, ATOM))
-		return as->add_atom(HandleCast(vptr));
+	{
+		Handle h = as->add_atom(HandleCast(vptr));
+		if (h) return h; // Might be null if `as` is read-only.
+		return vptr;
+	}
 
 	if (nameserver().isA(t, LINK_VALUE))
 	{

@@ -153,16 +153,24 @@ TruthValuePtr Atom::getTruthValue() const
 /// If the value is a null pointer, then the key is removed.
 void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
-	std::lock_guard<std::mutex> lck(_mtx);
-	if (nullptr != value)
+	// This is rather irritating, but we fake it for the
+	// PredicateNode "*-TruthValueKey-*" because if we don't
+	// then load-from-file and load-from-network breaks.
+	if (key != truth_key() and *key == *truth_key())
 	{
-		_values[key] = value;
+		std::lock_guard<std::mutex> lck(_mtx);
+		if (nullptr != value)
+			_values[truth_key()] = value;
+		else
+			_values.erase(truth_key());
 	}
 	else
 	{
-		// If the value is a null pointer, then the value at
-		// this key should be blanked out, i.e. unset.
-		_values.erase(key);
+		std::lock_guard<std::mutex> lck(_mtx);
+		if (nullptr != value)
+			_values[key] = value;
+		else
+			_values.erase(key);
 	}
 }
 
@@ -172,7 +180,7 @@ ValuePtr Atom::getValue(const Handle& key) const
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
     // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
     // What it boils down to here is that we must *always* make a copy
-    // of the value before we use it, since it can go out of scope
+    // of the value-pointer before we use it, since it can go out of scope
     // because it can get set in another thread.  Viz, using it to
     // dereference can return a raw pointer to an object that has been
     // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
@@ -180,9 +188,22 @@ ValuePtr Atom::getValue(const Handle& key) const
     // Furthermore, we must make a copy while holding the lock! Got that?
 
     ValuePtr pap;
-    std::lock_guard<std::mutex> lck(_mtx);
-    auto pr = _values.find(key);
-    if (_values.end() != pr) pap = pr->second;
+
+    // This is rather irritating, but we fake it for the
+    // PredicateNode "*-TruthValueKey-*" because if we don't
+    // then load-from-file and load-from-network breaks.
+    if ((key != truth_key()) and (*key == *truth_key()))
+    {
+        std::lock_guard<std::mutex> lck(_mtx);
+        auto pr = _values.find(truth_key());
+        if (_values.end() != pr) pap = pr->second;
+    }
+    else
+    {
+        std::lock_guard<std::mutex> lck(_mtx);
+        auto pr = _values.find(key);
+        if (_values.end() != pr) pap = pr->second;
+    }
     return pap;
 }
 

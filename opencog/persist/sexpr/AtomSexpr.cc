@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <opencog/util/exceptions.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -76,25 +77,34 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
 	return count;
 }
 
+static NameServer& namer = nameserver();
+
 /// Extracts link or node type. Given the string `s`, this updates
 /// the `l` and `r` values such that `l` points at the first
 /// non-whitespace character of the name, and `r` points at the last.
-static void get_typename(const std::string& s, size_t& l, size_t& r,
+static Type get_typename(const std::string& s, size_t& l, size_t& r,
                          size_t line_cnt)
 {
 	// Advance past whitespace.
-	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+	l = s.find_first_not_of(" \t\n", l);
 
 	if (s[l] != '(')
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
+		throw SyntaxException(TRACE_INFO,
+			"Error at line %lu unexpected content: >>%s<< in %s",
+			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
-	// Advance until whitespace. Might be fast to use strtok?
+	// Advance until whitespace.
 	l++;
-	size_t p = l;
-	for (; l < r and s[p] != '(' and s[p] != ' ' and s[p] != '\t' and s[p] != '\n'; p++);
-	r = p;
+	r = s.find_first_of("( \t\n", l);
+
+	const std::string stype = s.substr(l, r-l);
+	Type atype = namer.getType(stype);
+	if (atype == opencog::NOTYPE)
+		throw SyntaxException(TRACE_INFO,
+			"Error at line %lu unknown Atom type: %s",
+			line_cnt, stype.c_str());
+
+	return atype;
 }
 
 /// Extracts Node name-string. Given the string `s`, this updates
@@ -146,8 +156,6 @@ static TruthValuePtr get_stv(const std::string& s,
 				NumberNode::to_vector(s.substr(l+4, r-l-4)));
 }
 
-static NameServer& namer = nameserver();
-
 /// Convert an Atomese S-expression into a C++ Atom.
 /// For example: `(Concept "foobar")`  or
 /// `(Evaluation (Predicate "blort") (List (Concept "foo") (Concept "bar")))`
@@ -161,14 +169,7 @@ Handle Sexpr::decode_atom(const std::string& s,
                           size_t l, size_t r, size_t line_cnt)
 {
 	size_t l1 = l, r1 = r;
-	get_typename(s, l1, r1, line_cnt);
-	const std::string stype = s.substr(l1, r1-l1);
-
-	opencog::Type atype = namer.getType(stype);
-	if (atype == opencog::NOTYPE)
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unknown Atom type: " + stype);
+	Type atype = get_typename(s, l1, r1, line_cnt);
 
 	l = r1;
 	if (namer.isLink(atype))

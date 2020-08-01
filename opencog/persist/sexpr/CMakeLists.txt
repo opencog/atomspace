@@ -2,6 +2,8 @@
 # Generic S-expression decoding.
 ADD_LIBRARY (sexpr
 	AtomSexpr
+	Commands
+	SexprEval
 	ValueSexpr
 )
 
@@ -19,7 +21,9 @@ INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	Commands.h
 	Sexpr.h
+	SexprEval.h
 	DESTINATION "include/opencog/persist/sexpr"
 )
 

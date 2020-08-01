@@ -349,6 +349,16 @@ class SQLAtomStorage::Response
 				store->_tlbuf.addAtom(hkey, key);
 			}
 
+			// The below usually triggers only on tvpred,
+			// and so we could save some CPU cycles by handling
+			// tvpred earlier, and avoiding this check.
+			if (nullptr == hkey->getAtomTable() and
+			    nullptr != atom->getAtomTable())
+			{
+				hkey = atom->getAtomTable()->add(hkey, false);
+				store->_tlbuf.addAtom(hkey, key);
+			}
+
 			ValuePtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
 			return false;

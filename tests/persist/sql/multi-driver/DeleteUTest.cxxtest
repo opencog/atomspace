@@ -542,8 +542,10 @@ void DeleteUTest::do_test_remove(void)
     for (i=0; i<idx; i++)
         delete_links(i, _as);
 
-    printf("Post-remove size=%lu expect=%d\n", _as->get_size(), 4*idx);
-    TSM_ASSERT("Post-remove unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    // Plus-one for PredicateNode "*-TruthValueKey-*"
+    printf("Post-remove size=%lu expect=%d\n", _as->get_size(), 4*idx+1);
+    TSM_ASSERT_EQUALS("Post-remove unexpected atomspace size",
+		((unsigned)(4*idx+1)), _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
@@ -551,8 +553,9 @@ void DeleteUTest::do_test_remove(void)
         check_remove(i, _as, "verify-gone");
     }
 
-    printf("Post-referesh size=%lu expect=%d\n", _as->get_size(), 7*idx);
-    TSM_ASSERT("Post-refetch unexpected atomspace size", ((unsigned)(7*idx)) == _as->get_size());
+    printf("Post-referesh size=%lu expect=%d\n", _as->get_size(), 7*idx+1);
+    TSM_ASSERT_EQUALS("Post-refetch unexpected atomspace size",
+		((unsigned)(7*idx+1)), _as->get_size());
 
     /* Kill data for good */
     _as->clear();
@@ -637,7 +640,8 @@ void DeleteUTest::do_test_recurse(void)
     for (i=0; i<zap; i++)
         extract_nodes(i, _as);
 
-    size_t expsz = 7*(idx-zap) + 3*zap;
+    // Plus-one for PredicateNode "*-TruthValueKey-*"
+    size_t expsz = 7*(idx-zap) + 3*zap; // + 1;
     printf("Atomspace size=%lu expect=%lu\n",
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
@@ -652,6 +656,8 @@ void DeleteUTest::do_test_recurse(void)
     for (i=0; i<zap; i++)
         delete_nodes(i, _as);
 
+    // Plus-one for PredicateNode "*-TruthValueKey-*"
+    expsz += 1;
     printf("Post-remove size=%lu expect=%lu\n",
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
@@ -664,9 +670,9 @@ void DeleteUTest::do_test_recurse(void)
     }
 
     printf("Post-refetch size=%lu expect=%d\n",
-         _as->get_size(), 7*idx);
+         _as->get_size(), 7*idx+1);
     TSM_ASSERT("Unexpected atomspace size",
-         ((unsigned) 7*idx) == _as->get_size());
+         ((unsigned) 7*idx+1) == _as->get_size());
 
     /* Check that the removed atoms really got zapped. */
     for (i=0; i<zap; i++) {

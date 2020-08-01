@@ -22,6 +22,30 @@ by tuning the Postgres server, using SSD disks, and using HugePages.
 Tuning details are given below. The [performance diary](README-perf.md)
 provides some benchmarking results.
 
+Meta-Status
+-----------
+In retrospect, database-backed storage is a fundamental design mistake.
+Why?
+
+* A vast number of cycles are wasted serializing and unserializing
+  Atoms and Values, and converting them to "unnatural" formats.
+* Almost all database features, bells and whistles are not required
+  and are not used.
+* There are easier and faster ways to get distributed AtomSpaces, e.g.
+  by using https://github.com/opencog/atomspace-cog/ which is *fast*.
+
+In retrospect, what was really needed was a fast, efficient single-user
+file-storage system, something that is tuned to the vagaries of
+file-system performance. This could be provided by a fairly minimalist
+key-value of "column store" database that is small, simple, fast and
+feature-poor. Something that doesn't eat RAM, so that it does not
+compete with the AtomSpace for RAM.
+
+Well, in a futuristic world, there would be one nice feature to have:
+pattern matching in the file-backed database. But this would have to
+somehow be faster and more effective that pattern-matching in RAM, and
+so this is a very high bar to exceed.
+
 Features
 --------
  * Save and restore of individual atoms and values.
