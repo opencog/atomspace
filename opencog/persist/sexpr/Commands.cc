@@ -20,12 +20,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <time.h>
+
 #include <functional>
 #include <string>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Commands.h"
@@ -74,6 +77,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
+	// -----------------------------------------------
 	// (cog-atomspace-clear)
 	if (clear == act)
 	{
@@ -81,10 +85,46 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "#t\n";
 	}
 
-	//    cog-execute-cache!
+	// -----------------------------------------------
+	// (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
+	// This is complicated, and subject to change...
 	if (cache == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle query = Sexpr::decode_atom(cmd, pos);
+		query = as->add_atom(query);
+		Handle key = Sexpr::decode_atom(cmd, ++pos);
+		key = as->add_atom(key);
 
+		bool force = false;
+		pos = cmd.find_first_of('(', pos);
+		if (std::string::npos != pos)
+		{
+			Handle meta = Sexpr::decode_atom(cmd, pos);
+			meta = as->add_atom(meta);
+
+			// XXX Hacky .. store time in float value...
+			query->setValue(meta, createFloatValue((double)time(0)));
+			if (std::string::npos != cmd.find("#t", pos))
+				force = true;
+		}
+		ValuePtr rslt = query->getValue(key);
+		if (nullptr != rslt and not force)
+			return Sexpr::encode_value(rslt);
+
+		// For now, prevent general execution.
+		Type qt = query->get_type();
+		if (not nameserver().isA(qt, PATTERN_LINK) and
+		    not nameserver().isA(qt, JOIN_LINK))
+			return "#f\n";
+
+		rslt = query->execute();
+		query->setValue(key, rslt);
+
+		return Sexpr::encode_value(rslt);
+	}
+
+	// -----------------------------------------------
 	// (cog-extract! (Concept "foo"))
 	if (extra == act)
 	{
@@ -95,6 +135,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "#f\n";
 	}
 
+	// -----------------------------------------------
 	// (cog-extract-recursive! (Concept "foo"))
 	if (recur == act)
 	{
@@ -105,6 +146,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "#f\n";
 	}
 
+	// -----------------------------------------------
 	// (cog-get-atoms 'Node #t)
 	if (gtatm == act)
 	{
@@ -125,6 +167,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return rv;
 	}
 
+	// -----------------------------------------------
 	// (cog-incoming-by-type (Concept "foo") 'ListLink)
 	if (incty == act)
 	{
@@ -140,6 +183,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return alist;
 	}
 
+	// -----------------------------------------------
 	// (cog-incoming-set (Concept "foo"))
 	if (incom == act)
 	{
@@ -153,6 +197,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return alist;
 	}
 
+	// -----------------------------------------------
 	// (cog-keys->alist (Concept "foo"))
 	if (keys == act)
 	{
@@ -168,6 +213,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return alist;
 	}
 
+	// -----------------------------------------------
 	// (cog-node 'Concept "foobar")
 	// (cog-link 'ListLink (Atom) (Atom) (Atom))
 	if (node == act or link == act)
@@ -203,6 +249,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return Sexpr::encode_atom(h);
 	}
 
+	// -----------------------------------------------
 	// (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
 	if (stval == act)
 	{
@@ -218,6 +265,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "()\n";
 	}
 
+	// -----------------------------------------------
 	// (cog-set-values! (Concpet "foo")
 	//     (list (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
@@ -229,6 +277,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "()\n";
 	}
 
+	// -----------------------------------------------
 	// (cog-set-tv! (Concept "foo") (stv 1 0))
 	if (settv == act)
 	{
@@ -238,6 +287,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "()\n";
 	}
 
+	// -----------------------------------------------
 	// (cog-value (Concept "foo") (Predicate "key"))
 	if (value == act)
 	{

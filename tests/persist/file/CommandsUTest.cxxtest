@@ -53,6 +53,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_set_values();
 		void test_get_values();
 		void test_extract();
+		void test_execute();
 };
 
 // Test cog-node
@@ -267,6 +268,43 @@ void CommandsUTest::test_extract()
 
 	ax = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr == ax);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-execute-cache!
+void CommandsUTest::test_execute()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Populate teh AtomSpace
+	Handle a = as->add_node(CONCEPT_NODE, "a");
+	Handle b = as->add_node(CONCEPT_NODE, "b");
+	Handle l = as->add_link(LIST_LINK, a, b);
+
+	// Run this query
+	std::string in =
+	"(cog-execute-cache! "
+		"(Meet (Variable \"x\")"
+		"(Present (List (Variable \"x\") (Concept \"b\"))))"
+		"(Predicate \"key\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT(0 == out.compare("(QueueValue  (ConceptNode \"a\"))"));
+
+	// Verify that the result was placed onto the key.
+#define an as->add_node
+#define al as->add_link
+	Handle q = al(MEET_LINK, an(VARIABLE_NODE, "x"),
+		al(PRESENT_LINK,
+			al(LIST_LINK, an(VARIABLE_NODE, "x"), an(CONCEPT_NODE, "b"))));
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = q->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	printf("Got %s\n", vp->to_short_string().c_str());
+	TS_ASSERT(QUEUE_VALUE == vp->get_type());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
