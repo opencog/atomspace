@@ -51,6 +51,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_set_value();
 		void test_set_values();
 		void test_get_values();
+		void test_extract();
 };
 
 // Test cog-node
@@ -203,6 +204,35 @@ void CommandsUTest::test_get_values()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT(140 < out.size());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-extract!
+void CommandsUTest::test_extract()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle a = as->add_node(CONCEPT_NODE, "a");
+	Handle l = as->add_link(LIST_LINK, a);
+
+	std::string in = "(cog-extract! (Concept \"a\"))";
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("#f\n"));
+
+	Handle ax = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(a == ax);
+
+	in = "(cog-extract-recursive! (Concept \"a\"))";
+
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("#t\n"));
+
+	ax = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr == ax);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

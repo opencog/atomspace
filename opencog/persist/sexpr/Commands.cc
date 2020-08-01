@@ -85,13 +85,25 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (cache == act)
 		throw SyntaxException(TRACE_INFO, "Not implemented");
 
-	//    cog-extract!
+	// (cog-extract! (Concept "foo"))
 	if (extra == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos));
+		if (nullptr == h) return "#t\n";
+		if (as->extract_atom(h, false)) return "#t\n";
+		return "#f\n";
+	}
 
-	//    cog-extract-recursive!
+	// (cog-extract-recursive! (Concept "foo"))
 	if (recur == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos));
+		if (nullptr == h) return "#t\n";
+		if (as->extract_atom(h, true)) return "#t\n";
+		return "#f\n";
+	}
 
 	// (cog-get-atoms 'Node #t)
 	if (gtatm == act)
