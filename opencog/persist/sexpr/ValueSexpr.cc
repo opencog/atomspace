@@ -228,9 +228,10 @@ void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
 		ValuePtr val(decode_value(alist, pos));
 
 		// Make sure all atoms have found a nice home.
-		if (as and not as->get_read_only())
+		if (as)
 		{
-			key = as->add_atom(key);
+			Handle hkey = as->add_atom(key);
+			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
 		}
 		atom->setValue(key, val);
@@ -269,7 +270,8 @@ void Sexpr::decode_slist(Handle& atom, const std::string& alist, size_t& pos)
 		if (as)
 		{
 			// Make sure all atoms have found a nice home.
-			key = as->add_atom(key);
+			Handle hkey = as->add_atom(key);
+			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
 		}
 		atom->setValue(key, val);
@@ -353,7 +355,11 @@ ValuePtr Sexpr::add_atoms(AtomSpace* as, const ValuePtr& vptr)
 {
 	Type t = vptr->get_type();
 	if (nameserver().isA(t, ATOM))
-		return as->add_atom(HandleCast(vptr));
+	{
+		Handle h = as->add_atom(HandleCast(vptr));
+		if (h) return h; // Might be null if `as` is read-only.
+		return vptr;
+	}
 
 	if (nameserver().isA(t, LINK_VALUE))
 	{
