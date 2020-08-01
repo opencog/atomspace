@@ -190,12 +190,14 @@ void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
 	{
 		++pos;  // over first paren of pair
 		Handle key(decode_atom(alist, pos));
+
 		pos = alist.find(" . ", pos);
 		pos += 3;
 		ValuePtr val(decode_value(alist, pos));
-		if (as)
+
+		// Make sure all atoms have found a nice home.
+		if (as and not as->get_read_only())
 		{
-			// Make sure all atoms have found a nice home.
 			key = as->add_atom(key);
 			val = add_atoms(as, val);
 		}
