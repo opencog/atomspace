@@ -49,6 +49,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_link();
 		void test_set_tv();
 		void test_set_value();
+		void test_get_value();
 		void test_set_values();
 		void test_get_values();
 		void test_extract();
@@ -147,6 +148,38 @@ void CommandsUTest::test_set_value()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+// Test cog-value
+void CommandsUTest::test_get_value()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = as->add_node(CONCEPT_NODE, "a");
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle fiz = as->add_node(PREDICATE_NODE, "fiz");
+	Handle buz = as->add_node(PREDICATE_NODE, "buz");
+
+	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
+	h->setValue(fiz, createStringValue(std::vector<std::string>{"a", "b"}));
+	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
+
+	std::string in = "(cog-value (Concept \"a\") (Predicate \"key\"))";
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare(0, 12, "(FloatValue "));
+
+	in = "(cog-value (Concept \"a\") (Predicate \"fiz\"))";
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare("(StringValue \"a\" \"b\")"));
+
+	in = "(cog-value (Concept \"a\") (Predicate \"buz\"))";
+	out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+	TS_ASSERT(0 == out.compare(0, 18, "(SimpleTruthValue "));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
 // Test cog-set-values!
 void CommandsUTest::test_set_values()
 {
@@ -203,6 +236,7 @@ void CommandsUTest::test_get_values()
 	std::string out = Commands::interpret_command(as, in);
 	printf("Got %s\n", out.c_str());
 
+	TS_ASSERT(0 == out.compare(0, 17, "(((PredicateNode "));
 	TS_ASSERT(140 < out.size());
 
 	logger().info("END TEST: %s", __FUNCTION__);

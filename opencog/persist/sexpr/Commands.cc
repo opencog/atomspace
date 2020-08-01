@@ -238,9 +238,18 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return "()\n";
 	}
 
-	//    cog-value
+	// (cog-value (Concept "foo") (Predicate "key"))
 	if (value == act)
-		throw SyntaxException(TRACE_INFO, "Not implemented");
+	{
+		pos = epos + 1;
+		Handle atom = Sexpr::decode_atom(cmd, pos);
+		atom = as->add_atom(atom);
+		Handle key = Sexpr::decode_atom(cmd, ++pos);
+		key = as->add_atom(key);
+
+		ValuePtr vp = atom->getValue(key);
+		return Sexpr::encode_value(vp);
+	}
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());
