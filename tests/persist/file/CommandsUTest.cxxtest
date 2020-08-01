@@ -122,6 +122,18 @@ void CommandsUTest::test_set_tv()
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
 
+	// ------------
+	h = as->add_node(CONCEPT_NODE, "b");
+	as->set_truthvalue(h, createSimpleTruthValue(0.5, 0.5));
+
+	// Clobber the TV on B back to Default
+	in = R"((cog-set-tv! (Concept "b") (stv 1 0)))";
+	out = Commands::interpret_command(as, in);
+
+	TruthValuePtr tv = h->getTruthValue();
+	printf("new TV is %s\n", tv->to_string().c_str());
+	TS_ASSERT(*tv == *TruthValue::DEFAULT_TV());
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
