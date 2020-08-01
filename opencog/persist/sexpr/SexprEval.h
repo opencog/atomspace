@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_SEXPR_EVAL_H
 #define _OPENCOG_SEXPR_EVAL_H
 
+#include <mutex>
 #include <string>
 #include <opencog/eval/GenericEval.h>
 
@@ -43,6 +44,11 @@ class SexprEval : public GenericEval
 {
 	private:
 		AtomSpace* _atomspace;
+
+		// poll_result() is called in a different thread
+		// than eval_expr() and the result is that _answer
+		// can get clobbered. So force the reader to wait.
+		std::mutex _mtx;
 		std::string _answer;
 
 		SexprEval(AtomSpace*);

@@ -46,6 +46,7 @@ SexprEval::~SexprEval()
 void SexprEval::eval_expr(const std::string &expr)
 {
 	try {
+		std::lock_guard<std::mutex> lock(_mtx);
 		_answer = Commands::interpret_command(_atomspace, expr);
 	}
 	catch (const StandardException& ex)
@@ -58,6 +59,7 @@ void SexprEval::eval_expr(const std::string &expr)
 std::string SexprEval::poll_result()
 {
 	std::string ret;
+	std::lock_guard<std::mutex> lock(_mtx);
 	ret.swap(_answer);
 	return ret;
 }
@@ -65,6 +67,12 @@ std::string SexprEval::poll_result()
 
 void SexprEval::begin_eval()
 {
+	std::lock_guard<std::mutex> lock(_mtx);
+	while (0 < _answer.size())
+	{
+		logger().warn("This shouldn't happen!");
+		usleep(100);
+	}
 	_answer.clear();
 }
 
