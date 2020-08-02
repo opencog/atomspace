@@ -1,5 +1,5 @@
 ;
-; persistence.scm -- Putting the AtomSpace in a "real" database.
+; persistence-sql.scm -- Putting the AtomSpace in a "real" database.
 ;
 ; The AtomSpace is an in-RAM database. You just might want to sometimes
 ; write some of it out to disk, and save it for later.  The most robust
@@ -10,20 +10,55 @@
 ;
 ; The AtomSpace has been designed with a generic "backend" layer, so
 ; that data can be saved to any database. A number of these have been
-; tried. The one that works the best is PostgresSQL. Some have not
-; worked out very well: we tried some Java-based graph DB's, but the
-; network overhead is a real killer, and they are much too slow.
+; tried. The one that currently works the best is PostgresSQL.
 ;
-; The most promising future backend is probably Apache Ignite; that's
+; -------------------------------------------------------------------
+; Architectural Notes & Commentary.
+;
+; Some other database have been tried; this has not worked out so well.
+; It turns out that the cost of converting Atoms and Values to the
+; native database format (serialization/deserialization) takes up far
+; more CPU time than the AtomSpace does. Thus, converting Atoms/Values
+; to other formats is a (very?) costly proposition. This was
+; particularly true for Neo4J.  It was tried, it didn't work out.
+;
+; Another issue is that most databases provide many, many features that
+; are simply not needed by the AtomSpace. For example, data analytics
+; is more-or-less totally useless.
+;
+; Another issue is that many databases compete for RAM with the
+; AtomSpace; since the AtomSpace is an in-RAM database itself, having
+; something else competing with it for RAM is wasteful and prevents
+; larger datasets from being loadable.
+;
+; That said, there are then two issues worth considering.
+; (1) Persistance-to-disk. This would probably be best achieved by
+;     a simple, small, fast, single-user database (key-value or
+;     column-store). This allows datasets to be distributed as files.
+;
+; (2) Network communications. The best current system for this is the
+;     cogserver-bases client/server system. It allows a number of
+;     AtomSpaces to talk directly to one-another, in a more-or-less
+;     almost peer-to-peer fashion. See the repo at
+;     https://github.com/opencog/atomspace-cog and the examples there.
+;
+; If you still want to have a "real" database, even after reading the
+; above, then the most promising is probably Apache Ignite; that's
 ; mostly because it has an impressive set of features, and it seems
-; likely that it will interface well with C++ code. Anyway, that does
-; not exist yet.
+; to play nice with C++ code. Anyway, that backend does not exist yet.
+;
+; ----------------------------------------
+; This Demo.
 ;
 ; This file demos using the generic API to the backend. It explores
 ; database login, logout and atom loading and storage.  It assumes that
 ; PostgreSQL has been configured to run with the AtomSpace.
 ; Unfortunately, this can be quite challenging. Sorry!
 ; [The instructions are here](../../opencog/persist/sql/README.md)
+;
+; Note: Most of this demo will *also* work with the cogserver-based
+; backend. Just cut out the SQL parts below and replace then with the
+; cogserver URL.
 ;
 ; You should make sure that the unit tests pass: if you misconfigured
 ; the database, the unit tests will fail! Caveat Emptor!
