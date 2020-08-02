@@ -31,10 +31,11 @@
 ; something else competing with it for RAM is wasteful and prevents
 ; larger datasets from being loadable.
 ;
-; That said, there are then two issues worth considering.
+; That said, there are then two issues worth considering:
+;
 ; (1) Persistence-to-disk. This would probably be best achieved by
-;     a simple, small, fast, single-user database (key-value or
-;     column-store). This allows datasets to be distributed as files.
+;     a simple, small, fast, single-user (key-value) database. This
+;     allows datasets to be distributed as files.
 ;
 ; (2) Network communications. The best current system for this is the
 ;     cogserver-bases client/server system. It allows a number of

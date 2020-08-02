@@ -55,7 +55,7 @@
 ; peer-to-peer communication between AtomSpaces (e.g. with the
 ; previously mentioned https://github.com/opencog/atomspace-cog/)
 ; and provide persistence with a fast, simple file-backed single-user
-; (key-value or column-store) DB.
+; key-value DB. e.g. RocksDB or LevelDB.
 ;
 ; (The other point is that none of the whizzy bells-n-whistles of the
 ; whizzy database XYZ are needed. Those whizzy data analytics tools
