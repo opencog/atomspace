@@ -1,36 +1,68 @@
 ;
-; distributed.scm -- (Network/Cluster/Cloud) Distributed AtomSpace.
+; distributed-sql.scm -- Network-via-SQL Distributed AtomSpace.
 ;
-; The AtomSpace is an in-RAM database, backed by a network database.
-; This allows the AtomSpace to run across multiple computers in a
-; distributed fashion (network, cluster or cloud). This provides a
-; very basic demo.
+; The AtomSpace is an in-RAM database, with several backends that allow
+; data storage and network communications.  This perticular demo shows
+; the Postgres SQL backend, and how to use it to have multiple
+; AtomSpaces communicate with each other over the network.
+;
+; The AtomSpace has a built-in "Backend API" - a small and simple layer
+; for sending/receiving (or saving/restoring) Atoms and Values, either
+; individually, or in groups, to whatever backend was provided. This
+; demo is for the PostgresSQL backend (which is networked).
+;
+; Besides SQL, there is also a direct AtomSpace-to-AtomSpace network
+; client/server interface at https://github.com/opencog/atomspace-cog/
+; It has its own examples, although the example below should also work
+; with that system. (Actually, the "cog" backend is maybe 2x or 3x
+; faster than the Postgres backend; data serialization represents the
+; majority of the total CPU usage; the direct AtomSpace-to-AtomSpace
+; communications avoids much or most of this overhead.)
+;
+; -------------------------------------
+; Architecture
 ;
 ; Understanding the overall architecture is important. Some key ideas:
 ;
-; * The AtomSpace is a thin layer on top of a network-distribution layer.
-; * The network distribution is provided by popular 3rd-party systems.
-; * De facto, today, this means PostgreSQL (We've tried others. See below.)
+; * From the network point-of-view, the AtomSpace seems to be a thin
+;   layer on top of a network-distribution layer.
+; * The network distribution can be provided by anything for which a
+;   "BackingStore API" has been created.
+; * One of these is PostgreSQL, the subject of this demo.
 ;
-; The reason for this layering is that creating a scalable distributed
-; system "from scratch" is hard. There are already dozens of systems
-; that do this that are popular, reliable, well-known. It's more-or-less
-; pointless to try to re-invent this technology; it's much easier to
-; leverage existing systems. Treat this as modular architecture: use
-; well-tested, debugged high-performance systems that already exist.
-; Don't reinvent them.
+; The goal of the layering is to provide a minimal API that allows
+; Atoms and Values to be shipped across the network (or to a file-based
+; database). Minimal API's mean:
 ;
-; The layering is done with a generic "backend" layer. The AtomSpace
-; works with the backend to save and fetch individual Atoms or various
-; sets of Atoms. The backend is responsible for network distribution.
+; -- easier to implement
+; -- minimal overhead
 ;
-; Several different backends have been implemented. Only one is fully
-; functional, complete, debugged -- the PostgreSQL backend. Others
-; were attempted but abandoned because they were too slow. It might
-; be nice to have a choice: for example, Apache Ignite looks very
-; promising. A backend for Ignite does not yet exist.  However, do not
-; underestimate the scalability of PostgreSQL. Here are some typical
-; blogs about scalability and distributed processing:
+; The problem with layering is that it requires format conversions:
+; the Atoms and Values have to be converted to the native format of
+; the other system (i.e. have to be serialized/deserialized). This
+; is surprisingly CPU-intensive! (... because Atoms/Values are really
+; very small and simple, so they're fast, and just about anything else
+; is slower...)
+;
+; In principle, one *could* creat a backend for whiz-bag super-ultra
+; very-popular and highly-recommended distributed database XYZ.
+; This way, the distribution and scalability issues can be handled by
+; system XYZ -- and *bingo*, you've got a highly distributed AtomSpace.
+;
+; Or ... that's the theory. In practice, the serialization/deserialization
+; costs overwhelm performance. It currently appears that the best way
+; to use the AtomSpace is in a "decentralized" fashion, with
+; peer-to-peer communication between AtomSpaces (e.g. with the
+; previously mentioned https://github.com/opencog/atomspace-cog/)
+; and provide persistance with a fast, simple file-backed single-user
+; (key-value or column-store) DB.
+;
+; (The other point is that none of the whizzy bells-n-whistles of the
+; whizzy database XYZ are needed. Those whizzy data analytics tools
+; are useless on AtomSpace data...)
+;
+;-------------------------------------------------------------
+; Some blogs about scaling PostgreSQL:
 ;
 ; https://blog.timescale.com/scalable-postgresql-high-availability-read-scalability-streaming-replication-fb95023e2af
 ; https://www.enterprisedb.com/blog/horizontal-scalability-postgresql-96
@@ -42,7 +74,7 @@
 ; configured PostgreSQL for network operation. This is not easy.
 ; [The instructions are here](../../opencog/persist/sql/README.md)
 ;
-; You should make sure that the unit tests pass. There are four unit
+; You should make sure that the unit tests pass. There are ten unit
 ; tests that check the PostgreSQL backend. If you misconfigured the
 ; database, the unit tests will fail. Passing them will get you started.
 ;

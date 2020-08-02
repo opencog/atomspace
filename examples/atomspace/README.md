@@ -71,8 +71,8 @@ be effective.
 * `execute.scm`        -- Callbacks written in python or scheme.
 * `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
-* `persistence.scm`    -- Layering the AtomSpace on a "real" database.
-* `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
+* `persistence-sql.scm`-- Layering the AtomSpace on a "real" database.
+* `distributed-sql.scm`-- Distributed AtomSpace on multiple network nodes.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
