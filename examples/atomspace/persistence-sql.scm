@@ -10,7 +10,7 @@
 ;
 ; The AtomSpace has been designed with a generic "backend" layer, so
 ; that data can be saved to any database. A number of these have been
-; tried. The one that currently works the best is PostgresSQL.
+; tried. The one that currently works the best is PostgreSQL.
 ;
 ; -------------------------------------------------------------------
 ; Architectural Notes & Commentary.
@@ -32,7 +32,7 @@
 ; larger datasets from being loadable.
 ;
 ; That said, there are then two issues worth considering.
-; (1) Persistance-to-disk. This would probably be best achieved by
+; (1) Persistence-to-disk. This would probably be best achieved by
 ;     a simple, small, fast, single-user database (key-value or
 ;     column-store). This allows datasets to be distributed as files.
 ;

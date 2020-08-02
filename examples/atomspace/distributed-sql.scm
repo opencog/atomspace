@@ -2,14 +2,14 @@
 ; distributed-sql.scm -- Network-via-SQL Distributed AtomSpace.
 ;
 ; The AtomSpace is an in-RAM database, with several backends that allow
-; data storage and network communications.  This perticular demo shows
+; data storage and network communications.  This particular demo shows
 ; the Postgres SQL backend, and how to use it to have multiple
 ; AtomSpaces communicate with each other over the network.
 ;
 ; The AtomSpace has a built-in "Backend API" - a small and simple layer
 ; for sending/receiving (or saving/restoring) Atoms and Values, either
 ; individually, or in groups, to whatever backend was provided. This
-; demo is for the PostgresSQL backend (which is networked).
+; demo is for the PostgreSQL backend (which is networked).
 ;
 ; Besides SQL, there is also a direct AtomSpace-to-AtomSpace network
 ; client/server interface at https://github.com/opencog/atomspace-cog/
@@ -44,7 +44,7 @@
 ; very small and simple, so they're fast, and just about anything else
 ; is slower...)
 ;
-; In principle, one *could* creat a backend for whiz-bag super-ultra
+; In principle, one *could* create a backend for whiz-bag super-ultra
 ; very-popular and highly-recommended distributed database XYZ.
 ; This way, the distribution and scalability issues can be handled by
 ; system XYZ -- and *bingo*, you've got a highly distributed AtomSpace.
@@ -54,7 +54,7 @@
 ; to use the AtomSpace is in a "decentralized" fashion, with
 ; peer-to-peer communication between AtomSpaces (e.g. with the
 ; previously mentioned https://github.com/opencog/atomspace-cog/)
-; and provide persistance with a fast, simple file-backed single-user
+; and provide persistence with a fast, simple file-backed single-user
 ; (key-value or column-store) DB.
 ;
 ; (The other point is that none of the whizzy bells-n-whistles of the
@@ -68,7 +68,7 @@
 ; https://www.enterprisedb.com/blog/horizontal-scalability-postgresql-96
 ; https://www.cybertec-postgresql.com/en/services/administration/postgresql-performance-and-scalability/
 ;
-; This demo is a minor variant of the demo in `persistence.scm`. It
+; This demo is a minor variant of the demo in `persistence-sql.scm`. It
 ; uses two AtomSpaces, running on different machines, connecting to the
 ; same PostgreSQL backend. This assumes that you have correctly
 ; configured PostgreSQL for network operation. This is not easy.
@@ -81,8 +81,8 @@
 ; -------------------------------------------------
 ; Demo steps:
 ; * Make sure that you understand how to run database operations on a
-;   single node first -- see the demo example `persistance.scm`.
-;   This includes installing and configuring PostreSQL as described
+;   single node first -- see the demo example `persistence-sql.scm`.
+;   This includes installing and configuring Postgresql as described
 ;   [here](../../opencog/persist/sql/README.md)
 ; * The below assumes that Postgres is running at the network address
 ;   10.70.70.2 -- change this as needed (and use DNS).
