@@ -51,10 +51,12 @@ void BackingStore::getAtom(const Handle& h)
 	if (hv)
 	{
 		AtomSpace *as = h->getAtomSpace();
-		if (nullptr != as and not as->get_read_only())
+		if (nullptr != as)
 			for (const Handle& k: hv->getKeys())
 			{
 				Handle ak = as->add_atom(k);
+				// Read-only AtomSpaces won't allow insertion.
+				if (nullptr == ak) continue;
 				as->set_value(h, ak, hv->getValue(k));
 			}
 		else

@@ -382,6 +382,7 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // else, then save the old TV, fetch the new TV, and combine them
     // with your favorite algo.
     Handle ah = add_atom(h);
+    if (nullptr == ah) return ah; // if read-only, then cannot update.
     _backing_store->getAtom(ah);
     return ah;
 }
