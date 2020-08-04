@@ -204,7 +204,8 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
  * ((KEY . VALUE)(KEY2 . VALUE2)...)
  * Store the results as values on the atom.
  */
-void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
+void Sexpr::decode_alist(const Handle& atom,
+                         const std::string& alist, size_t& pos)
 {
 	AtomSpace* as = atom->getAtomSpace();
 
@@ -247,7 +248,8 @@ void Sexpr::decode_alist(Handle& atom, const std::string& alist, size_t& pos)
  * (list (cons KEY VALUE)(cons KEY2 VALUE2)...)
  * Store the results as values on the atom.
  */
-void Sexpr::decode_slist(Handle& atom, const std::string& alist, size_t& pos)
+void Sexpr::decode_slist(const Handle& atom,
+                         const std::string& alist, size_t& pos)
 {
 	AtomSpace* as = atom->getAtomSpace();
 

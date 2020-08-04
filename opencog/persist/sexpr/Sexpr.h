@@ -55,9 +55,9 @@ public:
 	static ValuePtr decode_value(const std::string&, size_t&);
 	static Type decode_type(const std::string& s, size_t& pos);
 
-	static void decode_slist(Handle&, const std::string&, size_t&);
-	static void decode_alist(Handle&, const std::string&, size_t&);
-	static void decode_alist(Handle& h, const std::string& s) {
+	static void decode_slist(const Handle&, const std::string&, size_t&);
+	static void decode_alist(const Handle&, const std::string&, size_t&);
+	static void decode_alist(const Handle& h, const std::string& s) {
 		size_t junk = 0;
 		decode_alist(h, s, junk);
 	}
