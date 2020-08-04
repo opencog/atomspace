@@ -37,3 +37,24 @@ void BackingStore::unregisterWith(AtomSpace* atomspace)
 {
 	atomspace->unregisterBackingStore(this);
 }
+
+/* Provide a backwards-compat implementation. */
+void BackingStore::getAtom(const Handle& h)
+{
+	Handle hv;
+	if (h->is_node())
+		hv = getNode(h->get_type(), h->get_name().c_str());
+	else
+		hv = getLink(h->get_type(), h->getOutgoingSet());
+
+	barrier();
+	if (hv)
+	{
+		AtomSpace *as = h->getAtomSpace();
+		if (nullptr != as)
+			for (const Handle& k: hv->getKeys())
+				as->set_value(h, k, hv->getValue(k));
+		else
+			h->copyValues(hv);
+	}
+}

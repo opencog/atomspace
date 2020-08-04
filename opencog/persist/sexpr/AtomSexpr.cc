@@ -46,6 +46,7 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
                          size_t line_cnt)
 {
 	// Advance past whitespace.
+	// Would be more efficient to say l = s.find_first_not_of(" \t\n", l);
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
 	if (l == r) return 0;
 
