@@ -56,26 +56,20 @@ class BackingStore
 		virtual ~BackingStore() {}
 
 		/**
-		 * Return a Link with the indicated type and outset,
-		 * if it exists; else return nullptr. The returned atom
-		 * will have all values attached to it, that the backing
-		 * store knows about.
+		 * Fetch all the Values attached to the indicated Atom,
+		 * if any. The Values are automatically installed on the
+		 * provided Atom. If the Atom is in some AtomSpace, then
+		 * the keys, as well as any (other) Atoms appearing inside
+		 * of the Values are placed into that AtomSpace. (That is,
+		 * just provide a null AtomSpace if this is not wanted.)
 		 *
 		 * See also `loadValue()` below, which can fetch just one
 		 * single value.
-		 */
-		virtual Handle getLink(Type, const HandleSeq&) = 0;
-
-		/**
-		 * Return a Node with the indicated type and name, if it
-		 * exists; else return nullptr. The returned atom will have
-		 * all values attached to it, that the backing store knows
-		 * about.
 		 *
-		 * See also `loadValue()` below, which can fetch just one
-		 * single value.
+		 * FYI: This replaces the deprecated getNode() and getLink().
+		 * A backwards-compat implementation is provided.
 		 */
-		virtual Handle getNode(Type, const char *) = 0;
+		virtual void getAtom(const Handle&);
 
 		/**
 		 * Fetch the entire incoming set of the indicated Atom,
@@ -252,6 +246,14 @@ class BackingStore
 		 * Unregister this backing store with the atomspace.
 		 */
 		void unregisterWith(AtomSpace*);
+
+		/**  Deprecated. Implement getAtom() instead. */
+		virtual Handle getLink(Type, const HandleSeq&) {
+			throw IOException(TRACE_INFO, "Implementation is buggy!");
+		}
+		virtual Handle getNode(Type, const char *) {
+			throw IOException(TRACE_INFO, "Implementation is buggy!");
+		}
 };
 
 /** @}*/

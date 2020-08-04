@@ -381,25 +381,10 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // and not to play monkey-shines with them.  If you want something
     // else, then save the old TV, fetch the new TV, and combine them
     // with your favorite algo.
-    Handle hv;
-    if (h->is_node()) {
-        hv = _backing_store->getNode(h->get_type(),
-                                     h->get_name().c_str());
-    }
-    else if (h->is_link()) {
-        hv = _backing_store->getLink(h->get_type(),
-                                     h->getOutgoingSet());
-    }
-
-    // If we found it, add it to the atomspace -- even when the
-    // atomspace is marked read-only; the atomspace is acting as
-    // a cache for the backingstore.
-    if (hv) return _atom_table.add(hv);
-
-    // If it is not found, then it cannot be added.
-    if (_read_only) return Handle::UNDEFINED;
-
-    return _atom_table.add(h);
+    Handle ah = add_atom(h);
+    if (nullptr == ah) return ah; // if read-only, then cannot update.
+    _backing_store->getAtom(ah);
+    return ah;
 }
 
 Handle AtomSpace::fetch_value(const Handle& h, const Handle& key)
