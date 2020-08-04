@@ -51,9 +51,12 @@ void BackingStore::getAtom(const Handle& h)
 	if (hv)
 	{
 		AtomSpace *as = h->getAtomSpace();
-		if (nullptr != as)
+		if (nullptr != as and not as->get_read_only())
 			for (const Handle& k: hv->getKeys())
-				as->set_value(h, k, hv->getValue(k));
+			{
+				Handle ak = as->add_atom(k);
+				as->set_value(h, ak, hv->getValue(k));
+			}
 		else
 			h->copyValues(hv);
 	}

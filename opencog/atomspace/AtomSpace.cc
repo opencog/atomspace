@@ -381,9 +381,9 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // and not to play monkey-shines with them.  If you want something
     // else, then save the old TV, fetch the new TV, and combine them
     // with your favorite algo.
-    add_atom(h);
-    _backing_store->getAtom(h);
-    return h;
+    Handle ah = add_atom(h);
+    _backing_store->getAtom(ah);
+    return ah;
 }
 
 Handle AtomSpace::fetch_value(const Handle& h, const Handle& key)
