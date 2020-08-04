@@ -355,23 +355,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 /// a nice home to live in.
 ValuePtr Sexpr::add_atoms(AtomSpace* as, const ValuePtr& vptr)
 {
-	Type t = vptr->get_type();
-	if (nameserver().isA(t, ATOM))
-	{
-		Handle h = as->add_atom(HandleCast(vptr));
-		if (h) return h; // Might be null if `as` is read-only.
-		return vptr;
-	}
-
-	if (nameserver().isA(t, LINK_VALUE))
-	{
-		std::vector<ValuePtr> vvec;
-		for (const ValuePtr& v : LinkValueCast(vptr)->value())
-			vvec.push_back(add_atoms(as, v));
-
-		return valueserver().create(t, vvec);
-	}
-	return vptr;
+	return as->add_atoms(vptr);
 }
 
 /* ============================= END OF FILE ================= */

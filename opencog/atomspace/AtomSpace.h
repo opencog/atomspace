@@ -249,6 +249,13 @@ public:
     }
 
     /**
+     * Given a Value, find all of the Atoms inside of it, and add them
+     * to the AtomSpace. Return an equivalent Value, with all Atoms
+     * substituted by the ones that are in this AtomSpace.
+     */
+    ValuePtr add_atoms(const ValuePtr&);
+
+    /**
      * Make sure all atom writes have completed, before returning.
      * This only has an effect when the atomspace is backed by some
      * sort of storage, or is sending atoms to some remote location

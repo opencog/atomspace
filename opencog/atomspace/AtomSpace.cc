@@ -28,17 +28,14 @@
 
 #include <stdlib.h>
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/oc_assert.h>
-
+#include <opencog/atoms/atom_types/types.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/atom_types/types.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "AtomSpace.h"
-
-//#define DPRINTF printf
-#define DPRINTF(...)
 
 using namespace opencog;
 
@@ -345,6 +342,27 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
     return _atom_table.getHandle(t, std::move(outgoing));
+}
+
+ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
+{
+    Type t = vptr->get_type();
+    if (nameserver().isA(t, ATOM))
+    {
+        Handle h = add_atom(HandleCast(vptr));
+        if (h) return h; // Might be null if AtomSpace is read-only.
+        return vptr;
+    }
+
+    if (nameserver().isA(t, LINK_VALUE))
+    {
+        std::vector<ValuePtr> vvec;
+        for (const ValuePtr& v : LinkValueCast(vptr)->value())
+           vvec.push_back(add_atoms(v));
+
+        return valueserver().create(t, vvec);
+    }
+    return vptr;
 }
 
 void AtomSpace::store_atom(const Handle& h)
