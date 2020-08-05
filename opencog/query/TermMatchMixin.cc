@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atomspace/Transient.h>
 
 #include "TermMatchMixin.h"
 
@@ -39,81 +40,6 @@ using namespace opencog;
 #else
 #define DO_LOG(STUFF)
 #endif
-
-/* ======================================================== */
-// Cache for temp (transient) atomsapaces.  The evaluation of
-// expressions during pattern matching requires having a temporary
-// atomspace, treated as a scratch space to hold temporary results.
-// These are then discarded, after the match is confirmed or denied.
-// The issue is that creating an atomspace is CPU-intensive, so its
-// cheaper to just have a cache of empty atomspaces, hanging around,
-// and ready to go. The code in this section implements this.
-
-const bool TRANSIENT_SPACE = true;
-const int MAX_CACHED_TRANSIENTS = 8;
-
-// Allocated storage for the transient atomspace cache static variables.
-std::mutex TermMatchMixin::s_transient_cache_mutex;
-std::vector<AtomSpace*> TermMatchMixin::s_transient_cache;
-
-AtomSpace* TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
-{
-	AtomSpace* transient_atomspace = nullptr;
-
-	// See if the cache has one...
-	if (s_transient_cache.size() > 0)
-	{
-		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
-
-		// Check to make sure the cache still has one now that we have
-		// the mutex.
-		if (s_transient_cache.size() > 0)
-		{
-			// Pop the last transient atomspace off the cache stack.
-			transient_atomspace = s_transient_cache.back();
-			s_transient_cache.pop_back();
-
-			// Ready it for the new parent atomspace.
-			transient_atomspace->ready_transient(parent);
-		}
-	}
-
-	// If we didn't get one from the cache, then create a new one.
-	if (!transient_atomspace)
-		transient_atomspace = new AtomSpace(parent, TRANSIENT_SPACE);
-
-	return transient_atomspace;
-}
-
-void TermMatchMixin::release_transient_atomspace(AtomSpace* atomspace)
-{
-	bool atomspace_cached = false;
-
-	// If the cache is not full...
-	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
-	{
-		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
-
-		// Check it again since we only now have the mutex locked.
-		if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
-		{
-			// Clear this transient atomspace.
-			atomspace->clear_transient();
-
-			// Place this transient into the cache.
-			s_transient_cache.push_back(atomspace);
-
-			// The atomspace has been cached.
-			atomspace_cached = true;
-		}
-	}
-
-	// If we didn't cache the atomspace, then delete it.
-	if (!atomspace_cached)
-		delete atomspace;
-}
 
 /* ======================================================== */
 
