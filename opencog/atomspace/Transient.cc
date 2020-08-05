@@ -53,7 +53,7 @@ static std::vector<AtomSpace*> s_transient_cache;
 
 static std::atomic_int num_issued = 0;
 
-AtomSpace* grab_transient_atomspace(AtomSpace* parent)
+AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 {
 	AtomSpace* transient_atomspace = nullptr;
 
@@ -91,7 +91,7 @@ AtomSpace* grab_transient_atomspace(AtomSpace* parent)
 	return transient_atomspace;
 }
 
-void release_transient_atomspace(AtomSpace* atomspace)
+void opencog::release_transient_atomspace(AtomSpace* atomspace)
 {
 	bool atomspace_cached = false;
 
