@@ -6,6 +6,7 @@ ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomTable.cc
 	BackingStore.cc
+	Transient.cc
 	TypeIndex.cc
 )
 
@@ -40,6 +41,7 @@ INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
 	BackingStore.h
+	Transient.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
