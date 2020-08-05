@@ -280,7 +280,9 @@ Handle AtomTable::add(const Handle& orig, bool force)
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal.emit(atom);
+    // No don't even bother. This just damages performance,
+    // and no one uses this stuff.
+    // _addAtomSignal.emit(atom);
 
     return atom;
 }
@@ -434,7 +436,7 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
     // unlocking it once is not enough, because it can still be
     // recurisvely locked.
     // lck.unlock();
-    _removeAtomSignal.emit(handle);
+    // _removeAtomSignal.emit(handle);
     // lck.lock();
 
     typeIndex.removeAtom(handle);

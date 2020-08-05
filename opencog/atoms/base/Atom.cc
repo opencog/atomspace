@@ -135,10 +135,12 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
     setValue (truth_key(), ValueCast(newTV));
 
-    if (_atom_space != nullptr) {
-        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
-        tvch.emit(get_handle(), oldTV, newTV);
-    }
+    // Do not emit signals. This does nothing at all except damage
+    // performance. No one uses this stuff.
+    //if (_atom_space != nullptr) {
+    //    TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
+    //    tvch.emit(get_handle(), oldTV, newTV);
+    //}
 }
 
 TruthValuePtr Atom::getTruthValue() const
