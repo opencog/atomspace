@@ -13,7 +13,7 @@ apt-get install python-nose
 You may need to set up the PYTHON path:
 export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
 or, if installed:
-export PYTHONPATH=/usr/local/lib/python3/dist-packages/opencog:${PYTHON}
+export PYTHONPATH=/usr/local/lib/python3.7/dist-packages/opencog:${PYTHON}
 
 For example:
 export PYTHONPATH=build/opencog/cython PROJECT_SOURCE_DIR=.
