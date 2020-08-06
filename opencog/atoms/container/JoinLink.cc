@@ -687,7 +687,7 @@ HandleSet JoinLink::container(AtomSpace* as, JoinCallback* jcb,
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);
-	return replace(trav.containers, trav);
+	return replace(trav);
 }
 
 /* ================================================================= */
@@ -695,13 +695,12 @@ HandleSet JoinLink::container(AtomSpace* as, JoinCallback* jcb,
 /// Given a top-level set of containing links, perform
 /// replacements, substituting the bottom-most atoms as requested,
 /// while honoring all scoping and quoting.
-HandleSet JoinLink::replace(const HandleSet& containers,
-                            const Traverse& trav) const
+HandleSet JoinLink::replace(const Traverse& trav) const
 {
 	// Use the Replacement utility, so that all scoping and
 	// quoting is handled correctly.
 	HandleSet replaced;
-	for (const Handle& top: containers)
+	for (const Handle& top: trav.containers)
 	{
 		Handle rep = Replacement::replace_nocheck(top, trav.replace_map);
 		replaced.insert(rep);

@@ -89,7 +89,7 @@ protected:
 	HandleSet constrain(AtomSpace*, bool, Traverse&) const;
 
 	void fixup_replacements(Traverse&) const;
-	HandleSet replace(const HandleSet&, const Traverse&) const;
+	HandleSet replace(const Traverse&) const;
 
 	void find_top(Traverse&, const Handle&) const;
 	HandleSet container(AtomSpace*, JoinCallback*, bool) const;
