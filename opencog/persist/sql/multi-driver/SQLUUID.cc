@@ -81,6 +81,10 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 /// Return the UUID of the handle, if it is known.
 /// If the handle is in the database, then the correct UUID is returned.
 /// If the handle is NOT in the database, this returns the invalid UUID.
+///
+/// FYI, this can also throw, because doGetLink() can throw, if one of
+/// the Atoms in the Link is missing. So, really, this and get_uuid()
+/// should be merged back into one. XXX FIXME.
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);

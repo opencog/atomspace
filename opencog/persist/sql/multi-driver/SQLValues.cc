@@ -478,31 +478,30 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 
 void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
 {
+	rethrow();
 	if (nullptr == atom) return;
+	try
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+			get_uuid(key), get_uuid(atom));
 
-	UUID utom = check_uuid(atom);
-	if (TLB::INVALID_UUID == utom) return;
+		Response rp(conn_pool);
+		rp.exec(buff);
 
-	UUID ukey = check_uuid(key);
-	if (TLB::INVALID_UUID == ukey) return;
-
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		ukey, utom);
-
-	Response rp(conn_pool);
-	rp.exec(buff);
-
-	rp.store = this;
-	rp.atom = atom;
-	rp.table = nullptr;
-	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
-	rp.atom = nullptr;
+		rp.store = this;
+		rp.atom = atom;
+		rp.table = nullptr;
+		rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
+		rp.atom = nullptr;
+	}
+	catch (const NotFoundException& ex) {}
 }
 
 void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
 {
+	rethrow();
 	if (nullptr == atom) return;
 
 	ValuePtr pap = atom->getValue(key);
