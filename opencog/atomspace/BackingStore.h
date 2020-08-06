@@ -247,6 +247,10 @@ class BackingStore
 		 */
 		void unregisterWith(AtomSpace*);
 
+	protected:
+		virtual void getIncomingSet(AtomSpace*, const Handle&);
+		virtual void getIncomingByType(AtomSpace*, const Handle&, Type);
+
 		/**  Deprecated. Implement getAtom() instead. */
 		virtual Handle getLink(Type, const HandleSeq&) {
 			throw IOException(TRACE_INFO, "Implementation is buggy!");
