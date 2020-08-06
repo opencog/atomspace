@@ -112,22 +112,51 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 
 // ==========================================================
 
-/// Attention: The design of this thing is subject to change.
-/// This is the current experimental API.
+/// runQuery -- run a specific query on the backend dataset and load
+/// only those atoms that satisfy the query. (i.e. load them into the
+/// AtomSpace.)
 ///
-/// The thing I don't like about this is the caching... so, we
-/// performed the query straight out of disk starage (with the
-/// incoming-set trick above), but then we are wasting CPU cycles
-/// writing results back to disk, and maybe the user didn't need
-/// that.
+/// This is currently experimental, and subject to change.
 ///
-/// This should be compared to the client-server variant of this,
-/// where the caching comes "for free" (because the search result is
-/// already on the srever; it would take more effort to send it to the
-/// client, delete it from the server, only to have the client turn
-/// around and send it back to the server for caching.
+/// The thing I don't like about this is the caching design...
+/// So: first of all, there are *two* generic kinds of backends, call
+/// them "local" and "remote". The "remote" backends can find Atoms
+/// easily enough, but have a high cost of shipping them (i.e. over the
+/// network). The "local" backends have a low or zero cost of shipping
+/// Atoms; the main bottleneck is just obtaining the Atoms in  the first
+/// place.  The caching needs of these two backends differ.
 ///
-/// Maybe we need two versions of this: a cached and a non-cached API...
+/// The caching currently works as follows:
+/// On the first call, the query is performed, and the resulting Atoms
+/// are loaded into the AtomSpace, and they are *also* attached to the
+/// indicated key.  That's the cache. On second and subsequent calls,
+/// the value on the key is returned (thus avoiding the over-head of
+/// re-running the query.) The cache can be cleared by deleting the key.
+///
+/// For the "local storage" case, the caching "isn't really needed",
+/// because the user can "do it themselves" -- its not hard -- run the
+/// query, attach the results to the key. Done.  There's even a
+/// downside: the code below writes that key back into storage,
+/// potentially wasting both CPU time, and storage space.  This is
+/// bothersome, if the user didn't need that, and was just wanted
+/// throw-away results.
+///
+/// For the "remote storage" case, the below is much closer to ideal.
+/// Asking users to "do it themselves" for the remote case is
+/// inefficient. The query is computed on the remote server, and is
+/// shipped to the local server. The "do-it-yourself" cases would then
+/// ship the query results back to the server... which is a pointless
+/// waste of network bandwidth and risks extra latency.
+///
+/// So, I'm thinking, ... Maybe we need two versions of this: a cached
+/// and a non-cached API... or maybe one more flag-- an "always cache
+/// remotely" flag...
+///
+/// See also the notes about meta-information. It's currently
+/// implemented to be compatible with what `cog-execute-cache!` does.
+/// (and that compatibility should be maintained). See
+/// `opencog/scm/opencog/exec.scm` for that code.
+///
 void BackingStore::runQuery(const Handle& query, const Handle& key,
                             const Handle& meta, bool fresh)
 {
