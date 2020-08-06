@@ -49,26 +49,11 @@ using namespace opencog;
 class QueryPersistUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *_as;
+		AtomSpace* _as;
 		std::string uri;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
-
-		NodePtr n1[10];
-		NodePtr n2[10];
-		NodePtr n3[10];
-		NodePtr n4[10];
-		LinkPtr l[10];
-		LinkPtr l2[10];
-		LinkPtr l3[10];
-		Handle h1[10];
-		Handle h2[10];
-		Handle h3[10];
-		Handle h4[10];
-		Handle hl[10];
-		Handle hl2[10];
-		Handle hl3[10];
 
 	public:
 
@@ -136,13 +121,11 @@ QueryPersistUTest:: QueryPersistUTest(void)
  */
 void QueryPersistUTest::setUp(void)
 {
-	_as = new AtomSpace();
+	_as = nullptr;
 }
 
 void QueryPersistUTest::tearDown(void)
 {
-	delete _as;
-
 	kill_data();
 }
 
@@ -242,12 +225,18 @@ void QueryPersistUTest::test_pq_query(void)
 #endif
 }
 
+// ============================================================
+#define an _as->add_node
+#define al _as->add_link
+#define CONCEPT CONCEPT_NODE
+
 void QueryPersistUTest::do_test_query(void)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	kill_data();
 
+	_as = new AtomSpace();
 	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
 	TSM_ASSERT("Persist Module not loaded", _pm);
 
@@ -261,31 +250,47 @@ void QueryPersistUTest::do_test_query(void)
 		exit(1);
 	};
 
-	int idx = 0;
-	add_to_space(idx++, _as, "AA-aa-wow ");
-	add_to_space(idx++, _as, "BB-bb-wow ");
-	add_to_space(idx++, _as, "CC-cc-wow ");
-	add_to_space(idx++, _as, "DD-dd-wow ");
-	add_to_space(idx++, _as, "EE-ee-wow ");
+	/* Populate the Storage with stuff that we will later query. */
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "wheel")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "battery")));
 
-	/* Make sure UTF-8 works fine. */
-	add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
-	add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
-	add_to_space(idx++, _as, "係拉丁字母");
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "wheel")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "derailleur")));
+
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "airplane"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "airplane"), an(CONCEPT, "wings")));
+
+	// Sprinkle in some TruthValues
+	an(CONCEPT, "airplane") ->
+		setTruthValue(SimpleTruthValue::createTV(0.11, 100));
+
+	an(CONCEPT, "bicycle") ->
+		setTruthValue(SimpleTruthValue::createTV(0.22, 100));
+
+	an(CONCEPT, "car") ->
+		setTruthValue(SimpleTruthValue::createTV(0.33, 300));
 
 	/* Push all atoms out to the SQL DB */
 	_as->store_atomspace();
 
-	/* Extract atoms from the AtomSpace. This does not delete them from
-	 * the SQL storage, though; to do that, they must be deleted, not
-	 * extracted.
+	/* Clear the AtomSpace. This leaves the above in Sotrage.
 	 */
 	_as->barrier();
 	_as->clear();
-	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
 	delete _pm;
-	logger().debug("END TEST: %s", __FUNCTION__);
+	delete _as;
+	logger().info("END TEST: %s", __FUNCTION__);
 }
 
 /* ============================= END OF FILE ================= */
