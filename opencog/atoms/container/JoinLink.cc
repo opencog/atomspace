@@ -605,8 +605,7 @@ void JoinLink::find_top(Traverse& trav, const Handle& h) const
 /// term.  This include type constraints, as well as evaluatable
 /// terms that name the top variable.
 HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
-                              Traverse& trav,
-                              const HandleSet& containers) const
+                              Traverse& trav) const
 {
 	HandleSet rejects;
 
@@ -614,7 +613,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 	if (0 < _top_clauses.size())
 		temp = grab_transient_atomspace(as);
 
-	for (const Handle& h : containers)
+	for (const Handle& h : trav.containers)
 	{
 		// Weed out anything that is the wrong type
 		for (const Handle& toty : _top_types)
@@ -654,7 +653,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 
 	// Remove the rejects
 	HandleSet accept;
-	std::set_difference(containers.begin(), containers.end(),
+	std::set_difference(trav.containers.begin(), trav.containers.end(),
 	                    rejects.begin(), rejects.end(),
 	                    std::inserter(accept, accept.begin()));
 	return accept;
@@ -684,7 +683,7 @@ HandleSet JoinLink::container(AtomSpace* as, JoinCallback* jcb,
 
 	// Apply constraints on the top type, if any
 	if (0 < _top_types.size() or 0 < _top_clauses.size())
-		trav.containers = constrain(as, silent, trav, trav.containers);
+		trav.containers = constrain(as, silent, trav);
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);

@@ -86,7 +86,7 @@ protected:
 	HandleSet upper_set(AtomSpace*, bool, Traverse&) const;
 	HandleSet supremum(AtomSpace*, bool, Traverse&) const;
 
-	HandleSet constrain(AtomSpace*, bool, Traverse&, const HandleSet&) const;
+	HandleSet constrain(AtomSpace*, bool, Traverse&) const;
 
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;
