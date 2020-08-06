@@ -184,7 +184,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
-	UUID kuid;
+	UUID kuid = TLB::INVALID_UUID;
 	{
 		// We must make sure the key is in the database BEFORE it
 		// is used in any valuation; else a 'foreign key constraint'
@@ -192,11 +192,26 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		// the store completes, before some other thread gets its
 		// fingers on the key.
 		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
-		kuid = check_uuid(key);
+		try {
+			kuid = check_uuid(key);
+		} catch (const NotFoundException& ex) {}
 		if (TLB::INVALID_UUID == kuid)
 		{
 			do_store_atom(key);
-			kuid = get_uuid(key);
+			kuid = check_uuid(key);
+		}
+	}
+
+	UUID auid = TLB::INVALID_UUID;
+	{
+		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+		try {
+			auid = check_uuid(atom);
+		} catch (const NotFoundException& ex) {}
+		if (TLB::INVALID_UUID == auid)
+		{
+			do_store_atom(atom);
+			auid = check_uuid(atom);
 		}
 	}
 
@@ -204,7 +219,6 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
 	char aidbuff[BUFSZ];
-	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted first,
