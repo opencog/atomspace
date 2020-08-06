@@ -1319,9 +1319,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 			// Yuck. What we really want to do here is to find out
 			// if `Link(t, oset)` is in the incoming set of `hg`. But
 			// there isn't any direct way of doing this (at this time).
-			// So hack around this by asking the AtomSpace about it,
-			// instead.
-			Handle hup(hg->getAtomSpace()->get_link(t, std::move(oset)));
+			Handle hup(_pmc.get_link(hg, t, std::move(oset)));
 			if (nullptr == hup) return false;
 			return explore_type_branches(parent, hup, clause);
 		}

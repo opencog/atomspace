@@ -94,6 +94,10 @@ class PMCGroundings : public SatisfyMixin
 		{
 			return _cb.get_incoming_set(h, t);
 		}
+		Handle get_link(const Handle& hg, Type t, HandleSeq&& oset)
+		{
+			return _cb.get_link(hg, t, std::move(oset));
+		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
 		void next_connections(const GroundingMap& var_grounding)

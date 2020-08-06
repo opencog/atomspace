@@ -475,6 +475,12 @@ IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
 	return h->getIncomingSetByType(t, _as);
 }
 
+Handle TermMatchMixin::get_link(const Handle& hg,
+                                Type t, HandleSeq&& oset)
+{
+	return _as->get_link(t, std::move(oset));
+}
+
 /* ======================================================== */
 
 /// Evaluation of the link requires working with an atomspace of

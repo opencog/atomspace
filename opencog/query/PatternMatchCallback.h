@@ -292,6 +292,18 @@ class PatternMatchCallback
 			return h->getIncomingSetByType(t);
 		}
 
+		/**
+		 * Called whenever there is a need to verify that the given
+		 * Link(t, oset) appears in the incoming set of `hg`. That is,
+		 * `hg` is one of the atoms in the `oset`, and the goal is
+		 * confirm or deny that the Link(t, oset) exists, i.e is valid.
+		 * This allows the search space to intervene in link-presence
+		 * checking, e.g. by cutting off searches with low priority,
+		 * or by fetching from storage, as needed.
+		 */
+		virtual Handle get_link(const Handle& hg,
+		                        Type t, HandleSeq&& oset) = 0;
+
 		virtual const TypeSet& get_connectives(void)
 		{ static const TypeSet _empty; return _empty; }
 
