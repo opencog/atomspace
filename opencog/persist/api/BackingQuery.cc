@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
+#include <opencog/atomspace/Transient.h>
 
 #include <opencog/atoms/container/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
@@ -89,12 +90,6 @@ void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
 	getIncomingByType(as->get_atomtable(), h, t);
 }
 
-void BackingStore::runQuery(const Handle& query, const Handle& key,
-                            const Handle& metadata_key, bool fresh)
-{
-	throw IOException(TRACE_INFO, "Not implemented!");
-}
-
 // ==========================================================
 
 IncomingSet BackingImplicator::get_incoming_set(const Handle& h, Type t)
@@ -115,16 +110,7 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 	return h->getIncomingSet(_as);
 }
 
-// ====================== END OF FILE =======================
-
-#if 0
-
-#include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
-#include <opencog/persist/sexpr/Sexpr.h>
+// ==========================================================
 
 /// Attention: The design of this thing is subject to change.
 /// This is the current experimental API.
@@ -142,7 +128,7 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// around and send it back to the server for caching.
 ///
 /// Maybe we need two versions of this: a cached and a non-cached API...
-void RocksStorage::runQuery(const Handle& query, const Handle& key,
+void BackingStore::runQuery(const Handle& query, const Handle& key,
                             const Handle& meta, bool fresh)
 {
 	Type qt = query->get_type();
@@ -177,7 +163,7 @@ void RocksStorage::runQuery(const Handle& query, const Handle& key,
 		QueryLinkPtr qlp(QueryLinkCast(query));
 
 		AtomSpace* tas = grab_transient_atomspace(as);
-		RocksImplicator impl(this, tas);
+		BackingImplicator impl(this, tas);
 		impl.implicand = qlp->get_implicand();
 		impl.satisfy(qlp);
 
@@ -187,7 +173,7 @@ void RocksStorage::runQuery(const Handle& query, const Handle& key,
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
 		AtomSpace* tas = grab_transient_atomspace(as);
-		RocksSatisfyingSet sater(this, tas);
+		BackingSatisfyingSet sater(this, tas);
 		sater.satisfy(PatternLinkCast(query));
 
 		qv = sater.get_result_queue();
@@ -196,7 +182,7 @@ void RocksStorage::runQuery(const Handle& query, const Handle& key,
 	else if (nameserver().isA(qt, JOIN_LINK))
 	{
 		AtomSpace* tas = grab_transient_atomspace(as);
-		RocksJoinCallback rjcb(this, tas);
+		BackingJoinCallback rjcb(this, tas);
 
 		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
 		release_transient_atomspace(tas);
@@ -217,7 +203,7 @@ void RocksStorage::runQuery(const Handle& query, const Handle& key,
 	storeValue(query, key);
 
 	// If there's a meta-info key, then attach a timestamp. For now,
-	// that's teh only meta info we attach, and we try to be compatible
+	// that's the only meta info we attach, and we try to be compatible
 	// with what the code in `cog-execute-cache!` does. See
 	// https://github.com/opencog/atomspace/tree/master/opencog/scm/opencog/exec.scm
    // somewhere around lines 16-50.
@@ -229,4 +215,5 @@ void RocksStorage::runQuery(const Handle& query, const Handle& key,
 	query->setValue(meta, createFloatValue(dnow));
 	storeValue(query, meta);
 }
-#endif
+
+// ====================== END OF FILE =======================
