@@ -52,6 +52,9 @@ namespace opencog
  */
 class BackingStore
 {
+	friend class BackingImplicator;
+	friend class BackingSatisfyingSet;
+	friend class BackingJoinCallback;
 	public:
 		virtual ~BackingStore() {}
 

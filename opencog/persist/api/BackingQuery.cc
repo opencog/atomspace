@@ -95,6 +95,26 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	throw IOException(TRACE_INFO, "Not implemented!");
 }
 
+// ==========================================================
+
+IncomingSet BackingImplicator::get_incoming_set(const Handle& h, Type t)
+{
+	_store->getIncomingByType(_ras, h, t);
+	return h->getIncomingSetByType(t, _ras);
+}
+
+IncomingSet BackingSatisfyingSet::get_incoming_set(const Handle& h, Type t)
+{
+	_store->getIncomingByType(_as, h, t);
+	return h->getIncomingSetByType(t, _as);
+}
+
+IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
+{
+	_store->getIncomingSet(_as, h);
+	return h->getIncomingSet(_as);
+}
+
 // ====================== END OF FILE =======================
 
 #if 0
@@ -105,29 +125,6 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
 #include <opencog/persist/sexpr/Sexpr.h>
-
-#include "RocksStorage.h"
-
-
-using namespace opencog;
-
-IncomingSet RocksImplicator::get_incoming_set(const Handle& h, Type t)
-{
-	_store->getIncomingByType(_ras, h, t);
-	return h->getIncomingSetByType(t, _ras);
-}
-
-IncomingSet RocksSatisfyingSet::get_incoming_set(const Handle& h, Type t)
-{
-	_store->getIncomingByType(_as, h, t);
-	return h->getIncomingSetByType(t, _as);
-}
-
-IncomingSet RocksJoinCallback::get_incoming_set(const Handle& h)
-{
-	_store->getIncomingSet(_as, h);
-	return h->getIncomingSet(_as);
-}
 
 /// Attention: The design of this thing is subject to change.
 /// This is the current experimental API.
