@@ -734,6 +734,11 @@ ValuePtr JoinLink::execute(AtomSpace* as, bool silent)
 	return do_execute(as, &djcb, silent);
 }
 
+ValuePtr JoinLink::execute_cb(AtomSpace* as, JoinCallback* jcb)
+{
+	return do_execute(as, jcb, false);
+}
+
 DEFINE_LINK_FACTORY(JoinLink, JOIN_LINK)
 
 /* ===================== END OF FILE ===================== */

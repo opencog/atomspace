@@ -31,6 +31,8 @@ namespace opencog
  *  @{
  */
 
+/// Allow users to overload the getIncomingSet method.
+/// Currently required by the file-storage backend.
 class JoinCallback
 {
 public:
