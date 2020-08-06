@@ -581,7 +581,7 @@ HandleSet JoinLink::supremum(AtomSpace* as, bool silent,
 /// find_top() - walk upwards from `h` and insert topmost atoms into
 /// the container set.  This recursively walks to the top, until there
 /// is nothing more above.
-void JoinLink::find_top(Traverse& trav, HandleSet& containers, const Handle& h) const
+void JoinLink::find_top(Traverse& trav, const Handle& h) const
 {
 	// Ignore other containers!
 	Type t = h->get_type();
@@ -591,12 +591,12 @@ void JoinLink::find_top(Traverse& trav, HandleSet& containers, const Handle& h) 
 	IncomingSet is(trav.jcb->get_incoming_set(h));
 	if (0 == is.size())
 	{
-		containers.insert(h);
+		trav.containers.insert(h);
 		return;
 	}
 
 	for (const Handle& ih: is)
-		find_top(trav, containers, ih);
+		find_top(trav, ih);
 }
 
 /* ================================================================= */
@@ -668,28 +668,27 @@ HandleSet JoinLink::container(AtomSpace* as, JoinCallback* jcb,
 	Traverse trav;
 	trav.jcb = jcb;
 
-	HandleSet containers;
 	Type t = get_type();
 	if (MINIMAL_JOIN_LINK == t)
-		containers = supremum(as, silent, trav);
+		trav.containers = supremum(as, silent, trav);
 	else if (UPPER_SET_LINK == t)
-		containers = upper_set(as, silent, trav);
+		trav.containers = upper_set(as, silent, trav);
 	else if (MAXIMAL_JOIN_LINK == t)
 	{
 		HandleSet supset(supremum(as, silent, trav));
 		for (const Handle& h: supset)
-			find_top(trav, containers, h);
-		if (0 == containers.size())
-			containers = supset;
+			find_top(trav, h);
+		if (0 == trav.containers.size())
+			trav.containers = supset;
 	}
 
 	// Apply constraints on the top type, if any
 	if (0 < _top_types.size() or 0 < _top_clauses.size())
-		containers = constrain(as, silent, trav, containers);
+		trav.containers = constrain(as, silent, trav, trav.containers);
 
 	// Perform the actual rewriting.
 	fixup_replacements(trav);
-	return replace(containers, trav);
+	return replace(trav.containers, trav);
 }
 
 /* ================================================================= */

@@ -72,6 +72,7 @@ protected:
 	struct Traverse
 	{
 		JoinCallback *jcb;
+		HandleSet containers;
 		HandleMap replace_map;
 		HandleSetSeq join_map;
 		HandleSeqMap top_map;
@@ -90,7 +91,7 @@ protected:
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;
 
-	void find_top(Traverse&, HandleSet&, const Handle&) const;
+	void find_top(Traverse&, const Handle&) const;
 	HandleSet container(AtomSpace*, JoinCallback*, bool) const;
 
 	virtual QueueValuePtr do_execute(AtomSpace*,
