@@ -1,8 +1,11 @@
 /*
  * opencog/persist/api/BackingQuery.cc
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (c) 2020 Linas Vepstas <linas@linas.org>
  * All Rights Reserved
+ *
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,8 +23,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <time.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
+
+#include <opencog/atoms/container/JoinLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
+#include <opencog/query/Implicator.h>
+#include <opencog/query/Satisfier.h>
+
+// This is in a C file, not a header file,
+// because no else one should touch this.
+namespace opencog
+{
+
+// Callback for QueryLinks
+class BackingImplicator : public Implicator
+{
+		BackingStore* _store;
+		AtomSpace* _ras;
+	public:
+		BackingImplicator(BackingStore* sto, AtomSpace* as) :
+			Implicator(as), _store(sto), _ras(as) {}
+		virtual ~BackingImplicator() {}
+		virtual IncomingSet get_incoming_set(const Handle&, Type);
+};
+
+// Callback for MeetLinks
+class BackingSatisfyingSet : public SatisfyingSet
+{
+		BackingStore* _store;
+	public:
+		BackingSatisfyingSet(BackingStore* sto, AtomSpace* as) :
+			SatisfyingSet(as), _store(sto) {}
+		virtual ~BackingSatisfyingSet() {}
+		virtual IncomingSet get_incoming_set(const Handle&, Type);
+};
+
+// Callback for JoinLinks
+class BackingJoinCallback : public JoinCallback
+{
+		BackingStore* _store;
+		AtomSpace* _as;
+	public:
+		BackingJoinCallback(BackingStore* sto, AtomSpace* as)
+			: _store(sto), _as(as) {}
+		virtual ~BackingJoinCallback() {}
+		virtual IncomingSet get_incoming_set(const Handle&);
+};
+
+} // namespace opencog
 
 using namespace opencog;
 
@@ -46,85 +98,16 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 // ====================== END OF FILE =======================
 
 #if 0
-/*
- * RocksQuery.cc
- * Query the database.
- *
- * Copyright (c) 2020 Linas Vepstas <linas@linas.org>
- *
- * LICENSE:
- * SPDX-License-Identifier: AGPL-3.0-or-later
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
-#include <time.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
-#include <opencog/atoms/container/JoinLink.h>
-#include <opencog/atoms/pattern/QueryLink.h>
-#include <opencog/query/Implicator.h>
-#include <opencog/query/Satisfier.h>
 #include <opencog/persist/sexpr/Sexpr.h>
 
 #include "RocksStorage.h"
 
-namespace opencog
-{
-
-// Callback for QueryLinks
-class RocksImplicator : public Implicator
-{
-		RocksStorage* _store;
-		AtomSpace* _ras;
-	public:
-		RocksImplicator(RocksStorage* sto, AtomSpace* as) :
-			Implicator(as), _store(sto), _ras(as) {}
-		virtual ~RocksImplicator() {}
-		virtual IncomingSet get_incoming_set(const Handle&, Type);
-};
-
-// Callback for MeetLinks
-class RocksSatisfyingSet : public SatisfyingSet
-{
-		RocksStorage* _store;
-	public:
-		RocksSatisfyingSet(RocksStorage* sto, AtomSpace* as) :
-			SatisfyingSet(as), _store(sto) {}
-		virtual ~RocksSatisfyingSet() {}
-		virtual IncomingSet get_incoming_set(const Handle&, Type);
-};
-
-// Callback for JoinLinks
-class RocksJoinCallback : public JoinCallback
-{
-		RocksStorage* _store;
-		AtomSpace* _as;
-	public:
-		RocksJoinCallback(RocksStorage* sto, AtomSpace* as)
-			: _store(sto), _as(as) {}
-		virtual ~RocksJoinCallback() {}
-		virtual IncomingSet get_incoming_set(const Handle&);
-};
-
-} // namespace opencog
 
 using namespace opencog;
 
