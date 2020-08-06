@@ -36,18 +36,6 @@ void BackingStore::unregisterWith(AtomSpace* atomspace)
 }
 
 // ==========================================================
-
-void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
-{
-	getIncomingSet(as->get_atomtable(), h);
-}
-
-void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
-{
-	getIncomingByType(as->get_atomtable(), h, t);
-}
-
-// ==========================================================
 // Provide a backwards-compat implementation.
 // This is for those providers that implemented `getNode()` and
 // `getLink()`.  They should be updated to provide the below
@@ -78,3 +66,5 @@ void BackingStore::getAtom(const Handle& h)
 			h->copyValues(hv);
 	}
 }
+
+// ====================== END OF FILE =======================

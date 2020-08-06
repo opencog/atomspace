@@ -193,10 +193,7 @@ class BackingStore
 		 */
 		virtual void runQuery(const Handle& query, const Handle& key,
 		                      const Handle& metadata_key = Handle::UNDEFINED,
-		                      bool fresh=false)
-		{
-			throw IOException(TRACE_INFO, "Not implemented!");
-		}
+		                      bool fresh=false);
 
 		/**
 		 * Fetch *all* Atoms of the given type, and place them into the
