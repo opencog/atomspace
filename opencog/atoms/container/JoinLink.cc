@@ -30,12 +30,11 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Transient.h>
 
 #include "JoinLink.h"
 
 using namespace opencog;
-
-static const bool TRANSIENT_SPACE = true;
 
 void JoinLink::init(void)
 {
@@ -350,9 +349,10 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	AtomSpace temp(as, TRANSIENT_SPACE);
-	Handle meet = temp.add_atom(_meet);
+	AtomSpace* temp = grab_transient_atomspace(as);
+	Handle meet = temp->add_atom(_meet);
 	ValuePtr vp = meet->execute();
+	release_transient_atomspace(temp);
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
@@ -602,7 +602,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 
 	AtomSpace* temp = nullptr;
 	if (0 < _top_clauses.size())
-		temp = new AtomSpace(as, TRANSIENT_SPACE);
+		temp = grab_transient_atomspace(as);
 
 	for (const Handle& h : containers)
 	{
@@ -640,7 +640,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 			}
 		}
 	}
-	if (temp) delete temp;
+	if (temp) release_transient_atomspace(temp);
 
 	// Remove the rejects
 	HandleSet accept;
