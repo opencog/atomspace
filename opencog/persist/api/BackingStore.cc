@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/BackingStore.cc
+ * opencog/persist/api/BackingStore.cc
  *
  * Copyright (C) 2013 Linas Vepstas
  * All Rights Reserved
@@ -20,11 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
-
-#include "BackingStore.h"
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/BackingStore.h>
 
 using namespace opencog;
 

@@ -1,5 +1,6 @@
 
 ADD_LIBRARY (persist
+	BackingStore.cc
 	PersistSCM.cc
 )
 
