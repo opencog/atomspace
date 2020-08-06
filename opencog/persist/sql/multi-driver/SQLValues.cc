@@ -476,4 +476,28 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	rp.atom = nullptr;
 }
 
+void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
+{
+	if (nullptr == atom) return;
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+		get_uuid(key), get_uuid(atom));
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+
+	rp.store = this;
+	rp.atom = atom;
+	rp.table = nullptr;
+	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
+	rp.atom = nullptr;
+}
+
+void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
+{
+	if (nullptr == atom) return;
+}
+
 /* ============================= END OF FILE ================= */
