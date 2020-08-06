@@ -498,6 +498,9 @@ void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
 void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
 {
 	if (nullptr == atom) return;
+
+	ValuePtr pap = atom->getValue(key);
+	storeValuation(key, atom, pap);
 }
 
 /* ============================= END OF FILE ================= */
