@@ -480,10 +480,16 @@ void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
 {
 	if (nullptr == atom) return;
 
+	UUID utom = check_uuid(atom);
+	if (TLB::INVALID_UUID == utom) return;
+
+	UUID ukey = check_uuid(key);
+	if (TLB::INVALID_UUID == ukey) return;
+
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		get_uuid(key), get_uuid(atom));
+		ukey, utom);
 
 	Response rp(conn_pool);
 	rp.exec(buff);
