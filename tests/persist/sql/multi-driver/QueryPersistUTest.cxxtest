@@ -1,0 +1,291 @@
+/*
+ * tests/persist/sql/multi-driver/QueryPersistUTest.cxxtest
+ *
+ * Test persistance queries.  Assumes PerisistUTest and ValueSaveUtests
+ * are passing.
+ *
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
+ *
+ * Copyright (C) 2008, 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cstdio>
+
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include "mkuri.h"
+
+using namespace opencog;
+
+class QueryPersistUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *_as;
+		std::string uri;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
+
+		NodePtr n1[10];
+		NodePtr n2[10];
+		NodePtr n3[10];
+		NodePtr n4[10];
+		LinkPtr l[10];
+		LinkPtr l2[10];
+		LinkPtr l3[10];
+		Handle h1[10];
+		Handle h2[10];
+		Handle h3[10];
+		Handle h4[10];
+		Handle hl[10];
+		Handle hl2[10];
+		Handle hl3[10];
+
+	public:
+
+		QueryPersistUTest(void);
+		~QueryPersistUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+		void kill_data(void);
+
+		void friendlyFailMessage()
+		{
+			TS_FAIL("The QueryPersistUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistance is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+		void atomCompare(AtomPtr, AtomPtr, std::string);
+
+		void do_test_query(void);
+		void test_odbc_query(void);
+		void test_pq_query(void);
+};
+
+QueryPersistUTest:: QueryPersistUTest(void)
+{
+	try
+	{
+		config().load("atomspace-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.get_message() << std::endl;
+	}
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		friendlyFailMessage();
+	}
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void QueryPersistUTest::setUp(void)
+{
+	_as = new AtomSpace();
+}
+
+void QueryPersistUTest::tearDown(void)
+{
+	delete _as;
+
+	kill_data();
+}
+
+// ============================================================
+
+void QueryPersistUTest::kill_data(void)
+{
+#if HAVE_ODBC_STORAGE
+	if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
+#endif
+#if HAVE_PGSQL_STORAGE
+	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
+#endif
+	SQLAtomStorage* astore = new SQLAtomStorage();
+	astore->open(uri);
+	if (!astore->connected())
+	{
+		logger().info("setUp: SQLAtomStorage cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	}
+	logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+
+	// Trash the contents of the database.
+	astore->kill_data();
+
+	// Destructor also logs out of database (avoid warning in DB log file)
+	delete astore;
+}
+
+// ============================================================
+
+void QueryPersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
+{
+	printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
+	TSM_ASSERT("No atom found", b != nullptr);
+
+	if (nullptr == b) return;
+
+	TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
+
+	NodePtr na(NodeCast(a));
+	NodePtr nb(NodeCast(b));
+	if (na and nb)
+	{
+		TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
+	}
+
+	LinkPtr la(LinkCast(a));
+	LinkPtr lb(LinkCast(b));
+	if (la and lb)
+	{
+		TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
+		if (*la != *lb)
+		{
+			printf("Mismatching la = %s\n", la->to_string().c_str());
+			printf("Mismatching lb = %s\n", lb->to_string().c_str());
+			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
+		}
+	}
+
+	TruthValuePtr ta = a->getTruthValue();
+	TruthValuePtr tb = b->getTruthValue();
+	if (ta or tb)
+	{
+		TSM_ASSERT("Missing truth value", ta);
+		TSM_ASSERT("Missing truth value", tb);
+		if (ta and tb)
+		{
+			TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
+
+			if (not ((*ta) == (*tb)))
+			{
+				fprintf(stderr, "Error, truth value miscompare, "
+					"ma=%f mb=%f ca=%f cb=%f\n",
+					ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
+			}
+		}
+	}
+}
+
+// ============================================================
+
+void QueryPersistUTest::test_odbc_query(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_query();
+#endif
+}
+
+void QueryPersistUTest::test_pq_query(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_query();
+#endif
+}
+
+void QueryPersistUTest::do_test_query(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	kill_data();
+
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	int idx = 0;
+	add_to_space(idx++, _as, "AA-aa-wow ");
+	add_to_space(idx++, _as, "BB-bb-wow ");
+	add_to_space(idx++, _as, "CC-cc-wow ");
+	add_to_space(idx++, _as, "DD-dd-wow ");
+	add_to_space(idx++, _as, "EE-ee-wow ");
+
+	/* Make sure UTF-8 works fine. */
+	add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
+	add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
+	add_to_space(idx++, _as, "係拉丁字母");
+
+	/* Push all atoms out to the SQL DB */
+	_as->store_atomspace();
+
+	/* Extract atoms from the AtomSpace. This does not delete them from
+	 * the SQL storage, though; to do that, they must be deleted, not
+	 * extracted.
+	 */
+	_as->barrier();
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+
+	delete _pm;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */
