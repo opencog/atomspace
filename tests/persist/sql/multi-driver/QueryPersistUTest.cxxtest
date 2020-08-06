@@ -86,6 +86,7 @@ class QueryPersistUTest :  public CxxTest::TestSuite
 
 		void atomCompare(AtomPtr, AtomPtr, std::string);
 
+		void setup_data(void);
 		void do_test_query(void);
 		void test_odbc_query(void);
 		void test_pq_query(void);
@@ -229,11 +230,10 @@ void QueryPersistUTest::test_pq_query(void)
 #define an _as->add_node
 #define al _as->add_link
 #define CONCEPT CONCEPT_NODE
+#define VARIABLE VARIABLE_NODE
 
-void QueryPersistUTest::do_test_query(void)
+void QueryPersistUTest::setup_data(void)
 {
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
 	kill_data();
 
 	_as = new AtomSpace();
@@ -282,12 +282,53 @@ void QueryPersistUTest::do_test_query(void)
 
 	/* Push all atoms out to the SQL DB */
 	_as->store_atomspace();
-
-	/* Clear the AtomSpace. This leaves the above in Sotrage.
-	 */
 	_as->barrier();
-	_as->clear();
 
+	_pm->do_close();
+	delete _pm;
+	delete _as;
+}
+
+void QueryPersistUTest::do_test_query(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Create a query to find all things that have wheels.
+	Handle qry =
+	al(MEET_LINK,
+		al(TYPED_VARIABLE_LINK,
+			an(VARIABLE, "$transport"), an(TYPE_NODE, "Concept")),
+		al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+			al(LIST_LINK, an(VARIABLE, "$transport"), an(CONCEPT, "wheel"))));
+
+	// Create a key where the query results will arrive...
+	Handle key = an(PREDICATE_NODE, "qkey");
+
+	// Run the query
+	_as->fetch_query(qry, key);
+
+	// Verify the fetch
+	ValuePtr results = qry->getValue(key);
+
+	printf("Got: %s\n", results->to_string().c_str());
+
+	_pm->do_close();
 	delete _pm;
 	delete _as;
 	logger().info("END TEST: %s", __FUNCTION__);
