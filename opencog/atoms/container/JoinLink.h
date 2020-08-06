@@ -30,6 +30,16 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+class JoinCallback
+{
+public:
+	virtual ~JoinCallback() {}
+
+	/// Callback to get the IncomgingSet of the given Handle.
+	virtual IncomingSet get_incoming_set(const Handle&) = 0;
+};
+
 class JoinLink : public PrenexLink
 {
 protected:
@@ -61,13 +71,14 @@ protected:
 	// Traversal context
 	struct Traverse
 	{
+		JoinCallback *jcb;
 		HandleMap replace_map;
 		HandleSetSeq join_map;
 		HandleSeqMap top_map;
 	};
 
 	HandleSet principals(AtomSpace*, Traverse&) const;
-	void principal_filter(HandleSet&, const Handle&) const;
+	void principal_filter(Traverse&, HandleSet&, const Handle&) const;
 	void principal_filter_map(Traverse&, const HandleSeq&,
 	                          HandleSet&, const Handle&) const;
 
@@ -79,10 +90,11 @@ protected:
 	void fixup_replacements(Traverse&) const;
 	HandleSet replace(const HandleSet&, const Traverse&) const;
 
-	void find_top(HandleSet&, const Handle&) const;
-	HandleSet container(AtomSpace*, bool) const;
+	void find_top(Traverse&, HandleSet&, const Handle&) const;
+	HandleSet container(AtomSpace*, JoinCallback*, bool) const;
 
-	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
+	virtual QueueValuePtr do_execute(AtomSpace*,
+	                                 JoinCallback*,  bool silent);
 
 public:
 	JoinLink(const HandleSeq&&, Type=JOIN_LINK);
@@ -92,6 +104,8 @@ public:
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool);
+
+	ValuePtr execute_cb(AtomSpace*, JoinCallback*);
 
 	static Handle factory(const Handle&);
 };
