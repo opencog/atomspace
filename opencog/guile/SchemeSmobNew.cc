@@ -42,7 +42,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	// Need to have a newline printed; otherewise
 	// cog-value->list prints badly-formatted grunge.
 	if (not pa->is_atom())
-		return pa->to_short_string() + "\n";
+		return pa->to_string() + "\n";
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
