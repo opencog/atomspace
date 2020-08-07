@@ -28,12 +28,6 @@ cdef class LinkValue(Value):
         cdef cValuePtr value
         while it != cpp_vector.const_end():
             value = deref(it)
-            if is_a(deref(value).get_type(), types.Value):
-                list.append(create_python_value_from_c_value(value))
-            else:
-                # TODO: Support Atoms as members of LinkValue requires inheriting
-                # Atom from Value and constructor to create Atom from cHandle.
-                raise TypeError('Only Values are supported '
-                                'as members of LinkValue')
+            list.append(create_python_value_from_c_value(value))
             inc(it)
         return list
