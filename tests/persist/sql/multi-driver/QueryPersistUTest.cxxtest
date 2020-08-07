@@ -319,7 +319,10 @@ void QueryPersistUTest::do_test_meet(void)
 	_as->fetch_query(qry, key);
 	ValuePtr rtoo = qry->getValue(key);
 	printf("Re-got: %s\n", rtoo->to_string().c_str());
-	TSM_ASSERT("Expect same results as before", *results == *rtoo);
+
+	lvp = LinkValueCast(rtoo);
+	HandleSet htoo = lvp->to_handle_set();
+	TSM_ASSERT("Expect same results as before", hset == htoo);
 
 	_pm->do_close();
 	delete _pm;
