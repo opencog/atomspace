@@ -292,6 +292,7 @@ void QueryPersistUTest::do_test_meet(void)
 
 	// Run the query
 	_as->fetch_query(qry, key);
+	_as->barrier();
 
 	// Verify that only bicycles and cars were fetched
 	ValuePtr results = qry->getValue(key);
@@ -317,6 +318,7 @@ void QueryPersistUTest::do_test_meet(void)
 
 	// Should get back the same results.
 	_as->fetch_query(qry, key);
+	_as->barrier();
 	ValuePtr rtoo = qry->getValue(key);
 	printf("Re-got: %s\n", rtoo->to_string().c_str());
 
@@ -359,6 +361,7 @@ void QueryPersistUTest::do_test_join(void)
 
 	// Run the join
 	_as->fetch_query(join, key);
+	_as->barrier();
 
 	// Verify that vehicles were fetched
 	ValuePtr results = join->getValue(key);
