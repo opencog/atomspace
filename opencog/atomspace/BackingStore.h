@@ -251,10 +251,27 @@ class BackingStore
 		virtual void getIncomingSet(AtomSpace*, const Handle&);
 		virtual void getIncomingByType(AtomSpace*, const Handle&, Type);
 
-		/**  Deprecated. Implement getAtom() instead. */
+		/**
+		 * Return a Link with the indicated type and outset,
+		 * if it exists; else return nullptr. The returned atom
+		 * will have all values attached to it, that the backing
+		 * store knows about.
+		 *
+		 * An implementation for this is required only for the default
+		 * runQuery() implementation; otherwise this is unused.
+		 */
 		virtual Handle getLink(Type, const HandleSeq&) {
 			throw IOException(TRACE_INFO, "Implementation is buggy!");
 		}
+
+		/**
+		 * Return a Node with the indicated type and name, if it
+		 * exists; else return nullptr. The returned atom will have
+		 * all values attached to it, that the backing store knows
+		 * about.
+		 *
+		 * Unusued. Present for backwards-compatibility only.
+		 */
 		virtual Handle getNode(Type, const char *) {
 			throw IOException(TRACE_INFO, "Implementation is buggy!");
 		}
