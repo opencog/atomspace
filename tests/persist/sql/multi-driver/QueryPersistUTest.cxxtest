@@ -325,8 +325,19 @@ void QueryPersistUTest::do_test_query(void)
 
 	// Verify the fetch
 	ValuePtr results = qry->getValue(key);
-
 	printf("Got: %s\n", results->to_string().c_str());
+
+	TSM_ASSERT("Expecting a LinkValue",
+		nameserver().isA(results->get_type(), LINK_VALUE));
+
+	LinkValuePtr lvp = LinkValueCast(results);
+	TSM_ASSERT_EQUALS("Expecting two results", lvp->size(), 2);
+
+	HandleSet hset = lvp->to_handle_set();
+	HandleSet expect;
+	expect.insert(an(CONCEPT, "bicycle"));
+	expect.insert(an(CONCEPT, "car"));
+	TSM_ASSERT_EQUALS("Expecting bicycle and car", hset, expect);
 
 	_pm->do_close();
 	delete _pm;
