@@ -77,15 +77,19 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)
     if clazz is not None:
-        return clazz(ptr_holder = ptr_holder)
+        return clazz(ptr_holder=ptr_holder)
 
     # For handling the children types of TruthValue.
     if is_a(value_type, types.TruthValue):
-        return TruthValue(ptr_holder = ptr_holder)
+        return TruthValue(ptr_holder=ptr_holder)
 
     # For handling the children types of Atom.
     if is_a(value_type, types.Atom):
-        return Atom(ptr_holder = ptr_holder)
+        return Atom(ptr_holder=ptr_holder)
+
+    # Handle Value children types.
+    if is_a(value_type, types.Value):
+        return Value(ptr_holder=ptr_holder)
 
     raise TypeError("Python API for " + type_name + " is not implemented yet")
 
