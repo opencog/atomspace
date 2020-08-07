@@ -167,7 +167,7 @@
 
 (define b-holders (MaximalJoin (Present (Concept "B"))))
 
-: Just like before...
+; Just like before...
 (fetch-query b-holders results-key)
 (cog-value b-holders results-key)
 
