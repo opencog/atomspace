@@ -84,8 +84,6 @@ class QueryPersistUTest :  public CxxTest::TestSuite
 			exit(1);
 		}
 
-		void atomCompare(AtomPtr, AtomPtr, std::string);
-
 		void setup_data(void);
 		void do_test_meet(void);
 		void test_odbc_meet(void);
@@ -159,57 +157,6 @@ void QueryPersistUTest::kill_data(void)
 
 	// Destructor also logs out of database (avoid warning in DB log file)
 	delete astore;
-}
-
-// ============================================================
-
-void QueryPersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
-{
-	printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
-	TSM_ASSERT("No atom found", b != nullptr);
-
-	if (nullptr == b) return;
-
-	TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
-
-	NodePtr na(NodeCast(a));
-	NodePtr nb(NodeCast(b));
-	if (na and nb)
-	{
-		TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
-	}
-
-	LinkPtr la(LinkCast(a));
-	LinkPtr lb(LinkCast(b));
-	if (la and lb)
-	{
-		TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
-		if (*la != *lb)
-		{
-			printf("Mismatching la = %s\n", la->to_string().c_str());
-			printf("Mismatching lb = %s\n", lb->to_string().c_str());
-			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
-		}
-	}
-
-	TruthValuePtr ta = a->getTruthValue();
-	TruthValuePtr tb = b->getTruthValue();
-	if (ta or tb)
-	{
-		TSM_ASSERT("Missing truth value", ta);
-		TSM_ASSERT("Missing truth value", tb);
-		if (ta and tb)
-		{
-			TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
-
-			if (not ((*ta) == (*tb)))
-			{
-				fprintf(stderr, "Error, truth value miscompare, "
-					"ma=%f mb=%f ca=%f cb=%f\n",
-					ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
-			}
-		}
-	}
 }
 
 // ============================================================
