@@ -75,6 +75,7 @@ IF (DB_IS_CONFIGURED)
 
     ADD_CXXTEST(MultiPersistUTest)
     ADD_CXXTEST(MultiUserUTest)
+    ADD_CXXTEST(QueryPersistUTest)
     ADD_CXXTEST(LargeFlatUTest)
     ADD_CXXTEST(LargeZipfUTest)
 

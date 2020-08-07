@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomTable.cc
-	BackingStore.cc
 	Transient.cc
 	TypeIndex.cc
 )

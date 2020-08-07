@@ -1,0 +1,390 @@
+/*
+ * tests/persist/sql/multi-driver/QueryPersistUTest.cxxtest
+ *
+ * Test persistence queries.  Assumes PerisistUTest and ValueSaveUTest
+ * are passing.
+ *
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
+ *
+ * Copyright (C) 2008, 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cstdio>
+
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include "mkuri.h"
+
+using namespace opencog;
+
+class QueryPersistUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* _as;
+		std::string uri;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
+
+	public:
+
+		QueryPersistUTest(void);
+		~QueryPersistUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+		void kill_data(void);
+
+		void friendlyFailMessage()
+		{
+			TS_FAIL("The QueryPersistUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistence is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+		void setup_data(void);
+		void do_test_meet(void);
+		void test_odbc_meet(void);
+		void test_pq_meet(void);
+
+		void do_test_join(void);
+		void test_odbc_join(void);
+		void test_pq_join(void);
+};
+
+QueryPersistUTest:: QueryPersistUTest(void)
+{
+	try
+	{
+		config().load("atomspace-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.get_message() << std::endl;
+	}
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		friendlyFailMessage();
+	}
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void QueryPersistUTest::setUp(void)
+{
+	_as = nullptr;
+}
+
+void QueryPersistUTest::tearDown(void)
+{
+	kill_data();
+}
+
+// ============================================================
+
+void QueryPersistUTest::kill_data(void)
+{
+#if HAVE_ODBC_STORAGE
+	if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
+#endif
+#if HAVE_PGSQL_STORAGE
+	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
+#endif
+	SQLAtomStorage* astore = new SQLAtomStorage();
+	astore->open(uri);
+	if (!astore->connected())
+	{
+		logger().info("setUp: SQLAtomStorage cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	}
+	logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+
+	// Trash the contents of the database.
+	astore->kill_data();
+
+	// Destructor also logs out of database (avoid warning in DB log file)
+	delete astore;
+}
+
+// ============================================================
+
+void QueryPersistUTest::test_odbc_meet(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_meet();
+#endif
+}
+
+void QueryPersistUTest::test_pq_meet(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_meet();
+#endif
+}
+
+// ============================================================
+
+void QueryPersistUTest::test_odbc_join(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_join();
+#endif
+}
+
+void QueryPersistUTest::test_pq_join(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_join();
+#endif
+}
+
+// ============================================================
+#define an _as->add_node
+#define al _as->add_link
+#define CONCEPT CONCEPT_NODE
+#define VARIABLE VARIABLE_NODE
+
+void QueryPersistUTest::setup_data(void)
+{
+	kill_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	/* Populate the Storage with stuff that we will later query. */
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "wheel")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "battery")));
+
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "wheel")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "derailleur")));
+
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+		al(LIST_LINK, an(CONCEPT, "airplane"), an(CONCEPT, "vehicle")));
+	al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+		al(LIST_LINK, an(CONCEPT, "airplane"), an(CONCEPT, "wings")));
+
+	// Sprinkle in some TruthValues
+	an(CONCEPT, "airplane") ->
+		setTruthValue(SimpleTruthValue::createTV(0.11, 100));
+
+	an(CONCEPT, "bicycle") ->
+		setTruthValue(SimpleTruthValue::createTV(0.22, 100));
+
+	an(CONCEPT, "car") ->
+		setTruthValue(SimpleTruthValue::createTV(0.33, 300));
+
+	/* Push all atoms out to the SQL DB */
+	_as->store_atomspace();
+	_as->barrier();
+
+	_pm->do_close();
+	delete _pm;
+	delete _as;
+}
+
+void QueryPersistUTest::do_test_meet(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Create a query to find all things that have wheels.
+	// We expect cars and bicycles, only.
+	Handle qry =
+	al(MEET_LINK,
+		al(TYPED_VARIABLE_LINK,
+			an(VARIABLE, "$transport"), an(TYPE_NODE, "Concept")),
+		al(EVALUATION_LINK, an(PREDICATE_NODE, "has-a"),
+			al(LIST_LINK, an(VARIABLE, "$transport"), an(CONCEPT, "wheel"))));
+
+	// Create a key where the query results will arrive...
+	Handle key = an(PREDICATE_NODE, "qkey");
+
+	// Run the query
+	_as->fetch_query(qry, key);
+
+	// Verify that only bicycles and cars were fetched
+	ValuePtr results = qry->getValue(key);
+	printf("Got: %s\n", results->to_string().c_str());
+
+	TSM_ASSERT("Expecting a LinkValue",
+		nameserver().isA(results->get_type(), LINK_VALUE));
+
+	LinkValuePtr lvp = LinkValueCast(results);
+	TSM_ASSERT_EQUALS("Expecting two results", lvp->size(), 2);
+
+	HandleSet hset = lvp->to_handle_set();
+	HandleSet expect;
+	expect.insert(an(CONCEPT, "bicycle"));
+	expect.insert(an(CONCEPT, "car"));
+	TSM_ASSERT_EQUALS("Expecting bicycle and car", hset, expect);
+
+	// Test key deletion.  Lack of a crash is a good thing.
+	qry->setValue(key, nullptr);
+	_as->store_value(qry, key);
+	ValuePtr nada = qry->getValue(key);
+	TS_ASSERT(nullptr == nada);
+
+	// Should get back the same results.
+	_as->fetch_query(qry, key);
+	ValuePtr rtoo = qry->getValue(key);
+	printf("Re-got: %s\n", rtoo->to_string().c_str());
+	TSM_ASSERT("Expect same results as before", *results == *rtoo);
+
+	_pm->do_close();
+	delete _pm;
+	delete _as;
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void QueryPersistUTest::do_test_join(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Create a join to find all vehicles.
+	Handle join =
+	al(MAXIMAL_JOIN_LINK, al(PRESENT_LINK, an(CONCEPT, "vehicle")));
+
+	// Create a key where the query results will arrive...
+	Handle key = an(PREDICATE_NODE, "qkey");
+
+	// Run the join
+	_as->fetch_query(join, key);
+
+	// Verify that vehicles were fetched
+	ValuePtr results = join->getValue(key);
+	printf("Got: %s\n", results->to_string().c_str());
+
+	TSM_ASSERT("Expecting a LinkValue",
+		nameserver().isA(results->get_type(), LINK_VALUE));
+
+	LinkValuePtr lvp = LinkValueCast(results);
+	TSM_ASSERT_EQUALS("Expecting three results", lvp->size(), 3);
+
+	HandleSet hset = lvp->to_handle_set();
+	HandleSet expect;
+	expect.insert(
+		al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+			al(LIST_LINK, an(CONCEPT, "airplane"), an(CONCEPT, "vehicle"))));
+	expect.insert(
+		al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+			al(LIST_LINK, an(CONCEPT, "bicycle"), an(CONCEPT, "vehicle"))));
+	expect.insert(
+		al(EVALUATION_LINK, an(PREDICATE_NODE, "is-a"),
+			al(LIST_LINK, an(CONCEPT, "car"), an(CONCEPT, "vehicle"))));
+
+	TSM_ASSERT_EQUALS("Expecting airplane, bicycle and car", hset, expect);
+
+	_pm->do_close();
+	delete _pm;
+	delete _as;
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/BackingStore.cc
+ * opencog/persist/api/BackingStore.cc
  *
  * Copyright (C) 2013 Linas Vepstas
  * All Rights Reserved
@@ -20,11 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
-
-#include "BackingStore.h"
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/BackingStore.h>
 
 using namespace opencog;
 
@@ -38,7 +35,25 @@ void BackingStore::unregisterWith(AtomSpace* atomspace)
 	atomspace->unregisterBackingStore(this);
 }
 
-/* Provide a backwards-compat implementation. */
+// ==========================================================
+
+void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
+{
+	getIncomingSet(as->get_atomtable(), h);
+}
+
+void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
+{
+	getIncomingByType(as->get_atomtable(), h, t);
+}
+
+// ==========================================================
+// Provide a backwards-compat implementation.
+// This is for those providers that implemented `getNode()` and
+// `getLink()`.  They should be updated to provide the below
+// instead. The reason for this is that they need to insert
+// keys and values into AtomSpaces, and that is problematic
+// with the old API. The below mostly patches this up...
 void BackingStore::getAtom(const Handle& h)
 {
 	Handle hv;
@@ -63,3 +78,5 @@ void BackingStore::getAtom(const Handle& h)
 			h->copyValues(hv);
 	}
 }
+
+// ====================== END OF FILE =======================

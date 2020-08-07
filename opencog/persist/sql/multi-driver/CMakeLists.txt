@@ -18,6 +18,7 @@ ADD_LIBRARY (persist-sql
 ADD_DEPENDENCIES(persist-sql opencog_atom_types atomspace)
 
 TARGET_LINK_LIBRARIES(persist-sql
+	persist
 	atomspaceutils
 	atomspace
 )

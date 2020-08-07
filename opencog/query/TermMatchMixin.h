@@ -79,6 +79,7 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		                                 const GroundingMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
+		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
 
 		/**
 		 * Called when a virtual link is encountered. Returns false

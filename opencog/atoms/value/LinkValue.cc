@@ -39,6 +39,18 @@ HandleSeq LinkValue::to_handle_seq(void) const
 	return hs;
 }
 
+HandleSet LinkValue::to_handle_set(void) const
+{
+	update();
+	HandleSet hs;
+	for (const ValuePtr& v : _value)
+	{
+		if (v->is_atom())
+			hs.insert(HandleCast(v));
+	}
+	return hs;
+}
+
 // ==============================================================
 
 bool LinkValue::operator==(const Value& other) const

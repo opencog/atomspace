@@ -184,7 +184,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
-	UUID kuid;
+	UUID kuid = TLB::INVALID_UUID;
 	{
 		// We must make sure the key is in the database BEFORE it
 		// is used in any valuation; else a 'foreign key constraint'
@@ -192,11 +192,26 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		// the store completes, before some other thread gets its
 		// fingers on the key.
 		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
-		kuid = check_uuid(key);
+		try {
+			kuid = check_uuid(key);
+		} catch (const NotFoundException& ex) {}
 		if (TLB::INVALID_UUID == kuid)
 		{
 			do_store_atom(key);
-			kuid = get_uuid(key);
+			kuid = check_uuid(key);
+		}
+	}
+
+	UUID auid = TLB::INVALID_UUID;
+	{
+		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+		try {
+			auid = check_uuid(atom);
+		} catch (const NotFoundException& ex) {}
+		if (TLB::INVALID_UUID == auid)
+		{
+			do_store_atom(atom);
+			auid = check_uuid(atom);
 		}
 	}
 
@@ -204,7 +219,6 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
 	char aidbuff[BUFSZ];
-	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted first,
@@ -474,6 +488,44 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	rp.table = nullptr;
 	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
 	rp.atom = nullptr;
+}
+
+void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
+{
+	rethrow();
+	if (nullptr == atom) return;
+	try
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+			get_uuid(key), get_uuid(atom));
+
+		Response rp(conn_pool);
+		rp.exec(buff);
+
+		rp.store = this;
+		rp.atom = atom;
+		rp.table = nullptr;
+		rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
+		rp.atom = nullptr;
+	}
+	catch (const NotFoundException& ex) {}
+}
+
+void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
+{
+	rethrow();
+	if (nullptr == atom) return;
+
+	ValuePtr pap = atom->getValue(key);
+	if (nullptr == pap)
+	{
+		deleteValuation(key, atom);
+		return;
+	}
+
+	storeValuation(key, atom, pap);
 }
 
 /* ============================= END OF FILE ================= */

@@ -102,7 +102,7 @@ class ValueSaveUTest :  public CxxTest::TestSuite
             const char * fail = "The ValueSaveUTest failed.\n"
                 "This is probably because you do not have SQL installed\n"
                 "or configured the way that OpenCog expects.\n\n"
-                "SQL persistance is optional for OpenCog, so if you don't\n"
+                "SQL persistence is optional for OpenCog, so if you don't\n"
                 "want it or need it, just ignore this test failure.\n"
                 "Otherwise, please be sure to read opencong/persist/sql/README,\n"
                 "and create/configure the SQL database as described there.\n"

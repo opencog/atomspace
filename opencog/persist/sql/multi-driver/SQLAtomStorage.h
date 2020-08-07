@@ -260,6 +260,8 @@ class SQLAtomStorage : public BackingStore
 		void getIncomingByType(AtomTable&, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
+		void storeValue(const Handle&, const Handle&);
+		void loadValue(const Handle&, const Handle&);
 		void loadType(AtomTable&, Type);
 		void barrier();
 		void flushStoreQueue();
