@@ -362,6 +362,18 @@ void QueryPersistUTest::do_test_meet(void)
 	expect.insert(an(CONCEPT, "car"));
 	TSM_ASSERT_EQUALS("Expecting bicycle and car", hset, expect);
 
+	// Test key deletion.  Lack of a crash is a good thing.
+	qry->setValue(key, nullptr);
+	_as->store_value(qry, key);
+	ValuePtr nada = qry->getValue(key);
+	TS_ASSERT(nullptr == nada);
+
+	// Should get back the same results.
+	_as->fetch_query(qry, key);
+	ValuePtr rtoo = qry->getValue(key);
+	printf("Re-got: %s\n", rtoo->to_string().c_str());
+	TSM_ASSERT("Expect same results as before", *results == *rtoo);
+
 	_pm->do_close();
 	delete _pm;
 	delete _as;

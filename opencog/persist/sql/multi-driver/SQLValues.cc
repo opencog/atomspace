@@ -519,6 +519,12 @@ void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
 	if (nullptr == atom) return;
 
 	ValuePtr pap = atom->getValue(key);
+	if (nullptr == pap)
+	{
+		deleteValuation(key, atom);
+		return;
+	}
+
 	storeValuation(key, atom, pap);
 }
 
