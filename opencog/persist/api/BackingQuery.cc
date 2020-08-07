@@ -49,6 +49,7 @@ class BackingImplicator : public Implicator
 			Implicator(as), _store(sto), _ras(as) {}
 		virtual ~BackingImplicator() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
+		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
 };
 
 // Callback for MeetLinks
@@ -81,24 +82,22 @@ using namespace opencog;
 
 // ==========================================================
 
-void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
-{
-	getIncomingSet(as->get_atomtable(), h);
-}
-
-void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
-{
-	getIncomingByType(as->get_atomtable(), h, t);
-}
-
-// ==========================================================
-
 IncomingSet BackingImplicator::get_incoming_set(const Handle& h, Type t)
 {
 	_store->getIncomingByType(_ras, h, t);
 	_store->barrier();
 	return h->getIncomingSetByType(t, _ras);
 }
+
+Handle BackingImplicator::get_link(const Handle& hg,
+                                   Type t, HandleSeq&& oset)
+{
+	Handle h = _store->getLink(t, oset);
+	if (nullptr == h) return h;
+	return _ras->add_atom(h);
+}
+
+// -------------
 
 IncomingSet BackingSatisfyingSet::get_incoming_set(const Handle& h, Type t)
 {
@@ -114,6 +113,8 @@ Handle BackingSatisfyingSet::get_link(const Handle& hg,
 	if (nullptr == h) return h;
 	return _as->add_atom(h);
 }
+
+// -------------
 
 IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 {
