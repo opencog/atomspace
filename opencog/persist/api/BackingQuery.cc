@@ -60,6 +60,7 @@ class BackingSatisfyingSet : public SatisfyingSet
 			SatisfyingSet(as), _store(sto) {}
 		virtual ~BackingSatisfyingSet() {}
 		virtual IncomingSet get_incoming_set(const Handle&, Type);
+		virtual Handle get_link(const Handle&, Type, HandleSeq&&);
 };
 
 // Callback for JoinLinks
@@ -95,18 +96,29 @@ void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
 IncomingSet BackingImplicator::get_incoming_set(const Handle& h, Type t)
 {
 	_store->getIncomingByType(_ras, h, t);
+	_store->barrier();
 	return h->getIncomingSetByType(t, _ras);
 }
 
 IncomingSet BackingSatisfyingSet::get_incoming_set(const Handle& h, Type t)
 {
 	_store->getIncomingByType(_as, h, t);
+	_store->barrier();
 	return h->getIncomingSetByType(t, _as);
+}
+
+Handle BackingSatisfyingSet::get_link(const Handle& hg,
+                                      Type t, HandleSeq&& oset)
+{
+	Handle h = _store->getLink(t, oset);
+	if (nullptr == h) return h;
+	return _as->add_atom(h);
 }
 
 IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 {
 	_store->getIncomingSet(_as, h);
+	_store->barrier();
 	return h->getIncomingSet(_as);
 }
 
