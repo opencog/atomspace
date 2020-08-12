@@ -42,8 +42,8 @@ public:
 	/// contents (The cogserver uses this to provide peer AtomSpace
 	/// network services). The goal is to provide much higher
 	/// performance than what is possible through the guile interfaces.
-   ///
-   /// The supported commands are:
+	///
+	/// The supported commands are:
 	///    cog-atomspace-clear
 	///    cog-execute-cache!
 	///    cog-extract!
@@ -59,7 +59,7 @@ public:
 	///    cog-set-tv!
 	///    cog-value
    ///
-   /// They MUST appear only once in the string, at the very begining,
+	/// They MUST appear only once in the string, at the very begining,
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
