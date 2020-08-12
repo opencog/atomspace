@@ -28,7 +28,7 @@
 
 ; Actually run it - this should return TrueTV i.e. `(stv 1 1)`
 ; because the SatisfactionLink is satisfiable.
-(cog-evaluate! satlink)
+(cog-execute! satlink)
 
 ; Print a list of all the keys attached to the SatisfactionLink.
 (cog-keys satlink)
