@@ -147,6 +147,12 @@ TYPE_INPUT_LINK <- LINK
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_LINK <- LINK
 
+// Alpha-convertible links are those that may have multiple different
+// representations that are alpha-equivalent. This mixin helps checkers
+// know whether they have to explicitly check for alpha-equivalence
+// (e.g. the storage backends)
+ALPHA_CONVERTIBLE_LINK <- LINK
+
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
@@ -407,7 +413,7 @@ DEFINE_LINK <- UNIQUE_LINK
 // entry with connector definitions inside of it. Viz, the scope
 // body is the lexical entry, and the variable declarations are the
 // connector declarations.
-SCOPE_LINK <- SECTION
+SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_LINK
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
@@ -528,7 +534,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // correct", but clunkier to the user, so we don't force it.
 // TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
 // See https://en.wikipedia.org/wiki/Union_type
-TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,ALPHA_CONVERTIBLE_LINK
 
 // Type constructor. Forces a set-intersection of all of the type
 // definitions (signatures) that it contains. Useful for computing
@@ -561,7 +567,7 @@ SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 //
 // The inherits from Connector, as it is a special case...
 // The variable name is not lexical -- its a wild-card.
-TYPED_VARIABLE_LINK <- CONNECTOR
+TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position cannot be
