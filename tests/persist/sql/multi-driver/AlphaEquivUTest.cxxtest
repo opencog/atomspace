@@ -1,0 +1,399 @@
+/*
+ * tests/persist/sql/multi-driver/AlphaEquivUTest.cxxtest
+ *
+ * Test alpha-equivalence.  Assumes PerisistUTest and ValueSaveUTest
+ * are passing.
+ *
+ * Copyright (C) 2008, 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cstdio>
+
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
+#include "mkuri.h"
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+
+class AlphaEquivUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* _as;
+		std::string uri;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
+
+		void friendlyFailMessage()
+		{
+			TS_FAIL("The AlphaEquivUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistence is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+	public:
+
+		AlphaEquivUTest(void);
+		~AlphaEquivUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+		void kill_data(void);
+
+		void setup_data(void);
+
+		void do_test_fetch(void);
+		void test_odbc_fetch(void);
+		void test_pq_fetch(void);
+
+		void do_test_remove(void);
+		void test_odbc_remove(void);
+		void test_pq_remove(void);
+
+		void do_test_recursive_remove(void);
+		void test_odbc_recursive_remove(void);
+		void test_pq_recursive_remove(void);
+};
+
+AlphaEquivUTest:: AlphaEquivUTest(void)
+{
+	try
+	{
+		config().load("atomspace-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.get_message() << std::endl;
+	}
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		friendlyFailMessage();
+	}
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void AlphaEquivUTest::setUp(void)
+{
+	_as = nullptr;
+}
+
+void AlphaEquivUTest::tearDown(void)
+{
+	kill_data();
+}
+
+// ============================================================
+
+void AlphaEquivUTest::kill_data(void)
+{
+#if HAVE_ODBC_STORAGE
+	if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
+#endif
+#if HAVE_PGSQL_STORAGE
+	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
+#endif
+	SQLAtomStorage* astore = new SQLAtomStorage();
+	astore->open(uri);
+	if (!astore->connected())
+	{
+		logger().info("setUp: SQLAtomStorage cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	}
+	logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+
+	// Trash the contents of the database.
+	astore->kill_data();
+
+	// Destructor also logs out of database (avoid warning in DB log file)
+	delete astore;
+}
+
+// ============================================================
+#define an _as->add_node
+#define al _as->add_link
+#define CONCEPT CONCEPT_NODE
+#define PREDICATE PREDICATE_NODE
+#define VARIABLE VARIABLE_NODE
+
+void AlphaEquivUTest::setup_data(void)
+{
+	kill_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	/* Populate the Storage with stuff that we will later query. */
+	Handle lx = al(LAMBDA_LINK, an(VARIABLE, "X"), an(CONCEPT, "A"));
+	lx->setTruthValue(SimpleTruthValue::createTV(0.11, 100));
+	lx->setValue(an(PREDICATE, "foo"),
+		createFloatValue(std::vector<double>{1, 2, 3}));
+
+	/* Push all atoms out to the database */
+	_as->store_atomspace();
+	_as->barrier();
+
+	delete _pm;
+	delete _as;
+}
+
+// ============================================================
+
+void AlphaEquivUTest::test_odbc_fetch(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_fetch();
+#endif
+}
+
+void AlphaEquivUTest::test_pq_fetch(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_fetch();
+#endif
+}
+
+// Test fetching by an alpha-equivalent name
+void AlphaEquivUTest::do_test_fetch(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Fetch an alpha-equivalent lambda link.
+	Handle ly = al(LAMBDA_LINK, an(VARIABLE, "Y"), an(CONCEPT, "A"));
+
+	ly = _as->fetch_atom(ly);
+	_as->barrier();
+
+	// Verify that the correct TV was fetched.
+	TruthValuePtr tvp = ly->getTruthValue();
+	printf("Got TV: %s\n", tvp->to_string().c_str());
+
+	TSM_ASSERT("Expecting (stv 0.11 100)",
+		0.1 < tvp->get_mean() and tvp->get_mean() < 0.12 and
+		99 < tvp->get_confidence() and tvp->get_confidence() < 101);
+
+	// Verify that other values are there too.
+	ValuePtr fu = ly->getValue(an(PREDICATE, "foo"));
+	printf("Got Value: %s\n", fu->to_string().c_str());
+
+	TSM_ASSERT("Expecting a LinkValue",
+		nameserver().isA(fu->get_type(), FLOAT_VALUE));
+
+	FloatValuePtr fvp = FloatValueCast(fu);
+	TSM_ASSERT_EQUALS("Expecting three floats", fvp->size(), 3);
+
+	delete _pm;
+	delete _as;
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void AlphaEquivUTest::test_odbc_remove(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_remove();
+#endif
+}
+
+void AlphaEquivUTest::test_pq_remove(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_remove();
+#endif
+}
+
+// Test removal by an alpha-equivalent name
+void AlphaEquivUTest::do_test_remove(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Remove the alpha-equivalent lambda link.
+	Handle ly = al(LAMBDA_LINK, an(VARIABLE, "Y"), an(CONCEPT, "A"));
+	_as->remove_atom(ly);
+	_as->barrier();
+	ly = Handle::UNDEFINED;
+
+	// Can we still find the original?
+	Handle lx = al(LAMBDA_LINK, an(VARIABLE, "X"), an(CONCEPT, "A"));
+	lx = _as->fetch_atom(lx);
+	_as->barrier();
+
+	TruthValuePtr tvp = lx->getTruthValue();
+	printf("Got TV: %s\n", tvp->to_string().c_str());
+
+	TSM_ASSERT("Expecting default TV", tvp == TruthValue::DEFAULT_TV());
+
+	// Verify that other values are absent
+	ValuePtr fu = lx->getValue(an(PREDICATE, "foo"));
+	TSM_ASSERT("Expecting null value", nullptr == fu);
+
+	delete _pm;
+	delete _as;
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void AlphaEquivUTest::test_odbc_recursive_remove(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_recursive_remove();
+#endif
+}
+
+void AlphaEquivUTest::test_pq_recursive_remove(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_recursive_remove();
+#endif
+}
+
+// Test recursive removal of alpha-equivalences
+void AlphaEquivUTest::do_test_recursive_remove(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	setup_data();
+
+	_as = new AtomSpace();
+	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+	TSM_ASSERT("Persist Module not loaded", _pm);
+
+	try {
+		_pm->do_open(uri);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	// Recursive remove Concept "A".
+	Handle ca = an(CONCEPT, "A");
+	_as->remove_atom(ca, true);
+	_as->barrier();
+
+	// What happens if we look for the original?
+	Handle lx = al(LAMBDA_LINK, an(VARIABLE, "X"), an(CONCEPT, "A"));
+	lx = _as->fetch_atom(lx);
+	_as->barrier();
+
+	TruthValuePtr tvp = lx->getTruthValue();
+	printf("Got TV: %s\n", tvp->to_string().c_str());
+
+	TSM_ASSERT("Expecting default TV", tvp == TruthValue::DEFAULT_TV());
+
+	// Verify that other values are absent
+	ValuePtr fu = lx->getValue(an(PREDICATE, "foo"));
+	TSM_ASSERT("Expecting null value", nullptr == fu);
+
+	delete _pm;
+	delete _as;
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */
