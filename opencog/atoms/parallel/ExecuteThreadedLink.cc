@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/parallel/ThreadJoinLink.cc
+ * opencog/atoms/parallel/ExecuteThreadedLink.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -24,22 +24,27 @@
 #include <thread>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/parallel/ThreadJoinLink.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/parallel/ExecuteThreadedLink.h>
+#include <opencog/atoms/value/QueueValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
-ThreadJoinLink::ThreadJoinLink(const HandleSeq&& oset, Type t)
-    : ParallelLink(std::move(oset), t)
+ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
+    : Link(std::move(oset), t), _nthreads(-1)
 {
+	if (0 == _outgoing.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting at least one argument!");
+
+	Type nt = _outgoing[0]->get_type();
+	if (NUMBER_NODE == nt)
+		_nthreads = std::floor(NumberNodeCast(_outgoing[0])->get_value());
 }
 
 static void thread_eval_tv(AtomSpace* as,
-                           const Handle& evelnk, AtomSpace* scratch,
+                           const Handle& evelnk,
                            bool silent, TruthValuePtr* tv,
                            std::exception_ptr* returned_ex)
 {
@@ -53,12 +58,11 @@ static void thread_eval_tv(AtomSpace* as,
 	}
 }
 
-bool ThreadJoinLink::evaluate(AtomSpace* as,
-                              bool silent,
-                              AtomSpace* scratch)
+ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
+                                      bool silent)
 {
 	size_t arity = _outgoing.size();
-	std::vector<TruthValuePtr> tvp(arity);
+	std::vector<ValuePtr> tvp(arity);
 
 	// Create a collection of joinable threads.
 	std::vector<std::thread> thread_set;
@@ -66,7 +70,7 @@ bool ThreadJoinLink::evaluate(AtomSpace* as,
 	for (size_t i=0; i<arity; i++)
 	{
 		thread_set.push_back(std::thread(&thread_eval_tv,
-			as, _outgoing[i], scratch, silent, &tvp[i], &ex));
+			as, oset[i], silent, &tvp[i], &ex));
 	}
 
 	// Wait for it all to come together.
@@ -74,20 +78,6 @@ bool ThreadJoinLink::evaluate(AtomSpace* as,
 
 	// Were there any exceptions? If so, rethrow.
 	if (ex) std::rethrow_exception(ex);
-
-	// Return the logical-AND of the returned truth values
-	for (const TruthValuePtr& tv: tvp)
-		if (0.5 > tv->get_mean()) return false;
-
-	return true;
 }
 
-TruthValuePtr ThreadJoinLink::evaluate(AtomSpace* as,
-                                       bool silent)
-{
-	bool ok = evaluate(as, silent, as);
-	if (ok) SimpleTruthValue::TRUE_TV();
-	return SimpleTruthValue::FALSE_TV();
-}
-
-DEFINE_LINK_FACTORY(ThreadJoinLink, THREAD_JOIN_LINK)
+DEFINE_LINK_FACTORY(ExecuteThreadedLink, EXECUTE_THREADED_LINK)
