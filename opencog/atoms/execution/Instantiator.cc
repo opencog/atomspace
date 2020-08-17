@@ -642,7 +642,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (nameserver().isA(t, PARALLEL_LINK))
 	{
 		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
+		// Yes, we do, but this is just not tested, right now.
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
