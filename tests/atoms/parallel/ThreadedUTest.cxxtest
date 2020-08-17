@@ -114,13 +114,21 @@ void ThreadedUTest::test_many(void)
 	printf("Got %lu results\n", vals.size());
 	TS_ASSERT_EQUALS(100, vals.size());
 
+	Handle flower = as->add_node(CONCEPT_NODE, "flower");
+	Handle rock = as->add_node(CONCEPT_NODE, "rock");
 	size_t nflowers = 0;
 	size_t nrocks = 0;
 	for (const ValuePtr& v : vals)
 	{
 		HandleSeq hs = LinkValueCast(v)->to_handle_seq();
 		TS_ASSERT_EQUALS(1, hs.size());
+		if (flower == hs[0]) nflowers++;
+		if (rock == hs[0]) nrocks++;
 	}
+
+	printf("Got %lu flowers and %lu rocks\n", nflowers, nrocks);
+	TS_ASSERT_EQUALS(50, nflowers)
+	TS_ASSERT_EQUALS(50, nrocks);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
