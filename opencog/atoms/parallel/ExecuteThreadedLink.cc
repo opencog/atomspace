@@ -34,6 +34,30 @@
 
 using namespace opencog;
 
+/// ExecuteThreadedLink
+/// Perform execution in parallel threads.
+/// The general structure of this link is
+///
+///        ExecuteThreadedLink
+///            NumberNode nthr  ; optionl; if present, number of threads.
+///            SetLink
+///                ExecutableAtoms...
+///
+/// When this link is executed, the `ExecutableAtoms...` are executed
+/// in parallel, in distinct threads, with the result of the execution
+/// appended to a thread-safe queue, the QueueValue.  After all of the
+/// atoms have been executed, the QueueValue holding the results is
+/// returned. Execution blocks until all of the threads have finished.
+///
+/// By default, the number of threads launched equals the number of
+/// Atoms in the set. If the NumberNode is present, then the number of
+/// threads is the smaller of the NumberNode and the seize of the Set.
+///
+/// XXX TODO: We could have a non-blocking version of this atom. We
+/// could just return the QueueValue immediately; the user could check
+/// to see if the queue is closed, to find out if the threads have
+/// finished.
+
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1), _setoff(0)
 {
