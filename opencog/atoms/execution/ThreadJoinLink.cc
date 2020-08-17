@@ -24,7 +24,9 @@
 #include <thread>
 
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ThreadJoinLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -32,35 +34,55 @@
 using namespace opencog;
 
 ThreadJoinLink::ThreadJoinLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t)
+    : ParallelLink(std::move(oset), t)
 {
 }
 
-static void thread_eval(AtomSpace* as,
-                        const Handle& evelnk, AtomSpace* scratch,
-                        bool silent)
+static void thread_eval_tv(AtomSpace* as,
+                           const Handle& evelnk, AtomSpace* scratch,
+                           bool silent, TruthValuePtr* tv,
+                           std::exception_ptr* returned_ex)
 {
 	try
 	{
-		ThreadJoinLink::do_eval_scratch(as, evelnk, scratch, silent);
+		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 	}
 	catch (const std::exception& ex)
 	{
-		logger().warn("Caught exception in thread:\n%s", ex.what());
+		*returned_ex = std::current_exception();
 	}
 }
 
 ValuePtr ThreadJoinLink::execute(AtomSpace* as,
-                               bool silent,
-                               AtomSpace* scratch)
+                                 bool silent,
+                                 AtomSpace* scratch)
 {
-	// Create and detach threads; return immediately.
-	for (const Handle& h : getOutgoingSet())
+	const HandleSeq& oset = getOutgoingSet();
+	size_t arity = oset.size();
+	std::vector<TruthValuePtr> tvp(arity);
+
+	// Create a collection of joinable threads.
+	std::vector<std::thread> thread_set;
+	std::exception_ptr ex;
+	for (size_t i=0; i<arity; i++)
 	{
-		std::thread thr(&thread_eval, as, h, scratch, silent);
-		thr.detach();
+		thread_set.push_back(std::thread(&thread_eval_tv,
+			as, oset[i], scratch, silent, &tvp[i], &ex));
 	}
-	return SimpleTruthValue::TRUE_TV();
+
+	// Wait for it all to come together.
+	for (std::thread& t : thread_set) t.join();
+
+	// Were there any exceptions? If so, rethrow.
+	if (ex) std::rethrow_exception(ex);
+
+	// Return the logical-AND of the returned truth values
+	for (const TruthValuePtr& tv: tvp)
+	{
+		if (0.5 > tv->get_mean())
+			return ValueCast(SimpleTruthValue::FALSE_TV());
+	}
+	return ValueCast(SimpleTruthValue::TRUE_TV());
 }
 
 DEFINE_LINK_FACTORY(ThreadJoinLink, THREAD_JOIN_LINK)
