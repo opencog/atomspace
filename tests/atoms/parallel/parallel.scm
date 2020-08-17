@@ -1,6 +1,7 @@
 ;
 ; parallel.scm
-; unit test for parallel and ThreadJoin links.
+;
+; Part of the unit test for ParallelLink and ThreadJoinLink.
 ;
 (use-modules (opencog) (opencog exec))
 
