@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_PARALLEL_LINK_H
 #define _OPENCOG_PARALLEL_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 
 namespace opencog
 {
@@ -34,22 +34,16 @@ namespace opencog
 
 class AtomSpace;
 
-class ParallelLink : public Link
+class ParallelLink : public UnorderedLink
 {
-protected:
-	size_t _nthreads;
-
 public:
 	ParallelLink(const HandleSeq&&, Type=PARALLEL_LINK);
 	ParallelLink(const ParallelLink&) = delete;
 	ParallelLink& operator=(const ParallelLink&) = delete;
 
-	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace* as, bool silent)
-	{
-		return execute(as, silent, as);
-	}
-	ValuePtr execute(AtomSpace*, bool, AtomSpace*);
+	virtual bool is_evaluatable() const { return true; }
+	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+	void evaluate(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };
@@ -57,8 +51,6 @@ public:
 typedef std::shared_ptr<ParallelLink> ParallelLinkPtr;
 static inline ParallelLinkPtr ParallelLinkCast(const Handle& h)
    { AtomPtr a(h); return std::dynamic_pointer_cast<ParallelLink>(a); }
-static inline ParallelLinkPtr ParallelLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ParallelLink>(a); }
 
 #define createParallelLink std::make_shared<ParallelLink>
 

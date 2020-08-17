@@ -41,12 +41,8 @@ public:
 	ThreadJoinLink(const ThreadJoinLink&) = delete;
 	ThreadJoinLink& operator=(const ThreadJoinLink&) = delete;
 
-	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace* as, bool silent)
-	{
-		return execute(as, silent, as);
-	}
-	ValuePtr execute(AtomSpace*, bool, AtomSpace*);
+	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+	bool evaluate(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };
@@ -54,8 +50,6 @@ public:
 typedef std::shared_ptr<ThreadJoinLink> ThreadJoinLinkPtr;
 static inline ThreadJoinLinkPtr ThreadJoinLinkCast(const Handle& h)
    { AtomPtr a(h); return std::dynamic_pointer_cast<ThreadJoinLink>(a); }
-static inline ThreadJoinLinkPtr ThreadJoinLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ThreadJoinLink>(a); }
 
 #define createThreadJoinLink std::make_shared<ThreadJoinLink>
 

@@ -24,7 +24,6 @@
 
 #include <thread>
 
-#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
@@ -34,13 +33,8 @@
 using namespace opencog;
 
 ParallelLink::ParallelLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t), _nthreads(-1)
+    : UnorderedLink(std::move(oset), t)
 {
-	if (0 == _outgoing.size()) return;
-
-	Type t = _outgoing[0]->get_type();
-	if (NUMBER_NODE == t)
-		_nthreads = NumberNodeCast(_outgoing[0])->get_value();
 }
 
 static void thread_eval(AtomSpace* as,
@@ -57,17 +51,23 @@ static void thread_eval(AtomSpace* as,
 	}
 }
 
-ValuePtr ParallelLink::execute(AtomSpace* as,
-                               bool silent,
-                               AtomSpace* scratch)
+void ParallelLink::evaluate(AtomSpace* as,
+                            bool silent,
+                            AtomSpace* scratch)
 {
 	// Create and detach threads; return immediately.
-	for (const Handle& h : getOutgoingSet())
+	for (const Handle& h : _outgoing)
 	{
 		std::thread thr(&thread_eval, as, h, scratch, silent);
 		thr.detach();
 	}
-	return ValueCast(SimpleTruthValue::TRUE_TV());
+}
+
+TruthValuePtr ParallelLink::evaluate(AtomSpace* as,
+                                     bool silent)
+{
+	evaluate(as, silent, as);
+	return SimpleTruthValue::TRUE_TV();
 }
 
 DEFINE_LINK_FACTORY(ParallelLink, PARALLEL_LINK)

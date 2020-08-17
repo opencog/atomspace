@@ -53,9 +53,9 @@ static void thread_eval_tv(AtomSpace* as,
 	}
 }
 
-ValuePtr ThreadJoinLink::execute(AtomSpace* as,
-                                 bool silent,
-                                 AtomSpace* scratch)
+bool ThreadJoinLink::evaluate(AtomSpace* as,
+                              bool silent,
+                              AtomSpace* scratch)
 {
 	const HandleSeq& oset = getOutgoingSet();
 	size_t arity = oset.size();
@@ -78,11 +78,17 @@ ValuePtr ThreadJoinLink::execute(AtomSpace* as,
 
 	// Return the logical-AND of the returned truth values
 	for (const TruthValuePtr& tv: tvp)
-	{
-		if (0.5 > tv->get_mean())
-			return ValueCast(SimpleTruthValue::FALSE_TV());
-	}
-	return ValueCast(SimpleTruthValue::TRUE_TV());
+		if (0.5 > tv->get_mean()) return false;
+
+	return true;
+}
+
+TruthValuePtr ThreadJoinLink::evaluate(AtomSpace* as,
+                                       bool silent)
+{
+	bool ok = evaluate(as, silent, as);
+	if (ok) SimpleTruthValue::TRUE_TV();
+	return SimpleTruthValue::FALSE_TV();
 }
 
 DEFINE_LINK_FACTORY(ThreadJoinLink, THREAD_JOIN_LINK)
