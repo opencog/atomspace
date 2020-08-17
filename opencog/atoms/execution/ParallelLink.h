@@ -45,7 +45,11 @@ public:
 	ParallelLink& operator=(const ParallelLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace* as, bool silent);
+	virtual ValuePtr execute(AtomSpace* as, bool silent)
+	{
+		return execute(as, silent, as);
+	}
+	ValuePtr execute(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

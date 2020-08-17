@@ -7,6 +7,7 @@ ADD_LIBRARY (execution
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
+	ParallelLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -29,5 +30,6 @@ INSTALL (FILES
 	Force.h
 	GroundedProcedureNode.h
 	Instantiator.h
+	ParallelLink.h
 	DESTINATION "include/opencog/atoms/execution"
 )
