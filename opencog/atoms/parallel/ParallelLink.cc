@@ -34,8 +34,13 @@
 using namespace opencog;
 
 ParallelLink::ParallelLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t)
+    : Link(std::move(oset), t), _nthreads(-1)
 {
+	if (0 == _outgoing.size()) return;
+
+	Type t = _outgoing[0]->get_type();
+	if (NUMBER_NODE == t)
+		_nthreads = NumberNodeCast(_outgoing[0])->get_value();
 }
 
 static void thread_eval(AtomSpace* as,
