@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (parallel
+	ExecuteThreadedLink.cc
 	ParallelLink.cc
 	ThreadJoinLink.cc
 )
@@ -20,6 +21,7 @@ INSTALL (TARGETS parallel
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	ExecuteThreadedLink.h
 	ParallelLink.h
 	ThreadJoinLink.h
 	DESTINATION "include/opencog/atoms/parallel"

@@ -38,6 +38,7 @@ class ExecuteThreadedLink : public Link
 {
 protected:
 	size_t _nthreads;
+	size_t _setoff;
 
 public:
 	ExecuteThreadedLink(const HandleSeq&&, Type=EXECUTE_THREADED_LINK);

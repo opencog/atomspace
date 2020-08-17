@@ -24,6 +24,7 @@
 #include <thread>
 
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ExecuteThreadedLink.h>
 #include <opencog/atoms/value/QueueValue.h>
 
@@ -32,25 +33,44 @@
 using namespace opencog;
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t), _nthreads(-1)
+    : Link(std::move(oset), t), _nthreads(-1), _setoff(0)
 {
 	if (0 == _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting at least one argument!");
 
 	Type nt = _outgoing[0]->get_type();
+	Type st = nt;
 	if (NUMBER_NODE == nt)
+	{
+		if (1 == _outgoing.size())
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting a set of executable links!");
 		_nthreads = std::floor(NumberNodeCast(_outgoing[0])->get_value());
+
+		// The set link.
+		_setoff = 1;
+		st = _outgoing[1]->get_type();
+	}
+
+	if (SET_LINK != st)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a set of executable links!");
 }
 
-static void thread_eval_tv(AtomSpace* as,
-                           const Handle& evelnk,
-                           bool silent, TruthValuePtr* tv,
-                           std::exception_ptr* returned_ex)
+static void thread_exec(AtomSpace* as,
+                        const Handle& h,
+                        bool silent, QueueValuePtr qvp,
+                        std::exception_ptr* returned_ex)
 {
+	// This is "identical" to what cog-execute! would do...
+	Instantiator inst(as);
 	try
 	{
-		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+		ValuePtr pap(inst.execute(h));
+		if (pap and pap->is_atom())
+			pap = as->add_atom(HandleCast(pap));
+		qvp->push(std::move(pap));
 	}
 	catch (const std::exception& ex)
 	{
@@ -61,16 +81,18 @@ static void thread_eval_tv(AtomSpace* as,
 ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
                                       bool silent)
 {
-	size_t arity = _outgoing.size();
-	std::vector<ValuePtr> tvp(arity);
+	QueueValuePtr qvp(createQueueValue());
 
 	// Create a collection of joinable threads.
 	std::vector<std::thread> thread_set;
 	std::exception_ptr ex;
+
+	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
+	size_t arity = exes.size();
 	for (size_t i=0; i<arity; i++)
 	{
-		thread_set.push_back(std::thread(&thread_eval_tv,
-			as, oset[i], silent, &tvp[i], &ex));
+		thread_set.push_back(std::thread(&thread_exec,
+			as, exes[i], silent, qvp, &ex));
 	}
 
 	// Wait for it all to come together.
@@ -78,6 +100,9 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 
 	// Were there any exceptions? If so, rethrow.
 	if (ex) std::rethrow_exception(ex);
+
+	qvp->close();
+	return qvp;
 }
 
 DEFINE_LINK_FACTORY(ExecuteThreadedLink, EXECUTE_THREADED_LINK)
