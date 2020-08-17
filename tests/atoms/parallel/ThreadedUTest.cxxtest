@@ -33,7 +33,7 @@ using namespace opencog;
 class ThreadedUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpace* as;
 	SchemeEval* eval;
 
 public:
@@ -61,6 +61,7 @@ public:
 	void tearDown(void);
 
 	void test_exec(void);
+	void test_many(void);
 };
 
 void ThreadedUTest::tearDown(void)
@@ -90,6 +91,36 @@ void ThreadedUTest::test_exec(void)
 	printf("Got %s\n", qvp->to_string().c_str());
 
 	TS_ASSERT_EQUALS(2, qvp->LinkValue::size());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ThreadedLink unit test.
+ */
+void ThreadedUTest::test_many(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/parallel/threaded.scm\")");
+
+	ValuePtr vp = eval->eval_v("(cog-execute! pmany)");
+
+	TS_ASSERT_EQUALS(vp->get_type(), QUEUE_VALUE);
+
+	QueueValuePtr qvp = QueueValueCast(vp);
+	const std::vector<ValuePtr>& vals = qvp->value();
+
+	printf("Got %lu results\n", vals.size());
+	TS_ASSERT_EQUALS(100, vals.size());
+
+	size_t nflowers = 0;
+	size_t nrocks = 0;
+	for (const ValuePtr& v : vals)
+	{
+		HandleSeq hs = LinkValueCast(v)->to_handle_seq();
+		TS_ASSERT_EQUALS(1, hs.size());
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
