@@ -23,6 +23,8 @@
 
 #include <thread>
 
+#include <opencog/util/concurrent_queue.h>
+
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ExecuteThreadedLink.h>
@@ -58,41 +60,53 @@ ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
 			"Expecting a set of executable links!");
 }
 
-static void thread_exec(AtomSpace* as,
-                        const Handle& h,
-                        bool silent, QueueValuePtr qvp,
+static void thread_exec(AtomSpace* as, bool silent,
+                        concurrent_queue<Handle>* todo,
+                        QueueValuePtr qvp,
                         std::exception_ptr* returned_ex)
 {
-	// This is "identical" to what cog-execute! would do...
-	Instantiator inst(as);
-	try
+	while (true)
 	{
-		ValuePtr pap(inst.execute(h));
-		if (pap and pap->is_atom())
-			pap = as->add_atom(HandleCast(pap));
-		qvp->push(std::move(pap));
-	}
-	catch (const std::exception& ex)
-	{
-		*returned_ex = std::current_exception();
+		Handle h;
+		if (not todo->try_get(h)) return;
+
+		// This is "identical" to what cog-execute! would do...
+		Instantiator inst(as);
+		try
+		{
+			ValuePtr pap(inst.execute(h));
+			if (pap and pap->is_atom())
+				pap = as->add_atom(HandleCast(pap));
+			qvp->push(std::move(pap));
+		}
+		catch (const std::exception& ex)
+		{
+			*returned_ex = std::current_exception();
+			return;
+		}
 	}
 }
 
 ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
                                       bool silent)
 {
+	// Place the work items onto a queue.
+	concurrent_queue<Handle> todo_list;
+	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
+	for (const Handle& h: exes)
+		todo_list.push(h);
+
+	// Where the results will be reported.
 	QueueValuePtr qvp(createQueueValue());
 
 	// Create a collection of joinable threads.
 	std::vector<std::thread> thread_set;
 	std::exception_ptr ex;
 
-	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
-	size_t arity = exes.size();
-	for (size_t i=0; i<arity; i++)
+	for (size_t i=0; i<_nthreads; i++)
 	{
 		thread_set.push_back(std::thread(&thread_exec,
-			as, exes[i], silent, qvp, &ex));
+			as, silent, &todo_list, qvp, &ex));
 	}
 
 	// Wait for it all to come together.
