@@ -119,7 +119,7 @@ void ParallelUTest::test_parallel(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
 
     // The scheme variable nnn should increment by one after 1, 3 and 5
     // seconds. If we check at 0, 2, 4, 6 seconds, we should get a clear
@@ -177,7 +177,7 @@ void ParallelUTest::test_join(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
 
     eval->eval("(set! nnn 0)");
 
@@ -216,7 +216,7 @@ void ParallelUTest::test_throw(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
     TS_ASSERT_THROWS_NOTHING(eval->eval_tv("(cog-evaluate!  pllel-bad)"));
     TS_ASSERT_EQUALS(false, eval->eval_error());
 
