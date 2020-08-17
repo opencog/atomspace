@@ -525,7 +525,7 @@ void GetLinkUTest::test_embed_vardels(void)
 
 	// ----------------------
 	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
-#if XREVERSE
+#if REVERSE
 	hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
