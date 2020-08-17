@@ -206,10 +206,6 @@ void ParallelUTest::test_join(void)
     int cnt = atoi(str.c_str());
     TS_ASSERT_EQUALS(cnt, 2);
 
-    // The ThreadJoin is an AndLink...
-    double mean = tvp->get_mean();
-    TS_ASSERT_LESS_THAN(mean, 0.5);
-
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
