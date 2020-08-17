@@ -58,6 +58,8 @@ ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
 	if (SET_LINK != st)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a set of executable links!");
+
+	_nthreads = std::min(_nthreads, _outgoing[_setoff]->get_arity());
 }
 
 static void thread_exec(AtomSpace* as, bool silent,
@@ -103,6 +105,7 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	std::vector<std::thread> thread_set;
 	std::exception_ptr ex;
 
+	// Launch the workers
 	for (size_t i=0; i<_nthreads; i++)
 	{
 		thread_set.push_back(std::thread(&thread_exec,
