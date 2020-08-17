@@ -30,6 +30,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/PredicateFormulaLink.h>
+#include <opencog/atoms/parallel/ParallelLink.h>
+#include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
@@ -40,8 +42,6 @@
 
 #include "Force.h"
 #include "EvaluationLink.h"
-#include "ParallelLink.h"
-#include "ThreadJoinLink.h"
 
 using namespace opencog;
 

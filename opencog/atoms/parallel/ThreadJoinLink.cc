@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/ThreadJoinLink.cc
+ * opencog/atoms/parallel/ThreadJoinLink.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ThreadJoinLink.h>
+#include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 

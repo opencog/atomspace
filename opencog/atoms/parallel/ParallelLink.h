@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/ThreadJoinLink.h
+ * opencog/atoms/parallel/ParallelLink.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_THREAD_JOIN_LINK_H
-#define _OPENCOG_THREAD_JOIN_LINK_H
+#ifndef _OPENCOG_PARALLEL_LINK_H
+#define _OPENCOG_PARALLEL_LINK_H
 
-#include <opencog/atoms/execution/ParallelLink.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
@@ -34,12 +34,15 @@ namespace opencog
 
 class AtomSpace;
 
-class ThreadJoinLink : public ParallelLink
+class ParallelLink : public Link
 {
+protected:
+	size_t _nthreads;
+
 public:
-	ThreadJoinLink(const HandleSeq&&, Type=THREAD_JOIN_LINK);
-	ThreadJoinLink(const ThreadJoinLink&) = delete;
-	ThreadJoinLink& operator=(const ThreadJoinLink&) = delete;
+	ParallelLink(const HandleSeq&&, Type=PARALLEL_LINK);
+	ParallelLink(const ParallelLink&) = delete;
+	ParallelLink& operator=(const ParallelLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent)
@@ -51,15 +54,15 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ThreadJoinLink> ThreadJoinLinkPtr;
-static inline ThreadJoinLinkPtr ThreadJoinLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ThreadJoinLink>(a); }
-static inline ThreadJoinLinkPtr ThreadJoinLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ThreadJoinLink>(a); }
+typedef std::shared_ptr<ParallelLink> ParallelLinkPtr;
+static inline ParallelLinkPtr ParallelLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<ParallelLink>(a); }
+static inline ParallelLinkPtr ParallelLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<ParallelLink>(a); }
 
-#define createThreadJoinLink std::make_shared<ThreadJoinLink>
+#define createParallelLink std::make_shared<ParallelLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_THREAD_JOIN_LINK_H
+#endif // _OPENCOG_PARALLEL_LINK_H

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/ParallelLink.cc
+ * opencog/atoms/parallel/ParallelLink.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015, 2020 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -26,7 +26,7 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ParallelLink.h>
+#include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
