@@ -246,12 +246,17 @@ ALWAYS_LINK <- PRESENT_LINK
 
 // ====================================================================
 // Performance scripting links.
+//
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  ThreadJoinLink launches multiple threads, and waits
-// for all of them to return, and then returns the And of their truth
-// values.
+// for all of them to return, and then returns the boolean And of their
+// TruthValues.
 PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 THREAD_JOIN_LINK <- PARALLEL_LINK
+
+// Somewhat like ThreadJoinLink, except that this works with executable,
+// not evaluatable links.
+EXECUTE_THREADED_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Connectors and sections.

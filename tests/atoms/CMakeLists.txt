@@ -11,6 +11,8 @@ ADD_SUBDIRECTORY (evaluation)
 
 ADD_SUBDIRECTORY (execution)
 
+ADD_SUBDIRECTORY (parallel)
+
 ADD_SUBDIRECTORY (truthvalue)
 
 ADD_SUBDIRECTORY (value)
@@ -26,8 +28,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(HashUTest smob atomspace)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest smob atomspace)
-	ADD_CXXTEST(ParallelUTest)
-	TARGET_LINK_LIBRARIES(ParallelUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(RandomUTest)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
 ENDIF(HAVE_GUILE)

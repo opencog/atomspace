@@ -1,5 +1,5 @@
 /*
- * tests/atoms/ParallelUTest.cxxtest
+ * tests/atoms/parallel/ParallelUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -42,7 +42,7 @@ private:
     SchemeEval* eval;
 
     int robustSleep(int secs);
-  
+
 public:
     ParallelUTest(void)
     {
@@ -95,7 +95,7 @@ int ParallelUTest::robustSleep(int secs)
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
-    
+
     while ((e = ATOM_SLEEP(&request, &remain)) != 0) {
         gettimeofday(&tv, nullptr);
         double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
@@ -106,11 +106,11 @@ int ParallelUTest::robustSleep(int secs)
         }
         else {
             return e;
-        }   
+        }
     }
 
     return e;
-}        
+}
 
 /*
  * ParallelLink unit test.
@@ -119,7 +119,7 @@ void ParallelUTest::test_parallel(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
 
     // The scheme variable nnn should increment by one after 1, 3 and 5
     // seconds. If we check at 0, 2, 4, 6 seconds, we should get a clear
@@ -137,7 +137,7 @@ void ParallelUTest::test_parallel(void)
     int cnt = atoi(str.c_str());
     TS_ASSERT_EQUALS(cnt, 0);
     int e = robustSleep(2);
-    
+
     gettimeofday(&tv, nullptr);
     double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
     printf("After first sleep (exit %d) %.4f secs past\n", e, now - start);
@@ -177,7 +177,7 @@ void ParallelUTest::test_join(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
 
     eval->eval("(set! nnn 0)");
 
@@ -220,7 +220,7 @@ void ParallelUTest::test_throw(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/parallel.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
     TS_ASSERT_THROWS_NOTHING(eval->eval_tv("(cog-evaluate!  pllel-bad)"));
     TS_ASSERT_EQUALS(false, eval->eval_error());
 

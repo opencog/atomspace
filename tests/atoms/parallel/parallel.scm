@@ -1,4 +1,8 @@
-
+;
+; parallel.scm
+;
+; Part of the unit test for ParallelLink and ThreadJoinLink.
+;
 (use-modules (opencog) (opencog exec))
 
 (define nnn 0)

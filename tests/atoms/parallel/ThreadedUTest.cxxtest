@@ -1,0 +1,134 @@
+/*
+ * tests/atoms/parallel/ThreadedUTest.cxxtest
+ *
+ * Copyright (C) 2015,2020 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <time.h>
+#include <sys/time.h>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ThreadedUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+	SchemeEval* eval;
+
+public:
+	ThreadedUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	~ThreadedUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_exec(void);
+	void test_many(void);
+};
+
+void ThreadedUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void ThreadedUTest::setUp(void)
+{
+	as->clear();
+}
+
+/*
+ * ThreadedLink unit test.
+ */
+void ThreadedUTest::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/parallel/threaded.scm\")");
+
+	ValuePtr vp = eval->eval_v("(cog-execute! pexec)");
+
+	TS_ASSERT_EQUALS(vp->get_type(), QUEUE_VALUE);
+
+	QueueValuePtr qvp = QueueValueCast(vp);
+	printf("Got %s\n", qvp->to_string().c_str());
+
+	TS_ASSERT_EQUALS(2, qvp->LinkValue::size());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ThreadedLink unit test.
+ */
+void ThreadedUTest::test_many(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/atoms/parallel/threaded.scm\")");
+
+	ValuePtr vp = eval->eval_v("(cog-execute! pmany)");
+
+	TS_ASSERT_EQUALS(vp->get_type(), QUEUE_VALUE);
+
+	QueueValuePtr qvp = QueueValueCast(vp);
+	const std::vector<ValuePtr>& vals = qvp->value();
+
+	printf("Got %lu results\n", vals.size());
+	TS_ASSERT_EQUALS(100, vals.size());
+
+	Handle flower = as->add_node(CONCEPT_NODE, "flower");
+	Handle rock = as->add_node(CONCEPT_NODE, "rock");
+	size_t nflowers = 0;
+	size_t nrocks = 0;
+	for (const ValuePtr& v : vals)
+	{
+		HandleSeq hs = LinkValueCast(v)->to_handle_seq();
+		TS_ASSERT_EQUALS(1, hs.size());
+		if (flower == hs[0]) nflowers++;
+		if (rock == hs[0]) nrocks++;
+	}
+
+	printf("Got %lu flowers and %lu rocks\n", nflowers, nrocks);
+	TS_ASSERT_EQUALS(50, nflowers)
+	TS_ASSERT_EQUALS(50, nrocks);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

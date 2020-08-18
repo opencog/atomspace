@@ -31,7 +31,6 @@ void opencog_exec_init(void);
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/guile/SchemeModule.h>
 
 // ========================================================
