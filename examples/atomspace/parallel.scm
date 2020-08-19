@@ -3,7 +3,11 @@
 ;
 ; Running programs and loops and what-not in Atomese can be awkward
 ; if you can't run things in parallel. Ah hah! But you can! The
-; ParallelLink and the JoinLink allow threads to be created and joined.
+; ParallelLink and the JoinThreadLink allow threads to be created and
+; joined. This example shows how.
+;
+; See also `threaded.scm` for the ExecuteThreadedLink, which might be
+; easier to use in many situations.
 ;
 
 (use-modules (opencog) (opencog exec))
@@ -50,7 +54,7 @@
 ; And again, just for good luck!
 (cog-evaluate! pllel)
 
-; This is almost identical to the above, except that the JoinLink
+; This is almost identical to the above, except that the ThreadJoinLink
 ; will not return control to the evaluator until all of the threads
 ; have finished. The longest running thread takes five seconds, so
 ; sit back and relax and watch the pretty messages appear.
