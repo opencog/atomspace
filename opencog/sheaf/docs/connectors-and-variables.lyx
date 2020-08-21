@@ -1202,6 +1202,13 @@ center
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "seed"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1602,7 +1609,206 @@ structuralist
 \end_layout
 
 \begin_layout Standard
-A more explicit bridge can be constructed via linguistics, as follows.
+A more explicit bridge can be constructed via linguistics, in the following.
+\end_layout
+
+\begin_layout Section*
+Tensors
+\end_layout
+
+\begin_layout Standard
+Much of what has been said above can be made slightly more precise with
+ the aid of mathematical notation.
+ This section reviews the concept of a tensor, starting from its most narrow
+ form, and broadening it to a general setting.
+ It is assumed that the reader already knows what a tensor is, as otherwise,
+ most of this won't make much sense.
+ Yet, the explanation will begin very simply; do not be mislead by the simplcity.
+\end_layout
+
+\begin_layout Standard
+Three properites of tensors will be exposed and articulated.
+ These may seem strange and idiosyncratic, if you already know what a tensor
+ is; but that is why we write.
+\end_layout
+
+\begin_layout Itemize
+A means of storing data in a particular form or shape.
+\end_layout
+
+\begin_layout Itemize
+The tensor product as a kind of concatenation and 
+\begin_inset Quotes eld
+\end_inset
+
+forgetting
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+The inner product as a kind of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging together of connectors
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+These properties can be taken in constrast to conventional expositions,
+ which emphasizes multi-linearity and and behavior under change-of-basis.
+ The change in focus is required to build the abstract notion of a tensor.
+\end_layout
+
+\begin_layout Standard
+The conventional defintion of a tensor in science and engineering starts
+ with the introduction of the concept of a scalar 
+\begin_inset Formula $s$
+\end_inset
+
+: a single number usually taken to be a real number or a complex number
+ or even, abstractly, taken from some ring 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ A vector 
+\begin_inset Formula $v=\left[v_{1},v_{2},\cdots,v_{n}\right]$
+\end_inset
+
+ is a sequence of numbers.
+ A matrix 
+\begin_inset Formula $M=\left[M\right]=M_{ij}=M(i,j)$
+\end_inset
+
+ is a square of numbers, indexed by rows and columns 
+\begin_inset Formula $i,j$
+\end_inset
+
+.
+ The equality signs here just suggest different ways (different noations)
+ of writing the same thing.
+ A 3-tensor 
+\begin_inset Formula $T_{ijk}=T(i,j,k)$
+\end_inset
+
+ is a cube of numbers; a 4-tensor 
+\begin_inset Formula $T_{ijkm}=T(i,j,k,m)$
+\end_inset
+
+ is a 4-dimensional 
+\begin_inset Quotes eld
+\end_inset
+
+hypercube
+\begin_inset Quotes erd
+\end_inset
+
+ of numbers, and so on.
+\end_layout
+
+\begin_layout Standard
+That tensors can be used to 
+\begin_inset Quotes eld
+\end_inset
+
+store data
+\begin_inset Quotes erd
+\end_inset
+
+ sounds a bit silly, or perhaps painfully obvious, given the conventional
+ definition.
+ None-the-less, tensors are a form of 
+\begin_inset Quotes eld
+\end_inset
+
+database
+\begin_inset Quotes erd
+\end_inset
+
+, where 
+\begin_inset Quotes eld
+\end_inset
+
+data
+\begin_inset Quotes erd
+\end_inset
+
+ (the number) has been 
+\begin_inset Quotes eld
+\end_inset
+
+stored
+\begin_inset Quotes erd
+\end_inset
+
+ at a 
+\begin_inset Quotes eld
+\end_inset
+
+location
+\begin_inset Quotes erd
+\end_inset
+
+ determined by the indexes (which are taken as ordinal numbers).
+ This becomes a slightly more interesting observation when one realizes
+ that computer-science has a small armada of similar devices for storing
+ data: arrays and vectors and lists and lookup tables and the like.
+ In comp-sci, considerations such as speed, space, accessibility, mutability
+ become important, and strongly affect algorithms.
+ That a tensor has the form of a database becomes even more interesting
+ when one ponders how to store extremely sparse tensors: those whose entries
+ are mostly zero, with a scattering of non-zero entries.
+ Consider a matrix with one million rows and one million columns: this has
+ 
+\begin_inset Formula $10^{6}\times10^{6}=10^{12}$
+\end_inset
+
+ locations; were we to splat a 64-bit floating-point number down at each
+ location, this would require 
+\begin_inset Formula $8\times10^{12}$
+\end_inset
+
+ bytes of storage: 8 terabytes.
+ If all of those locations were zero, except for possibly for 
+\begin_inset Formula $10^{6}$
+\end_inset
+
+ here or there ...
+ that would be an insane waste of RAM: storing a million non-zero numbers
+ requires only 8 megabytes, not 8 terabytes.
+\end_layout
+
+\begin_layout Standard
+See 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "seed"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ above
+\end_layout
+
+\begin_layout Standard
+The storage properties of tensors, although obvious
+\end_layout
+
+\begin_layout Standard
+They can be thought of as ways
+\end_layout
+
+\begin_layout Section*
+Applications
 \end_layout
 
 \begin_layout Subsubsection*
