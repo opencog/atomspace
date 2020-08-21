@@ -2131,6 +2131,198 @@ Tensor products as concatenation
 The above was needlessly complicated.
  There is a wildly simpler way of saying the same thing, which, remarkably,
  arrives at the same place.
+ Let 
+\begin_inset Formula $F\left(x,y,z\right)$
+\end_inset
+
+ be a function of variables 
+\begin_inset Formula $x,y,z$
+\end_inset
+
+ which are understood to be ordinal numbers, that is, integers.
+ Without any further restrictions (for the moment, as we ignore change-of-basis,
+ for now), the function 
+\begin_inset Formula $F\left(x,y,z\right)$
+\end_inset
+
+ is a tensor, and the 
+\begin_inset Formula $x,y,z$
+\end_inset
+
+ are the tensor indexes.
+ Given another function aka tensor 
+\begin_inset Formula $G\left(s,t\right)$
+\end_inset
+
+, the tensor product is simple the tensor 
+\begin_inset Formula 
+\[
+T\left(x,y,z,s,t\right)=F\left(x,y,z\right)G\left(s,t\right)
+\]
+
+\end_inset
+
+where the product is simply the scalar product.
+ This seems almost trivial in it's defintion – how hard can a scalar product
+ be? Its just the ordinary multiplication of numbers.
+ This seems effectively trivial, but it hides a bit of trickery: there's
+ a sleight-of-hand.
+ The tensor on the left-hand side is written as 
+\begin_inset Formula $T\left(x,y,z,s,t\right)$
+\end_inset
+
+ and not as 
+\begin_inset Formula $T\left(\left(x,y,z\right),\left(s,t\right)\right)$
+\end_inset
+
+.
+ If we look at 
+\begin_inset Formula $\left(x,y,z\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(s,t\right)$
+\end_inset
+
+ as two ordered lists, then 
+\begin_inset Formula $\left(x,y,z,s,t\right)$
+\end_inset
+
+ is the concatentation of those lists.
+ It is NOT the Cartesian product of them!
+\end_layout
+
+\begin_layout Standard
+As always, let's belabor the painfully obvious:
+\begin_inset Formula 
+\[
+\left(x,y,z,s,t\right)\ne\left(x,y,z\right)\times\left(s,t\right)=\left(\left(x,y,z\right),\left(s,t\right)\right)
+\]
+
+\end_inset
+
+List concatention 
+\begin_inset Quotes eld
+\end_inset
+
+erases
+\begin_inset Quotes erd
+\end_inset
+
+ a set of nested parenthesis.
+ It 
+\begin_inset Quotes eld
+\end_inset
+
+forgets
+\begin_inset Quotes erd
+\end_inset
+
+ where the indexes came from.
+ Indeed, it might have been the case that the list was the result of concatenati
+ng 
+\begin_inset Formula $\left(x,y\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $\left(z,s,t\right)$
+\end_inset
+
+ – we simply don't know, we forgot this bit of information.
+ We 
+\begin_inset Quotes eld
+\end_inset
+
+erased
+\begin_inset Quotes erd
+\end_inset
+
+ it, the origins have been 
+\begin_inset Quotes eld
+\end_inset
+
+democratized
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This works for conventional tensors because 
+\begin_inset Formula $F,G$
+\end_inset
+
+ and 
+\begin_inset Formula $T$
+\end_inset
+
+ are considered to be maps to 
+\begin_inset Quotes eld
+\end_inset
+
+numbers
+\begin_inset Quotes erd
+\end_inset
+
+, elements of a field or maybe a ring.
+ The multiplication of numbers (members of a field or ring) is also 
+\begin_inset Quotes eld
+\end_inset
+
+forgetful
+\begin_inset Quotes erd
+\end_inset
+
+: when we write 
+\begin_inset Quotes eld
+\end_inset
+
+42
+\begin_inset Quotes erd
+\end_inset
+
+, we don't know if it was constructed from the product of 6 and 7, or from
+ the product of 2 and 21.
+ It could have been either of these, or yet more.
+ To put it differently, if 
+\begin_inset Formula $F\left(a,b,c\right)=6$
+\end_inset
+
+ and 
+\begin_inset Formula $G\left(d,e\right)=7$
+\end_inset
+
+ for fixed constants 
+\begin_inset Formula $a,b,c,d,e$
+\end_inset
+
+, and we construct the product 
+\begin_inset Formula $T\left(a,b,c,d,e\right)=F\left(a,b,c\right)G\left(d,e\right)$
+\end_inset
+
+, we no longer know where the 42 came from.
+ It might have come from 
+\begin_inset Formula $T\left(a,b,c,d,e\right)=H\left(a,b\right)K\left(c,d,e\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $H\left(a,b\right)=2$
+\end_inset
+
+ and 
+\begin_inset Formula $K\left(c,d,e\right)=21$
+\end_inset
+
+.
+ The forgetfullness of list concatenation goes hand-in-hand with the forgetfulln
+ess of multiplication in fields and rings.
+ Tensors work because the exploit both of these properties.
+\end_layout
+
+\begin_layout Subsubsection*
+Tensor products vs.
+ lambda calculus
 \end_layout
 
 \begin_layout Section*
