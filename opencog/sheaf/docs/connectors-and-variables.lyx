@@ -2201,7 +2201,9 @@ As always, let's belabor the painfully obvious:
 
 \end_inset
 
-List concatention 
+The right side is a list.
+ The left side is a list of lists.
+ List concatention 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2209,7 +2211,7 @@ erases
 \begin_inset Quotes erd
 \end_inset
 
- a set of nested parenthesis.
+ the nested parenthesis that appear on the right-hand-side.
  It 
 \begin_inset Quotes eld
 \end_inset
@@ -2245,7 +2247,43 @@ democratized
 \begin_inset Quotes erd
 \end_inset
 
-.
+: we only have a list 
+\begin_inset Formula $\left(x,y,z,s,t\right)$
+\end_inset
+
+ but know not whence it came.
+\end_layout
+
+\begin_layout Standard
+To illustrate the correspondance, list concatenation can also be written
+ with an equivalence principle.
+ Using the symbol 
+\begin_inset Formula $\sim$
+\end_inset
+
+ to denote 
+\begin_inset Quotes eld
+\end_inset
+
+the same as
+\begin_inset Quotes erd
+\end_inset
+
+, one writes 
+\begin_inset Formula 
+\[
+\left(x,y,z\right)\times\left(s,t\right)\sim\left(x,y\right)\times\left(z,s,t\right)
+\]
+
+\end_inset
+
+Using the equivalence 
+\begin_inset Formula $\sim$
+\end_inset
+
+ to write a quotient space of concatenated products requires the development
+ of some additional notion.
+ This is partly undertaken in the next section.
 \end_layout
 
 \begin_layout Standard
@@ -2321,8 +2359,312 @@ ess of multiplication in fields and rings.
 \end_layout
 
 \begin_layout Subsubsection*
-Tensor products vs.
- lambda calculus
+Cartesian products and lambda calculus
+\end_layout
+
+\begin_layout Standard
+The simply-typed lambda calculus is famously the internal language of Cartesian-
+closed categories.
+ Let's take a moment to unpack that statement.
+ The treatment here is a bit informal; our goal is not to teach category
+ theory.
+ Consider a class 
+\begin_inset Formula $S$
+\end_inset
+
+ of symbols.
+ We call it a class because it could be a finite set, or an infinite set;
+ it may be uncountable, or it may be so horridly structured that it cannot
+ be expressed as a set.
+ For the purposes of comp sci, things are always finite, co calling it a
+ class 
+\begin_inset Formula $S$
+\end_inset
+
+ is merely conventional.
+ The elements of 
+\begin_inset Formula $S$
+\end_inset
+
+ are 
+\begin_inset Quotes erd
+\end_inset
+
+symbols
+\begin_inset Quotes erd
+\end_inset
+
+ because, for the purposes here, symbols, and the connotation that they
+ 
+\begin_inset Quotes eld
+\end_inset
+
+stand for something
+\begin_inset Quotes erd
+\end_inset
+
+, is an important property.
+\end_layout
+
+\begin_layout Standard
+The Cartesian product of elements of 
+\begin_inset Formula $S$
+\end_inset
+
+ is an ordered list: we already wrote above that 
+\begin_inset Formula $a\times b\times c=\left(a,b,c\right)$
+\end_inset
+
+ is two different ways of writing the same thing.
+ It is convenient to drop the commas, and write 
+\begin_inset Formula $\left(a,b,c\right)=\left(a\;b\;c\right)$
+\end_inset
+
+ as is standard in Lisp-dialect programming languages.
+ Of course, one can likewise construct lists-of-lists, and so on.
+ Consider now the collection (class) of all such nested lists-of-lists-of-lists...
+ A typical exemplar might look like
+\begin_inset Formula 
+\[
+\left(a\;b\;\left(c\;d\right)\;e\;\left(f\;g\;\left(h\left(j\left(k\left(m\right)\right)\right)\right)\right)\right)
+\]
+
+\end_inset
+
+whence the acronym LISP - 
+\begin_inset Quotes eld
+\end_inset
+
+Lots of InsidiouS Parenthesis
+\begin_inset Quotes erd
+\end_inset
+
+ comes from.
+ Here, the letters were taken to be symbols drawn from the class 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ It is, however, convenient to introduce the notion of variables; for these,
+ we write 
+\begin_inset Formula $x,y,z,\cdots$
+\end_inset
+
+ as always, by convention.
+ One can then consider the class of lists with embeed variables in them.
+ OK, but things really get interesting when one then considers replacing
+ variables by values.
+ To do this, the special notation of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is introduced, and one conventionally writes
+\begin_inset Formula 
+\[
+\left(\lambda x.A\right)B\to A\left[x:=B\right]
+\]
+
+\end_inset
+
+where both 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ are lists (possibly containing variables), and the expression on the left-hand
+ side of the arrow is a lambda-binding of the variable 
+\begin_inset Formula $x$
+\end_inset
+
+ such that any occurance of the variable 
+\begin_inset Formula $x$
+\end_inset
+
+ in the list 
+\begin_inset Formula $A$
+\end_inset
+
+ is to be replaced by the list 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ By convention, that is what the expression on the right hand side of the
+ arrow is supposed to mean.
+ The arrow itself is meant to denote beta-reduction, the actual act of plugging
+ in or substitution of the variable 
+\begin_inset Formula $x$
+\end_inset
+
+ by the thing 
+\begin_inset Formula $B$
+\end_inset
+
+ that is to be plugged in.
+\end_layout
+
+\begin_layout Standard
+Beta reduction takes actual effort and work, it is a computation problem,
+ and vastly complex schemes have been developed to perform beta reduction
+ rapidly.
+ From the comp-sci perspective, it is a highly non-trivial process, no matter
+ how obvious it may seem from the short expression above.
+\end_layout
+
+\begin_layout Standard
+That's it.
+ That's the effective definition of simply-typed lambda calculus.
+ It is 
+\begin_inset Quotes eld
+\end_inset
+
+simply typed
+\begin_inset Quotes erd
+\end_inset
+
+ because all members of the class 
+\begin_inset Formula $S$
+\end_inset
+
+ are taken to be of the same type.
+ There were only four ingredients in the construction:
+\end_layout
+
+\begin_layout Itemize
+The Cartesian product, which allows the construction of lists (and of lists
+ of lists ...).
+\end_layout
+
+\begin_layout Itemize
+The use of variables as 
+\begin_inset Quotes eld
+\end_inset
+
+placeholders
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+The use of a special symbol 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ which is used to call out or bind or name a specific variable.
+\end_layout
+
+\begin_layout Itemize
+The performance of substitution, named 
+\begin_inset Quotes eld
+\end_inset
+
+beta-reduction
+\begin_inset Quotes erd
+\end_inset
+
+, for historical reasons.
+\end_layout
+
+\begin_layout Standard
+There is, of course, much more that can be said about lambda calculus; this
+ hardly scratches the surface.
+ But it does show the centrality of the Caresian product to the construction.
+\end_layout
+
+\begin_layout Standard
+It also helps highlight just how different list concatenation is from the
+ Cartesian product of lists.
+ This is a source of tremendous confusion for students of engineering and
+ science, and so (as always) it is worth belaboring here.
+ By convention, one is introduced to the notion of 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ as the 
+\begin_inset Formula $n$
+\end_inset
+
+-dimensional Cartesian space.
+ It is a coordinate space – the points of Cartesian space are labelled by
+ 
+\begin_inset Formula $n$
+\end_inset
+
+ coordinates, taken to be real numbers, 
+\emph on
+i.e.
+
+\emph default
+ taken as elements of 
+\begin_inset Formula $\mathbb{R}$
+\end_inset
+
+.
+ By convention the Cartesian product of such spaces is 
+\begin_inset Formula $\mathbb{R}^{m}\times\mathbb{R}^{n}\cong\mathbb{R}^{m+n}$
+\end_inset
+
+ where the 
+\begin_inset Formula $\cong$
+\end_inset
+
+ symbol denotes isomorphism.
+ By convention, this works as list concatenation: if one has spatial coordinates
+ 
+\begin_inset Formula $\left(x,y,z\right)$
+\end_inset
+
+ in the 3D space 
+\begin_inset Formula $\mathbb{R}^{3}$
+\end_inset
+
+ and the spatial coordinates 
+\begin_inset Formula $\left(s,t\right)\in\mathbb{R}^{2}$
+\end_inset
+
+, then, 
+\begin_inset Quotes eld
+\end_inset
+
+of course
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Formula $\left(x,y,z,s,t\right)\in\mathbb{R}^{5}=\mathbb{R}\times\mathbb{R}\times\mathbb{R}\times\mathbb{R}\times\mathbb{R}$
+\end_inset
+
+.
+ Notationally, this is a bit unfortunate for our purposes, as it seems to
+ be a form of list concatenation.
+ Even worse, the right hand side is not a tensor product! Are you confused
+ yet? Posed as a riddle, the solution to the riddle is to realize that when
+ one writes a tensor 
+\begin_inset Formula $T_{ijklm}$
+\end_inset
+
+ of five indecies, these indecies are ordinal numbers: integers.
+ They are not real-number-valued coordinates of Eucliden space.
+ The value of 
+\begin_inset Formula $T$
+\end_inset
+
+ might be real, but the indexes are not.
+ The abundance of notations - parenthesis of various shapes, and commas
+ and what-not, can be a bit of a trap.
+\end_layout
+
+\begin_layout Subsubsection*
+Tensor product, in general
+\end_layout
+
+\begin_layout Standard
+is ssos
 \end_layout
 
 \begin_layout Section*
