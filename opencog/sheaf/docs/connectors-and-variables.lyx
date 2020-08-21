@@ -1202,13 +1202,6 @@ center
 \end_inset
 
 
-\begin_inset CommandInset label
-LatexCommand label
-name "seed"
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1621,15 +1614,16 @@ Much of what has been said above can be made slightly more precise with
  the aid of mathematical notation.
  This section reviews the concept of a tensor, starting from its most narrow
  form, and broadening it to a general setting.
- It is assumed that the reader already knows what a tensor is, as otherwise,
- most of this won't make much sense.
- Yet, the explanation will begin very simply; do not be mislead by the simplcity.
+ It is hoped that the reader already knows what a tensor is, as otherwise,
+ most of this may seem pointless.
+ The explanation begins very simply, at the freshman level; do not be mislead
+ by the simplicity, there are a few tricks in here.
 \end_layout
 
 \begin_layout Standard
-Three properites of tensors will be exposed and articulated.
+Three properties of tensors will be exposed and articulated.
  These may seem strange and idiosyncratic, if you already know what a tensor
- is; but that is why we write.
+ is; but communicating the strangeness is why we write.
 \end_layout
 
 \begin_layout Itemize
@@ -1666,8 +1660,12 @@ These properties can be taken in constrast to conventional expositions,
  The change in focus is required to build the abstract notion of a tensor.
 \end_layout
 
+\begin_layout Subsection*
+Tensors as databases
+\end_layout
+
 \begin_layout Standard
-The conventional defintion of a tensor in science and engineering starts
+The conventional definition of a tensor in science and engineering starts
  with the introduction of the concept of a scalar 
 \begin_inset Formula $s$
 \end_inset
@@ -1786,25 +1784,59 @@ location
 \end_layout
 
 \begin_layout Standard
-See 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "seed"
-plural "false"
-caps "false"
-noprefix "false"
+For sparse tensors, the preferred storage mechanism takes the form of a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+seed
+\begin_inset Quotes erd
+\end_inset
+
+, already illustrated in a figure above.
+ Lets repeat it:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed-unlabelled.eps
+	lyxscale 60
+	width 25col%
 
 \end_inset
 
- above
+
 \end_layout
 
 \begin_layout Standard
-The storage properties of tensors, although obvious
+The black dot at the center is the 
+\begin_inset Quotes eld
+\end_inset
+
+data
+\begin_inset Quotes erd
+\end_inset
+
+ (the number).
+ The white dots are the 
+\begin_inset Quotes eld
+\end_inset
+
+tensor indexes
+\begin_inset Quotes erd
+\end_inset
+
+ – the ordinal-number valued tuple identifying the location of the data.
+ The figure shows five connectors, and thus an entry in a 5-tensor.
+\end_layout
+
+\begin_layout Subsection*
+Tensor products
 \end_layout
 
 \begin_layout Standard
-They can be thought of as ways
+The s
 \end_layout
 
 \begin_layout Section*
