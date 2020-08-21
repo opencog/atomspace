@@ -1836,6 +1836,11 @@ Tensor products
 \end_layout
 
 \begin_layout Standard
+We begin with the conventional defintion of the tensor product, before generaliz
+ing it in a later section.
+\end_layout
+
+\begin_layout Standard
 The tensor product is conventionally denoted with the 
 \begin_inset Quotes eld
 \end_inset
@@ -2664,7 +2669,270 @@ Tensor product, in general
 \end_layout
 
 \begin_layout Standard
-is ssos
+We now have enough machinery developed to allow a general defintion of the
+ tensor product.
+ Lets return to the form
+\begin_inset Formula 
+\[
+T\left(x,y,z,s,t\right)=F\left(x,y,z\right)G\left(s,t\right)
+\]
+
+\end_inset
+
+as a simple product of 
+\begin_inset Formula $F\left(x,y,z\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $G\left(s,t\right)$
+\end_inset
+
+.
+ This time, we allow 
+\begin_inset Formula $F$
+\end_inset
+
+ and 
+\begin_inset Formula $G$
+\end_inset
+
+ to be 
+\begin_inset Quotes eld
+\end_inset
+
+anything with a forgetful product
+\begin_inset Quotes erd
+\end_inset
+
+ – not numbers, but anything which can be 
+\begin_inset Quotes eld
+\end_inset
+
+multiplied
+\begin_inset Quotes erd
+\end_inset
+
+ together, in some forgetful way, so that the origin of the factors is no
+ longer identifiable.
+ We had been previously vague as to whether the 
+\begin_inset Formula $x,y,z,s,t$
+\end_inset
+
+ were variables or constants; we may proceed with this vagueness, except
+ that now we generalize them not to be ordinals, but to be members of some
+ class 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ The ordinal property of the indexes is not relevant, here.
+\end_layout
+
+\begin_layout Standard
+Replacing numbers by things that can be forgetfully multiplied discards
+ the addition of tensors.
+ This, however, is an important property that we want to maintain.
+ This can be done by going 
+\begin_inset Quotes eld
+\end_inset
+
+metamathemaical
+\begin_inset Quotes erd
+\end_inset
+
+ in the conventional sense, and using the disjunctive-or to combine generalized
+ tensors.
+ The disjunctive-or is a 
+\begin_inset Quotes eld
+\end_inset
+
+menu choice
+\begin_inset Quotes erd
+\end_inset
+
+: it says 
+\begin_inset Quotes eld
+\end_inset
+
+pick this or pick that, pick at least one, but don't pick both
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If we have generalized tensors 
+\begin_inset Formula $T$
+\end_inset
+
+ and 
+\begin_inset Formula $U$
+\end_inset
+
+, we can no longer write 
+\begin_inset Formula $T+U$
+\end_inset
+
+ because there is no addition, but we can still combine them with disjunctive
+ choice: I can present you with 
+\begin_inset Formula $T\vee U$
+\end_inset
+
+ and demand that you pick either 
+\begin_inset Formula $T$
+\end_inset
+
+ or 
+\begin_inset Formula $U$
+\end_inset
+
+.
+ By convention, the disjunctive-or is denoted with 
+\begin_inset Formula $\vee$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+One can still use the 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ symbol to write the tensor product, or one can omit it entirely, as was
+ done above, when we wrote 
+\begin_inset Formula $T=FG$
+\end_inset
+
+.
+ It is often useful keep a tensor product symbol, but, as we've generalized,
+ it's conventional to use a slightly different symbol: the ampersand 
+\begin_inset Formula $\&$
+\end_inset
+
+, and so write 
+\begin_inset Formula $T=F\&G$
+\end_inset
+
+.
+ We now have two symbols: 
+\begin_inset Formula $\&$
+\end_inset
+
+ and 
+\begin_inset Formula $\vee$
+\end_inset
+
+ and can ask what the algebra of these symbols is.
+ Note very carefully that it is NOT the boolean algebra.
+ We have one distributive property, but not the other.
+ So, 
+\begin_inset Formula 
+\[
+\left(u\vee v\right)\&w=\left(u\&w\right)\vee\left(v\&w\right)
+\]
+
+\end_inset
+
+ is the alternate (generalized) form of the conventional distributive property
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(u+v\right)\otimes w=u\otimes w+v\otimes w
+\]
+
+\end_inset
+
+However, the other one, that would have made things boolean, does not hold:
+\begin_inset Formula 
+\[
+\left(u\&v\right)\vee w\ne\left(u\&w\right)\vee\left(v\&w\right)
+\]
+
+\end_inset
+
+This is hardly a surprise, since it is also the case that
+\begin_inset Formula 
+\[
+\left(u\otimes v\right)+w\ne u\otimes w+v\otimes w
+\]
+
+\end_inset
+
+which is once again obvious and trivial: tensor products do not form a Boolean
+ algebra.
+\end_layout
+
+\begin_layout Subsubsection*
+Tensor logic
+\end_layout
+
+\begin_layout Standard
+To round out the algebraic constructions for the tensor product, we can
+ do the same thing that was done to obtain (simply-typed) lambda calculus:
+\end_layout
+
+\begin_layout Itemize
+Define the algebra of 
+\begin_inset Formula $\&$
+\end_inset
+
+ and 
+\begin_inset Formula $\vee$
+\end_inset
+
+ over a class of symbols 
+\begin_inset Formula $S$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Introduce variables as 
+\begin_inset Quotes eld
+\end_inset
+
+placeholders
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Employ the symbol 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ to bind or call out a specific variable.
+\end_layout
+
+\begin_layout Itemize
+Enable beta-reduction.
+\end_layout
+
+\begin_layout Standard
+This glosses over the need for alpha-conversion and possibly eta-reduction.
+ I will call this algebraic system 
+\begin_inset Quotes eld
+\end_inset
+
+tensor logic
+\begin_inset Quotes erd
+\end_inset
+
+, as I am not aware of any convetional name for it.
+ It is similar to 
+\begin_inset Quotes eld
+\end_inset
+
+linear logic
+\begin_inset Quotes erd
+\end_inset
+
+, but is not the same, as it is missing an important ingredient, that of
+ conjugation.
 \end_layout
 
 \begin_layout Section*
