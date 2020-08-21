@@ -98,7 +98,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-2 May 2020
+21 August 2020
 \end_layout
 
 \begin_layout Abstract
@@ -2933,6 +2933,134 @@ linear logic
 
 , but is not the same, as it is missing an important ingredient, that of
  conjugation.
+\end_layout
+
+\begin_layout Subsection*
+Inner product
+\end_layout
+
+\begin_layout Standard
+Tensors become interesting in engineering and science only after the addition
+ of one more ingredient: the inner product.
+ The inner product allows tensors to be combined by 
+\begin_inset Quotes eld
+\end_inset
+
+contracting tensor indecies
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For example, given tensors 
+\begin_inset Formula $A_{ijk}$
+\end_inset
+
+ and 
+\begin_inset Formula $B_{lm}$
+\end_inset
+
+ one might consider the contraction
+\begin_inset Formula 
+\[
+C_{ijm}=A_{ijk}B_{km}=\sum_{k}A_{ijk}B_{km}
+\]
+
+\end_inset
+
+where the middle expression uses the so-called 
+\begin_inset Quotes eld
+\end_inset
+
+Einstein convention
+\begin_inset Quotes erd
+\end_inset
+
+ of summing repeated indexes, wheras on the right the sum is explicit.
+ For the moment, the distinction between covariant and contravariant indecies
+ will be ignored; as any discussion of change-of-basis has been ignored,
+ it remains appropriate to also ignore issues of contra/covariance.
+\end_layout
+
+\begin_layout Standard
+The prototypical inner product is that of two vectors, say 
+\begin_inset Formula $\vec{a}=\left[a_{1},a_{2},\cdots,a_{n}\right]$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{b}=\left[b_{1},b_{2},\cdots,b_{n}\right]$
+\end_inset
+
+.
+ One writes:
+\begin_inset Formula 
+\[
+i\left(\vec{a},\vec{b}\right)=\vec{a}\cdot\vec{b}=a_{1}b_{1}+a_{2}b_{2}+\cdots+a_{n}b_{n}
+\]
+
+\end_inset
+
+For the general case, one needs only to convert notation:
+\begin_inset Formula 
+\[
+i\left(\vec{a},\vec{b}\right)=a_{1}\&b_{1}\vee a_{2}\&b_{2}\vee\cdots\vee a_{n}\&b_{n}
+\]
+
+\end_inset
+
+which clearly has the same form despite a vastly different interpretation
+ of the symbols.
+ Diagrammatically, the contraction of tensor indecies was earlier depicted
+ with a puzzle-shaped diagram, repeated below, with slightly different labelling.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-vector.eps
+	lyxscale 60
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The diagram is slightly awkard here; the upper row is meant to depict the
+ two vectors, with naked, uncontracted indexes.
+ The lower part depicts a scalar, with Einstein-cnvention repeated indexes
+ that are summed over.
+ The two different mating puzzle-tab shapes hint at a hidden contra/covariance.
+ They are also meant to indicate compatible types.
+ That is to say, the type of 
+\begin_inset Formula $a_{j}$
+\end_inset
+
+ is compatible with the type of 
+\begin_inset Formula $b_{k}$
+\end_inset
+
+, and so can be multipled: so, they might both be numbers, or both be something
+ else, as long as they can compatibley be multiplied with each-other using
+ the product 
+\begin_inset Formula $\&$
+\end_inset
+
+ between them.
+ We return to types shortly.
+\end_layout
+
+\begin_layout Standard
+The point of the diagram is to re-assert the claim that the inner product
+ is just a form of 
+\begin_inset Quotes eld
+\end_inset
+
+connecting things together
+\begin_inset Quotes erd
+\end_inset
+
+, this time made explicit.
 \end_layout
 
 \begin_layout Section*
