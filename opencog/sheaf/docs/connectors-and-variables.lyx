@@ -1836,7 +1836,301 @@ Tensor products
 \end_layout
 
 \begin_layout Standard
-The s
+The tensor product is conventionally denoted with the 
+\begin_inset Quotes eld
+\end_inset
+
+otimes
+\begin_inset Quotes erd
+\end_inset
+
+ symbol 
+\begin_inset Formula $\otimes$
+\end_inset
+
+.
+ This intimidating symbol is used to emphasize the multi-linearity of the
+ tensor product.
+ That is, if 
+\begin_inset Formula $u,v$
+\end_inset
+
+ and 
+\begin_inset Formula $w$
+\end_inset
+
+ are vectors, and 
+\begin_inset Formula $a$
+\end_inset
+
+ and 
+\begin_inset Formula $b$
+\end_inset
+
+ are constant numbers, then 
+\begin_inset Formula 
+\[
+\left(au+bv\right)\otimes w=au\otimes w+bv\otimes w
+\]
+
+\end_inset
+
+for the left side of the product, and likewise for the right: that this
+ works on both sides is what makes it multi-linear.
+ The 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ symbol is required because the Cartesian product symbol 
+\begin_inset Formula $\times$
+\end_inset
+
+ does not work, it is not multi-linear.
+ Consider, for example, the two ordered pairs 
+\begin_inset Formula $u\times w=\left(u,w\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $v\times w=\left(v,w\right)$
+\end_inset
+
+.
+ How can we multiply a scalar times an ordered pair? Conventionally, one
+ rescales all of the components.
+ That is, 
+\begin_inset Formula $a.\left(u,w\right)=\left(a.u,a.w\right)$
+\end_inset
+
+ but this fails spectacularly in terms of multi-linearlity:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a.\left(u,w\right)+b.\left(v,w\right)=\left(a.u,a.w\right)+\left(b.v,b.w\right)=\left(au+bv,aw+bw\right)\ne\left(au+bv,w\right)
+\]
+
+\end_inset
+
+The tensor product 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ is not the Cartesian product 
+\begin_inset Formula $\times$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Tensor products as equivalence
+\end_layout
+
+\begin_layout Standard
+The tensor product can be constructed from the Cartesian product by declaring
+ an equivalence.
+ From the multi-linearity propertuy above, it's clear that we wish to say
+ that 
+\begin_inset Formula $au\times w$
+\end_inset
+
+ is the same thing as 
+\begin_inset Formula $u\times aw$
+\end_inset
+
+.
+ That is, we already have defined the tensor product so that 
+\begin_inset Formula $au\otimes w=u\otimes aw$
+\end_inset
+
+ as strict equality; yet this is patently false for ordinary ordered pairs.
+\end_layout
+
+\begin_layout Standard
+The proceedure to rectify this situation is to introduce a new notion of
+ equivalence.
+ Using the symbol 
+\begin_inset Formula $\sim$
+\end_inset
+
+ to denote 
+\begin_inset Quotes eld
+\end_inset
+
+the same as
+\begin_inset Quotes erd
+\end_inset
+
+, one writes 
+\begin_inset Formula $au\times w\sim u\times aw$
+\end_inset
+
+.
+ The usual laws of algebra should apply, so subtraction can be used to bring
+ everything over to one side: 
+\begin_inset Formula $au\times w-u\times aw\sim0$
+\end_inset
+
+.
+ That is, the difference of these two ordered pairs is the 
+\begin_inset Quotes eld
+\end_inset
+
+same as
+\begin_inset Quotes erd
+\end_inset
+
+ zero.
+ Switching notation for ordered pairs, one may write 
+\begin_inset Formula $\left(au,w\right)-\left(u,aw\right)\sim0$
+\end_inset
+
+.
+ The algebra is meant to behave 
+\begin_inset Quotes eld
+\end_inset
+
+as expected
+\begin_inset Quotes erd
+\end_inset
+
+, and so
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(au,w\right)-\left(u,aw\right)=\left(au-u,w-aw\right)=\left(\left(a-1\right)u,\left(1-a\right)w\right)\sim0
+\]
+
+\end_inset
+
+But 
+\begin_inset Formula $a-1$
+\end_inset
+
+ is just a number 
+\begin_inset Formula $c=a-1$
+\end_inset
+
+, so the above says 
+\begin_inset Formula 
+\[
+\left(cu,-cw\right)\sim0
+\]
+
+\end_inset
+
+for all numbers 
+\begin_inset Formula $c$
+\end_inset
+
+.
+ Such ordered pairs are 
+\begin_inset Quotes eld
+\end_inset
+
+equivalent
+\begin_inset Quotes erd
+\end_inset
+
+ to zero.
+\end_layout
+
+\begin_layout Standard
+The formal way to write the tensor product is as a quotient over this equivalenc
+e.
+ This is convecntionally written as 
+\begin_inset Formula 
+\[
+U\otimes W=U\times W/\sim
+\]
+
+\end_inset
+
+which is meant to denote the set of all equivalent ordered pairs.
+ In set notation,
+\begin_inset Formula 
+\[
+u\otimes w=\left\{ \mbox{all pairs }\left(s,t\right)\mbox{ such that }\left(s,t\right)=\left(u,w\right)+\left(cu,-cw\right)\mbox{ for some const }c\right\} 
+\]
+
+\end_inset
+
+This is to be read 
+\begin_inset Quotes eld
+\end_inset
+
+the set of all pairs to which we have added the equivalent of zero
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Formally, the set on the right is called 
+\begin_inset Quotes eld
+\end_inset
+
+coset
+\begin_inset Quotes erd
+\end_inset
+
+.
+ By treating all members of this coset as 
+\begin_inset Quotes eld
+\end_inset
+
+equivalent
+\begin_inset Quotes erd
+\end_inset
+
+, we 
+\begin_inset Quotes eld
+\end_inset
+
+forget
+\begin_inset Quotes erd
+\end_inset
+
+ thier identity and uniqueness (stemming from thier origins as Cartesian
+ pairs), and treat them as being all the same.
+ Choosing any one exemplar from the coset will do; it is a form of 
+\begin_inset Quotes eld
+\end_inset
+
+forgetting
+\begin_inset Quotes erd
+\end_inset
+
+ of differences, or an 
+\begin_inset Quotes eld
+\end_inset
+
+erasure
+\begin_inset Quotes erd
+\end_inset
+
+ of origins.
+ It is a denial of identity politics, it is a certain racial homogenization,
+ it is a democratic notion that 
+\begin_inset Quotes eld
+\end_inset
+
+all are created equal
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Tensor products as concatenation
+\end_layout
+
+\begin_layout Standard
+The above was needlessly complicated.
+ There is a wildly simpler way of saying the same thing, which, remarkably,
+ arrives at the same place.
 \end_layout
 
 \begin_layout Section*
