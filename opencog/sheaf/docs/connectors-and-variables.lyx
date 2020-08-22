@@ -99,6 +99,16 @@ Linas Vepstas
 
 \begin_layout Date
 21 August 2020
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Revised version; Earlier version: 2 May 2020
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -1621,7 +1631,7 @@ Much of what has been said above can be made slightly more precise with
 \end_layout
 
 \begin_layout Standard
-Three properties of tensors will be exposed and articulated.
+Four properties of tensors will be exposed and articulated.
  These may seem strange and idiosyncratic, if you already know what a tensor
  is; but communicating the strangeness is why we write.
 \end_layout
@@ -1652,6 +1662,10 @@ plugging together of connectors
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Itemize
+Types and fibers.
 \end_layout
 
 \begin_layout Standard
@@ -3009,7 +3023,14 @@ i\left(\vec{a},\vec{b}\right)=a_{1}\&b_{1}\vee a_{2}\&b_{2}\vee\cdots\vee a_{n}\
 
 which clearly has the same form despite a vastly different interpretation
  of the symbols.
- Diagrammatically, the contraction of tensor indecies was earlier depicted
+\end_layout
+
+\begin_layout Subsubsection*
+Inner product as connection
+\end_layout
+
+\begin_layout Standard
+Diagrammatically, the contraction of tensor indecies was earlier depicted
  with a puzzle-shaped diagram, repeated below, with slightly different labelling.
 \end_layout
 
@@ -3048,10 +3069,7 @@ The diagram is slightly awkard here; the upper row is meant to depict the
 
  between them.
  We return to types shortly.
-\end_layout
-
-\begin_layout Standard
-The point of the diagram is to re-assert the claim that the inner product
+ The point of the diagram is to re-assert the claim that the inner product
  is just a form of 
 \begin_inset Quotes eld
 \end_inset
@@ -3060,7 +3078,163 @@ connecting things together
 \begin_inset Quotes erd
 \end_inset
 
-, this time made explicit.
+, this time made notationally explicit.
+\end_layout
+
+\begin_layout Subsubsection*
+Beta reduction as inner product
+\end_layout
+
+\begin_layout Standard
+Earlier, also it was claimed that beta-reduction was a form of connecting
+ things together.
+ How can this be? To recap: when one plugs in 42 for 
+\begin_inset Formula $x$
+\end_inset
+
+ in 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ to get 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+, one is 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ 42 to 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+.
+ This is intuitively obvious, and one can even intuit how the jigsaw-puzzle
+ diagram captures this idea.
+ Yet it is not (yet) obviously an inner product.
+\end_layout
+
+\begin_layout Standard
+To demonstrate that it is, one may appeal to the most basic type theory
+ to elucidate.
+ Here, 42 is an exemplar of the set of 
+\begin_inset Quotes eld
+\end_inset
+
+integers
+\begin_inset Quotes erd
+\end_inset
+
+, and 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+function that takes integers
+\begin_inset Quotes erd
+\end_inset
+
+.
+ They can mate together because the types are compatible.
+ We can write an integer as
+\begin_inset Formula 
+\[
+1\vee2\vee3\vee\cdots
+\]
+
+\end_inset
+
+which is a menu choice - the disjoint union, again.
+ It says that 
+\begin_inset Quotes eld
+\end_inset
+
+you should choose either 1 or choose 2 or choose 3 ...
+ but choose at least one, and chose no more than one
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise, the result of plugging in is
+\begin_inset Formula 
+\[
+f\left(1\right)\vee f\left(2\right)\vee f\left(3\right)\vee\cdots
+\]
+
+\end_inset
+
+This begins to look like an inner product; the resemblance can be completed
+ by writing it as
+\begin_inset Formula 
+\[
+f_{1}\&1\,\vee\,f_{2}\&2\,\vee\,f_{3}\&3\,\vee\cdots
+\]
+
+\end_inset
+
+where, of course, 
+\begin_inset Formula $f_{1}\&1=f\left(1\right)$
+\end_inset
+
+ is how one writes 
+\begin_inset Quotes eld
+\end_inset
+
+the value of 
+\begin_inset Formula $f$
+\end_inset
+
+ at one can be obtained by mating together the value one, as a jigsaw-puzzle-tab
+, with 
+\begin_inset Formula $f_{1}$
+\end_inset
+
+ as the corresponding matching jigsaw-puzzle mate
+\begin_inset Quotes erd
+\end_inset
+
+.
+ With the revised notation, its now clear that beta-reduction is a form
+ of the inner product.
+\end_layout
+
+\begin_layout Standard
+To write it this way, there was a slight abuse of the notation 
+\begin_inset Formula $\&$
+\end_inset
+
+.
+ Previously, it was defined as the 
+\begin_inset Quotes eld
+\end_inset
+
+product of two things of the same type
+\begin_inset Quotes erd
+\end_inset
+
+; yet here it is used to denote 
+\begin_inset Quotes eld
+\end_inset
+
+the mating of matching types
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is convenient to read it both ways; for the moment we sweep this under
+ the rug, along with the co/contravariance issue.
+ They are not entirely unrelated.
+\end_layout
+
+\begin_layout Subsection*
+Types and fibers
 \end_layout
 
 \begin_layout Section*
