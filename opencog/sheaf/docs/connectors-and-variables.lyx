@@ -1465,7 +1465,7 @@ Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
 status open
 
 \begin_layout Plain Layout
-This is remeniscent of Derridas statement that 
+This is reminiscent of Derridas statement that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1600,7 +1600,7 @@ structuralist
  There is always still a predicate: either an edge exists, or it doesn't.
  To every graph there is a corresponding adjacency matrix, populated with
  zeroes and ones.
- Fortunetly, one can wriggle ones way out if this, by assigning numerical
+ Fortunately, one can wriggle ones way out if this, by assigning numerical
  weights to edges, making some probable and some improbable.
  Whether true and false can be replaced by a subobject classifier in this
  context is perhaps a step too far, but perhaps also an interesting step.
@@ -1669,8 +1669,8 @@ Types and fibers.
 \end_layout
 
 \begin_layout Standard
-These properties can be taken in constrast to conventional expositions,
- which emphasizes multi-linearity and and behavior under change-of-basis.
+These properties can be taken in contrast to conventional expositions, which
+ emphasizes multi-linearity and and behavior under change-of-basis.
  The change in focus is required to build the abstract notion of a tensor.
 \end_layout
 
@@ -1704,7 +1704,7 @@ The conventional definition of a tensor in science and engineering starts
 \end_inset
 
 .
- The equality signs here just suggest different ways (different noations)
+ The equality signs here just suggest different ways (different notations)
  of writing the same thing.
  A 3-tensor 
 \begin_inset Formula $T_{ijk}=T(i,j,k)$
@@ -1850,8 +1850,8 @@ Tensor products
 \end_layout
 
 \begin_layout Standard
-We begin with the conventional defintion of the tensor product, before generaliz
-ing it in a later section.
+We begin with the conventional definition of the tensor product, before
+ generalizing it in a later section.
 \end_layout
 
 \begin_layout Standard
@@ -1915,12 +1915,12 @@ for the left side of the product, and likewise for the right: that this
 
 .
  How can we multiply a scalar times an ordered pair? Conventionally, one
- rescales all of the components.
+ re-scales all of the components.
  That is, 
 \begin_inset Formula $a.\left(u,w\right)=\left(a.u,a.w\right)$
 \end_inset
 
- but this fails spectacularly in terms of multi-linearlity:
+ but this fails spectacularly in terms of multi-linearity:
 \end_layout
 
 \begin_layout Standard
@@ -1949,7 +1949,7 @@ Tensor products as equivalence
 \begin_layout Standard
 The tensor product can be constructed from the Cartesian product by declaring
  an equivalence.
- From the multi-linearity propertuy above, it's clear that we wish to say
+ From the multi-linearity property above, it's clear that we wish to say
  that 
 \begin_inset Formula $au\times w$
 \end_inset
@@ -1967,7 +1967,7 @@ The tensor product can be constructed from the Cartesian product by declaring
 \end_layout
 
 \begin_layout Standard
-The proceedure to rectify this situation is to introduce a new notion of
+The procedure to rectify this situation is to introduce a new notion of
  equivalence.
  Using the symbol 
 \begin_inset Formula $\sim$
@@ -2060,7 +2060,7 @@ equivalent
 \begin_layout Standard
 The formal way to write the tensor product is as a quotient over this equivalenc
 e.
- This is convecntionally written as 
+ This is conventionally written as 
 \begin_inset Formula 
 \[
 U\otimes W=U\times W/\sim
@@ -2111,7 +2111,7 @@ forget
 \begin_inset Quotes erd
 \end_inset
 
- thier identity and uniqueness (stemming from thier origins as Cartesian
+ their identity and uniqueness (stemming from their origins as Cartesian
  pairs), and treat them as being all the same.
  Choosing any one exemplar from the coset will do; it is a form of 
 \begin_inset Quotes eld
@@ -2182,7 +2182,7 @@ T\left(x,y,z,s,t\right)=F\left(x,y,z\right)G\left(s,t\right)
 \end_inset
 
 where the product is simply the scalar product.
- This seems almost trivial in it's defintion – how hard can a scalar product
+ This seems almost trivial in it's definition – how hard can a scalar product
  be? Its just the ordinary multiplication of numbers.
  This seems effectively trivial, but it hides a bit of trickery: there's
  a sleight-of-hand.
@@ -2207,7 +2207,7 @@ where the product is simply the scalar product.
 \begin_inset Formula $\left(x,y,z,s,t\right)$
 \end_inset
 
- is the concatentation of those lists.
+ is the concatenation of those lists.
  It is NOT the Cartesian product of them!
 \end_layout
 
@@ -2222,7 +2222,7 @@ As always, let's belabor the painfully obvious:
 
 The right side is a list.
  The left side is a list of lists.
- List concatention 
+ List concatenation 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2274,7 +2274,7 @@ democratized
 \end_layout
 
 \begin_layout Standard
-To illustrate the correspondance, list concatenation can also be written
+To illustrate the correspondence, list concatenation can also be written
  with an equivalence principle.
  Using the symbol 
 \begin_inset Formula $\sim$
@@ -2372,8 +2372,8 @@ forgetful
 \end_inset
 
 .
- The forgetfullness of list concatenation goes hand-in-hand with the forgetfulln
-ess of multiplication in fields and rings.
+ The forgetfulness of list concatenation goes hand-in-hand with the forgetfulnes
+s of multiplication in fields and rings.
  Tensors work because the exploit both of these properties.
 \end_layout
 
@@ -2470,7 +2470,7 @@ Lots of InsidiouS Parenthesis
 \end_inset
 
  as always, by convention.
- One can then consider the class of lists with embeed variables in them.
+ One can then consider the class of lists with embeded variables in them.
  OK, but things really get interesting when one then considers replacing
  variables by values.
  To do this, the special notation of 
@@ -2498,7 +2498,7 @@ where both
 \begin_inset Formula $x$
 \end_inset
 
- such that any occurance of the variable 
+ such that any occurrence of the variable 
 \begin_inset Formula $x$
 \end_inset
 
@@ -2592,7 +2592,7 @@ beta-reduction
 \begin_layout Standard
 There is, of course, much more that can be said about lambda calculus; this
  hardly scratches the surface.
- But it does show the centrality of the Caresian product to the construction.
+ But it does show the centrality of the Cartesian product to the construction.
 \end_layout
 
 \begin_layout Standard
@@ -2609,7 +2609,7 @@ It also helps highlight just how different list concatenation is from the
 \end_inset
 
 -dimensional Cartesian space.
- It is a coordinate space – the points of Cartesian space are labelled by
+ It is a coordinate space – the points of Cartesian space are labeled by
  
 \begin_inset Formula $n$
 \end_inset
@@ -2667,8 +2667,8 @@ of course
 \begin_inset Formula $T_{ijklm}$
 \end_inset
 
- of five indecies, these indecies are ordinal numbers: integers.
- They are not real-number-valued coordinates of Eucliden space.
+ of five indeces, these indeces are ordinal numbers: integers.
+ They are not real-number-valued coordinates of Euclidean space.
  The value of 
 \begin_inset Formula $T$
 \end_inset
@@ -2683,8 +2683,8 @@ Tensor product, in general
 \end_layout
 
 \begin_layout Standard
-We now have enough machinery developed to allow a general defintion of the
- tensor product.
+We now have enough machinery developed to allow a general definition of
+ the tensor product.
  Lets return to the form
 \begin_inset Formula 
 \[
@@ -2750,7 +2750,7 @@ Replacing numbers by things that can be forgetfully multiplied discards
 \begin_inset Quotes eld
 \end_inset
 
-metamathemaical
+meta-mathematical
 \begin_inset Quotes erd
 \end_inset
 
@@ -2836,7 +2836,7 @@ One can still use the
 \end_inset
 
  and can ask what the algebra of these symbols is.
- Note very carefully that it is NOT the boolean algebra.
+ Note very carefully that it is NOT the Boolean algebra.
  We have one distributive property, but not the other.
  So, 
 \begin_inset Formula 
@@ -2857,7 +2857,7 @@ One can still use the
 
 \end_inset
 
-However, the other one, that would have made things boolean, does not hold:
+However, the other one, that would have made things Boolean, does not hold:
 \begin_inset Formula 
 \[
 \left(u\&v\right)\vee w\ne\left(u\&w\right)\vee\left(v\&w\right)
@@ -2936,7 +2936,7 @@ tensor logic
 \begin_inset Quotes erd
 \end_inset
 
-, as I am not aware of any convetional name for it.
+, as I am not aware of any conventional name for it.
  It is similar to 
 \begin_inset Quotes eld
 \end_inset
@@ -2960,7 +2960,7 @@ Tensors become interesting in engineering and science only after the addition
 \begin_inset Quotes eld
 \end_inset
 
-contracting tensor indecies
+contracting tensor indeces
 \begin_inset Quotes erd
 \end_inset
 
@@ -2989,8 +2989,8 @@ Einstein convention
 \begin_inset Quotes erd
 \end_inset
 
- of summing repeated indexes, wheras on the right the sum is explicit.
- For the moment, the distinction between covariant and contravariant indecies
+ of summing repeated indexes, whereas on the right the sum is explicit.
+ For the moment, the distinction between covariant and contra-variant indeces
  will be ignored; as any discussion of change-of-basis has been ignored,
  it remains appropriate to also ignore issues of contra/covariance.
 \end_layout
@@ -3030,8 +3030,8 @@ Inner product as connection
 \end_layout
 
 \begin_layout Standard
-Diagrammatically, the contraction of tensor indecies was earlier depicted
- with a puzzle-shaped diagram, repeated below, with slightly different labelling.
+Diagrammatically, the contraction of tensor indeces was earlier depicted
+ with a puzzle-shaped diagram, repeated below, with slightly different labeling.
 \end_layout
 
 \begin_layout Standard
@@ -3047,9 +3047,9 @@ Diagrammatically, the contraction of tensor indecies was earlier depicted
 \end_layout
 
 \begin_layout Standard
-The diagram is slightly awkard here; the upper row is meant to depict the
+The diagram is slightly awkward here; the upper row is meant to depict the
  two vectors, with naked, uncontracted indexes.
- The lower part depicts a scalar, with Einstein-cnvention repeated indexes
+ The lower part depicts a scalar, with Einstein-convention repeated indexes
  that are summed over.
  The two different mating puzzle-tab shapes hint at a hidden contra/covariance.
  They are also meant to indicate compatible types.
@@ -3061,8 +3061,8 @@ The diagram is slightly awkard here; the upper row is meant to depict the
 \begin_inset Formula $b_{k}$
 \end_inset
 
-, and so can be multipled: so, they might both be numbers, or both be something
- else, as long as they can compatibley be multiplied with each-other using
+, and so can be multiplied: so, they might both be numbers, or both be something
+ else, as long as they can compatibly be multiplied with each-other using
  the product 
 \begin_inset Formula $\&$
 \end_inset
@@ -3237,6 +3237,10 @@ the mating of matching types
 Types and fibers
 \end_layout
 
+\begin_layout Standard
+Until now
+\end_layout
+
 \begin_layout Section*
 Applications
 \end_layout
@@ -3272,7 +3276,7 @@ Inference, theorem proving, planning, constraint satisfaction.
 \end_layout
 
 \begin_layout Standard
-The planning aspect is that one cann arrange a collection of unconnected
+The planning aspect is that one can arrange a collection of unconnected
  connectors at one end (the starting state) and another at the other end
  (the goal state) and build a bridge between the two.
 \end_layout
@@ -3288,7 +3292,7 @@ Conclusions:
 \begin_layout Standard
 There is no such thing as non-fiction; all writing is fundamentally fictional
  at it's root.
- The only way to be non-fictional is to be quarks and spacetime, the universe
+ The only way to be non-fictional is to be quarks and space-time, the universe
  itself.
 \end_layout
 
@@ -3321,7 +3325,7 @@ Yet, despite these problems, there is a way forward in relationships, without
  insisting on cause and effect, premise and inference, (Bayesian) prior
  and deduction.
  Directionality can be useful, but it is an infelicity, a trap with yawning
- abysses of doundational problems, not the least of which is the concept
+ abysses of foundational problems, not the least of which is the concept
  of 
 \begin_inset Quotes eld
 \end_inset
@@ -3360,7 +3364,7 @@ The Atomese Type System
 The existing Atomese type system is an extensible system of types usually
  defined at compile time.
  Although new types can be added at run-time, it is usually useful to have
- a coresponding object-oriented class definition for each type, so that
+ a corresponding object-oriented class definition for each type, so that
  the types can 
 \begin_inset Quotes eld
 \end_inset
@@ -3369,7 +3373,7 @@ do things
 \begin_inset Quotes erd
 \end_inset
 
- (be evaulatable, perform numeric operations, perform i/o operations, etc.)
+ (be evaluatable, perform numeric operations, perform i/o operations, etc.)
  As a result, the type hierarchy is somewhat limited and fairly rigid.
  Although there are more than 100 different types in use in the current
  system, only a handful of these are relevant to the current discussion.
@@ -3500,7 +3504,7 @@ Atom
 Atom
 \noun default
  is globally unique (within an AtomSpace), a more accurate conceptual visualizat
-ion is that of a rhizome or woolen felt, as differrent trees typically share
+ion is that of a rhizome or woolen felt, as different trees typically share
  the same branches.
  In the following, s-expressions will be used to write down trees.
 \end_layout
@@ -3569,7 +3573,7 @@ Concept
 \noun on
 ConceptNode
 \noun default
- being one of the many predefined types in the sytem.
+ being one of the many predefined types in the system.
  The 
 \noun on
 TypeNode
