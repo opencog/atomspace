@@ -193,6 +193,8 @@ void TypeChoice::analyze(Handle anontype)
 		Type vt = TypeNodeCast(anontype)->get_kind();
 		const TypeSet& ts = nameserver().getChildrenRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
+		if (ATOM != vt and VALUE != vt)
+			_simple_typeset.insert(vt);
 		return;
 	}
 
@@ -203,6 +205,8 @@ void TypeChoice::analyze(Handle anontype)
 		if (ATOM == vt or VALUE == vt) return;
 		const TypeSet& ts = nameserver().getParentsRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
+		if (ATOM != vt and VALUE != vt)
+			_simple_typeset.insert(vt);
 		return;
 	}
 
