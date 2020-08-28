@@ -228,6 +228,21 @@ plugging together of connectors
 These properties can be taken in contrast to conventional expositions, which
  emphasizes multi-linearity and and behavior under change-of-basis.
  The change in focus is required to build the abstract notion of a tensor.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+There is a different abstract formalization of tensor products, that used
+ in category theory.
+ It is breifly reviewed in the appendix.
+ It is far more abstract and daunting, thus we avoid it.
+ Note also the defintion of a tensor category does not include the notion
+ of an inner product, so our focus here really is different.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
@@ -851,7 +866,7 @@ democratized
 status collapsed
 
 \begin_layout Plain Layout
-The formal term for this property is that it is 
+The formal term for this property is that the product is 
 \begin_inset Quotes eld
 \end_inset
 
@@ -973,10 +988,10 @@ s of multiplication in fields and rings.
 status collapsed
 
 \begin_layout Plain Layout
-This is effectively what the abstract defintion of a tensor category (or
+This is effectively what the abstract definition of a tensor category (or
  monoidal category) in category theory is saying.
  This text mostly tries to avoid category theory, as there is a heavy conceptual
- overhead required to learn category theory, and that complixity concels,
+ overhead required to learn category theory, and that complexity conceals,
  hides the points we are trying to make explicit, here.
  That said, some category theory is unavoidable.
 \end_layout
@@ -1635,6 +1650,107 @@ ion of the symbols.
 \end_layout
 
 \begin_layout Subsubsection*
+Properties of the inner product
+\end_layout
+
+\begin_layout Standard
+Inner products are compatible with tensors in that they are linear.
+ For ordinary vectors, this is expressed as 
+\begin_inset Formula 
+\[
+i\left(\vec{a}+\vec{b},\vec{c}\right)=i\left(\vec{a},\vec{c}\right)+i\left(\vec{b},\vec{c}\right)
+\]
+
+\end_inset
+
+It is apparent that this property of linearity is consistent with the algebraic
+ properties of 
+\begin_inset Formula $\&$
+\end_inset
+
+ and 
+\begin_inset Formula $\vee$
+\end_inset
+
+, in that the distributive property of 
+\begin_inset Formula $\&$
+\end_inset
+
+ over 
+\begin_inset Formula $\vee$
+\end_inset
+
+ is sufficent to guarantee linearity:
+\begin_inset Formula 
+\[
+\left(\left(a_{1}\vee b_{1}\right)\&c_{1}\right)\vee\left(\left(a_{2}\vee b_{2}\right)\&c_{2}\right)\vee\cdots=\left(a_{1}\&c_{1}\right)\vee\left(b_{1}\&c_{1}\right)\vee\left(a_{2}\&c_{2}\right)\vee\left(b_{2}\&c_{2}\right)\vee\cdots
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Inner products over a field or a ring are taken to obey several additional
+ properties: they are typically conjugate or symmetric; they are typically
+ linear in multiplication by a scalar, and they are positive definite.
+ These properties are discarded here.
+ There is no conjugation or symmetry, as we have an express interest in
+ the non-symmetric, non-conjucate case, as needed for linguistics.
+ There is no natural scalar multiplication in our generalized definition
+ of tensors above; it makes no sense to suddenly require one.
+ Our generalized notion of tensors also lacks a partial order 
+\begin_inset Formula $\ge$
+\end_inset
+
+, and so there is no way to express positive definiteness.
+ There are cases where partial orders or pre-orders may be avaialble; for
+ example, string-rewriting systems (which include lambda calculus) do have
+ a notion of 
+\begin_inset Quotes eld
+\end_inset
+
+lexicographic order
+\begin_inset Quotes erd
+\end_inset
+
+, and so allow ideas like 
+\begin_inset Quotes eld
+\end_inset
+
+monoidal preorders
+\begin_inset Quotes erd
+\end_inset
+
+ to be defined.
+ These assumptions are not needed or relvant here.
+ 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+That is, we are appealing to the existance of an inner product as a 
+\begin_inset Quotes eld
+\end_inset
+
+universal property
+\begin_inset Quotes erd
+\end_inset
+
+ of the tensor product.
+ The universal property is the mechanism by which all of the excess baggage
+ of symmetry and partial orders can be discarded.
+\end_layout
+
+\end_inset
+
+ Note that discarding all of these notions means that many derived properties,
+ such as norms, homogeneity, triangle inequalities, polarization identities
+ and so on all fall by the wayside.
+\end_layout
+
+\begin_layout Subsubsection*
 Inner product as connection
 \end_layout
 
@@ -1843,6 +1959,7 @@ the mating of matching types
  It is convenient to read it both ways; for the moment we sweep this under
  the rug, along with the co/contravariance issue.
  They are not entirely unrelated.
+ Later chapters will return to these topics.
 \end_layout
 
 \begin_layout Subsection*
@@ -1975,7 +2092,7 @@ what is expected
 .
  Adding the associator into the mix requires the verification of a pentagon-shap
 ed diagram.
- The Wikipedia article on monoidal categories provies an adequate summary
+ The Wikipedia article on monoidal categories provides an adequate summary
  of the definition of a monoidal category.
  Of course, much more can be said: there is a 350-page book on the topic
 \begin_inset CommandInset citation
@@ -2007,7 +2124,7 @@ lax monoidal category
 \end_layout
 
 \begin_layout Standard
-There are two important aspects of the definition of monoidal categories
+There are several important aspects of the definition of monoidal categories
  that are relevant to the current text:
 \end_layout
 
@@ -2056,8 +2173,14 @@ not
  sentences are not palindromes.
 \end_layout
 
+\begin_layout Itemize
+No mention is made of inner products.
+ The concept of a tensor category is unrelated to the concept of an inner
+ product.
+\end_layout
+
 \begin_layout Subsubsection*
-Isometries
+Change of basis and isometries
 \end_layout
 
 \begin_layout Standard
