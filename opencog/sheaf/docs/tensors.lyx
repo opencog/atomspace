@@ -99,16 +99,6 @@ Linas Vepstas
 
 \begin_layout Date
 26 August 2020
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-Revised version; Earlier version: 2 May 2020
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Abstract
@@ -182,7 +172,7 @@ Tensors
 
 \begin_layout Standard
 This text reviews the concept of a tensor, starting from the conventional
- defntion, which gives its most narrow form, and broadening it to a general
+ definition, which gives its most narrow form, and broadening it to a general
  setting.
  It is hoped that the reader already knows what a tensor is, as otherwise,
  most of this may seem pointless.
@@ -234,9 +224,9 @@ status collapsed
 \begin_layout Plain Layout
 There is a different abstract formalization of tensor products, that used
  in category theory.
- It is breifly reviewed in the appendix.
+ It is briefly reviewed in the appendix.
  It is far more abstract and daunting, thus we avoid it.
- Note also the defintion of a tensor category does not include the notion
+ Note also the definition of a tensor category does not include the notion
  of an inner product, so our focus here really is different.
 \end_layout
 
@@ -718,9 +708,9 @@ all are created equal
 \begin_layout Standard
 In a conventional exposition, there would be a verification to make sure
  that the result after quotienting is consistent: specifically, that the
- cosets are disjoint, that no exemplar ever belongs to two different cosests,
+ cosets are disjoint, that no exemplar ever belongs to two different cosets,
  and that the resulting mapping is one-to-one and onto – thus, an isomorphism.
- This can be taken for granted here; it needs verifcation only after the
+ This can be taken for granted here; it needs verification only after the
  more abstract definition is given.
 \end_layout
 
@@ -1093,7 +1083,7 @@ Lots of InsidiouS Parenthesis
 \end_inset
 
  as always, by convention.
- One can then consider the class of lists with embeded variables in them.
+ One can then consider the class of lists with embedded variables in them.
  OK, but things really get interesting when one then considers replacing
  variables by values.
  To do this, the special notation of 
@@ -1291,7 +1281,7 @@ of course
 \begin_inset Formula $T_{ijklm}$
 \end_inset
 
- of five indeces, these indeces are ordinal numbers: integers.
+ of five indices, these indices are ordinal numbers: integers.
  They are not real-number-valued coordinates of Euclidean space.
  The value of 
 \begin_inset Formula $T$
@@ -1584,7 +1574,7 @@ Tensors become interesting in engineering and science only after the addition
 \begin_inset Quotes eld
 \end_inset
 
-contracting tensor indeces
+contracting tensor indices
 \begin_inset Quotes erd
 \end_inset
 
@@ -1614,7 +1604,7 @@ Einstein convention
 \end_inset
 
  of summing repeated indexes, whereas on the right the sum is explicit.
- For the moment, the distinction between covariant and contra-variant indeces
+ For the moment, the distinction between covariant and contra-variant indices
  will be ignored; as any discussion of change-of-basis has been ignored,
  it remains appropriate to also ignore issues of contra/covariance.
 \end_layout
@@ -1680,7 +1670,7 @@ It is apparent that this property of linearity is consistent with the algebraic
 \begin_inset Formula $\vee$
 \end_inset
 
- is sufficent to guarantee linearity:
+ is sufficient to guarantee linearity:
 \begin_inset Formula 
 \[
 \left(\left(a_{1}\vee b_{1}\right)\&c_{1}\right)\vee\left(\left(a_{2}\vee b_{2}\right)\&c_{2}\right)\vee\cdots=\left(a_{1}\&c_{1}\right)\vee\left(b_{1}\&c_{1}\right)\vee\left(a_{2}\&c_{2}\right)\vee\left(b_{2}\&c_{2}\right)\vee\cdots
@@ -1697,7 +1687,7 @@ Inner products over a field or a ring are taken to obey several additional
  linear in multiplication by a scalar, and they are positive definite.
  These properties are discarded here.
  There is no conjugation or symmetry, as we have an express interest in
- the non-symmetric, non-conjucate case, as needed for linguistics.
+ the non-symmetric, non-conjugate case, as needed for linguistics.
  There is no natural scalar multiplication in our generalized definition
  of tensors above; it makes no sense to suddenly require one.
  Our generalized notion of tensors also lacks a partial order 
@@ -1705,7 +1695,7 @@ Inner products over a field or a ring are taken to obey several additional
 \end_inset
 
 , and so there is no way to express positive definiteness.
- There are cases where partial orders or pre-orders may be avaialble; for
+ There are cases where partial orders or pre-orders may be available; for
  example, string-rewriting systems (which include lambda calculus) do have
  a notion of 
 \begin_inset Quotes eld
@@ -1724,13 +1714,13 @@ monoidal preorders
 \end_inset
 
  to be defined.
- These assumptions are not needed or relvant here.
+ These assumptions are not needed or relevant here.
  
 \begin_inset Foot
 status collapsed
 
 \begin_layout Plain Layout
-That is, we are appealing to the existance of an inner product as a 
+That is, we are appealing to the existence of an inner product as a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1755,7 +1745,7 @@ Inner product as connection
 \end_layout
 
 \begin_layout Standard
-Diagrammatically, the contraction of tensor indeces was depicted earlier
+Diagrammatically, the contraction of tensor indices was depicted earlier
  in this series with a puzzle-shaped diagram.
  This is repeated below, with slightly different labeling.
 \end_layout
@@ -1967,7 +1957,7 @@ Appendix/FAQ
 \end_layout
 
 \begin_layout Standard
-A few related points and comonly-raised questions are addressed here.
+A few related points and commonly-raised questions are addressed here.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1975,7 +1965,7 @@ Monoidal categories
 \end_layout
 
 \begin_layout Standard
-The defintions above correspond with the conventional definition of tensor
+The definitions above correspond with the conventional definition of tensor
  products in monoidal categories; the goal has been not to invent something
  new, but rather to change perspective.
  Thus, the forgetfulness of the placement of parenthesis, 
@@ -1996,7 +1986,7 @@ associative property of a binary operation
 \end_inset
 
 .
- The defintion of the monoidal category elaborates on associativity: the
+ The definition of the monoidal category elaborates on associativity: the
  tensor product only needs to be associative 
 \begin_inset Quotes eld
 \end_inset
@@ -2081,7 +2071,7 @@ coherence conditions
 \end_inset
 
 : there is a triangle diagram, which verifies that the re-arrangement of
- paranthesis involving the idnetity object gives 
+ parenthesis involving the identity object gives 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2118,7 +2108,7 @@ lax monoidal category
 
 , where the associativity properties are slightly weakened.
  Some of the concepts discussed in this collection of chapters are properly
- lax monoidal cateogies; no particular effort is made to call attention
+ lax monoidal categories; no particular effort is made to call attention
  to this, and it seems harmless, as every such lax category has a corresponding
  equivalent strict category.
 \end_layout
@@ -2129,7 +2119,8 @@ There are several important aspects of the definition of monoidal categories
 \end_layout
 
 \begin_layout Itemize
-The defintion of a monoidal category makes no appeal to the concept of 
+The definition of a monoidal category makes no appeal to the concept of
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2219,7 +2210,7 @@ Consider the conventional case of Euclidean space.
 \begin_inset Formula $\left[\vec{e}_{k}\right]_{j}=\delta_{kj}$
 \end_inset
 
- ane of course 
+ and of course 
 \begin_inset Formula $\left[M\right]_{ij}=M_{ij}$
 \end_inset
 
@@ -2236,7 +2227,7 @@ Consider the conventional case of Euclidean space.
 \begin_inset Formula $\vee$
 \end_inset
 
- as operators? Attempting to reproduct the above gives
+ as operators? Attempting to reproduce the above gives
 \begin_inset Formula 
 \[
 \left[\vec{e}_{k}^{\prime}\right]_{i}=M_{i1}\&\left[\vec{e}_{k}\right]_{1}\vee M_{i2}\&\left[\vec{e}_{k}\right]_{2}\vee M_{i3}\&\left[\vec{e}_{k}\right]_{3}\vee\cdots
@@ -2271,7 +2262,7 @@ choose
 
  but is an entirely different beast: its a list of choices, or rather, just
  a name for a list of choices.
- Of course, this can be made a bit mor consistent, if one claims that 
+ Of course, this can be made a bit more consistent, if one claims that 
 \begin_inset Formula $\left[\vec{e}_{k}\right]_{j}$
 \end_inset
 
@@ -2285,7 +2276,7 @@ here is exactly one thing, and one you choose one and only one thing
 
 .
  Thus, here, a single change-of-basis merely creates an accretion or conglomerat
-ion: some intial collection of 
+ion: some initial collection of 
 \begin_inset Formula $\vec{e}_{k}$
 \end_inset
 
@@ -2303,7 +2294,7 @@ The inner product is also conventionally used to define a norm, and then
  a metric, allowing concepts of a metric space to be layered on.
  Here, we've discarded these notions.
  There is one, though, that naturally remains: the ultrametric.
- We can take, for example, the ultrametric to be a count, a cadinal number,
+ We can take, for example, the ultrametric to be a count, a cardinal number,
  of the number of connectors that have been connected, or the distance between
  two points, by counting the number of times the 
 \begin_inset Formula $\&$
@@ -2327,7 +2318,7 @@ For example, when writing
 \end_inset
 
 's are connected in some appropriate way, the identity results.
- If the algebra was, for exaple, the algebra of first-order logic, then
+ If the algebra was, for example, the algebra of first-order logic, then
  the associated ultrametric might be the number of steps required to prove
  something, or the number of rewriting steps needed to convert one expression
  into another.
