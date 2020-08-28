@@ -1,0 +1,800 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Mereology
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+2 May 2020
+\end_layout
+
+\begin_layout Abstract
+Almost all classical work on logic and symbolic reasoning, and indeed, much
+ of mathematics, including lambda calculus and term algebras, are built
+ on the intuitive foundation of 
+\begin_inset Quotes eld
+\end_inset
+
+variables
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+functions
+\begin_inset Quotes erd
+\end_inset
+
+ that map between them.
+ Modern work on linguistics and category theory indicates an alternative
+ viewpoint: that of 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this view, the act of replacing a variable by a value, and 
+\begin_inset Quotes eld
+\end_inset
+
+plugging it into a function
+\begin_inset Quotes erd
+\end_inset
+
+ (beta-reduction) is a special case of connecting a pair of connectors.
+\end_layout
+
+\begin_layout Abstract
+This is a short note clarifying the relationship between these two concepts.
+ Noteworthy is that the concept of connectors is 
+\begin_inset Quotes eld
+\end_inset
+
+more general
+\begin_inset Quotes erd
+\end_inset
+
+, and that, as a mathematical framework, it is far less explored.
+\end_layout
+
+\begin_layout Abstract
+As a footnote, it is noted that the use of connectors (and the implied sheaf
+ theory) appears to have impact on a number of philosophical arguments,
+ ranging from mereology to postmodernism(!) This is a surprise.
+ (The author acknowledges that it sounds perhaps cranky to place such claims
+ in the abstract, but the notions are heart-felt.)
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+In elementary mathematics, it is commonplace to speak of a variable, such
+ as 
+\begin_inset Formula $x$
+\end_inset
+
+, and functions of that variable, such as 
+\begin_inset Formula $f(x)$
+\end_inset
+
+.
+ The power of this abstraction is that variables can be assigned a value,
+ and that value can be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ a function.
+ For example, one asserts that 
+\begin_inset Formula $x=42$
+\end_inset
+
+ and then ponders 
+\begin_inset Formula $f(42)$
+\end_inset
+
+.
+ This act of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ is formally called 
+\begin_inset Quotes eld
+\end_inset
+
+beta reduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This process of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ can be compared to the process of 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+, for example, connecting together two jigsaw-puzzle pieces.
+ When mating together connectors, one typically has a matched pair that
+ can be mated: a plug that can be plugged into a socket.
+ It should be clear that beta reduction is a special case of this: that
+ 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+socket
+\begin_inset Quotes erd
+\end_inset
+
+ into which values can be plugged into.
+\end_layout
+
+\begin_layout Standard
+This observation seems nearly trivial; it is so painfully obvious that one
+ wonders what more can be said.
+ Yet there are tremendous consequences that arise from this, consequences
+ that are in some sense equally trivial and obvious.
+ That something is 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ is perhaps an indicator that it is important.
+ This note dwells on these 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ ideas, and demonstrates their importance.
+ The problem with 
+\begin_inset Quotes eld
+\end_inset
+
+obviousness
+\begin_inset Quotes erd
+\end_inset
+
+ is that it frames all manner of thinking: it is Aristotle's 
+\begin_inset Quotes eld
+\end_inset
+
+formal cause
+\begin_inset Quotes erd
+\end_inset
+
+, applied to thinking.
+ It is provides a normative framework in which all conversation takes place.
+ Design and thinking happen in the foreground; there is a 
+\begin_inset Quotes eld
+\end_inset
+
+figure
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+ground
+\begin_inset Quotes erd
+\end_inset
+
+, and anything that is obvious falls into the background, becomes implicit,
+ and serves as a barrier to further thought and examination.
+ Thus, the impetus for this note.
+\end_layout
+
+\begin_layout Standard
+The starting point of this note is that, when one thinks of variables and
+ functions, one is inevitably lead to the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+directed acyclic graphs
+\begin_inset Quotes erd
+\end_inset
+
+ (DAGs).
+ That is, plugging variables into functions, and those into other functions
+ invariably leads to a DAG, because the sense of direction of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ must be preserved: one cannot plug a variable into a value; one cannot
+ plug a function into a value; the plugging is always directed.
+ One is a receptacle, the other is not.
+ By contrast, that act of connecting together connectors has no such constraint:
+ a jigsaw puzzle is not a DAG; there is no jigsaw piece 
+\begin_inset Quotes eld
+\end_inset
+
+at the top
+\begin_inset Quotes erd
+\end_inset
+
+, and none 
+\begin_inset Quotes eld
+\end_inset
+
+at the bottom
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Although the connectors in a jigsaw puzzle have a polarity, the sense of
+ direction that they offer is immaterial to the final construction.
+\end_layout
+
+\begin_layout Standard
+The desired conclusion is that by approaching knowledge representation as
+ an assemblage of connections, rather than as a unidirectional network of
+ inferences, one can gain considerable power in working with the common
+ problems and stumbling blocks of AI and AGI, including problems of planning,
+ inference, constraint satisfaction, combinatorial explosion and the 
+\begin_inset Quotes eld
+\end_inset
+
+frame problem
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This note begins with a long review of everywhere that the notion of variables
+ and functions appear, or, more generally, of arrows and directed graphs.
+ This may seem pointless, but serves only to underscore their ubiquity.
+ This is followed by a section that develops the proposed alternative.
+ Along the way, assorted commentary is made with regards to outstanding
+ philosophical problems, as befits any exploration that belabors the 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Arrows
+\end_layout
+
+\begin_layout Standard
+Arrows, and usually accompanying DAGs are everywhere.
+ They really are pervasive in descriptions of mathematics, in symbolic AI
+ and knowledge representation, and even underpin vast tracts of philosophy.
+ This is, again, so potently 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+ that an explicit review is called for.
+\end_layout
+
+\begin_layout Subsubsection*
+In philosophy:
+\end_layout
+
+\begin_layout Standard
+Here's a hint of how pervasively important the concept of variables and
+ values can be.
+ Some philosophers use these notions to anchor the idea of 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+things
+\begin_inset Quotes erd
+\end_inset
+
+ that 
+\begin_inset Quotes eld
+\end_inset
+
+exist
+\begin_inset Quotes erd
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+An object is anything that can be the value of a variable, that is, anything
+ we can talk about using pronouns, that is, anything.
+\begin_inset Quotes erd
+\end_inset
+
+ (Van Inwagen 2002, 180)
+\end_layout
+
+\begin_layout Standard
+This conception of an object then leads to confused discussions about the
+ identity of indiscernibles, and the importance of location (space-time)
+ in mereology.
+ The notion of connectors can be used as an alternate foundation for the
+ conception of 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+identity
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+location
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Specifically, one can instead define objects as 
+\begin_inset Quotes eld
+\end_inset
+
+things that can participate in relationships
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\end_layout
+
+\begin_layout Subsubsection*
+In philosophy:
+\end_layout
+
+\begin_layout Standard
+The paradoxes of mereology were touched on in the previous section: the
+ difficulty of defining part-whole relationships in a consistent manner,
+ the problem of the existence or non-existence of 
+\begin_inset Quotes eld
+\end_inset
+
+gunk
+\begin_inset Quotes erd
+\end_inset
+
+, and even the puzzles from Ancient Greece (the Ship of Theseus, 
+\emph on
+etc
+\emph default
+.) One proposed solution to these riddles is the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+restricted composition
+\begin_inset Quotes erd
+\end_inset
+
+ (see Wikipedia).
+ The idea is that 
+\begin_inset Quotes eld
+\end_inset
+
+things
+\begin_inset Quotes erd
+\end_inset
+
+ are still composed of 
+\begin_inset Quotes eld
+\end_inset
+
+other things
+\begin_inset Quotes erd
+\end_inset
+
+, but the manner in which these can be composed is restricted.
+ The body of ideas is very nearly identical to the concept of sheaves.
+ Quoting directly from the Wikipedia article on mereology, we can can learn
+ that these are:
+\end_layout
+
+\begin_layout Itemize
+Contact—that a complex object Y is composed of X's if and only if the X's
+ are in contact.
+ 
+\emph on
+viz.
+ 
+\emph default
+seeds attach only if they can be connected.
+\end_layout
+
+\begin_layout Itemize
+Fastenation—the X's compose a complex Y if and only if the X's are fastened.
+ 
+\emph on
+viz.
+
+\emph default
+ seeds attach only if the connectors allow mating.
+ Once mated, they are fastened together.
+\end_layout
+
+\begin_layout Itemize
+Cohesion—the X's compose a complex Y if and only if the X's cohere (cannot
+ be pulled apart or moved in relation to each other without breaking).
+ The point of connectors is that they are not meant to be pulled apart,
+ once mated.
+ Insofar as the above abstract definition of a sheaf failed to appeal to
+ and forced order of the connectors, or to the length of the edges, the
+ concept of 
+\begin_inset Quotes eld
+\end_inset
+
+movement
+\begin_inset Quotes erd
+\end_inset
+
+ remains incomplete
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This can be repaired in a variety of ways.
+ In practical applications, it is convenient to order the edges, and to
+ give them weights.
+ These weights can sometimes act as distances, e.g.
+ in 
+\begin_inset Formula $N$
+\end_inset
+
+-dimensional space.
+ Furthermore, the branch of mathematics known as 
+\begin_inset Quotes eld
+\end_inset
+
+algebraic topology
+\begin_inset Quotes erd
+\end_inset
+
+ is very highly developed, and can provide very explicit and concrete statements
+ about the structure of space.
+ For example, the dimensionality of the embedding of the network is given
+ by the degree of the largest simplicial complex in the network.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
+ is when the X's are joined together such that there is no boundary).
+ Connectors, once connected, serve no further purpose, and are discarded.
+ What mattered was the bond that was made.
+ In this sense, the bonds are the fusion of connectors.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This is reminiscent of Derridas statement that 
+\begin_inset Quotes eld
+\end_inset
+
+deconstruction is not analysis
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One cannot break up meaning into atomic parts; there are no self-sufficient
+ atomic parts of meaning.
+ Meaning derives only from the fusion of words into text and into language.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Brutal Composition—"It's just the way things are." There is no true, nontrivial,
+ and finitely long answer.
+\end_layout
+
+\begin_layout Standard
+The last point is perhaps the most interesting notion coming out of restricted
+ composition.
+ It is not an ingredient, it is rather a consequence.
+ If one abandons the explicit DAGs of partial orders, one then also abandons
+ the notion of logical predicates and truth assignments.
+ One no longer arranges logical connectives into a tree structure, or even
+ into Horn clauses.
+ The network, rather, represents things 
+\begin_inset Quotes eld
+\end_inset
+
+as they are
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is not to deny predicate logic, or Boolean satisfiability: these are
+ tremendously useful concepts.
+ Rather, this is to avoid the symbol grounding problem (ref Wikipedia, again).
+ By discarding the arrow from 
+\begin_inset Quotes eld
+\end_inset
+
+signifier
+\begin_inset Quotes erd
+\end_inset
+
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+significand
+\begin_inset Quotes erd
+\end_inset
+
+, one can no longer peer into the gaping chasm of the question 
+\begin_inset Quotes eld
+\end_inset
+
+what does this symbol mean?
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is very much in line with theories of postmodernism and deconstruction
+ evident in the works of Derrida,
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The différance of Derrida can be seen as a rejection of the linguistic equivalen
+t of mereological nihilism: there is no infinite regression of looking up
+ the meanings of words in a dictionary.
+\end_layout
+
+\end_inset
+
+ Deleuze, Lyotard.
+ There is no difference between appearance and true form; the difference
+ is undecidable.
+ The constructed network of connections and relations is all there is.
+\end_layout
+
+\begin_layout Standard
+In the following sections, the sheaf construction will be used as a tool
+ to create A(G)I representations of reality.
+ Whether the constructed network is an accurate representation of reality
+ is undecidable, and this is true even in a narrow formal sense.
+ Famously, it is known that the question of whether two different presentations
+ of a (group-theoretical) group refer to the same group is undecidable,
+ in the computational sense: there is no algorithm, guaranteed to terminate
+ in finite time, that is capable of making this decision.
+ This is the undecidability problem in group theory.
+ That this result carries over into the fullness of a network built from
+ a sheaf should come as no surprise: the presentation of a group is little
+ more than a certain collection of labeled vertexes and edges (the group
+ elements and the group operations) and decidability requires the graph-rewritin
+g of these into a different form.
+ There are no graph rewrite rules that can always bring two different presentati
+ons into normal form.
+ Oddly enough, such 
+\begin_inset Quotes eld
+\end_inset
+
+received wisdom
+\begin_inset Quotes erd
+\end_inset
+
+ from mathematics can be used as a foundational cornerstone for post-modernism.
+ This is unexpected.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Despite this, sheaves are still somehow fundamentally 
+\begin_inset Quotes eld
+\end_inset
+
+structuralist
+\begin_inset Quotes erd
+\end_inset
+
+, not post-structuralist.
+ The bonds are relational, in the end.
+ There is always still a predicate: either an edge exists, or it doesn't.
+ To every graph there is a corresponding adjacency matrix, populated with
+ zeroes and ones.
+ Fortunately, one can wriggle ones way out if this, by assigning numerical
+ weights to edges, making some probable and some improbable.
+ Whether true and false can be replaced by a subobject classifier in this
+ context is perhaps a step too far, but perhaps also an interesting step.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A more explicit bridge can be constructed via linguistics, in the following.
+\end_layout
+
+\begin_layout Section*
+Bibliography
+\end_layout
+
+\begin_layout Itemize
+Van Inwagen, P.
+ (2002).
+ “The Number of Things.” 
+\emph on
+Philosophical Issues
+\emph default
+ 12 pp.176–196.
+\end_layout
+
+\end_body
+\end_document
