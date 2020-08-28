@@ -181,8 +181,9 @@ Tensors
 \end_layout
 
 \begin_layout Standard
-This text reviews the concept of a tensor, starting from its most narrow
- form, and broadening it to a general setting.
+This text reviews the concept of a tensor, starting from the conventional
+ defntion, which gives its most narrow form, and broadening it to a general
+ setting.
  It is hoped that the reader already knows what a tensor is, as otherwise,
  most of this may seem pointless.
  The explanation begins very simply, at the freshman level; do not be mislead
@@ -190,7 +191,7 @@ This text reviews the concept of a tensor, starting from its most narrow
 \end_layout
 
 \begin_layout Standard
-Four properties of tensors will be exposed and articulated.
+Three properties of tensors will be exposed and articulated.
  These may seem strange and idiosyncratic, if you already know what a tensor
  is; but communicating the strangeness is why we write.
 \end_layout
@@ -221,10 +222,6 @@ plugging together of connectors
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Itemize
-Types and fibers.
 \end_layout
 
 \begin_layout Standard
@@ -366,7 +363,7 @@ seed
 \begin_inset Quotes erd
 \end_inset
 
-, already illustrated in a figure above.
+, illustrated in previous sections.
  Lets repeat it:
 \end_layout
 
@@ -463,7 +460,7 @@ for the left side of the product, and likewise for the right: that this
 \begin_inset Formula $\times$
 \end_inset
 
- does not work, it is not multi-linear.
+ does not work; it is not multi-linear.
  Consider, for example, the two ordered pairs 
 \begin_inset Formula $u\times w=\left(u,w\right)$
 \end_inset
@@ -499,6 +496,8 @@ The tensor product
 \end_inset
 
 .
+ There is a way to construct the tensor product from the Cartesian product,
+ this is developed next.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -619,7 +618,7 @@ equivalent
 \begin_layout Standard
 The formal way to write the tensor product is as a quotient over this equivalenc
 e.
- This is conventionally written as 
+ This is conventionally written as a quotient
 \begin_inset Formula 
 \[
 U\otimes W=U\times W/\sim
@@ -631,7 +630,7 @@ which is meant to denote the set of all equivalent ordered pairs.
  In set notation,
 \begin_inset Formula 
 \[
-u\otimes w=\left\{ \mbox{all pairs }\left(s,t\right)\mbox{ such that }\left(s,t\right)=\left(u,w\right)+\left(cu,-cw\right)\mbox{ for some const }c\right\} 
+u\otimes w=\left\{ \mbox{all pairs }\left(s,t\right)\mbox{ such that }\left(s,t\right)=\left(u,w\right)+\left(cu,-cw\right)\mbox{ for some const }c.\right\} 
 \]
 
 \end_inset
@@ -701,6 +700,15 @@ all are created equal
 .
 \end_layout
 
+\begin_layout Standard
+In a conventional exposition, there would be a verification to make sure
+ that the result after quotienting is consistent: specifically, that the
+ cosets are disjoint, that no exemplar ever belongs to two different cosests,
+ and that the resulting mapping is one-to-one and onto – thus, an isomorphism.
+ This can be taken for granted here; it needs verifcation only after the
+ more abstract definition is given.
+\end_layout
+
 \begin_layout Subsubsection*
 Tensor products as concatenation
 \end_layout
@@ -740,7 +748,16 @@ T\left(x,y,z,s,t\right)=F\left(x,y,z\right)G\left(s,t\right)
 
 \end_inset
 
-where the product is simply the scalar product.
+where the product is simply the scalar product (for whatever field or ring
+ that 
+\begin_inset Formula $F$
+\end_inset
+
+ and 
+\begin_inset Formula $G$
+\end_inset
+
+ are valued in).
  This seems almost trivial in it's definition – how hard can a scalar product
  be? Its just the ordinary multiplication of numbers.
  This seems effectively trivial, but it hides a bit of trickery: there's
@@ -779,8 +796,8 @@ As always, let's belabor the painfully obvious:
 
 \end_inset
 
-The right side is a list.
- The left side is a list of lists.
+The left side is a list.
+ The right side is a list of lists.
  List concatenation 
 \begin_inset Quotes eld
 \end_inset
@@ -860,7 +877,7 @@ Using the equivalence
 \end_inset
 
  to write a quotient space of concatenated products requires the development
- of some additional notion.
+ of some additional concepts.
  This is partly undertaken in the next section.
 \end_layout
 
@@ -934,6 +951,21 @@ forgetful
  The forgetfulness of list concatenation goes hand-in-hand with the forgetfulnes
 s of multiplication in fields and rings.
  Tensors work because the exploit both of these properties.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is effectively what the abstract defintion of a tensor category in
+ category theory is saying.
+ This text mostly tries to avoid category theory, as there is a heavy conceptual
+ overhead required to learn category theory, and that complixity concels,
+ hides the points we are trying to make explicit, here.
+ That said, some category theory is unavoidable.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
@@ -944,8 +976,7 @@ Cartesian products and lambda calculus
 The simply-typed lambda calculus is famously the internal language of Cartesian-
 closed categories.
  Let's take a moment to unpack that statement.
- The treatment here is a bit informal; our goal is not to teach category
- theory.
+ The treatment here is informal; our goal is not to teach category theory.
  Consider a class 
 \begin_inset Formula $S$
 \end_inset
@@ -954,7 +985,7 @@ closed categories.
  We call it a class because it could be a finite set, or an infinite set;
  it may be uncountable, or it may be so horridly structured that it cannot
  be expressed as a set.
- For the purposes of comp sci, things are always finite, co calling it a
+ For the purposes of comp sci, things are always finite, so calling it a
  class 
 \begin_inset Formula $S$
 \end_inset
@@ -1070,8 +1101,8 @@ where both
 \end_inset
 
 .
- By convention, that is what the expression on the right hand side of the
- arrow is supposed to mean.
+ By convention, that is also what the expression on the right hand side
+ of the arrow is supposed to mean.
  The arrow itself is meant to denote beta-reduction, the actual act of plugging
  in or substitution of the variable 
 \begin_inset Formula $x$
@@ -1085,9 +1116,10 @@ where both
 \end_layout
 
 \begin_layout Standard
-Beta reduction takes actual effort and work, it is a computation problem,
- and vastly complex schemes have been developed to perform beta reduction
- rapidly.
+Beta reduction takes actual effort and work, it is a computational problem.
+ Done by hand, it requires transcribing symbols on sheets of paper.
+ Done by computer, it requires copying and moving bytes.
+ Vastly complex schemes have been developed to perform beta reduction rapidly.
  From the comp-sci perspective, it is a highly non-trivial process, no matter
  how obvious it may seem from the short expression above.
 \end_layout
@@ -1405,7 +1437,7 @@ One can still use the
 
 \end_inset
 
- is the alternate (generalized) form of the conventional distributive property
+is the alternate (generalized) form of the conventional distributive property
 \end_layout
 
 \begin_layout Standard
@@ -1458,7 +1490,7 @@ Define the algebra of
 \begin_inset Formula $S$
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Itemize
