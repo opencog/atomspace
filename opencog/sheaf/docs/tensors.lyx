@@ -2184,7 +2184,170 @@ Change of basis and isometries
 \end_layout
 
 \begin_layout Standard
-What if..
+Discarding the concept of a norm in the definition of the inner product
+ has serious consequences.
+ In particular, all conceptions of change-of-basis and isometries are thrown
+ out the window.
+ It's worth exploring this a bit.
+\end_layout
+
+\begin_layout Standard
+Consider the conventional case of Euclidean space.
+ A change of basis involves multiplication by an orthonormal matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ having the property 
+\begin_inset Formula $M^{T}M=I$
+\end_inset
+
+ so that 
+\begin_inset Formula $M\in SO(n)$
+\end_inset
+
+.
+ Then for some basis vector 
+\begin_inset Formula $\vec{e}_{k}$
+\end_inset
+
+, the transformed basis vector is 
+\begin_inset Formula $\vec{e}_{k}^{\prime}=M\vec{e}_{k}$
+\end_inset
+
+.
+ Writing out indexes, one has 
+\begin_inset Formula $\left[\vec{e}_{k}\right]_{j}=\delta_{kj}$
+\end_inset
+
+ ane of course 
+\begin_inset Formula $\left[M\right]_{ij}=M_{ij}$
+\end_inset
+
+ so that 
+\begin_inset Formula $\left[\vec{e}_{k}^{\prime}\right]_{i}=\left[M\right]_{ij}\left[\vec{e}_{k}\right]_{j}=M_{ij}\delta_{jk}=M_{ik}$
+\end_inset
+
+.
+ What happens if instead, we only have 
+\begin_inset Formula $\&$
+\end_inset
+
+ and 
+\begin_inset Formula $\vee$
+\end_inset
+
+ as operators? Attempting to reproduct the above gives
+\begin_inset Formula 
+\[
+\left[\vec{e}_{k}^{\prime}\right]_{i}=M_{i1}\&\left[\vec{e}_{k}\right]_{1}\vee M_{i2}\&\left[\vec{e}_{k}\right]_{2}\vee M_{i3}\&\left[\vec{e}_{k}\right]_{3}\vee\cdots
+\]
+
+\end_inset
+
+The construction on the right reads, as always 
+\begin_inset Quotes eld
+\end_inset
+
+choose 
+\begin_inset Formula $M_{i1}\&\left[\vec{e}_{k}\right]_{1}$
+\end_inset
+
+ or choose 
+\begin_inset Formula $M_{i2}\&\left[\vec{e}_{k}\right]_{2}$
+\end_inset
+
+ ...
+ choose one and only one
+\begin_inset Quotes erd
+\end_inset
+
+ and so the item on the left, the symbol 
+\begin_inset Formula $\left[\vec{e}_{k}^{\prime}\right]_{i}$
+\end_inset
+
+ is not some reduced thing in the same class as 
+\begin_inset Formula $\left[\vec{e}_{k}\right]_{j}$
+\end_inset
+
+ but is an entirely different beast: its a list of choices, or rather, just
+ a name for a list of choices.
+ Of course, this can be made a bit mor consistent, if one claims that 
+\begin_inset Formula $\left[\vec{e}_{k}\right]_{j}$
+\end_inset
+
+ is nothing but a singleton, with the commandment 
+\begin_inset Quotes eld
+\end_inset
+
+here is exactly one thing, and one you choose one and only one thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, here, a single change-of-basis merely creates an accretion or conglomerat
+ion: some intial collection of 
+\begin_inset Formula $\vec{e}_{k}$
+\end_inset
+
+ gets an extra 
+\begin_inset Formula $M$
+\end_inset
+
+ stuck onto the side.
+ Connecting connectors cause things to stick to each-other; the result is
+ still typically some thing with connectors that are still exposed.
+\end_layout
+
+\begin_layout Standard
+The inner product is also conventionally used to define a norm, and then
+ a metric, allowing concepts of a metric space to be layered on.
+ Here, we've discarded these notions.
+ There is one, though, that naturally remains: the ultrametric.
+ We can take, for example, the ultrametric to be a count, a cadinal number,
+ of the number of connectors that have been connected, or the distance between
+ two points, by counting the number of times the 
+\begin_inset Formula $\&$
+\end_inset
+
+ symbol appears between them.
+ This is fine, and an interesting thing to do, but this count is naturally
+ a number (an integer), and we have not defined any kind of natural scalar
+ product between integers and the elements of the algebra.
+ One may exist; only that we've not defined one.
+\end_layout
+
+\begin_layout Standard
+For example, when writing 
+\begin_inset Formula $M^{T}M=I$
+\end_inset
+
+, the thing on the right hand side is the identity, and so this equation
+ states that when two 
+\begin_inset Formula $M$
+\end_inset
+
+'s are connected in some appropriate way, the identity results.
+ If the algebra was, for exaple, the algebra of first-order logic, then
+ the associated ultrametric might be the number of steps required to prove
+ something, or the number of rewriting steps needed to convert one expression
+ into another.
+ Performing a sequence of operations 
+\emph on
+e.g
+\emph default
+.
+ applying a sequence of inference rules in natural deduction, and then reversing
+ them, can be interpreted as some transformation 
+\begin_inset Formula $M$
+\end_inset
+
+ and it's inverse.
+ There does not seem top be any particular insight here.
+ One might ask for the shortest proof: the proof with the smallest number
+ of steps from here to there, and take this as the (ultra-)metric on the
+ space of proofs.
+ This is interesting, but lies outside the immediate need for building up
+ machinery of knowledge representation.
 \end_layout
 
 \begin_layout Standard
