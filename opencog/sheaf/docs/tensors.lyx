@@ -112,7 +112,60 @@ Revised version; Earlier version: 2 May 2020
 \end_layout
 
 \begin_layout Abstract
-Extracted subsection from 
+This chapter defines a tensor in a general setting, extending the conventional
+ definition of a tensor valued in a field.
+ The definition here allows the tensor to be valued over 
+\begin_inset Quotes eld
+\end_inset
+
+anything
+\begin_inset Quotes erd
+\end_inset
+
+, with only minor algebraic constraints on what 
+\begin_inset Quotes eld
+\end_inset
+
+anything
+\begin_inset Quotes erd
+\end_inset
+
+ can be.
+ The tensor product can then be seen as a kind of concatenation or 
+\begin_inset Quotes eld
+\end_inset
+
+forgetting
+\begin_inset Quotes erd
+\end_inset
+
+, while the inner product becomes a 
+\begin_inset Quotes eld
+\end_inset
+
+plugging together of connectors
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The definition given here is more-or-less compatible with the idea of a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+tensor category
+\begin_inset Quotes erd
+\end_inset
+
+, but avoids category theory.
+ The focus is different: the focus here is concerned with knowledge representati
+on, computer algorithms and artificial intelligence.
+\end_layout
+
+\begin_layout Abstract
+This is a part of a sequence of articles exploring inter-related ideas;
+ it is meant to provide details for a broader context.
+ The current working title for the broader text is 
 \begin_inset Quotes eld
 \end_inset
 
@@ -120,158 +173,7 @@ Connectors and Variables
 \begin_inset Quotes erd
 \end_inset
 
-
-\end_layout
-
-\begin_layout Section*
-Introduction
-\end_layout
-
-\begin_layout Standard
-In elementary mathematics, it is commonplace to speak of a variable, such
- as 
-\begin_inset Formula $x$
-\end_inset
-
-, and functions of that variable, such as 
-\begin_inset Formula $f(x)$
-\end_inset
-
 .
- The power of this abstraction is that variables can be assigned a value,
- and that value can be 
-\begin_inset Quotes eld
-\end_inset
-
-plugged into
-\begin_inset Quotes erd
-\end_inset
-
- a function.
- For example, one asserts that 
-\begin_inset Formula $x=42$
-\end_inset
-
- and then ponders 
-\begin_inset Formula $f(42)$
-\end_inset
-
-.
- This act of 
-\begin_inset Quotes eld
-\end_inset
-
-plugging in
-\begin_inset Quotes erd
-\end_inset
-
- is formally called 
-\begin_inset Quotes eld
-\end_inset
-
-beta reduction
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-This process of 
-\begin_inset Quotes eld
-\end_inset
-
-plugging in
-\begin_inset Quotes erd
-\end_inset
-
- can be compared to the process of 
-\begin_inset Quotes eld
-\end_inset
-
-connecting
-\begin_inset Quotes erd
-\end_inset
-
-, for example, connecting together two jigsaw-puzzle pieces.
- When mating together connectors, one typically has a matched pair that
- can be mated: a plug that can be plugged into a socket.
- It should be clear that beta reduction is a special case of this: that
- 
-\begin_inset Formula $f(x)$
-\end_inset
-
- is a 
-\begin_inset Quotes eld
-\end_inset
-
-socket
-\begin_inset Quotes erd
-\end_inset
-
- into which values can be plugged into.
-\end_layout
-
-\begin_layout Standard
-This observation seems nearly trivial; it is so painfully obvious that one
- wonders what more can be said.
- Yet there are tremendous consequences that arise from this, consequences
- that are in some sense equally trivial and obvious.
- That something is 
-\begin_inset Quotes eld
-\end_inset
-
-obvious
-\begin_inset Quotes erd
-\end_inset
-
- is perhaps an indicator that it is important.
- This note dwells on these 
-\begin_inset Quotes eld
-\end_inset
-
-obvious
-\begin_inset Quotes erd
-\end_inset
-
- ideas, and demonstrates their importance.
- The problem with 
-\begin_inset Quotes eld
-\end_inset
-
-obviousness
-\begin_inset Quotes erd
-\end_inset
-
- is that it frames all manner of thinking: it is Aristotle's 
-\begin_inset Quotes eld
-\end_inset
-
-formal cause
-\begin_inset Quotes erd
-\end_inset
-
-, applied to thinking.
- It is provides a normative framework in which all conversation takes place.
- Design and thinking happen in the foreground; there is a 
-\begin_inset Quotes eld
-\end_inset
-
-figure
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-ground
-\begin_inset Quotes erd
-\end_inset
-
-, and anything that is obvious falls into the background, becomes implicit,
- and serves as a barrier to further thought and examination.
- Thus, the impetus for this note.
 \end_layout
 
 \begin_layout Section*
@@ -279,9 +181,7 @@ Tensors
 \end_layout
 
 \begin_layout Standard
-Much of what has been said above can be made slightly more precise with
- the aid of mathematical notation.
- This section reviews the concept of a tensor, starting from its most narrow
+This text reviews the concept of a tensor, starting from its most narrow
  form, and broadening it to a general setting.
  It is hoped that the reader already knows what a tensor is, as otherwise,
  most of this may seem pointless.
