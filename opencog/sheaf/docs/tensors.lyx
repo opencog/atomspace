@@ -2007,8 +2007,12 @@ lax monoidal category
 \end_layout
 
 \begin_layout Standard
-Perhaps the most important aspect for the current presentation is that there
- is no appeal made to the concept of 
+There are two important aspects of the definition of monoidal categories
+ that are relevant to the current text:
+\end_layout
+
+\begin_layout Itemize
+The defintion of a monoidal category makes no appeal to the concept of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2016,9 +2020,40 @@ addition
 \begin_inset Quotes erd
 \end_inset
 
+, or anything 
+\begin_inset Quotes eld
+\end_inset
+
+additive
+\begin_inset Quotes erd
+\end_inset
+
 .
- The definition of the monoidal category does not require any sense of additivit
-y.
+ This is not required to create a monoidal category.
+\end_layout
+
+\begin_layout Itemize
+Many tensor categories in mathematics are 
+\begin_inset Quotes eld
+\end_inset
+
+symmetric
+\begin_inset Quotes erd
+\end_inset
+
+, in that they have a natural isomorphism 
+\begin_inset Formula $A\otimes B\cong B\otimes A$
+\end_inset
+
+.
+ This is manifestly 
+\emph on
+not
+\emph default
+ the case here; we are very much concerned with the case where such symmetry
+ is entirely lacking.
+ This is precisely why the concept of tensors can be applied to linguistics:
+ sentences are not palindromes.
 \end_layout
 
 \begin_layout Subsubsection*
