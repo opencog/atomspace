@@ -847,6 +847,24 @@ democratized
 \end_inset
 
  but know not whence it came.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The formal term for this property is that it is 
+\begin_inset Quotes eld
+\end_inset
+
+associative
+\begin_inset Quotes erd
+\end_inset
+
+: re-arranging the parenthesis will not change the result.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -955,8 +973,8 @@ s of multiplication in fields and rings.
 status collapsed
 
 \begin_layout Plain Layout
-This is effectively what the abstract defintion of a tensor category in
- category theory is saying.
+This is effectively what the abstract defintion of a tensor category (or
+ monoidal category) in category theory is saying.
  This text mostly tries to avoid category theory, as there is a heavy conceptual
  overhead required to learn category theory, and that complixity concels,
  hides the points we are trying to make explicit, here.
@@ -1564,7 +1582,7 @@ contracting tensor indeces
 \begin_inset Formula $B_{lm}$
 \end_inset
 
- one might consider the contraction
+, one might consider the contraction
 \begin_inset Formula 
 \[
 C_{ijm}=A_{ijk}B_{km}=\sum_{k}A_{ijk}B_{km}
@@ -1612,8 +1630,8 @@ i\left(\vec{a},\vec{b}\right)=a_{1}\&b_{1}\vee a_{2}\&b_{2}\vee\cdots\vee a_{n}\
 
 \end_inset
 
-which clearly has the same form despite a vastly different interpretation
- of the symbols.
+which clearly has the same algebraic form despite a vastly different interpretat
+ion of the symbols.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1621,8 +1639,9 @@ Inner product as connection
 \end_layout
 
 \begin_layout Standard
-Diagrammatically, the contraction of tensor indeces was earlier depicted
- with a puzzle-shaped diagram, repeated below, with slightly different labeling.
+Diagrammatically, the contraction of tensor indeces was depicted earlier
+ in this series with a puzzle-shaped diagram.
+ This is repeated below, with slightly different labeling.
 \end_layout
 
 \begin_layout Standard
@@ -1659,7 +1678,8 @@ The diagram is slightly awkward here; the upper row is meant to depict the
 \end_inset
 
  between them.
- We return to types shortly.
+ The next chapter will return to types; the tensors defined here remain
+ simply-typed.
  The point of the diagram is to re-assert the claim that the inner product
  is just a form of 
 \begin_inset Quotes eld
@@ -1677,9 +1697,10 @@ Beta reduction as inner product
 \end_layout
 
 \begin_layout Standard
-Earlier, also it was claimed that beta-reduction was a form of connecting
- things together.
- How can this be? To recap: when one plugs in 42 for 
+Earlier chapters claimed that beta-reduction was a form of connecting things
+ together.
+ How can this be? To recap the argument so far: when one plugs in 42 for
+ 
 \begin_inset Formula $x$
 \end_inset
 
@@ -1825,22 +1846,199 @@ the mating of matching types
 \end_layout
 
 \begin_layout Subsection*
-Types and fibers
+Appendix/FAQ
 \end_layout
 
 \begin_layout Standard
-Types ...
+A few related points and comonly-raised questions are addressed here.
 \end_layout
 
-\begin_layout Subsection*
-Atomese
+\begin_layout Subsubsection*
+Monoidal categories
 \end_layout
 
 \begin_layout Standard
-..
- Ben, there's also a half written section that described how the above actaully
- is implemented in the current AtomSpace.
- If interested, I can provide this detail.
+The defintions above correspond with the conventional definition of tensor
+ products in monoidal categories; the goal has been not to invent something
+ new, but rather to change perspective.
+ Thus, the forgetfulness of the placement of parenthesis, 
+\emph on
+viz.
+
+\emph default
+ that 
+\begin_inset Formula $\left(a\left(b\,c\right)\right)\sim\left(\left(a\,b\right)c\right)$
+\end_inset
+
+ is more commonly called the 
+\begin_inset Quotes eld
+\end_inset
+
+associative property of a binary operation
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The defintion of the monoidal category elaborates on associativity: the
+ tensor product only needs to be associative 
+\begin_inset Quotes eld
+\end_inset
+
+up to isomorphism
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The isomorphism that does this is called the 
+\begin_inset Quotes eld
+\end_inset
+
+associator
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and it is a one-to-one, onto map 
+\begin_inset Formula $\alpha:A\otimes\left(B\otimes C\right)\mapsto\left(A\otimes B\right)\otimes C$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The category must contain also have a 
+\begin_inset Quotes eld
+\end_inset
+
+unit object
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+identity object
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $I$
+\end_inset
+
+; multiplication by the unit, on either the left or the right, must preserve
+ the multiplied object, 
+\begin_inset Quotes eld
+\end_inset
+
+up to isomorphism
+\begin_inset Quotes erd
+\end_inset
+
+.
+ These two isomorphisms are called the 
+\begin_inset Quotes eld
+\end_inset
+
+left and right unitors
+\begin_inset Quotes erd
+\end_inset
+
+; for example, the right unitor is the one-to-one, onto map 
+\begin_inset Formula $\rho:A\otimes I\mapsto A$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+With explicit left and right unitors, one must then verify several 
+\begin_inset Quotes eld
+\end_inset
+
+coherence conditions
+\begin_inset Quotes erd
+\end_inset
+
+: there is a triangle diagram, which verifies that the re-arrangement of
+ paranthesis involving the idnetity object gives 
+\begin_inset Quotes eld
+\end_inset
+
+what is expected
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Adding the associator into the mix requires the verification of a pentagon-shap
+ed diagram.
+ The Wikipedia article on monoidal categories provies an adequate summary
+ of the definition of a monoidal category.
+ Of course, much more can be said: there is a 350-page book on the topic
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Etingof2010"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Strict monoidal categories are those where the associator and the unitors
+ are identities; that is all that is called upon, in the above.
+ There is also the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+lax monoidal category
+\begin_inset Quotes erd
+\end_inset
+
+, where the associativity properties are slightly weakened.
+ Some of the concepts discussed in this collection of chapters are properly
+ lax monoidal cateogies; no particular effort is made to call attention
+ to this, and it seems harmless, as every such lax category has a corresponding
+ equivalent strict category.
+\end_layout
+
+\begin_layout Standard
+Perhaps the most important aspect for the current presentation is that there
+ is no appeal made to the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+addition
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The definition of the monoidal category does not require any sense of additivit
+y.
+\end_layout
+
+\begin_layout Subsubsection*
+Isometries
+\end_layout
+
+\begin_layout Standard
+What if..
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
