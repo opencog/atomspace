@@ -176,8 +176,56 @@ Topological space
 \end_layout
 
 \begin_layout Standard
-Here is a single seed, again, and a pair of connected seeds, and a hedge-hog:
- four interconnected seeds.
+Let's review the conventional definition of a topological space.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This entire section painfully belabors something that is relatively obvious
+ to those who know algebraic topology: it is describing something very much
+ like a 
+\begin_inset Quotes eld
+\end_inset
+
+simplicial complex
+\begin_inset Quotes erd
+\end_inset
+
+, and points out that it is a topological space.
+ Perhaps we could go farther: describe the analog of 
+\begin_inset Quotes eld
+\end_inset
+
+CW-complexes
+\begin_inset Quotes erd
+\end_inset
+
+, by describing gluing and a weak topology.
+ Yet there are differences: the connectors on seeds are typed, whereas the
+ vertexes of simplicial complexes are simply-typed.
+ The seeds also resemble dual-graphs, in that the connectors connect up
+ neighbors, and so denote where two things come together at a boundary.
+ So we cannot just make this jump, as simplicial complexes are almost but
+ not quite the correct concept.
+ It would also put too great a burden on the reader to tell them that they
+ must first study algebraic topology.
+ The goals here are entirely different: the goals are to gain insight into
+ knowledge representation and AGI.
+\end_layout
+
+\end_inset
+
+ During the review, keep in mind the conception of 
+\begin_inset Quotes eld
+\end_inset
+
+seeds
+\begin_inset Quotes erd
+\end_inset
+
+, as presented earlier.
+ As a reminder, here are diagrams of a single seed, a pair of connected
+ seeds, and a hedge-hog: four interconnected seeds.
 \end_layout
 
 \begin_layout Standard
@@ -229,6 +277,319 @@ open
 \end_inset
 
  boundary of the set, and the black circles to be the interior.
+ The primary conceptual issue is that topologies are conventionally framed
+ in terms of 
+\begin_inset Quotes eld
+\end_inset
+
+sets
+\begin_inset Quotes erd
+\end_inset
+
+, which then presumes 
+\begin_inset Quotes eld
+\end_inset
+
+set theory
+\begin_inset Quotes erd
+\end_inset
+
+ underneath it all.
+ And yet nothing about a single seed looks particularly set-like.
+ Yes, the middle diagram above is obviously a 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of two seeds, and the diagram on the right is the 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of four seeds.
+ But they are not sets.
+\end_layout
+
+\begin_layout Standard
+No matter.
+ A topology is defined in terms of a collection of axioms, and one should
+ argue that anything obeying those axioms is a topology, irregardless of
+ whether the underlying objects are actually sets, or not.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In a certain sense, this is preciely what the Yoneda lemma states.
+ But that sense is 
+\begin_inset Quotes eld
+\end_inset
+
+sideways
+\begin_inset Quotes erd
+\end_inset
+
+ from the direction we wish to travel in.
+ The Yoneda lemma is also sufficently abstract that it cannot be made a
+ pre-requisite to understanding this text.
+ It does, however, provide the sign-post to a 
+\begin_inset Quotes eld
+\end_inset
+
+classical
+\begin_inset Quotes erd
+\end_inset
+
+ formalization of the discussion here.
+\end_layout
+
+\end_inset
+
+ What are the axioms of a topology? Let's quote directly from Wikipedia,
+ again: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+A topological space is an ordered pair 
+\begin_inset Formula $\left(X,\tau\right)$
+\end_inset
+
+, where 
+\begin_inset Formula $X$
+\end_inset
+
+ is a set and 
+\begin_inset Formula $\tau$
+\end_inset
+
+ is a collection of subsets of 
+\begin_inset Formula $X$
+\end_inset
+
+, satisfying the following axioms:...
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the current context, the goal is to cross out the word 
+\begin_inset Quotes eld
+\end_inset
+
+set
+\begin_inset Quotes erd
+\end_inset
+
+ and replace it by 
+\begin_inset Quotes eld
+\end_inset
+
+hedgehog
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+mesh
+\begin_inset Quotes erd
+\end_inset
+
+ (the diagram above shows four interconnected seeds; in general it could
+ be a mesh of trillions, or even an infinite mesh.
+ An infinite mesh might be countable, if it was constructed recusively,
+ or even uncountable, if one is willing to entertain a mesh that interconnects
+ elements in a Cantor set.) One point to be careful about, in this analogy:
+ here, 
+\begin_inset Formula $X$
+\end_inset
+
+ is meant to be the fully-assembled mesh; it is NOT a collection of seeds!
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Of course, 
+\begin_inset Formula $X$
+\end_inset
+
+ could be just a collection of seeds, if that is the topological space that
+ one wished to work with; but that would be a very special case, and not
+ the general case.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's continue:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+The empty set and 
+\begin_inset Formula $X$
+\end_inset
+
+ itself belong to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Of course: the empty seed is just nothing at all: the seed with no connectors,
+ and no center.
+ And sure, let us assign the the hedgehog to 
+\begin_inset Formula $\tau.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Any arbitrary (finite or infinite) union of members of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ still belongs to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Of course, although one must be careful in reading the word 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+union
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, here.
+ There are two warring senses.
+ In one sense, the word 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ can be taken to mean 
+\begin_inset Quotes eld
+\end_inset
+
+the connection or connecting-together of two or more seeds, if they are
+ connectable
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is meant to be the re-gluing together of pieces of a mesh that were
+ cut out: if one takes some scissors, and cuts out pieces from the mesh,
+ and then joins them back together again, it is still a sub-portion of the
+ mesh.
+ In the other sense, the union is a disjoint union: supposed the two scissored
+ pieces of the mesh were far apart from each other.
+ One is then left with a 
+\emph on
+set
+\emph default
+ of two pieces, that cannot be joined together.
+ This is still a union.
+ If one carefully examines the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ in conventional set theory, it 
+\emph on
+always
+\emph default
+ means 
+\begin_inset Quotes eld
+\end_inset
+
+glue them together if you can
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Take, for example, a Venn diagram shown to elementary-school students:
+ the union is always the gluing-together, the overlapping bits being the
+ joint.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph on
+The intersection of any finite number of members of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ still belongs to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The reader was already invited to think of taking scissors to the mesh
+ to disconnect it, and also of gluing togehter pieces.
+ How, exactly, can the word 
+\begin_inset Quotes eld
+\end_inset
+
+intersection
+\begin_inset Quotes erd
+\end_inset
+
+ be interpreted?
+\end_layout
+
+\begin_layout Standard
+w
 \end_layout
 
 \begin_layout Subsection*
