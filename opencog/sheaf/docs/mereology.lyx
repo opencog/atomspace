@@ -238,7 +238,7 @@ Relational algebras
 \end_layout
 
 \begin_layout Standard
-Removing the term algebra but keeping the relations results in a 
+In mathematics, a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -246,7 +246,9 @@ relational algebra
 \begin_inset Quotes erd
 \end_inset
 
-, with examples of relations being 
+ is a system in which one can define collections of things, and make statements
+ about thier relationships to one-another.
+ Examples of relations are 
 \begin_inset Quotes eld
 \end_inset
 
@@ -271,7 +273,94 @@ part-of
 \end_inset
 
 .
- Limiting oneself to a single part-whole relationship, one arrives at mereology
+\end_layout
+
+\begin_layout Standard
+Relations have several notable properties: they provide an ordering (something
+ may have a part which may have a part...) and thus a hierarchy.
+ Formally, such hierarchies are refered to as 
+\begin_inset Quotes eld
+\end_inset
+
+directed acyclic graphs
+\begin_inset Quotes erd
+\end_inset
+
+ or DAG's.
+ In general, any partial ordering can be represented with arrows – the directed
+ edges of the DAG.
+ That is, relations are usually asymmetric, but not always.
+ If B is a part of A, then A is not a part of B, at least, not in any convention
+al sense.
+ But if A is-a B, then by convention, B is-a A.
+ One may write an entire book on the algebraic properties of relations;
+ and indeed, more than a few hundred books have been written on the topic,
+ to which the reader is invited to consult, for more information.
+\end_layout
+
+\begin_layout Standard
+By definition (i.e.
+ so as not to confuse vocabulary), relations manifestly do 
+\emph on
+not
+\emph default
+ define functions or mappings or 
+\begin_inset Quotes eld
+\end_inset
+
+terms
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There is a broader algebraic system, called 
+\begin_inset Quotes eld
+\end_inset
+
+term algebra
+\begin_inset Quotes erd
+\end_inset
+
+, which does supply these combinatoric elements; the relational algebras
+ are a fragment of term algebras.
+\end_layout
+
+\begin_layout Standard
+Relational algebras find common deployment in computer science, where they
+ provide an explicit theory for databases (
+\emph on
+e.g.
+
+\emph default
+ both SQL and no-SQL, and so on.) They are also central to dictionaries of
+ natural language, providing relational explanations aside from part-of-speech
+ tagging (
+\emph on
+e.g.
+
+\emph default
+ 
+\begin_inset Quotes eld
+\end_inset
+
+pitch•fork pĭch′fôrk″ n.
+ A large, long-handled fork with ...
+\begin_inset Quotes erd
+\end_inset
+
+) In between these two extremes is the more general problem of knowledge
+ representation, 
+\emph on
+i.e.
+
+\emph default
+ of capturing knowledge in such a way that a computer can manipulate it,
+ that is, artificial intelligence, which is the ostensible topic of this
+ collection of essays.
+\end_layout
+
+\begin_layout Standard
+Limiting oneself to a single part-whole relationship, one arrives at mereology
  as a possible alternative to set theory as a foundation for mathematics.
  But one also arrives the the notion of 
 \begin_inset Quotes eld
@@ -289,6 +378,17 @@ gunk
  That there are such puzzles is perhaps endemic to the desire to apply part-whol
 e relationships, and the adduced DAG partial orders as a fundamental ground
  on which to build philosophical discussions.
+ it also perhaps suggests that a search be undertaken for some other foundationa
+l principle.
+ This text offers up 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+ as the alternative.
 \end_layout
 
 \begin_layout Subsection*
@@ -296,9 +396,9 @@ Mereology
 \end_layout
 
 \begin_layout Standard
-The paradoxes of mereology were touched on in the previous section: the
- difficulty of defining part-whole relationships in a consistent manner,
- the problem of the existence or non-existence of 
+The paradoxes of mereology mentioned just above: the difficulty of defining
+ part-whole relationships in a consistent manner, the problem of the existence
+ or non-existence of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -336,24 +436,84 @@ other things
 \end_inset
 
 , but the manner in which these can be composed is restricted.
- The body of ideas is very nearly identical to the concept of sheaves.
- Quoting directly from the Wikipedia article on mereology, we can can learn
- that these are:
+ The body of ideas is very nearly identical to the concept of seeds and
+ sheaves introduced in the earlier chapter.
 \end_layout
 
-\begin_layout Itemize
-Contact—that a complex object Y is composed of X's if and only if the X's
- are in contact.
+\begin_layout Standard
+To recap, here is a seed:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed-unlabelled.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Think of it as a burr, the black dot in the center being the seed; the white
+ circles being unattached conectors.
+ The connectors may be typed, so that they attach much as jigsaw-puzzle
+ pieces.
+ To make it painfully obvious, some figures:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed-puzzle.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+ 
+\begin_inset space \hspace{}
+\length 15col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/puzzle-vector.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The explicit labels in the figures above have no particular meaning for
+ this text; rather, keep in mind the general notion of jigsaw-puzzle pieces
+ for the remainder of this text.
+\end_layout
+
+\begin_layout Standard
+Then, quoting directly from the Wikipedia article on mereology, we can can
+ learn that the notions of restricted compositionality include:
+\end_layout
+
+\begin_layout Description
+Contact — that a complex object Y is composed of X's if and only if the
+ X's are in contact.
  
 \emph on
 viz.
  
 \emph default
-seeds attach only if they can be connected.
+that thing which we defined as a seed in the previous chapter (XXX cross-ref)
+ attach only if they can be connected.
 \end_layout
 
-\begin_layout Itemize
-Fastenation—the X's compose a complex Y if and only if the X's are fastened.
+\begin_layout Description
+Fastenation — the X's compose a complex Y if and only if the X's are fastened.
  
 \emph on
 viz.
@@ -363,8 +523,8 @@ viz.
  Once mated, they are fastened together.
 \end_layout
 
-\begin_layout Itemize
-Cohesion—the X's compose a complex Y if and only if the X's cohere (cannot
+\begin_layout Description
+Cohesion — the X's compose a complex Y if and only if the X's cohere (cannot
  be pulled apart or moved in relation to each other without breaking).
  The point of connectors is that they are not meant to be pulled apart,
  once mated.
@@ -411,8 +571,8 @@ algebraic topology
 
 \end_layout
 
-\begin_layout Itemize
-Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
+\begin_layout Description
+Fusion — the X's compose a complex Y if and only if the X's are fused (fusion
  is when the X's are joined together such that there is no boundary).
  Connectors, once connected, serve no further purpose, and are discarded.
  What mattered was the bond that was made.
@@ -440,9 +600,9 @@ deconstruction is not analysis
 
 \end_layout
 
-\begin_layout Itemize
-Brutal Composition—"It's just the way things are." There is no true, nontrivial,
- and finitely long answer.
+\begin_layout Description
+Brutal Composition — "It's just the way things are." There is no true, nontrivial
+, and finitely long answer.
 \end_layout
 
 \begin_layout Standard
