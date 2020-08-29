@@ -234,6 +234,64 @@ things that can participate in relationships
 \end_layout
 
 \begin_layout Subsection*
+Relational algebras
+\end_layout
+
+\begin_layout Standard
+Removing the term algebra but keeping the relations results in a 
+\begin_inset Quotes eld
+\end_inset
+
+relational algebra
+\begin_inset Quotes erd
+\end_inset
+
+, with examples of relations being 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+part-of
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Limiting oneself to a single part-whole relationship, one arrives at mereology
+ as a possible alternative to set theory as a foundation for mathematics.
+ But one also arrives the the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+gunk
+\begin_inset Quotes erd
+\end_inset
+
+ in philosophy (that, roughly speaking, infinite recursion is possible,
+ when considering the structure of physical reality), as well as a number
+ of puzzles dating to Ancient Greece (the Ship of Theseus: what happens
+ when parts are replaced? The Statue and the Lump of Clay: what happens
+ when parts are rearranged?).
+ That there are such puzzles is perhaps endemic to the desire to apply part-whol
+e relationships, and the adduced DAG partial orders as a fundamental ground
+ on which to build philosophical discussions.
+\end_layout
+
+\begin_layout Subsection*
 Mereology
 \end_layout
 

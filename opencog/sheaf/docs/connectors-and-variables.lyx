@@ -1335,284 +1335,31 @@ compositional
  is immaterial: one obtains the same figure, no matter what the sequence.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 In philosophy:
 \end_layout
 
 \begin_layout Standard
-The paradoxes of mereology were touched on in the previous section: the
- difficulty of defining part-whole relationships in a consistent manner,
- the problem of the existence or non-existence of 
-\begin_inset Quotes eld
-\end_inset
-
-gunk
-\begin_inset Quotes erd
-\end_inset
-
-, and even the puzzles from Ancient Greece (the Ship of Theseus, 
-\emph on
-etc
-\emph default
-.) One proposed solution to these riddles is the notion of 
-\begin_inset Quotes eld
-\end_inset
-
-restricted composition
-\begin_inset Quotes erd
-\end_inset
-
- (see Wikipedia).
- The idea is that 
-\begin_inset Quotes eld
-\end_inset
-
-things
-\begin_inset Quotes erd
-\end_inset
-
- are still composed of 
-\begin_inset Quotes eld
-\end_inset
-
-other things
-\begin_inset Quotes erd
-\end_inset
-
-, but the manner in which these can be composed is restricted.
- The body of ideas is very nearly identical to the concept of sheaves.
- Quoting directly from the Wikipedia article on mereology, we can can learn
- that these are:
-\end_layout
-
-\begin_layout Itemize
-Contact—that a complex object Y is composed of X's if and only if the X's
- are in contact.
+The paradoxes of mereology were touched on in the section onb relational
+ algebras.
+ For an extended discussion of the philsophical issues, see the text titiled
  
-\emph on
-viz.
- 
-\emph default
-seeds attach only if they can be connected.
-\end_layout
-
-\begin_layout Itemize
-Fastenation—the X's compose a complex Y if and only if the X's are fastened.
- 
-\emph on
-viz.
-
-\emph default
- seeds attach only if the connectors allow mating.
- Once mated, they are fastened together.
-\end_layout
-
-\begin_layout Itemize
-Cohesion—the X's compose a complex Y if and only if the X's cohere (cannot
- be pulled apart or moved in relation to each other without breaking).
- The point of connectors is that they are not meant to be pulled apart,
- once mated.
- Insofar as the above abstract definition of a sheaf failed to appeal to
- and forced order of the connectors, or to the length of the edges, the
- concept of 
 \begin_inset Quotes eld
 \end_inset
 
-movement
+Mereology and Postmodernism
 \begin_inset Quotes erd
 \end_inset
 
- remains incomplete
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-This can be repaired in a variety of ways.
- In practical applications, it is convenient to order the edges, and to
- give them weights.
- These weights can sometimes act as distances, e.g.
- in 
-\begin_inset Formula $N$
-\end_inset
-
--dimensional space.
- Furthermore, the branch of mathematics known as 
+, in 
 \begin_inset Quotes eld
 \end_inset
 
-algebraic topology
+mereology.pdf
 \begin_inset Quotes erd
 \end_inset
 
- is very highly developed, and can provide very explicit and concrete statements
- about the structure of space.
- For example, the dimensionality of the embedding of the network is given
- by the degree of the largest simplicial complex in the network.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
- is when the X's are joined together such that there is no boundary).
- Connectors, once connected, serve no further purpose, and are discarded.
- What mattered was the bond that was made.
- In this sense, the bonds are the fusion of connectors.
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-This is reminiscent of Derridas statement that 
-\begin_inset Quotes eld
-\end_inset
-
-deconstruction is not analysis
-\begin_inset Quotes erd
-\end_inset
-
-.
- One cannot break up meaning into atomic parts; there are no self-sufficient
- atomic parts of meaning.
- Meaning derives only from the fusion of words into text and into language.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Brutal Composition—"It's just the way things are." There is no true, nontrivial,
- and finitely long answer.
-\end_layout
-
-\begin_layout Standard
-The last point is perhaps the most interesting notion coming out of restricted
- composition.
- It is not an ingredient, it is rather a consequence.
- If one abandons the explicit DAGs of partial orders, one then also abandons
- the notion of logical predicates and truth assignments.
- One no longer arranges logical connectives into a tree structure, or even
- into Horn clauses.
- The network, rather, represents things 
-\begin_inset Quotes eld
-\end_inset
-
-as they are
-\begin_inset Quotes erd
-\end_inset
-
-.
- This is not to deny predicate logic, or Boolean satisfiability: these are
- tremendously useful concepts.
- Rather, this is to avoid the symbol grounding problem (ref Wikipedia, again).
- By discarding the arrow from 
-\begin_inset Quotes eld
-\end_inset
-
-signifier
-\begin_inset Quotes erd
-\end_inset
-
- to 
-\begin_inset Quotes eld
-\end_inset
-
-significand
-\begin_inset Quotes erd
-\end_inset
-
-, one can no longer peer into the gaping chasm of the question 
-\begin_inset Quotes eld
-\end_inset
-
-what does this symbol mean?
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This is very much in line with theories of postmodernism and deconstruction
- evident in the works of Derrida,
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-The différance of Derrida can be seen as a rejection of the linguistic equivalen
-t of mereological nihilism: there is no infinite regression of looking up
- the meanings of words in a dictionary.
-\end_layout
-
-\end_inset
-
- Deleuze, Lyotard.
- There is no difference between appearance and true form; the difference
- is undecidable.
- The constructed network of connections and relations is all there is.
-\end_layout
-
-\begin_layout Standard
-In the following sections, the sheaf construction will be used as a tool
- to create A(G)I representations of reality.
- Whether the constructed network is an accurate representation of reality
- is undecidable, and this is true even in a narrow formal sense.
- Famously, it is known that the question of whether two different presentations
- of a (group-theoretical) group refer to the same group is undecidable,
- in the computational sense: there is no algorithm, guaranteed to terminate
- in finite time, that is capable of making this decision.
- This is the undecidability problem in group theory.
- That this result carries over into the fullness of a network built from
- a sheaf should come as no surprise: the presentation of a group is little
- more than a certain collection of labeled vertexes and edges (the group
- elements and the group operations) and decidability requires the graph-rewritin
-g of these into a different form.
- There are no graph rewrite rules that can always bring two different presentati
-ons into normal form.
- Oddly enough, such 
-\begin_inset Quotes eld
-\end_inset
-
-received wisdom
-\begin_inset Quotes erd
-\end_inset
-
- from mathematics can be used as a foundational cornerstone for post-modernism.
- This is unexpected.
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-Despite this, sheaves are still somehow fundamentally 
-\begin_inset Quotes eld
-\end_inset
-
-structuralist
-\begin_inset Quotes erd
-\end_inset
-
-, not post-structuralist.
- The bonds are relational, in the end.
- There is always still a predicate: either an edge exists, or it doesn't.
- To every graph there is a corresponding adjacency matrix, populated with
- zeroes and ones.
- Fortunately, one can wriggle ones way out if this, by assigning numerical
- weights to edges, making some probable and some improbable.
- Whether true and false can be replaced by a subobject classifier in this
- context is perhaps a step too far, but perhaps also an interesting step.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-A more explicit bridge can be constructed via linguistics, in the following.
+ in this directory.
 \end_layout
 
 \begin_layout Section*
