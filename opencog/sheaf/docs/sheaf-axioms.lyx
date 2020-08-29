@@ -1,0 +1,280 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Topological Spaces and Sheaf Axioms
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+29 August 2020
+\end_layout
+
+\begin_layout Abstract
+This chapter presents the conventional (pre-)sheaf axioms and then demonstrates
+ how these describe the graphical/tensor structures that are the primary
+ topic of this series of chapters.
+\end_layout
+
+\begin_layout Abstract
+This is a part of a sequence of articles exploring inter-related ideas;
+ it is meant to provide details for a broader context.
+ The current working title for the broader text is 
+\begin_inset Quotes eld
+\end_inset
+
+Connectors and Variables
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Pre-sheaves
+\end_layout
+
+\begin_layout Standard
+This text reviews the concept of a pre-sheaves and sheaves, starting from
+ the conventional definition, and then demonstrating how this applies to
+ the system of knowledge representation being developed in these texts.
+ It is primarily an exercise in examining the axioms using different kinds
+ of notation, as notational differences appear to present one of the primary
+ stumbling blocks to the development of AGI.
+\end_layout
+
+\begin_layout Standard
+The conventional definition of a (pre-)sheaf begins as follows: Let 
+\begin_inset Formula $X$
+\end_inset
+
+ be a topological space and let 
+\begin_inset Formula $C$
+\end_inset
+
+ be a category.
+ A presheaf 
+\begin_inset Formula $F$
+\end_inset
+
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+ is a functor with values in 
+\begin_inset Formula $C$
+\end_inset
+
+ having a certain set of properties ...
+ (to be reviewed below).
+ The conception of 
+\begin_inset Quotes eld
+\end_inset
+
+seeds
+\begin_inset Quotes erd
+\end_inset
+
+ being advanced here play the role of a topological space; this is the primary
+ driver of much of the mathematical machinery.
+ Thus, the re review here starts with topological spaces.
+\end_layout
+
+\begin_layout Subsection*
+Topological space
+\end_layout
+
+\begin_layout Standard
+Here is a single seed, again, and a pair of connected seeds, and a hedge-hog:
+ four interconnected seeds.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed-unlabelled.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 15col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/seeds-two.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 15col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/hedgehog.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These begin to look like the open sets of a topology, if one considers the
+ open circles to be the 
+\begin_inset Quotes eld
+\end_inset
+
+open
+\begin_inset Quotes erd
+\end_inset
+
+ boundary of the set, and the black circles to be the interior.
+\end_layout
+
+\begin_layout Subsection*
+Presheaf axioms
+\end_layout
+
+\begin_layout Standard
+The conventional definition begins as follows.
+ Let 
+\begin_inset Formula $X$
+\end_inset
+
+ be a topological space and let 
+\begin_inset Formula $C$
+\end_inset
+
+ be a category.
+ A presheaf 
+\begin_inset Formula $F$
+\end_inset
+
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+ is a functor with values in 
+\begin_inset Formula $C$
+\end_inset
+
+ having a certain set of properties, to be reviewed below.
+ They will map onto the concept of seeds, primarily because the seeds themselves
+ can be organized into a kind of topological space.
+ This alone is worth reviewing.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

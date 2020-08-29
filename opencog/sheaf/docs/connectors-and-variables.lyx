@@ -1414,6 +1414,15 @@ Sheaf Axioms:
 
 \begin_layout Standard
 It obeys the sheaf axioms.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf-axioms.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
 \end_layout
 
 \begin_layout Subsubsection*
