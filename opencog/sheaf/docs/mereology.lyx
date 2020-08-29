@@ -466,7 +466,7 @@ To recap, here is a seed:
 \begin_inset Graphics
 	filename graphics/seed-unlabelled.eps
 	lyxscale 60
-	width 25col%
+	width 15col%
 
 \end_inset
 
@@ -486,7 +486,7 @@ Think of it as a burr, the black dot in the center being the seed; the white
 \begin_inset Graphics
 	filename graphics/seed-puzzle.eps
 	lyxscale 60
-	width 25col%
+	width 20col%
 
 \end_inset
 
@@ -499,7 +499,7 @@ Think of it as a burr, the black dot in the center being the seed; the white
 \begin_inset Graphics
 	filename graphics/puzzle-vector.eps
 	lyxscale 60
-	width 25col%
+	width 30col%
 
 \end_inset
 
