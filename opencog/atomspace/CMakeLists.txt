@@ -39,7 +39,6 @@ INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
-	BackingStore.h
 	Transient.h
 	TypeIndex.h
 	version.h

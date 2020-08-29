@@ -26,13 +26,14 @@
 #include <time.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/Transient.h>
 
 #include <opencog/atoms/container/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/Satisfier.h>
+
+#include <opencog/persist/api/BackingStore.h>
 
 // This is in a C file, not a header file,
 // because no else one should touch this.

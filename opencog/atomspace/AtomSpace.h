@@ -31,7 +31,7 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/persist/api/BackingStore.h>
 
 class BasicSaveUTest;
 

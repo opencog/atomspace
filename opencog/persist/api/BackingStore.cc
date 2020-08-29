@@ -21,7 +21,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/persist/api/BackingStore.h>
 
 using namespace opencog;
 
