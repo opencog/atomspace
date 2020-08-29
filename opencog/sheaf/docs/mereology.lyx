@@ -508,8 +508,8 @@ Contact — that a complex object Y is composed of X's if and only if the
 viz.
  
 \emph default
-that thing which we defined as a seed in the previous chapter (XXX cross-ref)
- attach only if they can be connected.
+that seeds may attach only if they are sufficeintly close to one-another
+ to become connectable.
 \end_layout
 
 \begin_layout Description
@@ -528,9 +528,9 @@ Cohesion — the X's compose a complex Y if and only if the X's cohere (cannot
  be pulled apart or moved in relation to each other without breaking).
  The point of connectors is that they are not meant to be pulled apart,
  once mated.
- Insofar as the above abstract definition of a sheaf failed to appeal to
- and forced order of the connectors, or to the length of the edges, the
- concept of 
+ Insofar as the abstract definition of a sheaf given in earlier sections
+ failed to appeal to and force any order of the connectors, or to the length
+ of the edges, the concept of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -538,7 +538,7 @@ movement
 \begin_inset Quotes erd
 \end_inset
 
- remains incomplete
+ remains incomplete.
 \begin_inset Foot
 status open
 
@@ -581,7 +581,7 @@ Fusion — the X's compose a complex Y if and only if the X's are fused (fusion
 status open
 
 \begin_layout Plain Layout
-This is reminiscent of Derridas statement that 
+This is reminiscent of Derrida's statement that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -601,8 +601,12 @@ deconstruction is not analysis
 \end_layout
 
 \begin_layout Description
-Brutal Composition — "It's just the way things are." There is no true, nontrivial
-, and finitely long answer.
+Brutal
+\begin_inset space \space{}
+\end_inset
+
+Composition — "It's just the way things are." There is no true, nontrivial,
+ and finitely long answer.
 \end_layout
 
 \begin_layout Standard
@@ -652,9 +656,13 @@ what does this symbol mean?
 
 \end_layout
 
+\begin_layout Subsection*
+Postmodernism
+\end_layout
+
 \begin_layout Standard
-This is very much in line with theories of postmodernism and deconstruction
- evident in the works of Derrida,
+These last observations are very much in line with theories of postmodernism
+ and deconstruction evident in the works of Derrida,
 \begin_inset Foot
 status open
 
@@ -670,10 +678,37 @@ t of mereological nihilism: there is no infinite regression of looking up
  There is no difference between appearance and true form; the difference
  is undecidable.
  The constructed network of connections and relations is all there is.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+In this sense, it is also a rejection of Searle's 
+\begin_inset Quotes eld
+\end_inset
+
+Chinese Rom
+\begin_inset Quotes erd
+\end_inset
+
+: there is no additional meaning beyond the vacant activity of the mindless
+ drones performing algorithmic actions.
+ That is all that there is, nothing more.
+ For Searle to pretend that there is something more to meaning, language
+ and translation is effectively an appeal to the existance of some sort
+ of magical metaphysical quintessence of language that simply is not there.
+ Words have meaning insofar as they related to each other; a bad translation
+ rendered by a mindless Chinese Room is nothing more than a bad translation.
+ The Chinese Room neithr demonstrates the existence of intelligence, nor
+ the absence of it.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-In the following sections, the sheaf construction will be used as a tool
+In the remaining chapters, the sheaf construction will be used as a tool
  to create A(G)I representations of reality.
  Whether the constructed network is an accurate representation of reality
  is undecidable, and this is true even in a narrow formal sense.
@@ -728,7 +763,8 @@ structuralist
 \end_layout
 
 \begin_layout Standard
-A more explicit bridge can be constructed via linguistics, in the following.
+Much of postmodernism is concerned with lingusitics.
+ This is more directly attacked in the subsequent chapters.
 \end_layout
 
 \begin_layout Standard
