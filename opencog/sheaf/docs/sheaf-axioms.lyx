@@ -492,11 +492,11 @@ Any arbitrary (finite or infinite) union of members of
 \end_inset
 
 union
-\emph default
-
 \begin_inset Quotes erd
 \end_inset
 
+
+\emph default
 , here.
  There are two warring senses.
  In one sense, the word 
@@ -553,6 +553,15 @@ glue them together if you can
  Take, for example, a Venn diagram shown to elementary-school students:
  the union is always the gluing-together, the overlapping bits being the
  joint.
+ The overlapping bits are mashed together: this is the 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of set theory: it is a gluing-together of the common, shared parts.
 \end_layout
 
 \begin_layout Itemize
@@ -576,7 +585,7 @@ The intersection of any finite number of members of
 \end_inset
 
  The reader was already invited to think of taking scissors to the mesh
- to disconnect it, and also of gluing togehter pieces.
+ to disconnect it, and also of gluing together pieces.
  How, exactly, can the word 
 \begin_inset Quotes eld
 \end_inset
@@ -585,11 +594,109 @@ intersection
 \begin_inset Quotes erd
 \end_inset
 
- be interpreted?
+ be interpreted? The intent is that it be read in the intuitively-obvious
+ sense.
+ If we have two fragments of a mesh, and they have points and links in common,
+ then the intersection are those points and links that are in common between
+ those two fragments.
+ Cut edges then become open connectors: as always, a connector is a 
+\begin_inset Quotes eld
+\end_inset
+
+half-edge
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+The elements of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ are called 
+\series bold
+\shape italic
+\emph default
+open sets
+\series default
+\shape default
+\emph on
+ and the collection 
+\begin_inset Formula $\tau$
+\end_inset
+
+ is called a 
+\series bold
+\shape slanted
+topology
+\series default
+\shape default
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes eld
+\end_inset
+
+ That is the conclusion, with emphasis in the orginal.
 \end_layout
 
 \begin_layout Standard
-w
+It would appear that a mesh: that is, a graph whose edges can be scissored
+ into half-edges aka connectors forms a topology, in that it obeys the axioms
+ of a topology (ignoring the fact that hedge-hogs are not actually sets).
+ This is meant to be self-evident, so that it becomes straight-forward to
+ develop notational devices.
+ For example, given a hedgehog 
+\begin_inset Formula $U,$
+\end_inset
+
+the boundary 
+\begin_inset Formula $\partial U$
+\end_inset
+
+ of 
+\begin_inset Formula $U$
+\end_inset
+
+ is the collection of connectors on 
+\begin_inset Formula $U$
+\end_inset
+
+ that have not been connected up, yet.
+ The interior then are the vertexes that are fully connected (and so also,
+ the edges connecting them.)
+\end_layout
+
+\begin_layout Standard
+Of course, the mesh is a fair bit richer than the set: the edges are meant
+ to be typed, whereas in set theory, all sets have the same type: set theory
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+simply typed
+\begin_inset Quotes erd
+\end_inset
+
+, there is only one type, and that is the type of the set.
+\end_layout
+
+\begin_layout Standard
+At any rate, the goal here would seem to have been met: meshes can be made
+ to look like a topology.
+ This means that many of the mechanisms and concepts intended for topologies
+ can be carried forward, transported and applied to meshes.
 \end_layout
 
 \begin_layout Subsection*
@@ -619,10 +726,107 @@ The conventional definition begins as follows.
 \begin_inset Formula $C$
 \end_inset
 
- having a certain set of properties, to be reviewed below.
- They will map onto the concept of seeds, primarily because the seeds themselves
- can be organized into a kind of topological space.
- This alone is worth reviewing.
+ having the following properties (quoted from Wikipedia):
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For each open set 
+\begin_inset Formula $U$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+, there corresponds an object 
+\begin_inset Formula $F\left(U\right)$
+\end_inset
+
+ in 
+\begin_inset Formula $C$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For each inclusion of open sets 
+\begin_inset Formula $V\subseteq U$
+\end_inset
+
+, there is a corresponding morphism 
+\begin_inset Formula $\mbox{res}_{V,U}:F\left(U\right)\to F\left(V\right)$
+\end_inset
+
+ in the category 
+\begin_inset Formula $C$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For every open set 
+\begin_inset Formula $U$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+, the restriction morphism 
+\begin_inset Formula $\mbox{res}_{U,U}:F\left(U\right)\to F\left(U\right)$
+\end_inset
+
+ is the identity morphism on 
+\begin_inset Formula $F\left(U\right)$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+If we have three open sets 
+\begin_inset Formula $W\subseteq V\subseteq U$
+\end_inset
+
+, then the composite 
+\begin_inset Formula $\mbox{res}_{W,V}\circ\mbox{res}_{V,U}$
+\end_inset
+
+ equals 
+\begin_inset Formula $\mbox{res}_{W,U}$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
