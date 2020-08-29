@@ -247,7 +247,7 @@ relational algebra
 \end_inset
 
  is a system in which one can define collections of things, and make statements
- about thier relationships to one-another.
+ about their relationships to one-another.
  Examples of relations are 
 \begin_inset Quotes eld
 \end_inset
@@ -278,7 +278,7 @@ part-of
 \begin_layout Standard
 Relations have several notable properties: they provide an ordering (something
  may have a part which may have a part...) and thus a hierarchy.
- Formally, such hierarchies are refered to as 
+ Formally, such hierarchies are referred to as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -296,6 +296,15 @@ al sense.
  One may write an entire book on the algebraic properties of relations;
  and indeed, more than a few hundred books have been written on the topic,
  to which the reader is invited to consult, for more information.
+ I recommend 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hodges1997"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -418,7 +427,15 @@ restricted composition
 \begin_inset Quotes erd
 \end_inset
 
- (see Wikipedia).
+ (see Wikipedia 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Mereology"
+literal "false"
+
+\end_inset
+
+).
  The idea is that 
 \begin_inset Quotes eld
 \end_inset
@@ -458,7 +475,7 @@ To recap, here is a seed:
 
 \begin_layout Standard
 Think of it as a burr, the black dot in the center being the seed; the white
- circles being unattached conectors.
+ circles being unattached connectors.
  The connectors may be typed, so that they attach much as jigsaw-puzzle
  pieces.
  To make it painfully obvious, some figures:
@@ -508,7 +525,7 @@ Contact — that a complex object Y is composed of X's if and only if the
 viz.
  
 \emph default
-that seeds may attach only if they are sufficeintly close to one-another
+that seeds may attach only if they are sufficiently close to one-another
  to become connectable.
 \end_layout
 
@@ -694,7 +711,7 @@ Chinese Rom
  drones performing algorithmic actions.
  That is all that there is, nothing more.
  For Searle to pretend that there is something more to meaning, language
- and translation is effectively an appeal to the existance of some sort
+ and translation is effectively an appeal to the existence of some sort
  of magical metaphysical quintessence of language that simply is not there.
  Words have meaning insofar as they related to each other; a bad translation
  rendered by a mindless Chinese Room is nothing more than a bad translation.
@@ -763,7 +780,7 @@ structuralist
 \end_layout
 
 \begin_layout Standard
-Much of postmodernism is concerned with lingusitics.
+Much of postmodernism is concerned with linguistics.
  This is more directly attacked in the subsequent chapters.
 \end_layout
 

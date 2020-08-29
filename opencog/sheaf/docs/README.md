@@ -14,6 +14,11 @@ There are several files here:
   length, it is split into bite-sized chapters. The chapters are currently,
   in serial order:
 
+** [mereology.pdf](mereology.pdf) discusses the relationship of the
+   connector-and-sheaf viewpoint to the philosophical notions of mereology
+   and postmodernism.
+
 ** [tensors.pdf](tensors.pdf) defines a generalized tensor as an algebraic
    object. It is meant to formalize earlier statements, while still being
    readable and approachable.
+
