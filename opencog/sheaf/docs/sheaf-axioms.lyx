@@ -830,6 +830,64 @@ If we have three open sets
 \end_layout
 
 \begin_layout Standard
+These are rather abstract statements; before they can be given a concrete
+ meaning, an exploration of what the category 
+\begin_inset Formula $C$
+\end_inset
+
+ might be is required.
+ Since, again, the task at hand is that of providing meaning, the category
+ 
+\begin_inset Formula $C$
+\end_inset
+
+ can be taken to be 
+\begin_inset Quotes eld
+\end_inset
+
+the category of meanings
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But what is a meaning? To prevent the discussion from devolving into abstract
+ nonsense, it is best to make 
+\begin_inset Formula $C$
+\end_inset
+
+ concrete.
+\end_layout
+
+\begin_layout Standard
+To that end, a suitable example might be the vectorial/tensorial meanings
+ provided by word-sense disambiguation (
+\emph on
+e.g.
+
+\emph default
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+Mihalcea algorithm
+\begin_inset Quotes erd
+\end_inset
+
+), or the compositional concept of meaning that is commonly invoked in artificia
+l neural nets (
+\emph on
+e.g.
+
+\emph default
+ Skipgram models of language.)
+\end_layout
+
+\begin_layout Standard
+To recap these two different models of meaning ...
+ (is this wise here or does this belong in a different chapter?)
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
