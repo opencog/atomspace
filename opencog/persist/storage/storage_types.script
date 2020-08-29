@@ -1,0 +1,17 @@
+//
+// Script for automatic "storage atom type" generation. This defines
+// a collection of types suitable for defining distributed storage
+// interconnects.
+//
+// The base type for all storage nodes
+STORAGE_NODE <- NODE
+//
+// Specific storage nodes. Most of these are implemented in other git
+// repos, and not here. Look for git repos called "atomspace-xxx" for
+// approrpiate values of "xxx".
+POSTGRES_STORAGE_NODE <- STORAGE_NODE
+ROCKSDB_STORAGE_NODE <- STORAGE_NODE
+COGSERVER_STORAGE_NODE <- STORAGE_NODE
+//
+// There is no IPFS_STORAGE_NODE nore DHT_STORAGE_NODE because these
+// are currently deeply, fundamentally broken. Whoops!
