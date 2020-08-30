@@ -50,7 +50,6 @@ using namespace opencog;
  * are festooned with.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    AtomSpaceComms(this),
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _read_only(false),
     _copy_on_write(transient)

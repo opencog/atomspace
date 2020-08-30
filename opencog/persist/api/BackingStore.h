@@ -278,12 +278,6 @@ class BackingStore
 		}
 };
 
-class StorageNode: public Node, public BackingStore
-{
-	public:
-		StorageNode(Type, const std::string);
-};
-
 /** @}*/
 } //namespace opencog
 

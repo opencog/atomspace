@@ -3,6 +3,7 @@ ADD_LIBRARY (persist
 	BackingQuery.cc
 	BackingStore.cc
 	PersistSCM.cc
+	StorageNode.cc
 )
 
 TARGET_LINK_LIBRARIES(persist
@@ -19,5 +20,6 @@ INSTALL (TARGETS persist EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	BackingStore.h
+	StorageNode.h
    DESTINATION "include/opencog/persist/api"
 )

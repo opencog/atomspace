@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AtomSpaceComms.h
+ * opencog/persist/api/StorageNode.h
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
@@ -22,9 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ATOMSPACE_COMMS_H
-#define _OPENCOG_ATOMSPACE_COMMS_H
+#ifndef _OPENCOG_STORAGE_NODE_H
+#define _OPENCOG_STORAGE_NODE_H
 
+#include <opencog/atoms/base/Node.h>
 #include <opencog/persist/api/BackingStore.h>
 
 namespace opencog
@@ -32,7 +33,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class AtomSpaceComms
+class StorageNode
 {
 protected:
 	AtomSpace* _as;
@@ -53,8 +54,8 @@ public:
 	bool isAttachedToBackingStore();
 
 public:
-	AtomSpaceComms(AtomSpace*);
-	~AtomSpaceComms();
+	StorageNode(Type, std::string);
+	~StorageNode();
 
 	/**
 	 * Make sure all atom writes have completed, before returning.
@@ -207,4 +208,4 @@ public:
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_ATOMSPACE_COMMS_H
+#endif // _OPENCOG_STORAGE_NODE_H

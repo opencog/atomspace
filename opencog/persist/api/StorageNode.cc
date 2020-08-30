@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AtomSpaceComms.cc
+ * opencog/persist/ati/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
  * Copyright (c) 2009, 2013,2020 Linas Vepstas
@@ -23,31 +23,31 @@
 
 #include <string>
 
-#include "AtomSpace.h"
-#include "AtomSpaceComms.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include "StorageNode.h"
 
 using namespace opencog;
 
 // ====================================================================
 
-AtomSpaceComms::AtomSpaceComms(AtomSpace* as) :
+StorageNode::StorageNode(AtomSpace* as) :
 	_as(as),
 	_atom_table(as->get_atomtable()),
 	_backing_store(nullptr)
 {
 }
 
-AtomSpaceComms::~AtomSpaceComms()
+StorageNode::~StorageNode()
 {
 }
 
-bool AtomSpaceComms::isAttachedToBackingStore()
+bool StorageNode::isAttachedToBackingStore()
 {
 	if (nullptr != _backing_store) return true;
 	return false;
 }
 
-void AtomSpaceComms::registerBackingStore(BackingStore *bs)
+void StorageNode::registerBackingStore(BackingStore *bs)
 {
 	if (isAttachedToBackingStore())
 		throw RuntimeException(TRACE_INFO,
@@ -56,7 +56,7 @@ void AtomSpaceComms::registerBackingStore(BackingStore *bs)
 	_backing_store = bs;
 }
 
-void AtomSpaceComms::unregisterBackingStore(BackingStore *bs)
+void StorageNode::unregisterBackingStore(BackingStore *bs)
 {
 	if (not isAttachedToBackingStore())
 		throw RuntimeException(TRACE_INFO,
@@ -67,13 +67,13 @@ void AtomSpaceComms::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-void AtomSpaceComms::barrier(void)
+void StorageNode::barrier(void)
 {
 	_atom_table.barrier();
 	if (_backing_store) _backing_store->barrier();
 }
 
-void AtomSpaceComms::store_atom(const Handle& h)
+void StorageNode::store_atom(const Handle& h)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -84,7 +84,7 @@ void AtomSpaceComms::store_atom(const Handle& h)
 	_backing_store->storeAtom(h);
 }
 
-void AtomSpaceComms::store_value(const Handle& h, const Handle& key)
+void StorageNode::store_value(const Handle& h, const Handle& key)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -95,7 +95,7 @@ void AtomSpaceComms::store_value(const Handle& h, const Handle& key)
 	_backing_store->storeValue(h, key);
 }
 
-bool AtomSpaceComms::remove_atom(Handle h, bool recursive)
+bool StorageNode::remove_atom(Handle h, bool recursive)
 {
     // Removal of atoms from read-only databases is not allowed.
     // It is OK to remove atoms from a read-only atomspace, because
@@ -106,7 +106,7 @@ bool AtomSpaceComms::remove_atom(Handle h, bool recursive)
     return 0 < _atom_table.extract(h, recursive).size();
 }
 
-Handle AtomSpaceComms::fetch_atom(const Handle& h)
+Handle StorageNode::fetch_atom(const Handle& h)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -124,7 +124,7 @@ Handle AtomSpaceComms::fetch_atom(const Handle& h)
 	return ah;
 }
 
-Handle AtomSpaceComms::fetch_value(const Handle& h, const Handle& key)
+Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -139,7 +139,7 @@ Handle AtomSpaceComms::fetch_value(const Handle& h, const Handle& key)
 	return lh;
 }
 
-Handle AtomSpaceComms::fetch_incoming_set(const Handle& h, bool recursive)
+Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -163,7 +163,7 @@ Handle AtomSpaceComms::fetch_incoming_set(const Handle& h, bool recursive)
 	return lh;
 }
 
-Handle AtomSpaceComms::fetch_incoming_by_type(const Handle& h, Type t)
+Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -181,7 +181,7 @@ Handle AtomSpaceComms::fetch_incoming_by_type(const Handle& h, Type t)
 	return lh;
 }
 
-Handle AtomSpaceComms::fetch_query(const Handle& query, const Handle& key,
+Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 							const Handle& metadata, bool fresh)
 {
 	if (nullptr == _backing_store)
@@ -206,7 +206,7 @@ Handle AtomSpaceComms::fetch_query(const Handle& query, const Handle& key,
 	return lq;
 }
 
-void AtomSpaceComms::load_atomspace(void)
+void StorageNode::load_atomspace(void)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
@@ -216,14 +216,14 @@ void AtomSpaceComms::load_atomspace(void)
 /**
  * Use the backing store to store entire AtomSpace.
  */
-void AtomSpaceComms::store_atomspace(void)
+void StorageNode::store_atomspace(void)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");
 	_backing_store->storeAtomSpace(_atom_table);
 }
 
-void AtomSpaceComms::fetch_all_atoms_of_type(Type t)
+void StorageNode::fetch_all_atoms_of_type(Type t)
 {
 	if (nullptr == _backing_store)
 		throw RuntimeException(TRACE_INFO, "No backing store");

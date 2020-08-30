@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
-	AtomSpaceComms.cc
 	AtomTable.cc
 	Transient.cc
 	TypeIndex.cc
@@ -39,7 +38,6 @@ INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AtomSpace.h
-	AtomSpaceComms.h
 	AtomTable.h
 	Transient.h
 	TypeIndex.h
