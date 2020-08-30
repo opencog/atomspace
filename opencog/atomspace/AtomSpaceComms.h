@@ -35,6 +35,9 @@ namespace opencog
 class AtomSpaceComms
 {
 protected:
+    AtomSpace* _as;
+    AtomTable& _atom_table;
+
     /**
      * Used to fetch atoms from disk.
      */
@@ -50,8 +53,8 @@ public:
     bool isAttachedToBackingStore();
 
 public:
-    AtomSpaceComms(void) : _backing_store(nullptr) {}
-    ~AtomSpaceComms() {}
+    AtomSpaceComms(AtomSpace*);
+    ~AtomSpaceComms();
 
     /**
      * Make sure all atom writes have completed, before returning.

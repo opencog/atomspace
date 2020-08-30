@@ -52,6 +52,7 @@ class AtomSpace : public AtomSpaceComms
 {
     friend class Atom;               // Needs to call get_atomtable()
     friend class BackingStore;
+    friend class AtomSpaceComms;
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class UuidSCM;            // Needs to call get_atomtable()
