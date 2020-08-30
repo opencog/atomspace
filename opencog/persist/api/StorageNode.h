@@ -38,7 +38,52 @@ class StorageNode : public Node, protected BackingStore
 {
 public:
 	StorageNode(Type, std::string);
-	~StorageNode();
+	virtual ~StorageNode();
+
+
+	// ----------------------------------------------------------------
+	// Operations regarding the connection to the remote URI.
+	/**
+	 * Open a connection to the indicated URI.
+	 */
+	virtual void open(void) = 0;
+
+	/**
+	 * Cloase an active, ppen a connection to the indicated URI.
+	 */
+	virtual void close(void) = 0;
+
+	/**
+	 * Return true if the connection to the remote end appears to
+	 * be established and functioning.
+	 */
+	virtual bool connected(void) = 0;
+
+	/**
+	 * Initialize storage at the remote end. There must already be
+	 * an open connection to the remote end; and the remote end must
+	 * be vacant or empty.  For example: for an SQL server, this can
+	 * be used to create the database, the tables in the database for
+	 * the first time.
+	 */
+	virtual void create(void) = 0;
+
+	/**
+	 * Destroy the storage at the remote end. Empties the remote end of
+	 * data, and then undoes whaterver `create()` did. Remote ends might
+	 * not honor this request, e.g. if other clients have open
+	 * connections.
+	 */
+	virtual void destroy(void) = 0;
+
+	/**
+	 * Erase the entire contents of the remote end. Performs a bulk
+	 * deletion of all data.
+	 */
+	virtual void erase(void) = 0;
+
+	// ----------------------------------------------------------------
+	// Operations regarding specific atomspace contents.
 
 	/**
 	 * Make sure all atom writes have completed, before returning.
