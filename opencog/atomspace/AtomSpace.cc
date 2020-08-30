@@ -51,7 +51,6 @@ using namespace opencog;
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
-    _backing_store(nullptr),
     _read_only(false),
     _copy_on_write(transient)
 {
@@ -261,32 +260,6 @@ bool AtomSpace::operator!=(const AtomSpace& other) const
 
 // ====================================================================
 
-bool AtomSpace::isAttachedToBackingStore()
-{
-    if (nullptr != _backing_store) return true;
-    return false;
-}
-
-void AtomSpace::registerBackingStore(BackingStore *bs)
-{
-    if (isAttachedToBackingStore())
-        throw RuntimeException(TRACE_INFO,
-            "AtomSpace is already connected to a BackingStore.");
-
-    _backing_store = bs;
-}
-
-void AtomSpace::unregisterBackingStore(BackingStore *bs)
-{
-    if (not isAttachedToBackingStore())
-        throw RuntimeException(TRACE_INFO,
-            "AtomSpace is not connected to a BackingStore.");
-
-    if (bs == _backing_store) _backing_store = nullptr;
-}
-
-// ====================================================================
-
 Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
@@ -364,129 +337,6 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     }
     return vptr;
 }
-
-void AtomSpace::store_atom(const Handle& h)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    if (_read_only)
-        throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
-
-    _backing_store->storeAtom(h);
-}
-
-void AtomSpace::store_value(const Handle& h, const Handle& key)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    if (_read_only)
-        throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
-
-    _backing_store->storeValue(h, key);
-}
-
-Handle AtomSpace::fetch_atom(const Handle& h)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-    if (nullptr == h) return Handle::UNDEFINED;
-
-    // Now, get the latest values from the backing store.
-    // The operation here is to CLOBBER the values, NOT to merge them!
-    // The goal of an explicit fetch is to explicitly fetch the values,
-    // and not to play monkey-shines with them.  If you want something
-    // else, then save the old TV, fetch the new TV, and combine them
-    // with your favorite algo.
-    Handle ah = add_atom(h);
-    if (nullptr == ah) return ah; // if read-only, then cannot update.
-    _backing_store->getAtom(ah);
-    return ah;
-}
-
-Handle AtomSpace::fetch_value(const Handle& h, const Handle& key)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // Make sure we are working with Atoms in this Atomspace.
-    // Not clear if we really have to do this, or if its enough
-    // to just assume  that they are. Could save a few CPU cycles,
-    // here, by trading efficiency for safety.
-    Handle lkey = _atom_table.add(key);
-    Handle lh = _atom_table.add(h);
-    _backing_store->loadValue(lh, lkey);
-    return lh;
-}
-
-Handle AtomSpace::fetch_incoming_set(const Handle& h, bool recursive)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // Make sure we are working with Atoms in this Atomspace.
-    // Not clear if we really have to do this, or if its enough
-    // to just assume  that they are. Could save a few CPU cycles,
-    // here, by trading efficiency for safety.
-    Handle lh = get_atom(h);
-    if (nullptr == lh) return lh;
-
-    // Get everything from the backing store.
-    _backing_store->getIncomingSet(_atom_table, lh);
-
-    if (not recursive) return lh;
-
-    IncomingSet vh(h->getIncomingSet());
-    for (const Handle& lp : vh)
-        fetch_incoming_set(lp, true);
-
-    return lh;
-}
-
-Handle AtomSpace::fetch_incoming_by_type(const Handle& h, Type t)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // Make sure we are working with Atoms in this Atomspace.
-    // Not clear if we really have to do this, or if its enough
-    // to just assume  that they are. Could save a few CPU cycles,
-    // here, by trading efficiency for safety.
-    Handle lh = get_atom(h);
-    if (nullptr == lh) return lh;
-
-    // Get everything from the backing store.
-    _backing_store->getIncomingByType(_atom_table, lh, t);
-
-    return lh;
-}
-
-Handle AtomSpace::fetch_query(const Handle& query, const Handle& key,
-                            const Handle& metadata, bool fresh)
-{
-    if (nullptr == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // At this time, we restrict queries to be ... queries.
-    Type qt = query->get_type();
-    if (not nameserver().isA(qt, JOIN_LINK) and
-        not nameserver().isA(qt, PATTERN_LINK))
-        throw RuntimeException(TRACE_INFO, "Not a Join or Meet!");
-
-    // Make sure we are working with Atoms in this Atomspace.
-    // Not clear if we really have to do this, or if it's enough
-    // to just assume  that they are. Could save a few CPU cycles,
-    // here, by trading efficiency for safety.
-    Handle lkey = _atom_table.add(key);
-    Handle lq = _atom_table.add(query);
-    Handle lmeta = metadata;
-    if (Handle::UNDEFINED != lmeta) lmeta = _atom_table.add(lmeta);
-
-    _backing_store->runQuery(lq, lkey, lmeta, fresh);
-    return lq;
-}
-
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
