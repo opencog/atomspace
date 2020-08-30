@@ -491,7 +491,7 @@ void MultiPersistUTest::test_atomspace(void)
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     /* The clear above removed the node. Lets add it back in. */
-    Handle hsn = _as->add_atom(hsn);
+    Handle hsn = _as->add_atom(_store);
     _store = StorageNodeCast(hsn);
 
     int i, off;
