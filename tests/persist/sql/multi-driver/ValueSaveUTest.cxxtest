@@ -272,9 +272,9 @@ void ValueSaveUTest::do_test_single_atom_save()
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
-	as->store_atom(key);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(key);
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	// Now set some values
@@ -283,32 +283,32 @@ void ValueSaveUTest::do_test_single_atom_save()
 		                     3.09876543210987654e200}));
 
 	atom->setValue(key, pvf);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	atom->setValue(key, pvs);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvl = createLinkValue(
 		std::vector<ValuePtr>({pvf, pvs}));
 
 	atom->setValue(key, pvl);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvl2 = createLinkValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	atom->setValue(key, pvl2);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	store->kill_data();
@@ -336,14 +336,14 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	AtomSpace* as = new AtomSpace();
 	store->registerWith(as);
 
-	Handle key = as->fetch_atom(bkey);
-	Handle atom = as->fetch_atom(batom);
+	Handle key = store->fetch_atom(bkey);
+	Handle atom = store->fetch_atom(batom);
 	printf ("Setup atom %s\n", atom->to_string().c_str());
 	printf ("Vals %s\n", atom->valuesToString().c_str());
 
 	atom->setValue(key, pap);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	printf ("Stored atom %s\n", atom->to_string().c_str());
 	printf ("Stored vals %s\n", atom->valuesToString().c_str());
@@ -362,8 +362,8 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// Storage uses a different code path if the key is not yet
 	// known when the values are fetched.  Test this code path.
-	if (fetchkey) key = as->fetch_atom(bkey);
-	atom = as->fetch_atom(batom);
+	if (fetchkey) key = store->fetch_atom(bkey);
+	atom = store->fetch_atom(batom);
 
 	printf("Got atom %s\n", atom->to_string().c_str());
 	printf("Got vals %s\n", atom->valuesToString().c_str());
@@ -393,9 +393,9 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
-	as->store_atom(key);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(key);
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	// Now set some values
@@ -488,11 +488,11 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Save, and close things down.
-	as->store_atom(af);
-	as->store_atom(at);
-	as->store_atom(al);
-	as->store_atom(av);
-	as->barrier();
+	store->store_atom(af);
+	store->store_atom(at);
+	store->store_atom(al);
+	store->store_atom(av);
+	store->barrier();
 
 	delete as;
 	delete store;
@@ -509,8 +509,8 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
-	as->fetch_all_atoms_of_type(CONCEPT_NODE);
-	as->barrier();
+	store->fetch_all_atoms_of_type(CONCEPT_NODE);
+	store->barrier();
 
 	// Six: 4 ConceptNodes, the PredicateNode "*-TruthValueKey-*"
 	// and PredicateNode "some pred key" -- the two preds show up
@@ -649,11 +649,11 @@ void ValueSaveUTest::do_test_link_by_type()
 	// Save, and close things down.
 	// Note that this store will also *recursively* store the
 	// values on the outgoing atoms, as well.
-	as->store_atom(cf);
-	as->store_atom(ct);
-	as->store_atom(cl);
-	as->store_atom(cv);
-	as->barrier();
+	store->store_atom(cf);
+	store->store_atom(ct);
+	store->store_atom(cl);
+	store->store_atom(cv);
+	store->barrier();
 
 	delete as;
 	delete store;
@@ -681,8 +681,8 @@ void ValueSaveUTest::do_test_link_by_type()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	as->fetch_all_atoms_of_type(LIST_LINK);
-	as->barrier();
+	store->fetch_all_atoms_of_type(LIST_LINK);
+	store->barrier();
 	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 14);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
@@ -860,11 +860,11 @@ void ValueSaveUTest::do_test_incoming()
 	// Save, and close things down.
 	// Note that this store will also *recursively* store the
 	// values on the outgoing atoms, as well.
-	as->store_atom(cf);
-	as->store_atom(ct);
-	as->store_atom(cl);
-	as->store_atom(cv);
-	as->barrier();
+	store->store_atom(cf);
+	store->store_atom(ct);
+	store->store_atom(cl);
+	store->store_atom(cv);
+	store->barrier();
 
 	delete as;
 	delete store;
