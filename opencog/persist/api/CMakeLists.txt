@@ -21,5 +21,6 @@ INSTALL (TARGETS persist EXPORT AtomSpaceTargets
 INSTALL (FILES
 	BackingStore.h
 	StorageNode.h
+	PersistSCM.h
    DESTINATION "include/opencog/persist/api"
 )
