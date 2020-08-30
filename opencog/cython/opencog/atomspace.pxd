@@ -205,7 +205,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
 
         void clear()
-        bint remove_atom(cHandle h, bint recursive)
+        bint extract_atom(cHandle h, bint recursive)
 
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)

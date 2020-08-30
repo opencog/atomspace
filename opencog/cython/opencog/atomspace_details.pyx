@@ -169,7 +169,7 @@ cdef class AtomSpace:
         if self.atomspace == NULL:
             return None
         cdef bint recurse = recursive
-        return self.atomspace.remove_atom(deref(atom.handle),recurse)
+        return self.atomspace.extract_atom(deref(atom.handle),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
