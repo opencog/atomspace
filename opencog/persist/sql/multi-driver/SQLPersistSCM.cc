@@ -24,7 +24,8 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/api/BackingStore.h>
+#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/api/PersistSCM.h>
 #include <opencog/guile/SchemePrimitive.h>
 
 #include "SQLAtomStorage.h"
@@ -105,7 +106,7 @@ void SQLPersistSCM::do_open(const std::string& uri)
             "sql-open: Error: Unable to connect to the database");
     }
 
-    _storage->registerWith(_as);
+    PersistSCM::set_connection(_storage);
 }
 
 void SQLPersistSCM::do_close(void)
@@ -119,7 +120,8 @@ void SQLPersistSCM::do_close(void)
     // So unhook the atomspace first -- this will prevent new writes
     // from accidentally being queued. (It will also drain the queues)
     // Only then actually call the dtor.
-    _storage->unregisterWith(_as);
+    // XXX Above comment no longer applies, XXX FIXME; I think we need
+    // to remove _storage from the atomspace ??
     _storage = nullptr;
 }
 
