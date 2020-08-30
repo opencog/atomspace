@@ -240,12 +240,17 @@ class SQLAtomStorage : public StorageNode
 		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
 		void open(void);
+		void close(void) {}
 		void connect(void);
 		bool connected(void); // connection to DB is alive
 
 		void create_database(void); // create the database
 		void kill_data(void);       // destroy DB contents
 		void clear_cache(void);     // clear out the TLB.
+
+		void create(void) { create_database(); }
+		void destroy(void) { kill_data(); /* TODO also delete the db */ }
+		void erase(void) { kill_data(); }
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);

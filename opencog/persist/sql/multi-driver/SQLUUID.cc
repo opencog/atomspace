@@ -56,14 +56,10 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 		std::bind(&SQLAtomStorage::extract_callback, this,
 			std::placeholders::_1));
 #endif // NOT_NEEDED_RIGHT_NOW
-
-	BackingStore::registerWith(as);
 }
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
-	BackingStore::unregisterWith(as);
-
 	flushStoreQueue();
 	_tlbuf.clear_resolver(&as->get_atomtable());
 
