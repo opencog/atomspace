@@ -41,7 +41,7 @@
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/persist/api/BackingStore.h>
+#include <opencog/persist/api/StorageNode.h>
 
 #include "llapi.h"
 

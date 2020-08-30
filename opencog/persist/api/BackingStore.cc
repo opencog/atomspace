@@ -27,7 +27,22 @@ using namespace opencog;
 
 // ==========================================================
 
+void BackingStore::registerWith(AtomSpace* atomspace)
+{
+}
+
+void BackingStore::unregisterWith(AtomSpace* atomspace)
+{
+}
+
+// ==========================================================
+
 void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
+{
+	getIncomingSet(as->get_atomtable(), h);
+}
+
+void BackingStore::doGetIncomingSet(AtomSpace* as, const Handle& h)
 {
 	getIncomingSet(as->get_atomtable(), h);
 }

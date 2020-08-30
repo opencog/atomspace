@@ -250,6 +250,7 @@ class BackingStore
 
 	protected:
 		virtual void getIncomingSet(AtomSpace*, const Handle&);
+		virtual void doGetIncomingSet(AtomSpace*, const Handle&);
 		virtual void getIncomingByType(AtomSpace*, const Handle&, Type);
 
 		/**

@@ -47,7 +47,7 @@ StorageNode::~StorageNode()
 void StorageNode::barrier(void)
 {
 	getAtomTable()->barrier();
-	BackingStore::barrier();
+	barrier();
 }
 
 void StorageNode::store_atom(const Handle& h)
@@ -55,7 +55,7 @@ void StorageNode::store_atom(const Handle& h)
 	if (_atom_space->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
-	BackingStore::storeAtom(h);
+	storeAtom(h);
 }
 
 void StorageNode::store_value(const Handle& h, const Handle& key)
@@ -63,7 +63,7 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 	if (_atom_space->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
-	BackingStore::storeValue(h, key);
+	storeValue(h, key);
 }
 
 bool StorageNode::remove_atom(Handle h, bool recursive)
@@ -73,7 +73,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
     // it is acting as a cache for the database, and removal is used
     // used to free up RAM storage.
     if (not _atom_space->get_read_only())
-        BackingStore::removeAtom(h, recursive);
+        removeAtom(h, recursive);
     return 0 < getAtomTable()->extract(h, recursive).size();
 }
 
@@ -89,7 +89,7 @@ Handle StorageNode::fetch_atom(const Handle& h)
 	// with your favorite algo.
 	Handle ah = _atom_space->add_atom(h);
 	if (nullptr == ah) return ah; // if read-only, then cannot update.
-	BackingStore::getAtom(ah);
+	getAtom(ah);
 	return ah;
 }
 
@@ -101,7 +101,7 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
 	// here, by trading efficiency for safety.
 	Handle lkey = getAtomTable()->add(key);
 	Handle lh = getAtomTable()->add(h);
-	BackingStore::loadValue(lh, lkey);
+	loadValue(lh, lkey);
 	return lh;
 }
 
@@ -115,7 +115,7 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	BackingStore::getIncomingSet(*getAtomTable(), lh);
+	doGetIncomingSet(_atom_space, lh);
 
 	if (not recursive) return lh;
 
@@ -136,7 +136,7 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	BackingStore::getIncomingByType(*getAtomTable(), lh, t);
+	getIncomingByType(*getAtomTable(), lh, t);
 
 	return lh;
 }
@@ -159,7 +159,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	Handle lmeta = metadata;
 	if (Handle::UNDEFINED != lmeta) lmeta = getAtomTable()->add(lmeta);
 
-	BackingStore::runQuery(lq, lkey, lmeta, fresh);
+	runQuery(lq, lkey, lmeta, fresh);
 	return lq;
 }
 

@@ -97,11 +97,6 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Can't find the atomspace!");
 
-    // Allow only one connection at a time.
-    if (_as->isAttachedToBackingStore())
-        throw RuntimeException(TRACE_INFO,
-             "sql-open: Error: Atomspace connected to another storage backend!");
-
     SQLAtomStorage *store = new SQLAtomStorage(uri);
     store->open();
     if (!store->connected())
