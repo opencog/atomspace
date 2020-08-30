@@ -19,14 +19,11 @@ ADD_LIBRARY(storage-types SHARED
 ADD_DEPENDENCIES(storage-types storage_types)
 
 TARGET_LINK_LIBRARIES(storage-types
-	${ATOMSPACE_atomcore_LIBRARY}
-	${ATOMSPACE_atombase_LIBRARY}
-	${ATOMSPACE_atomproto_LIBRARY}
 	${ATOMSPACE_atomtypes_LIBRARY}
 )
 
 INSTALL (TARGETS storage-types
-	EXPORT AttentionBankTargets
+	EXPORT AtomSpaceTargets
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

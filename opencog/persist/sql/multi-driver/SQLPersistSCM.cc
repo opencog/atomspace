@@ -78,8 +78,8 @@ SQLPersistSCM::~SQLPersistSCM()
 
 void SQLPersistSCM::do_create(const std::string& uri)
 {
-    SQLAtomStorage* store = new SQLAtomStorage();
-    store->create_database(uri);
+    SQLAtomStorage* store = new SQLAtomStorage(uri);
+    store->create_database();
     delete store;
 }
 
@@ -102,8 +102,8 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Atomspace connected to another storage backend!");
 
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         delete store;

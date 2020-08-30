@@ -55,7 +55,7 @@ namespace opencog
  *  @{
  */
 
-class SQLAtomStorage : public BackingStore
+class SQLAtomStorage : public StorageNode
 {
 	private:
 		// Pool of shared connections
@@ -67,11 +67,12 @@ class SQLAtomStorage : public BackingStore
 		// Utility for handling responses (on stack).
 		class Response;
 
-		std::string _uri;
 		bool _use_libpq;
 		bool _use_odbc;
 		int _server_version;
 		void get_server_version(void);
+
+		void connect(const char *);
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
@@ -236,15 +237,13 @@ class SQLAtomStorage : public BackingStore
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(void);
-		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
-		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
+		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
-		void open(std::string uri);
-		void connect(std::string uri);
+		void open(void);
+		void connect(void);
 		bool connected(void); // connection to DB is alive
 
-		void create_database(std::string uri); // create the database
+		void create_database(void); // create the database
 		void kill_data(void);       // destroy DB contents
 		void clear_cache(void);     // clear out the TLB.
 

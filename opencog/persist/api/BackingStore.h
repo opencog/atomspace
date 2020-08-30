@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/BackingStore.h
+ * opencog/persist/api/BackingStore.h
  *
  * Implements an interface class for client-server communitcations.
  *
@@ -26,6 +26,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {
@@ -275,6 +276,12 @@ class BackingStore
 		virtual Handle getNode(Type, const char *) {
 			throw IOException(TRACE_INFO, "Implementation is buggy!");
 		}
+};
+
+class StorageNode: public Node, public BackingStore
+{
+	public:
+		StorageNode(Type, const std::string);
 };
 
 /** @}*/
