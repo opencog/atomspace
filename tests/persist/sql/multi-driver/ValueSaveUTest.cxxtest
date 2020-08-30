@@ -892,11 +892,11 @@ void ValueSaveUTest::do_test_incoming()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	as->fetch_incoming_set(gaf, false);
-	as->fetch_incoming_set(gat, false);
-	as->fetch_incoming_set(gal, false);
-	as->fetch_incoming_set(gav, false);
-	as->barrier();
+	store->fetch_incoming_set(gaf, false);
+	store->fetch_incoming_set(gat, false);
+	store->fetch_incoming_set(gal, false);
+	store->fetch_incoming_set(gav, false);
+	store->barrier();
 	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 14);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
