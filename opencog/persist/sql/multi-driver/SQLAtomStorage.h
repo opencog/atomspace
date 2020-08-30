@@ -276,6 +276,24 @@ class SQLAtomStorage : public StorageNode
 		void set_stall_writers(bool);
 };
 
+class PostgresStorageNode : public SQLAtomStorage
+{
+	public:
+		PostgresStorageNode(Type t, const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{
+		}
+		static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<PostgresStorageNode> PostgresStorageNodePtr;
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(const Handle& h)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(h); }
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(a); }
+
+#define createPostgresStorageNode std::make_shared<PostgresStorageNode>
+
 
 /** @}*/
 } // namespace opencog

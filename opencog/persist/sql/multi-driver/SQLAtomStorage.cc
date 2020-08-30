@@ -606,4 +606,6 @@ void SQLAtomStorage::print_stats(void)
 	       used, mad, frac);
 }
 
+DEFINE_NODE_FACTORY(PostgresStorageNode, POSTGRES_STORAGE_NODE)
+
 /* ============================= END OF FILE ================= */
