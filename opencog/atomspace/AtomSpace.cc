@@ -273,10 +273,8 @@ Handle AtomSpace::add_atom(const Handle& h)
         rh = _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
-        // Atom deletion has not been implemented in the backing store
-        // This is a major to-do item.
-        if (_backing_store)
-           _backing_store->removeAtom(h, false);
+        // Hmmm. Need to notify the backing store
+        // about the deleted atom. But how?
     }
     return rh;
 }
@@ -307,8 +305,8 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
         return _atom_table.add(h);
     }
     catch (const DeleteException& ex) {
-        if (_backing_store)
-           _backing_store->removeAtom(h, false);
+        // Hmmm. Need to notify the backing store
+        // about the deleted atom. But how?
     }
     return Handle::UNDEFINED;
 }
