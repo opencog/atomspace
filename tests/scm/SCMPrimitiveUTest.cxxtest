@@ -110,7 +110,7 @@ class MyExampleClass
 				return;
 			}
 
-			as->remove_atom(h, false);
+			as->extract_atom(h, false);
 		}
 };
 
