@@ -67,8 +67,12 @@ void opencog_persist_init(void);
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include "StorageNode.h"
 
 using namespace opencog;
+
+// Single global default storage node ...
+static StorageNode* sn = nullptr;
 
 PersistSCM::PersistSCM(void)
 	: ModuleWrap("opencog persist")
@@ -111,40 +115,34 @@ void PersistSCM::init(void)
 
 Handle PersistSCM::fetch_atom(Handle h)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-atom");
-	return as->fetch_atom(h);
+	return sn->fetch_atom(h);
 }
 
 Handle PersistSCM::fetch_value(Handle h, Handle key)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-value");
-	return as->fetch_value(h, key);
+	return sn->fetch_value(h, key);
 }
 
 Handle PersistSCM::fetch_incoming_set(Handle h)
 {
 	// The "false" flag here means that the fetch is NOT recursive.
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	return as->fetch_incoming_set(h, false);
+	return sn->fetch_incoming_set(h, false);
 }
 
 Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
-	return as->fetch_incoming_by_type(h, t);
+	return sn->fetch_incoming_by_type(h, t);
 }
 
 Handle PersistSCM::fetch_query2(Handle query, Handle key)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-query");
-	return as->fetch_query(query, key, Handle::UNDEFINED, false);
+	return sn->fetch_query(query, key, Handle::UNDEFINED, false);
 }
 
 Handle PersistSCM::fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-query");
-	return as->fetch_query(query, key, meta, fresh);
+	return sn->fetch_query(query, key, meta, fresh);
 }
 
 /**
@@ -153,39 +151,33 @@ Handle PersistSCM::fetch_query4(Handle query, Handle key,
  */
 Handle PersistSCM::store_atom(Handle h)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atom");
-	as->store_atom(h);
+	sn->store_atom(h);
 	return h;
 }
 
 void PersistSCM::store_value(Handle h, Handle key)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("store-value");
-	as->store_value(h, key);
+	sn->store_value(h, key);
 }
 
 void PersistSCM::load_type(Type t)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	as->fetch_all_atoms_of_type(t);
+	sn->fetch_all_atoms_of_type(t);
 }
 
 void PersistSCM::load_atomspace(void)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atomspace");
-	as->load_atomspace();
+	sn->load_atomspace();
 }
 
 void PersistSCM::store_atomspace(void)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atomspace");
-	as->store_atomspace();
+	sn->store_atomspace();
 }
 
 void PersistSCM::barrier(void)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("barrier");
-	as->barrier();
+	sn->barrier();
 }
 
 void opencog_persist_init(void)
