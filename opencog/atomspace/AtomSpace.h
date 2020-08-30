@@ -50,6 +50,7 @@ namespace opencog
 class AtomSpace
 {
     friend class Atom;               // Needs to call get_atomtable()
+    friend class BackingStore;       // Needs to call get_atomtable()
     friend class StorageNode;        // Needs to call get_atomtable()
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()

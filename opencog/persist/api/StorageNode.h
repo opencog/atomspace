@@ -33,26 +33,8 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class StorageNode
+class StorageNode : public Node, protected BackingStore
 {
-protected:
-	AtomSpace* _as;
-	AtomTable& _atom_table;
-
-	/**
-	 * Used to fetch atoms from disk.
-	 */
-	BackingStore* _backing_store;
-
-	/**
-	 * Register a provider of backing storage.
-	 */
-	void registerBackingStore(BackingStore*);
-	void unregisterBackingStore(BackingStore*);
-
-public:
-	bool isAttachedToBackingStore();
-
 public:
 	StorageNode(Type, std::string);
 	~StorageNode();

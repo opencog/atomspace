@@ -21,27 +21,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/storage/storage_types.h>
 #include <opencog/persist/api/BackingStore.h>
 
 using namespace opencog;
-
-StorageNode::StorageNode(Type t, const std::string s)
-	: Node(t, s)
-{
-	if (not nameserver().isA(t, STORAGE_NODE))
-		throw RuntimeException(TRACE_INFO, "Bad inheritance!");
-}
-
-void BackingStore::registerWith(AtomSpace* atomspace)
-{
-	atomspace->registerBackingStore(this);
-}
-
-void BackingStore::unregisterWith(AtomSpace* atomspace)
-{
-	atomspace->unregisterBackingStore(this);
-}
 
 // ==========================================================
 

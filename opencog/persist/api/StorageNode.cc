@@ -2,7 +2,7 @@
  * opencog/persist/ati/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009, 2013,2020 Linas Vepstas
+ * Copyright (c) 2009,2013,2020 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,75 +24,46 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
 
 using namespace opencog;
 
 // ====================================================================
 
-StorageNode::StorageNode(AtomSpace* as) :
-	_as(as),
-	_atom_table(as->get_atomtable()),
-	_backing_store(nullptr)
+StorageNode::StorageNode(Type t, std::string uri) :
+	Node(t, uri)
 {
+	if (not nameserver().isA(t, STORAGE_NODE))
+		throw RuntimeException(TRACE_INFO, "Bad inheritance!");
 }
 
 StorageNode::~StorageNode()
 {
 }
 
-bool StorageNode::isAttachedToBackingStore()
-{
-	if (nullptr != _backing_store) return true;
-	return false;
-}
-
-void StorageNode::registerBackingStore(BackingStore *bs)
-{
-	if (isAttachedToBackingStore())
-		throw RuntimeException(TRACE_INFO,
-			"AtomSpace is already connected to a BackingStore.");
-
-	_backing_store = bs;
-}
-
-void StorageNode::unregisterBackingStore(BackingStore *bs)
-{
-	if (not isAttachedToBackingStore())
-		throw RuntimeException(TRACE_INFO,
-			"AtomSpace is not connected to a BackingStore.");
-
-	if (bs == _backing_store) _backing_store = nullptr;
-}
-
 // ====================================================================
 
 void StorageNode::barrier(void)
 {
-	_atom_table.barrier();
-	if (_backing_store) _backing_store->barrier();
+	getAtomTable()->barrier();
+	BackingStore::barrier();
 }
 
 void StorageNode::store_atom(const Handle& h)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
-	if (_as->get_read_only())
+	if (_atom_space->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
-	_backing_store->storeAtom(h);
+	BackingStore::storeAtom(h);
 }
 
 void StorageNode::store_value(const Handle& h, const Handle& key)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
-	if (_as->get_read_only())
+	if (_atom_space->get_read_only())
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
-	_backing_store->storeValue(h, key);
+	BackingStore::storeValue(h, key);
 }
 
 bool StorageNode::remove_atom(Handle h, bool recursive)
@@ -101,15 +72,13 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
     // It is OK to remove atoms from a read-only atomspace, because
     // it is acting as a cache for the database, and removal is used
     // used to free up RAM storage.
-    if (_backing_store and not _as->get_read_only())
-        _backing_store->removeAtom(h, recursive);
-    return 0 < _atom_table.extract(h, recursive).size();
+    if (not _atom_space->get_read_only())
+        BackingStore::removeAtom(h, recursive);
+    return 0 < getAtomTable()->extract(h, recursive).size();
 }
 
 Handle StorageNode::fetch_atom(const Handle& h)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
 	if (nullptr == h) return Handle::UNDEFINED;
 
 	// Now, get the latest values from the backing store.
@@ -118,41 +87,35 @@ Handle StorageNode::fetch_atom(const Handle& h)
 	// and not to play monkey-shines with them.  If you want something
 	// else, then save the old TV, fetch the new TV, and combine them
 	// with your favorite algo.
-	Handle ah = _as->add_atom(h);
+	Handle ah = _atom_space->add_atom(h);
 	if (nullptr == ah) return ah; // if read-only, then cannot update.
-	_backing_store->getAtom(ah);
+	BackingStore::getAtom(ah);
 	return ah;
 }
 
 Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
 	// Make sure we are working with Atoms in this Atomspace.
 	// Not clear if we really have to do this, or if its enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = _atom_table.add(key);
-	Handle lh = _atom_table.add(h);
-	_backing_store->loadValue(lh, lkey);
+	Handle lkey = getAtomTable()->add(key);
+	Handle lh = getAtomTable()->add(h);
+	BackingStore::loadValue(lh, lkey);
 	return lh;
 }
 
 Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
 	// Make sure we are working with Atoms in this Atomspace.
 	// Not clear if we really have to do this, or if its enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lh = _as->get_atom(h);
+	Handle lh = _atom_space->get_atom(h);
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	_backing_store->getIncomingSet(_atom_table, lh);
+	BackingStore::getIncomingSet(*getAtomTable(), lh);
 
 	if (not recursive) return lh;
 
@@ -165,18 +128,15 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
 
 Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
 	// Make sure we are working with Atoms in this Atomspace.
 	// Not clear if we really have to do this, or if its enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lh = _as->get_atom(h);
+	Handle lh = _atom_space->get_atom(h);
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	_backing_store->getIncomingByType(_atom_table, lh, t);
+	BackingStore::getIncomingByType(*getAtomTable(), lh, t);
 
 	return lh;
 }
@@ -184,9 +144,6 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 							const Handle& metadata, bool fresh)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-
 	// At this time, we restrict queries to be ... queries.
 	Type qt = query->get_type();
 	if (not nameserver().isA(qt, JOIN_LINK) and
@@ -197,20 +154,18 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	// Not clear if we really have to do this, or if it's enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = _atom_table.add(key);
-	Handle lq = _atom_table.add(query);
+	Handle lkey = getAtomTable()->add(key);
+	Handle lq = getAtomTable()->add(query);
 	Handle lmeta = metadata;
-	if (Handle::UNDEFINED != lmeta) lmeta = _atom_table.add(lmeta);
+	if (Handle::UNDEFINED != lmeta) lmeta = getAtomTable()->add(lmeta);
 
-	_backing_store->runQuery(lq, lkey, lmeta, fresh);
+	BackingStore::runQuery(lq, lkey, lmeta, fresh);
 	return lq;
 }
 
 void StorageNode::load_atomspace(void)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-	_backing_store->loadAtomSpace(_atom_table);
+	loadAtomSpace(*getAtomTable());
 }
 
 /**
@@ -218,14 +173,10 @@ void StorageNode::load_atomspace(void)
  */
 void StorageNode::store_atomspace(void)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-	_backing_store->storeAtomSpace(_atom_table);
+	storeAtomSpace(*getAtomTable());
 }
 
 void StorageNode::fetch_all_atoms_of_type(Type t)
 {
-	if (nullptr == _backing_store)
-		throw RuntimeException(TRACE_INFO, "No backing store");
-	_backing_store->loadType(_atom_table, t);
+	loadType(*getAtomTable(), t);
 }
