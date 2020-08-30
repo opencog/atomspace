@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeModule.h>
+#include <opencog/persist/api/StorageNode.h>
 
 namespace opencog
 {
@@ -37,6 +38,9 @@ namespace opencog
 class PersistSCM : public ModuleWrap
 {
 private:
+	// Single global default storage node ...
+	static StorageNodePtr _sn;
+
 	void init(void);
 
 	Handle fetch_atom(Handle);
@@ -54,6 +58,7 @@ private:
 
 public:
 	PersistSCM(void);
+	static void set_connection(const StorageNodePtr& sn) {_sn = sn; }
 }; // class
 
 /** @}*/
@@ -67,12 +72,10 @@ void opencog_persist_init(void);
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include "StorageNode.h"
 
 using namespace opencog;
 
-// Single global default storage node ...
-static StorageNode* sn = nullptr;
+StorageNodePtr PersistSCM::_sn;
 
 PersistSCM::PersistSCM(void)
 	: ModuleWrap("opencog persist")
@@ -115,34 +118,34 @@ void PersistSCM::init(void)
 
 Handle PersistSCM::fetch_atom(Handle h)
 {
-	return sn->fetch_atom(h);
+	return _sn->fetch_atom(h);
 }
 
 Handle PersistSCM::fetch_value(Handle h, Handle key)
 {
-	return sn->fetch_value(h, key);
+	return _sn->fetch_value(h, key);
 }
 
 Handle PersistSCM::fetch_incoming_set(Handle h)
 {
 	// The "false" flag here means that the fetch is NOT recursive.
-	return sn->fetch_incoming_set(h, false);
+	return _sn->fetch_incoming_set(h, false);
 }
 
 Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 {
-	return sn->fetch_incoming_by_type(h, t);
+	return _sn->fetch_incoming_by_type(h, t);
 }
 
 Handle PersistSCM::fetch_query2(Handle query, Handle key)
 {
-	return sn->fetch_query(query, key, Handle::UNDEFINED, false);
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false);
 }
 
 Handle PersistSCM::fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
-	return sn->fetch_query(query, key, meta, fresh);
+	return _sn->fetch_query(query, key, meta, fresh);
 }
 
 /**
@@ -151,33 +154,33 @@ Handle PersistSCM::fetch_query4(Handle query, Handle key,
  */
 Handle PersistSCM::store_atom(Handle h)
 {
-	sn->store_atom(h);
+	_sn->store_atom(h);
 	return h;
 }
 
 void PersistSCM::store_value(Handle h, Handle key)
 {
-	sn->store_value(h, key);
+	_sn->store_value(h, key);
 }
 
 void PersistSCM::load_type(Type t)
 {
-	sn->fetch_all_atoms_of_type(t);
+	_sn->fetch_all_atoms_of_type(t);
 }
 
 void PersistSCM::load_atomspace(void)
 {
-	sn->load_atomspace();
+	_sn->load_atomspace();
 }
 
 void PersistSCM::store_atomspace(void)
 {
-	sn->store_atomspace();
+	_sn->store_atomspace();
 }
 
 void PersistSCM::barrier(void)
 {
-	sn->barrier();
+	_sn->barrier();
 }
 
 void opencog_persist_init(void)

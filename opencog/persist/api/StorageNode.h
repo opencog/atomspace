@@ -187,6 +187,10 @@ public:
 	bool remove_atom(Handle h, bool recursive=false);
 };
 
+typedef std::shared_ptr<StorageNode> StorageNodePtr;
+static inline StorageNodePtr StorageNodeCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<StorageNode>(h); }
+
 /** @}*/
 } // namespace opencog
 
