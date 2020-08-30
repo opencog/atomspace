@@ -38,9 +38,9 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -73,7 +73,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
     private:
 #define NUSERS 6
         AtomSpace* _as[NUSERS];
-        SQLPersistSCM* _pm[NUSERS];
+        StorageNodePtr _store[NUSERS];
         std::atomic<int> nstarted;
 
         std::string uri;
@@ -130,8 +130,8 @@ class MultiUserUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        void add_to_space(int, AtomSpace *, std::string id);
-        void fetch_space(int, AtomSpace *);
+        void add_to_space(int, AtomSpace *, StorageNodePtr, std::string id);
+        void fetch_space(int, StorageNodePtr);
         void check_space(int, AtomSpace *, std::string dbgmsg);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
@@ -206,10 +206,11 @@ void MultiUserUTest::setUp(void)
 void MultiUserUTest::connect_to_db(int i)
 {
     _as[i] = new AtomSpace();
-    _pm[i] = new SQLPersistSCM(_as[i]);
+    Handle hsn = _as[i]->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+    _store[i] = StorageNodeCast(hsn);
 
     try {
-        _pm[i]->do_open(uri);
+        _store[i]->open();
     }
     catch (RuntimeException &e)
     {
@@ -224,8 +225,7 @@ void MultiUserUTest::tearDown(void)
     /* Orderly shutdown avoids warning in Postgres log file. */
     for (int i=0; i < n_threads; i++)
     {
-        // _pm[i]->do_close();
-        delete _pm[i];
+        _store[i]->close();
         delete _as[i];
     }
     kill_data();
@@ -326,7 +326,8 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 // ============================================================
 
-void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
+void MultiUserUTest::add_to_space(int idx, AtomSpace *as,
+                                  StorageNodePtr store, std::string id)
 {
     if (not clobber) id += std::to_string(idx);
 
@@ -335,19 +336,19 @@ void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     h1[idx] = as->add_node(CONCEPT_NODE, id + "fromNode");
     h1[idx]->setTruthValue(stv);
     n1[idx] = NodeCast(h1[idx]);
-    as->store_atom(h1[idx]);
+    store->store_atom(h1[idx]);
 
     TruthValuePtr stv2(CountTruthValue::createTV(0.22, 0.0, 200+idx));
     h2[idx] = as->add_node(CONCEPT_NODE, id + "toNode");
     h2[idx]->setTruthValue(stv2);
     n2[idx] = NodeCast(h2[idx]);
-    as->store_atom(h2[idx]);
+    store->store_atom(h2[idx]);
 
     TruthValuePtr stv3(CountTruthValue::createTV(0.33, 0.0, 300+idx));
     h3[idx] = as->add_node(CONCEPT_NODE, id + "third wheel");
     h3[idx]->setTruthValue(stv3);
     n3[idx] = NodeCast(h3[idx]);
-    as->store_atom(h3[idx]);
+    store->store_atom(h3[idx]);
 
     // The NumberNode will go through the AtomTable clone factory
     // and should thus elicit any errors in clone uuid handling.
@@ -356,7 +357,7 @@ void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     TruthValuePtr stv4(CountTruthValue::createTV(0.44, 0.0, 400+idx));
     h4[idx]->setTruthValue(stv4);
     n4[idx] = NodeCast(h4[idx]);
-    as->store_atom(h4[idx]);
+    store->store_atom(h4[idx]);
 
     HandleSeq hvec;
     hvec.push_back(h1[idx]);
@@ -366,28 +367,28 @@ void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 
     // Note that SetLink is an unordered link.
     hl[idx] = as->add_link(SET_LINK, std::move(hvec));
-    as->store_atom(hl[idx]);
+    store->store_atom(hl[idx]);
     l[idx] = LinkCast(hl[idx]);
 
     hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
-    as->store_atom(hl2[idx]);
+    store->store_atom(hl2[idx]);
     l2[idx] = LinkCast(hl2[idx]);
 
     hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
-    as->store_atom(hl3[idx]);
+    store->store_atom(hl3[idx]);
     l3[idx] = LinkCast(hl3[idx]);
 
     // Do it again, just for good measure.
-    as->store_atom(hl[idx]);
-    as->store_atom(hl2[idx]);
-    as->store_atom(hl3[idx]);
-    as->barrier();
+    store->store_atom(hl[idx]);
+    store->store_atom(hl2[idx]);
+    store->store_atom(hl3[idx]);
+    store->barrier();
 
     // printf("Added for idx=%d\n", idx);
     fflush(stdout);
 }
 
-void MultiUserUTest::fetch_space(int idx, AtomSpace *space)
+void MultiUserUTest::fetch_space(int idx, StorageNodePtr space)
 {
     AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
     Handle hb1(ab1->get_handle());
@@ -469,17 +470,18 @@ void MultiUserUTest::add_atoms(int thread_id)
     int idx = 0;
     int off = NCLAUSE*thread_id;
     AtomSpace* as = _as[thread_id];
+    StorageNodePtr store = _store[thread_id];
 
-    add_to_space(off + idx++, as, "AA-aa-wow ");
-    add_to_space(off + idx++, as, "BB-bb-wow ");
-    add_to_space(off + idx++, as, "CC-cc-wow ");
-    add_to_space(off + idx++, as, "DD-dd-wow ");
-    add_to_space(off + idx++, as, "EE-ee-wow ");
+    add_to_space(off + idx++, as, store, "AA-aa-wow ");
+    add_to_space(off + idx++, as, store, "BB-bb-wow ");
+    add_to_space(off + idx++, as, store, "CC-cc-wow ");
+    add_to_space(off + idx++, as, store, "DD-dd-wow ");
+    add_to_space(off + idx++, as, store, "EE-ee-wow ");
 
     /* Make sure UTF-8 works fine. */
-    add_to_space(off + idx++, as, "Попытка выбраться вызвала слабый стон ");
-    add_to_space(off + idx++, as, "はにがうりだそうであってるのかはち ");
-    add_to_space(off + idx++, as, "係拉丁字母");
+    add_to_space(off + idx++, as, store, "Попытка выбраться вызвала слабый стон ");
+    add_to_space(off + idx++, as, store, "はにがうりだそうであってるのかはち ");
+    add_to_space(off + idx++, as, store, "係拉丁字母");
 
     TSM_ASSERT("Bad number of clauses", idx == NCLAUSE);
 
@@ -511,7 +513,7 @@ void MultiUserUTest::run_user_test(int thread_id)
 	TSM_ASSERT("Took too long to connect", end - start < 10);
 
 	add_atoms(thread_id);
-	_pm[thread_id]->do_close(); // this will force a flush.
+	_store[thread_id]->close(); // this will force a flush.
 }
 
 // ============================================================
@@ -519,8 +521,6 @@ void MultiUserUTest::run_user_test(int thread_id)
 
 void MultiUserUTest::do_test_multiuser(void)
 {
-    TSM_ASSERT("Persist Module not loaded", _pm);
-
     printf("Start creating %d user sessions\n", n_threads);
 
     nstarted = 0;
@@ -534,17 +534,17 @@ void MultiUserUTest::do_test_multiuser(void)
     printf("Done joining threads\n");
 
     AtomSpace* aspace = new AtomSpace();
-    SQLPersistSCM* pm = new SQLPersistSCM(aspace);
+    Handle hsn = aspace->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+    StorageNodePtr store = StorageNodeCast(hsn);
 
-    pm->do_open(uri);
+    store->open();
     for (int off=0; off<n_threads; off++)
         for (int i=0; i<NCLAUSE; i++) {
-            fetch_space(NCLAUSE*off+i, aspace);
+            fetch_space(NCLAUSE*off+i, store);
             check_space(NCLAUSE*off+i, aspace, "verify-again");
         }
 
-    pm->do_close();
-    delete pm;
+    store->close();
     delete aspace;
 }
 
