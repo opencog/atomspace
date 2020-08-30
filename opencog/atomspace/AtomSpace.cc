@@ -339,17 +339,6 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     return vptr;
 }
 
-bool AtomSpace::remove_atom(Handle h, bool recursive)
-{
-    // Removal of atoms from read-only databases is not allowed.
-    // It is OK to remove atoms from a read-only atomspace, because
-    // it is acting as a cache for the database, and removal is used
-    // used to free up RAM storage.
-    if (_backing_store and not _read_only)
-        _backing_store->removeAtom(h, recursive);
-    return 0 < _atom_table.extract(h, recursive).size();
-}
-
 // Copy-on-write for setting values.
 Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,

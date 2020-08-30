@@ -276,24 +276,6 @@ public:
     }
 
     /**
-     * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles that
-     * reference it; it is deleted only when the last reference
-     * goes away.
-     *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag. If the flag is set,
-     *       then this atom, and *everything* that points to it will
-     *       be removed from the atomspace.  This can cause a large
-     *       cascade of removals!  If the flag is not set, then the
-     *       atom will be removed only if its incoming set is empty.
-     *       By default, recursion is disabled.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
-     */
-    bool remove_atom(Handle h, bool recursive=false);
-
-    /**
      * Set the Value on the atom, performing necessary permissions
      * checking. If this atomspace is read-only, then the setting
      * of values is prohibited.  If this atomspace has read-write

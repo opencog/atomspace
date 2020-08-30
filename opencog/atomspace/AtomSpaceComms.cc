@@ -37,6 +37,10 @@ AtomSpaceComms::AtomSpaceComms(AtomSpace* as) :
 {
 }
 
+AtomSpaceComms::~AtomSpaceComms()
+{
+}
+
 bool AtomSpaceComms::isAttachedToBackingStore()
 {
 	if (nullptr != _backing_store) return true;
@@ -89,6 +93,17 @@ void AtomSpaceComms::store_value(const Handle& h, const Handle& key)
 		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
 
 	_backing_store->storeValue(h, key);
+}
+
+bool AtomSpaceComms::remove_atom(Handle h, bool recursive)
+{
+    // Removal of atoms from read-only databases is not allowed.
+    // It is OK to remove atoms from a read-only atomspace, because
+    // it is acting as a cache for the database, and removal is used
+    // used to free up RAM storage.
+    if (_backing_store and not _as->get_read_only())
+        _backing_store->removeAtom(h, recursive);
+    return 0 < _atom_table.extract(h, recursive).size();
 }
 
 Handle AtomSpaceComms::fetch_atom(const Handle& h)
