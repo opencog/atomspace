@@ -262,8 +262,8 @@ void PatternUTest::test_simple_link(void)
 	TSM_ASSERT("incorrect predicate", hpred_1a == pmcb.preds[he]);
 
 	// Remove garbage, just in case ...
-	as->remove_atom(he);
-	as->remove_atom(hvar);
+	as->extract_atom(he);
+	as->extract_atom(hvar);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -449,7 +449,7 @@ void PatternUTest::test_implication(void)
 	imply(as, han, hpa);
 
 	// Remove the parse link, so that the other one is easier to find.
-	as->remove_atom(hpa);
+	as->extract_atom(hpa);
 
 	// At this point, the AtomSpace should contain a structure
 	// that looks like the below. Look for it.
