@@ -254,8 +254,8 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -383,8 +383,8 @@ void BasicSaveUTest::do_test_single_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    astore = new SQLAtomStorage();
-    astore->open(uri);
+    astore = new SQLAtomStorage(uri);
+    astore->open();
     if (!astore->connected())
     {
         logger().info("setUp: cannot connect to database");
@@ -411,8 +411,8 @@ void BasicSaveUTest::do_test_fresh_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -454,8 +454,8 @@ void BasicSaveUTest::do_test_table()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         logger().debug("test_table: cannot connect to db");
@@ -476,8 +476,8 @@ void BasicSaveUTest::do_test_table()
     delete table1;
 
     // Reopen connection, and load the atom table.
-    store = new SQLAtomStorage();
-    store->open(uri);
+    store = new SQLAtomStorage(uri);
+    store->open();
     TSM_ASSERT("Not connected to database", store->connected());
 
     AtomTable *table2 = new AtomTable();
