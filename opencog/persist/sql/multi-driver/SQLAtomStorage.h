@@ -281,8 +281,10 @@ class PostgresStorageNode : public SQLAtomStorage
 	public:
 		PostgresStorageNode(Type t, const std::string&& uri) :
 			SQLAtomStorage(std::move(uri))
-		{
-		}
+		{}
+		PostgresStorageNode(const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{}
 		static Handle factory(const Handle&);
 };
 

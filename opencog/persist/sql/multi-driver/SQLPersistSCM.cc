@@ -38,7 +38,6 @@ using namespace opencog;
 SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 {
     _as = as;
-    _backing = nullptr;
 
     static bool is_init = false;
     if (is_init) return;
@@ -73,7 +72,7 @@ void SQLPersistSCM::init(void)
 
 SQLPersistSCM::~SQLPersistSCM()
 {
-    if (_backing) delete _backing;
+	_storage = nullptr;
 }
 
 void SQLPersistSCM::do_create(const std::string& uri)
@@ -85,7 +84,7 @@ void SQLPersistSCM::do_create(const std::string& uri)
 
 void SQLPersistSCM::do_open(const std::string& uri)
 {
-    if (_backing)
+    if (_storage)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Already connected to a database!");
 
@@ -97,86 +96,82 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Can't find the atomspace!");
 
-    SQLAtomStorage *store = new SQLAtomStorage(uri);
-    store->open();
-    if (!store->connected())
+    _storage = createPostgresStorageNode(std::move(uri));
+    _storage->open();
+    if (!_storage->connected())
     {
-        delete store;
+        _storage = nullptr;
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to connect to the database");
     }
 
-    _backing = store;
-    _backing->registerWith(_as);
+    _storage->registerWith(_as);
 }
 
 void SQLPersistSCM::do_close(void)
 {
-    if (nullptr == _backing)
+    if (nullptr == _storage)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
-
-    SQLAtomStorage *backing = _backing;
-    _backing = nullptr;
 
     // The destructor might run for a while before its done; it will
     // be emptying the pending store queues, which might take a while.
     // So unhook the atomspace first -- this will prevent new writes
     // from accidentally being queued. (It will also drain the queues)
     // Only then actually call the dtor.
-    backing->unregisterWith(_as);
-    delete backing;
+    _storage->unregisterWith(_as);
+    _storage = nullptr;
 }
 
 void SQLPersistSCM::do_stats(void)
 {
-    if (nullptr == _backing) {
+    if (nullptr == _storage) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
     printf("sql-stats: Atomspace holds %lu atoms\n", _as->get_size());
-    _backing->print_stats();
+    _storage->print_stats();
 }
 
 void SQLPersistSCM::do_clear_cache(void)
 {
-    if (nullptr == _backing) {
+    if (nullptr == _storage) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _backing->clear_cache();
+    _storage->clear_cache();
 }
 
 void SQLPersistSCM::do_clear_stats(void)
 {
-    if (nullptr == _backing) {
+    if (nullptr == _storage) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _backing->clear_stats();
+    _storage->clear_stats();
 }
 
 void SQLPersistSCM::do_set_hilo(int hi, int lo)
 {
-    if (nullptr == _backing) {
+    if (nullptr == _storage) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _backing->set_hilo_watermarks(hi, lo);
+    _storage->set_hilo_watermarks(hi, lo);
 }
 
 void SQLPersistSCM::do_set_stall(bool stall)
 {
-    if (nullptr == _backing) {
+    if (nullptr == _storage) {
         printf("sql-stats: Database not open\n");
         return;
     }
 
-    _backing->set_stall_writers(stall);
+    _storage->set_stall_writers(stall);
 }
 
 void opencog_persist_sql_init(void)
