@@ -56,6 +56,7 @@ class SchemeSmob
 	template<typename R, typename T, class... Args> friend class SchemePrimitive;
 	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
+	template<class... Args> friend class SchemeArgConverters;
 	friend class SchemeReturnConverters;
 	friend class LoggerSCM;
 

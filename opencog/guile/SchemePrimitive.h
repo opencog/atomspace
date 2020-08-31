@@ -152,39 +152,22 @@ protected:
 	virtual ~PrimitiveEnviron();
 };
 
-
-template<typename R, typename C, class... Args >
-class SchemePrimitiveBase : public PrimitiveEnviron
+// Convert the ith scm argument to its C++ object. The reason the
+// return type is also present as third argument is to tell gcc
+// what overloaded version of scm_to to use. It is a bit of a hack
+// but not that ugly given that the alternative is to use
+// specialized templates.
+template<class... Args >
+class SchemeArgConverters
 {
-	typedef R (C::*Method)(Args...);
-	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
-
-	Method method;
-	C* that;
-	const char *scheme_module;
-	const char *scheme_name;
-
-public:
-	SchemePrimitiveBase(const char* module, const char* name,
-	                    R (C::*cb)(Args...), C *data)
+protected:
+	SchemeArgConverters(const char* name)
 	{
-		that = data;
-		method = cb;
-		scheme_module = module;
 		scheme_name = name;
-		do_register(module, name, sizeof...(Args));
 	}
 
-protected:
-	virtual const char *get_name(void) { return scheme_name; }
-	virtual const char *get_module(void) { return scheme_module; }
-	virtual size_t get_size(void) { return sizeof (*this); }
+	const char *scheme_name;
 
-	// Convert the ith scm argument to its C++ object. The reason the
-	// return type is also present as third argument is to tell gcc
-	// what overloaded version of scm_to to use. It is a bit of a hack
-	// but not that ugly given that the alternative is to use
-	// specialized templates.
 	SCM scm_to(SCM args, size_t idx, SCM) const
 	{
 		return scm_list_ref(args, scm_from_size_t(idx));
@@ -250,12 +233,43 @@ protected:
 		return SchemeSmob::verify_logger(arg, scheme_name, idx);
 	}
 
+};
+
+template<typename R, typename C, class... Args >
+class SchemePrimitiveBase :
+	SchemeArgConverters<Args...>,
+	public PrimitiveEnviron
+{
+	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
+	typedef R (C::*Method)(Args...);
+
+	Method method;
+	C* that;
+	const char *scheme_module;
+
+public:
+	SchemePrimitiveBase(const char* module, const char* name,
+	                    R (C::*cb)(Args...), C *data) :
+		SchemeArgConverters<Args...>(name)
+	{
+		that = data;
+		method = cb;
+		scheme_module = module;
+		do_register(module, name, sizeof...(Args));
+	}
+
+protected:
+	virtual const char *get_name(void) {
+		return SchemeArgConverters<Args...>::scheme_name; }
+	virtual const char *get_module(void) { return scheme_module; }
+	virtual size_t get_size(void) { return sizeof (*this); }
+
 	// Get the Ith argument and convert it to a C++ object.
 	template<std::size_t I>
 	typename std::tuple_element<I, PlainTuple>::type
 		get_conv(SCM args, const PlainTuple& t)
 	{
-		return scm_to(args, I, std::get<I>(t));
+		return SchemeArgConverters<Args...>::scm_to(args, I, std::get<I>(t));
 	}
 
 	// Convert the scm arguments into their C++ objects, and call the
