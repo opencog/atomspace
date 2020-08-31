@@ -13,6 +13,8 @@
 
 ; This avoids complaints, when the docs are set, below.
 (export
+	cog-open
+	cog-close
 	fetch-atom
 	fetch-value
 	fetch-incoming-set
@@ -27,6 +29,38 @@
 
 ;; -----------------------------------------------------
 ;;
+(set-procedure-property! cog-open 'documentation
+"
+ cog-open STORAGE-ATOM
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-open (PostgresStorage "postgres:///example-db?user=foo&password=bar"))
+       (cog-open (RocksStorage "rocks:///tmp/my-rocks-db"))
+       (cog-open (CogserverStorage "cog://localhost:17001"))
+
+    See also:
+       `cog-close` to close a connection.
+")
+
+(set-procedure-property! cog-close 'documentation
+"
+ cog-close STORAGE-ATOM
+
+    Close an open connection to the indicated STORAGE-ATOM. Closing the
+    connection disables further communication on the connection. The
+    STORAGE-ATOM indicates which connection to close.
+
+    Examples:
+       (cog-close (PostgresStorage "postgres:///example-db?user=foo&password=bar"))
+       (cog-close (RocksStorage "rocks:///tmp/my-rocks-db"))
+       (cog-close (CogserverStorage "cog://localhost:17001"))
+
+    See also:
+       `cog-open` to open a connection.
+")
 
 (set-procedure-property! fetch-atom 'documentation
 "
