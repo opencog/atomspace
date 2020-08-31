@@ -38,26 +38,27 @@ namespace opencog
 class PersistSCM : public ModuleWrap
 {
 private:
-	// Single global default storage node ...
-	static StorageNodePtr _sn;
-
 	void init(void);
 
-	void open(Handle);
-	void close(Handle);
+	// Single global default storage node,
+	// which all the functions below use.
+	static StorageNodePtr _sn;
 
-	Handle fetch_atom(Handle);
-	Handle fetch_value(Handle, Handle);
-	Handle fetch_incoming_set(Handle);
-	Handle fetch_incoming_by_type(Handle, Type);
-	Handle fetch_query2(Handle, Handle);
-	Handle fetch_query4(Handle, Handle, Handle, bool);
-	Handle store_atom(Handle);
-	void store_value(Handle, Handle);
-	void load_type(Type);
-	void load_atomspace(void);
-	void store_atomspace(void);
-	void barrier(void);
+	void sn_open(Handle);
+	void sn_close(Handle);
+
+	Handle sn_fetch_atom(Handle);
+	Handle sn_fetch_value(Handle, Handle);
+	Handle sn_fetch_incoming_set(Handle);
+	Handle sn_fetch_incoming_by_type(Handle, Type);
+	Handle sn_fetch_query2(Handle, Handle);
+	Handle sn_fetch_query4(Handle, Handle, Handle, bool);
+	Handle sn_store_atom(Handle);
+	void sn_store_value(Handle, Handle);
+	void sn_load_type(Type);
+	void sn_load_atomspace(void);
+	void sn_store_atomspace(void);
+	void sn_barrier(void);
 
 public:
 	PersistSCM(void);
