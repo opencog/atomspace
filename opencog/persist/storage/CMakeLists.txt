@@ -29,7 +29,7 @@ INSTALL (TARGETS storage-types
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/storage_types.h
-	DESTINATION "include/opencog/persist/types"
+	DESTINATION "include/opencog/persist/storage"
 )
 
 # Install the auto-generated atom types as well
