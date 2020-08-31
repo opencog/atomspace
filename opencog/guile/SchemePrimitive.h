@@ -235,6 +235,60 @@ protected:
 	}
 };
 
+// Base class to wrap a call to a function.
+// R == return type
+template<typename R, class... Args >
+class SchemeFunctionBase :
+	SchemeArgConverters<Args...>,
+	PrimitiveEnviron
+{
+	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
+	typedef R (*Funct)(Args...);
+	typedef SchemeArgConverters<Args...> super;
+
+	Funct funct;
+public:
+	SchemeFunctionBase(const char* module, const char* name,
+	                    R (*fun)(Args...)) :
+		SchemeArgConverters<Args...>(module, name)
+	{
+		funct = fun;
+		do_register(module, name, sizeof...(Args));
+	}
+
+protected:
+	virtual const char *get_name(void) { return super::scheme_name; }
+	virtual const char *get_module(void) { return super::scheme_module; }
+	virtual size_t get_size(void) { return sizeof (*this); }
+
+	// Get the Ith argument and convert it to a C++ object.
+	template<std::size_t I>
+	typename std::tuple_element<I, PlainTuple>::type
+		get_conv(SCM args, const PlainTuple& t)
+	{
+		return SchemeArgConverters<Args...>::scm_to(args, I, std::get<I>(t));
+	}
+
+	// Convert the scm arguments into their C++ objects,
+	// and call the function over them.
+	template<size_t ...S>
+	R conv_call_function(SCM args, std::index_sequence<S...>)
+	{
+		return (*funct)(get_conv<S>(args, PlainTuple())...);
+	}
+
+	// Call the function, after converting the SCM args to C++ args.
+	R cpp_invoke(SCM args)
+	{
+		// Call the function over the scm arguments. The index sequence
+		// is used to access the argument types.
+		return conv_call_function(args, std::index_sequence_for<Args...>{});
+	}
+};
+
+// Base class to wrap a call to a method.
+// R == return type
+// C == class which holds the method.
 template<typename R, typename C, class... Args >
 class SchemeMethodBase :
 	SchemeArgConverters<Args...>,
@@ -242,6 +296,7 @@ class SchemeMethodBase :
 {
 	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
 	typedef R (C::*Method)(Args...);
+	typedef SchemeArgConverters<Args...> super;
 
 	Method method;
 	C* that;
@@ -256,10 +311,8 @@ public:
 	}
 
 protected:
-	virtual const char *get_name(void) {
-		return SchemeArgConverters<Args...>::scheme_name; }
-	virtual const char *get_module(void) {
-		return SchemeArgConverters<Args...>::scheme_module; }
+	virtual const char *get_name(void) { return super::scheme_name; }
+	virtual const char *get_module(void) { return super::scheme_module; }
 	virtual size_t get_size(void) { return sizeof (*this); }
 
 	// Get the Ith argument and convert it to a C++ object.
@@ -270,15 +323,15 @@ protected:
 		return SchemeArgConverters<Args...>::scm_to(args, I, std::get<I>(t));
 	}
 
-	// Convert the scm arguments into their C++ objects, and call the
-	// method over them.
+	// Convert the scm arguments into their C++ objects,
+	// and call the method over them.
 	template<size_t ...S>
 	R conv_call_method(SCM args, std::index_sequence<S...>)
 	{
 		return (that->*method)(get_conv<S>(args, PlainTuple())...);
 	}
 
-	// Like invoke but return the C++ type instead of its SCM conversion
+	// Call the method, after converting the SCM args to C++ args.
 	R cpp_invoke(SCM args)
 	{
 		// Call the method over the scm arguments. The index sequence
@@ -287,6 +340,7 @@ protected:
 	}
 };
 
+// Convert return values to SCM.
 class SchemeReturnConverters
 {
 protected:
@@ -364,6 +418,17 @@ protected:
 };
 
 // General case when R is non-void
+template<typename R, class... Args>
+class SchemeFunction :
+	SchemeReturnConverters
+{
+public:
+	SchemeFunction(const char* module, const char* name,
+	                R (*func)(Args...))
+		{}
+};
+
+// General case when R is non-void
 template<typename R, typename C, class... Args>
 class SchemePrimitive :
 	SchemeReturnConverters,
@@ -402,16 +467,6 @@ protected:
 		super::cpp_invoke(args);
 		return SCM_UNSPECIFIED;
 	}
-};
-
-template<typename R, class... Args>
-class SchemeFunction :
-	SchemeReturnConverters
-{
-public:
-	SchemeFunction(const char* module, const char* name,
-	                R (*func)(Args...))
-		{}
 };
 
 // Method on a class C
