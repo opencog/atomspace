@@ -10,7 +10,7 @@ STORAGE_NODE <- NODE
 // repos, and not here. Look for git repos called "atomspace-xxx" for
 // approrpiate values of "xxx".
 POSTGRES_STORAGE_NODE <- STORAGE_NODE
-ROCKSDB_STORAGE_NODE <- STORAGE_NODE
+ROCKS_STORAGE_NODE <- STORAGE_NODE
 COGSERVER_STORAGE_NODE <- STORAGE_NODE
 //
 // There is no IPFS_STORAGE_NODE nore DHT_STORAGE_NODE because these
