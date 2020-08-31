@@ -79,6 +79,16 @@ void PersistSCM::open(Handle h)
 			"Expecting StorageNode, got %s", h->to_short_string().c_str());
 
 	StorageNodePtr stnp = StorageNodeCast(h);
+
+	// The cast will fail, if the dynamic library that defines the type
+	// isn't loaded. This is the user's job. They can do it by saying
+	// (use-modules (opencog persist-foo))
+	if (nullptr == stnp)
+		throw RuntimeException(TRACE_INFO,
+			"Not opened; please load module that defines %s\n"
+			"Like so: (use-modules (persist-foo))",
+			nameserver().getTypeName(h->get_type()).c_str());
+
 	stnp->open();
 
 	if (nullptr == _sn) _sn = stnp;
