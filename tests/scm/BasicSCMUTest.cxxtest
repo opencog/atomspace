@@ -370,7 +370,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	check_tv(h, mslow, cslow);
 
 	// remove Node so we can redo the test
-	as->remove_atom(h);
+	as->extract_atom(h);
 }
 
 void BasicSCMUTest::test_truth_value(void)

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/BackingStore.h
+ * opencog/persist/api/BackingStore.h
  *
  * Implements an interface class for client-server communitcations.
  *
@@ -26,6 +26,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {
@@ -237,18 +238,9 @@ class BackingStore
 		 */
 		virtual void barrier() = 0;
 
-		/**
-		 * Register this backing store with the atomspace.
-		 */
-		void registerWith(AtomSpace*);
-
-		/**
-		 * Unregister this backing store with the atomspace.
-		 */
-		void unregisterWith(AtomSpace*);
-
 	protected:
 		virtual void getIncomingSet(AtomSpace*, const Handle&);
+		virtual void doGetIncomingSet(AtomSpace*, const Handle&);
 		virtual void getIncomingByType(AtomSpace*, const Handle&, Type);
 
 		/**

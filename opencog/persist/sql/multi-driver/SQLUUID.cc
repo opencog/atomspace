@@ -56,20 +56,29 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 		std::bind(&SQLAtomStorage::extract_callback, this,
 			std::placeholders::_1));
 #endif // NOT_NEEDED_RIGHT_NOW
-
-	BackingStore::registerWith(as);
 }
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
-	BackingStore::unregisterWith(as);
-
 	flushStoreQueue();
 	_tlbuf.clear_resolver(&as->get_atomtable());
 
 #ifdef NOT_NEEDED_RIGHT_NOW
 	_extract_sig.disconnect();
 #endif // NOT_NEEDED_RIGHT_NOW
+}
+
+void SQLAtomStorage::setAtomSpace(AtomSpace* tb)
+{
+	if (tb == _atom_space) return;
+
+	// XXX FIXME ... I don't get it .. stubbing out the two lines
+	// below does not seem to affect the outcome of the unit tests.
+	// But I'm pretty sure they are needed, so ???
+	if (tb) registerWith(tb);
+	else unregisterWith(_atom_space);
+
+	Atom::setAtomSpace(tb);
 }
 
 void SQLAtomStorage::extract_callback(const AtomPtr& atom)

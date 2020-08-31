@@ -109,7 +109,7 @@ void StateLink::install()
 		_outgoing[1]->insert_atom(new_state);
 
 		// Remove the old StateLink too. It must be no more.
-		as->remove_atom(defl, true);
+		as->extract_atom(defl, true);
 		swapped = true;
 	}
 

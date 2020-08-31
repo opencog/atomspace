@@ -36,8 +36,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -142,8 +142,8 @@ void QueryPersistUTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
 	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-	SQLAtomStorage* astore = new SQLAtomStorage();
-	astore->open(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -206,15 +206,15 @@ void QueryPersistUTest::setup_data(void)
 	kill_data();
 
 	_as = new AtomSpace();
-	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-	TSM_ASSERT("Persist Module not loaded", _pm);
+	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
 
 	try {
-		_pm->do_open(uri);
+		store->open();
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -250,11 +250,10 @@ void QueryPersistUTest::setup_data(void)
 		setTruthValue(SimpleTruthValue::createTV(0.33, 300));
 
 	/* Push all atoms out to the SQL DB */
-	_as->store_atomspace();
-	_as->barrier();
+	store->store_atomspace();
+	store->barrier();
 
-	_pm->do_close();
-	delete _pm;
+	store->close();
 	delete _as;
 }
 
@@ -265,15 +264,15 @@ void QueryPersistUTest::do_test_meet(void)
 	setup_data();
 
 	_as = new AtomSpace();
-	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-	TSM_ASSERT("Persist Module not loaded", _pm);
+	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
 
 	try {
-		_pm->do_open(uri);
+		store->open();
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -291,8 +290,8 @@ void QueryPersistUTest::do_test_meet(void)
 	Handle key = an(PREDICATE_NODE, "qkey");
 
 	// Run the query
-	_as->fetch_query(qry, key);
-	_as->barrier();
+	store->fetch_query(qry, key);
+	store->barrier();
 
 	// Verify that only bicycles and cars were fetched
 	ValuePtr results = qry->getValue(key);
@@ -312,13 +311,13 @@ void QueryPersistUTest::do_test_meet(void)
 
 	// Test key deletion.  Lack of a crash is a good thing.
 	qry->setValue(key, nullptr);
-	_as->store_value(qry, key);
+	store->store_value(qry, key);
 	ValuePtr nada = qry->getValue(key);
 	TS_ASSERT(nullptr == nada);
 
 	// Should get back the same results.
-	_as->fetch_query(qry, key);
-	_as->barrier();
+	store->fetch_query(qry, key);
+	store->barrier();
 	ValuePtr rtoo = qry->getValue(key);
 	printf("Re-got: %s\n", rtoo->to_string().c_str());
 
@@ -326,8 +325,7 @@ void QueryPersistUTest::do_test_meet(void)
 	HandleSet htoo = lvp->to_handle_set();
 	TSM_ASSERT("Expect same results as before", hset == htoo);
 
-	_pm->do_close();
-	delete _pm;
+	store->close();
 	delete _as;
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -339,15 +337,15 @@ void QueryPersistUTest::do_test_join(void)
 	setup_data();
 
 	_as = new AtomSpace();
-	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-	TSM_ASSERT("Persist Module not loaded", _pm);
+	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
 
 	try {
-		_pm->do_open(uri);
+		store->open();
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -360,8 +358,8 @@ void QueryPersistUTest::do_test_join(void)
 	Handle key = an(PREDICATE_NODE, "qkey");
 
 	// Run the join
-	_as->fetch_query(join, key);
-	_as->barrier();
+	store->fetch_query(join, key);
+	store->barrier();
 
 	// Verify that vehicles were fetched
 	ValuePtr results = join->getValue(key);
@@ -387,8 +385,7 @@ void QueryPersistUTest::do_test_join(void)
 
 	TSM_ASSERT_EQUALS("Expecting airplane, bicycle and car", hset, expect);
 
-	_pm->do_close();
-	delete _pm;
+	store->close();
 	delete _as;
 	logger().info("END TEST: %s", __FUNCTION__);
 }

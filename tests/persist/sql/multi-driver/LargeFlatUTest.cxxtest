@@ -20,8 +20,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -89,7 +89,7 @@ class LargeFlatUTest :  public CxxTest::TestSuite
 
 		int filler_up(AtomSpace *);
 		void add_to_space(int, AtomSpace *, std::string id);
-		void fetch_space(int, AtomSpace *);
+		void fetch_space(int, StorageNodePtr);
 		void check_space(int, AtomSpace *, std::string dbgmsg);
 		void check_empty(int, AtomSpace *);
 		void atomCompare(AtomPtr, AtomPtr, std::string);
@@ -150,8 +150,8 @@ void LargeFlatUTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
 	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-	SQLAtomStorage* astore = new SQLAtomStorage();
-	astore->open(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -264,7 +264,7 @@ void LargeFlatUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	l3[idx] = LinkCast(hl3[idx]);
 }
 
-void LargeFlatUTest::fetch_space(int idx, AtomSpace *space)
+void LargeFlatUTest::fetch_space(int idx, StorageNodePtr space)
 {
 	AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
 	Handle hb1(ab1->get_handle());
@@ -405,15 +405,15 @@ void LargeFlatUTest::do_test_atomspace(void)
 
 	kill_data();
 
-	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-	TSM_ASSERT("Persist Module not loaded", _pm);
+	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
 
 	try {
-		_pm->do_open(uri);
+		store->open();
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -427,19 +427,23 @@ void LargeFlatUTest::do_test_atomspace(void)
 		check_space(i, _as, "verify-add");
 
 	/* Push all atoms out to the SQL DB */
-	_as->store_atomspace();
+	store->store_atomspace();
 
 	/* Extract atoms from the AtomSpace. This does not delete them from
 	 * the SQL storage, though; to do that, they must be deleted, not
 	 * extracted.
 	 */
-	_as->barrier();
+	store->barrier();
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
+	/* The clear above removed the node. Lets add it back in. */
+	hsn = _as->add_atom(hsn);
+	store = StorageNodeCast(hsn);
+
 	/* Verify that the atoms can still be fetched from storage. */
 	for (i=0; i<idx; i++) {
-		fetch_space(i, _as);
+		fetch_space(i, store);
 		check_space(i, _as, "verify-fetch");
 	}
 
@@ -447,9 +451,13 @@ void LargeFlatUTest::do_test_atomspace(void)
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
+	/* The clear above removed the node. Lets add it back in. */
+	hsn = _as->add_atom(hsn);
+	store = StorageNodeCast(hsn);
+
 	/* Verify that the atoms can still be fetched from storage. */
 	for (i=0; i<idx; i++) {
-		fetch_space(i, _as);
+		fetch_space(i, store);
 		check_space(i, _as, "ver-again");
 	}
 
@@ -463,9 +471,8 @@ void LargeFlatUTest::do_test_atomspace(void)
 		check_empty(i, _as);
 
 	/* Orderly shutdown avoids warning in Postgres log file. */
-	_pm->do_close();
+	store->close();
 
-	delete _pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

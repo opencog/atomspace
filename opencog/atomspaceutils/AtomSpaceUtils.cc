@@ -54,7 +54,8 @@ bool do_hypergraph_removal(AtomSpace& as, const Handle& h, bool from_storage)
     // Recursive case
     if (h->is_link()) {
         HandleSeq oset = h->getOutgoingSet();
-        bool success = (from_storage)? as.remove_atom(h) : as.extract_atom(h);
+        // bool success = (from_storage)? as.remove_atom(h) : as.extract_atom(h);
+        bool success = as.extract_atom(h);
         if (success) {
             // Return true only if entire subgraph was removed.
             for (const Handle& oh : oset)
@@ -65,7 +66,8 @@ bool do_hypergraph_removal(AtomSpace& as, const Handle& h, bool from_storage)
     }
     // Base case
     else {
-        return (from_storage)? as.remove_atom(h) : as.extract_atom(h);
+        // return (from_storage)? as.remove_atom(h) : as.extract_atom(h);
+        return as.extract_atom(h);
     }
 }
 

@@ -575,7 +575,8 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 
 	// AtomSpace::removeAtom() returns true if atom was deleted,
 	// else returns false
-	bool rc = atomspace->remove_atom(h, false);
+	// bool rc = atomspace->remove_atom(h, false);
+	bool rc = atomspace->extract_atom(h, false);
 
 	// Clobber the handle, too.
 	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
@@ -599,7 +600,8 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive!");
 
-	bool rc = atomspace->remove_atom(h, true);
+	// bool rc = atomspace->remove_atom(h, true);
+	bool rc = atomspace->extract_atom(h, true);
 
 	// Clobber the handle, too.
 	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;

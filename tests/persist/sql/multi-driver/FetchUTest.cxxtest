@@ -150,8 +150,8 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	SQLAtomStorage* astore = new SQLAtomStorage();
-	astore->open(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -306,9 +306,9 @@ void FetchUTest::test_readonly(void)
 
 	delete _as;
 	_as = new AtomSpace();
-	_as->set_read_only();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
+	_as->set_read_only();
 
 	// Despite the AtomSpace being readonly, we should still be
 	// able to load atoms from the database.
@@ -342,20 +342,20 @@ void FetchUTest::test_readonly(void)
 	TS_ASSERT((*tv) == (*etv));
 
 	// Should be possible to extract, even though its read-only
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 	eval->eval(R"((cog-extract! (Concept "AAA")))");
 	eval->eval(R"((cog-extract! (Concept "BBB")))");
-	TS_ASSERT(1 == _as->get_size());
+	TS_ASSERT(2 == _as->get_size());
 
 	// And re-load them again.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
 	eval->eval("(barrier)");
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 
 	TS_ASSERT(true == _as->get_read_only());
 	Handle d = _as->add_node(CONCEPT_NODE, "barfoo");
 	TS_ASSERT(d == nullptr);
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

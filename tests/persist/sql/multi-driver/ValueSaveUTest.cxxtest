@@ -117,6 +117,8 @@ class ValueSaveUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
+        void kill_data(const StorageNodePtr&);
+
         void do_test_single_atom_save();
         void do_test_save_restore(bool);
         void check_one(ValuePtr, bool);
@@ -146,6 +148,11 @@ class ValueSaveUTest :  public CxxTest::TestSuite
 void ValueSaveUTest::setUp(void) {}
 
 void ValueSaveUTest::tearDown(void) {}
+
+void ValueSaveUTest::kill_data(const StorageNodePtr& store)
+{
+	store->erase();
+}
 
 void ValueSaveUTest::test_odbc_single_atom_save(void)
 {
@@ -257,24 +264,24 @@ void ValueSaveUTest::test_pq_incoming(void)
  */
 void ValueSaveUTest::do_test_single_atom_save()
 {
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
-	store->kill_data();
-
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
+	kill_data(store);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
-	as->store_atom(key);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(key);
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	// Now set some values
@@ -283,38 +290,37 @@ void ValueSaveUTest::do_test_single_atom_save()
 		                     3.09876543210987654e200}));
 
 	atom->setValue(key, pvf);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	atom->setValue(key, pvs);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvl = createLinkValue(
 		std::vector<ValuePtr>({pvf, pvs}));
 
 	atom->setValue(key, pvl);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	ValuePtr pvl2 = createLinkValue(
 		std::vector<ValuePtr>({pvl, pvl, pvf, pvs}));
 
 	atom->setValue(key, pvl2);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
-	store->kill_data();
+	store->erase();
 
 	delete as;
-	delete store;
 }
 
 // ============================================================
@@ -329,41 +335,40 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 
 	// ------
 	// First, save the value
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
-
-	Handle key = as->fetch_atom(bkey);
-	Handle atom = as->fetch_atom(batom);
+	Handle key = store->fetch_atom(bkey);
+	Handle atom = store->fetch_atom(batom);
 	printf ("Setup atom %s\n", atom->to_string().c_str());
 	printf ("Vals %s\n", atom->valuesToString().c_str());
 
 	atom->setValue(key, pap);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(atom);
+	store->barrier();
 
 	printf ("Stored atom %s\n", atom->to_string().c_str());
 	printf ("Stored vals %s\n", atom->valuesToString().c_str());
 
 	delete as;
-	delete store;
 
 	// ---------------------------------
 	// Now, fetch the value and compare.
-	store = new SQLAtomStorage();
-	store->open(uri);
-	TS_ASSERT(store->connected())
-
 	as = new AtomSpace();
-	store->registerWith(as);
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
 
 	// Storage uses a different code path if the key is not yet
 	// known when the values are fetched.  Test this code path.
-	if (fetchkey) key = as->fetch_atom(bkey);
-	atom = as->fetch_atom(batom);
+	if (fetchkey) key = store->fetch_atom(bkey);
+	atom = store->fetch_atom(batom);
 
 	printf("Got atom %s\n", atom->to_string().c_str());
 	printf("Got vals %s\n", atom->valuesToString().c_str());
@@ -373,29 +378,28 @@ void ValueSaveUTest::check_one(ValuePtr pap, bool fetchkey)
 	TS_ASSERT(*pap == *fap);
 
 	delete as;
-	delete store;
 }
 
 void ValueSaveUTest::do_test_save_restore(bool fkey)
 {
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
-	store->kill_data();
-
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
+	kill_data(store);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
-	as->store_atom(key);
-	as->store_atom(atom);
-	as->barrier();
+	store->store_atom(key);
+	store->store_atom(atom);
+	store->barrier();
 
 	// --------------------
 	// Now set some values
@@ -424,9 +428,8 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	check_one(pvl2, fkey);
 
 	// --------------------
-	store->kill_data();
+	kill_data(store);
 	delete as;
-	delete store;
 }
 
 // ============================================================
@@ -436,15 +439,15 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 // as well.  This tests the fetching of nodes.
 void ValueSaveUTest::do_test_load_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
-	store->kill_data();
-
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
+	kill_data(store);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "float node");
@@ -488,34 +491,34 @@ void ValueSaveUTest::do_test_load_by_type()
 
 	// --------------------
 	// Save, and close things down.
-	as->store_atom(af);
-	as->store_atom(at);
-	as->store_atom(al);
-	as->store_atom(av);
-	as->barrier();
+	store->store_atom(af);
+	store->store_atom(at);
+	store->store_atom(al);
+	store->store_atom(av);
+	store->barrier();
 
 	delete as;
-	delete store;
 
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage();
-	store->open(uri);
-	TS_ASSERT(store->connected())
-
 	as = new AtomSpace();
-	store->registerWith(as);
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
-	as->fetch_all_atoms_of_type(CONCEPT_NODE);
-	as->barrier();
+	store->fetch_all_atoms_of_type(CONCEPT_NODE);
+	store->barrier();
 
-	// Six: 4 ConceptNodes, the PredicateNode "*-TruthValueKey-*"
+	// Seven: 4 ConceptNodes, the PredicateNode "*-TruthValueKey-*"
 	// and PredicateNode "some pred key" -- the two preds show up
-	// when the attached values are fetched.
-	TSM_ASSERT_EQUALS("Wrong number of Atoms fetched!", as->get_size(), 6);
+	// when the attached values are fetched. And, cough cough,
+	// (PostgresStorageNode "postgres:///opencog_test")
+	TSM_ASSERT_EQUALS("Wrong number of Atoms fetched!", as->get_size(), 7);
 
 	printf("Got %lu Atoms\n", as->get_size());
 	HandleSet hset;
@@ -555,9 +558,8 @@ void ValueSaveUTest::do_test_load_by_type()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
+	kill_data(store);
 	delete as;
-	delete store;
 }
 
 // ============================================================
@@ -569,15 +571,15 @@ void ValueSaveUTest::do_test_load_by_type()
 // be fetched.
 void ValueSaveUTest::do_test_link_by_type()
 {
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
-	store->kill_data();
-
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
+	kill_data(store);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -649,24 +651,23 @@ void ValueSaveUTest::do_test_link_by_type()
 	// Save, and close things down.
 	// Note that this store will also *recursively* store the
 	// values on the outgoing atoms, as well.
-	as->store_atom(cf);
-	as->store_atom(ct);
-	as->store_atom(cl);
-	as->store_atom(cv);
-	as->barrier();
+	store->store_atom(cf);
+	store->store_atom(ct);
+	store->store_atom(cl);
+	store->store_atom(cv);
+	store->barrier();
 
 	delete as;
-	delete store;
 
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage();
-	store->open(uri);
-	TS_ASSERT(store->connected())
-
 	as = new AtomSpace();
-	store->registerWith(as);
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
@@ -681,9 +682,9 @@ void ValueSaveUTest::do_test_link_by_type()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	as->fetch_all_atoms_of_type(LIST_LINK);
-	as->barrier();
-	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 14);
+	store->fetch_all_atoms_of_type(LIST_LINK);
+	store->barrier();
+	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 15);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
@@ -768,9 +769,8 @@ void ValueSaveUTest::do_test_link_by_type()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
+	kill_data(store);
 	delete as;
-	delete store;
 }
 
 // ============================================================
@@ -780,15 +780,15 @@ void ValueSaveUTest::do_test_link_by_type()
 // as well, but only on the incoming set!
 void ValueSaveUTest::do_test_incoming()
 {
-	SQLAtomStorage *store = new SQLAtomStorage();
-	store->open(uri);
+	AtomSpace* as = new AtomSpace();
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
 	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
-	store->kill_data();
-
-	AtomSpace* as = new AtomSpace();
-	store->registerWith(as);
+	kill_data(store);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle af = as->add_node(CONCEPT_NODE, "a float node");
@@ -860,24 +860,23 @@ void ValueSaveUTest::do_test_incoming()
 	// Save, and close things down.
 	// Note that this store will also *recursively* store the
 	// values on the outgoing atoms, as well.
-	as->store_atom(cf);
-	as->store_atom(ct);
-	as->store_atom(cl);
-	as->store_atom(cv);
-	as->barrier();
+	store->store_atom(cf);
+	store->store_atom(ct);
+	store->store_atom(cl);
+	store->store_atom(cv);
+	store->barrier();
 
 	delete as;
-	delete store;
 
 	// --------------------
 	// Start it up again.
 
-	store = new SQLAtomStorage();
-	store->open(uri);
-	TS_ASSERT(store->connected())
-
 	as = new AtomSpace();
-	store->registerWith(as);
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
 
 	// --------------------
 	// Fetch incoming set. This is what we are testing.
@@ -892,12 +891,12 @@ void ValueSaveUTest::do_test_incoming()
 	// The B-nodes are added after the fetch. In either case,
 	// there should not be any values fetched for either A or B;
 	// only the values on the C-links should be fetched.
-	as->fetch_incoming_set(gaf, false);
-	as->fetch_incoming_set(gat, false);
-	as->fetch_incoming_set(gal, false);
-	as->fetch_incoming_set(gav, false);
-	as->barrier();
-	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 14);
+	store->fetch_incoming_set(gaf, false);
+	store->fetch_incoming_set(gat, false);
+	store->fetch_incoming_set(gal, false);
+	store->fetch_incoming_set(gav, false);
+	store->barrier();
+	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 15);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
@@ -982,9 +981,8 @@ void ValueSaveUTest::do_test_incoming()
 	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
-	store->kill_data();
+	kill_data(store);
 	delete as;
-	delete store;
 }
 
 /* ============================= END OF FILE ================= */

@@ -21,23 +21,18 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/persist/api/BackingStore.h>
 
 using namespace opencog;
-
-void BackingStore::registerWith(AtomSpace* atomspace)
-{
-	atomspace->registerBackingStore(this);
-}
-
-void BackingStore::unregisterWith(AtomSpace* atomspace)
-{
-	atomspace->unregisterBackingStore(this);
-}
 
 // ==========================================================
 
 void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
+{
+	getIncomingSet(as->get_atomtable(), h);
+}
+
+void BackingStore::doGetIncomingSet(AtomSpace* as, const Handle& h)
 {
 	getIncomingSet(as->get_atomtable(), h);
 }

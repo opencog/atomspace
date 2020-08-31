@@ -41,7 +41,7 @@
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/persist/api/StorageNode.h>
 
 #include "llapi.h"
 
@@ -55,7 +55,7 @@ namespace opencog
  *  @{
  */
 
-class SQLAtomStorage : public BackingStore
+class SQLAtomStorage : public StorageNode
 {
 	private:
 		// Pool of shared connections
@@ -67,11 +67,12 @@ class SQLAtomStorage : public BackingStore
 		// Utility for handling responses (on stack).
 		class Response;
 
-		std::string _uri;
 		bool _use_libpq;
 		bool _use_odbc;
 		int _server_version;
 		void get_server_version(void);
+
+		void connect(const char *);
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
@@ -188,6 +189,10 @@ class SQLAtomStorage : public BackingStore
 		UUID_manager _uuid_manager;
 		UUID_manager _vuid_manager;
 
+		void registerWith(AtomSpace*);
+		void unregisterWith(AtomSpace*);
+		virtual void setAtomSpace(AtomSpace *);
+
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
@@ -236,20 +241,21 @@ class SQLAtomStorage : public BackingStore
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(void);
-		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
-		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
+		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
-		void open(std::string uri);
-		void connect(std::string uri);
+		void open(void);
+		void close(void) { barrier(); /* FIXME we should do more */ }
+		void connect(void);
 		bool connected(void); // connection to DB is alive
 
-		void create_database(std::string uri); // create the database
+		void create_database(void); // create the database
 		void kill_data(void);       // destroy DB contents
 		void clear_cache(void);     // clear out the TLB.
 
-		void registerWith(AtomSpace*);
-		void unregisterWith(AtomSpace*);
+		void create(void) { create_database(); }
+		void destroy(void) { kill_data(); /* TODO also delete the db */ }
+		void erase(void) { kill_data(); }
+
 		void extract_callback(const AtomPtr&);
 		int _extract_sig;
 
@@ -276,6 +282,26 @@ class SQLAtomStorage : public BackingStore
 		void set_hilo_watermarks(int, int);
 		void set_stall_writers(bool);
 };
+
+class PostgresStorageNode : public SQLAtomStorage
+{
+	public:
+		PostgresStorageNode(Type t, const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{}
+		PostgresStorageNode(const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{}
+		static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<PostgresStorageNode> PostgresStorageNodePtr;
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(const Handle& h)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(h); }
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(a); }
+
+#define createPostgresStorageNode std::make_shared<PostgresStorageNode>
 
 
 /** @}*/

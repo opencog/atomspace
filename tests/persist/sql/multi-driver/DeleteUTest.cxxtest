@@ -35,8 +35,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -99,14 +99,14 @@ class DeleteUTest :  public CxxTest::TestSuite
         }
 
         void add_to_space(int, AtomSpace *, std::string id);
-        void fetch_space(int, AtomSpace *);
+        void fetch_space(int, StorageNodePtr);
         void check_space(int, AtomSpace *, std::string dbgmsg);
         void check_remove(int, AtomSpace *, std::string dbgmsg);
         void check_empty(int, AtomSpace *);
         void extract_links(int, AtomSpace *);
-        void delete_links(int, AtomSpace *);
+        void delete_links(int, StorageNodePtr);
         void extract_nodes(int, AtomSpace *);
-        void delete_nodes(int, AtomSpace *);
+        void delete_nodes(int, StorageNodePtr);
         void atomCompare(AtomPtr, AtomPtr, std::string);
         void tvMiscompare(AtomPtr, AtomPtr, std::string);
 
@@ -169,8 +169,8 @@ void DeleteUTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
     if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-    SQLAtomStorage* astore = new SQLAtomStorage();
-    astore->open(uri);
+    SQLAtomStorage* astore = new SQLAtomStorage(uri);
+    astore->open();
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -305,7 +305,7 @@ void DeleteUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     l3[idx] = LinkCast(hl3[idx]);
 }
 
-void DeleteUTest::fetch_space(int idx, AtomSpace *space)
+void DeleteUTest::fetch_space(int idx, StorageNodePtr space)
 {
     AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
     Handle hb1(ab1->get_handle());
@@ -436,14 +436,14 @@ void DeleteUTest::extract_links(int idx, AtomSpace *as)
 
 // This should delete all the links from storage (and also
 // the AtomSpace)
-void DeleteUTest::delete_links(int idx, AtomSpace *as)
+void DeleteUTest::delete_links(int idx, StorageNodePtr store)
 {
-	as->remove_atom(hl3[idx]);
-	as->barrier();
-	as->remove_atom(hl2[idx]);
-	as->barrier();
-	as->remove_atom(hl[idx]);
-	as->barrier();
+	store->remove_atom(hl3[idx]);
+	store->barrier();
+	store->remove_atom(hl2[idx]);
+	store->barrier();
+	store->remove_atom(hl[idx]);
+	store->barrier();
 }
 
 // This removes all the links, and one node, from atomspace,
@@ -454,10 +454,10 @@ void DeleteUTest::extract_nodes(int idx, AtomSpace *as)
 }
 
 // This should delete all the links and one node from storage.
-void DeleteUTest::delete_nodes(int idx, AtomSpace *as)
+void DeleteUTest::delete_nodes(int idx, StorageNodePtr store)
 {
-	as->remove_atom(h3[idx], true);
-	as->barrier();
+	store->remove_atom(h3[idx], true);
+	store->barrier();
 }
 
 // ============================================================
@@ -484,15 +484,15 @@ void DeleteUTest::do_test_remove(void)
 
     kill_data();
 
-    SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-    TSM_ASSERT("Persist Module not loaded", _pm);
+    Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+    StorageNodePtr store = StorageNodeCast(hsn);
 
     try {
-        _pm->do_open(uri);
+        store->open();
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };
@@ -515,47 +515,48 @@ void DeleteUTest::do_test_remove(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to storage */
-    _as->store_atomspace();
+    store->store_atomspace();
 
     printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx);
     TSM_ASSERT("Initial unexpected atomspace size",
-          ((unsigned)(7*idx)) == _as->get_size());
+          ((unsigned)(7*idx+1)) == _as->get_size());
     /* Delete some atoms with non-empty incoming sets.
      * This should result in thier being removed from the atomspace,
      * but NOT fom the backend!
      */
-    _as->barrier();
+    store->barrier();
 
     for (i=0; i<idx; i++)
         extract_links(i, _as);
 
     printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx);
-    TSM_ASSERT("Post-extract unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Post-extract unexpected atomspace size",
+        ((unsigned)(4*idx+1)) == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
-        fetch_space(i, _as);
+        fetch_space(i, store);
         check_space(i, _as, "verify-fetch");
     }
 
     /* This time, kill them in the backend too.  */
     for (i=0; i<idx; i++)
-        delete_links(i, _as);
+        delete_links(i, store);
 
     // Plus-one for PredicateNode "*-TruthValueKey-*"
     printf("Post-remove size=%lu expect=%d\n", _as->get_size(), 4*idx+1);
     TSM_ASSERT_EQUALS("Post-remove unexpected atomspace size",
-		((unsigned)(4*idx+1)), _as->get_size());
+		((unsigned)(4*idx+2)), _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
-        fetch_space(i, _as);
+        fetch_space(i, store);
         check_remove(i, _as, "verify-gone");
     }
 
     printf("Post-referesh size=%lu expect=%d\n", _as->get_size(), 7*idx+1);
     TSM_ASSERT_EQUALS("Post-refetch unexpected atomspace size",
-		((unsigned)(7*idx+1)), _as->get_size());
+		((unsigned)(7*idx+2)), _as->get_size());
 
     /* Kill data for good */
     _as->clear();
@@ -567,9 +568,8 @@ void DeleteUTest::do_test_remove(void)
         check_empty(i, _as);
 
     /* Orderly shutdown avoids warning in Postgres log file. */
-    _pm->do_close();
+    store->close();
 
-    delete _pm;
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -595,15 +595,15 @@ void DeleteUTest::do_test_recurse(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-    TSM_ASSERT("Persist Module not loaded", _pm);
+    Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+    StorageNodePtr store = StorageNodeCast(hsn);
 
     try {
-        _pm->do_open(uri);
+        store->open();
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };
@@ -628,33 +628,34 @@ void DeleteUTest::do_test_recurse(void)
         check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
-    _as->store_atomspace();
+    store->store_atomspace();
 
     /* Perform recursive extract of some nodes.
      * This should result in thier being removed from the atomspace,
      * but NOT fom the backend!
      */
-    _as->barrier();
+    store->barrier();
 
     int zap = 4;
     for (i=0; i<zap; i++)
         extract_nodes(i, _as);
 
     // Plus-one for PredicateNode "*-TruthValueKey-*"
-    size_t expsz = 7*(idx-zap) + 3*zap; // + 1;
+    // Plus-one for PostgresStorageNode
+    size_t expsz = 7*(idx-zap) + 3*zap + 1;
     printf("Atomspace size=%lu expect=%lu\n",
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
-        fetch_space(i, _as);
+        fetch_space(i, store);
         check_space(i, _as, "verify-fetch");
     }
 
     /* This time, kill them in the backend too.  */
     for (i=0; i<zap; i++)
-        delete_nodes(i, _as);
+        delete_nodes(i, store);
 
     // Plus-one for PredicateNode "*-TruthValueKey-*"
     expsz += 1;
@@ -662,17 +663,17 @@ void DeleteUTest::do_test_recurse(void)
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
-    _as->barrier();
+    store->barrier();
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
-        fetch_space(i, _as);
+        fetch_space(i, store);
     }
 
     printf("Post-refetch size=%lu expect=%d\n",
-         _as->get_size(), 7*idx+1);
+         _as->get_size(), 7*idx+2);
     TSM_ASSERT("Unexpected atomspace size",
-         ((unsigned) 7*idx+1) == _as->get_size());
+         ((unsigned) 7*idx+2) == _as->get_size());
 
     /* Check that the removed atoms really got zapped. */
     for (i=0; i<zap; i++) {
@@ -694,9 +695,8 @@ void DeleteUTest::do_test_recurse(void)
         check_empty(i, _as);
 
     /* Orderly shutdown avoids warning in Postgres log file. */
-    _pm->do_close();
+    store->close();
 
-    delete _pm;
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 

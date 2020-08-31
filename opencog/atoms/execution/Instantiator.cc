@@ -433,7 +433,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		{
 			Type ht = h->get_type();
 			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
-				_as->remove_atom(h, true);
+				_as->extract_atom(h, true);
 		}
 		return Handle::UNDEFINED;
 	}
