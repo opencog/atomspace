@@ -161,12 +161,13 @@ template<class... Args >
 class SchemeArgConverters
 {
 protected:
-	SchemeArgConverters(const char* name)
-	{
-		scheme_name = name;
-	}
-
+	const char *scheme_module;
 	const char *scheme_name;
+
+	SchemeArgConverters(const char * module, const char* name) :
+		scheme_module(module),
+		scheme_name(name)
+	{}
 
 	SCM scm_to(SCM args, size_t idx, SCM) const
 	{
@@ -232,36 +233,33 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_logger(arg, scheme_name, idx);
 	}
-
 };
 
 template<typename R, typename C, class... Args >
-class SchemePrimitiveBase :
+class SchemeMethodBase :
 	SchemeArgConverters<Args...>,
-	public PrimitiveEnviron
+	PrimitiveEnviron
 {
 	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
 	typedef R (C::*Method)(Args...);
 
 	Method method;
 	C* that;
-	const char *scheme_module;
-
 public:
-	SchemePrimitiveBase(const char* module, const char* name,
+	SchemeMethodBase(const char* module, const char* name,
 	                    R (C::*cb)(Args...), C *data) :
-		SchemeArgConverters<Args...>(name)
+		SchemeArgConverters<Args...>(module, name)
 	{
 		that = data;
 		method = cb;
-		scheme_module = module;
 		do_register(module, name, sizeof...(Args));
 	}
 
 protected:
 	virtual const char *get_name(void) {
 		return SchemeArgConverters<Args...>::scheme_name; }
-	virtual const char *get_module(void) { return scheme_module; }
+	virtual const char *get_module(void) {
+		return SchemeArgConverters<Args...>::scheme_module; }
 	virtual size_t get_size(void) { return sizeof (*this); }
 
 	// Get the Ith argument and convert it to a C++ object.
@@ -369,9 +367,10 @@ protected:
 template<typename R, typename C, class... Args>
 class SchemePrimitive :
 	SchemeReturnConverters,
-   public SchemePrimitiveBase<R, C, Args...>
+   public SchemeMethodBase<R, C, Args...>
 {
-	typedef SchemePrimitiveBase<R, C, Args...> super;
+	typedef SchemeMethodBase<R, C, Args...> super;
+
 public:
 	SchemePrimitive(const char* module, const char* name,
 	                R (C::*cb)(Args...), C *data)
@@ -386,9 +385,11 @@ protected:
 
 // Special case when R is void
 template<typename C, class... Args>
-class SchemePrimitive<void, C, Args...> : public SchemePrimitiveBase<void, C, Args...>
+class SchemePrimitive<void, C, Args...> :
+	SchemeMethodBase<void, C, Args...>
 {
-	typedef SchemePrimitiveBase<void, C, Args...> super;
+	typedef SchemeMethodBase<void, C, Args...> super;
+
 public:
 	SchemePrimitive(const char* module, const char* name,
 	                void (C::*cb)(Args...), C *data)
