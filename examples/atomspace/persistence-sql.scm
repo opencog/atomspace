@@ -77,19 +77,20 @@
 ; the unit tests use. Next time the unit tests run, they will wipe
 ; out this data, and so you should probably create and use your own
 ; private login.
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
+(cog-open psn)
 
 ; Try storing again.
 (store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
 
 ; Close the database.
-(sql-close)
+(cog-close psn)
 
 ; Try fetching the atom. The database is closed -- this should fail!
 (fetch-atom (Concept "asdf"))
 
 ; Reopen the database.
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+(cog-open psn)
 
 ; Try fetching the atom. This time it should work.  Notice that
 ; it retrieved the correct TruthValue.
@@ -102,7 +103,7 @@
 	(StringValue "Humpty" "Dumpty"))
 
 (store-atom (Concept "asdf"))
-(sql-close)
+(cog-close psn)
 
 ; The database is closed. Let's mess with the truth value.
 (cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
@@ -113,7 +114,7 @@
 	(Predicate "my key")
 	(StringValue "sat" "on" "a" "wall"))
 
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+(cog-open psn)
 
 (fetch-atom (Concept "asdf"))
 
@@ -136,5 +137,12 @@
 ;
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
 ;   performance data.
+;
+; * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`
+;   Except they take the URL directly. Unfortunatley this means that
+;   one cannot work with more than one connection at a time this way.
+;   Examples:
+;   (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+;   (sql-close)
 ;
 ; That's all for now.
