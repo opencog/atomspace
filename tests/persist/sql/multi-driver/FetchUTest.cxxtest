@@ -306,9 +306,9 @@ void FetchUTest::test_readonly(void)
 
 	delete _as;
 	_as = new AtomSpace();
-	_as->set_read_only();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
+	_as->set_read_only();
 
 	// Despite the AtomSpace being readonly, we should still be
 	// able to load atoms from the database.

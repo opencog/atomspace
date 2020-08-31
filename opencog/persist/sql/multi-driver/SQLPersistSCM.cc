@@ -97,6 +97,12 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Can't find the atomspace!");
 
+    // Adding the postgres node to the atomspace will fail on read-only
+    // atomspaces.
+    if (_as->get_read_only())
+        throw RuntimeException(TRACE_INFO,
+             "sql-open: Error: AtomSpace is read-only!");
+
     Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
     _storage = PostgresStorageNodeCast(hsn);
     _storage->open();
