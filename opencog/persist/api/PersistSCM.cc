@@ -27,8 +27,6 @@
 
 using namespace opencog;
 
-StorageNodePtr PersistSCM::_sn;
-
 PersistSCM::PersistSCM(void)
 	: ModuleWrap("opencog persist")
 {
@@ -40,108 +38,218 @@ PersistSCM::PersistSCM(void)
 
 void PersistSCM::init(void)
 {
-	define_scheme_primitive("sn-cog-open",
-	             &PersistSCM::sn_open, this, "persist");
-	define_scheme_primitive("sn-cog-close",
-	             &PersistSCM::sn_close, this, "persist");
+	define_scheme_primitive("cog-open",
+	             &PersistSCM::open, this, "persist");
+	define_scheme_primitive("cog-close",
+	             &PersistSCM::close, this, "persist");
+
 	define_scheme_primitive("sn-fetch-atom",
-	             &PersistSCM::sn_fetch_atom, this, "persist");
+	             &PersistSCM::sn_fetch_atom, "persist");
 	define_scheme_primitive("sn-fetch-value",
-	             &PersistSCM::sn_fetch_value, this, "persist");
+	             &PersistSCM::sn_fetch_value, "persist");
 	define_scheme_primitive("sn-fetch-incoming-set",
-	             &PersistSCM::sn_fetch_incoming_set, this, "persist");
+	             &PersistSCM::sn_fetch_incoming_set, "persist");
 	define_scheme_primitive("sn-fetch-incoming-by-type",
-	             &PersistSCM::sn_fetch_incoming_by_type, this, "persist");
+	             &PersistSCM::sn_fetch_incoming_by_type, "persist");
 	define_scheme_primitive("sn-fetch-query-2args",
-	             &PersistSCM::sn_fetch_query2, this, "persist");
+	             &PersistSCM::sn_fetch_query2, "persist");
 	define_scheme_primitive("sn-fetch-query-4args",
-	             &PersistSCM::sn_fetch_query4, this, "persist");
+	             &PersistSCM::sn_fetch_query4, "persist");
 	define_scheme_primitive("sn-store-atom",
-	             &PersistSCM::sn_store_atom, this, "persist");
+	             &PersistSCM::sn_store_atom, "persist");
 	define_scheme_primitive("sn-store-value",
-	             &PersistSCM::sn_store_value, this, "persist");
+	             &PersistSCM::sn_store_value, "persist");
 	define_scheme_primitive("sn-load-atoms-of-type",
-	             &PersistSCM::sn_load_type, this, "persist");
+	             &PersistSCM::sn_load_type, "persist");
 	define_scheme_primitive("sn-load-atomspace",
-	             &PersistSCM::sn_load_atomspace, this, "persist");
+	             &PersistSCM::sn_load_atomspace, "persist");
 	define_scheme_primitive("sn-store-atomspace",
-	             &PersistSCM::sn_store_atomspace, this, "persist");
+	             &PersistSCM::sn_store_atomspace, "persist");
 	define_scheme_primitive("sn-barrier",
-	             &PersistSCM::sn_barrier, this, "persist");
+	             &PersistSCM::sn_barrier, "persist");
+
+	define_scheme_primitive("dflt-fetch-atom",
+	             &PersistSCM::dflt_fetch_atom, this, "persist");
+	define_scheme_primitive("dflt-fetch-value",
+	             &PersistSCM::dflt_fetch_value, this, "persist");
+	define_scheme_primitive("dflt-fetch-incoming-set",
+	             &PersistSCM::dflt_fetch_incoming_set, this, "persist");
+	define_scheme_primitive("dflt-fetch-incoming-by-type",
+	             &PersistSCM::dflt_fetch_incoming_by_type, this, "persist");
+	define_scheme_primitive("dflt-fetch-query-2args",
+	             &PersistSCM::dflt_fetch_query2, this, "persist");
+	define_scheme_primitive("dflt-fetch-query-4args",
+	             &PersistSCM::dflt_fetch_query4, this, "persist");
+	define_scheme_primitive("dflt-store-atom",
+	             &PersistSCM::dflt_store_atom, this, "persist");
+	define_scheme_primitive("dflt-store-value",
+	             &PersistSCM::dflt_store_value, this, "persist");
+	define_scheme_primitive("dflt-load-atoms-of-type",
+	             &PersistSCM::dflt_load_type, this, "persist");
+	define_scheme_primitive("dflt-load-atomspace",
+	             &PersistSCM::dflt_load_atomspace, this, "persist");
+	define_scheme_primitive("dflt-store-atomspace",
+	             &PersistSCM::dflt_store_atomspace, this, "persist");
+	define_scheme_primitive("dflt-barrier",
+	             &PersistSCM::dflt_barrier, this, "persist");
 }
 
 // =====================================================================
 
-void PersistSCM::sn_open(Handle h)
+// South Texas Nuclear Project
+#define GET_STNP \
+	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) \
+		throw RuntimeException(TRACE_INFO, \
+			"Expecting StorageNode, got %s", hsn->to_short_string().c_str()); \
+ \
+	StorageNodePtr stnp = StorageNodeCast(hsn); \
+ \
+	/* The cast will fail, if the dynamic library that defines the type */ \
+	/* isn't loaded. This is the user's job. They can do it by saying */ \
+	/* (use-modules (opencog persist-foo), Handle hsn) */ \
+	if (nullptr == stnp) \
+		throw RuntimeException(TRACE_INFO, \
+			"Not opened; please load module that defines %s\n" \
+			"Like so: (use-modules (persist-foo))", \
+			nameserver().getTypeName(hsn->get_type()).c_str());
+
+StorageNodePtr PersistSCM::_sn;
+
+void PersistSCM::open(Handle hsn)
 {
-	if (not nameserver().isA(h->get_type(), STORAGE_NODE))
-		throw RuntimeException(TRACE_INFO,
-			"Expecting StorageNode, got %s", h->to_short_string().c_str());
-
-	StorageNodePtr stnp = StorageNodeCast(h);
-
-	// The cast will fail, if the dynamic library that defines the type
-	// isn't loaded. This is the user's job. They can do it by saying
-	// (use-modules (opencog persist-foo))
-	if (nullptr == stnp)
-		throw RuntimeException(TRACE_INFO,
-			"Not opened; please load module that defines %s\n"
-			"Like so: (use-modules (persist-foo))",
-			nameserver().getTypeName(h->get_type()).c_str());
-
+	GET_STNP;
 	stnp->open();
 
 	if (nullptr == _sn) _sn = stnp;
 }
 
-void PersistSCM::sn_close(Handle h)
+void PersistSCM::close(Handle hsn)
 {
-	if (not nameserver().isA(h->get_type(), STORAGE_NODE))
-		throw RuntimeException(TRACE_INFO,
-			"Expecting StorageNode, got %s", h->to_short_string().c_str());
-
-	StorageNodePtr stnp = StorageNodeCast(h);
+	GET_STNP;
 	stnp->close();
 
 	if (stnp == _sn) _sn = nullptr;
 }
 
+// =====================================================================
+
+Handle PersistSCM::sn_fetch_atom(Handle h, Handle hsn)
+{
+	GET_STNP;
+	return stnp->fetch_atom(h);
+}
+
+Handle PersistSCM::sn_fetch_value(Handle h, Handle key, Handle hsn)
+{
+	GET_STNP;
+	return stnp->fetch_value(h, key);
+}
+
+Handle PersistSCM::sn_fetch_incoming_set(Handle h, Handle hsn)
+{
+	GET_STNP;
+	// The "false" flag here means that the fetch is NOT recursive.
+	return stnp->fetch_incoming_set(h, false);
+}
+
+Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t, Handle hsn)
+{
+	GET_STNP;
+	return stnp->fetch_incoming_by_type(h, t);
+}
+
+Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
+{
+	GET_STNP;
+	return stnp->fetch_query(query, key, Handle::UNDEFINED, false);
+}
+
+Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
+                                Handle meta, bool fresh, Handle hsn)
+{
+	GET_STNP;
+	return stnp->fetch_query(query, key, meta, fresh);
+}
+
+/**
+ * Store the single atom to the backing store hanging off the
+ * atom-space.
+ */
+Handle PersistSCM::sn_store_atom(Handle h, Handle hsn)
+{
+	GET_STNP;
+	stnp->store_atom(h);
+	return h;
+}
+
+void PersistSCM::sn_store_value(Handle h, Handle key, Handle hsn)
+{
+	GET_STNP;
+	stnp->store_value(h, key);
+}
+
+void PersistSCM::sn_load_type(Type t, Handle hsn)
+{
+	GET_STNP;
+	stnp->fetch_all_atoms_of_type(t);
+}
+
+void PersistSCM::sn_load_atomspace(Handle hsn)
+{
+	GET_STNP;
+	stnp->load_atomspace();
+}
+
+void PersistSCM::sn_store_atomspace(Handle hsn)
+{
+	GET_STNP;
+	stnp->store_atomspace();
+}
+
+void PersistSCM::sn_barrier(Handle hsn)
+{
+	GET_STNP;
+	stnp->barrier();
+}
+
+// =====================================================================
+
 #define CHECK \
 	if (nullptr == _sn) \
 		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
 
-Handle PersistSCM::sn_fetch_atom(Handle h)
+Handle PersistSCM::dflt_fetch_atom(Handle h)
 {
 	CHECK;
 	return _sn->fetch_atom(h);
 }
 
-Handle PersistSCM::sn_fetch_value(Handle h, Handle key)
+Handle PersistSCM::dflt_fetch_value(Handle h, Handle key)
 {
 	CHECK;
 	return _sn->fetch_value(h, key);
 }
 
-Handle PersistSCM::sn_fetch_incoming_set(Handle h)
+Handle PersistSCM::dflt_fetch_incoming_set(Handle h)
 {
 	CHECK;
 	// The "false" flag here means that the fetch is NOT recursive.
 	return _sn->fetch_incoming_set(h, false);
 }
 
-Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t)
+Handle PersistSCM::dflt_fetch_incoming_by_type(Handle h, Type t)
 {
 	CHECK;
 	return _sn->fetch_incoming_by_type(h, t);
 }
 
-Handle PersistSCM::sn_fetch_query2(Handle query, Handle key)
+Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
 {
 	CHECK;
 	return _sn->fetch_query(query, key, Handle::UNDEFINED, false);
 }
 
-Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
+Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
 	CHECK;
@@ -152,38 +260,38 @@ Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
  * Store the single atom to the backing store hanging off the
  * atom-space.
  */
-Handle PersistSCM::sn_store_atom(Handle h)
+Handle PersistSCM::dflt_store_atom(Handle h)
 {
 	CHECK;
 	_sn->store_atom(h);
 	return h;
 }
 
-void PersistSCM::sn_store_value(Handle h, Handle key)
+void PersistSCM::dflt_store_value(Handle h, Handle key)
 {
 	CHECK;
 	_sn->store_value(h, key);
 }
 
-void PersistSCM::sn_load_type(Type t)
+void PersistSCM::dflt_load_type(Type t)
 {
 	CHECK;
 	_sn->fetch_all_atoms_of_type(t);
 }
 
-void PersistSCM::sn_load_atomspace(void)
+void PersistSCM::dflt_load_atomspace(void)
 {
 	CHECK;
 	_sn->load_atomspace();
 }
 
-void PersistSCM::sn_store_atomspace(void)
+void PersistSCM::dflt_store_atomspace(void)
 {
 	CHECK;
 	_sn->store_atomspace();
 }
 
-void PersistSCM::sn_barrier(void)
+void PersistSCM::dflt_barrier(void)
 {
 	CHECK;
 	_sn->barrier();
@@ -193,3 +301,5 @@ void opencog_persist_init(void)
 {
 	static PersistSCM patty;
 }
+
+// =================== END OF FILE ====================

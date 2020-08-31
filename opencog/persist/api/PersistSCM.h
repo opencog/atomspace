@@ -40,25 +40,39 @@ class PersistSCM : public ModuleWrap
 private:
 	void init(void);
 
+	// These take the storage-node to use as final argument.
+	static Handle sn_fetch_atom(Handle, Handle);
+	static Handle sn_fetch_value(Handle, Handle, Handle);
+	static Handle sn_fetch_incoming_set(Handle, Handle);
+	static Handle sn_fetch_incoming_by_type(Handle, Type, Handle);
+	static Handle sn_fetch_query2(Handle, Handle, Handle);
+	static Handle sn_fetch_query4(Handle, Handle, Handle, bool, Handle);
+	static Handle sn_store_atom(Handle, Handle);
+	static void sn_store_value(Handle, Handle, Handle);
+	static void sn_load_type(Type, Handle);
+	static void sn_load_atomspace(Handle);
+	static void sn_store_atomspace(Handle);
+	static void sn_barrier(Handle);
+
 	// Single global default storage node,
 	// which all the functions below use.
 	static StorageNodePtr _sn;
 
-	void sn_open(Handle);
-	void sn_close(Handle);
+	void open(Handle);
+	void close(Handle);
 
-	Handle sn_fetch_atom(Handle);
-	Handle sn_fetch_value(Handle, Handle);
-	Handle sn_fetch_incoming_set(Handle);
-	Handle sn_fetch_incoming_by_type(Handle, Type);
-	Handle sn_fetch_query2(Handle, Handle);
-	Handle sn_fetch_query4(Handle, Handle, Handle, bool);
-	Handle sn_store_atom(Handle);
-	void sn_store_value(Handle, Handle);
-	void sn_load_type(Type);
-	void sn_load_atomspace(void);
-	void sn_store_atomspace(void);
-	void sn_barrier(void);
+	Handle dflt_fetch_atom(Handle);
+	Handle dflt_fetch_value(Handle, Handle);
+	Handle dflt_fetch_incoming_set(Handle);
+	Handle dflt_fetch_incoming_by_type(Handle, Type);
+	Handle dflt_fetch_query2(Handle, Handle);
+	Handle dflt_fetch_query4(Handle, Handle, Handle, bool);
+	Handle dflt_store_atom(Handle);
+	void dflt_store_value(Handle, Handle);
+	void dflt_load_type(Type);
+	void dflt_load_atomspace(void);
+	void dflt_store_atomspace(void);
+	void dflt_barrier(void);
 
 public:
 	PersistSCM(void);
