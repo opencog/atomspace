@@ -365,16 +365,8 @@ protected:
 	}
 };
 
-// General case when R is non-void
-template<typename R, typename C, class... Args>
-class SchemePrimitive : public SchemePrimitiveBase<R, C, Args...>
+class SchemeReturnConverters
 {
-	typedef SchemePrimitiveBase<R, C, Args...> super;
-public:
-	SchemePrimitive(const char* module, const char* name,
-	                R (C::*cb)(Args...), C *data)
-		: super(module, name, cb, data) {}
-
 protected:
 	// Convert any type to SCM
 	SCM scm_from(SCM scm) const
@@ -447,7 +439,21 @@ protected:
 	{
 		return SchemeSmob::logger_to_scm(lg);
 	}
+};
 
+// General case when R is non-void
+template<typename R, typename C, class... Args>
+class SchemePrimitive :
+	SchemeReturnConverters,
+   public SchemePrimitiveBase<R, C, Args...>
+{
+	typedef SchemePrimitiveBase<R, C, Args...> super;
+public:
+	SchemePrimitive(const char* module, const char* name,
+	                R (C::*cb)(Args...), C *data)
+		: super(module, name, cb, data) {}
+
+protected:
 	virtual SCM invoke (SCM args)
 	{
 		return scm_from(super::cpp_invoke(args));
@@ -473,6 +479,17 @@ protected:
 	}
 };
 
+template<typename R, class... Args>
+class SchemeFunction :
+	SchemeReturnConverters
+{
+public:
+	SchemeFunction(const char* module, const char* name,
+	                R (*func)(Args...))
+		{}
+};
+
+// Method on a class C
 template<typename R, typename C, class... Args >
 inline void define_scheme_primitive(const char *name,
                                     R (C::*method)(Args...),
@@ -480,6 +497,15 @@ inline void define_scheme_primitive(const char *name,
                                     const char* module="extension")
 {
 	new SchemePrimitive<R, C, Args...>(module, name, method, data);
+}
+
+// Plain function, or static method
+template<typename R, class... Args >
+inline void define_scheme_primitive(const char *name,
+                                    R (func)(Args...),
+                                    const char* module="extension")
+{
+	new SchemeFunction<R, Args...>(module, name, func);
 }
 
 }
