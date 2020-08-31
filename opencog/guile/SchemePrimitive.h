@@ -152,129 +152,23 @@ protected:
 	virtual ~PrimitiveEnviron();
 };
 
-// Before being refactored with variadic templates this class used to
-// enumerate all type signatures of all methods passed to
-// SchemePrimitive ctor. This was ugly but had the advantage that it
-// would discourage people from creating new signatures, in particular
-// ones not using Handles. Indeed, in order to foster reflexivity we
-// prefer functions that take Handles and return Handles, because they
-// can then be called within atomese programs (using
-// ExecutionOutputLink or EvaluationLink).
-//
-// The signatures were represented as (were + indicates one or more):
-//
-// X_X+
-//
-// the first X indicating the return type and the ones after the
-// underscore indicating the input types, with the following type
-// naming conventions:
-//
-// A == AtomSpace*
-// B == bool
-// D == double
-// H == Handle
-// I == int
-// Q == HandleSeq
-// K == HandleSeqSeq
-// S == string
-// P == TruthValuePtr
-// T == Type
-// V == void
-// Z == size_t
-//
-// So for instance the following
-//
-// S_AS
-//
-// would indicate a method that takes an Atomspace* and string as
-// first and second arguments, and return a string.
-//
-// Given that signature representation, below is a list of potential
-// abuse of this API. Again it was never the intent that this would
-// become a free-for-all, anything-goes dumping ground for badly
-// designed API's. But that is what it has become. Can we reverse the
-// decay?
-//
-// Here is a list of some of the users:
-//
-// B_B    -- cogutil logger boolean setters/getters.
-// B_HH   -- PatternSCM::value_is_type(), etc.
-//        -- LGDictSCM::do_lg_conn_type_match(), etc.
-// H_HH   -- ?? someoene??
-// H_HHH  -- pointmem (the 3D spatial API)
-// H_HHHH -- do_backward_chaining, do_forward_chaining
-// H_HT   -- fetch-incoming-by-type
-// I_V    -- cogutil RandGen
-// P_H    -- FunctionWrapper
-// S_AS   -- CogServerSCM::start_server()
-// S_S    -- cogutil logger API, see guile/LoggerSCM.h
-// S_SS   -- DistSCM  (Gearman server)
-// S_V    -- CogServerSCM::stop_server()
-//        -- cogutil logger get_level(), etc.
-// V_B    -- SQLPersistSCM:do_set_stall, PatternMiner
-// V_I    -- cogutil do_randgen_set_seed
-// V_II   -- SQLPersistSCM:do_set_hilo
-// V_S    -- cogutil logger setters
-//        -- SQLPersistSCM::do_open()
-// V_V    -- SQLPersistSCM::do_close(), do_load(), do_store()
-//        -- WordSenseProcessor::run_wsd()
-//
-// Users that probably should be fixed:
-// V_SA   -- PythonSCM::apply_as
-//           That's backwards, should probably be V_AS
-// K_H    -- SuRealSCM::do_non_cached_sureal_match(), etc.
-//           Should be re-written to use H_H not K_H
-//
-// This API needs to be re-thought, from scratch. Its offensive.
-// H_HTQB -- FuzzySCM::do_nlp_fuzzy_match()
-//
-// This API needs to be re-thought, from scratch. Its offensive.
-// Its complete and total crap.
-// D_HHTB -- DimEmbedModule::euclidDist()
-// Q_HTIB -- DimEmbedModule::kNearestNeighbors()
-// V_T    -- DimEmbedModule::logAtomEmbedding()
-// V_TI   -- DimEmbedModule::embedAtomSpace()
-// V_TIDI -- DimEmbedModule::addKMeansClusters
-//
-// This API needs to be re-thought, from scratch. Its offensive.
-// S_AS   -- PatternMiner
-// S_B    -- PatternMiner
-// S_I    -- PatternMiner
-// S_V    -- PatternMiner
-// V_SI   -- PatternMiner
-
-template<typename R, typename C, class... Args >
-class SchemePrimitiveBase : public PrimitiveEnviron
+// Convert the ith scm argument to its C++ object. The reason the
+// return type is also present as third argument is to tell gcc
+// what overloaded version of scm_to to use. It is a bit of a hack
+// but not that ugly given that the alternative is to use
+// specialized templates.
+template<class... Args >
+class SchemeArgConverters
 {
-	typedef R (C::*Method)(Args...);
-	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
-
-	Method method;
-	C* that;
+protected:
 	const char *scheme_module;
 	const char *scheme_name;
 
-public:
-	SchemePrimitiveBase(const char* module, const char* name,
-	                    R (C::*cb)(Args...), C *data)
-	{
-		that = data;
-		method = cb;
-		scheme_module = module;
-		scheme_name = name;
-		do_register(module, name, sizeof...(Args));
-	}
+	SchemeArgConverters(const char * module, const char* name) :
+		scheme_module(module),
+		scheme_name(name)
+	{}
 
-protected:
-	virtual const char *get_name(void) { return scheme_name; }
-	virtual const char *get_module(void) { return scheme_module; }
-	virtual size_t get_size(void) { return sizeof (*this); }
-
-	// Convert the ith scm argument to its C++ object. The reason the
-	// return type is also present as third argument is to tell gcc
-	// what overloaded version of scm_to to use. It is a bit of a hack
-	// but not that ugly given that the alternative is to use
-	// specialized templates.
 	SCM scm_to(SCM args, size_t idx, SCM) const
 	{
 		return scm_list_ref(args, scm_from_size_t(idx));
@@ -339,24 +233,105 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_logger(arg, scheme_name, idx);
 	}
+};
+
+// Base class to wrap a call to a function.
+// R == return type
+template<typename R, class... Args >
+class SchemeFunctionBase :
+	SchemeArgConverters<Args...>,
+	PrimitiveEnviron
+{
+	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
+	typedef R (*Funct)(Args...);
+	typedef SchemeArgConverters<Args...> super;
+
+	Funct funct;
+public:
+	SchemeFunctionBase(const char* module, const char* name,
+	                    R (*fun)(Args...)) :
+		SchemeArgConverters<Args...>(module, name)
+	{
+		funct = fun;
+		do_register(module, name, sizeof...(Args));
+	}
+
+protected:
+	virtual const char *get_name(void) { return super::scheme_name; }
+	virtual const char *get_module(void) { return super::scheme_module; }
+	virtual size_t get_size(void) { return sizeof (*this); }
 
 	// Get the Ith argument and convert it to a C++ object.
 	template<std::size_t I>
 	typename std::tuple_element<I, PlainTuple>::type
 		get_conv(SCM args, const PlainTuple& t)
 	{
-		return scm_to(args, I, std::get<I>(t));
+		return SchemeArgConverters<Args...>::scm_to(args, I, std::get<I>(t));
 	}
 
-	// Convert the scm arguments into their C++ objects, and call the
-	// method over them.
+	// Convert the scm arguments into their C++ objects,
+	// and call the function over them.
+	template<size_t ...S>
+	R conv_call_function(SCM args, std::index_sequence<S...>)
+	{
+		return (*funct)(get_conv<S>(args, PlainTuple())...);
+	}
+
+	// Call the function, after converting the SCM args to C++ args.
+	R cpp_invoke(SCM args)
+	{
+		// Call the function over the scm arguments. The index sequence
+		// is used to access the argument types.
+		return conv_call_function(args, std::index_sequence_for<Args...>{});
+	}
+};
+
+// Base class to wrap a call to a method.
+// R == return type
+// C == class which holds the method.
+template<typename R, typename C, class... Args >
+class SchemeMethodBase :
+	SchemeArgConverters<Args...>,
+	PrimitiveEnviron
+{
+	using PlainTuple = std::tuple<typename std::remove_reference<Args>::type...>;
+	typedef R (C::*Method)(Args...);
+	typedef SchemeArgConverters<Args...> super;
+
+	Method method;
+	C* that;
+public:
+	SchemeMethodBase(const char* module, const char* name,
+	                    R (C::*cb)(Args...), C *data) :
+		SchemeArgConverters<Args...>(module, name)
+	{
+		that = data;
+		method = cb;
+		do_register(module, name, sizeof...(Args));
+	}
+
+protected:
+	virtual const char *get_name(void) { return super::scheme_name; }
+	virtual const char *get_module(void) { return super::scheme_module; }
+	virtual size_t get_size(void) { return sizeof (*this); }
+
+	// Get the Ith argument and convert it to a C++ object.
+	template<std::size_t I>
+	typename std::tuple_element<I, PlainTuple>::type
+		get_conv(SCM args, const PlainTuple& t)
+	{
+		return SchemeArgConverters<Args...>::scm_to(args, I, std::get<I>(t));
+	}
+
+	// Convert the scm arguments into their C++ objects,
+	// and call the method over them.
 	template<size_t ...S>
 	R conv_call_method(SCM args, std::index_sequence<S...>)
 	{
 		return (that->*method)(get_conv<S>(args, PlainTuple())...);
 	}
 
-	// Like invoke but return the C++ type instead of its SCM conversion
+	// Call the method, after converting the SCM args to C++ args.
 	R cpp_invoke(SCM args)
 	{
 		// Call the method over the scm arguments. The index sequence
@@ -365,16 +340,9 @@ protected:
 	}
 };
 
-// General case when R is non-void
-template<typename R, typename C, class... Args>
-class SchemePrimitive : public SchemePrimitiveBase<R, C, Args...>
+// Convert return values to SCM.
+class SchemeReturnConverters
 {
-	typedef SchemePrimitiveBase<R, C, Args...> super;
-public:
-	SchemePrimitive(const char* module, const char* name,
-	                R (C::*cb)(Args...), C *data)
-		: super(module, name, cb, data) {}
-
 protected:
 	// Convert any type to SCM
 	SCM scm_from(SCM scm) const
@@ -447,18 +415,76 @@ protected:
 	{
 		return SchemeSmob::logger_to_scm(lg);
 	}
+};
 
+// Call function. General case when R is non-void
+template<typename R, class... Args>
+class SchemeFunction :
+	SchemeReturnConverters,
+	SchemeFunctionBase<R, Args...>
+{
+	typedef SchemeFunctionBase<R, Args...> super;
+
+public:
+	SchemeFunction(const char* module, const char* name,
+	                R (*func)(Args...))
+		: super(module, name, func) {}
+
+protected:
 	virtual SCM invoke (SCM args)
 	{
 		return scm_from(super::cpp_invoke(args));
 	}
 };
 
-// Special case when R is void
-template<typename C, class... Args>
-class SchemePrimitive<void, C, Args...> : public SchemePrimitiveBase<void, C, Args...>
+// Call function: Special case when R is void
+template<class... Args>
+class SchemeFunction<void, Args...> :
+	SchemeFunctionBase<void, Args...>
 {
-	typedef SchemePrimitiveBase<void, C, Args...> super;
+	typedef SchemeFunctionBase<void, Args...> super;
+
+public:
+	SchemeFunction(const char* module, const char* name,
+	               void (*func)(Args...))
+		: super(module, name, func) {}
+
+protected:
+
+	virtual SCM invoke (SCM args)
+	{
+		super::cpp_invoke(args);
+		return SCM_UNSPECIFIED;
+	}
+};
+
+// Call method on class. General case when R is non-void
+template<typename R, typename C, class... Args>
+class SchemePrimitive :
+	SchemeReturnConverters,
+	SchemeMethodBase<R, C, Args...>
+{
+	typedef SchemeMethodBase<R, C, Args...> super;
+
+public:
+	SchemePrimitive(const char* module, const char* name,
+	                R (C::*cb)(Args...), C *data)
+		: super(module, name, cb, data) {}
+
+protected:
+	virtual SCM invoke (SCM args)
+	{
+		return scm_from(super::cpp_invoke(args));
+	}
+};
+
+// Call method on class: Special case when R is void
+template<typename C, class... Args>
+class SchemePrimitive<void, C, Args...> :
+	SchemeMethodBase<void, C, Args...>
+{
+	typedef SchemeMethodBase<void, C, Args...> super;
+
 public:
 	SchemePrimitive(const char* module, const char* name,
 	                void (C::*cb)(Args...), C *data)
@@ -473,6 +499,16 @@ protected:
 	}
 };
 
+// Plain function, or static method
+template<typename R, class... Args >
+inline void define_scheme_primitive(const char *name,
+                                    R (func)(Args...),
+                                    const char* module="extension")
+{
+	new SchemeFunction<R, Args...>(module, name, func);
+}
+
+// Method on a class C
 template<typename R, typename C, class... Args >
 inline void define_scheme_primitive(const char *name,
                                     R (C::*method)(Args...),
