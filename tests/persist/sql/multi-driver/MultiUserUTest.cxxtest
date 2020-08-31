@@ -214,7 +214,7 @@ void MultiUserUTest::connect_to_db(int i)
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };

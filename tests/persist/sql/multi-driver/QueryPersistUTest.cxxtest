@@ -214,7 +214,7 @@ void QueryPersistUTest::setup_data(void)
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -272,7 +272,7 @@ void QueryPersistUTest::do_test_meet(void)
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -345,7 +345,7 @@ void QueryPersistUTest::do_test_join(void)
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};

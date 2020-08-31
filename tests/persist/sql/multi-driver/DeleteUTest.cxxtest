@@ -492,7 +492,7 @@ void DeleteUTest::do_test_remove(void)
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };
@@ -603,7 +603,7 @@ void DeleteUTest::do_test_recurse(void)
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };

@@ -399,7 +399,7 @@ void PersistUTest::do_test_atomspace(void)
     }
     catch (RuntimeException &e)
     {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        logger().info("setUp: SQL cannot connect to database");
         friendlyFailMessage();
         exit(1);
     };
