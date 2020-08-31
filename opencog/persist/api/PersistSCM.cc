@@ -96,35 +96,45 @@ void PersistSCM::close(Handle h)
 	if (stnp == _sn) _sn = nullptr;
 }
 
+#define CHECK \
+	if (nullptr == _sn) \
+		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
+
 Handle PersistSCM::fetch_atom(Handle h)
 {
+	CHECK;
 	return _sn->fetch_atom(h);
 }
 
 Handle PersistSCM::fetch_value(Handle h, Handle key)
 {
+	CHECK;
 	return _sn->fetch_value(h, key);
 }
 
 Handle PersistSCM::fetch_incoming_set(Handle h)
 {
+	CHECK;
 	// The "false" flag here means that the fetch is NOT recursive.
 	return _sn->fetch_incoming_set(h, false);
 }
 
 Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 {
+	CHECK;
 	return _sn->fetch_incoming_by_type(h, t);
 }
 
 Handle PersistSCM::fetch_query2(Handle query, Handle key)
 {
+	CHECK;
 	return _sn->fetch_query(query, key, Handle::UNDEFINED, false);
 }
 
 Handle PersistSCM::fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
+	CHECK;
 	return _sn->fetch_query(query, key, meta, fresh);
 }
 
@@ -134,32 +144,38 @@ Handle PersistSCM::fetch_query4(Handle query, Handle key,
  */
 Handle PersistSCM::store_atom(Handle h)
 {
+	CHECK;
 	_sn->store_atom(h);
 	return h;
 }
 
 void PersistSCM::store_value(Handle h, Handle key)
 {
+	CHECK;
 	_sn->store_value(h, key);
 }
 
 void PersistSCM::load_type(Type t)
 {
+	CHECK;
 	_sn->fetch_all_atoms_of_type(t);
 }
 
 void PersistSCM::load_atomspace(void)
 {
+	CHECK;
 	_sn->load_atomspace();
 }
 
 void PersistSCM::store_atomspace(void)
 {
+	CHECK;
 	_sn->store_atomspace();
 }
 
 void PersistSCM::barrier(void)
 {
+	CHECK;
 	_sn->barrier();
 }
 
