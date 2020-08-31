@@ -97,7 +97,8 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: Can't find the atomspace!");
 
-    _storage = createPostgresStorageNode(std::move(uri));
+    Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+    _storage = PostgresStorageNodeCast(hsn);
     _storage->open();
     if (!_storage->connected())
     {
@@ -120,8 +121,7 @@ void SQLPersistSCM::do_close(void)
     // So unhook the atomspace first -- this will prevent new writes
     // from accidentally being queued. (It will also drain the queues)
     // Only then actually call the dtor.
-    // XXX Above comment no longer applies, XXX FIXME; I think we need
-    // to remove _storage from the atomspace ??
+    _as->extract_atom(HandleCast(_storage));
     _storage = nullptr;
 }
 
