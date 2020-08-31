@@ -37,9 +37,9 @@
     allows Atoms to be sent/received along this connection.
 
     Examples:
-       (cog-open (PostgresStorage "postgres:///example-db?user=foo&password=bar"))
-       (cog-open (RocksStorage "rocks:///tmp/my-rocks-db"))
-       (cog-open (CogserverStorage "cog://localhost:17001"))
+       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-open (CogserverStorage \"cog://localhost:17001\"))
 
     See also:
        `cog-close` to close a connection.
@@ -54,9 +54,9 @@
     STORAGE-ATOM indicates which connection to close.
 
     Examples:
-       (cog-close (PostgresStorage "postgres:///example-db?user=foo&password=bar"))
-       (cog-close (RocksStorage "rocks:///tmp/my-rocks-db"))
-       (cog-close (CogserverStorage "cog://localhost:17001"))
+       (cog-close (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-close (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-close (CogserverStorage \"cog://localhost:17001\"))
 
     See also:
        `cog-open` to open a connection.
