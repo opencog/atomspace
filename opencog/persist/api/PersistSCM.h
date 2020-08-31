@@ -43,6 +43,9 @@ private:
 
 	void init(void);
 
+	void open(Handle);
+	void close(Handle);
+
 	Handle fetch_atom(Handle);
 	Handle fetch_value(Handle, Handle);
 	Handle fetch_incoming_set(Handle);
@@ -58,7 +61,7 @@ private:
 
 public:
 	PersistSCM(void);
-	static void set_connection(const StorageNodePtr& sn) {_sn = sn; }
+	static void set_connection(const StorageNodePtr& sn) { _sn = sn; }
 }; // class
 
 /** @}*/

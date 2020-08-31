@@ -40,6 +40,10 @@ PersistSCM::PersistSCM(void)
 
 void PersistSCM::init(void)
 {
+	define_scheme_primitive("cog-open",
+	             &PersistSCM::open, this, "persist");
+	define_scheme_primitive("cog-close",
+	             &PersistSCM::close, this, "persist");
 	define_scheme_primitive("fetch-atom",
 	             &PersistSCM::fetch_atom, this, "persist");
 	define_scheme_primitive("fetch-value",
@@ -67,6 +71,30 @@ void PersistSCM::init(void)
 }
 
 // =====================================================================
+
+void PersistSCM::open(Handle h)
+{
+	if (not nameserver().isA(h->get_type(), STORAGE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"Expecting StorageNode, got %s", h->to_short_string().c_str());
+
+	StorageNodePtr stnp = StorageNodeCast(h);
+	stnp->open();
+
+	if (nullptr == _sn) _sn = stnp;
+}
+
+void PersistSCM::close(Handle h)
+{
+	if (not nameserver().isA(h->get_type(), STORAGE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"Expecting StorageNode, got %s", h->to_short_string().c_str());
+
+	StorageNodePtr stnp = StorageNodeCast(h);
+	stnp->close();
+
+	if (stnp == _sn) _sn = nullptr;
+}
 
 Handle PersistSCM::fetch_atom(Handle h)
 {
