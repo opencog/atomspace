@@ -108,7 +108,7 @@ void SQLPersistSCM::do_open(const std::string& uri)
     _storage->open();
     if (!_storage->connected())
     {
-        _as->exract_atom(hsn);
+        _as->extract_atom(hsn);
         _storage = nullptr;
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to connect to the database");
