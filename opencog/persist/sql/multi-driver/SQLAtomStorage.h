@@ -189,6 +189,10 @@ class SQLAtomStorage : public StorageNode
 		UUID_manager _uuid_manager;
 		UUID_manager _vuid_manager;
 
+		void registerWith(AtomSpace*);
+		void unregisterWith(AtomSpace*);
+		virtual void setAtomSpace(AtomSpace *);
+
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
@@ -252,8 +256,6 @@ class SQLAtomStorage : public StorageNode
 		void destroy(void) { kill_data(); /* TODO also delete the db */ }
 		void erase(void) { kill_data(); }
 
-		void registerWith(AtomSpace*);
-		void unregisterWith(AtomSpace*);
 		void extract_callback(const AtomPtr&);
 		int _extract_sig;
 

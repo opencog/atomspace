@@ -68,6 +68,19 @@ void SQLAtomStorage::unregisterWith(AtomSpace* as)
 #endif // NOT_NEEDED_RIGHT_NOW
 }
 
+void SQLAtomStorage::setAtomSpace(AtomSpace* tb)
+{
+	if (tb == _atom_space) return;
+
+	// XXX FIXME ... I don't get it .. stubbing out the two lines
+	// below does not seem to affect the outcome of the unit tests.
+	// But I'm pretty sure they are needed, so ???
+	if (tb) registerWith(tb);
+	else unregisterWith(_atom_space);
+
+	Atom::setAtomSpace(tb);
+}
+
 void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 {
 	_tlbuf.removeAtom(atom);
