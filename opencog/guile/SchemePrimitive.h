@@ -421,7 +421,7 @@ protected:
 template<typename R, class... Args>
 class SchemeFunction :
 	SchemeReturnConverters,
-   SchemeFunctionBase<R, Args...>
+	SchemeFunctionBase<R, Args...>
 {
 	typedef SchemeFunctionBase<R, Args...> super;
 
@@ -462,7 +462,7 @@ protected:
 template<typename R, typename C, class... Args>
 class SchemePrimitive :
 	SchemeReturnConverters,
-   SchemeMethodBase<R, C, Args...>
+	SchemeMethodBase<R, C, Args...>
 {
 	typedef SchemeMethodBase<R, C, Args...> super;
 
