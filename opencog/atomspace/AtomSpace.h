@@ -273,6 +273,9 @@ public:
     bool extract_atom(Handle h, bool recursive=false) {
         return 0 < _atom_table.extract(h, recursive).size();
     }
+    bool remove_atom(Handle h, bool recursive=false) {
+        return extract_atom(h, recursive);
+    }
 
     /**
      * Set the Value on the atom, performing necessary permissions
