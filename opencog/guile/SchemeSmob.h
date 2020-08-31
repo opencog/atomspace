@@ -53,9 +53,8 @@ class SchemeSmob
 {
 	friend class SchemeEval;
 	friend class PrimitiveEnviron;
-	template<typename R, typename T, class... Args> friend class SchemePrimitive;
-	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
-
+	template<class... Args> friend class SchemeArgConverters;
+	friend class SchemeReturnConverters;
 	friend class LoggerSCM;
 
 private:
