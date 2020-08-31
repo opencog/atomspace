@@ -417,22 +417,52 @@ protected:
 	}
 };
 
-// General case when R is non-void
+// Call function. General case when R is non-void
 template<typename R, class... Args>
 class SchemeFunction :
-	SchemeReturnConverters
+	SchemeReturnConverters,
+   SchemeFunctionBase<R, Args...>
 {
+	typedef SchemeFunctionBase<R, Args...> super;
+
 public:
 	SchemeFunction(const char* module, const char* name,
 	                R (*func)(Args...))
-		{}
+		: super(module, name, func) {}
+
+protected:
+	virtual SCM invoke (SCM args)
+	{
+		return scm_from(super::cpp_invoke(args));
+	}
 };
 
-// General case when R is non-void
+// Call function: Special case when R is void
+template<class... Args>
+class SchemeFunction<void, Args...> :
+	SchemeFunctionBase<void, Args...>
+{
+	typedef SchemeFunctionBase<void, Args...> super;
+
+public:
+	SchemeFunction(const char* module, const char* name,
+	               void (*func)(Args...))
+		: super(module, name, func) {}
+
+protected:
+
+	virtual SCM invoke (SCM args)
+	{
+		super::cpp_invoke(args);
+		return SCM_UNSPECIFIED;
+	}
+};
+
+// Call method on class. General case when R is non-void
 template<typename R, typename C, class... Args>
 class SchemePrimitive :
 	SchemeReturnConverters,
-   public SchemeMethodBase<R, C, Args...>
+   SchemeMethodBase<R, C, Args...>
 {
 	typedef SchemeMethodBase<R, C, Args...> super;
 
@@ -448,7 +478,7 @@ protected:
 	}
 };
 
-// Special case when R is void
+// Call method on class: Special case when R is void
 template<typename C, class... Args>
 class SchemePrimitive<void, C, Args...> :
 	SchemeMethodBase<void, C, Args...>
@@ -469,6 +499,15 @@ protected:
 	}
 };
 
+// Plain function, or static method
+template<typename R, class... Args >
+inline void define_scheme_primitive(const char *name,
+                                    R (func)(Args...),
+                                    const char* module="extension")
+{
+	new SchemeFunction<R, Args...>(module, name, func);
+}
+
 // Method on a class C
 template<typename R, typename C, class... Args >
 inline void define_scheme_primitive(const char *name,
@@ -477,15 +516,6 @@ inline void define_scheme_primitive(const char *name,
                                     const char* module="extension")
 {
 	new SchemePrimitive<R, C, Args...>(module, name, method, data);
-}
-
-// Plain function, or static method
-template<typename R, class... Args >
-inline void define_scheme_primitive(const char *name,
-                                    R (func)(Args...),
-                                    const char* module="extension")
-{
-	new SchemeFunction<R, Args...>(module, name, func);
 }
 
 }
