@@ -11,6 +11,8 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
 
+(include-from-path "opencog/persist/types/storage_types.scm")
+
 ; This avoids complaints, when the docs are set, below.
 (export
 	cog-open
