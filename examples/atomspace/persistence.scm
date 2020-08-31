@@ -171,9 +171,9 @@
 
 ; Other useful commands are:
 ;
-; * `sql-load` and `sql-store` for bulk fetch and restore. For large
-;   datasets, these can be slow. Extremely large datasets might not fit
-;   in RAM, which is why `fetch-atom` is so handy!
+; * `load-atomspace` and `store-atomspace` for bulk fetch and restore.
+;   For large datasets, these can be slow. Extremely large datasets might
+;   not fit in RAM, which is why `fetch-atom` is so handy!
 ;
 ; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
 ;   useful for fetching all graphs that an atom belongs to. These
@@ -181,10 +181,10 @@
 ;   the system. They really make the whole idea usable and easy-to-use.
 ;
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
-;   performance data.
+;   performance data for the SQL backend.
 ;
-; * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`
-;   Except they take the URL directly. Unfortunatley this means that
+; * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`,
+;   except they take the URL directly. Unfortunately, this means that
 ;   one cannot work with more than one connection at a time this way.
 ;   Examples:
 ;   (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
