@@ -128,7 +128,9 @@ void SQLPersistSCM::do_close(void)
     // So unhook the atomspace first -- this will prevent new writes
     // from accidentally being queued. (It will also drain the queues)
     // Only then actually call the dtor.
+    _storage->close();
     _as->extract_atom(HandleCast(_storage));
+    PersistSCM::set_connection(nullptr);
     _storage = nullptr;
 }
 
