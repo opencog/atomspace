@@ -70,6 +70,7 @@
 
 ; Delete this atom (again).
 (cog-extract! (Concept "asdf"))
+(cog-prt-atomspace)
 
 ; Open just Rocks, load everything, and take a look.
 (cog-open rsn)
@@ -77,10 +78,20 @@
 (cog-close rsn)
 (cog-prt-atomspace)
 
-; Try fetching the atom. This time it should work.  Notice that
-; it retrieved the correct TruthValue.
-(fetch-atom (Concept "asdf"))
-
+; And now for some fun. Put "asdf" into rocks, but with a different TV.
 (cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
+(cog-open rsn)
+(store-atom (Concept "asdf"))
+(cog-close rsn)
+
+; Open both.
+(cog-open psn)
+(cog-open rsn)
+
+(fetch-atom (Concept "asdf") psn)
+(fetch-atom (Concept "asdf") rsn)
+
+(cog-close psn)
+(cog-close rsn)
 
 ; That's all for now.
